@@ -194,6 +194,9 @@ public class PlatformKeyManager {
            UnrecoverableKeyException, NoSuchAlgorithmException, InsecureUserException {
         init(userId);
         try {
+            // Try to see if the decryption key is still accessible before using the encryption key.
+            // The auth-bound decryption will be unrecoverable if the screen lock is disabled.
+            getDecryptKeyInternal(userId);
             return getEncryptKeyInternal(userId);
         } catch (UnrecoverableKeyException e) {
             Log.i(TAG, String.format(Locale.US,
@@ -219,7 +222,7 @@ public class PlatformKeyManager {
            UnrecoverableKeyException, NoSuchAlgorithmException, InsecureUserException {
         int generationId = getGenerationId(userId);
         String alias = getEncryptAlias(userId, generationId);
-        if (!mKeyStore.containsAlias(alias)) {
+        if (!isKeyLoaded(userId, generationId)) {
             throw new UnrecoverableKeyException("KeyStore doesn't contain key " + alias);
         }
         AndroidKeyStoreSecretKey key = (AndroidKeyStoreSecretKey) mKeyStore.getKey(
@@ -268,7 +271,7 @@ public class PlatformKeyManager {
            UnrecoverableKeyException, NoSuchAlgorithmException, InsecureUserException {
         int generationId = getGenerationId(userId);
         String alias = getDecryptAlias(userId, generationId);
-        if (!mKeyStore.containsAlias(alias)) {
+        if (!isKeyLoaded(userId, generationId)) {
             throw new UnrecoverableKeyException("KeyStore doesn't contain key " + alias);
         }
         AndroidKeyStoreSecretKey key = (AndroidKeyStoreSecretKey) mKeyStore.getKey(
@@ -300,12 +303,12 @@ public class PlatformKeyManager {
             return;
         }
         if (generationId == -1) {
-            Log.i(TAG, "Generating initial platform ID.");
+            Log.i(TAG, "Generating initial platform key generation ID.");
             generationId = 1;
         } else {
             Log.w(TAG, String.format(Locale.US, "Platform generation ID was %d but no "
                     + "entry was present in AndroidKeyStore. Generating fresh key.", generationId));
-            // Had to generate a fresh key, bump the generation id
+            // Have to generate a fresh key, so bump the generation id
             generationId++;
         }
 
@@ -374,7 +377,7 @@ public class PlatformKeyManager {
         String decryptAlias = getDecryptAlias(userId, generationId);
         SecretKey secretKey = generateAesKey();
 
-        // Store Since decryption key first since it is more likely to fail.
+        // Store decryption key first since it is more likely to fail.
         mKeyStore.setEntry(
                 decryptAlias,
                 new KeyStore.SecretKeyEntry(secretKey),
@@ -386,7 +389,6 @@ public class PlatformKeyManager {
                     .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                     .setBoundToSpecificSecureUserId(userId)
                     .build());
-
         mKeyStore.setEntry(
                 encryptAlias,
                 new KeyStore.SecretKeyEntry(secretKey),
@@ -397,11 +399,7 @@ public class PlatformKeyManager {
 
         setGenerationId(userId, generationId);
 
-        try {
-            secretKey.destroy();
-        } catch (DestroyFailedException e) {
-            Log.w(TAG, "Failed to destroy in-memory platform key.", e);
-        }
+        // TODO: Use a reliable way to destroy the temporary secretKey in memory.
     }
 
     /**
