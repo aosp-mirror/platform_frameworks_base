@@ -285,7 +285,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private final static class AnomalyAlarmReceiver extends BroadcastReceiver {
+    public final static class AnomalyAlarmReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             Slog.i(TAG, "StatsCompanionService believes an anomaly has occurred.");
@@ -305,7 +305,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private final static class PullingAlarmReceiver extends BroadcastReceiver {
+    public final static class PullingAlarmReceiver extends BroadcastReceiver {
       @Override
       public void onReceive(Context context, Intent intent) {
         if (DEBUG)
