@@ -276,13 +276,18 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             mWallpaperVisibilityTimedOut = false;
         }
 
-        if (!mKeyguardUpdateMonitor.needsSlowUnlockTransition()) {
-            scheduleUpdate();
-        } else {
+        if (mKeyguardUpdateMonitor.needsSlowUnlockTransition() && mState == ScrimState.UNLOCKED) {
             // In case the user isn't unlocked, make sure to delay a bit because the system is hosed
             // with too many things at this case, in order to not skip the initial frames.
             mScrimInFront.postOnAnimationDelayed(this::scheduleUpdate, 16);
             mAnimationDelay = StatusBar.FADE_KEYGUARD_START_DELAY;
+        } else if (!mDozeParameters.getAlwaysOn() && oldState == ScrimState.AOD) {
+            // Execute first frame immediately when display was completely off.
+            // Scheduling a frame isn't enough because the system may aggressively enter doze,
+            // delaying callbacks or never triggering them until the power button is pressed.
+            onPreDraw();
+        } else {
+            scheduleUpdate();
         }
     }
 
