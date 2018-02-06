@@ -86,13 +86,13 @@ public class NonPhoneDependencyTest extends SysuiTestCase {
                 mHeadsUpManager);
         gutsManager.setUpWithPresenter(mPresenter, entryManager, mListContainer,
                 mCheckSaveListener, mOnClickListener);
-        notificationListener.setUpWithPresenter(mPresenter, entryManager);
         notificationLogger.setUpWithEntryManager(entryManager, mListContainer);
         mediaManager.setUpWithPresenter(mPresenter, entryManager);
         remoteInputManager.setUpWithPresenter(mPresenter, entryManager, mRemoteInputManagerCallback,
                 mDelegate);
         lockscreenUserManager.setUpWithPresenter(mPresenter, entryManager);
         viewHierarchyManager.setUpWithPresenter(mPresenter, entryManager, mListContainer);
+        notificationListener.setUpWithPresenter(mPresenter, entryManager);
 
         assertFalse(mDependency.hasInstantiatedDependency(StatusBarWindowManager.class));
     }

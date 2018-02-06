@@ -24,8 +24,10 @@ import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sPartitionMaxCount;
 import static com.android.server.autofill.Helper.sVerbose;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.content.BroadcastReceiver;
@@ -507,6 +509,18 @@ public final class AutofillManagerService extends SystemService {
         public void onBackKeyPressed() {
             if (sDebug) Slog.d(TAG, "onBackKeyPressed()");
             mUi.hideAll(null);
+        }
+
+        @Override
+        public boolean isCompatibilityModeRequested(@NonNull String packageName,
+                long versionCode, @UserIdInt int userId) {
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
+                if (service != null) {
+                    return service.isCompatibilityModeRequestedLocked(packageName, versionCode);
+                }
+            }
+            return false;
         }
     }
 

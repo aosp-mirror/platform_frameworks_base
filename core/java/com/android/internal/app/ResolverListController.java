@@ -106,7 +106,7 @@ public class ResolverListController {
             int flags = PackageManager.MATCH_DEFAULT_ONLY
                     | (shouldGetResolvedFilter ? PackageManager.GET_RESOLVED_FILTER : 0)
                     | (shouldGetActivityMetadata ? PackageManager.GET_META_DATA : 0);
-            if (intent.isBrowsableWebIntent()
+            if (intent.isWebIntent()
                         || (intent.getFlags() & Intent.FLAG_ACTIVITY_MATCH_EXTERNAL) != 0) {
                 flags |= PackageManager.MATCH_INSTANT;
             }

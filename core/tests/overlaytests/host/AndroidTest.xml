@@ -18,6 +18,11 @@
     <option name="test-tag" value="OverlayHostTests" />
     <option name="test-suite-tag" value="apct" />
 
+    <!-- Install the device tests that will be used to verify things on device. -->
+    <target_preparer class="com.android.tradefed.targetprep.TestAppInstallSetup">
+        <option name="test-file-name" value="OverlayHostTests_UpdateOverlay.apk" />
+    </target_preparer>
+
     <test class="com.android.tradefed.testtype.HostTest">
         <option name="class" value="com.android.server.om.hosttest.InstallOverlayTests" />
     </test>

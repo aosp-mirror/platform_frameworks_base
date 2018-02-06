@@ -7296,6 +7296,12 @@ public class AudioService extends IAudioService.Stub
     //======================
     /**  */
     public int dispatchFocusChange(AudioFocusInfo afi, int focusChange, IAudioPolicyCallback pcb) {
+        if (afi == null) {
+            throw new IllegalArgumentException("Illegal null AudioFocusInfo");
+        }
+        if (pcb == null) {
+            throw new IllegalArgumentException("Illegal null AudioPolicy callback");
+        }
         synchronized (mAudioPolicies) {
             if (!mAudioPolicies.containsKey(pcb.asBinder())) {
                 throw new IllegalStateException("Unregistered AudioPolicy for focus dispatch");
@@ -7303,6 +7309,23 @@ public class AudioService extends IAudioService.Stub
             return mMediaFocusControl.dispatchFocusChange(afi, focusChange);
         }
     }
+
+    public void setFocusRequestResultFromExtPolicy(AudioFocusInfo afi, int requestResult,
+            IAudioPolicyCallback pcb) {
+        if (afi == null) {
+            throw new IllegalArgumentException("Illegal null AudioFocusInfo");
+        }
+        if (pcb == null) {
+            throw new IllegalArgumentException("Illegal null AudioPolicy callback");
+        }
+        synchronized (mAudioPolicies) {
+            if (!mAudioPolicies.containsKey(pcb.asBinder())) {
+                throw new IllegalStateException("Unregistered AudioPolicy for external focus");
+            }
+            mMediaFocusControl.setFocusRequestResultFromExtPolicy(afi, requestResult);
+        }
+    }
+
 
     //======================
     // misc

@@ -1745,15 +1745,18 @@ public class Editor {
             highlight = null;
         }
 
+        if (mSelectionActionModeHelper != null) {
+            mSelectionActionModeHelper.onDraw(canvas);
+            if (mSelectionActionModeHelper.isDrawingHighlight()) {
+                highlight = null;
+            }
+        }
+
         if (mTextView.canHaveDisplayList() && canvas.isHardwareAccelerated()) {
             drawHardwareAccelerated(canvas, layout, highlight, highlightPaint,
                     cursorOffsetVertical);
         } else {
             layout.draw(canvas, highlight, highlightPaint, cursorOffsetVertical);
-        }
-
-        if (mSelectionActionModeHelper != null) {
-            mSelectionActionModeHelper.onDraw(canvas);
         }
     }
 

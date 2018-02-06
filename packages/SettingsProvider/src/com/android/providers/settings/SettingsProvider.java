@@ -3017,7 +3017,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 153;
+            private static final int SETTINGS_VERSION = 154;
 
             private final int mUserId;
 
@@ -3625,6 +3625,23 @@ public class SettingsProvider extends ContentProvider {
                 if (currentVersion == 152) {
                     getGlobalSettingsLocked().deleteSettingLocked("wifi_wakeup_available");
                     currentVersion = 153;
+                }
+
+                if (currentVersion == 153) {
+                    // Version 154: Read notification badge configuration from config.
+                    // If user has already set the value, don't do anything.
+                    final SettingsState systemSecureSettings = getSecureSettingsLocked(userId);
+                    final Setting showNotificationBadges = systemSecureSettings.getSettingLocked(
+                            Settings.Secure.NOTIFICATION_BADGING);
+                    if (showNotificationBadges.isNull()) {
+                        final boolean defaultValue = getContext().getResources().getBoolean(
+                                com.android.internal.R.bool.config_notificationBadging);
+                        systemSecureSettings.insertSettingLocked(
+                                Secure.NOTIFICATION_BADGING,
+                                defaultValue ? "1" : "0",
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 154;
                 }
 
                 // vXXX: Add new settings above this point.

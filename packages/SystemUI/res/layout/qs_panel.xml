@@ -54,7 +54,6 @@
         android:layout_marginTop="@*android:dimen/quick_qs_offset_height"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="48dp"
         android:elevation="4dp"
     />
 

@@ -28,6 +28,7 @@
 #include "stats_util.h"
 
 #include <log/logprint.h>
+#include <private/android_filesystem_config.h>
 
 using android::util::FIELD_COUNT_REPEATED;
 using android::util::FIELD_TYPE_MESSAGE;
@@ -47,7 +48,7 @@ const int FIELD_ID_METRICS = 1;
 
 MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
                                const long timeBaseSec, sp<UidMap> uidMap)
-    : mConfigKey(key), mUidMap(uidMap), mStatsdUid(getStatsdUid()) {
+    : mConfigKey(key), mUidMap(uidMap) {
     mConfigValid =
             initStatsdConfig(key, config, *uidMap, timeBaseSec, mTagIds, mAllAtomMatchers, mAllConditionTrackers,
                              mAllMetricProducers, mAllAnomalyTrackers, mConditionToMetricMap,
@@ -59,9 +60,9 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
         // mConfigValid = false;
         // ALOGE("Log source white list is empty! This config won't get any data.");
 
-        mAllowedUid.push_back(1000);
-        mAllowedUid.push_back(0);
-        mAllowedUid.push_back(mStatsdUid);
+        mAllowedUid.push_back(AID_ROOT);
+        mAllowedUid.push_back(AID_STATSD);
+        mAllowedUid.push_back(AID_SYSTEM);
         mAllowedLogSources.insert(mAllowedUid.begin(), mAllowedUid.end());
     } else {
         for (const auto& source : config.allowed_log_source()) {
@@ -198,7 +199,7 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
         // unless that caller is statsd itself (statsd is allowed to spoof uids).
         long appHookUid = event.GetLong(event.size()-2, &err);
         int32_t loggerUid = event.GetUid();
-        if (err != NO_ERROR || (loggerUid != appHookUid && loggerUid != mStatsdUid)) {
+        if (err != NO_ERROR || (loggerUid != appHookUid && loggerUid != AID_STATSD)) {
             VLOG("AppHook has invalid uid: claimed %ld but caller is %d", appHookUid, loggerUid);
             return;
         }
@@ -331,16 +332,6 @@ size_t MetricsManager::byteSize() {
         totalSize += metricProducer->byteSize();
     }
     return totalSize;
-}
-
-int32_t MetricsManager::getStatsdUid() {
-    auto suit = UidMap::sAidToUidMapping.find("AID_STATSD");
-    if (suit != UidMap::sAidToUidMapping.end()) {
-        return suit->second;
-    } else {
-        ALOGE("Statsd failed to find its own uid!");
-        return -1;
-    }
 }
 
 }  // namespace statsd

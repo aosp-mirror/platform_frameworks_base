@@ -502,7 +502,7 @@ public class MediaSession2 implements AutoCloseable {
 
         /**
          * Called when a controller requested to play a specific media item represented by a URI
-         * through {@link MediaController2#playFromUri(String, Bundle)}
+         * through {@link MediaController2#playFromUri(Uri, Bundle)}
          *
          * @param controller controller information
          * @param uri uri
@@ -510,7 +510,7 @@ public class MediaSession2 implements AutoCloseable {
          * @see #COMMAND_CODE_PLAY_FROM_URI
          */
         public void onPlayFromUri(@NonNull ControllerInfo controller,
-                @NonNull String uri, @Nullable Bundle extras) { }
+                @NonNull Uri uri, @Nullable Bundle extras) { }
 
         /**
          * Called when a controller requested to prepare for playing a specific mediaId through

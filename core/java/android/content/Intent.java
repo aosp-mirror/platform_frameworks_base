@@ -10089,9 +10089,8 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /** @hide */
-    public boolean isBrowsableWebIntent() {
+    public boolean isWebIntent() {
         return ACTION_VIEW.equals(mAction)
-                && hasCategory(CATEGORY_BROWSABLE)
                 && hasWebURI();
     }
 

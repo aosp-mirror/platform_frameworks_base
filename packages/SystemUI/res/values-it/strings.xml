@@ -103,12 +103,9 @@
     <string name="camera_label" msgid="7261107956054836961">"apri fotocamera"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Seleziona un nuovo layout per le attività"</string>
     <string name="cancel" msgid="6442560571259935130">"Annulla"</string>
-    <!-- no translation found for accessibility_fingerprint_dialog_fingerprint_icon (3125122495414253226) -->
-    <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_app_icon (3228052542929174609) -->
-    <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_help_area (5730471601819225159) -->
-    <skip />
+    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Icona dell\'impronta digitale"</string>
+    <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"Icona dell\'applicazione"</string>
+    <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Area dei messaggi di assistenza"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Pulsante zoom compatibilità."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom inferiore per schermo più grande."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth collegato."</string>
@@ -313,6 +310,8 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi disattivato"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi attivo"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Nessuna rete Wi-Fi disponibile"</string>
+    <!-- no translation found for quick_settings_alarm_title (2416759007342260676) -->
+    <skip />
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Trasmetti"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"In trasmissione"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Dispositivo senza nome"</string>
@@ -329,9 +328,11 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"Connessione..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Tethering"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
-    <!-- no translation found for quick_settings_hotspot_secondary_label_transient (7161046712706277215) -->
-    <skip />
-    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (2324635800672199428) -->
+    <string name="quick_settings_hotspot_secondary_label_transient" msgid="7161046712706277215">"Attivazione…"</string>
+    <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
+      <item quantity="other">%d dispositivi</item>
+      <item quantity="one">%d dispositivo</item>
+    </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Notifiche"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Torcia"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Dati mobili"</string>
@@ -501,11 +502,24 @@
     <string name="volume_zen_end_now" msgid="6930243045593601084">"Disattiva ora"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Espandi"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Comprimi"</string>
+    <string name="accessibility_output_chooser" msgid="8185317493017988680">"Cambia dispositivo di uscita"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"La schermata è fissata"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"La schermata rimane visibile finché non viene sganciata. Per sganciarla, tieni premuto Indietro e Panoramica."</string>
+    <!-- no translation found for screen_pinning_description_recents_invisible (8281145542163727971) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"La schermata rimane visibile finché non viene sganciata. Per sganciarla, tieni premuto Panoramica."</string>
+    <!-- no translation found for screen_pinning_description_recents_invisible_accessible (6134833683151189507) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast (2266705122951934150) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast_recents_invisible (8252402309499161281) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"OK"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"No, grazie"</string>
+    <!-- no translation found for screen_pinning_start (1022122128489278317) -->
+    <skip />
+    <!-- no translation found for screen_pinning_exit (5187339744262325372) -->
+    <skip />
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Nascondere <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Verranno visualizzate di nuovo quando le riattiverai nelle impostazioni."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Nascondi"</string>
@@ -585,8 +599,7 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"I controlli di gestione delle notifiche ti consentono di impostare un livello di importanza compreso tra 0 e 5 per le notifiche di un\'app. \n\n"<b>"Livello 5"</b>" \n- Mostra in cima all\'elenco di notifiche \n- Consenti l\'interruzione a schermo intero \n- Visualizza sempre \n\n"<b>"Livello 4"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Visualizza sempre \n\n"<b>"Livello 3"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Non visualizzare mai \n\n"<b>"Livello 2"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Non visualizzare mai \n- Non emettere mai suoni e vibrazioni \n\n"<b>"Livello 1"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Non visualizzare mai \n- Non emettere mai suoni e vibrazioni \n- Nascondi da schermata di blocco e barra di stato \n- Mostra in fondo all\'elenco di notifiche \n\n"<b>"Livello 0"</b>" \n- Blocca tutte le notifiche dell\'app"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Notifiche"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Non vedrai più queste notifiche"</string>
-    <!-- no translation found for inline_blocking_helper (3055064577771478591) -->
-    <skip />
+    <string name="inline_blocking_helper" msgid="3055064577771478591">"In genere ignori queste notifiche. \nVuoi continuare a riceverle?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Continuare a ricevere queste notifiche?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Interrompi la ricezione di notifiche"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Continua a mostrare"</string>

@@ -1593,7 +1593,7 @@ public class NotificationManagerService extends SystemService {
                     && update.getImportance() == IMPORTANCE_NONE)) {
                 getContext().sendBroadcastAsUser(
                         new Intent(ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED)
-                                .putExtra(NotificationManager.EXTRA_BLOCK_STATE_CHANGED_ID,
+                                .putExtra(NotificationManager.EXTRA_NOTIFICATION_CHANNEL_ID,
                                         update.getId())
                                 .putExtra(NotificationManager.EXTRA_BLOCKED_STATE,
                                         update.getImportance() == IMPORTANCE_NONE)
@@ -1631,7 +1631,7 @@ public class NotificationManagerService extends SystemService {
             if (preUpdate.isBlocked() != update.isBlocked()) {
                 getContext().sendBroadcastAsUser(
                         new Intent(ACTION_NOTIFICATION_CHANNEL_GROUP_BLOCK_STATE_CHANGED)
-                                .putExtra(NotificationManager.EXTRA_BLOCK_STATE_CHANGED_ID,
+                                .putExtra(NotificationManager.EXTRA_NOTIFICATION_CHANNEL_GROUP_ID,
                                         update.getId())
                                 .putExtra(NotificationManager.EXTRA_BLOCKED_STATE,
                                         update.isBlocked())

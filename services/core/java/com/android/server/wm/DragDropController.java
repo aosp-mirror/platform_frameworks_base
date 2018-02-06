@@ -153,9 +153,9 @@ class DragDropController {
                     mDragState.mToken = dragToken;
 
                     final Display display = displayContent.getDisplay();
-                    mDragState.register(display);
-                    if (!mService.mInputManager.transferTouchFocus(callingWin.mInputChannel,
-                            mDragState.getInputChannel())) {
+                    if (!mCallback.get().registerInputChannel(
+                            mDragState, display, mService.mInputManager,
+                            callingWin.mInputChannel)) {
                         Slog.e(TAG_WM, "Unable to transfer touch focus");
                         return null;
                     }

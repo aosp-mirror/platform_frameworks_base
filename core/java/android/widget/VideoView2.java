@@ -152,9 +152,10 @@ public class VideoView2 extends ViewGroupHelper<VideoView2Provider> {
      * instance if any.
      *
      * @param mediaControlView a media control view2 instance.
+     * @param intervalMs a time interval in milliseconds until VideoView2 hides MediaControlView2.
      */
-    public void setMediaControlView2(MediaControlView2 mediaControlView) {
-        mProvider.setMediaControlView2_impl(mediaControlView);
+    public void setMediaControlView2(MediaControlView2 mediaControlView, long intervalMs) {
+        mProvider.setMediaControlView2_impl(mediaControlView, intervalMs);
     }
 
     /**

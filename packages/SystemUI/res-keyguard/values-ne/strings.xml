@@ -53,6 +53,10 @@
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"अर्को अलार्म <xliff:g id="ALARM">%1$s</xliff:g> का लागि सेट गरियो"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"मेट्नुहोस्"</string>
     <string name="disable_carrier_button_text" msgid="6914341927421916114">"eSIM लाई असक्षम पार्नुहोस्"</string>
+    <!-- no translation found for error_disable_esim_title (4852978431156228006) -->
+    <skip />
+    <!-- no translation found for error_disable_esim_msg (676694908770135639) -->
+    <skip />
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"प्रविष्टि गर्नुहोस्"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"ढाँचा बिर्सनुभयो"</string>
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"गलत ढाँचा"</string>
@@ -65,7 +69,8 @@
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"आफ्नो ढाँचा कोर्नुहोस्"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"SIM को PIN प्रविष्टि गर्नुहोस्।"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" को SIM को PIN प्रविष्ट गर्नुहोस्।"</string>
-    <string name="kg_sim_lock_instructions_esim" msgid="4957650659201013804">"मोबाइल सेवा बिना यन्त्रको प्रयोग गर्न eSIM लाई असक्षम पार्नुहोस्।"</string>
+    <!-- no translation found for kg_sim_lock_esim_instructions (4416732549172148542) -->
+    <skip />
     <string name="kg_pin_instructions" msgid="4069609316644030034">"PIN प्रविष्टि गर्नुहोस्"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"पासवर्ड प्रविष्ट गर्नुहोस्"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"SIM कार्ड अहिले असक्षम छ। सुचारु गर्नको लागि PUK कोड प्रविष्ट गर्नुहोस्।  विवरणको लागि सेवा प्रदायकलाई सम्पर्क गर्नुहोस्।"</string>

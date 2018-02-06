@@ -71,6 +71,7 @@ import android.os.Trace;
 import android.util.AndroidRuntimeException;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.LongArray;
 import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -114,6 +115,8 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -2569,6 +2572,10 @@ public final class ViewRootImpl implements ViewParent,
                         ~WindowManager.LayoutParams
                                 .SOFT_INPUT_IS_FORWARD_NAVIGATION;
                 mHasHadWindowFocus = true;
+
+                // Refocusing a window that has a focused view should fire a
+                // focus event for the view since the global focused view changed.
+                fireAccessibilityFocusEventIfHasFocusedNode();
             } else {
                 if (mPointerCapture) {
                     handlePointerCaptureChanged(false);
@@ -2576,6 +2583,86 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
         mFirstInputStage.onWindowFocusChanged(hasWindowFocus);
+    }
+
+    private void fireAccessibilityFocusEventIfHasFocusedNode() {
+        if (!AccessibilityManager.getInstance(mContext).isEnabled()) {
+            return;
+        }
+        final View focusedView = mView.findFocus();
+        if (focusedView == null) {
+            return;
+        }
+        final AccessibilityNodeProvider provider = focusedView.getAccessibilityNodeProvider();
+        if (provider == null) {
+            focusedView.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
+        } else {
+            final AccessibilityNodeInfo focusedNode = findFocusedVirtualNode(provider);
+            if (focusedNode != null) {
+                final int virtualId = AccessibilityNodeInfo.getVirtualDescendantId(
+                        focusedNode.getSourceNodeId());
+                // This is a best effort since clearing and setting the focus via the
+                // provider APIs could have side effects. We don't have a provider API
+                // similar to that on View to ask a given event to be fired.
+                final AccessibilityEvent event = AccessibilityEvent.obtain(
+                        AccessibilityEvent.TYPE_VIEW_FOCUSED);
+                event.setSource(focusedView, virtualId);
+                event.setPackageName(focusedNode.getPackageName());
+                event.setChecked(focusedNode.isChecked());
+                event.setContentDescription(focusedNode.getContentDescription());
+                event.setPassword(focusedNode.isPassword());
+                event.getText().add(focusedNode.getText());
+                event.setEnabled(focusedNode.isEnabled());
+                focusedView.getParent().requestSendAccessibilityEvent(focusedView, event);
+                focusedNode.recycle();
+            }
+        }
+    }
+
+    private AccessibilityNodeInfo findFocusedVirtualNode(AccessibilityNodeProvider provider) {
+        AccessibilityNodeInfo focusedNode = provider.findFocus(
+                AccessibilityNodeInfo.FOCUS_INPUT);
+        if (focusedNode != null) {
+            return focusedNode;
+        }
+
+        if (!mContext.isAutofillCompatibilityEnabled()) {
+            return null;
+        }
+
+        // Unfortunately some provider implementations don't properly
+        // implement AccessibilityNodeProvider#findFocus
+        AccessibilityNodeInfo current = provider.createAccessibilityNodeInfo(
+                AccessibilityNodeProvider.HOST_VIEW_ID);
+        if (current.isFocused()) {
+            return current;
+        }
+
+        final Queue<AccessibilityNodeInfo> fringe = new LinkedList<>();
+        fringe.offer(current);
+
+        while (!fringe.isEmpty()) {
+            current = fringe.poll();
+            final LongArray childNodeIds = current.getChildNodeIds();
+            if (childNodeIds== null || childNodeIds.size() <= 0) {
+                continue;
+            }
+            final int childCount = childNodeIds.size();
+            for (int i = 0; i < childCount; i++) {
+                final int virtualId = AccessibilityNodeInfo.getVirtualDescendantId(
+                        childNodeIds.get(i));
+                final AccessibilityNodeInfo child = provider.createAccessibilityNodeInfo(virtualId);
+                if (child != null) {
+                    if (child.isFocused()) {
+                        return child;
+                    }
+                    fringe.offer(child);
+                }
+            }
+            current.recycle();
+        }
+
+        return null;
     }
 
     private void handleOutOfResourcesException(Surface.OutOfResourcesException e) {

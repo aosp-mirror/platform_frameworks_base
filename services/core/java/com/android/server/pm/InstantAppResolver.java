@@ -377,7 +377,7 @@ public abstract class InstantAppResolver {
         failureIntent.setFlags(failureIntent.getFlags() | Intent.FLAG_IGNORE_EPHEMERAL);
         failureIntent.setLaunchToken(token);
         ArrayList<AuxiliaryResolveInfo.AuxiliaryFilter> filters = null;
-        boolean isWebIntent = origIntent.isBrowsableWebIntent();
+        boolean isWebIntent = origIntent.isWebIntent();
         for (InstantAppResolveInfo instantAppResolveInfo : instantAppResolveInfoList) {
             if (shaPrefix.length > 0 && instantAppResolveInfo.shouldLetInstallerDecide()) {
                 Slog.e(TAG, "InstantAppResolveInfo with mShouldLetInstallerDecide=true when digest"
@@ -448,7 +448,7 @@ public abstract class InstantAppResolver {
                 instantAppInfo.getIntentFilters();
         if (instantAppFilters == null || instantAppFilters.isEmpty()) {
             // No filters on web intent; no matches, 2nd phase unnecessary.
-            if (origIntent.isBrowsableWebIntent()) {
+            if (origIntent.isWebIntent()) {
                 return null;
             }
             // No filters; we need to start phase two

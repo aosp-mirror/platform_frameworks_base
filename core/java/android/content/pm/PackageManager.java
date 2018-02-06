@@ -441,6 +441,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final int MATCH_FACTORY_ONLY = 0x00200000;
 
     /**

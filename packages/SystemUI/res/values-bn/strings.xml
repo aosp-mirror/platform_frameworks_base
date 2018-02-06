@@ -103,12 +103,9 @@
     <string name="camera_label" msgid="7261107956054836961">"ক্যামেরা খুলুন"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"নতুন কার্য লেআউট বেছে নিন"</string>
     <string name="cancel" msgid="6442560571259935130">"বাতিল করুন"</string>
-    <!-- no translation found for accessibility_fingerprint_dialog_fingerprint_icon (3125122495414253226) -->
-    <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_app_icon (3228052542929174609) -->
-    <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_help_area (5730471601819225159) -->
-    <skip />
+    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"আঙ্গুলের ছাপের আইকন"</string>
+    <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"অ্যাপ্লিকেশনের আইকন"</string>
+    <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"সহায়তার মেসেজ দেখানোর জায়গা"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"সামঞ্জস্যের জুম বোতাম৷"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ছোট থেকে বৃহৎ স্ক্রীণে জুম করুন৷"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"ব্লুটুথ সংযুক্ত হয়েছে৷"</string>
@@ -311,6 +308,8 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"ওয়াই-ফাই বন্ধ"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"ওয়াই-ফাই চালু আছে"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"কোনো ওয়াই-ফাই নেটওয়ার্ক উপলব্ধ নেই"</string>
+    <!-- no translation found for quick_settings_alarm_title (2416759007342260676) -->
+    <skip />
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"কাস্ট করুন"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"কাস্ট করা হচ্ছে"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"নামবিহীন ডিভাইস"</string>
@@ -327,9 +326,11 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"সংযুক্ত হচ্ছে..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"টেদারিং"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"হটস্পট"</string>
-    <!-- no translation found for quick_settings_hotspot_secondary_label_transient (7161046712706277215) -->
-    <skip />
-    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (2324635800672199428) -->
+    <string name="quick_settings_hotspot_secondary_label_transient" msgid="7161046712706277215">"চালু করা হচ্ছে…"</string>
+    <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
+      <item quantity="one">%dটি ডিভাইস</item>
+      <item quantity="other">%dটি ডিভাইস</item>
+    </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"বিজ্ঞপ্তিগুলি"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ফ্ল্যাশলাইট"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"মোবাইল ডেটা"</string>
@@ -339,10 +340,8 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> ব্যবহৃত হয়েছে"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"সীমা <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> সতর্কতা"</string>
-    <!-- no translation found for quick_settings_work_mode_on_label (3421274215098764735) -->
-    <skip />
-    <!-- no translation found for quick_settings_work_mode_off_label (8856918707867192186) -->
-    <skip />
+    <string name="quick_settings_work_mode_on_label" msgid="3421274215098764735">"কাজের প্রোফাইল"</string>
+    <string name="quick_settings_work_mode_off_label" msgid="8856918707867192186">"বিজ্ঞপ্তি ও অ্যাপ বন্ধ আছে"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"নাইট লাইট"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"সূর্যাস্তে চালু হবে"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"সূর্যোদয় পর্যন্ত"</string>
@@ -360,8 +359,7 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"নিরাপদ মোডে <xliff:g id="APP">%s</xliff:g> অক্ষম করা হয়েছে৷"</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"সবকিছু সাফ করুন"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"বিভক্ত স্ক্রীন ব্যবহার করতে এখানে টেনে আনুন"</string>
-    <!-- no translation found for recents_swipe_up_onboarding (3824607135920170001) -->
-    <skip />
+    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"অন্য অ্যাপে যেতে উপরের দিকে সোয়াইপ করুন"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"অনুভূমিক স্প্লিট"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"উল্লম্ব স্প্লিট"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"কাস্টম স্প্লিট করুন"</string>
@@ -502,11 +500,25 @@
     <string name="volume_zen_end_now" msgid="6930243045593601084">"এখনই বন্ধ করুন"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"বড় করুন"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"সঙ্কুচিত করুন"</string>
+    <!-- no translation found for accessibility_output_chooser (8185317493017988680) -->
+    <skip />
     <string name="screen_pinning_title" msgid="3273740381976175811">"স্ক্রিন পিন করা হয়েছে"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"এটি আপনি আনপিন না করা পর্যন্ত এটিকে প্রদর্শিত করবে৷ আনপিন করতে ফিরুন এবং ওভারভিউ স্পর্শ করে ধরে থাকুন।"</string>
+    <!-- no translation found for screen_pinning_description_recents_invisible (8281145542163727971) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"এটি আপনি আনপিন না করা পর্যন্ত এটিকে প্রদর্শিত করবে৷ আনপিন করতে ওভারভিউ স্পর্শ করে ধরে থাকুন৷"</string>
+    <!-- no translation found for screen_pinning_description_recents_invisible_accessible (6134833683151189507) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast (2266705122951934150) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast_recents_invisible (8252402309499161281) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"বুঝেছি"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"না থাক"</string>
+    <!-- no translation found for screen_pinning_start (1022122128489278317) -->
+    <skip />
+    <!-- no translation found for screen_pinning_exit (5187339744262325372) -->
+    <skip />
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> লুকাবেন?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"আপনি পরের বার সেটিংস-এ এটি চালু করলে এটি উপস্থিত হবে"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"লুকান"</string>
@@ -586,8 +598,7 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"পাওয়ার বিজ্ঞপ্তির নিয়ন্ত্রণগুলি ব্যহবার করে, আপনি কোনও অ্যাপ্লিকেশনের বিজ্ঞপ্তির জন্য ০ থেকে ৫ পর্যন্ত একটি গুরুত্বের লেভেলকে সেট করতে পারবেন৷ \n\n"<b>"লেভেল ৫"</b>" \n- বিজ্ঞপ্তি তালিকার শীর্ষে দেখায় \n- পূর্ণ স্ক্রিনের বাধাকে অনুমতি দেয় \n- সর্বদা স্ক্রিনে উপস্থিত হয় \n\n"<b>"লেভেল ৪"</b>" \n- পূর্ণ স্ক্রিনের বাধাকে আটকায় \n- সর্বদা স্ক্রিনে উপস্থিত হয় \n\n"<b>"লেভেল ৩"</b>" \n- পূর্ণ স্ক্রিনের বাধাকে আটকায় \n- কখনওই স্ক্রিনে উপস্থিত হয় না \n\n"<b>"লেভেল ২"</b>" \n- পূর্ণ স্ক্রিনের বাধাকে আটকায় \n- কখনওই স্ক্রিনে উপস্থিত হয় না \n- কখনওই শব্দ এবং কম্পন করে না \n\n"<b>"লেভেল ১"</b>" \n- পূর্ণ স্ক্রিনের বাধাকে আটকায় \n- কখনওই স্ক্রিনে উপস্থিত হয় না \n- কখনওই শব্দ এবং কম্পন করে না \n- লক স্ক্রিন এবং স্ট্যাটাস বার থেকে লুকায় \n- বিজ্ঞপ্তি তালিকার নীচের দিকে দেখায় \n\n"<b>"লেভেল ০"</b>" \n- অ্যাপ্লিকেশন থেকে সমস্ত বিজ্ঞপ্তিকে অবরূদ্ধ করে"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"বিজ্ঞপ্তি"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"এই বিজ্ঞপ্তিগুলি আপনাকে আর দেখানো হবে না"</string>
-    <!-- no translation found for inline_blocking_helper (3055064577771478591) -->
-    <skip />
+    <string name="inline_blocking_helper" msgid="3055064577771478591">"এই বিজ্ঞপ্তিগুলিকে আপনি সাধারণত বাতিল করেন। \nসেগুলি দেখতে চান?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"এই বিজ্ঞপ্তিগুলি পরেও দেখে যেতে চান?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"বিজ্ঞপ্তি বন্ধ করুন"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"দেখতে থাকুন"</string>

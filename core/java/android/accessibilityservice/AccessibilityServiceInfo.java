@@ -16,6 +16,7 @@
 
 package android.accessibilityservice;
 
+import android.annotation.IntDef;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -43,6 +44,8 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -346,6 +349,19 @@ public class AccessibilityServiceInfo implements Parcelable {
      */
     public String[] packageNames;
 
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "FEEDBACK_" }, value = {
+            FEEDBACK_AUDIBLE,
+            FEEDBACK_GENERIC,
+            FEEDBACK_HAPTIC,
+            FEEDBACK_SPOKEN,
+            FEEDBACK_VISUAL,
+            FEEDBACK_BRAILLE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FeedbackType {}
+
     /**
      * The feedback type an {@link AccessibilityService} provides.
      * <p>
@@ -358,6 +374,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      * @see #FEEDBACK_VISUAL
      * @see #FEEDBACK_BRAILLE
      */
+    @FeedbackType
     public int feedbackType;
 
     /**
@@ -818,7 +835,8 @@ public class AccessibilityServiceInfo implements Parcelable {
         return stringBuilder.toString();
     }
 
-    private static void appendFeedbackTypes(StringBuilder stringBuilder, int feedbackTypes) {
+    private static void appendFeedbackTypes(StringBuilder stringBuilder,
+            @FeedbackType int feedbackTypes) {
         stringBuilder.append("feedbackTypes:");
         stringBuilder.append("[");
         while (feedbackTypes != 0) {

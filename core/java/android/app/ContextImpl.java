@@ -187,6 +187,7 @@ class ContextImpl extends Context {
     private @Nullable String mSplitName = null;
 
     private AutofillClient mAutofillClient = null;
+    private boolean mIsAutofillCompatEnabled;
 
     private final Object mSync = new Object();
 
@@ -2253,6 +2254,18 @@ class ContextImpl extends Context {
     @Override
     public void setAutofillClient(AutofillClient client) {
         mAutofillClient = client;
+    }
+
+    /** @hide */
+    @Override
+    public boolean isAutofillCompatibilityEnabled() {
+        return mIsAutofillCompatEnabled;
+    }
+
+    /** @hide */
+    @Override
+    public void setAutofillCompatibilityEnabled(boolean autofillCompatEnabled) {
+        mIsAutofillCompatEnabled = autofillCompatEnabled;
     }
 
     static ContextImpl createSystemContext(ActivityThread mainThread) {

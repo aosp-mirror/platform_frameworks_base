@@ -103,12 +103,9 @@
     <string name="camera_label" msgid="7261107956054836961">"kemaranı açın"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Yeni tapşırıq sxemi seçin"</string>
     <string name="cancel" msgid="6442560571259935130">"Ləğv et"</string>
-    <!-- no translation found for accessibility_fingerprint_dialog_fingerprint_icon (3125122495414253226) -->
-    <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_app_icon (3228052542929174609) -->
-    <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_help_area (5730471601819225159) -->
-    <skip />
+    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Barmaq izi ikonası"</string>
+    <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"Tətbiq ikonası"</string>
+    <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Yardım mesajı bölməsi"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Uyğunluq zoom düyməsi."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Daha böyük ekranda uzaqlaşdır."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth qoşulub."</string>
@@ -311,6 +308,8 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi sönülüdür"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi Aktiv"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Heç bir Wi-Fi şəbəkəsi əlçatan deyil"</string>
+    <!-- no translation found for quick_settings_alarm_title (2416759007342260676) -->
+    <skip />
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Yayım"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Yayım"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Adsız cihaz"</string>
@@ -327,9 +326,11 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"Qoşulur..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Birləşmə"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
-    <!-- no translation found for quick_settings_hotspot_secondary_label_transient (7161046712706277215) -->
-    <skip />
-    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (2324635800672199428) -->
+    <string name="quick_settings_hotspot_secondary_label_transient" msgid="7161046712706277215">"Aktiv edilir..."</string>
+    <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
+      <item quantity="other">%d cihaz</item>
+      <item quantity="one">%d cihaz</item>
+    </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Bildirişlər"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"İşartı"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Mobil data"</string>
@@ -499,11 +500,24 @@
     <string name="volume_zen_end_now" msgid="6930243045593601084">"İndi deaktiv edin"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Genişləndirin"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Yığcamlaşdırın"</string>
+    <string name="accessibility_output_chooser" msgid="8185317493017988680">"Çıxış cihazına keçin"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekrana sancaq taxıldı"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Sancaq götürülənə qədər bu görünəcək. Sancağı götürmək üçün Geri və İcmal düymələrinə basıb saxlayın."</string>
+    <!-- no translation found for screen_pinning_description_recents_invisible (8281145542163727971) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Sancaq götürülənə qədər bu görünəcək. Sancağı götürmək üçün Geri düyməsinə basıb saxlayın."</string>
+    <!-- no translation found for screen_pinning_description_recents_invisible_accessible (6134833683151189507) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast (2266705122951934150) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast_recents_invisible (8252402309499161281) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Anladım!"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Yox, çox sağ olun"</string>
+    <!-- no translation found for screen_pinning_start (1022122128489278317) -->
+    <skip />
+    <!-- no translation found for screen_pinning_exit (5187339744262325372) -->
+    <skip />
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> gizlədilsin?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Ayarlarda onu aktivləşdirəcəyiniz vaxta qədər o, yenidən görünəcək."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Gizlədin"</string>
@@ -583,8 +597,7 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Enerji bildiriş nəzarəti ilə, tətbiq bildirişləri üçün əhəmiyyət səviyyəsini 0-dan 5-ə kimi ayarlaya bilərsiniz. \n\n"<b>"Səviyyə 5"</b>" \n- Bildiriş siyahısının yuxarı hissəsində göstərin \n- Tam ekran kəsintisinə icazə verin \n- Hər zaman izləyin \n\n"<b>"Səviyyə 4"</b>" \n- Tam ekran kəsintisinin qarşısını alın \n- Hər zaman izləyin \n\n"<b>"Level 3"</b>" \n- Tam ekran kəsintisinin qarşısını alın \n- Heç vaxt izləməyin \n\n"<b>"Level 2"</b>" \n- Tam ekran kəsintisinin qarşısını alın \n- Heç vaxt izləməyin \n- Heç vaxt səsliyə və ya vibrasiyaya qoymayın \n\n"<b>"Səviyyə 1"</b>" \n- Prevent full screen interruption \n- Heç vaxt izləməyin \n- Heç vaxt səsliyə və ya vibrasiyaya qoymayın \n- Ekran kilidi və ya status panelindən gizlədin \n- Bildiriş siyahısının yuxarı hissəsində göstərin \n\n"<b>"Səviyyə 0"</b>" \n- Bütün bildirişləri tətbiqdən blok edin"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Bildirişlər"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Artıq bu bildirişləri görməyəcəkəsiniz"</string>
-    <!-- no translation found for inline_blocking_helper (3055064577771478591) -->
-    <skip />
+    <string name="inline_blocking_helper" msgid="3055064577771478591">"Adətən bu bildirişləri rədd edirsiniz. \nBildirişlər göstərilsin?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Bu bildirişlər göstərilməyə davam edilsin?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Bildirişləri dayandırın"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Göstərməyə davam edin"</string>

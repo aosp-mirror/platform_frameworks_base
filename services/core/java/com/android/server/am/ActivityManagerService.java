@@ -385,6 +385,7 @@ import android.view.RemoteAnimationDefinition;
 import android.view.View;
 import android.view.WindowManager;
 
+import android.view.autofill.AutofillManagerInternal;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -777,8 +778,11 @@ public class ActivityManagerService extends IActivityManager.Stub
     long mWaitForNetworkTimeoutMs;
 
     /**
-     * Helper class which parses out priority arguments and dumps sections according to their
-     * priority. If priority arguments are omitted, function calls the legacy dump command.
+     * Helper class which strips out priority and proto arguments then calls the dump function with
+     * the appropriate arguments. If priority arguments are omitted, function calls the legacy
+     * dump command.
+     * If priority arguments are omitted all sections are dumped, otherwise sections are dumped
+     * according to their priority.
      */
     private final PriorityDump.PriorityDumper mPriorityDumper = new PriorityDump.PriorityDumper() {
         @Override
@@ -790,24 +794,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void dumpNormal(FileDescriptor fd, PrintWriter pw, String[] args, boolean asProto) {
-            if (asProto) {
-                doDump(fd, pw, new String[0], asProto);
-            } else {
-                doDump(fd, pw, new String[]{"settings"}, asProto);
-                doDump(fd, pw, new String[]{"intents"}, asProto);
-                doDump(fd, pw, new String[]{"broadcasts"}, asProto);
-                doDump(fd, pw, new String[]{"providers"}, asProto);
-                doDump(fd, pw, new String[]{"permissions"}, asProto);
-                doDump(fd, pw, new String[]{"services"}, asProto);
-                doDump(fd, pw, new String[]{"recents"}, asProto);
-                doDump(fd, pw, new String[]{"lastanr"}, asProto);
-                doDump(fd, pw, new String[]{"starter"}, asProto);
-                doDump(fd, pw, new String[]{"containers"}, asProto);
-                if (mAssociations.size() > 0) {
-                    doDump(fd, pw, new String[]{"associations"}, asProto);
-                }
-                doDump(fd, pw, new String[]{"processes"}, asProto);
-            }
+            doDump(fd, pw, new String[]{"-a", "--normal-priority"}, asProto);
         }
 
         @Override
@@ -7513,6 +7500,18 @@ public class ActivityManagerService extends IActivityManager.Stub
                 thread.attachAgent(preBindAgent);
             }
 
+
+            // Figure out whether the app needs to run in autofill compat mode.
+            boolean isAutofillCompatEnabled = false;
+            if (UserHandle.getAppId(app.info.uid) >= Process.FIRST_APPLICATION_UID) {
+                final AutofillManagerInternal afm = LocalServices.getService(
+                        AutofillManagerInternal.class);
+                if (afm != null) {
+                    isAutofillCompatEnabled = afm.isCompatibilityModeRequested(
+                            app.info.packageName, app.info.versionCode, app.userId);
+                }
+            }
+
             checkTime(startTime, "attachApplicationLocked: immediately before bindApplication");
             mStackSupervisor.getActivityMetricsLogger().notifyBindApplication(app);
             if (app.isolatedEntryPoint != null) {
@@ -7530,7 +7529,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         new Configuration(getGlobalConfiguration()), app.compat,
                         getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
-                        buildSerial);
+                        buildSerial, isAutofillCompatEnabled);
             } else {
                 thread.bindApplication(processName, appInfo, providers, null, profilerInfo,
                         null, null, null, testMode,
@@ -7539,7 +7538,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         new Configuration(getGlobalConfiguration()), app.compat,
                         getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
-                        buildSerial);
+                        buildSerial, isAutofillCompatEnabled);
             }
 
             checkTime(startTime, "attachApplicationLocked: immediately after bindApplication");
@@ -13675,6 +13674,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // Timed out.
                 return;
             }
+
             if ((sendReceiver=pae.receiver) != null) {
                 // Caller wants result sent back to them.
                 sendBundle = new Bundle();
@@ -15490,6 +15490,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         boolean dumpClient = false;
         boolean dumpCheckin = false;
         boolean dumpCheckinFormat = false;
+        boolean dumpNormalPriority = false;
         boolean dumpVisibleStacksOnly = false;
         boolean dumpFocusedStackOnly = false;
         String dumpPackage = null;
@@ -15522,6 +15523,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 dumpCheckin = dumpCheckinFormat = true;
             } else if ("-C".equals(opt)) {
                 dumpCheckinFormat = true;
+            } else if ("--normal-priority".equals(opt)) {
+                dumpNormalPriority = true;
             } else if ("-h".equals(opt)) {
                 ActivityManagerShellCommand.dumpHelp(pw, true);
                 return;
@@ -15923,11 +15926,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                     pw.println("-------------------------------------------------------------------------------");
                 }
                 dumpActivityContainersLocked(pw);
-                pw.println();
-                if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
+                // Activities section is dumped as part of the Critical priority dump. Exclude the
+                // section if priority is Normal.
+                if (!dumpNormalPriority){
+                    pw.println();
+                    if (dumpAll) {
+                        pw.println("-------------------------------------------------------------------------------");
+                    }
+                    dumpActivitiesLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
                 }
-                dumpActivitiesLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
                 if (mAssociations.size() > 0) {
                     pw.println();
                     if (dumpAll) {

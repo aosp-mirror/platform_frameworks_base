@@ -1229,7 +1229,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 captor.getValue().getAction());
         assertEquals(PKG, captor.getValue().getPackage());
         assertEquals(mTestNotificationChannel.getId(), captor.getValue().getStringExtra(
-                        NotificationManager.EXTRA_BLOCK_STATE_CHANGED_ID));
+                        NotificationManager.EXTRA_NOTIFICATION_CHANNEL_ID));
         assertTrue(captor.getValue().getBooleanExtra(EXTRA_BLOCKED_STATE, false));
     }
 
@@ -1251,7 +1251,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 captor.getValue().getAction());
         assertEquals(PKG, captor.getValue().getPackage());
         assertEquals(mTestNotificationChannel.getId(), captor.getValue().getStringExtra(
-                NotificationManager.EXTRA_BLOCK_STATE_CHANGED_ID));
+                NotificationManager.EXTRA_NOTIFICATION_CHANNEL_ID));
         assertFalse(captor.getValue().getBooleanExtra(EXTRA_BLOCKED_STATE, false));
     }
 
@@ -1287,7 +1287,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 captor.getValue().getAction());
         assertEquals(PKG, captor.getValue().getPackage());
         assertEquals(existing.getId(), captor.getValue().getStringExtra(
-                NotificationManager.EXTRA_BLOCK_STATE_CHANGED_ID));
+                NotificationManager.EXTRA_NOTIFICATION_CHANNEL_GROUP_ID));
         assertTrue(captor.getValue().getBooleanExtra(EXTRA_BLOCKED_STATE, false));
     }
 
@@ -1308,7 +1308,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 captor.getValue().getAction());
         assertEquals(PKG, captor.getValue().getPackage());
         assertEquals(existing.getId(), captor.getValue().getStringExtra(
-                NotificationManager.EXTRA_BLOCK_STATE_CHANGED_ID));
+                NotificationManager.EXTRA_NOTIFICATION_CHANNEL_GROUP_ID));
         assertFalse(captor.getValue().getBooleanExtra(EXTRA_BLOCKED_STATE, false));
     }
 

@@ -3555,13 +3555,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     public void dispatchProvideAutofillStructure(ViewStructure structure,
             @AutofillFlags int flags) {
         super.dispatchProvideAutofillStructure(structure, flags);
+
         if (structure.getChildCount() != 0) {
             return;
         }
 
         if (!isLaidOut()) {
-            Log.v(VIEW_LOG_TAG, "dispatchProvideAutofillStructure(): not laid out, ignoring "
-                    + mChildrenCount + " children of " + getAutofillId());
+            if (Helper.sVerbose) {
+                Log.v(VIEW_LOG_TAG, "dispatchProvideAutofillStructure(): not laid out, ignoring "
+                        + mChildrenCount + " children of " + getAutofillId());
+            }
             return;
         }
 
@@ -5119,6 +5122,20 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             // When adding a child that contains default focus, either during inflation or while
             // manually assembling the hierarchy, update the ancestor default-focus chain.
             setDefaultFocus(child);
+        }
+
+        touchAccessibilityNodeProviderIfNeeded(child);
+    }
+
+    /**
+     * We may need to touch the provider to bring up the a11y layer. In a11y mode
+     * clients inspect the screen or the user touches it which triggers bringing up
+     * of the a11y infrastructure while in autofill mode we want the infra up and
+     * running from the beginning since we watch for a11y events to drive autofill.
+     */
+    private void touchAccessibilityNodeProviderIfNeeded(View child) {
+        if (mContext.isAutofillCompatibilityEnabled()) {
+            child.getAccessibilityNodeProvider();
         }
     }
 

@@ -362,12 +362,15 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
 
     private boolean shouldShowUI(int flags) {
         updateStatusBar();
-        return mStatusBar != null
-                && mStatusBar.getWakefulnessState() != WakefulnessLifecycle.WAKEFULNESS_ASLEEP
-                && mStatusBar.getWakefulnessState() != WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP
+        // if status bar isn't null, check if phone is in AOD, else check flags
+        // since we could be using a different status bar
+        return mStatusBar != null ?
+                mStatusBar.getWakefulnessState() != WakefulnessLifecycle.WAKEFULNESS_ASLEEP
+                && mStatusBar.getWakefulnessState() !=
+                        WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP
                 && mStatusBar.isDeviceInteractive()
-                && (flags & AudioManager.FLAG_SHOW_UI) != 0
-                && mShowVolumeDialog;
+                && (flags & AudioManager.FLAG_SHOW_UI) != 0 && mShowVolumeDialog
+                : mShowVolumeDialog && (flags & AudioManager.FLAG_SHOW_UI) != 0;
     }
 
     boolean onVolumeChangedW(int stream, int flags) {

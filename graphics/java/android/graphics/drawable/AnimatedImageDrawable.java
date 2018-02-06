@@ -81,12 +81,7 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
 
     private State mState;
 
-    private Runnable mRunnable = new Runnable() {
-        @Override
-        public void run() {
-            invalidateSelf();
-        }
-    };
+    private Runnable mRunnable;
 
     /**
      *  Pass this to {@link #setLoopCount} to loop infinitely.
@@ -242,6 +237,9 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
         // a value <= 0 indicates that the drawable is stopped or that renderThread
         // will manage the animation
         if (nextUpdate > 0) {
+            if (mRunnable == null) {
+                mRunnable = this::invalidateSelf;
+            }
             scheduleSelf(mRunnable, nextUpdate);
         } else if (nextUpdate == FINISHED) {
             // This means the animation was drawn in software mode and ended.

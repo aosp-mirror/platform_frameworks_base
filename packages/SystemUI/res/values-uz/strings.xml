@@ -103,12 +103,9 @@
     <string name="camera_label" msgid="7261107956054836961">"kamerani ochish"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Yangi vazifa tartibini tanlash"</string>
     <string name="cancel" msgid="6442560571259935130">"Bekor qilish"</string>
-    <!-- no translation found for accessibility_fingerprint_dialog_fingerprint_icon (3125122495414253226) -->
-    <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_app_icon (3228052542929174609) -->
-    <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_help_area (5730471601819225159) -->
-    <skip />
+    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Barmoq izi belgisi"</string>
+    <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"Ilova ikonkasi"</string>
+    <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Yordam xabari"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Kattalashtirish tugmasi mosligi."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Kattaroq ekran uchun kichikroqni kattalashtirish."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth ulandi."</string>
@@ -288,7 +285,7 @@
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="7106697106764717416">"Batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Garnitura"</string>
-    <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Matn kiritish"</string>
+    <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Kirish"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Yorqinlik"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Avtomatik burilish"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Ekranning avtomatik burilishi"</string>
@@ -313,6 +310,8 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi o‘chiq"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi yoqilgan"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Hech qanday Wi-Fi tarmog‘i mavjud emas"</string>
+    <!-- no translation found for quick_settings_alarm_title (2416759007342260676) -->
+    <skip />
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Translatsiya"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Translatsiya qilinmoqda"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Nomsiz qurilma"</string>
@@ -329,9 +328,11 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"Ulanmoqda…"</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Modem rejimi"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
-    <!-- no translation found for quick_settings_hotspot_secondary_label_transient (7161046712706277215) -->
-    <skip />
-    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (2324635800672199428) -->
+    <string name="quick_settings_hotspot_secondary_label_transient" msgid="7161046712706277215">"Yoqilmoqda…"</string>
+    <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
+      <item quantity="other">%d ta qurilma</item>
+      <item quantity="one">%d ta qurilma</item>
+    </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Bildirishnomalar"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Fonar"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Mobil internet"</string>
@@ -341,10 +342,8 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> ishlatilgan"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Cheklov: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Ogohlantirish: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <!-- no translation found for quick_settings_work_mode_on_label (3421274215098764735) -->
-    <skip />
-    <!-- no translation found for quick_settings_work_mode_off_label (8856918707867192186) -->
-    <skip />
+    <string name="quick_settings_work_mode_on_label" msgid="3421274215098764735">"Ishchi profil"</string>
+    <string name="quick_settings_work_mode_off_label" msgid="8856918707867192186">"Bildirishnomalar va ilovalar o‘chiq"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Tungi rejim"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Kunbotarda yoqish"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Quyosh chiqqunicha"</string>
@@ -362,8 +361,7 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Xavfsiz rejimda <xliff:g id="APP">%s</xliff:g> ilovasi o‘chirib qo‘yildi."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Hammasini tozalash"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Ekranni bo‘lish xususiyatidan foydalanish uchun bu yerga torting"</string>
-    <!-- no translation found for recents_swipe_up_onboarding (3824607135920170001) -->
-    <skip />
+    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Ilovalarni almashtirish uchun ekranni tepaga suring"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Gorizontal yo‘nalishda bo‘lish"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Vertikal yo‘nalishda bo‘lish"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Boshqa usulda bo‘lish"</string>
@@ -504,11 +502,25 @@
     <string name="volume_zen_end_now" msgid="6930243045593601084">"O‘chiring"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Yoyish"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Yig‘ish"</string>
+    <!-- no translation found for accessibility_output_chooser (8185317493017988680) -->
+    <skip />
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekran qadaldi"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Ekran yechilmaguncha u o‘zgarmas holatda qoladi. Uni yechish uchun “Orqaga” va “Umumiy ma’lumot” tugmalarini bosib turing."</string>
+    <!-- no translation found for screen_pinning_description_recents_invisible (8281145542163727971) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Ekran yechilmaguncha u o‘zgarmas holatda qoladi. Uni yechish uchun “Umumiy ma’lumot” tugmasini bosib turing."</string>
+    <!-- no translation found for screen_pinning_description_recents_invisible_accessible (6134833683151189507) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast (2266705122951934150) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast_recents_invisible (8252402309499161281) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"OK"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Yo‘q, kerakmas"</string>
+    <!-- no translation found for screen_pinning_start (1022122128489278317) -->
+    <skip />
+    <!-- no translation found for screen_pinning_exit (5187339744262325372) -->
+    <skip />
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> berkitilsinmi?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Keyingi safar sozlamalardan yoqilgan paydo bo‘ladi."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Berkitish"</string>
@@ -588,8 +600,7 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Bildirishnomalar uchun kengaytirilgan boshqaruv yordamida ilova bildirishnomalarining muhimlik darajasini (0-5) sozlash mumkin. \n\n"<b>"5-daraja"</b>" \n- Bildirishnomani ro‘yxatning boshida ko‘rsatish \n- To‘liq ekranli bildirishnomalarni ko‘rsatish \n- Qalqib chiquvchi bildirishnomalarni ko‘rsatish \n\n"<b>"4-daraja"</b>" \n- To‘liq ekranli bildirishnomalarni ko‘rsatmaslik \n- Qalqib chiquvchi bildirishnomalarni ko‘rsatish \n\n"<b>"3-daraja"</b>" \n- To‘liq ekranli bildirishnomalarni ko‘rsatmaslik \n- Qalqib chiquvchi bildirishnomalarni ko‘rsatmaslik \n\n"<b>"2-daraja"</b>" \n- To‘liq ekranli bildirishnomalarni ko‘rsatmaslik \n- Qalqib chiquvchi bildirishnomalarni ko‘rsatmaslik \n- Ovoz va tebranishdan foydalanmaslik \n\n"<b>"1-daraja"</b>" \n- To‘liq ekranli bildirishnomalarni ko‘rsatmaslik \n- Qalqib chiquvchi bildirishnomalarni ko‘rsatmaslik \n- Ovoz va tebranishdan foydalanmaslik \n- Ekran qulfi va holat qatorida ko‘rsatmaslik \n- Bildirishnomani ro‘yxatning oxirida ko‘rsatish \n\n"<b>"0-daraja"</b>" \n- Ilovadan keladigan barcha bildirishnomalarni bloklash"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Bildirishnomalar"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Bu bildirishnomalar endi chiqmaydi"</string>
-    <!-- no translation found for inline_blocking_helper (3055064577771478591) -->
-    <skip />
+    <string name="inline_blocking_helper" msgid="3055064577771478591">"Odatda bunday bildirishnomalarni yopasiz. \nUlar ochiq tursinmi?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Mazkur bildirishnomalar chiqaversinmi?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Chiqmasin"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Ha"</string>

@@ -490,8 +490,45 @@ import com.android.internal.os.SomeArgs;
  * strong suspicious that it could. For example, if an activity has four or more fields and one of
  * them is a list, chances are that these are address fields (like address, city, state, and
  * zip code).
+ *
+ * <a name="CompatibilityMode"></a>
+ * <h3>Compatibility mode</h3>
+ *
+ * <p>Apps that use standard Android widgets support autofill out-of-the-box and need to do
+ * very little to improve their user experience (annotating autofillable views and providing
+ * autofill hints). However, some apps do their own rendering and the rendered content may
+ * contain semantic structure that needs to be surfaced to the autofill framework. The platform
+ * exposes APIs to achieve this, however it could take some time until these apps implement
+ * autofill support.
+ *
+ * <p>To enable autofill for such apps the platform provides a compatibility mode in which the
+ * platform would fall back to the accessibility APIs to generate the state reported to autofill
+ * services and fill data. This mode needs to be explicitly requested for a given package up
+ * to a specified max version code allowing clean migration path when the target app begins to
+ * support autofill natively. Note that enabling compatibility may degrade performance for the
+ * target package and should be used with caution. The platform supports whitelisting which packages
+ * can be targeted in compatibility mode to ensure this mode is used only when needed and as long
+ * as needed.
+ *
+ * <p>You can request compatibility mode for packages of interest in the meta-data resource
+ * associated with your service. Below is a sample service declaration:
+ *
+ * <pre> &lt;service android:name=".MyAutofillService"
+ *              android:permission="android.permission.BIND_AUTOFILL_SERVICE"&gt;
+ *     &lt;intent-filter&gt;
+ *         &lt;action android:name="android.service.autofill.AutofillService" /&gt;
+ *     &lt;/intent-filter&gt;
+ *     &lt;meta-data android:name="android.autofillservice" android:resource="@xml/autofillservice" /&gt;
+ * &lt;/service&gt;</pre>
+ *
+ * <P>In the XML file you can specify one or more packages for which to enable compatibility
+ * mode. Below is a sample meta-data declaration:
+ *
+ * <pre> &lt;autofill-service xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+ *     &lt;compatibility-package android:name="foo.bar.baz" android:maxLongVersionCode="1000000000"/&gt;
+ * &lt;/autofill-service&gt;</pre>
  */
-// TODO(b/70407264): add code snippets above???
+// TODO(b/70407264): add code snippets to field classification ???
 public abstract class AutofillService extends Service {
     private static final String TAG = "AutofillService";
 

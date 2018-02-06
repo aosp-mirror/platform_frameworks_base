@@ -23,12 +23,14 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.IBinder;
+import android.view.Display;
 import android.view.IInputFilter;
 import android.view.IWindow;
+import android.view.InputChannel;
 import android.view.MagnificationSpec;
 import android.view.WindowInfo;
-import android.view.animation.Animation;
 
+import com.android.server.input.InputManagerService;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.util.List;
@@ -153,6 +155,13 @@ public abstract class WindowManagerInternal {
      * An interface to customize drag and drop behaviors.
      */
     public interface IDragDropCallback {
+        default boolean registerInputChannel(
+                DragState state, Display display, InputManagerService service,
+                InputChannel source) {
+            state.register(display);
+            return service.transferTouchFocus(source, state.getInputChannel());
+        }
+
         /**
          * Called when drag operation is starting.
          */

@@ -328,10 +328,12 @@ public final class ConnectivityController extends StateController implements
     @Override
     public void dumpControllerStateLocked(PrintWriter pw, int filterUid) {
         pw.print("Connectivity: connected=");
-        pw.print(mConnected);
+        pw.println(mConnected);
+
         pw.print("Tracking ");
         pw.print(mTrackedJobs.size());
-        pw.println(":");
+        pw.println(" jobs");
+
         for (int i = 0; i < mTrackedJobs.size(); i++) {
             final JobStatus js = mTrackedJobs.valueAt(i);
             if (js.shouldDump(filterUid)) {
@@ -339,7 +341,9 @@ public final class ConnectivityController extends StateController implements
                 js.printUniqueId(pw);
                 pw.print(" from ");
                 UserHandle.formatUid(pw, js.getSourceUid());
-                pw.print(": "); pw.print(js.getJob().getRequiredNetwork());
+                pw.print(": ");
+                pw.print(js.getJob().getRequiredNetwork());
+                pw.println();
             }
         }
     }

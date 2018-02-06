@@ -4925,6 +4925,19 @@ public abstract class Context {
     }
 
     /**
+     * @hide
+     */
+    public boolean isAutofillCompatibilityEnabled() {
+        return false;
+    }
+
+    /**
+     * @hide
+     */
+    public void setAutofillCompatibilityEnabled(boolean autofillCompatEnabled) {
+    }
+
+    /**
      * Throws an exception if the Context is using system resources,
      * which are non-runtime-overlay-themable and may show inconsistent UI.
      * @hide

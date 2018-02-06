@@ -88,7 +88,8 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
      * Layout is happening from end -> start
      */
     private void calculateIconTranslations() {
-        float translationX = getWidth();
+        float width = getWidth();
+        float translationX = width;
         float contentStart = getPaddingStart();
         int childCount = getChildCount();
         // Underflow === don't show content until that index
@@ -131,6 +132,15 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
                 if (vs != null) {
                     vs.hidden = true;
                 }
+            }
+        }
+
+        // Stole this from NotificationIconContainer. Not optimal but keeps the layout logic clean
+        if (isLayoutRtl()) {
+            for (int i = 0; i < childCount; i++) {
+                View child = getChildAt(i);
+                ViewState state = getViewStateFromChild(child);
+                state.xTranslation = width - state.xTranslation - child.getWidth();
             }
         }
     }

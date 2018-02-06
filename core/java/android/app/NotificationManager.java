@@ -98,7 +98,7 @@ public class NotificationManager {
      * This broadcast is only sent to the app whose block state has changed.
      *
      * Input: nothing
-     * Output: nothing
+     * Output: {@link #EXTRA_BLOCKED_STATE}
      */
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_APP_BLOCK_STATE_CHANGED =
@@ -113,24 +113,31 @@ public class NotificationManager {
      * This broadcast is only sent to the app that owns the channel that has changed.
      *
      * Input: nothing
-     * Output: {@link #EXTRA_BLOCK_STATE_CHANGED_ID}
+     * Output: {@link #EXTRA_NOTIFICATION_CHANNEL_ID}
+     * Output: {@link #EXTRA_BLOCKED_STATE}
      */
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED =
             "android.app.action.NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED";
 
     /**
-     * Extra for {@link #ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED} or
-     * {@link #ACTION_NOTIFICATION_CHANNEL_GROUP_BLOCK_STATE_CHANGED} containing the id of the
-     * object which has a new blocked state.
+     * Extra for {@link #ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED} containing the id of the
+     * {@link NotificationChannel} which has a new blocked state.
      *
-     * The value will be the {@link NotificationChannel#getId()} of the channel for
-     * {@link #ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED} and
-     * the {@link NotificationChannelGroup#getId()} of the group for
-     * {@link #ACTION_NOTIFICATION_CHANNEL_GROUP_BLOCK_STATE_CHANGED}.
+     * The value will be the {@link NotificationChannel#getId()} of the channel.
      */
-    public static final String EXTRA_BLOCK_STATE_CHANGED_ID =
-            "android.app.extra.BLOCK_STATE_CHANGED_ID";
+    public static final String EXTRA_NOTIFICATION_CHANNEL_ID =
+            "android.app.extra.NOTIFICATION_CHANNEL_ID";
+
+    /**
+     * Extra for {@link #ACTION_NOTIFICATION_CHANNEL_GROUP_BLOCK_STATE_CHANGED} containing the id
+     * of the {@link NotificationChannelGroup} which has a new blocked state.
+     *
+     * The value will be the {@link NotificationChannelGroup#getId()} of the group.
+     */
+    public static final String EXTRA_NOTIFICATION_CHANNEL_GROUP_ID =
+            "android.app.extra.NOTIFICATION_CHANNEL_GROUP_ID";
+
 
     /**
      * Extra for {@link #ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED} or
@@ -142,7 +149,6 @@ public class NotificationManager {
      */
     public static final String EXTRA_BLOCKED_STATE = "android.app.extra.BLOCKED_STATE";
 
-
     /**
      * Intent that is broadcast when a {@link NotificationChannelGroup} is
      * {@link NotificationChannelGroup#isBlocked() blocked} or unblocked.
@@ -150,7 +156,8 @@ public class NotificationManager {
      * This broadcast is only sent to the app that owns the channel group that has changed.
      *
      * Input: nothing
-     * Output: {@link #EXTRA_BLOCK_STATE_CHANGED_ID}
+     * Output: {@link #EXTRA_NOTIFICATION_CHANNEL_GROUP_ID}
+     * Output: {@link #EXTRA_BLOCKED_STATE}
      */
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_NOTIFICATION_CHANNEL_GROUP_BLOCK_STATE_CHANGED =

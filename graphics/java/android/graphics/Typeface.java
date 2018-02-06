@@ -60,6 +60,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
@@ -801,36 +802,18 @@ public class Typeface {
      * @return The new typeface.
      */
     public static Typeface createFromAsset(AssetManager mgr, String path) {
-        if (path == null) {
-            throw new NullPointerException();  // for backward compatibility
-        }
-        synchronized (sDynamicCacheLock) {
-            Typeface typeface = new Builder(mgr, path).build();
-            if (typeface != null) return typeface;
+        Preconditions.checkNotNull(path); // for backward compatibility
+        Preconditions.checkNotNull(mgr);
 
-            final String key = Builder.createAssetUid(mgr, path, 0 /* ttcIndex */,
-                    null /* axes */, RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE,
-                    DEFAULT_FAMILY);
-            typeface = sDynamicTypefaceCache.get(key);
-            if (typeface != null) return typeface;
-
-            final FontFamily fontFamily = new FontFamily();
-            if (fontFamily.addFontFromAssetManager(mgr, path, 0, true /* isAsset */,
-                    0 /* ttc index */, RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE,
-                    null /* axes */)) {
-                if (!fontFamily.freeze()) {
-                    return Typeface.DEFAULT;
-                }
-                final FontFamily[] families = { fontFamily };
-                typeface = createFromFamiliesWithDefault(families, DEFAULT_FAMILY,
-                        RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE);
-                sDynamicTypefaceCache.put(key, typeface);
-                return typeface;
-            } else {
-                fontFamily.abortCreation();
-            }
+        Typeface typeface = new Builder(mgr, path).build();
+        if (typeface != null) return typeface;
+        // check if the file exists, and throw an exception for backward compatibility
+        try (InputStream inputStream = mgr.open(path)) {
+        } catch (IOException e) {
+            throw new RuntimeException("Font asset not found " + path);
         }
-        throw new RuntimeException("Font asset not found " + path);
+
+        return Typeface.DEFAULT;
     }
 
     /**
@@ -848,13 +831,22 @@ public class Typeface {
     /**
      * Create a new typeface from the specified font file.
      *
-     * @param path The path to the font data.
+     * @param file The path to the font data.
      * @return The new typeface.
      */
-    public static Typeface createFromFile(@Nullable File path) {
+    public static Typeface createFromFile(@Nullable File file) {
         // For the compatibility reasons, leaving possible NPE here.
         // See android.graphics.cts.TypefaceTest#testCreateFromFileByFileReferenceNull
-        return createFromFile(path.getAbsolutePath());
+
+        Typeface typeface = new Builder(file).build();
+        if (typeface != null) return typeface;
+
+        // check if the file exists, and throw an exception for backward compatibility
+        if (!file.exists()) {
+            throw new RuntimeException("Font asset not found " + file.getAbsolutePath());
+        }
+
+        return Typeface.DEFAULT;
     }
 
     /**
@@ -864,19 +856,8 @@ public class Typeface {
      * @return The new typeface.
      */
     public static Typeface createFromFile(@Nullable String path) {
-        final FontFamily fontFamily = new FontFamily();
-        if (fontFamily.addFont(path, 0 /* ttcIndex */, null /* axes */,
-                  RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE)) {
-            if (!fontFamily.freeze()) {
-                return Typeface.DEFAULT;
-            }
-            FontFamily[] families = { fontFamily };
-            return createFromFamiliesWithDefault(families, DEFAULT_FAMILY,
-                    RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE);
-        } else {
-            fontFamily.abortCreation();
-        }
-        throw new RuntimeException("Font not found " + path);
+        Preconditions.checkNotNull(path); // for backward compatibility
+        return createFromFile(new File(path));
     }
 
     /**

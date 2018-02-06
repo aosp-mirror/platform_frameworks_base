@@ -22,6 +22,7 @@ import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.START_ANY_ACTIVITY;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
+import static android.app.ActivityManager.START_DELIVERED_TO_TOP;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY;
@@ -1133,19 +1134,31 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
     }
 
-    void reportTaskToFrontNoLaunch(ActivityRecord r) {
+    void reportWaitingActivityLaunchedIfNeeded(ActivityRecord r, int result) {
+        if (mWaitingActivityLaunched.isEmpty()) {
+            return;
+        }
+
+        if (result != START_DELIVERED_TO_TOP && result != START_TASK_TO_FRONT) {
+            return;
+        }
+
         boolean changed = false;
+
         for (int i = mWaitingActivityLaunched.size() - 1; i >= 0; i--) {
             WaitResult w = mWaitingActivityLaunched.remove(i);
             if (w.who == null) {
                 changed = true;
-                // Set result to START_TASK_TO_FRONT so that startActivityMayWait() knows that
-                // the starting activity ends up moving another activity to front, and it should
-                // wait for this new activity to become visible instead.
-                // Do not modify other fields.
-                w.result = START_TASK_TO_FRONT;
+                w.result = result;
+
+                // Unlike START_TASK_TO_FRONT, When an intent is delivered to top, there
+                // will be no followup launch signals. Assign the result and launched component.
+                if (result == START_DELIVERED_TO_TOP) {
+                    w.who = r.realActivity;
+                }
             }
         }
+
         if (changed) {
             mService.notifyAll();
         }
@@ -1253,7 +1266,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "resolveIntent");
                 int modifiedFlags = flags
                         | PackageManager.MATCH_DEFAULT_ONLY | ActivityManagerService.STOCK_PM_FLAGS;
-                if (intent.isBrowsableWebIntent()
+                if (intent.isWebIntent()
                             || (intent.getFlags() & Intent.FLAG_ACTIVITY_MATCH_EXTERNAL) != 0) {
                     modifiedFlags |= PackageManager.MATCH_INSTANT;
                 }

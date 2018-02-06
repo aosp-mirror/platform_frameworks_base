@@ -53,6 +53,8 @@
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Növbəti zəng vaxtı: <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"Silin"</string>
     <string name="disable_carrier_button_text" msgid="6914341927421916114">"eSİM\'i deaktiv edin"</string>
+    <string name="error_disable_esim_title" msgid="4852978431156228006">"eSIM-i deaktiv etmək alınmadı"</string>
+    <string name="error_disable_esim_msg" msgid="676694908770135639">"eSIM xəta səbəbi ilə deaktiv edilmədi."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Daxil edin"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Modeli unutmuşam"</string>
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"Yanlış Model"</string>
@@ -65,7 +67,7 @@
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"Modeli çəkin"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"SIM PIN\'ni daxil edin."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" üçün SIM PIN\'ni daxil edin."</string>
-    <string name="kg_sim_lock_instructions_esim" msgid="4957650659201013804">"Mobil xidmət olmadan cihazı istifadə etmək üçün eSIM\'i deaktiv edin."</string>
+    <string name="kg_sim_lock_esim_instructions" msgid="4416732549172148542">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Mobil xidmət olmadan cihazı istifadə etmək üçün eSIM-i deaktiv edin."</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"PIN daxil edin"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"Parol daxil edin"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"SIM indi deaktivdir. Davam etmək üçün PUK kod daxil edin. Ətraflı məlumat üçün operatorla əlaqə saxlayın."</string>

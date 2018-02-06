@@ -3692,6 +3692,20 @@ public final class Settings {
                 new SettingsValidators.InclusiveIntegerRangeValidator(0, 3);
 
         /**
+         * User-selected RTT mode
+         * 0 = OFF
+         * 1 = FULL
+         * 2 = VCO
+         * 3 = HCO
+         * Uses the same constants as TTY (e.g. {@link android.telecom.TelecomManager#TTY_MODE_OFF})
+         * @hide
+         */
+        public static final String RTT_CALLING_MODE = "rtt_calling_mode";
+
+        /** @hide */
+        public static final Validator RTT_CALLING_MODE_VALIDATOR = TTY_MODE_VALIDATOR;
+
+        /**
          * Whether the sounds effects (key clicks, lid open ...) are enabled. The value is
          * boolean (1 or 0).
          */
@@ -4016,6 +4030,7 @@ public final class Settings {
             DTMF_TONE_WHEN_DIALING,
             DTMF_TONE_TYPE_WHEN_DIALING,
             HEARING_AID,
+            RTT_CALLING_MODE,
             TTY_MODE,
             MASTER_MONO,
             SOUND_EFFECTS_ENABLED,
@@ -4214,6 +4229,7 @@ public final class Settings {
             VALIDATORS.put(DTMF_TONE_TYPE_WHEN_DIALING, DTMF_TONE_TYPE_WHEN_DIALING_VALIDATOR);
             VALIDATORS.put(HEARING_AID, HEARING_AID_VALIDATOR);
             VALIDATORS.put(TTY_MODE, TTY_MODE_VALIDATOR);
+            VALIDATORS.put(RTT_CALLING_MODE, RTT_CALLING_MODE_VALIDATOR);
             VALIDATORS.put(NOTIFICATION_LIGHT_PULSE, NOTIFICATION_LIGHT_PULSE_VALIDATOR);
             VALIDATORS.put(POINTER_LOCATION, POINTER_LOCATION_VALIDATOR);
             VALIDATORS.put(SHOW_TOUCHES, SHOW_TOUCHES_VALIDATOR);
@@ -10255,6 +10271,20 @@ public final class Settings {
         public static final String BATTERY_TIP_CONSTANTS = "battery_tip_constants";
 
         /**
+         * An integer to show the version of the anomaly config. Ex: 1, which means
+         * current version is 1.
+         * @hide
+         */
+        public static final String ANOMALY_CONFIG_VERSION = "anomaly_config_version";
+
+        /**
+         * A base64-encoded string represents anomaly stats config, used for
+         * {@link android.app.StatsManager}.
+         * @hide
+         */
+        public static final String ANOMALY_CONFIG = "anomaly_config";
+
+        /**
          * Always on display(AOD) specific settings
          * This is encoded as a key=value list, separated by commas. Ex:
          *
@@ -10283,6 +10313,16 @@ public final class Settings {
         * @hide
         */
         public static final String SYS_VDSO = "sys_vdso";
+
+        /**
+        * Uid CpuPower global setting. This links the uid.cpupower system property.
+        * The following values are supported:
+        * 0 -> /proc/uid_cpupower/* are disabled
+        * 1 -> /proc/uid_cpupower/* are enabled
+        * Any other value defaults to enabled.
+        * @hide
+        */
+        public static final String UID_CPUPOWER = "uid_cpupower";
 
         /**
          * An integer to reduce the FPS by this factor. Only for experiments. Need to reboot the
@@ -11333,6 +11373,15 @@ public final class Settings {
                 "chained_battery_attribution_enabled";
 
         /**
+         * The packages whitelisted to be run in autofill compatibility mode.
+         *
+         * @hide
+         */
+        @SystemApi
+        public static final String AUTOFILL_COMPAT_ALLOWED_PACKAGES =
+                "autofill_compat_allowed_packages";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -11873,8 +11922,6 @@ public final class Settings {
           * @hide
           */
         public static final String MULTI_SIM_SMS_PROMPT = "multi_sim_sms_prompt";
-
-
 
         /** User preferred subscriptions setting.
           * This holds the details of the user selected subscription from the card and

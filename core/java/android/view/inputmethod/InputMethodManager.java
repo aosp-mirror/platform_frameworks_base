@@ -1179,8 +1179,9 @@ public final class InputMethodManager {
         }
     }
 
-    /*
+    /**
      * This method toggles the input method window display.
+     *
      * If the input window is already displayed, it gets hidden.
      * If not the input window will be displayed.
      * @param showFlags Provides additional operating flags.  May be
@@ -1189,7 +1190,6 @@ public final class InputMethodManager {
      * @param hideFlags Provides additional operating flags.  May be
      * 0 or have the {@link #HIDE_IMPLICIT_ONLY},
      * {@link #HIDE_NOT_ALWAYS} bit set.
-     * @hide
      */
     public void toggleSoftInput(int showFlags, int hideFlags) {
         if (mCurMethod != null) {

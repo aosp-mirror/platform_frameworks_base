@@ -241,15 +241,15 @@ public class FocusRequester {
 
 
     void release() {
+        final IBinder srcRef = mSourceRef;
+        final AudioFocusDeathHandler deathHdlr = mDeathHandler;
         try {
-            if (mSourceRef != null && mDeathHandler != null) {
-                mSourceRef.unlinkToDeath(mDeathHandler, 0);
-                mDeathHandler = null;
-                mFocusDispatcher = null;
+            if (srcRef != null && deathHdlr != null) {
+                srcRef.unlinkToDeath(deathHdlr, 0);
             }
-        } catch (java.util.NoSuchElementException e) {
-            Log.e(TAG, "FocusRequester.release() hit ", e);
-        }
+        } catch (java.util.NoSuchElementException e) { }
+        mDeathHandler = null;
+        mFocusDispatcher = null;
     }
 
     @Override
@@ -424,7 +424,7 @@ public class FocusRequester {
 
     int dispatchFocusChange(int focusChange) {
         if (mFocusDispatcher == null) {
-            if (MediaFocusControl.DEBUG) { Log.v(TAG, "dispatchFocusChange: no focus dispatcher"); }
+            if (MediaFocusControl.DEBUG) { Log.e(TAG, "dispatchFocusChange: no focus dispatcher"); }
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
         if (focusChange == AudioManager.AUDIOFOCUS_NONE) {
@@ -445,10 +445,27 @@ public class FocusRequester {
         try {
             mFocusDispatcher.dispatchAudioFocusChange(focusChange, mClientId);
         } catch (android.os.RemoteException e) {
-            Log.v(TAG, "dispatchFocusChange: error talking to focus listener", e);
+            Log.e(TAG, "dispatchFocusChange: error talking to focus listener " + mClientId, e);
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
         return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+    }
+
+    void dispatchFocusResultFromExtPolicy(int requestResult) {
+        if (mFocusDispatcher == null) {
+            if (MediaFocusControl.DEBUG) {
+                Log.e(TAG, "dispatchFocusResultFromExtPolicy: no focus dispatcher");
+            }
+        }
+        if (DEBUG) {
+            Log.v(TAG, "dispatching result" + requestResult + " to " + mClientId);
+        }
+        try {
+            mFocusDispatcher.dispatchFocusResultFromExtPolicy(requestResult, mClientId);
+        } catch (android.os.RemoteException e) {
+            Log.e(TAG, "dispatchFocusResultFromExtPolicy: error talking to focus listener"
+                    + mClientId, e);
+        }
     }
 
     AudioFocusInfo toAudioFocusInfo() {
