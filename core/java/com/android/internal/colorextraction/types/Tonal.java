@@ -405,12 +405,13 @@ public class Tonal implements ExtractionType {
         return v - (float) Math.floor(v);
     }
 
-    static class TonalPalette {
-        final float[] h;
-        final float[] s;
-        final float[] l;
-        final float minHue;
-        final float maxHue;
+    @VisibleForTesting
+    public static class TonalPalette {
+        public final float[] h;
+        public final float[] s;
+        public final float[] l;
+        public final float minHue;
+        public final float maxHue;
 
         TonalPalette(float[] h, float[] s, float[] l) {
             if (h.length != s.length || s.length != l.length) {
