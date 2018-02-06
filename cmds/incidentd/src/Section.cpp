@@ -18,13 +18,19 @@
 
 #include "Section.h"
 
+#include <dirent.h>
+#include <errno.h>
 #include <wait.h>
 
 #include <mutex>
+#include <set>
 
 #include <android-base/file.h>
+#include <android-base/stringprintf.h>
 #include <android/util/protobuf.h>
 #include <binder/IServiceManager.h>
+#include <debuggerd/client.h>
+#include <dumputils/dump_utils.h>
 #include <log/log_event_list.h>
 #include <log/log_read.h>
 #include <log/logprint.h>
@@ -33,6 +39,7 @@
 #include "FdBuffer.h"
 #include "Privacy.h"
 #include "PrivacyBuffer.h"
+#include "frameworks/base/core/proto/android/os/backtrace.proto.h"
 #include "frameworks/base/core/proto/android/os/data.proto.h"
 #include "frameworks/base/core/proto/android/util/log.proto.h"
 #include "incidentd_util.h"
@@ -95,6 +102,7 @@ static status_t write_section_header(int fd, int sectionId, size_t size) {
     return WriteFully(fd, buf, p - buf) ? NO_ERROR : -errno;
 }
 
+// Reads data from FdBuffer and writes it to the requests file descriptor.
 static status_t write_report_requests(const int id, const FdBuffer& buffer,
                                       ReportRequestSet* requests) {
     status_t err = -EBADF;
@@ -387,6 +395,7 @@ status_t GZipSection::Execute(ReportRequestSet* requests) const {
 
     return NO_ERROR;
 }
+
 // ================================================================================
 struct WorkerThreadData : public virtual RefBase {
     const WorkerThreadSection* section;
@@ -413,7 +422,8 @@ WorkerThreadData::WorkerThreadData(const WorkerThreadSection* sec)
 WorkerThreadData::~WorkerThreadData() {}
 
 // ================================================================================
-WorkerThreadSection::WorkerThreadSection(int id) : Section(id) {}
+WorkerThreadSection::WorkerThreadSection(int id, const int64_t timeoutMs)
+    : Section(id, timeoutMs) {}
 
 WorkerThreadSection::~WorkerThreadSection() {}
 
@@ -594,7 +604,7 @@ status_t CommandSection::Execute(ReportRequestSet* requests) const {
         return readStatus;
     }
 
-    // TODO: wait for command here has one trade-off: the failed status of command won't be detected
+    // Waiting for command here has one trade-off: the failed status of command won't be detected
     // until buffer timeout, but it has advatage on starting the data stream earlier.
     status_t cmdStatus = wait_child(cmdPid);
     status_t ihStatus = wait_child(ihPid);
@@ -694,7 +704,6 @@ static inline int32_t get4LE(uint8_t const* src) {
 }
 
 status_t LogSection::BlockingCall(int pipeWriteFd) const {
-    status_t err = NO_ERROR;
     // Open log buffer and getting logs since last retrieved time if any.
     unique_ptr<logger_list, void (*)(logger_list*)> loggers(
             gLastLogsRetrieved.find(mLogID) == gLastLogsRetrieved.end()
@@ -705,15 +714,16 @@ status_t LogSection::BlockingCall(int pipeWriteFd) const {
 
     if (android_logger_open(loggers.get(), mLogID) == NULL) {
         ALOGW("LogSection %s: Can't get logger.", this->name.string());
-        return err;
+        return NO_ERROR;
     }
 
     log_msg msg;
     log_time lastTimestamp(0);
 
+    status_t err = NO_ERROR;
     ProtoOutputStream proto;
     while (true) {  // keeps reading until logd buffer is fully read.
-        status_t err = android_logger_list_read(loggers.get(), &msg);
+        err = android_logger_list_read(loggers.get(), &msg);
         // err = 0 - no content, unexpected connection drop or EOF.
         // err = +ive number - size of retrieved data from logger
         // err = -ive number, OS supplied error _except_ for -EAGAIN
@@ -811,6 +821,136 @@ status_t LogSection::BlockingCall(int pipeWriteFd) const {
         }
     }
     gLastLogsRetrieved[mLogID] = lastTimestamp;
+    proto.flush(pipeWriteFd);
+    return err;
+}
+
+// ================================================================================
+
+TombstoneSection::TombstoneSection(int id, const char* type, const int64_t timeoutMs)
+    : WorkerThreadSection(id, timeoutMs), mType(type) {
+    name += "tombstone ";
+    name += type;
+}
+
+TombstoneSection::~TombstoneSection() {}
+
+status_t TombstoneSection::BlockingCall(int pipeWriteFd) const {
+    std::unique_ptr<DIR, decltype(&closedir)> proc(opendir("/proc"), closedir);
+    if (proc.get() == nullptr) {
+        ALOGE("opendir /proc failed: %s\n", strerror(errno));
+        return -errno;
+    }
+
+    const std::set<int> hal_pids = get_interesting_hal_pids();
+
+    ProtoOutputStream proto;
+    struct dirent* d;
+    status_t err = NO_ERROR;
+    while ((d = readdir(proc.get()))) {
+        int pid = atoi(d->d_name);
+        if (pid <= 0) {
+            continue;
+        }
+
+        const std::string link_name = android::base::StringPrintf("/proc/%d/exe", pid);
+        std::string exe;
+        if (!android::base::Readlink(link_name, &exe)) {
+            ALOGE("Can't read '%s': %s\n", link_name.c_str(), strerror(errno));
+            continue;
+        }
+
+        bool is_java_process;
+        if (exe == "/system/bin/app_process32" || exe == "/system/bin/app_process64") {
+            if (mType != "java") continue;
+            // Don't bother dumping backtraces for the zygote.
+            if (IsZygote(pid)) {
+                VLOG("Skipping Zygote");
+                continue;
+            }
+
+            is_java_process = true;
+        } else if (should_dump_native_traces(exe.c_str())) {
+            if (mType != "native") continue;
+            is_java_process = false;
+        } else if (hal_pids.find(pid) != hal_pids.end()) {
+            if (mType != "hal") continue;
+            is_java_process = false;
+        } else {
+            // Probably a native process we don't care about, continue.
+            VLOG("Skipping %d", pid);
+            continue;
+        }
+
+        Fpipe dumpPipe;
+        if (!dumpPipe.init()) {
+            ALOGW("TombstoneSection '%s' failed to setup dump pipe", this->name.string());
+            err = -errno;
+            break;
+        }
+
+        const uint64_t start = Nanotime();
+        pid_t child = fork();
+        if (child < 0) {
+            ALOGE("Failed to fork child process");
+            break;
+        } else if (child == 0) {
+            // This is the child process.
+            close(dumpPipe.readFd());
+            const int ret = dump_backtrace_to_file_timeout(
+                    pid, is_java_process ? kDebuggerdJavaBacktrace : kDebuggerdNativeBacktrace,
+                    is_java_process ? 5 : 20, dumpPipe.writeFd());
+            if (ret == -1) {
+                if (errno == 0) {
+                    ALOGW("Dumping failed for pid '%d', likely due to a timeout\n", pid);
+                } else {
+                    ALOGE("Dumping failed for pid '%d': %s\n", pid, strerror(errno));
+                }
+            }
+            if (close(dumpPipe.writeFd()) != 0) {
+                ALOGW("TombstoneSection '%s' failed to close dump pipe writeFd: %d",
+                      this->name.string(), errno);
+                _exit(EXIT_FAILURE);
+            }
+
+            _exit(EXIT_SUCCESS);
+        }
+        close(dumpPipe.writeFd());
+        // Parent process.
+        // Read from the pipe concurrently to avoid blocking the child.
+        FdBuffer buffer;
+        err = buffer.readFully(dumpPipe.readFd());
+        if (err != NO_ERROR) {
+            ALOGW("TombstoneSection '%s' failed to read stack dump: %d", this->name.string(), err);
+            if (close(dumpPipe.readFd()) != 0) {
+                ALOGW("TombstoneSection '%s' failed to close dump pipe readFd: %s",
+                      this->name.string(), strerror(errno));
+            }
+            break;
+        }
+
+        auto dump = std::make_unique<char[]>(buffer.size());
+        auto iterator = buffer.data();
+        int i = 0;
+        while (iterator.hasNext()) {
+            dump[i] = iterator.next();
+            i++;
+        }
+        long long token = proto.start(android::os::BackTraceProto::TRACES);
+        proto.write(android::os::BackTraceProto::Stack::PID, pid);
+        proto.write(android::os::BackTraceProto::Stack::DUMP, dump.get(), i);
+        proto.write(android::os::BackTraceProto::Stack::DUMP_DURATION_NS,
+                    static_cast<long long>(Nanotime() - start));
+        proto.end(token);
+
+        if (close(dumpPipe.readFd()) != 0) {
+            ALOGW("TombstoneSection '%s' failed to close dump pipe readFd: %d", this->name.string(),
+                  errno);
+            err = -errno;
+            break;
+        }
+    }
+
     proto.flush(pipeWriteFd);
     return err;
 }

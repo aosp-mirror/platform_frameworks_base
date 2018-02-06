@@ -16,6 +16,7 @@ service incidentd /system/bin/incidentd
     class main
     user incidentd
     group incidentd log readproc
+    capabilities KILL SYS_PTRACE
 
 on post-fs-data
     # Create directory for incidentd
