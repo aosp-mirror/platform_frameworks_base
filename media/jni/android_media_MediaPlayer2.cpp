@@ -21,15 +21,14 @@
 
 #include <sys/stat.h>
 
-#include <media/mediaplayer2.h>
 #include <media/AudioResamplerPublic.h>
 #include <media/DataSourceDesc.h>
 #include <media/MediaHTTPService.h>
-#include <media/MediaPlayer2Interface.h>
 #include <media/MediaAnalyticsItem.h>
 #include <media/NdkWrapper.h>
 #include <media/stagefright/Utils.h>
 #include <media/stagefright/foundation/ByteUtils.h>  // for FOURCC definition
+#include <mediaplayer2/mediaplayer2.h>
 #include <stdio.h>
 #include <assert.h>
 #include <limits.h>
