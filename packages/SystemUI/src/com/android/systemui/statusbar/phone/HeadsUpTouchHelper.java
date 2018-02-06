@@ -23,7 +23,7 @@ import android.view.ViewConfiguration;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 /**
@@ -31,7 +31,7 @@ import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
  */
 public class HeadsUpTouchHelper implements Gefingerpoken {
 
-    private HeadsUpManager mHeadsUpManager;
+    private HeadsUpManagerPhone mHeadsUpManager;
     private NotificationStackScrollLayout mStackScroller;
     private int mTrackingPointer;
     private float mTouchSlop;
@@ -43,7 +43,7 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
     private NotificationPanelView mPanel;
     private ExpandableNotificationRow mPickedChild;
 
-    public HeadsUpTouchHelper(HeadsUpManager headsUpManager,
+    public HeadsUpTouchHelper(HeadsUpManagerPhone headsUpManager,
             NotificationStackScrollLayout stackScroller,
             NotificationPanelView notificationPanelView) {
         mHeadsUpManager = headsUpManager;
