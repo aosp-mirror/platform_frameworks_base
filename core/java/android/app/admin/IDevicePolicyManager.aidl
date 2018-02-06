@@ -402,9 +402,6 @@ interface IDevicePolicyManager {
     CharSequence getStartUserSessionMessage(in ComponentName admin);
     CharSequence getEndUserSessionMessage(in ComponentName admin);
 
-    void setPrintingEnabled(in ComponentName admin, boolean enabled);
-    boolean isPrintingEnabled();
-
     List<String> setMeteredDataDisabled(in ComponentName admin, in List<String> packageNames);
     List<String> getMeteredDataDisabled(in ComponentName admin);
 

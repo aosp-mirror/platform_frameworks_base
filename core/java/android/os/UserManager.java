@@ -943,6 +943,20 @@ public class UserManager {
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_SHARE_INTO_MANAGED_PROFILE = "no_sharing_into_profile";
+
+    /**
+     * Specifies whether the user is allowed to print.
+     *
+     * This restriction can be set by device or profile owner.
+     *
+     * The default value is {@code false}.
+     *
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_PRINTING = "no_printing";
+
     /**
      * Application restriction key that is used to indicate the pending arrival
      * of real restrictions for the app.

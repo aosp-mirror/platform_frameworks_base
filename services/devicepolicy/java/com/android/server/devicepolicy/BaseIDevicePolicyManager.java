@@ -122,16 +122,6 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void setPrintingEnabled(ComponentName admin, boolean enabled) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isPrintingEnabled() {
-        return true;
-    }
-
-    @Override
     public List<String> setMeteredDataDisabled(ComponentName admin, List<String> packageNames) {
         return packageNames;
     }

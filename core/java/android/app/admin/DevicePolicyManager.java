@@ -9404,41 +9404,6 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Allows/disallows printing.
-     *
-     * Called by a device owner or a profile owner.
-     * Device owner changes policy for all users. Profile owner can override it if present.
-     * Printing is enabled by default. If {@code FEATURE_PRINTING} is absent, the call is ignored.
-     *
-     * @param admin which {@link DeviceAdminReceiver} this request is associated with.
-     * @param enabled whether printing should be allowed or not.
-     * @throws SecurityException if {@code admin} is neither device, nor profile owner.
-     */
-    public void setPrintingEnabled(@NonNull ComponentName admin, boolean enabled) {
-        try {
-            mService.setPrintingEnabled(admin, enabled);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Returns whether printing is enabled for this user.
-     *
-     * Always {@code false} if {@code FEATURE_PRINTING} is absent.
-     * Otherwise, {@code true} by default.
-     *
-     * @return {@code true} iff printing is enabled.
-     */
-    public boolean isPrintingEnabled() {
-        try {
-            return mService.isPrintingEnabled();
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Called by device owner to add an override APN.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with

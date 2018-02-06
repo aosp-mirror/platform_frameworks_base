@@ -21,7 +21,6 @@ import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
-import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
@@ -115,12 +114,9 @@ public final class PrintManagerService extends SystemService {
 
         private final SparseArray<UserState> mUserStates = new SparseArray<>();
 
-        private final DevicePolicyManager mDpm;
-
         PrintManagerImpl(Context context) {
             mContext = context;
             mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
-            mDpm = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
             registerContentObservers();
             registerBroadcastReceivers();
         }
@@ -722,7 +718,7 @@ public final class PrintManagerService extends SystemService {
         }
 
         private boolean isPrintingEnabled() {
-            return mDpm == null || mDpm.isPrintingEnabled();
+            return !mUserManager.hasUserRestriction(UserManager.DISALLOW_PRINTING);
         }
 
         private void dump(@NonNull DualDumpOutputStream dumpStream,
