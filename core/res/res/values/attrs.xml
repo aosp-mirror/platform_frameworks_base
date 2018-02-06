@@ -8000,6 +8000,8 @@
         <attr name="icon"/>
         <!-- The activity to launch when the setting is clicked on. -->
         <attr name="settingsActivity"/>
+        <!-- The user restriction for this preference. -->
+        <attr name="userRestriction"/>
     </declare-styleable>
 
     <!-- =============================== -->
