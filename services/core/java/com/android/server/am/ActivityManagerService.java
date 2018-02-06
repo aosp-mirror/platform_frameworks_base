@@ -11316,8 +11316,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
-                startLockTaskModeLocked(mStackSupervisor.anyTaskForIdLocked(taskId),
-                        true /* isSystemCaller */);
+                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
+
+                // When starting lock task mode the stack must be in front and focused
+                task.getStack().moveToFront("startSystemLockTaskMode");
+                startLockTaskModeLocked(task, true /* isSystemCaller */);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
