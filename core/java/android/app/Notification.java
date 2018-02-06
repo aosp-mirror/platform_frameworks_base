@@ -1055,11 +1055,10 @@ public class Notification implements Parcelable
     /**
      * {@link #extras} key: A
      * {@link android.content.ContentUris content URI} pointing to an image that can be displayed
-     * in the background when the notification is selected. The URI must point to an image stream
-     * suitable for passing into
+     * in the background when the notification is selected. Used on television platforms.
+     * The URI must point to an image stream suitable for passing into
      * {@link android.graphics.BitmapFactory#decodeStream(java.io.InputStream)
-     * BitmapFactory.decodeStream}; all other content types will be ignored. The content provider
-     * URI used for this purpose must require no permissions to read the image data.
+     * BitmapFactory.decodeStream}; all other content types will be ignored.
      */
     public static final String EXTRA_BACKGROUND_IMAGE_URI = "android.backgroundImageUri";
 

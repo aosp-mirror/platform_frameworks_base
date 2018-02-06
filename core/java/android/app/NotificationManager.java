@@ -24,6 +24,7 @@ import android.annotation.TestApi;
 import android.app.Notification.Builder;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
@@ -350,6 +351,14 @@ public class NotificationManager {
      * the same tag and id has already been posted by your application and has not yet been
      * canceled, it will be replaced by the updated information.
      *
+     * All {@link android.service.notification.NotificationListenerService listener services} will
+     * be granted {@link Intent#FLAG_GRANT_READ_URI_PERMISSION} access to any {@link Uri uris}
+     * provided on this notification or the
+     * {@link NotificationChannel} this notification is posted to using
+     * {@link Context#grantUriPermission(String, Uri, int)}. Permission will be revoked when the
+     * notification is canceled, or you can revoke permissions with
+     * {@link Context#revokeUriPermission(Uri, int)}.
+     *
      * @param tag A string identifier for this notification.  May be {@code null}.
      * @param id An identifier for this notification.  The pair (tag, id) must be unique
      *        within your application.
@@ -370,11 +379,13 @@ public class NotificationManager {
         String pkg = mContext.getPackageName();
         // Fix the notification as best we can.
         Notification.addFieldsFromContext(mContext, notification);
+
         if (notification.sound != null) {
             notification.sound = notification.sound.getCanonicalUri();
             if (StrictMode.vmFileUriExposureEnabled()) {
                 notification.sound.checkFileUriExposed("Notification.sound");
             }
+
         }
         fixLegacySmallIcon(notification, pkg);
         if (mContext.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.LOLLIPOP_MR1) {
@@ -385,6 +396,7 @@ public class NotificationManager {
         }
         if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
         notification.reduceImageSizes(mContext);
+
         ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
         boolean isLowRam = am.isLowRamDevice();
         final Notification copy = Builder.maybeCloneStrippedForDelivery(notification, isLowRam);
