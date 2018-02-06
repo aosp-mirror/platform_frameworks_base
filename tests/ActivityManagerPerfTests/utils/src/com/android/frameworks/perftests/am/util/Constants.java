@@ -17,7 +17,7 @@
 package com.android.frameworks.perftests.am.util;
 
 public class Constants {
-    public static final String TYPE_ACTIVITY_CREATED = "activity_create";
+    public static final String TYPE_TARGET_PACKAGE_START = "target_package_start";
     public static final String TYPE_BROADCAST_RECEIVE = "broadcast_receive";
 
     public static final String ACTION_BROADCAST_MANIFEST_RECEIVE =

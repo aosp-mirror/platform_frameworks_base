@@ -62,7 +62,7 @@ public class TargetPackageUtils {
             sleep();
         }
         // make sure Application has run
-        timeReceiver.getReceivedTimeNs(Constants.TYPE_ACTIVITY_CREATED);
+        timeReceiver.getReceivedTimeNs(Constants.TYPE_TARGET_PACKAGE_START);
         Utils.drainBroadcastQueue();
     }
 
