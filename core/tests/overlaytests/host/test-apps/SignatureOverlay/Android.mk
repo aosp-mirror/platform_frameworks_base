@@ -40,13 +40,4 @@ LOCAL_AAPT_FLAGS := --custom-package $(my_package_prefix)_v1
 LOCAL_AAPT_FLAGS += --version-code 1 --version-name v1
 include $(BUILD_PACKAGE)
 
-include $(CLEAR_VARS)
-LOCAL_MODULE_TAGS := tests
-LOCAL_PACKAGE_NAME := OverlayHostTests_PlatformSignatureOverlayV2
-LOCAL_COMPATIBILITY_SUITE := general-tests
-LOCAL_CERTIFICATE := platform
-LOCAL_AAPT_FLAGS := --custom-package $(my_package_prefix)_v2
-LOCAL_AAPT_FLAGS += --version-code 2 --version-name v2
-include $(BUILD_PACKAGE)
-
 my_package_prefix :=

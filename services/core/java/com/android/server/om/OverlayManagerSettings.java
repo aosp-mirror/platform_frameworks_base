@@ -145,7 +145,8 @@ final class OverlayManagerSettings {
         return mItems.get(idx).setEnabled(enable);
     }
 
-    int getState(@NonNull final String packageName, final int userId) throws BadKeyException {
+    @OverlayInfo.State int getState(@NonNull final String packageName, final int userId)
+            throws BadKeyException {
         final int idx = select(packageName, userId);
         if (idx < 0) {
             throw new BadKeyException(packageName, userId);
@@ -156,8 +157,8 @@ final class OverlayManagerSettings {
     /**
      * Returns true if the settings were modified, false if they remain the same.
      */
-    boolean setState(@NonNull final String packageName, final int userId, final int state)
-            throws BadKeyException {
+    boolean setState(@NonNull final String packageName, final int userId,
+            final @OverlayInfo.State int state) throws BadKeyException {
         final int idx = select(packageName, userId);
         if (idx < 0) {
             throw new BadKeyException(packageName, userId);
@@ -413,7 +414,7 @@ final class OverlayManagerSettings {
         private final String mPackageName;
         private final String mTargetPackageName;
         private String mBaseCodePath;
-        private int mState;
+        private @OverlayInfo.State int mState;
         private boolean mIsEnabled;
         private OverlayInfo mCache;
         private boolean mIsStatic;
@@ -421,7 +422,7 @@ final class OverlayManagerSettings {
 
         SettingsItem(@NonNull final String packageName, final int userId,
                 @NonNull final String targetPackageName, @NonNull final String baseCodePath,
-                final int state, final boolean isEnabled, final boolean isStatic,
+                final @OverlayInfo.State int state, final boolean isEnabled, final boolean isStatic,
                 final int priority) {
             mPackageName = packageName;
             mUserId = userId;
@@ -462,11 +463,11 @@ final class OverlayManagerSettings {
             return false;
         }
 
-        private int getState() {
+        private @OverlayInfo.State int getState() {
             return mState;
         }
 
-        private boolean setState(final int state) {
+        private boolean setState(final @OverlayInfo.State int state) {
             if (mState != state) {
                 mState = state;
                 invalidateCache();

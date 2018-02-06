@@ -24,7 +24,11 @@ LOCAL_TARGET_REQUIRED_MODULES := \
     OverlayHostTests_BadSignatureOverlay \
     OverlayHostTests_PlatformSignatureStaticOverlay \
     OverlayHostTests_PlatformSignatureOverlay \
-    OverlayHostTests_PlatformSignatureOverlayV2
+    OverlayHostTests_UpdateOverlay \
+    OverlayHostTests_FrameworkOverlayV1 \
+    OverlayHostTests_FrameworkOverlayV2 \
+    OverlayHostTests_AppOverlayV1 \
+    OverlayHostTests_AppOverlayV2
 include $(BUILD_HOST_JAVA_LIBRARY)
 
 # Include to build test-apps.
