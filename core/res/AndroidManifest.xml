@@ -3861,6 +3861,7 @@
                 android:excludeFromRecents="true"
                 android:label="@string/user_owner_label"
                 android:exported="true"
+                android:visibleToInstantApps="true"
                 >
         </activity>
         <activity-alias android:name="com.android.internal.app.ForwardIntentToParent"
