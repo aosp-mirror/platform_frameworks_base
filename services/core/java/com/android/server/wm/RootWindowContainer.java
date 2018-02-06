@@ -599,8 +599,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                     "<<< CLOSE TRANSACTION performLayoutAndPlaceSurfaces");
         }
 
-        mService.mAnimator.executeAfterPrepareSurfacesRunnables();
-
         final WindowSurfacePlacer surfacePlacer = mService.mWindowPlacerLocked;
 
         // If we are ready to perform an app transition, check through all of the app tokens to be
