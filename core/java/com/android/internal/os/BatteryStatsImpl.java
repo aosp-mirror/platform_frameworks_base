@@ -3743,7 +3743,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         if (mNumHistoryItems == MAX_HISTORY_ITEMS
                 || mNumHistoryItems == MAX_MAX_HISTORY_ITEMS) {
-            addHistoryRecordLocked(elapsedRealtimeMs, HistoryItem.CMD_OVERFLOW);
+            addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_OVERFLOW, cur);
         }
 
         if (mNumHistoryItems >= MAX_HISTORY_ITEMS) {
@@ -3760,7 +3760,7 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        addHistoryRecordLocked(elapsedRealtimeMs, HistoryItem.CMD_UPDATE);
+        addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_UPDATE, cur);
     }
 
     public void addHistoryEventLocked(long elapsedRealtimeMs, long uptimeMs, int code,
