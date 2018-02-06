@@ -4061,6 +4061,7 @@ class AlarmManagerService extends SystemService {
         /**
          * Deliver an alarm and set up the post-delivery handling appropriately
          */
+        @GuardedBy("mLock")
         public void deliverLocked(Alarm alarm, long nowELAPSED, boolean allowWhileIdle) {
             if (alarm.operation != null) {
                 // PendingIntent alarm

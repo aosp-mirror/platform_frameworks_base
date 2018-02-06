@@ -497,6 +497,7 @@ public class ForceAppStandbyTracker {
     /**
      * Update {@link #mRunAnyRestrictedPackages} with the current app ops state.
      */
+    @GuardedBy("mLock")
     private void refreshForcedAppStandbyUidPackagesLocked() {
         mRunAnyRestrictedPackages.clear();
         final List<PackageOps> ops = mAppOpsManager.getPackagesForOps(
@@ -536,6 +537,7 @@ public class ForceAppStandbyTracker {
     /**
      * Update {@link #mForceAllAppsStandby} and notifies the listeners.
      */
+    @GuardedBy("mLock")
     private void toggleForceAllAppsStandbyLocked(boolean enable) {
         if (enable == mForceAllAppsStandby) {
             return;
@@ -545,6 +547,7 @@ public class ForceAppStandbyTracker {
         mHandler.notifyForceAllAppsStandbyChanged();
     }
 
+    @GuardedBy("mLock")
     private int findForcedAppStandbyUidPackageIndexLocked(int uid, @NonNull String packageName) {
         final int size = mRunAnyRestrictedPackages.size();
         if (size > 8) {
@@ -563,6 +566,7 @@ public class ForceAppStandbyTracker {
     /**
      * @return whether a uid package-name pair is in mRunAnyRestrictedPackages.
      */
+    @GuardedBy("mLock")
     boolean isRunAnyRestrictedLocked(int uid, @NonNull String packageName) {
         return findForcedAppStandbyUidPackageIndexLocked(uid, packageName) >= 0;
     }
@@ -570,6 +574,7 @@ public class ForceAppStandbyTracker {
     /**
      * Add to / remove from {@link #mRunAnyRestrictedPackages}.
      */
+    @GuardedBy("mLock")
     boolean updateForcedAppStandbyUidPackageLocked(int uid, @NonNull String packageName,
             boolean restricted) {
         final int index = findForcedAppStandbyUidPackageIndexLocked(uid, packageName);

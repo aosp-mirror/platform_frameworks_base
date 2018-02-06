@@ -289,6 +289,7 @@ class AudioPlayerStateMonitor extends IPlaybackConfigDispatcher.Stub {
         }
     }
 
+    @GuardedBy("mLock")
     private void sendAudioPlayerActiveStateChangedMessageLocked(
             final AudioPlaybackConfiguration config, final boolean isRemoved) {
         for (MessageHandler messageHandler : mListenerMap.values()) {

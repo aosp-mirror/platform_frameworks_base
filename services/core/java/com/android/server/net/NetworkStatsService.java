@@ -405,6 +405,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 mNonMonotonicObserver, dropBox, prefix, config.bucketDuration, includeTags);
     }
 
+    @GuardedBy("mStatsLock")
     private void shutdownLocked() {
         mContext.unregisterReceiver(mTetherReceiver);
         mContext.unregisterReceiver(mPollReceiver);
@@ -431,6 +432,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mSystemReady = false;
     }
 
+    @GuardedBy("mStatsLock")
     private void maybeUpgradeLegacyStatsLocked() {
         File file;
         try {
@@ -909,6 +911,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * reflect current {@link #mPersistThreshold} value. Always defers to
      * {@link Global} values when defined.
      */
+    @GuardedBy("mStatsLock")
     private void updatePersistThresholdsLocked() {
         mDevRecorder.setPersistThreshold(mSettings.getDevPersistBytes(mPersistThreshold));
         mXtRecorder.setPersistThreshold(mSettings.getXtPersistBytes(mPersistThreshold));
@@ -1029,6 +1032,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * are active on a single {@code iface}, they are combined under a single
      * {@link NetworkIdentitySet}.
      */
+    @GuardedBy("mStatsLock")
     private void updateIfacesLocked(Network[] defaultNetworks) {
         if (!mSystemReady) return;
         if (LOGV) Slog.v(TAG, "updateIfacesLocked()");
@@ -1128,6 +1132,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         return ident;
     }
 
+    @GuardedBy("mStatsLock")
     private void recordSnapshotLocked(long currentTime) throws RemoteException {
         // snapshot and record current counters; read UID stats first to
         // avoid over counting dev stats.
@@ -1163,6 +1168,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * Bootstrap initial stats snapshot, usually during {@link #systemReady()}
      * so we have baseline values without double-counting.
      */
+    @GuardedBy("mStatsLock")
     private void bootstrapStatsLocked() {
         final long currentTime = mTime.hasCache() ? mTime.currentTimeMillis()
                 : System.currentTimeMillis();
@@ -1197,6 +1203,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * Periodic poll operation, reading current statistics and recording into
      * {@link NetworkStatsHistory}.
      */
+    @GuardedBy("mStatsLock")
     private void performPollLocked(int flags) {
         if (!mSystemReady) return;
         if (LOGV) Slog.v(TAG, "performPollLocked(flags=0x" + Integer.toHexString(flags) + ")");
@@ -1258,6 +1265,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     /**
      * Sample recent statistics summary into {@link EventLog}.
      */
+    @GuardedBy("mStatsLock")
     private void performSampleLocked() {
         // TODO: migrate trustedtime fixes to separate binary log events
         final long trustedTime = mTime.hasCache() ? mTime.currentTimeMillis() : -1;
@@ -1295,6 +1303,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     /**
      * Clean up {@link #mUidRecorder} after UID is removed.
      */
+    @GuardedBy("mStatsLock")
     private void removeUidsLocked(int... uids) {
         if (LOGV) Slog.v(TAG, "removeUidsLocked() for UIDs " + Arrays.toString(uids));
 
@@ -1313,6 +1322,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     /**
      * Clean up {@link #mUidRecorder} after user is removed.
      */
+    @GuardedBy("mStatsLock")
     private void removeUserLocked(int userId) {
         if (LOGV) Slog.v(TAG, "removeUserLocked() for userId=" + userId);
 
@@ -1434,6 +1444,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
     }
 
+    @GuardedBy("mStatsLock")
     private void dumpProtoLocked(FileDescriptor fd) {
         final ProtoOutputStream proto = new ProtoOutputStream(fd);
 

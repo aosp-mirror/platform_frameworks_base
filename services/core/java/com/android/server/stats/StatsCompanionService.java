@@ -209,6 +209,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     }
 
     // Assumes that sStatsdLock is held.
+    @GuardedBy("sStatsdLock")
     private final void informAllUidsLocked(Context context) throws RemoteException {
         UserManager um = (UserManager) context.getSystemService(Context.USER_SERVICE);
         PackageManager pm = context.getPackageManager();

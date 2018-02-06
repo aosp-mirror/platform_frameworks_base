@@ -797,6 +797,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return overlayPackages;
         }
 
+        @GuardedBy("mInstallLock")
         final String[] getStaticOverlayPathsLocked(Collection<PackageParser.Package> allPackages,
                 String targetPackageName, String targetPath) {
             if ("android".equals(targetPackageName)) {
@@ -9015,6 +9016,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private void notifyPackageUseLocked(String packageName, int reason) {
         final PackageParser.Package p = mPackages.get(packageName);
         if (p == null) {
@@ -13954,6 +13956,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private boolean canSuspendPackageForUserLocked(String packageName, int userId) {
         if (isPackageDeviceAdmin(packageName, userId)) {
             Slog.w(TAG, "Cannot suspend/un-suspend package \"" + packageName

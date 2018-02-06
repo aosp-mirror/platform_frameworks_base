@@ -1116,6 +1116,7 @@ public final class ContentService extends IContentService.Stub {
         return (pi != null) ? pi.packageName : null;
     }
 
+    @GuardedBy("mCache")
     private ArrayMap<Pair<String, Uri>, Bundle> findOrCreateCacheLocked(int userId,
             String providerPackageName) {
         ArrayMap<String, ArrayMap<Pair<String, Uri>, Bundle>> userCache = mCache.get(userId);
@@ -1131,6 +1132,7 @@ public final class ContentService extends IContentService.Stub {
         return packageCache;
     }
 
+    @GuardedBy("mCache")
     private void invalidateCacheLocked(int userId, String providerPackageName, Uri uri) {
         ArrayMap<String, ArrayMap<Pair<String, Uri>, Bundle>> userCache = mCache.get(userId);
         if (userCache == null) return;

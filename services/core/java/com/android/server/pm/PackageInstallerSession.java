@@ -318,6 +318,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     /**
      * @return {@code true} iff the installing is app an device owner or affiliated profile owner.
      */
+    @GuardedBy("mLock")
     private boolean isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked() {
         DevicePolicyManagerInternal dpmi =
                 LocalServices.getService(DevicePolicyManagerInternal.class);
@@ -334,6 +335,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      *
      * @return {@code true} iff we need to ask to confirm the permissions?
      */
+    @GuardedBy("mLock")
     private boolean needToAskForPermissionsLocked() {
         if (mPermissionsManuallyAccepted) {
             return false;
@@ -456,6 +458,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    @GuardedBy("mLock")
     private void assertPreparedAndNotSealedLocked(String cookie) {
         assertPreparedAndNotCommittedOrDestroyedLocked(cookie);
         if (mSealed) {
@@ -463,6 +466,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    @GuardedBy("mLock")
     private void assertPreparedAndNotCommittedOrDestroyedLocked(String cookie) {
         assertPreparedAndNotDestroyedLocked(cookie);
         if (mCommitted) {
@@ -470,6 +474,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    @GuardedBy("mLock")
     private void assertPreparedAndNotDestroyedLocked(String cookie) {
         if (!mPrepared) {
             throw new IllegalStateException(cookie + " before prepared");
@@ -484,6 +489,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * might point at an ASEC mount point, which is why we delay path resolution
      * until someone actively works with the session.
      */
+    @GuardedBy("mLock")
     private File resolveStageDirLocked() throws IOException {
         if (mResolvedStageDir == null) {
             if (stageDir != null) {
@@ -516,6 +522,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    @GuardedBy("mLock")
     private void computeProgressLocked(boolean forcePublish) {
         mProgress = MathUtils.constrain(mClientProgress * 0.8f, 0f, 0.8f)
                 + MathUtils.constrain(mInternalProgress * 0.2f, 0f, 0.2f);
@@ -728,6 +735,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * Check if the caller is the owner of this session. Otherwise throw a
      * {@link SecurityException}.
      */
+    @GuardedBy("mLock")
     private void assertCallerIsOwnerOrRootLocked() {
         final int callingUid = Binder.getCallingUid();
         if (callingUid != Process.ROOT_UID && callingUid != mInstallerUid) {
@@ -738,6 +746,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     /**
      * If anybody is reading or writing data of the session, throw an {@link SecurityException}.
      */
+    @GuardedBy("mLock")
     private void assertNoWriteFileTransfersOpenLocked() {
         // Verify that all writers are hands-off
         for (RevocableFileDescriptor fd : mFds) {
@@ -820,6 +829,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * @throws PackageManagerException if the session was sealed but something went wrong. If the
      *                                 session was sealed this is the only possible exception.
      */
+    @GuardedBy("mLock")
     private void sealAndValidateLocked() throws PackageManagerException, IOException {
         assertNoWriteFileTransfersOpenLocked();
         assertPreparedAndNotDestroyedLocked("sealing of session");
@@ -901,6 +911,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mCallback.onSessionSealedBlocking(this);
     }
 
+    @GuardedBy("mLock")
     private void commitLocked()
             throws PackageManagerException {
         if (mDestroyed) {
@@ -1016,6 +1027,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * Note that upgrade compatibility is still performed by
      * {@link PackageManagerService}.
      */
+    @GuardedBy("mLock")
     private void validateInstallLocked(@Nullable PackageInfo pkgInfo)
             throws PackageManagerException {
         mPackageName = null;
@@ -1228,6 +1240,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    @GuardedBy("mLock")
     private void assertApkConsistentLocked(String tag, ApkLite apk)
             throws PackageManagerException {
         if (!mPackageName.equals(apk.packageName)) {
@@ -1511,6 +1524,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    @GuardedBy("mLock")
     private void dumpLocked(IndentingPrintWriter pw) {
         pw.println("Session " + sessionId + ":");
         pw.increaseIndent();

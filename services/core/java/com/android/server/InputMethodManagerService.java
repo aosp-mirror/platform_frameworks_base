@@ -1166,6 +1166,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mImePackageAppeared = false;
         }
 
+        @GuardedBy("mMethodMap")
         private boolean shouldRebuildInputMethodListLocked() {
             // This method is guaranteed to be called only by getRegisteredHandler().
 
@@ -1467,6 +1468,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         setSelectedInputMethodAndSubtypeLocked(defIm, NOT_A_SUBTYPE_ID, false);
     }
 
+    @GuardedBy("mMethodMap")
     private void switchUserLocked(int newUserId) {
         if (DEBUG) Slog.d(TAG, "Switching user stage 1/3. newUserId=" + newUserId
                 + " currentUserId=" + mSettings.getCurrentUserId());
@@ -1817,6 +1819,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return flags;
     }
 
+    @GuardedBy("mMethodMap")
     @NonNull
     InputBindResult attachNewInputLocked(
             /* @InputMethodClient.StartInputReason */ final int startInputReason, boolean initial) {
@@ -1846,6 +1849,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mCurId, mCurSeq, mCurUserActionNotificationSequenceNumber);
     }
 
+    @GuardedBy("mMethodMap")
     @NonNull
     InputBindResult startInputLocked(
             /* @InputMethodClient.StartInputReason */ final int startInputReason,
@@ -1889,6 +1893,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 controlFlags, startInputReason);
     }
 
+    @GuardedBy("mMethodMap")
     @NonNull
     InputBindResult startInputUncheckedLocked(@NonNull ClientState cs, IInputContext inputContext,
             /* @InputConnectionInspector.missingMethods */ final int missingMethods,
@@ -3642,6 +3647,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return false;
     }
 
+    @GuardedBy("mMethodMap")
     void buildInputMethodListLocked(boolean resetDefaultEnabledIme) {
         if (DEBUG) {
             Slog.d(TAG, "--- re-buildInputMethodList reset = " + resetDefaultEnabledIme

@@ -1210,6 +1210,7 @@ Slog.e(TAG, "TODD: Packages: " + Arrays.toString(packages));
         return false;
     }
 
+    @GuardedBy("mLock")
     private void grantRuntimePermissionsGrantedToDisabledPackageLocked(
             PackageParser.Package pkg, int callingUid, PermissionCallback callback) {
         if (pkg.parentPackage == null) {
@@ -1499,6 +1500,7 @@ Slog.e(TAG, "TODD: Packages: " + Arrays.toString(packages));
         }
     }
 
+    @GuardedBy("mLock")
     private int[] revokeUnusedSharedUserPermissionsLocked(
             SharedUserSetting suSetting, int[] allUserIds) {
         // Collect all used permissions in the UID

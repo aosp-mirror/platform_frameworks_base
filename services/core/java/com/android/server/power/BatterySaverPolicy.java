@@ -306,6 +306,7 @@ public class BatterySaverPolicy extends ContentObserver {
         }
     }
 
+    @GuardedBy("mLock")
     @VisibleForTesting
     void updateConstantsLocked(final String setting, final String deviceSpecificSetting) {
         mSettings = setting;

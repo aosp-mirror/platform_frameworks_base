@@ -226,6 +226,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         }
     }
 
+    @GuardedBy("mSessions")
     private void reconcileStagesLocked(String volumeUuid, boolean isEphemeral) {
         final File stagingDir = buildStagingDir(volumeUuid, isEphemeral);
         final ArraySet<File> unclaimedStages = newArraySet(
@@ -283,6 +284,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         }
     }
 
+    @GuardedBy("mSessions")
     private void readSessionsLocked() {
         if (LOGD) Slog.v(TAG, "readSessionsLocked()");
 
@@ -340,6 +342,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         }
     }
 
+    @GuardedBy("mSessions")
     private void addHistoricalSessionLocked(PackageInstallerSession session) {
         CharArrayWriter writer = new CharArrayWriter();
         IndentingPrintWriter pw = new IndentingPrintWriter(writer, "    ");
@@ -352,6 +355,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                 mHistoricalSessionsByInstaller.get(installerUid) + 1);
     }
 
+    @GuardedBy("mSessions")
     private void writeSessionsLocked() {
         if (LOGD) Slog.v(TAG, "writeSessionsLocked()");
 
@@ -612,6 +616,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         }
     }
 
+    @GuardedBy("mSessions")
     private int allocateSessionIdLocked() {
         int n = 0;
         int sessionId;

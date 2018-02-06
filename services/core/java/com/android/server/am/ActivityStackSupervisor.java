@@ -166,6 +166,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.RemoteAnimationAdapter;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.logging.MetricsLoggerWrapper;
@@ -1858,6 +1859,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * Called when the frontmost task is idle.
      * @return the state of mService.mBooting before this was called.
      */
+    @GuardedBy("mService")
     private boolean checkFinishBootingLocked() {
         final boolean booting = mService.mBooting;
         boolean enableScreen = false;
@@ -1873,6 +1875,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     // Checked.
+    @GuardedBy("mService")
     final ActivityRecord activityIdleInternalLocked(final IBinder token, boolean fromTimeout,
             boolean processPausingActivities, Configuration config) {
         if (DEBUG_ALL) Slog.v(TAG, "Activity idle: " + token);
