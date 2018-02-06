@@ -145,37 +145,6 @@ public abstract class CameraDevice implements AutoCloseable {
      */
     public static final int TEMPLATE_MANUAL = 6;
 
-    /**
-     * A template for selecting camera parameters that match TEMPLATE_PREVIEW as closely as
-     * possible while improving the camera output for motion tracking use cases.
-     *
-     * <p>This template is best used by applications that are frequently switching between motion
-     * tracking use cases and regular still capture use cases, to minimize the IQ changes
-     * when swapping use cases.</p>
-     *
-     * <p>This template is guaranteed to be supported on camera devices that support the
-     * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_MOTION_TRACKING MOTION_TRACKING}
-     * capability.</p>
-     *
-     * @see #createCaptureRequest
-     */
-    public static final int TEMPLATE_MOTION_TRACKING_PREVIEW = 7;
-
-    /**
-     * A template for selecting camera parameters that maximize the quality of camera output for
-     * motion tracking use cases.
-     *
-     * <p>This template is best used by applications dedicated to motion tracking applications,
-     * which aren't concerned about fast switches between motion tracking and other use cases.</p>
-     *
-     * <p>This template is guaranteed to be supported on camera devices that support the
-     * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_MOTION_TRACKING MOTION_TRACKING}
-     * capability.</p>
-     *
-     * @see #createCaptureRequest
-     */
-    public static final int TEMPLATE_MOTION_TRACKING_BEST = 8;
-
      /** @hide */
      @Retention(RetentionPolicy.SOURCE)
      @IntDef(prefix = {"TEMPLATE_"}, value =
@@ -184,9 +153,7 @@ public abstract class CameraDevice implements AutoCloseable {
           TEMPLATE_RECORD,
           TEMPLATE_VIDEO_SNAPSHOT,
           TEMPLATE_ZERO_SHUTTER_LAG,
-          TEMPLATE_MANUAL,
-          TEMPLATE_MOTION_TRACKING_PREVIEW,
-          TEMPLATE_MOTION_TRACKING_BEST})
+          TEMPLATE_MANUAL})
      public @interface RequestTemplate {};
 
     /**
@@ -417,27 +384,6 @@ public abstract class CameraDevice implements AutoCloseable {
      * <tr> <td>{@code YUV }</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV }</td><td id="rb">{@code PREVIEW}</td> <td>{@code RAW }</td><td id="rb">{@code MAXIMUM}</td> <td>Two-input in-app processing plus DNG capture.</td> </tr>
      * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code JPEG}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code RAW }</td><td id="rb">{@code MAXIMUM}</td> <td>Still capture with simultaneous JPEG and DNG.</td> </tr>
      * <tr> <td>{@code YUV }</td><td id="rb">{@code PREVIEW}</td> <td>{@code JPEG}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code RAW }</td><td id="rb">{@code MAXIMUM}</td> <td>In-app processing with simultaneous JPEG and DNG.</td> </tr>
-     * </table><br>
-     * </p>
-     *
-     * <p>MOTION_TRACKING-capability ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES}
-     * includes
-     * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_MOTION_TRACKING MOTION_TRACKING})
-     * devices support at least the below stream combinations in addition to those for
-     * {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED LIMITED} devices. The
-     * {@code FULL FOV 640} entry means that the device will support a resolution that's 640 pixels
-     * wide, with the height set so that the resolution aspect ratio matches the MAXIMUM output
-     * aspect ratio, rounded down.  So for a device with a 4:3 image sensor, this will be 640x480,
-     * and for a device with a 16:9 sensor, this will be 640x360, and so on. And the
-     * {@code MAX 30FPS} entry means the largest JPEG resolution on the device for which
-     * {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputMinFrameDuration}
-     * returns a value less than or equal to 1/30s.
-     *
-     * <table>
-     * <tr><th colspan="7">MOTION_TRACKING-capability additional guaranteed configurations</th></tr>
-     * <tr><th colspan="2" id="rb">Target 1</th><th colspan="2" id="rb">Target 2</th><th colspan="2" id="rb">Target 3</th><th rowspan="2">Sample use case(s)</th> </tr>
-     * <tr><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th></tr>
-     * <tr> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV }</td><td id="rb">{@code FULL FOV 640}</td> <td>{@code JPEG}</td><td id="rb">{@code MAX 30FPS}</td> <td>Preview with a tracking YUV output and a as-large-as-possible JPEG for still captures.</td> </tr>
      * </table><br>
      * </p>
      *
