@@ -168,7 +168,7 @@ class WindowSurfaceController {
         }
     }
 
-    void destroyInTransaction() {
+    void destroyNotInTransaction() {
         if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
             Slog.i(TAG, "Destroying surface " + this + " called by " + Debug.getCallers(8));
         }
