@@ -137,11 +137,13 @@ public class SyncJobService extends JobService {
                             + " params=" + jobParametersToString(params));
                 }
             } else if (runtime < 10 * 1000) {
-                // Job stopped too soon. WTF.
-                wtf("Job " + jobId + " stopped in " + runtime + " ms: "
-                        + " startUptime=" + startUptime
-                        + " nowUptime=" + nowUptime
-                        + " params=" + jobParametersToString(params));
+                // This happens too in a normal case too, and it's rather too often.
+                // Disable it for now.
+//                // Job stopped too soon. WTF.
+//                wtf("Job " + jobId + " stopped in " + runtime + " ms: "
+//                        + " startUptime=" + startUptime
+//                        + " nowUptime=" + nowUptime
+//                        + " params=" + jobParametersToString(params));
             }
 
             mStartedSyncs.delete(jobId);
