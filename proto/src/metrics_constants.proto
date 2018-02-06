@@ -5171,6 +5171,7 @@ message MetricsEvent {
     // An autofill service was bound using an unofficial(but still supported) permission.
     // Package: Package of the autofill service
     // OS: P
+
     AUTOFILL_INVALID_PERMISSION = 1289;
 
     // OPEN: QS Alarm tile shown
@@ -5184,6 +5185,21 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     // OS: P
     USB_DEVICE_DETAILS = 1291;
+
+    // OPEN: Settings > Accessibility > Vibration
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACCESSIBILITY_VIBRATION = 1292;
+
+    // OPEN: Settings > Accessibility > Vibration > Ring & notification vibration
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACCESSIBILITY_VIBRATION_NOTIFICATION = 1293;
+
+    // OPEN: Settings > Accessibility > Vibration > Touch vibration
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACCESSIBILITY_VIBRATION_TOUCH = 1294;
 
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
