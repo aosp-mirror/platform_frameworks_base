@@ -44,6 +44,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Map;
 
 /**
@@ -246,5 +247,14 @@ public final class AutofillServiceInfo {
         builder.append(", hasCompatPckgs:").append(mCompatibilityPackages != null
                 && !mCompatibilityPackages.isEmpty()).append("]");
         return builder.toString();
+    }
+
+    /**
+     * Dumps it!
+     */
+    public void dump(String prefix, PrintWriter pw) {
+        pw.print(prefix); pw.print("Component: "); pw.println(getServiceInfo().getComponentName());
+        pw.print(prefix); pw.print("Settings: "); pw.println(mSettingsActivity);
+        pw.print(prefix); pw.print("Compat packages: "); pw.println(mCompatibilityPackages);
     }
 }
