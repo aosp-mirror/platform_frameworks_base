@@ -204,10 +204,6 @@ static inline SaveFlags::Flags saveFlags(SkCanvas::SaveLayerFlags layerFlags) {
         saveFlags |= SaveFlags::ClipToLayer;
     }
 
-    if (!(layerFlags & SkCanvas::kIsOpaque_SaveLayerFlag)) {
-        saveFlags |= SaveFlags::HasAlphaLayer;
-    }
-
     return saveFlags;
 }
 
