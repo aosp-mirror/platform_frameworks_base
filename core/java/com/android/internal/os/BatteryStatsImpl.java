@@ -9931,8 +9931,6 @@ public class BatteryStatsImpl extends BatteryStats {
             if (wl != null) {
                 StopwatchTimer wlt = getWakelockTimerLocked(wl, type);
                 wlt.stopRunningLocked(elapsedRealtimeMs);
-                if (!wlt.isRunningLocked()) { // only tell statsd if truly stopped
-                }
             }
             if (type == WAKE_TYPE_PARTIAL) {
                 if (mAggregatedPartialWakelockTimer != null) {
