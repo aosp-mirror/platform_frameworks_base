@@ -219,6 +219,9 @@ public abstract class ActivityManagerInternal {
     /**
      * Start activity {@code intents} as if {@code packageName} on user {@code userId} did it.
      *
+     * - DO NOT call it with the calling UID cleared.
+     * - All the necessary caller permission checks must be done at callsites.
+     *
      * @return error codes used by {@link IActivityManager#startActivity} and its siblings.
      */
     public abstract int startActivitiesAsPackage(String packageName,

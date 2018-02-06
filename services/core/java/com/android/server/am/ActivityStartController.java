@@ -245,11 +245,25 @@ public class ActivityStartController {
                 .execute();
     }
 
+    /**
+     * Start intents as a package.
+     *
+     * @param uid make a call as if this UID did.
+     * @param callingPackage make a call as if this package did.
+     * @param intents intents to start.
+     * @param userId start the intents on this user.
+     * @param validateIncomingUser set true to skip checking {@code userId} with the calling UID.
+     */
     final int startActivitiesInPackage(int uid, String callingPackage, Intent[] intents,
-            String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options, int userId) {
+            String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options, int userId,
+            boolean validateIncomingUser) {
         final String reason = "startActivityInPackage";
-        userId = mService.mUserController.handleIncomingUser(Binder.getCallingPid(),
-                Binder.getCallingUid(), userId, false, ALLOW_FULL_ONLY, reason, null);
+        if (validateIncomingUser) {
+            userId = mService.mUserController.handleIncomingUser(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, false, ALLOW_FULL_ONLY, reason, null);
+        } else {
+            mService.mUserController.ensureNotSpecialUser(userId);
+        }
         // TODO: Switch to user app stacks here.
         return startActivities(null, uid, callingPackage, intents, resolvedTypes, resultTo, options,
                 userId, reason);

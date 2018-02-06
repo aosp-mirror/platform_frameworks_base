@@ -25683,9 +25683,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             synchronized (ActivityManagerService.this) {
-                return mActivityStartController.startActivitiesInPackage(packageUid, packageName,
+                return mActivityStartController.startActivitiesInPackage(
+                        packageUid, packageName,
                         intents, resolvedTypes, null /* resultTo */,
-                        SafeActivityOptions.fromBundle(bOptions), userId);
+                        SafeActivityOptions.fromBundle(bOptions), userId,
+                        false /* validateIncomingUser */);
             }
         }
 
