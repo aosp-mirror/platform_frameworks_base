@@ -92,7 +92,6 @@ public class WindowAnimator {
      * executed and the corresponding transaction is closed and applied.
      */
     private final ArrayList<Runnable> mAfterPrepareSurfacesRunnables = new ArrayList<>();
-    private boolean mInExecuteAfterPrepareSurfacesRunnables;
 
     WindowAnimator(final WindowManagerService service) {
         mService = service;
@@ -439,13 +438,7 @@ public class WindowAnimator {
         scheduleAnimation();
     }
 
-    void executeAfterPrepareSurfacesRunnables() {
-
-        // Don't even think about to start recursing!
-        if (mInExecuteAfterPrepareSurfacesRunnables) {
-            return;
-        }
-        mInExecuteAfterPrepareSurfacesRunnables = true;
+    private void executeAfterPrepareSurfacesRunnables() {
 
         // Traverse in order they were added.
         final int size = mAfterPrepareSurfacesRunnables.size();
@@ -453,6 +446,5 @@ public class WindowAnimator {
             mAfterPrepareSurfacesRunnables.get(i).run();
         }
         mAfterPrepareSurfacesRunnables.clear();
-        mInExecuteAfterPrepareSurfacesRunnables = false;
     }
 }
