@@ -676,6 +676,35 @@ public final class BluetoothSocket implements Closeable {
         mExcludeSdp = excludeSdp;
     }
 
+    /**
+     * Set the LE Transmit Data Length to be the maximum that the BT Controller is capable of. This
+     * parameter is used by the BT Controller to set the maximum transmission packet size on this
+     * connection. This function is currently used for testing only.
+     * @hide
+     */
+    public void requestMaximumTxDataLength() throws IOException {
+        if (mDevice == null) {
+            throw new IOException("requestMaximumTxDataLength is called on null device");
+        }
+
+        try {
+            if (mSocketState == SocketState.CLOSED) {
+                throw new IOException("socket closed");
+            }
+            IBluetooth bluetoothProxy =
+                    BluetoothAdapter.getDefaultAdapter().getBluetoothService(null);
+            if (bluetoothProxy == null) {
+                throw new IOException("Bluetooth is off");
+            }
+
+            if (DBG) Log.d(TAG, "requestMaximumTxDataLength");
+            bluetoothProxy.getSocketManager().requestMaximumTxDataLength(mDevice);
+        } catch (RemoteException e) {
+            Log.e(TAG, Log.getStackTraceString(new Throwable()));
+            throw new IOException("unable to send RPC: " + e.getMessage());
+        }
+    }
+
     private String convertAddr(final byte[] addr) {
         return String.format(Locale.US, "%02X:%02X:%02X:%02X:%02X:%02X",
                 addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
