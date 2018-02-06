@@ -306,6 +306,7 @@ public final class AutofillManagerService extends SystemService {
      *
      * @return service instance.
      */
+    @GuardedBy("mLock")
     @NonNull
     AutofillManagerServiceImpl getServiceForUserLocked(int userId) {
         final int resolvedUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
@@ -325,6 +326,7 @@ public final class AutofillManagerService extends SystemService {
      *
      * @return service instance or {@code null} if not already present
      */
+    @GuardedBy("mLock")
     @Nullable
     AutofillManagerServiceImpl peekServiceForUserLocked(int userId) {
         final int resolvedUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
@@ -474,6 +476,7 @@ public final class AutofillManagerService extends SystemService {
     /**
      * Removes a cached service for a given user.
      */
+    @GuardedBy("mLock")
     private void removeCachedServiceLocked(int userId) {
         final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
         if (service != null) {
@@ -485,6 +488,7 @@ public final class AutofillManagerService extends SystemService {
     /**
      * Updates a cached service for a given user.
      */
+    @GuardedBy("mLock")
     private void updateCachedServiceLocked(int userId) {
         updateCachedServiceLocked(userId, mDisabledUsers.get(userId));
     }
@@ -492,6 +496,7 @@ public final class AutofillManagerService extends SystemService {
     /**
      * Updates a cached service for a given user.
      */
+    @GuardedBy("mLock")
     private void updateCachedServiceLocked(int userId, boolean disabled) {
         AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
         if (service != null) {

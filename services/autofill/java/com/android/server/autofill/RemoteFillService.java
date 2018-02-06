@@ -475,6 +475,7 @@ final class RemoteFillService implements DeathRecipient {
             return true;
         }
 
+        @GuardedBy("mLock")
         protected boolean isCancelledLocked() {
             return mCancelled;
         }
