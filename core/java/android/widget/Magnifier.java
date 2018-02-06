@@ -18,8 +18,10 @@ package android.widget;
 
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.annotation.UiThread;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -268,5 +270,47 @@ public final class Magnifier {
     private ImageView getImageView() {
         return mWindow.getContentView().findViewById(
                 com.android.internal.R.id.magnifier_image);
+    }
+
+    /**
+     * @return the content being currently displayed in the magnifier, as bitmap
+     *
+     * @hide
+     */
+    @TestApi
+    public Bitmap getContent() {
+        return mBitmap;
+    }
+
+    /**
+     * @return the position of the magnifier window relative to the screen
+     *
+     * @hide
+     */
+    @TestApi
+    public Rect getWindowPositionOnScreen() {
+        final int[] viewLocationOnScreen = new int[2];
+        mView.getLocationOnScreen(viewLocationOnScreen);
+        final int[] viewLocationInSurface = new int[2];
+        mView.getLocationInSurface(viewLocationInSurface);
+
+        final int left = mWindowCoords.x + viewLocationOnScreen[0] - viewLocationInSurface[0];
+        final int top = mWindowCoords.y + viewLocationOnScreen[1] - viewLocationInSurface[1];
+        return new Rect(left, top, left + mWindow.getWidth(), top + mWindow.getHeight());
+    }
+
+    /**
+     * @return the size of the magnifier window in dp
+     *
+     * @hide
+     */
+    @TestApi
+    public static PointF getMagnifierDefaultSize() {
+        final Resources resources = Resources.getSystem();
+        final float density = resources.getDisplayMetrics().density;
+        final PointF size = new PointF();
+        size.x = resources.getDimension(com.android.internal.R.dimen.magnifier_width) / density;
+        size.y = resources.getDimension(com.android.internal.R.dimen.magnifier_height) / density;
+        return size;
     }
 }

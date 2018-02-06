@@ -1078,6 +1078,12 @@ package android.widget {
     field public static final int MODE_SPINNER = 1; // 0x1
   }
 
+  public final class Magnifier {
+    method public android.graphics.Bitmap getContent();
+    method public static android.graphics.PointF getMagnifierDefaultSize();
+    method public android.graphics.Rect getWindowPositionOnScreen();
+  }
+
   public class NumberPicker extends android.widget.LinearLayout {
     method public java.lang.CharSequence getDisplayedValueForCurrentSelection();
   }
