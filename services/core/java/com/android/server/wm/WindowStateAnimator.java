@@ -211,6 +211,8 @@ class WindowStateAnimator {
 
     private final Rect mTmpSize = new Rect();
 
+    private final SurfaceControl.Transaction mReparentTransaction = new SurfaceControl.Transaction();
+
     WindowStateAnimator(final WindowState win) {
         final WindowManagerService service = win.mService;
 
@@ -371,9 +373,9 @@ class WindowStateAnimator {
                 // child layers need to be reparented to the new surface to make this
                 // transparent to the app.
                 if (mWin.mAppToken == null || mWin.mAppToken.isRelaunching() == false) {
-                    SurfaceControl.openTransaction();
-                    mPendingDestroySurface.reparentChildrenInTransaction(mSurfaceController);
-                    SurfaceControl.closeTransaction();
+                    mReparentTransaction.reparentChildren(mPendingDestroySurface.mSurfaceControl,
+                            mSurfaceController.mSurfaceControl.getHandle())
+                            .apply();
                 }
             }
         }
