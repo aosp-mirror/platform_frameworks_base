@@ -204,7 +204,10 @@ message IncidentProto {
         (section).args = "power --proto"
     ];
 
-    optional android.service.print.PrintServiceDumpProto print = 3010;
+    optional android.service.print.PrintServiceDumpProto print = 3010 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "print --proto"
+    ];
 
     optional android.service.procstats.ProcessStatsServiceDumpProto procstats = 3011 [
         (section).type = SECTION_DUMPSYS,
