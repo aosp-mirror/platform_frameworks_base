@@ -5201,6 +5201,18 @@ message MetricsEvent {
     // OS: P
     ACCESSIBILITY_VIBRATION_TOUCH = 1294;
 
+    // OPEN: Volume panel > output chooser dialog
+    // OS: P
+    OUTPUT_CHOOSER = 1295;
+
+    // Action: Volume panel > output chooser dialog > tap on device
+    // OS: P
+    ACTION_OUTPUT_CHOOSER_CONNECT = 1296;
+
+    // Action: Volume panel > output chooser dialog > tap on X next to connected device
+    // OS: P
+    ACTION_OUTPUT_CHOOSER_DISCONNECT = 1297;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
