@@ -170,7 +170,6 @@ public class ResourcesImpl {
         mDisplayAdjustments = displayAdjustments;
         mConfiguration.setToDefaults();
         updateConfiguration(config, metrics, displayAdjustments.getCompatibilityInfo());
-        mAssets.ensureStringBlocks();
     }
 
     public DisplayAdjustments getDisplayAdjustments() {
@@ -1281,8 +1280,7 @@ public class ResourcesImpl {
 
         void applyStyle(int resId, boolean force) {
             synchronized (mKey) {
-                AssetManager.applyThemeStyle(mTheme, resId, force);
-
+                mAssets.applyStyleToTheme(mTheme, resId, force);
                 mThemeResId = resId;
                 mKey.append(resId, force);
             }
@@ -1291,7 +1289,7 @@ public class ResourcesImpl {
         void setTo(ThemeImpl other) {
             synchronized (mKey) {
                 synchronized (other.mKey) {
-                    AssetManager.copyTheme(mTheme, other.mTheme);
+                    AssetManager.nativeThemeCopy(mTheme, other.mTheme);
 
                     mThemeResId = other.mThemeResId;
                     mKey.setTo(other.getKey());
@@ -1314,12 +1312,10 @@ public class ResourcesImpl {
                 // out the attributes from the XML file (applying type information
                 // contained in the resources and such).
                 final XmlBlock.Parser parser = (XmlBlock.Parser) set;
-                AssetManager.applyStyle(mTheme, defStyleAttr, defStyleRes,
-                        parser != null ? parser.mParseState : 0,
-                        attrs, attrs.length, array.mDataAddress, array.mIndicesAddress);
+                mAssets.applyStyle(mTheme, defStyleAttr, defStyleRes, parser, attrs,
+                        array.mDataAddress, array.mIndicesAddress);
                 array.mTheme = wrapper;
                 array.mXml = parser;
-
                 return array;
             }
         }
@@ -1336,7 +1332,7 @@ public class ResourcesImpl {
                 }
 
                 final TypedArray array = TypedArray.obtain(wrapper.getResources(), len);
-                AssetManager.resolveAttrs(mTheme, 0, 0, values, attrs, array.mData, array.mIndices);
+                mAssets.resolveAttrs(mTheme, 0, 0, values, attrs, array.mData, array.mIndices);
                 array.mTheme = wrapper;
                 array.mXml = null;
                 return array;
@@ -1356,14 +1352,14 @@ public class ResourcesImpl {
         @Config int getChangingConfigurations() {
             synchronized (mKey) {
                 final @NativeConfig int nativeChangingConfig =
-                        AssetManager.getThemeChangingConfigurations(mTheme);
+                        AssetManager.nativeThemeGetChangingConfigurations(mTheme);
                 return ActivityInfo.activityInfoConfigNativeToJava(nativeChangingConfig);
             }
         }
 
         public void dump(int priority, String tag, String prefix) {
             synchronized (mKey) {
-                AssetManager.dumpTheme(mTheme, priority, tag, prefix);
+                mAssets.dumpTheme(mTheme, priority, tag, prefix);
             }
         }
 
@@ -1392,13 +1388,13 @@ public class ResourcesImpl {
          */
         void rebase() {
             synchronized (mKey) {
-                AssetManager.clearTheme(mTheme);
+                AssetManager.nativeThemeClear(mTheme);
 
                 // Reapply the same styles in the same order.
                 for (int i = 0; i < mKey.mCount; i++) {
                     final int resId = mKey.mResId[i];
                     final boolean force = mKey.mForce[i];
-                    AssetManager.applyThemeStyle(mTheme, resId, force);
+                    mAssets.applyStyleToTheme(mTheme, resId, force);
                 }
             }
         }
