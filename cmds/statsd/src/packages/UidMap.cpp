@@ -119,7 +119,7 @@ void UidMap::updateMap(const int64_t& timestamp, const vector<int32_t>& uid,
     for (auto weakPtr : broadcastList) {
         auto strongPtr = weakPtr.promote();
         if (strongPtr != NULL) {
-            strongPtr->onUidMapReceived();
+            strongPtr->onUidMapReceived(timestamp);
         }
     }
 }
@@ -166,7 +166,7 @@ void UidMap::updateApp(const int64_t& timestamp, const String16& app_16, const i
     for (auto weakPtr : broadcastList) {
         auto strongPtr = weakPtr.promote();
         if (strongPtr != NULL) {
-            strongPtr->notifyAppUpgrade(appName, uid, versionCode);
+            strongPtr->notifyAppUpgrade(timestamp, appName, uid, versionCode);
         }
     }
 }
@@ -239,7 +239,7 @@ void UidMap::removeApp(const int64_t& timestamp, const String16& app_16, const i
     for (auto weakPtr : broadcastList) {
         auto strongPtr = weakPtr.promote();
         if (strongPtr != NULL) {
-            strongPtr->notifyAppRemoved(app, uid);
+            strongPtr->notifyAppRemoved(timestamp, app, uid);
         }
     }
 }
@@ -316,13 +316,13 @@ UidMapping UidMap::getOutput(const int64_t& timestamp, const ConfigKey& key) {
     mLastUpdatePerConfigKey[key] = timestamp;
     int64_t newMin = getMinimumTimestampNs();
 
-    if (newMin > prevMin) {
+    if (newMin > prevMin) {  // Delete anything possible now that the minimum has moved forward.
         int64_t cutoff_nanos = newMin;
         auto snapshots = mOutput.mutable_snapshots();
         auto it_snapshots = snapshots->cbegin();
         while (it_snapshots != snapshots->cend()) {
             if (it_snapshots->timestamp_nanos() < cutoff_nanos) {
-                // it_snapshots now points to the following element.
+                // it_snapshots points to the following element after erasing.
                 it_snapshots = snapshots->erase(it_snapshots);
             } else {
                 ++it_snapshots;
@@ -332,7 +332,7 @@ UidMapping UidMap::getOutput(const int64_t& timestamp, const ConfigKey& key) {
         auto it_deltas = deltas->cbegin();
         while (it_deltas != deltas->cend()) {
             if (it_deltas->timestamp_nanos() < cutoff_nanos) {
-                // it_deltas now points to the following element.
+                // it_snapshots points to the following element after erasing.
                 it_deltas = deltas->erase(it_deltas);
             } else {
                 ++it_deltas;

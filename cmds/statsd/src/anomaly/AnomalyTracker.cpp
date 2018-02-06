@@ -35,9 +35,7 @@ namespace statsd {
 
 // TODO: Get rid of bucketNumbers, and return to the original circular array method.
 AnomalyTracker::AnomalyTracker(const Alert& alert, const ConfigKey& configKey)
-    : mAlert(alert),
-      mConfigKey(configKey),
-      mNumOfPastBuckets(mAlert.num_buckets() - 1) {
+    : mAlert(alert), mConfigKey(configKey), mNumOfPastBuckets(mAlert.num_buckets() - 1) {
     VLOG("AnomalyTracker() called");
     if (mAlert.num_buckets() <= 0) {
         ALOGE("Cannot create AnomalyTracker with %lld buckets",

@@ -121,13 +121,13 @@ unique_ptr<DurationTracker> DurationMetricProducer::createDurationTracker(
         case DurationMetric_AggregationType_SUM:
             return make_unique<OringDurationTracker>(
                     mConfigKey, mMetricId, eventKey, mWizard, mConditionTrackerIndex,
-                    mDimensionsInCondition, mNested,
-                    mCurrentBucketStartTimeNs, mBucketSizeNs, mConditionSliced, mAnomalyTrackers);
+                    mDimensionsInCondition, mNested, mCurrentBucketStartTimeNs, mCurrentBucketNum,
+                    mStartTimeNs, mBucketSizeNs, mConditionSliced, mAnomalyTrackers);
         case DurationMetric_AggregationType_MAX_SPARSE:
             return make_unique<MaxDurationTracker>(
                     mConfigKey, mMetricId, eventKey, mWizard, mConditionTrackerIndex,
-                    mDimensionsInCondition, mNested,
-                    mCurrentBucketStartTimeNs, mBucketSizeNs, mConditionSliced, mAnomalyTrackers);
+                    mDimensionsInCondition, mNested, mCurrentBucketStartTimeNs, mCurrentBucketNum,
+                    mStartTimeNs, mBucketSizeNs, mConditionSliced, mAnomalyTrackers);
     }
 }
 
@@ -252,17 +252,18 @@ void DurationMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
     protoOutput->end(protoToken);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS, (long long)dumpTimeNs);
     mPastBuckets.clear();
-    mStartTimeNs = mCurrentBucketStartTimeNs;
 }
 
-void DurationMetricProducer::flushIfNeededLocked(const uint64_t& eventTime) {
-    if (mCurrentBucketStartTimeNs + mBucketSizeNs > eventTime) {
+void DurationMetricProducer::flushIfNeededLocked(const uint64_t& eventTimeNs) {
+    uint64_t currentBucketEndTimeNs = getCurrentBucketEndTimeNs();
+
+    if (currentBucketEndTimeNs > eventTimeNs) {
         return;
     }
     VLOG("flushing...........");
     for (auto it = mCurrentSlicedDurationTrackerMap.begin();
             it != mCurrentSlicedDurationTrackerMap.end();) {
-        if (it->second->flushIfNeeded(eventTime, &mPastBuckets)) {
+        if (it->second->flushIfNeeded(eventTimeNs, &mPastBuckets)) {
             VLOG("erase bucket for key %s", it->first.c_str());
             it = mCurrentSlicedDurationTrackerMap.erase(it);
         } else {
@@ -270,9 +271,21 @@ void DurationMetricProducer::flushIfNeededLocked(const uint64_t& eventTime) {
         }
     }
 
-    int numBucketsForward = (eventTime - mCurrentBucketStartTimeNs) / mBucketSizeNs;
-    mCurrentBucketStartTimeNs += numBucketsForward * mBucketSizeNs;
+    int numBucketsForward = 1 + (eventTimeNs - currentBucketEndTimeNs) / mBucketSizeNs;
+    mCurrentBucketStartTimeNs = currentBucketEndTimeNs + (numBucketsForward - 1) * mBucketSizeNs;
     mCurrentBucketNum += numBucketsForward;
+}
+
+void DurationMetricProducer::flushCurrentBucketLocked(const uint64_t& eventTimeNs) {
+    for (auto it = mCurrentSlicedDurationTrackerMap.begin();
+         it != mCurrentSlicedDurationTrackerMap.end();) {
+        if (it->second->flushCurrentBucket(eventTimeNs, &mPastBuckets)) {
+            VLOG("erase bucket for key %s", it->first.c_str());
+            it = mCurrentSlicedDurationTrackerMap.erase(it);
+        } else {
+            ++it;
+        }
+    }
 }
 
 void DurationMetricProducer::dumpStatesLocked(FILE* out, bool verbose) const {

@@ -190,7 +190,6 @@ void ValueMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
 
     VLOG("metric %lld dump report now...", (long long)mMetricId);
     mPastBuckets.clear();
-    mStartTimeNs = mCurrentBucketStartTimeNs;
     // TODO: Clear mDimensionKeyMap once the report is dumped.
 }
 
@@ -320,8 +319,13 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(
         interval.sum += value;
     }
 
+    long wholeBucketVal = interval.sum;
+    auto prev = mCurrentFullBucket.find(eventKey);
+    if (prev != mCurrentFullBucket.end()) {
+        wholeBucketVal += prev->second;
+    }
     for (auto& tracker : mAnomalyTrackers) {
-        tracker->detectAndDeclareAnomaly(eventTimeNs, mCurrentBucketNum, eventKey, interval.sum);
+        tracker->detectAndDeclareAnomaly(eventTimeNs, mCurrentBucketNum, eventKey, wholeBucketVal);
     }
 }
 
@@ -333,16 +337,39 @@ std::shared_ptr<FieldValueMap> ValueMetricProducer::getValueFields(const LogEven
 }
 
 void ValueMetricProducer::flushIfNeededLocked(const uint64_t& eventTimeNs) {
-    if (mCurrentBucketStartTimeNs + mBucketSizeNs > eventTimeNs) {
+    uint64_t currentBucketEndTimeNs = getCurrentBucketEndTimeNs();
+
+    if (currentBucketEndTimeNs > eventTimeNs) {
         VLOG("eventTime is %lld, less than next bucket start time %lld", (long long)eventTimeNs,
-             (long long)(mCurrentBucketStartTimeNs + mBucketSizeNs));
+             (long long)(currentBucketEndTimeNs));
         return;
     }
+
+    flushCurrentBucketLocked(eventTimeNs);
+
+    int64_t numBucketsForward = 1 + (eventTimeNs - currentBucketEndTimeNs) / mBucketSizeNs;
+    mCurrentBucketStartTimeNs = currentBucketEndTimeNs + (numBucketsForward - 1) * mBucketSizeNs;
+    mCurrentBucketNum += numBucketsForward;
+
+    if (numBucketsForward > 1) {
+        VLOG("Skipping forward %lld buckets", (long long)numBucketsForward);
+    }
+    VLOG("metric %lld: new bucket start time: %lld", (long long)mMetricId,
+         (long long)mCurrentBucketStartTimeNs);
+}
+
+void ValueMetricProducer::flushCurrentBucketLocked(const uint64_t& eventTimeNs) {
     VLOG("finalizing bucket for %ld, dumping %d slices", (long)mCurrentBucketStartTimeNs,
          (int)mCurrentSlicedBucket.size());
+    uint64_t fullBucketEndTimeNs = getCurrentBucketEndTimeNs();
+
     ValueBucket info;
     info.mBucketStartNs = mCurrentBucketStartTimeNs;
-    info.mBucketEndNs = mCurrentBucketStartTimeNs + mBucketSizeNs;
+    if (eventTimeNs < fullBucketEndTimeNs) {
+        info.mBucketEndNs = eventTimeNs;
+    } else {
+        info.mBucketEndNs = fullBucketEndTimeNs;
+    }
     info.mBucketNum = mCurrentBucketNum;
 
     int tainted = 0;
@@ -352,27 +379,42 @@ void ValueMetricProducer::flushIfNeededLocked(const uint64_t& eventTimeNs) {
         // it will auto create new vector of ValuebucketInfo if the key is not found.
         auto& bucketList = mPastBuckets[slice.first];
         bucketList.push_back(info);
-
-        for (auto& tracker : mAnomalyTrackers) {
-            if (tracker != nullptr) {
-                tracker->addPastBucket(slice.first, info.mValue, info.mBucketNum);
-            }
-        }
     }
     VLOG("%d tainted pairs in the bucket", tainted);
 
+    if (eventTimeNs > fullBucketEndTimeNs) {  // If full bucket, send to anomaly tracker.
+        // Accumulate partial buckets with current value and then send to anomaly tracker.
+        if (mCurrentFullBucket.size() > 0) {
+            for (const auto& slice : mCurrentSlicedBucket) {
+                mCurrentFullBucket[slice.first] += slice.second.sum;
+            }
+            for (const auto& slice : mCurrentFullBucket) {
+                for (auto& tracker : mAnomalyTrackers) {
+                    if (tracker != nullptr) {
+                        tracker->addPastBucket(slice.first, slice.second, mCurrentBucketNum);
+                    }
+                }
+            }
+            mCurrentFullBucket.clear();
+        } else {
+            // Skip aggregating the partial buckets since there's no previous partial bucket.
+            for (const auto& slice : mCurrentSlicedBucket) {
+                for (auto& tracker : mAnomalyTrackers) {
+                    if (tracker != nullptr) {
+                        tracker->addPastBucket(slice.first, slice.second.sum, mCurrentBucketNum);
+                    }
+                }
+            }
+        }
+    } else {
+        // Accumulate partial bucket.
+        for (const auto& slice : mCurrentSlicedBucket) {
+            mCurrentFullBucket[slice.first] += slice.second.sum;
+        }
+    }
+
     // Reset counters
     mCurrentSlicedBucket.clear();
-
-    int64_t numBucketsForward = (eventTimeNs - mCurrentBucketStartTimeNs) / mBucketSizeNs;
-    mCurrentBucketStartTimeNs = mCurrentBucketStartTimeNs + numBucketsForward * mBucketSizeNs;
-    mCurrentBucketNum += numBucketsForward;
-
-    if (numBucketsForward > 1) {
-        VLOG("Skipping forward %lld buckets", (long long)numBucketsForward);
-    }
-    VLOG("metric %lld: new bucket start time: %lld", (long long)mMetricId,
-         (long long)mCurrentBucketStartTimeNs);
 }
 
 size_t ValueMetricProducer::byteSizeLocked() const {

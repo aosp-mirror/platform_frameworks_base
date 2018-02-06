@@ -51,11 +51,12 @@ public:
 
     void setAnomalyMonitor(const sp<AnomalyMonitor>& anomalyMonitor);
 
-    void notifyAppUpgrade(const string& apk, const int uid, const int64_t version) override;
+    void notifyAppUpgrade(const uint64_t& eventTimeNs, const string& apk, const int uid,
+                          const int64_t version) override;
 
-    void notifyAppRemoved(const string& apk, const int uid) override;
+    void notifyAppRemoved(const uint64_t& eventTimeNs, const string& apk, const int uid) override;
 
-    void onUidMapReceived() override;
+    void onUidMapReceived(const uint64_t& eventTimeNs) override;
 
     bool shouldAddUidMapListener() const {
         return !mAllowedPkg.empty();

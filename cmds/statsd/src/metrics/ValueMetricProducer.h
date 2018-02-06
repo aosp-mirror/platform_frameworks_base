@@ -47,6 +47,39 @@ public:
 
     void onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& data) override;
 
+    // ValueMetric needs special logic if it's a pulled atom.
+    void notifyAppUpgrade(const uint64_t& eventTimeNs, const string& apk, const int uid,
+                          const int64_t version) override {
+        std::lock_guard<std::mutex> lock(mMutex);
+
+        if (mPullTagId != -1) {
+            vector<shared_ptr<LogEvent>> allData;
+            mStatsPullerManager->Pull(mPullTagId, &allData);
+            if (allData.size() == 0) {
+                // This shouldn't happen since this valuemetric is not useful now.
+            }
+
+            // Pretend the pulled data occurs right before the app upgrade event.
+            mCondition = false;
+            for (const auto& data : allData) {
+                data->setTimestampNs(eventTimeNs - 1);
+                onMatchedLogEventLocked(0, *data);
+            }
+
+            flushCurrentBucketLocked(eventTimeNs);
+            mCurrentBucketStartTimeNs = eventTimeNs;
+
+            mCondition = true;
+            for (const auto& data : allData) {
+                data->setTimestampNs(eventTimeNs);
+                onMatchedLogEventLocked(0, *data);
+            }
+        } else {  // For pushed value metric, we simply flush and reset the current bucket start.
+            flushCurrentBucketLocked(eventTimeNs);
+            mCurrentBucketStartTimeNs = eventTimeNs;
+        }
+    };
+
 protected:
     void onMatchedLogEventInternalLocked(
             const size_t matcherIndex, const MetricDimensionKey& eventKey,
@@ -70,7 +103,9 @@ private:
     void dumpStatesLocked(FILE* out, bool verbose) const override{};
 
     // Util function to flush the old packet.
-    void flushIfNeededLocked(const uint64_t& eventTime);
+    void flushIfNeededLocked(const uint64_t& eventTime) override;
+
+    void flushCurrentBucketLocked(const uint64_t& eventTimeNs) override;
 
     const FieldMatcher mValueField;
 
@@ -101,6 +136,8 @@ private:
 
     std::unordered_map<MetricDimensionKey, Interval> mCurrentSlicedBucket;
 
+    std::unordered_map<MetricDimensionKey, long> mCurrentFullBucket;
+
     // Save the past buckets and we can clear when the StatsLogReport is dumped.
     // TODO: Add a lock to mPastBuckets.
     std::unordered_map<MetricDimensionKey, std::vector<ValueBucket>> mPastBuckets;
@@ -114,6 +151,8 @@ private:
 
     FRIEND_TEST(ValueMetricProducerTest, TestNonDimensionalEvents);
     FRIEND_TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition);
+    FRIEND_TEST(ValueMetricProducerTest, TestPushedEventsWithUpgrade);
+    FRIEND_TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade);
     FRIEND_TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition);
     FRIEND_TEST(ValueMetricProducerTest, TestAnomalyDetection);
 };
