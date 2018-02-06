@@ -396,13 +396,9 @@ public class VolumeDialogImpl implements VolumeDialog {
                 if (hasVibrator) {
                     mController.setRingerMode(AudioManager.RINGER_MODE_VIBRATE, false);
                 } else {
-                    final boolean wasZero = ss.level == 0;
-                    mController.setStreamVolume(AudioManager.STREAM_RING, wasZero ? 1 : 0);
                     mController.setRingerMode(AudioManager.RINGER_MODE_SILENT, false);
                 }
             } else if (mState.ringerModeInternal == AudioManager.RINGER_MODE_VIBRATE) {
-                final boolean wasZero = ss.level == 0;
-                mController.setStreamVolume(AudioManager.STREAM_RING, wasZero ? 1 : 0);
                 mController.setRingerMode(AudioManager.RINGER_MODE_SILENT, false);
             } else {
                 mController.setRingerMode(AudioManager.RINGER_MODE_NORMAL, false);
