@@ -463,9 +463,9 @@ public class AudioPolicy {
          * Only ever called if the {@link AudioPolicy} was built with
          * {@link AudioPolicy.Builder#setIsAudioFocusPolicy(boolean)} set to {@code true}.
          * @param afi information about the focus request and the requester
-         * @param requestResult the result that was returned synchronously by the framework to the
-         *     application, {@link #AUDIOFOCUS_REQUEST_FAILED},or
-         *     {@link #AUDIOFOCUS_REQUEST_DELAYED}.
+         * @param requestResult deprecated after the addition of
+         *     {@link AudioManager#setFocusRequestResult(AudioFocusInfo, int, AudioPolicy)}
+         *     in Android P, always equal to {@link #AUDIOFOCUS_REQUEST_GRANTED}.
          */
         public void onAudioFocusRequest(AudioFocusInfo afi, int requestResult) {}
         /**
@@ -534,7 +534,7 @@ public class AudioPolicy {
             sendMsg(MSG_FOCUS_REQUEST, afi, requestResult);
             if (DEBUG) {
                 Log.v(TAG, "notifyAudioFocusRequest: pack=" + afi.getPackageName() + " client="
-                        + afi.getClientId() + "reqRes=" + requestResult);
+                        + afi.getClientId() + " gen=" + afi.getGen());
             }
         }
 

@@ -207,5 +207,8 @@ interface IAudioService {
     int setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(in BluetoothDevice device,
             int state, int profile, boolean suppressNoisyIntent);
 
+    oneway void setFocusRequestResultFromExtPolicy(in AudioFocusInfo afi, int requestResult,
+            in IAudioPolicyCallback pcb);
+
     // WARNING: read warning at top of file, it is recommended to add new methods at the end
 }

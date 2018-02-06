@@ -2516,6 +2516,7 @@ package android.media {
     method public int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, android.media.AudioAttributes, int, int) throws java.lang.IllegalArgumentException;
     method public deprecated int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, android.media.AudioAttributes, int, int, android.media.audiopolicy.AudioPolicy) throws java.lang.IllegalArgumentException;
     method public int requestAudioFocus(android.media.AudioFocusRequest, android.media.audiopolicy.AudioPolicy);
+    method public void setFocusRequestResult(android.media.AudioFocusInfo, int, android.media.audiopolicy.AudioPolicy);
     method public void unregisterAudioPolicyAsync(android.media.audiopolicy.AudioPolicy);
     field public static final int AUDIOFOCUS_FLAG_DELAY_OK = 1; // 0x1
     field public static final int AUDIOFOCUS_FLAG_LOCK = 4; // 0x4

@@ -38,6 +38,10 @@ public final class AudioFocusInfo implements Parcelable {
     private int mLossReceived;
     private int mFlags;
 
+    // generation count for the validity of a request/response async exchange between
+    // external focus policy and MediaFocusControl
+    private long mGenCount = -1;
+
 
     /**
      * Class constructor
@@ -59,6 +63,16 @@ public final class AudioFocusInfo implements Parcelable {
         mLossReceived = lossReceived;
         mFlags = flags;
         mSdkTarget = sdk;
+    }
+
+    /** @hide */
+    public void setGen(long g) {
+        mGenCount = g;
+    }
+
+    /** @hide */
+    public long getGen() {
+        return mGenCount;
     }
 
 
@@ -128,6 +142,7 @@ public final class AudioFocusInfo implements Parcelable {
         dest.writeInt(mLossReceived);
         dest.writeInt(mFlags);
         dest.writeInt(mSdkTarget);
+        dest.writeLong(mGenCount);
     }
 
     @Override
@@ -168,6 +183,8 @@ public final class AudioFocusInfo implements Parcelable {
         if (mSdkTarget != other.mSdkTarget) {
             return false;
         }
+        // mGenCount is not used to verify equality between two focus holds as multiple requests
+        // (hence of different generations) could correspond to the same hold
         return true;
     }
 
@@ -175,7 +192,7 @@ public final class AudioFocusInfo implements Parcelable {
             = new Parcelable.Creator<AudioFocusInfo>() {
 
         public AudioFocusInfo createFromParcel(Parcel in) {
-            return new AudioFocusInfo(
+            final AudioFocusInfo afi = new AudioFocusInfo(
                     AudioAttributes.CREATOR.createFromParcel(in), //AudioAttributes aa
                     in.readInt(), // int clientUid
                     in.readString(), //String clientId
@@ -185,6 +202,8 @@ public final class AudioFocusInfo implements Parcelable {
                     in.readInt(), //int flags
                     in.readInt()  //int sdkTarget
                     );
+            afi.setGen(in.readLong());
+            return afi;
         }
 
         public AudioFocusInfo[] newArray(int size) {
