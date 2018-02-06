@@ -128,7 +128,7 @@ class WatchlistLoggingHandler extends Handler {
                 Slog.e(TAG, "Couldn't find package: " + packageNames);
                 return false;
             }
-            ai = mPm.getApplicationInfo(packageNames[0],0);
+            ai = mPm.getApplicationInfo(packageNames[0], 0);
         } catch (NameNotFoundException e) {
             // Should not happen.
             return false;
@@ -136,7 +136,7 @@ class WatchlistLoggingHandler extends Handler {
         return (ai.flags & ApplicationInfo.FLAG_TEST_ONLY) != 0;
     }
 
-     /**
+    /**
      * Report network watchlist records if we collected enough data.
      */
     public void reportWatchlistIfNecessary() {
@@ -180,6 +180,10 @@ class WatchlistLoggingHandler extends Handler {
             return true;
         }
         final byte[] digest = getDigestFromUid(uid);
+        if (digest == null) {
+            Slog.e(TAG, "Cannot get digest from uid: " + uid);
+            return false;
+        }
         final boolean result = mDbHelper.insertNewRecord(digest, cncHost, timestamp);
         tryAggregateRecords();
         return result;
@@ -242,6 +246,11 @@ class WatchlistLoggingHandler extends Handler {
         final int size = apps.size();
         for (int i = 0; i < size; i++) {
             byte[] digest = getDigestFromUid(apps.get(i).uid);
+            if (digest == null) {
+                Slog.e(TAG, "Cannot get digest from uid: " + apps.get(i).uid
+                        + ",pkg: " + apps.get(i).packageName);
+                continue;
+            }
             result.add(HexDump.toHexString(digest));
         }
         // Step 2: Add all digests from records
