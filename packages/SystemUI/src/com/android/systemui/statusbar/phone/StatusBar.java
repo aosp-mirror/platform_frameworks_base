@@ -4393,6 +4393,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void onScreenTurnedOn() {
+            mScrimController.onScreenTurnedOn();
         }
 
         @Override
