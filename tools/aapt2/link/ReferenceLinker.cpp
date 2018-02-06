@@ -80,7 +80,7 @@ class ReferenceLinkerVisitor : public DescendingValueVisitor {
 
       // Find the attribute in the symbol table and check if it is visible from this callsite.
       const SymbolTable::Symbol* symbol = ReferenceLinker::ResolveAttributeCheckVisibility(
-          transformed_reference, callsite_, symbols_, &err_str);
+          transformed_reference, callsite_, symbols_, context_->IsAutoNamespace(), &err_str);
       if (symbol) {
         // Assign our style key the correct ID. The ID may not exist.
         entry.key.id = symbol->id;
@@ -202,12 +202,18 @@ bool IsSymbolVisible(const SymbolTable::Symbol& symbol, const Reference& ref,
 
 const SymbolTable::Symbol* ReferenceLinker::ResolveSymbol(const Reference& reference,
                                                           const CallSite& callsite,
-                                                          SymbolTable* symbols) {
+                                                          SymbolTable* symbols,
+                                                          bool auto_namespace) {
   if (reference.name) {
     const ResourceName& name = reference.name.value();
     if (name.package.empty()) {
       // Use the callsite's package name if no package name was defined.
-      return symbols->FindByName(ResourceName(callsite.package, name.type, name.entry));
+      const SymbolTable::Symbol* local_symbol =
+          symbols->FindByName(ResourceName(callsite.package, name.type, name.entry));
+      if (!auto_namespace || local_symbol) {
+        return local_symbol;
+      }
+      return symbols->FindByNameInAnyPackage(name);
     }
     return symbols->FindByName(name);
   } else if (reference.id) {
@@ -220,8 +226,9 @@ const SymbolTable::Symbol* ReferenceLinker::ResolveSymbol(const Reference& refer
 const SymbolTable::Symbol* ReferenceLinker::ResolveSymbolCheckVisibility(const Reference& reference,
                                                                          const CallSite& callsite,
                                                                          SymbolTable* symbols,
+                                                                         bool auto_namespace,
                                                                          std::string* out_error) {
-  const SymbolTable::Symbol* symbol = ResolveSymbol(reference, callsite, symbols);
+  const SymbolTable::Symbol* symbol = ResolveSymbol(reference, callsite, symbols, auto_namespace);
   if (!symbol) {
     if (out_error) *out_error = "not found";
     return nullptr;
@@ -235,10 +242,10 @@ const SymbolTable::Symbol* ReferenceLinker::ResolveSymbolCheckVisibility(const R
 }
 
 const SymbolTable::Symbol* ReferenceLinker::ResolveAttributeCheckVisibility(
-    const Reference& reference, const CallSite& callsite, SymbolTable* symbols,
+    const Reference& reference, const CallSite& callsite, SymbolTable* symbols, bool auto_namespace,
     std::string* out_error) {
   const SymbolTable::Symbol* symbol =
-      ResolveSymbolCheckVisibility(reference, callsite, symbols, out_error);
+      ResolveSymbolCheckVisibility(reference, callsite, symbols, auto_namespace, out_error);
   if (!symbol) {
     return nullptr;
   }
@@ -253,9 +260,10 @@ const SymbolTable::Symbol* ReferenceLinker::ResolveAttributeCheckVisibility(
 Maybe<xml::AaptAttribute> ReferenceLinker::CompileXmlAttribute(const Reference& reference,
                                                                const CallSite& callsite,
                                                                SymbolTable* symbols,
+                                                               bool auto_namespace,
                                                                std::string* out_error) {
   const SymbolTable::Symbol* symbol =
-      ResolveAttributeCheckVisibility(reference, callsite, symbols, out_error);
+      ResolveAttributeCheckVisibility(reference, callsite, symbols, auto_namespace, out_error);
   if (!symbol) {
     return {};
   }
@@ -333,8 +341,8 @@ bool ReferenceLinker::LinkReference(const CallSite& callsite, Reference* referen
   xml::ResolvePackage(decls, &transformed_reference);
 
   std::string err_str;
-  const SymbolTable::Symbol* s =
-      ResolveSymbolCheckVisibility(transformed_reference, callsite, symbols, &err_str);
+  const SymbolTable::Symbol* s = ResolveSymbolCheckVisibility(
+      transformed_reference, callsite, symbols, context->IsAutoNamespace(), &err_str);
   if (s) {
     // The ID may not exist. This is fine because of the possibility of building
     // against libraries without assigned IDs.

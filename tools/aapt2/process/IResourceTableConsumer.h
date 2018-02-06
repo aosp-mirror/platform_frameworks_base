@@ -50,6 +50,7 @@ struct IAaptContext {
   virtual NameMangler* GetNameMangler() = 0;
   virtual bool IsVerbose() = 0;
   virtual int GetMinSdkVersion() = 0;
+  virtual bool IsAutoNamespace() = 0;
 };
 
 struct IResourceTableConsumer {
