@@ -8389,10 +8389,10 @@ public final class Settings {
         private static final Validator POWER_SOUNDS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
-         * URI for the "wireless charging started" sound.
+         * URI for the "wireless charging started" and "wired charging started" sound.
          * @hide
          */
-        public static final String WIRELESS_CHARGING_STARTED_SOUND =
+        public static final String CHARGING_STARTED_SOUND =
                 "wireless_charging_started_sound";
 
         /**

@@ -160,7 +160,7 @@ class SettingsProtoDumpUtil {
                 Settings.Global.POWER_SOUNDS_ENABLED,
                 GlobalSettingsProto.POWER_SOUNDS_ENABLED);
         dumpSetting(s, p,
-                Settings.Global.WIRELESS_CHARGING_STARTED_SOUND,
+                Settings.Global.CHARGING_STARTED_SOUND,
                 GlobalSettingsProto.WIRELESS_CHARGING_STARTED_SOUND);
         dumpSetting(s, p,
                 Settings.Global.CHARGING_SOUNDS_ENABLED,
