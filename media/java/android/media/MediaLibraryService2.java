@@ -149,12 +149,12 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
         }
 
         /**
-         * Called to get the search result . Return result here for the browser.
+         * Called to get an item. Return result here for the browser.
          * <p>
-         * Return an empty list for no search result, and return {@code null} for the error.
+         * Return {@code null} for no result or error.
          *
          * @param itemId item id to get media item.
-         * @return media item2. {@code null} for error.
+         * @return a media item. {@code null} for no result or error.
          */
         public @Nullable MediaItem2 onLoadItem(@NonNull ControllerInfo controllerInfo,
                 @NonNull String itemId) {
@@ -162,14 +162,14 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
         }
 
         /**
-         * Called to get the search result. Return search result here for the browser.
+         * Called to get children of given parent id. Return the children here for the browser.
          * <p>
-         * Return an empty list for no search result, and return {@code null} for the error.
+         * Return an empty list for no children, and return {@code null} for the error.
          *
          * @param parentId parent id to get children
          * @param page number of page
          * @param pageSize size of the page
-         * @param options
+         * @param options optional bundle
          * @return list of children. Can be {@code null}.
          */
         public @Nullable List<MediaItem2> onLoadChildren(@NonNull ControllerInfo controller,

@@ -152,7 +152,7 @@ public class MediaBrowser2 extends MediaController2 {
      * Get the media item with the given media id. Result would be sent back asynchronously with the
      * {@link BrowserCallback#onItemLoaded(String, MediaItem2)}.
      *
-     * @param mediaId media id
+     * @param mediaId media id for specifying the item
      */
     public void getItem(String mediaId) {
         mProvider.getItem_impl(mediaId);
@@ -162,10 +162,10 @@ public class MediaBrowser2 extends MediaController2 {
      * Get list of children under the parent. Result would be sent back asynchronously with the
      * {@link BrowserCallback#onChildrenLoaded(String, int, int, Bundle, List)}.
      *
-     * @param parentId
-     * @param page
-     * @param pageSize
-     * @param options
+     * @param parentId parent id for getting the children.
+     * @param page page number to get the result. Starts from {@code 1}
+     * @param pageSize page size. Should be greater or equal to {@code 1}
+     * @param options optional bundle
      */
     public void getChildren(String parentId, int page, int pageSize, @Nullable Bundle options) {
         mProvider.getChildren_impl(parentId, page, pageSize, options);
