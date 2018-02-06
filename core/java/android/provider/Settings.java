@@ -10271,6 +10271,20 @@ public final class Settings {
         public static final String BATTERY_TIP_CONSTANTS = "battery_tip_constants";
 
         /**
+         * An integer to show the version of the anomaly config. Ex: 1, which means
+         * current version is 1.
+         * @hide
+         */
+        public static final String ANOMALY_CONFIG_VERSION = "anomaly_config_version";
+
+        /**
+         * A base64-encoded string represents anomaly stats config, used for
+         * {@link android.app.StatsManager}.
+         * @hide
+         */
+        public static final String ANOMALY_CONFIG = "anomaly_config";
+
+        /**
          * Always on display(AOD) specific settings
          * This is encoded as a key=value list, separated by commas. Ex:
          *

@@ -109,6 +109,8 @@ public class SettingsBackupTest {
                     Settings.Global.ALWAYS_ON_DISPLAY_CONSTANTS,
                     Settings.Global.ANIMATOR_DURATION_SCALE,
                     Settings.Global.ANOMALY_DETECTION_CONSTANTS,
+                    Settings.Global.ANOMALY_CONFIG,
+                    Settings.Global.ANOMALY_CONFIG_VERSION,
                     Settings.Global.APN_DB_UPDATE_CONTENT_URL,
                     Settings.Global.APN_DB_UPDATE_METADATA_URL,
                     Settings.Global.APP_IDLE_CONSTANTS,
