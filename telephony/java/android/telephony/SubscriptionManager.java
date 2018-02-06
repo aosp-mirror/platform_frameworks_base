@@ -541,9 +541,9 @@ public class SubscriptionManager {
      *                 onSubscriptionsChanged overridden.
      */
     public void addOnSubscriptionsChangedListener(OnSubscriptionsChangedListener listener) {
-        String pkgName = mContext != null ? mContext.getOpPackageName() : "<unknown>";
+        String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         if (DBG) {
-            logd("register OnSubscriptionsChangedListener pkgName=" + pkgName
+            logd("register OnSubscriptionsChangedListener pkgForDebug=" + pkgForDebug
                     + " listener=" + listener);
         }
         try {
@@ -552,7 +552,7 @@ public class SubscriptionManager {
             ITelephonyRegistry tr = ITelephonyRegistry.Stub.asInterface(ServiceManager.getService(
                     "telephony.registry"));
             if (tr != null) {
-                tr.addOnSubscriptionsChangedListener(pkgName, listener.callback);
+                tr.addOnSubscriptionsChangedListener(pkgForDebug, listener.callback);
             }
         } catch (RemoteException ex) {
             // Should not happen
