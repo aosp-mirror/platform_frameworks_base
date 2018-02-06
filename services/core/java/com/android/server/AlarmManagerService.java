@@ -3528,8 +3528,13 @@ class AlarmManagerService extends SystemService {
         public static final int REPORT_ALARMS_ACTIVE = 4;
         public static final int APP_STANDBY_BUCKET_CHANGED = 5;
         public static final int APP_STANDBY_PAROLE_CHANGED = 6;
+        public static final int REMOVE_FOR_STOPPED = 7;
 
         public AlarmHandler() {
+        }
+
+        public void postRemoveForStopped(int uid) {
+            obtainMessage(REMOVE_FOR_STOPPED, uid, 0).sendToTarget();
         }
 
         public void handleMessage(Message msg) {
@@ -3591,6 +3596,12 @@ class AlarmManagerService extends SystemService {
                             rescheduleKernelAlarmsLocked();
                             updateNextAlarmClockLocked();
                         }
+                    }
+                    break;
+
+                case REMOVE_FOR_STOPPED:
+                    synchronized (mLock) {
+                        removeForStoppedLocked(msg.arg1);
                     }
                     break;
 
@@ -3783,10 +3794,8 @@ class AlarmManagerService extends SystemService {
         }
 
         @Override public void onUidGone(int uid, boolean disabled) {
-            synchronized (mLock) {
-                if (disabled) {
-                    removeForStoppedLocked(uid);
-                }
+            if (disabled) {
+                mHandler.postRemoveForStopped(uid);
             }
         }
 
@@ -3794,10 +3803,8 @@ class AlarmManagerService extends SystemService {
         }
 
         @Override public void onUidIdle(int uid, boolean disabled) {
-            synchronized (mLock) {
-                if (disabled) {
-                    removeForStoppedLocked(uid);
-                }
+            if (disabled) {
+                mHandler.postRemoveForStopped(uid);
             }
         }
 

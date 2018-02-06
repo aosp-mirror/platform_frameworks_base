@@ -614,48 +614,22 @@ public class ForceAppStandbyTracker {
     private final class UidObserver extends IUidObserver.Stub {
         @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq) {
-            synchronized (mLock) {
-                if (procState > ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
-                    if (removeUidFromArray(mForegroundUids, uid, false)) {
-                        mHandler.notifyUidForegroundStateChanged(uid);
-                    }
-                } else {
-                    if (addUidToArray(mForegroundUids, uid)) {
-                        mHandler.notifyUidForegroundStateChanged(uid);
-                    }
-                }
-            }
-        }
-
-        @Override
-        public void onUidGone(int uid, boolean disabled) {
-            removeUid(uid, true);
+            mHandler.onUidStateChanged(uid, procState);
         }
 
         @Override
         public void onUidActive(int uid) {
-            synchronized (mLock) {
-                if (addUidToArray(mActiveUids, uid)) {
-                    mHandler.notifyUidActiveStateChanged(uid);
-                }
-            }
+            mHandler.onUidActive(uid);
+        }
+
+        @Override
+        public void onUidGone(int uid, boolean disabled) {
+            mHandler.onUidGone(uid, disabled);
         }
 
         @Override
         public void onUidIdle(int uid, boolean disabled) {
-            // Just to avoid excessive memcpy, don't remove from the array in this case.
-            removeUid(uid, false);
-        }
-
-        private void removeUid(int uid, boolean remove) {
-            synchronized (mLock) {
-                if (removeUidFromArray(mActiveUids, uid, remove)) {
-                    mHandler.notifyUidActiveStateChanged(uid);
-                }
-                if (removeUidFromArray(mForegroundUids, uid, remove)) {
-                    mHandler.notifyUidForegroundStateChanged(uid);
-                }
-            }
+            mHandler.onUidIdle(uid, disabled);
         }
 
         @Override
@@ -740,6 +714,11 @@ public class ForceAppStandbyTracker {
         private static final int MSG_FORCE_APP_STANDBY_FEATURE_FLAG_CHANGED = 9;
         private static final int MSG_EXEMPT_CHANGED = 10;
 
+        private static final int MSG_ON_UID_STATE_CHANGED = 11;
+        private static final int MSG_ON_UID_ACTIVE = 12;
+        private static final int MSG_ON_UID_GONE = 13;
+        private static final int MSG_ON_UID_IDLE = 14;
+
         public MyHandler(Looper looper) {
             super(looper);
         }
@@ -788,6 +767,22 @@ public class ForceAppStandbyTracker {
 
         public void doUserRemoved(int userId) {
             obtainMessage(MSG_USER_REMOVED, userId, 0).sendToTarget();
+        }
+
+        public void onUidStateChanged(int uid, int procState) {
+            obtainMessage(MSG_ON_UID_STATE_CHANGED, uid, procState).sendToTarget();
+        }
+
+        public void onUidActive(int uid) {
+            obtainMessage(MSG_ON_UID_ACTIVE, uid, 0).sendToTarget();
+        }
+
+        public void onUidGone(int uid, boolean disabled) {
+            obtainMessage(MSG_ON_UID_GONE, uid, disabled ? 1 : 0).sendToTarget();
+        }
+
+        public void onUidIdle(int uid, boolean disabled) {
+            obtainMessage(MSG_ON_UID_IDLE, uid, disabled ? 1 : 0).sendToTarget();
         }
 
         @Override
@@ -883,6 +878,61 @@ public class ForceAppStandbyTracker {
                 case MSG_USER_REMOVED:
                     handleUserRemoved(msg.arg1);
                     return;
+
+                case MSG_ON_UID_STATE_CHANGED:
+                    handleUidStateChanged(msg.arg1, msg.arg2);
+                    return;
+                case MSG_ON_UID_ACTIVE:
+                    handleUidActive(msg.arg1);
+                    return;
+                case MSG_ON_UID_GONE:
+                    handleUidGone(msg.arg1, msg.arg1 != 0);
+                    return;
+                case MSG_ON_UID_IDLE:
+                    handleUidIdle(msg.arg1, msg.arg1 != 0);
+                    return;
+            }
+        }
+
+        public void handleUidStateChanged(int uid, int procState) {
+            synchronized (mLock) {
+                if (procState > ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
+                    if (removeUidFromArray(mForegroundUids, uid, false)) {
+                        mHandler.notifyUidForegroundStateChanged(uid);
+                    }
+                } else {
+                    if (addUidToArray(mForegroundUids, uid)) {
+                        mHandler.notifyUidForegroundStateChanged(uid);
+                    }
+                }
+            }
+        }
+
+        public void handleUidActive(int uid) {
+            synchronized (mLock) {
+                if (addUidToArray(mActiveUids, uid)) {
+                    mHandler.notifyUidActiveStateChanged(uid);
+                }
+            }
+        }
+
+        public void handleUidGone(int uid, boolean disabled) {
+            removeUid(uid, true);
+        }
+
+        public void handleUidIdle(int uid, boolean disabled) {
+            // Just to avoid excessive memcpy, don't remove from the array in this case.
+            removeUid(uid, false);
+        }
+
+        private void removeUid(int uid, boolean remove) {
+            synchronized (mLock) {
+                if (removeUidFromArray(mActiveUids, uid, remove)) {
+                    mHandler.notifyUidActiveStateChanged(uid);
+                }
+                if (removeUidFromArray(mForegroundUids, uid, remove)) {
+                    mHandler.notifyUidForegroundStateChanged(uid);
+                }
             }
         }
     }
