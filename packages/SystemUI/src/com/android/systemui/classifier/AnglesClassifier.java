@@ -16,6 +16,9 @@
 
 package com.android.systemui.classifier;
 
+import android.os.Build;
+import android.os.SystemProperties;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import java.util.ArrayList;
@@ -49,13 +52,18 @@ import java.util.List;
 public class AnglesClassifier extends StrokeClassifier {
     private HashMap<Stroke, Data> mStrokeMap = new HashMap<>();
 
+    public static final boolean VERBOSE = SystemProperties.getBoolean("debug.falsing_log.ang",
+            Build.IS_DEBUGGABLE);
+
+    private static String TAG = "ANG";
+
     public AnglesClassifier(ClassifierData classifierData) {
         mClassifierData = classifierData;
     }
 
     @Override
     public String getTag() {
-        return "ANG";
+        return TAG;
     }
 
     @Override
@@ -170,18 +178,31 @@ public class AnglesClassifier extends StrokeClassifier {
 
         public float getAnglesVariance() {
             float anglesVariance = getAnglesVariance(mSumSquares, mSum, mCount);
+            if (VERBOSE) {
+                FalsingLog.i(TAG, "getAnglesVariance: (first pass) " + anglesVariance);
+                FalsingLog.i(TAG, "   - mFirstLength=" + mFirstLength);
+                FalsingLog.i(TAG, "   - mLength=" + mLength);
+            }
             if (mFirstLength < mLength / 2f) {
                 anglesVariance = Math.min(anglesVariance, mFirstAngleVariance
                         + getAnglesVariance(mSecondSumSquares, mSecondSum, mSecondCount));
+                if (VERBOSE) FalsingLog.i(TAG, "getAnglesVariance: (second pass) " + anglesVariance);
             }
             return anglesVariance;
         }
 
         public float getAnglesPercentage() {
             if (mAnglesCount == 0.0f) {
+                if (VERBOSE) FalsingLog.i(TAG, "getAnglesPercentage: count==0, result=1");
                 return 1.0f;
             }
-            return (Math.max(mLeftAngles, mRightAngles) + mStraightAngles) / mAnglesCount;
+            final float result = (Math.max(mLeftAngles, mRightAngles) + mStraightAngles) / mAnglesCount;
+            if (VERBOSE) {
+                FalsingLog.i(TAG, "getAnglesPercentage: left=" + mLeftAngles + " right="
+                        + mRightAngles + " straight=" + mStraightAngles + " count=" + mAnglesCount
+                        + " result=" + result);
+            }
+            return result;
         }
     }
 }
