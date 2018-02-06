@@ -21,6 +21,7 @@
 #include "logd/LogReader.h"
 #include "metrics/MetricsManager.h"
 #include "packages/UidMap.h"
+#include "external/StatsPullerManager.h"
 
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 
@@ -75,6 +76,8 @@ private:
 
     sp<UidMap> mUidMap;  // Reference to the UidMap to lookup app name and version for each uid.
 
+    StatsPullerManager mStatsPullerManager;
+
     sp<AnomalyMonitor> mAnomalyMonitor;
 
     void onDumpReportLocked(const ConfigKey& key, vector<uint8_t>* outData);
@@ -95,6 +98,8 @@ private:
     std::function<void(const ConfigKey& key)> mSendBroadcast;
 
     const long mTimeBaseSec;
+
+    long mLastPullerCacheClearTimeSec = 0;
 
     FRIEND_TEST(StatsLogProcessorTest, TestRateLimitByteSize);
     FRIEND_TEST(StatsLogProcessorTest, TestRateLimitBroadcast);

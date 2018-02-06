@@ -199,10 +199,20 @@ void StatsPullerManagerImpl::OnAlarmFired() {
     }
 }
 
-void StatsPullerManagerImpl::ClearPullerCache() {
+int StatsPullerManagerImpl::ForceClearPullerCache() {
+    int totalCleared = 0;
     for (auto puller : mPullers) {
-        puller.second->ClearCache();
+        totalCleared += puller.second->ForceClearCache();
     }
+    return totalCleared;
+}
+
+int StatsPullerManagerImpl::ClearPullerCacheIfNecessary(long timestampSec) {
+    int totalCleared = 0;
+    for (auto puller : mPullers) {
+        totalCleared += puller.second->ClearCacheIfNecessary(timestampSec);
+    }
+    return totalCleared;
 }
 
 }  // namespace statsd

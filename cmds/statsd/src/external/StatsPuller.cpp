@@ -59,9 +59,24 @@ bool StatsPuller::Pull(std::vector<std::shared_ptr<LogEvent>>* data) {
     return ret;
 }
 
-void StatsPuller::ClearCache() {
+int StatsPuller::ForceClearCache() {
+    return clearCache();
+}
+
+int StatsPuller::clearCache() {
     lock_guard<std::mutex> lock(mLock);
+    int ret = mCachedData.size();
     mCachedData.clear();
+    mLastPullTimeSec = 0;
+    return ret;
+}
+
+int StatsPuller::ClearCacheIfNecessary(long timestampSec) {
+    if (timestampSec - mLastPullTimeSec > mCoolDownSec) {
+        return clearCache();
+    } else {
+        return 0;
+    }
 }
 
 }  // namespace statsd

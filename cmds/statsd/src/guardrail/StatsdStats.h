@@ -85,6 +85,9 @@ public:
     // Maximum size of all files that can be written to stats directory on disk.
     static const int kMaxFileSize = 50 * 1024 * 1024;
 
+    // How long to try to clear puller cache from last time
+    static const long kPullerCacheClearIntervalSec = 1;
+
     /**
      * Report a new config has been received and report the static stats about the config.
      *

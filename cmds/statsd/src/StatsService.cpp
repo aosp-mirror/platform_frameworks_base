@@ -240,6 +240,10 @@ status_t StatsService::command(FILE* in, FILE* out, FILE* err, Vector<String8>& 
         if (!args[0].compare(String8("log-app-hook"))) {
             return cmd_log_app_hook(out, args);
         }
+
+        if (!args[0].compare(String8("clear-puller-cache"))) {
+            return cmd_clear_puller_cache(out);
+        }
     }
 
     print_cmd_help(out);
@@ -320,6 +324,10 @@ void StatsService::print_cmd_help(FILE* out) {
     fprintf(out, "\n");
     fprintf(out, "usage: adb shell cmd stats print-stats\n");
     fprintf(out, "  Prints some basic stats.\n");
+    fprintf(out, "\n");
+    fprintf(out, "\n");
+    fprintf(out, "usage: adb shell cmd stats clear-puller-cache\n");
+    fprintf(out, "  Clear cached puller data.\n");
 }
 
 status_t StatsService::cmd_trigger_broadcast(FILE* out, Vector<String8>& args) {
@@ -602,9 +610,15 @@ status_t StatsService::cmd_dump_memory_info(FILE* out) {
 }
 
 status_t StatsService::cmd_clear_puller_cache(FILE* out) {
-    mStatsPullerManager.ClearPullerCache();
-    fprintf(out, "Puller cached data removed!\n");
-    return NO_ERROR;
+    IPCThreadState* ipc = IPCThreadState::self();
+    VLOG("StatsService::cmd_clear_puller_cache with Pid %i, Uid %i", ipc->getCallingPid(), ipc->getCallingUid());
+    if (checkCallingPermission(String16(kPermissionDump))) {
+        int cleared = mStatsPullerManager.ForceClearPullerCache();
+        fprintf(out, "Puller removed %d cached data!\n", cleared);
+        return NO_ERROR;
+    } else {
+        return PERMISSION_DENIED;
+    }
 }
 
 Status StatsService::informAllUidData(const vector<int32_t>& uid, const vector<int64_t>& version,

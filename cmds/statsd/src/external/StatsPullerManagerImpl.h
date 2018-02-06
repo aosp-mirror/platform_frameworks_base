@@ -49,7 +49,9 @@ public:
 
     void SetTimeBaseSec(long timeBaseSec) {mTimeBaseSec = timeBaseSec;};
 
-    void ClearPullerCache();
+    int ForceClearPullerCache();
+
+    int ClearPullerCacheIfNecessary(long timestampSec);
 
 private:
     StatsPullerManagerImpl();
