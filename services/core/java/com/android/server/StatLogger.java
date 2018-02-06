@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.os.SystemClock;
+import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
@@ -33,6 +34,8 @@ import java.io.PrintWriter;
  * @hide
  */
 public class StatLogger {
+    private static final String TAG = "StatLogger";
+
     private final Object mLock = new Object();
 
     private final int SIZE;
@@ -66,8 +69,12 @@ public class StatLogger {
      */
     public void logDurationStat(int eventId, long start) {
         synchronized (mLock) {
-            mCountStats[eventId]++;
-            mDurationStats[eventId] += (getTime() - start);
+            if (eventId >= 0 && eventId < SIZE) {
+                mCountStats[eventId]++;
+                mDurationStats[eventId] += (getTime() - start);
+            } else {
+                Slog.wtf(TAG, "Invalid event ID: " + eventId);
+            }
         }
     }
 
