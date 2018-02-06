@@ -16,11 +16,12 @@
 
 package com.android.server.textclassifier;
 
-import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -30,6 +31,7 @@ import android.service.textclassifier.ITextClassificationCallback;
 import android.service.textclassifier.ITextLinksCallback;
 import android.service.textclassifier.ITextSelectionCallback;
 import android.service.textclassifier.TextClassifierService;
+import android.view.textclassifier.SelectionEvent;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassifier;
 import android.view.textclassifier.TextLinks;
@@ -216,6 +218,23 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         }
     }
 
+    @Override
+    public void onSelectionEvent(SelectionEvent event) throws RemoteException {
+        validateInput(event, mContext);
+
+        synchronized (mLock) {
+            if (isBoundLocked()) {
+                mService.onSelectionEvent(event);
+            } else {
+                final Callable<Void> request = () -> {
+                    onSelectionEvent(event);
+                    return null;
+                };
+                enqueueRequestLocked(request, null /* onServiceFailure */, null /* binder */);
+            }
+        }
+    }
+
     /**
      * @return true if the service is bound or in the process of being bound.
      *      Returns false otherwise.
@@ -281,8 +300,8 @@ public final class TextClassificationManagerService extends ITextClassifierServi
     private final class PendingRequest implements IBinder.DeathRecipient {
 
         private final Callable<Void> mRequest;
-        private final Callable<Void> mOnServiceFailure;
-        private final IBinder mBinder;
+        @Nullable private final Callable<Void> mOnServiceFailure;
+        @Nullable private final IBinder mBinder;
 
         /**
          * Initializes a new pending request.
@@ -292,15 +311,17 @@ public final class TextClassificationManagerService extends ITextClassifierServi
          * @param binder binder to the process that made this pending request
          */
         PendingRequest(
-                @NonNull Callable<Void> request, @NonNull Callable<Void> onServiceFailure,
-                @NonNull IBinder binder) {
+                Callable<Void> request, @Nullable Callable<Void> onServiceFailure,
+                @Nullable IBinder binder) {
             mRequest = Preconditions.checkNotNull(request);
-            mOnServiceFailure = Preconditions.checkNotNull(onServiceFailure);
-            mBinder = Preconditions.checkNotNull(binder);
-            try {
-                mBinder.linkToDeath(this, 0);
-            } catch (RemoteException e) {
-                e.printStackTrace();
+            mOnServiceFailure = onServiceFailure;
+            mBinder = binder;
+            if (mBinder != null) {
+                try {
+                    mBinder.linkToDeath(this, 0);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
@@ -317,11 +338,13 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         @GuardedBy("mLock")
         void notifyServiceFailureLocked() {
             removeLocked();
-            try {
-                mOnServiceFailure.call();
-            } catch (Exception e) {
-                Slog.d(LOG_TAG, "Error notifying callback of service failure: "
-                        + e.getMessage());
+            if (mOnServiceFailure != null) {
+                try {
+                    mOnServiceFailure.call();
+                } catch (Exception e) {
+                    Slog.d(LOG_TAG, "Error notifying callback of service failure: "
+                            + e.getMessage());
+                }
             }
         }
 
@@ -336,7 +359,9 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         @GuardedBy("mLock")
         private void removeLocked() {
             mPendingRequests.remove(this);
-            mBinder.unlinkToDeath(this, 0);
+            if (mBinder != null) {
+                mBinder.unlinkToDeath(this, 0);
+            }
         }
     }
 
@@ -356,6 +381,18 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             TextClassifier.Utils.validate(text, true /* allowInMainThread */);
             Preconditions.checkNotNull(callback);
         } catch (IllegalArgumentException | NullPointerException e) {
+            throw new RemoteException(e.getMessage());
+        }
+    }
+
+    private static void validateInput(SelectionEvent event, Context context)
+            throws RemoteException {
+        try {
+            final int uid = context.getPackageManager()
+                    .getPackageUid(event.getPackageName(), 0);
+            Preconditions.checkArgument(Binder.getCallingUid() == uid);
+        } catch (IllegalArgumentException | NullPointerException |
+                PackageManager.NameNotFoundException e) {
             throw new RemoteException(e.getMessage());
         }
     }

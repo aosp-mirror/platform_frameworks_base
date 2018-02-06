@@ -4693,6 +4693,7 @@ package android.service.textclassifier {
     method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract void onClassifyText(java.lang.CharSequence, int, int, android.view.textclassifier.TextClassification.Options, android.os.CancellationSignal, android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextClassification>);
     method public abstract void onGenerateLinks(java.lang.CharSequence, android.view.textclassifier.TextLinks.Options, android.os.CancellationSignal, android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextLinks>);
+    method public void onSelectionEvent(android.view.textclassifier.SelectionEvent);
     method public abstract void onSuggestSelection(java.lang.CharSequence, int, int, android.view.textclassifier.TextSelection.Options, android.os.CancellationSignal, android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextSelection>);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.textclassifier.TextClassifierService";
   }
