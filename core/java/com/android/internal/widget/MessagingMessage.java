@@ -16,182 +16,125 @@
 
 package com.android.internal.widget;
 
-import android.annotation.AttrRes;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.annotation.StyleRes;
 import android.app.Notification;
-import android.content.Context;
-import android.text.Layout;
-import android.util.AttributeSet;
-import android.util.Pools;
-import android.view.LayoutInflater;
-import android.view.ViewGroup;
-import android.view.ViewParent;
-import android.widget.RemoteViews;
-
-import com.android.internal.R;
+import android.view.View;
 
 import java.util.Objects;
 
 /**
  * A message of a {@link MessagingLayout}.
  */
-@RemoteViews.RemoteView
-public class MessagingMessage extends ImageFloatingTextView implements
-        MessagingLinearLayout.MessagingChild {
+public interface MessagingMessage extends MessagingLinearLayout.MessagingChild {
 
-    private static Pools.SimplePool<MessagingMessage> sInstancePool
-            = new Pools.SynchronizedPool<>(10);
-    private Notification.MessagingStyle.Message mMessage;
-    private MessagingGroup mGroup;
-    private boolean mIsHistoric;
-    private boolean mIsHidingAnimated;
+    /**
+     * Prefix for supported image MIME types
+     **/
+    String IMAGE_MIME_TYPE_PREFIX = "image/";
 
-    public MessagingMessage(@NonNull Context context) {
-        super(context);
+    static MessagingMessage createMessage(MessagingLayout layout,
+            Notification.MessagingStyle.Message m) {
+        if (hasImage(m)) {
+            return MessagingImageMessage.createMessage(layout, m);
+        } else {
+            return MessagingTextMessage.createMessage(layout, m);
+        }
     }
 
-    public MessagingMessage(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
+    static void dropCache() {
+        MessagingTextMessage.dropCache();
+        MessagingImageMessage.dropCache();
     }
 
-    public MessagingMessage(@NonNull Context context, @Nullable AttributeSet attrs,
-            @AttrRes int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+    static boolean hasImage(Notification.MessagingStyle.Message m) {
+        return m.getDataUri() != null
+                && m.getDataMimeType() != null
+                && m.getDataMimeType().startsWith(IMAGE_MIME_TYPE_PREFIX);
     }
 
-    public MessagingMessage(@NonNull Context context, @Nullable AttributeSet attrs,
-            @AttrRes int defStyleAttr, @StyleRes int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
+    /**
+     * Set a message for this view.
+     * @return true if setting the message worked
+     */
+    default boolean setMessage(Notification.MessagingStyle.Message message) {
+        getState().setMessage(message);
+        return true;
     }
 
-    private void setMessage(Notification.MessagingStyle.Message message) {
-        mMessage = message;
-        setText(message.getText());
+    default Notification.MessagingStyle.Message getMessage() {
+        return getState().getMessage();
     }
 
-    public Notification.MessagingStyle.Message getMessage() {
-        return mMessage;
-    }
-
-    boolean sameAs(Notification.MessagingStyle.Message message) {
-        if (!Objects.equals(message.getText(), mMessage.getText())) {
+    default boolean sameAs(Notification.MessagingStyle.Message message) {
+        Notification.MessagingStyle.Message ownMessage = getMessage();
+        if (!Objects.equals(message.getText(), ownMessage.getText())) {
             return false;
         }
-        if (!Objects.equals(message.getSender(), mMessage.getSender())) {
+        if (!Objects.equals(message.getSender(), ownMessage.getSender())) {
             return false;
         }
-        if (!Objects.equals(message.getTimestamp(), mMessage.getTimestamp())) {
+        if (!Objects.equals(message.getTimestamp(), ownMessage.getTimestamp())) {
+            return false;
+        }
+        if (!Objects.equals(message.getDataMimeType(), ownMessage.getDataMimeType())) {
+            return false;
+        }
+        if (!Objects.equals(message.getDataUri(), ownMessage.getDataUri())) {
             return false;
         }
         return true;
     }
 
-    boolean sameAs(MessagingMessage message) {
+    default boolean sameAs(MessagingMessage message) {
         return sameAs(message.getMessage());
     }
 
-    static MessagingMessage createMessage(MessagingLayout layout,
-            Notification.MessagingStyle.Message m) {
-        MessagingLinearLayout messagingLinearLayout = layout.getMessagingLinearLayout();
-        MessagingMessage createdMessage = sInstancePool.acquire();
-        if (createdMessage == null) {
-            createdMessage = (MessagingMessage) LayoutInflater.from(layout.getContext()).inflate(
-                    R.layout.notification_template_messaging_message, messagingLinearLayout,
-                    false);
-        }
-        createdMessage.setMessage(m);
-        return createdMessage;
+    default void removeMessage() {
+        getGroup().removeMessage(this);
     }
 
-    public void removeMessage() {
-        mGroup.removeMessage(this);
+    default void setMessagingGroup(MessagingGroup group) {
+        getState().setGroup(group);
     }
 
-    public void recycle() {
-        mGroup = null;
-        mMessage = null;
-        setAlpha(1.0f);
-        setTranslationY(0);
-        sInstancePool.release(this);
+    default void setIsHistoric(boolean isHistoric) {
+        getState().setIsHistoric(isHistoric);
     }
 
-    public void setMessagingGroup(MessagingGroup group) {
-        mGroup = group;
+    default MessagingGroup getGroup() {
+        return getState().getGroup();
     }
 
-    public static void dropCache() {
-        sInstancePool = new Pools.SynchronizedPool<>(10);
-    }
-
-    public void setIsHistoric(boolean isHistoric) {
-        mIsHistoric = isHistoric;
-    }
-
-    public MessagingGroup getGroup() {
-        return mGroup;
+    default void setIsHidingAnimated(boolean isHiding) {
+        getState().setIsHidingAnimated(isHiding);
     }
 
     @Override
-    public int getMeasuredType() {
-        boolean measuredTooSmall = getMeasuredHeight()
-                < getLayoutHeight() + getPaddingTop() + getPaddingBottom();
-        if (measuredTooSmall) {
-            return MEASURED_TOO_SMALL;
-        } else {
-            Layout layout = getLayout();
-            if (layout == null) {
-                return MEASURED_TOO_SMALL;
-            }
-            if (layout.getEllipsisCount(layout.getLineCount() - 1) > 0) {
-                return MEASURED_SHORTENED;
-            } else {
-                return MEASURED_NORMAL;
-            }
-        }
+    default boolean isHidingAnimated() {
+        return getState().isHidingAnimated();
     }
 
     @Override
-    public void hideAnimated() {
+    default void hideAnimated() {
         setIsHidingAnimated(true);
-        mGroup.performRemoveAnimation(this, () -> setIsHidingAnimated(false));
+        getGroup().performRemoveAnimation(getState().getHostView(),
+                () -> setIsHidingAnimated(false));
     }
 
-    private void setIsHidingAnimated(boolean isHiding) {
-        ViewParent parent = getParent();
-        mIsHidingAnimated = isHiding;
-        invalidate();
-        if (parent instanceof ViewGroup) {
-            ((ViewGroup) parent).invalidate();
-        }
-    }
-
-    @Override
-    public boolean isHidingAnimated() {
-        return mIsHidingAnimated;
-    }
-
-    @Override
-    public void setMaxDisplayedLines(int lines) {
-        setMaxLines(lines);
-    }
-
-    @Override
-    public int getConsumedLines() {
-        return getLineCount();
-    }
-
-    public int getLayoutHeight() {
-        Layout layout = getLayout();
-        if (layout == null) {
-            return 0;
-        }
-        return layout.getHeight();
-    }
-
-    @Override
-    public boolean hasOverlappingRendering() {
+    default boolean hasOverlappingRendering() {
         return false;
     }
+
+    default void recycle() {
+        getState().reset();
+    }
+
+    default View getView() {
+        return (View) this;
+    }
+
+    default void setColor(int textColor) {}
+
+    MessagingMessageState getState();
+
+    void setVisibility(int visibility);
 }

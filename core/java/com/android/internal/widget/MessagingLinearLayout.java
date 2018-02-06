@@ -75,7 +75,6 @@ public class MessagingLinearLayout extends ViewGroup {
                 targetHeight = Integer.MAX_VALUE;
                 break;
         }
-        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
 
         // Now that we know which views to take, fix up the indents and see what width we get.
         int measuredWidth = mPaddingLeft + mPaddingRight;
@@ -90,7 +89,6 @@ public class MessagingLinearLayout extends ViewGroup {
         totalHeight = mPaddingTop + mPaddingBottom;
         boolean first = true;
         int linesRemaining = mMaxDisplayedLines;
-
         // Starting from the bottom: we measure every view as if it were the only one. If it still
         // fits, we take it, otherwise we stop there.
         for (int i = count - 1; i >= 0 && totalHeight < targetHeight; i--) {
@@ -100,11 +98,13 @@ public class MessagingLinearLayout extends ViewGroup {
             final View child = getChildAt(i);
             LayoutParams lp = (LayoutParams) getChildAt(i).getLayoutParams();
             MessagingChild messagingChild = null;
+            int spacing = mSpacing;
             if (child instanceof MessagingChild) {
                 messagingChild = (MessagingChild) child;
                 messagingChild.setMaxDisplayedLines(linesRemaining);
+                spacing += messagingChild.getExtraSpacing();
             }
-            int spacing = first ? 0 : mSpacing;
+            spacing = first ? 0 : spacing;
             measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, totalHeight
                     - mPaddingTop - mPaddingBottom + spacing);
 
@@ -254,6 +254,9 @@ public class MessagingLinearLayout extends ViewGroup {
         void setMaxDisplayedLines(int lines);
         void hideAnimated();
         boolean isHidingAnimated();
+        default int getExtraSpacing() {
+            return 0;
+        }
     }
 
     public static class LayoutParams extends MarginLayoutParams {

@@ -6434,7 +6434,7 @@ public class Notification implements Parcelable
         public RemoteViews makeContentView(boolean increasedHeight) {
             mBuilder.mOriginalActions = mBuilder.mActions;
             mBuilder.mActions = new ArrayList<>();
-            RemoteViews remoteViews = makeBigContentView(true /* showRightIcon */);
+            RemoteViews remoteViews = makeMessagingView(true /* isCollapsed */);
             mBuilder.mActions = mBuilder.mOriginalActions;
             mBuilder.mOriginalActions = null;
             return remoteViews;
@@ -6469,11 +6469,11 @@ public class Notification implements Parcelable
          */
         @Override
         public RemoteViews makeBigContentView() {
-            return makeBigContentView(false /* showRightIcon */);
+            return makeMessagingView(false /* isCollapsed */);
         }
 
         @NonNull
-        private RemoteViews makeBigContentView(boolean showRightIcon) {
+        private RemoteViews makeMessagingView(boolean isCollapsed) {
             CharSequence conversationTitle = !TextUtils.isEmpty(super.mBigContentTitle)
                     ? super.mBigContentTitle
                     : mConversationTitle;
@@ -6484,21 +6484,24 @@ public class Notification implements Parcelable
                 nameReplacement = conversationTitle;
                 conversationTitle = null;
             }
+            boolean hideLargeIcon = !isCollapsed || isOneToOne;
             RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(
                     mBuilder.getMessagingLayoutResource(),
                     mBuilder.mParams.reset().hasProgress(false).title(conversationTitle).text(null)
-                            .hideLargeIcon(!showRightIcon || isOneToOne)
+                            .hideLargeIcon(hideLargeIcon)
                             .headerTextSecondary(conversationTitle)
-                            .alwaysShowReply(showRightIcon));
+                            .alwaysShowReply(isCollapsed));
             addExtras(mBuilder.mN.extras);
             // also update the end margin if there is an image
             int endMargin = R.dimen.notification_content_margin_end;
-            if (mBuilder.mN.hasLargeIcon() && showRightIcon) {
+            if (isCollapsed) {
                 endMargin = R.dimen.notification_content_plus_picture_margin_end;
             }
             contentView.setViewLayoutMarginEndDimen(R.id.notification_main_column, endMargin);
             contentView.setInt(R.id.status_bar_latest_event_content, "setLayoutColor",
                     mBuilder.resolveContrastColor());
+            contentView.setBoolean(R.id.status_bar_latest_event_content, "setIsCollapsed",
+                    isCollapsed);
             contentView.setIcon(R.id.status_bar_latest_event_content, "setLargeIcon",
                     mBuilder.mN.mLargeIcon);
             contentView.setCharSequence(R.id.status_bar_latest_event_content, "setNameReplacement",
@@ -6565,7 +6568,7 @@ public class Notification implements Parcelable
          */
         @Override
         public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
-            RemoteViews remoteViews = makeBigContentView(true /* showRightIcon */);
+            RemoteViews remoteViews = makeMessagingView(true /* isCollapsed */);
             remoteViews.setInt(R.id.notification_messaging, "setMaxDisplayedLines", 1);
             return remoteViews;
         }

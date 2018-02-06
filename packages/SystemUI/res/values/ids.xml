@@ -58,6 +58,8 @@
     <item type="id" name="notification_plugin"/>
     <item type="id" name="transformation_start_x_tag"/>
     <item type="id" name="transformation_start_y_tag"/>
+    <item type="id" name="transformation_start_actual_width"/>
+    <item type="id" name="transformation_start_actual_height"/>
     <item type="id" name="transformation_start_scale_x_tag"/>
     <item type="id" name="transformation_start_scale_y_tag"/>
     <item type="id" name="continuous_clipping_tag"/>
