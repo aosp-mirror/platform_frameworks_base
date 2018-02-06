@@ -22,8 +22,10 @@ import android.os.UserHandle;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.server.ForceAppStandbyTracker;
-import com.android.server.ForceAppStandbyTracker.Listener;
+import com.android.internal.util.Preconditions;
+import com.android.server.AppStateTracker;
+import com.android.server.AppStateTracker.Listener;
+import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobStore;
 import com.android.server.job.StateControllerProto;
@@ -42,8 +44,7 @@ public final class BackgroundJobsController extends StateController {
 
     private final JobSchedulerService mJobSchedulerService;
 
-    private final ForceAppStandbyTracker mForceAppStandbyTracker;
-
+    private final AppStateTracker mAppStateTracker;
 
     public static BackgroundJobsController get(JobSchedulerService service) {
         synchronized (sCreationLock) {
@@ -59,10 +60,9 @@ public final class BackgroundJobsController extends StateController {
         super(service, context, lock);
         mJobSchedulerService = service;
 
-        mForceAppStandbyTracker = ForceAppStandbyTracker.getInstance(context);
-
-        mForceAppStandbyTracker.addListener(mForceAppStandbyListener);
-        mForceAppStandbyTracker.start();
+        mAppStateTracker = Preconditions.checkNotNull(
+                LocalServices.getService(AppStateTracker.class));
+        mAppStateTracker.addListener(mForceAppStandbyListener);
     }
 
     @Override
@@ -79,7 +79,7 @@ public final class BackgroundJobsController extends StateController {
     public void dumpControllerStateLocked(final PrintWriter pw, final int filterUid) {
         pw.println("BackgroundJobsController");
 
-        mForceAppStandbyTracker.dump(pw, "");
+        mAppStateTracker.dump(pw, "");
 
         pw.println("Job state:");
         mJobSchedulerService.getJobStore().forEachJob((jobStatus) -> {
@@ -92,16 +92,16 @@ public final class BackgroundJobsController extends StateController {
             jobStatus.printUniqueId(pw);
             pw.print(" from ");
             UserHandle.formatUid(pw, uid);
-            pw.print(mForceAppStandbyTracker.isUidActive(uid) ? " active" : " idle");
-            if (mForceAppStandbyTracker.isUidPowerSaveWhitelisted(uid) ||
-                    mForceAppStandbyTracker.isUidTempPowerSaveWhitelisted(uid)) {
+            pw.print(mAppStateTracker.isUidActive(uid) ? " active" : " idle");
+            if (mAppStateTracker.isUidPowerSaveWhitelisted(uid) ||
+                    mAppStateTracker.isUidTempPowerSaveWhitelisted(uid)) {
                 pw.print(", whitelisted");
             }
             pw.print(": ");
             pw.print(sourcePkg);
 
             pw.print(" [RUN_ANY_IN_BACKGROUND ");
-            pw.print(mForceAppStandbyTracker.isRunAnyInBackgroundAppOpsAllowed(uid, sourcePkg)
+            pw.print(mAppStateTracker.isRunAnyInBackgroundAppOpsAllowed(uid, sourcePkg)
                     ? "allowed]" : "disallowed]");
 
             if ((jobStatus.satisfiedConstraints
@@ -118,7 +118,7 @@ public final class BackgroundJobsController extends StateController {
         final long token = proto.start(fieldId);
         final long mToken = proto.start(StateControllerProto.BACKGROUND);
 
-        mForceAppStandbyTracker.dumpProto(proto,
+        mAppStateTracker.dumpProto(proto,
                 StateControllerProto.BackgroundJobsController.FORCE_APP_STANDBY_TRACKER);
 
         mJobSchedulerService.getJobStore().forEachJob((jobStatus) -> {
@@ -136,14 +136,14 @@ public final class BackgroundJobsController extends StateController {
             proto.write(TrackedJob.SOURCE_PACKAGE_NAME, sourcePkg);
 
             proto.write(TrackedJob.IS_IN_FOREGROUND,
-                    mForceAppStandbyTracker.isUidActive(sourceUid));
+                    mAppStateTracker.isUidActive(sourceUid));
             proto.write(TrackedJob.IS_WHITELISTED,
-                    mForceAppStandbyTracker.isUidPowerSaveWhitelisted(sourceUid) ||
-                    mForceAppStandbyTracker.isUidTempPowerSaveWhitelisted(sourceUid));
+                    mAppStateTracker.isUidPowerSaveWhitelisted(sourceUid) ||
+                    mAppStateTracker.isUidTempPowerSaveWhitelisted(sourceUid));
 
             proto.write(
                     TrackedJob.CAN_RUN_ANY_IN_BACKGROUND,
-                    mForceAppStandbyTracker.isRunAnyInBackgroundAppOpsAllowed(
+                    mAppStateTracker.isRunAnyInBackgroundAppOpsAllowed(
                             sourceUid, sourcePkg));
 
             proto.write(
@@ -197,7 +197,7 @@ public final class BackgroundJobsController extends StateController {
         final int uid = jobStatus.getSourceUid();
         final String packageName = jobStatus.getSourcePackageName();
 
-        final boolean canRun = !mForceAppStandbyTracker.areJobsRestricted(uid, packageName,
+        final boolean canRun = !mAppStateTracker.areJobsRestricted(uid, packageName,
                 (jobStatus.getInternalFlags() & JobStatus.INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION)
                         != 0);
 
