@@ -79,6 +79,11 @@ public class FakeWindowState implements WindowManagerPolicy.WindowState {
     }
 
     @Override
+    public Point getShownPositionLw() {
+        return new Point(parentFrame.left, parentFrame.top);
+    }
+
+    @Override
     public Rect getDisplayFrameLw() {
         return displayFrame;
     }
