@@ -318,6 +318,7 @@ public class ConnectivityServiceTest {
 
     // This test has an inherent race condition in it, and cannot be enabled for continuous testing
     // or presubmit tests. It is kept for manual runs and documentation purposes.
+    @Ignore
     public void verifyThatNotWaitingForIdleCausesRaceConditions() {
         // Bring up a network that we can use to send messages to ConnectivityService.
         ConditionVariable cv = waitForConnectivityBroadcasts(1);
