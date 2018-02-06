@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package android.telephony.ims.feature;
 
-import com.android.ims.internal.IImsRcsFeature;
+import android.telephony.ims.aidl.IImsRcsFeature;
 
 /**
  * Base implementation of the RcsFeature APIs. Any ImsService wishing to support RCS should extend
@@ -36,12 +36,19 @@ public class RcsFeature extends ImsFeature {
     }
 
     @Override
-    public void onFeatureReady() {
-
+    public void changeEnabledCapabilities(CapabilityChangeRequest request,
+            CapabilityCallbackProxy c) {
+        // Do nothing for base implementation.
     }
 
     @Override
     public void onFeatureRemoved() {
+
+    }
+
+    /**{@inheritDoc}*/
+    @Override
+    public void onFeatureReady() {
 
     }
 

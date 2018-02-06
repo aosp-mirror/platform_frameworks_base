@@ -47,12 +47,13 @@ import android.service.carrier.CarrierIdentifier;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telephony.VisualVoicemailService.VisualVoicemailTask;
+import android.telephony.ims.aidl.IImsConfig;
+import android.telephony.ims.aidl.IImsMmTelFeature;
+import android.telephony.ims.aidl.IImsRcsFeature;
+import android.telephony.ims.aidl.IImsRegistration;
 import android.telephony.ims.feature.ImsFeature;
 import android.util.Log;
 
-import com.android.ims.internal.IImsMMTelFeature;
-import com.android.ims.internal.IImsRcsFeature;
-import com.android.ims.internal.IImsRegistration;
 import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telecom.ITelecomService;
@@ -4900,57 +4901,60 @@ public class TelephonyManager {
         }
     }
 
-    /** @hide */
-    @IntDef({ImsFeature.EMERGENCY_MMTEL, ImsFeature.MMTEL, ImsFeature.RCS})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface Feature {}
-
     /**
-     * Returns the {@link IImsMMTelFeature} that corresponds to the given slot Id and MMTel
-     * feature or {@link null} if the service is not available. If an MMTelFeature is available, the
-     * {@link IImsServiceFeatureCallback} callback is registered as a listener for feature updates.
-     * @param slotIndex The SIM slot that we are requesting the {@link IImsMMTelFeature} for.
-     * @param callback Listener that will send updates to ImsManager when there are updates to
-     * ImsServiceController.
-     * @return {@link IImsMMTelFeature} interface for the feature specified or {@code null} if
-     * it is unavailable.
+     * Enables IMS for the framework. This will trigger IMS registration and ImsFeature capability
+     * status updates, if not already enabled.
      * @hide
      */
-    public @Nullable IImsMMTelFeature getImsMMTelFeatureAndListen(int slotIndex,
-            IImsServiceFeatureCallback callback) {
+    public void enableIms(int slotId) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getMMTelFeatureAndListen(slotIndex, callback);
+                telephony.enableIms(slotId);
             }
         } catch (RemoteException e) {
-            Rlog.e(TAG, "getImsMMTelFeatureAndListen, RemoteException: "
+            Rlog.e(TAG, "enableIms, RemoteException: "
                     + e.getMessage());
         }
-        return null;
     }
 
     /**
-     * Returns the {@link IImsMMTelFeature} that corresponds to the given slot Id and MMTel
-     * feature for emergency calling or {@link null} if the service is not available. If an
-     * MMTelFeature is available, the {@link IImsServiceFeatureCallback} callback is registered as a
-     * listener for feature updates.
-     * @param slotIndex The SIM slot that we are requesting the {@link IImsMMTelFeature} for.
+     * Disables IMS for the framework. This will trigger IMS de-registration and trigger ImsFeature
+     * status updates to disabled.
+     * @hide
+     */
+    public void disableIms(int slotId) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.disableIms(slotId);
+            }
+        } catch (RemoteException e) {
+            Rlog.e(TAG, "disableIms, RemoteException: "
+                    + e.getMessage());
+        }
+    }
+
+    /**
+     * Returns the {@link IImsMmTelFeature} that corresponds to the given slot Id and MMTel
+     * feature or {@link null} if the service is not available. If an MMTelFeature is available, the
+     * {@link IImsServiceFeatureCallback} callback is registered as a listener for feature updates.
+     * @param slotIndex The SIM slot that we are requesting the {@link IImsMmTelFeature} for.
      * @param callback Listener that will send updates to ImsManager when there are updates to
      * ImsServiceController.
-     * @return {@link IImsMMTelFeature} interface for the feature specified or {@code null} if
+     * @return {@link IImsMmTelFeature} interface for the feature specified or {@code null} if
      * it is unavailable.
      * @hide
      */
-    public @Nullable IImsMMTelFeature getImsEmergencyMMTelFeatureAndListen(int slotIndex,
+    public @Nullable IImsMmTelFeature getImsMmTelFeatureAndListen(int slotIndex,
             IImsServiceFeatureCallback callback) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getEmergencyMMTelFeatureAndListen(slotIndex, callback);
+                return telephony.getMmTelFeatureAndListen(slotIndex, callback);
             }
         } catch (RemoteException e) {
-            Rlog.e(TAG, "getImsEmergencyMMTelFeatureAndListen, RemoteException: "
+            Rlog.e(TAG, "getImsMmTelFeatureAndListen, RemoteException: "
                     + e.getMessage());
         }
         return null;
@@ -4994,6 +4998,25 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 return telephony.getImsRegistration(slotIndex, feature);
+            }
+        } catch (RemoteException e) {
+            Rlog.e(TAG, "getImsRegistration, RemoteException: " + e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * @return the {@IImsConfig} interface that corresponds with the slot index and feature.
+     * @param slotIndex The SIM slot corresponding to the ImsService ImsConfig is active for.
+     * @param feature An integer indicating the feature that we wish to get the ImsConfig for.
+     * Corresponds to features defined in ImsFeature.
+     * @hide
+     */
+    public @Nullable IImsConfig getImsConfig(int slotIndex, int feature) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getImsConfig(slotIndex, feature);
             }
         } catch (RemoteException e) {
             Rlog.e(TAG, "getImsRegistration, RemoteException: " + e.getMessage());

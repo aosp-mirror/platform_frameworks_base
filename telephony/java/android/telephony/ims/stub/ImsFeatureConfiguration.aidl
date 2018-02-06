@@ -14,6 +14,6 @@
  * limitations under the License
  */
 
-package android.telephony.ims.internal.feature;
+package android.telephony.ims.stub;
 
-parcelable CapabilityChangeRequest;
+parcelable ImsFeatureConfiguration;

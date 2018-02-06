@@ -24,7 +24,6 @@ import com.android.ims.internal.IImsConfig;
 import com.android.ims.internal.IImsEcbm;
 import com.android.ims.internal.IImsMultiEndpoint;
 import com.android.ims.internal.IImsRegistrationListener;
-import com.android.ims.internal.IImsSmsListener;
 import com.android.ims.internal.IImsUt;
 
 import android.os.Message;
@@ -52,12 +51,4 @@ interface IImsMMTelFeature {
     IImsEcbm getEcbmInterface();
     void setUiTTYMode(int uiTtyMode, in Message onComplete);
     IImsMultiEndpoint getMultiEndpointInterface();
-    // SMS APIs
-    void setSmsListener(IImsSmsListener l);
-    oneway void sendSms(in int token, int messageRef, String format, String smsc, boolean retry,
-            in byte[] pdu);
-    oneway void acknowledgeSms(int token, int messageRef, int result);
-    oneway void acknowledgeSmsReport(int token, int messageRef, int result);
-    String getSmsFormat();
-    oneway void onSmsReady();
 }

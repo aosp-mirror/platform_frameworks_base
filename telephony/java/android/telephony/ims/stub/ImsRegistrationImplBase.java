@@ -18,14 +18,13 @@ package android.telephony.ims.stub;
 
 import android.annotation.IntDef;
 import android.net.Uri;
-import android.os.IBinder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.telephony.ims.aidl.IImsRegistration;
+import android.telephony.ims.aidl.IImsRegistrationCallback;
 import android.util.Log;
 
 import com.android.ims.ImsReasonInfo;
-import com.android.ims.internal.IImsRegistration;
-import com.android.ims.internal.IImsRegistrationCallback;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
