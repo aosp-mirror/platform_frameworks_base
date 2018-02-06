@@ -16,6 +16,7 @@
 
 package android.telephony.ims.feature;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
@@ -30,17 +31,32 @@ import java.util.Set;
  * the request.
  * {@hide}
  */
-public class CapabilityChangeRequest implements Parcelable {
+@SystemApi
+public final class CapabilityChangeRequest implements Parcelable {
 
+    /**
+     * Contains a feature capability, defined as
+     * {@link MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VOICE},
+     * {@link MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VIDEO},
+     * {@link MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_UT}, or
+     * {@link MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_SMS},
+     * along with an associated technology, defined as
+     * {@link ImsRegistrationImplBase#REGISTRATION_TECH_LTE} or
+     * {@link ImsRegistrationImplBase#REGISTRATION_TECH_IWLAN}
+     */
     public static class CapabilityPair {
         private final int mCapability;
         private final int radioTech;
 
-        public CapabilityPair(int capability, int radioTech) {
+        public CapabilityPair(@MmTelFeature.MmTelCapabilities.MmTelCapability int capability,
+                @ImsRegistrationImplBase.ImsRegistrationTech int radioTech) {
             this.mCapability = capability;
             this.radioTech = radioTech;
         }
 
+        /**
+         * @hide
+         */
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -52,6 +68,9 @@ public class CapabilityChangeRequest implements Parcelable {
             return getRadioTech() == that.getRadioTech();
         }
 
+        /**
+         * @hide
+         */
         @Override
         public int hashCode() {
             int result = getCapability();
@@ -59,10 +78,22 @@ public class CapabilityChangeRequest implements Parcelable {
             return result;
         }
 
+        /**
+         * @return The stored capability, defined as
+         * {@link MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VOICE},
+         * {@link MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VIDEO},
+         * {@link MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_UT}, or
+         * {@link MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_SMS}
+         */
         public @MmTelFeature.MmTelCapabilities.MmTelCapability int getCapability() {
             return mCapability;
         }
 
+        /**
+         * @return the stored radio technology, defined as
+         * {@link ImsRegistrationImplBase#REGISTRATION_TECH_LTE} or
+         * {@link ImsRegistrationImplBase#REGISTRATION_TECH_IWLAN}
+         */
         public @ImsRegistrationImplBase.ImsRegistrationTech int getRadioTech() {
             return radioTech;
         }
@@ -73,6 +104,7 @@ public class CapabilityChangeRequest implements Parcelable {
     // Pair contains <radio tech, mCapability>
     private final Set<CapabilityPair> mCapabilitiesToDisable;
 
+    /** @hide */
     public CapabilityChangeRequest() {
         mCapabilitiesToEnable = new ArraySet<>();
         mCapabilitiesToDisable = new ArraySet<>();
@@ -130,6 +162,9 @@ public class CapabilityChangeRequest implements Parcelable {
         }
     }
 
+    /**
+     * @hide
+     */
     protected CapabilityChangeRequest(Parcel in) {
         int enableSize = in.readInt();
         mCapabilitiesToEnable = new ArraySet<>(enableSize);
@@ -177,6 +212,9 @@ public class CapabilityChangeRequest implements Parcelable {
         }
     }
 
+    /**
+     * @hide
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -189,6 +227,9 @@ public class CapabilityChangeRequest implements Parcelable {
         return mCapabilitiesToDisable.equals(that.mCapabilitiesToDisable);
     }
 
+    /**
+     * @hide
+     */
     @Override
     public int hashCode() {
         int result = mCapabilitiesToEnable.hashCode();

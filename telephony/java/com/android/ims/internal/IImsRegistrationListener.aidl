@@ -16,7 +16,7 @@
 
 package com.android.ims.internal;
 
-import com.android.ims.ImsReasonInfo;
+import android.telephony.ims.ImsReasonInfo;
 
 import android.net.Uri;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,11 +11,12 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License
  */
 
-package com.android.ims;
+package android.telephony.ims;
 
+import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -32,7 +33,8 @@ import android.telephony.Rlog;
  * Parcelable object to handle MultiEndpoint Dialog Information
  * @hide
  */
-public class ImsExternalCallState implements Parcelable {
+@SystemApi
+public final class ImsExternalCallState implements Parcelable {
 
     private static final String TAG = "ImsExternalCallState";
 
@@ -50,9 +52,11 @@ public class ImsExternalCallState implements Parcelable {
     private int mCallType;
     private boolean mIsHeld;
 
+    /** @hide */
     public ImsExternalCallState() {
     }
 
+    /** @hide */
     public ImsExternalCallState(int callId, Uri address, boolean isPullable, int callState,
             int callType, boolean isCallheld) {
         mCallId = callId;
@@ -64,6 +68,7 @@ public class ImsExternalCallState implements Parcelable {
         Rlog.d(TAG, "ImsExternalCallState = " + this);
     }
 
+    /** @hide */
     public ImsExternalCallState(Parcel in) {
         mCallId = in.readInt();
         ClassLoader classLoader = ImsExternalCallState.class.getClassLoader();

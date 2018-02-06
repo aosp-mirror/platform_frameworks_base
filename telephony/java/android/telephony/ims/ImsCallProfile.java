@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,11 +11,12 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License
  */
 
-package com.android.ims;
+package android.telephony.ims;
 
+import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -32,7 +33,8 @@ import com.android.internal.telephony.PhoneConstants;
  *
  * @hide
  */
-public class ImsCallProfile implements Parcelable {
+@SystemApi
+public final class ImsCallProfile implements Parcelable {
     private static final String TAG = "ImsCallProfile";
 
     /**
@@ -110,52 +112,92 @@ public class ImsCallProfile implements Parcelable {
      *      the video during voice call.
      *  conference_avail : Indicates if the session can be extended to the conference.
      */
+    /**
+     * @hide
+     */
     public static final String EXTRA_CONFERENCE = "conference";
+    /**
+     * @hide
+     */
     public static final String EXTRA_E_CALL = "e_call";
+    /**
+     * @hide
+     */
     public static final String EXTRA_VMS = "vms";
+    /**
+     * @hide
+     */
     public static final String EXTRA_CALL_MODE_CHANGEABLE = "call_mode_changeable";
+    /**
+     * @hide
+     */
     public static final String EXTRA_CONFERENCE_AVAIL = "conference_avail";
 
     // Extra string for internal use only. OEMs should not use
     // this for packing extras.
+    /**
+     * @hide
+     */
     public static final String EXTRA_OEM_EXTRAS = "OemCallExtras";
 
     /**
-     * Integer extra properties
-     *  oir : Rule for originating identity (number) presentation, MO/MT.
+     * Rule for originating identity (number) presentation, MO/MT.
      *      {@link ImsCallProfile#OIR_DEFAULT}
      *      {@link ImsCallProfile#OIR_PRESENTATION_RESTRICTED}
      *      {@link ImsCallProfile#OIR_PRESENTATION_NOT_RESTRICTED}
-     *  cnap : Rule for calling name presentation
+     */
+    public static final String EXTRA_OIR = "oir";
+    /**
+     * Rule for calling name presentation
      *      {@link ImsCallProfile#OIR_DEFAULT}
      *      {@link ImsCallProfile#OIR_PRESENTATION_RESTRICTED}
      *      {@link ImsCallProfile#OIR_PRESENTATION_NOT_RESTRICTED}
-     *  dialstring : To identify the Ims call type, MO
-     *      {@link ImsCallProfile#DIALSTRING_NORMAL_CALL}
+     */
+    public static final String EXTRA_CNAP = "cnap";
+    /**
+     * To identify the Ims call type, MO
+     *      {@link ImsCallProfile#DIALSTRING_NORMAL}
      *      {@link ImsCallProfile#DIALSTRING_SS_CONF}
      *      {@link ImsCallProfile#DIALSTRING_USSD}
      */
-    public static final String EXTRA_OIR = "oir";
-    public static final String EXTRA_CNAP = "cnap";
     public static final String EXTRA_DIALSTRING = "dialstring";
 
     /**
      * Values for EXTRA_OIR / EXTRA_CNAP
      */
+    /**
+     * Default presentation for Originating Identity.
+     */
     public static final int OIR_DEFAULT = 0;    // "user subscription default value"
+    /**
+     * Restricted presentation for Originating Identity.
+     */
     public static final int OIR_PRESENTATION_RESTRICTED = 1;
+    /**
+     * Not restricted presentation for Originating Identity.
+     */
     public static final int OIR_PRESENTATION_NOT_RESTRICTED = 2;
+    /**
+     * Presentation unknown for Originating Identity.
+     */
     public static final int OIR_PRESENTATION_UNKNOWN = 3;
+    /**
+     * Payphone presentation for Originating Identity.
+     */
     public static final int OIR_PRESENTATION_PAYPHONE = 4;
 
+    //Values for EXTRA_DIALSTRING
     /**
-     * Values for EXTRA_DIALSTRING
+     * A default or normal normal call.
      */
-    // default (normal call)
     public static final int DIALSTRING_NORMAL = 0;
-    // Call for SIP-based user configuration
+    /**
+     * Call for SIP-based user configuration
+     */
     public static final int DIALSTRING_SS_CONF = 1;
-    // Call for USSD message
+    /**
+     * Call for USSD message
+     */
     public static final int DIALSTRING_USSD = 2;
 
     /**
@@ -215,8 +257,11 @@ public class ImsCallProfile implements Parcelable {
      */
     public static final String EXTRA_CALL_RAT_TYPE_ALT = "callRadioTech";
 
+    /** @hide */
     public int mServiceType;
+    /** @hide */
     public int mCallType;
+    /** @hide */
     public int mRestrictCause = CALL_RESTRICT_CAUSE_NONE;
 
     /**
@@ -241,13 +286,17 @@ public class ImsCallProfile implements Parcelable {
      * Invalid types will be removed when the {@link ImsCallProfile} is parceled for transmit across
      * a {@link android.os.Binder}.
      */
+    /** @hide */
     public Bundle mCallExtras;
+    /** @hide */
     public ImsStreamMediaProfile mMediaProfile;
 
+    /** @hide */
     public ImsCallProfile(Parcel in) {
         readFromParcel(in);
     }
 
+    /** @hide */
     public ImsCallProfile() {
         mServiceType = SERVICE_TYPE_NORMAL;
         mCallType = CALL_TYPE_VOICE_N_VIDEO;
@@ -255,6 +304,7 @@ public class ImsCallProfile implements Parcelable {
         mMediaProfile = new ImsStreamMediaProfile();
     }
 
+    /** @hide */
     public ImsCallProfile(int serviceType, int callType) {
         mServiceType = serviceType;
         mCallType = callType;
@@ -366,8 +416,28 @@ public class ImsCallProfile implements Parcelable {
         }
     };
 
+    public int getServiceType() {
+        return mServiceType;
+    }
+
+    public int getCallType() {
+        return mCallType;
+    }
+
+    public int getRestrictCause() {
+        return mRestrictCause;
+    }
+
+    public Bundle getCallExtras() {
+        return mCallExtras;
+    }
+
+    public ImsStreamMediaProfile getMediaProfile() {
+        return mMediaProfile;
+    }
+
     /**
-     * Converts from the call types defined in {@link com.android.ims.ImsCallProfile} to the
+     * Converts from the call types defined in {@link ImsCallProfile} to the
      * video state values defined in {@link VideoProfile}.
      *
      * @param callProfile The call profile.
@@ -434,9 +504,9 @@ public class ImsCallProfile implements Parcelable {
     }
 
     /**
-     * Translate presentation value to OIR value
-     * @param presentation
-     * @return OIR valuse
+     * Badly named old method, kept for compatibility.
+     * See {@link #presentationToOir(int)}.
+     * @hide
      */
     public static int presentationToOIR(int presentation) {
         switch (presentation) {
@@ -454,9 +524,19 @@ public class ImsCallProfile implements Parcelable {
     }
 
     /**
+     * Translate presentation value to OIR value
+     * @param presentation
+     * @return OIR values
+     */
+    public static int presentationToOir(int presentation) {
+        return presentationToOIR(presentation);
+    }
+
+    /**
      * Translate OIR value to presentation value
      * @param oir value
      * @return presentation value
+     * @hide
      */
     public static int OIRToPresentation(int oir) {
         switch(oir) {

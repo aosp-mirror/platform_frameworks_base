@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
  * limitations under the License
  */
 
-package com.android.ims.internal;
+package android.telephony.ims;
 
+import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
@@ -26,11 +27,14 @@ import android.telecom.VideoProfile;
 import android.telecom.VideoProfile.CameraCapabilities;
 import android.view.Surface;
 
+import com.android.ims.internal.IImsVideoCallCallback;
+import com.android.ims.internal.IImsVideoCallProvider;
 import com.android.internal.os.SomeArgs;
 
 /**
  * @hide
  */
+@SystemApi
 public abstract class ImsVideoCallProvider {
     private static final int MSG_SET_CALLBACK = 1;
     private static final int MSG_SET_CAMERA = 2;
@@ -173,6 +177,7 @@ public abstract class ImsVideoCallProvider {
 
     /**
      * Returns binder object which can be used across IPC methods.
+     * @hide
      */
     public final IImsVideoCallProvider getInterface() {
         return mBinder;

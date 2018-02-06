@@ -22,7 +22,7 @@ import android.telephony.ims.aidl.IImsSmsListener;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.feature.CapabilityChangeRequest;
 
-import com.android.ims.ImsCallProfile;
+import android.telephony.ims.ImsCallProfile;
 import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsEcbm;
 import com.android.ims.internal.IImsMultiEndpoint;
@@ -57,4 +57,5 @@ interface IImsMmTelFeature {
     oneway void acknowledgeSms(int token, int messageRef, int result);
     oneway void acknowledgeSmsReport(int token, int messageRef, int result);
     String getSmsFormat();
+    oneway void onSmsReady();
 }
