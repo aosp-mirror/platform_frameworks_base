@@ -101,7 +101,7 @@ public class MessagingImageMessage extends ImageView implements MessagingMessage
             e.printStackTrace();
             return false;
         }
-        int intrinsicHeight = mDrawable.getIntrinsicHeight();
+        int intrinsicHeight = drawable.getIntrinsicHeight();
         if (intrinsicHeight == 0) {
             Log.w(TAG, "Drawable with 0 intrinsic height was returned");
             return false;
