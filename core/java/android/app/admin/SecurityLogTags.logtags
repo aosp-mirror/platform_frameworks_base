@@ -36,3 +36,5 @@ option java_package android.app.admin
 210029 security_cert_authority_installed        (success|1),(subject|3)
 210030 security_cert_authority_removed          (success|1),(subject|3)
 210031 security_crypto_self_test_completed      (success|1)
+210032 security_key_integrity_violation         (key_id|3),(uid|1)
+210033 security_cert_validation_failure         (reason|3)
