@@ -2970,12 +2970,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         break;
                 }
 
-                if (!didStart && attribute != null) {
-                    if (!DebugFlags.FLAG_OPTIMIZE_START_INPUT.value()
-                            || (controlFlags
-                                    & InputMethodManager.CONTROL_WINDOW_IS_TEXT_EDITOR) != 0) {
-                        res = startInputUncheckedLocked(cs, inputContext, missingMethods, attribute,
-                                controlFlags, startInputReason);
+                if (!didStart) {
+                    if (attribute != null) {
+                        if (!DebugFlags.FLAG_OPTIMIZE_START_INPUT.value()
+                                || (controlFlags
+                                & InputMethodManager.CONTROL_WINDOW_IS_TEXT_EDITOR) != 0) {
+                            res = startInputUncheckedLocked(cs, inputContext, missingMethods,
+                                    attribute,
+                                    controlFlags, startInputReason);
+                        } else {
+                            res = InputBindResult.NO_EDITOR;
+                        }
+                    } else {
+                        res = InputBindResult.NULL_EDITOR_INFO;
                     }
                 }
             }
