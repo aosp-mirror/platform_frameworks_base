@@ -166,7 +166,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private boolean mScreenBlankingCallbackCalled;
     private Callback mCallback;
     private boolean mWallpaperSupportsAmbientMode;
+
+    // Scrim blanking callbacks
     private Choreographer.FrameCallback mPendingFrameCallback;
+    private Runnable mBlankingTransitionRunnable;
 
     private final WakeLock mWakeLock;
     private boolean mWakeLockHeld;
@@ -249,9 +252,14 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         mCurrentInFrontAlpha = state.getFrontAlpha();
         mCurrentBehindAlpha = state.getBehindAlpha();
 
+        // Cancel blanking transitions that were pending before we requested a new state
         if (mPendingFrameCallback != null) {
             Choreographer.getInstance().removeFrameCallback(mPendingFrameCallback);
             mPendingFrameCallback = null;
+        }
+        if (getHandler().hasCallbacks(mBlankingTransitionRunnable)) {
+            getHandler().removeCallbacks(mBlankingTransitionRunnable);
+            mBlankingTransitionRunnable = null;
         }
 
         // Showing/hiding the keyguard means that scrim colors have to be switched, not necessary
@@ -767,7 +775,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
                 mScreenBlankingCallbackCalled = true;
             }
 
-            Runnable blankingCallback = () -> {
+            mBlankingTransitionRunnable = () -> {
+                mBlankingTransitionRunnable = null;
                 mPendingFrameCallback = null;
                 mBlankScreen = false;
                 // Try again.
@@ -776,7 +785,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
 
             // Setting power states can happen after we push out the frame. Make sure we
             // stay fully opaque until the power state request reaches the lower levels.
-            getHandler().postDelayed(blankingCallback, 100);
+            if (DEBUG) {
+                Log.d(TAG, "Waiting for the screen to turn on...");
+            }
+            getHandler().postDelayed(mBlankingTransitionRunnable, 500);
         };
         doOnTheNextFrame(mPendingFrameCallback);
     }
@@ -885,6 +897,20 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         ScrimState[] states = ScrimState.values();
         for (int i = 0; i < states.length; i++) {
             states[i].setWallpaperSupportsAmbientMode(wallpaperSupportsAmbientMode);
+        }
+    }
+
+    /**
+     * Interrupts blanking transitions once the display notifies that it's already on.
+     */
+    public void onScreenTurnedOn() {
+        final Handler handler = getHandler();
+        if (handler.hasCallbacks(mBlankingTransitionRunnable)) {
+            if (DEBUG) {
+                Log.d(TAG, "Shorter blanking because screen turned on. All good.");
+            }
+            handler.removeCallbacks(mBlankingTransitionRunnable);
+            mBlankingTransitionRunnable.run();
         }
     }
 
