@@ -654,7 +654,7 @@ public class UsageStatsService extends SystemService implements
         public boolean isAppInactive(String packageName, int userId) {
             try {
                 userId = ActivityManager.getService().handleIncomingUser(Binder.getCallingPid(),
-                        Binder.getCallingUid(), userId, false, true, "isAppInactive", null);
+                        Binder.getCallingUid(), userId, false, false, "isAppInactive", null);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
