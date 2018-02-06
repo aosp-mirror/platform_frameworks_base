@@ -4721,6 +4721,7 @@ package android.telephony.ims {
   }
 
   public final class ImsSuppServiceNotification implements android.os.Parcelable {
+    ctor public ImsSuppServiceNotification(int, int, int, int, java.lang.String, java.lang.String[]);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.telephony.ims.ImsSuppServiceNotification> CREATOR;
@@ -4788,7 +4789,6 @@ package android.telephony.ims.feature {
   public abstract class ImsFeature {
     ctor public ImsFeature();
     method public abstract void changeEnabledCapabilities(android.telephony.ims.feature.CapabilityChangeRequest, android.telephony.ims.feature.ImsFeature.CapabilityCallbackProxy);
-    method public final int getFeatureState();
     method public abstract void onFeatureReady();
     method public abstract void onFeatureRemoved();
     method public final void setFeatureState(int);
@@ -4817,10 +4817,12 @@ package android.telephony.ims.feature {
     method public android.telephony.ims.stub.ImsUtImplBase getUt();
     method public final void notifyCapabilitiesStatusChanged(android.telephony.ims.feature.MmTelFeature.MmTelCapabilities);
     method public final void notifyIncomingCall(android.telephony.ims.stub.ImsCallSessionImplBase, android.os.Bundle);
+    method public final void notifyVoiceMessageCountUpdate(int);
     method public void onFeatureReady();
     method public void onFeatureRemoved();
     method public boolean queryCapabilityConfiguration(int, int);
     method public final android.telephony.ims.feature.MmTelFeature.MmTelCapabilities queryCapabilityStatus();
+    method public void setUiTtyMode(int, android.os.Message);
     method public int shouldProcessCall(java.lang.String[]);
     field public static final int PROCESS_CALL_CSFB = 1; // 0x1
     field public static final int PROCESS_CALL_EMERGENCY_CSFB = 2; // 0x2

@@ -147,7 +147,7 @@ public class ImsConfigImplBase {
             mProvisionedIntValue.remove(item);
             int retVal = getImsConfigImpl().setConfig(item, value);
             if (retVal == ImsConfig.OperationStatusConstants.SUCCESS) {
-                updateCachedValue(item, retVal, true);
+                updateCachedValue(item, value, true);
             } else {
                 Log.d(TAG, "Set provision value of " + item +
                         " to " + value + " failed with error code " + retVal);
@@ -173,7 +173,7 @@ public class ImsConfigImplBase {
             mProvisionedStringValue.remove(item);
             int retVal = getImsConfigImpl().setConfig(item, value);
             if (retVal == ImsConfig.OperationStatusConstants.SUCCESS) {
-                updateCachedValue(item, retVal, true);
+                updateCachedValue(item, value, true);
             }
 
             return retVal;

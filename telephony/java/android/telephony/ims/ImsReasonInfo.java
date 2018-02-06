@@ -421,13 +421,13 @@ public final class ImsReasonInfo implements Parcelable {
 
     // For main reason code
     /** @hide */
-    public final int mCode;
+    public int mCode;
     // For the extra code value; it depends on the code value.
     /** @hide */
-    public final int mExtraCode;
+    public int mExtraCode;
     // For the additional message of the reason info.
     /** @hide */
-    public final String mExtraMessage;
+    public String mExtraMessage;
 
     /** @hide */
     public ImsReasonInfo() {
