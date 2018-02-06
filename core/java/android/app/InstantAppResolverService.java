@@ -88,7 +88,7 @@ public abstract class InstantAppResolverService extends Service {
     public void onGetInstantAppResolveInfo(Intent sanitizedIntent, int[] hostDigestPrefix,
             String token, InstantAppResolutionCallback callback) {
         // if not overridden, forward to old methods and filter out non-web intents
-        if (sanitizedIntent.isBrowsableWebIntent()) {
+        if (sanitizedIntent.isWebIntent()) {
             onGetInstantAppResolveInfo(hostDigestPrefix, token, callback);
         } else {
             callback.onInstantAppResolveInfo(Collections.emptyList());
@@ -107,7 +107,7 @@ public abstract class InstantAppResolverService extends Service {
             String token, InstantAppResolutionCallback callback) {
         Log.e(TAG, "New onGetInstantAppIntentFilter is not overridden");
         // if not overridden, forward to old methods and filter out non-web intents
-        if (sanitizedIntent.isBrowsableWebIntent()) {
+        if (sanitizedIntent.isWebIntent()) {
             onGetInstantAppIntentFilter(hostDigestPrefix, token, callback);
         } else {
             callback.onInstantAppResolveInfo(Collections.emptyList());
