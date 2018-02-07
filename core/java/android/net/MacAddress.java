@@ -26,6 +26,7 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -329,16 +330,34 @@ public final class MacAddress implements Parcelable {
 
     /**
      * Returns a generated MAC address whose 24 least significant bits constituting the
-     * NIC part of the address are randomly selected.
+     * NIC part of the address are randomly selected and has Google OUI base.
      *
      * The locally assigned bit is always set to 1. The multicast bit is always set to 0.
      *
-     * @return a random locally assigned MacAddress.
+     * @return a random locally assigned, unicast MacAddress with Google OUI.
+     *
+     * @hide
+     */
+    public static @NonNull MacAddress createRandomUnicastAddressWithGoogleBase() {
+        return createRandomUnicastAddress(BASE_GOOGLE_MAC, new SecureRandom());
+    }
+
+    /**
+     * Returns a generated MAC address whose 46 bits, excluding the locally assigned bit and the
+     * unicast bit, are randomly selected.
+     *
+     * The locally assigned bit is always set to 1. The multicast bit is always set to 0.
+     *
+     * @return a random locally assigned, unicast MacAddress.
      *
      * @hide
      */
     public static @NonNull MacAddress createRandomUnicastAddress() {
-        return createRandomUnicastAddress(BASE_GOOGLE_MAC, new Random());
+        SecureRandom r = new SecureRandom();
+        long addr = r.nextLong() & VALID_LONG_MASK;
+        addr |= LOCALLY_ASSIGNED_MASK;
+        addr &= ~MULTICAST_MASK;
+        return new MacAddress(addr);
     }
 
     /**
@@ -355,8 +374,8 @@ public final class MacAddress implements Parcelable {
      */
     public static @NonNull MacAddress createRandomUnicastAddress(MacAddress base, Random r) {
         long addr = (base.mAddr & OUI_MASK) | (NIC_MASK & r.nextLong());
-        addr = addr | LOCALLY_ASSIGNED_MASK;
-        addr = addr & ~MULTICAST_MASK;
+        addr |= LOCALLY_ASSIGNED_MASK;
+        addr &= ~MULTICAST_MASK;
         return new MacAddress(addr);
     }
 
