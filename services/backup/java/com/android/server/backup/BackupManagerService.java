@@ -1931,6 +1931,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     /**
      * Remove a package from the full-data queue.
      */
+    @GuardedBy("mQueueLock")
     private void dequeueFullBackupLocked(String packageName) {
         final int N = mFullBackupQueue.size();
         for (int i = N - 1; i >= 0; i--) {

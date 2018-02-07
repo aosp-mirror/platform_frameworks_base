@@ -539,6 +539,7 @@ public class AppStandbyController {
         }
     }
 
+    @GuardedBy("mAppIdleLock")
     @StandbyBuckets int getBucketForLocked(String packageName, int userId,
             long elapsedRealtime) {
         int bucketIndex = mAppIdleHistory.getThresholdIndex(packageName, userId,

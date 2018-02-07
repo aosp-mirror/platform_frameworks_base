@@ -1068,6 +1068,7 @@ public class ApfFilter {
         mLastInstallEvent.flags = ApfProgramEvent.flagsFor(mIPv4Address != null, mMulticastFilter);
     }
 
+    @GuardedBy("this")
     private void logApfProgramEventLocked(long now) {
         if (mLastInstallEvent == null) {
             return;
