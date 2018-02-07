@@ -84,9 +84,11 @@ public final class IpSecTransform implements AutoCloseable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface EncapType {}
 
-    private IpSecTransform(Context context, IpSecConfig config) {
+    /** @hide */
+    @VisibleForTesting
+    public IpSecTransform(Context context, IpSecConfig config) {
         mContext = context;
-        mConfig = config;
+        mConfig = new IpSecConfig(config);
         mResourceId = INVALID_RESOURCE_ID;
     }
 
@@ -140,6 +142,18 @@ public final class IpSecTransform implements AutoCloseable {
         }
 
         return this;
+    }
+
+    /**
+     * Equals method used for testing
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static boolean equals(IpSecTransform lhs, IpSecTransform rhs) {
+        if (lhs == null || rhs == null) return (lhs == rhs);
+        return IpSecConfig.equals(lhs.getConfig(), rhs.getConfig())
+                && lhs.mResourceId == rhs.mResourceId;
     }
 
     /**

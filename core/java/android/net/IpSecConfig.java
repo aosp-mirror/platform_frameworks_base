@@ -218,6 +218,25 @@ public final class IpSecConfig implements Parcelable {
     @VisibleForTesting
     public IpSecConfig() {}
 
+    /** Copy constructor */
+    @VisibleForTesting
+    public IpSecConfig(IpSecConfig c) {
+        mMode = c.mMode;
+        mSourceAddress = c.mSourceAddress;
+        mDestinationAddress = c.mDestinationAddress;
+        mNetwork = c.mNetwork;
+        mSpiResourceId = c.mSpiResourceId;
+        mEncryption = c.mEncryption;
+        mAuthentication = c.mAuthentication;
+        mAuthenticatedEncryption = c.mAuthenticatedEncryption;
+        mEncapType = c.mEncapType;
+        mEncapSocketResourceId = c.mEncapSocketResourceId;
+        mEncapRemotePort = c.mEncapRemotePort;
+        mNattKeepaliveInterval = c.mNattKeepaliveInterval;
+        mMarkValue = c.mMarkValue;
+        mMarkMask = c.mMarkMask;
+    }
+
     private IpSecConfig(Parcel in) {
         mMode = in.readInt();
         mSourceAddress = in.readString();
