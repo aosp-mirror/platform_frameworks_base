@@ -40,7 +40,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.Intent.UriFlags;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -79,7 +78,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.DeviceIdleController;
 import com.android.server.FgThread;
-import com.android.server.ForceAppStandbyTracker;
+import com.android.server.AppStateTracker;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerServiceDumpProto.ActiveJob;
 import com.android.server.job.JobSchedulerServiceDumpProto.PendingJob;
@@ -184,7 +183,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
     ActivityManagerInternal mActivityManagerInternal;
     IBatteryStats mBatteryStats;
     DeviceIdleController.LocalService mLocalDeviceIdleController;
-    final ForceAppStandbyTracker mForceAppStandbyTracker;
+    AppStateTracker mAppStateTracker;
 
     /**
      * Set to true once we are allowed to run third party apps.
@@ -787,20 +786,13 @@ public final class JobSchedulerService extends com.android.server.SystemService
     }
 
     /**
-     * Return whether an UID is in the foreground or not.
+     * Return whether an UID is active or idle.
      */
-    private boolean isUidInForeground(int uid) {
-        synchronized (mLock) {
-            if (mUidPriorityOverride.get(uid, 0) > 0) {
-                return true;
-            }
-        }
-        // Note UID observer may not be called in time, so we always check with the AM.
-        return mActivityManagerInternal.getUidProcessState(uid)
-                <= ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+    private boolean isUidActive(int uid) {
+        return mAppStateTracker.isUidActiveSynced(uid);
     }
 
-    private final Predicate<Integer> mIsUidInForegroundPredicate = this::isUidInForeground;
+    private final Predicate<Integer> mIsUidActivePredicate = this::isUidActive;
 
     public int scheduleAsPackage(JobInfo job, JobWorkItem work, int uId, String packageName,
             int userId, String tag) {
@@ -826,7 +818,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
                     // If any of work item is enqueued when the source is in the foreground,
                     // exempt the entire job.
-                    toCancel.maybeAddForegroundExemption(mIsUidInForegroundPredicate);
+                    toCancel.maybeAddForegroundExemption(mIsUidActivePredicate);
 
                     return JobScheduler.RESULT_SUCCESS;
                 }
@@ -838,7 +830,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
             // Note if it's a sync job, this method is called on the handler so it's not exactly
             // the state when requestSync() was called, but that should be fine because of the
             // 1 minute foreground grace period.
-            jobStatus.maybeAddForegroundExemption(mIsUidInForegroundPredicate);
+            jobStatus.maybeAddForegroundExemption(mIsUidActivePredicate);
 
             if (DEBUG) Slog.d(TAG, "SCHEDULE: " + jobStatus.toShortString());
             // Jobs on behalf of others don't apply to the per-app job cap
@@ -1123,8 +1115,6 @@ public final class JobSchedulerService extends com.android.server.SystemService
         mDeviceIdleJobsController = DeviceIdleJobsController.get(this);
         mControllers.add(mDeviceIdleJobsController);
 
-        mForceAppStandbyTracker = ForceAppStandbyTracker.getInstance(context);
-
         // If the job store determined that it can't yet reschedule persisted jobs,
         // we need to start watching the clock.
         if (!mJobs.jobTimesInflatedValid()) {
@@ -1185,7 +1175,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
         if (PHASE_SYSTEM_SERVICES_READY == phase) {
             mConstants.start(getContext().getContentResolver());
 
-            mForceAppStandbyTracker.start();
+            mAppStateTracker = Preconditions.checkNotNull(
+                    LocalServices.getService(AppStateTracker.class));
 
             // Register br for package removals and user removals.
             final IntentFilter filter = new IntentFilter();
