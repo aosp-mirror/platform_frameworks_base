@@ -1722,7 +1722,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final long totalBytes = getTotalBytes(
                         NetworkTemplate.buildTemplateMobileAll(state.subscriberId), start, end);
                 final long remainingBytes = limitBytes - totalBytes;
-                final long remainingDays = Math.min(1, (end - currentTimeMillis())
+                final long remainingDays = Math.max(1, (end - currentTimeMillis())
                         / TimeUnit.DAYS.toMillis(1));
                 if (remainingBytes > 0) {
                     quotaBytes = (remainingBytes / remainingDays) / 10;
