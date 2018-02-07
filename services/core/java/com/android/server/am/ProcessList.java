@@ -501,19 +501,19 @@ public final class ProcessList {
     private static final int PSS_FIRST_CACHED_INTERVAL = 20*1000;
 
     // The amount of time until PSS when an important process stays in the same state.
-    private static final int PSS_SAME_PERSISTENT_INTERVAL = 20*60*1000;
+    private static final int PSS_SAME_PERSISTENT_INTERVAL = 10*60*1000;
 
     // The amount of time until PSS when the top process stays in the same state.
-    private static final int PSS_SAME_TOP_INTERVAL = 5*60*1000;
+    private static final int PSS_SAME_TOP_INTERVAL = 1*60*1000;
 
     // The amount of time until PSS when an important process stays in the same state.
-    private static final int PSS_SAME_IMPORTANT_INTERVAL = 15*60*1000;
+    private static final int PSS_SAME_IMPORTANT_INTERVAL = 10*60*1000;
 
     // The amount of time until PSS when a service process stays in the same state.
-    private static final int PSS_SAME_SERVICE_INTERVAL = 20*60*1000;
+    private static final int PSS_SAME_SERVICE_INTERVAL = 5*60*1000;
 
     // The amount of time until PSS when a cached process stays in the same state.
-    private static final int PSS_SAME_CACHED_INTERVAL = 20*60*1000;
+    private static final int PSS_SAME_CACHED_INTERVAL = 10*60*1000;
 
     // The amount of time until PSS when a persistent process first appears.
     private static final int PSS_FIRST_ASLEEP_PERSISTENT_INTERVAL = 1*60*1000;
@@ -622,16 +622,17 @@ public final class ProcessList {
 
     public static final class ProcStateMemTracker {
         final int[] mHighestMem = new int[PROC_MEM_NUM];
+        final float[] mScalingFactor = new float[PROC_MEM_NUM];
         int mTotalHighestMem = PROC_MEM_CACHED;
-        float mCurFactor = 1.0f;
 
         int mPendingMemState;
         int mPendingHighestMemState;
-        boolean mPendingSame;
+        float mPendingScalingFactor;
 
         public ProcStateMemTracker() {
             for (int i = PROC_MEM_PERSISTENT; i < PROC_MEM_NUM; i++) {
                 mHighestMem[i] = PROC_MEM_NUM;
+                mScalingFactor[i] = 1.0f;
             }
             mPendingMemState = -1;
         }
@@ -639,16 +640,22 @@ public final class ProcessList {
         public void dumpLine(PrintWriter pw) {
             pw.print("best=");
             pw.print(mTotalHighestMem);
-            pw.print(" ");
-            pw.print(mCurFactor);
-            pw.print("x (");
+            pw.print(" (");
+            boolean needSep = false;
             for (int i = 0; i < PROC_MEM_NUM; i++) {
-                if (i != 0) {
-                    pw.print(", ");
+                if (mHighestMem[i] < PROC_MEM_NUM) {
+                    if (needSep) {
+                        pw.print(", ");
+                        needSep = false;
+                    }
+                    pw.print(i);
+                    pw.print("=");
+                    pw.print(mHighestMem[i]);
+                    pw.print(" ");
+                    pw.print(mScalingFactor[i]);
+                    pw.print("x");
+                    needSep = true;
                 }
-                pw.print(i);
-                pw.print("=");
-                pw.print(mHighestMem[i]);
             }
             pw.print(")");
             if (mPendingMemState >= 0) {
@@ -656,8 +663,9 @@ public final class ProcessList {
                 pw.print(mPendingMemState);
                 pw.print(" highest=");
                 pw.print(mPendingHighestMemState);
-                pw.print(" same=");
-                pw.print(mPendingSame);
+                pw.print(" ");
+                pw.print(mPendingScalingFactor);
+                pw.print("x");
             }
             pw.println();
         }
@@ -674,12 +682,8 @@ public final class ProcessList {
     public static void commitNextPssTime(ProcStateMemTracker tracker) {
         if (tracker.mPendingMemState >= 0) {
             tracker.mHighestMem[tracker.mPendingMemState] = tracker.mPendingHighestMemState;
+            tracker.mScalingFactor[tracker.mPendingMemState] = tracker.mPendingScalingFactor;
             tracker.mTotalHighestMem = tracker.mPendingHighestMemState;
-            if (tracker.mPendingSame) {
-                tracker.mCurFactor *= 1.5f;
-            } else {
-                tracker.mCurFactor = 1;
-            }
             tracker.mPendingMemState = -1;
         }
     }
@@ -691,6 +695,7 @@ public final class ProcessList {
     public static long computeNextPssTime(int procState, ProcStateMemTracker tracker, boolean test,
             boolean sleeping, long now) {
         boolean first;
+        float scalingFactor;
         final int memState = sProcStateToProcMem[procState];
         if (tracker != null) {
             final int highestMemState = memState < tracker.mTotalHighestMem
@@ -698,9 +703,15 @@ public final class ProcessList {
             first = highestMemState < tracker.mHighestMem[memState];
             tracker.mPendingMemState = memState;
             tracker.mPendingHighestMemState = highestMemState;
-            tracker.mPendingSame = !first;
+            if (first) {
+                tracker.mPendingScalingFactor = scalingFactor = 1.0f;
+            } else {
+                scalingFactor = tracker.mScalingFactor[memState];
+                tracker.mPendingScalingFactor = scalingFactor * 1.5f;
+            }
         } else {
             first = true;
+            scalingFactor = 1.0f;
         }
         final long[] table = test
                 ? (first
@@ -709,8 +720,7 @@ public final class ProcessList {
                 : (first
                 ? (sleeping ? sFirstAsleepPssTimes : sFirstAwakePssTimes)
                 : (sleeping ? sSameAsleepPssTimes : sSameAwakePssTimes));
-        long delay = (long)(table[memState] * (tracker != null && !first
-                ? tracker.mCurFactor : 1.0f));
+        long delay = (long)(table[memState] * scalingFactor);
         if (delay > PSS_MAX_INTERVAL) {
             delay = PSS_MAX_INTERVAL;
         }

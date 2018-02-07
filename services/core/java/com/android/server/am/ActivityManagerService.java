@@ -1854,7 +1854,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int REPORT_MEM_USAGE_MSG = 33;
     static final int IMMERSIVE_MODE_LOCK_MSG = 37;
     static final int PERSIST_URI_GRANTS_MSG = 38;
-    static final int REQUEST_ALL_PSS_MSG = 39;
     static final int UPDATE_TIME_PREFERENCE_MSG = 41;
     static final int ENTER_ANIMATION_COMPLETE_MSG = 44;
     static final int FINISH_BOOTING_MSG = 45;
@@ -2320,12 +2319,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 writeGrantedUriPermissions();
                 break;
             }
-            case REQUEST_ALL_PSS_MSG: {
-                synchronized (ActivityManagerService.this) {
-                    requestPssAllProcsLocked(SystemClock.uptimeMillis(), true, false);
-                }
-                break;
-            }
             case UPDATE_TIME_PREFERENCE_MSG: {
                 // The user's time format preference might have changed.
                 // For convenience we re-use the Intent extra values.
@@ -2615,11 +2608,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                         procState = proc.pssProcState;
                         statType = proc.pssStatType;
                         lastPssTime = proc.lastPssTime;
+                        long now = SystemClock.uptimeMillis();
                         if (proc.thread != null && procState == proc.setProcState
                                 && (lastPssTime+ProcessList.PSS_SAFE_TIME_FROM_STATE_CHANGE)
-                                        < SystemClock.uptimeMillis()) {
+                                        < now) {
                             pid = proc.pid;
                         } else {
+                            ProcessList.abortNextPssTime(proc.procStateMemTracker);
+                            if (DEBUG_PSS) Slog.d(TAG_PSS, "Skipped pss collection of " + pid +
+                                    ": still need " +
+                                    (lastPssTime+ProcessList.PSS_SAFE_TIME_FROM_STATE_CHANGE-now) +
+                                    "ms until safe");
                             proc = null;
                             pid = 0;
                         }
@@ -14477,9 +14476,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                             mTestPssMode, isSleepingLocked(), now);
                 }
             }
-
-            mHandler.removeMessages(REQUEST_ALL_PSS_MSG);
-            mHandler.sendEmptyMessageDelayed(REQUEST_ALL_PSS_MSG, 2*60*1000);
         }
     }
 
@@ -19526,6 +19522,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mProcessesToGc.remove(app);
         mPendingPssProcesses.remove(app);
+        ProcessList.abortNextPssTime(app.procStateMemTracker);
 
         // Dismiss any open dialogs.
         if (app.crashDialog != null && !app.forceCrashReport) {
@@ -23290,9 +23287,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * Schedule PSS collection of a process.
      */
-    void requestPssLocked(ProcessRecord proc, int procState) {
+    boolean requestPssLocked(ProcessRecord proc, int procState) {
         if (mPendingPssProcesses.contains(proc)) {
-            return;
+            return false;
         }
         if (mPendingPssProcesses.size() == 0) {
             mBgHandler.sendEmptyMessage(COLLECT_PSS_BG_MSG);
@@ -23301,6 +23298,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         proc.pssProcState = procState;
         proc.pssStatType = ProcessStats.ADD_PSS_INTERNAL_SINGLE;
         mPendingPssProcesses.add(proc);
+        return true;
     }
 
     /**
@@ -23317,6 +23315,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (DEBUG_PSS) Slog.d(TAG_PSS, "Requesting pss of all procs!  memLowered=" + memLowered);
         mLastFullPssTime = now;
         mFullPssPending = true;
+        for (int i = mPendingPssProcesses.size() - 1; i >= 0; i--) {
+            ProcessList.abortNextPssTime(mPendingPssProcesses.get(i).procStateMemTracker);;
+        }
         mPendingPssProcesses.ensureCapacity(mLruProcesses.size());
         mPendingPssProcesses.clear();
         for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
@@ -23325,7 +23326,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     || app.curProcState == ActivityManager.PROCESS_STATE_NONEXISTENT) {
                 continue;
             }
-            if (memLowered || now > (app.lastStateTime+ProcessList.PSS_ALL_INTERVAL)) {
+            if (memLowered || (always && now >
+                            app.lastStateTime+ProcessList.PSS_SAFE_TIME_FROM_STATE_CHANGE)
+                    || now > (app.lastStateTime+ProcessList.PSS_ALL_INTERVAL)) {
                 app.pssProcState = app.setProcState;
                 app.pssStatType = always ? ProcessStats.ADD_PSS_INTERNAL_ALL_POLL
                         : ProcessStats.ADD_PSS_INTERNAL_ALL_MEM;
@@ -23334,7 +23337,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mPendingPssProcesses.add(app);
             }
         }
-        mBgHandler.sendEmptyMessage(COLLECT_PSS_BG_MSG);
+        if (!mBgHandler.hasMessages(COLLECT_PSS_BG_MSG)) {
+            mBgHandler.sendEmptyMessage(COLLECT_PSS_BG_MSG);
+        }
     }
 
     public void setTestPssMode(boolean enabled) {
@@ -23692,7 +23697,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // Experimental code to more aggressively collect pss while
                 // running test...  the problem is that this tends to collect
                 // the data right when a process is transitioning between process
-                // states, which well tend to give noisy data.
+                // states, which will tend to give noisy data.
                 long start = SystemClock.uptimeMillis();
                 long startTime = SystemClock.currentThreadTimeMillis();
                 long pss = Debug.getPss(app.pid, mTmpLong, null);
@@ -23715,9 +23720,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (now > app.nextPssTime || (now > (app.lastPssTime+ProcessList.PSS_MAX_INTERVAL)
                     && now > (app.lastStateTime+ProcessList.minTimeFromStateChange(
                     mTestPssMode)))) {
-                requestPssLocked(app, app.setProcState);
-                app.nextPssTime = ProcessList.computeNextPssTime(app.curProcState,
-                        app.procStateMemTracker, mTestPssMode, isSleepingLocked(), now);
+                if (requestPssLocked(app, app.setProcState)) {
+                    app.nextPssTime = ProcessList.computeNextPssTime(app.curProcState,
+                            app.procStateMemTracker, mTestPssMode, isSleepingLocked(), now);
+                }
             } else if (false && DEBUG_PSS) Slog.d(TAG_PSS,
                     "Not requesting pss of " + app + ": next=" + (app.nextPssTime-now));
         }
