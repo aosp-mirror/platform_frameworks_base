@@ -19,6 +19,7 @@ package android.view.textclassifier;
 import static org.junit.Assert.assertEquals;
 
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
@@ -47,7 +48,7 @@ public class TextClassificationTest {
             colors[i] = colorValue;
         }
         final Bitmap bitmap = Bitmap.createBitmap(colors, width, height, Bitmap.Config.ARGB_8888);
-        final BitmapDrawable drawable = new BitmapDrawable(null, bitmap);
+        final BitmapDrawable drawable = new BitmapDrawable(Resources.getSystem(), bitmap);
         drawable.setTargetDensity(bitmap.getDensity());
         return drawable;
     }
