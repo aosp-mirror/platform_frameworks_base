@@ -65,6 +65,7 @@ statsd_common_src := \
     src/storage/StorageManager.cpp \
     src/StatsLogProcessor.cpp \
     src/StatsService.cpp \
+    src/subscriber/IncidentdReporter.cpp \
     src/subscriber/SubscriberReporter.cpp \
     src/HashableDimensionKey.cpp \
     src/guardrail/MemoryLeakTrackUtil.cpp \

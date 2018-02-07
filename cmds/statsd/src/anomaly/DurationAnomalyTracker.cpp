@@ -52,8 +52,7 @@ void DurationAnomalyTracker::declareAnomalyIfAlarmExpired(const MetricDimensionK
 }
 
 void DurationAnomalyTracker::startAlarm(const MetricDimensionKey& dimensionKey,
-                                const uint64_t& timestampNs) {
-
+                                        const uint64_t& timestampNs) {
     uint32_t timestampSec = static_cast<uint32_t>(timestampNs / NS_PER_SEC);
     if (isInRefractoryPeriod(timestampNs, dimensionKey)) {
         VLOG("Skipping setting anomaly alarm since it'd fall in the refractory period");
@@ -86,15 +85,15 @@ void DurationAnomalyTracker::stopAllAlarms() {
     }
 }
 
-void DurationAnomalyTracker::informAlarmsFired(const uint64_t& timestampNs,
+void DurationAnomalyTracker::informAlarmsFired(
+        const uint64_t& timestampNs,
         unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>>& firedAlarms) {
-
     if (firedAlarms.empty() || mAlarms.empty()) return;
     // Find the intersection of firedAlarms and mAlarms.
     // The for loop is inefficient, since it loops over all keys, but that's okay since it is very
     // seldomly called. The alternative would be having AnomalyAlarms store information about the
-    // DurationAnomalyTracker and key, but that's a lot of data overhead to speed up something that is
-    // rarely ever called.
+    // DurationAnomalyTracker and key, but that's a lot of data overhead to speed up something that
+    // is rarely ever called.
     unordered_map<MetricDimensionKey, sp<const AnomalyAlarm>> matchedAlarms;
     for (const auto& kv : mAlarms) {
         if (firedAlarms.count(kv.second) > 0) {

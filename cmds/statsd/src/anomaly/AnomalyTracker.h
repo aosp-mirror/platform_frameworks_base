@@ -16,22 +16,24 @@
 
 #pragma once
 
+#include <memory>  // unique_ptr
+
+#include <stdlib.h>
+
 #include <gtest/gtest_prod.h>
+#include <utils/RefBase.h>
+
 #include "AnomalyMonitor.h"
 #include "config/ConfigKey.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"  // Alert
 #include "stats_util.h"  // HashableDimensionKey and DimToValMap
 
-#include <memory> // unique_ptr
-#include <stdlib.h>
-#include <utils/RefBase.h>
-
 namespace android {
 namespace os {
 namespace statsd {
 
-using std::unordered_map;
 using std::shared_ptr;
+using std::unordered_map;
 
 // Does NOT allow negative values.
 class AnomalyTracker : public virtual RefBase {
@@ -60,12 +62,11 @@ public:
 
     // Detects the alert and informs the incidentd when applicable.
     void detectAndDeclareAnomaly(const uint64_t& timestampNs, const int64_t& currBucketNum,
-                                 const MetricDimensionKey& key,
-                                 const int64_t& currentBucketValue);
+                                 const MetricDimensionKey& key, const int64_t& currentBucketValue);
 
     // Init the AnomalyMonitor which is shared across anomaly trackers.
     virtual void setAnomalyMonitor(const sp<AnomalyMonitor>& anomalyMonitor) {
-        return; // Base AnomalyTracker class has no need for the AnomalyMonitor.
+        return;  // Base AnomalyTracker class has no need for the AnomalyMonitor.
     }
 
     // Helper function to return the sum value of past buckets at given dimension.
@@ -92,9 +93,10 @@ public:
 
     // Declares an anomaly for each alarm in firedAlarms that belongs to this AnomalyTracker,
     // and removes it from firedAlarms. Does NOT remove the alarm from the AnomalyMonitor.
-    virtual void informAlarmsFired(const uint64_t& timestampNs,
+    virtual void informAlarmsFired(
+            const uint64_t& timestampNs,
             unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>>& firedAlarms) {
-        return; // The base AnomalyTracker class doesn't have alarms.
+        return;  // The base AnomalyTracker class doesn't have alarms.
     }
 
 protected:

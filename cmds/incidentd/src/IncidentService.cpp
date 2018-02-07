@@ -46,6 +46,7 @@ static Status
 checkIncidentPermissions(const IncidentReportArgs& args)
 {
     uid_t callingUid = IPCThreadState::self()->getCallingUid();
+    pid_t callingPid = IPCThreadState::self()->getCallingPid();
     if (callingUid == AID_ROOT || callingUid == AID_SHELL) {
         // root doesn't have permission.DUMP if don't do this!
         return Status::ok();
@@ -54,13 +55,13 @@ checkIncidentPermissions(const IncidentReportArgs& args)
     // checking calling permission.
     if (!checkCallingPermission(DUMP_PERMISSION)) {
         ALOGW("Calling pid %d and uid %d does not have permission: android.permission.DUMP",
-                IPCThreadState::self()->getCallingPid(), callingUid);
+                callingPid, callingUid);
         return Status::fromExceptionCode(Status::EX_SECURITY,
                 "Calling process does not have permission: android.permission.DUMP");
     }
     if (!checkCallingPermission(USAGE_STATS_PERMISSION)) {
         ALOGW("Calling pid %d and uid %d does not have permission: android.permission.USAGE_STATS",
-                IPCThreadState::self()->getCallingPid(), callingUid);
+                callingPid, callingUid);
         return Status::fromExceptionCode(Status::EX_SECURITY,
                 "Calling process does not have permission: android.permission.USAGE_STATS");
     }
@@ -68,13 +69,17 @@ checkIncidentPermissions(const IncidentReportArgs& args)
     // checking calling request uid permission.
     switch (args.dest()) {
         case DEST_LOCAL:
-            if (callingUid != AID_SHELL || callingUid != AID_ROOT) {
+            if (callingUid != AID_SHELL && callingUid != AID_ROOT) {
+                ALOGW("Calling pid %d and uid %d does not have permission to get local data.",
+                        callingPid, callingUid);
                 return Status::fromExceptionCode(Status::EX_SECURITY,
                     "Calling process does not have permission to get local data.");
             }
         case DEST_EXPLICIT:
-            if (callingUid != AID_SHELL || callingUid != AID_ROOT ||
-                callingUid != AID_STATSD || callingUid != AID_SYSTEM) {
+            if (callingUid != AID_SHELL && callingUid != AID_ROOT &&
+                callingUid != AID_STATSD && callingUid != AID_SYSTEM) {
+                ALOGW("Calling pid %d and uid %d does not have permission to get explicit data.",
+                        callingPid, callingUid);
                 return Status::fromExceptionCode(Status::EX_SECURITY,
                     "Calling process does not have permission to get explicit data.");
             }
