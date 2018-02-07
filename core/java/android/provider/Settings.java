@@ -10315,22 +10315,21 @@ public final class Settings {
         public static final String SYS_VDSO = "sys_vdso";
 
         /**
-        * Uid CpuPower global setting. This links the uid.cpupower system property.
-        * The following values are supported:
-        * 0 -> /proc/uid_cpupower/* are disabled
-        * 1 -> /proc/uid_cpupower/* are enabled
-        * Any other value defaults to enabled.
-        * @hide
-        */
-        public static final String UID_CPUPOWER = "uid_cpupower";
-
-        /**
          * An integer to reduce the FPS by this factor. Only for experiments. Need to reboot the
          * device for this setting to take full effect.
          *
          * @hide
          */
         public static final String FPS_DEVISOR = "fps_divisor";
+
+        /**
+         * Flag to enable or disable display panel low power mode (lpm)
+         * false -> Display panel power saving mode is disabled.
+         * true  -> Display panel power saving mode is enabled.
+         *
+         * @hide
+         */
+        public static final String DISPLAY_PANEL_LPM = "display_panel_lpm";
 
         /**
          * App standby (app idle) specific settings.
