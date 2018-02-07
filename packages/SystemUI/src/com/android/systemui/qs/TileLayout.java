@@ -104,6 +104,11 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         setMeasuredDimension(width, height);
     }
 
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
+
     private static int exactly(int size) {
         return MeasureSpec.makeMeasureSpec(size, MeasureSpec.EXACTLY);
     }
