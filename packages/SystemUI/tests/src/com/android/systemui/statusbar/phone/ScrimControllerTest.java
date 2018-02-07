@@ -31,6 +31,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.app.AlarmManager;
 import android.graphics.Color;
 import android.os.Handler;
@@ -180,6 +181,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void transitionToUnlocked() {
+        mScrimController.setPanelExpansion(0f);
         mScrimController.transitionTo(ScrimState.UNLOCKED);
         mScrimController.finishAnimationsImmediately();
         // Front scrim should be transparent
@@ -197,6 +199,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     public void transitionToUnlockedFromAod() {
         // Simulate unlock with fingerprint
         mScrimController.transitionTo(ScrimState.AOD);
+        mScrimController.setPanelExpansion(0f);
         mScrimController.finishAnimationsImmediately();
         mScrimController.transitionTo(ScrimState.UNLOCKED);
         // Immediately tinted after the transition starts
@@ -324,6 +327,35 @@ public class ScrimControllerTest extends SysuiTestCase {
         verify(mAlarmManager).cancel(any(AlarmManager.OnAlarmListener.class));
     }
 
+    @Test
+    public void testConservesExpansionOpacityAfterTransition() {
+        mScrimController.transitionTo(ScrimState.UNLOCKED);
+        mScrimController.setPanelExpansion(0.5f);
+        mScrimController.finishAnimationsImmediately();
+
+        final float expandedAlpha = mScrimBehind.getViewAlpha();
+
+        mScrimController.transitionTo(ScrimState.BRIGHTNESS_MIRROR);
+        mScrimController.finishAnimationsImmediately();
+        mScrimController.transitionTo(ScrimState.UNLOCKED);
+        mScrimController.finishAnimationsImmediately();
+
+        Assert.assertEquals("Scrim expansion opacity wasn't conserved when transitioning back",
+                expandedAlpha, mScrimBehind.getViewAlpha(), 0.01f);
+    }
+
+    @Test
+    public void cancelsOldAnimationBeforeBlanking() {
+        mScrimController.transitionTo(ScrimState.AOD);
+        mScrimController.finishAnimationsImmediately();
+        // Consume whatever value we had before
+        mScrimController.wasAnimationJustCancelled();
+
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+        mScrimController.finishAnimationsImmediately();
+        Assert.assertTrue(mScrimController.wasAnimationJustCancelled());
+    }
+
     private void assertScrimTint(ScrimView scrimView, boolean tinted) {
         final boolean viewIsTinted = scrimView.getTint() != Color.TRANSPARENT;
         final String name = scrimView == mScrimInFront ? "front" : "back";
@@ -357,6 +389,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     private class SynchronousScrimController extends ScrimController {
 
         private FakeHandler mHandler;
+        private boolean mAnimationCancelled;
 
         public SynchronousScrimController(LightBarController lightBarController,
                 ScrimView scrimBehind, ScrimView scrimInFront, View headsUpScrim,
@@ -385,11 +418,23 @@ public class ScrimControllerTest extends SysuiTestCase {
             }
         }
 
+        public boolean wasAnimationJustCancelled() {
+            final boolean wasCancelled = mAnimationCancelled;
+            mAnimationCancelled = false;
+            return wasCancelled;
+        }
+
         private void endAnimation(ScrimView scrimView, int tag) {
             Animator animator = (Animator) scrimView.getTag(tag);
             if (animator != null) {
                 animator.end();
             }
+        }
+
+        @Override
+        protected void cancelAnimator(ValueAnimator previousAnimator) {
+            super.cancelAnimator(previousAnimator);
+            mAnimationCancelled = true;
         }
 
         @Override
