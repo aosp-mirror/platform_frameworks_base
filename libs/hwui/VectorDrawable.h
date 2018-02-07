@@ -644,7 +644,7 @@ public:
      * Draws VD cache into a canvas. This should always be called from RT and it works with Skia
      * pipelines only.
      */
-    void draw(SkCanvas* canvas);
+    void draw(SkCanvas* canvas, const SkRect& bounds);
 
     /**
      * Draws VD into a GPU backed surface.
