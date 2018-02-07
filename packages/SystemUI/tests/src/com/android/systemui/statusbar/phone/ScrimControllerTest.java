@@ -38,6 +38,7 @@ import android.os.Looper;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.Choreographer;
 import android.view.View;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -374,7 +375,6 @@ public class ScrimControllerTest extends SysuiTestCase {
             onPreDraw();
 
             // Force finish screen blanking.
-            endAnimation(mScrimInFront, TAG_KEY_ANIM_BLANK);
             mHandler.dispatchQueuedMessages();
             // Force finish all animations.
             endAnimation(mScrimBehind, TAG_KEY_ANIM);
@@ -400,6 +400,15 @@ public class ScrimControllerTest extends SysuiTestCase {
         @Override
         protected WakeLock createWakeLock() {
             return mWakeLock;
+        }
+
+        /**
+         * Do not wait for a frame since we're in a test environment.
+         * @param callback What to execute.
+         */
+        @Override
+        protected void doOnTheNextFrame(Choreographer.FrameCallback callback) {
+            callback.doFrame(0);
         }
     }
 
