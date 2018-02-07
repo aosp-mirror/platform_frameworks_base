@@ -15,7 +15,7 @@
  */
 package com.android.server;
 
-import static com.android.server.ForceAppStandbyTracker.TARGET_OP;
+import static com.android.server.AppStateTracker.TARGET_OP;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -33,6 +33,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.OpEntry;
 import android.app.AppOpsManager.PackageOps;
@@ -63,7 +64,7 @@ import android.util.Pair;
 
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
-import com.android.server.ForceAppStandbyTracker.Listener;
+import com.android.server.AppStateTracker.Listener;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -82,17 +83,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
- * Tests for {@link ForceAppStandbyTracker}
+ * Tests for {@link AppStateTracker}
  *
  * Run with:
- atest $ANDROID_BUILD_TOP/frameworks/base/services/tests/servicestests/src/com/android/server/ForceAppStandbyTrackerTest.java
+ atest $ANDROID_BUILD_TOP/frameworks/base/services/tests/servicestests/src/com/android/server/AppStateTrackerTest.java
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class ForceAppStandbyTrackerTest {
+public class AppStateTrackerTest {
 
-    private class ForceAppStandbyTrackerTestable extends ForceAppStandbyTracker {
-        ForceAppStandbyTrackerTestable() {
+    private class AppStateTrackerTestable extends AppStateTracker {
+        AppStateTrackerTestable() {
             super(mMockContext, Looper.getMainLooper());
         }
 
@@ -109,6 +110,11 @@ public class ForceAppStandbyTrackerTest {
         @Override
         IActivityManager injectIActivityManager() {
             return mMockIActivityManager;
+        }
+
+        @Override
+        ActivityManagerInternal injectActivityManagerInternal() {
+            return mMockIActivityManagerInternal;
         }
 
         @Override
@@ -150,6 +156,9 @@ public class ForceAppStandbyTrackerTest {
 
     @Mock
     private IActivityManager mMockIActivityManager;
+
+    @Mock
+    private ActivityManagerInternal mMockIActivityManagerInternal;
 
     @Mock
     private AppOpsManager mMockAppOpsManager;
@@ -195,7 +204,7 @@ public class ForceAppStandbyTrackerTest {
         return new PowerSaveState.Builder().setBatterySaverEnabled(mPowerSaveMode).build();
     }
 
-    private ForceAppStandbyTrackerTestable newInstance() throws Exception {
+    private AppStateTrackerTestable newInstance() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         when(mMockIAppOpsService.checkOperation(eq(TARGET_OP), anyInt(), anyString()))
@@ -205,12 +214,12 @@ public class ForceAppStandbyTrackerTest {
                             AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED;
                 });
 
-        final ForceAppStandbyTrackerTestable instance = new ForceAppStandbyTrackerTestable();
+        final AppStateTrackerTestable instance = new AppStateTrackerTestable();
 
         return instance;
     }
 
-    private void callStart(ForceAppStandbyTrackerTestable instance) throws RemoteException {
+    private void callStart(AppStateTrackerTestable instance) throws RemoteException {
 
         // Set up functions that start() calls.
         when(mMockPowerManagerInternal.getLowPowerState(eq(ServiceType.FORCE_ALL_APPS_STANDBY)))
@@ -223,7 +232,7 @@ public class ForceAppStandbyTrackerTest {
         when(mMockContext.getContentResolver()).thenReturn(mMockContentResolver);
 
         // Call start.
-        instance.start();
+        instance.onSystemServicesReady();
 
         // Capture the listeners.
         ArgumentCaptor<IUidObserver> uidObserverArgumentCaptor =
@@ -287,7 +296,7 @@ public class ForceAppStandbyTrackerTest {
     private static final int JOBS_ONLY = 1 << 1;
     private static final int JOBS_AND_ALARMS = ALARMS_ONLY | JOBS_ONLY;
 
-    private void areRestricted(ForceAppStandbyTrackerTestable instance, int uid, String packageName,
+    private void areRestricted(AppStateTrackerTestable instance, int uid, String packageName,
             int restrictionTypes, boolean exemptFromBatterySaver) {
         assertEquals(((restrictionTypes & JOBS_ONLY) != 0),
                 instance.areJobsRestricted(uid, packageName, exemptFromBatterySaver));
@@ -295,13 +304,13 @@ public class ForceAppStandbyTrackerTest {
                 instance.areAlarmsRestricted(uid, packageName, exemptFromBatterySaver));
     }
 
-    private void areRestricted(ForceAppStandbyTrackerTestable instance, int uid, String packageName,
+    private void areRestricted(AppStateTrackerTestable instance, int uid, String packageName,
             int restrictionTypes) {
         areRestricted(instance, uid, packageName, restrictionTypes,
                 /*exemptFromBatterySaver=*/ false);
     }
 
-    private void areRestrictedWithExemption(ForceAppStandbyTrackerTestable instance,
+    private void areRestrictedWithExemption(AppStateTrackerTestable instance,
             int uid, String packageName, int restrictionTypes) {
         areRestricted(instance, uid, packageName, restrictionTypes,
                 /*exemptFromBatterySaver=*/ true);
@@ -309,7 +318,7 @@ public class ForceAppStandbyTrackerTest {
 
     @Test
     public void testAll() throws Exception {
-        final ForceAppStandbyTrackerTestable instance = newInstance();
+        final AppStateTrackerTestable instance = newInstance();
         callStart(instance);
 
         assertFalse(instance.isForceAllAppsStandbyEnabled());
@@ -466,7 +475,7 @@ public class ForceAppStandbyTrackerTest {
 
     @Test
     public void testUidStateForeground() throws Exception {
-        final ForceAppStandbyTrackerTestable instance = newInstance();
+        final AppStateTrackerTestable instance = newInstance();
         callStart(instance);
 
         mIUidObserver.onUidActive(UID_1);
@@ -475,6 +484,10 @@ public class ForceAppStandbyTrackerTest {
         assertTrue(instance.isUidActive(UID_1));
         assertFalse(instance.isUidActive(UID_2));
         assertTrue(instance.isUidActive(Process.SYSTEM_UID));
+
+        assertTrue(instance.isUidActiveSynced(UID_1));
+        assertFalse(instance.isUidActiveSynced(UID_2));
+        assertTrue(instance.isUidActiveSynced(Process.SYSTEM_UID));
 
         assertFalse(instance.isUidInForeground(UID_1));
         assertFalse(instance.isUidInForeground(UID_2));
@@ -488,6 +501,10 @@ public class ForceAppStandbyTrackerTest {
         assertTrue(instance.isUidActive(UID_1));
         assertFalse(instance.isUidActive(UID_2));
         assertTrue(instance.isUidActive(Process.SYSTEM_UID));
+
+        assertTrue(instance.isUidActiveSynced(UID_1));
+        assertFalse(instance.isUidActiveSynced(UID_2));
+        assertTrue(instance.isUidActiveSynced(Process.SYSTEM_UID));
 
         assertFalse(instance.isUidInForeground(UID_1));
         assertTrue(instance.isUidInForeground(UID_2));
@@ -548,14 +565,34 @@ public class ForceAppStandbyTrackerTest {
         assertFalse(instance.isUidActive(UID_2));
         assertTrue(instance.isUidActive(Process.SYSTEM_UID));
 
+        assertFalse(instance.isUidActiveSynced(UID_1));
+        assertFalse(instance.isUidActiveSynced(UID_2));
+        assertTrue(instance.isUidActiveSynced(Process.SYSTEM_UID));
+
         assertFalse(instance.isUidInForeground(UID_1));
         assertFalse(instance.isUidInForeground(UID_2));
         assertTrue(instance.isUidInForeground(Process.SYSTEM_UID));
+
+        // The result from AMI.isUidActive() only affects isUidActiveSynced().
+        when(mMockIActivityManagerInternal.isUidActive(anyInt())).thenReturn(true);
+
+        assertFalse(instance.isUidActive(UID_1));
+        assertFalse(instance.isUidActive(UID_2));
+        assertTrue(instance.isUidActive(Process.SYSTEM_UID));
+
+        assertTrue(instance.isUidActiveSynced(UID_1));
+        assertTrue(instance.isUidActiveSynced(UID_2));
+        assertTrue(instance.isUidActiveSynced(Process.SYSTEM_UID));
+
+        assertFalse(instance.isUidInForeground(UID_1));
+        assertFalse(instance.isUidInForeground(UID_2));
+        assertTrue(instance.isUidInForeground(Process.SYSTEM_UID));
+
     }
 
     @Test
     public void testExempt() throws Exception {
-        final ForceAppStandbyTrackerTestable instance = newInstance();
+        final AppStateTrackerTestable instance = newInstance();
         callStart(instance);
 
         assertFalse(instance.isForceAllAppsStandbyEnabled());
@@ -621,7 +658,7 @@ public class ForceAppStandbyTrackerTest {
     }
 
     public void loadPersistedAppOps() throws Exception {
-        final ForceAppStandbyTrackerTestable instance = newInstance();
+        final AppStateTrackerTestable instance = newInstance();
 
         final List<PackageOps> ops = new ArrayList<>();
 
@@ -631,7 +668,7 @@ public class ForceAppStandbyTrackerTest {
                 AppOpsManager.OP_ACCESS_NOTIFICATIONS,
                 AppOpsManager.MODE_IGNORED, 0, 0, 0, 0, null));
         entries.add(new AppOpsManager.OpEntry(
-                ForceAppStandbyTracker.TARGET_OP,
+                AppStateTracker.TARGET_OP,
                 AppOpsManager.MODE_IGNORED, 0, 0, 0, 0, null));
 
         ops.add(new PackageOps(PACKAGE_1, UID_1, entries));
@@ -639,7 +676,7 @@ public class ForceAppStandbyTrackerTest {
         //--------------------------------------------------
         entries = new ArrayList<>();
         entries.add(new AppOpsManager.OpEntry(
-                ForceAppStandbyTracker.TARGET_OP,
+                AppStateTracker.TARGET_OP,
                 AppOpsManager.MODE_IGNORED, 0, 0, 0, 0, null));
 
         ops.add(new PackageOps(PACKAGE_2, UID_2, entries));
@@ -647,7 +684,7 @@ public class ForceAppStandbyTrackerTest {
         //--------------------------------------------------
         entries = new ArrayList<>();
         entries.add(new AppOpsManager.OpEntry(
-                ForceAppStandbyTracker.TARGET_OP,
+                AppStateTracker.TARGET_OP,
                 AppOpsManager.MODE_ALLOWED, 0, 0, 0, 0, null));
 
         ops.add(new PackageOps(PACKAGE_1, UID_10_1, entries));
@@ -655,7 +692,7 @@ public class ForceAppStandbyTrackerTest {
         //--------------------------------------------------
         entries = new ArrayList<>();
         entries.add(new AppOpsManager.OpEntry(
-                ForceAppStandbyTracker.TARGET_OP,
+                AppStateTracker.TARGET_OP,
                 AppOpsManager.MODE_IGNORED, 0, 0, 0, 0, null));
         entries.add(new AppOpsManager.OpEntry(
                 AppOpsManager.OP_ACCESS_NOTIFICATIONS,
@@ -688,10 +725,10 @@ public class ForceAppStandbyTrackerTest {
 
     @Test
     public void testPowerSaveListener() throws Exception {
-        final ForceAppStandbyTrackerTestable instance = newInstance();
+        final AppStateTrackerTestable instance = newInstance();
         callStart(instance);
 
-        ForceAppStandbyTracker.Listener l = mock(ForceAppStandbyTracker.Listener.class);
+        AppStateTracker.Listener l = mock(AppStateTracker.Listener.class);
         instance.addListener(l);
 
         // Power save on.
@@ -731,10 +768,10 @@ public class ForceAppStandbyTrackerTest {
 
     @Test
     public void testAllListeners() throws Exception {
-        final ForceAppStandbyTrackerTestable instance = newInstance();
+        final AppStateTrackerTestable instance = newInstance();
         callStart(instance);
 
-        ForceAppStandbyTracker.Listener l = mock(ForceAppStandbyTracker.Listener.class);
+        AppStateTracker.Listener l = mock(AppStateTracker.Listener.class);
         instance.addListener(l);
 
         // -------------------------------------------------------------------------
@@ -1042,7 +1079,7 @@ public class ForceAppStandbyTrackerTest {
 
     @Test
     public void testUserRemoved() throws Exception {
-        final ForceAppStandbyTrackerTestable instance = newInstance();
+        final AppStateTrackerTestable instance = newInstance();
         callStart(instance);
 
         mIUidObserver.onUidActive(UID_1);
@@ -1077,7 +1114,7 @@ public class ForceAppStandbyTrackerTest {
         // This is a small battery device
         mIsSmallBatteryDevice = true;
 
-        final ForceAppStandbyTrackerTestable instance = newInstance();
+        final AppStateTrackerTestable instance = newInstance();
         callStart(instance);
         assertFalse(instance.isForceAllAppsStandbyEnabled());
 
@@ -1103,7 +1140,7 @@ public class ForceAppStandbyTrackerTest {
         // Not a small battery device, so plugged in status should not affect forced app standby
         mIsSmallBatteryDevice = false;
 
-        final ForceAppStandbyTrackerTestable instance = newInstance();
+        final AppStateTrackerTestable instance = newInstance();
         callStart(instance);
         assertFalse(instance.isForceAllAppsStandbyEnabled());
 
@@ -1152,7 +1189,7 @@ public class ForceAppStandbyTrackerTest {
 
     private void checkAnyAppIdUnwhitelisted(int[] prevArray, int[] newArray, boolean expected) {
         assertEquals("Input: " + Arrays.toString(prevArray) + " " + Arrays.toString(newArray),
-                expected, ForceAppStandbyTracker.isAnyAppIdUnwhitelisted(prevArray, newArray));
+                expected, AppStateTracker.isAnyAppIdUnwhitelisted(prevArray, newArray));
 
         // Also test isAnyAppIdUnwhitelistedSlow.
         assertEquals("Input: " + Arrays.toString(prevArray) + " " + Arrays.toString(newArray),
@@ -1184,7 +1221,7 @@ public class ForceAppStandbyTrackerTest {
             final int[] array2 = makeRandomArray();
 
             final boolean expected = isAnyAppIdUnwhitelistedSlow(array1, array2);
-            final boolean actual = ForceAppStandbyTracker.isAnyAppIdUnwhitelisted(array1, array2);
+            final boolean actual = AppStateTracker.isAnyAppIdUnwhitelisted(array1, array2);
 
             assertEquals("Input: " + Arrays.toString(array1) + " " + Arrays.toString(array2),
                     expected, actual);

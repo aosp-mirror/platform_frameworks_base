@@ -348,4 +348,9 @@ public abstract class ActivityManagerInternal {
      * Returns is the caller has the same uid as the Recents component
      */
     public abstract boolean isCallerRecents(int callingUid);
+
+    /**
+     * Whether an UID is active or idle.
+     */
+    public abstract boolean isUidActive(int uid);
 }
