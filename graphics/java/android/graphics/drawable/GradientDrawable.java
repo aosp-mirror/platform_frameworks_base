@@ -825,6 +825,14 @@ public class GradientDrawable extends Drawable {
         mFillPaint.setXfermode(mode);
     }
 
+    /**
+     * @param aa to draw this drawable with
+     * @hide
+     */
+    public void setAntiAlias(boolean aa) {
+        mFillPaint.setAntiAlias(aa);
+    }
+
     private void buildPathIfDirty() {
         final GradientState st = mGradientState;
         if (mPathIsDirty) {
