@@ -3173,6 +3173,15 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
+        writeToParcelNoRecycle(parcel, flags);
+        // Since instances of this class are fetched via synchronous i.e. blocking
+        // calls in IPCs we always recycle as soon as the instance is marshaled.
+        recycle();
+    }
+
+    /** @hide */
+    @TestApi
+    public void writeToParcelNoRecycle(Parcel parcel, int flags) {
         // Write bit set of indices of fields with values differing from default
         long nonDefaultFields = 0;
         int fieldIndex = 0; // index of the current field
@@ -3406,10 +3415,6 @@ public class AccessibilityNodeInfo implements Parcelable {
                         + " vs " + fieldIndex);
             }
         }
-
-        // Since instances of this class are fetched via synchronous i.e. blocking
-        // calls in IPCs we always recycle as soon as the instance is marshaled.
-        recycle();
     }
 
     /**
@@ -3557,7 +3562,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
             mContentDescription = parcel.readCharSequence();
         }
-        if (isBitSet(nonDefaultFields, fieldIndex++)) mPaneTitle = parcel.readString();
+        if (isBitSet(nonDefaultFields, fieldIndex++)) mPaneTitle = parcel.readCharSequence();
         if (isBitSet(nonDefaultFields, fieldIndex++)) mTooltipText = parcel.readCharSequence();
         if (isBitSet(nonDefaultFields, fieldIndex++)) mViewIdResourceName = parcel.readString();
 
