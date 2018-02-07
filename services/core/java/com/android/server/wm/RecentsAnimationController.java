@@ -62,7 +62,6 @@ public class RecentsAnimationController {
 
     // The recents component app token that is shown behind the visibile tasks
     private AppWindowToken mHomeAppToken;
-    private Rect mMinimizedHomeBounds = new Rect();
 
     // We start the RecentsAnimationController in a pending-start state since we need to wait for
     // the wallpaper/activity to draw before we can give control to the handler to start animating
@@ -106,7 +105,7 @@ public class RecentsAnimationController {
                             final AppWindowToken topChild = task.getTopChild();
                             final WindowState mainWindow = topChild.findMainWindow();
                             return new TaskSnapshot(buffer, topChild.getConfiguration().orientation,
-                                    mainWindow.mContentInsets,
+                                    mainWindow.mStableInsets,
                                     ActivityManager.isLowRamDeviceStatic() /* reduced */,
                                     1.0f /* scale */);
                         }
@@ -164,6 +163,8 @@ public class RecentsAnimationController {
      * @param remoteAnimationRunner The remote runner which should be notified when the animation is
      *                              ready to start or has been canceled
      * @param callbacks Callbacks to be made when the animation finishes
+     * @param restoreHomeBehindStackId The stack id to restore the home stack behind once the
+     *                                 animation is complete. Will be passed to the callback.
      */
     RecentsAnimationController(WindowManagerService service,
             IRecentsAnimationRunner remoteAnimationRunner, RecentsAnimationCallbacks callbacks,
@@ -199,14 +200,12 @@ public class RecentsAnimationController {
         if (recentsComponentAppToken != null) {
             if (DEBUG) Log.d(TAG, "setHomeApp(" + recentsComponentAppToken.getName() + ")");
             mHomeAppToken = recentsComponentAppToken;
+            final WallpaperController wc = dc.mWallpaperController;
             if (recentsComponentAppToken.windowsCanBeWallpaperTarget()) {
                 dc.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
                 dc.setLayoutNeeded();
             }
         }
-
-        // Save the minimized home height
-        dc.getDockedDividerController().getHomeStackBoundsInDockedMode(mMinimizedHomeBounds);
 
         mService.mWindowPlacerLocked.performSurfacePlacement();
     }
@@ -233,12 +232,7 @@ public class RecentsAnimationController {
                 appAnimations[i] = mPendingAnimations.get(i).createRemoteAnimationApp();
             }
             mPendingStart = false;
-
-            final Rect minimizedHomeBounds =
-                    mHomeAppToken != null && mHomeAppToken.inSplitScreenSecondaryWindowingMode()
-                            ? mMinimizedHomeBounds : null;
-            mRunner.onAnimationStart_New(mController, appAnimations,
-                    mHomeAppToken.findMainWindow().mContentInsets, minimizedHomeBounds);
+            mRunner.onAnimationStart(mController, appAnimations);
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to start recents animation", e);
         }
@@ -340,15 +334,11 @@ public class RecentsAnimationController {
         }
 
         RemoteAnimationTarget createRemoteAnimationApp() {
-            final Point position = new Point();
-            final Rect bounds = new Rect();
-            final WindowContainer container = mTask.getParent();
-            container.getRelativePosition(position);
-            container.getBounds(bounds);
-            final WindowState mainWindow = mTask.getTopVisibleAppMainWindow();
+            // TODO: Do we need position and stack bounds?
             return new RemoteAnimationTarget(mTask.mTaskId, MODE_CLOSING, mCapturedLeash,
-                    !mTask.fillsParent(), mainWindow.mWinAnimator.mLastClipRect,
-                    mainWindow.mContentInsets, mTask.getPrefixOrderIndex(), position, bounds,
+                    !mTask.fillsParent(),
+                    mTask.getTopVisibleAppMainWindow().mWinAnimator.mLastClipRect,
+                    mTask.getPrefixOrderIndex(), new Point(), new Rect(),
                     mTask.getWindowConfiguration());
         }
 

@@ -16,9 +16,6 @@
 
 package com.android.systemui.shared.system;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
-
-import android.app.WindowConfiguration;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.view.RemoteAnimationTarget;
@@ -40,10 +37,7 @@ public class RemoteAnimationTargetCompat {
     public final Point position;
     public final Rect sourceContainerBounds;
 
-    private final RemoteAnimationTarget mTarget;
-
     public RemoteAnimationTargetCompat(RemoteAnimationTarget app) {
-        mTarget = app;
         taskId = app.taskId;
         mode = app.mode;
         leash = new SurfaceControlCompat(app.leash);
@@ -61,19 +55,5 @@ public class RemoteAnimationTargetCompat {
             appsCompat[i] = new RemoteAnimationTargetCompat(apps[i]);
         }
         return appsCompat;
-    }
-
-    /**
-     * TODO: Get as a method for compatibility (will move into ctor once Launcher updates)
-     */
-    public Rect getContentInsets() {
-        return mTarget.contentInsets;
-    }
-
-    /**
-     * TODO: Get as a method for compatibility (will move into ctor once Launcher updates)
-     */
-    public boolean isAssistantActivityType() {
-        return mTarget.windowConfiguration.getActivityType() == ACTIVITY_TYPE_ASSISTANT;
     }
 }
