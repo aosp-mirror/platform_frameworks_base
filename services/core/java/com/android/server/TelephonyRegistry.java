@@ -35,7 +35,6 @@ import android.os.UserHandle;
 import android.telephony.CellInfo;
 import android.telephony.CellLocation;
 import android.telephony.DisconnectCause;
-import android.telephony.LocationAccessPolicy;
 import android.telephony.PhoneStateListener;
 import android.telephony.PreciseCallState;
 import android.telephony.PreciseDataConnectionState;
@@ -94,8 +93,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         IPhoneStateListener callback;
         IOnSubscriptionsChangedListener onSubscriptionsChangedListenerCallback;
 
-        int callerUid;
-        int callerPid;
+        int callerUserId;
 
         int events;
 
@@ -119,7 +117,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     + " callback=" + callback
                     + " onSubscriptionsChangedListenererCallback="
                                             + onSubscriptionsChangedListenerCallback
-                    + " callerUid=" + callerUid + " subId=" + subId + " phoneId=" + phoneId
+                    + " callerUserId=" + callerUserId + " subId=" + subId + " phoneId=" + phoneId
                     + " events=" + Integer.toHexString(events)
                     + " canReadPhoneState=" + canReadPhoneState + "}";
         }
@@ -358,8 +356,6 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     public void addOnSubscriptionsChangedListener(String callingPackage,
             IOnSubscriptionsChangedListener callback) {
         int callerUserId = UserHandle.getCallingUserId();
-        mContext.getSystemService(AppOpsManager.class)
-                .checkPackage(Binder.getCallingUid(), callingPackage);
         if (VDBG) {
             log("listen oscl: E pkg=" + callingPackage + " myUserId=" + UserHandle.myUserId()
                 + " callerUserId="  + callerUserId + " callback=" + callback
@@ -403,8 +399,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
             r.onSubscriptionsChangedListenerCallback = callback;
             r.callingPackage = callingPackage;
-            r.callerUid = Binder.getCallingUid();
-            r.callerPid = Binder.getCallingPid();
+            r.callerUserId = callerUserId;
             r.events = 0;
             r.canReadPhoneState = true; // permission has been enforced above
             if (DBG) {
@@ -475,8 +470,6 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private void listen(String callingPackage, IPhoneStateListener callback, int events,
             boolean notifyNow, int subId) {
         int callerUserId = UserHandle.getCallingUserId();
-        mContext.getSystemService(AppOpsManager.class)
-                .checkPackage(Binder.getCallingUid(), callingPackage);
         if (VDBG) {
             log("listen: E pkg=" + callingPackage + " events=0x" + Integer.toHexString(events)
                 + " notifyNow=" + notifyNow + " subId=" + subId + " myUserId="
@@ -521,8 +514,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
                 r.callback = callback;
                 r.callingPackage = callingPackage;
-                r.callerUid = Binder.getCallingUid();
-                r.callerPid = Binder.getCallingPid();
+                r.callerUserId = callerUserId;
                 boolean isPhoneStateEvent = (events & (CHECK_PHONE_STATE_PERMISSION_MASK
                         | ENFORCE_PHONE_STATE_PERMISSION_MASK)) != 0;
                 r.canReadPhoneState = isPhoneStateEvent && canReadPhoneState(callingPackage);
@@ -580,10 +572,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         try {
                             if (DBG_LOC) log("listen: mCellLocation = "
                                     + mCellLocation[phoneId]);
-                            if (checkLocationAccess(r)) {
-                                r.callback.onCellLocationChanged(
-                                        new Bundle(mCellLocation[phoneId]));
-                            }
+                            r.callback.onCellLocationChanged(
+                                    new Bundle(mCellLocation[phoneId]));
                         } catch (RemoteException ex) {
                             remove(r.binder);
                         }
@@ -629,9 +619,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         try {
                             if (DBG_LOC) log("listen: mCellInfo[" + phoneId + "] = "
                                     + mCellInfo.get(phoneId));
-                            if (checkLocationAccess(r)) {
-                                r.callback.onCellInfoChanged(mCellInfo.get(phoneId));
-                            }
+                            r.callback.onCellInfoChanged(mCellInfo.get(phoneId));
                         } catch (RemoteException ex) {
                             remove(r.binder);
                         }
@@ -991,8 +979,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mCellInfo.set(phoneId, cellInfo);
                 for (Record r : mRecords) {
                     if (validateEventsAndUserLocked(r, PhoneStateListener.LISTEN_CELL_INFO) &&
-                            idMatch(r.subId, subId, phoneId) &&
-                            checkLocationAccess(r)) {
+                            idMatch(r.subId, subId, phoneId)) {
                         try {
                             if (DBG_LOC) {
                                 log("notifyCellInfo: mCellInfo=" + cellInfo + " r=" + r);
@@ -1275,8 +1262,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mCellLocation[phoneId] = cellLocation;
                 for (Record r : mRecords) {
                     if (validateEventsAndUserLocked(r, PhoneStateListener.LISTEN_CELL_LOCATION) &&
-                            idMatch(r.subId, subId, phoneId) &&
-                            checkLocationAccess(r)) {
+                            idMatch(r.subId, subId, phoneId)) {
                         try {
                             if (DBG_LOC) {
                                 log("notifyCellLocation: cellLocation=" + cellLocation
@@ -1720,11 +1706,10 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         boolean valid = false;
         try {
             foregroundUser = ActivityManager.getCurrentUser();
-            valid = UserHandle.getUserId(r.callerUid) == foregroundUser
-                    && r.matchPhoneStateListenerEvent(events);
+            valid = r.callerUserId ==  foregroundUser && r.matchPhoneStateListenerEvent(events);
             if (DBG | DBG_LOC) {
                 log("validateEventsAndUserLocked: valid=" + valid
-                        + " r.callerUid=" + r.callerUid + " foregroundUser=" + foregroundUser
+                        + " r.callerUserId=" + r.callerUserId + " foregroundUser=" + foregroundUser
                         + " r.events=" + r.events + " events=" + events);
             }
         } finally {
@@ -1753,16 +1738,6 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return (subId == mDefaultSubId);
         } else {
             return (rSubId == subId);
-        }
-    }
-
-    private boolean checkLocationAccess(Record r) {
-        long token = Binder.clearCallingIdentity();
-        try {
-            return LocationAccessPolicy.canAccessCellLocation(mContext,
-                    r.callingPackage, r.callerUid, r.callerPid);
-        } finally {
-            Binder.restoreCallingIdentity(token);
         }
     }
 
@@ -1813,9 +1788,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     log("checkPossibleMissNotify: onCellInfoChanged[" + phoneId + "] = "
                             + mCellInfo.get(phoneId));
                 }
-                if (checkLocationAccess(r)) {
-                    r.callback.onCellInfoChanged(mCellInfo.get(phoneId));
-                }
+                r.callback.onCellInfoChanged(mCellInfo.get(phoneId));
             } catch (RemoteException ex) {
                 mRemoveList.add(r.binder);
             }
@@ -1863,9 +1836,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             try {
                 if (DBG_LOC) log("checkPossibleMissNotify: onCellLocationChanged mCellLocation = "
                         + mCellLocation[phoneId]);
-                if (checkLocationAccess(r)) {
-                    r.callback.onCellLocationChanged(new Bundle(mCellLocation[phoneId]));
-                }
+                r.callback.onCellLocationChanged(new Bundle(mCellLocation[phoneId]));
             } catch (RemoteException ex) {
                 mRemoveList.add(r.binder);
             }
