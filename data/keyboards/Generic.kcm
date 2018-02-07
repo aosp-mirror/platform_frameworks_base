@@ -477,6 +477,10 @@ key ESCAPE {
     ctrl:                               fallback MENU
 }
 
+key DEL {
+    ctrl+alt:                           fallback BACK
+}
+
 ### Gamepad buttons ###
 
 key BUTTON_A {
