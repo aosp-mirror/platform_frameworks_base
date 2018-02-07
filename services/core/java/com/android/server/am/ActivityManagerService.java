@@ -14762,8 +14762,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             mUserController.sendUserSwitchBroadcasts(-1, currentUserId);
 
             BinderInternal.nSetBinderProxyCountEnabled(true);
-            //STOPSHIP: Temporary BinderProxy Threshold for b/71353150
-            BinderInternal.nSetBinderProxyCountWatermarks(1500, 1200);
             BinderInternal.setBinderProxyCountCallback(
                     new BinderInternal.BinderProxyLimitListener() {
                         @Override
