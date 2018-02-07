@@ -172,7 +172,7 @@ public class MacAddressTest {
         final int iterations = 1000;
         final String expectedAndroidOui = "da:a1:19";
         for (int i = 0; i < iterations; i++) {
-            MacAddress mac = MacAddress.createRandomUnicastAddress();
+            MacAddress mac = MacAddress.createRandomUnicastAddressWithGoogleBase();
             String stringRepr = mac.toString();
 
             assertTrue(stringRepr + " expected to be a locally assigned address",
@@ -194,6 +194,15 @@ public class MacAddressTest {
             assertEquals(MacAddress.TYPE_UNICAST, mac.getAddressType());
             assertTrue(stringRepr + " expected to begin with " + expectedLocalOui,
                     stringRepr.startsWith(expectedLocalOui));
+        }
+
+        for (int i = 0; i < iterations; i++) {
+            MacAddress mac = MacAddress.createRandomUnicastAddress();
+            String stringRepr = mac.toString();
+
+            assertTrue(stringRepr + " expected to be a locally assigned address",
+                    mac.isLocallyAssigned());
+            assertEquals(MacAddress.TYPE_UNICAST, mac.getAddressType());
         }
     }
 
