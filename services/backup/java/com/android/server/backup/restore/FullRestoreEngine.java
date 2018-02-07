@@ -36,11 +36,13 @@ import android.app.backup.IFullBackupRestoreObserver;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.LocalServices;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.FileMetadata;
 import com.android.server.backup.KeyValueAdbRestoreEngine;
@@ -207,8 +209,11 @@ public class FullRestoreEngine extends RestoreEngine {
                 if (info.path.equals(BACKUP_MANIFEST_FILENAME)) {
                     Signature[] signatures = tarBackupReader.readAppManifestAndReturnSignatures(
                             info);
+                    PackageManagerInternal pmi = LocalServices.getService(
+                            PackageManagerInternal.class);
                     RestorePolicy restorePolicy = tarBackupReader.chooseRestorePolicy(
-                            mBackupManagerService.getPackageManager(), allowApks, info, signatures);
+                            mBackupManagerService.getPackageManager(), allowApks, info, signatures,
+                            pmi);
                     mManifestSignatures.put(info.packageName, signatures);
                     mPackagePolicies.put(pkg, restorePolicy);
                     mPackageInstallers.put(pkg, info.installerPackageName);

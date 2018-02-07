@@ -23,6 +23,7 @@ import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.Signature;
@@ -30,6 +31,7 @@ import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.util.Slog;
 
+import com.android.server.LocalServices;
 import com.android.server.backup.utils.AppBackupUtils;
 
 import java.io.BufferedInputStream;
@@ -235,7 +237,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
         if (home != null) {
             try {
                 homeInfo = mPackageManager.getPackageInfo(home.getPackageName(),
-                        PackageManager.GET_SIGNATURES);
+                        PackageManager.GET_SIGNING_CERTIFICATES);
                 homeInstaller = mPackageManager.getInstallerPackageName(home.getPackageName());
                 homeVersion = homeInfo.getLongVersionCode();
                 homeSigHashes = BackupUtils.hashSignatureArray(homeInfo.signatures);
@@ -252,10 +254,11 @@ public class PackageManagerBackupAgent extends BackupAgent {
             //    2. the home app [or absence] we now use differs from the prior state,
             // OR 3. it looks like we use the same home app + version as before, but
             //       the signatures don't match so we treat them as different apps.
+            PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
             final boolean needHomeBackup = (homeVersion != mStoredHomeVersion)
                     || !Objects.equals(home, mStoredHomeComponent)
                     || (home != null
-                        && !BackupUtils.signaturesMatch(mStoredHomeSigHashes, homeInfo));
+                        && !BackupUtils.signaturesMatch(mStoredHomeSigHashes, homeInfo, pmi));
             if (needHomeBackup) {
                 if (DEBUG) {
                     Slog.i(TAG, "Home preference changed; backing up new state " + home);

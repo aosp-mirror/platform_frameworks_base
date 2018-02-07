@@ -42,6 +42,7 @@ import android.app.backup.RestoreDescription;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.os.Message;
@@ -56,6 +57,7 @@ import android.util.Slog;
 import com.android.internal.backup.IBackupTransport;
 import com.android.server.AppWidgetBackupBridge;
 import com.android.server.EventLogTags;
+import com.android.server.LocalServices;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.BackupUtils;
 import com.android.server.backup.PackageManagerBackupAgent;
@@ -497,7 +499,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
             try {
                 mCurrentPackage = backupManagerService.getPackageManager().getPackageInfo(
-                        pkgName, PackageManager.GET_SIGNATURES);
+                        pkgName, PackageManager.GET_SIGNING_CERTIFICATES);
             } catch (NameNotFoundException e) {
                 // Whoops, we thought we could restore this package but it
                 // turns out not to be present.  Skip it.
@@ -612,7 +614,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         }
 
         Metadata metaInfo = mPmAgent.getRestoredMetadata(packageName);
-        if (!BackupUtils.signaturesMatch(metaInfo.sigHashes, mCurrentPackage)) {
+        PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
+        if (!BackupUtils.signaturesMatch(metaInfo.sigHashes, mCurrentPackage, pmi)) {
             Slog.w(TAG, "Signature mismatch restoring " + packageName);
             mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
                     BackupManagerMonitor.LOG_EVENT_ID_SIGNATURE_MISMATCH, mCurrentPackage,

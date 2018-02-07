@@ -15,73 +15,298 @@
  */
 package com.android.server.pm.backup;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser.Package;
 import android.content.pm.Signature;
-import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.platform.test.annotations.Presubmit;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 
 import com.android.server.backup.BackupUtils;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 @SmallTest
-public class BackupUtilsTest extends AndroidTestCase {
+@Presubmit
+@RunWith(AndroidJUnit4.class)
+public class BackupUtilsTest {
 
-    private Signature[] genSignatures(String... signatures) {
-        final Signature[] sigs = new Signature[signatures.length];
-        for (int i = 0; i < signatures.length; i++){
-            sigs[i] = new Signature(signatures[i].getBytes());
-        }
-        return sigs;
+    private static final Signature SIGNATURE_1 = generateSignature((byte) 1);
+    private static final Signature SIGNATURE_2 = generateSignature((byte) 2);
+    private static final Signature SIGNATURE_3 = generateSignature((byte) 3);
+    private static final Signature SIGNATURE_4 = generateSignature((byte) 4);
+    private static final byte[] SIGNATURE_HASH_1 = BackupUtils.hashSignature(SIGNATURE_1);
+    private static final byte[] SIGNATURE_HASH_2 = BackupUtils.hashSignature(SIGNATURE_2);
+    private static final byte[] SIGNATURE_HASH_3 = BackupUtils.hashSignature(SIGNATURE_3);
+    private static final byte[] SIGNATURE_HASH_4 = BackupUtils.hashSignature(SIGNATURE_4);
+
+    private PackageManagerInternal mMockPackageManagerInternal;
+
+    @Before
+    public void setUp() throws Exception {
+        mMockPackageManagerInternal = mock(PackageManagerInternal.class);
     }
 
-    private PackageInfo genPackage(String... signatures) {
-        final PackageInfo pi = new PackageInfo();
-        pi.packageName = "package";
-        pi.applicationInfo = new ApplicationInfo();
-        pi.signatures = genSignatures(signatures);
+    @Test
+    public void signaturesMatch_targetIsNull_returnsFalse() throws Exception {
+        ArrayList<byte[]> storedSigHashes = new ArrayList<>();
+        storedSigHashes.add(SIGNATURE_HASH_1);
+        boolean result = BackupUtils.signaturesMatch(storedSigHashes, null,
+                mMockPackageManagerInternal);
 
-        return pi;
+        assertThat(result).isFalse();
     }
 
-    public void testSignaturesMatch() {
-        final ArrayList<byte[]> stored1 = BackupUtils.hashSignatureArray(Arrays.asList(
-                "abc".getBytes()));
-        final ArrayList<byte[]> stored2 = BackupUtils.hashSignatureArray(Arrays.asList(
-                "abc".getBytes(), "def".getBytes()));
+    @Test
+    public void signaturesMatch_systemApplication_returnsTrue() throws Exception {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.applicationInfo = new ApplicationInfo();
+        packageInfo.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
 
-        PackageInfo pi;
+        ArrayList<byte[]> storedSigHashes = new ArrayList<>();
+        storedSigHashes.add(SIGNATURE_HASH_1);
+        boolean result = BackupUtils.signaturesMatch(storedSigHashes, packageInfo,
+                mMockPackageManagerInternal);
 
-        // False for null package.
-        assertFalse(BackupUtils.signaturesMatch(stored1, null));
-
-        // If it's a system app, signatures don't matter.
-        pi = genPackage("xyz");
-        pi.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
-        assertTrue(BackupUtils.signaturesMatch(stored1, pi));
-
-        // Non system apps.
-        assertTrue(BackupUtils.signaturesMatch(stored1, genPackage("abc")));
-
-        // Superset is okay.
-        assertTrue(BackupUtils.signaturesMatch(stored1, genPackage("abc", "xyz")));
-        assertTrue(BackupUtils.signaturesMatch(stored1, genPackage("xyz", "abc")));
-
-        assertFalse(BackupUtils.signaturesMatch(stored1, genPackage("xyz")));
-        assertFalse(BackupUtils.signaturesMatch(stored1, genPackage("xyz", "def")));
-
-        assertTrue(BackupUtils.signaturesMatch(stored2, genPackage("def", "abc")));
-        assertTrue(BackupUtils.signaturesMatch(stored2, genPackage("x", "def", "abc", "y")));
-
-        // Subset is not okay.
-        assertFalse(BackupUtils.signaturesMatch(stored2, genPackage("abc")));
-        assertFalse(BackupUtils.signaturesMatch(stored2, genPackage("def")));
+        assertThat(result).isTrue();
     }
 
+    @Test
+    public void signaturesMatch_disallowsUnsignedApps_storedSignatureNull_returnsFalse()
+            throws Exception {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.signingCertificateHistory = new Signature[][] {{SIGNATURE_1}};
+        packageInfo.applicationInfo = new ApplicationInfo();
+
+        boolean result = BackupUtils.signaturesMatch(null, packageInfo,
+                mMockPackageManagerInternal);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void signaturesMatch_disallowsUnsignedApps_storedSignatureEmpty_returnsFalse()
+            throws Exception {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.signingCertificateHistory = new Signature[][] {{SIGNATURE_1}};
+        packageInfo.applicationInfo = new ApplicationInfo();
+
+        ArrayList<byte[]> storedSigHashes = new ArrayList<>();
+        boolean result = BackupUtils.signaturesMatch(storedSigHashes, packageInfo,
+                mMockPackageManagerInternal);
+
+        assertThat(result).isFalse();
+    }
+
+
+    @Test
+    public void
+    signaturesMatch_disallowsUnsignedApps_targetSignatureEmpty_returnsFalse()
+            throws Exception {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.signingCertificateHistory = new Signature[0][0];
+        packageInfo.applicationInfo = new ApplicationInfo();
+
+        ArrayList<byte[]> storedSigHashes = new ArrayList<>();
+        storedSigHashes.add(SIGNATURE_HASH_1);
+        boolean result = BackupUtils.signaturesMatch(storedSigHashes, packageInfo,
+                mMockPackageManagerInternal);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void
+    signaturesMatch_disallowsUnsignedApps_targetSignatureNull_returnsFalse()
+            throws Exception {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.signingCertificateHistory = null;
+        packageInfo.applicationInfo = new ApplicationInfo();
+
+        ArrayList<byte[]> storedSigHashes = new ArrayList<>();
+        storedSigHashes.add(SIGNATURE_HASH_1);
+        boolean result = BackupUtils.signaturesMatch(storedSigHashes, packageInfo,
+                mMockPackageManagerInternal);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void signaturesMatch_disallowsUnsignedApps_bothSignaturesNull_returnsFalse()
+            throws Exception {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.signingCertificateHistory = null;
+        packageInfo.applicationInfo = new ApplicationInfo();
+
+        boolean result = BackupUtils.signaturesMatch(null, packageInfo,
+                mMockPackageManagerInternal);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void signaturesMatch_disallowsUnsignedApps_bothSignaturesEmpty_returnsFalse()
+            throws Exception {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.signingCertificateHistory = new Signature[0][0];
+        packageInfo.applicationInfo = new ApplicationInfo();
+
+        ArrayList<byte[]> storedSigHashes = new ArrayList<>();
+        boolean result = BackupUtils.signaturesMatch(storedSigHashes, packageInfo,
+                mMockPackageManagerInternal);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void signaturesMatch_equalSignatures_returnsTrue() throws Exception {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.signingCertificateHistory = new Signature[][] {
+                {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3}
+        };
+        packageInfo.applicationInfo = new ApplicationInfo();
+
+        ArrayList<byte[]> storedSigHashes = new ArrayList<>();
+        storedSigHashes.add(SIGNATURE_HASH_1);
+        storedSigHashes.add(SIGNATURE_HASH_2);
+        storedSigHashes.add(SIGNATURE_HASH_3);
+        boolean result = BackupUtils.signaturesMatch(storedSigHashes, packageInfo,
+                mMockPackageManagerInternal);
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void signaturesMatch_extraSignatureInTarget_returnsTrue() throws Exception {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.signingCertificateHistory = new Signature[][] {
+                {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3}
+        };
+        packageInfo.applicationInfo = new ApplicationInfo();
+
+        ArrayList<byte[]> storedSigHashes = new ArrayList<>();
+        storedSigHashes.add(SIGNATURE_HASH_1);
+        storedSigHashes.add(SIGNATURE_HASH_2);
+        boolean result = BackupUtils.signaturesMatch(storedSigHashes, packageInfo,
+                mMockPackageManagerInternal);
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void signaturesMatch_extraSignatureInStored_returnsFalse() throws Exception {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.signingCertificateHistory = new Signature[][] {{SIGNATURE_1, SIGNATURE_2}};
+        packageInfo.applicationInfo = new ApplicationInfo();
+
+        ArrayList<byte[]> storedSigHashes = new ArrayList<>();
+        storedSigHashes.add(SIGNATURE_HASH_1);
+        storedSigHashes.add(SIGNATURE_HASH_2);
+        storedSigHashes.add(SIGNATURE_HASH_3);
+        boolean result = BackupUtils.signaturesMatch(storedSigHashes, packageInfo,
+                mMockPackageManagerInternal);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void signaturesMatch_oneNonMatchingSignature_returnsFalse() throws Exception {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.signingCertificateHistory = new Signature[][] {
+                {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3}
+        };
+        packageInfo.applicationInfo = new ApplicationInfo();
+
+        ArrayList<byte[]> storedSigHashes = new ArrayList<>();
+        storedSigHashes.add(SIGNATURE_HASH_1);
+        storedSigHashes.add(SIGNATURE_HASH_2);
+        storedSigHashes.add(SIGNATURE_HASH_4);
+        boolean result = BackupUtils.signaturesMatch(storedSigHashes, packageInfo,
+                mMockPackageManagerInternal);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void signaturesMatch_singleStoredSignatureNoRotation_returnsTrue()
+            throws Exception {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = "test";
+        packageInfo.signingCertificateHistory = new Signature[][] {{SIGNATURE_1}};
+        packageInfo.applicationInfo = new ApplicationInfo();
+
+        doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(SIGNATURE_HASH_1,
+                packageInfo.packageName);
+
+        ArrayList<byte[]> storedSigHashes = new ArrayList<>();
+        storedSigHashes.add(SIGNATURE_HASH_1);
+        boolean result = BackupUtils.signaturesMatch(storedSigHashes, packageInfo,
+                mMockPackageManagerInternal);
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void signaturesMatch_singleStoredSignatureWithRotationAssumeDataCapability_returnsTrue()
+            throws Exception {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = "test";
+        packageInfo.signingCertificateHistory = new Signature[][] {{SIGNATURE_1}, {SIGNATURE_2}};
+        packageInfo.applicationInfo = new ApplicationInfo();
+
+        // we know SIGNATURE_1 is in history, and we want to assume it has
+        // SigningDetails.CertCapabilities.INSTALLED_DATA capability
+        doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(SIGNATURE_HASH_1,
+                packageInfo.packageName);
+
+        ArrayList<byte[]> storedSigHashes = new ArrayList<>();
+        storedSigHashes.add(SIGNATURE_HASH_1);
+        boolean result = BackupUtils.signaturesMatch(storedSigHashes, packageInfo,
+                mMockPackageManagerInternal);
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void
+            signaturesMatch_singleStoredSignatureWithRotationAssumeNoDataCapability_returnsFalse()
+            throws Exception {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = "test";
+        packageInfo.signingCertificateHistory = new Signature[][] {{SIGNATURE_1}, {SIGNATURE_2}};
+        packageInfo.applicationInfo = new ApplicationInfo();
+
+        // we know SIGNATURE_1 is in history, but we want to assume it does not have
+        // SigningDetails.CertCapabilities.INSTALLED_DATA capability
+        doReturn(false).when(mMockPackageManagerInternal).isDataRestoreSafe(SIGNATURE_HASH_1,
+                packageInfo.packageName);
+
+        ArrayList<byte[]> storedSigHashes = new ArrayList<>();
+        storedSigHashes.add(SIGNATURE_HASH_1);
+        boolean result = BackupUtils.signaturesMatch(storedSigHashes, packageInfo,
+                mMockPackageManagerInternal);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
     public void testHashSignature() {
         final byte[] sig1 = "abc".getBytes();
         final byte[] sig2 = "def".getBytes();
@@ -114,5 +339,11 @@ public class BackupUtilsTest extends AndroidTestCase {
 
         MoreAsserts.assertEquals(hash2a, listA.get(1));
         MoreAsserts.assertEquals(hash2a, listB.get(1));
+    }
+
+    private static Signature generateSignature(byte i) {
+        byte[] signatureBytes = new byte[256];
+        signatureBytes[0] = i;
+        return new Signature(signatureBytes);
     }
 }

@@ -18,9 +18,14 @@ package com.android.server.backup.utils;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
 import android.os.Process;
 import android.platform.test.annotations.Presubmit;
@@ -30,6 +35,7 @@ import android.support.test.runner.AndroidJUnit4;
 import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.testutils.PackageManagerStub;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -45,7 +51,14 @@ public class AppBackupUtilsTest {
     private static final Signature SIGNATURE_3 = generateSignature((byte) 3);
     private static final Signature SIGNATURE_4 = generateSignature((byte) 4);
 
-    private final PackageManagerStub mPackageManagerStub = new PackageManagerStub();
+    private PackageManagerStub mPackageManagerStub;
+    private PackageManagerInternal mMockPackageManagerInternal;
+
+    @Before
+    public void setUp() throws Exception {
+        mPackageManagerStub = new PackageManagerStub();
+        mMockPackageManagerInternal = mock(PackageManagerInternal.class);
+    }
 
     @Test
     public void appIsEligibleForBackup_backupNotAllowed_returnsFalse() throws Exception {
@@ -358,7 +371,8 @@ public class AppBackupUtilsTest {
 
     @Test
     public void signaturesMatch_targetIsNull_returnsFalse() throws Exception {
-        boolean result = AppBackupUtils.signaturesMatch(new Signature[] {SIGNATURE_1}, null);
+        boolean result = AppBackupUtils.signaturesMatch(new Signature[] {SIGNATURE_1}, null,
+                mMockPackageManagerInternal);
 
         assertThat(result).isFalse();
     }
@@ -369,7 +383,8 @@ public class AppBackupUtilsTest {
         packageInfo.applicationInfo = new ApplicationInfo();
         packageInfo.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
 
-        boolean result = AppBackupUtils.signaturesMatch(new Signature[0], packageInfo);
+        boolean result = AppBackupUtils.signaturesMatch(new Signature[0], packageInfo,
+                mMockPackageManagerInternal);
 
         assertThat(result).isTrue();
     }
@@ -378,10 +393,11 @@ public class AppBackupUtilsTest {
     public void signaturesMatch_disallowsUnsignedApps_storedSignatureNull_returnsFalse()
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = new Signature[] {SIGNATURE_1};
+        packageInfo.signingCertificateHistory = new Signature[][] {{SIGNATURE_1}};
         packageInfo.applicationInfo = new ApplicationInfo();
 
-        boolean result = AppBackupUtils.signaturesMatch(null, packageInfo);
+        boolean result = AppBackupUtils.signaturesMatch(null, packageInfo,
+                mMockPackageManagerInternal);
 
         assertThat(result).isFalse();
     }
@@ -390,10 +406,11 @@ public class AppBackupUtilsTest {
     public void signaturesMatch_disallowsUnsignedApps_storedSignatureEmpty_returnsFalse()
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = new Signature[] {SIGNATURE_1};
+        packageInfo.signingCertificateHistory = new Signature[][] {{SIGNATURE_1}};
         packageInfo.applicationInfo = new ApplicationInfo();
 
-        boolean result = AppBackupUtils.signaturesMatch(new Signature[0], packageInfo);
+        boolean result = AppBackupUtils.signaturesMatch(new Signature[0], packageInfo,
+                mMockPackageManagerInternal);
 
         assertThat(result).isFalse();
     }
@@ -404,11 +421,11 @@ public class AppBackupUtilsTest {
     signaturesMatch_disallowsUnsignedApps_targetSignatureEmpty_returnsFalse()
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = new Signature[0];
+        packageInfo.signingCertificateHistory = new Signature[0][0];
         packageInfo.applicationInfo = new ApplicationInfo();
 
-        boolean result = AppBackupUtils.signaturesMatch(new Signature[] {SIGNATURE_1},
-                packageInfo);
+        boolean result = AppBackupUtils.signaturesMatch(new Signature[] {SIGNATURE_1}, packageInfo,
+                mMockPackageManagerInternal);
 
         assertThat(result).isFalse();
     }
@@ -418,11 +435,11 @@ public class AppBackupUtilsTest {
     signaturesMatch_disallowsUnsignedApps_targetSignatureNull_returnsFalse()
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = null;
+        packageInfo.signingCertificateHistory = null;
         packageInfo.applicationInfo = new ApplicationInfo();
 
-        boolean result = AppBackupUtils.signaturesMatch(new Signature[] {SIGNATURE_1},
-                packageInfo);
+        boolean result = AppBackupUtils.signaturesMatch(new Signature[] {SIGNATURE_1}, packageInfo,
+                mMockPackageManagerInternal);
 
         assertThat(result).isFalse();
     }
@@ -431,10 +448,11 @@ public class AppBackupUtilsTest {
     public void signaturesMatch_disallowsUnsignedApps_bothSignaturesNull_returnsFalse()
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = null;
+        packageInfo.signingCertificateHistory = null;
         packageInfo.applicationInfo = new ApplicationInfo();
 
-        boolean result = AppBackupUtils.signaturesMatch(null, packageInfo);
+        boolean result = AppBackupUtils.signaturesMatch(null, packageInfo,
+                mMockPackageManagerInternal);
 
         assertThat(result).isFalse();
     }
@@ -443,10 +461,11 @@ public class AppBackupUtilsTest {
     public void signaturesMatch_disallowsUnsignedApps_bothSignaturesEmpty_returnsFalse()
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = new Signature[0];
+        packageInfo.signingCertificateHistory = new Signature[0][0];
         packageInfo.applicationInfo = new ApplicationInfo();
 
-        boolean result = AppBackupUtils.signaturesMatch(new Signature[0], packageInfo);
+        boolean result = AppBackupUtils.signaturesMatch(new Signature[0], packageInfo,
+                mMockPackageManagerInternal);
 
         assertThat(result).isFalse();
     }
@@ -458,11 +477,14 @@ public class AppBackupUtilsTest {
         Signature signature3Copy = new Signature(SIGNATURE_3.toByteArray());
 
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = new Signature[]{SIGNATURE_1, SIGNATURE_2, SIGNATURE_3};
+        packageInfo.signingCertificateHistory = new Signature[][] {
+                {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3}
+        };
         packageInfo.applicationInfo = new ApplicationInfo();
 
         boolean result = AppBackupUtils.signaturesMatch(
-                new Signature[]{signature3Copy, signature1Copy, signature2Copy}, packageInfo);
+                new Signature[] {signature3Copy, signature1Copy, signature2Copy}, packageInfo,
+                mMockPackageManagerInternal);
 
         assertThat(result).isTrue();
     }
@@ -473,11 +495,14 @@ public class AppBackupUtilsTest {
         Signature signature2Copy = new Signature(SIGNATURE_2.toByteArray());
 
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = new Signature[]{SIGNATURE_1, SIGNATURE_2, SIGNATURE_3};
+        packageInfo.signingCertificateHistory = new Signature[][] {
+                {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3}
+        };
         packageInfo.applicationInfo = new ApplicationInfo();
 
         boolean result = AppBackupUtils.signaturesMatch(
-                new Signature[]{signature2Copy, signature1Copy}, packageInfo);
+                new Signature[]{signature2Copy, signature1Copy}, packageInfo,
+                mMockPackageManagerInternal);
 
         assertThat(result).isTrue();
     }
@@ -488,11 +513,14 @@ public class AppBackupUtilsTest {
         Signature signature2Copy = new Signature(SIGNATURE_2.toByteArray());
 
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = new Signature[]{signature1Copy, signature2Copy};
+        packageInfo.signingCertificateHistory = new Signature[][] {
+                {signature1Copy, signature2Copy}
+        };
         packageInfo.applicationInfo = new ApplicationInfo();
 
         boolean result = AppBackupUtils.signaturesMatch(
-                new Signature[]{SIGNATURE_1, SIGNATURE_2, SIGNATURE_3}, packageInfo);
+                new Signature[]{SIGNATURE_1, SIGNATURE_2, SIGNATURE_3}, packageInfo,
+                mMockPackageManagerInternal);
 
         assertThat(result).isFalse();
     }
@@ -503,11 +531,76 @@ public class AppBackupUtilsTest {
         Signature signature2Copy = new Signature(SIGNATURE_2.toByteArray());
 
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signatures = new Signature[]{SIGNATURE_1, SIGNATURE_2, SIGNATURE_3};
+        packageInfo.signingCertificateHistory = new Signature[][] {
+                {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3}
+        };
         packageInfo.applicationInfo = new ApplicationInfo();
 
         boolean result = AppBackupUtils.signaturesMatch(
-                new Signature[]{signature1Copy, signature2Copy, SIGNATURE_4}, packageInfo);
+                new Signature[]{signature1Copy, signature2Copy, SIGNATURE_4}, packageInfo,
+                mMockPackageManagerInternal);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void signaturesMatch_singleStoredSignatureNoRotation_returnsTrue()
+            throws Exception {
+        Signature signature1Copy = new Signature(SIGNATURE_1.toByteArray());
+
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = "test";
+        packageInfo.signingCertificateHistory = new Signature[][] {{SIGNATURE_1}};
+        packageInfo.applicationInfo = new ApplicationInfo();
+
+        doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(signature1Copy,
+                packageInfo.packageName);
+
+        boolean result = AppBackupUtils.signaturesMatch(new Signature[] {signature1Copy},
+                packageInfo, mMockPackageManagerInternal);
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void signaturesMatch_singleStoredSignatureWithRotationAssumeDataCapability_returnsTrue()
+            throws Exception {
+        Signature signature1Copy = new Signature(SIGNATURE_1.toByteArray());
+
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = "test";
+        packageInfo.signingCertificateHistory = new Signature[][] {{SIGNATURE_1}, {SIGNATURE_2}};
+        packageInfo.applicationInfo = new ApplicationInfo();
+
+        // we know signature1Copy is in history, and we want to assume it has
+        // SigningDetails.CertCapabilities.INSTALLED_DATA capability
+        doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(signature1Copy,
+                packageInfo.packageName);
+
+        boolean result = AppBackupUtils.signaturesMatch(new Signature[] {signature1Copy},
+                packageInfo, mMockPackageManagerInternal);
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void
+            signaturesMatch_singleStoredSignatureWithRotationAssumeNoDataCapability_returnsFalse()
+            throws Exception {
+        Signature signature1Copy = new Signature(SIGNATURE_1.toByteArray());
+
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = "test";
+        packageInfo.signingCertificateHistory = new Signature[][] {{SIGNATURE_1}, {SIGNATURE_2}};
+        packageInfo.applicationInfo = new ApplicationInfo();
+
+        // we know signature1Copy is in history, but we want to assume it does not have
+        // SigningDetails.CertCapabilities.INSTALLED_DATA capability
+        doReturn(false).when(mMockPackageManagerInternal).isDataRestoreSafe(signature1Copy,
+                packageInfo.packageName);
+
+        boolean result = AppBackupUtils.signaturesMatch(new Signature[] {signature1Copy},
+                packageInfo, mMockPackageManagerInternal);
 
         assertThat(result).isFalse();
     }
