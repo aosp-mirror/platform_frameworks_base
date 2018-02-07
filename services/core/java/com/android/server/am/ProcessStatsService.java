@@ -237,6 +237,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             if (commit) {
                 mProcessStats.resetSafely();
                 updateFile();
+                mAm.requestPssAllProcsLocked(SystemClock.uptimeMillis(), true, false);
             }
             mLastWriteTime = SystemClock.uptimeMillis();
             totalTime = SystemClock.uptimeMillis() - now;
@@ -784,12 +785,14 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                 } else if ("--reset".equals(arg)) {
                     synchronized (mAm) {
                         mProcessStats.resetSafely();
+                        mAm.requestPssAllProcsLocked(SystemClock.uptimeMillis(), true, false);
                         pw.println("Process stats reset.");
                         quit = true;
                     }
                 } else if ("--clear".equals(arg)) {
                     synchronized (mAm) {
                         mProcessStats.resetSafely();
+                        mAm.requestPssAllProcsLocked(SystemClock.uptimeMillis(), true, false);
                         ArrayList<String> files = getCommittedFiles(0, true, true);
                         if (files != null) {
                             for (int fi=0; fi<files.size(); fi++) {
