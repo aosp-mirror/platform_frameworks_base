@@ -125,6 +125,7 @@ public class RecoverableKeyStoreManagerTest {
     private static final byte[] RECOVERY_RESPONSE_HEADER =
             "V1 reencrypted_recovery_key".getBytes(StandardCharsets.UTF_8);
     private static final String TEST_ALIAS = "nick";
+    private static final String TEST_ALIAS2 = "bob";
     private static final int RECOVERABLE_KEY_SIZE_BYTES = 32;
     private static final int GENERATION_ID = 1;
     private static final byte[] NONCE = getUtf8Bytes("nonce");
@@ -424,7 +425,7 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
-    public void recoverKeys_throwsIfFailedToDecryptAnApplicationKey() throws Exception {
+    public void recoverKeys_throwsIfFailedToDecryptAllApplicationKeys() throws Exception {
         mRecoverableKeyStoreManager.startRecoverySession(
                 TEST_SESSION_ID,
                 TEST_PUBLIC_KEY,
@@ -442,7 +443,7 @@ public class RecoverableKeyStoreManagerTest {
                 keyClaimant, TEST_SECRET, TEST_VAULT_PARAMS, recoveryKey);
         WrappedApplicationKey badApplicationKey = new WrappedApplicationKey(
                 TEST_ALIAS,
-                randomBytes(32));
+                encryptedApplicationKey(randomRecoveryKey(), randomBytes(32)));
 
         try {
             mRecoverableKeyStoreManager.recoverKeys(
@@ -451,7 +452,7 @@ public class RecoverableKeyStoreManagerTest {
                     /*applicationKeys=*/ ImmutableList.of(badApplicationKey));
             fail("should have thrown");
         } catch (ServiceSpecificException e) {
-            assertThat(e.getMessage()).startsWith("Failed to recover key with alias 'nick'");
+            assertThat(e.getMessage()).startsWith("Failed to recover any of the application keys");
         }
     }
 
@@ -484,6 +485,44 @@ public class RecoverableKeyStoreManagerTest {
 
         assertThat(recoveredKeys).hasSize(1);
         assertThat(recoveredKeys.get(TEST_ALIAS)).isEqualTo(applicationKeyBytes);
+    }
+
+    @Test
+    public void recoverKeys_worksOnOtherApplicationKeysIfOneDecryptionFails() throws Exception {
+        mRecoverableKeyStoreManager.startRecoverySession(
+                TEST_SESSION_ID,
+                TEST_PUBLIC_KEY,
+                TEST_VAULT_PARAMS,
+                TEST_VAULT_CHALLENGE,
+                ImmutableList.of(new KeyChainProtectionParams(
+                        TYPE_LOCKSCREEN,
+                        UI_FORMAT_PASSWORD,
+                        KeyDerivationParams.createSha256Params(TEST_SALT),
+                        TEST_SECRET)));
+        byte[] keyClaimant = mRecoverySessionStorage.get(Binder.getCallingUid(), TEST_SESSION_ID)
+                .getKeyClaimant();
+        SecretKey recoveryKey = randomRecoveryKey();
+        byte[] encryptedClaimResponse = encryptClaimResponse(
+                keyClaimant, TEST_SECRET, TEST_VAULT_PARAMS, recoveryKey);
+
+        byte[] applicationKeyBytes1 = randomBytes(32);
+        byte[] applicationKeyBytes2 = randomBytes(32);
+
+        WrappedApplicationKey applicationKey1 = new WrappedApplicationKey(
+                TEST_ALIAS,
+                // Use a different recovery key here, so the decryption will fail
+                encryptedApplicationKey(randomRecoveryKey(), applicationKeyBytes1));
+        WrappedApplicationKey applicationKey2 = new WrappedApplicationKey(
+                TEST_ALIAS2,
+                encryptedApplicationKey(recoveryKey, applicationKeyBytes2));
+
+        Map<String, byte[]> recoveredKeys = mRecoverableKeyStoreManager.recoverKeys(
+                TEST_SESSION_ID,
+                encryptedClaimResponse,
+                ImmutableList.of(applicationKey1, applicationKey2));
+
+        assertThat(recoveredKeys).hasSize(1);
+        assertThat(recoveredKeys.get(TEST_ALIAS2)).isEqualTo(applicationKeyBytes2);
     }
 
     @Test
