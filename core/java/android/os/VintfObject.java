@@ -80,4 +80,11 @@ public class VintfObject {
      *  ("25.1.3", ["libjpeg.so", "libbase.so"])]
      */
     public static native Map<String, String[]> getVndkSnapshots();
+
+    /**
+     * @return target FCM version, a number specified in the device manifest
+     * indicating the FCM version that the device manifest implements. Null if
+     * device manifest doesn't specify this number (for legacy devices).
+     */
+    public static native Long getTargetFrameworkCompatibilityMatrixVersion();
 }

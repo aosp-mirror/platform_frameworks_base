@@ -32,10 +32,13 @@ static jclass gString;
 static jclass gHashMapClazz;
 static jmethodID gHashMapInit;
 static jmethodID gHashMapPut;
+static jclass gLongClazz;
+static jmethodID gLongValueOf;
 
 namespace android {
 
 using vintf::HalManifest;
+using vintf::Level;
 using vintf::SchemaType;
 using vintf::VintfObject;
 using vintf::XmlConverter;
@@ -154,6 +157,14 @@ static jobject android_os_VintfObject_getVndkSnapshots(JNIEnv* env, jclass) {
     return jMap;
 }
 
+static jobject android_os_VintfObject_getTargetFrameworkCompatibilityMatrixVersion(JNIEnv* env, jclass) {
+    std::shared_ptr<const HalManifest> manifest = VintfObject::GetDeviceHalManifest();
+    if (manifest == nullptr || manifest->level() == Level::UNSPECIFIED) {
+        return nullptr;
+    }
+    return env->CallStaticObjectMethod(gLongClazz, gLongValueOf, static_cast<jlong>(manifest->level()));
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gVintfObjectMethods[] = {
@@ -163,6 +174,7 @@ static const JNINativeMethod gVintfObjectMethods[] = {
     {"getHalNamesAndVersions", "()[Ljava/lang/String;", (void*)android_os_VintfObject_getHalNamesAndVersions},
     {"getSepolicyVersion", "()Ljava/lang/String;", (void*)android_os_VintfObject_getSepolicyVersion},
     {"getVndkSnapshots", "()Ljava/util/Map;", (void*)android_os_VintfObject_getVndkSnapshots},
+    {"getTargetFrameworkCompatibilityMatrixVersion", "()Ljava/lang/Long;", (void*)android_os_VintfObject_getTargetFrameworkCompatibilityMatrixVersion},
 };
 
 const char* const kVintfObjectPathName = "android/os/VintfObject";
@@ -175,6 +187,8 @@ int register_android_os_VintfObject(JNIEnv* env)
     gHashMapInit = GetMethodIDOrDie(env, gHashMapClazz, "<init>", "()V");
     gHashMapPut = GetMethodIDOrDie(env, gHashMapClazz,
             "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+    gLongClazz = MakeGlobalRefOrDie(env, FindClassOrDie(env, "java/lang/Long"));
+    gLongValueOf = GetStaticMethodIDOrDie(env, gLongClazz, "valueOf", "(J)Ljava/lang/Long;");
 
     return RegisterMethodsOrDie(env, kVintfObjectPathName, gVintfObjectMethods,
             NELEM(gVintfObjectMethods));
