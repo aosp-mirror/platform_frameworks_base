@@ -89,6 +89,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
+import com.android.server.SystemService;
 import com.android.server.job.JobSchedulerInternal;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
@@ -102,7 +103,6 @@ import com.android.server.backup.AccountSyncSettingsBackupHelper;
 import com.android.server.content.SyncStorageEngine.AuthorityInfo;
 import com.android.server.content.SyncStorageEngine.EndPoint;
 import com.android.server.content.SyncStorageEngine.OnSyncRequestListener;
-import com.android.server.job.JobSchedulerInternal.JobStorePersistStats;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -156,18 +156,6 @@ public class SyncManager {
         LOCAL_SYNC_DELAY =
                 SystemProperties.getLong("sync.local_sync_delay", 30 * 1000 /* 30 seconds */);
     }
-
-    /**
-     * When retrying a sync for the first time use this delay. After that
-     * the retry time will double until it reached MAX_SYNC_RETRY_TIME.
-     * In milliseconds.
-     */
-    private static final long INITIAL_SYNC_RETRY_TIME_IN_MS = 30 * 1000; // 30 seconds
-
-    /**
-     * Default the max sync retry time to this value.
-     */
-    private static final long DEFAULT_MAX_SYNC_RETRY_TIME_IN_SECONDS = 60 * 60; // one hour
 
     /**
      * How long to wait before retrying a sync that failed due to one already being in progress.
@@ -449,6 +437,7 @@ public class SyncManager {
     };
 
     private final SyncHandler mSyncHandler;
+    private final SyncManagerConstants mConstants;
 
     private volatile boolean mBootCompleted = false;
     private volatile boolean mJobServiceReady = false;
@@ -616,6 +605,7 @@ public class SyncManager {
         }, mSyncHandler);
 
         mRand = new Random(System.currentTimeMillis());
+        mConstants = new SyncManagerConstants(context);
 
         IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         context.registerReceiver(mConnectivityIntentReceiver, intentFilter);
@@ -756,6 +746,14 @@ public class SyncManager {
         mSyncHandler.post(() -> mLogger.log("onStopUser: user=", userHandle));
     }
 
+    public void onBootPhase(int phase) {
+        // Note SyncManager only receives PHASE_SYSTEM_SERVICES_READY and after.
+        switch (phase) {
+            case SystemService.PHASE_SYSTEM_SERVICES_READY:
+                mConstants.start();
+                break;
+        }
+    }
 
     private void whiteListExistingSyncAdaptersIfNeeded() {
         if (!mSyncStorageEngine.shouldGrantSyncAdaptersAccountAccess()) {
@@ -903,7 +901,10 @@ public class SyncManager {
         }
         if (isLoggable) {
             Log.d(TAG, "one-time sync for: " + requestedAccount + " " + extras.toString() + " "
-                    + requestedAuthority);
+                    + requestedAuthority
+                    + " reason=" + reason
+                    + " checkIfAccountReady=" + checkIfAccountReady
+                    + " isAppStandbyExempted=" + isAppStandbyExempted);
         }
 
         AccountAndUser[] accounts = null;
@@ -1368,18 +1369,18 @@ public class SyncManager {
                 return;
             }
             // Subsequent delays are the double of the previous delay.
-            newDelayInMs = previousSettings.second * 2;
+            newDelayInMs =
+                    (long) (previousSettings.second * mConstants.getRetryTimeIncreaseFactor());
         }
         if (newDelayInMs <= 0) {
             // The initial delay is the jitterized INITIAL_SYNC_RETRY_TIME_IN_MS.
-            newDelayInMs = jitterize(INITIAL_SYNC_RETRY_TIME_IN_MS,
-                    (long)(INITIAL_SYNC_RETRY_TIME_IN_MS * 1.1));
+            final long initialRetryMs = mConstants.getInitialSyncRetryTimeInSeconds() * 1000;
+            newDelayInMs = jitterize(initialRetryMs, (long)(initialRetryMs * 1.1));
         }
 
         // Cap the delay.
-        long maxSyncRetryTimeInSeconds = Settings.Global.getLong(mContext.getContentResolver(),
-                Settings.Global.SYNC_MAX_RETRY_DELAY_IN_SECONDS,
-                DEFAULT_MAX_SYNC_RETRY_TIME_IN_SECONDS);
+        final long maxSyncRetryTimeInSeconds = mConstants.getMaxSyncRetryTimeInSeconds();
+
         if (newDelayInMs > maxSyncRetryTimeInSeconds * 1000) {
             newDelayInMs = maxSyncRetryTimeInSeconds * 1000;
         }
@@ -1930,6 +1931,7 @@ public class SyncManager {
     protected void dump(FileDescriptor fd, PrintWriter pw, boolean dumpAll) {
         final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
         dumpSyncState(ipw);
+        mConstants.dump(pw, "");
         dumpSyncAdapters(ipw);
 
         if (dumpAll) {
@@ -3573,7 +3575,13 @@ public class SyncManager {
                         reschedulePeriodicSyncH(syncOperation);
                     }
                 } else {
-                    Log.d(TAG, "failed sync operation " + syncOperation + ", " + syncResult);
+                    Log.w(TAG, "failed sync operation " + syncOperation + ", " + syncResult);
+
+                    syncOperation.retries++;
+                    if (syncOperation.retries > mConstants.getMaxRetriesWithAppStandbyExemption()) {
+                        syncOperation.isAppStandbyExempted = false;
+                    }
+
                     // the operation failed so increase the backoff time
                     increaseBackoffSetting(syncOperation.target);
                     if (!syncOperation.isPeriodic) {

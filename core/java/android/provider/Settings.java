@@ -10505,6 +10505,16 @@ public final class Settings {
         public static final String BATTERY_STATS_CONSTANTS = "battery_stats_constants";
 
         /**
+         * SyncManager specific settings.
+         *
+         * <p>
+         * Type: string
+         * @hide
+         * @see com.android.server.content.SyncManagerConstants
+         */
+        public static final String SYNC_MANAGER_CONSTANTS = "sync_manager_constants";
+
+        /**
          * Whether or not App Standby feature is enabled. This controls throttling of apps
          * based on usage patterns and predictions.
          * Type: int (0 for false, 1 for true)
