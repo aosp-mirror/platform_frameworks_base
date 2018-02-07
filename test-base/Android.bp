@@ -24,6 +24,9 @@ java_library {
 
     srcs: ["src/**/*.java"],
 
+    // Needs to be consistent with the repackaged version of this make target.
+    java_version: "1.8",
+
     no_framework_libs: true,
     hostdex: true,
     libs: [
@@ -55,21 +58,22 @@ java_library_static {
     name: "repackaged.android.test.base",
 
     static_libs: ["android.test.base"],
-
     no_framework_libs: true,
     libs: [
         "framework",
     ],
 
     jarjar_rules: "jarjar-rules.txt",
+    // Pin java_version until jarjar is certified to support later versions. http://b/72703434
+    java_version: "1.8",
 }
 
 // Build the android.test.base-minus-junit library
 // ===============================================
 // This contains the android.test classes from android.test.base plus
 // the com.android.internal.util.Predicate[s] classes. This is only
-// intended for inclusion in the android.test.legacy static library and
-// must not be used elsewhere.
+// intended for inclusion in the android.test.legacy and
+// legacy-android-test static libraries and must not be used elsewhere.
 java_library_static {
     name: "android.test.base-minus-junit",
 

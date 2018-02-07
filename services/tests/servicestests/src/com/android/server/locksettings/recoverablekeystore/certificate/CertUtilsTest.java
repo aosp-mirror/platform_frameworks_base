@@ -146,14 +146,14 @@ public final class CertUtilsTest {
     @Test
     public void getXmlNodeContents_singleLevel_succeeds() throws Exception {
         Element root = CertUtils.getXmlRootNode(XML_STR.getBytes(UTF_8));
-        assertThat(CertUtils.getXmlNodeContents(CertUtils.MustExist.FALSE, root, "node1"))
+        assertThat(CertUtils.getXmlNodeContents(CertUtils.MUST_EXIST_UNENFORCED, root, "node1"))
                 .containsExactly("node1-1", "node1-2");
     }
 
     @Test
     public void getXmlNodeContents_multipleLevels_succeeds() throws Exception {
         Element root = CertUtils.getXmlRootNode(XML_STR.getBytes(UTF_8));
-        assertThat(CertUtils.getXmlNodeContents(CertUtils.MustExist.FALSE, root, "node2", "node1"))
+        assertThat(CertUtils.getXmlNodeContents(CertUtils.MUST_EXIST_UNENFORCED, root, "node2", "node1"))
                 .containsExactly("node2-node1-1", "node2-node1-2", "node2-node1-3");
     }
 
@@ -162,7 +162,7 @@ public final class CertUtilsTest {
         Element root = CertUtils.getXmlRootNode(XML_STR.getBytes(UTF_8));
         assertThat(
                 CertUtils.getXmlNodeContents(
-                        CertUtils.MustExist.FALSE, root, "node2", "node-not-exist"))
+                        CertUtils.MUST_EXIST_UNENFORCED, root, "node2", "node-not-exist"))
                 .isEmpty();
     }
 
@@ -174,7 +174,7 @@ public final class CertUtilsTest {
                         CertParsingException.class,
                         () ->
                                 CertUtils.getXmlNodeContents(
-                                        CertUtils.MustExist.AT_LEAST_ONE, root, "node2",
+                                        CertUtils.MUST_EXIST_AT_LEAST_ONE, root, "node2",
                                         "node-not-exist"));
         assertThat(expected.getMessage()).contains("must contain at least one");
     }
@@ -187,7 +187,7 @@ public final class CertUtilsTest {
                         CertParsingException.class,
                         () ->
                                 CertUtils.getXmlNodeContents(
-                                        CertUtils.MustExist.EXACTLY_ONE, root, "node-not-exist",
+                                        CertUtils.MUST_EXIST_EXACTLY_ONE, root, "node-not-exist",
                                         "node1"));
         assertThat(expected.getMessage()).contains("must contain exactly one");
     }
@@ -200,7 +200,7 @@ public final class CertUtilsTest {
                         CertParsingException.class,
                         () ->
                                 CertUtils.getXmlNodeContents(
-                                        CertUtils.MustExist.EXACTLY_ONE, root, "node2", "node1"));
+                                        CertUtils.MUST_EXIST_EXACTLY_ONE, root, "node2", "node1"));
         assertThat(expected.getMessage()).contains("must contain exactly one");
     }
 

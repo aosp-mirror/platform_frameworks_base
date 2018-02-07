@@ -41,6 +41,11 @@ const ConfigKey kConfigKey(0, 12345);
 
 const int TagId = 1;
 
+const HashableDimensionKey eventKey = getMockedDimensionKey(TagId, 0, "1");
+const std::vector<HashableDimensionKey> conditionKey = {getMockedDimensionKey(TagId, 4, "1")};
+const HashableDimensionKey key1 = getMockedDimensionKey(TagId, 1, "1");
+const HashableDimensionKey key2 = getMockedDimensionKey(TagId, 1, "2");
+const uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
 TEST(MaxDurationTrackerTest, TestSimpleMaxDuration) {
     const MetricDimensionKey eventKey = getMockedMetricDimensionKey(TagId, 0, "1");
@@ -54,11 +59,13 @@ TEST(MaxDurationTrackerTest, TestSimpleMaxDuration) {
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
 
     uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
+    uint64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
+    uint64_t bucketNum = 0;
 
     int64_t metricId = 1;
     MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, -1, dimensionInCondition,
-                               false, bucketStartTimeNs, bucketSizeNs, false, {});
+                               false, bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
+                               false, {});
 
     tracker.noteStart(key1, true, bucketStartTimeNs, ConditionKey());
     // Event starts again. This would not change anything as it already starts.
@@ -87,12 +94,15 @@ TEST(MaxDurationTrackerTest, TestStopAll) {
 
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
 
-    uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
+    uint64_t bucketStartTimeNs = 10000000000;
+    uint64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
+    uint64_t bucketNum = 0;
 
     int64_t metricId = 1;
     MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, -1, dimensionInCondition,
-                               false, bucketStartTimeNs, bucketSizeNs, false, {});
+                               false, bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
+                               false, {});
 
     tracker.noteStart(key1, true, bucketStartTimeNs + 1, ConditionKey());
 
@@ -101,15 +111,14 @@ TEST(MaxDurationTrackerTest, TestStopAll) {
     tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 40, &buckets);
     tracker.noteStopAll(bucketStartTimeNs + bucketSizeNs + 40);
     EXPECT_TRUE(tracker.mInfos.empty());
-
-    EXPECT_TRUE(buckets.find(eventKey) != buckets.end());
-    EXPECT_EQ(1u, buckets[eventKey].size());
-    EXPECT_EQ(bucketSizeNs - 1, buckets[eventKey][0].mDuration);
+    EXPECT_TRUE(buckets.find(eventKey) == buckets.end());
 
     tracker.flushIfNeeded(bucketStartTimeNs + 3 * bucketSizeNs + 40, &buckets);
-    EXPECT_EQ(2u, buckets[eventKey].size());
-    EXPECT_EQ(bucketSizeNs - 1, buckets[eventKey][0].mDuration);
-    EXPECT_EQ(40ULL, buckets[eventKey][1].mDuration);
+    EXPECT_TRUE(buckets.find(eventKey) != buckets.end());
+    EXPECT_EQ(1u, buckets[eventKey].size());
+    EXPECT_EQ(bucketSizeNs + 40 - 1, buckets[eventKey][0].mDuration);
+    EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, buckets[eventKey][0].mBucketStartNs);
+    EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs, buckets[eventKey][0].mBucketEndNs);
 }
 
 TEST(MaxDurationTrackerTest, TestCrossBucketBoundary) {
@@ -122,12 +131,15 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary) {
 
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
 
-    uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
+    uint64_t bucketStartTimeNs = 10000000000;
+    uint64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
+    uint64_t bucketNum = 0;
 
     int64_t metricId = 1;
     MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, -1, dimensionInCondition,
-                               false, bucketStartTimeNs, bucketSizeNs, false, {});
+                               false, bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
+                               false, {});
 
     // The event starts.
     tracker.noteStart(DEFAULT_DIMENSION_KEY, true, bucketStartTimeNs + 1, ConditionKey());
@@ -137,14 +149,18 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary) {
                       ConditionKey());
 
     // The event stops at early 4th bucket.
+    // Notestop is called from DurationMetricProducer's onMatchedLogEvent, which calls
+    // flushIfneeded.
     tracker.flushIfNeeded(bucketStartTimeNs + (3 * bucketSizeNs) + 20, &buckets);
     tracker.noteStop(DEFAULT_DIMENSION_KEY, bucketStartTimeNs + (3 * bucketSizeNs) + 20,
                      false /*stop all*/);
-    EXPECT_TRUE(buckets.find(eventKey) != buckets.end());
-    EXPECT_EQ(3u, buckets[eventKey].size());
-    EXPECT_EQ((unsigned long long)(bucketSizeNs - 1), buckets[eventKey][0].mDuration);
-    EXPECT_EQ((unsigned long long)bucketSizeNs, buckets[eventKey][1].mDuration);
-    EXPECT_EQ((unsigned long long)bucketSizeNs, buckets[eventKey][2].mDuration);
+    EXPECT_TRUE(buckets.find(eventKey) == buckets.end());
+
+    tracker.flushIfNeeded(bucketStartTimeNs + 4 * bucketSizeNs, &buckets);
+    EXPECT_EQ(1u, buckets[eventKey].size());
+    EXPECT_EQ((3 * bucketSizeNs) + 20 - 1, buckets[eventKey][0].mDuration);
+    EXPECT_EQ(bucketStartTimeNs + 3 * bucketSizeNs, buckets[eventKey][0].mBucketStartNs);
+    EXPECT_EQ(bucketStartTimeNs + 4 * bucketSizeNs, buckets[eventKey][0].mBucketEndNs);
 }
 
 TEST(MaxDurationTrackerTest, TestCrossBucketBoundary_nested) {
@@ -157,12 +173,15 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary_nested) {
 
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
 
-    uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
+    uint64_t bucketStartTimeNs = 10000000000;
+    uint64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
+    uint64_t bucketNum = 0;
 
     int64_t metricId = 1;
     MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, -1, dimensionInCondition,
-                               true, bucketStartTimeNs, bucketSizeNs, false, {});
+                               true, bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
+                               false, {});
 
     // 2 starts
     tracker.noteStart(DEFAULT_DIMENSION_KEY, true, bucketStartTimeNs + 1, ConditionKey());
@@ -171,21 +190,16 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary_nested) {
     tracker.noteStop(DEFAULT_DIMENSION_KEY, bucketStartTimeNs + 20, false /*stop all*/);
 
     tracker.flushIfNeeded(bucketStartTimeNs + (2 * bucketSizeNs) + 1, &buckets);
-
-    EXPECT_TRUE(buckets.find(eventKey) != buckets.end());
-    EXPECT_EQ(2u, buckets[eventKey].size());
-    EXPECT_EQ(bucketSizeNs - 1, buckets[eventKey][0].mDuration);
-    EXPECT_EQ(bucketSizeNs, buckets[eventKey][1].mDuration);
+    // Because of nesting, still not stopped.
+    EXPECT_TRUE(buckets.find(eventKey) == buckets.end());
 
     // real stop now.
     tracker.noteStop(DEFAULT_DIMENSION_KEY,
                      bucketStartTimeNs + (2 * bucketSizeNs) + 5, false);
     tracker.flushIfNeeded(bucketStartTimeNs + (3 * bucketSizeNs) + 1, &buckets);
 
-    EXPECT_EQ(3u, buckets[eventKey].size());
-    EXPECT_EQ(bucketSizeNs - 1, buckets[eventKey][0].mDuration);
-    EXPECT_EQ(bucketSizeNs, buckets[eventKey][1].mDuration);
-    EXPECT_EQ(5ULL, buckets[eventKey][2].mDuration);
+    EXPECT_EQ(1u, buckets[eventKey].size());
+    EXPECT_EQ(2 * bucketSizeNs + 5 - 1, buckets[eventKey][0].mDuration);
 }
 
 TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition) {
@@ -204,14 +218,17 @@ TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition) {
 
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
 
-    uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
+    uint64_t bucketStartTimeNs = 10000000000;
+    uint64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
+    uint64_t bucketNum = 0;
+    uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
     int64_t durationTimeNs = 2 * 1000;
 
     int64_t metricId = 1;
     MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, dimensionInCondition,
-                               false, bucketStartTimeNs, bucketSizeNs, true, {});
+                               false, bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
+                               true, {});
     EXPECT_TRUE(tracker.mAnomalyTrackers.empty());
 
     tracker.noteStart(key1, true, eventStartTimeNs, conditionKey1);
@@ -224,45 +241,6 @@ TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition) {
     EXPECT_TRUE(buckets.find(eventKey) != buckets.end());
     EXPECT_EQ(1u, buckets[eventKey].size());
     EXPECT_EQ(5ULL, buckets[eventKey][0].mDuration);
-}
-
-TEST(MaxDurationTrackerTest, TestAnomalyDetection) {
-    const MetricDimensionKey eventKey = getMockedMetricDimensionKey(TagId, 0, "1");
-    const HashableDimensionKey key1 = getMockedDimensionKey(TagId, 1, "1");
-    const HashableDimensionKey key2 = getMockedDimensionKey(TagId, 1, "2");
-    FieldMatcher dimensionInCondition;
-    int64_t metricId = 1;
-    Alert alert;
-    alert.set_id(101);
-    alert.set_metric_id(metricId);
-    alert.set_trigger_if_sum_gt(32 * NS_PER_SEC);
-    alert.set_num_buckets(2);
-    const int32_t refPeriodSec = 1;
-    alert.set_refractory_period_secs(refPeriodSec);
-
-    unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
-    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
-
-    uint64_t bucketStartTimeNs = 10 * NS_PER_SEC;
-    uint64_t eventStartTimeNs = bucketStartTimeNs + NS_PER_SEC + 1;
-    uint64_t bucketSizeNs = 30 * NS_PER_SEC;
-
-    sp<DurationAnomalyTracker> anomalyTracker = new DurationAnomalyTracker(alert, kConfigKey);
-    MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, -1, dimensionInCondition,
-                               true, bucketStartTimeNs, bucketSizeNs, false, {anomalyTracker});
-
-    tracker.noteStart(key1, true, eventStartTimeNs, ConditionKey());
-    tracker.noteStop(key1, eventStartTimeNs + 10, false);
-    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(eventKey), 0U);
-    EXPECT_EQ(10LL, tracker.mDuration);
-
-    tracker.noteStart(key2, true, eventStartTimeNs + 20, ConditionKey());
-    tracker.flushIfNeeded(eventStartTimeNs + 2 * bucketSizeNs + 3 * NS_PER_SEC, &buckets);
-    tracker.noteStop(key2, eventStartTimeNs + 2 * bucketSizeNs + 3 * NS_PER_SEC, false);
-    EXPECT_EQ((long long)(4 * NS_PER_SEC + 1LL), tracker.mDuration);
-
-    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(eventKey),
-              (eventStartTimeNs + 2 * bucketSizeNs) / NS_PER_SEC  + 3 + refPeriodSec);
 }
 
 }  // namespace statsd

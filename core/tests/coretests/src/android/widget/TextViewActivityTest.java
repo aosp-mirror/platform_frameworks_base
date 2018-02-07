@@ -66,6 +66,7 @@ import android.support.test.espresso.action.EspressoKey;
 import android.support.test.filters.MediumTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
+import android.support.test.uiautomator.UiDevice;
 import android.test.suitebuilder.annotation.Suppress;
 import android.text.InputType;
 import android.text.Selection;
@@ -311,15 +312,69 @@ public class TextViewActivityTest {
 
     @Test
     public void testToolbarAppearsAfterLinkClicked() throws Throwable {
-        runToolbarAppearsAfterLinkClickedTest(R.id.textview);
+        TextLinks.TextLink textLink = addLinkifiedTextToTextView(R.id.textview);
+        int position = (textLink.getStart() + textLink.getEnd()) / 2;
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(position));
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarIsDisplayed();
+
     }
 
     @Test
     public void testToolbarAppearsAfterLinkClickedNonselectable() throws Throwable {
-        runToolbarAppearsAfterLinkClickedTest(R.id.nonselectable_textview);
+        TextLinks.TextLink textLink = addLinkifiedTextToTextView(R.id.nonselectable_textview);
+        int position = (textLink.getStart() + textLink.getEnd()) / 2;
+        onView(withId(R.id.nonselectable_textview)).perform(clickOnTextAtIndex(position));
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarIsDisplayed();
     }
 
-    private void runToolbarAppearsAfterLinkClickedTest(int id) throws Throwable {
+    @Test
+    public void testSelectionRemovedWhenNonselectableTextLosesFocus() throws Throwable {
+        // Add a link to both selectable and nonselectable TextViews:
+        TextLinks.TextLink textLink = addLinkifiedTextToTextView(R.id.textview);
+        int selectablePosition = (textLink.getStart() + textLink.getEnd()) / 2;
+        textLink = addLinkifiedTextToTextView(R.id.nonselectable_textview);
+        int nonselectablePosition = (textLink.getStart() + textLink.getEnd()) / 2;
+        TextView selectableTextView = mActivity.findViewById(R.id.textview);
+        TextView nonselectableTextView = mActivity.findViewById(R.id.nonselectable_textview);
+
+        onView(withId(R.id.nonselectable_textview))
+                .perform(clickOnTextAtIndex(nonselectablePosition));
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarIsDisplayed();
+        assertTrue(nonselectableTextView.hasSelection());
+
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(selectablePosition));
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarIsDisplayed();
+
+        assertTrue(selectableTextView.hasSelection());
+        assertFalse(nonselectableTextView.hasSelection());
+    }
+
+    @Test
+    public void testSelectionRemovedFromNonselectableTextWhenWindowLosesFocus() throws Throwable {
+        TextLinks.TextLink textLink = addLinkifiedTextToTextView(R.id.nonselectable_textview);
+        int nonselectablePosition = (textLink.getStart() + textLink.getEnd()) / 2;
+        TextView nonselectableTextView = mActivity.findViewById(R.id.nonselectable_textview);
+
+        onView(withId(R.id.nonselectable_textview))
+                .perform(clickOnTextAtIndex(nonselectablePosition));
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarIsDisplayed();
+        assertTrue(nonselectableTextView.hasSelection());
+
+        UiDevice device = UiDevice.getInstance(mInstrumentation);
+        device.openNotification();
+        Thread.sleep(2000);
+        device.pressBack();
+        Thread.sleep(2000);
+
+        assertFalse(nonselectableTextView.hasSelection());
+    }
+
+    private TextLinks.TextLink addLinkifiedTextToTextView(int id) throws Throwable {
         TextView textView = mActivity.findViewById(id);
         useSystemDefaultTextClassifier();
         TextClassificationManager textClassificationManager =
@@ -338,11 +393,7 @@ public class TextViewActivityTest {
         // Wait for the UI thread to refresh
         Thread.sleep(1000);
 
-        TextLinks.TextLink textLink = links.getLinks().iterator().next();
-        int position = (textLink.getStart() + textLink.getEnd()) / 2;
-        onView(withId(id)).perform(clickOnTextAtIndex(position));
-        sleepForFloatingToolbarPopup();
-        assertFloatingToolbarIsDisplayed();
+        return links.getLinks().iterator().next();
     }
 
     @Test

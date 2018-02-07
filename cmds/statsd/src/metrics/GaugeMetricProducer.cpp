@@ -191,8 +191,18 @@ void GaugeMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS, (long long)dumpTimeNs);
 
     mPastBuckets.clear();
-    mStartTimeNs = mCurrentBucketStartTimeNs;
     // TODO: Clear mDimensionKeyMap once the report is dumped.
+}
+
+void GaugeMetricProducer::pullLocked() {
+    vector<std::shared_ptr<LogEvent>> allData;
+    if (!mStatsPullerManager->Pull(mPullTagId, &allData)) {
+        ALOGE("Stats puller failed for tag: %d", mPullTagId);
+        return;
+    }
+    for (const auto& data : allData) {
+        onMatchedLogEventLocked(0, *data);
+    }
 }
 
 void GaugeMetricProducer::onConditionChangedLocked(const bool conditionMet,
@@ -326,7 +336,6 @@ void GaugeMetricProducer::onMatchedLogEventInternalLocked(
 }
 
 void GaugeMetricProducer::updateCurrentSlicedBucketForAnomaly() {
-    mCurrentSlicedBucketForAnomaly->clear();
     status_t err = NO_ERROR;
     for (const auto& slice : *mCurrentSlicedBucket) {
         if (slice.second.empty() || slice.second.front().mFields->empty()) {
@@ -349,42 +358,57 @@ void GaugeMetricProducer::updateCurrentSlicedBucketForAnomaly() {
 // if data is pushed, onMatchedLogEvent will only be called through onConditionChanged() inside
 // the GaugeMetricProducer while holding the lock.
 void GaugeMetricProducer::flushIfNeededLocked(const uint64_t& eventTimeNs) {
-    if (eventTimeNs < mCurrentBucketStartTimeNs + mBucketSizeNs) {
+    uint64_t currentBucketEndTimeNs = getCurrentBucketEndTimeNs();
+
+    if (eventTimeNs < currentBucketEndTimeNs) {
         VLOG("eventTime is %lld, less than next bucket start time %lld", (long long)eventTimeNs,
              (long long)(mCurrentBucketStartTimeNs + mBucketSizeNs));
         return;
     }
 
+    flushCurrentBucketLocked(eventTimeNs);
+
+    // Adjusts the bucket start and end times.
+    int64_t numBucketsForward = 1 + (eventTimeNs - currentBucketEndTimeNs) / mBucketSizeNs;
+    mCurrentBucketStartTimeNs = currentBucketEndTimeNs + (numBucketsForward - 1) * mBucketSizeNs;
+    mCurrentBucketNum += numBucketsForward;
+    VLOG("metric %lld: new bucket start time: %lld", (long long)mMetricId,
+         (long long)mCurrentBucketStartTimeNs);
+}
+
+void GaugeMetricProducer::flushCurrentBucketLocked(const uint64_t& eventTimeNs) {
+    uint64_t fullBucketEndTimeNs = getCurrentBucketEndTimeNs();
+
     GaugeBucket info;
     info.mBucketStartNs = mCurrentBucketStartTimeNs;
-    info.mBucketEndNs = mCurrentBucketStartTimeNs + mBucketSizeNs;
+    if (eventTimeNs < fullBucketEndTimeNs) {
+        info.mBucketEndNs = eventTimeNs;
+    } else {
+        info.mBucketEndNs = fullBucketEndTimeNs;
+    }
     info.mBucketNum = mCurrentBucketNum;
 
     for (const auto& slice : *mCurrentSlicedBucket) {
         info.mGaugeAtoms = slice.second;
         auto& bucketList = mPastBuckets[slice.first];
         bucketList.push_back(info);
-        VLOG("gauge metric %lld, dump key value: %s",
-            (long long)mMetricId, slice.first.c_str());
+        VLOG("gauge metric %lld, dump key value: %s", (long long)mMetricId, slice.first.c_str());
     }
 
-    // Reset counters
+    // If we have anomaly trackers, we need to update the partial bucket values.
     if (mAnomalyTrackers.size() > 0) {
         updateCurrentSlicedBucketForAnomaly();
-        for (auto& tracker : mAnomalyTrackers) {
-            tracker->addPastBucket(mCurrentSlicedBucketForAnomaly, mCurrentBucketNum);
+
+        if (eventTimeNs > fullBucketEndTimeNs) {
+            // This is known to be a full bucket, so send this data to the anomaly tracker.
+            for (auto& tracker : mAnomalyTrackers) {
+                tracker->addPastBucket(mCurrentSlicedBucketForAnomaly, mCurrentBucketNum);
+            }
+            mCurrentSlicedBucketForAnomaly = std::make_shared<DimToValMap>();
         }
     }
 
-    mCurrentSlicedBucketForAnomaly = std::make_shared<DimToValMap>();
     mCurrentSlicedBucket = std::make_shared<DimToGaugeAtomsMap>();
-
-    // Adjusts the bucket start time
-    int64_t numBucketsForward = (eventTimeNs - mCurrentBucketStartTimeNs) / mBucketSizeNs;
-    mCurrentBucketStartTimeNs = mCurrentBucketStartTimeNs + numBucketsForward * mBucketSizeNs;
-    mCurrentBucketNum += numBucketsForward;
-    VLOG("metric %lld: new bucket start time: %lld", (long long)mMetricId,
-         (long long)mCurrentBucketStartTimeNs);
 }
 
 size_t GaugeMetricProducer::byteSizeLocked() const {

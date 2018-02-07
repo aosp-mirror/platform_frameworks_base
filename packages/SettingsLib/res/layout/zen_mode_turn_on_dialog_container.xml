@@ -22,25 +22,40 @@
             android:fillViewport ="true"
             android:orientation="vertical">
 
-    <com.android.settingslib.notification.ZenRadioLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/zen_conditions"
+    <LinearLayout
+        android:id="@+id/dialog_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="4dp"
-        android:layout_marginStart="4dp"
-        android:paddingBottom="4dp"
-        android:orientation="horizontal">
-        <RadioGroup
-            android:id="@+id/zen_radio_buttons"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <LinearLayout
-            android:id="@+id/zen_radio_buttons_content"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:orientation="vertical"/>
-    </com.android.settingslib.notification.ZenRadioLayout>
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <com.android.settingslib.notification.ZenRadioLayout
+            android:id="@+id/zen_conditions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginStart="4dp"
+            android:paddingBottom="4dp"
+            android:orientation="horizontal">
+            <RadioGroup
+                android:id="@+id/zen_radio_buttons"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <LinearLayout
+                android:id="@+id/zen_radio_buttons_content"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:orientation="vertical"/>
+        </com.android.settingslib.notification.ZenRadioLayout>
+
+        <TextView
+            android:id="@+id/zen_alarm_warning"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="18dp"
+            android:layout_marginEnd="16dp"
+            android:textDirection="locale"
+            android:textColor="?android:attr/colorError"/>
+    </LinearLayout>
 
 </ScrollView>

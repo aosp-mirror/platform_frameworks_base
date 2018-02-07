@@ -26,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.android.internal.widget.MessagingImageMessage;
 import com.android.internal.widget.MessagingPropertyAnimator;
 import com.android.internal.widget.ViewClippingUtil;
 import com.android.systemui.Interpolators;
@@ -80,7 +81,7 @@ public class TransformState {
     private boolean mSameAsAny;
     private float mTransformationEndY = UNDEFINED;
     private float mTransformationEndX = UNDEFINED;
-    private Interpolator mDefaultInterpolator = Interpolators.FAST_OUT_SLOW_IN;
+    protected Interpolator mDefaultInterpolator = Interpolators.FAST_OUT_SLOW_IN;
 
     public void initFrom(View view, TransformInfo transformInfo) {
         mTransformedView = view;
@@ -131,7 +132,7 @@ public class TransformState {
         transformViewFrom(otherState, TRANSFORM_Y, null, transformationAmount);
     }
 
-    private void transformViewFrom(TransformState otherState, int transformationFlags,
+    protected void transformViewFrom(TransformState otherState, int transformationFlags,
             ViewTransformationHelper.CustomTransformation customTransformation,
             float transformationAmount) {
         final View transformedView = mTransformedView;
@@ -446,6 +447,11 @@ public class TransformState {
         }
         if (view.getId() == com.android.internal.R.id.notification_messaging) {
             MessagingLayoutTransformState result = MessagingLayoutTransformState.obtain();
+            result.initFrom(view, transformInfo);
+            return result;
+        }
+        if (view instanceof MessagingImageMessage) {
+            MessagingImageTransformState result = MessagingImageTransformState.obtain();
             result.initFrom(view, transformInfo);
             return result;
         }

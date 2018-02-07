@@ -262,6 +262,18 @@
     <!-- The spacing between messages in Notification.MessagingStyle -->
     <dimen name="notification_messaging_spacing">6dp</dimen>
 
+    <!-- The rounding for messaging images -->
+    <dimen name="messaging_image_rounding">4dp</dimen>
+
+    <!-- The minimum size for any image in messaging style in order to be displayed -->
+    <dimen name="messaging_image_min_size">44dp</dimen>
+
+    <!-- The maximum size for any image in messaging style in order to be displayed -->
+    <dimen name="messaging_image_max_height">136dp</dimen>
+
+    <!-- Extra spacing before and after images in messaging style -->
+    <dimen name="messaging_image_extra_spacing">8dp</dimen>
+
     <!-- Preferred width and height of the search view. -->
     <dimen name="search_view_preferred_width">320dip</dimen>
     <dimen name="search_view_preferred_height">48dip</dimen>

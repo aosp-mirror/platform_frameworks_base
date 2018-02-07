@@ -8389,10 +8389,10 @@ public final class Settings {
         private static final Validator POWER_SOUNDS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
-         * URI for the "wireless charging started" sound.
+         * URI for the "wireless charging started" and "wired charging started" sound.
          * @hide
          */
-        public static final String WIRELESS_CHARGING_STARTED_SOUND =
+        public static final String CHARGING_STARTED_SOUND =
                 "wireless_charging_started_sound";
 
         /**
@@ -10313,6 +10313,16 @@ public final class Settings {
         * @hide
         */
         public static final String SYS_VDSO = "sys_vdso";
+
+        /**
+        * Uid CpuPower global setting. This links the uid.cpupower system property.
+        * The following values are supported:
+        * 0 -> /proc/uid_cpupower/* are disabled
+        * 1 -> /proc/uid_cpupower/* are enabled
+        * Any other value defaults to enabled.
+        * @hide
+        */
+        public static final String UID_CPUPOWER = "uid_cpupower";
 
         /**
          * An integer to reduce the FPS by this factor. Only for experiments. Need to reboot the

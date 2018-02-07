@@ -211,6 +211,8 @@ class WindowStateAnimator {
 
     private final Rect mTmpSize = new Rect();
 
+    private final SurfaceControl.Transaction mReparentTransaction = new SurfaceControl.Transaction();
+
     WindowStateAnimator(final WindowState win) {
         final WindowManagerService service = win.mService;
 
@@ -371,9 +373,9 @@ class WindowStateAnimator {
                 // child layers need to be reparented to the new surface to make this
                 // transparent to the app.
                 if (mWin.mAppToken == null || mWin.mAppToken.isRelaunching() == false) {
-                    SurfaceControl.openTransaction();
-                    mPendingDestroySurface.reparentChildrenInTransaction(mSurfaceController);
-                    SurfaceControl.closeTransaction();
+                    mReparentTransaction.reparentChildren(mPendingDestroySurface.mSurfaceControl,
+                            mSurfaceController.mSurfaceControl.getHandle())
+                            .apply();
                 }
             }
         }
@@ -587,7 +589,7 @@ class WindowStateAnimator {
                         if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
                             WindowManagerService.logSurface(mWin, "DESTROY PENDING", true);
                         }
-                        mPendingDestroySurface.destroyInTransaction();
+                        mPendingDestroySurface.destroyNotInTransaction();
                     }
                     mPendingDestroySurface = mSurfaceController;
                 }
@@ -624,7 +626,7 @@ class WindowStateAnimator {
                 if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
                     WindowManagerService.logSurface(mWin, "DESTROY PENDING", true);
                 }
-                mPendingDestroySurface.destroyInTransaction();
+                mPendingDestroySurface.destroyNotInTransaction();
                 // Don't hide wallpaper if we're destroying a deferred surface
                 // after a surface mode change.
                 if (!mDestroyPreservedSurfaceUponRedraw) {
@@ -1419,7 +1421,7 @@ class WindowStateAnimator {
     void destroySurface() {
         try {
             if (mSurfaceController != null) {
-                mSurfaceController.destroyInTransaction();
+                mSurfaceController.destroyNotInTransaction();
             }
         } catch (RuntimeException e) {
             Slog.w(TAG, "Exception thrown when destroying surface " + this

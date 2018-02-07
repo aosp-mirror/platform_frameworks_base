@@ -94,7 +94,7 @@ public final class SigXml {
             throws CertParsingException {
         List<String> contents =
                 CertUtils.getXmlNodeContents(
-                        CertUtils.MustExist.FALSE,
+                        CertUtils.MUST_EXIST_UNENFORCED,
                         rootNode,
                         INTERMEDIATE_CERT_LIST_TAG,
                         INTERMEDIATE_CERT_ITEM_TAG);
@@ -108,14 +108,14 @@ public final class SigXml {
     private static X509Certificate parseSignerCert(Element rootNode) throws CertParsingException {
         List<String> contents =
                 CertUtils.getXmlNodeContents(
-                        CertUtils.MustExist.EXACTLY_ONE, rootNode, SIGNER_CERT_NODE_TAG);
+                        CertUtils.MUST_EXIST_EXACTLY_ONE, rootNode, SIGNER_CERT_NODE_TAG);
         return CertUtils.decodeCert(CertUtils.decodeBase64(contents.get(0)));
     }
 
     private static byte[] parseFileSignature(Element rootNode) throws CertParsingException {
         List<String> contents =
                 CertUtils.getXmlNodeContents(
-                        CertUtils.MustExist.EXACTLY_ONE, rootNode, SIGNATURE_NODE_TAG);
+                        CertUtils.MUST_EXIST_EXACTLY_ONE, rootNode, SIGNATURE_NODE_TAG);
         return CertUtils.decodeBase64(contents.get(0));
     }
 }

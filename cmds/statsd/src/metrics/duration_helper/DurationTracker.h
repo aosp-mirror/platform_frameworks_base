@@ -63,7 +63,8 @@ public:
     DurationTracker(const ConfigKey& key, const int64_t& id, const MetricDimensionKey& eventKey,
                     sp<ConditionWizard> wizard, int conditionIndex,
                     const FieldMatcher& dimensionInCondition, bool nesting,
-                    uint64_t currentBucketStartNs, uint64_t bucketSizeNs, bool conditionSliced,
+                    uint64_t currentBucketStartNs, uint64_t currentBucketNum, uint64_t startTimeNs,
+                    uint64_t bucketSizeNs, bool conditionSliced,
                     const std::vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
         : mConfigKey(key),
           mTrackerId(id),
@@ -75,7 +76,9 @@ public:
           mNested(nesting),
           mCurrentBucketStartTimeNs(currentBucketStartNs),
           mDuration(0),
-          mCurrentBucketNum(0),
+          mDurationFullBucket(0),
+          mCurrentBucketNum(currentBucketNum),
+          mStartTimeNs(startTimeNs),
           mConditionSliced(conditionSliced),
           mAnomalyTrackers(anomalyTrackers){};
 
@@ -96,6 +99,12 @@ public:
     // events, so that the owner can safely remove the tracker.
     virtual bool flushIfNeeded(
             uint64_t timestampNs,
+            std::unordered_map<MetricDimensionKey, std::vector<DurationBucket>>* output) = 0;
+
+    // Should only be called during an app upgrade or from this tracker's flushIfNeeded. If from
+    // an app upgrade, we assume that we're trying to form a partial bucket.
+    virtual bool flushCurrentBucket(
+            const uint64_t& eventTimeNs,
             std::unordered_map<MetricDimensionKey, std::vector<DurationBucket>>* output) = 0;
 
     // Predict the anomaly timestamp given the current status.
@@ -153,6 +162,13 @@ protected:
             }
         }
     }
+
+    // Convenience to compute the current bucket's end time, which is always aligned with the
+    // start time of the metric.
+    uint64_t getCurrentBucketEndTimeNs() {
+        return mStartTimeNs + (mCurrentBucketNum + 1) * mBucketSizeNs;
+    }
+
     // A reference to the DurationMetricProducer's config key.
     const ConfigKey& mConfigKey;
 
@@ -172,9 +188,13 @@ protected:
 
     uint64_t mCurrentBucketStartTimeNs;
 
-    int64_t mDuration;  // current recorded duration result
+    int64_t mDuration;  // current recorded duration result (for partial bucket)
+
+    int64_t mDurationFullBucket;  // Sum of past partial buckets in current full bucket.
 
     uint64_t mCurrentBucketNum;
+
+    const uint64_t mStartTimeNs;
 
     const bool mConditionSliced;
 

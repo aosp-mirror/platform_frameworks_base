@@ -947,7 +947,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         final int flags = lastResponse.getFlags();
         if ((flags & FillResponse.FLAG_TRACK_CONTEXT_COMMITED) == 0) {
-            if (sDebug) Slog.d(TAG, "logContextCommittedLocked(): ignored by flags " + flags);
+            if (sVerbose) Slog.v(TAG, "logContextCommittedLocked(): ignored by flags " + flags);
             return;
         }
 
@@ -1431,7 +1431,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     }
                 }
 
-                if (sDebug) Slog.d(TAG, "Good news, everyone! All checks passed, show save UI!");
+                if (sDebug) {
+                    Slog.d(TAG, "Good news, everyone! All checks passed, show save UI for "
+                            + id + "!");
+                }
 
                 // Use handler so logContextCommitted() is logged first
                 mHandlerCaller.getHandler().post(() -> mService.logSaveShown(id, mClientState));
@@ -1455,7 +1458,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
         // Nothing changed...
         if (sDebug) {
-            Slog.d(TAG, "showSaveLocked(): with no changes, comes no responsibilities."
+            Slog.d(TAG, "showSaveLocked(" + id +"): with no changes, comes no responsibilities."
                     + "allRequiredAreNotNull=" + allRequiredAreNotEmpty
                     + ", atLeastOneChanged=" + atLeastOneChanged);
         }
@@ -1970,7 +1973,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         try {
             if (sVerbose) {
                 Slog.v(TAG, "updateTrackedIdsLocked(): " + trackedViews + " => " + fillableIds
-                        + " (triggering on " + saveTriggerId + ")");
+                        + " triggerId: " + saveTriggerId + " saveOnFinish:" + saveOnFinish);
             }
             mClient.setTrackedViews(id, toArray(trackedViews), saveOnAllViewsInvisible,
                     saveOnFinish, toArray(fillableIds), saveTriggerId);

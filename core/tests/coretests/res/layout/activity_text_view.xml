@@ -24,6 +24,9 @@
             android:id="@+id/textview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+    <Space
+        android:layout_width="1dp"
+        android:layout_height="60dp"/>
 
     <TextView
         android:id="@+id/nonselectable_textview"

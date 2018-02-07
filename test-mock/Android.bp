@@ -19,6 +19,8 @@
 java_library {
     name: "android.test.mock",
 
+    // Needs to be consistent with the repackaged version of this make target.
+    java_version: "1.8",
     srcs: ["src/**/*.java"],
 
     no_framework_libs: true,
@@ -35,4 +37,6 @@ java_library_static {
     static_libs: ["android.test.mock"],
 
     jarjar_rules: "jarjar-rules.txt",
+    // Pin java_version until jarjar is certified to support later versions. http://b/72703434
+    java_version: "1.8",
 }

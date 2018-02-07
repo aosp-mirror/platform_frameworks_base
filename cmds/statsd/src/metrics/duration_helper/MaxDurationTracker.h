@@ -28,10 +28,11 @@ namespace statsd {
 // they stop or bucket expires.
 class MaxDurationTracker : public DurationTracker {
 public:
-    MaxDurationTracker(const ConfigKey& key, const int64_t& id,
-                       const MetricDimensionKey& eventKey, sp<ConditionWizard> wizard,
-                       int conditionIndex, const FieldMatcher& dimensionInCondition, bool nesting,
-                       uint64_t currentBucketStartNs, uint64_t bucketSizeNs, bool conditionSliced,
+    MaxDurationTracker(const ConfigKey& key, const int64_t& id, const MetricDimensionKey& eventKey,
+                       sp<ConditionWizard> wizard, int conditionIndex,
+                       const FieldMatcher& dimensionInCondition, bool nesting,
+                       uint64_t currentBucketStartNs, uint64_t currentBucketNum,
+                       uint64_t startTimeNs, uint64_t bucketSizeNs, bool conditionSliced,
                        const std::vector<sp<DurationAnomalyTracker>>& anomalyTrackers);
 
     MaxDurationTracker(const MaxDurationTracker& tracker) = default;
@@ -47,6 +48,9 @@ public:
     bool flushIfNeeded(
             uint64_t timestampNs,
             std::unordered_map<MetricDimensionKey, std::vector<DurationBucket>>* output) override;
+    bool flushCurrentBucket(
+            const uint64_t& eventTimeNs,
+            std::unordered_map<MetricDimensionKey, std::vector<DurationBucket>>*) override;
 
     void onSlicedConditionMayChange(const uint64_t timestamp) override;
     void onConditionChanged(bool condition, const uint64_t timestamp) override;
@@ -68,7 +72,6 @@ private:
     FRIEND_TEST(MaxDurationTrackerTest, TestCrossBucketBoundary);
     FRIEND_TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition);
     FRIEND_TEST(MaxDurationTrackerTest, TestStopAll);
-    FRIEND_TEST(MaxDurationTrackerTest, TestAnomalyDetection);
 };
 
 }  // namespace statsd

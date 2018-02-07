@@ -21,13 +21,18 @@ option java_multiple_files = true;
 option java_outer_classname = "PrintServiceProto";
 
 import "frameworks/base/core/proto/android/content/component_name.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 message PrintServiceDumpProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Each user has a separate printer state
     repeated PrintUserStateProto userStates = 1;
 }
 
 message PrintUserStateProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Should be 0, 10, 11, 12, etc. where 0 is the owner.
     optional int32 user_id = 1;
 
@@ -51,6 +56,8 @@ message PrintUserStateProto {
 }
 
 message PrintSpoolerStateProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Is the print spooler destroyed?
     optional bool is_destroyed = 1;
 
@@ -62,6 +69,8 @@ message PrintSpoolerStateProto {
 }
 
 message PrintSpoolerInternalStateProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Print jobs
     repeated PrintJobInfoProto print_jobs = 1;
 
@@ -73,6 +82,8 @@ message PrintSpoolerInternalStateProto {
 }
 
 message PrinterCapabilitiesProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Minimum margins of the printer
     optional MarginsProto min_margins = 1;
 
@@ -90,6 +101,8 @@ message PrinterCapabilitiesProto {
 }
 
 message PrinterInfoProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // The id of the printer
     optional PrinterIdProto id = 1;
 
@@ -120,6 +133,8 @@ message PrinterInfoProto {
 }
 
 message PrinterDiscoverySessionProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Is this session destroyed?
     optional bool is_destroyed = 1;
 
@@ -140,6 +155,8 @@ message PrinterDiscoverySessionProto {
 }
 
 message InstalledPrintServiceProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Component name of the service
     optional android.content.ComponentNameProto component_name = 1;
 
@@ -154,14 +171,18 @@ message InstalledPrintServiceProto {
 }
 
 message PrinterIdProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Component name of the service that reported the printer
     optional android.content.ComponentNameProto service_name = 1;
 
     // Local id of the printer
-    optional string local_id = 2;
+    optional string local_id = 2 [ (android.privacy).dest = DEST_EXPLICIT ];
 }
 
 message ActivePrintServiceProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Component name of the service
     optional android.content.ComponentNameProto component_name = 1;
 
@@ -185,6 +206,8 @@ message ActivePrintServiceProto {
 }
 
 message MediaSizeProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Id of this media size
     optional string id = 1;
 
@@ -199,6 +222,8 @@ message MediaSizeProto {
 }
 
 message ResolutionProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Id of this resolution
     optional string id = 1;
 
@@ -213,6 +238,8 @@ message ResolutionProto {
 }
 
 message MarginsProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Space at the top
     optional int32 top_mils = 1;
 
@@ -227,6 +254,8 @@ message MarginsProto {
 }
 
 message PrintAttributesProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Media to use
     optional ResolutionProto media_size = 1;
 
@@ -270,8 +299,10 @@ message PrintAttributesProto {
 }
 
 message PrintDocumentInfoProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Name of the document to print
-    optional string name = 1;
+    optional string name = 1 [ (android.privacy).dest = DEST_EXPLICIT ];
 
     // Number of pages in the doc
     optional int32 page_count = 2;
@@ -284,6 +315,8 @@ message PrintDocumentInfoProto {
 }
 
 message PageRangeProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Start of the range
     optional int32 start = 1;
 
@@ -292,8 +325,10 @@ message PageRangeProto {
 }
 
 message PrintJobInfoProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Label of the job
-    optional string label = 1;
+    optional string label = 1 [ (android.privacy).dest = DEST_EXPLICIT ];
 
     // Id of the job
     optional string print_job_id = 2;
@@ -359,6 +394,8 @@ message PrintJobInfoProto {
 }
 
 message CachedPrintJobProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // The id of the app the job belongs to
     optional int32 app_id = 1;
 

@@ -99,6 +99,7 @@ bool SubsystemSleepStatePuller::PullInternal(vector<shared_ptr<LogEvent>>* data)
                         auto statePtr = make_shared<LogEvent>(android::util::SUBSYSTEM_SLEEP_STATE,
                                                               timestamp);
                         statePtr->write(state.name);
+                        statePtr->write("");
                         statePtr->write(state.totalTransitions);
                         statePtr->write(state.residencyInMsecSinceBoot);
                         statePtr->init();
@@ -110,7 +111,8 @@ bool SubsystemSleepStatePuller::PullInternal(vector<shared_ptr<LogEvent>>* data)
                         for (auto voter : state.voters) {
                             auto voterPtr = make_shared<LogEvent>(android::util::SUBSYSTEM_SLEEP_STATE,
                                                                   timestamp);
-                            voterPtr->write((std::string)state.name + "." + (std::string)voter.name);
+                            voterPtr->write(state.name);
+                            voterPtr->write(voter.name);
                             voterPtr->write(voter.totalNumberOfTimesVotedSinceBoot);
                             voterPtr->write(voter.totalTimeInMsecVotedForSinceBoot);
                             voterPtr->init();
@@ -144,7 +146,8 @@ bool SubsystemSleepStatePuller::PullInternal(vector<shared_ptr<LogEvent>>* data)
                                             subsystem.states[j];
                                     auto subsystemStatePtr = make_shared<LogEvent>(
                                         android::util::SUBSYSTEM_SLEEP_STATE, timestamp);
-                                    subsystemStatePtr->write((std::string)subsystem.name + "." + (std::string)state.name);
+                                    subsystemStatePtr->write(subsystem.name);
+                                    subsystemStatePtr->write(state.name);
                                     subsystemStatePtr->write(state.totalTransitions);
                                     subsystemStatePtr->write(state.residencyInMsecSinceBoot);
                                     subsystemStatePtr->init();

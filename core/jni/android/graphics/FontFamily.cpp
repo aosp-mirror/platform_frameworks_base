@@ -28,7 +28,7 @@
 #include <nativehelper/ScopedUtfChars.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_util_AssetManager.h>
-#include <androidfw/AssetManager.h>
+#include <androidfw/AssetManager2.h>
 #include "Utils.h"
 #include "FontUtils.h"
 
@@ -90,7 +90,7 @@ static void FontFamily_unref(jlong familyPtr) {
 }
 
 static bool addSkTypeface(NativeFamilyBuilder* builder, sk_sp<SkData>&& data, int ttcIndex,
-        jint givenWeight, jint givenItalic) {
+        jint weight, jint italic) {
     uirenderer::FatVector<SkFontArguments::Axis, 2> skiaAxes;
     for (const auto& axis : builder->axes) {
         skiaAxes.emplace_back(SkFontArguments::Axis{axis.axisTag, axis.value});
@@ -114,27 +114,15 @@ static bool addSkTypeface(NativeFamilyBuilder* builder, sk_sp<SkData>&& data, in
     std::shared_ptr<minikin::MinikinFont> minikinFont =
             std::make_shared<MinikinFontSkia>(std::move(face), fontPtr, fontSize, ttcIndex,
                     builder->axes);
+    minikin::Font::Builder fontBuilder(minikinFont);
 
-    int weight = givenWeight;
-    bool italic = givenItalic == 1;
-    if (givenWeight == RESOLVE_BY_FONT_TABLE || givenItalic == RESOLVE_BY_FONT_TABLE) {
-        int os2Weight;
-        bool os2Italic;
-        if (!minikin::FontFamily::analyzeStyle(minikinFont, &os2Weight, &os2Italic)) {
-            ALOGE("analyzeStyle failed. Using default style");
-            os2Weight = 400;
-            os2Italic = false;
-        }
-        if (givenWeight == RESOLVE_BY_FONT_TABLE) {
-            weight = os2Weight;
-        }
-        if (givenItalic == RESOLVE_BY_FONT_TABLE) {
-            italic = os2Italic;
-        }
+    if (weight != RESOLVE_BY_FONT_TABLE) {
+        fontBuilder.setWeight(weight);
     }
-
-    builder->fonts.push_back(minikin::Font(minikinFont,
-            minikin::FontStyle(weight, static_cast<minikin::FontStyle::Slant>(italic))));
+    if (italic != RESOLVE_BY_FONT_TABLE) {
+        fontBuilder.setSlant(static_cast<minikin::FontStyle::Slant>(italic != 0));
+    }
+    builder->fonts.push_back(fontBuilder.build());
     builder->axes.clear();
     return true;
 }
@@ -217,7 +205,8 @@ static jboolean FontFamily_addFontFromAssetManager(JNIEnv* env, jobject, jlong b
     NPE_CHECK_RETURN_ZERO(env, jpath);
 
     NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
-    AssetManager* mgr = assetManagerForJavaObject(env, jassetMgr);
+
+    Guarded<AssetManager2>* mgr = AssetManagerForJavaObject(env, jassetMgr);
     if (NULL == mgr) {
         builder->axes.clear();
         return false;
@@ -229,27 +218,33 @@ static jboolean FontFamily_addFontFromAssetManager(JNIEnv* env, jobject, jlong b
         return false;
     }
 
-    Asset* asset;
-    if (isAsset) {
-        asset = mgr->open(str.c_str(), Asset::ACCESS_BUFFER);
-    } else {
-        asset = cookie ? mgr->openNonAsset(static_cast<int32_t>(cookie), str.c_str(),
-                Asset::ACCESS_BUFFER) : mgr->openNonAsset(str.c_str(), Asset::ACCESS_BUFFER);
+    std::unique_ptr<Asset> asset;
+    {
+      ScopedLock<AssetManager2> locked_mgr(*mgr);
+      if (isAsset) {
+          asset = locked_mgr->Open(str.c_str(), Asset::ACCESS_BUFFER);
+      } else if (cookie > 0) {
+          // Valid java cookies are 1-based, but AssetManager cookies are 0-based.
+          asset = locked_mgr->OpenNonAsset(str.c_str(), static_cast<ApkAssetsCookie>(cookie - 1),
+                  Asset::ACCESS_BUFFER);
+      } else {
+          asset = locked_mgr->OpenNonAsset(str.c_str(), Asset::ACCESS_BUFFER);
+      }
     }
 
-    if (NULL == asset) {
+    if (nullptr == asset) {
         builder->axes.clear();
         return false;
     }
 
     const void* buf = asset->getBuffer(false);
     if (NULL == buf) {
-        delete asset;
         builder->axes.clear();
         return false;
     }
 
-    sk_sp<SkData> data(SkData::MakeWithProc(buf, asset->getLength(), releaseAsset, asset));
+    sk_sp<SkData> data(SkData::MakeWithProc(buf, asset->getLength(), releaseAsset,
+            asset.release()));
     return addSkTypeface(builder, std::move(data), ttcIndex, weight, isItalic);
 }
 

@@ -26,10 +26,13 @@ import android.os.Parcelable;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 
 /**
  * Describes an externally resolvable instant application. There are three states that this class
@@ -227,14 +230,25 @@ public final class InstantAppResolveInfo implements Parcelable {
      */
     @SystemApi
     public static final class InstantAppDigest implements Parcelable {
-        private static final int DIGEST_MASK = 0xfffff000;
-
+        static final int DIGEST_MASK = 0xfffff000;
         public static final InstantAppDigest UNDEFINED =
                 new InstantAppDigest(new byte[][]{}, new int[]{});
+
+        private static Random sRandom = null;
+        static {
+            try {
+                sRandom = SecureRandom.getInstance("SHA1PRNG");
+            } catch (NoSuchAlgorithmException e) {
+                // oh well
+                sRandom = new Random();
+            }
+        }
         /** Full digest of the domain hashes */
         private final byte[][] mDigestBytes;
-        /** The first 4 bytes of the domain hashes */
+        /** The first 5 bytes of the domain hashes */
         private final int[] mDigestPrefix;
+        /** The first 5 bytes of the domain hashes interspersed with random data */
+        private int[] mDigestPrefixSecure;
 
         public InstantAppDigest(@NonNull String hostName) {
             this(hostName, -1 /*maxDigests*/);
@@ -306,6 +320,7 @@ public final class InstantAppResolveInfo implements Parcelable {
                 }
             }
             mDigestPrefix = in.createIntArray();
+            mDigestPrefixSecure = in.createIntArray();
         }
 
         public byte[][] getDigestBytes() {
@@ -316,6 +331,26 @@ public final class InstantAppResolveInfo implements Parcelable {
             return mDigestPrefix;
         }
 
+        /**
+         * Returns a digest prefix with additional random prefixes interspersed.
+         * @hide
+         */
+        public int[] getDigestPrefixSecure() {
+            if (this == InstantAppResolveInfo.InstantAppDigest.UNDEFINED) {
+                return getDigestPrefix();
+            } else if (mDigestPrefixSecure == null) {
+                // let's generate some random data to intersperse throughout the set of prefixes
+                final int realSize = getDigestPrefix().length;
+                final int manufacturedSize = realSize + 10 + sRandom.nextInt(10);
+                mDigestPrefixSecure = Arrays.copyOf(getDigestPrefix(), manufacturedSize);
+                for (int i = realSize; i < manufacturedSize; i++) {
+                    mDigestPrefixSecure[i] = sRandom.nextInt() & DIGEST_MASK;
+                }
+                Arrays.sort(mDigestPrefixSecure);
+            }
+            return mDigestPrefixSecure;
+        }
+
         @Override
         public int describeContents() {
             return 0;
@@ -323,6 +358,11 @@ public final class InstantAppResolveInfo implements Parcelable {
 
         @Override
         public void writeToParcel(Parcel out, int flags) {
+            final boolean isUndefined = this == UNDEFINED;
+            out.writeBoolean(isUndefined);
+            if (isUndefined) {
+                return;
+            }
             if (mDigestBytes == null) {
                 out.writeInt(-1);
             } else {
@@ -332,6 +372,7 @@ public final class InstantAppResolveInfo implements Parcelable {
                 }
             }
             out.writeIntArray(mDigestPrefix);
+            out.writeIntArray(mDigestPrefixSecure);
         }
 
         @SuppressWarnings("hiding")
@@ -339,6 +380,9 @@ public final class InstantAppResolveInfo implements Parcelable {
                 new Parcelable.Creator<InstantAppDigest>() {
             @Override
             public InstantAppDigest createFromParcel(Parcel in) {
+                if (in.readBoolean() /* is undefined */) {
+                    return UNDEFINED;
+                }
                 return new InstantAppDigest(in);
             }
             @Override

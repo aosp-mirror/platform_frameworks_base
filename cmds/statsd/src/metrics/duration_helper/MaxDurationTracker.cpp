@@ -28,11 +28,13 @@ MaxDurationTracker::MaxDurationTracker(const ConfigKey& key, const int64_t& id,
                                        const MetricDimensionKey& eventKey,
                                        sp<ConditionWizard> wizard, int conditionIndex,
                                        const FieldMatcher& dimensionInCondition, bool nesting,
-                                       uint64_t currentBucketStartNs, uint64_t bucketSizeNs,
+                                       uint64_t currentBucketStartNs, uint64_t currentBucketNum,
+                                       uint64_t startTimeNs, uint64_t bucketSizeNs,
                                        bool conditionSliced,
                                        const vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
     : DurationTracker(key, id, eventKey, wizard, conditionIndex, dimensionInCondition, nesting,
-                      currentBucketStartNs, bucketSizeNs, conditionSliced, anomalyTrackers) {
+                      currentBucketStartNs, currentBucketNum, startTimeNs, bucketSizeNs,
+                      conditionSliced, anomalyTrackers) {
 }
 
 unique_ptr<DurationTracker> MaxDurationTracker::clone(const uint64_t eventTime) {
@@ -102,7 +104,6 @@ void MaxDurationTracker::noteStart(const HashableDimensionKey& key, bool conditi
 
 void MaxDurationTracker::noteStop(const HashableDimensionKey& key, const uint64_t eventTime,
                                   bool forceStop) {
-    declareAnomalyIfAlarmExpired(eventTime);
     VLOG("MaxDuration: key %s stop", key.c_str());
     if (mInfos.find(key) == mInfos.end()) {
         // we didn't see a start event before. do nothing.
@@ -122,7 +123,7 @@ void MaxDurationTracker::noteStop(const HashableDimensionKey& key, const uint64_
                 VLOG("Max, key %s, Stop %lld %lld %lld", key.c_str(),
                      (long long)duration.lastStartTime, (long long)eventTime,
                      (long long)durationTime);
-                duration.lastDuration = duration.lastDuration + durationTime;
+                duration.lastDuration += durationTime;
                 VLOG("  record duration: %lld ", (long long)duration.lastDuration);
             }
             break;
@@ -138,7 +139,6 @@ void MaxDurationTracker::noteStop(const HashableDimensionKey& key, const uint64_
 
     if (duration.lastDuration > mDuration) {
         mDuration = duration.lastDuration;
-        detectAndDeclareAnomaly(eventTime, mCurrentBucketNum, mDuration);
         VLOG("Max: new max duration: %lld", (long long)mDuration);
     }
     // Once an atom duration ends, we erase it. Next time, if we see another atom event with the
@@ -158,86 +158,65 @@ void MaxDurationTracker::noteStopAll(const uint64_t eventTime) {
     }
 }
 
-bool MaxDurationTracker::flushIfNeeded(
-        uint64_t eventTime, unordered_map<MetricDimensionKey, vector<DurationBucket>>* output) {
-    if (mCurrentBucketStartTimeNs + mBucketSizeNs > eventTime) {
-        return false;
-    }
-
+bool MaxDurationTracker::flushCurrentBucket(
+        const uint64_t& eventTimeNs,
+        std::unordered_map<MetricDimensionKey, std::vector<DurationBucket>>* output) {
     VLOG("MaxDurationTracker flushing.....");
 
     // adjust the bucket start time
-    int numBucketsForward = (eventTime - mCurrentBucketStartTimeNs) / mBucketSizeNs;
+    int numBucketsForward = 0;
+    uint64_t fullBucketEnd = getCurrentBucketEndTimeNs();
+    uint64_t currentBucketEndTimeNs;
+    if (eventTimeNs >= fullBucketEnd) {
+        numBucketsForward = 1 + (eventTimeNs - fullBucketEnd) / mBucketSizeNs;
+        currentBucketEndTimeNs = fullBucketEnd;
+    } else {
+        // This must be a partial bucket.
+        currentBucketEndTimeNs = eventTimeNs;
+    }
 
-    uint64_t endTime = mCurrentBucketStartTimeNs + mBucketSizeNs;
-
-    DurationBucket info;
-    info.mBucketStartNs = mCurrentBucketStartTimeNs;
-    info.mBucketEndNs = endTime;
-    info.mBucketNum = mCurrentBucketNum;
-
-    uint64_t oldBucketStartTimeNs = mCurrentBucketStartTimeNs;
-    mCurrentBucketStartTimeNs += (numBucketsForward)*mBucketSizeNs;
-
-    bool hasOnGoingStartedEvent = false;  // a kStarted event last across bucket boundaries.
     bool hasPendingEvent =
             false;  // has either a kStarted or kPaused event across bucket boundaries
-                    // meaning we need to carry them over to the new bucket.
+    // meaning we need to carry them over to the new bucket.
     for (auto it = mInfos.begin(); it != mInfos.end(); ++it) {
         int64_t finalDuration = it->second.lastDuration;
-        if (it->second.state == kStarted) {
-            // the event is still on-going, duration needs to be updated.
-            // |..lastDurationTime_recorded...last_start -----|bucket_end. We need to record the
-            // duration between lastStartTime and bucketEnd.
-            int64_t durationTime = endTime - it->second.lastStartTime;
-
-            finalDuration += durationTime;
-            VLOG("  unrecorded %lld -> %lld", (long long)(durationTime), (long long)finalDuration);
-            // if the event is still on-going, we need to fill the buckets between prev_bucket and
-            // now_bucket. |prev_bucket|...|..|...|now_bucket|
-            hasOnGoingStartedEvent = true;
-        }
-
-        if (finalDuration > mDuration) {
-            mDuration = finalDuration;
-        }
-
         if (it->second.state == DurationState::kStopped) {
             // No need to keep buckets for events that were stopped before.
             mInfos.erase(it);
         } else {
             hasPendingEvent = true;
-            // for kPaused, and kStarted event, we will keep track of them, and reset the start time
-            // and duration.
-            it->second.lastStartTime = mCurrentBucketStartTimeNs;
-            it->second.lastDuration = 0;
         }
     }
 
+    // mDuration is updated in noteStop to the maximum duration that ended in the current bucket.
     if (mDuration != 0) {
+        DurationBucket info;
+        info.mBucketStartNs = mCurrentBucketStartTimeNs;
+        info.mBucketEndNs = currentBucketEndTimeNs;
+        info.mBucketNum = mCurrentBucketNum;
         info.mDuration = mDuration;
         (*output)[mEventKey].push_back(info);
-        addPastBucketToAnomalyTrackers(info.mDuration, info.mBucketNum);
         VLOG("  final duration for last bucket: %lld", (long long)mDuration);
     }
 
-    mDuration = 0;
-    if (hasOnGoingStartedEvent) {
-        for (int i = 1; i < numBucketsForward; i++) {
-            DurationBucket info;
-            info.mBucketStartNs = oldBucketStartTimeNs + mBucketSizeNs * i;
-            info.mBucketEndNs = endTime + mBucketSizeNs * i;
-            info.mBucketNum = mCurrentBucketNum + i;
-            info.mDuration = mBucketSizeNs;
-            (*output)[mEventKey].push_back(info);
-            addPastBucketToAnomalyTrackers(info.mDuration, info.mBucketNum);
-            VLOG("  filling gap bucket with duration %lld", (long long)mBucketSizeNs);
-        }
+    if (numBucketsForward > 0) {
+        mCurrentBucketStartTimeNs = fullBucketEnd + (numBucketsForward - 1) * mBucketSizeNs;
+        mCurrentBucketNum += numBucketsForward;
+    } else {  // We must be forming a partial bucket.
+        mCurrentBucketStartTimeNs = eventTimeNs;
     }
 
-    mCurrentBucketNum += numBucketsForward;
+    mDuration = 0;
     // If this tracker has no pending events, tell owner to remove.
     return !hasPendingEvent;
+}
+
+bool MaxDurationTracker::flushIfNeeded(
+        uint64_t eventTimeNs, unordered_map<MetricDimensionKey, vector<DurationBucket>>* output) {
+    if (eventTimeNs < getCurrentBucketEndTimeNs()) {
+        return false;
+    }
+    return flushCurrentBucket(eventTimeNs, output);
 }
 
 void MaxDurationTracker::onSlicedConditionMayChange(const uint64_t timestamp) {
@@ -267,7 +246,6 @@ void MaxDurationTracker::onConditionChanged(bool condition, const uint64_t times
 
 void MaxDurationTracker::noteConditionChanged(const HashableDimensionKey& key, bool conditionMet,
                                               const uint64_t timestamp) {
-    declareAnomalyIfAlarmExpired(timestamp);
     auto it = mInfos.find(key);
     if (it == mInfos.end()) {
         return;
@@ -297,7 +275,6 @@ void MaxDurationTracker::noteConditionChanged(const HashableDimensionKey& key, b
     }
     if (it->second.lastDuration > mDuration) {
         mDuration = it->second.lastDuration;
-        detectAndDeclareAnomaly(timestamp, mCurrentBucketNum, mDuration);
     }
 }
 

@@ -53,7 +53,8 @@ public:
     // and removes it from firedAlarms.
     // Note that this will generally be called from a different thread from the other functions;
     // the caller is responsible for thread safety.
-    void informAlarmsFired(const uint64_t& timestampNs,
+    void informAlarmsFired(
+            const uint64_t& timestampNs,
             unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>>& firedAlarms) override;
 
 protected:

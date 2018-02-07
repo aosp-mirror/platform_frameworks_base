@@ -16,6 +16,8 @@
 
 package com.android.systemui.volume;
 
+import static com.android.systemui.volume.OutputChooserDialog.INCLUDE_MEDIA_ROUTES;
+
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -149,19 +151,13 @@ public class OutputChooserDialogTest extends SysuiTestCase {
     }
 
     @Test
-    public void testMediaScanIfNotInCall() {
-        mDialog.setIsInCall(false);
-        mDialog.onAttachedToWindow();
-
-        verify(mRouter, times(1)).addCallback(any(), any(), anyInt());
-    }
-
-    @Test
     public void testRegisterCallbacks() {
         mDialog.setIsInCall(false);
         mDialog.onAttachedToWindow();
 
-        verify(mRouter, times(1)).addCallback(any(), any(), anyInt());
+        if (INCLUDE_MEDIA_ROUTES) {
+            verify(mRouter, times(1)).addCallback(any(), any(), anyInt());
+        }
         verify(mController, times(1)).addCallback(any());
         verify(mVolumeController, times(1)).addCallback(any(), any());
     }

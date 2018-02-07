@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.internal.car;
+#pragma once
+
+#include "config/ConfigKey.h"
+#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"  // Alert, IncidentdDetails
+
+namespace android {
+namespace os {
+namespace statsd {
 
 /**
- * Helper API for car service. Only for itneraction between system server and car service.
- * @hide
+ * Calls incidentd to trigger an incident report and put in dropbox for uploading.
  */
-interface ICarServiceHelper {
-}
+bool GenerateIncidentReport(const IncidentdDetails& config, const Alert& alert,
+                            const ConfigKey& configKey);
+
+}  // namespace statsd
+}  // namespace os
+}  // namespace android

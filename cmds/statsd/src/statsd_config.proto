@@ -275,6 +275,12 @@ message Alarm {
 
 message IncidentdDetails {
   repeated int32 section = 1;
+
+  enum Destination {
+    AUTOMATIC = 0;
+    EXPLICIT = 1;
+  }
+  optional Destination dest = 2;
 }
 
 message PerfettoDetails {

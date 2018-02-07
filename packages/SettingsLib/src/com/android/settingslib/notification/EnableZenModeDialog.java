@@ -1,5 +1,3 @@
-package com.android.settingslib.notification;
-
 /*
  * Copyright (C) 2018 The Android Open Source Project
  *
@@ -16,6 +14,8 @@ package com.android.settingslib.notification;
  * limitations under the License.
  */
 
+package com.android.settingslib.notification;
+
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -28,6 +28,7 @@ import android.provider.Settings;
 import android.service.notification.Condition;
 import android.service.notification.ZenModeConfig;
 import android.text.TextUtils;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.util.Slog;
 import android.view.LayoutInflater;
@@ -40,6 +41,7 @@ import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.policy.PhoneWindow;
@@ -48,11 +50,11 @@ import com.android.settingslib.R;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 import java.util.Objects;
 
 public class EnableZenModeDialog {
-
-    private static final String TAG = "QSEnableZenModeDialog";
+    private static final String TAG = "EnableZenModeDialog";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final int[] MINUTE_BUCKETS = ZenModeConfig.MINUTE_BUCKETS;
@@ -60,24 +62,36 @@ public class EnableZenModeDialog {
     private static final int MAX_BUCKET_MINUTES = MINUTE_BUCKETS[MINUTE_BUCKETS.length - 1];
     private static final int DEFAULT_BUCKET_INDEX = Arrays.binarySearch(MINUTE_BUCKETS, 60);
 
-    private static final int FOREVER_CONDITION_INDEX = 0;
-    private static final int COUNTDOWN_CONDITION_INDEX = 1;
-    private static final int COUNTDOWN_ALARM_CONDITION_INDEX = 2;
+    @VisibleForTesting
+    protected static final int FOREVER_CONDITION_INDEX = 0;
+    @VisibleForTesting
+    protected static final int COUNTDOWN_CONDITION_INDEX = 1;
+    @VisibleForTesting
+    protected static final int COUNTDOWN_ALARM_CONDITION_INDEX = 2;
 
     private static final int SECONDS_MS = 1000;
     private static final int MINUTES_MS = 60 * SECONDS_MS;
 
-    private Uri mForeverId;
+    @VisibleForTesting
+    protected Uri mForeverId;
     private int mBucketIndex = -1;
 
     private AlarmManager mAlarmManager;
     private int mUserId;
     private boolean mAttached;
 
-    private Context mContext;
+    @VisibleForTesting
+    protected Context mContext;
+    @VisibleForTesting
+    protected TextView mZenAlarmWarning;
+    @VisibleForTesting
+    protected LinearLayout mZenRadioGroupContent;
+
     private RadioGroup mZenRadioGroup;
-    private LinearLayout mZenRadioGroupContent;
     private int MAX_MANUAL_DND_OPTIONS = 3;
+
+    @VisibleForTesting
+    protected LayoutInflater mLayoutInflater;
 
     public EnableZenModeDialog(Context context) {
         mContext = context;
@@ -133,32 +147,40 @@ public class EnableZenModeDialog {
         for (int i = 0; i < N; i++) {
             mZenRadioGroupContent.getChildAt(i).setVisibility(View.GONE);
         }
+
+        mZenAlarmWarning.setVisibility(View.GONE);
     }
 
     protected View getContentView() {
-        final LayoutInflater inflater = new PhoneWindow(mContext).getLayoutInflater();
-        View contentView = inflater.inflate(R.layout.zen_mode_turn_on_dialog_container, null);
+        if (mLayoutInflater == null) {
+            mLayoutInflater = new PhoneWindow(mContext).getLayoutInflater();
+        }
+        View contentView = mLayoutInflater.inflate(R.layout.zen_mode_turn_on_dialog_container,
+                null);
         ScrollView container = (ScrollView) contentView.findViewById(R.id.container);
 
         mZenRadioGroup = container.findViewById(R.id.zen_radio_buttons);
         mZenRadioGroupContent = container.findViewById(R.id.zen_radio_buttons_content);
+        mZenAlarmWarning = container.findViewById(R.id.zen_alarm_warning);
 
         for (int i = 0; i < MAX_MANUAL_DND_OPTIONS; i++) {
-            final View radioButton = inflater.inflate(R.layout.zen_mode_radio_button,
+            final View radioButton = mLayoutInflater.inflate(R.layout.zen_mode_radio_button,
                     mZenRadioGroup, false);
             mZenRadioGroup.addView(radioButton);
             radioButton.setId(i);
 
-            final View radioButtonContent = inflater.inflate(R.layout.zen_mode_condition,
+            final View radioButtonContent = mLayoutInflater.inflate(R.layout.zen_mode_condition,
                     mZenRadioGroupContent, false);
             radioButtonContent.setId(i + MAX_MANUAL_DND_OPTIONS);
             mZenRadioGroupContent.addView(radioButtonContent);
         }
+
         hideAllConditions();
         return contentView;
     }
 
-    private void bind(final Condition condition, final View row, final int rowId) {
+    @VisibleForTesting
+    protected void bind(final Condition condition, final View row, final int rowId) {
         if (condition == null) throw new IllegalArgumentException("condition must not be null");
         final boolean enabled = condition.state == Condition.STATE_TRUE;
         final ConditionTag tag = row.getTag() != null ? (ConditionTag) row.getTag() :
@@ -181,6 +203,7 @@ public class EnableZenModeDialog {
                     if (DEBUG) Log.d(TAG, "onCheckedChanged " + conditionId);
                     MetricsLogger.action(mContext,
                             MetricsProto.MetricsEvent.QS_DND_CONDITION_SELECT);
+                    updateAlarmWarningText(tag.condition);
                     announceConditionSelection(tag);
                 }
             }
@@ -190,11 +213,13 @@ public class EnableZenModeDialog {
         row.setVisibility(View.VISIBLE);
     }
 
-    private ConditionTag getConditionTagAt(int index) {
+    @VisibleForTesting
+    protected ConditionTag getConditionTagAt(int index) {
         return (ConditionTag) mZenRadioGroupContent.getChildAt(index).getTag();
     }
 
-    private void bindConditions(Condition c) {
+    @VisibleForTesting
+    protected void bindConditions(Condition c) {
         // forever
         bind(forever(), mZenRadioGroupContent.getChildAt(FOREVER_CONDITION_INDEX),
                 FOREVER_CONDITION_INDEX);
@@ -236,11 +261,13 @@ public class EnableZenModeDialog {
         return info != null ? info.getTriggerTime() : 0;
     }
 
-    private boolean isAlarm(Condition c) {
+    @VisibleForTesting
+    protected boolean isAlarm(Condition c) {
         return c != null && ZenModeConfig.isValidCountdownToAlarmConditionId(c.id);
     }
 
-    private boolean isCountdown(Condition c) {
+    @VisibleForTesting
+    protected boolean isCountdown(Condition c) {
         return c != null && ZenModeConfig.isValidCountdownConditionId(c.id);
     }
 
@@ -264,7 +291,8 @@ public class EnableZenModeDialog {
     }
 
     // Returns a time condition if the next alarm is within the next week.
-    private Condition getTimeUntilNextAlarmCondition() {
+    @VisibleForTesting
+    protected Condition getTimeUntilNextAlarmCondition() {
         GregorianCalendar weekRange = new GregorianCalendar();
         setToMidnight(weekRange);
         weekRange.add(Calendar.DATE, 6);
@@ -282,7 +310,8 @@ public class EnableZenModeDialog {
         return null;
     }
 
-    private void bindGenericCountdown() {
+    @VisibleForTesting
+    protected void bindGenericCountdown() {
         mBucketIndex = DEFAULT_BUCKET_INDEX;
         Condition countdown = ZenModeConfig.toTimeCondition(mContext,
                 MINUTE_BUCKETS[mBucketIndex], ActivityManager.getCurrentUser());
@@ -366,7 +395,8 @@ public class EnableZenModeDialog {
         }
     }
 
-    private void bindNextAlarm(Condition c) {
+    @VisibleForTesting
+    protected void bindNextAlarm(Condition c) {
         View alarmContent = mZenRadioGroupContent.getChildAt(COUNTDOWN_ALARM_CONDITION_INDEX);
         ConditionTag tag = (ConditionTag) alarmContent.getTag();
 
@@ -415,6 +445,7 @@ public class EnableZenModeDialog {
                     MINUTE_BUCKETS[mBucketIndex], ActivityManager.getCurrentUser());
         }
         bind(newCondition, row, rowId);
+        updateAlarmWarningText(tag.condition);
         tag.rb.setChecked(true);
         announceConditionSelection(tag);
     }
@@ -428,8 +459,43 @@ public class EnableZenModeDialog {
         }
     }
 
+    private void updateAlarmWarningText(Condition condition) {
+        String warningText = computeAlarmWarningText(condition);
+        mZenAlarmWarning.setText(warningText);
+        mZenAlarmWarning.setVisibility(warningText == null ? View.GONE : View.VISIBLE);
+    }
+
+    private String computeAlarmWarningText(Condition condition) {
+        final long now = System.currentTimeMillis();
+        final long nextAlarm = getNextAlarm();
+        if (nextAlarm < now) {
+            return null;
+        }
+        int warningRes = 0;
+        if (condition == null || isForever(condition)) {
+            warningRes = R.string.zen_alarm_warning_indef;
+        } else {
+            final long time = ZenModeConfig.tryParseCountdownConditionId(condition.id);
+            if (time > now && nextAlarm < time) {
+                warningRes = R.string.zen_alarm_warning;
+            }
+        }
+        if (warningRes == 0) {
+            return null;
+        }
+        final boolean soon = (nextAlarm - now) < 24 * 60 * 60 * 1000;
+        final boolean is24 = DateFormat.is24HourFormat(mContext, ActivityManager.getCurrentUser());
+        final String skeleton = soon ? (is24 ? "Hm" : "hma") : (is24 ? "EEEHm" : "EEEhma");
+        final String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
+        final CharSequence formattedTime = DateFormat.format(pattern, nextAlarm);
+        final int templateRes = soon ? R.string.alarm_template : R.string.alarm_template_far;
+        final String template = mContext.getResources().getString(templateRes, formattedTime);
+        return mContext.getResources().getString(warningRes, template);
+    }
+
     // used as the view tag on condition rows
-    private static class ConditionTag {
+    @VisibleForTesting
+    protected static class ConditionTag {
         public RadioButton rb;
         public View lines;
         public TextView line1;

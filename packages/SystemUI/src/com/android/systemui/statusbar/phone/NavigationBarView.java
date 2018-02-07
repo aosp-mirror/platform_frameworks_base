@@ -50,14 +50,13 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.DockedStackExistsListener;
 import com.android.systemui.OverviewProxyService;
-import com.android.systemui.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.statusbar.phone.NavGesture;
 import com.android.systemui.plugins.statusbar.phone.NavGesture.GestureHelper;
-import com.android.systemui.recents.SwipeUpOnboarding;
+import com.android.systemui.recents.RecentsOnboarding;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.policy.DeadZone;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
@@ -126,7 +125,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private NavigationBarInflaterView mNavigationInflaterView;
     private RecentsComponent mRecentsComponent;
     private Divider mDivider;
-    private SwipeUpOnboarding mSwipeUpOnboarding;
+    private RecentsOnboarding mRecentsOnboarding;
     private NotificationPanelView mPanelView;
 
     private class NavTransitionListener implements TransitionListener {
@@ -236,7 +235,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 new ButtonDispatcher(R.id.rotate_suggestion));
 
         mOverviewProxyService = Dependency.get(OverviewProxyService.class);
-        mSwipeUpOnboarding = new SwipeUpOnboarding(context);
+        mRecentsOnboarding = new RecentsOnboarding(context, mOverviewProxyService);
     }
 
     public BarTransitions getBarTransitions() {
@@ -265,8 +264,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     public void setRecentsAnimationStarted(boolean started) {
         mRecentsAnimationStarted = started;
-        if (mSwipeUpOnboarding != null) {
-            mSwipeUpOnboarding.onRecentsAnimationStarted();
+        if (mRecentsOnboarding != null) {
+            mRecentsOnboarding.onRecentsAnimationStarted();
         }
     }
 
@@ -274,14 +273,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         updateSlippery();
         setDisabledFlags(mDisabledFlags, true);
         setUpSwipeUpOnboarding(isConnected);
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if (mGestureHelper.onTouchEvent(event)) {
-            return true;
-        }
-        return mRecentsAnimationStarted || super.onTouchEvent(event);
     }
 
     @Override
@@ -300,7 +291,16 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 }
             }
         }
+
         return mGestureHelper.onInterceptTouchEvent(event) || mRecentsAnimationStarted;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (mGestureHelper.onTouchEvent(event)) {
+            return true;
+        }
+        return mRecentsAnimationStarted || super.onTouchEvent(event);
     }
 
     public void abortCurrentGesture() {
@@ -674,8 +674,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         if (mGestureHelper != null) {
             mGestureHelper.onDarkIntensityChange(intensity);
         }
-        if (mSwipeUpOnboarding != null) {
-            mSwipeUpOnboarding.setContentDarkIntensity(intensity);
+        if (mRecentsOnboarding != null) {
+            mRecentsOnboarding.setContentDarkIntensity(intensity);
         }
     }
 
@@ -793,7 +793,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         updateTaskSwitchHelper();
         updateIcons(getContext(), mConfiguration, newConfig);
         updateRecentsIcon();
-        mSwipeUpOnboarding.onConfigurationChanged(newConfig);
+        mRecentsOnboarding.onConfigurationChanged(newConfig);
         if (uiCarModeChanged || mConfiguration.densityDpi != newConfig.densityDpi
                 || mConfiguration.getLayoutDirection() != newConfig.getLayoutDirection()) {
             // If car mode or density changes, we need to reset the icons.
@@ -897,9 +897,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     private void setUpSwipeUpOnboarding(boolean connectedToOverviewProxy) {
         if (connectedToOverviewProxy) {
-            mSwipeUpOnboarding.onConnectedToLauncher();
+            mRecentsOnboarding.onConnectedToLauncher();
         } else {
-            mSwipeUpOnboarding.onDisconnectedFromLauncher();
+            mRecentsOnboarding.onDisconnectedFromLauncher();
         }
     }
 

@@ -48,7 +48,6 @@ public enum ScrimState {
                     // set our scrim to black in this frame to avoid flickering and
                     // fade it out afterwards.
                     mBlankScreen = true;
-                    updateScrimColor(mScrimInFront, 1, Color.BLACK);
                 }
             } else {
                 mAnimationDuration = ScrimController.ANIMATION_DURATION;
@@ -86,9 +85,6 @@ public enum ScrimState {
     AOD(3) {
         @Override
         public void prepare(ScrimState previousState) {
-            if (previousState == ScrimState.PULSING && !mCanControlScreenOff) {
-                updateScrimColor(mScrimInFront, 1, Color.BLACK);
-            }
             final boolean alwaysOnEnabled = mDozeParameters.getAlwaysOn();
             final boolean wasPulsing = previousState == ScrimState.PULSING;
             mBlankScreen = wasPulsing && !mCanControlScreenOff;
@@ -115,9 +111,6 @@ public enum ScrimState {
                     && !mKeyguardUpdateMonitor.hasLockscreenWallpaper() ? 0f : 1f;
             mCurrentBehindTint = Color.BLACK;
             mBlankScreen = mDisplayRequiresBlanking;
-            if (mDisplayRequiresBlanking) {
-                updateScrimColor(mScrimInFront, 1, Color.BLACK);
-            }
         }
     },
 

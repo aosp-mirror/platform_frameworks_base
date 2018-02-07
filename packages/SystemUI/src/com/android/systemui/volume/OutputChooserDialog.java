@@ -49,6 +49,8 @@ import android.util.Pair;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto;
 import com.android.settingslib.Utils;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.systemui.Dependency;
@@ -81,6 +83,7 @@ public class OutputChooserDialog extends Dialog
     private final MediaRouterWrapper mRouter;
     private final MediaRouterCallback mRouterCallback;
     private long mLastUpdateTime;
+    static final boolean INCLUDE_MEDIA_ROUTES = false;
     private boolean mIsInCall;
     protected boolean isAttached;
 
@@ -174,7 +177,7 @@ public class OutputChooserDialog extends Dialog
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
 
-        if (!mIsInCall) {
+        if (!mIsInCall && INCLUDE_MEDIA_ROUTES) {
             mRouter.addCallback(mRouteSelector, mRouterCallback,
                     MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN);
         }
@@ -201,6 +204,7 @@ public class OutputChooserDialog extends Dialog
     @Override
     public void show() {
         super.show();
+        Dependency.get(MetricsLogger.class).visible(MetricsProto.MetricsEvent.OUTPUT_CHOOSER);
         mHardwareLayout.setTranslationX(getAnimTranslation());
         mHardwareLayout.setAlpha(0);
         mHardwareLayout.animate()
@@ -214,6 +218,7 @@ public class OutputChooserDialog extends Dialog
 
     @Override
     public void dismiss() {
+        Dependency.get(MetricsLogger.class).hidden(MetricsProto.MetricsEvent.OUTPUT_CHOOSER);
         mHardwareLayout.setTranslationX(0);
         mHardwareLayout.setAlpha(1);
         mHardwareLayout.animate()
@@ -236,11 +241,15 @@ public class OutputChooserDialog extends Dialog
         if (item.deviceType == OutputChooserLayout.Item.DEVICE_TYPE_BT) {
             final CachedBluetoothDevice device = (CachedBluetoothDevice) item.tag;
             if (device.getMaxConnectionState() == BluetoothProfile.STATE_DISCONNECTED) {
+                Dependency.get(MetricsLogger.class).action(
+                        MetricsProto.MetricsEvent.ACTION_OUTPUT_CHOOSER_CONNECT);
                 mBluetoothController.connect(device);
             }
         } else if (item.deviceType == OutputChooserLayout.Item.DEVICE_TYPE_MEDIA_ROUTER) {
             final MediaRouter.RouteInfo route = (MediaRouter.RouteInfo) item.tag;
             if (route.isEnabled()) {
+                Dependency.get(MetricsLogger.class).action(
+                        MetricsProto.MetricsEvent.ACTION_OUTPUT_CHOOSER_CONNECT);
                 route.select();
             }
         }
@@ -251,8 +260,12 @@ public class OutputChooserDialog extends Dialog
         if (item == null || item.tag == null) return;
         if (item.deviceType == OutputChooserLayout.Item.DEVICE_TYPE_BT) {
             final CachedBluetoothDevice device = (CachedBluetoothDevice) item.tag;
+            Dependency.get(MetricsLogger.class).action(
+                    MetricsProto.MetricsEvent.ACTION_OUTPUT_CHOOSER_DISCONNECT);
             mBluetoothController.disconnect(device);
         } else if (item.deviceType == OutputChooserLayout.Item.DEVICE_TYPE_MEDIA_ROUTER) {
+            Dependency.get(MetricsLogger.class).action(
+                    MetricsProto.MetricsEvent.ACTION_OUTPUT_CHOOSER_DISCONNECT);
             mRouter.unselect(UNSELECT_REASON_DISCONNECTED);
         }
     }
@@ -272,7 +285,7 @@ public class OutputChooserDialog extends Dialog
         addBluetoothDevices(items);
 
         // Add remote displays
-        if (!mIsInCall) {
+        if (!mIsInCall && INCLUDE_MEDIA_ROUTES) {
             addRemoteDisplayRoutes(items);
         }
 

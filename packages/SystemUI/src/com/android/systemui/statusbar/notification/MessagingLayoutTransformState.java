@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.internal.widget.MessagingGroup;
+import com.android.internal.widget.MessagingImageMessage;
 import com.android.internal.widget.MessagingLayout;
 import com.android.internal.widget.MessagingLinearLayout;
 import com.android.internal.widget.MessagingMessage;
@@ -30,6 +31,7 @@ import com.android.systemui.Interpolators;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * A transform state of the action list
@@ -156,6 +158,7 @@ public class MessagingLayoutTransformState extends TransformState {
         }
         appear(ownGroup.getAvatar(), transformationAmount);
         appear(ownGroup.getSenderView(), transformationAmount);
+        appear(ownGroup.getIsolatedMessage(), transformationAmount);
         setClippingDeactivated(ownGroup.getSenderView(), true);
         setClippingDeactivated(ownGroup.getAvatar(), true);
     }
@@ -187,12 +190,13 @@ public class MessagingLayoutTransformState extends TransformState {
         }
         disappear(ownGroup.getAvatar(), transformationAmount);
         disappear(ownGroup.getSenderView(), transformationAmount);
+        disappear(ownGroup.getIsolatedMessage(), transformationAmount);
         setClippingDeactivated(ownGroup.getSenderView(), true);
         setClippingDeactivated(ownGroup.getAvatar(), true);
     }
 
     private void appear(View child, float transformationAmount) {
-        if (child.getVisibility() == View.GONE) {
+        if (child == null || child.getVisibility() == View.GONE) {
             return;
         }
         TransformState ownState = TransformState.createFrom(child, mTransformInfo);
@@ -201,7 +205,7 @@ public class MessagingLayoutTransformState extends TransformState {
     }
 
     private void disappear(View child, float transformationAmount) {
-        if (child.getVisibility() == View.GONE) {
+        if (child == null || child.getVisibility() == View.GONE) {
             return;
         }
         TransformState ownState = TransformState.createFrom(child, mTransformInfo);
@@ -224,22 +228,24 @@ public class MessagingLayoutTransformState extends TransformState {
 
     private void transformGroups(MessagingGroup ownGroup, MessagingGroup otherGroup,
             float transformationAmount, boolean to) {
+        boolean useLinearTransformation =
+                otherGroup.getIsolatedMessage() == null && !mTransformInfo.isAnimating();
         transformView(transformationAmount, to, ownGroup.getSenderView(), otherGroup.getSenderView(),
-                true /* sameAsAny */);
+                true /* sameAsAny */, useLinearTransformation);
         transformView(transformationAmount, to, ownGroup.getAvatar(), otherGroup.getAvatar(),
-                true /* sameAsAny */);
-        MessagingLinearLayout ownMessages = ownGroup.getMessageContainer();
-        MessagingLinearLayout otherMessages = otherGroup.getMessageContainer();
+                true /* sameAsAny */, useLinearTransformation);
+        List<MessagingMessage> ownMessages = ownGroup.getMessages();
+        List<MessagingMessage> otherMessages = otherGroup.getMessages();
         float previousTranslation = 0;
-        for (int i = 0; i < ownMessages.getChildCount(); i++) {
-            View child = ownMessages.getChildAt(ownMessages.getChildCount() - 1 - i);
+        for (int i = 0; i < ownMessages.size(); i++) {
+            View child = ownMessages.get(ownMessages.size() - 1 - i).getView();
             if (isGone(child)) {
                 continue;
             }
-            int otherIndex = otherMessages.getChildCount() - 1 - i;
+            int otherIndex = otherMessages.size() - 1 - i;
             View otherChild = null;
             if (otherIndex >= 0) {
-                otherChild = otherMessages.getChildAt(otherIndex);
+                otherChild = otherMessages.get(otherIndex).getView();
                 if (isGone(otherChild)) {
                     otherChild = null;
                 }
@@ -252,7 +258,12 @@ public class MessagingLayoutTransformState extends TransformState {
                     transformationAmount = 1.0f - transformationAmount;
                 }
             }
-            transformView(transformationAmount, to, child, otherChild, false /* sameAsAny */);
+            transformView(transformationAmount, to, child, otherChild, false, /* sameAsAny */
+                    useLinearTransformation);
+            if (transformationAmount == 0.0f
+                    && otherGroup.getIsolatedMessage() == otherChild) {
+                ownGroup.setTransformingImages(true);
+            }
             if (otherChild == null) {
                 child.setTranslationY(previousTranslation);
                 setClippingDeactivated(child, true);
@@ -264,12 +275,13 @@ public class MessagingLayoutTransformState extends TransformState {
                 previousTranslation = child.getTranslationY();
             }
         }
+        ownGroup.updateClipRect();
     }
 
     private void transformView(float transformationAmount, boolean to, View ownView,
-            View otherView, boolean sameAsAny) {
+            View otherView, boolean sameAsAny, boolean useLinearTransformation) {
         TransformState ownState = TransformState.createFrom(ownView, mTransformInfo);
-        if (!mTransformInfo.isAnimating()) {
+        if (useLinearTransformation) {
             ownState.setDefaultInterpolator(Interpolators.LINEAR);
         }
         ownState.setIsSameAsAnyView(sameAsAny);
@@ -339,11 +351,15 @@ public class MessagingLayoutTransformState extends TransformState {
             if (!isGone(ownGroup)) {
                 MessagingLinearLayout ownMessages = ownGroup.getMessageContainer();
                 for (int j = 0; j < ownMessages.getChildCount(); j++) {
-                    MessagingMessage child = (MessagingMessage) ownMessages.getChildAt(j);
+                    View child = ownMessages.getChildAt(j);
                     setVisible(child, visible, force);
                 }
                 setVisible(ownGroup.getAvatar(), visible, force);
                 setVisible(ownGroup.getSenderView(), visible, force);
+                MessagingImageMessage isolatedMessage = ownGroup.getIsolatedMessage();
+                if (isolatedMessage != null) {
+                    setVisible(isolatedMessage, visible, force);
+                }
             }
         }
     }
@@ -375,11 +391,17 @@ public class MessagingLayoutTransformState extends TransformState {
                 }
                 resetTransformedView(ownGroup.getAvatar());
                 resetTransformedView(ownGroup.getSenderView());
+                MessagingImageMessage isolatedMessage = ownGroup.getIsolatedMessage();
+                if (isolatedMessage != null) {
+                    resetTransformedView(isolatedMessage);
+                }
                 setClippingDeactivated(ownGroup.getAvatar(), false);
                 setClippingDeactivated(ownGroup.getSenderView(), false);
                 ownGroup.setTranslationY(0);
                 ownGroup.getMessageContainer().setTranslationY(0);
             }
+            ownGroup.setTransformingImages(false);
+            ownGroup.updateClipRect();
         }
     }
 

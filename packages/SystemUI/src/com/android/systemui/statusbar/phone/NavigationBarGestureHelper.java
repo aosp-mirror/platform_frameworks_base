@@ -157,6 +157,20 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
         return (mDockWindowEnabled && interceptDockWindowEvent(event));
     }
 
+    public boolean onTouchEvent(MotionEvent event) {
+        // The same down event was just sent on intercept and therefore can be ignored here
+        boolean ignoreProxyDownEvent = event.getAction() == MotionEvent.ACTION_DOWN
+                && mOverviewEventSender.getProxy() != null;
+        boolean result = mStatusBar.isPresenterFullyCollapsed()
+                && (mQuickScrubController.onTouchEvent(event)
+                || ignoreProxyDownEvent
+                || proxyMotionEvents(event));
+        if (mDockWindowEnabled) {
+            result |= handleDockWindowEvent(event);
+        }
+        return result;
+    }
+
     public void onDraw(Canvas canvas) {
         if (mOverviewEventSender.getProxy() != null) {
             mQuickScrubController.onDraw(canvas);
@@ -305,20 +319,6 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
             return DRAG_MODE_DIVIDER;
         }
         return DRAG_MODE_RECENTS;
-    }
-
-    public boolean onTouchEvent(MotionEvent event) {
-        // The same down event was just sent on intercept and therefore can be ignored here
-        boolean ignoreProxyDownEvent = event.getAction() == MotionEvent.ACTION_DOWN
-                && mOverviewEventSender.getProxy() != null;
-        boolean result = mStatusBar.isPresenterFullyCollapsed()
-                && (mQuickScrubController.onTouchEvent(event)
-                || ignoreProxyDownEvent
-                || proxyMotionEvents(event));
-        if (mDockWindowEnabled) {
-            result |= handleDockWindowEvent(event);
-        }
-        return result;
     }
 
     @Override

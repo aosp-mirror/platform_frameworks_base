@@ -376,9 +376,7 @@ abstract public class ManagedServices {
     protected void upgradeXml(final int xmlVersion, final int userId) {}
 
     private void loadAllowedComponentsFromSettings() {
-
-        UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        for (UserInfo user : userManager.getUsers()) {
+        for (UserInfo user : mUm.getUsers()) {
             final ContentResolver cr = mContext.getContentResolver();
             addApprovedList(Settings.Secure.getStringForUser(
                     cr,
@@ -482,7 +480,9 @@ abstract public class ManagedServices {
         for (int i = 0; i < allowedByType.size(); i++) {
             final ArraySet<String> allowed = allowedByType.valueAt(i);
             allowedPackages.addAll(
-                    allowed.stream().map(this::getPackageName).collect(Collectors.toList()));
+                    allowed.stream().map(this::getPackageName).
+                            filter(value -> !TextUtils.isEmpty(value))
+                            .collect(Collectors.toList()));
         }
         return allowedPackages;
     }

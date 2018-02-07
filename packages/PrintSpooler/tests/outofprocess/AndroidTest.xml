@@ -20,6 +20,8 @@
 
     <option name="test-suite-tag" value="apct" />
     <option name="test-tag" value="PrintSpoolerOutOfProcessTests" />
+    <option name="config-descriptor:metadata" key="component" value="print" />
+
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.android.printspooler.outofprocess.tests" />
         <option name="runner" value="android.support.test.runner.AndroidJUnitRunner" />

@@ -18,6 +18,7 @@ package com.android.server.locksettings.recoverablekeystore.certificate;
 
 import static javax.xml.xpath.XPathConstants.NODESET;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -25,6 +26,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -72,13 +75,14 @@ final class CertUtils {
     private static final String CERT_STORE_ALG = "Collection";
     private static final String SIGNATURE_ALG = "SHA256withRSA";
 
-    private CertUtils() {}
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({MUST_EXIST_UNENFORCED, MUST_EXIST_EXACTLY_ONE, MUST_EXIST_AT_LEAST_ONE})
+    @interface MustExist {}
+    static final int MUST_EXIST_UNENFORCED = 0;
+    static final int MUST_EXIST_EXACTLY_ONE = 1;
+    static final int MUST_EXIST_AT_LEAST_ONE = 2;
 
-    enum MustExist {
-        FALSE,
-        EXACTLY_ONE,
-        AT_LEAST_ONE,
-    }
+    private CertUtils() {}
 
     /**
      * Decodes a byte array containing an encoded X509 certificate.
@@ -159,7 +163,7 @@ final class CertUtils {
      * @return a list of strings that are the text contents of the child nodes
      * @throws CertParsingException if any parsing error occurs
      */
-    static List<String> getXmlNodeContents(MustExist mustExist, Element rootNode,
+    static List<String> getXmlNodeContents(@MustExist int mustExist, Element rootNode,
             String... nodeTags)
             throws CertParsingException {
         String expression = String.join("/", nodeTags);
@@ -173,10 +177,10 @@ final class CertUtils {
         }
 
         switch (mustExist) {
-            case FALSE:
+            case MUST_EXIST_UNENFORCED:
                 break;
 
-            case EXACTLY_ONE:
+            case MUST_EXIST_EXACTLY_ONE:
                 if (nodeList.getLength() != 1) {
                     throw new CertParsingException(
                             "The XML file must contain exactly one node with the path "
@@ -184,7 +188,7 @@ final class CertUtils {
                 }
                 break;
 
-            case AT_LEAST_ONE:
+            case MUST_EXIST_AT_LEAST_ONE:
                 if (nodeList.getLength() == 0) {
                     throw new CertParsingException(
                             "The XML file must contain at least one node with the path "
@@ -194,7 +198,7 @@ final class CertUtils {
 
             default:
                 throw new UnsupportedOperationException(
-                        "This enum value of MustExist is not supported: " + mustExist);
+                        "This value of MustExist is not supported: " + mustExist);
         }
 
         List<String> result = new ArrayList<>();

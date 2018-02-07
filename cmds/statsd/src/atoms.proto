@@ -1019,6 +1019,138 @@ message ForegroundServiceStateChanged {
 }
 
 /**
+ * Logs creation or removal of an isolated uid. Isolated uid's are temporary uid's to sandbox risky
+ * behavior in its own uid. However, the metrics of these isolated uid's almost always should be
+ * attributed back to the parent (host) uid. One example is Chrome.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message IsolatedUidChanged {
+    // The host UID. Generally, we should attribute metrics from the isolated uid to the host uid.
+    optional int32 parent_uid = 1;
+
+    optional int32 isolated_uid = 2;
+
+    // We expect an isolated uid to be removed before if it's used for another parent uid.
+    enum Event {
+        REMOVED = 0;
+        CREATED = 1;
+    }
+    optional Event event = 3;
+}
+
+/*
+ * Logs the reception of an incoming network packet causing the main system to wake up for
+ * processing that packet. These events are notified by the kernel via Netlink NFLOG to Netd
+ * and processed by WakeupController.cpp.
+ */
+message PacketWakeupOccurred {
+    // The uid owning the socket into which the packet was delivered, or -1 if the packet was
+    // delivered nowhere.
+    optional int32 uid = 1;
+    // The interface name on which the packet was received.
+    optional string iface = 2;
+    // The ethertype value of the packet.
+    optional int32 ethertype = 3;
+    // String representation of the destination MAC address of the packet.
+    optional string destination_hardware_address = 4;
+    // String representation of the source address of the packet if this was an IP packet.
+    optional string source_ip = 5;
+    // String representation of the destination address of the packet if this was an IP packet.
+    optional string destination_ip = 6;
+    // The value of the protocol field if this was an IPv4 packet or the value of the Next Header
+    // field if this was an IPv6 packet. The range of possible values is the same for both IP
+    // families.
+    optional int32 ip_next_header = 7;
+    // The source port if this was a TCP or UDP packet.
+    optional int32 source_port = 8;
+    // The destination port if this was a TCP or UDP packet.
+    optional int32 destination_port = 9;
+}
+
+/*
+ * Logs the memory stats for an app on startup.
+ * Logged from:
+ *     frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ */
+message AppStartMemoryStateCaptured {
+    // The uid if available. -1 means not available.
+    optional int32 uid = 1;
+
+    // The process name.
+    optional string process_name = 2;
+
+    // The activity name.
+    optional string activity_name = 3;
+
+    // # of page-faults
+    optional int64 pgfault = 4;
+
+    // # of major page-faults
+    optional int64 pgmajfault = 5;
+
+    // RSS
+    optional int64 rss_in_bytes = 6;
+
+    // CACHE
+    optional int64 cache_in_bytes = 7;
+
+    // SWAP
+    optional int64 swap_in_bytes = 8;
+}
+
+/*
+ * Logs the change in Low Memory Killer Daemon (LMKD) state which is used as start/stop boundaries
+ * for LMK event.
+ * Logged from:
+ *      system/core/lmkd/lmkd.c
+ */
+message LmkStateChanged {
+    enum State {
+        UNKNOWN = 0;
+        START = 1;
+        STOP = 2;
+    }
+    optional State state = 1;
+}
+
+/*
+ * Logs the event when Low Memory Killer Daemon (LMKD) kills a process to reduce memory pressure.
+ * Logged from:
+ *      system/core/lmkd/lmkd.c
+ */
+message LmkKillOccurred {
+    // The uid if available. -1 means not available.
+    optional int32 uid = 1;
+
+    // The process name.
+    optional string process_name = 2;
+
+    // oom adj score.
+    optional int32 oom_score = 3;
+
+    // # of page-faults
+    optional int64 pgfault = 4;
+
+    // # of major page-faults
+    optional int64 pgmajfault = 5;
+
+    // RSS
+    optional int64 rss_in_bytes = 6;
+
+    // CACHE
+    optional int64 cache_in_bytes = 7;
+
+    // SWAP
+    optional int64 swap_in_bytes = 8;
+}
+
+//////////////////////////////////////////////////////////////////////
+// Pulled atoms below this line //
+//////////////////////////////////////////////////////////////////////
+
+/**
  * Pulls bytes transferred via wifi (Sum of foreground and background usage).
  *
  * Pulled from:
@@ -1134,37 +1266,15 @@ message KernelWakelock {
  *   hardware/interfaces/power/1.1/types.hal
  */
 message SubsystemSleepState {
-    // Name should be in the format of XXX.YYY where XXX is subsystem name,
-    // YYY is corresponding voter name.
-    // If there are no voters, the format should just be XXX (with no dot).
-    // XXX and YYY should not contain a "." in it.
-    optional string name = 1;
+    // Subsystem name
+    optional string subsystem_name = 1;
+    // For PlatformLowPowerStats (hal 1.0), this is the voter name, which could be empty.
+    // For SubsystemLowPowerStats (hal 1.1), this is the sleep state name.
+    optional string subname = 2;
     // The number of times it entered, or voted for entering the sleep state
-    optional uint64 count = 2;
+    optional uint64 count = 3;
     // The length of time spent in, or spent voting for, the sleep state
-    optional uint64 timeMs = 3;
-}
-
-/**
- * Logs creation or removal of an isolated uid. Isolated uid's are temporary uid's to sandbox risky
- * behavior in its own uid. However, the metrics of these isolated uid's almost always should be
- * attributed back to the parent (host) uid. One example is Chrome.
- *
- * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
- */
-message IsolatedUidChanged {
-    // The host UID. Generally, we should attribute metrics from the isolated uid to the host uid.
-    optional int32 parent_uid = 1;
-
-    optional int32 isolated_uid = 2;
-
-    // We expect an isolated uid to be removed before if it's used for another parent uid.
-    enum Event {
-        REMOVED = 0;
-        CREATED = 1;
-    }
-    optional Event event = 3;
+    optional uint64 timeMs = 4;
 }
 
 /**
@@ -1199,35 +1309,6 @@ message CpuTimePerUidFreq {
     optional uint64 uid = 1;
     optional uint64 freq_idx = 2;
     optional uint64 time_ms = 3;
-}
-
-/*
- * Logs the reception of an incoming network packet causing the main system to wake up for
- * processing that packet. These events are notified by the kernel via Netlink NFLOG to Netd
- * and processed by WakeupController.cpp.
- */
-message PacketWakeupOccurred {
-    // The uid owning the socket into which the packet was delivered, or -1 if the packet was
-    // delivered nowhere.
-    optional int32 uid = 1;
-    // The interface name on which the packet was received.
-    optional string iface = 2;
-    // The ethertype value of the packet.
-    optional int32 ethertype = 3;
-    // String representation of the destination MAC address of the packet.
-    optional string destination_hardware_address = 4;
-    // String representation of the source address of the packet if this was an IP packet.
-    optional string source_ip = 5;
-    // String representation of the destination address of the packet if this was an IP packet.
-    optional string destination_ip = 6;
-    // The value of the protocol field if this was an IPv4 packet or the value of the Next Header
-    // field if this was an IPv6 packet. The range of possible values is the same for both IP
-    // families.
-    optional int32 ip_next_header = 7;
-    // The source port if this was a TCP or UDP packet.
-    optional int32 source_port = 8;
-    // The destination port if this was a TCP or UDP packet.
-    optional int32 destination_port = 9;
 }
 
 /**
@@ -1303,86 +1384,9 @@ message BluetoothActivityInfo {
 }
 
 /*
- * Logs the memory stats for an app on startup.
- * Logged from:
- *     frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
- */
-message AppStartMemoryStateCaptured {
-    // The uid if available. -1 means not available.
-    optional int32 uid = 1;
-
-    // The process name.
-    optional string process_name = 2;
-
-    // The activity name.
-    optional string activity_name = 3;
-
-    // # of page-faults
-    optional int64 pgfault = 4;
-
-    // # of major page-faults
-    optional int64 pgmajfault = 5;
-
-    // RSS
-    optional int64 rss_in_bytes = 6;
-
-    // CACHE
-    optional int64 cache_in_bytes = 7;
-
-    // SWAP
-    optional int64 swap_in_bytes = 8;
-}
-
-/*
  * Logs the memory stats for a process.
  */
 message ProcessMemoryState {
-    // The uid if available. -1 means not available.
-    optional int32 uid = 1;
-
-    // The process name.
-    optional string process_name = 2;
-
-    // oom adj score.
-    optional int32 oom_score = 3;
-
-    // # of page-faults
-    optional int64 pgfault = 4;
-
-    // # of major page-faults
-    optional int64 pgmajfault = 5;
-
-    // RSS
-    optional int64 rss_in_bytes = 6;
-
-    // CACHE
-    optional int64 cache_in_bytes = 7;
-
-    // SWAP
-    optional int64 swap_in_bytes = 8;
-}
-
-/*
- * Logs the change in Low Memory Killer Daemon (LMKD) state which is used as start/stop boundaries
- * for LMK event.
- * Logged from:
- *      system/core/lmkd/lmkd.c
- */
-message LmkStateChanged {
-    enum State {
-        UNKNOWN = 0;
-        START = 1;
-        STOP = 2;
-    }
-    optional State state = 1;
-}
-
-/*
- * Logs the event when Low Memory Killer Daemon (LMKD) kills a process to reduce memory pressure.
- * Logged from:
- *      system/core/lmkd/lmkd.c
- */
-message LmkKillOccurred {
     // The uid if available. -1 means not available.
     optional int32 uid = 1;
 

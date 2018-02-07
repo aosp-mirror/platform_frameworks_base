@@ -146,6 +146,12 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event) {
         return;
     }
 
+    long curTime = time(nullptr);
+    if (curTime - mLastPullerCacheClearTimeSec > StatsdStats::kPullerCacheClearIntervalSec) {
+        mStatsPullerManager.ClearPullerCacheIfNecessary(curTime);
+        mLastPullerCacheClearTimeSec = curTime;
+    }
+
     if (event->GetTagId() != android::util::ISOLATED_UID_CHANGED) {
         // Map the isolated uid to host uid if necessary.
         mapIsolatedUidToHostUidIfNecessaryLocked(event);
@@ -290,6 +296,10 @@ void StatsLogProcessor::OnConfigRemoved(const ConfigKey& key) {
     StatsdStats::getInstance().noteConfigRemoved(key);
 
     mLastBroadcastTimes.erase(key);
+
+    if (mMetricsManagers.empty()) {
+        mStatsPullerManager.ForceClearPullerCache();
+    }
 }
 
 void StatsLogProcessor::flushIfNecessaryLocked(

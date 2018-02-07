@@ -126,17 +126,16 @@ public abstract class InstantAppResolver {
         final Intent origIntent = requestObj.origIntent;
         final Intent sanitizedIntent = sanitizeIntent(origIntent);
 
-        final InstantAppDigest digest = getInstantAppDigest(origIntent);
-        final int[] shaPrefix = digest.getDigestPrefix();
         AuxiliaryResolveInfo resolveInfo = null;
         @ResolutionStatus int resolutionStatus = RESOLUTION_SUCCESS;
         try {
             final List<InstantAppResolveInfo> instantAppResolveInfoList =
-                    connection.getInstantAppResolveInfoList(sanitizedIntent, shaPrefix, token);
+                    connection.getInstantAppResolveInfoList(sanitizedIntent,
+                            requestObj.digest.getDigestPrefixSecure(), token);
             if (instantAppResolveInfoList != null && instantAppResolveInfoList.size() > 0) {
                 resolveInfo = InstantAppResolver.filterInstantAppIntent(
                         instantAppResolveInfoList, origIntent, requestObj.resolvedType,
-                        requestObj.userId, origIntent.getPackage(), digest, token);
+                        requestObj.userId, origIntent.getPackage(), requestObj.digest, token);
             }
         } catch (ConnectionException e) {
             if (e.failure == ConnectionException.FAILURE_BIND) {
@@ -166,12 +165,6 @@ public abstract class InstantAppResolver {
         return resolveInfo;
     }
 
-    private static InstantAppDigest getInstantAppDigest(Intent origIntent) {
-        return origIntent.getData() != null && !TextUtils.isEmpty(origIntent.getData().getHost())
-                ? new InstantAppDigest(origIntent.getData().getHost(), 5 /*maxDigests*/)
-                : InstantAppDigest.UNDEFINED;
-    }
-
     public static void doInstantAppResolutionPhaseTwo(Context context,
             InstantAppResolverConnection connection, InstantAppRequest requestObj,
             ActivityInfo instantAppInstaller, Handler callbackHandler) {
@@ -182,8 +175,6 @@ public abstract class InstantAppResolver {
         }
         final Intent origIntent = requestObj.origIntent;
         final Intent sanitizedIntent = sanitizeIntent(origIntent);
-        final InstantAppDigest digest = getInstantAppDigest(origIntent);
-        final int[] shaPrefix = digest.getDigestPrefix();
 
         final PhaseTwoCallback callback = new PhaseTwoCallback() {
             @Override
@@ -194,7 +185,8 @@ public abstract class InstantAppResolver {
                     final AuxiliaryResolveInfo instantAppIntentInfo =
                             InstantAppResolver.filterInstantAppIntent(
                                     instantAppResolveInfoList, origIntent, null /*resolvedType*/,
-                                    0 /*userId*/, origIntent.getPackage(), digest, token);
+                                    0 /*userId*/, origIntent.getPackage(), requestObj.digest,
+                                    token);
                     if (instantAppIntentInfo != null) {
                         failureIntent = instantAppIntentInfo.failureIntent;
                     } else {
@@ -225,8 +217,9 @@ public abstract class InstantAppResolver {
             }
         };
         try {
-            connection.getInstantAppIntentFilterList(sanitizedIntent, shaPrefix, token, callback,
-                    callbackHandler, startTime);
+            connection.getInstantAppIntentFilterList(sanitizedIntent,
+                    requestObj.digest.getDigestPrefixSecure(), token, callback, callbackHandler,
+                    startTime);
         } catch (ConnectionException e) {
             @ResolutionStatus int resolutionStatus = RESOLUTION_FAILURE;
             if (e.failure == ConnectionException.FAILURE_BIND) {

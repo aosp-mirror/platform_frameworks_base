@@ -129,7 +129,7 @@ public final class CertXml {
     private static long parseSerial(Element rootNode) throws CertParsingException {
         List<String> contents =
                 CertUtils.getXmlNodeContents(
-                        CertUtils.MustExist.EXACTLY_ONE,
+                        CertUtils.MUST_EXIST_EXACTLY_ONE,
                         rootNode,
                         METADATA_NODE_TAG,
                         METADATA_SERIAL_NODE_TAG);
@@ -139,7 +139,7 @@ public final class CertXml {
     private static long parseRefreshInterval(Element rootNode) throws CertParsingException {
         List<String> contents =
                 CertUtils.getXmlNodeContents(
-                        CertUtils.MustExist.EXACTLY_ONE,
+                        CertUtils.MUST_EXIST_EXACTLY_ONE,
                         rootNode,
                         METADATA_NODE_TAG,
                         METADATA_REFRESH_INTERVAL_NODE_TAG);
@@ -150,7 +150,7 @@ public final class CertXml {
             throws CertParsingException {
         List<String> contents =
                 CertUtils.getXmlNodeContents(
-                        CertUtils.MustExist.FALSE,
+                        CertUtils.MUST_EXIST_UNENFORCED,
                         rootNode,
                         INTERMEDIATE_CERT_LIST_TAG,
                         INTERMEDIATE_CERT_ITEM_TAG);
@@ -165,7 +165,7 @@ public final class CertXml {
             throws CertParsingException {
         List<String> contents =
                 CertUtils.getXmlNodeContents(
-                        CertUtils.MustExist.AT_LEAST_ONE,
+                        CertUtils.MUST_EXIST_AT_LEAST_ONE,
                         rootNode,
                         ENDPOINT_CERT_LIST_TAG,
                         ENDPOINT_CERT_ITEM_TAG);

@@ -519,11 +519,11 @@ public class RecoverableKeyStoreManager {
         byte[] locallyEncryptedKey;
         try {
             // TODO: Remove the extraneous logging here
-            Log.e(TAG, constructLoggingMessage("sessionEntry.getKeyClaimant()",
+            Log.d(TAG, constructLoggingMessage("sessionEntry.getKeyClaimant()",
                     sessionEntry.getKeyClaimant()));
-            Log.e(TAG, constructLoggingMessage("sessionEntry.getVaultParams()",
+            Log.d(TAG, constructLoggingMessage("sessionEntry.getVaultParams()",
                     sessionEntry.getVaultParams()));
-            Log.e(TAG, constructLoggingMessage("encryptedClaimResponse", encryptedClaimResponse));
+            Log.d(TAG, constructLoggingMessage("encryptedClaimResponse", encryptedClaimResponse));
             locallyEncryptedKey = KeySyncUtils.decryptRecoveryClaimResponse(
                     sessionEntry.getKeyClaimant(),
                     sessionEntry.getVaultParams(),
@@ -543,9 +543,9 @@ public class RecoverableKeyStoreManager {
 
         try {
             // TODO: Remove the extraneous logging here
-            Log.e(TAG, constructLoggingMessage("sessionEntry.getLskfHash()",
+            Log.d(TAG, constructLoggingMessage("sessionEntry.getLskfHash()",
                     sessionEntry.getLskfHash()));
-            Log.e(TAG, constructLoggingMessage("locallyEncryptedKey", locallyEncryptedKey));
+            Log.d(TAG, constructLoggingMessage("locallyEncryptedKey", locallyEncryptedKey));
             return KeySyncUtils.decryptRecoveryKey(sessionEntry.getLskfHash(), locallyEncryptedKey);
         } catch (InvalidKeyException e) {
             Log.e(TAG, "Got InvalidKeyException during decrypting recovery key", e);
@@ -585,8 +585,8 @@ public class RecoverableKeyStoreManager {
 
             try {
                 // TODO: Remove the extraneous logging here
-                Log.e(TAG, constructLoggingMessage("recoveryKey", recoveryKey));
-                Log.e(TAG, constructLoggingMessage("encryptedKeyMaterial", encryptedKeyMaterial));
+                Log.d(TAG, constructLoggingMessage("recoveryKey", recoveryKey));
+                Log.d(TAG, constructLoggingMessage("encryptedKeyMaterial", encryptedKeyMaterial));
                 byte[] keyMaterial =
                         KeySyncUtils.decryptApplicationKey(recoveryKey, encryptedKeyMaterial);
                 keyMaterialByAlias.put(alias, keyMaterial);
@@ -600,12 +600,15 @@ public class RecoverableKeyStoreManager {
                 throw new ServiceSpecificException(ERROR_DECRYPTION_FAILED,
                         "Failed to recover key with alias '" + alias + "': " + e.getMessage());
             } catch (AEADBadTagException e) {
-                // TODO: Remove the extraneous logging here
                 Log.e(TAG, "Got AEADBadTagException during decrypting application key with alias: "
                         + alias, e);
-                throw new ServiceSpecificException(ERROR_DECRYPTION_FAILED,
-                        "Failed to recover key with alias '" + alias + "': " + e.getMessage());
+                // Ignore the exception to continue to recover the other application keys.
             }
+        }
+        if (keyMaterialByAlias.isEmpty()) {
+            Log.e(TAG, "Failed to recover any of the application keys.");
+            throw new ServiceSpecificException(ERROR_DECRYPTION_FAILED,
+                    "Failed to recover any of the application keys.");
         }
         return keyMaterialByAlias;
     }
