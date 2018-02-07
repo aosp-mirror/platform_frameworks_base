@@ -30,7 +30,7 @@ import android.media.MediaSession2.PlaylistParams;
 import android.media.session.MediaSessionManager;
 import android.media.update.ApiLoader;
 import android.media.update.MediaController2Provider;
-import android.media.update.PlaybackInfoProvider;
+import android.media.update.MediaController2Provider.PlaybackInfoProvider;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ResultReceiver;
