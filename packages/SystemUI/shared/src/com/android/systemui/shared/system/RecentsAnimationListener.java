@@ -16,13 +16,15 @@
 
 package com.android.systemui.shared.system;
 
+import android.graphics.Rect;
+
 public interface RecentsAnimationListener {
 
     /**
      * Called when the animation into Recents can start. This call is made on the binder thread.
      */
     void onAnimationStart(RecentsAnimationControllerCompat controller,
-            RemoteAnimationTargetCompat[] apps);
+            RemoteAnimationTargetCompat[] apps, Rect homeContentInsets, Rect minimizedHomeBounds);
 
     /**
      * Called when the animation into Recents was canceled. This call is made on the binder thread.

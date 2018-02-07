@@ -20,6 +20,7 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
+import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 
@@ -27,6 +28,7 @@ import android.app.ActivityOptions;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Handler;
+import android.os.Trace;
 import android.view.IRecentsAnimationRunner;
 import com.android.server.wm.RecentsAnimationController.RecentsAnimationCallbacks;
 import com.android.server.wm.WindowManagerService;
@@ -70,6 +72,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
 
     void startRecentsActivity(Intent intent, IRecentsAnimationRunner recentsAnimationRunner,
             ComponentName recentsComponent, int recentsUid) {
+        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "RecentsAnimation#startRecentsActivity");
         mWindowManager.deferSurfaceLayout();
         try {
             // Cancel the previous recents animation if necessary
@@ -124,6 +127,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
             mHandler.postDelayed(mCancelAnimationRunnable, RECENTS_ANIMATION_TIMEOUT);
         } finally {
             mWindowManager.continueSurfaceLayout();
+            Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
         }
     }
 
@@ -134,6 +138,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
             if (mWindowManager.getRecentsAnimationController() == null) return;
 
             mWindowManager.inSurfaceTransaction(() -> {
+                Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER,
+                        "RecentsAnimation#onAnimationFinished_inSurfaceTransaction");
                 mWindowManager.deferSurfaceLayout();
                 try {
                     mWindowManager.cleanupRecentsAnimation();
@@ -167,6 +173,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
                     mWindowManager.executeAppTransition();
                 } finally {
                     mWindowManager.continueSurfaceLayout();
+                    Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
                 }
             });
         }
