@@ -23,6 +23,8 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.LocaleList;
 import android.util.Pair;
+import android.view.View.AutofillImportance;
+import android.view.ViewStructure.HtmlInfo;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 
@@ -345,6 +347,12 @@ public abstract class ViewStructure {
      * meaning of each possible value in the list.
      */
     public abstract void setAutofillOptions(CharSequence[] options);
+
+    /**
+     * Sets the {@link View#setImportantForAutofill(int) importantForAutofill mode} of the
+     * view associated with this node.
+     */
+    public void setImportantForAutofill(@AutofillImportance int mode) {}
 
     /**
      * Sets the {@link android.text.InputType} bits of this node.
