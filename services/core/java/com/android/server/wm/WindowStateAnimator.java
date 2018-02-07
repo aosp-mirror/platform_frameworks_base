@@ -1095,31 +1095,6 @@ class WindowStateAnimator {
                         w.setOrientationChanging(false);
                     }
                 }
-                // We process mTurnOnScreen even for windows which have already
-                // been shown, to handle cases where windows are not necessarily
-                // hidden while the screen is turning off.
-                // TODO(b/63773439): These cases should be eliminated, though we probably still
-                // want to process mTurnOnScreen in this way for clarity.
-                if (mWin.mTurnOnScreen &&
-                        (mWin.mAppToken == null || mWin.mAppToken.canTurnScreenOn())) {
-                    if (DEBUG_VISIBILITY) Slog.v(TAG, "Show surface turning screen on: " + mWin);
-                    mWin.mTurnOnScreen = false;
-
-                    // The window should only turn the screen on once per resume, but
-                    // prepareSurfaceLocked can be called multiple times. Set canTurnScreenOn to
-                    // false so the window doesn't turn the screen on again during this resume.
-                    if (mWin.mAppToken != null) {
-                        mWin.mAppToken.setCanTurnScreenOn(false);
-                    }
-
-                    // We do not add {@code SET_TURN_ON_SCREEN} when the screen is already
-                    // interactive as the value may persist until the next animation, which could
-                    // potentially occurring while turning off the screen. This would lead to the
-                    // screen incorrectly turning back on.
-                    if (!mService.mPowerManager.isInteractive()) {
-                        mService.mTurnOnScreen = true;
-                    }
-                }
             }
             if (hasSurface()) {
                 w.mToken.hasVisible = true;

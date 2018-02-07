@@ -748,19 +748,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                     (mSustainedPerformanceModeEnabled ? 1 : 0));
         }
 
-        if (mService.mTurnOnScreen) {
-            if (mService.mAllowTheaterModeWakeFromLayout
-                    || Settings.Global.getInt(mService.mContext.getContentResolver(),
-                    Settings.Global.THEATER_MODE_ON, 0) == 0) {
-                if (DEBUG_VISIBILITY || DEBUG_POWER) {
-                    Slog.v(TAG, "Turning screen on after layout!");
-                }
-                mService.mPowerManager.wakeUp(SystemClock.uptimeMillis(),
-                        "android.server.wm:TURN_ON");
-            }
-            mService.mTurnOnScreen = false;
-        }
-
         if (mUpdateRotation) {
             if (DEBUG_ORIENTATION) Slog.d(TAG, "Performing post-rotate rotation");
             // TODO(multi-display): Update rotation for different displays separately.
