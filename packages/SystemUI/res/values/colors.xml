@@ -162,9 +162,11 @@
 
     <!-- Fingerprint dialog colors -->
     <color name="fingerprint_dialog_bg_color">#f4ffffff</color> <!-- 96% white -->
-    <color name="fingerprint_dialog_text_color">#ff424242</color> <!-- gray 800-->
+    <color name="fingerprint_dialog_text_dark_color">#ff212121</color>
+    <color name="fingerprint_dialog_text_light_color">#ff757575</color>
     <color name="fingerprint_dialog_dim_color">#80000000</color> <!-- 50% black -->
-    <color name="fingerprint_error_message_color">#ff5722</color>
+    <color name="fingerprint_dialog_error_message_color">#ffff5722</color>
+    <color name="fingerprint_dialog_fingerprint_color">#ff009688</color>
 
     <!-- Logout button -->
     <color name="logout_button_bg_color">#ccffffff</color>

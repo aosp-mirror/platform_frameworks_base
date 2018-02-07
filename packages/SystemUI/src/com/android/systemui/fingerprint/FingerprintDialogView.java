@@ -16,17 +16,18 @@
 
 package com.android.systemui.fingerprint;
 
-import android.app.ActivityManager;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.fingerprint.FingerprintDialog;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -41,8 +42,6 @@ import android.widget.TextView;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.shared.system.ActivityManagerWrapper;
-import com.android.systemui.shared.system.PackageManagerWrapper;
 
 /**
  * This class loads the view for the system-provided dialog. The view consists of:
@@ -55,28 +54,39 @@ public class FingerprintDialogView extends LinearLayout {
 
     private static final int ANIMATION_DURATION = 250; // ms
 
+    private static final int STATE_NONE = 0;
+    private static final int STATE_FINGERPRINT = 1;
+    private static final int STATE_FINGERPRINT_ERROR = 2;
+    private static final int STATE_FINGERPRINT_AUTHENTICATED = 3;
+
     private final IBinder mWindowToken = new Binder();
-    private final ActivityManagerWrapper mActivityManagerWrapper;
-    private final PackageManagerWrapper mPackageManageWrapper;
     private final Interpolator mLinearOutSlowIn;
     private final Interpolator mFastOutLinearIn;
     private final float mAnimationTranslationOffset;
+    private final int mErrorTextColor;
+    private final int mTextColor;
+    private final int mFingerprintColor;
 
     private ViewGroup mLayout;
     private final TextView mErrorText;
     private Handler mHandler;
     private Bundle mBundle;
     private final LinearLayout mDialog;
+    private int mLastState;
 
     public FingerprintDialogView(Context context, Handler handler) {
         super(context);
         mHandler = handler;
-        mActivityManagerWrapper = ActivityManagerWrapper.getInstance();
-        mPackageManageWrapper = PackageManagerWrapper.getInstance();
         mLinearOutSlowIn = Interpolators.LINEAR_OUT_SLOW_IN;
         mFastOutLinearIn = Interpolators.FAST_OUT_LINEAR_IN;
         mAnimationTranslationOffset = getResources()
                 .getDimension(R.dimen.fingerprint_dialog_animation_translation_offset);
+        mErrorTextColor = Color.parseColor(
+                getResources().getString(R.color.fingerprint_dialog_error_message_color));
+        mTextColor = Color.parseColor(
+                getResources().getString(R.color.fingerprint_dialog_text_light_color));
+        mFingerprintColor = Color.parseColor(
+                getResources().getString(R.color.fingerprint_dialog_fingerprint_color));
 
         // Create the dialog
         LayoutInflater factory = LayoutInflater.from(getContext());
@@ -112,7 +122,7 @@ public class FingerprintDialogView extends LinearLayout {
 
         space.setClickable(true);
         space.setOnTouchListener((View view, MotionEvent event) -> {
-            mHandler.obtainMessage(FingerprintDialogImpl.MSG_HIDE_DIALOG, true /* userCanceled*/)
+            mHandler.obtainMessage(FingerprintDialogImpl.MSG_HIDE_DIALOG, true /* userCanceled */)
                     .sendToTarget();
             return true;
         });
@@ -137,16 +147,16 @@ public class FingerprintDialogView extends LinearLayout {
         final TextView subtitle = mLayout.findViewById(R.id.subtitle);
         final TextView description = mLayout.findViewById(R.id.description);
         final Button negative = mLayout.findViewById(R.id.button2);
-        final ImageView image = mLayout.findViewById(R.id.icon);
         final Button positive = mLayout.findViewById(R.id.button1);
-        final ImageView fingerprint_icon = mLayout.findViewById(R.id.fingerprint_icon);
+
+        mLastState = STATE_NONE;
+        updateFingerprintIcon(STATE_FINGERPRINT);
 
         title.setText(mBundle.getCharSequence(FingerprintDialog.KEY_TITLE));
         title.setSelected(true);
         subtitle.setText(mBundle.getCharSequence(FingerprintDialog.KEY_SUBTITLE));
         description.setText(mBundle.getCharSequence(FingerprintDialog.KEY_DESCRIPTION));
         negative.setText(mBundle.getCharSequence(FingerprintDialog.KEY_NEGATIVE_TEXT));
-        setAppIcon(image);
 
         final CharSequence positiveText =
                 mBundle.getCharSequence(FingerprintDialog.KEY_POSITIVE_TEXT);
@@ -183,39 +193,75 @@ public class FingerprintDialogView extends LinearLayout {
         mBundle = bundle;
     }
 
-    protected void clearMessage() {
-        mErrorText.setVisibility(View.INVISIBLE);
+    // Clears the temporary message and shows the help message.
+    protected void resetMessage() {
+        updateFingerprintIcon(STATE_FINGERPRINT);
+        mErrorText.setText(R.string.fingerprint_dialog_touch_sensor);
+        mErrorText.setTextColor(mTextColor);
     }
 
-    private void showMessage(String message) {
+    // Shows an error/help message
+    private void showTemporaryMessage(String message) {
         mHandler.removeMessages(FingerprintDialogImpl.MSG_CLEAR_MESSAGE);
+        updateFingerprintIcon(STATE_FINGERPRINT_ERROR);
         mErrorText.setText(message);
+        mErrorText.setTextColor(mErrorTextColor);
         mErrorText.setContentDescription(message);
-        mErrorText.setVisibility(View.VISIBLE);
         mHandler.sendMessageDelayed(mHandler.obtainMessage(FingerprintDialogImpl.MSG_CLEAR_MESSAGE),
                 FingerprintDialog.HIDE_DIALOG_DELAY);
     }
 
     public void showHelpMessage(String message) {
-        showMessage(message);
+        showTemporaryMessage(message);
     }
 
     public void showErrorMessage(String error) {
-        showMessage(error);
+        showTemporaryMessage(error);
         mHandler.sendMessageDelayed(mHandler.obtainMessage(FingerprintDialogImpl.MSG_HIDE_DIALOG,
                 false /* userCanceled */), FingerprintDialog.HIDE_DIALOG_DELAY);
     }
 
-    private void setAppIcon(ImageView image) {
-        final ActivityManager.RunningTaskInfo taskInfo = mActivityManagerWrapper.getRunningTask();
-        final ComponentName cn = taskInfo.topActivity;
-        final int userId = mActivityManagerWrapper.getCurrentUserId();
-        final ActivityInfo activityInfo = mPackageManageWrapper.getActivityInfo(cn, userId);
-        image.setImageDrawable(mActivityManagerWrapper.getBadgedActivityIcon(activityInfo, userId));
-        image.setContentDescription(
-                getResources().getString(R.string.accessibility_fingerprint_dialog_app_icon)
-                        + " "
-                        + mActivityManagerWrapper.getBadgedActivityLabel(activityInfo, userId));
+    private void updateFingerprintIcon(int newState) {
+        Drawable icon  = getAnimationResForTransition(mLastState, newState);
+
+        if (icon == null) {
+            Log.e(TAG, "Animation not found");
+            return;
+        }
+
+        if (newState == STATE_FINGERPRINT) {
+            icon.setColorFilter(mFingerprintColor, PorterDuff.Mode.SRC_IN);
+        }
+
+        final AnimatedVectorDrawable animation = icon instanceof AnimatedVectorDrawable
+                ? (AnimatedVectorDrawable) icon
+                : null;
+
+        final ImageView fingerprint_icon = mLayout.findViewById(R.id.fingerprint_icon);
+        fingerprint_icon.setImageDrawable(icon);
+
+        if (animation != null) {
+            animation.forceAnimationOnUI();
+            animation.start();
+        }
+
+        mLastState = newState;
+    }
+
+    private Drawable getAnimationResForTransition(int oldState, int newState) {
+        int iconRes;
+        if (oldState == STATE_NONE && newState == STATE_FINGERPRINT) {
+            iconRes = R.drawable.lockscreen_fingerprint_draw_on_animation;
+        } else if (oldState == STATE_FINGERPRINT && newState == STATE_FINGERPRINT_ERROR) {
+            iconRes = R.drawable.lockscreen_fingerprint_fp_to_error_state_animation;
+        } else if (oldState == STATE_FINGERPRINT_ERROR && newState == STATE_FINGERPRINT) {
+            iconRes = R.drawable.lockscreen_fingerprint_error_state_to_fp_animation;
+        } else if (oldState == STATE_FINGERPRINT && newState == STATE_FINGERPRINT_AUTHENTICATED) {
+            iconRes = R.drawable.lockscreen_fingerprint_draw_off_animation;
+        } else {
+            return null;
+        }
+        return mContext.getDrawable(iconRes);
     }
 
     public WindowManager.LayoutParams getLayoutParams() {
