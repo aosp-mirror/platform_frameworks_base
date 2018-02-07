@@ -2400,6 +2400,32 @@
          in the display pipeline plus some slack just to be sure. -->
     <integer name="config_drawLockTimeoutMillis">120</integer>
 
+    <!-- An array of device capabilities defined by GSMA SGP.22 v2.0.
+         The first item is the capability name that the device supports. The second item is the
+         major version. The minor and revision versions are default to 0s.
+         The device capabilities and their definition in the spec are:
+             gsm : gsmSupportedRelease
+             utran : utranSupportedRelease
+             cdma1x : cdma2000onexSupportedRelease
+             hrpd : cdma2000hrpdSupportedRelease
+             ehrpd : cdma2000ehrpdSupportedRelease
+             eutran : eutranSupportedRelease
+             nfc : contactlessSupportedRelease
+             crl : rspCrlSupportedVersion
+    -->
+    <string-array translatable="false" name="config_telephonyEuiccDeviceCapabilities">
+        <!-- Example:
+        <item>"gsm,11"</item>
+        <item>"utran,11"</item>
+        <item>"cdma1x,1"</item>
+        <item>"hrpd,3"</item>
+        <item>"ehrpd,12"</item>
+        <item>"eutran,11"</item>
+        <item>"nfc,1"</item>
+        <item>"crl,1"</item>
+        -->
+    </string-array>
+
     <!-- default telephony hardware configuration for this platform.
     -->
     <!-- this string array should be overridden by the device to present a list
