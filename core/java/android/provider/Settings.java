@@ -12134,6 +12134,12 @@ public final class Settings {
          * @hide
          */
         public static final String SHOW_MUTE_IN_CRASH_DIALOG = "show_mute_in_crash_dialog";
+
+        /**
+         * If nonzero, will show the zen upgrade notification when the user toggles DND on/off.
+         * @hide
+         */
+        public static final String SHOW_ZEN_UPGRADE_NOTIFICATION = "show_zen_upgrade_notification";
     }
 
     /**

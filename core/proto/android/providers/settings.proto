@@ -426,10 +426,11 @@ message GlobalSettingsProto {
     optional SettingProto show_first_crash_dialog = 349 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto show_restart_in_crash_dialog = 351 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto show_mute_in_crash_dialog = 352 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingsProto show_zen_upgrade_notification = 354  [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     // Please insert fields in the same order as in
     // frameworks/base/core/java/android/provider/Settings.java.
-    // Next tag = 354;
+    // Next tag = 355;
 }
 
 message SecureSettingsProto {
