@@ -45,6 +45,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Unit tests for {@link android.app.admin.SystemUpdatePolicy}.
@@ -251,6 +252,147 @@ public final class SystemUpdatePolicyTest {
         assertEquals(365 * 2, FreezeInterval.distanceWithoutLeapYear(
                 LocalDate.of(2017, 3, 1), LocalDate.of(2015, 3, 1)));
 
+    }
+
+    @Test
+    public void testInstallationOptionWithoutFreeze() {
+        // Also duplicated at com.google.android.gts.deviceowner.SystemUpdatePolicyTest
+        final long millis_2018_01_01 = TimeUnit.SECONDS.toMillis(1514764800);
+
+        SystemUpdatePolicy p = SystemUpdatePolicy.createAutomaticInstallPolicy();
+        assertInstallationOption(SystemUpdatePolicy.TYPE_INSTALL_AUTOMATIC, Long.MAX_VALUE,
+                millis_2018_01_01, p);
+
+        p = SystemUpdatePolicy.createPostponeInstallPolicy();
+        assertInstallationOption(SystemUpdatePolicy.TYPE_POSTPONE, Long.MAX_VALUE,
+                millis_2018_01_01, p);
+
+        p = SystemUpdatePolicy.createWindowedInstallPolicy(120, 180); // 2:00 - 3:00
+        // 00:00 is two hours before the next window
+        assertInstallationOption(SystemUpdatePolicy.TYPE_PAUSE, TimeUnit.HOURS.toMillis(2),
+                millis_2018_01_01, p);
+        // 02:00 is within the current maintenance window, and one hour until the window ends
+        assertInstallationOption(
+                SystemUpdatePolicy.TYPE_INSTALL_AUTOMATIC, TimeUnit.HOURS.toMillis(1),
+                millis_2018_01_01 + TimeUnit.HOURS.toMillis(2), p);
+        // 04:00 is 22 hours from the window next day
+        assertInstallationOption(SystemUpdatePolicy.TYPE_PAUSE, TimeUnit.HOURS.toMillis(22),
+                millis_2018_01_01 + TimeUnit.HOURS.toMillis(4), p);
+
+        p = SystemUpdatePolicy.createWindowedInstallPolicy(22 * 60, 2 * 60); // 22:00 - 2:00
+        // 21:00 is one hour from the next window
+        assertInstallationOption(SystemUpdatePolicy.TYPE_PAUSE, TimeUnit.HOURS.toMillis(1),
+                millis_2018_01_01 + TimeUnit.HOURS.toMillis(21), p);
+        // 00:00 is two hours from the end of current window
+        assertInstallationOption(
+                SystemUpdatePolicy.TYPE_INSTALL_AUTOMATIC, TimeUnit.HOURS.toMillis(2),
+                millis_2018_01_01, p);
+        // 03:00 is 22 hours from the window today
+        assertInstallationOption(SystemUpdatePolicy.TYPE_PAUSE, TimeUnit.HOURS.toMillis(19),
+                millis_2018_01_01 + TimeUnit.HOURS.toMillis(3), p);
+    }
+
+    @Test
+    public void testInstallationOptionWithFreeze() throws Exception {
+        final long millis_2016_02_29 = TimeUnit.SECONDS.toMillis(1456704000);
+        final long millis_2017_01_31 = TimeUnit.SECONDS.toMillis(1485820800);
+        final long millis_2017_02_28 = TimeUnit.SECONDS.toMillis(1488240000);
+        final long millis_2018_01_01 = TimeUnit.SECONDS.toMillis(1514764800);
+        final long millis_2018_08_01 = TimeUnit.SECONDS.toMillis(1533081600);
+
+        SystemUpdatePolicy p = SystemUpdatePolicy.createAutomaticInstallPolicy();
+        setFreezePeriods(p, "01-01", "01-31");
+        // Inside a freeze period
+        assertInstallationOption(
+                SystemUpdatePolicy.TYPE_PAUSE, TimeUnit.DAYS.toMillis(31),
+                millis_2018_01_01, p);
+        // Device is outside freeze between 2/28 to 12/31 inclusive
+        assertInstallationOption(
+                SystemUpdatePolicy.TYPE_INSTALL_AUTOMATIC, TimeUnit.DAYS.toMillis(307),
+                millis_2017_02_28, p);
+
+        // Freeze period contains leap day Feb 29
+        p = SystemUpdatePolicy.createPostponeInstallPolicy();
+        setFreezePeriods(p, "02-01", "03-15");
+        // Freezed until 3/31, note 2016 is a leap year
+        assertInstallationOption(SystemUpdatePolicy.TYPE_PAUSE, TimeUnit.DAYS.toMillis(16),
+                millis_2016_02_29, p);
+        // Freezed until 3/31, note 2017 is not a leap year
+        assertInstallationOption(SystemUpdatePolicy.TYPE_PAUSE, TimeUnit.DAYS.toMillis(16),
+                millis_2017_02_28, p);
+        // Next freeze is 2018/2/1
+        assertInstallationOption(SystemUpdatePolicy.TYPE_POSTPONE, TimeUnit.DAYS.toMillis(31),
+                millis_2018_01_01, p);
+
+        // Freeze period start on or right after leap day
+        p = SystemUpdatePolicy.createAutomaticInstallPolicy();
+        setFreezePeriods(p, "03-01", "03-31");
+        assertInstallationOption(
+                SystemUpdatePolicy.TYPE_INSTALL_AUTOMATIC, TimeUnit.DAYS.toMillis(1),
+                millis_2016_02_29, p);
+        assertInstallationOption(
+                SystemUpdatePolicy.TYPE_INSTALL_AUTOMATIC, TimeUnit.DAYS.toMillis(1),
+                millis_2017_02_28, p);
+        setFreezePeriods(p, "02-28", "03-15");
+        assertInstallationOption(
+                SystemUpdatePolicy.TYPE_PAUSE, TimeUnit.DAYS.toMillis(16),
+                millis_2016_02_29, p);
+        assertInstallationOption(
+                SystemUpdatePolicy.TYPE_PAUSE, TimeUnit.DAYS.toMillis(16),
+                millis_2017_02_28, p);
+
+        // Freeze period end on or right after leap day
+        p = SystemUpdatePolicy.createAutomaticInstallPolicy();
+        setFreezePeriods(p, "02-01", "02-28");
+        assertInstallationOption(
+                SystemUpdatePolicy.TYPE_PAUSE, TimeUnit.DAYS.toMillis(1),
+                millis_2016_02_29, p);
+        assertInstallationOption(
+                SystemUpdatePolicy.TYPE_PAUSE, TimeUnit.DAYS.toMillis(1),
+                millis_2017_02_28, p);
+        p = SystemUpdatePolicy.createAutomaticInstallPolicy();
+        setFreezePeriods(p, "02-01", "03-01");
+        assertInstallationOption(
+                SystemUpdatePolicy.TYPE_PAUSE, TimeUnit.DAYS.toMillis(2),
+                millis_2016_02_29, p);
+        assertInstallationOption(
+                SystemUpdatePolicy.TYPE_PAUSE, TimeUnit.DAYS.toMillis(2),
+                millis_2017_02_28, p);
+
+        // Freeze period with maintenance window
+        p = SystemUpdatePolicy.createWindowedInstallPolicy(23 * 60, 1 * 60); // 23:00 - 1:00
+        setFreezePeriods(p, "02-01", "02-28");
+        // 00:00 is within the current window, outside freeze period
+        assertInstallationOption(
+                SystemUpdatePolicy.TYPE_INSTALL_AUTOMATIC, TimeUnit.HOURS.toMillis(1),
+                millis_2018_01_01, p);
+        // Last day of feeze period, which ends in 22 hours
+        assertInstallationOption(
+                SystemUpdatePolicy.TYPE_PAUSE, TimeUnit.HOURS.toMillis(22),
+                millis_2017_02_28 + TimeUnit.HOURS.toMillis(2), p);
+        // Last day before the next freeze, and within window
+        assertInstallationOption(
+                SystemUpdatePolicy.TYPE_INSTALL_AUTOMATIC, TimeUnit.HOURS.toMillis(1),
+                millis_2017_01_31, p);
+        // Last day before the next freeze, and there is still a partial maintenance window before
+        // the freeze.
+        assertInstallationOption(
+                SystemUpdatePolicy.TYPE_PAUSE, TimeUnit.HOURS.toMillis(19),
+                millis_2017_01_31 + TimeUnit.HOURS.toMillis(4), p);
+
+        // Two freeze periods
+        p = SystemUpdatePolicy.createAutomaticInstallPolicy();
+        setFreezePeriods(p, "05-01", "06-01", "12-01", "01-31");
+        // automatic policy for August, September, November and December
+        assertInstallationOption(
+                SystemUpdatePolicy.TYPE_INSTALL_AUTOMATIC, TimeUnit.DAYS.toMillis(122),
+                millis_2018_08_01, p);
+    }
+
+    private void assertInstallationOption(int expectedType, long expectedTime, long now,
+            SystemUpdatePolicy p) {
+        assertEquals(expectedType, p.getInstallationOptionAt(now).getType());
+        assertEquals(expectedTime, p.getInstallationOptionAt(now).getEffectiveTime());
     }
 
     private void testFreezePeriodsSucceeds(String...dates) throws Exception {

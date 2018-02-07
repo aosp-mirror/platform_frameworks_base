@@ -21,6 +21,7 @@ import static org.xmlpull.v1.XmlPullParser.END_TAG;
 import static org.xmlpull.v1.XmlPullParser.TEXT;
 
 import android.annotation.IntDef;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -33,9 +34,15 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -102,6 +109,19 @@ public class SystemUpdatePolicy implements Parcelable {
      * However, the expiration will be recalculated when a new system update is made available.
      */
     public static final int TYPE_POSTPONE = 3;
+
+    /**
+     * Incoming system updates (including security updates) should be blocked. This flag is not
+     * exposed to third-party apps (and any attempt to set it will raise exceptions). This is used
+     * to represent the current installation option type to the privileged system update clients,
+     * for example to indicate OTA freeze is currently in place or when system is outside a daily
+     * maintenance window.
+     *
+     * @see InstallationOption
+     * @hide
+     */
+    @SystemApi
+    public static final int TYPE_PAUSE = 4;
 
     private static final String KEY_POLICY_TYPE = "policy_type";
     private static final String KEY_INSTALL_WINDOW_START = "install_window_start";
@@ -460,6 +480,30 @@ public class SystemUpdatePolicy implements Parcelable {
         return null;
     }
 
+    /**
+     * Returns time (in milliseconds) until the start of the next freeze period, assuming now
+     * is not within a freeze period.
+     */
+    private long timeUntilNextFreezePeriod(long now) {
+        List<FreezeInterval> sortedPeriods = FreezeInterval.canonicalizeIntervals(mFreezePeriods);
+        LocalDate nowDate = millisToDate(now);
+        LocalDate nextFreezeStart = null;
+        for (FreezeInterval interval : sortedPeriods) {
+            if (interval.after(nowDate)) {
+                nextFreezeStart = interval.toCurrentOrFutureRealDates(nowDate).first;
+                break;
+            } else if (interval.contains(nowDate)) {
+                throw new IllegalArgumentException("Given date is inside a freeze period");
+            }
+        }
+        if (nextFreezeStart == null) {
+            // If no interval is after now, then it must be the one that starts at the beginning
+            // of next year
+            nextFreezeStart = sortedPeriods.get(0).toCurrentOrFutureRealDates(nowDate).first;
+        }
+        return dateToMillis(nextFreezeStart) - now;
+    }
+
     /** @hide */
     public void validateFreezePeriods() {
         FreezeInterval.validatePeriods(mFreezePeriods);
@@ -472,6 +516,134 @@ public class SystemUpdatePolicy implements Parcelable {
                 prevPeriodEnd, now);
     }
 
+    /**
+     * An installation option represents how system update clients should act on incoming system
+     * updates and how long this action is valid for, given the current system update policy. Its
+     * action could be one of the following
+     * <ul>
+     * <li> {@code TYPE_INSTALL_AUTOMATIC} system updates should be installed immedately and without
+     * user intervention as soon as they become available.
+     * <li> {@code TYPE_POSTPONE} system updates should be postponed for a maximum of 30 days
+     * <li> {@code TYPE_PAUSE} system updates should be postponed indefinitely until further notice
+     * </ul>
+     *
+     * The effective time measures how long this installation option is valid for from the queried
+     * time, in milliseconds.
+     *
+     * This is an internal API for system update clients.
+     * @hide
+     */
+    @SystemApi
+    public static class InstallationOption {
+        private final int mType;
+        private long mEffectiveTime;
+
+        InstallationOption(int type, long effectiveTime) {
+            this.mType = type;
+            this.mEffectiveTime = effectiveTime;
+        }
+
+        public int getType() {
+            return mType;
+        }
+
+        public long getEffectiveTime() {
+            return mEffectiveTime;
+        }
+
+        /** @hide */
+        protected void limitEffectiveTime(long otherTime) {
+            mEffectiveTime = Long.min(mEffectiveTime, otherTime);
+        }
+    }
+
+    /**
+     * Returns the installation option at the specified time, under the current
+     * {@code SystemUpdatePolicy} object. This is a convenience method for system update clients
+     * so they can instantiate this policy at any given time and find out what to do with incoming
+     * system updates, without the need of examining the overall policy structure.
+     *
+     * Normally the system update clients will query the current installation option by calling this
+     * method with the current timestamp, and act on the returned option until its effective time
+     * lapses. It can then query the latest option using a new timestamp. It should also listen
+     * for {@code DevicePolicyManager#ACTION_SYSTEM_UPDATE_POLICY_CHANGED} broadcast, in case the
+     * whole policy is updated.
+     *
+     * @param when At what time the intallation option is being queried, specified in number of
+           milliseonds since the epoch.
+     * @see InstallationOption
+     * @hide
+     */
+    @SystemApi
+    public InstallationOption getInstallationOptionAt(long when) {
+        LocalDate whenDate = millisToDate(when);
+        Pair<LocalDate, LocalDate> current = getCurrentFreezePeriod(whenDate);
+        if (current != null) {
+            return new InstallationOption(TYPE_PAUSE,
+                    dateToMillis(roundUpLeapDay(current.second).plusDays(1)) - when);
+        }
+        // We are not within a freeze period, query the underlying policy.
+        // But also consider the start of the next freeze period, which might
+        // reduce the effective time of the current installation option
+        InstallationOption option = getInstallationOptionRegardlessFreezeAt(when);
+        if (mFreezePeriods.size() > 0) {
+            option.limitEffectiveTime(timeUntilNextFreezePeriod(when));
+        }
+        return option;
+    }
+
+    private InstallationOption getInstallationOptionRegardlessFreezeAt(long when) {
+        if (mPolicyType == TYPE_INSTALL_AUTOMATIC || mPolicyType == TYPE_POSTPONE) {
+            return new InstallationOption(mPolicyType, Long.MAX_VALUE);
+        } else if (mPolicyType == TYPE_INSTALL_WINDOWED) {
+            Calendar query = Calendar.getInstance();
+            query.setTimeInMillis(when);
+            // Calculate the number of milliseconds since midnight of the time specified by when
+            long whenMillis = TimeUnit.HOURS.toMillis(query.get(Calendar.HOUR_OF_DAY))
+                    + TimeUnit.MINUTES.toMillis(query.get(Calendar.MINUTE))
+                    + TimeUnit.SECONDS.toMillis(query.get(Calendar.SECOND))
+                    + query.get(Calendar.MILLISECOND);
+            long windowStartMillis = TimeUnit.MINUTES.toMillis(mMaintenanceWindowStart);
+            long windowEndMillis = TimeUnit.MINUTES.toMillis(mMaintenanceWindowEnd);
+            final long dayInMillis = TimeUnit.DAYS.toMillis(1);
+
+            if ((windowStartMillis <= whenMillis && whenMillis <= windowEndMillis)
+                    || ((windowStartMillis > windowEndMillis)
+                    && (windowStartMillis <= whenMillis || whenMillis <= windowEndMillis))) {
+                return new InstallationOption(TYPE_INSTALL_AUTOMATIC,
+                        (windowEndMillis - whenMillis + dayInMillis) % dayInMillis);
+            } else {
+                return new InstallationOption(TYPE_PAUSE,
+                        (windowStartMillis - whenMillis + dayInMillis) % dayInMillis);
+            }
+        } else {
+            throw new RuntimeException("Unknown policy type");
+        }
+    }
+
+    private static LocalDate roundUpLeapDay(LocalDate date) {
+        if (date.isLeapYear() && date.getMonthValue() == 2 && date.getDayOfMonth() == 28) {
+            return date.plusDays(1);
+        } else {
+            return date;
+        }
+    }
+
+    /** Convert a timestamp since epoch to a LocalDate using default timezone, truncating
+     * the hour/min/seconds part.
+     */
+    private static LocalDate millisToDate(long when) {
+        return Instant.ofEpochMilli(when).atZone(ZoneId.systemDefault()).toLocalDate();
+    }
+
+    /**
+     * Returns the timestamp since epoch of a LocalDate, assuming the time is 00:00:00.
+     */
+    private static long dateToMillis(LocalDate when) {
+        return LocalDateTime.of(when, LocalTime.MIN).atZone(ZoneId.systemDefault()).toInstant()
+                .toEpochMilli();
+    }
+
     @Override
     public String toString() {
         return String.format("SystemUpdatePolicy (type: %d, windowStart: %d, windowEnd: %d, "
@@ -480,11 +652,13 @@ public class SystemUpdatePolicy implements Parcelable {
                 mFreezePeriods.stream().map(n -> n.toString()).collect(Collectors.joining(",")));
     }
 
+    @SystemApi
     @Override
     public int describeContents() {
         return 0;
     }
 
+    @SystemApi
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mPolicyType);
@@ -499,6 +673,7 @@ public class SystemUpdatePolicy implements Parcelable {
         }
     }
 
+    @SystemApi
     public static final Parcelable.Creator<SystemUpdatePolicy> CREATOR =
             new Parcelable.Creator<SystemUpdatePolicy>() {
 

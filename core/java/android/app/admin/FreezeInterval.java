@@ -84,6 +84,10 @@ public class FreezeInterval {
         }
     }
 
+    boolean after(LocalDate localDate) {
+        return mStartDay > dayOfYearDisregardLeapYear(localDate);
+    }
+
     /**
      * Instantiate the current interval to real calendar dates, given a calendar date
      * {@code now}. If the interval contains now, the returned calendar dates should be the
@@ -161,7 +165,7 @@ public class FreezeInterval {
      *     3. At most one wrapped Interval remains, and it will be at the end of the list
      * @hide
      */
-    private static List<FreezeInterval> canonicalizeIntervals(List<FreezeInterval> intervals) {
+    protected static List<FreezeInterval> canonicalizeIntervals(List<FreezeInterval> intervals) {
         boolean[] taken = new boolean[DAYS_IN_YEAR];
         // First convert the intervals into flat array
         for (FreezeInterval interval : intervals) {
