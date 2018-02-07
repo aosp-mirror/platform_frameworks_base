@@ -182,6 +182,15 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
     }
 
     /**
+     * Deflects an incoming call.
+     *
+     * @param deflectNumber number to deflect the call
+     */
+    @Override
+    public void deflect(String deflectNumber) {
+    }
+
+    /**
      * Rejects an incoming call or session update.
      *
      * @param reason reason code to reject an incoming call, defined in {@link ImsReasonInfo}.
