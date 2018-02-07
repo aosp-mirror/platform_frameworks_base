@@ -2804,6 +2804,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     public void setRemoteInputActive(NotificationData.Entry entry,
                             boolean remoteInputActive) {
                         mHeadsUpManager.setRemoteInputActive(entry, remoteInputActive);
+                        entry.row.updateMaxHeights();
                     }
                     public void lockScrollTo(NotificationData.Entry entry) {
                         mStackScroller.lockScrollTo(entry.row);

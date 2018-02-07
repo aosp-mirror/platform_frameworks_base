@@ -82,7 +82,6 @@ import com.android.systemui.statusbar.stack.AmbientState;
 import com.android.systemui.statusbar.stack.AnimationProperties;
 import com.android.systemui.statusbar.stack.ExpandableViewState;
 import com.android.systemui.statusbar.stack.NotificationChildrenContainer;
-import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.StackScrollState;
 
 import java.util.ArrayList;
@@ -1947,18 +1946,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
-    private void updateMaxHeights() {
+    public void updateMaxHeights() {
         int intrinsicBefore = getIntrinsicHeight();
-        View expandedChild = mPrivateLayout.getExpandedChild();
-        if (expandedChild == null) {
-            expandedChild = mPrivateLayout.getContractedChild();
-        }
-        mMaxExpandHeight = expandedChild.getHeight();
-        View headsUpChild = mPrivateLayout.getHeadsUpChild();
-        if (headsUpChild == null) {
-            headsUpChild = mPrivateLayout.getContractedChild();
-        }
-        mHeadsUpHeight = headsUpChild.getHeight();
+        mMaxExpandHeight = mPrivateLayout.getExpandHeight();
+        mHeadsUpHeight = mPrivateLayout.getHeadsUpHeight();
         if (intrinsicBefore != getIntrinsicHeight()) {
             notifyHeightChanged(true  /* needsAnimation */);
         }

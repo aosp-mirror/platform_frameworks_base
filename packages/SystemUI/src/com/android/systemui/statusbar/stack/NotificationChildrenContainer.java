@@ -120,6 +120,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         super(context, attrs, defStyleAttr, defStyleRes);
         initDimens();
         mHybridGroupManager = new HybridGroupManager(getContext(), this);
+        setClipChildren(false);
     }
 
     private void initDimens() {
@@ -134,7 +135,7 @@ public class NotificationChildrenContainer extends ViewGroup {
                 R.dimen.notification_children_container_top_padding);
         mHeaderHeight = mNotificationHeaderMargin + mNotificatonTopPadding;
         mCollapsedBottompadding = res.getDimensionPixelSize(
-                com.android.internal.R.dimen.notification_content_margin_bottom);
+                com.android.internal.R.dimen.notification_content_margin);
         mEnableShadowOnChildNotifications =
                 res.getBoolean(R.bool.config_enableShadowOnChildNotifications);
         mShowDividersWhenExpanded =

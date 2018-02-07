@@ -20,6 +20,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:tag="inbox"
+    android:clipChildren="false"
     >
     <include layout="@layout/notification_template_header" />
     <LinearLayout
@@ -38,8 +39,8 @@
             android:layout_gravity="top"
             android:paddingStart="@dimen/notification_content_margin_start"
             android:paddingEnd="@dimen/notification_content_margin_end"
-            android:paddingBottom="@dimen/notification_content_margin_bottom"
             android:minHeight="@dimen/notification_min_content_height"
+            android:layout_weight="1"
             android:clipToPadding="false"
             android:orientation="vertical"
             >
@@ -124,8 +125,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/notification_content_margin_start"
             android:layout_marginEnd="@dimen/notification_content_margin_end"
-            android:layout_marginBottom="@dimen/notification_content_margin_bottom" />
+            android:layout_marginTop="@dimen/notification_content_margin" />
+        <include layout="@layout/notification_material_action_list" />
     </LinearLayout>
-    <include layout="@layout/notification_material_action_list" />
     <include layout="@layout/notification_template_right_icon" />
 </FrameLayout>
