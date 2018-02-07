@@ -132,8 +132,8 @@ Typeface* Typeface::createFromFamilies(std::vector<std::shared_ptr<minikin::Font
         bool italicFromFont;
 
         const minikin::FontStyle defaultStyle;
-        const minikin::MinikinFont* mf = families.empty() ? nullptr
-                : families[0]->getClosestMatch(defaultStyle).font->typeface().get();
+        const minikin::MinikinFont* mf =
+                families.empty() ? nullptr : families[0]->getClosestMatch(defaultStyle).font;
         if (mf != nullptr) {
             SkTypeface* skTypeface = reinterpret_cast<const MinikinFontSkia*>(mf)->GetSkTypeface();
             const SkFontStyle& style = skTypeface->fontStyle();
@@ -183,7 +183,7 @@ void Typeface::setRobotoTypefaceForTest() {
     std::shared_ptr<minikin::MinikinFont> font = std::make_shared<MinikinFontSkia>(
             std::move(typeface), data, st.st_size, 0, std::vector<minikin::FontVariation>());
     std::vector<minikin::Font> fonts;
-    fonts.push_back(minikin::Font::Builder(font).build());
+    fonts.push_back(minikin::Font(std::move(font), minikin::FontStyle()));
 
     std::shared_ptr<minikin::FontCollection> collection = std::make_shared<minikin::FontCollection>(
             std::make_shared<minikin::FontFamily>(std::move(fonts)));
