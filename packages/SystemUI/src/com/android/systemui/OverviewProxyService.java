@@ -66,6 +66,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     private IOverviewProxy mOverviewProxy;
     private int mConnectionBackoffAttempts;
+    private CharSequence mOnboardingText;
 
     private ISystemUiProxy mSysUiProxy = new ISystemUiProxy.Stub() {
 
@@ -104,6 +105,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
+        }
+
+        public void setRecentsOnboardingText(CharSequence text) {
+            mOnboardingText = text;
         }
     };
 
@@ -223,8 +228,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         return mOverviewProxy;
     }
 
-    public ComponentName getLauncherComponent() {
-        return mLauncherComponentName;
+    public CharSequence getOnboardingText() {
+        return mOnboardingText;
     }
 
     private void disconnectFromLauncherService() {
