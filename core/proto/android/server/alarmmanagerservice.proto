@@ -104,11 +104,6 @@ message AlarmManagerServiceProto {
 
   repeated InFlightProto outstanding_deliveries = 34;
 
-  // Minimum time between ALLOW_WHILE_IDLE alarms when system is idling. It
-  // should be either CosntantsProto.allow_while_idle_short_duration_ms or
-  // ConstantsProto.allow_while_idle_long_duration_ms.
-  optional int64 allow_while_idle_min_duration_ms = 35;
-
   message LastAllowWhileIdleDispatch {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -121,7 +116,7 @@ message AlarmManagerServiceProto {
   }
 
   // Whether the short or long while-idle timeout should be used for each UID.
-  repeated int32 use_allow_while_idle_short_time = 42;
+  repeated int32 use_allow_while_idle_short_time = 35;
 
   // For each uid, this is the last time we dispatched an "allow while idle"
   // alarm, used to determine the earliest we can dispatch the next such alarm.
