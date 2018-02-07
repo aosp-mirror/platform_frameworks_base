@@ -29,7 +29,13 @@ public abstract class HwBinder implements IHwBinder {
 
     private static final NativeAllocationRegistry sNativeRegistry;
 
-    /** @hide */
+    /**
+     * Create and initialize a HwBinder object and the native objects
+     * used to allow this to participate in hwbinder transactions.
+     *
+     * @hide
+     */
+    @SystemApi
     public HwBinder() {
         native_setup();
 
@@ -44,12 +50,28 @@ public abstract class HwBinder implements IHwBinder {
             int code, HwParcel request, HwParcel reply, int flags)
         throws RemoteException;
 
-    /** @hide */
+    /**
+     * Process a hwbinder transaction.
+     *
+     * @param code interface specific code for interface.
+     * @param request parceled transaction
+     * @param reply object to parcel reply into
+     * @param flags transaction flags to be chosen by wire protocol
+     *
+     * @hide
+     */
+    @SystemApi
     public abstract void onTransact(
             int code, HwParcel request, HwParcel reply, int flags)
         throws RemoteException;
 
-    /** @hide */
+    /**
+     * Registers this service with the hwservicemanager.
+     *
+     * @param serviceName instance name of the service
+     * @hide
+     */
+    @SystemApi
     public native final void registerService(String serviceName)
         throws RemoteException;
 
