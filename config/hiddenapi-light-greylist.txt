@@ -292,6 +292,11 @@ Landroid/graphics/drawable/StateListDrawable;->getStateDrawable(I)Landroid/graph
 Landroid/graphics/drawable/StateListDrawable;->getStateSet(I)[I
 Landroid/graphics/drawable/StateListDrawable;->mStateListState:Landroid/graphics/drawable/StateListDrawable$StateListState;
 Landroid/graphics/drawable/StateListDrawable;->updateStateFromTypedArray(Landroid/content/res/TypedArray;)V
+Landroid/graphics/FontFamily;->abortCreation()V
+Landroid/graphics/FontFamily;->addFontFromAssetManager(Landroid/content/res/AssetManager;Ljava/lang/String;IZIII[Landroid/graphics/fonts/FontVariationAxis;)Z
+Landroid/graphics/FontFamily;->addFontFromBuffer(Ljava/nio/ByteBuffer;I[Landroid/graphics/fonts/FontVariationAxis;II)Z
+Landroid/graphics/FontFamily;->freeze()Z
+Landroid/graphics/FontFamily;-><init>()V
 Landroid/graphics/LinearGradient;->mColors:[I
 Landroid/graphics/NinePatch;->mBitmap:Landroid/graphics/Bitmap;
 Landroid/graphics/SurfaceTexture;->nativeDetachFromGLContext()I
@@ -547,12 +552,14 @@ Landroid/os/UpdateLock;->release()V
 Landroid/os/UpdateLock;->UPDATE_LOCK_CHANGED:Ljava/lang/String;
 Landroid/os/UserHandle;->ALL:Landroid/os/UserHandle;
 Landroid/os/UserHandle;->getAppIdFromSharedAppGid(I)I
+Landroid/os/UserHandle;->getCallingUserId()I
 Landroid/os/UserHandle;->getIdentifier()I
 Landroid/os/UserHandle;->getUserId(I)I
 Landroid/os/UserHandle;-><init>(I)V
 Landroid/os/UserHandle;->isOwner()Z
 Landroid/os/UserHandle;->myUserId()I
 Landroid/os/UserHandle;->of(I)Landroid/os/UserHandle;
+Landroid/os/UserHandle;->USER_OWNER:I
 Landroid/os/UserManager;->getBadgedLabelForUser(Ljava/lang/CharSequence;Landroid/os/UserHandle;)Ljava/lang/CharSequence;
 Landroid/os/UserManager;->get(Landroid/content/Context;)Landroid/os/UserManager;
 Landroid/os/UserManager;->getMaxSupportedUsers()I
