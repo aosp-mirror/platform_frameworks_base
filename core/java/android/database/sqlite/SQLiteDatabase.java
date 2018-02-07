@@ -2006,7 +2006,6 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *     SQLiteDatabase db = SQLiteDatabase.openDatabase("db_filename", cursorFactory,
      *             SQLiteDatabase.CREATE_IF_NECESSARY | SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING,
      *             myDatabaseErrorHandler);
-     *     db.enableWriteAheadLogging();
      * </pre></code>
      * </p><p>
      * Another way to enable write-ahead logging is to call {@link #enableWriteAheadLogging}
