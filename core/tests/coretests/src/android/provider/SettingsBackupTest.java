@@ -492,6 +492,7 @@ public class SettingsBackupTest {
                  Settings.Secure.DOZE_ALWAYS_ON,
                  Settings.Secure.DOZE_PULSE_ON_LONG_PRESS,
                  Settings.Secure.EMERGENCY_ASSISTANCE_APPLICATION,
+                 Settings.Secure.ENABLED_INPUT_METHODS,  // Intentionally removed in P
                  Settings.Secure.ENABLED_NOTIFICATION_ASSISTANT,
                  Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
                  Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,
