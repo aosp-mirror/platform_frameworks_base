@@ -743,7 +743,7 @@ class UserController implements Handler.Callback {
             mInjector.stackSupervisorRemoveUser(userId);
             // Remove the user if it is ephemeral.
             if (getUserInfo(userId).isEphemeral()) {
-                mInjector.getUserManager().removeUser(userId);
+                mInjector.getUserManager().removeUserEvenWhenDisallowed(userId);
             }
             // Evict the user's credential encryption key.
             try {
