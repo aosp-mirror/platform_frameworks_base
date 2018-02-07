@@ -363,7 +363,7 @@ public class BatterySavingStats {
             indent = indent + "  ";
 
             pw.print(indent);
-            pw.println("Battery Saver:       Off                                        On");
+            pw.println("Battery Saver:     w/Off                                      w/On");
             dumpLineLocked(pw, indent, InteractiveState.NON_INTERACTIVE, "NonIntr",
                     DozeState.NOT_DOZING, "NonDoze");
             dumpLineLocked(pw, indent, InteractiveState.INTERACTIVE, "   Intr",
