@@ -2236,9 +2236,10 @@ public class LockSettingsService extends ILockSettings.Stub {
      *     This happens during a normal migration case when the user currently has password.
      *
      * 2. credentialhash == null and credential == null
-     *     A new SP blob and a new SID will be created, while the user has no credentials.
+     *     A new SP blob and will be created, while the user has no credentials.
      *     This can happens when we are activating an escrow token on a unsecured device, during
      *     which we want to create the SP structure with an empty user credential.
+     *     This could also happen during an untrusted reset to clear password.
      *
      * 3. credentialhash == null and credential != null
      *     This is the untrusted credential reset, OR the user sets a new lockscreen password
@@ -2250,16 +2251,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             String credential, int credentialType, int requestedQuality,
             int userId) throws RemoteException {
         Slog.i(TAG, "Initialize SyntheticPassword for user: " + userId);
-        // Load from the cache or a make a new one
-        AuthenticationToken auth = mSpCache.get(userId);
-        if (auth != null) {
-            // If the synthetic password has been cached, we can only be in case 3., described
-            // above, for an untrusted credential reset so a new SID is still needed.
-            mSpManager.newSidForUser(getGateKeeperService(), auth, userId);
-        } else {
-            auth = mSpManager.newSyntheticPasswordAndSid(getGateKeeperService(),
-                      credentialHash, credential, userId);
-        }
+        final AuthenticationToken auth = mSpManager.newSyntheticPasswordAndSid(
+                getGateKeeperService(), credentialHash, credential, userId);
         onAuthTokenKnownForUser(userId, auth);
         if (auth == null) {
             Slog.wtf(TAG, "initializeSyntheticPasswordLocked returns null auth token");
@@ -2473,35 +2466,40 @@ public class LockSettingsService extends ILockSettings.Stub {
                             : "pattern"));
         }
 
+        boolean untrustedReset = false;
         if (auth != null) {
-            // We are performing a trusted credential change i.e. a correct existing credential
-            // is provided
-            setLockCredentialWithAuthTokenLocked(credential, credentialType, auth, requestedQuality,
-                    userId);
-            mSpManager.destroyPasswordBasedSyntheticPassword(handle, userId);
             onAuthTokenKnownForUser(userId, auth);
         } else if (response != null
                 && response.getResponseCode() == VerifyCredentialResponse.RESPONSE_ERROR) {
-            // We are performing an untrusted credential change i.e. by DevicePolicyManager.
-            // So provision a new SP and SID. This would invalidate existing escrow tokens.
-            // Still support this for now but this flow will be removed in the next release.
+            // We are performing an untrusted credential change, by DevicePolicyManager or other
+            // internal callers that don't provide the existing credential
             Slog.w(TAG, "Untrusted credential change invoked");
-
-            if (mSpCache.get(userId) == null) {
-                throw new IllegalStateException(
-                        "Untrusted credential reset not possible without cached SP");
-            }
-
-            initializeSyntheticPasswordLocked(null, credential, credentialType, requestedQuality,
-                    userId);
-            synchronizeUnifiedWorkChallengeForProfiles(userId, null);
-            mSpManager.destroyPasswordBasedSyntheticPassword(handle, userId);
-
-            notifyActivePasswordMetricsAvailable(credential, userId);
+            // Try to get a cached auth token, so we can keep SP unchanged.
+            auth = mSpCache.get(userId);
+            untrustedReset = true;
         } else /* response == null || responseCode == VerifyCredentialResponse.RESPONSE_RETRY */ {
             Slog.w(TAG, "spBasedSetLockCredentialInternalLocked: " +
                     (response != null ? "rate limit exceeded" : "failed"));
             return;
+        }
+
+        if (auth != null) {
+            if (untrustedReset) {
+                // Force change the current SID to mantain existing behaviour that an untrusted
+                // reset leads to a change of SID. If the untrusted reset is for clearing the
+                // current password, the nuking of the SID will be done in
+                // setLockCredentialWithAuthTokenLocked next
+                mSpManager.newSidForUser(getGateKeeperService(), auth, userId);
+            }
+            setLockCredentialWithAuthTokenLocked(credential, credentialType, auth, requestedQuality,
+                    userId);
+            mSpManager.destroyPasswordBasedSyntheticPassword(handle, userId);
+        } else {
+            throw new IllegalStateException(
+                    "Untrusted credential reset not possible without cached SP");
+            // Could call initializeSyntheticPasswordLocked(null, credential, credentialType,
+            // requestedQuality, userId) instead if we still allow untrusted reset that changes
+            // synthetic password. That would invalidate existing escrow tokens though.
         }
         mRecoverableKeyStoreManager.lockScreenSecretChanged(credentialType, credential, userId);
     }
