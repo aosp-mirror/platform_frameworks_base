@@ -17,6 +17,7 @@
 package android.view;
 
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
+
 import static java.lang.Math.max;
 
 import android.animation.AnimatorInflater;
@@ -8378,7 +8379,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             AccessibilityNodeProvider provider, AccessibilityNodeInfo info,
             boolean forAutofill) {
         structure.setId(AccessibilityNodeInfo.getVirtualDescendantId(info.getSourceNodeId()),
-                null, null, null);
+                null, null, info.getViewIdResourceName());
         Rect rect = structure.getTempRect();
         info.getBoundsInParent(rect);
         structure.setDimens(rect.left, rect.top, 0, 0, rect.width(), rect.height());
@@ -8418,6 +8419,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         CharSequence cname = info.getClassName();
         structure.setClassName(cname != null ? cname.toString() : null);
         structure.setContentDescription(info.getContentDescription());
+        if (forAutofill) {
+            final int maxTextLength = info.getMaxTextLength();
+            if (maxTextLength != -1) {
+                structure.setMaxTextLength(maxTextLength);
+            }
+            structure.setHint(info.getHintText());
+        }
         if ((info.getText() != null || info.getError() != null)) {
             structure.setText(info.getText(), info.getTextSelectionStart(),
                     info.getTextSelectionEnd());
@@ -8428,7 +8436,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     final AutofillValue autofillValue = AutofillValue.forText(structure.getText());
                     structure.setAutofillValue(autofillValue);
                     if (info.isPassword()) {
-                        structure.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                        structure.setInputType(InputType.TYPE_CLASS_TEXT
+                                | InputType.TYPE_TEXT_VARIATION_PASSWORD);
                     }
                 } else {
                     structure.setDataIsSensitive(false);

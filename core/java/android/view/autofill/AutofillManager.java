@@ -16,6 +16,10 @@
 
 package android.view.autofill;
 
+import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
+import static android.view.autofill.Helper.sDebug;
+import static android.view.autofill.Helper.sVerbose;
+
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -47,13 +51,14 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.accessibility.AccessibilityWindowInfo;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
+
 import org.xmlpull.v1.XmlPullParserException;
-import sun.misc.Cleaner;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -66,9 +71,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
-import static android.view.autofill.Helper.sDebug;
-import static android.view.autofill.Helper.sVerbose;
+import sun.misc.Cleaner;
 
 // TODO: use java.lang.ref.Cleaner once Android supports Java 9
 
@@ -616,10 +619,8 @@ public final class AutofillManager {
     /**
      * @hide
      */
-    public boolean isCompatibilityModeEnabled() {
-        synchronized (mLock) {
-            return mCompatibilityBridge != null;
-        }
+    public boolean isCompatibilityModeEnabledLocked() {
+        return mCompatibilityBridge != null;
     }
 
     /**
@@ -1381,7 +1382,8 @@ public final class AutofillManager {
             @NonNull AutofillValue value, int flags) {
         if (sVerbose) {
             Log.v(TAG, "startSessionLocked(): id=" + id + ", bounds=" + bounds + ", value=" + value
-                    + ", flags=" + flags + ", state=" + getStateAsStringLocked());
+                    + ", flags=" + flags + ", state=" + getStateAsStringLocked()
+                    + ", compatMode=" + isCompatibilityModeEnabledLocked());
         }
         if (mState != STATE_UNKNOWN && !isFinishedLocked() && (flags & FLAG_MANUAL_REQUEST) == 0) {
             if (sVerbose) {
@@ -1392,7 +1394,7 @@ public final class AutofillManager {
         }
         try {
             final AutofillClient client = getClient();
-            if (client == null) return; // NOTE: getClient() already logd it..
+            if (client == null) return; // NOTE: getClient() already logged it..
 
             mSessionId = mService.startSession(client.autofillClientGetActivityToken(),
                     mServiceClient.asBinder(), id, bounds, value, mContext.getUserId(),
@@ -1939,7 +1941,8 @@ public final class AutofillManager {
         pw.print(pfx); pw.print("fillable ids: "); pw.println(mFillableIds);
         pw.print(pfx); pw.print("save trigger id: "); pw.println(mSaveTriggerId);
         pw.print(pfx); pw.print("save on finish(): "); pw.println(mSaveOnFinish);
-        pw.print(pfx); pw.print("compat mode enabled: "); pw.println(isCompatibilityModeEnabled());
+        pw.print(pfx); pw.print("compat mode enabled: "); pw.println(
+                isCompatibilityModeEnabledLocked());
         pw.print(pfx); pw.print("debug: "); pw.print(sDebug);
         pw.print(" verbose: "); pw.println(sVerbose);
     }
