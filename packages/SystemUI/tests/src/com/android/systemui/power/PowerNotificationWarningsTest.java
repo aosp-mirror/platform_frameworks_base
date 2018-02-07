@@ -151,22 +151,4 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
         verify(mMockNotificationManager, times(1)).cancelAsUser(anyString(),
                 eq(SystemMessage.NOTE_THERMAL_SHUTDOWN), any());
     }
-
-    @Test
-    public void testGetTimeRemainingFormatted_roundsDownTo15() {
-        mPowerNotificationWarnings.updateEstimate(
-                new Estimate(TimeUnit.MINUTES.toMillis(57), true));
-        String time = mPowerNotificationWarnings.getTimeRemainingFormatted();
-
-        assertTrue("time:" + time + ", expected: " + FORMATTED_45M, time.equals(FORMATTED_45M));
-    }
-
-    @Test
-    public void testGetTimeRemainingFormatted_keepsMinutesWhenZero() {
-        mPowerNotificationWarnings.updateEstimate(
-                new Estimate(TimeUnit.MINUTES.toMillis(65), true));
-        String time = mPowerNotificationWarnings.getTimeRemainingFormatted();
-
-        assertTrue("time:" + time + ", expected: " + FORMATTED_HOUR, time.equals(FORMATTED_HOUR));
-    }
 }
