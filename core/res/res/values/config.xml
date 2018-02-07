@@ -1075,6 +1075,14 @@
         <item>10</item>
     </integer-array>
 
+    <!-- The URI to associate with each ringtone effect constant, intended to be used with the
+         android.os.VibrationEffect#get(Uri, Context) API.
+         The position of the string in the string-array determines which ringtone effect is chosen.
+         For example, if the URI passed into get match the third string in the string-array, then
+         RINGTONE_3 will be the returned effect -->
+    <string-array translatable="false" name="config_ringtoneEffectUris">
+    </string-array>
+
     <bool name="config_use_strict_phone_number_comparation">false</bool>
 
     <!-- Display low battery warning when battery level dips to this value.

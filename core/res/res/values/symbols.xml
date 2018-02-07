@@ -3252,4 +3252,6 @@
   <java-symbol type="string" name="screenshot_edit" />
 
   <java-symbol type="bool" name="config_keepRestrictedProfilesInBackground" />
+
+  <java-symbol type="array" name="config_ringtoneEffectUris" />
 </resources>

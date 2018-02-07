@@ -25,7 +25,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.input.InputManager;
-import android.hardware.vibrator.V1_0.Constants.EffectStrength;
+import android.hardware.vibrator.V1_0.EffectStrength;
 import android.icu.text.DateFormat;
 import android.media.AudioManager;
 import android.os.PowerManager.ServiceType;
