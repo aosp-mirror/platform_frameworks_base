@@ -790,7 +790,7 @@ class ActivityStarter {
         // Instead, launch the ephemeral installer. Once the installer is finished, it
         // starts either the intent we resolved here [on install error] or the ephemeral
         // app [on install success].
-        if (rInfo != null && rInfo.isInstantAppAvailable) {
+        if (rInfo != null && rInfo.auxiliaryInfo != null) {
             intent = createLaunchIntent(rInfo.auxiliaryInfo, ephemeralIntent,
                     callingPackage, verificationBundle, resolvedType, userId);
             resolvedType = null;
