@@ -18,11 +18,14 @@
 
 #include <android/os/StatsLogEventWrapper.h>
 #include <utils/String16.h>
+#include <utils/RefBase.h>
 #include <mutex>
 #include <vector>
+#include "packages/UidMap.h"
 
-#include "logd/LogEvent.h"
 #include "guardrail/StatsdStats.h"
+#include "logd/LogEvent.h"
+#include "puller_util.h"
 
 using android::os::StatsLogEventWrapper;
 
@@ -30,7 +33,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
-class StatsPuller {
+class StatsPuller : public virtual RefBase {
 public:
     StatsPuller(const int tagId);
 
@@ -44,7 +47,9 @@ public:
     // Clear cache if elapsed time is more than cooldown time
     int ClearCacheIfNecessary(long timestampSec);
 
-protected:
+    static void SetUidMap(const sp<UidMap>& uidMap);
+
+   protected:
     // The atom tag id this puller pulls
     const int mTagId;
 
@@ -67,6 +72,8 @@ private:
     long mLastPullTimeSec;
 
     int clearCache();
+
+    static sp<UidMap> mUidMap;
 };
 
 }  // namespace statsd

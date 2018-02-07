@@ -32,6 +32,20 @@ namespace android {
 namespace os {
 namespace statsd {
 
+typedef struct {
+  // The field numbers of the fields that need to be summed when merging
+  // isolated uid with host uid.
+  std::vector<int> additiveFields;
+  // The field numbers of the fields that can't be merged when merging
+  // data belong to isolated uid and host uid.
+  std::vector<int> nonAdditiveFields;
+  // How long should the puller wait before doing an actual pull again. Default
+  // 1 sec. Set this to 0 if this is handled elsewhere.
+  long coolDownSec = 1;
+  // The actual puller
+  sp<StatsPuller> puller;
+} PullAtomInfo;
+
 class StatsPullerManagerImpl : public virtual RefBase {
 public:
     static StatsPullerManagerImpl& GetInstance();
@@ -53,16 +67,15 @@ public:
 
     int ClearPullerCacheIfNecessary(long timestampSec);
 
-private:
+    const static std::map<int, PullAtomInfo> kAllPullAtomInfo;
+
+   private:
     StatsPullerManagerImpl();
 
     // use this to update alarm
     sp<IStatsCompanionService> mStatsCompanionService = nullptr;
 
     sp<IStatsCompanionService> get_stats_companion_service();
-
-    // mapping from simple matcher tagId to puller
-    std::map<int, std::shared_ptr<StatsPuller>> mPullers;
 
     typedef struct {
         // pull_interval_sec : last_pull_time_sec
@@ -81,8 +94,6 @@ private:
     // bucket size. All pulled metrics start pulling based on this time, so that they can be
     // correctly attributed to the correct buckets.
     long mTimeBaseSec;
-
-    LogEvent parse_pulled_data(String16 data);
 };
 
 }  // namespace statsd

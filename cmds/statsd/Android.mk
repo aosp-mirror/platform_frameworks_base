@@ -44,6 +44,7 @@ statsd_common_src := \
     src/external/KernelUidCpuActiveTimeReader.cpp \
     src/external/KernelUidCpuClusterTimeReader.cpp \
     src/external/StatsPullerManagerImpl.cpp \
+    src/external/puller_util.cpp \
     src/logd/LogEvent.cpp \
     src/logd/LogListener.cpp \
     src/logd/LogReader.cpp \
@@ -175,6 +176,7 @@ LOCAL_SRC_FILES := \
     tests/AnomalyMonitor_test.cpp \
     tests/anomaly/AnomalyTracker_test.cpp \
     tests/ConfigManager_test.cpp \
+    tests/external/puller_util_test.cpp \
     tests/indexed_priority_queue_test.cpp \
     tests/LogEntryMatcher_test.cpp \
     tests/LogReader_test.cpp \

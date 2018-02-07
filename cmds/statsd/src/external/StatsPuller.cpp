@@ -19,12 +19,16 @@
 
 #include "StatsPuller.h"
 #include "guardrail/StatsdStats.h"
+#include "puller_util.h"
 
 namespace android {
 namespace os {
 namespace statsd {
 
 using std::lock_guard;
+
+sp<UidMap> StatsPuller::mUidMap = nullptr;
+void StatsPuller::SetUidMap(const sp<UidMap>& uidMap) { mUidMap = uidMap; }
 
 // ValueMetric has a minimum bucket size of 10min so that we don't pull too frequently
 StatsPuller::StatsPuller(const int tagId)
@@ -54,7 +58,8 @@ bool StatsPuller::Pull(std::vector<std::shared_ptr<LogEvent>>* data) {
     mLastPullTimeSec = curTime;
     bool ret = PullInternal(&mCachedData);
     if (ret) {
-        (*data) = mCachedData;
+      mergeIsolatedUidsToHostUid(mCachedData, mUidMap, mTagId);
+      (*data) = mCachedData;
     }
     return ret;
 }
