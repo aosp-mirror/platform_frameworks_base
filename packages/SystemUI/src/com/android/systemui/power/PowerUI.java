@@ -53,7 +53,6 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
 
 public class PowerUI extends SystemUI {
     static final String TAG = "PowerUI";
@@ -72,10 +71,11 @@ public class PowerUI extends SystemUI {
     private final Configuration mLastConfiguration = new Configuration();
     private int mBatteryLevel = 100;
     private long mTimeRemaining = Long.MAX_VALUE;
-    private int mBatteryStatus = BatteryManager.BATTERY_STATUS_UNKNOWN;
     private int mPlugType = 0;
     private int mInvalidCharger = 0;
     private EnhancedEstimates mEnhancedEstimates;
+    private boolean mLowWarningShownThisChargeCycle;
+    private boolean mSevereWarningShownThisChargeCycle;
 
     private int mLowBatteryAlertCloseLevel;
     private final int[] mLowBatteryReminderLevels = new int[2];
@@ -87,6 +87,8 @@ public class PowerUI extends SystemUI {
     private int mNumTemps;
     private long mNextLogTime;
     private IThermalService mThermalService;
+
+    @VisibleForTesting int mBatteryStatus = BatteryManager.BATTERY_STATUS_UNKNOWN;
 
     // by using the same instance (method references are not guaranteed to be the same object
     // We create a method reference here so that we are guaranteed that we can remove a callback
@@ -218,6 +220,12 @@ public class PowerUI extends SystemUI {
 
                 final boolean plugged = mPlugType != 0;
                 final boolean oldPlugged = oldPlugType != 0;
+                // if we are now unplugged but we were previously plugged in we should allow the
+                // time based trigger again.
+                if (!plugged && plugged != oldPlugged) {
+                    mLowWarningShownThisChargeCycle = false;
+                    mSevereWarningShownThisChargeCycle = false;
+                }
 
                 int oldBucket = findBatteryLevelBucket(oldBatteryLevel);
                 int bucket = findBatteryLevelBucket(mBatteryLevel);
@@ -268,7 +276,6 @@ public class PowerUI extends SystemUI {
         boolean isPowerSaver = mPowerManager.isPowerSaveMode();
         // only play SFX when the dialog comes up or the bucket changes
         final boolean playSound = bucket != oldBucket || oldPlugged;
-        long oldTimeRemaining = mTimeRemaining;
         if (mEnhancedEstimates.isHybridNotificationEnabled()) {
             final Estimate estimate = mEnhancedEstimates.getEstimate();
             // Turbo is not always booted once SysUI is running so we have ot make sure we actually
@@ -281,10 +288,18 @@ public class PowerUI extends SystemUI {
             }
         }
 
-        if (shouldShowLowBatteryWarning(plugged, oldPlugged, oldBucket, bucket, oldTimeRemaining,
-                mTimeRemaining,
-                isPowerSaver, mBatteryStatus)) {
+        if (shouldShowLowBatteryWarning(plugged, oldPlugged, oldBucket, bucket,
+                mTimeRemaining, isPowerSaver, mBatteryStatus)) {
             mWarnings.showLowBatteryWarning(playSound);
+
+            // mark if we've already shown a warning this cycle. This will prevent the time based
+            // trigger from spamming users since the time remaining can vary based on current
+            // device usage.
+            if (mTimeRemaining < mEnhancedEstimates.getSevereWarningThreshold()) {
+                mSevereWarningShownThisChargeCycle = true;
+            } else {
+                mLowWarningShownThisChargeCycle = true;
+            }
         } else if (shouldDismissLowBatteryWarning(plugged, oldBucket, bucket, mTimeRemaining,
                 isPowerSaver)) {
             mWarnings.dismissLowBatteryWarning();
@@ -295,20 +310,12 @@ public class PowerUI extends SystemUI {
 
     @VisibleForTesting
     boolean shouldShowLowBatteryWarning(boolean plugged, boolean oldPlugged, int oldBucket,
-            int bucket, long oldTimeRemaining, long timeRemaining,
-            boolean isPowerSaver, int mBatteryStatus) {
+            int bucket, long timeRemaining, boolean isPowerSaver, int mBatteryStatus) {
         return !plugged
                 && !isPowerSaver
                 && (((bucket < oldBucket || oldPlugged) && bucket < 0)
-                        || (mEnhancedEstimates.isHybridNotificationEnabled()
-                                && timeRemaining < mEnhancedEstimates.getLowWarningThreshold()
-                                && isHourLess(oldTimeRemaining, timeRemaining)))
+                        || isTimeBasedTrigger(timeRemaining))
                 && mBatteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN;
-    }
-
-    private boolean isHourLess(long oldTimeRemaining, long timeRemaining) {
-        final long dif = oldTimeRemaining - timeRemaining;
-        return dif >= TimeUnit.HOURS.toMillis(1);
     }
 
     @VisibleForTesting
@@ -321,6 +328,23 @@ public class PowerUI extends SystemUI {
                 || plugged
                 || (standardWouldDismiss && (!mEnhancedEstimates.isHybridNotificationEnabled()
                         || hybridWouldDismiss));
+    }
+
+    private boolean isTimeBasedTrigger(long timeRemaining) {
+        if (!mEnhancedEstimates.isHybridNotificationEnabled()) {
+            return false;
+        }
+
+        // Only show the time based warning once per charge cycle
+        final boolean canShowWarning = timeRemaining < mEnhancedEstimates.getLowWarningThreshold()
+                && !mLowWarningShownThisChargeCycle;
+
+        // Only show the severe time based warning once per charge cycle
+        final boolean canShowSevereWarning =
+                timeRemaining < mEnhancedEstimates.getSevereWarningThreshold()
+                        && !mSevereWarningShownThisChargeCycle;
+
+        return canShowWarning || canShowSevereWarning;
     }
 
     private void initTemperatureWarning() {
