@@ -25,7 +25,7 @@ import android.annotation.Nullable;
 import android.annotation.RawRes;
 import android.content.ContentResolver;
 import android.content.res.AssetFileDescriptor;
-import android.content.res.AssetManager.AssetInputStream;
+import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.graphics.drawable.AnimatedImageDrawable;
 import android.graphics.drawable.Drawable;
@@ -257,63 +257,6 @@ public final class ImageDecoder implements AutoCloseable {
         }
     }
 
-    /**
-     * Takes ownership of the AssetInputStream.
-     *
-     * @hide
-     */
-    public static class AssetInputStreamSource extends Source {
-        public AssetInputStreamSource(@NonNull AssetInputStream ais,
-                @NonNull Resources res, @NonNull TypedValue value) {
-            mAssetInputStream = ais;
-            mResources = res;
-
-            if (value.density == TypedValue.DENSITY_DEFAULT) {
-                mDensity = DisplayMetrics.DENSITY_DEFAULT;
-            } else if (value.density != TypedValue.DENSITY_NONE) {
-                mDensity = value.density;
-            } else {
-                mDensity = Bitmap.DENSITY_NONE;
-            }
-        }
-
-        private AssetInputStream mAssetInputStream;
-        private final Resources  mResources;
-        private final int        mDensity;
-
-        @Override
-        public Resources getResources() { return mResources; }
-
-        @Override
-        public int getDensity() {
-            return mDensity;
-        }
-
-        @Override
-        public ImageDecoder createImageDecoder() throws IOException {
-            ImageDecoder decoder = null;
-            synchronized (this) {
-                if (mAssetInputStream == null) {
-                    throw new IOException("Cannot reuse AssetInputStreamSource");
-                }
-                AssetInputStream ais = mAssetInputStream;
-                mAssetInputStream = null;
-                try {
-                    long asset = ais.getNativeAsset();
-                    decoder = nCreate(asset);
-                } finally {
-                    if (decoder == null) {
-                        IoUtils.closeQuietly(ais);
-                    } else {
-                        decoder.mInputStream = ais;
-                        decoder.mOwnsInputStream = true;
-                    }
-                }
-                return decoder;
-            }
-        }
-    }
-
     private static class ResourceSource extends Source {
         ResourceSource(@NonNull Resources res, int resId) {
             mResources = res;
@@ -347,7 +290,11 @@ public final class ImageDecoder implements AutoCloseable {
                     mResDensity = value.density;
                 }
 
-                long asset = ((AssetInputStream) is).getNativeAsset();
+                if (!(is instanceof AssetManager.AssetInputStream)) {
+                    // This should never happen.
+                    throw new RuntimeException("Resource is not an asset?");
+                }
+                long asset = ((AssetManager.AssetInputStream) is).getNativeAsset();
                 decoder = nCreate(asset);
             } finally {
                 if (decoder == null) {
