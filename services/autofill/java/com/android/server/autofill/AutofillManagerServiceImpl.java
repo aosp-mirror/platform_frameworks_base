@@ -211,6 +211,7 @@ final class AutofillManagerServiceImpl {
         }
     }
 
+    @GuardedBy("mLock")
     private int getServiceUidLocked() {
         if (mInfo == null) {
             Slog.w(TAG,  "getServiceUidLocked(): no mInfo");
@@ -248,6 +249,7 @@ final class AutofillManagerServiceImpl {
                 mContext.getContentResolver(), Settings.Secure.AUTOFILL_SERVICE, mUserId);
     }
 
+    @GuardedBy("mLock")
     void updateLocked(boolean disabled) {
         final boolean wasEnabled = isEnabledLocked();
         if (sVerbose) {
@@ -300,6 +302,7 @@ final class AutofillManagerServiceImpl {
         }
     }
 
+    @GuardedBy("mLock")
     boolean addClientLocked(IAutoFillManagerClient client) {
         if (mClients == null) {
             mClients = new RemoteCallbackList<>();
@@ -308,12 +311,14 @@ final class AutofillManagerServiceImpl {
         return isEnabledLocked();
     }
 
+    @GuardedBy("mLock")
     void removeClientLocked(IAutoFillManagerClient client) {
         if (mClients != null) {
             mClients.unregister(client);
         }
     }
 
+    @GuardedBy("mLock")
     void setAuthenticationResultLocked(Bundle data, int sessionId, int authenticationId, int uid) {
         if (!isEnabledLocked()) {
             return;
@@ -336,6 +341,7 @@ final class AutofillManagerServiceImpl {
         }
     }
 
+    @GuardedBy("mLock")
     int startSessionLocked(@NonNull IBinder activityToken, int uid,
             @NonNull IBinder appCallbackToken, @NonNull AutofillId autofillId,
             @NonNull Rect virtualBounds, @Nullable AutofillValue value, boolean hasCallback,
@@ -389,6 +395,7 @@ final class AutofillManagerServiceImpl {
     /**
      * Remove abandoned sessions if needed.
      */
+    @GuardedBy("mLock")
     private void pruneAbandonedSessionsLocked() {
         long now = System.currentTimeMillis();
         if (mLastPrune < now - MAX_ABANDONED_SESSION_MILLIS) {
@@ -400,6 +407,7 @@ final class AutofillManagerServiceImpl {
         }
     }
 
+    @GuardedBy("mLock")
     void finishSessionLocked(int sessionId, int uid) {
         if (!isEnabledLocked()) {
             return;
@@ -423,6 +431,7 @@ final class AutofillManagerServiceImpl {
         }
     }
 
+    @GuardedBy("mLock")
     void cancelSessionLocked(int sessionId, int uid) {
         if (!isEnabledLocked()) {
             return;
@@ -436,6 +445,7 @@ final class AutofillManagerServiceImpl {
         session.removeSelfLocked();
     }
 
+    @GuardedBy("mLock")
     void disableOwnedAutofillServicesLocked(int uid) {
         Slog.i(TAG, "disableOwnedServices(" + uid + "): " + mInfo);
         if (mInfo == null) return;
@@ -468,6 +478,7 @@ final class AutofillManagerServiceImpl {
         }
     }
 
+    @GuardedBy("mLock")
     private Session createSessionByTokenLocked(@NonNull IBinder activityToken, int uid,
             @NonNull IBinder appCallbackToken, boolean hasCallback,
             @NonNull ComponentName componentName, int flags) {
@@ -546,6 +557,7 @@ final class AutofillManagerServiceImpl {
     /**
      * Updates a session and returns whether it should be restarted.
      */
+    @GuardedBy("mLock")
     boolean updateSessionLocked(int sessionId, int uid, AutofillId autofillId, Rect virtualBounds,
             AutofillValue value, int action, int flags) {
         final Session session = mSessions.get(sessionId);
@@ -568,6 +580,7 @@ final class AutofillManagerServiceImpl {
         return false;
     }
 
+    @GuardedBy("mLock")
     void removeSessionLocked(int sessionId) {
         mSessions.remove(sessionId);
     }
@@ -603,6 +616,7 @@ final class AutofillManagerServiceImpl {
         }
     }
 
+    @GuardedBy("mLock")
     void destroyLocked() {
         if (sVerbose) Slog.v(TAG, "destroyLocked()");
 
@@ -655,6 +669,7 @@ final class AutofillManagerServiceImpl {
         }
     }
 
+    @GuardedBy("mLock")
     private boolean isValidEventLocked(String method, int sessionId) {
         if (mEventHistory == null) {
             Slog.w(TAG, method + ": not logging event because history is null");
@@ -726,6 +741,7 @@ final class AutofillManagerServiceImpl {
     /**
      * Updates the last fill response when an autofill context is committed.
      */
+    @GuardedBy("mLock")
     void logContextCommittedLocked(int sessionId, @Nullable Bundle clientState,
             @Nullable ArrayList<String> selectedDatasets,
             @Nullable ArraySet<String> ignoredDatasets,
@@ -739,6 +755,7 @@ final class AutofillManagerServiceImpl {
                 manuallyFilledDatasetIds, null, null, appPackageName);
     }
 
+    @GuardedBy("mLock")
     void logContextCommittedLocked(int sessionId, @Nullable Bundle clientState,
             @Nullable ArrayList<String> selectedDatasets,
             @Nullable ArraySet<String> ignoredDatasets,
@@ -847,6 +864,7 @@ final class AutofillManagerServiceImpl {
         }
     }
 
+    @GuardedBy("mLock")
     private boolean isCalledByServiceLocked(String methodName, int callingUid) {
         if (getServiceUidLocked() != callingUid) {
             Slog.w(TAG, methodName + "() called by UID " + callingUid
@@ -856,6 +874,7 @@ final class AutofillManagerServiceImpl {
         return true;
     }
 
+    @GuardedBy("mLock")
     void dumpLocked(String prefix, PrintWriter pw) {
         final String prefix2 = prefix + "  ";
 
@@ -965,6 +984,7 @@ final class AutofillManagerServiceImpl {
         mFieldClassificationStrategy.dump(prefix2, pw);
     }
 
+    @GuardedBy("mLock")
     void destroySessionsLocked() {
         if (mSessions.size() == 0) {
             mUi.destroyAll(null, null, false);
@@ -976,6 +996,7 @@ final class AutofillManagerServiceImpl {
     }
 
     // TODO(b/64940307): remove this method if SaveUI is refactored to be attached on activities
+    @GuardedBy("mLock")
     void destroyFinishedSessionsLocked() {
         final int sessionCount = mSessions.size();
         for (int i = sessionCount - 1; i >= 0; i--) {
@@ -987,6 +1008,7 @@ final class AutofillManagerServiceImpl {
         }
     }
 
+    @GuardedBy("mLock")
     void listSessionsLocked(ArrayList<String> output) {
         final int numSessions = mSessions.size();
         for (int i = 0; i < numSessions; i++) {
@@ -995,6 +1017,7 @@ final class AutofillManagerServiceImpl {
         }
     }
 
+    @GuardedBy("mLock")
     boolean isCompatibilityModeRequestedLocked(@NonNull String packageName,
             long versionCode) {
         if (mInfo == null || !mInfo.isCompatibilityModeRequested(packageName, versionCode)) {
@@ -1060,6 +1083,7 @@ final class AutofillManagerServiceImpl {
         }
     }
 
+    @GuardedBy("mLock")
     private boolean isClientSessionDestroyedLocked(IAutoFillManagerClient client) {
         final int sessionCount = mSessions.size();
         for (int i = 0; i < sessionCount; i++) {
@@ -1071,6 +1095,7 @@ final class AutofillManagerServiceImpl {
         return true;
     }
 
+    @GuardedBy("mLock")
     boolean isEnabledLocked() {
         return mSetupComplete && mInfo != null && !mDisabled;
     }
@@ -1123,6 +1148,7 @@ final class AutofillManagerServiceImpl {
     /**
      * Checks if autofill is disabled by service to the given activity.
      */
+    @GuardedBy("mLock")
     private boolean isAutofillDisabledLocked(@NonNull ComponentName componentName) {
         // Check activities first.
         long elapsedTime = 0;
