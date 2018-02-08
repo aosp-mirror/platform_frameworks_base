@@ -700,8 +700,9 @@ public final class AccessibilityManager {
      */
     public void removeAccessibilityServicesStateChangeListener(
             @NonNull AccessibilityServicesStateChangeListener listener) {
-        // Final CopyOnWriteArrayList - no lock needed.
-        mServicesStateChangeListeners.remove(listener);
+        synchronized (mLock) {
+            mServicesStateChangeListeners.remove(listener);
+        }
     }
 
     /**
