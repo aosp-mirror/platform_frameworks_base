@@ -55,6 +55,7 @@ import android.util.Slog;
 import android.view.InputDevice;
 import android.media.AudioAttributes;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.DumpUtils;
@@ -111,6 +112,7 @@ public class VibratorService extends IVibratorService.Stub
     private boolean mVibrateInputDevicesSetting; // guarded by mInputDeviceVibrators
     private boolean mInputDeviceListenerRegistered; // guarded by mInputDeviceVibrators
 
+    @GuardedBy("mLock")
     private Vibration mCurrentVibration;
     private int mCurVibUid = -1;
     private boolean mLowPowerMode;
@@ -435,45 +437,45 @@ public class VibratorService extends IVibratorService.Stub
 
         // If our current vibration is longer than the new vibration and is the same amplitude,
         // then just let the current one finish.
-        if (effect instanceof VibrationEffect.OneShot
-                && mCurrentVibration != null
-                && mCurrentVibration.effect instanceof VibrationEffect.OneShot) {
-            VibrationEffect.OneShot newOneShot = (VibrationEffect.OneShot) effect;
-            VibrationEffect.OneShot currentOneShot =
-                    (VibrationEffect.OneShot) mCurrentVibration.effect;
-            if (mCurrentVibration.hasTimeoutLongerThan(newOneShot.getDuration())
-                    && newOneShot.getAmplitude() == currentOneShot.getAmplitude()) {
+        synchronized (mLock) {
+            if (effect instanceof VibrationEffect.OneShot
+                    && mCurrentVibration != null
+                    && mCurrentVibration.effect instanceof VibrationEffect.OneShot) {
+                VibrationEffect.OneShot newOneShot = (VibrationEffect.OneShot) effect;
+                VibrationEffect.OneShot currentOneShot =
+                        (VibrationEffect.OneShot) mCurrentVibration.effect;
+                if (mCurrentVibration.hasTimeoutLongerThan(newOneShot.getDuration())
+                        && newOneShot.getAmplitude() == currentOneShot.getAmplitude()) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Ignoring incoming vibration in favor of current vibration");
+                    }
+                    return;
+                }
+            }
+
+            // If the current vibration is repeating and the incoming one is non-repeating, then
+            // ignore the non-repeating vibration. This is so that we don't cancel vibrations that
+            // are meant to grab the attention of the user, like ringtones and alarms, in favor of
+            // one-shot vibrations that are likely quite short.
+            if (!isRepeatingVibration(effect)
+                    && mCurrentVibration != null
+                    && isRepeatingVibration(mCurrentVibration.effect)) {
                 if (DEBUG) {
-                    Slog.d(TAG, "Ignoring incoming vibration in favor of current vibration");
+                    Slog.d(TAG, "Ignoring incoming vibration in favor of alarm vibration");
                 }
                 return;
             }
-        }
 
-        // If the current vibration is repeating and the incoming one is non-repeating, then ignore
-        // the non-repeating vibration. This is so that we don't cancel vibrations that are meant
-        // to grab the attention of the user, like ringtones and alarms, in favor of one-shot
-        // vibrations that are likely quite short.
-        if (!isRepeatingVibration(effect)
-                && mCurrentVibration != null && isRepeatingVibration(mCurrentVibration.effect)) {
-            if (DEBUG) {
-                Slog.d(TAG, "Ignoring incoming vibration in favor of alarm vibration");
-            }
-            return;
-        }
-
-        Vibration vib = new Vibration(token, effect, usageHint, uid, opPkg);
-        linkVibration(vib);
-
-        long ident = Binder.clearCallingIdentity();
-        try {
-            synchronized (mLock) {
+            Vibration vib = new Vibration(token, effect, usageHint, uid, opPkg);
+            linkVibration(vib);
+            long ident = Binder.clearCallingIdentity();
+            try {
                 doCancelVibrateLocked();
                 startVibrationLocked(vib);
                 addToPreviousVibrationsLocked(vib);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
             }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -516,6 +518,7 @@ public class VibratorService extends IVibratorService.Stub
         }
     };
 
+    @GuardedBy("mLock")
     private void doCancelVibrateLocked() {
         mH.removeCallbacks(mVibrationEndRunnable);
         if (mThread != null) {
@@ -538,6 +541,7 @@ public class VibratorService extends IVibratorService.Stub
         }
     }
 
+    @GuardedBy("mLock")
     private void startVibrationLocked(final Vibration vib) {
         if (!isAllowedToVibrateLocked(vib)) {
             return;
@@ -568,6 +572,7 @@ public class VibratorService extends IVibratorService.Stub
         startVibrationInnerLocked(vib);
     }
 
+    @GuardedBy("mLock")
     private void startVibrationInnerLocked(Vibration vib) {
         mCurrentVibration = vib;
         if (vib.effect instanceof VibrationEffect.OneShot) {
@@ -701,6 +706,7 @@ public class VibratorService extends IVibratorService.Stub
         return mode;
     }
 
+    @GuardedBy("mLock")
     private void reportFinishVibrationLocked() {
         if (mCurrentVibration != null) {
             try {
@@ -880,6 +886,7 @@ public class VibratorService extends IVibratorService.Stub
         }
     }
 
+    @GuardedBy("mLock")
     private long doVibratorPrebakedEffectLocked(Vibration vib) {
         final VibrationEffect.Prebaked prebaked = (VibrationEffect.Prebaked) vib.effect;
         final boolean usingInputDeviceVibrators;
