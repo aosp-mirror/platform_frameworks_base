@@ -202,6 +202,9 @@
     <!-- to change themes - light or dark -->
     <uses-permission android:name="android.permission.CHANGE_OVERLAY_PACKAGES" />
 
+    <!-- Listen app op changes -->
+    <uses-permission android:name="android.permission.WATCH_APPOPS" />
+
     <application
         android:name=".SystemUIApplication"
         android:persistent="true"

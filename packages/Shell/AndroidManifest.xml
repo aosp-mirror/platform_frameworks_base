@@ -143,6 +143,7 @@
         android:name="android.permission.MANAGE_BLUETOOTH_WHEN_PERMISSION_REVIEW_REQUIRED" />
     <uses-permission
         android:name="android.permission.MANAGE_WIFI_WHEN_PERMISSION_REVIEW_REQUIRED" />
+    <uses-permission android:name="android.permission.WATCH_APPOPS" />
 
     <application android:label="@string/app_label"
                  android:defaultToDeviceProtectedStorage="true"
