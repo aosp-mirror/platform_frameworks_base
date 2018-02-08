@@ -907,6 +907,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private static boolean sThrowOnInvalidFloatProperties;
 
+    /**
+     * Prior to P, {@code #startDragAndDrop} accepts a builder which produces an empty drag shadow.
+     * Currently zero size SurfaceControl cannot be created thus we create a dummy 1x1 surface
+     * instead.
+     */
+    private static boolean sAcceptZeroSizeDragShadow;
+
     /** @hide */
     @IntDef({NOT_FOCUSABLE, FOCUSABLE, FOCUSABLE_AUTO})
     @Retention(RetentionPolicy.SOURCE)
@@ -4840,6 +4847,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             sCanFocusZeroSized = targetSdkVersion < Build.VERSION_CODES.P;
 
             sAlwaysAssignFocus = targetSdkVersion < Build.VERSION_CODES.P;
+
+            sAcceptZeroSizeDragShadow = targetSdkVersion < Build.VERSION_CODES.P;
 
             sCompatibilityDone = true;
         }
@@ -23628,8 +23637,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * constructor variant is only useful when the {@link #onProvideShadowMetrics(Point, Point)}
          * and {@link #onDrawShadow(Canvas)} methods are also overridden in order
          * to supply the drag shadow's dimensions and appearance without
-         * reference to any View object. If they are not overridden, then the result is an
-         * invisible drag shadow.
+         * reference to any View object.
          */
         public DragShadowBuilder() {
             mView = new WeakReference<View>(null);
@@ -23783,6 +23791,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // Create 1x1 surface when zero surface size is specified because SurfaceControl.Builder
         // does not accept zero size surface.
         if (shadowSize.x == 0  || shadowSize.y == 0) {
+            if (!sAcceptZeroSizeDragShadow) {
+                throw new IllegalStateException("Drag shadow dimensions must be positive");
+            }
             shadowSize.x = 1;
             shadowSize.y = 1;
         }
