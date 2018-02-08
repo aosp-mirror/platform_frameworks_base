@@ -156,14 +156,18 @@ public final class RangingRequest implements Parcelable {
         /**
          * Add the device specified by the {@code peerMacAddress} to the list of devices with
          * which to measure range.
-         *
+         * <p>
          * The MAC address may be obtained out-of-band from a peer Wi-Fi Aware device. A Wi-Fi
          * Aware device may obtain its MAC address using the {@link IdentityChangedListener}
          * provided to
          * {@link WifiAwareManager#attach(AttachCallback, IdentityChangedListener, Handler)}.
-         *
-         * * Note: in order to use this API the device must support Wi-Fi Aware
-         * {@link android.net.wifi.aware}.
+         * <p>
+         * Note: in order to use this API the device must support Wi-Fi Aware
+         * {@link android.net.wifi.aware}. The peer device which is being ranged to must be
+         * configured to publish a service (with any name) with:
+         * <li>Type {@link android.net.wifi.aware.PublishConfig#PUBLISH_TYPE_UNSOLICITED}.
+         * <li>Ranging enabled
+         * {@link android.net.wifi.aware.PublishConfig.Builder#setRangingEnabled(boolean)}.
          *
          * @param peerMacAddress The MAC address of the Wi-Fi Aware peer.
          * @return The builder, to facilitate chaining {@code builder.setXXX(..).setXXX(..)}.
@@ -179,12 +183,16 @@ public final class RangingRequest implements Parcelable {
         /**
          * Add a device specified by a {@link PeerHandle} to the list of devices with which to
          * measure range.
-         *
+         * <p>
          * The {@link PeerHandle} may be obtained as part of the Wi-Fi Aware discovery process. E.g.
          * using {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle, byte[], List)}.
-         *
+         * <p>
          * Note: in order to use this API the device must support Wi-Fi Aware
-         * {@link android.net.wifi.aware}.
+         * {@link android.net.wifi.aware}. The peer device which is being ranged to must be
+         * configured to publish a service (with any name) with:
+         * <li>Type {@link android.net.wifi.aware.PublishConfig#PUBLISH_TYPE_UNSOLICITED}.
+         * <li>Ranging enabled
+         * {@link android.net.wifi.aware.PublishConfig.Builder#setRangingEnabled(boolean)}.
          *
          * @param peerHandle The peer handler of the peer Wi-Fi Aware device.
          * @return The builder, to facilitate chaining {@code builder.setXXX(..).setXXX(..)}.
