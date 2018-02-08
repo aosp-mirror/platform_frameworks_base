@@ -76,6 +76,7 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
 
     private boolean mDraggingActive;
     private boolean mQuickScrubActive;
+    private boolean mAllowQuickSwitch;
     private float mDownOffset;
     private float mTranslation;
     private int mTouchDownX;
@@ -136,7 +137,7 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
         new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velX, float velY) {
-                if (!isQuickScrubEnabled() || mQuickScrubActive ||
+                if (!isQuickScrubEnabled() || mQuickScrubActive || !mAllowQuickSwitch ||
                         !mHomeButtonRect.contains(mTouchDownX, mTouchDownY)) {
                     return false;
                 }
@@ -234,6 +235,7 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
                     homeButton.setDelayTouchFeedback(false);
                     mTouchDownX = mTouchDownY = -1;
                 }
+                mAllowQuickSwitch = true;
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
@@ -416,6 +418,11 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
             }
         }
         mDraggingActive = false;
+    }
+
+    public void cancelQuickSwitch() {
+        mAllowQuickSwitch = false;
+        mHandler.removeCallbacks(mLongPressRunnable);
     }
 
     private int getDimensionPixelSize(Context context, @DimenRes int resId) {

@@ -21,9 +21,40 @@ import com.android.systemui.shared.recents.ISystemUiProxy;
 
 oneway interface IOverviewProxy {
     void onBind(in ISystemUiProxy sysUiProxy);
+
+    /**
+     * Proxies motion events from the nav bar in SystemUI to the OverviewProxyService. The sender
+     * guarantees the following order of events:
+     *
+     * Normal gesture: DOWN, (MOVE/POINTER_DOWN/POINTER_UP)*, UP
+     * Quick switch: DOWN, (MOVE/POINTER_DOWN/POINTER_UP)*, SWITCH
+     * Quick scrub: DOWN, (MOVE/POINTER_DOWN/POINTER_UP)*, SCRUB_START, SCRUB_PROGRESS*, SCRUB_END
+     *
+     * Once quick switch/scrub is sent, then no further motion events will be provided.
+     */
     void onMotionEvent(in MotionEvent event);
+
+    /**
+     * Sent when a user has quickly flinged on the nav bar to switch tasks. Once this event is sent
+     * the caller will stop sending any motion events.
+     */
     void onQuickSwitch();
+
+    /**
+     * Sent when the user starts to actively scrub the nav bar to switch tasks. Once this event is
+     * sent the caller will stop sending any motion events.
+     */
     void onQuickScrubStart();
+
+    /**
+     * Sent when the user stops actively scrubbing the nav bar to switch tasks. Once this event is
+     * sent the caller will stop sending any motion events.
+     */
     void onQuickScrubEnd();
+
+    /**
+     * Sent for each movement over the nav bar while the user is scrubbing it to switch tasks. Once
+     * this event is sent the caller will stop sending any motion events.
+     */
     void onQuickScrubProgress(float progress);
 }
