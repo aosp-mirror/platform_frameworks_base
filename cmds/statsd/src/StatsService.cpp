@@ -669,11 +669,18 @@ Status StatsService::informAnomalyAlarmFired() {
                                          "Only system uid can call informAnomalyAlarmFired");
     }
 
-    VLOG("StatsService::informAnomalyAlarmFired succeeded");
+    // TODO: This may be a bug. time(nullptr) can be off (wrt AlarmManager's time) and cause us to
+    //       miss the alarm! Eventually we will switch to using elapsedRealTime everywhere,
+    //       which may hopefully fix the problem, so we'll leave this alone for now.
     uint64_t currentTimeSec = time(nullptr);
     std::unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> anomalySet =
             mAnomalyMonitor->popSoonerThan(static_cast<uint32_t>(currentTimeSec));
-    mProcessor->onAnomalyAlarmFired(currentTimeSec * NS_PER_SEC, anomalySet);
+    if (anomalySet.size() > 0) {
+        VLOG("Found an anomaly alarm that fired.");
+        mProcessor->onAnomalyAlarmFired(currentTimeSec * NS_PER_SEC, anomalySet);
+    } else {
+        VLOG("Cannot find an anomaly alarm that fired. Perhaps it was recently cancelled.");
+    }
     return Status::ok();
 }
 

@@ -96,7 +96,7 @@ unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> AnomalyMonitor::popS
     std::lock_guard<std::mutex> lock(mLock);
 
     for (sp<const AnomalyAlarm> t = mPq.top(); t != nullptr && t->timestampSec <= timestampSec;
-         t = mPq.top()) {
+        t = mPq.top()) {
         oldAlarms.insert(t);
         mPq.pop();  // remove t
     }
