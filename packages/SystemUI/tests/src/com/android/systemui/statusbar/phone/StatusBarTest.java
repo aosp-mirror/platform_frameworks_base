@@ -86,8 +86,8 @@ import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
+import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.KeyguardMonitorImpl;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
@@ -110,7 +110,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private UnlockMethodCache mUnlockMethodCache;
     @Mock private KeyguardIndicationController mKeyguardIndicationController;
     @Mock private NotificationStackScrollLayout mStackScroller;
-    @Mock private HeadsUpManager mHeadsUpManager;
+    @Mock private HeadsUpManagerPhone mHeadsUpManager;
     @Mock private SystemServicesProxy mSystemServicesProxy;
     @Mock private NotificationPanelView mNotificationPanelView;
     @Mock private IStatusBarService mBarService;
@@ -588,7 +588,7 @@ public class StatusBarTest extends SysuiTestCase {
     static class TestableStatusBar extends StatusBar {
         public TestableStatusBar(StatusBarKeyguardViewManager man,
                 UnlockMethodCache unlock, KeyguardIndicationController key,
-                NotificationStackScrollLayout stack, HeadsUpManager hum,
+                NotificationStackScrollLayout stack, HeadsUpManagerPhone hum,
                 PowerManager pm, NotificationPanelView panelView,
                 IStatusBarService barService, NotificationListener notificationListener,
                 NotificationLogger notificationLogger,
@@ -650,7 +650,7 @@ public class StatusBarTest extends SysuiTestCase {
         public void setUpForTest(NotificationPresenter presenter,
                 NotificationListContainer listContainer,
                 Callback callback,
-                HeadsUpManager headsUpManager,
+                HeadsUpManagerPhone headsUpManager,
                 NotificationData notificationData) {
             super.setUpWithPresenter(presenter, listContainer, callback, headsUpManager);
             mNotificationData = notificationData;

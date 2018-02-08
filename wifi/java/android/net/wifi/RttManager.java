@@ -12,7 +12,6 @@ import android.net.wifi.rtt.RangingRequest;
 import android.net.wifi.rtt.RangingResult;
 import android.net.wifi.rtt.RangingResultCallback;
 import android.net.wifi.rtt.WifiRttManager;
-import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -838,8 +837,8 @@ public class RttManager {
                     }
                     dest.writeByte(result.LCR.id);
                     if (result.LCR.id != (byte) 0xFF) {
-                        dest.writeInt((byte) result.LCR.data.length);
-                        dest.writeByte(result.LCR.id);
+                        dest.writeByte((byte) result.LCR.data.length);
+                        dest.writeByteArray(result.LCR.data);
                     }
                     dest.writeByte(result.secure ? (byte) 1 : 0);
                 }
@@ -916,51 +915,6 @@ public class RttManager {
         public void onSuccess(RttResult[] results);
         public void onFailure(int reason, String description);
         public void onAborted();
-    }
-
-    /**
-     * A parcelable that contains rtt client information.
-     *
-     * @hide
-     */
-    public static class RttClient implements Parcelable {
-        // Package name of RttClient.
-        private final String mPackageName;
-
-        public RttClient(String packageName) {
-            mPackageName = packageName;
-        }
-
-        protected RttClient(Parcel in) {
-            mPackageName = in.readString();
-        }
-
-        public static final Creator<RttManager.RttClient> CREATOR =
-                new Creator<RttManager.RttClient>() {
-            @Override
-            public RttManager.RttClient createFromParcel(Parcel in) {
-                return new RttManager.RttClient(in);
-            }
-
-            @Override
-            public RttManager.RttClient[] newArray(int size) {
-                return new RttManager.RttClient[size];
-            }
-        };
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel parcel, int i) {
-            parcel.writeString(mPackageName);
-        }
-
-        public String getPackageName() {
-            return mPackageName;
-        }
     }
 
     /**
@@ -1202,7 +1156,6 @@ public class RttManager {
     /** @hide */
     public static final int CMD_OP_REG_BINDER           = BASE + 9;
 
-    private final Context mContext;
     private final WifiRttManager mNewService;
     private RttCapabilities mRttCapabilities;
 
@@ -1211,17 +1164,14 @@ public class RttManager {
      * Applications will almost always want to use
      * {@link android.content.Context#getSystemService Context.getSystemService()} to retrieve
      * the standard {@link android.content.Context#WIFI_RTT_SERVICE Context.WIFI_RTT_SERVICE}.
-     * @param context the application context
-     * @param service the Binder interface
-     * @param looper Looper for running the callbacks.
+     * @param service the new WifiRttManager service
      *
      * @hide
      */
-    public RttManager(Context context, IRttManager service, Looper looper) {
-        mContext = context;
-        mNewService = (WifiRttManager) mContext.getSystemService(Context.WIFI_RTT_RANGING_SERVICE);
+    public RttManager(Context context, WifiRttManager service) {
+        mNewService = service;
 
-        boolean rttSupported = mContext.getPackageManager().hasSystemFeature(
+        boolean rttSupported = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_WIFI_RTT);
 
         mRttCapabilities = new RttCapabilities();

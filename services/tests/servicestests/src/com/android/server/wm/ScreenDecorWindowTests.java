@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static android.graphics.Color.BLUE;
 import static android.graphics.Color.RED;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
@@ -27,7 +26,6 @@ import static android.view.Gravity.LEFT;
 import static android.view.Gravity.RIGHT;
 import static android.view.Gravity.TOP;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
@@ -49,6 +47,7 @@ import android.media.ImageReader;
 import android.os.Handler;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.Pair;
@@ -66,18 +65,19 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
+import java.util.function.BooleanSupplier;
 
 /**
  * Tests for the {@link android.view.WindowManager.LayoutParams#PRIVATE_FLAG_IS_SCREEN_DECOR} flag.
  *
  * Build/Install/Run:
- *  bit FrameworksServicesTests:com.android.server.wm.ScreenDecorWindowTests
+ *  atest FrameworksServicesTests:com.android.server.wm.ScreenDecorWindowTests
  */
 // TODO: Add test for FLAG_FULLSCREEN which hides the status bar and also other flags.
 // TODO: Test non-Activity windows.
 @SmallTest
-// TODO(b/68957554)
-//@Presubmit
+@Presubmit
+@FlakyTest(bugId = 68957554)
 @RunWith(AndroidJUnit4.class)
 public class ScreenDecorWindowTests {
 
@@ -123,40 +123,33 @@ public class ScreenDecorWindowTests {
     public void testScreenSides() throws Exception {
         // Decor on top
         final View decorWindow = createDecorWindow(TOP, MATCH_PARENT, mDecorThickness);
-        WindowInsets insets = getInsets(mTestActivity);
-        assertGreaterOrEqual(insets.getSystemWindowInsetTop(), mDecorThickness);
+        assertInsetGreaterOrEqual(mTestActivity, TOP, mDecorThickness);
 
         // Decor at the bottom
         updateWindow(decorWindow, BOTTOM, MATCH_PARENT, mDecorThickness, 0, 0);
-        insets = getInsets(mTestActivity);
-        assertGreaterOrEqual(insets.getSystemWindowInsetBottom(), mDecorThickness);
+        assertInsetGreaterOrEqual(mTestActivity, BOTTOM, mDecorThickness);
 
         // Decor to the left
         updateWindow(decorWindow, LEFT, mDecorThickness, MATCH_PARENT, 0, 0);
-        insets = getInsets(mTestActivity);
-        assertGreaterOrEqual(insets.getSystemWindowInsetLeft(), mDecorThickness);
+        assertInsetGreaterOrEqual(mTestActivity, LEFT, mDecorThickness);
 
         // Decor to the right
         updateWindow(decorWindow, RIGHT, mDecorThickness, MATCH_PARENT, 0, 0);
-        insets = getInsets(mTestActivity);
-        assertGreaterOrEqual(insets.getSystemWindowInsetRight(), mDecorThickness);
+        assertInsetGreaterOrEqual(mTestActivity, RIGHT, mDecorThickness);
     }
 
     @Test
     public void testMultipleDecors() throws Exception {
         // Test 2 decor windows on-top.
         createDecorWindow(TOP, MATCH_PARENT, mHalfDecorThickness);
-        WindowInsets insets = getInsets(mTestActivity);
-        assertGreaterOrEqual(insets.getSystemWindowInsetTop(), mHalfDecorThickness);
+        assertInsetGreaterOrEqual(mTestActivity, TOP, mHalfDecorThickness);
         createDecorWindow(TOP, MATCH_PARENT, mDecorThickness);
-        insets = getInsets(mTestActivity);
-        assertGreaterOrEqual(insets.getSystemWindowInsetTop(), mDecorThickness);
+        assertInsetGreaterOrEqual(mTestActivity, TOP, mDecorThickness);
 
         // And one at the bottom.
         createDecorWindow(BOTTOM, MATCH_PARENT, mHalfDecorThickness);
-        insets = getInsets(mTestActivity);
-        assertGreaterOrEqual(insets.getSystemWindowInsetTop(), mDecorThickness);
-        assertGreaterOrEqual(insets.getSystemWindowInsetBottom(), mHalfDecorThickness);
+        assertInsetGreaterOrEqual(mTestActivity, TOP, mDecorThickness);
+        assertInsetGreaterOrEqual(mTestActivity, BOTTOM, mHalfDecorThickness);
     }
 
     @Test
@@ -164,18 +157,15 @@ public class ScreenDecorWindowTests {
         WindowInsets initialInsets = getInsets(mTestActivity);
 
         final View decorWindow = createDecorWindow(TOP, MATCH_PARENT, mDecorThickness);
-        WindowInsets insets = getInsets(mTestActivity);
-        assertEquals(mDecorThickness, insets.getSystemWindowInsetTop());
+        assertTopInsetEquals(mTestActivity, mDecorThickness);
 
         updateWindow(decorWindow, TOP, MATCH_PARENT, mDecorThickness,
                 0, PRIVATE_FLAG_IS_SCREEN_DECOR);
-        insets = getInsets(mTestActivity);
-        assertEquals(initialInsets.getSystemWindowInsetTop(), insets.getSystemWindowInsetTop());
+        assertTopInsetEquals(mTestActivity, initialInsets.getSystemWindowInsetTop());
 
         updateWindow(decorWindow, TOP, MATCH_PARENT, mDecorThickness,
                 PRIVATE_FLAG_IS_SCREEN_DECOR, PRIVATE_FLAG_IS_SCREEN_DECOR);
-        insets = getInsets(mTestActivity);
-        assertEquals(mDecorThickness, insets.getSystemWindowInsetTop());
+        assertTopInsetEquals(mTestActivity, mDecorThickness);
     }
 
     @Test
@@ -183,17 +173,10 @@ public class ScreenDecorWindowTests {
         WindowInsets initialInsets = getInsets(mTestActivity);
 
         final View decorWindow = createDecorWindow(TOP, MATCH_PARENT, mDecorThickness);
-        WindowInsets insets = getInsets(mTestActivity);
-        assertGreaterOrEqual(insets.getSystemWindowInsetTop(), mDecorThickness);
+        assertInsetGreaterOrEqual(mTestActivity, TOP, mDecorThickness);
 
         removeWindow(decorWindow);
-        insets = getInsets(mTestActivity);
-        assertEquals(initialInsets.getSystemWindowInsetTop(), insets.getSystemWindowInsetTop());
-    }
-
-    private View createAppWindow() {
-        return createWindow("appWindow", TOP, MATCH_PARENT, MATCH_PARENT, BLUE,
-                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR, 0);
+        assertTopInsetEquals(mTestActivity, initialInsets.getSystemWindowInsetTop());
     }
 
     private View createDecorWindow(int gravity, int width, int height) {
@@ -249,10 +232,6 @@ public class ScreenDecorWindowTests {
         waitForIdle();
     }
 
-    private WindowInsets getInsets(View v) {
-        return new WindowInsets(v.getRootWindowInsets());
-    }
-
     private WindowInsets getInsets(Activity a) {
         return new WindowInsets(a.getWindow().getDecorView().getRootWindowInsets());
     }
@@ -269,9 +248,57 @@ public class ScreenDecorWindowTests {
         lp.flags = (lp.flags & ~mask) | (flags & mask);
     }
 
+    /**
+     * Asserts the top inset of {@param activity} is equal to {@param expected} waiting as needed.
+     */
+    private void assertTopInsetEquals(Activity activity, int expected) throws Exception {
+        waitFor(() -> getInsets(activity).getSystemWindowInsetTop() == expected);
+        assertEquals(expected, getInsets(activity).getSystemWindowInsetTop());
+    }
+
+    /**
+     * Asserts the inset at {@param side} of {@param activity} is equal to {@param expected}
+     * waiting as needed.
+     */
+    private void assertInsetGreaterOrEqual(Activity activity, int side, int expected)
+            throws Exception {
+        waitFor(() -> {
+            final WindowInsets insets = getInsets(activity);
+            switch (side) {
+                case TOP: return insets.getSystemWindowInsetTop() >= expected;
+                case BOTTOM: return insets.getSystemWindowInsetBottom() >= expected;
+                case LEFT: return insets.getSystemWindowInsetLeft() >= expected;
+                case RIGHT: return insets.getSystemWindowInsetRight() >= expected;
+                default: return true;
+            }
+        });
+
+        final WindowInsets insets = getInsets(activity);
+        switch (side) {
+            case TOP: assertGreaterOrEqual(insets.getSystemWindowInsetTop(), expected); break;
+            case BOTTOM: assertGreaterOrEqual(insets.getSystemWindowInsetBottom(), expected); break;
+            case LEFT: assertGreaterOrEqual(insets.getSystemWindowInsetLeft(), expected); break;
+            case RIGHT: assertGreaterOrEqual(insets.getSystemWindowInsetRight(), expected); break;
+        }
+    }
+
     /** Asserts that the first entry is greater than or equal to the second entry. */
     private void assertGreaterOrEqual(int first, int second) throws Exception {
         Assert.assertTrue("Excepted " + first + " >= " + second, first >= second);
+    }
+
+    private void waitFor(BooleanSupplier waitCondition) {
+        int retriesLeft = 5;
+        do {
+            if (waitCondition.getAsBoolean()) {
+                break;
+            }
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                // Well I guess we are not waiting...
+            }
+        } while (retriesLeft-- > 0);
     }
 
     private void finishActivity(Activity a) {

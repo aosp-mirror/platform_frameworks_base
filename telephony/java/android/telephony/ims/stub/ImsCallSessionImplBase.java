@@ -174,6 +174,11 @@ public class ImsCallSessionImplBase implements AutoCloseable {
         }
 
         @Override
+        public void deflect(String deflectNumber) {
+            ImsCallSessionImplBase.this.deflect(deflectNumber);
+        }
+
+        @Override
         public void reject(int reason) {
             ImsCallSessionImplBase.this.reject(reason);
         }
@@ -392,6 +397,14 @@ public class ImsCallSessionImplBase implements AutoCloseable {
      * @see {@link ImsCallSession.Listener#callSessionStarted}
      */
     public void accept(int callType, ImsStreamMediaProfile profile) {
+    }
+
+    /**
+     * Deflects an incoming call.
+     *
+     * @param deflectNumber number to deflect the call
+     */
+    public void deflect(String deflectNumber) {
     }
 
     /**

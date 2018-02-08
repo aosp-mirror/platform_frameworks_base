@@ -673,7 +673,7 @@ jobject javaObjectForIBinder(JNIEnv* env, const sp<IBinder>& val)
         nativeData->mObject = val;
         gNativeDataCache = nullptr;
         ++gNumProxies;
-        if (++gNumProxies >= gProxiesWarned + PROXY_WARN_INTERVAL) {
+        if (gNumProxies >= gProxiesWarned + PROXY_WARN_INTERVAL) {
             ALOGW("Unexpectedly many live BinderProxies: %d\n", gNumProxies);
             gProxiesWarned = gNumProxies;
         }

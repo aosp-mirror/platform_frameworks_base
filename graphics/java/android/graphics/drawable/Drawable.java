@@ -1171,6 +1171,8 @@ public abstract class Drawable {
     /**
      * Create a drawable from an inputstream, using the given resources and
      * value to determine density information.
+     *
+     * @deprecated Prefer the version without an Options object.
      */
     public static Drawable createFromResourceStream(Resources res, TypedValue value,
             InputStream is, String srcName, BitmapFactory.Options opts) {

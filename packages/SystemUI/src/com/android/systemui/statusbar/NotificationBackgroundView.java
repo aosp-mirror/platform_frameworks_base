@@ -249,6 +249,9 @@ public class NotificationBackgroundView extends View {
                     (GradientDrawable) ((LayerDrawable) mBackground).getDrawable(0);
             gradientDrawable.setXfermode(
                     running ? new PorterDuffXfermode(PorterDuff.Mode.SRC) : null);
+            // Speed optimization: disable AA if transfer mode is not SRC_OVER. AA is not easy to
+            // spot during animation anyways.
+            gradientDrawable.setAntiAlias(!running);
         }
         if (!mExpandAnimationRunning) {
             setDrawableAlpha(mDrawableAlpha);

@@ -7396,7 +7396,8 @@ public final class Settings {
          */
         public static final String NIGHT_DISPLAY_AUTO_MODE = "night_display_auto_mode";
 
-        private static final Validator NIGHT_DISPLAY_AUTO_MODE_VALIDATOR = BOOLEAN_VALIDATOR;
+        private static final Validator NIGHT_DISPLAY_AUTO_MODE_VALIDATOR =
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 2);
 
         /**
          * Control the color temperature of Night Display, represented in Kelvin.
@@ -8562,9 +8563,8 @@ public final class Settings {
          *
          * @see android.service.euicc.EuiccService
          * @hide
-         *
-         * TODO(b/35851809): Make this a SystemApi.
          */
+        @SystemApi
         public static final String DEFAULT_SM_DP_PLUS = "default_sm_dp_plus";
 
         /**
@@ -10313,16 +10313,6 @@ public final class Settings {
         * @hide
         */
         public static final String SYS_VDSO = "sys_vdso";
-
-        /**
-        * Uid CpuPower global setting. This links the uid.cpupower system property.
-        * The following values are supported:
-        * 0 -> /proc/uid_cpupower/* are disabled
-        * 1 -> /proc/uid_cpupower/* are enabled
-        * Any other value defaults to enabled.
-        * @hide
-        */
-        public static final String UID_CPUPOWER = "uid_cpupower";
 
         /**
          * An integer to reduce the FPS by this factor. Only for experiments. Need to reboot the

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package android.media.update;
+#pragma once
 
-import android.media.AudioAttributes;
+#include <vector>
+#include "HashableDimensionKey.h"
+#include "StatsPuller.h"
+#include "logd/LogEvent.h"
+#include "packages/UidMap.h"
 
-/**
- * @hide
- */
-// TODO(jaewan): @SystemApi
-public interface PlaybackInfoProvider {
-    int getPlaybackType_impl();
-    AudioAttributes getAudioAttributes_impl();
-    int getControlType_impl();
-    int getMaxVolume_impl();
-    int getCurrentVolume_impl();
-}
+namespace android {
+namespace os {
+namespace statsd {
+
+void mergeIsolatedUidsToHostUid(std::vector<std::shared_ptr<LogEvent>>& data,
+                                const sp<UidMap>& uidMap, int tagId);
+
+}  // namespace statsd
+}  // namespace os
+}  // namespace android

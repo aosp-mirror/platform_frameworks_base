@@ -164,7 +164,7 @@ public class BootReceiver extends BroadcastReceiver {
             .append("Revision: ")
             .append(SystemProperties.get("ro.revision", "")).append("\n")
             .append("Bootloader: ").append(Build.BOOTLOADER).append("\n")
-            .append("Radio: ").append(Build.RADIO).append("\n")
+            .append("Radio: ").append(Build.getRadioVersion()).append("\n")
             .append("Kernel: ")
             .append(FileUtils.readTextFile(new File("/proc/version"), 1024, "...\n"))
             .append("\n").toString();

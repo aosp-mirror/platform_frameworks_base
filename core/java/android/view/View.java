@@ -17,6 +17,7 @@
 package android.view;
 
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
+
 import static java.lang.Math.max;
 
 import android.animation.AnimatorInflater;
@@ -905,6 +906,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * these bogus values.
      */
     private static boolean sThrowOnInvalidFloatProperties;
+
+    /**
+     * Prior to P, {@code #startDragAndDrop} accepts a builder which produces an empty drag shadow.
+     * Currently zero size SurfaceControl cannot be created thus we create a dummy 1x1 surface
+     * instead.
+     */
+    private static boolean sAcceptZeroSizeDragShadow;
 
     /** @hide */
     @IntDef({NOT_FOCUSABLE, FOCUSABLE, FOCUSABLE_AUTO})
@@ -4840,6 +4848,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             sAlwaysAssignFocus = targetSdkVersion < Build.VERSION_CODES.P;
 
+            sAcceptZeroSizeDragShadow = targetSdkVersion < Build.VERSION_CODES.P;
+
             sCompatibilityDone = true;
         }
     }
@@ -8378,7 +8388,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             AccessibilityNodeProvider provider, AccessibilityNodeInfo info,
             boolean forAutofill) {
         structure.setId(AccessibilityNodeInfo.getVirtualDescendantId(info.getSourceNodeId()),
-                null, null, null);
+                null, null, info.getViewIdResourceName());
         Rect rect = structure.getTempRect();
         info.getBoundsInParent(rect);
         structure.setDimens(rect.left, rect.top, 0, 0, rect.width(), rect.height());
@@ -8418,6 +8428,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         CharSequence cname = info.getClassName();
         structure.setClassName(cname != null ? cname.toString() : null);
         structure.setContentDescription(info.getContentDescription());
+        if (forAutofill) {
+            final int maxTextLength = info.getMaxTextLength();
+            if (maxTextLength != -1) {
+                structure.setMaxTextLength(maxTextLength);
+            }
+            structure.setHint(info.getHintText());
+        }
         if ((info.getText() != null || info.getError() != null)) {
             structure.setText(info.getText(), info.getTextSelectionStart(),
                     info.getTextSelectionEnd());
@@ -8428,7 +8445,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     final AutofillValue autofillValue = AutofillValue.forText(structure.getText());
                     structure.setAutofillValue(autofillValue);
                     if (info.isPassword()) {
-                        structure.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                        structure.setInputType(InputType.TYPE_CLASS_TEXT
+                                | InputType.TYPE_TEXT_VARIATION_PASSWORD);
                     }
                 } else {
                     structure.setDataIsSensitive(false);
@@ -23619,8 +23637,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * constructor variant is only useful when the {@link #onProvideShadowMetrics(Point, Point)}
          * and {@link #onDrawShadow(Canvas)} methods are also overridden in order
          * to supply the drag shadow's dimensions and appearance without
-         * reference to any View object. If they are not overridden, then the result is an
-         * invisible drag shadow.
+         * reference to any View object.
          */
         public DragShadowBuilder() {
             mView = new WeakReference<View>(null);
@@ -23774,6 +23791,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // Create 1x1 surface when zero surface size is specified because SurfaceControl.Builder
         // does not accept zero size surface.
         if (shadowSize.x == 0  || shadowSize.y == 0) {
+            if (!sAcceptZeroSizeDragShadow) {
+                throw new IllegalStateException("Drag shadow dimensions must be positive");
+            }
             shadowSize.x = 1;
             shadowSize.y = 1;
         }

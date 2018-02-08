@@ -136,6 +136,13 @@ interface IImsCallSession {
     void accept(int callType, in ImsStreamMediaProfile profile);
 
     /**
+     * Deflects an incoming call.
+     *
+     * @param deflectNumber number to deflect the call
+     */
+    void deflect(String deflectNumber);
+
+    /**
      * Rejects an incoming call or session update.
      *
      * @param reason reason code to reject an incoming call

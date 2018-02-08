@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define DEBUG true
+#define DEBUG false
 #include "Log.h"
 
 #include <android/os/IStatsCompanionService.h>
@@ -24,6 +24,9 @@
 #include "CpuTimePerUidFreqPuller.h"
 #include "CpuTimePerUidPuller.h"
 #include "ResourceHealthManagerPuller.h"
+#include "KernelUidCpuActiveTimeReader.h"
+#include "KernelUidCpuClusterTimeReader.h"
+#include "SubsystemSleepStatePuller.h"
 #include "StatsCompanionServicePuller.h"
 #include "StatsPullerManagerImpl.h"
 #include "StatsService.h"
@@ -44,60 +47,130 @@ namespace android {
 namespace os {
 namespace statsd {
 
+const std::map<int, PullAtomInfo> StatsPullerManagerImpl::kAllPullAtomInfo = {
+    // wifi_bytes_transfer
+    {android::util::WIFI_BYTES_TRANSFER,
+     {{2, 3, 4, 5},
+      {},
+      1,
+      new StatsCompanionServicePuller(android::util::WIFI_BYTES_TRANSFER)}},
+    // wifi_bytes_transfer_by_fg_bg
+    {android::util::WIFI_BYTES_TRANSFER_BY_FG_BG,
+     {{3, 4, 5, 6},
+      {2},
+      1,
+      new StatsCompanionServicePuller(
+          android::util::WIFI_BYTES_TRANSFER_BY_FG_BG)}},
+    // mobile_bytes_transfer
+    {android::util::MOBILE_BYTES_TRANSFER,
+     {{2, 3, 4, 5},
+      {},
+      1,
+      new StatsCompanionServicePuller(android::util::MOBILE_BYTES_TRANSFER)}},
+    // mobile_bytes_transfer_by_fg_bg
+    {android::util::MOBILE_BYTES_TRANSFER_BY_FG_BG,
+     {{3, 4, 5, 6},
+      {2},
+      1,
+      new StatsCompanionServicePuller(
+          android::util::MOBILE_BYTES_TRANSFER_BY_FG_BG)}},
+    // bluetooth_bytes_transfer
+    {android::util::BLUETOOTH_BYTES_TRANSFER,
+     {{2, 3},
+      {},
+      1,
+      new StatsCompanionServicePuller(
+          android::util::BLUETOOTH_BYTES_TRANSFER)}},
+    // kernel_wakelock
+    {android::util::KERNEL_WAKELOCK,
+     {{},
+      {},
+      1,
+      new StatsCompanionServicePuller(android::util::KERNEL_WAKELOCK)}},
+    // subsystem_sleep_state
+    {android::util::SUBSYSTEM_SLEEP_STATE,
+     {{},
+      {},
+      1,
+      new StatsCompanionServicePuller(android::util::SUBSYSTEM_SLEEP_STATE)}},
+    // cpu_time_per_freq
+    {android::util::CPU_TIME_PER_FREQ,
+     {{3},
+      {2},
+      1,
+      new StatsCompanionServicePuller(android::util::CPU_TIME_PER_FREQ)}},
+    // cpu_time_per_uid
+    {android::util::CPU_TIME_PER_UID,
+     {{2, 3}, {}, 1, new CpuTimePerUidPuller()}},
+    // cpu_time_per_uid_freq
+    {android::util::CPU_TIME_PER_UID_FREQ,
+     {{3}, {2}, 1, new CpuTimePerUidFreqPuller()}},
+    // wifi_activity_energy_info
+    {android::util::WIFI_ACTIVITY_ENERGY_INFO,
+     {{},
+      {},
+      1,
+      new StatsCompanionServicePuller(
+          android::util::WIFI_ACTIVITY_ENERGY_INFO)}},
+    // modem_activity_info
+    {android::util::MODEM_ACTIVITY_INFO,
+     {{},
+      {},
+      1,
+      new StatsCompanionServicePuller(android::util::MODEM_ACTIVITY_INFO)}},
+    // bluetooth_activity_info
+    {android::util::BLUETOOTH_ACTIVITY_INFO,
+     {{},
+      {},
+      1,
+      new StatsCompanionServicePuller(android::util::BLUETOOTH_ACTIVITY_INFO)}},
+    // system_elapsed_realtime
+    {android::util::SYSTEM_ELAPSED_REALTIME,
+     {{},
+      {},
+      1,
+      new StatsCompanionServicePuller(android::util::SYSTEM_ELAPSED_REALTIME)}},
+    // system_uptime
+    {android::util::SYSTEM_UPTIME,
+     {{},
+      {},
+      1,
+      new StatsCompanionServicePuller(android::util::SYSTEM_UPTIME)}},
+    // cpu_active_time
+    {android::util::CPU_ACTIVE_TIME,
+     {{3}, {2}, 1, new KernelUidCpuActiveTimeReader()}},
+    // cpu_cluster_time
+    {android::util::CPU_CLUSTER_TIME,
+     {{3}, {2}, 1, new KernelUidCpuClusterTimeReader()}},
+    // disk_space
+    {android::util::DISK_SPACE,
+     {{}, {}, 1, new StatsCompanionServicePuller(android::util::DISK_SPACE)}},
+    // remaining_battery_capacity
+    {android::util::REMAINING_BATTERY_CAPACITY,
+     {{},
+      {},
+      1,
+      new ResourceHealthManagerPuller(
+          android::util::REMAINING_BATTERY_CAPACITY)}},
+    // full_battery_capacity
+    {android::util::FULL_BATTERY_CAPACITY,
+     {{},
+      {},
+      1,
+      new ResourceHealthManagerPuller(android::util::FULL_BATTERY_CAPACITY)}}};
+
 StatsPullerManagerImpl::StatsPullerManagerImpl()
     : mCurrentPullingInterval(LONG_MAX) {
-    mPullers.insert({android::util::KERNEL_WAKELOCK,
-                     make_shared<StatsCompanionServicePuller>(android::util::KERNEL_WAKELOCK)});
-    mPullers.insert({android::util::WIFI_BYTES_TRANSFER,
-                     make_shared<StatsCompanionServicePuller>(android::util::WIFI_BYTES_TRANSFER)});
-    mPullers.insert(
-            {android::util::MOBILE_BYTES_TRANSFER,
-             make_shared<StatsCompanionServicePuller>(android::util::MOBILE_BYTES_TRANSFER)});
-    mPullers.insert({android::util::WIFI_BYTES_TRANSFER_BY_FG_BG,
-                     make_shared<StatsCompanionServicePuller>(
-                             android::util::WIFI_BYTES_TRANSFER_BY_FG_BG)});
-    mPullers.insert({android::util::MOBILE_BYTES_TRANSFER_BY_FG_BG,
-                     make_shared<StatsCompanionServicePuller>(
-                             android::util::MOBILE_BYTES_TRANSFER_BY_FG_BG)});
-    mPullers.insert(
-            {android::util::SUBSYSTEM_SLEEP_STATE,
-             make_shared<SubsystemSleepStatePuller>()});
-    mPullers.insert({android::util::CPU_TIME_PER_FREQ, make_shared<StatsCompanionServicePuller>(android::util::CPU_TIME_PER_FREQ)});
-    mPullers.insert({android::util::CPU_TIME_PER_UID, make_shared<CpuTimePerUidPuller>()});
-    mPullers.insert({android::util::CPU_TIME_PER_UID_FREQ, make_shared<CpuTimePerUidFreqPuller>()});
-    mPullers.insert(
-            {android::util::SYSTEM_ELAPSED_REALTIME,
-             make_shared<StatsCompanionServicePuller>(android::util::SYSTEM_ELAPSED_REALTIME)});
-    mPullers.insert({android::util::SYSTEM_UPTIME,
-                     make_shared<StatsCompanionServicePuller>(android::util::SYSTEM_UPTIME)});
-    mPullers.insert({android::util::DISK_SPACE,
-                     make_shared<StatsCompanionServicePuller>(android::util::DISK_SPACE)});
-    mPullers.insert(
-            {android::util::BLUETOOTH_ACTIVITY_INFO,
-             make_shared<StatsCompanionServicePuller>(android::util::BLUETOOTH_ACTIVITY_INFO)});
-
-    mPullers.insert(
-            {android::util::BLUETOOTH_BYTES_TRANSFER,
-             make_shared<StatsCompanionServicePuller>(android::util::BLUETOOTH_BYTES_TRANSFER)});
-    mPullers.insert(
-            {android::util::WIFI_ACTIVITY_ENERGY_INFO,
-             make_shared<StatsCompanionServicePuller>(android::util::WIFI_ACTIVITY_ENERGY_INFO)});
-    mPullers.insert({android::util::MODEM_ACTIVITY_INFO,
-                     make_shared<StatsCompanionServicePuller>(android::util::MODEM_ACTIVITY_INFO)});
-    mPullers.insert({android::util::REMAINING_BATTERY_CAPACITY,
-                     make_shared<ResourceHealthManagerPuller>(android::util::REMAINING_BATTERY_CAPACITY)});
-    mPullers.insert({android::util::FULL_BATTERY_CAPACITY,
-                     make_shared<ResourceHealthManagerPuller>(android::util::FULL_BATTERY_CAPACITY)});
     mStatsCompanionService = StatsService::getStatsCompanionService();
 }
 
 bool StatsPullerManagerImpl::Pull(int tagId, vector<shared_ptr<LogEvent>>* data) {
     if (DEBUG) ALOGD("Initiating pulling %d", tagId);
 
-    if (mPullers.find(tagId) != mPullers.end()) {
-        bool ret = mPullers.find(tagId)->second->Pull(data);
-        ALOGD("pulled %d items", (int)data->size());
-        return ret;
+    if (kAllPullAtomInfo.find(tagId) != kAllPullAtomInfo.end()) {
+      bool ret = kAllPullAtomInfo.find(tagId)->second.puller->Pull(data);
+      ALOGD("pulled %d items", (int)data->size());
+      return ret;
     } else {
         ALOGD("Unknown tagId %d", tagId);
         return false;  // Return early since we don't know what to pull.
@@ -110,7 +183,7 @@ StatsPullerManagerImpl& StatsPullerManagerImpl::GetInstance() {
 }
 
 bool StatsPullerManagerImpl::PullerForMatcherExists(int tagId) const {
-    return mPullers.find(tagId) != mPullers.end();
+  return kAllPullAtomInfo.find(tagId) != kAllPullAtomInfo.end();
 }
 
 void StatsPullerManagerImpl::RegisterReceiver(int tagId, wp<PullDataReceiver> receiver,
@@ -201,16 +274,16 @@ void StatsPullerManagerImpl::OnAlarmFired() {
 
 int StatsPullerManagerImpl::ForceClearPullerCache() {
     int totalCleared = 0;
-    for (auto puller : mPullers) {
-        totalCleared += puller.second->ForceClearCache();
+    for (const auto& pulledAtom : kAllPullAtomInfo) {
+        totalCleared += pulledAtom.second.puller->ForceClearCache();
     }
     return totalCleared;
 }
 
 int StatsPullerManagerImpl::ClearPullerCacheIfNecessary(long timestampSec) {
     int totalCleared = 0;
-    for (auto puller : mPullers) {
-        totalCleared += puller.second->ClearCacheIfNecessary(timestampSec);
+    for (const auto& pulledAtom : kAllPullAtomInfo) {
+        totalCleared += pulledAtom.second.puller->ClearCacheIfNecessary(timestampSec);
     }
     return totalCleared;
 }

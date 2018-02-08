@@ -1271,6 +1271,9 @@ public class LocationManager {
         final String allowedProviders = Settings.Secure.getStringForUser(
                 mContext.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
                 userHandle.getIdentifier());
+        if (allowedProviders == null) {
+            return false;
+        }
         final List<String> providerList = Arrays.asList(allowedProviders.split(","));
         for(String provider : getAllProviders()) {
             if (provider.equals(PASSIVE_PROVIDER)) {

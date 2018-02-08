@@ -76,6 +76,7 @@ public:
      * Returns BAD_TYPE if the index is available but the data is the wrong type.
      */
     int64_t GetLong(size_t key, status_t* err) const;
+    int GetInt(size_t key, status_t* err) const;
     const char* GetString(size_t key, status_t* err) const;
     bool GetBool(size_t key, status_t* err) const;
     float GetFloat(size_t key, status_t* err) const;

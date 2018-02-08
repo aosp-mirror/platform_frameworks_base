@@ -26,10 +26,6 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.icu.text.MeasureFormat;
-import android.icu.text.MeasureFormat.FormatWidth;
-import android.icu.util.Measure;
-import android.icu.util.MeasureUnit;
 import android.media.AudioAttributes;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -37,11 +33,11 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.UserHandle;
 import android.support.annotation.VisibleForTesting;
-import android.text.format.DateUtils;
 import android.util.Slog;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.settingslib.Utils;
+import com.android.settingslib.utils.PowerUtil;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
@@ -49,8 +45,6 @@ import com.android.systemui.util.NotificationChannels;
 
 import java.io.PrintWriter;
 import java.text.NumberFormat;
-import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private static final String TAG = PowerUI.TAG + ".Notification";
@@ -200,12 +194,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         // override notification copy if hybrid notification enabled
         if (mEstimate != null) {
             title = mContext.getString(R.string.battery_low_title_hybrid);
-            contentText = mContext.getString(
-                    mEstimate.isBasedOnUsage
-                            ? R.string.battery_low_percent_format_hybrid
-                            : R.string.battery_low_percent_format_hybrid_short,
-                    percentage,
-                    getTimeRemainingFormatted());
+            contentText = getHybridContentString(percentage);
         }
 
         final Notification.Builder nb =
@@ -239,21 +228,12 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         mNoMan.notifyAsUser(TAG_BATTERY, SystemMessage.NOTE_POWER_LOW, n, UserHandle.ALL);
     }
 
-    @VisibleForTesting
-    String getTimeRemainingFormatted() {
-        final Locale currentLocale = mContext.getResources().getConfiguration().getLocales().get(0);
-        MeasureFormat frmt = MeasureFormat.getInstance(currentLocale, FormatWidth.NARROW);
-
-        final long remainder = mEstimate.estimateMillis % DateUtils.HOUR_IN_MILLIS;
-        final long hours = TimeUnit.MILLISECONDS.toHours(
-                mEstimate.estimateMillis - remainder);
-        // round down to the nearest 15 min for now to not appear overly precise
-        final long minutes = TimeUnit.MILLISECONDS.toMinutes(
-                remainder - (remainder % TimeUnit.MINUTES.toMillis(15)));
-        final Measure hoursMeasure = new Measure(hours, MeasureUnit.HOUR);
-        final Measure minutesMeasure = new Measure(minutes, MeasureUnit.MINUTE);
-
-        return frmt.formatMeasures(hoursMeasure, minutesMeasure);
+    private String getHybridContentString(String percentage) {
+        return PowerUtil.getBatteryRemainingStringFormatted(
+            mContext,
+            mEstimate.estimateMillis,
+            percentage,
+            mEstimate.isBasedOnUsage);
     }
 
     private PendingIntent pendingBroadcast(String action) {
