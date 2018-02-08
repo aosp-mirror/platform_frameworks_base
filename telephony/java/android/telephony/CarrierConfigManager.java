@@ -1370,6 +1370,12 @@ public class CarrierConfigManager {
      */
     public static final String KEY_ALLOW_HOLD_IN_IMS_CALL_BOOL = "allow_hold_in_ims_call";
 
+    /**
+     * Flag indicating whether the carrier supports call deflection for an incoming IMS call.
+     * @hide
+     */
+    public static final String KEY_CARRIER_ALLOW_DEFLECT_IMS_CALL_BOOL =
+            "carrier_allow_deflect_ims_call_bool";
 
     /**
      * Flag indicating whether the carrier always wants to play an "on-hold" tone when a call has
@@ -1822,6 +1828,7 @@ public class CarrierConfigManager {
     static {
         sDefaults = new PersistableBundle();
         sDefaults.putBoolean(KEY_ALLOW_HOLD_IN_IMS_CALL_BOOL, true);
+        sDefaults.putBoolean(KEY_CARRIER_ALLOW_DEFLECT_IMS_CALL_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_PLAY_REMOTE_HOLD_TONE_BOOL, false);
         sDefaults.putBoolean(KEY_ADDITIONAL_CALL_SETTING_BOOL, true);
         sDefaults.putBoolean(KEY_ALLOW_EMERGENCY_NUMBERS_IN_CALL_LOG_BOOL, false);
