@@ -1167,12 +1167,14 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the NAI. Return null if NAI is not available.
-     *
+     * Returns the Network Access Identifier (NAI). Return null if NAI is not available.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      */
-    /** {@hide}*/
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public String getNai() {
-        return getNai(getSlotIndex());
+        return getNaiBySubscriberId(getSubId());
     }
 
     /**
@@ -1183,11 +1185,18 @@ public class TelephonyManager {
     /** {@hide}*/
     public String getNai(int slotIndex) {
         int[] subId = SubscriptionManager.getSubId(slotIndex);
+        if (subId == null) {
+            return null;
+        }
+        return getNaiBySubscriberId(subId[0]);
+    }
+
+    private String getNaiBySubscriberId(int subId) {
         try {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            String nai = info.getNaiForSubscriber(subId[0], mContext.getOpPackageName());
+            String nai = info.getNaiForSubscriber(subId, mContext.getOpPackageName());
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Rlog.v(TAG, "Nai = " + nai);
             }
