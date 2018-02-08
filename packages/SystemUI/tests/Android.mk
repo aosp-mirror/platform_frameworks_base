@@ -65,7 +65,6 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 LOCAL_JAVA_LIBRARIES := \
     android.test.runner \
     telephony-common \
-    android.car \
     android.test.base \
 
 
