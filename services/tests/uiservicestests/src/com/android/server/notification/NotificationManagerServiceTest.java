@@ -188,6 +188,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         protected void reportSeen(NotificationRecord r) {
             return;
         }
+
+        @Override
+        protected void reportUserInteraction(NotificationRecord r) {
+            return;
+        }
     }
 
     @Before

@@ -16,6 +16,7 @@
 package android.app.usage;
 
 import android.annotation.IntDef;
+import android.annotation.SystemApi;
 import android.content.res.Configuration;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -104,12 +105,14 @@ public final class UsageEvents implements Parcelable {
          * An event type denoting that a notification was viewed by the user.
          * @hide
          */
+        @SystemApi
         public static final int NOTIFICATION_SEEN = 10;
 
         /**
          * An event type denoting a change in App Standby Bucket.
          * @hide
          */
+        @SystemApi
         public static final int STANDBY_BUCKET_CHANGED = 11;
 
         /** @hide */
@@ -255,6 +258,17 @@ public final class UsageEvents implements Parcelable {
          */
         public String getShortcutId() {
             return mShortcutId;
+        }
+
+        /**
+         * Returns the standby bucket of the app, if the event is of type
+         * {@link #STANDBY_BUCKET_CHANGED}, otherwise returns 0.
+         * @return the standby bucket associated with the event.
+         * @hide
+         */
+        @SystemApi
+        public int getStandbyBucket() {
+            return mBucket;
         }
 
         /** @hide */

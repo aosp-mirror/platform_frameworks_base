@@ -688,6 +688,12 @@ package android.app.usage {
     field public static final java.lang.String SERVICE_INTERFACE = "android.app.usage.CacheQuotaService";
   }
 
+  public static final class UsageEvents.Event {
+    method public int getStandbyBucket();
+    field public static final int NOTIFICATION_SEEN = 10; // 0xa
+    field public static final int STANDBY_BUCKET_CHANGED = 11; // 0xb
+  }
+
   public final class UsageStatsManager {
     method public int getAppStandbyBucket(java.lang.String);
     method public java.util.Map<java.lang.String, java.lang.Integer> getAppStandbyBuckets();
