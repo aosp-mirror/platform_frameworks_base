@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.net.Uri;
 import android.bluetooth.BluetoothDevice;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -56,6 +57,19 @@ public final class InCallAdapter {
     public void answerCall(String callId, int videoState) {
         try {
             mAdapter.answerCall(callId, videoState);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Instructs Telecom to deflect the specified call.
+     *
+     * @param callId The identifier of the call to deflect.
+     * @param address The address to deflect.
+     */
+    public void deflectCall(String callId, Uri address) {
+        try {
+            mAdapter.deflectCall(callId, address);
         } catch (RemoteException e) {
         }
     }

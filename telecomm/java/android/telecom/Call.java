@@ -352,8 +352,11 @@ public final class Call {
          */
         public static final int CAPABILITY_CAN_PULL_CALL = 0x00800000;
 
+        /** Call supports the deflect feature. */
+        public static final int CAPABILITY_SUPPORT_DEFLECT = 0x01000000;
+
         //******************************************************************************************
-        // Next CAPABILITY value: 0x01000000
+        // Next CAPABILITY value: 0x02000000
         //******************************************************************************************
 
         /**
@@ -528,6 +531,9 @@ public final class Call {
             }
             if (can(capabilities, CAPABILITY_CAN_PULL_CALL)) {
                 builder.append(" CAPABILITY_CAN_PULL_CALL");
+            }
+            if (can(capabilities, CAPABILITY_SUPPORT_DEFLECT)) {
+                builder.append(" CAPABILITY_SUPPORT_DEFLECT");
             }
             builder.append("]");
             return builder.toString();
@@ -1233,6 +1239,15 @@ public final class Call {
      */
     public void answer(int videoState) {
         mInCallAdapter.answerCall(mTelecomCallId, videoState);
+    }
+
+    /**
+     * Instructs this {@link #STATE_RINGING} {@code Call} to deflect.
+     *
+     * @param address The address to which the call will be deflected.
+     */
+    public void deflect(Uri address) {
+        mInCallAdapter.deflectCall(mTelecomCallId, address);
     }
 
     /**
