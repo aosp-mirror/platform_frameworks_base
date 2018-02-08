@@ -90,9 +90,19 @@ public:
      * Binder call to let clients send a configuration and indicate they're interested when they
      * should requestData for this configuration.
      */
-    virtual Status addConfiguration(int64_t key, const vector <uint8_t>& config,
-                                    const String16& package, const String16& cls, bool* success)
-    override;
+    virtual Status addConfiguration(int64_t key, const vector<uint8_t>& config,
+                                    bool* success) override;
+
+    /**
+     * Binder call to let clients register the data fetch operation for a configuration.
+     */
+    virtual Status setDataFetchOperation(int64_t key, const sp<android::IBinder>& intentSender,
+                                         bool* success) override;
+
+    /**
+     * Binder call to remove the data fetch operation for the specified config key.
+     */
+    virtual Status removeDataFetchOperation(int64_t key, bool* success) override;
 
     /**
      * Binder call to allow clients to remove the specified configuration.

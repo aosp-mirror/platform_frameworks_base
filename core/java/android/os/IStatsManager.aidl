@@ -81,12 +81,26 @@ interface IStatsManager {
     /**
      * Sets a configuration with the specified config key and subscribes to updates for this
      * configuration key. Broadcasts will be sent if this configuration needs to be collected.
-     * The configuration must be a wire-encoded StatsdConfig. The caller specifies the name of the
-     * package and class that should receive these broadcasts.
+     * The configuration must be a wire-encoded StatsDConfig. The receiver for this data is
+     * registered in a separate function.
      *
      * Returns if this configuration was correctly registered.
      */
-    boolean addConfiguration(in long configKey, in byte[] config, in String pkg, in String cls);
+    boolean addConfiguration(in long configKey, in byte[] config);
+
+    /**
+     * Registers the given pending intent for this config key. This intent is invoked when the
+     * memory consumed by the metrics for this configuration approach the pre-defined limits. There
+     * can be at most one listener per config key.
+     *
+     * Returns if this listener was correctly registered.
+     */
+    boolean setDataFetchOperation(long configKey, in IBinder intentSender);
+
+    /**
+     * Removes the data fetch operation for the specified configuration.
+     */
+    boolean removeDataFetchOperation(long configKey);
 
     /**
      * Removes the configuration with the matching config key. No-op if this config key does not

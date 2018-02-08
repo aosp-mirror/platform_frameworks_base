@@ -24,6 +24,8 @@
     <string name="statsd_not_running">Statsd NOT Running</string>
 
     <string name="push_config">Push baseline config</string>
+    <string name="set_receiver">Set pendingintent</string>
+    <string name="remove_receiver">Remove pendingintent</string>
 
     <string name="app_a_foreground">App A foreground</string>
     <string name="app_b_foreground">App B foreground</string>

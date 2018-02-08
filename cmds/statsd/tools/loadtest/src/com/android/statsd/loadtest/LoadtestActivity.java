@@ -47,10 +47,12 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.android.os.StatsLog.ConfigMetricsReport;
 import com.android.os.StatsLog.ConfigMetricsReportList;
 import com.android.os.StatsLog.StatsdStatsReport;
 import com.android.internal.os.StatsdConfigProto.TimeUnit;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,18 +62,18 @@ import java.util.Map;
  * Runs a load test for statsd.
  * How it works:
  * <ul>
- *   <li> Sets up and pushes a custom config with metrics that exercise a large swath of code paths.
- *   <li> Periodically logs certain atoms into logd.
- *   <li> Impact on battery can be printed to logcat, or a bug report can be filed and analyzed
- *        in battery Historian.
+ * <li> Sets up and pushes a custom config with metrics that exercise a large swath of code paths.
+ * <li> Periodically logs certain atoms into logd.
+ * <li> Impact on battery can be printed to logcat, or a bug report can be filed and analyzed
+ * in battery Historian.
  * </ul>
  * The load depends on how demanding the config is, as well as how frequently atoms are pushsed
  * to logd. Those are all controlled by 4 adjustable parameters:
  * <ul>
- *   <li> The 'replication' parameter artificially multiplies the number of metrics in the config.
- *   <li> The bucket size controls the time-bucketing the aggregate metrics.
- *   <li> The period parameter controls how frequently atoms are pushed to logd.
- *   <li> The 'burst' parameter controls how many atoms are pushed at the same time (per period).
+ * <li> The 'replication' parameter artificially multiplies the number of metrics in the config.
+ * <li> The bucket size controls the time-bucketing the aggregate metrics.
+ * <li> The period parameter controls how frequently atoms are pushed to logd.
+ * <li> The 'burst' parameter controls how many atoms are pushed at the same time (per period).
  * </ul>
  */
 public class LoadtestActivity extends Activity implements AdapterView.OnItemSelectedListener {
@@ -93,7 +95,7 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
             Intent activityIntent = new Intent(context, LoadtestActivity.class);
             activityIntent.putExtra(TYPE, PUSH_ALARM);
             context.startActivity(activityIntent);
-         }
+        }
     }
 
     public final static class StopperAlarmReceiver extends BroadcastReceiver {
@@ -102,7 +104,7 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
             Intent activityIntent = new Intent(context, LoadtestActivity.class);
             activityIntent.putExtra(TYPE, STOP);
             context.startActivity(activityIntent);
-         }
+        }
     }
 
     private static Map<String, TimeUnit> initializeTimeUnitMap() {
@@ -119,6 +121,7 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
         labels.put("1s", TimeUnit.CTS);
         return labels;
     }
+
     private static List<String> initializeTimeUnitLabels() {
         List<String> labels = new ArrayList();
         labels.add("1s");
@@ -136,10 +139,14 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
 
     private AlarmManager mAlarmMgr;
 
-    /** Used to periodically log atoms to logd. */
+    /**
+     * Used to periodically log atoms to logd.
+     */
     private PendingIntent mPushPendingIntent;
 
-    /** Used to end the loadtest. */
+    /**
+     * Used to end the loadtest.
+     */
     private PendingIntent mStopPendingIntent;
 
     private Button mStartStop;
@@ -156,13 +163,19 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
     private CheckBox mValueMetricCheckBox;
     private CheckBox mGaugeMetricCheckBox;
 
-    /** When the load test started. */
+    /**
+     * When the load test started.
+     */
     private long mStartedTimeMillis;
 
-    /** For measuring perf data. */
+    /**
+     * For measuring perf data.
+     */
     private PerfData mPerfData;
 
-    /** For communicating with statsd. */
+    /**
+     * For communicating with statsd.
+     */
     private StatsManager mStatsManager;
 
     private PowerManager mPowerManager;
@@ -199,34 +212,54 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
      */
     private boolean mIncludeGaugeMetric;
 
-    /** The burst size. */
+    /**
+     * The burst size.
+     */
     private int mBurst;
 
-    /** The metrics replication. */
+    /**
+     * The metrics replication.
+     */
     private int mReplication;
 
-    /** The period, in seconds, at which batches of atoms are pushed. */
+    /**
+     * The period, in seconds, at which batches of atoms are pushed.
+     */
     private long mPeriodSecs;
 
-    /** The bucket size, in minutes, for aggregate metrics. */
+    /**
+     * The bucket size, in minutes, for aggregate metrics.
+     */
     private TimeUnit mBucket;
 
-    /** The duration, in minutes, of the loadtest. */
+    /**
+     * The duration, in minutes, of the loadtest.
+     */
     private long mDurationMins;
 
-    /** Whether the loadtest has started. */
+    /**
+     * Whether the loadtest has started.
+     */
     private boolean mStarted = false;
 
-    /** Orchestrates the logging of pushed events into logd. */
+    /**
+     * Orchestrates the logging of pushed events into logd.
+     */
     private SequencePusher mPusher;
 
-    /** Generates statsd configs. */
+    /**
+     * Generates statsd configs.
+     */
     private ConfigFactory mFactory;
 
-    /** For intra-minute periods. */
+    /**
+     * For intra-minute periods.
+     */
     private final Handler mHandler = new Handler();
 
-    /** Number of metrics in the current config. */
+    /**
+     * Number of metrics in the current config.
+     */
     private int mNumMetrics;
 
     @Override
@@ -250,7 +283,7 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 InputMethodManager imm =
-                    (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 if (getCurrentFocus() != null) {
                     imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
                 }
@@ -380,10 +413,10 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
         }
         // Piggy-back on that alarm to show the elapsed time.
         long elapsedTimeMins = (long) Math.floor(
-            (SystemClock.elapsedRealtime() - mStartedTimeMillis) / 60 / 1000);
+                (SystemClock.elapsedRealtime() - mStartedTimeMillis) / 60 / 1000);
         mReportText.setText("Loadtest in progress.\n"
-            + "num metrics =" + mNumMetrics
-            + "\nElapsed time = " + elapsedTimeMins + " min(s)");
+                + "num metrics =" + mNumMetrics
+                + "\nElapsed time = " + elapsedTimeMins + " min(s)");
     }
 
     private void onAlarm() {
@@ -402,12 +435,14 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
         mWakeLock = null;
     }
 
-    /** Schedules the next cycle of pushing atoms into logd. */
+    /**
+     * Schedules the next cycle of pushing atoms into logd.
+     */
     private void scheduleNext() {
         Intent intent = new Intent(this, PusherAlarmReceiver.class);
         intent.putExtra(TYPE, PUSH_ALARM);
         mPushPendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
-        long nextTime =  SystemClock.elapsedRealtime() + mPeriodSecs * 1000;
+        long nextTime = SystemClock.elapsedRealtime() + mPeriodSecs * 1000;
         mAlarmMgr.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, nextTime, mPushPendingIntent);
     }
 
@@ -433,7 +468,7 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
         Intent intent = new Intent(this, StopperAlarmReceiver.class);
         intent.putExtra(TYPE, STOP);
         mStopPendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
-        long nextTime =  SystemClock.elapsedRealtime() + mDurationMins * 60 * 1000;
+        long nextTime = SystemClock.elapsedRealtime() + mDurationMins * 60 * 1000;
         mAlarmMgr.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, nextTime, mStopPendingIntent);
 
         // Log atoms.
@@ -441,8 +476,8 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
 
         // Start tracking performance.
         mPerfData = new PerfData(this, mPlacebo, mReplication, mBucket, mPeriodSecs, mBurst,
-            mIncludeCountMetric, mIncludeDurationMetric, mIncludeEventMetric, mIncludeValueMetric,
-            mIncludeGaugeMetric);
+                mIncludeCountMetric, mIncludeDurationMetric, mIncludeEventMetric, mIncludeValueMetric,
+                mIncludeGaugeMetric);
         mPerfData.startRecording(this);
 
         mReportText.setText("Loadtest in progress.\nnum metrics =" + mNumMetrics);
@@ -476,7 +511,7 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
         getData();
 
         long elapsedTimeMins = (long) Math.floor(
-            (SystemClock.elapsedRealtime() - mStartedTimeMillis) / 60 / 1000);
+                (SystemClock.elapsedRealtime() - mStartedTimeMillis) / 60 / 1000);
         mReportText.setText("Loadtest ended. Elapsed time = " + elapsedTimeMins + " min(s)");
         clearConfigs();
         updateStarted(false);
@@ -485,7 +520,7 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
     private synchronized void updateStarted(boolean started) {
         mStarted = started;
         mStartStop.setBackgroundColor(started ?
-            Color.parseColor("#FFFF0000") : Color.parseColor("#FF00FF00"));
+                Color.parseColor("#FFFF0000") : Color.parseColor("#FF00FF00"));
         mStartStop.setText(started ? getString(R.string.stop) : getString(R.string.start));
         updateControlsEnabled();
     }
@@ -538,22 +573,21 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
     }
 
     private boolean setConfig(ConfigFactory.ConfigMetadata configData) {
-      if (mStatsManager != null) {
-            if (mStatsManager.addConfiguration(ConfigFactory.CONFIG_ID,
-                configData.bytes, getPackageName(), LoadtestActivity.this.getClass().getName())) {
+        if (mStatsManager != null) {
+            if (mStatsManager.addConfiguration(ConfigFactory.CONFIG_ID, configData.bytes)) {
                 mNumMetrics = configData.numMetrics;
                 Log.d(TAG, "Config pushed to statsd");
                 return true;
             } else {
                 Log.d(TAG, "Failed to push config to statsd");
             }
-      }
-      return false;
+        }
+        return false;
     }
 
     private synchronized void setReplication(int replication) {
         if (mStarted) {
-          return;
+            return;
         }
         mReplicationText.setText("" + replication);
     }
@@ -614,13 +648,13 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
         mBucketSpinner = (Spinner) findViewById(R.id.bucket_spinner);
 
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(
-            this, R.layout.spinner_item, TIME_UNIT_LABELS);
+                this, R.layout.spinner_item, TIME_UNIT_LABELS);
 
         mBucketSpinner.setAdapter(dataAdapter);
         mBucketSpinner.setOnItemSelectedListener(this);
 
         for (String label : TIME_UNIT_MAP.keySet()) {
-          if (defaultValue.equals(TIME_UNIT_MAP.get(label).toString())) {
+            if (defaultValue.equals(TIME_UNIT_MAP.get(label).toString())) {
                 mBucketSpinner.setSelection(dataAdapter.getPosition(label));
             }
         }
