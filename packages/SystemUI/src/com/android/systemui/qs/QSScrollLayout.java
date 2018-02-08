@@ -65,8 +65,8 @@ public class QSScrollLayout extends NestedScrollView {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (canScrollVertically(1) || canScrollVertically(-1)) {
-            return super.onInterceptTouchEvent(ev);
+        if (!canScrollVertically(1) && !canScrollVertically(-1)) {
+            return false;
         }
         mSwipeDetector.onTouchEvent(ev);
         return super.onInterceptTouchEvent(ev) || mOverScrollHelper.isInOverScroll();
@@ -74,8 +74,8 @@ public class QSScrollLayout extends NestedScrollView {
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        if (canScrollVertically(1) || canScrollVertically(-1)) {
-            return super.onTouchEvent(ev);
+        if (!canScrollVertically(1) && !canScrollVertically(-1)) {
+            return false;
         }
         mSwipeDetector.onTouchEvent(ev);
         return super.onTouchEvent(ev);
