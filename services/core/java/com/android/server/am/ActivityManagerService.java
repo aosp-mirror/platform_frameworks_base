@@ -192,6 +192,7 @@ import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.am.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
+import static com.android.server.am.MemoryStatUtil.readMemoryStatFromMemcg;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
@@ -248,6 +249,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.PictureInPictureParams;
+import android.app.ProcessMemoryState;
 import android.app.ProfilerInfo;
 import android.app.RemoteAction;
 import android.app.WaitResult;
@@ -436,6 +438,7 @@ import com.android.server.SystemServiceManager;
 import com.android.server.ThreadPriorityBooster;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;
+import com.android.server.am.MemoryStatUtil.MemoryStat;
 import com.android.server.am.proto.ActivityManagerServiceProto;
 import com.android.server.am.proto.BroadcastProto;
 import com.android.server.am.proto.GrantUriProto;
@@ -26096,6 +26099,33 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final UidRecord uidRec = mActiveUids.get(uid);
                 return (uidRec != null) && !uidRec.idle;
             }
+        }
+
+        @Override
+        public List<ProcessMemoryState> getMemoryStateForProcesses() {
+            List<ProcessMemoryState> processMemoryStates = new ArrayList<>();
+            synchronized (mPidsSelfLocked) {
+                for (int i = 0, size = mPidsSelfLocked.size(); i < size; i++) {
+                    final ProcessRecord r = mPidsSelfLocked.valueAt(i);
+                    final int pid = r.pid;
+                    final int uid = r.uid;
+                    final MemoryStat memoryStat = readMemoryStatFromMemcg(uid, pid);
+                    if (memoryStat == null) {
+                        continue;
+                    }
+                    ProcessMemoryState processMemoryState =
+                            new ProcessMemoryState(uid,
+                                    r.processName,
+                                    r.maxAdj,
+                                    memoryStat.pgfault,
+                                    memoryStat.pgmajfault,
+                                    memoryStat.rssInBytes,
+                                    memoryStat.cacheInBytes,
+                                    memoryStat.swapInBytes);
+                    processMemoryStates.add(processMemoryState);
+                }
+            }
+            return processMemoryStates;
         }
     }
 

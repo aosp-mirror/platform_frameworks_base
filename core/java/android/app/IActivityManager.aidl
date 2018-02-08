@@ -686,24 +686,24 @@ interface IActivityManager {
     // If a transaction which will also be used on the native side is being inserted, add it
     // alongside with other transactions of this kind at the top of this file.
 
-     void setShowWhenLocked(in IBinder token, boolean showWhenLocked);
-     void setTurnScreenOn(in IBinder token, boolean turnScreenOn);
+    void setShowWhenLocked(in IBinder token, boolean showWhenLocked);
+    void setTurnScreenOn(in IBinder token, boolean turnScreenOn);
 
-     /**
-      *  Similar to {@link #startUserInBackground(int userId), but with a listener to report
-      *  user unlock progress.
-      */
-     boolean startUserInBackgroundWithListener(int userid, IProgressListener unlockProgressListener);
+    /**
+     *  Similar to {@link #startUserInBackground(int userId), but with a listener to report
+     *  user unlock progress.
+     */
+    boolean startUserInBackgroundWithListener(int userid, IProgressListener unlockProgressListener);
 
-     /**
-      * Registers remote animations for a specific activity.
-      */
-     void registerRemoteAnimations(in IBinder token, in RemoteAnimationDefinition definition);
+    /**
+     * Registers remote animations for a specific activity.
+     */
+    void registerRemoteAnimations(in IBinder token, in RemoteAnimationDefinition definition);
 
-     /**
-      * Registers a remote animation to be run for all activity starts from a certain package during
-      * a short predefined amount of time.
-      */
-     void registerRemoteAnimationForNextActivityStart(in String packageName,
-            in RemoteAnimationAdapter adapter);
+    /**
+     * Registers a remote animation to be run for all activity starts from a certain package during
+     * a short predefined amount of time.
+     */
+    void registerRemoteAnimationForNextActivityStart(in String packageName,
+           in RemoteAnimationAdapter adapter);
 }

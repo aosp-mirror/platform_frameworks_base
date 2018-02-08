@@ -16,8 +16,10 @@
 package com.android.server.stats;
 
 import android.annotation.Nullable;
+import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.app.ProcessMemoryState;
 import android.app.StatsManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.BluetoothAdapter;
@@ -219,9 +221,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             Slog.w(TAG, "Iterating over " + users.size() + " profiles.");
         }
 
-        List<Integer> uids = new ArrayList();
-        List<Long> versions = new ArrayList();
-        List<String> apps = new ArrayList();
+        List<Integer> uids = new ArrayList<>();
+        List<Long> versions = new ArrayList<>();
+        List<String> apps = new ArrayList<>();
 
         // Add in all the apps for every user/profile.
         for (UserInfo profile : users) {
@@ -712,6 +714,24 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         pulledData.add(e);
     }
 
+    private void pullProcessMemoryState(int tagId, List<StatsLogEventWrapper> pulledData) {
+        List<ProcessMemoryState> processMemoryStates =
+                LocalServices.getService(ActivityManagerInternal.class)
+                        .getMemoryStateForProcesses();
+        for (ProcessMemoryState processMemoryState : processMemoryStates) {
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, 8 /* fields */);
+            e.writeInt(processMemoryState.uid);
+            e.writeString(processMemoryState.processName);
+            e.writeInt(processMemoryState.oomScore);
+            e.writeLong(processMemoryState.pgfault);
+            e.writeLong(processMemoryState.pgmajfault);
+            e.writeLong(processMemoryState.rssInBytes);
+            e.writeLong(processMemoryState.cacheInBytes);
+            e.writeLong(processMemoryState.swapInBytes);
+            pulledData.add(e);
+        }
+    }
+
     /**
      * Pulls various data.
      */
@@ -720,7 +740,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         enforceCallingPermission();
         if (DEBUG)
             Slog.d(TAG, "Pulling " + tagId);
-        List<StatsLogEventWrapper> ret = new ArrayList();
+        List<StatsLogEventWrapper> ret = new ArrayList<>();
         switch (tagId) {
             case StatsLog.WIFI_BYTES_TRANSFER: {
                 pullWifiBytesTransfer(tagId, ret);
@@ -772,6 +792,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.DISK_SPACE: {
                 pullDiskSpace(tagId, ret);
+                break;
+            }
+            case StatsLog.PROCESS_MEMORY_STATE: {
+                pullProcessMemoryState(tagId, ret);
                 break;
             }
             default:
