@@ -98,48 +98,64 @@ void SubscriberReporter::sendBroadcastLocked(const sp<IBinder>& intentSender,
         ALOGW("Failed to send subscriber broadcast: could not access StatsCompanionService.");
         return;
     }
-    mStatsCompanionService->sendSubscriberBroadcast(intentSender,
-                                                    configKey.GetUid(),
-                                                    configKey.GetId(),
-                                                    subscription.id(),
-                                                    subscription.rule_id(),
-                                                    protoToStatsDimensionsValue(dimKey));
+    mStatsCompanionService->sendSubscriberBroadcast(
+            intentSender, configKey.GetUid(), configKey.GetId(), subscription.id(),
+            subscription.rule_id(), getStatsDimensionsValue(dimKey.getDimensionKeyInWhat()));
 }
 
-StatsDimensionsValue SubscriberReporter::protoToStatsDimensionsValue(
-        const MetricDimensionKey& dimKey) {
-    return protoToStatsDimensionsValue(dimKey.getDimensionKeyInWhat().getDimensionsValue());
-}
-
-StatsDimensionsValue SubscriberReporter::protoToStatsDimensionsValue(
-        const DimensionsValue& protoDimsVal) {
-    int32_t field = protoDimsVal.field();
-
-    switch (protoDimsVal.value_case()) {
-        case DimensionsValue::ValueCase::kValueStr:
-            return StatsDimensionsValue(field, String16(protoDimsVal.value_str().c_str()));
-        case DimensionsValue::ValueCase::kValueInt:
-            return StatsDimensionsValue(field, static_cast<int32_t>(protoDimsVal.value_int()));
-        case DimensionsValue::ValueCase::kValueLong:
-            return StatsDimensionsValue(field, static_cast<int64_t>(protoDimsVal.value_long()));
-        case DimensionsValue::ValueCase::kValueBool:
-            return StatsDimensionsValue(field, static_cast<bool>(protoDimsVal.value_bool()));
-        case DimensionsValue::ValueCase::kValueFloat:
-            return StatsDimensionsValue(field, static_cast<float>(protoDimsVal.value_float()));
-        case DimensionsValue::ValueCase::kValueTuple:
-            {
-                int sz = protoDimsVal.value_tuple().dimensions_value_size();
-                std::vector<StatsDimensionsValue> sdvVec(sz);
-                for (int i = 0; i < sz; i++) {
-                    sdvVec[i] = protoToStatsDimensionsValue(
-                            protoDimsVal.value_tuple().dimensions_value(i));
-                }
-                return StatsDimensionsValue(field, sdvVec);
+void getStatsDimensionsValueHelper(const std::vector<FieldValue>& dims, size_t* index, int depth,
+                                   int prefix, vector<StatsDimensionsValue>* output) {
+    size_t count = dims.size();
+    while (*index < count) {
+        const auto& dim = dims[*index];
+        const int valueDepth = dim.mField.getDepth();
+        const int valuePrefix = dim.mField.getPrefix(depth);
+        if (valueDepth > 2) {
+            ALOGE("Depth > 2 not supported");
+            return;
+        }
+        if (depth == valueDepth && valuePrefix == prefix) {
+            switch (dim.mValue.getType()) {
+                case INT:
+                    output->push_back(StatsDimensionsValue(dim.mField.getPosAtDepth(depth),
+                                                           dim.mValue.int_value));
+                    break;
+                case LONG:
+                    output->push_back(StatsDimensionsValue(dim.mField.getPosAtDepth(depth),
+                                                           dim.mValue.long_value));
+                    break;
+                case FLOAT:
+                    output->push_back(StatsDimensionsValue(dim.mField.getPosAtDepth(depth),
+                                                           dim.mValue.float_value));
+                    break;
+                case STRING:
+                    output->push_back(StatsDimensionsValue(dim.mField.getPosAtDepth(depth),
+                                                           String16(dim.mValue.str_value.c_str())));
+                    break;
+                default:
+                    break;
             }
-        default:
-            ALOGW("protoToStatsDimensionsValue failed: illegal type.");
-            return StatsDimensionsValue();
+            (*index)++;
+        } else if (valueDepth > depth && valuePrefix == prefix) {
+            vector<StatsDimensionsValue> childOutput;
+            getStatsDimensionsValueHelper(dims, index, depth + 1, dim.mField.getPrefix(depth + 1),
+                                          &childOutput);
+            output->push_back(StatsDimensionsValue(dim.mField.getPosAtDepth(depth), childOutput));
+        } else {
+            return;
+        }
     }
+}
+
+StatsDimensionsValue SubscriberReporter::getStatsDimensionsValue(const HashableDimensionKey& dim) {
+    if (dim.getValues().size() == 0) {
+        return StatsDimensionsValue();
+    }
+
+    vector<StatsDimensionsValue> fields;
+    size_t index = 0;
+    getStatsDimensionsValueHelper(dim.getValues(), &index, 0, 0, &fields);
+    return StatsDimensionsValue(dim.getValues()[0].mField.getTag(), fields);
 }
 
 }  // namespace statsd

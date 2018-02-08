@@ -26,7 +26,7 @@ using std::pair;
 
 OringDurationTracker::OringDurationTracker(
         const ConfigKey& key, const int64_t& id, const MetricDimensionKey& eventKey,
-        sp<ConditionWizard> wizard, int conditionIndex, const FieldMatcher& dimensionInCondition,
+        sp<ConditionWizard> wizard, int conditionIndex, const vector<Matcher>& dimensionInCondition,
         bool nesting, uint64_t currentBucketStartNs, uint64_t currentBucketNum,
         uint64_t startTimeNs, uint64_t bucketSizeNs, bool conditionSliced,
         const vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
@@ -53,9 +53,7 @@ bool OringDurationTracker::hitGuardRail(const HashableDimensionKey& newKey) {
     }
     if (mConditionKeyMap.size() > StatsdStats::kDimensionKeySizeSoftLimit - 1) {
         size_t newTupleCount = mConditionKeyMap.size() + 1;
-        StatsdStats::getInstance().noteMetricDimensionSize(
-            mConfigKey, hashMetricDimensionKey(mTrackerId, mEventKey),
-            newTupleCount);
+        StatsdStats::getInstance().noteMetricDimensionSize(mConfigKey, mTrackerId, newTupleCount);
         // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
         if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
             ALOGE("OringDurTracker %lld dropping data for dimension key %s",
@@ -229,9 +227,9 @@ void OringDurationTracker::onSlicedConditionMayChange(const uint64_t timestamp) 
                 mWizard->query(mConditionTrackerIndex, mConditionKeyMap[key],
                                mDimensionInCondition, &conditionDimensionKeySet);
             if (conditionState != ConditionState::kTrue ||
-                (mDimensionInCondition.has_field() &&
+                (mDimensionInCondition.size() != 0 &&
                  conditionDimensionKeySet.find(mEventKey.getDimensionKeyInCondition()) ==
-                    conditionDimensionKeySet.end())) {
+                         conditionDimensionKeySet.end())) {
                 startedToPaused.push_back(*it);
                 it = mStarted.erase(it);
                 VLOG("Key %s started -> paused", key.c_str());
@@ -261,9 +259,9 @@ void OringDurationTracker::onSlicedConditionMayChange(const uint64_t timestamp) 
                 mWizard->query(mConditionTrackerIndex, mConditionKeyMap[key],
                                mDimensionInCondition, &conditionDimensionKeySet);
             if (conditionState == ConditionState::kTrue &&
-                (!mDimensionInCondition.has_field() ||
-                 conditionDimensionKeySet.find(mEventKey.getDimensionKeyInCondition())
-                    != conditionDimensionKeySet.end())) {
+                (mDimensionInCondition.size() == 0 ||
+                 conditionDimensionKeySet.find(mEventKey.getDimensionKeyInCondition()) !=
+                         conditionDimensionKeySet.end())) {
                 pausedToStarted.push_back(*it);
                 it = mPaused.erase(it);
                 VLOG("Key %s paused -> started", key.c_str());

@@ -29,8 +29,8 @@ class OringDurationTracker : public DurationTracker {
 public:
     OringDurationTracker(const ConfigKey& key, const int64_t& id,
                          const MetricDimensionKey& eventKey, sp<ConditionWizard> wizard,
-                         int conditionIndex, const FieldMatcher& dimensionInCondition, bool nesting,
-                         uint64_t currentBucketStartNs, uint64_t currentBucketNum,
+                         int conditionIndex, const std::vector<Matcher>& dimensionInCondition,
+                         bool nesting, uint64_t currentBucketStartNs, uint64_t currentBucketNum,
                          uint64_t startTimeNs, uint64_t bucketSizeNs, bool conditionSliced,
                          const std::vector<sp<DurationAnomalyTracker>>& anomalyTrackers);
 

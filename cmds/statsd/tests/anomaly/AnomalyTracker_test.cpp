@@ -34,10 +34,10 @@ namespace statsd {
 const ConfigKey kConfigKey(0, 12345);
 
 MetricDimensionKey getMockMetricDimensionKey(int key, string value) {
-    DimensionsValue dimensionsValue;
-    dimensionsValue.set_field(key);
-    dimensionsValue.set_value_str(value);
-    return MetricDimensionKey(HashableDimensionKey(dimensionsValue), DEFAULT_DIMENSION_KEY);
+    int pos[] = {key, 0, 0};
+    HashableDimensionKey dim;
+    dim.addValue(FieldValue(Field(1, pos, 0), Value(value)));
+    return MetricDimensionKey(dim, DEFAULT_DIMENSION_KEY);
 }
 
 void AddValueToBucket(const std::vector<std::pair<MetricDimensionKey, long>>& key_value_pair_list,

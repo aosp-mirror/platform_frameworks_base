@@ -26,12 +26,10 @@ namespace statsd {
 
 class MockConditionWizard : public ConditionWizard {
 public:
-    MOCK_METHOD4(
-            query,
-            ConditionState(const int conditionIndex,
-                           const ConditionKey& conditionParameters,
-                           const FieldMatcher& dimensionFields,
-                           std::unordered_set<HashableDimensionKey> *dimensionKeySet));
+    MOCK_METHOD4(query,
+                 ConditionState(const int conditionIndex, const ConditionKey& conditionParameters,
+                                const vector<Matcher>& dimensionFields,
+                                std::unordered_set<HashableDimensionKey>* dimensionKeySet));
 };
 
 class MockStatsPullerManager : public StatsPullerManager {
@@ -48,6 +46,10 @@ class MockUidMap : public UidMap {
 
 HashableDimensionKey getMockedDimensionKey(int tagId, int key, std::string value);
 MetricDimensionKey getMockedMetricDimensionKey(int tagId, int key, std::string value);
+
+// Utils to build FieldMatcher proto for simple one-depth atoms.
+void buildSimpleAtomFieldMatcher(const int tagId, const int atomFieldNum, FieldMatcher* matcher);
+void buildSimpleAtomFieldMatcher(const int tagId, FieldMatcher* matcher);
 
 }  // namespace statsd
 }  // namespace os

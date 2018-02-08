@@ -52,7 +52,7 @@ TEST(OringDurationTrackerTest, TestDurationOverlap) {
         {getMockedDimensionKey(TagId, 1, "maps")};
     const HashableDimensionKey kEventKey1 = getMockedDimensionKey(TagId, 2, "maps");
     const HashableDimensionKey kEventKey2 = getMockedDimensionKey(TagId, 3, "maps");
-    FieldMatcher dimensionInCondition;
+    vector<Matcher> dimensionInCondition;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
@@ -88,7 +88,7 @@ TEST(OringDurationTrackerTest, TestDurationNested) {
         {getMockedDimensionKey(TagId, 1, "maps")};
     const HashableDimensionKey kEventKey1 = getMockedDimensionKey(TagId, 2, "maps");
     const HashableDimensionKey kEventKey2 = getMockedDimensionKey(TagId, 3, "maps");
-    FieldMatcher dimensionInCondition;
+    vector<Matcher> dimensionInCondition;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
@@ -122,7 +122,7 @@ TEST(OringDurationTrackerTest, TestStopAll) {
         {getMockedDimensionKey(TagId, 1, "maps")};
     const HashableDimensionKey kEventKey1 = getMockedDimensionKey(TagId, 2, "maps");
     const HashableDimensionKey kEventKey2 = getMockedDimensionKey(TagId, 3, "maps");
-    FieldMatcher dimensionInCondition;
+    vector<Matcher> dimensionInCondition;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
@@ -155,7 +155,7 @@ TEST(OringDurationTrackerTest, TestCrossBucketBoundary) {
         {getMockedDimensionKey(TagId, 1, "maps")};
     const HashableDimensionKey kEventKey1 = getMockedDimensionKey(TagId, 2, "maps");
     const HashableDimensionKey kEventKey2 = getMockedDimensionKey(TagId, 3, "maps");
-    FieldMatcher dimensionInCondition;
+    vector<Matcher> dimensionInCondition;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
@@ -197,7 +197,7 @@ TEST(OringDurationTrackerTest, TestDurationConditionChange) {
         {getMockedDimensionKey(TagId, 1, "maps")};
     const HashableDimensionKey kEventKey1 = getMockedDimensionKey(TagId, 2, "maps");
     const HashableDimensionKey kEventKey2 = getMockedDimensionKey(TagId, 3, "maps");
-    FieldMatcher dimensionInCondition;
+    vector<Matcher> dimensionInCondition;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     ConditionKey key1;
@@ -238,7 +238,7 @@ TEST(OringDurationTrackerTest, TestDurationConditionChange2) {
         {getMockedDimensionKey(TagId, 1, "maps")};
     const HashableDimensionKey kEventKey1 = getMockedDimensionKey(TagId, 2, "maps");
     const HashableDimensionKey kEventKey2 = getMockedDimensionKey(TagId, 3, "maps");
-    FieldMatcher dimensionInCondition;
+    vector<Matcher> dimensionInCondition;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     ConditionKey key1;
@@ -283,7 +283,7 @@ TEST(OringDurationTrackerTest, TestDurationConditionChangeNested) {
         {getMockedDimensionKey(TagId, 1, "maps")};
     const HashableDimensionKey kEventKey1 = getMockedDimensionKey(TagId, 2, "maps");
     const HashableDimensionKey kEventKey2 = getMockedDimensionKey(TagId, 3, "maps");
-    FieldMatcher dimensionInCondition;
+    vector<Matcher> dimensionInCondition;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     ConditionKey key1;
@@ -326,7 +326,7 @@ TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp) {
         {getMockedDimensionKey(TagId, 1, "maps")};
     const HashableDimensionKey kEventKey1 = getMockedDimensionKey(TagId, 2, "maps");
     const HashableDimensionKey kEventKey2 = getMockedDimensionKey(TagId, 3, "maps");
-    FieldMatcher dimensionInCondition;
+    vector<Matcher> dimensionInCondition;
     Alert alert;
     alert.set_id(101);
     alert.set_metric_id(1);
@@ -395,7 +395,7 @@ TEST(OringDurationTrackerTest, TestAnomalyDetectionExpiredAlarm) {
     const std::vector<HashableDimensionKey> kConditionKey1 = {getMockedDimensionKey(TagId, 1, "maps")};
     const HashableDimensionKey kEventKey1 = getMockedDimensionKey(TagId, 2, "maps");
     const HashableDimensionKey kEventKey2 = getMockedDimensionKey(TagId, 3, "maps");
-    FieldMatcher dimensionInCondition;
+    vector<Matcher> dimensionInCondition;
     Alert alert;
     alert.set_id(101);
     alert.set_metric_id(1);
@@ -446,7 +446,7 @@ TEST(OringDurationTrackerTest, TestAnomalyDetectionFiredAlarm) {
         {getMockedDimensionKey(TagId, 1, "maps")};
     const HashableDimensionKey kEventKey1 = getMockedDimensionKey(TagId, 2, "maps");
     const HashableDimensionKey kEventKey2 = getMockedDimensionKey(TagId, 3, "maps");
-    FieldMatcher dimensionInCondition;
+    vector<Matcher> dimensionInCondition;
     Alert alert;
     alert.set_id(101);
     alert.set_metric_id(1);

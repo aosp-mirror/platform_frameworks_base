@@ -89,7 +89,6 @@ protected:
 private:
     void onDumpReportLocked(const uint64_t dumpTimeNs,
                             android::util::ProtoOutputStream* protoOutput) override;
-    void onDumpReportLocked(const uint64_t dumpTimeNs, StatsLogReport* report) override;
 
     // Internal interface to handle condition change.
     void onConditionChangedLocked(const bool conditionMet, const uint64_t eventTime) override;
@@ -120,6 +119,8 @@ private:
     // tagId for pulled data. -1 if this is not pulled
     const int mPullTagId;
 
+    int mField;
+
     // internal state of a bucket.
     typedef struct {
         // Pulled data always come in pair of <start, end>. This holds the value
@@ -141,8 +142,6 @@ private:
     // Save the past buckets and we can clear when the StatsLogReport is dumped.
     // TODO: Add a lock to mPastBuckets.
     std::unordered_map<MetricDimensionKey, std::vector<ValueBucket>> mPastBuckets;
-
-    std::shared_ptr<FieldValueMap> getValueFields(const LogEvent& event);
 
     // Util function to check whether the specified dimension hits the guardrail.
     bool hitGuardRailLocked(const MetricDimensionKey& newKey);

@@ -80,31 +80,31 @@ std::map<int64_t, std::vector<HashableDimensionKey>> getWakeLockQueryKey(
     const std::vector<int> &uids, const string& conditionName) {
     std::map<int64_t, std::vector<HashableDimensionKey>> outputKeyMap;
     std::vector<int> uid_indexes;
+    int pos[] = {1, 1, 1};
+    int depth = 2;
+    Field field(1, pos, depth);
     switch(position) {
         case Position::FIRST:
             uid_indexes.push_back(0);
             break;
         case Position::LAST:
             uid_indexes.push_back(uids.size() - 1);
+            field.setField(0x02018001);
             break;
         case Position::ANY:
             uid_indexes.resize(uids.size());
             std::iota(uid_indexes.begin(), uid_indexes.end(), 0);
+            field.setField(0x02010001);
             break;
         default:
             break;
     }
 
     for (const int idx : uid_indexes) {
-        DimensionsValue dimensionsValue;
-        dimensionsValue.set_field(TAG_ID);
-        dimensionsValue.mutable_value_tuple()->add_dimensions_value()->set_field(
-            ATTRIBUTION_NODE_FIELD_ID);
-        dimensionsValue.mutable_value_tuple()->mutable_dimensions_value(0)
-            ->mutable_value_tuple()->add_dimensions_value()->set_field(ATTRIBUTION_NODE_FIELD_ID);
-        dimensionsValue.mutable_value_tuple()->mutable_dimensions_value(0)
-            ->mutable_value_tuple()->mutable_dimensions_value(0)->set_value_int(uids[idx]);
-        outputKeyMap[StringToId(conditionName)].push_back(HashableDimensionKey(dimensionsValue));
+        Value value((int32_t)uids[idx]);
+        HashableDimensionKey dim;
+        dim.addValue(FieldValue(field, value));
+        outputKeyMap[StringToId(conditionName)].push_back(dim);
     }
     return outputKeyMap;
 }
@@ -265,7 +265,7 @@ TEST(SimpleConditionTrackerTest, TestNonSlicedConditionNestCounting) {
 TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
     for (Position position :
             { Position::ANY, Position::FIRST, Position::LAST}) {
-        FieldMatcher dimensionInCondition;
+        vector<Matcher> dimensionInCondition;
         std::unordered_set<HashableDimensionKey> dimensionKeys;
 
         SimplePredicate simplePredicate = getWakeLockHeldCondition(
@@ -374,7 +374,7 @@ TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
 }
 
 TEST(SimpleConditionTrackerTest, TestSlicedWithNoOutputDim) {
-    FieldMatcher dimensionInCondition;
+    vector<Matcher> dimensionInCondition;
     std::unordered_set<HashableDimensionKey> dimensionKeys;
 
     SimplePredicate simplePredicate = getWakeLockHeldCondition(
@@ -470,7 +470,7 @@ TEST(SimpleConditionTrackerTest, TestSlicedWithNoOutputDim) {
 TEST(SimpleConditionTrackerTest, TestStopAll) {
     for (Position position :
             {Position::ANY, Position::FIRST, Position::LAST}) {
-        FieldMatcher dimensionInCondition;
+        vector<Matcher> dimensionInCondition;
         std::unordered_set<HashableDimensionKey> dimensionKeys;
         SimplePredicate simplePredicate = getWakeLockHeldCondition(
                 true /*nesting*/, true /*default to false*/, true /*output slice by uid*/,
@@ -576,7 +576,6 @@ TEST(SimpleConditionTrackerTest, TestStopAll) {
                                         conditionCache, dimensionKeys);
         EXPECT_EQ(ConditionState::kFalse, conditionCache[0]);
     }
-
 }
 
 }  // namespace statsd

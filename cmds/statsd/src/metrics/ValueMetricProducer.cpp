@@ -17,7 +17,6 @@
 #define DEBUG false  // STOPSHIP if true
 #include "Log.h"
 
-#include "dimension.h"
 #include "ValueMetricProducer.h"
 #include "guardrail/StatsdStats.h"
 #include "stats_log_util.h"
@@ -79,15 +78,28 @@ ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric
     }
 
     mBucketSizeNs = bucketSizeMills * 1000000;
-    mDimensionsInWhat = metric.dimensions_in_what();
-    mDimensionsInCondition = metric.dimensions_in_condition();
+    if (metric.has_dimensions_in_what()) {
+        translateFieldMatcher(metric.dimensions_in_what(), &mDimensionsInWhat);
+    }
+
+    if (metric.has_dimensions_in_condition()) {
+        translateFieldMatcher(metric.dimensions_in_condition(), &mDimensionsInCondition);
+    }
 
     if (metric.links().size() > 0) {
-        mConditionLinks.insert(mConditionLinks.begin(), metric.links().begin(),
-                               metric.links().end());
+        for (const auto& link : metric.links()) {
+            Metric2Condition mc;
+            mc.conditionId = link.condition();
+            translateFieldMatcher(link.fields_in_what(), &mc.metricFields);
+            translateFieldMatcher(link.fields_in_condition(), &mc.conditionFields);
+            mMetric2ConditionLinks.push_back(mc);
+        }
     }
-    mConditionSliced = (metric.links().size() > 0)||
-        (mDimensionsInCondition.has_field() && mDimensionsInCondition.child_size() > 0);
+
+    if (mValueField.child_size()) {
+        mField = mValueField.child(0).field();
+    }
+    mConditionSliced = (metric.links().size() > 0) || (mDimensionsInCondition.size() > 0);
 
     if (!metric.has_condition() && mPullTagId != -1) {
         VLOG("Setting up periodic pulling for %d", mPullTagId);
@@ -117,25 +129,6 @@ void ValueMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eventT
     VLOG("Metric %lld onSlicedConditionMayChange", (long long)mMetricId);
 }
 
-void ValueMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs, StatsLogReport* report) {
-    flushIfNeededLocked(dumpTimeNs);
-    report->set_metric_id(mMetricId);
-    auto value_metrics = report->mutable_value_metrics();
-    for (const auto& pair : mPastBuckets) {
-        ValueMetricData* metricData = value_metrics->add_data();
-        *metricData->mutable_dimensions_in_what() =
-            pair.first.getDimensionKeyInWhat().getDimensionsValue();
-        *metricData->mutable_dimensions_in_condition() =
-            pair.first.getDimensionKeyInCondition().getDimensionsValue();
-        for (const auto& bucket : pair.second) {
-            ValueBucketInfo* bucketInfo = metricData->add_bucket_info();
-            bucketInfo->set_start_bucket_nanos(bucket.mBucketStartNs);
-            bucketInfo->set_end_bucket_nanos(bucket.mBucketEndNs);
-            bucketInfo->set_value(bucket.mValue);
-        }
-    }
-}
-
 void ValueMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
                                              ProtoOutputStream* protoOutput) {
     VLOG("metric %lld dump report now...", (long long)mMetricId);
@@ -155,14 +148,12 @@ void ValueMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
         // First fill dimension.
         long long dimensionToken = protoOutput->start(
             FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_WHAT);
-        writeDimensionsValueProtoToStream(
-            dimensionKey.getDimensionKeyInWhat().getDimensionsValue(), protoOutput);
+        writeDimensionToProto(dimensionKey.getDimensionKeyInWhat(), protoOutput);
         protoOutput->end(dimensionToken);
         if (dimensionKey.hasDimensionKeyInCondition()) {
             long long dimensionInConditionToken = protoOutput->start(
                     FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_CONDITION);
-            writeDimensionsValueProtoToStream(
-                dimensionKey.getDimensionKeyInCondition().getDimensionsValue(), protoOutput);
+            writeDimensionToProto(dimensionKey.getDimensionKeyInCondition(), protoOutput);
             protoOutput->end(dimensionInConditionToken);
         }
 
@@ -284,11 +275,11 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(
     }
     Interval& interval = mCurrentSlicedBucket[eventKey];
 
-    std::shared_ptr<FieldValueMap> valueFieldMap = getValueFields(event);
-    if (valueFieldMap->empty() || valueFieldMap->size() > 1) {
+    int error = 0;
+    const long value = event.GetLong(mField, &error);
+    if (error < 0) {
         return;
     }
-    const long value = getLongFromDimenValue(valueFieldMap->begin()->second);
 
     if (mPullTagId != -1) { // for pulled events
         if (mCondition == true) {
@@ -322,13 +313,6 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(
     for (auto& tracker : mAnomalyTrackers) {
         tracker->detectAndDeclareAnomaly(eventTimeNs, mCurrentBucketNum, eventKey, wholeBucketVal);
     }
-}
-
-std::shared_ptr<FieldValueMap> ValueMetricProducer::getValueFields(const LogEvent& event) {
-    std::shared_ptr<FieldValueMap> valueFields =
-        std::make_shared<FieldValueMap>(event.getFieldValueMap());
-    filterFields(mValueField, valueFields.get());
-    return valueFields;
 }
 
 void ValueMetricProducer::flushIfNeededLocked(const uint64_t& eventTimeNs) {

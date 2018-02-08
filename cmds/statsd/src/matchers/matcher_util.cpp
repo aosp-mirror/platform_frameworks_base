@@ -13,23 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#define DEBUG false  // STOPSHIP if true
 #include "Log.h"
 
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "matchers/LogMatchingTracker.h"
 #include "matchers/matcher_util.h"
-#include "dimension.h"
 #include "stats_util.h"
-#include "field_util.h"
-
-#include <log/event_tag_map.h>
-#include <log/log_event_list.h>
-#include <log/logprint.h>
-#include <utils/Errors.h>
-
-#include <sstream>
-#include <unordered_map>
 
 using std::ostringstream;
 using std::set;
@@ -93,198 +83,224 @@ bool combinationMatch(const vector<int>& children, const LogicalOperation& opera
     return matched;
 }
 
-namespace {
-
-bool matchFieldSimple(const UidMap& uidMap, const FieldValueMap& fieldMap,
-                      const FieldValueMatcher&matcher, Field* rootField, Field* leafField);
-
-bool matchesNonRepeatedField(const UidMap& uidMap, const FieldValueMap& fieldMap,
-                             const FieldValueMatcher&matcher, Field* rootField, Field* leafField) {
-    if (matcher.value_matcher_case() ==
-            FieldValueMatcher::ValueMatcherCase::VALUE_MATCHER_NOT_SET) {
-        return !fieldMap.empty() && fieldMap.begin()->first.field() == matcher.field();
-    } else if (matcher.value_matcher_case() == FieldValueMatcher::ValueMatcherCase::kMatchesTuple) {
-        bool allMatched = true;
-        Field* newLeafField = leafField->add_child();
-        for (int i = 0; allMatched && i <  matcher.matches_tuple().field_value_matcher_size(); ++i) {
-            const auto& childMatcher = matcher.matches_tuple().field_value_matcher(i);
-            newLeafField->set_field(childMatcher.field());
-            allMatched &= matchFieldSimple(uidMap, fieldMap, childMatcher, rootField, newLeafField);
-        }
-        leafField->clear_child();
-        return allMatched;
-    } else {
-        auto ret = fieldMap.equal_range(*rootField);
-        int found = 0;
-        for (auto it = ret.first; it != ret.second; ++it) {
-            found++;
-        }
-        // Not found.
-        if (found <= 0) {
-            return false;
-        }
-        if (found > 1) {
-            ALOGE("Found multiple values for optional field.");
-            return false;
-        }
-        bool matched = false;
-        switch (matcher.value_matcher_case()) {
-            case FieldValueMatcher::ValueMatcherCase::kEqBool: {
-                // Logd does not support bool, it is int instead.
-                matched = ((ret.first->second.value_int() > 0) == matcher.eq_bool());
-                break;
-            }
-            case FieldValueMatcher::ValueMatcherCase::kEqString: {
-                if (IsAttributionUidField(*rootField)) {
-                    const int uid = ret.first->second.value_int();
-                    std::set<string> packageNames =
-                            uidMap.getAppNamesFromUid(uid, true /* normalize*/);
-                    matched = packageNames.find(matcher.eq_string()) != packageNames.end();
-                } else {
-                    matched = (ret.first->second.value_str() == matcher.eq_string());
-                }
-                break;
-            }
-            case FieldValueMatcher::ValueMatcherCase::kEqInt: {
-                    int64_t val = ret.first->second.has_value_int() ?
-                                  ret.first->second.value_int() : ret.first->second.value_long();
-                    matched = (val == matcher.eq_int());
-                break;
-            }
-            case FieldValueMatcher::ValueMatcherCase::kLtInt: {
-                int64_t val = ret.first->second.has_value_int() ?
-                              ret.first->second.value_int() : ret.first->second.value_long();
-                matched = (val < matcher.lt_int());
-                break;
-            }
-            case FieldValueMatcher::ValueMatcherCase::kGtInt: {
-                int64_t val = ret.first->second.has_value_int() ?
-                              ret.first->second.value_int() : ret.first->second.value_long();
-                matched = (val > matcher.gt_int());
-                break;
-            }
-            case FieldValueMatcher::ValueMatcherCase::kLtFloat: {
-                matched = (ret.first->second.value_float() < matcher.lt_float());
-                break;
-            }
-            case FieldValueMatcher::ValueMatcherCase::kGtFloat: {
-                matched = (ret.first->second.value_float() > matcher.gt_float());
-                break;
-            }
-            case FieldValueMatcher::ValueMatcherCase::kLteInt: {
-                int64_t val = ret.first->second.has_value_int() ?
-                              ret.first->second.value_int() : ret.first->second.value_long();
-                matched = (val <= matcher.lte_int());
-                break;
-            }
-            case FieldValueMatcher::ValueMatcherCase::kGteInt: {
-                int64_t val = ret.first->second.has_value_int() ?
-                              ret.first->second.value_int() : ret.first->second.value_long();
-                matched = (val >= matcher.gte_int());
-                break;
-            }
-            default:
-                break;
-        }
-        return matched;
+bool tryMatchString(const UidMap& uidMap, const Field& field, const Value& value,
+                    const string& str_match) {
+    if (isAttributionUidField(field, value)) {
+        int uid = value.int_value;
+        std::set<string> packageNames = uidMap.getAppNamesFromUid(uid, true /* normalize*/);
+        return packageNames.find(str_match) != packageNames.end();
+    } else if (value.getType() == STRING) {
+        return value.str_value == str_match;
     }
+    return false;
 }
 
-bool matchesRepeatedField(const UidMap& uidMap, const FieldValueMap& fieldMap,
-                          const FieldValueMatcher&matcher,
-                          Field* rootField, Field* leafField) {
-    if (matcher.position() == Position::FIRST) {
-        leafField->set_position_index(0);
-        bool res = matchesNonRepeatedField(uidMap, fieldMap, matcher, rootField, leafField);
-        leafField->clear_position_index();
-        return res;
-    } else {
-        auto itLower = fieldMap.lower_bound(*rootField);
-        if (itLower == fieldMap.end()) {
+bool matchesSimple(const UidMap& uidMap, const FieldValueMatcher& matcher,
+                   const vector<FieldValue>& values, int start, int end, int depth) {
+    if (depth > 2) {
+        ALOGE("Depth > 3 not supported");
+        return false;
+    }
+
+    if (start >= end) {
+        return false;
+    }
+
+    // Filter by entry field first
+    int newStart = -1;
+    int newEnd = end;
+    // because the fields are naturally sorted in the DFS order. we can safely
+    // break when pos is larger than the one we are searching for.
+    for (int i = start; i < end; i++) {
+        int pos = values[i].mField.getPosAtDepth(depth);
+        if (pos == matcher.field()) {
+            if (newStart == -1) {
+                newStart = i;
+            }
+            newEnd = i + 1;
+        } else if (pos > matcher.field()) {
+            break;
+        }
+    }
+
+    // Now we have zoomed in to a new range
+    start = newStart;
+    end = newEnd;
+
+    if (start == -1) {
+        // No such field found.
+        return false;
+    }
+
+    vector<pair<int, int>> ranges; // the ranges are for matching ANY position
+    if (matcher.has_position()) {
+        // Repeated fields position is stored as a node in the path.
+        depth++;
+        if (depth > 2) {
             return false;
         }
-
-        const int leafFieldNum = leafField->field();
-        leafField->set_field(leafFieldNum + 1);
-        auto itUpper = fieldMap.lower_bound(*rootField);
-        // Resets the field number.
-        leafField->set_field(leafFieldNum);
-
         switch (matcher.position()) {
-             case Position::LAST:
-                 {
-                     itUpper--;
-                     if (itUpper == fieldMap.end()) {
-                        return false;
-                     } else {
-                         int last_index = getPositionByReferenceField(*rootField, itUpper->first);
-                         if (last_index < 0) {
-                            return false;
-                         }
-                         leafField->set_position_index(last_index);
-                         bool res = matchesNonRepeatedField(uidMap, fieldMap, matcher, rootField, leafField);
-                         leafField->clear_position_index();
-                         return res;
-                     }
-                 }
-                 break;
-             case Position::ANY:
-                 {
-                    bool matched = false;
-                    for (auto it = itLower; it != itUpper; ++it) {
-                        int index = getPositionByReferenceField(*rootField, it->first);
-                        if (index >= 0) {
-                             leafField->set_position_index(index);
-                             matched |= matchesNonRepeatedField(uidMap, fieldMap, matcher, rootField, leafField);
-                             leafField->clear_position_index();
-                             if (matched) {
-                                break;
-                             }
-                        }
+            case Position::FIRST: {
+                for (int i = start; i < end; i++) {
+                    int pos = values[i].mField.getPosAtDepth(depth);
+                    if (pos != 1) {
+                        // Again, the log elements are stored in sorted order. so
+                        // once the position is > 1, we break;
+                        end = i;
+                        break;
                     }
-                    return matched;
-                 }
-             default:
-                return false;
-         }
-    }
-
-}
-
-bool matchFieldSimple(const UidMap& uidMap, const FieldValueMap& fieldMap,
-                      const FieldValueMatcher&matcher, Field* rootField, Field* leafField) {
-    if (!matcher.has_position()) {
-        return matchesNonRepeatedField(uidMap, fieldMap, matcher, rootField, leafField);
+                }
+                ranges.push_back(std::make_pair(start, end));
+                break;
+            }
+            case Position::LAST: {
+                // move the starting index to the first LAST field at the depth.
+                for (int i = start; i < end; i++) {
+                    if (values[i].mField.isLastPos(depth)) {
+                        start = i;
+                        break;
+                    }
+                }
+                ranges.push_back(std::make_pair(start, end));
+                break;
+            }
+            case Position::ANY: {
+                // ANY means all the children matchers match in any of the sub trees, it's a match
+                newStart = start;
+                newEnd = end;
+                // Here start is guaranteed to be a valid index.
+                int currentPos = values[start].mField.getPosAtDepth(depth);
+                // Now find all sub trees ranges.
+                for (int i = start; i < end; i++) {
+                    int newPos = values[i].mField.getPosAtDepth(depth);
+                    if (newPos != currentPos) {
+                        ranges.push_back(std::make_pair(newStart, i));
+                        newStart = i;
+                        currentPos = newPos;
+                    }
+                }
+                ranges.push_back(std::make_pair(newStart, end));
+                break;
+            }
+            case Position::POSITION_UNKNOWN:
+                break;
+        }
     } else {
-        return matchesRepeatedField(uidMap, fieldMap, matcher, rootField, leafField);
+        // No position
+        ranges.push_back(std::make_pair(start, end));
+    }
+    // start and end are still pointing to the matched range.
+    switch (matcher.value_matcher_case()) {
+        case FieldValueMatcher::kMatchesTuple: {
+            ++depth;
+            // If any range matches all matchers, good.
+            for (const auto& range : ranges) {
+                bool matched = true;
+                for (const auto& subMatcher : matcher.matches_tuple().field_value_matcher()) {
+                    if (!matchesSimple(uidMap, subMatcher, values, range.first, range.second,
+                                       depth)) {
+                        matched = false;
+                        break;
+                    }
+                }
+                if (matched) return true;
+            }
+            return false;
+        }
+        case FieldValueMatcher::ValueMatcherCase::kEqBool: {
+            for (int i = start; i < end; i++) {
+                if ((values[i].mValue.getType() == INT &&
+                     (values[i].mValue.int_value != 0) == matcher.eq_bool()) ||
+                    (values[i].mValue.getType() == LONG &&
+                     (values[i].mValue.long_value != 0) == matcher.eq_bool())) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        case FieldValueMatcher::ValueMatcherCase::kEqString: {
+            for (int i = start; i < end; i++) {
+                if (tryMatchString(uidMap, values[i].mField, values[i].mValue,
+                                   matcher.eq_string())) {
+                    return true;
+                }
+            }
+        }
+            return false;
+        case FieldValueMatcher::ValueMatcherCase::kEqInt:
+            for (int i = start; i < end; i++) {
+                if (values[i].mValue.getType() == INT &&
+                    (matcher.eq_int() == values[i].mValue.int_value)) {
+                    return true;
+                }
+            }
+            return false;
+        case FieldValueMatcher::ValueMatcherCase::kLtInt:
+            for (int i = start; i < end; i++) {
+                if (values[i].mValue.getType() == INT &&
+                    (values[i].mValue.int_value < matcher.lt_int())) {
+                    return true;
+                }
+            }
+            return false;
+        case FieldValueMatcher::ValueMatcherCase::kGtInt:
+            for (int i = start; i < end; i++) {
+                if (values[i].mValue.getType() == INT &&
+                    (values[i].mValue.int_value > matcher.gt_int())) {
+                    return true;
+                }
+            }
+            return false;
+        case FieldValueMatcher::ValueMatcherCase::kLtFloat:
+            for (int i = start; i < end; i++) {
+                if (values[i].mValue.getType() == FLOAT &&
+                    (values[i].mValue.float_value < matcher.lt_float())) {
+                    return true;
+                }
+            }
+            return false;
+        case FieldValueMatcher::ValueMatcherCase::kGtFloat:
+            for (int i = start; i < end; i++) {
+                if (values[i].mValue.getType() == FLOAT &&
+                    (values[i].mValue.float_value > matcher.gt_float())) {
+                    return true;
+                }
+            }
+            return false;
+        case FieldValueMatcher::ValueMatcherCase::kLteInt:
+            for (int i = start; i < end; i++) {
+                if (values[i].mValue.getType() == INT &&
+                    (values[i].mValue.int_value <= matcher.lte_int())) {
+                    return true;
+                }
+            }
+            return false;
+        case FieldValueMatcher::ValueMatcherCase::kGteInt:
+            for (int i = start; i < end; i++) {
+                if (values[i].mValue.getType() == INT &&
+                    (values[i].mValue.int_value >= matcher.gte_int())) {
+                    return true;
+                }
+            }
+            return false;
+        default:
+            return false;
     }
 }
-
-}  // namespace
 
 bool matchesSimple(const UidMap& uidMap, const SimpleAtomMatcher& simpleMatcher,
                    const LogEvent& event) {
     if (simpleMatcher.field_value_matcher_size() <= 0) {
         return event.GetTagId() == simpleMatcher.atom_id();
     }
-    Field root_field;
-    root_field.set_field(simpleMatcher.atom_id());
-    FieldValueMatcher root_field_matcher;
-    root_field_matcher.set_field(simpleMatcher.atom_id());
-    for (int i = 0; i < simpleMatcher.field_value_matcher_size(); i++) {
-        *root_field_matcher.mutable_matches_tuple()->add_field_value_matcher() =
-            simpleMatcher.field_value_matcher(i);
+    for (const auto& matcher : simpleMatcher.field_value_matcher()) {
+        if (!matchesSimple(uidMap, matcher, event.getValues(), 0, event.getValues().size(), 0)) {
+            return false;
+        }
     }
-    return matchFieldSimple(
-        uidMap, event.getFieldValueMap(), root_field_matcher, &root_field, &root_field);
+    return true;
 }
 
-void getDimensionKeys(const LogEvent& event, const FieldMatcher& matcher,
-                      std::vector<DimensionsValue> *dimensionKeys) {
-    if (matcher.has_field()) {
-        findDimensionsValues(event.getFieldValueMap(), matcher, dimensionKeys);
-    }
-}
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
