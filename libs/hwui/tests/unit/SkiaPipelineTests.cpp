@@ -250,6 +250,7 @@ public:
     sk_sp<SkImage> onNewImageSnapshot() override { return nullptr; }
     T* canvas() { return static_cast<T*>(getCanvas()); }
     void onCopyOnWrite(ContentChangeMode) override {}
+    void onWritePixels(const SkPixmap&, int x, int y) override {}
 };
 }
 
