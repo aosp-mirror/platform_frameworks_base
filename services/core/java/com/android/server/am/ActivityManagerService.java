@@ -25882,14 +25882,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         public boolean isCallerRecents(int callingUid) {
             return getRecentTasks().isCallerRecents(callingUid);
         }
-
-        @Override
-        public boolean isUidActive(int uid) {
-            synchronized (ActivityManagerService.this) {
-                final UidRecord uidRec = mActiveUids.get(uid);
-                return (uidRec != null) && !uidRec.idle;
-            }
-        }
     }
 
     /**

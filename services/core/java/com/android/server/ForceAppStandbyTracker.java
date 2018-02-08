@@ -54,6 +54,7 @@ import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
+import com.android.server.DeviceIdleController.LocalService;
 import com.android.server.ForceAppStandbyTrackerProto.ExemptedPackage;
 import com.android.server.ForceAppStandbyTrackerProto.RunAnyInBackgroundRestrictedPackages;
 
@@ -72,14 +73,14 @@ import java.util.List;
  * TODO: Make it a LocalService.
  *
  * Test:
-  atest $ANDROID_BUILD_TOP/frameworks/base/services/tests/servicestests/src/com/android/server/AppStateTrackerTest.java
+  atest $ANDROID_BUILD_TOP/frameworks/base/services/tests/servicestests/src/com/android/server/ForceAppStandbyTrackerTest.java
  */
-public class AppStateTracker {
+public class ForceAppStandbyTracker {
     private static final String TAG = "ForceAppStandbyTracker";
     private static final boolean DEBUG = true;
 
-    @GuardedBy("AppStateTracker.class")
-    private static AppStateTracker sInstance;
+    @GuardedBy("ForceAppStandbyTracker.class")
+    private static ForceAppStandbyTracker sInstance;
 
     private final Object mLock = new Object();
     private final Context mContext;
@@ -88,7 +89,6 @@ public class AppStateTracker {
     static final int TARGET_OP = AppOpsManager.OP_RUN_ANY_IN_BACKGROUND;
 
     IActivityManager mIActivityManager;
-    ActivityManagerInternal mActivityManagerInternal;
     AppOpsManager mAppOpsManager;
     IAppOpsService mAppOpsService;
     PowerManagerInternal mPowerManagerInternal;
@@ -172,9 +172,6 @@ public class AppStateTracker {
         int EXEMPT_CHANGED = 6;
         int FORCE_ALL_CHANGED = 7;
         int FORCE_APP_STANDBY_FEATURE_FLAG_CHANGED = 8;
-
-        int IS_UID_ACTIVE_CACHED = 9;
-        int IS_UID_ACTIVE_RAW = 10;
     }
 
     private final StatLogger mStatLogger = new StatLogger(new String[] {
@@ -187,9 +184,6 @@ public class AppStateTracker {
             "EXEMPT_CHANGED",
             "FORCE_ALL_CHANGED",
             "FORCE_APP_STANDBY_FEATURE_FLAG_CHANGED",
-
-            "IS_UID_ACTIVE_CACHED",
-            "IS_UID_ACTIVE_RAW",
     });
 
     @VisibleForTesting
@@ -255,7 +249,7 @@ public class AppStateTracker {
         /**
          * This is called when the OP_RUN_ANY_IN_BACKGROUND appops changed for a package.
          */
-        private void onRunAnyAppOpsChanged(AppStateTracker sender,
+        private void onRunAnyAppOpsChanged(ForceAppStandbyTracker sender,
                 int uid, @NonNull String packageName) {
             updateJobsForUidPackage(uid, packageName);
 
@@ -270,14 +264,14 @@ public class AppStateTracker {
         /**
          * This is called when the foreground state changed for a UID.
          */
-        private void onUidForegroundStateChanged(AppStateTracker sender, int uid) {
+        private void onUidForegroundStateChanged(ForceAppStandbyTracker sender, int uid) {
             onUidForeground(uid, sender.isUidInForeground(uid));
         }
 
         /**
          * This is called when the active/idle state changed for a UID.
          */
-        private void onUidActiveStateChanged(AppStateTracker sender, int uid) {
+        private void onUidActiveStateChanged(ForceAppStandbyTracker sender, int uid) {
             updateJobsForUid(uid);
 
             if (sender.isUidActive(uid)) {
@@ -288,7 +282,7 @@ public class AppStateTracker {
         /**
          * This is called when an app-id(s) is removed from the power save whitelist.
          */
-        private void onPowerSaveUnwhitelisted(AppStateTracker sender) {
+        private void onPowerSaveUnwhitelisted(ForceAppStandbyTracker sender) {
             updateAllJobs();
             unblockAllUnrestrictedAlarms();
         }
@@ -297,14 +291,14 @@ public class AppStateTracker {
          * This is called when the power save whitelist changes, excluding the
          * {@link #onPowerSaveUnwhitelisted} case.
          */
-        private void onPowerSaveWhitelistedChanged(AppStateTracker sender) {
+        private void onPowerSaveWhitelistedChanged(ForceAppStandbyTracker sender) {
             updateAllJobs();
         }
 
         /**
          * This is called when the temp whitelist changes.
          */
-        private void onTempPowerSaveWhitelistChanged(AppStateTracker sender) {
+        private void onTempPowerSaveWhitelistChanged(ForceAppStandbyTracker sender) {
 
             // TODO This case happens rather frequently; consider optimizing and update jobs
             // only for affected app-ids.
@@ -317,7 +311,7 @@ public class AppStateTracker {
         /**
          * This is called when the EXEMPT bucket is updated.
          */
-        private void onExemptChanged(AppStateTracker sender) {
+        private void onExemptChanged(ForceAppStandbyTracker sender) {
             // This doesn't happen very often, so just re-evaluate all jobs / alarms.
             updateAllJobs();
             unblockAllUnrestrictedAlarms();
@@ -326,7 +320,7 @@ public class AppStateTracker {
         /**
          * This is called when the global "force all apps standby" flag changes.
          */
-        private void onForceAllAppsStandbyChanged(AppStateTracker sender) {
+        private void onForceAllAppsStandbyChanged(ForceAppStandbyTracker sender) {
             updateAllJobs();
 
             if (!sender.isForceAllAppsStandbyEnabled()) {
@@ -383,15 +377,30 @@ public class AppStateTracker {
         }
     }
 
-    public AppStateTracker(Context context, Looper looper) {
+    @VisibleForTesting
+    ForceAppStandbyTracker(Context context, Looper looper) {
         mContext = context;
         mHandler = new MyHandler(looper);
+    }
+
+    private ForceAppStandbyTracker(Context context) {
+        this(context, FgThread.get().getLooper());
+    }
+
+    /**
+     * Get the singleton instance.
+     */
+    public static synchronized ForceAppStandbyTracker getInstance(Context context) {
+        if (sInstance == null) {
+            sInstance = new ForceAppStandbyTracker(context);
+        }
+        return sInstance;
     }
 
     /**
      * Call it when the system is ready.
      */
-    public void onSystemServicesReady() {
+    public void start() {
         synchronized (mLock) {
             if (mStarted) {
                 return;
@@ -399,7 +408,6 @@ public class AppStateTracker {
             mStarted = true;
 
             mIActivityManager = Preconditions.checkNotNull(injectIActivityManager());
-            mActivityManagerInternal = Preconditions.checkNotNull(injectActivityManagerInternal());
             mAppOpsManager = Preconditions.checkNotNull(injectAppOpsManager());
             mAppOpsService = Preconditions.checkNotNull(injectIAppOpsService());
             mPowerManagerInternal = Preconditions.checkNotNull(injectPowerManagerInternal());
@@ -464,11 +472,6 @@ public class AppStateTracker {
     @VisibleForTesting
     IActivityManager injectIActivityManager() {
         return ActivityManager.getService();
-    }
-
-    @VisibleForTesting
-    ActivityManagerInternal injectActivityManagerInternal() {
-        return LocalServices.getService(ActivityManagerInternal.class);
     }
 
     @VisibleForTesting
@@ -796,7 +799,7 @@ public class AppStateTracker {
                     return;
                 }
             }
-            final AppStateTracker sender = AppStateTracker.this;
+            final ForceAppStandbyTracker sender = ForceAppStandbyTracker.this;
 
             long start = mStatLogger.getTime();
             switch (msg.what) {
@@ -1086,11 +1089,11 @@ public class AppStateTracker {
     }
 
     /**
-     * @return whether a UID is in active or not *based on cached information.*
+     * @return whether a UID is in active or not.
      *
      * Note this information is based on the UID proc state callback, meaning it's updated
      * asynchronously and may subtly be stale. If the fresh data is needed, use
-     * {@link #isUidActiveSynced} instead.
+     * {@link ActivityManagerInternal#getUidProcessState} instead.
      */
     public boolean isUidActive(int uid) {
         if (UserHandle.isCore(uid)) {
@@ -1099,23 +1102,6 @@ public class AppStateTracker {
         synchronized (mLock) {
             return mActiveUids.get(uid);
         }
-    }
-
-    /**
-     * @return whether a UID is in active or not *right now.*
-     *
-     * This gives the fresh information, but may access the activity manager so is slower.
-     */
-    public boolean isUidActiveSynced(int uid) {
-        if (isUidActive(uid)) { // Use the cached one first.
-            return true;
-        }
-        final long start = mStatLogger.getTime();
-
-        final boolean ret = mActivityManagerInternal.isUidActive(uid);
-        mStatLogger.logDurationStat(Stats.IS_UID_ACTIVE_RAW, start);
-
-        return ret;
     }
 
     /**
