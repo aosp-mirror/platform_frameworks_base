@@ -518,10 +518,7 @@ void Tree::updateCache(sp<skiapipeline::VectorDrawableAtlas>& atlas, GrContext* 
             Bitmap& bitmap = getBitmapUpdateIfDirty();
             SkBitmap skiaBitmap;
             bitmap.getSkBitmap(&skiaBitmap);
-            if (!surface->getCanvas()->writePixels(skiaBitmap, dst.fLeft, dst.fTop)) {
-                ALOGD("VectorDrawable caching failed to efficiently upload");
-                surface->getCanvas()->drawBitmap(skiaBitmap, dst.fLeft, dst.fTop);
-            }
+            surface->writePixels(skiaBitmap, dst.fLeft, dst.fTop);
         }
         mCache.dirty = false;
     }
