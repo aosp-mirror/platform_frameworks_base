@@ -1144,3 +1144,46 @@ TEST(ReorderBarrierDrawable, testShadowMatrix) {
     canvas.drawDrawable(&drawable);
     EXPECT_EQ(6, canvas.getIndex());
 }
+
+// Draw a vector drawable twice but with different bounds and verify correct bounds are used.
+RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaRecordingCanvas, drawVectorDrawable) {
+    static const int CANVAS_WIDTH = 100;
+    static const int CANVAS_HEIGHT = 200;
+    class VectorDrawableTestCanvas : public TestCanvasBase {
+    public:
+        VectorDrawableTestCanvas() : TestCanvasBase(CANVAS_WIDTH, CANVAS_HEIGHT) {}
+        void onDrawBitmapRect(const SkBitmap& bitmap, const SkRect* src, const SkRect& dst,
+                const SkPaint* paint, SrcRectConstraint constraint) override {
+            const int index = mDrawCounter++;
+            switch (index) {
+                case 0:
+                    EXPECT_EQ(dst, SkRect::MakeWH(CANVAS_WIDTH, CANVAS_HEIGHT));
+                    break;
+                case 1:
+                    EXPECT_EQ(dst, SkRect::MakeWH(CANVAS_WIDTH/2, CANVAS_HEIGHT));
+                    break;
+                default:
+                    ADD_FAILURE();
+            }
+        }
+    };
+
+    VectorDrawable::Group* group = new VectorDrawable::Group();
+    sp<VectorDrawableRoot> vectorDrawable(new VectorDrawableRoot(group));
+    vectorDrawable->mutateStagingProperties()->setScaledSize(CANVAS_WIDTH/10, CANVAS_HEIGHT/10);
+
+    auto node = TestUtils::createSkiaNode(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT,
+            [&](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+                vectorDrawable->mutateStagingProperties()->setBounds(SkRect::MakeWH(CANVAS_WIDTH,
+                        CANVAS_HEIGHT));
+                canvas.drawVectorDrawable(vectorDrawable.get());
+                vectorDrawable->mutateStagingProperties()->setBounds(SkRect::MakeWH(CANVAS_WIDTH/2,
+                        CANVAS_HEIGHT));
+                canvas.drawVectorDrawable(vectorDrawable.get());
+            });
+
+    VectorDrawableTestCanvas canvas;
+    RenderNodeDrawable drawable(node.get(), &canvas, true);
+    canvas.drawDrawable(&drawable);
+    EXPECT_EQ(2, canvas.mDrawCounter);
+}
