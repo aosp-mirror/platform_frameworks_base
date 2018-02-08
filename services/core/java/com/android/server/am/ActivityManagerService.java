@@ -3628,6 +3628,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             info.className = entryPoint;
             info.packageName = "android";
             info.seInfoUser = SELinuxUtil.COMPLETE_STR;
+            info.targetSdkVersion = Build.VERSION.SDK_INT;
             ProcessRecord proc = startProcessLocked(processName, info /* info */,
                     false /* knownToBeDead */, 0 /* intentFlags */, ""  /* hostingType */,
                     null /* hostingName */, true /* allowWhileBooting */, true /* isolated */,
