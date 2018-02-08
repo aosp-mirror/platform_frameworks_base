@@ -158,6 +158,9 @@ public class DataUsageController {
             usage.startDate = start;
             usage.usageLevel = totalBytes;
             usage.period = formatDateRange(start, end);
+            usage.cycleStart = start;
+            usage.cycleEnd = end;
+
             if (policy != null) {
                 usage.limitLevel = policy.limitBytes > 0 ? policy.limitBytes : 0;
                 usage.warningLevel = policy.warningBytes > 0 ? policy.warningBytes : 0;
@@ -245,6 +248,8 @@ public class DataUsageController {
         public long limitLevel;
         public long warningLevel;
         public long usageLevel;
+        public long cycleStart;
+        public long cycleEnd;
     }
 
     public interface Callback {
