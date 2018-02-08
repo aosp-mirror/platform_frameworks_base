@@ -20,6 +20,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.SparseIntArray;
 
+import com.android.internal.location.gnssmetrics.GnssMetrics;
 import java.util.ArrayList;
 import java.util.concurrent.Future;
 
@@ -39,6 +40,11 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
                 mOnBatteryTimeBase);
         mBluetoothScanTimer = new StopwatchTimer(mClocks, null, -14, null, mOnBatteryTimeBase);
         setExternalStatsSyncLocked(new DummyExternalStatsSync());
+
+        for (int i=0; i< GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS; i++) {
+            mGpsSignalQualityTimer[i] = new StopwatchTimer(clocks, null, -1000-i, null,
+                mOnBatteryTimeBase);
+        }
 
         // A no-op handler.
         mHandler = new Handler(Looper.getMainLooper()) {};
