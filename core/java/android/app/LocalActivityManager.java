@@ -380,7 +380,7 @@ public class LocalActivityManager {
         }
         if (localLOGV) Log.v(TAG, r.id + ": destroying");
         mActivityThread.performDestroyActivity(r, finish, 0 /* configChanges */,
-                false /* getNonConfigInstance */);
+                false /* getNonConfigInstance */, "LocalActivityManager::performDestroy");
         r.activity = null;
         r.window = null;
         if (finish) {
@@ -645,7 +645,7 @@ public class LocalActivityManager {
             LocalActivityRecord r = mActivityArray.get(i);
             if (localLOGV) Log.v(TAG, r.id + ": destroying");
             mActivityThread.performDestroyActivity(r, finishing, 0 /* configChanges */,
-                    false /* getNonConfigInstance */);
+                    false /* getNonConfigInstance */, "LocalActivityManager::dispatchDestroy");
         }
         mActivities.clear();
         mActivityArray.clear();

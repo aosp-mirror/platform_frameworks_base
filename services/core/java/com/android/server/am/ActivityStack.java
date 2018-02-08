@@ -4214,7 +4214,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 if (DEBUG_SWITCH) Slog.i(TAG_SWITCH, "Destroying: " + r);
                 mService.mLifecycleManager.scheduleTransaction(r.app.thread, r.appToken,
                         DestroyActivityItem.obtain(r.finishing, r.configChangeFlags)
-                            .setDescription(r.getLifecycleDescription("destroyActivityLocked")));
+                            .setDescription(
+                                    r.getLifecycleDescription("destroyActivityLocked:" + reason)));
             } catch (Exception e) {
                 // We can just ignore exceptions here...  if the process
                 // has crashed, our death notification will clean things
