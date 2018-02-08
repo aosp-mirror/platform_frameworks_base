@@ -38,59 +38,64 @@
             android:layout_height="wrap_content"
             android:clipChildren="false"
             android:clipToPadding="false"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
             android:background="@drawable/rounded_bg_full"
             android:translationZ="@dimen/volume_panel_elevation"
             android:orientation="horizontal" >
                 <!-- volume rows added and removed here! :-) -->
         </LinearLayout>
 
-        <LinearLayout
+        <FrameLayout
             android:id="@+id/footer"
             android:layout_width="@dimen/volume_dialog_panel_width"
             android:layout_height="@dimen/volume_dialog_panel_width"
-            android:clipChildren="false"
-            android:clipToPadding="false"
             android:layout_marginTop="6dp"
             android:layout_marginBottom="6dp"
             android:layout_below="@id/volume_dialog_rows"
-            android:background="@drawable/rounded_bg_full"
-            android:gravity="center"
-            android:layout_gravity="end"
-            android:translationZ="@dimen/volume_panel_elevation"
-            android:clickable="true"
-            android:orientation="vertical" >
+            android:background="@drawable/rounded_bg_full">
 
-            <TextView
-                android:id="@+id/ringer_title"
-                android:text="@string/ring_toggle_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:layout_centerVertical="true"
-                android:textColor="?android:attr/colorControlNormal"
-                android:textAppearance="@style/TextAppearance.Volume.Header" />
+            <LinearLayout
+                android:id="@+id/footer_linear_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:gravity="center"
+                android:layout_gravity="end"
+                android:translationZ="@dimen/volume_panel_elevation"
+                android:clickable="true"
+                android:orientation="vertical" >
 
-            <com.android.keyguard.AlphaOptimizedImageButton
-                android:id="@+id/ringer_icon"
-                style="@style/VolumeButtons"
-                android:background="?android:selectableItemBackgroundBorderless"
-                android:layout_width="@dimen/volume_dialog_panel_width"
-                android:layout_height="@dimen/volume_button_size"
-                android:tint="?android:attr/colorAccent"
-                android:soundEffectsEnabled="false" />
+                <TextView
+                    android:id="@+id/ringer_title"
+                    android:text="@string/ring_toggle_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:layout_centerVertical="true"
+                    android:textColor="?android:attr/colorControlNormal"
+                    android:textAppearance="@style/TextAppearance.Volume.Header" />
 
-            <TextView
-                android:id="@+id/ringer_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:textColor="?android:attr/colorControlNormal"
-                android:textAppearance="@style/TextAppearance.Volume.Header.Secondary" />
+                <com.android.keyguard.AlphaOptimizedImageButton
+                    android:id="@+id/ringer_icon"
+                    style="@style/VolumeButtons"
+                    android:background="?android:selectableItemBackgroundBorderless"
+                    android:layout_width="@dimen/volume_dialog_panel_width"
+                    android:layout_height="@dimen/volume_button_size"
+                    android:tint="@color/accent_tint_color_selector"
+                    android:soundEffectsEnabled="false" />
 
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/ringer_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="?android:attr/colorControlNormal"
+                    android:textAppearance="@style/TextAppearance.Volume.Header.Secondary" />
+            </LinearLayout>
+
+            <include layout="@layout/volume_dnd_icon"/>
+        </FrameLayout>
     </LinearLayout>
 </com.android.systemui.volume.VolumeUiLayout>
