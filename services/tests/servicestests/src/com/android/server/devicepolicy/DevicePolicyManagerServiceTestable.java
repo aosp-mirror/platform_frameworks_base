@@ -447,5 +447,8 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
             return new TransferOwnershipMetadataManager(
                     new TransferOwnershipMetadataManagerTest.MockInjector());
         }
+
+        @Override
+        public void runCryptoSelfTest() {}
     }
 }

@@ -2044,6 +2044,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         public TransferOwnershipMetadataManager newTransferOwnershipMetadataManager() {
             return new TransferOwnershipMetadataManager();
         }
+
+        public void runCryptoSelfTest() {
+            CryptoTestHelper.runAndLogSelfTest();
+        }
     }
 
     /**
@@ -2296,6 +2300,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
             if (hasDeviceOwner && mInjector.securityLogGetLoggingEnabledProperty()) {
                 mSecurityLogMonitor.start();
+                mInjector.runCryptoSelfTest();
                 maybePauseDeviceWideLoggingLocked();
             }
         }
