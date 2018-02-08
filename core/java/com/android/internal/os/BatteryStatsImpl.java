@@ -3828,6 +3828,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mActiveHistoryStates2 = 0xffffffff;
     }
 
+    @GuardedBy("this")
     public void updateTimeBasesLocked(boolean unplugged, int screenState, long uptime,
             long realtime) {
         final boolean screenOff = !isScreenOn(screenState);
@@ -3905,6 +3906,7 @@ public class BatteryStatsImpl extends BatteryStats {
      * This should only be called after the cpu times have been read.
      * @see #scheduleRemoveIsolatedUidLocked(int, int)
      */
+    @GuardedBy("this")
     public void removeIsolatedUidLocked(int isolatedUid) {
         StatsLog.write(
                 StatsLog.ISOLATED_UID_CHANGED, mIsolatedUids.get(isolatedUid, -1),
@@ -4734,6 +4736,7 @@ public class BatteryStatsImpl extends BatteryStats {
         return;
     }
 
+    @GuardedBy("this")
     public void noteScreenStateLocked(int state) {
         state = mPretendScreenOff ? Display.STATE_OFF : state;
 
@@ -9650,6 +9653,7 @@ public class BatteryStatsImpl extends BatteryStats {
             return ps;
         }
 
+        @GuardedBy("mBsi")
         public void updateUidProcessStateLocked(int procState) {
             int uidRunningState;
             // Make special note of Foreground Services
@@ -11762,6 +11766,7 @@ public class BatteryStatsImpl extends BatteryStats {
      * and we are on battery with screen off, we give more of the cpu time to those apps holding
      * wakelocks. If the screen is on, we just assign the actual cpu time an app used.
      */
+    @GuardedBy("this")
     public void updateCpuTimeLocked() {
         if (mPowerProfile == null) {
             return;
@@ -12207,6 +12212,7 @@ public class BatteryStatsImpl extends BatteryStats {
         return false;
     }
 
+    @GuardedBy("this")
     protected void setOnBatteryLocked(final long mSecRealtime, final long mSecUptime,
             final boolean onBattery, final int oldStatus, final int level, final int chargeUAh) {
         boolean doWrite = false;
@@ -12383,6 +12389,7 @@ public class BatteryStatsImpl extends BatteryStats {
     // This should probably be exposed in the API, though it's not critical
     public static final int BATTERY_PLUGGED_NONE = OsProtoEnums.BATTERY_PLUGGED_NONE; // = 0
 
+    @GuardedBy("this")
     public void setBatteryStateLocked(final int status, final int health, final int plugType,
             final int level, /* not final */ int temp, final int volt, final int chargeUAh,
             final int chargeFullUAh) {
@@ -13198,6 +13205,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    @GuardedBy("this")
     public void dumpConstantsLocked(PrintWriter pw) {
         mConstants.dumpLocked(pw);
     }

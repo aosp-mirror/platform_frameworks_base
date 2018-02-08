@@ -3926,6 +3926,7 @@ public class NotificationManagerService extends SystemService {
         return true;
     }
 
+    @GuardedBy("mNotificationLock")
     protected int getNotificationCountLocked(String pkg, int userId, int excludedId,
             String excludedTag) {
         int count = 0;

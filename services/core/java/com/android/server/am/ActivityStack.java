@@ -138,6 +138,7 @@ import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.BatteryStatsImpl;
@@ -2211,6 +2212,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      *       Use {@link ActivityStackSupervisor#resumeFocusedStackTopActivityLocked} to resume the
      *       right activity for the current system state.
      */
+    @GuardedBy("mService")
     boolean resumeTopActivityUncheckedLocked(ActivityRecord prev, ActivityOptions options) {
         if (mStackSupervisor.inResumeTopActivity) {
             // Don't even start recursing.
@@ -2250,6 +2252,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mStackSupervisor.mRecentTasks.add(r.getTask());
     }
 
+    @GuardedBy("mService")
     private boolean resumeTopActivityInnerLocked(ActivityRecord prev, ActivityOptions options) {
         if (!mService.mBooting && !mService.mBooted) {
             // Not ready yet!

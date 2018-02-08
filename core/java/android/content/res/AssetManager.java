@@ -143,6 +143,7 @@ public final class AssetManager implements AutoCloseable {
     /**
      * This must be called from Zygote so that system assets are shared by all applications.
      */
+    @GuardedBy("sSync")
     private static void createSystemAssetsInZygoteLocked() {
         if (sSystem != null) {
             return;
@@ -366,6 +367,7 @@ public final class AssetManager implements AutoCloseable {
      * The AssetManager may have been closed, but references to it still exist
      * and therefore the native implementation is not destroyed.
      */
+    @GuardedBy("this")
     private void ensureValidLocked() {
         if (mObject == 0) {
             throw new RuntimeException("AssetManager has been destroyed");
@@ -376,6 +378,7 @@ public final class AssetManager implements AutoCloseable {
      * Ensures that the AssetManager has not been explicitly closed. If this method passes,
      * then this implies that ensureValidLocked() also passes.
      */
+    @GuardedBy("this")
     private void ensureOpenLocked() {
         // If mOpen is true, this implies that mObject != 0.
         if (!mOpen) {
@@ -1189,6 +1192,7 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
+    @GuardedBy("this")
     private void incRefsLocked(long id) {
         if (DEBUG_REFS) {
             if (mRefStacks == null) {
@@ -1201,6 +1205,7 @@ public final class AssetManager implements AutoCloseable {
         mNumRefs++;
     }
 
+    @GuardedBy("this")
     private void decRefsLocked(long id) {
         if (DEBUG_REFS && mRefStacks != null) {
             mRefStacks.remove(id);

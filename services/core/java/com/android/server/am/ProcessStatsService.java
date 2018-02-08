@@ -135,6 +135,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         return mMemFactorLowered;
     }
 
+    @GuardedBy("mAm")
     public boolean setMemFactorLocked(int memFactor, boolean screenOn, long now) {
         mMemFactorLowered = memFactor < mLastMemOnlyState;
         mLastMemOnlyState = memFactor;

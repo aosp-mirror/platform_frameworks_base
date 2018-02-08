@@ -1547,6 +1547,7 @@ public class UserManagerService extends IUserManager.Stub {
         return result;
     }
 
+    @GuardedBy("mRestrictionsLock")
     private EnforcingUser getEnforcingUserLocked(@UserIdInt int userId) {
         int source = mDeviceOwnerUserId == userId ? UserManager.RESTRICTION_SOURCE_DEVICE_OWNER
                 : UserManager.RESTRICTION_SOURCE_PROFILE_OWNER;
@@ -2896,6 +2897,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    @GuardedBy("mUsersLock")
     @VisibleForTesting
     void addRemovingUserIdLocked(int userId) {
         // We remember deleted user IDs to prevent them from being
@@ -3405,6 +3407,7 @@ public class UserManagerService extends IUserManager.Stub {
         return nextId;
     }
 
+    @GuardedBy("mUsersLock")
     private int scanNextAvailableIdLocked() {
         for (int i = MIN_USER_ID; i < MAX_USER_ID; i++) {
             if (mUsers.indexOfKey(i) < 0 && !mRemovingUserIds.get(i)) {

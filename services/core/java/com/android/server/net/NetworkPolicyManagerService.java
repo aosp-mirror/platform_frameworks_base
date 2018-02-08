@@ -4678,10 +4678,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return subId;
     }
 
+    @GuardedBy("mNetworkPoliciesSecondLock")
     private int getSubIdLocked(Network network) {
         return mNetIdToSubId.get(network.netId, INVALID_SUBSCRIPTION_ID);
     }
 
+    @GuardedBy("mNetworkPoliciesSecondLock")
     private SubscriptionPlan getPrimarySubscriptionPlanLocked(int subId) {
         final SubscriptionPlan[] plans = mSubscriptionPlans.get(subId);
         return ArrayUtils.isEmpty(plans) ? null : plans[0];

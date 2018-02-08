@@ -3292,6 +3292,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Update AMS states when an activity is resumed. This should only be called by
      * {@link ActivityStack#setResumedActivityLocked} when an activity is resumed.
      */
+    @GuardedBy("this")
     void setResumedActivityUncheckLocked(ActivityRecord r, String reason) {
         final TaskRecord task = r.getTask();
         if (task.isActivityTypeStandard()) {
@@ -3826,6 +3827,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @GuardedBy("this")
     final ProcessRecord startProcessLocked(String processName,
             ApplicationInfo info, boolean knownToBeDead, int intentFlags,
             String hostingType, ComponentName hostingName, boolean allowWhileBooting,
@@ -3836,6 +3838,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 null /* crashHandler */);
     }
 
+    @GuardedBy("this")
     final ProcessRecord startProcessLocked(String processName, ApplicationInfo info,
             boolean knownToBeDead, int intentFlags, String hostingType, ComponentName hostingName,
             boolean allowWhileBooting, boolean isolated, int isolatedUid, boolean keepIfLarge,
@@ -3952,6 +3955,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         return (ai.flags&ApplicationInfo.FLAG_PERSISTENT) != 0;
     }
 
+    @GuardedBy("this")
     private final void startProcessLocked(ProcessRecord app,
             String hostingType, String hostingNameStr) {
         startProcessLocked(app, hostingType, hostingNameStr, null /* abiOverride */);
@@ -3960,6 +3964,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * @return {@code true} if process start is successful, false otherwise.
      */
+    @GuardedBy("this")
     private final boolean startProcessLocked(ProcessRecord app, String hostingType,
             String hostingNameStr, String abiOverride) {
         if (app.pendingStart) {
@@ -5134,6 +5139,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 .supportsLocalVoiceInteraction();
     }
 
+    @GuardedBy("this")
     void onLocalVoiceInteractionStartedLocked(IBinder activity,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor) {
         ActivityRecord activityToCallback = ActivityRecord.forTokenLocked(activity);
@@ -5632,6 +5638,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * as a result of that process going away.  Clears out all connections
      * to the process.
      */
+    @GuardedBy("this")
     private final void handleAppDiedLocked(ProcessRecord app,
             boolean restarting, boolean allowRestart) {
         int pid = app.pid;
@@ -5778,10 +5785,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @GuardedBy("this")
     final void appDiedLocked(ProcessRecord app) {
        appDiedLocked(app, app.pid, app.thread, false);
     }
 
+    @GuardedBy("this")
     final void appDiedLocked(ProcessRecord app, int pid, IApplicationThread thread,
             boolean fromBinderDied) {
         // First check if this ProcessRecord is actually active for the pid.
@@ -6239,6 +6248,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @GuardedBy("this")
     final void showLaunchWarningLocked(final ActivityRecord cur, final ActivityRecord next) {
         if (!mLaunchWarningShown) {
             mLaunchWarningShown = true;
@@ -6665,6 +6675,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @GuardedBy("this")
     void closeSystemDialogsLocked(String reason) {
         Intent intent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
@@ -6771,11 +6782,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @GuardedBy("this")
     private void forceStopPackageLocked(final String packageName, int uid, String reason) {
         forceStopPackageLocked(packageName, UserHandle.getAppId(uid), false,
                 false, true, false, false, UserHandle.getUserId(uid), reason);
     }
 
+    @GuardedBy("this")
     private void finishForceStopPackageLocked(final String packageName, int uid) {
         Intent intent = new Intent(Intent.ACTION_PACKAGE_RESTARTED,
                 Uri.fromParts("package", packageName, null));
@@ -6791,6 +6804,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
 
+    @GuardedBy("this")
     private final boolean killPackageProcessesLocked(String packageName, int appId,
             int userId, int minOomAdj, boolean callerWillRestart, boolean allowRestart,
             boolean doit, boolean evenPersistent, String reason) {
@@ -6962,6 +6976,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         return didSomething;
     }
 
+    @GuardedBy("this")
     final boolean forceStopPackageLocked(String packageName, int appId,
             boolean callerWillRestart, boolean purgeCache, boolean doit,
             boolean evenPersistent, boolean uninstalling, int userId, String reason) {
@@ -7173,6 +7188,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @GuardedBy("this")
     boolean removeProcessLocked(ProcessRecord app,
             boolean callerWillRestart, boolean allowRestart, String reason) {
         final String name = app.processName;
@@ -7227,6 +7243,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         return needRestart;
     }
 
+    @GuardedBy("this")
     private final void processContentProviderPublishTimedOutLocked(ProcessRecord app) {
         cleanupAppInLaunchingProvidersLocked(app, true);
         removeProcessLocked(app, false, true, "timeout publishing content providers");
@@ -7287,6 +7304,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @GuardedBy("this")
     private final boolean attachApplicationLocked(IApplicationThread thread,
             int pid, int callingUid, long startSeq) {
 
@@ -9140,6 +9158,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 grantEphemeralAccess(userId, intent, targetAppId, ephemeralAppId);
     }
 
+    @GuardedBy("this")
     private UriPermission findUriPermissionLocked(int targetUid, GrantUri grantUri) {
         final ArrayMap<GrantUri, UriPermission> targetUris = mGrantedUriPermissions.get(targetUid);
         if (targetUris != null) {
@@ -9148,6 +9167,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         return null;
     }
 
+    @GuardedBy("this")
     private UriPermission findOrCreateUriPermissionLocked(String sourcePkg,
             String targetPkg, int targetUid, GrantUri grantUri) {
         ArrayMap<GrantUri, UriPermission> targetUris = mGrantedUriPermissions.get(targetUid);
@@ -9165,6 +9185,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         return perm;
     }
 
+    @GuardedBy("this")
     private final boolean checkUriPermissionLocked(GrantUri grantUri, int uid,
             final int modeFlags) {
         final boolean persistable = (modeFlags & Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION) != 0;
@@ -9235,6 +9256,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * If you already know the uid of the target, you can supply it in
      * lastTargetUid else set that to -1.
      */
+    @GuardedBy("this")
     int checkGrantUriPermissionLocked(int callingUid, String targetPkg, GrantUri grantUri,
             final int modeFlags, int lastTargetUid) {
         if (!Intent.isAccessUriMode(modeFlags)) {
@@ -9397,6 +9419,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @GuardedBy("this")
     void grantUriPermissionUncheckedLocked(int targetUid, String targetPkg, GrantUri grantUri,
             final int modeFlags, UriPermissionOwner owner) {
         if (!Intent.isAccessUriMode(modeFlags)) {
@@ -9426,6 +9449,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         perm.grantModes(modeFlags, owner);
     }
 
+    @GuardedBy("this")
     void grantUriPermissionLocked(int callingUid, String targetPkg, GrantUri grantUri,
             final int modeFlags, UriPermissionOwner owner, int targetUserId) {
         if (targetPkg == null) {
@@ -9477,6 +9501,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * Like checkGrantUriPermissionLocked, but takes an Intent.
      */
+    @GuardedBy("this")
     NeededUriGrants checkGrantUriPermissionFromIntentLocked(int callingUid,
             String targetPkg, Intent intent, int mode, NeededUriGrants needed, int targetUserId) {
         if (DEBUG_URI_PERMISSION) Slog.v(TAG_URI_PERMISSION,
@@ -9563,6 +9588,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * Like grantUriPermissionUncheckedLocked, but takes an Intent.
      */
+    @GuardedBy("this")
     void grantUriPermissionUncheckedFromIntentLocked(NeededUriGrants needed,
             UriPermissionOwner owner) {
         if (needed != null) {
@@ -9574,6 +9600,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @GuardedBy("this")
     void grantUriPermissionFromIntentLocked(int callingUid,
             String targetPkg, Intent intent, UriPermissionOwner owner, int targetUserId) {
         NeededUriGrants needed = checkGrantUriPermissionFromIntentLocked(callingUid, targetPkg,
@@ -9618,6 +9645,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @GuardedBy("this")
     void removeUriPermissionIfNeededLocked(UriPermission perm) {
         if (perm.modeFlags == 0) {
             final ArrayMap<GrantUri, UriPermission> perms = mGrantedUriPermissions.get(
@@ -9634,6 +9662,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @GuardedBy("this")
     private void revokeUriPermissionLocked(String targetPackage, int callingUid, GrantUri grantUri,
             final int modeFlags) {
         if (DEBUG_URI_PERMISSION) Slog.v(TAG_URI_PERMISSION,
@@ -9768,6 +9797,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param targetOnly When {@code true}, only remove permissions where the app is the target,
      * not source.
      */
+    @GuardedBy("this")
     private void removeUriPermissionsForPackageLocked(
             String packageName, int userHandle, boolean persistable, boolean targetOnly) {
         if (userHandle == UserHandle.USER_ALL && packageName == null) {
@@ -9954,6 +9984,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @GuardedBy("this")
     private void readGrantedUriPermissionsLocked() {
         if (DEBUG_URI_PERMISSION) Slog.v(TAG_URI_PERMISSION, "readGrantedUriPermissions()");
 
@@ -10116,6 +10147,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      *
      * @return if any mutations occured that require persisting.
      */
+    @GuardedBy("this")
     private boolean maybePrunePersistedUriGrantsLocked(int uid) {
         final ArrayMap<GrantUri, UriPermission> perms = mGrantedUriPermissions.get(uid);
         if (perms == null) return false;
@@ -12617,6 +12649,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     // GLOBAL MANAGEMENT
     // =========================================================
 
+    @GuardedBy("this")
     final ProcessRecord newProcessRecordLocked(ApplicationInfo info, String customProcess,
             boolean isolated, int isolatedUid) {
         String proc = customProcess != null ? customProcess : info.processName;
@@ -12706,6 +12739,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @GuardedBy("this")
     final ProcessRecord addAppLocked(ApplicationInfo info, String customProcess, boolean isolated,
             String abiOverride, ActiveInstrumentation instrumentation) {
         ProcessRecord app;
@@ -12825,6 +12859,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @GuardedBy("this")
     void finishRunningVoiceLocked() {
         if (mRunningVoice != null) {
             mRunningVoice = null;
@@ -12840,6 +12875,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @GuardedBy("this")
     void updateSleepIfNeededLocked() {
         final boolean shouldSleep = !mStackSupervisor.hasAwakeDisplay();
         final boolean wasSleeping = mSleeping;
@@ -12944,6 +12980,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         Binder.restoreCallingIdentity(origId);
     }
 
+    @GuardedBy("this")
     void startRunningVoiceLocked(IVoiceInteractionSession session, int targetUid) {
         Slog.d(TAG, "<<<  startRunningVoiceLocked()");
         mVoiceWakeLock.setWorkSource(new WorkSource(targetUid));
@@ -16179,6 +16216,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         return false;
     }
 
+    @GuardedBy("this")
     void dumpProcessesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll, String dumpPackage, int dumpAppId) {
         boolean needSep = false;
@@ -16632,6 +16670,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         pw.println("  mForceBackgroundCheck=" + mForceBackgroundCheck);
     }
 
+    @GuardedBy("this")
     void writeProcessesToProtoLocked(ProtoOutputStream proto, String dumpPackage) {
         int numPers = 0;
 
@@ -17459,6 +17498,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @GuardedBy("this")
     void dumpPermissionsLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll, String dumpPackage) {
         boolean needSep = false;
@@ -19531,6 +19571,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @return Returns true if the given process has been restarted, so the
      * app that was passed in must remain on the process lists.
      */
+    @GuardedBy("this")
     private final boolean cleanUpApplicationRecordLocked(ProcessRecord app,
             boolean restarting, boolean allowRestart, int index, boolean replacingPid) {
         if (index >= 0) {
@@ -20620,6 +20661,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @GuardedBy("this")
     final int broadcastIntentLocked(ProcessRecord callerApp,
             String callerPackage, Intent intent, String resolvedType,
             IIntentReceiver resultTo, int resultCode, String resultData,
@@ -21609,6 +21651,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @GuardedBy("this")
     void finishInstrumentationLocked(ProcessRecord app, int resultCode, Bundle results) {
         if (app.instr == null) {
             Slog.w(TAG, "finishInstrumentation called on non-instrumented: " + app);
@@ -24007,6 +24050,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         return applyOomAdjLocked(app, doingAll, now, SystemClock.elapsedRealtime());
     }
 
+    @GuardedBy("this")
     final void updateProcessForegroundLocked(ProcessRecord proc, boolean isForeground,
             boolean oomAdj) {
         if (isForeground != proc.foregroundServices) {
@@ -24076,6 +24120,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      *                  if necessary, or skip.
      * @return whether updateOomAdjLocked(app) was successful.
      */
+    @GuardedBy("this")
     final boolean updateOomAdjLocked(ProcessRecord app, boolean oomAdjAll) {
         final ActivityRecord TOP_ACT = resumedAppLocked();
         final ProcessRecord TOP_APP = TOP_ACT != null ? TOP_ACT.app : null;
@@ -24100,6 +24145,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         return success;
     }
 
+    @GuardedBy("this")
     final void updateOomAdjLocked() {
         final ActivityRecord TOP_ACT = resumedAppLocked();
         final ProcessRecord TOP_APP = TOP_ACT != null ? TOP_ACT.app : null;
@@ -24820,6 +24866,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * Whitelists {@code targetUid} to temporarily bypass Power Save mode.
      */
+    @GuardedBy("this")
     void tempWhitelistForPendingIntentLocked(int callerPid, int callerUid, int targetUid,
             long duration, String tag) {
         if (DEBUG_WHITELISTS) {
@@ -24852,6 +24899,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * Whitelists {@code targetUid} to temporarily bypass Power Save mode.
      */
+    @GuardedBy("this")
     void tempWhitelistUidLocked(int targetUid, long duration, String tag) {
         mPendingTempWhitelist.put(targetUid, new PendingTempWhitelist(targetUid, duration, tag));
         setUidTempWhitelistStateLocked(targetUid, true);
@@ -24891,6 +24939,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @GuardedBy("this")
     final void setAppIdTempWhitelistStateLocked(int appId, boolean onWhitelist) {
         boolean changed = false;
         for (int i=mActiveUids.size()-1; i>=0; i--) {
@@ -24905,6 +24954,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @GuardedBy("this")
     final void setUidTempWhitelistStateLocked(int uid, boolean onWhitelist) {
         boolean changed = false;
         final UidRecord uidRec = mActiveUids.get(uid);

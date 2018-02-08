@@ -182,6 +182,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         mExecutorService.shutdownNow();
     }
 
+    @GuardedBy("this")
     private Future<?> scheduleSyncLocked(String reason, int flags) {
         if (mExecutorService.isShutdown()) {
             return CompletableFuture.failedFuture(new IllegalStateException("worker shutdown"));
@@ -248,6 +249,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         }
     };
 
+    @GuardedBy("mWorkerLock")
     private void updateExternalStatsLocked(final String reason, int updateFlags) {
         // We will request data from external processes asynchronously, and wait on a timeout.
         SynchronousResultReceiver wifiReceiver = null;
@@ -372,6 +374,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         return null;
     }
 
+    @GuardedBy("mWorkerLock")
     private WifiActivityEnergyInfo extractDeltaLocked(WifiActivityEnergyInfo latest) {
         final long timePeriodMs = latest.mTimestamp - mLastInfo.mTimestamp;
         final long lastScanMs = mLastInfo.mControllerScanTimeMs;

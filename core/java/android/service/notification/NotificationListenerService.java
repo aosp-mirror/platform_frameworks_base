@@ -1343,6 +1343,7 @@ public abstract class NotificationListenerService extends Service {
     /**
      * @hide
      */
+    @GuardedBy("mLock")
     public final void applyUpdateLocked(NotificationRankingUpdate update) {
         mRankingMap = new RankingMap(update);
     }

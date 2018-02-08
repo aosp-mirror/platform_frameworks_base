@@ -141,6 +141,7 @@ final class InstantAppResolverConnection implements DeathRecipient {
         }
     }
 
+    @GuardedBy("mLock")
     private void waitForBindLocked(String token) throws TimeoutException, InterruptedException {
         final long startMillis = SystemClock.uptimeMillis();
         while (mBindState != STATE_IDLE) {
@@ -250,6 +251,7 @@ final class InstantAppResolverConnection implements DeathRecipient {
         }
     }
 
+    @GuardedBy("mLock")
     private void handleBinderDiedLocked() {
         if (mRemoteInstance != null) {
             try {

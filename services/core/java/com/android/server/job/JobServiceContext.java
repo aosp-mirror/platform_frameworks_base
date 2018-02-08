@@ -295,10 +295,12 @@ public final class JobServiceContext implements ServiceConnection {
     }
 
     /** Called externally when a job that was scheduled for execution should be cancelled. */
+    @GuardedBy("mLock")
     void cancelExecutingJobLocked(int reason, String debugReason) {
         doCancelLocked(reason, debugReason);
     }
 
+    @GuardedBy("mLock")
     void preemptExecutingJobLocked() {
         doCancelLocked(JobParameters.REASON_PREEMPT, "cancelled due to preemption");
     }
@@ -319,6 +321,7 @@ public final class JobServiceContext implements ServiceConnection {
         return mTimeoutElapsed;
     }
 
+    @GuardedBy("mLock")
     boolean timeoutIfExecutingLocked(String pkgName, int userId, boolean matchJobId, int jobId,
             String reason) {
         final JobStatus executing = getRunningJobLocked();
@@ -512,6 +515,7 @@ public final class JobServiceContext implements ServiceConnection {
         }
     }
 
+    @GuardedBy("mLock")
     void doServiceBoundLocked() {
         removeOpTimeOutLocked();
         handleServiceBoundLocked();
@@ -531,6 +535,7 @@ public final class JobServiceContext implements ServiceConnection {
         }
     }
 
+    @GuardedBy("mLock")
     void doCallbackLocked(boolean reschedule, String reason) {
         if (DEBUG) {
             Slog.d(TAG, "doCallback of : " + mRunningJob
@@ -550,6 +555,7 @@ public final class JobServiceContext implements ServiceConnection {
         }
     }
 
+    @GuardedBy("mLock")
     void doCancelLocked(int arg1, String debugReason) {
         if (mVerb == VERB_FINISHED) {
             if (DEBUG) {
@@ -567,6 +573,7 @@ public final class JobServiceContext implements ServiceConnection {
     }
 
     /** Start the job on the service. */
+    @GuardedBy("mLock")
     private void handleServiceBoundLocked() {
         if (DEBUG) {
             Slog.d(TAG, "handleServiceBound for " + getRunningJobNameLocked());
@@ -605,6 +612,7 @@ public final class JobServiceContext implements ServiceConnection {
      *     _EXECUTING  -> Error
      *     _STOPPING   -> Error
      */
+    @GuardedBy("mLock")
     private void handleStartedLocked(boolean workOngoing) {
         switch (mVerb) {
             case VERB_STARTING:
@@ -637,6 +645,7 @@ public final class JobServiceContext implements ServiceConnection {
      *     _STARTING   -> Error
      *     _PENDING    -> Error
      */
+    @GuardedBy("mLock")
     private void handleFinishedLocked(boolean reschedule, String reason) {
         switch (mVerb) {
             case VERB_EXECUTING:
@@ -659,6 +668,7 @@ public final class JobServiceContext implements ServiceConnection {
      *                      in the message queue.
      *     _ENDING     -> No point in doing anything here, so we ignore.
      */
+    @GuardedBy("mLock")
     private void handleCancelLocked(String reason) {
         if (JobSchedulerService.DEBUG) {
             Slog.d(TAG, "Handling cancel for: " + mRunningJob.getJobId() + " "
@@ -683,6 +693,7 @@ public final class JobServiceContext implements ServiceConnection {
     }
 
     /** Process MSG_TIMEOUT here. */
+    @GuardedBy("mLock")
     private void handleOpTimeoutLocked() {
         switch (mVerb) {
             case VERB_BINDING:
@@ -722,6 +733,7 @@ public final class JobServiceContext implements ServiceConnection {
      * Already running, need to stop. Will switch {@link #mVerb} from VERB_EXECUTING ->
      * VERB_STOPPING.
      */
+    @GuardedBy("mLock")
     private void sendStopMessageLocked(String reason) {
         removeOpTimeOutLocked();
         if (mVerb != VERB_EXECUTING) {
@@ -747,6 +759,7 @@ public final class JobServiceContext implements ServiceConnection {
      * or from acknowledging the stop message we sent. Either way, we're done tracking it and
      * we want to clean up internally.
      */
+    @GuardedBy("mLock")
     private void closeAndCleanupJobLocked(boolean reschedule, String reason) {
         final JobStatus completedJob;
         if (mVerb == VERB_FINISHED) {
