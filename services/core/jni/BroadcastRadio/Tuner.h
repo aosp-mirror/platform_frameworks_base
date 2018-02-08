@@ -22,8 +22,8 @@
 #include "JavaRef.h"
 
 #include <android/hardware/broadcastradio/1.1/IBroadcastRadio.h>
-#include <android/hardware/broadcastradio/1.2/ITuner.h>
-#include <android/hardware/broadcastradio/1.2/ITunerCallback.h>
+#include <android/hardware/broadcastradio/1.1/ITuner.h>
+#include <android/hardware/broadcastradio/1.1/ITunerCallback.h>
 #include <jni.h>
 #include <utils/StrongPointer.h>
 
@@ -39,7 +39,7 @@ void assignHalInterfaces(JNIEnv *env, JavaRef<jobject> const &jTuner,
         sp<hardware::broadcastradio::V1_0::IBroadcastRadio> halModule,
         sp<hardware::broadcastradio::V1_0::ITuner> halTuner);
 
-sp<hardware::broadcastradio::V1_2::ITunerCallback>
+sp<hardware::broadcastradio::V1_1::ITunerCallback>
 getNativeCallback(JNIEnv *env, JavaRef<jobject> const &tuner);
 
 Region getRegion(JNIEnv *env, jobject obj);

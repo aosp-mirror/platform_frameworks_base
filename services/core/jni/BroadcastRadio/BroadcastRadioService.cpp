@@ -23,7 +23,7 @@
 #include "convert.h"
 
 #include <android/hardware/broadcastradio/1.1/IBroadcastRadio.h>
-#include <android/hardware/broadcastradio/1.2/IBroadcastRadioFactory.h>
+#include <android/hardware/broadcastradio/1.1/IBroadcastRadioFactory.h>
 #include <android/hidl/manager/1.0/IServiceManager.h>
 #include <broadcastradio-utils-1x/Utils.h>
 #include <core_jni_helpers.h>
@@ -45,7 +45,6 @@ using hardware::hidl_vec;
 
 namespace V1_0 = hardware::broadcastradio::V1_0;
 namespace V1_1 = hardware::broadcastradio::V1_1;
-namespace V1_2 = hardware::broadcastradio::V1_2;
 namespace utils = hardware::broadcastradio::utils;
 
 using V1_0::BandConfig;
@@ -149,11 +148,7 @@ static jobject nativeLoadModules(JNIEnv *env, jobject obj, jlong nativeContext) 
 
         auto halRev = HalRevision::V1_0;
         auto halMinor = 0;
-        if (V1_2::IBroadcastRadioFactory::castFrom(factory).withDefault(nullptr) != nullptr) {
-            halRev = HalRevision::V1_2;
-            halMinor = 2;
-        } else if (V1_1::IBroadcastRadioFactory::castFrom(factory).withDefault(nullptr)
-                != nullptr) {
+        if (V1_1::IBroadcastRadioFactory::castFrom(factory).withDefault(nullptr) != nullptr) {
             halRev = HalRevision::V1_1;
             halMinor = 1;
         }

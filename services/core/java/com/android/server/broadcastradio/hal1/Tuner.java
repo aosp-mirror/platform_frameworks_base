@@ -98,10 +98,6 @@ class Tuner extends ITuner.Stub {
     private native boolean nativeIsAnalogForced(long nativeContext);
     private native void nativeSetAnalogForced(long nativeContext, boolean isForced);
 
-    private native Map<String, String> nativeSetParameters(long nativeContext,
-            Map<String, String> parameters);
-    private native Map<String, String> nativeGetParameters(long nativeContext, List<String> keys);
-
     @Override
     public void close() {
         synchronized (mLock) {
@@ -291,26 +287,11 @@ class Tuner extends ITuner.Stub {
 
     @Override
     public Map setParameters(Map parameters) {
-        Map<String, String> results;
-        synchronized (mLock) {
-            checkNotClosedLocked();
-            results = nativeSetParameters(mNativeContext, Objects.requireNonNull(parameters));
-        }
-        if (results == null) return Collections.emptyMap();
-        return results;
+        throw new UnsupportedOperationException("Not supported by HAL 1.x");
     }
 
     @Override
     public Map getParameters(List<String> keys) {
-        if (keys == null) {
-            throw new IllegalArgumentException("The argument must not be a null pointer");
-        }
-        Map<String, String> results;
-        synchronized (mLock) {
-            checkNotClosedLocked();
-            results = nativeGetParameters(mNativeContext, keys);
-        }
-        if (results == null) return Collections.emptyMap();
-        return results;
+        throw new UnsupportedOperationException("Not supported by HAL 1.x");
     }
 }
