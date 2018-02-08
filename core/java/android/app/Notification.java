@@ -4616,10 +4616,15 @@ public class Notification implements Parcelable
                 if (N>MAX_ACTION_BUTTONS) N=MAX_ACTION_BUTTONS;
                 for (int i=0; i<N; i++) {
                     Action action = mActions.get(i);
-                    validRemoteInput |= hasValidRemoteInput(action);
+                    boolean actionHasValidInput = hasValidRemoteInput(action);
+                    validRemoteInput |= actionHasValidInput;
 
                     final RemoteViews button = generateActionButton(action, emphazisedMode,
                             i % 2 != 0, p.ambient);
+                    if (actionHasValidInput) {
+                        // Clear the drawable
+                        button.setInt(R.id.action0, "setBackgroundResource", 0);
+                    }
                     big.addView(R.id.actions, button);
                 }
             } else {
