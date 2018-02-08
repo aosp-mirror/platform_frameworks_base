@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define DEBUG false  // STOPSHIP if true
+#define DEBUG true  // STOPSHIP if true
 #include "Log.h"
 #include "MetricsManager.h"
 #include "statslog.h"
@@ -151,14 +151,6 @@ void MetricsManager::onUidMapReceived(const uint64_t& eventTimeNs) {
     initLogSourceWhiteList();
 }
 
-void MetricsManager::onDumpReport(const uint64_t& dumpTimeStampNs, ConfigMetricsReport* report) {
-    for (const auto& producer : mAllMetricProducers) {
-        if (mNoReportMetricIds.find(producer->getMetricId()) == mNoReportMetricIds.end()) {
-            producer->onDumpReport(dumpTimeStampNs, report->add_metrics());
-        }
-    }
-}
-
 void MetricsManager::dumpStates(FILE* out, bool verbose) {
     fprintf(out, "ConfigKey %s, allowed source:", mConfigKey.ToString().c_str());
     {
@@ -173,9 +165,8 @@ void MetricsManager::dumpStates(FILE* out, bool verbose) {
     }
 }
 
-void MetricsManager::onDumpReport(ProtoOutputStream* protoOutput) {
+void MetricsManager::onDumpReport(const uint64_t dumpTimeStampNs, ProtoOutputStream* protoOutput) {
     VLOG("=========================Metric Reports Start==========================");
-    uint64_t dumpTimeStampNs = time(nullptr) * NS_PER_SEC;
     // one StatsLogReport per MetricProduer
     for (const auto& producer : mAllMetricProducers) {
         if (mNoReportMetricIds.find(producer->getMetricId()) == mNoReportMetricIds.end()) {

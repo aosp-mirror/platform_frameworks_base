@@ -19,6 +19,7 @@
 
 #include <shared_mutex>
 
+#include "HashableDimensionKey.h"
 #include "anomaly/AnomalyTracker.h"
 #include "condition/ConditionWizard.h"
 #include "config/ConfigKey.h"
@@ -109,11 +110,6 @@ public:
         std::lock_guard<std::mutex> lock(mMutex);
         return onDumpReportLocked(dumpTimeNs, protoOutput);
     }
-    // This method does not clear the past buckets.
-    void onDumpReport(const uint64_t dumpTimeNs, StatsLogReport* report) {
-        std::lock_guard<std::mutex> lock(mMutex);
-        return onDumpReportLocked(dumpTimeNs, report);
-    }
 
     void dumpStates(FILE* out, bool verbose) const {
         std::lock_guard<std::mutex> lock(mMutex);
@@ -150,7 +146,6 @@ protected:
     virtual void onSlicedConditionMayChangeLocked(const uint64_t eventTime) = 0;
     virtual void onDumpReportLocked(const uint64_t dumpTimeNs,
                                     android::util::ProtoOutputStream* protoOutput) = 0;
-    virtual void onDumpReportLocked(const uint64_t dumpTimeNs, StatsLogReport* report) = 0;
     virtual size_t byteSizeLocked() const = 0;
     virtual void dumpStatesLocked(FILE* out, bool verbose) const = 0;
 
@@ -203,10 +198,10 @@ protected:
 
     int mConditionTrackerIndex;
 
-    FieldMatcher mDimensionsInWhat;  // The dimensions_in_what defined in statsd_config
-    FieldMatcher mDimensionsInCondition;  // The dimensions_in_condition defined in statsd_config
+    vector<Matcher> mDimensionsInWhat;       // The dimensions_in_what defined in statsd_config
+    vector<Matcher> mDimensionsInCondition;  // The dimensions_in_condition defined in statsd_config
 
-    std::vector<MetricConditionLink> mConditionLinks;
+    std::vector<Metric2Condition> mMetric2ConditionLinks;
 
     std::vector<sp<AnomalyTracker>> mAnomalyTrackers;
 

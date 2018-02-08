@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "field_util.h"
+#include "FieldValue.h"
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 
 #include <android/util/ProtoOutputStream.h>
@@ -24,11 +24,8 @@
 #include <log/log_read.h>
 #include <private/android_logger.h>
 #include <utils/Errors.h>
-#include <utils/JenkinsHash.h>
 
-#include <memory>
 #include <string>
-#include <map>
 #include <vector>
 
 namespace android {
@@ -37,7 +34,6 @@ namespace statsd {
 
 using std::string;
 using std::vector;
-
 /**
  * Wrapper for the log_msg structure.
  */
@@ -81,19 +77,6 @@ public:
     bool GetBool(size_t key, status_t* err) const;
     float GetFloat(size_t key, status_t* err) const;
 
-    /*
-     * Get DimensionsValue proto objects from FieldMatcher.
-     */
-    void GetAtomDimensionsValueProtos(
-        const FieldMatcher& matcher, std::vector<DimensionsValue> *dimensionsValues) const;
-    bool GetAtomDimensionsValueProto(
-        const FieldMatcher& matcher, DimensionsValue* dimensionsValue) const;
-
-    /*
-     * Get a DimensionsValue proto objects from Field.
-     */
-    bool GetSimpleAtomDimensionsValueProto(size_t field, DimensionsValue* dimensionsValue) const;
-
     /**
      * Write test data to the LogEvent. This can only be used when the LogEvent is constructed
      * using LogEvent(tagId, timestampNs). You need to call init() before you can read from it.
@@ -129,15 +112,16 @@ public:
     void setTimestampNs(uint64_t timestampNs) {mTimestampNs = timestampNs;}
 
     inline int size() const {
-        return mFieldValueMap.size();
+        return mValues.size();
     }
 
-    /**
-     * Returns the mutable DimensionsValue proto for the specific the field.
-     */
-    DimensionsValue* findFieldValueOrNull(const Field& field);
+    const std::vector<FieldValue>& getValues() const {
+        return mValues;
+    }
 
-    inline const FieldValueMap& getFieldValueMap() const { return mFieldValueMap; }
+    std::vector<FieldValue>* getMutableValues() {
+        return &mValues;
+    }
 
 private:
     /**
@@ -151,7 +135,9 @@ private:
      */
     void init(android_log_context context);
 
-    FieldValueMap mFieldValueMap;
+    // The items are naturally sorted in DFS order as we read them. this allows us to do fast
+    // matching.
+    std::vector<FieldValue> mValues;
 
     // This field is used when statsD wants to create log event object and write fields to it. After
     // calling init() function, this object would be destroyed to save memory usage.

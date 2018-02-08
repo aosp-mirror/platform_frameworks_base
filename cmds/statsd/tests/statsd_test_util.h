@@ -159,14 +159,30 @@ void ValidateAttributionUidDimension(const DimensionsValue& value, int atomId, i
 void ValidateAttributionUidAndTagDimension(
     const DimensionsValue& value, int atomId, int uid, const std::string& tag);
 
+struct DimensionsPair {
+    DimensionsPair(DimensionsValue m1, DimensionsValue m2) : dimInWhat(m1), dimInCondition(m2){};
+
+    DimensionsValue dimInWhat;
+    DimensionsValue dimInCondition;
+};
+
+bool LessThan(const DimensionsValue& s1, const DimensionsValue& s2);
+bool LessThan(const DimensionsPair& s1, const DimensionsPair& s2);
+
+struct DimensionCompare {
+    bool operator()(const DimensionsPair& s1, const DimensionsPair& s2) const {
+        return LessThan(s1, s2);
+    }
+};
+
 template <typename T>
 void sortMetricDataByDimensionsValue(const T& metricData, T* sortedMetricData) {
-    std::map<MetricDimensionKey, int> dimensionIndexMap;
+    std::map<DimensionsPair, int, DimensionCompare> dimensionIndexMap;
     for (int i = 0; i < metricData.data_size(); ++i) {
-        dimensionIndexMap.insert(std::make_pair(
-            MetricDimensionKey(HashableDimensionKey(metricData.data(i).dimensions_in_what()),
-            HashableDimensionKey(metricData.data(i).dimensions_in_condition())),
-            i));
+        dimensionIndexMap.insert(
+                std::make_pair(DimensionsPair(metricData.data(i).dimensions_in_what(),
+                                              metricData.data(i).dimensions_in_condition()),
+                               i));
     }
     for (const auto& itr : dimensionIndexMap) {
         *sortedMetricData->add_data() = metricData.data(itr.second);

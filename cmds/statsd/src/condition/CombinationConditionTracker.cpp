@@ -106,11 +106,9 @@ bool CombinationConditionTracker::init(const vector<Predicate>& allConditionConf
 }
 
 void CombinationConditionTracker::isConditionMet(
-        const ConditionKey& conditionParameters,
-        const vector<sp<ConditionTracker>>& allConditions,
-        const FieldMatcher& dimensionFields,
-        vector<ConditionState>& conditionCache,
-        std::unordered_set<HashableDimensionKey> &dimensionsKeySet) const {
+        const ConditionKey& conditionParameters, const vector<sp<ConditionTracker>>& allConditions,
+        const std::vector<Matcher>& dimensionFields, vector<ConditionState>& conditionCache,
+        std::unordered_set<HashableDimensionKey>& dimensionsKeySet) const {
     // So far, this is fine as there is at most one child having sliced output.
     for (const int childIndex : mChildren) {
         if (conditionCache[childIndex] == ConditionState::kNotEvaluated) {
@@ -169,8 +167,8 @@ void CombinationConditionTracker::evaluateCondition(
 
 ConditionState CombinationConditionTracker::getMetConditionDimension(
         const std::vector<sp<ConditionTracker>>& allConditions,
-        const FieldMatcher& dimensionFields,
-        std::unordered_set<HashableDimensionKey> &dimensionsKeySet) const {
+        const std::vector<Matcher>& dimensionFields,
+        std::unordered_set<HashableDimensionKey>& dimensionsKeySet) const {
     vector<ConditionState> conditionCache(allConditions.size(), ConditionState::kNotEvaluated);
     // So far, this is fine as there is at most one child having sliced output.
     for (const int childIndex : mChildren) {

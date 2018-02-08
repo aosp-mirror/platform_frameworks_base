@@ -19,7 +19,6 @@
 
 #include "GaugeMetricProducer.h"
 #include "guardrail/StatsdStats.h"
-#include "dimension.h"
 #include "stats_log_util.h"
 
 #include <cutils/log.h>
@@ -77,18 +76,29 @@ GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric
     mBucketSizeNs = bucketSizeMills * 1000000;
 
     mSamplingType = metric.sampling_type();
-    mFieldFilter = metric.gauge_fields_filter();
+    if (!metric.gauge_fields_filter().include_all()) {
+        translateFieldMatcher(metric.gauge_fields_filter().fields(), &mFieldMatchers);
+    }
 
     // TODO: use UidMap if uid->pkg_name is required
-    mDimensionsInWhat = metric.dimensions_in_what();
-    mDimensionsInCondition = metric.dimensions_in_condition();
+    if (metric.has_dimensions_in_what()) {
+        translateFieldMatcher(metric.dimensions_in_what(), &mDimensionsInWhat);
+    }
+
+    if (metric.has_dimensions_in_condition()) {
+        translateFieldMatcher(metric.dimensions_in_condition(), &mDimensionsInCondition);
+    }
 
     if (metric.links().size() > 0) {
-        mConditionLinks.insert(mConditionLinks.begin(), metric.links().begin(),
-                               metric.links().end());
+        for (const auto& link : metric.links()) {
+            Metric2Condition mc;
+            mc.conditionId = link.condition();
+            translateFieldMatcher(link.fields_in_what(), &mc.metricFields);
+            translateFieldMatcher(link.fields_in_condition(), &mc.conditionFields);
+            mMetric2ConditionLinks.push_back(mc);
+        }
     }
-    mConditionSliced = (metric.links().size() > 0)||
-        (mDimensionsInCondition.has_field() && mDimensionsInCondition.child_size() > 0);
+    mConditionSliced = (metric.links().size() > 0) || (mDimensionsInCondition.size() > 0);
 
     // Kicks off the puller immediately.
     if (mPullTagId != -1 && mSamplingType == GaugeMetric::RANDOM_ONE_SAMPLE) {
@@ -115,13 +125,6 @@ GaugeMetricProducer::~GaugeMetricProducer() {
     }
 }
 
-void GaugeMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs, StatsLogReport* report) {
-    flushIfNeededLocked(dumpTimeNs);
-    ProtoOutputStream pbOutput;
-    onDumpReportLocked(dumpTimeNs, &pbOutput);
-    parseProtoOutputStream(pbOutput, report);
-}
-
 void GaugeMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
                                              ProtoOutputStream* protoOutput) {
     VLOG("gauge metric %lld report now...", (long long)mMetricId);
@@ -144,15 +147,13 @@ void GaugeMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
         // First fill dimension.
         long long dimensionToken = protoOutput->start(
                 FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_WHAT);
-        writeDimensionsValueProtoToStream(
-            dimensionKey.getDimensionKeyInWhat().getDimensionsValue(), protoOutput);
+        writeDimensionToProto(dimensionKey.getDimensionKeyInWhat(), protoOutput);
         protoOutput->end(dimensionToken);
 
         if (dimensionKey.hasDimensionKeyInCondition()) {
             long long dimensionInConditionToken = protoOutput->start(
                     FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_CONDITION);
-            writeDimensionsValueProtoToStream(
-                dimensionKey.getDimensionKeyInCondition().getDimensionsValue(), protoOutput);
+            writeDimensionToProto(dimensionKey.getDimensionKeyInCondition(), protoOutput);
             protoOutput->end(dimensionInConditionToken);
         }
 
@@ -169,7 +170,7 @@ void GaugeMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
                 long long atomsToken =
                     protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_ATOM);
                 for (const auto& atom : bucket.mGaugeAtoms) {
-                    writeFieldValueTreeToStream(*atom.mFields, protoOutput);
+                    writeFieldValueTreeToStream(mTagId, *(atom.mFields), protoOutput);
                 }
                 protoOutput->end(atomsToken);
 
@@ -246,13 +247,14 @@ void GaugeMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eventT
     VLOG("Metric %lld onSlicedConditionMayChange", (long long)mMetricId);
 }
 
-std::shared_ptr<FieldValueMap> GaugeMetricProducer::getGaugeFields(const LogEvent& event) {
-    std::shared_ptr<FieldValueMap> gaugeFields =
-        std::make_shared<FieldValueMap>(event.getFieldValueMap());
-    if (!mFieldFilter.include_all()) {
-        filterFields(mFieldFilter.fields(), gaugeFields.get());
+std::shared_ptr<vector<FieldValue>> GaugeMetricProducer::getGaugeFields(const LogEvent& event) {
+    if (mFieldMatchers.size() > 0) {
+        std::shared_ptr<vector<FieldValue>> gaugeFields = std::make_shared<vector<FieldValue>>();
+        filterGaugeValues(mFieldMatchers, event.getValues(), gaugeFields.get());
+        return gaugeFields;
+    } else {
+        return std::make_shared<vector<FieldValue>>(event.getValues());
     }
-    return gaugeFields;
 }
 
 void GaugeMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& allData) {
@@ -292,6 +294,7 @@ void GaugeMetricProducer::onMatchedLogEventInternalLocked(
         return;
     }
     uint64_t eventTimeNs = event.GetTimestampNs();
+    mTagId = event.GetTagId();
     if (eventTimeNs < mCurrentBucketStartTimeNs) {
         VLOG("Skip event due to late arrival: %lld vs %lld", (long long)eventTimeNs,
              (long long)mCurrentBucketStartTimeNs);
@@ -308,20 +311,18 @@ void GaugeMetricProducer::onMatchedLogEventInternalLocked(
     if (hitGuardRailLocked(eventKey)) {
         return;
     }
-    GaugeAtom gaugeAtom;
-    gaugeAtom.mFields = getGaugeFields(event);
-    gaugeAtom.mTimestamps = eventTimeNs;
+    GaugeAtom gaugeAtom(getGaugeFields(event), eventTimeNs);
     (*mCurrentSlicedBucket)[eventKey].push_back(gaugeAtom);
     // Anomaly detection on gauge metric only works when there is one numeric
     // field specified.
     if (mAnomalyTrackers.size() > 0) {
         if (gaugeAtom.mFields->size() == 1) {
-            const DimensionsValue& dimensionsValue = gaugeAtom.mFields->begin()->second;
+            const Value& value = gaugeAtom.mFields->begin()->mValue;
             long gaugeVal = 0;
-            if (dimensionsValue.has_value_int()) {
-                gaugeVal = (long)dimensionsValue.value_int();
-            } else if (dimensionsValue.has_value_long()) {
-                gaugeVal = dimensionsValue.value_long();
+            if (value.getType() == INT) {
+                gaugeVal = (long)value.int_value;
+            } else if (value.getType() == LONG) {
+                gaugeVal = value.long_value;
             }
             for (auto& tracker : mAnomalyTrackers) {
                 tracker->detectAndDeclareAnomaly(eventTimeNs, mCurrentBucketNum, eventKey,
@@ -334,15 +335,15 @@ void GaugeMetricProducer::onMatchedLogEventInternalLocked(
 void GaugeMetricProducer::updateCurrentSlicedBucketForAnomaly() {
     status_t err = NO_ERROR;
     for (const auto& slice : *mCurrentSlicedBucket) {
-        if (slice.second.empty() || slice.second.front().mFields->empty()) {
+        if (slice.second.empty()) {
             continue;
         }
-        const DimensionsValue& dimensionsValue = slice.second.front().mFields->begin()->second;
+        const Value& value = slice.second.front().mFields->front().mValue;
         long gaugeVal = 0;
-        if (dimensionsValue.has_value_int()) {
-            gaugeVal = (long)dimensionsValue.value_int();
-        } else if (dimensionsValue.has_value_long()) {
-            gaugeVal = dimensionsValue.value_long();
+        if (value.getType() == INT) {
+            gaugeVal = (long)value.int_value;
+        } else if (value.getType() == LONG) {
+            gaugeVal = value.long_value;
         }
         (*mCurrentSlicedBucketForAnomaly)[slice.first] = gaugeVal;
     }

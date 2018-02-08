@@ -38,6 +38,22 @@ namespace android {
 namespace os {
 namespace statsd {
 
+namespace {
+
+bool hasLeafNode(const FieldMatcher& matcher) {
+    if (!matcher.has_field()) {
+        return false;
+    }
+    for (int i = 0; i < matcher.child_size(); ++i) {
+        if (hasLeafNode(matcher.child(i))) {
+            return true;
+        }
+    }
+    return true;
+}
+
+}  // namespace
+
 bool handleMetricWithLogTrackers(const int64_t what, const int metricIndex,
                                  const bool usedForDimension,
                                  const vector<sp<LogMatchingTracker>>& allAtomMatchers,

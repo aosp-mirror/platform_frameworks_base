@@ -55,8 +55,13 @@ EventMetricProducer::EventMetricProducer(const ConfigKey& key, const EventMetric
                                          const uint64_t startTimeNs)
     : MetricProducer(metric.id(), key, startTimeNs, conditionIndex, wizard) {
     if (metric.links().size() > 0) {
-        mConditionLinks.insert(mConditionLinks.begin(), metric.links().begin(),
-                               metric.links().end());
+        for (const auto& link : metric.links()) {
+            Metric2Condition mc;
+            mc.conditionId = link.condition();
+            translateFieldMatcher(link.fields_in_what(), &mc.metricFields);
+            translateFieldMatcher(link.fields_in_condition(), &mc.conditionFields);
+            mMetric2ConditionLinks.push_back(mc);
+        }
         mConditionSliced = true;
     }
 
@@ -92,10 +97,6 @@ std::unique_ptr<std::vector<uint8_t>> serializeProtoLocked(ProtoOutputStream& pr
     }
 
     return buffer;
-}
-
-void EventMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs, StatsLogReport* report) {
-
 }
 
 void EventMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,

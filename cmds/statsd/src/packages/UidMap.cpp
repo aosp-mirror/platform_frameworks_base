@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define DEBUG false  // STOPSHIP if true
+#define DEBUG true  // STOPSHIP if true
 #include "Log.h"
 
 #include "guardrail/StatsdStats.h"

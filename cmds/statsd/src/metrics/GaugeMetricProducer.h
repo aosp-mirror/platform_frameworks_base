@@ -33,7 +33,10 @@ namespace os {
 namespace statsd {
 
 struct GaugeAtom {
-    std::shared_ptr<FieldValueMap> mFields;
+    GaugeAtom(std::shared_ptr<vector<FieldValue>> fields, int64_t timeNs)
+        : mFields(fields), mTimestamps(timeNs) {
+    }
+    std::shared_ptr<vector<FieldValue>> mFields;
     int64_t mTimestamps;
 };
 
@@ -87,7 +90,6 @@ protected:
 private:
     void onDumpReportLocked(const uint64_t dumpTimeNs,
                             android::util::ProtoOutputStream* protoOutput) override;
-    void onDumpReportLocked(const uint64_t dumpTimeNs, StatsLogReport* report) override;
 
     // for testing
     GaugeMetricProducer(const ConfigKey& key, const GaugeMetric& gaugeMetric,
@@ -113,6 +115,8 @@ private:
 
     void pullLocked();
 
+    int mTagId;
+
     std::shared_ptr<StatsPullerManager> mStatsPullerManager;
     // tagId for pulled data. -1 if this is not pulled
     const int mPullTagId;
@@ -133,12 +137,12 @@ private:
     void updateCurrentSlicedBucketForAnomaly();
 
     // Whitelist of fields to report. Empty means all are reported.
-    FieldFilter mFieldFilter;
+    std::vector<Matcher> mFieldMatchers;
 
     GaugeMetric::SamplingType mSamplingType;
 
     // apply a whitelist on the original input
-    std::shared_ptr<FieldValueMap> getGaugeFields(const LogEvent& event);
+    std::shared_ptr<vector<FieldValue>> getGaugeFields(const LogEvent& event);
 
     // Util function to check whether the specified dimension hits the guardrail.
     bool hitGuardRailLocked(const MetricDimensionKey& newKey);
