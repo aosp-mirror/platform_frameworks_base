@@ -47,14 +47,18 @@ public:
     /**
      * Constructs a LogEvent with synthetic data for testing. Must call init() before reading.
      */
-    explicit LogEvent(int32_t tagId, uint64_t timestampNs);
+    explicit LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedTimestampNs);
+
+    // For testing. The timestamp is used as both elapsed real time and logd timestamp.
+    explicit LogEvent(int32_t tagId, int64_t timestampNs);
 
     ~LogEvent();
 
     /**
      * Get the timestamp associated with this event.
      */
-    inline uint64_t GetTimestampNs() const { return mTimestampNs; }
+    inline int64_t GetLogdTimestampNs() const { return mLogdTimestampNs; }
+    inline int64_t GetElapsedTimestampNs() const { return mElapsedTimestampNs; }
 
     /**
      * Get the tag for this event.
@@ -107,9 +111,18 @@ public:
     void init();
 
     /**
-     * Set timestamp if the original timestamp is missing.
+     * Set elapsed timestamp if the original timestamp is missing.
      */
-    void setTimestampNs(uint64_t timestampNs) {mTimestampNs = timestampNs;}
+    void setElapsedTimestampNs(int64_t timestampNs) {
+        mElapsedTimestampNs = timestampNs;
+    }
+
+    /**
+     * Set the timestamp if the original logd timestamp is missing.
+     */
+    void setLogdWallClockTimestampNs(int64_t timestampNs) {
+        mLogdTimestampNs = timestampNs;
+    }
 
     inline int size() const {
         return mValues.size();
@@ -144,7 +157,11 @@ private:
     // When the log event is created from log msg, this field is never initiated.
     android_log_context mContext = NULL;
 
-    uint64_t mTimestampNs;
+    // The timestamp set by the logd.
+    int64_t mLogdTimestampNs;
+
+    // The elapsed timestamp set by statsd log writer.
+    int64_t mElapsedTimestampNs;
 
     int mTagId;
 

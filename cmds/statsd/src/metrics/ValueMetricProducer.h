@@ -62,7 +62,7 @@ public:
             // Pretend the pulled data occurs right before the app upgrade event.
             mCondition = false;
             for (const auto& data : allData) {
-                data->setTimestampNs(eventTimeNs - 1);
+                data->setElapsedTimestampNs(eventTimeNs - 1);
                 onMatchedLogEventLocked(0, *data);
             }
 
@@ -71,7 +71,7 @@ public:
 
             mCondition = true;
             for (const auto& data : allData) {
-                data->setTimestampNs(eventTimeNs);
+                data->setElapsedTimestampNs(eventTimeNs);
                 onMatchedLogEventLocked(0, *data);
             }
         } else {  // For pushed value metric, we simply flush and reset the current bucket start.

@@ -22,6 +22,7 @@
 #include <private/android_filesystem_config.h>
 #include "StatsCompanionServicePuller.h"
 #include "StatsService.h"
+#include "stats_log_util.h"
 #include "guardrail/StatsdStats.h"
 
 using namespace android;
@@ -53,13 +54,13 @@ bool StatsCompanionServicePuller::PullInternal(vector<shared_ptr<LogEvent> >* da
             return false;
         }
         data->clear();
-        int timestamp = time(nullptr);
+        int32_t timestampSec = getWallClockSec();
         for (const StatsLogEventWrapper& it : returned_value) {
             log_msg tmp;
             tmp.entry_v1.len = it.bytes.size();
             // Manually set the header size to 28 bytes to match the pushed log events.
             tmp.entry.hdr_size = kLogMsgHeaderSize;
-            tmp.entry_v1.sec = timestamp;
+            tmp.entry_v1.sec = timestampSec;
             // And set the received bytes starting after the 28 bytes reserved for header.
             std::copy(it.bytes.begin(), it.bytes.end(), tmp.buf + kLogMsgHeaderSize);
             data->push_back(make_shared<LogEvent>(tmp));

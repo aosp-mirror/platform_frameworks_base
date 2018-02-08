@@ -36,6 +36,7 @@
 #include "SubsystemSleepStatePuller.h"
 #include "logd/LogEvent.h"
 #include "statslog.h"
+#include "stats_log_util.h"
 
 using android::hardware::hidl_vec;
 using android::hardware::power::V1_0::IPower;
@@ -84,20 +85,22 @@ bool SubsystemSleepStatePuller::PullInternal(vector<shared_ptr<LogEvent>>* data)
         return false;
     }
 
-    uint64_t timestamp = time(nullptr) * NS_PER_SEC;
+    int64_t wallClockTimestampNs = getWallClockNs();
+    int64_t elapsedTimestampNs = getElapsedRealtimeNs();
 
     data->clear();
 
     Return<void> ret;
         ret = gPowerHalV1_0->getPlatformLowPowerStats(
-                [&data, timestamp](hidl_vec<PowerStatePlatformSleepState> states, Status status) {
+                [&data, wallClockTimestampNs, elapsedTimestampNs](hidl_vec<PowerStatePlatformSleepState> states, Status status) {
                     if (status != Status::SUCCESS) return;
 
                     for (size_t i = 0; i < states.size(); i++) {
                         const PowerStatePlatformSleepState& state = states[i];
 
-                        auto statePtr = make_shared<LogEvent>(android::util::SUBSYSTEM_SLEEP_STATE,
-                                                              timestamp);
+                        auto statePtr = make_shared<LogEvent>(
+                            android::util::SUBSYSTEM_SLEEP_STATE,
+                            wallClockTimestampNs, elapsedTimestampNs);
                         statePtr->write(state.name);
                         statePtr->write("");
                         statePtr->write(state.totalTransitions);
@@ -109,8 +112,9 @@ bool SubsystemSleepStatePuller::PullInternal(vector<shared_ptr<LogEvent>>* data)
                              (long long)state.totalTransitions,
                              state.supportedOnlyInSuspend ? 1 : 0);
                         for (auto voter : state.voters) {
-                            auto voterPtr = make_shared<LogEvent>(android::util::SUBSYSTEM_SLEEP_STATE,
-                                                                  timestamp);
+                            auto voterPtr = make_shared<LogEvent>(
+                                android::util::SUBSYSTEM_SLEEP_STATE,
+                                wallClockTimestampNs, elapsedTimestampNs);
                             voterPtr->write(state.name);
                             voterPtr->write(voter.name);
                             voterPtr->write(voter.totalNumberOfTimesVotedSinceBoot);
@@ -135,7 +139,7 @@ bool SubsystemSleepStatePuller::PullInternal(vector<shared_ptr<LogEvent>>* data)
                 android::hardware::power::V1_1::IPower::castFrom(gPowerHalV1_0);
         if (gPowerHal_1_1 != nullptr) {
             ret = gPowerHal_1_1->getSubsystemLowPowerStats(
-                    [&data, timestamp](hidl_vec<PowerStateSubsystem> subsystems, Status status) {
+                    [&data, wallClockTimestampNs, elapsedTimestampNs](hidl_vec<PowerStateSubsystem> subsystems, Status status) {
                         if (status != Status::SUCCESS) return;
 
                         if (subsystems.size() > 0) {
@@ -145,7 +149,8 @@ bool SubsystemSleepStatePuller::PullInternal(vector<shared_ptr<LogEvent>>* data)
                                     const PowerStateSubsystemSleepState& state =
                                             subsystem.states[j];
                                     auto subsystemStatePtr = make_shared<LogEvent>(
-                                        android::util::SUBSYSTEM_SLEEP_STATE, timestamp);
+                                        android::util::SUBSYSTEM_SLEEP_STATE,
+                                        wallClockTimestampNs, elapsedTimestampNs);
                                     subsystemStatePtr->write(subsystem.name);
                                     subsystemStatePtr->write(state.name);
                                     subsystemStatePtr->write(state.totalTransitions);

@@ -24,6 +24,7 @@
 #include "guardrail/StatsdStats.h"
 #include "logd/LogEvent.h"
 #include "statslog.h"
+#include "stats_log_util.h"
 
 using std::make_shared;
 using std::shared_ptr;
@@ -57,7 +58,8 @@ bool CpuTimePerUidPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
         return false;
     }
 
-    uint64_t timestamp = time(nullptr) * NS_PER_SEC;
+    int64_t wallClockTimestampNs = getWallClockNs();
+    int64_t elapsedTimestampNs = getElapsedRealtimeNs();
     char buf[kLineBufferSize];
     char* pch;
     while (!fin.eof()) {
@@ -70,7 +72,8 @@ bool CpuTimePerUidPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
         pch = strtok(buf, " ");
         uint64_t sysTimeMs = std::stoull(pch);
 
-        auto ptr = make_shared<LogEvent>(android::util::CPU_TIME_PER_UID, timestamp);
+        auto ptr = make_shared<LogEvent>(android::util::CPU_TIME_PER_UID,
+            wallClockTimestampNs, elapsedTimestampNs);
         ptr->write(uid);
         ptr->write(userTimeMs);
         ptr->write(sysTimeMs);

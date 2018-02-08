@@ -25,6 +25,7 @@
 #include "ResourceHealthManagerPuller.h"
 #include "logd/LogEvent.h"
 #include "statslog.h"
+#include "stats_log_util.h"
 
 using android::hardware::hidl_vec;
 using android::hardware::health::V2_0::get_health_service;
@@ -61,7 +62,8 @@ bool ResourceHealthManagerPuller::PullInternal(vector<shared_ptr<LogEvent>>* dat
         return false;
     }
 
-    uint64_t timestamp = time(nullptr) * NS_PER_SEC;
+    int64_t wallClockTimestampNs = getWallClockNs();
+    int64_t elapsedTimestampNs = getElapsedRealtimeNs();
 
     data->clear();
     bool result_success = true;
@@ -72,12 +74,14 @@ bool ResourceHealthManagerPuller::PullInternal(vector<shared_ptr<LogEvent>>* dat
             return;
         }
         if (mTagId == android::util::REMAINING_BATTERY_CAPACITY) {
-            auto ptr = make_shared<LogEvent>(android::util::REMAINING_BATTERY_CAPACITY, timestamp);
+            auto ptr = make_shared<LogEvent>(android::util::REMAINING_BATTERY_CAPACITY,
+                wallClockTimestampNs, elapsedTimestampNs);
             ptr->write(v.legacy.batteryChargeCounter);
             ptr->init();
             data->push_back(ptr);
         } else if (mTagId == android::util::FULL_BATTERY_CAPACITY) {
-            auto ptr = make_shared<LogEvent>(android::util::FULL_BATTERY_CAPACITY, timestamp);
+            auto ptr = make_shared<LogEvent>(android::util::FULL_BATTERY_CAPACITY,
+                wallClockTimestampNs, elapsedTimestampNs);
             ptr->write(v.legacy.batteryFullCharge);
             ptr->init();
             data->push_back(ptr);

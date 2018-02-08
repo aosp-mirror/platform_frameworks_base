@@ -18,6 +18,7 @@
 #include "Log.h"
 
 #include "StatsService.h"
+#include "stats_log_util.h"
 #include "android-base/stringprintf.h"
 #include "config/ConfigKey.h"
 #include "config/ConfigManager.h"
@@ -79,18 +80,20 @@ StatsService::StatsService(const sp<Looper>& handlerLooper)
     mUidMap = new UidMap();
     StatsPuller::SetUidMap(mUidMap);
     mConfigManager = new ConfigManager();
-    mProcessor = new StatsLogProcessor(mUidMap, mAnomalyMonitor, time(nullptr), [this](const ConfigKey& key) {
-        sp<IStatsCompanionService> sc = getStatsCompanionService();
-        auto receiver = mConfigManager->GetConfigReceiver(key);
-        if (sc == nullptr) {
-            VLOG("Could not find StatsCompanionService");
-        } else if (receiver == nullptr) {
-            VLOG("Statscompanion could not find a broadcast receiver for %s",
-                 key.ToString().c_str());
-        } else {
-            sc->sendDataBroadcast(receiver);
+    mProcessor = new StatsLogProcessor(mUidMap, mAnomalyMonitor, getElapsedRealtimeSec(),
+        [this](const ConfigKey& key) {
+            sp<IStatsCompanionService> sc = getStatsCompanionService();
+            auto receiver = mConfigManager->GetConfigReceiver(key);
+            if (sc == nullptr) {
+                VLOG("Could not find StatsCompanionService");
+            } else if (receiver == nullptr) {
+                VLOG("Statscompanion could not find a broadcast receiver for %s",
+                     key.ToString().c_str());
+            } else {
+                sc->sendDataBroadcast(receiver);
+            }
         }
-    });
+    );
 
     mConfigManager->AddListener(mProcessor);
 
@@ -668,11 +671,7 @@ Status StatsService::informAnomalyAlarmFired() {
         return Status::fromExceptionCode(Status::EX_SECURITY,
                                          "Only system uid can call informAnomalyAlarmFired");
     }
-
-    // TODO: This may be a bug. time(nullptr) can be off (wrt AlarmManager's time) and cause us to
-    //       miss the alarm! Eventually we will switch to using elapsedRealTime everywhere,
-    //       which may hopefully fix the problem, so we'll leave this alone for now.
-    uint64_t currentTimeSec = time(nullptr);
+    uint64_t currentTimeSec = getElapsedRealtimeSec();
     std::unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> anomalySet =
             mAnomalyMonitor->popSoonerThan(static_cast<uint32_t>(currentTimeSec));
     if (anomalySet.size() > 0) {

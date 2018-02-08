@@ -21,6 +21,7 @@
 #include <android-base/file.h>
 #include <dirent.h>
 #include "StatsLogProcessor.h"
+#include "stats_log_util.h"
 #include "android-base/stringprintf.h"
 #include "guardrail/StatsdStats.h"
 #include "metrics/CountMetricProducer.h"
@@ -59,8 +60,8 @@ const int FIELD_ID_ID = 2;
 // for ConfigMetricsReport
 const int FIELD_ID_METRICS = 1;
 const int FIELD_ID_UID_MAP = 2;
-const int FIELD_ID_LAST_REPORT_NANOS = 3;
-const int FIELD_ID_CURRENT_REPORT_NANOS = 4;
+const int FIELD_ID_LAST_REPORT_ELAPSED_NANOS = 3;
+const int FIELD_ID_CURRENT_REPORT_ELAPSED_NANOS = 4;
 
 #define STATS_DATA_DIR "/data/misc/stats-data"
 
@@ -136,7 +137,7 @@ void StatsLogProcessor::onIsolatedUidChangedEventLocked(const LogEvent& event) {
 void StatsLogProcessor::OnLogEvent(LogEvent* event) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
     StatsdStats::getInstance().noteAtomLogged(
-        event->GetTagId(), event->GetTimestampNs() / NS_PER_SEC);
+        event->GetTagId(), event->GetElapsedTimestampNs() / NS_PER_SEC);
 
     // Hard-coded logic to update the isolated uid's in the uid-map.
     // The field numbers need to be currently updated by hand with atoms.proto
@@ -148,10 +149,10 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event) {
         return;
     }
 
-    long curTime = time(nullptr);
-    if (curTime - mLastPullerCacheClearTimeSec > StatsdStats::kPullerCacheClearIntervalSec) {
-        mStatsPullerManager.ClearPullerCacheIfNecessary(curTime);
-        mLastPullerCacheClearTimeSec = curTime;
+    uint64_t curTimeSec = getElapsedRealtimeSec();
+    if (curTimeSec - mLastPullerCacheClearTimeSec > StatsdStats::kPullerCacheClearIntervalSec) {
+        mStatsPullerManager.ClearPullerCacheIfNecessary(curTimeSec);
+        mLastPullerCacheClearTimeSec = curTimeSec;
     }
 
     if (event->GetTagId() != android::util::ISOLATED_UID_CHANGED) {
@@ -162,7 +163,7 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event) {
     // pass the event to metrics managers.
     for (auto& pair : mMetricsManagers) {
         pair.second->onLogEvent(*event);
-        flushIfNecessaryLocked(event->GetTimestampNs(), pair.first, *(pair.second));
+        flushIfNecessaryLocked(event->GetElapsedTimestampNs(), pair.first, *(pair.second));
     }
 }
 
@@ -242,6 +243,7 @@ void StatsLogProcessor::onDumpReportLocked(const ConfigKey& key, const uint64_t 
     long long reportsToken =
             proto.start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_REPORTS);
 
+    int64_t lastReportTimeNs = it->second->getLastReportTimeNs();
     // First, fill in ConfigMetricsReport using current data on memory, which
     // starts from filling in StatsLogReport's.
     it->second->onDumpReport(dumpTimeStampNs, &proto);
@@ -254,10 +256,10 @@ void StatsLogProcessor::onDumpReportLocked(const ConfigKey& key, const uint64_t 
     proto.write(FIELD_TYPE_MESSAGE | FIELD_ID_UID_MAP, uidMapBuffer, uidMapSize);
 
     // Fill in the timestamps.
-    proto.write(FIELD_TYPE_INT64 | FIELD_ID_LAST_REPORT_NANOS,
-                (long long)it->second->getLastReportTimeNs());
-    proto.write(FIELD_TYPE_INT64 | FIELD_ID_CURRENT_REPORT_NANOS,
-                (long long)::android::elapsedRealtimeNano());
+    proto.write(FIELD_TYPE_INT64 | FIELD_ID_LAST_REPORT_ELAPSED_NANOS,
+                (long long)lastReportTimeNs);
+    proto.write(FIELD_TYPE_INT64 | FIELD_ID_CURRENT_REPORT_ELAPSED_NANOS,
+                (long long)dumpTimeStampNs);
 
     // End of ConfigMetricsReport (reports).
     proto.end(reportsToken);
@@ -340,8 +342,8 @@ void StatsLogProcessor::WriteDataToDisk() {
         vector<uint8_t> data;
         onDumpReportLocked(key, time(nullptr) * NS_PER_SEC, &data);
         // TODO: Add a guardrail to prevent accumulation of file on disk.
-        string file_name = StringPrintf("%s/%ld_%d_%lld", STATS_DATA_DIR, time(nullptr),
-                                        key.GetUid(), (long long)key.GetId());
+        string file_name = StringPrintf("%s/%ld_%d_%lld", STATS_DATA_DIR,
+             (long)getWallClockSec(), key.GetUid(), (long long)key.GetId());
         StorageManager::writeFile(file_name.c_str(), &data[0], data.size());
     }
 }

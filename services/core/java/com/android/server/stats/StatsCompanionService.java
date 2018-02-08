@@ -361,9 +361,11 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         if (DEBUG) Slog.d(TAG, "Setting anomaly alarm for " + timestampMs);
         final long callingToken = Binder.clearCallingIdentity();
         try {
-            // using RTC, not RTC_WAKEUP, so if device is asleep, will only fire when it awakens.
+            // using ELAPSED_REALTIME, not ELAPSED_REALTIME_WAKEUP, so if device is asleep, will
+            // only fire when it awakens.
+            // This alarm is inexact, leaving its exactness completely up to the OS optimizations.
             // AlarmManager will automatically cancel any previous mAnomalyAlarmIntent alarm.
-            mAlarmManager.setExact(AlarmManager.RTC, timestampMs, mAnomalyAlarmIntent);
+            mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME, timestampMs, mAnomalyAlarmIntent);
         } finally {
             Binder.restoreCallingIdentity(callingToken);
         }
@@ -388,10 +390,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             Slog.d(TAG, "Setting pulling alarm for " + timestampMs + " every " + intervalMs + "ms");
         final long callingToken = Binder.clearCallingIdentity();
         try {
-            // using RTC, not RTC_WAKEUP, so if device is asleep, will only fire when it awakens.
+            // using ELAPSED_REALTIME, not ELAPSED_REALTIME_WAKEUP, so if device is asleep, will
+            // only fire when it awakens.
             // This alarm is inexact, leaving its exactness completely up to the OS optimizations.
             // TODO: totally inexact means that stats per bucket could be quite off. Is this okay?
-            mAlarmManager.setRepeating(AlarmManager.RTC, timestampMs, intervalMs, mPullingAlarmIntent);
+            mAlarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME, timestampMs, intervalMs,
+                    mPullingAlarmIntent);
         } finally {
             Binder.restoreCallingIdentity(callingToken);
         }
