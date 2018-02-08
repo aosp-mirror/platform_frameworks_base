@@ -1212,6 +1212,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         } else if (scheme != null) {
             // handle non-file sources
             nativeSetDataSource(
+                srcId,
                 Media2HTTPService.createHTTPService(path, cookies),
                 path,
                 keys,
@@ -1231,7 +1232,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     }
 
     private native void nativeSetDataSource(
-        Media2HTTPService httpService, String path, String[] keys, String[] values)
+        long srcId, Media2HTTPService httpService, String path, String[] keys, String[] values)
         throws IOException, IllegalArgumentException, SecurityException, IllegalStateException;
 
     /**
@@ -1245,10 +1246,10 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      */
     private void setDataSourcePriv(long srcId, FileDescriptor fd, long offset, long length)
             throws IOException {
-        _setDataSource(fd, offset, length);
+        _setDataSource(srcId, fd, offset, length);
     }
 
-    private native void _setDataSource(FileDescriptor fd, long offset, long length)
+    private native void _setDataSource(long srcId, FileDescriptor fd, long offset, long length)
             throws IOException;
 
     /**
@@ -1256,10 +1257,10 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * @throws IllegalArgumentException if dataSource is not a valid Media2DataSource
      */
     private void setDataSourcePriv(long srcId, Media2DataSource dataSource) {
-        _setDataSource(dataSource);
+        _setDataSource(srcId, dataSource);
     }
 
-    private native void _setDataSource(Media2DataSource dataSource);
+    private native void _setDataSource(long srcId, Media2DataSource dataSource);
 
     /**
      * Prepares the player for playback, synchronously.
@@ -3072,6 +3073,10 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
         @Override
         public void handleMessage(Message msg) {
+            handleMessage(msg, 0);
+        }
+
+        public void handleMessage(Message msg, long srcId) {
             if (mMediaPlayer.mNativeContext == 0) {
                 Log.w(TAG, "mediaplayer2 went away with unhandled events");
                 return;
@@ -3094,7 +3099,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 synchronized (mEventCbLock) {
                     for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
                         cb.first.execute(() -> cb.second.onInfo(
-                                mMediaPlayer, 0, MEDIA_INFO_PREPARED, 0));
+                                mMediaPlayer, srcId, MEDIA_INFO_PREPARED, 0));
                     }
                 }
                 return;
@@ -3132,7 +3137,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 synchronized (mEventCbLock) {
                     for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
                         cb.first.execute(() -> cb.second.onInfo(
-                                mMediaPlayer, 0, MEDIA_INFO_PLAYBACK_COMPLETE, 0));
+                                mMediaPlayer, srcId, MEDIA_INFO_PLAYBACK_COMPLETE, 0));
                     }
                 }
                 stayAwake(false);
@@ -3162,7 +3167,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 synchronized (mEventCbLock) {
                     for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
                         cb.first.execute(() -> cb.second.onBufferingUpdate(
-                                mMediaPlayer, 0, percent));
+                                mMediaPlayer, srcId, percent));
                     }
                 }
                 return;
@@ -3171,7 +3176,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 synchronized (mEventCbLock) {
                     for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
                         cb.first.execute(() -> cb.second.onInfo(
-                                mMediaPlayer, 0, MEDIA_INFO_COMPLETE_CALL_SEEK, 0));
+                                mMediaPlayer, srcId, MEDIA_INFO_COMPLETE_CALL_SEEK, 0));
                     }
                 }
                 // fall through
@@ -3191,7 +3196,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 synchronized (mEventCbLock) {
                     for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
                         cb.first.execute(() -> cb.second.onVideoSizeChanged(
-                                mMediaPlayer, 0, width, height));
+                                mMediaPlayer, srcId, width, height));
                     }
                 }
                 return;
@@ -3201,9 +3206,9 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 synchronized (mEventCbLock) {
                     for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
                         cb.first.execute(() -> cb.second.onError(
-                                mMediaPlayer, 0, what, extra));
+                                mMediaPlayer, srcId, what, extra));
                         cb.first.execute(() -> cb.second.onInfo(
-                                mMediaPlayer, 0, MEDIA_INFO_PLAYBACK_COMPLETE, 0));
+                                mMediaPlayer, srcId, MEDIA_INFO_PLAYBACK_COMPLETE, 0));
                     }
                 }
                 stayAwake(false);
@@ -3246,7 +3251,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 synchronized (mEventCbLock) {
                     for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
                         cb.first.execute(() -> cb.second.onInfo(
-                                mMediaPlayer, 0, what, extra));
+                                mMediaPlayer, srcId, what, extra));
                     }
                 }
                 // No real default action so far.
@@ -3271,7 +3276,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
                 synchronized (mEventCbLock) {
                     for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
-                        cb.first.execute(() -> cb.second.onTimedText(mMediaPlayer, 0, text));
+                        cb.first.execute(() -> cb.second.onTimedText(mMediaPlayer, srcId, text));
                     }
                 }
                 return;
@@ -3302,7 +3307,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 synchronized (mEventCbLock) {
                     for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
                         cb.first.execute(() -> cb.second.onTimedMetaDataAvailable(
-                                mMediaPlayer, 0, data));
+                                mMediaPlayer, srcId, data));
                     }
                 }
                 return;
@@ -3334,7 +3339,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * code is safe from the object disappearing from underneath it.  (This is
      * the cookie passed to native_setup().)
      */
-    private static void postEventFromNative(Object mediaplayer2_ref,
+    private static void postEventFromNative(Object mediaplayer2_ref, long srcId,
                                             int what, int arg1, int arg2, Object obj)
     {
         final MediaPlayer2Impl mp = (MediaPlayer2Impl)((WeakReference)mediaplayer2_ref).get();
@@ -3387,7 +3392,13 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
         if (mp.mEventHandler != null) {
             Message m = mp.mEventHandler.obtainMessage(what, arg1, arg2, obj);
-            mp.mEventHandler.sendMessage(m);
+
+            mp.mEventHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mp.mEventHandler.handleMessage(m, srcId);
+                }
+            });
         }
     }
 
@@ -4489,7 +4500,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         // no need for log(N) search performance
         private MediaTimeProvider.OnMediaTimeListener mListeners[];
         private long mTimes[];
-        private Handler mEventHandler;
+        private EventHandler mEventHandler;
         private boolean mRefresh = false;
         private boolean mPausing = false;
         private boolean mSeeking = false;
