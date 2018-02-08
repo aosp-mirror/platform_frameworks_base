@@ -156,7 +156,7 @@ public class CommandQueue extends IStatusBar.Stub {
         default void handleShowGlobalActionsMenu() { }
         default void handleShowShutdownUi(boolean isReboot, String reason) { }
 
-        default void showChargingAnimation(int batteryLevel) {  }
+        default void showWirelessChargingAnimation(int batteryLevel) {  }
 
         default void onRotationProposal(int rotation, boolean isValid) { }
 
@@ -497,7 +497,7 @@ public class CommandQueue extends IStatusBar.Stub {
     }
 
     @Override
-    public void showChargingAnimation(int batteryLevel) {
+    public void showWirelessChargingAnimation(int batteryLevel) {
         mHandler.removeMessages(MSG_SHOW_CHARGING_ANIMATION);
         mHandler.obtainMessage(MSG_SHOW_CHARGING_ANIMATION, batteryLevel, 0)
                 .sendToTarget();
@@ -784,7 +784,7 @@ public class CommandQueue extends IStatusBar.Stub {
                     break;
                 case MSG_SHOW_CHARGING_ANIMATION:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).showChargingAnimation(msg.arg1);
+                        mCallbacks.get(i).showWirelessChargingAnimation(msg.arg1);
                     }
                     break;
                 case MSG_SHOW_PINNING_TOAST_ENTER_EXIT:

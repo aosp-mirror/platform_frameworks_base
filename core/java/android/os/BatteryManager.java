@@ -323,4 +323,16 @@ public class BatteryManager {
     public long getLongProperty(int id) {
         return queryProperty(id);
     }
+
+    /**
+     * Return true if the plugType given is wired
+     * @param plugType {@link #BATTERY_PLUGGED_AC}, {@link #BATTERY_PLUGGED_USB},
+     *        or {@link #BATTERY_PLUGGED_WIRELESS}
+     *
+     * @return true if plugType is wired
+     * @hide
+     */
+    public static boolean isPlugWired(int plugType) {
+        return plugType == BATTERY_PLUGGED_USB || plugType == BATTERY_PLUGGED_AC;
+    }
 }

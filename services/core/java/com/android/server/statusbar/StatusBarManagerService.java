@@ -321,7 +321,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         public void showChargingAnimation(int batteryLevel) {
             if (mBar != null) {
                 try {
-                    mBar.showChargingAnimation(batteryLevel);
+                    mBar.showWirelessChargingAnimation(batteryLevel);
                 } catch (RemoteException ex){
                 }
             }

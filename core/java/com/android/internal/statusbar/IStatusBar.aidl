@@ -35,7 +35,7 @@ oneway interface IStatusBar
     void animateCollapsePanels();
     void togglePanel();
 
-    void showChargingAnimation(int batteryLevel);
+    void showWirelessChargingAnimation(int batteryLevel);
 
     /**
      * Notifies the status bar of a System UI visibility flag change.
