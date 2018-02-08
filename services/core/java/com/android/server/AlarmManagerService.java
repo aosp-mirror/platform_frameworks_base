@@ -88,6 +88,7 @@ import java.util.TreeSet;
 import java.util.function.Predicate;
 
 import static android.app.AlarmManager.FLAG_ALLOW_WHILE_IDLE;
+import static android.app.AlarmManager.FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED;
 import static android.app.AlarmManager.RTC_WAKEUP;
 import static android.app.AlarmManager.RTC;
 import static android.app.AlarmManager.ELAPSED_REALTIME_WAKEUP;
@@ -1011,7 +1012,7 @@ class AlarmManagerService extends SystemService {
             // Recurring alarms may have passed several alarm intervals while the
             // alarm was kept pending. Send the appropriate trigger count.
             if (alarm.repeatInterval > 0) {
-                alarm.count += (nowELAPSED - alarm.requestedWhenElapsed) / alarm.repeatInterval;
+                alarm.count += (nowELAPSED - alarm.expectedWhenElapsed) / alarm.repeatInterval;
                 // Also schedule its next recurrence
                 final long delta = alarm.count * alarm.repeatInterval;
                 final long nextElapsed = alarm.whenElapsed + delta;
@@ -1507,24 +1508,19 @@ class AlarmManagerService extends SystemService {
      * Adjusts the alarm delivery time based on the current app standby bucket.
      * @param alarm The alarm to adjust
      * @return true if the alarm delivery time was updated.
-     * TODO: Reduce the number of calls to getAppStandbyBucket by batching the calls per
-     * {package, user} pairs
      */
     private boolean adjustDeliveryTimeBasedOnStandbyBucketLocked(Alarm alarm) {
-        if (alarm.alarmClock != null || UserHandle.isCore(alarm.creatorUid)) {
-            return false;
-        }
-        // TODO: short term fix for b/72816079, remove after a proper fix is in place
-        if ((alarm.flags & AlarmManager.FLAG_ALLOW_WHILE_IDLE) != 0) {
+        if (isExemptFromAppStandby(alarm)) {
             return false;
         }
         if (mAppStandbyParole) {
-            if (alarm.whenElapsed > alarm.requestedWhenElapsed) {
+            if (alarm.whenElapsed > alarm.expectedWhenElapsed) {
                 // We did defer this alarm earlier, restore original requirements
-                alarm.whenElapsed = alarm.requestedWhenElapsed;
-                alarm.maxWhenElapsed = alarm.requestedMaxWhenElapsed;
+                alarm.whenElapsed = alarm.expectedWhenElapsed;
+                alarm.maxWhenElapsed = alarm.expectedMaxWhenElapsed;
+                return true;
             }
-            return true;
+            return false;
         }
         final long oldWhenElapsed = alarm.whenElapsed;
         final long oldMaxWhenElapsed = alarm.maxWhenElapsed;
@@ -1538,13 +1534,13 @@ class AlarmManagerService extends SystemService {
         final long lastElapsed = mLastAlarmDeliveredForPackage.getOrDefault(packageUser, 0L);
         if (lastElapsed > 0) {
             final long minElapsed = lastElapsed + getMinDelayForBucketLocked(standbyBucket);
-            if (alarm.requestedWhenElapsed < minElapsed) {
+            if (alarm.expectedWhenElapsed < minElapsed) {
                 alarm.whenElapsed = alarm.maxWhenElapsed = minElapsed;
             } else {
                 // app is now eligible to run alarms at the originally requested window.
                 // Restore original requirements in case they were changed earlier.
-                alarm.whenElapsed = alarm.requestedWhenElapsed;
-                alarm.maxWhenElapsed = alarm.requestedMaxWhenElapsed;
+                alarm.whenElapsed = alarm.expectedWhenElapsed;
+                alarm.maxWhenElapsed = alarm.expectedMaxWhenElapsed;
             }
         }
         return (oldWhenElapsed != alarm.whenElapsed || oldMaxWhenElapsed != alarm.maxWhenElapsed);
@@ -1728,7 +1724,7 @@ class AlarmManagerService extends SystemService {
             // This means we will allow these alarms to go off as normal even while idle, with no
             // timing restrictions.
             } else if (workSource == null && (callingUid < Process.FIRST_APPLICATION_UID
-                    || callingUid == mSystemUiUid
+                    || UserHandle.isSameApp(callingUid, mSystemUiUid)
                     || mForceAppStandbyTracker.isUidPowerSaveWhitelisted(callingUid))) {
                 flags |= AlarmManager.FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED;
                 flags &= ~AlarmManager.FLAG_ALLOW_WHILE_IDLE;
@@ -3000,10 +2996,11 @@ class AlarmManagerService extends SystemService {
                         // Whoops, it hasn't been long enough since the last ALLOW_WHILE_IDLE
                         // alarm went off for this app.  Reschedule the alarm to be in the
                         // correct time period.
-                        alarm.whenElapsed = minTime;
+                        alarm.expectedWhenElapsed = alarm.whenElapsed = minTime;
                         if (alarm.maxWhenElapsed < minTime) {
                             alarm.maxWhenElapsed = minTime;
                         }
+                        alarm.expectedMaxWhenElapsed = alarm.maxWhenElapsed;
                         if (RECORD_DEVICE_IDLE_ALARMS) {
                             IdleDispatchEntry ent = new IdleDispatchEntry();
                             ent.uid = alarm.uid;
@@ -3053,7 +3050,7 @@ class AlarmManagerService extends SystemService {
                 if (alarm.repeatInterval > 0) {
                     // this adjustment will be zero if we're late by
                     // less than one full repeat interval
-                    alarm.count += (nowELAPSED - alarm.requestedWhenElapsed) / alarm.repeatInterval;
+                    alarm.count += (nowELAPSED - alarm.expectedWhenElapsed) / alarm.repeatInterval;
 
                     // Also schedule its next recurrence
                     final long delta = alarm.count * alarm.repeatInterval;
@@ -3128,8 +3125,9 @@ class AlarmManagerService extends SystemService {
         public long windowLength;
         public long whenElapsed;    // 'when' in the elapsed time base
         public long maxWhenElapsed; // also in the elapsed time base
-        public final long requestedWhenElapsed; // original expiry time requested by the app
-        public final long requestedMaxWhenElapsed;
+        // Expected alarm expiry time before app standby deferring is applied.
+        public long expectedWhenElapsed;
+        public long expectedMaxWhenElapsed;
         public long repeatInterval;
         public PriorityClass priorityClass;
 
@@ -3143,10 +3141,10 @@ class AlarmManagerService extends SystemService {
                     || _type == AlarmManager.RTC_WAKEUP;
             when = _when;
             whenElapsed = _whenElapsed;
-            requestedWhenElapsed = _whenElapsed;
+            expectedWhenElapsed = _whenElapsed;
             windowLength = _windowLength;
             maxWhenElapsed = _maxWhen;
-            requestedMaxWhenElapsed = _maxWhen;
+            expectedMaxWhenElapsed = _maxWhen;
             repeatInterval = _interval;
             operation = _op;
             listener = _rec;
@@ -3205,8 +3203,10 @@ class AlarmManagerService extends SystemService {
             final boolean isRtc = (type == RTC || type == RTC_WAKEUP);
             pw.print(prefix); pw.print("tag="); pw.println(statsTag);
             pw.print(prefix); pw.print("type="); pw.print(type);
-                    pw.print(" requestedWhenElapsed="); TimeUtils.formatDuration(
-                            requestedWhenElapsed, nowELAPSED, pw);
+                    pw.print(" expectedWhenElapsed="); TimeUtils.formatDuration(
+                    expectedWhenElapsed, nowELAPSED, pw);
+                    pw.print(" expectedMaxWhenElapsed="); TimeUtils.formatDuration(
+                    expectedMaxWhenElapsed, nowELAPSED, pw);
                     pw.print(" whenElapsed="); TimeUtils.formatDuration(whenElapsed,
                             nowELAPSED, pw);
                     pw.print(" when=");
@@ -3344,6 +3344,11 @@ class AlarmManagerService extends SystemService {
         }
     }
 
+    private boolean isExemptFromAppStandby(Alarm a) {
+        return a.alarmClock != null || UserHandle.isCore(a.creatorUid)
+                || (a.flags & FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED) != 0;
+    }
+
     private class AlarmThread extends Thread
     {
         public AlarmThread()
@@ -3462,7 +3467,7 @@ class AlarmManagerService extends SystemService {
                                     new ArraySet<>();
                             for (int i = 0; i < triggerList.size(); i++) {
                                 final Alarm a = triggerList.get(i);
-                                if (!UserHandle.isCore(a.creatorUid)) {
+                                if (!isExemptFromAppStandby(a)) {
                                     triggerPackages.add(Pair.create(
                                             a.sourcePackage, UserHandle.getUserId(a.creatorUid)));
                                 }
@@ -4148,7 +4153,7 @@ class AlarmManagerService extends SystemService {
                     mAllowWhileIdleDispatches.add(ent);
                 }
             }
-            if (!UserHandle.isCore(alarm.creatorUid)) {
+            if (!isExemptFromAppStandby(alarm)) {
                 final Pair<String, Integer> packageUser = Pair.create(alarm.sourcePackage,
                         UserHandle.getUserId(alarm.creatorUid));
                 mLastAlarmDeliveredForPackage.put(packageUser, nowELAPSED);
