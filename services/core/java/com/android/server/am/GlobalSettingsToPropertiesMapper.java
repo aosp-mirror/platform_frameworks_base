@@ -93,7 +93,7 @@ class GlobalSettingsToPropertiesMapper {
         }
         try {
             systemPropertiesSet(key, value);
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             Slog.e(TAG, "Unable to set property " + key + " value '" + value + "'", e);
         }
     }
