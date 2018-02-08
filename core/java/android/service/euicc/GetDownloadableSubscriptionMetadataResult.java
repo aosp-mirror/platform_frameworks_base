@@ -16,7 +16,6 @@
 package android.service.euicc;
 
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.euicc.DownloadableSubscription;
@@ -24,8 +23,9 @@ import android.telephony.euicc.DownloadableSubscription;
 /**
  * Result of a {@link EuiccService#onGetDownloadableSubscriptionMetadata} operation.
  * @hide
+ *
+ * TODO(b/35851809): Make this a SystemApi.
  */
-@SystemApi
 public final class GetDownloadableSubscriptionMetadataResult implements Parcelable {
 
     public static final Creator<GetDownloadableSubscriptionMetadataResult> CREATOR =
@@ -42,34 +42,20 @@ public final class GetDownloadableSubscriptionMetadataResult implements Parcelab
     };
 
     /**
-     * @hide
-     * @deprecated - Do no use. Use getResult() instead.
-     */
-    @Deprecated
-    public final int result;
-
-    @Nullable
-    private final DownloadableSubscription mSubscription;
-
-    /**
-     * Gets the result of the operation.
+     * Result of the operation.
      *
      * <p>May be one of the predefined {@code RESULT_} constants in EuiccService or any
      * implementation-specific code starting with {@link EuiccService#RESULT_FIRST_USER}.
      */
-    public int getResult() {
-        return result;
-    }
+    public final int result;
 
     /**
-     * Gets the {@link DownloadableSubscription} with filled-in metadata.
+     * The {@link DownloadableSubscription} with filled-in metadata.
      *
      * <p>Only non-null if {@link #result} is {@link EuiccService#RESULT_OK}.
      */
     @Nullable
-    public DownloadableSubscription getDownloadableSubscription() {
-        return mSubscription;
-    }
+    public final DownloadableSubscription subscription;
 
     /**
      * Construct a new {@link GetDownloadableSubscriptionMetadataResult}.
@@ -84,25 +70,25 @@ public final class GetDownloadableSubscriptionMetadataResult implements Parcelab
             @Nullable DownloadableSubscription subscription) {
         this.result = result;
         if (this.result == EuiccService.RESULT_OK) {
-            this.mSubscription = subscription;
+            this.subscription = subscription;
         } else {
             if (subscription != null) {
                 throw new IllegalArgumentException(
                         "Error result with non-null subscription: " + result);
             }
-            this.mSubscription = null;
+            this.subscription = null;
         }
     }
 
     private GetDownloadableSubscriptionMetadataResult(Parcel in) {
         this.result = in.readInt();
-        this.mSubscription = in.readTypedObject(DownloadableSubscription.CREATOR);
+        this.subscription = in.readTypedObject(DownloadableSubscription.CREATOR);
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(result);
-        dest.writeTypedObject(this.mSubscription, flags);
+        dest.writeTypedObject(this.subscription, flags);
     }
 
     @Override

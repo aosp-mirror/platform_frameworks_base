@@ -30,7 +30,6 @@ import android.annotation.SystemService;
 import android.app.BroadcastOptions;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -823,13 +822,10 @@ public class SubscriptionManager {
      * if the list is non-empty the list is sorted by {@link SubscriptionInfo#getSimSlotIndex}
      * then by {@link SubscriptionInfo#getSubscriptionId}.
      * </ul>
-     *
-     * <p>
-     * Permissions android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE is required
-     * for #getAvailableSubscriptionInfoList to be invoked.
      * @hide
+     *
+     * TODO(b/35851809): Make this a SystemApi.
      */
-    @SystemApi
     public List<SubscriptionInfo> getAvailableSubscriptionInfoList() {
         List<SubscriptionInfo> result = null;
 
@@ -867,6 +863,9 @@ public class SubscriptionManager {
      * if the list is non-empty the list is sorted by {@link SubscriptionInfo#getSimSlotIndex}
      * then by {@link SubscriptionInfo#getSubscriptionId}.
      * </ul>
+     * @hide
+     *
+     * TODO(b/35851809): Make this public.
      */
     public List<SubscriptionInfo> getAccessibleSubscriptionInfoList() {
         List<SubscriptionInfo> result = null;
@@ -892,8 +891,9 @@ public class SubscriptionManager {
      *
      * <p>Requires the {@link android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission.
      * @hide
+     *
+     * TODO(b/35851809): Make this a SystemApi.
      */
-    @SystemApi
     public void requestEmbeddedSubscriptionInfoListRefresh() {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
@@ -1891,52 +1891,5 @@ public class SubscriptionManager {
         final BroadcastOptions options = BroadcastOptions.makeBasic();
         options.setTemporaryAppWhitelistDuration(TimeUnit.MINUTES.toMillis(1));
         mContext.sendBroadcast(intent, null, options.toBundle());
-    }
-
-    /**
-     * Checks whether the app with the given context is authorized to manage the given subscription
-     * according to its metadata. Only supported for embedded subscriptions (if
-     * {@code SubscriptionInfo#isEmbedded} returns true).
-     *
-     * @param info The subscription to check.
-     * @return whether the app is authorized to manage this subscription per its metadata.
-     * @throws UnsupportedOperationException if this subscription is not embedded.
-     */
-    public boolean canManageSubscription(SubscriptionInfo info) {
-        return canManageSubscription(info, mContext.getPackageName());
-    }
-
-    /**
-     * Checks whether the given app is authorized to manage the given subscription according to its
-     * metadata. Only supported for embedded subscriptions (if {@code SubscriptionInfo#isEmbedded}
-     * returns true).
-     *
-     * @param info The subscription to check.
-     * @param packageName Package name of the app to check.
-     * @return whether the app is authorized to manage this subscription per its metadata.
-     * @throws UnsupportedOperationException if this subscription is not embedded.
-     * @hide
-     */
-    public boolean canManageSubscription(SubscriptionInfo info, String packageName) {
-        if (!info.isEmbedded()) {
-            throw new UnsupportedOperationException("Not an embedded subscription");
-        }
-        if (info.getAccessRules() == null) {
-            return false;
-        }
-        PackageManager packageManager = mContext.getPackageManager();
-        PackageInfo packageInfo;
-        try {
-            packageInfo = packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
-        } catch (PackageManager.NameNotFoundException e) {
-            throw new IllegalArgumentException("Unknown package: " + packageName, e);
-        }
-        for (UiccAccessRule rule : info.getAccessRules()) {
-            if (rule.getCarrierPrivilegeStatus(packageInfo)
-                    == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
-                return true;
-            }
-        }
-        return false;
     }
 }
