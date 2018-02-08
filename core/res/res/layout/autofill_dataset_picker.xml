@@ -14,7 +14,8 @@
      limitations under the License.
 -->
 
-<FrameLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+<view  xmlns:android="http://schemas.android.com/apk/res/android"
+    class="com.android.server.autofill.ui.FillUi$AutofillFrameLayout"
     android:id="@+id/autofill_dataset_picker"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
@@ -30,4 +31,4 @@
         android:visibility="gone">
     </ListView>
 
-</FrameLayout>
+</view>

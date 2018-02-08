@@ -45,6 +45,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Choreographer;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -407,6 +408,13 @@ public final class AutofillManager {
          */
         boolean autofillClientRequestShowFillUi(@NonNull View anchor, int width, int height,
                 @Nullable Rect virtualBounds, IAutofillWindowPresenter presenter);
+
+        /**
+         * Dispatch unhandled keyevent from Autofill window
+         * @param anchor The real view the UI needs to anchor to.
+         * @param keyEvent Unhandled KeyEvent from autofill window.
+         */
+        void autofillClientDispatchUnhandledKey(@NonNull View anchor, @NonNull KeyEvent keyEvent);
 
         /**
          * Request hiding the autofill UI.
@@ -1666,6 +1674,24 @@ public final class AutofillManager {
         }
     }
 
+    private void dispatchUnhandledKey(int sessionId, AutofillId id, KeyEvent keyEvent) {
+        final View anchor = findView(id);
+        if (anchor == null) {
+            return;
+        }
+
+        AutofillCallback callback = null;
+        synchronized (mLock) {
+            if (mSessionId == sessionId) {
+                AutofillClient client = getClient();
+
+                if (client != null) {
+                    client.autofillClientDispatchUnhandledKey(anchor, keyEvent);
+                }
+            }
+        }
+    }
+
     /** @hide */
     public static final int SET_STATE_FLAG_ENABLED = 0x01;
     /** @hide */
@@ -2604,6 +2630,14 @@ public final class AutofillManager {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
                 afm.post(() -> afm.notifyNoFillUi(sessionId, id, sessionFinishedState));
+            }
+        }
+
+        @Override
+        public void dispatchUnhandledKey(int sessionId, AutofillId id, KeyEvent fullScreen) {
+            final AutofillManager afm = mAfm.get();
+            if (afm != null) {
+                afm.post(() -> afm.dispatchUnhandledKey(sessionId, id, fullScreen));
             }
         }
 

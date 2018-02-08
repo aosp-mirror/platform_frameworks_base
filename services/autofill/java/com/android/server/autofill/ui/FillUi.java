@@ -18,6 +18,7 @@ package com.android.server.autofill.ui;
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sVerbose;
 
+import android.annotation.AttrRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
@@ -31,8 +32,10 @@ import android.service.autofill.Dataset;
 import android.service.autofill.Dataset.DatasetFieldFilter;
 import android.service.autofill.FillResponse;
 import android.text.TextUtils;
+import android.util.AttributeSet;
 import android.util.Slog;
 import android.util.TypedValue;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -47,6 +50,7 @@ import android.view.autofill.IAutofillWindowPresenter;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.RemoteViews;
 
@@ -70,6 +74,28 @@ final class FillUi {
 
     private static final TypedValue sTempTypedValue = new TypedValue();
 
+    public static final class AutofillFrameLayout extends FrameLayout {
+
+        OnKeyListener mUnhandledListener;
+
+        public AutofillFrameLayout(Context context, AttributeSet attrs) {
+            super(context, attrs);
+        }
+
+        public AutofillFrameLayout(Context context, AttributeSet attrs, @AttrRes int defStyleAttr) {
+            super(context, attrs, defStyleAttr);
+        }
+
+        @Override
+        public boolean dispatchKeyEvent(KeyEvent event) {
+            boolean handled = super.dispatchKeyEvent(event);
+            if (!handled) {
+                handled = mUnhandledListener.onKey(this, event.getKeyCode(), event);
+            }
+            return handled;
+        }
+    }
+
     interface Callback {
         void onResponsePicked(@NonNull FillResponse response);
         void onDatasetPicked(@NonNull Dataset dataset);
@@ -79,6 +105,7 @@ final class FillUi {
                 IAutofillWindowPresenter windowPresenter);
         void requestHideFillUi();
         void startIntentSender(IntentSender intentSender);
+        void dispatchUnhandledKey(KeyEvent keyEvent);
     }
 
     private final @NonNull Point mTempPoint = new Point();
@@ -122,6 +149,31 @@ final class FillUi {
         final ViewGroup decor = (ViewGroup) inflater.inflate(
                 mFullScreen ? R.layout.autofill_dataset_picker_fullscreen
                         : R.layout.autofill_dataset_picker, null);
+
+        // if autofill ui is not fullscreen, send unhandled keyevent to app window.
+        if (!mFullScreen) {
+            if (decor instanceof AutofillFrameLayout) {
+                ((AutofillFrameLayout) decor).mUnhandledListener =
+                        (View view, int keyCode, KeyEvent event) -> {
+                            switch (keyCode) {
+                                case KeyEvent.KEYCODE_BACK:
+                                case KeyEvent.KEYCODE_ESCAPE:
+                                case KeyEvent.KEYCODE_ENTER:
+                                case KeyEvent.KEYCODE_DPAD_CENTER:
+                                case KeyEvent.KEYCODE_DPAD_LEFT:
+                                case KeyEvent.KEYCODE_DPAD_UP:
+                                case KeyEvent.KEYCODE_DPAD_RIGHT:
+                                case KeyEvent.KEYCODE_DPAD_DOWN:
+                                    return false;
+                                default:
+                                    mCallback.dispatchUnhandledKey(event);
+                                    return true;
+                            }
+                        };
+            } else {
+                Slog.wtf(TAG, "Unable to send unhandled key");
+            }
+        }
 
         final RemoteViews.OnClickHandler interceptionHandler = new RemoteViews.OnClickHandler() {
             @Override
