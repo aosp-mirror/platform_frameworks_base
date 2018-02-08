@@ -436,7 +436,6 @@ public class WifiTrackerTest {
 
         mRequestScoresLatch = new CountDownLatch(1);
         startTracking(tracker);
-        tracker.forceUpdate();
         assertTrue("Latch timed out",
                 mRequestScoresLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
 
@@ -647,7 +646,8 @@ public class WifiTrackerTest {
         when(mockWifiManager.getConfiguredNetworks())
                 .thenReturn(new ArrayList<WifiConfiguration>());
         when(mockWifiManager.getScanResults()).thenReturn(results);
-        tracker.forceUpdate();
+
+        startTracking(tracker);
     }
 
     @Test
@@ -671,7 +671,7 @@ public class WifiTrackerTest {
     }
 
     @Test
-    public void forceUpdateShouldSynchronouslyFetchLatestInformation() throws Exception {
+    public void onStartShouldSynchronouslyFetchLatestInformation() throws Exception {
         Network mockNetwork = mock(Network.class);
         when(mockWifiManager.getCurrentNetwork()).thenReturn(mockNetwork);
 
@@ -683,7 +683,7 @@ public class WifiTrackerTest {
         when(mockConnectivityManager.getNetworkInfo(any(Network.class))).thenReturn(networkInfo);
 
         WifiTracker tracker = createMockedWifiTracker();
-        tracker.forceUpdate();
+        startTracking(tracker);
 
         verify(mockWifiManager).getConnectionInfo();
         verify(mockWifiManager, times(1)).getConfiguredNetworks();

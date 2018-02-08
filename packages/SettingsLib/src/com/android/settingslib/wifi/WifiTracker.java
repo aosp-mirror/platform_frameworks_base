@@ -258,7 +258,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
 
     /** Synchronously update the list of access points with the latest information. */
     @MainThread
-    public void forceUpdate() {
+    private void forceUpdate() {
         synchronized (mLock) {
             mLastInfo = mWifiManager.getConnectionInfo();
             mLastNetworkInfo = mConnectivityManager.getNetworkInfo(mWifiManager.getCurrentNetwork());
@@ -335,6 +335,9 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                 mConnectivityManager.registerNetworkCallback(mNetworkRequest, mNetworkCallback);
                 mRegistered = true;
             }
+
+            // fetch current ScanResults instead of waiting for broadcast of fresh results
+            forceUpdate();
         }
     }
 
