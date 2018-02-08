@@ -68,14 +68,12 @@ import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 import java.util.List;
-import java.util.Collection;
 
 public class NotificationPanelView extends PanelView implements
         ExpandableView.OnHeightChangedListener,
@@ -1571,7 +1569,7 @@ public class NotificationPanelView extends PanelView implements
     private void updatePanelExpanded() {
         boolean isExpanded = !isFullyCollapsed();
         if (mPanelExpanded != isExpanded) {
-            mHeadsUpManager.setIsExpanded(isExpanded);
+            mHeadsUpManager.setIsPanelExpanded(isExpanded);
             mStatusBar.setPanelExpanded(isExpanded);
             mPanelExpanded = isExpanded;
         }
@@ -2338,7 +2336,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
-    public void setHeadsUpManager(HeadsUpManager headsUpManager) {
+    public void setHeadsUpManager(HeadsUpManagerPhone headsUpManager) {
         super.setHeadsUpManager(headsUpManager);
         mHeadsUpTouchHelper = new HeadsUpTouchHelper(headsUpManager, mNotificationStackScroller,
                 this);
@@ -2630,8 +2628,8 @@ public class NotificationPanelView extends PanelView implements
         }
     }
 
-    public void setPulsing(Collection<HeadsUpManager.HeadsUpEntry> pulsing) {
-        mKeyguardStatusView.setPulsing(pulsing != null);
+    public void setPulsing(boolean pulsing) {
+        mKeyguardStatusView.setPulsing(pulsing);
         positionClockAndNotifications();
         mNotificationStackScroller.setPulsing(pulsing, mKeyguardStatusView.getLocationOnScreen()[1]
                 + mKeyguardStatusView.getClockBottom());
