@@ -16610,6 +16610,12 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (userId != UserHandle.USER_ALL) {
                     ps.setInstalled(true, userId);
                     ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, userId, installerPackageName);
+                } else {
+                    for (int currentUserId : sUserManager.getUserIds()) {
+                        ps.setInstalled(true, currentUserId);
+                        ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, currentUserId,
+                                installerPackageName);
+                    }
                 }
 
                 // When replacing an existing package, preserve the original install reason for all
