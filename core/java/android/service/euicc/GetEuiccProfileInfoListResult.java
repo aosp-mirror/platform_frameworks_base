@@ -16,18 +16,15 @@
 package android.service.euicc;
 
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Result of a {@link EuiccService#onGetEuiccProfileInfoList} operation.
  * @hide
+ *
+ * TODO(b/35851809): Make this a SystemApi.
  */
-@SystemApi
 public final class GetEuiccProfileInfoListResult implements Parcelable {
 
     public static final Creator<GetEuiccProfileInfoListResult> CREATOR =
@@ -44,38 +41,19 @@ public final class GetEuiccProfileInfoListResult implements Parcelable {
             };
 
     /**
-     * @hide
-     * @deprecated - Do no use. Use getResult() instead.
-     */
-    @Deprecated
-    public final int result;
-
-    @Nullable
-    private final EuiccProfileInfo[] mProfiles;
-
-    private final boolean mIsRemovable;
-
-    /**
-     * Gets the result of the operation.
+     * Result of the operation.
      *
      * <p>May be one of the predefined {@code RESULT_} constants in EuiccService or any
      * implementation-specific code starting with {@link EuiccService#RESULT_FIRST_USER}.
      */
-    public int getResult() {
-        return result;
-    }
+    public final int result;
 
-    /** Gets the profile list (only upon success). */
+    /** The profile list (only upon success). */
     @Nullable
-    public List<EuiccProfileInfo> getProfiles() {
-        if (mProfiles == null) return null;
-        return Arrays.asList(mProfiles);
-    }
+    public final EuiccProfileInfo[] profiles;
 
-    /** Gets whether the eUICC is removable. */
-    public boolean getIsRemovable() {
-        return mIsRemovable;
-    }
+    /** Whether the eUICC is removable. */
+    public final boolean isRemovable;
 
     /**
      * Construct a new {@link GetEuiccProfileInfoListResult}.
@@ -93,29 +71,30 @@ public final class GetEuiccProfileInfoListResult implements Parcelable {
     public GetEuiccProfileInfoListResult(
             int result, @Nullable EuiccProfileInfo[] profiles, boolean isRemovable) {
         this.result = result;
-        this.mIsRemovable = isRemovable;
+        this.isRemovable = isRemovable;
         if (this.result == EuiccService.RESULT_OK) {
-            this.mProfiles = profiles;
+            this.profiles = profiles;
         } else {
             if (profiles != null) {
                 throw new IllegalArgumentException(
                         "Error result with non-null profiles: " + result);
             }
-            this.mProfiles = null;
+            this.profiles = null;
         }
+
     }
 
     private GetEuiccProfileInfoListResult(Parcel in) {
         this.result = in.readInt();
-        this.mProfiles = in.createTypedArray(EuiccProfileInfo.CREATOR);
-        this.mIsRemovable = in.readBoolean();
+        this.profiles = in.createTypedArray(EuiccProfileInfo.CREATOR);
+        this.isRemovable = in.readBoolean();
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(result);
-        dest.writeTypedArray(mProfiles, flags);
-        dest.writeBoolean(mIsRemovable);
+        dest.writeTypedArray(profiles, flags);
+        dest.writeBoolean(isRemovable);
     }
 
     @Override

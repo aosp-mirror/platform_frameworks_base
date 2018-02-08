@@ -17,7 +17,6 @@ package android.service.euicc;
 
 import android.annotation.CallSuper;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
@@ -42,11 +41,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p>To implement the LPA backend, you must extend this class and declare this service in your
  * manifest file. The service must require the
  * {@link android.Manifest.permission#BIND_EUICC_SERVICE} permission and include an intent filter
- * with the {@link #EUICC_SERVICE_INTERFACE} action. It's suggested that the priority of the intent
- * filter to be set to a non-zero value in case multiple implementations are present on the device.
- * See the below example. Note that there will be problem if two LPAs are present and they have the
- * same priority.
- * Example:
+ * with the {@link #EUICC_SERVICE_INTERFACE} action. The priority of the intent filter must be set
+ * to a non-zero value in case multiple implementations are present on the device. For example:
  *
  * <pre>{@code
  * <service android:name=".MyEuiccService"
@@ -69,9 +65,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * filter with the appropriate action, the {@link #CATEGORY_EUICC_UI} category, and a non-zero
  * priority.
  *
+ * TODO(b/35851809): Make this a SystemApi.
  * @hide
  */
-@SystemApi
 public abstract class EuiccService extends Service {
     /** Action which must be included in this service's intent filter. */
     public static final String EUICC_SERVICE_INTERFACE = "android.service.euicc.EuiccService";
@@ -81,10 +77,7 @@ public abstract class EuiccService extends Service {
 
     // LUI actions. These are passthroughs of the corresponding EuiccManager actions.
 
-    /**
-     * @see android.telephony.euicc.EuiccManager#ACTION_MANAGE_EMBEDDED_SUBSCRIPTIONS
-     * The difference is this one is used by system to bring up the LUI.
-     */
+    /** @see android.telephony.euicc.EuiccManager#ACTION_MANAGE_EMBEDDED_SUBSCRIPTIONS */
     public static final String ACTION_MANAGE_EMBEDDED_SUBSCRIPTIONS =
             "android.service.euicc.action.MANAGE_EMBEDDED_SUBSCRIPTIONS";
     /** @see android.telephony.euicc.EuiccManager#ACTION_PROVISION_EMBEDDED_SUBSCRIPTION */
@@ -95,10 +88,7 @@ public abstract class EuiccService extends Service {
     // require user interaction.
     // TODO(b/33075886): Define extras for any input parameters to these dialogs once they are
     // more scoped out.
-    /**
-     * Alert the user that this action will result in an active SIM being deactivated.
-     * To implement the LUI triggered by the system, you need to define this in AndroidManifest.xml.
-     */
+    /** Alert the user that this action will result in an active SIM being deactivated. */
     public static final String ACTION_RESOLVE_DEACTIVATE_SIM =
             "android.service.euicc.action.RESOLVE_DEACTIVATE_SIM";
     /**
@@ -112,11 +102,7 @@ public abstract class EuiccService extends Service {
     public static final String ACTION_RESOLVE_CONFIRMATION_CODE =
             "android.service.euicc.action.RESOLVE_CONFIRMATION_CODE";
 
-    /**
-     * Intent extra set for resolution requests containing the package name of the calling app.
-     * This is used by the above actions including ACTION_RESOLVE_DEACTIVATE_SIM,
-     * ACTION_RESOLVE_NO_PRIVILEGES and ACTION_RESOLVE_CONFIRMATION_CODE.
-     */
+    /** Intent extra set for resolution requests containing the package name of the calling app. */
     public static final String EXTRA_RESOLUTION_CALLING_PACKAGE =
             "android.service.euicc.extra.RESOLUTION_CALLING_PACKAGE";
 
@@ -150,18 +136,10 @@ public abstract class EuiccService extends Service {
         RESOLUTION_ACTIONS.add(EuiccService.ACTION_RESOLVE_CONFIRMATION_CODE);
     }
 
-    /**
-     * Boolean extra for resolution actions indicating whether the user granted consent.
-     * This is used and set by the implementation and used in {@code EuiccOperation}.
-     */
-    public static final String EXTRA_RESOLUTION_CONSENT =
-            "android.service.euicc.extra.RESOLUTION_CONSENT";
-    /**
-     * String extra for resolution actions indicating the carrier confirmation code.
-     * This is used and set by the implementation and used in {@code EuiccOperation}.
-     */
-    public static final String EXTRA_RESOLUTION_CONFIRMATION_CODE =
-            "android.service.euicc.extra.RESOLUTION_CONFIRMATION_CODE";
+    /** Boolean extra for resolution actions indicating whether the user granted consent. */
+    public static final String RESOLUTION_EXTRA_CONSENT = "consent";
+    /** String extra for resolution actions indicating the carrier confirmation code. */
+    public static final String RESOLUTION_EXTRA_CONFIRMATION_CODE = "confirmation_code";
 
     private final IEuiccService.Stub mStubWrapper;
 
@@ -221,9 +199,9 @@ public abstract class EuiccService extends Service {
      *
      * @see IEuiccService#startOtaIfNecessary
      */
-    public abstract static class OtaStatusChangedCallback {
+    public interface OtaStatusChangedCallback {
         /** Called when OTA status is changed. */
-        abstract void onOtaStatusChanged(int status);
+        void onOtaStatusChanged(int status);
     }
 
     /**
@@ -260,7 +238,8 @@ public abstract class EuiccService extends Service {
     /**
      * Populate {@link DownloadableSubscription} metadata for the given downloadable subscription.
      *
-     * @param slotId ID of the SIM slot to use for the operation.
+     * @param slotId ID of the SIM slot to use for the operation. This is currently not populated
+     *     but is here to future-proof the APIs.
      * @param subscription A subscription whose metadata needs to be populated.
      * @param forceDeactivateSim If true, and if an active SIM must be deactivated to access the
      *     eUICC, perform this action automatically. Otherwise, {@link #RESULT_MUST_DEACTIVATE_SIM)}
@@ -288,7 +267,8 @@ public abstract class EuiccService extends Service {
     /**
      * Download the given subscription.
      *
-     * @param slotId ID of the SIM slot to use for the operation.
+     * @param slotId ID of the SIM slot to use for the operation. This is currently not populated
+     *     but is here to future-proof the APIs.
      * @param subscription The subscription to download.
      * @param switchAfterDownload If true, the subscription should be enabled upon successful
      *     download.
@@ -306,7 +286,8 @@ public abstract class EuiccService extends Service {
     /**
      * Return a list of all @link EuiccProfileInfo}s.
      *
-     * @param slotId ID of the SIM slot to use for the operation.
+     * @param slotId ID of the SIM slot to use for the operation. This is currently not populated
+     *     but is here to future-proof the APIs.
      * @return The result of the operation.
      * @see android.telephony.SubscriptionManager#getAvailableSubscriptionInfoList
      * @see android.telephony.SubscriptionManager#getAccessibleSubscriptionInfoList
@@ -316,7 +297,8 @@ public abstract class EuiccService extends Service {
     /**
      * Return info about the eUICC chip/device.
      *
-     * @param slotId ID of the SIM slot to use for the operation.
+     * @param slotId ID of the SIM slot to use for the operation. This is currently not populated
+     *     but is here to future-proof the APIs.
      * @return the {@link EuiccInfo} for the eUICC chip/device.
      * @see android.telephony.euicc.EuiccManager#getEuiccInfo
      */
@@ -328,7 +310,8 @@ public abstract class EuiccService extends Service {
      * <p>If the subscription is currently active, it should be deactivated first (equivalent to a
      * physical SIM being ejected).
      *
-     * @param slotId ID of the SIM slot to use for the operation.
+     * @param slotId ID of the SIM slot to use for the operation. This is currently not populated
+     *     but is here to future-proof the APIs.
      * @param iccid the ICCID of the subscription to delete.
      * @return the result of the delete operation. May be one of the predefined {@code RESULT_}
      *     constants or any implementation-specific code starting with {@link #RESULT_FIRST_USER}.
@@ -339,7 +322,8 @@ public abstract class EuiccService extends Service {
     /**
      * Switch to the given subscription.
      *
-     * @param slotId ID of the SIM slot to use for the operation.
+     * @param slotId ID of the SIM slot to use for the operation. This is currently not populated
+     *     but is here to future-proof the APIs.
      * @param iccid the ICCID of the subscription to enable. May be null, in which case the current
      *     profile should be deactivated and no profile should be activated to replace it - this is
      *     equivalent to a physical SIM being ejected.
@@ -356,7 +340,8 @@ public abstract class EuiccService extends Service {
     /**
      * Update the nickname of the given subscription.
      *
-     * @param slotId ID of the SIM slot to use for the operation.
+     * @param slotId ID of the SIM slot to use for the operation. This is currently not populated
+     *     but is here to future-proof the APIs.
      * @param iccid the ICCID of the subscription to update.
      * @param nickname the new nickname to apply.
      * @return the result of the update operation. May be one of the predefined {@code RESULT_}

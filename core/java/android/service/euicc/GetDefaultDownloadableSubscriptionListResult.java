@@ -16,19 +16,16 @@
 package android.service.euicc;
 
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.euicc.DownloadableSubscription;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * Result of a {@link EuiccService#onGetDefaultDownloadableSubscriptionList} operation.
  * @hide
+ *
+ * TODO(b/35851809): Make this a SystemApi.
  */
-@SystemApi
 public final class GetDefaultDownloadableSubscriptionListResult implements Parcelable {
 
     public static final Creator<GetDefaultDownloadableSubscriptionListResult> CREATOR =
@@ -45,35 +42,20 @@ public final class GetDefaultDownloadableSubscriptionListResult implements Parce
     };
 
     /**
-     * @hide
-     * @deprecated - Do no use. Use getResult() instead.
-     */
-    @Deprecated
-    public final int result;
-
-    @Nullable
-    private final DownloadableSubscription[] mSubscriptions;
-
-    /**
-     * Gets the result of the operation.
+     * Result of the operation.
      *
      * <p>May be one of the predefined {@code RESULT_} constants in EuiccService or any
      * implementation-specific code starting with {@link EuiccService#RESULT_FIRST_USER}.
      */
-    public int getResult() {
-        return result;
-    }
+    public final int result;
 
     /**
-     * Gets the available {@link DownloadableSubscription}s (with filled-in metadata).
+     * The available {@link DownloadableSubscription}s (with filled-in metadata).
      *
      * <p>Only non-null if {@link #result} is {@link EuiccService#RESULT_OK}.
      */
     @Nullable
-    public List<DownloadableSubscription> getDownloadableSubscriptions() {
-        if (mSubscriptions == null) return null;
-        return Arrays.asList(mSubscriptions);
-    }
+    public final DownloadableSubscription[] subscriptions;
 
     /**
      * Construct a new {@link GetDefaultDownloadableSubscriptionListResult}.
@@ -88,25 +70,25 @@ public final class GetDefaultDownloadableSubscriptionListResult implements Parce
             @Nullable DownloadableSubscription[] subscriptions) {
         this.result = result;
         if (this.result == EuiccService.RESULT_OK) {
-            this.mSubscriptions = subscriptions;
+            this.subscriptions = subscriptions;
         } else {
             if (subscriptions != null) {
                 throw new IllegalArgumentException(
                         "Error result with non-null subscriptions: " + result);
             }
-            this.mSubscriptions = null;
+            this.subscriptions = null;
         }
     }
 
     private GetDefaultDownloadableSubscriptionListResult(Parcel in) {
         this.result = in.readInt();
-        this.mSubscriptions = in.createTypedArray(DownloadableSubscription.CREATOR);
+        this.subscriptions = in.createTypedArray(DownloadableSubscription.CREATOR);
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(result);
-        dest.writeTypedArray(mSubscriptions, flags);
+        dest.writeTypedArray(subscriptions, flags);
     }
 
     @Override
