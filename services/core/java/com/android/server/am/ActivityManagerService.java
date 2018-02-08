@@ -4084,9 +4084,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 runtimeFlags |= Zygote.ONLY_USE_SYSTEM_OAT_FILES;
             }
 
-            if (app.info.isAllowedToUseHiddenApi() || app.instr != null) {
-                // This app is allowed to use undocumented and private APIs or is
-                // being instrumented. Set up its runtime with the appropriate flag.
+            if (app.info.isAllowedToUseHiddenApi()) {
+                // This app is allowed to use undocumented and private APIs. Set
+                // up its runtime with the appropriate flag.
                 runtimeFlags |= Zygote.DISABLE_HIDDEN_API_CHECKS;
             }
 
@@ -7218,7 +7218,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             handleAppDiedLocked(app, willRestart, allowRestart);
             if (willRestart) {
                 removeLruProcessLocked(app);
-                addAppLocked(app.info, null, false, null /* ABI override */, app.instr);
+                addAppLocked(app.info, null, false, null /* ABI override */);
             }
         } else {
             mRemovedProcesses.add(app);
@@ -12490,8 +12490,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         .getPersistentApplications(STOCK_PM_FLAGS | matchFlags).getList();
                 for (ApplicationInfo app : apps) {
                     if (!"android".equals(app.packageName)) {
-                        addAppLocked(app, null, false, null /* ABI override */,
-                                null /* instrumentation */);
+                        addAppLocked(app, null, false, null /* ABI override */);
                     }
                 }
             } catch (RemoteException ex) {
@@ -12707,7 +12706,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     final ProcessRecord addAppLocked(ApplicationInfo info, String customProcess, boolean isolated,
-            String abiOverride, ActiveInstrumentation instrumentation) {
+            String abiOverride) {
         ProcessRecord app;
         if (!isolated) {
             app = getProcessRecordLocked(customProcess != null ? customProcess : info.processName,
@@ -12736,9 +12735,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             app.persistent = true;
             app.maxAdj = ProcessList.PERSISTENT_PROC_ADJ;
         }
-
-        app.instr = instrumentation;
-
         if (app.thread == null && mPersistentStartingProcesses.indexOf(app) < 0) {
             mPersistentStartingProcesses.add(app);
             startProcessLocked(app, "added application",
@@ -21545,7 +21541,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mUsageStatsService.reportEvent(ii.targetPackage, userId,
                         UsageEvents.Event.SYSTEM_INTERACTION);
             }
-            ProcessRecord app = addAppLocked(ai, defProcess, false, abiOverride, activeInstr);
+            ProcessRecord app = addAppLocked(ai, defProcess, false, abiOverride);
+            app.instr = activeInstr;
             activeInstr.mFinished = false;
             activeInstr.mRunningProcesses.add(app);
             if (!mActiveInstrumentation.contains(activeInstr)) {
@@ -24944,7 +24941,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     mRemovedProcesses.remove(i);
 
                     if (app.persistent) {
-                        addAppLocked(app.info, null, false, null /* ABI override */, app.instr);
+                        addAppLocked(app.info, null, false, null /* ABI override */);
                     }
                 }
             }

@@ -16,7 +16,6 @@
 package android.telephony;
 
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.content.pm.PackageInfo;
 import android.content.pm.Signature;
 import android.os.Parcel;
@@ -40,8 +39,9 @@ import java.util.Objects;
  * specification.
  *
  * @hide
+ *
+ * TODO(b/35851809): Make this a SystemApi.
  */
-@SystemApi
 public final class UiccAccessRule implements Parcelable {
     private static final String TAG = "UiccAccessRule";
 
