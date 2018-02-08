@@ -3539,6 +3539,7 @@ public abstract class Context {
      * @hide
      */
     @SystemApi
+    @Deprecated
     public static final String WIFI_RTT_SERVICE = "rttmanager";
 
     /**

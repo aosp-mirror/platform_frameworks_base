@@ -12,6 +12,7 @@ import android.net.wifi.rtt.RangingRequest;
 import android.net.wifi.rtt.RangingResult;
 import android.net.wifi.rtt.RangingResultCallback;
 import android.net.wifi.rtt.WifiRttManager;
+import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -23,6 +24,7 @@ import java.util.List;
 
 /** @hide */
 @SystemApi
+@Deprecated
 @SystemService(Context.WIFI_RTT_SERVICE)
 public class RttManager {
 
@@ -180,6 +182,7 @@ public class RttManager {
     /**
      * This class describe the RTT capability of the Hardware
      */
+    @Deprecated
     public static class RttCapabilities implements Parcelable {
         /** @deprecated It is not supported*/
         @Deprecated
@@ -313,12 +316,16 @@ public class RttManager {
              };
     }
 
+    /**
+     * This method is deprecated. Please use the {@link WifiRttManager} API.
+     */
     @RequiresPermission(Manifest.permission.LOCATION_HARDWARE)
     public RttCapabilities getRttCapabilities() {
         return mRttCapabilities;
     }
 
     /** specifies parameters for RTT request */
+    @Deprecated
     public static class RttParams {
         /**
          * type of destination device being ranged
@@ -501,6 +508,7 @@ public class RttManager {
     }
 
     /** pseudo-private class used to parcel arguments */
+    @Deprecated
     public static class ParcelableRttParams implements Parcelable {
 
         @NonNull
@@ -588,12 +596,14 @@ public class RttManager {
                 };
     }
 
+    @Deprecated
     public static class WifiInformationElement {
         /** Information Element ID 0xFF means element is invalid. */
         public byte id;
         public byte[] data;
     }
     /** specifies RTT results */
+    @Deprecated
     public static class RttResult {
         /** mac address of the device being ranged. */
         public String bssid;
@@ -745,6 +755,7 @@ public class RttManager {
 
 
     /** pseudo-private class used to parcel results. */
+    @Deprecated
     public static class ParcelableRttResults implements Parcelable {
 
         public RttResult mResults[];
@@ -910,7 +921,7 @@ public class RttManager {
                 };
     }
 
-
+    @Deprecated
     public static interface RttListener {
         public void onSuccess(RttResult[] results);
         public void onFailure(int reason, String description);
@@ -919,6 +930,9 @@ public class RttManager {
 
     /**
      * Request to start an RTT ranging
+     * <p>
+     * This method is deprecated. Please use the
+     * {@link WifiRttManager#startRanging(RangingRequest, RangingResultCallback, Handler)} API.
      *
      * @param params  -- RTT request Parameters
      * @param listener -- Call back to inform RTT result
@@ -990,6 +1004,10 @@ public class RttManager {
         }
     }
 
+    /**
+     * This method is deprecated and performs no function. Please use the {@link WifiRttManager}
+     * API.
+     */
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public void stopRanging(RttListener listener) {
         Log.e(TAG, "stopRanging: unsupported operation - nop");
@@ -1004,6 +1022,7 @@ public class RttManager {
      * The client can freely destroy or reuse the callback after {@link RttManager#disableResponder}
      * is called.
      */
+    @Deprecated
     public abstract static class ResponderCallback {
         /** Callback when responder is enabled. */
         public abstract void onResponderEnabled(ResponderConfig config);
@@ -1019,6 +1038,10 @@ public class RttManager {
      * Note calling this method with the same callback when the responder is already enabled won't
      * change the responder state, a cached {@link ResponderConfig} from the last enabling will be
      * returned through the callback.
+     * <p>
+     * This method is deprecated and will throw an {@link UnsupportedOperationException}
+     * exception. Please use the {@link WifiRttManager} API to perform a Wi-Fi Aware peer-to-peer
+     * ranging.
      *
      * @param callback Callback for responder enabling/disabling result.
      * @throws IllegalArgumentException If {@code callback} is null.
@@ -1035,6 +1058,10 @@ public class RttManager {
      * <p>
      * Calling this method when responder isn't enabled won't have any effect. The callback can be
      * reused for enabling responder after this method is called.
+     * <p>
+     * This method is deprecated and will throw an {@link UnsupportedOperationException}
+     * exception. Please use the {@link WifiRttManager} API to perform a Wi-Fi Aware peer-to-peer
+     * ranging.
      *
      * @param callback The same callback used for enabling responder.
      * @throws IllegalArgumentException If {@code callback} is null.
@@ -1051,6 +1078,7 @@ public class RttManager {
      *
      * @see ScanResult
      */
+    @Deprecated
     public static class ResponderConfig implements Parcelable {
 
         // TODO: make all fields final once we can get mac address from responder HAL APIs.
