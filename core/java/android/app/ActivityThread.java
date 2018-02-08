@@ -5890,21 +5890,23 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         // Preload fonts resources
         FontsContract.setApplicationContextForResources(appContext);
-        try {
-            final ApplicationInfo info =
-                    getPackageManager().getApplicationInfo(
-                            data.appInfo.packageName,
-                            PackageManager.GET_META_DATA /*flags*/,
-                            UserHandle.myUserId());
-            if (info.metaData != null) {
-                final int preloadedFontsResource = info.metaData.getInt(
-                        ApplicationInfo.METADATA_PRELOADED_FONTS, 0);
-                if (preloadedFontsResource != 0) {
-                    data.info.getResources().preloadFonts(preloadedFontsResource);
+        if (!Process.isIsolated()) {
+            try {
+                final ApplicationInfo info =
+                        getPackageManager().getApplicationInfo(
+                                data.appInfo.packageName,
+                                PackageManager.GET_META_DATA /*flags*/,
+                                UserHandle.myUserId());
+                if (info.metaData != null) {
+                    final int preloadedFontsResource = info.metaData.getInt(
+                            ApplicationInfo.METADATA_PRELOADED_FONTS, 0);
+                    if (preloadedFontsResource != 0) {
+                        data.info.getResources().preloadFonts(preloadedFontsResource);
+                    }
                 }
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
         }
     }
 
