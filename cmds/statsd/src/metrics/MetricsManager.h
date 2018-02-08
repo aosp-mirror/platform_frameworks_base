@@ -64,6 +64,11 @@ public:
 
     void dumpStates(FILE* out, bool verbose);
 
+    // Returns the elapsed realtime when this metric manager last reported metrics.
+    uint64_t getLastReportTimeNs() {
+        return mLastReportTimeNs;
+    };
+
     // Config source owner can call onDumpReport() to get all the metrics collected.
     virtual void onDumpReport(android::util::ProtoOutputStream* protoOutput);
     virtual void onDumpReport(const uint64_t& dumpTimeStampNs, ConfigMetricsReport* report);
@@ -77,6 +82,8 @@ private:
     sp<UidMap> mUidMap;
 
     bool mConfigValid = false;
+
+    uint64_t mLastReportTimeNs;
 
     // The uid log sources from StatsdConfig.
     std::vector<int32_t> mAllowedUid;

@@ -45,8 +45,6 @@ namespace statsd {
 
 // for StatsLogReport
 const int FIELD_ID_ID = 1;
-const int FIELD_ID_START_REPORT_NANOS = 2;
-const int FIELD_ID_END_REPORT_NANOS = 3;
 const int FIELD_ID_GAUGE_METRICS = 8;
 // for GaugeMetricDataWrapper
 const int FIELD_ID_DATA = 1;
@@ -134,7 +132,6 @@ void GaugeMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
     }
 
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
-    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_START_REPORT_NANOS, (long long)mStartTimeNs);
     long long protoToken = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_GAUGE_METRICS);
 
     for (const auto& pair : mPastBuckets) {
@@ -188,7 +185,6 @@ void GaugeMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
         protoOutput->end(wrapperToken);
     }
     protoOutput->end(protoToken);
-    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS, (long long)dumpTimeNs);
 
     mPastBuckets.clear();
     // TODO: Clear mDimensionKeyMap once the report is dumped.

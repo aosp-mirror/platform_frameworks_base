@@ -44,8 +44,6 @@ namespace statsd {
 
 // for StatsLogReport
 const int FIELD_ID_ID = 1;
-const int FIELD_ID_START_REPORT_NANOS = 2;
-const int FIELD_ID_END_REPORT_NANOS = 3;
 const int FIELD_ID_DURATION_METRICS = 6;
 // for DurationMetricDataWrapper
 const int FIELD_ID_DATA = 1;
@@ -179,7 +177,6 @@ void DurationMetricProducer::onConditionChangedLocked(const bool conditionMet,
 void DurationMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs, StatsLogReport* report) {
     flushIfNeededLocked(dumpTimeNs);
     report->set_metric_id(mMetricId);
-    report->set_start_report_nanos(mStartTimeNs);
 
     auto duration_metrics = report->mutable_duration_metrics();
     for (const auto& pair : mPastBuckets) {
@@ -205,7 +202,6 @@ void DurationMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
     }
 
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
-    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_START_REPORT_NANOS, (long long)mStartTimeNs);
     long long protoToken = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_DURATION_METRICS);
 
     VLOG("metric %lld dump report now...", (long long)mMetricId);
@@ -250,7 +246,6 @@ void DurationMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
     }
 
     protoOutput->end(protoToken);
-    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS, (long long)dumpTimeNs);
     mPastBuckets.clear();
 }
 
