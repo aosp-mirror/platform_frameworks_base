@@ -906,7 +906,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                     if (mStatusBarWindowManager != null) {
                         mStatusBarWindowManager.setScrimsVisibility(scrimsVisible);
                     }
-                }, new DozeParameters(mContext), mContext.getSystemService(AlarmManager.class));
+                }, DozeParameters.getInstance(mContext),
+                mContext.getSystemService(AlarmManager.class));
         if (mScrimSrcModeEnabled) {
             Runnable runnable = () -> {
                 boolean asSrc = mBackdrop.getVisibility() != View.VISIBLE;
@@ -918,7 +919,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         mHeadsUpManager.addListener(mScrimController);
         mStackScroller.setScrimController(mScrimController);
-        mDozeScrimController = new DozeScrimController(mScrimController, context);
+        mDozeScrimController = new DozeScrimController(mScrimController, context,
+                DozeParameters.getInstance(context));
 
         // Other icons
         mVolumeComponent = getComponent(VolumeComponent.class);
@@ -1867,7 +1869,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public boolean isDozing() {
-        return mDozing;
+        return mDozing && mStackScroller.isFullyDark();
     }
 
     @Override
@@ -3817,13 +3819,16 @@ public class StatusBar extends SystemUI implements DemoMode,
     private void updateDozingState() {
         Trace.traceCounter(Trace.TRACE_TAG_APP, "dozing", mDozing ? 1 : 0);
         Trace.beginSection("StatusBar#updateDozingState");
+
+        boolean sleepingFromKeyguard =
+                mStatusBarKeyguardViewManager.isGoingToSleepVisibleNotOccluded();
         boolean animate = (!mDozing && mDozeServiceHost.shouldAnimateWakeup())
-                || (mDozing && mDozeServiceHost.shouldAnimateScreenOff());
-        mNotificationPanel.setDozing(mDozing, animate);
+                || (mDozing && mDozeServiceHost.shouldAnimateScreenOff() && sleepingFromKeyguard);
+
         mStackScroller.setDark(mDozing, animate, mWakeUpTouchLocation);
         mDozeScrimController.setDozing(mDozing);
         mKeyguardIndicationController.setDozing(mDozing);
-        mNotificationPanel.setDark(mDozing, animate);
+        mNotificationPanel.setDozing(mDozing, animate);
         updateQsExpansionEnabled();
         mViewHierarchyManager.updateRowStates();
         Trace.endSection();
@@ -4739,6 +4744,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             if (mDozingRequested) {
                 mDozingRequested = false;
                 DozeLog.traceDozing(mContext, mDozing);
+                mWakefulnessLifecycle.dispatchStartedWakingUp();
                 updateDozing();
             }
         }

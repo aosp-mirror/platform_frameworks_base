@@ -400,7 +400,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private int mSidePaddings;
     private final int mSeparatorWidth;
     private final int mSeparatorThickness;
-    private final Rect mTmpRect = new Rect();
+    private final Rect mBackgroundAnimationRect = new Rect();
     private int mClockBottom;
     private int mAntiBurnInOffsetX;
 
@@ -515,26 +515,29 @@ public class NotificationStackScrollLayout extends ViewGroup
         final int darkBottom = darkTop + mSeparatorThickness;
 
         if (mAmbientState.hasPulsingNotifications()) {
-            // TODO draw divider between notification and shelf
-        } else if (mAmbientState.isDark()) {
+            // No divider, we have a notification icon instead
+        } else if (mAmbientState.isFullyDark()) {
             // Only draw divider on AOD if we actually have notifications
             if (mFirstVisibleBackgroundChild != null) {
                 canvas.drawRect(darkLeft, darkTop, darkRight, darkBottom, mBackgroundPaint);
             }
-            setClipBounds(null);
         } else {
             float animProgress = Interpolators.FAST_OUT_SLOW_IN
                     .getInterpolation(1f - mDarkAmount);
             float sidePaddingsProgress = Interpolators.FAST_OUT_SLOW_IN
                     .getInterpolation((1f - mDarkAmount) * 2);
-            mTmpRect.set((int) MathUtils.lerp(darkLeft, lockScreenLeft, sidePaddingsProgress),
+            mBackgroundAnimationRect.set(
+                    (int) MathUtils.lerp(darkLeft, lockScreenLeft, sidePaddingsProgress),
                     (int) MathUtils.lerp(darkTop, lockScreenTop, animProgress),
                     (int) MathUtils.lerp(darkRight, lockScreenRight, sidePaddingsProgress),
                     (int) MathUtils.lerp(darkBottom, lockScreenBottom, animProgress));
-            canvas.drawRoundRect(mTmpRect.left, mTmpRect.top, mTmpRect.right, mTmpRect.bottom,
-                    mCornerRadius, mCornerRadius, mBackgroundPaint);
-            setClipBounds(animProgress == 1 ? null : mTmpRect);
+            if (!mAmbientState.isDark() || mFirstVisibleBackgroundChild != null) {
+                canvas.drawRoundRect(mBackgroundAnimationRect.left, mBackgroundAnimationRect.top,
+                        mBackgroundAnimationRect.right, mBackgroundAnimationRect.bottom,
+                        mCornerRadius, mCornerRadius, mBackgroundPaint);
+            }
         }
+        updateClipping();
     }
 
     private void updateBackgroundDimming() {
@@ -693,7 +696,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (mPulsing) {
             mTopPadding = mClockBottom;
         } else {
-            mTopPadding = mAmbientState.isDark() ? mDarkTopPadding : mRegularTopPadding;
+            mTopPadding = (int) MathUtils.lerp(mRegularTopPadding, mDarkTopPadding, mDarkAmount);
         }
         mAmbientState.setLayoutHeight(getLayoutHeight());
         updateAlgorithmLayoutMinHeight();
@@ -820,6 +823,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (mRegularTopPadding != topPadding) {
             mRegularTopPadding = topPadding;
             mDarkTopPadding = topPadding + mDarkSeparatorPadding;
+            mAmbientState.setDarkTopPadding(mDarkTopPadding);
             updateAlgorithmHeightAndPadding();
             updateContentHeight();
             if (animate && mAnimationsEnabled && mIsExpanded) {
@@ -883,13 +887,17 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void updateClipping() {
+        boolean animatingClipping = mDarkAmount > 0 && mDarkAmount < 1;
         boolean clipped = mRequestedClipBounds != null && !mInHeadsUpPinnedMode
                 && !mHeadsUpAnimatingAway;
         if (mIsClipped != clipped) {
             mIsClipped = clipped;
             updateFadingState();
         }
-        if (clipped) {
+
+        if (animatingClipping) {
+            setClipBounds(mBackgroundAnimationRect);
+        } else if (clipped) {
             setClipBounds(mRequestedClipBounds);
         } else {
             setClipBounds(null);
@@ -2075,7 +2083,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         float previousPaddingAmount = 0.0f;
         int numShownItems = 0;
         boolean finish = false;
-        int maxDisplayedNotifications = mAmbientState.isDark()
+        int maxDisplayedNotifications = mAmbientState.isFullyDark()
                 ? (hasPulsingNotifications() ? 1 : 0)
                 : mMaxDisplayedNotifications;
 
@@ -2085,7 +2093,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                     && !expandableView.hasNoContentHeight()) {
                 boolean limitReached = maxDisplayedNotifications != -1
                         && numShownItems >= maxDisplayedNotifications;
-                boolean notificationOnAmbientThatIsNotPulsing = mAmbientState.isDark()
+                boolean notificationOnAmbientThatIsNotPulsing = mAmbientState.isFullyDark()
                         && hasPulsingNotifications()
                         && expandableView instanceof ExpandableNotificationRow
                         && !isPulsing(((ExpandableNotificationRow) expandableView).getEntry());
@@ -2168,7 +2176,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void updateBackground() {
         // No need to update the background color if it's not being drawn.
-        if (!mShouldDrawNotificationBackground || mAmbientState.isDark()) {
+        if (!mShouldDrawNotificationBackground || mAmbientState.isFullyDark()) {
             return;
         }
 
@@ -3298,7 +3306,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                             .animateY(mShelf));
             ev.darkAnimationOriginIndex = mDarkAnimationOriginIndex;
             mAnimationEvents.add(ev);
-            startBackgroundFadeIn();
+            startBackgroundFade();
         }
         mDarkNeedsAnimation = false;
     }
@@ -3889,7 +3897,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         requestChildrenUpdate();
         applyCurrentBackgroundBounds();
         updateWillNotDraw();
-        updateContentHeight();
         updateAntiBurnInTranslation();
         notifyHeightChangeListener(mShelf);
     }
@@ -3910,6 +3917,11 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void setDarkAmount(float darkAmount) {
         mDarkAmount = darkAmount;
+        final boolean fullyDark = darkAmount == 1;
+        if (mAmbientState.isFullyDark() != fullyDark) {
+            mAmbientState.setFullyDark(fullyDark);
+            updateContentHeight();
+        }
         updateBackgroundDimming();
     }
 
@@ -3917,8 +3929,9 @@ public class NotificationStackScrollLayout extends ViewGroup
         return mDarkAmount;
     }
 
-    private void startBackgroundFadeIn() {
-        ObjectAnimator fadeAnimator = ObjectAnimator.ofFloat(this, DARK_AMOUNT, mDarkAmount, 0f);
+    private void startBackgroundFade() {
+        ObjectAnimator fadeAnimator = ObjectAnimator.ofFloat(this, DARK_AMOUNT, mDarkAmount,
+                mAmbientState.isDark() ? 1f : 0);
         fadeAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_WAKEUP);
         fadeAnimator.setInterpolator(Interpolators.ALPHA_IN);
         fadeAnimator.start();
@@ -4500,6 +4513,10 @@ public class NotificationStackScrollLayout extends ViewGroup
                                 : "invisible",
                 getAlpha(),
                 mAmbientState.getScrollY()));
+    }
+
+    public boolean isFullyDark() {
+        return mAmbientState.isFullyDark();
     }
 
     /**

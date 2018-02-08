@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
+import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -24,6 +25,7 @@ import android.text.TextUtils;
 import android.util.MathUtils;
 import android.util.SparseBooleanArray;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -36,18 +38,34 @@ public class DozeParameters implements TunerService.Tunable {
     private static final int MAX_DURATION = 60 * 1000;
     public static final String DOZE_SENSORS_WAKE_UP_FULLY = "doze_sensors_wake_up_fully";
 
+    private static IntInOutMatcher sPickupSubtypePerformsProxMatcher;
+    private static DozeParameters sInstance;
+
     private final Context mContext;
     private final AmbientDisplayConfiguration mAmbientDisplayConfiguration;
+    private final PowerManager mPowerManager;
 
-    private static IntInOutMatcher sPickupSubtypePerformsProxMatcher;
     private final AlwaysOnDisplayPolicy mAlwaysOnPolicy;
 
     private boolean mDozeAlwaysOn;
+    private boolean mControlScreenOffAnimation;
 
-    public DozeParameters(Context context) {
+    public static DozeParameters getInstance(Context context) {
+        if (sInstance == null) {
+            sInstance = new DozeParameters(context);
+        }
+        return sInstance;
+    }
+
+    @VisibleForTesting
+    protected DozeParameters(Context context) {
         mContext = context;
         mAmbientDisplayConfiguration = new AmbientDisplayConfiguration(mContext);
         mAlwaysOnPolicy = new AlwaysOnDisplayPolicy(context);
+
+        mControlScreenOffAnimation = !getDisplayNeedsBlanking();
+        mPowerManager = mContext.getSystemService(PowerManager.class);
+        mPowerManager.setDozeAfterScreenOff(!mControlScreenOffAnimation);
 
         Dependency.get(TunerService.class).addTunable(this, Settings.Secure.DOZE_ALWAYS_ON,
                 Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
@@ -165,15 +183,21 @@ public class DozeParameters implements TunerService.Tunable {
                 com.android.internal.R.bool.config_displayBlanksAfterDoze);
     }
 
-    /**
-     * Whether we can implement our own screen off animation or if we need
-     * to rely on DisplayPowerManager to dim the display.
-     *
-     * @return {@code true} if SystemUI can control the screen off animation.
-     */
-    public boolean getCanControlScreenOffAnimation() {
-        return !mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_dozeAfterScreenOff);
+    public boolean shouldControlScreenOff() {
+        return mControlScreenOffAnimation;
+    }
+
+    public void setControlScreenOffAnimation(boolean controlScreenOffAnimation) {
+        if (mControlScreenOffAnimation == controlScreenOffAnimation) {
+            return;
+        }
+        mControlScreenOffAnimation = controlScreenOffAnimation;
+        getPowerManager().setDozeAfterScreenOff(!controlScreenOffAnimation);
+    }
+
+    @VisibleForTesting
+    protected PowerManager getPowerManager() {
+        return mPowerManager;
     }
 
     private boolean getBoolean(String propName, int resId) {
