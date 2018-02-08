@@ -328,8 +328,11 @@ public abstract class Connection extends Conferenceable {
      */
     public static final int CAPABILITY_CAN_PULL_CALL = 0x01000000;
 
+    /** Call supports the deflect feature. */
+    public static final int CAPABILITY_SUPPORT_DEFLECT = 0x02000000;
+
     //**********************************************************************************************
-    // Next CAPABILITY value: 0x02000000
+    // Next CAPABILITY value: 0x04000000
     //**********************************************************************************************
 
     /**
@@ -725,6 +728,9 @@ public abstract class Connection extends Conferenceable {
         }
         if (can(capabilities, CAPABILITY_CAN_PULL_CALL)) {
             builder.append(isLong ? " CAPABILITY_CAN_PULL_CALL" : " pull");
+        }
+        if (can(capabilities, CAPABILITY_SUPPORT_DEFLECT)) {
+            builder.append(isLong ? " CAPABILITY_SUPPORT_DEFLECT" : " sup_def");
         }
 
         builder.append("]");
@@ -2749,6 +2755,12 @@ public abstract class Connection extends Conferenceable {
     public void onAnswer() {
         onAnswer(VideoProfile.STATE_AUDIO_ONLY);
     }
+
+    /**
+     * Notifies this Connection, which is in {@link #STATE_RINGING}, of
+     * a request to deflect.
+     */
+    public void onDeflect(Uri address) {}
 
     /**
      * Notifies this Connection, which is in {@link #STATE_RINGING}, of

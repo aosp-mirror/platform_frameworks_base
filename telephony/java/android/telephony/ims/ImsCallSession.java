@@ -754,6 +754,22 @@ public class ImsCallSession {
     }
 
     /**
+     * Deflects an incoming call.
+     *
+     * @param number number to be deflected to
+     */
+    public void deflect(String number) {
+        if (mClosed) {
+            return;
+        }
+
+        try {
+            miSession.deflect(number);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
      * Rejects an incoming call or session update.
      *
      * @param reason reason code to reject an incoming call
