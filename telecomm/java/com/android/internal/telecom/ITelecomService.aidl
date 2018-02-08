@@ -187,7 +187,7 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#endCall
      */
-    boolean endCall();
+    boolean endCall(String callingPackage);
 
     /**
      * @see TelecomServiceImpl#acceptRingingCall
