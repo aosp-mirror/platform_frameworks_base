@@ -68,7 +68,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /** Utility functions related to parsing and validating public-key certificates. */
-final class CertUtils {
+public final class CertUtils {
 
     private static final String CERT_FORMAT = "X.509";
     private static final String CERT_PATH_ALG = "PKIX";
@@ -217,7 +217,7 @@ final class CertUtils {
      * @return the decoding decoding result
      * @throws CertParsingException if the input string is not a properly base64-encoded string
      */
-    static byte[] decodeBase64(String str) throws CertParsingException {
+    public static byte[] decodeBase64(String str) throws CertParsingException {
         try {
             return Base64.getDecoder().decode(str);
         } catch (IllegalArgumentException e) {

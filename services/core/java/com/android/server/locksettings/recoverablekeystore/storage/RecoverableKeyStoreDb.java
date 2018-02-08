@@ -31,9 +31,14 @@ import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKe
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.RecoveryServiceMetadataEntry;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.UserMetadataEntry;
 
+import java.io.ByteArrayInputStream;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.cert.CertPath;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
@@ -53,6 +58,7 @@ public class RecoverableKeyStoreDb {
     private static final String TAG = "RecoverableKeyStoreDb";
     private static final int IDLE_TIMEOUT_SECONDS = 30;
     private static final int LAST_SYNCED_AT_UNSYNCED = -1;
+    private static final String CERT_PATH_ENCODING = "PkiPath";
 
     private final RecoverableKeyStoreDbHelper mKeyStoreDbHelper;
 
@@ -361,6 +367,79 @@ public class RecoverableKeyStoreDb {
     }
 
     /**
+     * Returns the serial number of the XML file containing certificates of the recovery service.
+     *
+     * @param userId The userId of the profile the application is running under.
+     * @param uid The uid of the application who initializes the local recovery components.
+     * @return The value that were previously set, or null if there's none.
+     *
+     * @hide
+     */
+    @Nullable
+    public Long getRecoveryServiceCertSerial(int userId, int uid) {
+        return getLong(userId, uid, RecoveryServiceMetadataEntry.COLUMN_NAME_CERT_SERIAL);
+    }
+
+    /**
+     * Records the serial number of the XML file containing certificates of the recovery service.
+     *
+     * @param userId The userId of the profile the application is running under.
+     * @param uid The uid of the application who initializes the local recovery components.
+     * @param serial The serial number contained in the XML file for recovery service certificates.
+     * @return The primary key of the inserted row, or -1 if failed.
+     *
+     * @hide
+     */
+    public long setRecoveryServiceCertSerial(int userId, int uid, long serial) {
+        return setLong(userId, uid, RecoveryServiceMetadataEntry.COLUMN_NAME_CERT_SERIAL, serial);
+    }
+
+    /**
+     * Returns the {@code CertPath} of the recovery service.
+     *
+     * @param userId The userId of the profile the application is running under.
+     * @param uid The uid of the application who initializes the local recovery components.
+     * @return The value that were previously set, or null if there's none.
+     *
+     * @hide
+     */
+    @Nullable
+    public CertPath getRecoveryServiceCertPath(int userId, int uid) {
+        byte[] bytes = getBytes(userId, uid, RecoveryServiceMetadataEntry.COLUMN_NAME_CERT_PATH);
+        if (bytes == null) {
+            return null;
+        }
+        try {
+            return decodeCertPath(bytes);
+        } catch (CertificateException e) {
+            Log.wtf(TAG,
+                    String.format(Locale.US,
+                            "Recovery service CertPath entry cannot be decoded for "
+                                    + "userId=%d uid=%d.",
+                            userId, uid), e);
+            return null;
+        }
+    }
+
+    /**
+     * Sets the {@code CertPath} of the recovery service.
+     *
+     * @param userId The userId of the profile the application is running under.
+     * @param uid The uid of the application who initializes the local recovery components.
+     * @param certPath The certificate path of the recovery service.
+     * @return The primary key of the inserted row, or -1 if failed.
+     * @hide
+     */
+    public long setRecoveryServiceCertPath(int userId, int uid, CertPath certPath) throws
+            CertificateEncodingException {
+        if (certPath.getCertificates().size() == 0) {
+            throw new CertificateEncodingException("No certificate contained in the cert path.");
+        }
+        return setBytes(userId, uid, RecoveryServiceMetadataEntry.COLUMN_NAME_CERT_PATH,
+                certPath.getEncoded(CERT_PATH_ENCODING));
+    }
+
+    /**
      * Returns the list of recovery agents initialized for given {@code userId}
      * @param userId The userId of the profile the application is running under.
      * @return The list of recovery agents
@@ -515,48 +594,6 @@ public class RecoverableKeyStoreDb {
     }
 
     /**
-     * Returns the first (and only?) public key for {@code userId}.
-     *
-     * @param userId The userId of the profile whose keys are to be synced.
-     * @return The public key, or null if none exists.
-     */
-    @Nullable
-    public PublicKey getRecoveryServicePublicKey(int userId) {
-        SQLiteDatabase db = mKeyStoreDbHelper.getReadableDatabase();
-
-        String[] projection = { RecoveryServiceMetadataEntry.COLUMN_NAME_PUBLIC_KEY };
-        String selection =
-                RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID + " = ?";
-        String[] selectionArguments = { Integer.toString(userId) };
-
-        try (
-            Cursor cursor = db.query(
-                    RecoveryServiceMetadataEntry.TABLE_NAME,
-                    projection,
-                    selection,
-                    selectionArguments,
-                    /*groupBy=*/ null,
-                    /*having=*/ null,
-                    /*orderBy=*/ null)
-        ) {
-            if (cursor.getCount() < 1) {
-                return null;
-            }
-
-            cursor.moveToFirst();
-            byte[] keyBytes = cursor.getBlob(cursor.getColumnIndexOrThrow(
-                    RecoveryServiceMetadataEntry.COLUMN_NAME_PUBLIC_KEY));
-
-            try {
-                return decodeX509Key(keyBytes);
-            } catch (InvalidKeySpecException e) {
-                Log.wtf(TAG, "Could not decode public key for " + userId);
-                return null;
-            }
-        }
-    }
-
-    /**
      * Updates the counterId
      *
      * @param userId The userId of the profile the application is running under.
@@ -584,7 +621,6 @@ public class RecoverableKeyStoreDb {
     public Long getCounterId(int userId, int uid) {
         return getLong(userId, uid, RecoveryServiceMetadataEntry.COLUMN_NAME_COUNTER_ID);
     }
-
 
     /**
      * Updates the server parameters given by the application initializing the local recovery
@@ -868,5 +904,17 @@ public class RecoverableKeyStoreDb {
             // Should never happen
             throw new RuntimeException(e);
         }
+    }
+
+    @Nullable
+    private static CertPath decodeCertPath(byte[] bytes) throws CertificateException {
+        CertificateFactory certFactory;
+        try {
+            certFactory = CertificateFactory.getInstance("X.509");
+        } catch (CertificateException e) {
+            // Should not happen, as X.509 is mandatory for all providers.
+            throw new RuntimeException(e);
+        }
+        return certFactory.generateCertPath(new ByteArrayInputStream(bytes), CERT_PATH_ENCODING);
     }
 }

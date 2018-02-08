@@ -32,6 +32,8 @@ import android.security.keystore.RecoveryController;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+
+import com.android.server.locksettings.recoverablekeystore.TestData;
 import com.android.server.locksettings.recoverablekeystore.WrappedKey;
 
 import java.io.File;
@@ -370,6 +372,57 @@ public class RecoverableKeyStoreDbTest {
                 pubkey);
     }
 
+    public void setRecoveryServiceCertPath_replaceOldValue() throws Exception {
+        int userId = 12;
+        int uid = 10009;
+        mRecoverableKeyStoreDb.setRecoveryServiceCertPath(userId, uid, TestData.CERT_PATH_1);
+        mRecoverableKeyStoreDb.setRecoveryServiceCertPath(userId, uid, TestData.CERT_PATH_2);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertPath(userId, uid)).isEqualTo(
+                TestData.CERT_PATH_2);
+    }
+
+    @Test
+    public void getRecoveryServiceCertPath_returnsNullIfNoValue() throws Exception {
+        int userId = 12;
+        int uid = 10009;
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertPath(userId, uid)).isNull();
+    }
+
+    @Test
+    public void getRecoveryServiceCertPath_returnsInsertedValue() throws Exception {
+        int userId = 12;
+        int uid = 10009;
+        mRecoverableKeyStoreDb.setRecoveryServiceCertPath(userId, uid, TestData.CERT_PATH_1);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertPath(userId, uid)).isEqualTo(
+                TestData.CERT_PATH_1);
+    }
+
+    @Test
+    public void setRecoveryServiceCertSerial_replaceOldValue() throws Exception {
+        int userId = 12;
+        int uid = 10009;
+
+        mRecoverableKeyStoreDb.setRecoveryServiceCertSerial(userId, uid, 1L);
+        mRecoverableKeyStoreDb.setRecoveryServiceCertSerial(userId, uid, 3L);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid)).isEqualTo(3L);
+    }
+
+    @Test
+    public void getRecoveryServiceCertSerial_returnsNullIfNoValue() throws Exception {
+        int userId = 12;
+        int uid = 10009;
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid)).isNull();
+    }
+
+    @Test
+    public void getRecoveryServiceCertSerial_returnsInsertedValue() throws Exception {
+        int userId = 12;
+        int uid = 10009;
+        mRecoverableKeyStoreDb.setRecoveryServiceCertSerial(userId, uid, 1234L);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid)).isEqualTo(
+                1234L);
+    }
+
     @Test
     public void getRecoveryAgents_returnsUidIfSet() throws Exception {
         int userId = 12;
@@ -490,17 +543,6 @@ public class RecoverableKeyStoreDbTest {
                 SERVER_PARAMS2);
         assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId, uid)).isEqualTo(
                 pubkey2);
-    }
-
-    @Test
-    public void getRecoveryServicePublicKey_returnsFirstKey() throws Exception {
-        int userId = 68;
-        int uid = 12904;
-        PublicKey publicKey = genRandomPublicKey();
-
-        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(userId, uid, publicKey);
-
-        assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId)).isEqualTo(publicKey);
     }
 
     @Test
