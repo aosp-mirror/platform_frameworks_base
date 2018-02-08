@@ -273,27 +273,6 @@ public class ScanResult implements Parcelable {
     public RadioChainInfo[] radioChainInfos;
 
     /**
-     * @hide
-     * Update RSSI of the scan result
-     * @param previousRssi
-     * @param previousSeen
-     * @param maxAge
-     */
-    public void averageRssi(int previousRssi, long previousSeen, int maxAge) {
-
-        if (seen == 0) {
-            seen = System.currentTimeMillis();
-        }
-        long age = seen - previousSeen;
-
-        if (previousSeen > 0 && age > 0 && age < maxAge/2) {
-            // Average the RSSI with previously seen instances of this scan result
-            double alpha = 0.5 - (double) age / (double) maxAge;
-            level = (int) ((double) level * (1 - alpha) + (double) previousRssi * alpha);
-        }
-    }
-
-    /**
      * Status indicating the scan result does not correspond to a user's saved configuration
      * @hide
      * @removed
