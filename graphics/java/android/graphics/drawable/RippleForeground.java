@@ -110,6 +110,7 @@ class RippleForeground extends RippleComponent {
 
         // Take 60% of the maximum of the width and height, then divided half to get the radius.
         mStartRadius = Math.max(bounds.width(), bounds.height()) * 0.3f;
+        clampStartingPosition();
     }
 
     @Override
@@ -350,7 +351,7 @@ class RippleForeground extends RippleComponent {
         final float cY = mBounds.exactCenterY();
         final float dX = mStartingX - cX;
         final float dY = mStartingY - cY;
-        final float r = mTargetRadius;
+        final float r = mTargetRadius - mStartRadius;
         if (dX * dX + dY * dY > r * r) {
             // Point is outside the circle, clamp to the perimeter.
             final double angle = Math.atan2(dY, dX);
