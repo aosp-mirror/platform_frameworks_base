@@ -3671,8 +3671,10 @@ public abstract class Context {
      *
      * @see #getSystemService(String)
      * @see android.telephony.euicc.EuiccManager
+     * TODO(b/35851809): Unhide this API.
+     * @hide
      */
-    public static final String EUICC_SERVICE = "euicc";
+    public static final String EUICC_SERVICE = "euicc_service";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
@@ -3680,10 +3682,10 @@ public abstract class Context {
      *
      * @see #getSystemService(String)
      * @see android.telephony.euicc.EuiccCardManager
+     * TODO(b/35851809): Make this a SystemApi.
      * @hide
      */
-    @SystemApi
-    public static final String EUICC_CARD_SERVICE = "euicc_card";
+    public static final String EUICC_CARD_SERVICE = "euicc_card_service";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a

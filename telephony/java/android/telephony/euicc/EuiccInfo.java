@@ -23,6 +23,9 @@ import android.os.Parcelable;
  * Information about an eUICC chip/device.
  *
  * @see EuiccManager#getEuiccInfo
+ * @hide
+ *
+ * TODO(b/35851809): Make this public.
  */
 // WARNING: Do not add any privacy-sensitive fields to this class (such as an eUICC identifier)!
 // This API is accessible to all applications. Privacy-sensitive fields should be returned in their
@@ -42,17 +45,12 @@ public final class EuiccInfo implements Parcelable {
                 }
             };
 
-    @Nullable
-    private final String osVersion;
-
     /**
-     * Gets the version of the operating system running on the eUICC. This field is
-     * hardware-specific and is not guaranteed to match any particular format.
+     * Version of the operating system running on the eUICC. This field is hardware-specific and is
+     * not guaranteed to match any particular format.
      */
     @Nullable
-    public String getOsVersion() {
-        return osVersion;
-    }
+    public final String osVersion;
 
     public EuiccInfo(@Nullable String osVersion) {
         this.osVersion = osVersion;
