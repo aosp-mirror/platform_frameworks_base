@@ -1446,6 +1446,13 @@ class LinkCommand {
 
     ContainerReaderEntry* entry;
     ContainerReader reader(input_stream.get());
+
+    if (reader.HadError()) {
+      context_->GetDiagnostics()->Error(DiagMessage(src)
+                                        << "failed to read file: " << reader.GetError());
+      return false;
+    }
+
     while ((entry = reader.Next()) != nullptr) {
       if (entry->Type() == ContainerEntryType::kResTable) {
         pb::ResourceTable pb_table;
