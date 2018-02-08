@@ -274,7 +274,7 @@ class InstantAppRegistry {
             }
 
             // Propagate permissions before removing any state
-            propagateInstantAppPermissionsIfNeeded(pkg.packageName, userId);
+            propagateInstantAppPermissionsIfNeeded(pkg, userId);
 
             // Track instant apps
             if (ps.getInstantApp(userId)) {
@@ -869,10 +869,10 @@ class InstantAppRegistry {
         return uninstalledApps;
     }
 
-    private void propagateInstantAppPermissionsIfNeeded(@NonNull String packageName,
+    private void propagateInstantAppPermissionsIfNeeded(@NonNull PackageParser.Package pkg,
             @UserIdInt int userId) {
         InstantAppInfo appInfo = peekOrParseUninstalledInstantAppInfo(
-                packageName, userId);
+                pkg.packageName, userId);
         if (appInfo == null) {
             return;
         }
@@ -884,8 +884,8 @@ class InstantAppRegistry {
             for (String grantedPermission : appInfo.getGrantedPermissions()) {
                 final boolean propagatePermission =
                         mService.mSettings.canPropagatePermissionToInstantApp(grantedPermission);
-                if (propagatePermission) {
-                    mService.grantRuntimePermission(packageName, grantedPermission, userId);
+                if (propagatePermission && pkg.requestedPermissions.contains(grantedPermission)) {
+                    mService.grantRuntimePermission(pkg.packageName, grantedPermission, userId);
                 }
             }
         } finally {
