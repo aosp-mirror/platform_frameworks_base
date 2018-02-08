@@ -38,7 +38,6 @@ import static android.app.ActivityManagerInternal.ASSIST_KEY_STRUCTURE;
 import static android.app.ActivityThread.PROC_START_SEQ_IDENT;
 import static android.app.AppOpsManager.OP_ASSIST_STRUCTURE;
 import static android.app.AppOpsManager.OP_NONE;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
@@ -454,7 +453,6 @@ import com.android.server.pm.Installer.InstallerException;
 import com.android.server.utils.PriorityDump;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.PinnedStackWindowController;
-import com.android.server.wm.RecentsAnimationController;
 import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;
@@ -1908,6 +1906,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     final ActivityManagerConstants mConstants;
 
+    // Encapsulates the global setting "hidden_api_blacklist_exemptions"
+    final HiddenApiBlacklist mHiddenApiBlacklist;
+
     PackageManagerInternal mPackageManagerInt;
 
     // VoiceInteraction session ID that changes for each new request except when
@@ -2825,6 +2826,42 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    /**
+     * Encapsulates the globla setting "hidden_api_blacklist_exemptions", including tracking the
+     * latest value via a content observer.
+     */
+    static class HiddenApiBlacklist extends ContentObserver {
+
+        private final Context mContext;
+        private boolean mBlacklistDisabled;
+
+        public HiddenApiBlacklist(Handler handler, Context context) {
+            super(handler);
+            mContext = context;
+        }
+
+        public void registerObserver() {
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.HIDDEN_API_BLACKLIST_EXEMPTIONS),
+                    false,
+                    this);
+            update();
+        }
+
+        private void update() {
+            mBlacklistDisabled = "*".equals(Settings.Global.getString(mContext.getContentResolver(),
+                    Settings.Global.HIDDEN_API_BLACKLIST_EXEMPTIONS));
+        }
+
+        boolean isDisabled() {
+            return mBlacklistDisabled;
+        }
+
+        public void onChange(boolean selfChange) {
+            update();
+        }
+    }
+
     @VisibleForTesting
     public ActivityManagerService(Injector injector) {
         mInjector = injector;
@@ -2859,6 +2896,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mLifecycleManager = null;
         mProcStartHandlerThread = null;
         mProcStartHandler = null;
+        mHiddenApiBlacklist = null;
     }
 
     // Note: This method is invoked on the main thread but may need to attach various
@@ -3001,6 +3039,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
         };
+
+        mHiddenApiBlacklist = new HiddenApiBlacklist(mHandler, mContext);
 
         Watchdog.getInstance().addMonitor(this);
         Watchdog.getInstance().addThread(mHandler);
@@ -4090,9 +4130,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 runtimeFlags |= Zygote.ONLY_USE_SYSTEM_OAT_FILES;
             }
 
-            if (!app.info.isAllowedToUseHiddenApi()) {
-                // This app is not allowed to use undocumented and private APIs.
-                // Set up its runtime with the appropriate flag.
+            if (!app.info.isAllowedToUseHiddenApi() && !mHiddenApiBlacklist.isDisabled()) {
+                // This app is not allowed to use undocumented and private APIs, or blacklisting is
+                // enabled. Set up its runtime with the appropriate flag.
                 runtimeFlags |= Zygote.ENABLE_HIDDEN_API_CHECKS;
             }
 
@@ -14578,6 +14618,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 NETWORK_ACCESS_TIMEOUT_MS, NETWORK_ACCESS_TIMEOUT_DEFAULT_MS);
         final boolean supportsLeanbackOnly =
                 mContext.getPackageManager().hasSystemFeature(FEATURE_LEANBACK_ONLY);
+        mHiddenApiBlacklist.registerObserver();
 
         // Transfer any global setting for forcing RTL layout, into a System Property
         SystemProperties.set(DEVELOPMENT_FORCE_RTL, forceRtl ? "1":"0");
