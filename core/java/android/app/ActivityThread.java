@@ -113,6 +113,7 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.LogPrinter;
+import android.util.MergedConfiguration;
 import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
@@ -204,7 +205,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     private static final boolean DEBUG_SERVICE = false;
     public static final boolean DEBUG_MEMORY_TRIM = false;
     private static final boolean DEBUG_PROVIDER = false;
-    private static final boolean DEBUG_ORDER = false;
+    public static final boolean DEBUG_ORDER = false;
     private static final long MIN_TIME_BETWEEN_GCS = 5*1000;
     private static final int SQLITE_MEM_RELEASED_EVENT_LOG_TAG = 75003;
     private static final int LOG_AM_ON_PAUSE_CALLED = 30021;
@@ -398,7 +399,6 @@ public final class ActivityThread extends ClientTransactionHandler {
         boolean startsNotResumed;
         public final boolean isForward;
         int pendingConfigChanges;
-        boolean onlyLocalRequest;
 
         Window mPendingRemoveWindow;
         WindowManager mPendingRemoveWindowManager;
@@ -520,7 +520,6 @@ public final class ActivityThread extends ClientTransactionHandler {
             sb.append(", startsNotResumed=").append(startsNotResumed);
             sb.append(", isForward=").append(isForward);
             sb.append(", pendingConfigChanges=").append(pendingConfigChanges);
-            sb.append(", onlyLocalRequest=").append(onlyLocalRequest);
             sb.append(", preserveWindow=").append(mPreserveWindow);
             if (activity != null) {
                 sb.append(", Activity{");
@@ -763,15 +762,6 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         public final void scheduleSleeping(IBinder token, boolean sleeping) {
             sendMessage(H.SLEEPING, token, sleeping ? 1 : 0);
-        }
-
-        @Override
-        public final void scheduleRelaunchActivity(IBinder token,
-                List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
-                int configChanges, boolean notResumed, Configuration config,
-                Configuration overrideConfig, boolean preserveWindow) {
-            requestRelaunchActivity(token, pendingResults, pendingNewIntents,
-                    configChanges, notResumed, config, overrideConfig, true, preserveWindow);
         }
 
         public final void scheduleReceiver(Intent intent, ActivityInfo info,
@@ -1531,7 +1521,6 @@ public final class ActivityThread extends ClientTransactionHandler {
         public static final int UNBIND_SERVICE          = 122;
         public static final int DUMP_SERVICE            = 123;
         public static final int LOW_MEMORY              = 124;
-        public static final int RELAUNCH_ACTIVITY       = 126;
         public static final int PROFILER_CONTROL        = 127;
         public static final int CREATE_BACKUP_AGENT     = 128;
         public static final int DESTROY_BACKUP_AGENT    = 129;
@@ -1577,7 +1566,6 @@ public final class ActivityThread extends ClientTransactionHandler {
                     case UNBIND_SERVICE: return "UNBIND_SERVICE";
                     case DUMP_SERVICE: return "DUMP_SERVICE";
                     case LOW_MEMORY: return "LOW_MEMORY";
-                    case RELAUNCH_ACTIVITY: return "RELAUNCH_ACTIVITY";
                     case PROFILER_CONTROL: return "PROFILER_CONTROL";
                     case CREATE_BACKUP_AGENT: return "CREATE_BACKUP_AGENT";
                     case DESTROY_BACKUP_AGENT: return "DESTROY_BACKUP_AGENT";
@@ -1611,12 +1599,6 @@ public final class ActivityThread extends ClientTransactionHandler {
         public void handleMessage(Message msg) {
             if (DEBUG_MESSAGES) Slog.v(TAG, ">>> handling: " + codeToString(msg.what));
             switch (msg.what) {
-                case RELAUNCH_ACTIVITY: {
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityRestart");
-                    ActivityClientRecord r = (ActivityClientRecord)msg.obj;
-                    handleRelaunchActivity(r);
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-                } break;
                 case BIND_APPLICATION:
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "bindApplication");
                     AppBindData data = (AppBindData)msg.obj;
@@ -3726,20 +3708,6 @@ public final class ActivityThread extends ClientTransactionHandler {
                 }
                 r.activity.performResume(r.startsNotResumed);
 
-                synchronized (mResourcesManager) {
-                    // If there is a pending local relaunch that was requested when the activity was
-                    // paused, it will put the activity into paused state when it finally happens.
-                    // Since the activity resumed before being relaunched, we don't want that to
-                    // happen, so we need to clear the request to relaunch paused.
-                    for (int i = mRelaunchingActivities.size() - 1; i >= 0; i--) {
-                        final ActivityClientRecord relaunching = mRelaunchingActivities.get(i);
-                        if (relaunching.token == r.token
-                                && relaunching.onlyLocalRequest && relaunching.startsNotResumed) {
-                            relaunching.startsNotResumed = false;
-                        }
-                    }
-                }
-
                 EventLog.writeEvent(LOG_AM_ON_RESUME_CALLED, UserHandle.myUserId(),
                         r.activity.getComponentName().getClassName(), reason);
 
@@ -3888,14 +3856,12 @@ public final class ActivityThread extends ClientTransactionHandler {
                 }
             }
 
-            if (!r.onlyLocalRequest) {
-                r.nextIdle = mNewActivities;
-                mNewActivities = r;
-                if (localLOGV) Slog.v(
-                    TAG, "Scheduling idle handler for " + r);
-                Looper.myQueue().addIdleHandler(new Idler());
+            r.nextIdle = mNewActivities;
+            mNewActivities = r;
+            if (localLOGV) {
+                Slog.v(TAG, "Scheduling idle handler for " + r);
             }
-            r.onlyLocalRequest = false;
+            Looper.myQueue().addIdleHandler(new Idler());
         } else {
             // If an exception was thrown when trying to resume, then
             // just end this activity.
@@ -4586,15 +4552,12 @@ public final class ActivityThread extends ClientTransactionHandler {
         mSomeActivitiesChanged = true;
     }
 
-    /**
-     * @param preserveWindow Whether the activity should try to reuse the window it created,
-     *                        including the decor view after the relaunch.
-     */
-    public final void requestRelaunchActivity(IBinder token,
+    @Override
+    public ActivityClientRecord prepareRelaunchActivity(IBinder token,
             List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
-            int configChanges, boolean notResumed, Configuration config,
-            Configuration overrideConfig, boolean fromServer, boolean preserveWindow) {
+            int configChanges, MergedConfiguration config, boolean preserveWindow) {
         ActivityClientRecord target = null;
+        boolean scheduleRelaunch = false;
 
         synchronized (mResourcesManager) {
             for (int i=0; i<mRelaunchingActivities.size(); i++) {
@@ -4616,57 +4579,31 @@ public final class ActivityThread extends ClientTransactionHandler {
                             r.pendingIntents = pendingNewIntents;
                         }
                     }
-
-                    // For each relaunch request, activity manager expects an answer
-                    if (!r.onlyLocalRequest && fromServer) {
-                        try {
-                            ActivityManager.getService().activityRelaunched(token);
-                        } catch (RemoteException e) {
-                            throw e.rethrowFromSystemServer();
-                        }
-                    }
                     break;
                 }
             }
 
             if (target == null) {
-                if (DEBUG_ORDER) Slog.d(TAG, "requestRelaunchActivity: target is null, fromServer:"
-                        + fromServer);
+                if (DEBUG_ORDER) Slog.d(TAG, "requestRelaunchActivity: target is null");
                 target = new ActivityClientRecord();
                 target.token = token;
                 target.pendingResults = pendingResults;
                 target.pendingIntents = pendingNewIntents;
                 target.mPreserveWindow = preserveWindow;
-                if (!fromServer) {
-                    final ActivityClientRecord existing = mActivities.get(token);
-                    if (DEBUG_ORDER) Slog.d(TAG, "requestRelaunchActivity: " + existing);
-                    if (existing != null) {
-                        if (DEBUG_ORDER) Slog.d(TAG, "requestRelaunchActivity: paused= "
-                                + existing.paused);;
-                        target.startsNotResumed = existing.paused;
-                        target.overrideConfig = existing.overrideConfig;
-                    }
-                    target.onlyLocalRequest = true;
-                }
                 mRelaunchingActivities.add(target);
-                sendMessage(H.RELAUNCH_ACTIVITY, target);
+                scheduleRelaunch = true;
             }
-
-            if (fromServer) {
-                target.startsNotResumed = notResumed;
-                target.onlyLocalRequest = false;
-            }
-            if (config != null) {
-                target.createdConfig = config;
-            }
-            if (overrideConfig != null) {
-                target.overrideConfig = overrideConfig;
-            }
+            target.createdConfig = config.getGlobalConfiguration();
+            target.overrideConfig = config.getOverrideConfiguration();
             target.pendingConfigChanges |= configChanges;
         }
+
+        return scheduleRelaunch ? target : null;
     }
 
-    private void handleRelaunchActivity(ActivityClientRecord tmp) {
+    @Override
+    public void handleRelaunchActivity(ActivityClientRecord tmp,
+            PendingTransactionActions pendingActions) {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
         unscheduleGcIdler();
@@ -4735,18 +4672,10 @@ public final class ActivityThread extends ClientTransactionHandler {
         ActivityClientRecord r = mActivities.get(tmp.token);
         if (DEBUG_CONFIGURATION) Slog.v(TAG, "Handling relaunch of " + r);
         if (r == null) {
-            if (!tmp.onlyLocalRequest) {
-                try {
-                    ActivityManager.getService().activityRelaunched(tmp.token);
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
-            }
             return;
         }
 
         r.activity.mConfigChangeFlags |= configChanges;
-        r.onlyLocalRequest = tmp.onlyLocalRequest;
         r.mPreserveWindow = tmp.mPreserveWindow;
 
         r.activity.mChangingConfigurations = true;
@@ -4763,9 +4692,9 @@ public final class ActivityThread extends ClientTransactionHandler {
         // preserved by the server, so we want to notify it that we are preparing to replace
         // everything
         try {
-            if (r.mPreserveWindow || r.onlyLocalRequest) {
+            if (r.mPreserveWindow) {
                 WindowManagerGlobal.getWindowSession().prepareToReplaceWindows(
-                        r.token, !r.onlyLocalRequest);
+                        r.token, true /* childrenOnly */);
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -4804,24 +4733,22 @@ public final class ActivityThread extends ClientTransactionHandler {
         r.startsNotResumed = tmp.startsNotResumed;
         r.overrideConfig = tmp.overrideConfig;
 
-        // TODO(lifecycler): Move relaunch to lifecycler.
-        PendingTransactionActions pendingActions = new PendingTransactionActions();
         handleLaunchActivity(r, pendingActions);
-        handleStartActivity(r, pendingActions);
-        handleResumeActivity(r.token, false /* clearHide */, r.isForward, "relaunch");
-        if (r.startsNotResumed) {
-            performPauseActivity(r, false /* finished */, "relaunch", pendingActions);
-        }
+        // Only report a successful relaunch to WindowManager.
+        pendingActions.setReportRelaunchToWindowManager(true);
+    }
 
-        if (!tmp.onlyLocalRequest) {
-            try {
-                ActivityManager.getService().activityRelaunched(r.token);
-                if (r.window != null) {
-                    r.window.reportActivityRelaunched();
-                }
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
+    @Override
+    public void reportRelaunch(IBinder token, PendingTransactionActions pendingActions) {
+        try {
+            ActivityManager.getService().activityRelaunched(token);
+            final ActivityClientRecord r = mActivities.get(token);
+            if (pendingActions.shouldReportRelaunchToWindowManager() && r != null
+                    && r.window != null) {
+                r.window.reportActivityRelaunched();
             }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 

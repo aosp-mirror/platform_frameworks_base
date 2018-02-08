@@ -1509,6 +1509,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             Slog.w(TAG, "Activity " + r + " being launched, but already in LRU list");
         }
 
+        // TODO(lifecycler): Resume or pause requests are done as part of launch transaction,
+        // so updating the state should be done accordingly.
         if (andResume && readyToResume()) {
             // As part of the process of launching, ActivityThread also performs
             // a resume.

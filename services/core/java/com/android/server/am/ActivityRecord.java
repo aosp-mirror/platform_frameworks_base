@@ -133,11 +133,16 @@ import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.app.PictureInPictureParams;
 import android.app.ResultInfo;
+import android.app.servertransaction.ActivityLifecycleItem;
+import android.app.servertransaction.ActivityRelaunchItem;
+import android.app.servertransaction.ClientTransaction;
+import android.app.servertransaction.ClientTransactionItem;
 import android.app.servertransaction.MoveToDisplayItem;
 import android.app.servertransaction.MultiWindowModeChangeItem;
 import android.app.servertransaction.NewIntentItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.PipModeChangeItem;
+import android.app.servertransaction.ResumeActivityItem;
 import android.app.servertransaction.WindowVisibilityItem;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.content.ComponentName;
@@ -2370,6 +2375,15 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
         setLastReportedConfiguration(service.getGlobalConfiguration(), newMergedOverrideConfig);
 
+        if (state == INITIALIZING) {
+            // No need to relaunch or schedule new config for activity that hasn't been launched
+            // yet. We do, however, return after applying the config to activity record, so that
+            // it will use it for launch transaction.
+            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
+                    "Skipping config check for initializing activity: " + this);
+            return true;
+        }
+
         if (changes == 0 && !forceNewConfig) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Configuration no differences in " + this);
@@ -2559,12 +2573,23 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                             + " callers=" + Debug.getCallers(6));
             forceNewConfig = false;
             mStackSupervisor.activityRelaunchingLocked(this);
-            app.thread.scheduleRelaunchActivity(appToken, pendingResults, pendingNewIntents,
-                    configChangeFlags, !andResume,
-                    new Configuration(service.getGlobalConfiguration()),
-                    new Configuration(getMergedOverrideConfiguration()), preserveWindow);
+            final ClientTransactionItem callbackItem = ActivityRelaunchItem.obtain(pendingResults,
+                    pendingNewIntents, configChangeFlags,
+                    new MergedConfiguration(service.getGlobalConfiguration(),
+                            getMergedOverrideConfiguration()),
+                    preserveWindow);
+            final ActivityLifecycleItem lifecycleItem;
+            if (andResume) {
+                lifecycleItem = ResumeActivityItem.obtain(service.isNextTransitionForward());
+            } else {
+                lifecycleItem = PauseActivityItem.obtain();
+            }
+            final ClientTransaction transaction = ClientTransaction.obtain(app.thread, appToken);
+            transaction.addCallback(callbackItem);
+            transaction.setLifecycleStateRequest(lifecycleItem);
+            service.mLifecycleManager.scheduleTransaction(transaction);
             // Note: don't need to call pauseIfSleepingLocked() here, because the caller will only
-            // pass in 'andResume' if this activity is currently resumed, which implies we aren't
+            // request resume if this activity is currently resumed, which implies we aren't
             // sleeping.
         } catch (RemoteException e) {
             if (DEBUG_SWITCH || DEBUG_STATES) Slog.i(TAG_SWITCH, "Relaunch failed", e);
