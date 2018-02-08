@@ -90,7 +90,7 @@ static void FontFamily_unref(jlong familyPtr) {
 }
 
 static bool addSkTypeface(NativeFamilyBuilder* builder, sk_sp<SkData>&& data, int ttcIndex,
-        jint givenWeight, jint givenItalic) {
+        jint weight, jint italic) {
     uirenderer::FatVector<SkFontArguments::Axis, 2> skiaAxes;
     for (const auto& axis : builder->axes) {
         skiaAxes.emplace_back(SkFontArguments::Axis{axis.axisTag, axis.value});
@@ -114,27 +114,15 @@ static bool addSkTypeface(NativeFamilyBuilder* builder, sk_sp<SkData>&& data, in
     std::shared_ptr<minikin::MinikinFont> minikinFont =
             std::make_shared<MinikinFontSkia>(std::move(face), fontPtr, fontSize, ttcIndex,
                     builder->axes);
+    minikin::Font::Builder fontBuilder(minikinFont);
 
-    int weight = givenWeight;
-    bool italic = givenItalic == 1;
-    if (givenWeight == RESOLVE_BY_FONT_TABLE || givenItalic == RESOLVE_BY_FONT_TABLE) {
-        int os2Weight;
-        bool os2Italic;
-        if (!minikin::FontFamily::analyzeStyle(minikinFont, &os2Weight, &os2Italic)) {
-            ALOGE("analyzeStyle failed. Using default style");
-            os2Weight = 400;
-            os2Italic = false;
-        }
-        if (givenWeight == RESOLVE_BY_FONT_TABLE) {
-            weight = os2Weight;
-        }
-        if (givenItalic == RESOLVE_BY_FONT_TABLE) {
-            italic = os2Italic;
-        }
+    if (weight != RESOLVE_BY_FONT_TABLE) {
+        fontBuilder.setWeight(weight);
     }
-
-    builder->fonts.push_back(minikin::Font(minikinFont,
-            minikin::FontStyle(weight, static_cast<minikin::FontStyle::Slant>(italic))));
+    if (italic != RESOLVE_BY_FONT_TABLE) {
+        fontBuilder.setSlant(static_cast<minikin::FontStyle::Slant>(italic != 0));
+    }
+    builder->fonts.push_back(fontBuilder.build());
     builder->axes.clear();
     return true;
 }
