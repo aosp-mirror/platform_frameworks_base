@@ -41,6 +41,13 @@ public class ContextMenuTest extends ActivityInstrumentationTestCase<ContextMenu
         testMenuPosition(getActivity().getTargetRtl());
     }
 
+    public void testContextMenuPositionRepetitive() throws InterruptedException {
+        // Regression test for b/72507876
+        testMenuPosition(getActivity().getTargetLtr());
+        testMenuPosition(getActivity().getTargetRtl());
+        testMenuPosition(getActivity().getTargetLtr());
+    }
+
     private void testMenuPosition(View target) throws InterruptedException {
         final int minScreenDimension = getMinScreenDimension();
         if (minScreenDimension < 320) {
