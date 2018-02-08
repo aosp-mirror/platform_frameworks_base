@@ -901,6 +901,7 @@ class MagnificationController implements Handler.Callback {
             }
         }
 
+        @GuardedBy("mLock")
         private void setMagnificationSpecLocked(MagnificationSpec spec) {
             if (mEnabled) {
                 if (DEBUG_SET_MAGNIFICATION_SPEC) {

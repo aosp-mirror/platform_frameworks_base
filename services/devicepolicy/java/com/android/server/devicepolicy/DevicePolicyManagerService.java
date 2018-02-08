@@ -10226,6 +10226,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             mInjector.registerContentObserver(mDefaultImeChanged, false, this, UserHandle.USER_ALL);
         }
 
+        @GuardedBy("DevicePolicyManagerService.this")
         private void addPendingChangeByOwnerLocked(int userId) {
             mUserIdsWithPendingChangesByOwner.add(userId);
         }

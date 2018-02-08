@@ -236,6 +236,7 @@ public class UsbService extends IUsbManager.Stub {
      *
      * @return Iff the caller is in the current user's profile group
      */
+    @GuardedBy("mLock")
     private boolean isCallerInCurrentUserProfileGroupLocked() {
         int userIdInt = UserHandle.getCallingUserId();
 

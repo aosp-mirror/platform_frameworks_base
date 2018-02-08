@@ -314,6 +314,7 @@ class UsbProfileGroupSettingsManager {
      * Upgrade any single-user settings from {@link #sSingleUserSettingsFile}.
      * Should only by called by owner.
      */
+    @GuardedBy("mLock")
     private void upgradeSingleUserLocked() {
         if (sSingleUserSettingsFile.exists()) {
             mDevicePreferenceMap.clear();
@@ -347,6 +348,7 @@ class UsbProfileGroupSettingsManager {
         }
     }
 
+    @GuardedBy("mLock")
     private void readSettingsLocked() {
         if (DEBUG) Slog.v(TAG, "readSettingsLocked()");
 
@@ -386,6 +388,7 @@ class UsbProfileGroupSettingsManager {
      * <p>In the uncommon case that the system crashes in between the scheduling and the write the
      * update is lost.</p>
      */
+    @GuardedBy("mLock")
     private void scheduleWriteSettingsLocked() {
         if (mIsWriteSettingsScheduled) {
             return;
@@ -869,6 +872,7 @@ class UsbProfileGroupSettingsManager {
         return null;
     }
 
+    @GuardedBy("mLock")
     private boolean clearCompatibleMatchesLocked(@NonNull UserPackage userPackage,
             @NonNull DeviceFilter filter) {
         ArrayList<DeviceFilter> keysToRemove = new ArrayList<>();
@@ -892,6 +896,7 @@ class UsbProfileGroupSettingsManager {
         return !keysToRemove.isEmpty();
     }
 
+    @GuardedBy("mLock")
     private boolean clearCompatibleMatchesLocked(@NonNull UserPackage userPackage,
             @NonNull AccessoryFilter filter) {
         ArrayList<AccessoryFilter> keysToRemove = new ArrayList<>();
@@ -915,6 +920,7 @@ class UsbProfileGroupSettingsManager {
         return !keysToRemove.isEmpty();
     }
 
+    @GuardedBy("mLock")
     private boolean handlePackageAddedLocked(UserPackage userPackage, ActivityInfo aInfo,
             String metaDataName) {
         XmlResourceParser parser = null;
