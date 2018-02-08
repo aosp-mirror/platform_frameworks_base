@@ -5965,6 +5965,7 @@ package android.telephony.ims.stub {
     ctor public ImsCallSessionImplBase();
     method public void accept(int, android.telephony.ims.ImsStreamMediaProfile);
     method public void close();
+    method public void deflect(java.lang.String);
     method public void extendToConference(java.lang.String[]);
     method public java.lang.String getCallId();
     method public android.telephony.ims.ImsCallProfile getCallProfile();
