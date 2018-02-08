@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.graphics.Rect;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.UserHandle;
@@ -25,27 +26,49 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.settingslib.Utils;
 import com.android.systemui.DemoMode;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.StatusBarIconView;
+import com.android.systemui.statusbar.policy.DarkIconDispatcher;
+import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.policy.LocationControllerImpl;
+import com.android.systemui.util.leak.LeakDetector;
 
-public class DemoStatusIcons extends LinearLayout implements DemoMode {
+public class DemoStatusIcons extends StatusIconContainer implements DemoMode, DarkReceiver {
     private final LinearLayout mStatusIcons;
     private final int mIconSize;
 
     private boolean mDemoMode;
+    private int mColor;
 
     public DemoStatusIcons(LinearLayout statusIcons, int iconSize) {
         super(statusIcons.getContext());
         mStatusIcons = statusIcons;
         mIconSize = iconSize;
+        mColor = DarkIconDispatcher.DEFAULT_ICON_TINT;
 
         setLayoutParams(mStatusIcons.getLayoutParams());
         setOrientation(mStatusIcons.getOrientation());
         setGravity(Gravity.CENTER_VERTICAL); // no LL.getGravity()
         ViewGroup p = (ViewGroup) mStatusIcons.getParent();
         p.addView(this, p.indexOfChild(mStatusIcons));
+    }
+
+    public void remove() {
+        ((ViewGroup) getParent()).removeView(this);
+    }
+
+    public void setColor(int color) {
+        mColor = color;
+        updateColors();
+    }
+
+    private void updateColors() {
+        for (int i = 0; i < getChildCount(); i++) {
+            StatusBarIconView child = (StatusBarIconView) getChildAt(i);
+            child.setStaticDrawableColor(mColor);
+        }
     }
 
     @Override
@@ -136,6 +159,7 @@ public class DemoStatusIcons extends LinearLayout implements DemoMode {
                     break;
                 } else {
                     StatusBarIcon icon = v.getStatusBarIcon();
+                    icon.visible = true;
                     icon.icon = Icon.createWithResource(icon.icon.getResPackage(), iconId);
                     v.set(icon);
                     v.updateDrawable();
@@ -150,9 +174,16 @@ public class DemoStatusIcons extends LinearLayout implements DemoMode {
             return;
         }
         StatusBarIcon icon = new StatusBarIcon(iconPkg, UserHandle.SYSTEM, iconId, 0, 0, "Demo");
+        icon.visible = true;
         StatusBarIconView v = new StatusBarIconView(getContext(), null, null);
         v.setTag(slot);
         v.set(icon);
+        v.setStaticDrawableColor(mColor);
         addView(v, 0, new LinearLayout.LayoutParams(mIconSize, mIconSize));
+    }
+
+    @Override
+    public void onDarkChanged(Rect area, float darkIntensity, int tint) {
+        setColor(DarkIconDispatcher.getTint(area, mStatusIcons, tint));
     }
 }

@@ -41,6 +41,8 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
+import static com.android.systemui.statusbar.phone.CollapsedStatusBarFragment.STATUS_BAR_ICON_MANAGER_TAG;
+
 /**
  * Receives the callbacks from CommandQueue related to icons and tracks the state of
  * all the icons. Dispatches this state to any IconManagers that are currently
@@ -48,6 +50,7 @@ import java.util.ArrayList;
  */
 public class StatusBarIconControllerImpl extends StatusBarIconList implements Tunable,
         ConfigurationListener, Dumpable, CommandQueue.Callbacks, StatusBarIconController {
+    private static final String TAG = "StatusBarIconController";
 
     private final ArrayList<IconManager> mIconGroups = new ArrayList<>();
     private final ArraySet<String> mIconBlacklist = new ArraySet<>();
@@ -55,6 +58,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
 
     private Context mContext;
     private DemoStatusIcons mDemoStatusIcons;
+    private IconManager mStatusBarIconManager;
 
     public StatusBarIconControllerImpl(Context context) {
         super(context.getResources().getStringArray(
@@ -197,26 +201,28 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        // TODO: Dump info about all icon groups?
-        ViewGroup statusIcons = mIconGroups.get(0).mGroup;
-        int N = statusIcons.getChildCount();
-        pw.println("  icon views: " + N);
-        for (int i = 0; i < N; i++) {
-            StatusBarIconView ic = (StatusBarIconView) statusIcons.getChildAt(i);
-            pw.println("    [" + i + "] icon=" + ic);
+        pw.println(TAG + " state:");
+        for (IconManager manager : mIconGroups) {
+            if (manager.shouldLog()) {
+                ViewGroup group = manager.mGroup;
+                int N = group.getChildCount();
+                pw.println("  icon views: " + N);
+                for (int i = 0; i < N; i++) {
+                    StatusBarIconView ic = (StatusBarIconView) group.getChildAt(i);
+                    pw.println("    [" + i + "] icon=" + ic);
+                }
+            }
         }
+
         super.dump(pw);
     }
 
     public void dispatchDemoCommand(String command, Bundle args) {
-        if (mDemoStatusIcons == null) {
-            // TODO: Rework how we handle demo mode.
-            int iconSize = mContext.getResources().getDimensionPixelSize(
-                    com.android.internal.R.dimen.status_bar_icon_size);
-            mDemoStatusIcons = new DemoStatusIcons((LinearLayout) mIconGroups.get(0).mGroup,
-                    iconSize);
+        for (IconManager manager : mIconGroups) {
+            if (manager.isDemoable()) {
+                manager.dispatchDemoCommand(command, args);
+            }
         }
-        mDemoStatusIcons.dispatchDemoCommand(command, args);
     }
 
     @Override

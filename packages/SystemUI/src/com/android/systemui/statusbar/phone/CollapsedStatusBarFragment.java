@@ -51,6 +51,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     public static final String TAG = "CollapsedStatusBarFragment";
     private static final String EXTRA_PANEL_STATE = "panel_state";
+    public static final String STATUS_BAR_ICON_MANAGER_TAG = "status_bar_icon_manager";
     public static final int FADE_IN_DURATION = 320;
     public static final int FADE_IN_DELAY = 50;
     private PhoneStatusBarView mStatusBar;
@@ -94,6 +95,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             mStatusBar.go(savedInstanceState.getInt(EXTRA_PANEL_STATE));
         }
         mDarkIconManager = new DarkIconManager(view.findViewById(R.id.statusIcons));
+        mDarkIconManager.setShouldLog(true);
         Dependency.get(StatusBarIconController.class).addIconGroup(mDarkIconManager);
         mSystemIconArea = mStatusBar.findViewById(R.id.system_icon_area);
         mClockView = mStatusBar.findViewById(R.id.clock);
