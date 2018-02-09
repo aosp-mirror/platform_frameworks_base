@@ -61,8 +61,6 @@ public final class AssetManager implements AutoCloseable {
 
     private static final Object sSync = new Object();
 
-    private static final ApkAssets[] sEmptyApkAssets = new ApkAssets[0];
-
     // Not private for LayoutLib's BridgeAssetManager.
     @GuardedBy("sSync") static AssetManager sSystem = null;
 
@@ -240,16 +238,10 @@ public final class AssetManager implements AutoCloseable {
      */
     public void setApkAssets(@NonNull ApkAssets[] apkAssets, boolean invalidateCaches) {
         Preconditions.checkNotNull(apkAssets, "apkAssets");
-
-        // Copy the apkAssets, but prepend the system assets (framework + overlays).
-        final ApkAssets[] newApkAssets = new ApkAssets[apkAssets.length + sSystemApkAssets.length];
-        System.arraycopy(sSystemApkAssets, 0, newApkAssets, 0, sSystemApkAssets.length);
-        System.arraycopy(apkAssets, 0, newApkAssets, sSystemApkAssets.length, apkAssets.length);
-
         synchronized (this) {
-            ensureOpenLocked();
-            mApkAssets = newApkAssets;
-            nativeSetApkAssets(mObject, mApkAssets, invalidateCaches);
+            ensureValidLocked();
+            mApkAssets = apkAssets;
+            nativeSetApkAssets(mObject, apkAssets, invalidateCaches);
             if (invalidateCaches) {
                 // Invalidate all caches.
                 invalidateCachesLocked(-1);
@@ -268,37 +260,13 @@ public final class AssetManager implements AutoCloseable {
     }
 
     /**
-     * Returns the set of ApkAssets loaded by this AssetManager. If the AssetManager is closed, this
-     * returns a 0-length array.
      * @hide
      */
     public @NonNull ApkAssets[] getApkAssets() {
         synchronized (this) {
-            if (mOpen) {
-                return mApkAssets;
-            }
-        }
-        return sEmptyApkAssets;
-    }
-
-    /**
-     * Returns a cookie for use with the other APIs of AssetManager.
-     * @return 0 if the path was not found, otherwise a positive integer cookie representing
-     * this path in the AssetManager.
-     * @hide
-     */
-    public int findCookieForPath(@NonNull String path) {
-        Preconditions.checkNotNull(path, "path");
-        synchronized (this) {
             ensureValidLocked();
-            final int count = mApkAssets.length;
-            for (int i = 0; i < count; i++) {
-                if (path.equals(mApkAssets[i].getAssetPath())) {
-                    return i + 1;
-                }
-            }
+            return mApkAssets;
         }
-        return 0;
     }
 
     /**
@@ -380,7 +348,6 @@ public final class AssetManager implements AutoCloseable {
      */
     @GuardedBy("this")
     private void ensureOpenLocked() {
-        // If mOpen is true, this implies that mObject != 0.
         if (!mOpen) {
             throw new RuntimeException("AssetManager has been closed");
         }
@@ -1214,7 +1181,6 @@ public final class AssetManager implements AutoCloseable {
         if (mNumRefs == 0 && mObject != 0) {
             nativeDestroy(mObject);
             mObject = 0;
-            mApkAssets = sEmptyApkAssets;
         }
     }
 
