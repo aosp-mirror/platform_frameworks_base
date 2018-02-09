@@ -783,7 +783,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         enforceCallingPermission();
         if (DEBUG) Slog.d(TAG, "learned that statsdReady");
         sayHiToStatsd(); // tell statsd that we're ready too and link to it
-        mContext.sendBroadcastAsUser(new Intent(StatsManager.ACTION_STATSD_STARTED),
+        mContext.sendBroadcastAsUser(
+                new Intent(StatsManager.ACTION_STATSD_STARTED)
+                        .addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND),
                 UserHandle.SYSTEM,
                 android.Manifest.permission.DUMP);
     }
