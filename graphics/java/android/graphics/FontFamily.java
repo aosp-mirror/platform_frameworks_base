@@ -19,9 +19,9 @@ package android.graphics;
 import android.annotation.Nullable;
 import android.content.res.AssetManager;
 import android.graphics.fonts.FontVariationAxis;
-import android.text.FontConfig;
 import android.text.TextUtils;
 import android.util.Log;
+
 import dalvik.annotation.optimization.CriticalNative;
 
 import java.io.FileInputStream;
