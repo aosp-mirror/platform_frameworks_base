@@ -33,8 +33,8 @@ import java.io.IOException;
  * making the creation of AssetManagers very cheap.
  * @hide
  */
-public final class ApkAssets {
-    @GuardedBy("this") private final long mNativePtr;
+public final class ApkAssets implements AutoCloseable {
+    @GuardedBy("this") private long mNativePtr;
     @GuardedBy("this") private StringBlock mStringBlock;
 
     /**
@@ -127,12 +127,14 @@ public final class ApkAssets {
 
     @NonNull String getAssetPath() {
         synchronized (this) {
+            ensureValidLocked();
             return nativeGetAssetPath(mNativePtr);
         }
     }
 
     CharSequence getStringFromPool(int idx) {
         synchronized (this) {
+            ensureValidLocked();
             return mStringBlock.get(idx);
         }
     }
@@ -149,6 +151,7 @@ public final class ApkAssets {
     public @NonNull XmlResourceParser openXml(@NonNull String fileName) throws IOException {
         Preconditions.checkNotNull(fileName, "fileName");
         synchronized (this) {
+            ensureValidLocked();
             long nativeXmlPtr = nativeOpenXml(mNativePtr, fileName);
             try (XmlBlock block = new XmlBlock(null, nativeXmlPtr)) {
                 XmlResourceParser parser = block.newParser();
@@ -167,13 +170,41 @@ public final class ApkAssets {
      */
     public boolean isUpToDate() {
         synchronized (this) {
+            ensureValidLocked();
             return nativeIsUpToDate(mNativePtr);
+        }
+    }
+
+    /**
+     * Closes the ApkAssets and destroys the underlying native implementation. Further use of the
+     * ApkAssets object will cause exceptions to be thrown.
+     *
+     * Calling close on an already closed ApkAssets does nothing.
+     */
+    @Override
+    public void close() {
+        synchronized (this) {
+            if (mNativePtr == 0) {
+                return;
+            }
+
+            mStringBlock = null;
+            nativeDestroy(mNativePtr);
+            mNativePtr = 0;
         }
     }
 
     @Override
     protected void finalize() throws Throwable {
-        nativeDestroy(mNativePtr);
+        if (mNativePtr != 0) {
+            nativeDestroy(mNativePtr);
+        }
+    }
+
+    private void ensureValidLocked() {
+        if (mNativePtr == 0) {
+            throw new RuntimeException("ApkAssets is closed");
+        }
     }
 
     private static native long nativeLoad(
