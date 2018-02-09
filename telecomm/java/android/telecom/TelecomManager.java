@@ -1301,7 +1301,7 @@ public class TelecomManager {
     public boolean endCall() {
         try {
             if (isServiceConnected()) {
-                return getTelecomService().endCall();
+                return getTelecomService().endCall(mContext.getPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecomService#endCall", e);
