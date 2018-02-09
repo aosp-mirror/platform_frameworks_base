@@ -2325,10 +2325,10 @@ package android.media.soundtrigger {
 package android.media.tv {
 
   public final class TvContentRatingSystemInfo implements android.os.Parcelable {
-    method public static final android.media.tv.TvContentRatingSystemInfo createTvContentRatingSystemInfo(int, android.content.pm.ApplicationInfo);
+    method public static android.media.tv.TvContentRatingSystemInfo createTvContentRatingSystemInfo(int, android.content.pm.ApplicationInfo);
     method public int describeContents();
-    method public final android.net.Uri getXmlUri();
-    method public final boolean isSystemDefined();
+    method public android.net.Uri getXmlUri();
+    method public boolean isSystemDefined();
     method public void writeToParcel(android.os.Parcel, int);
   }
 
@@ -3862,15 +3862,15 @@ package android.telecom {
   }
 
   public final deprecated class Phone {
-    method public final void addListener(android.telecom.Phone.Listener);
-    method public final boolean canAddCall();
-    method public final deprecated android.telecom.AudioState getAudioState();
-    method public final android.telecom.CallAudioState getCallAudioState();
-    method public final java.util.List<android.telecom.Call> getCalls();
-    method public final void removeListener(android.telecom.Phone.Listener);
+    method public void addListener(android.telecom.Phone.Listener);
+    method public boolean canAddCall();
+    method public deprecated android.telecom.AudioState getAudioState();
+    method public android.telecom.CallAudioState getCallAudioState();
+    method public java.util.List<android.telecom.Call> getCalls();
+    method public void removeListener(android.telecom.Phone.Listener);
     method public void requestBluetoothAudio(java.lang.String);
-    method public final void setAudioRoute(int);
-    method public final void setMuted(boolean);
+    method public void setAudioRoute(int);
+    method public void setMuted(boolean);
   }
 
   public static abstract class Phone.Listener {
