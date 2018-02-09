@@ -18,11 +18,9 @@ package android.content.res;
 
 import android.annotation.AnyRes;
 import android.annotation.ArrayRes;
-import android.annotation.AttrRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
-import android.annotation.StyleRes;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration.NativeConfig;
 import android.os.ParcelFileDescriptor;
@@ -31,19 +29,11 @@ import android.util.SparseArray;
 import android.util.TypedValue;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.Preconditions;
 
-import libcore.io.IoUtils;
-
-import java.io.BufferedReader;
-import java.io.FileInputStream;
+import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.channels.FileLock;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -54,17 +44,7 @@ import java.util.HashMap;
  * bytes.
  */
 public final class AssetManager implements AutoCloseable {
-    private static final String TAG = "AssetManager";
-    private static final boolean DEBUG_REFS = false;
-
-    private static final String FRAMEWORK_APK_PATH = "/system/framework/framework-res.apk";
-
-    private static final Object sSync = new Object();
-
-    // Not private for LayoutLib's BridgeAssetManager.
-    @GuardedBy("sSync") static AssetManager sSystem = null;
-
-    @GuardedBy("sSync") private static ApkAssets[] sSystemApkAssets = new ApkAssets[0];
+    /* modes used when opening an asset */
 
     /**
      * Mode for {@link #open(String, int)}: no specific information about how
@@ -87,303 +67,87 @@ public final class AssetManager implements AutoCloseable {
      */
     public static final int ACCESS_BUFFER = 3;
 
-    @GuardedBy("this") private final TypedValue mValue = new TypedValue();
-    @GuardedBy("this") private final long[] mOffsets = new long[2];
+    private static final String TAG = "AssetManager";
+    private static final boolean localLOGV = false || false;
+    
+    private static final boolean DEBUG_REFS = false;
+    
+    private static final Object sSync = new Object();
+    /*package*/ static AssetManager sSystem = null;
 
-    // Pointer to native implementation, stuffed inside a long.
-    @GuardedBy("this") private long mObject;
+    private final TypedValue mValue = new TypedValue();
+    private final long[] mOffsets = new long[2];
+    
+    // For communication with native code.
+    private long mObject;
 
-    // The loaded asset paths.
-    @GuardedBy("this") private ApkAssets[] mApkAssets;
-
-    // Debug/reference counting implementation.
-    @GuardedBy("this") private boolean mOpen = true;
-    @GuardedBy("this") private int mNumRefs = 1;
-    @GuardedBy("this") private HashMap<Long, RuntimeException> mRefStacks;
-
+    private StringBlock mStringBlocks[] = null;
+    
+    private int mNumRefs = 1;
+    private boolean mOpen = true;
+    private HashMap<Long, RuntimeException> mRefStacks;
+ 
     /**
      * Create a new AssetManager containing only the basic system assets.
      * Applications will not generally use this method, instead retrieving the
      * appropriate asset manager with {@link Resources#getAssets}.    Not for
      * use by applications.
-     * @hide
+     * {@hide}
      */
     public AssetManager() {
-        final ApkAssets[] assets;
-        synchronized (sSync) {
-            createSystemAssetsInZygoteLocked();
-            assets = sSystemApkAssets;
-        }
-
-        mObject = nativeCreate();
-        if (DEBUG_REFS) {
-            mNumRefs = 0;
-            incRefsLocked(hashCode());
-        }
-
-        // Always set the framework resources.
-        setApkAssets(assets, false /*invalidateCaches*/);
-    }
-
-    /**
-     * Private constructor that doesn't call ensureSystemAssets.
-     * Used for the creation of system assets.
-     */
-    @SuppressWarnings("unused")
-    private AssetManager(boolean sentinel) {
-        mObject = nativeCreate();
-        if (DEBUG_REFS) {
-            mNumRefs = 0;
-            incRefsLocked(hashCode());
-        }
-    }
-
-    /**
-     * This must be called from Zygote so that system assets are shared by all applications.
-     */
-    @GuardedBy("sSync")
-    private static void createSystemAssetsInZygoteLocked() {
-        if (sSystem != null) {
-            return;
-        }
-
-        // Make sure that all IDMAPs are up to date.
-        nativeVerifySystemIdmaps();
-
-        try {
-            ArrayList<ApkAssets> apkAssets = new ArrayList<>();
-            apkAssets.add(ApkAssets.loadFromPath(FRAMEWORK_APK_PATH, true /*system*/));
-            loadStaticRuntimeOverlays(apkAssets);
-
-            sSystemApkAssets = apkAssets.toArray(new ApkAssets[apkAssets.size()]);
-            sSystem = new AssetManager(true /*sentinel*/);
-            sSystem.setApkAssets(sSystemApkAssets, false /*invalidateCaches*/);
-        } catch (IOException e) {
-            throw new IllegalStateException("Failed to create system AssetManager", e);
-        }
-    }
-
-    /**
-     * Loads the static runtime overlays declared in /data/resource-cache/overlays.list.
-     * Throws an exception if the file is corrupt or if loading the APKs referenced by the file
-     * fails. Returns quietly if the overlays.list file doesn't exist.
-     * @param outApkAssets The list to fill with the loaded ApkAssets.
-     */
-    private static void loadStaticRuntimeOverlays(ArrayList<ApkAssets> outApkAssets)
-            throws IOException {
-        final FileInputStream fis;
-        try {
-            fis = new FileInputStream("/data/resource-cache/overlays.list");
-        } catch (FileNotFoundException e) {
-            // We might not have any overlays, this is fine. We catch here since ApkAssets
-            // loading can also fail with the same exception, which we would want to propagate.
-            Log.i(TAG, "no overlays.list file found");
-            return;
-        }
-
-        try {
-            // Acquire a lock so that any idmap scanning doesn't impact the current set.
-            // The order of this try-with-resources block matters. We must release the lock, and
-            // then close the file streams when exiting the block.
-            try (final BufferedReader br = new BufferedReader(new InputStreamReader(fis));
-                 final FileLock flock = fis.getChannel().lock(0, Long.MAX_VALUE, true /*shared*/)) {
-                for (String line; (line = br.readLine()) != null; ) {
-                    final String idmapPath = line.split(" ")[1];
-                    outApkAssets.add(ApkAssets.loadOverlayFromPath(idmapPath, true /*system*/));
-                }
+        synchronized (this) {
+            if (DEBUG_REFS) {
+                mNumRefs = 0;
+                incRefsLocked(this.hashCode());
             }
-        } finally {
-            // When BufferedReader is closed above, FileInputStream is closed as well. But let's be
-            // paranoid.
-            IoUtils.closeQuietly(fis);
+            init(false);
+            if (localLOGV) Log.v(TAG, "New asset manager: " + this);
+            ensureSystemAssets();
         }
+    }
+
+    private static void ensureSystemAssets() {
+        synchronized (sSync) {
+            if (sSystem == null) {
+                AssetManager system = new AssetManager(true);
+                system.makeStringBlocks(null);
+                sSystem = system;
+            }
+        }
+    }
+    
+    private AssetManager(boolean isSystem) {
+        if (DEBUG_REFS) {
+            synchronized (this) {
+                mNumRefs = 0;
+                incRefsLocked(this.hashCode());
+            }
+        }
+        init(true);
+        if (localLOGV) Log.v(TAG, "New asset manager: " + this);
     }
 
     /**
      * Return a global shared asset manager that provides access to only
      * system assets (no application assets).
-     * @hide
+     * {@hide}
      */
     public static AssetManager getSystem() {
-        synchronized (sSync) {
-            createSystemAssetsInZygoteLocked();
-            return sSystem;
-        }
+        ensureSystemAssets();
+        return sSystem;
     }
 
     /**
      * Close this asset manager.
      */
-    @Override
     public void close() {
-        synchronized (this) {
-            if (!mOpen) {
-                return;
+        synchronized(this) {
+            //System.out.println("Release: num=" + mNumRefs
+            //                   + ", released=" + mReleased);
+            if (mOpen) {
+                mOpen = false;
+                decRefsLocked(this.hashCode());
             }
-
-            mOpen = false;
-            decRefsLocked(hashCode());
-        }
-    }
-
-    /**
-     * Changes the asset paths in this AssetManager. This replaces the {@link #addAssetPath(String)}
-     * family of methods.
-     *
-     * @param apkAssets The new set of paths.
-     * @param invalidateCaches Whether to invalidate any caches. This should almost always be true.
-     *                         Set this to false if you are appending new resources
-     *                         (not new configurations).
-     * @hide
-     */
-    public void setApkAssets(@NonNull ApkAssets[] apkAssets, boolean invalidateCaches) {
-        Preconditions.checkNotNull(apkAssets, "apkAssets");
-        synchronized (this) {
-            ensureValidLocked();
-            mApkAssets = apkAssets;
-            nativeSetApkAssets(mObject, apkAssets, invalidateCaches);
-            if (invalidateCaches) {
-                // Invalidate all caches.
-                invalidateCachesLocked(-1);
-            }
-        }
-    }
-
-    /**
-     * Invalidates the caches in this AssetManager according to the bitmask `diff`.
-     *
-     * @param diff The bitmask of changes generated by {@link Configuration#diff(Configuration)}.
-     * @see ActivityInfo.Config
-     */
-    private void invalidateCachesLocked(int diff) {
-        // TODO(adamlesinski): Currently there are no caches to invalidate in Java code.
-    }
-
-    /**
-     * @hide
-     */
-    public @NonNull ApkAssets[] getApkAssets() {
-        synchronized (this) {
-            ensureValidLocked();
-            return mApkAssets;
-        }
-    }
-
-    /**
-     * @deprecated Use {@link #setApkAssets(ApkAssets[], boolean)}
-     * @hide
-     */
-    @Deprecated
-    public int addAssetPath(String path) {
-        return addAssetPathInternal(path, false /*overlay*/, false /*appAsLib*/);
-    }
-
-    /**
-     * @deprecated Use {@link #setApkAssets(ApkAssets[], boolean)}
-     * @hide
-     */
-    @Deprecated
-    public int addAssetPathAsSharedLibrary(String path) {
-        return addAssetPathInternal(path, false /*overlay*/, true /*appAsLib*/);
-    }
-
-    /**
-     * @deprecated Use {@link #setApkAssets(ApkAssets[], boolean)}
-     * @hide
-     */
-    @Deprecated
-    public int addOverlayPath(String path) {
-        return addAssetPathInternal(path, true /*overlay*/, false /*appAsLib*/);
-    }
-
-    private int addAssetPathInternal(String path, boolean overlay, boolean appAsLib) {
-        Preconditions.checkNotNull(path, "path");
-        synchronized (this) {
-            ensureOpenLocked();
-            final int count = mApkAssets.length;
-            for (int i = 0; i < count; i++) {
-                if (mApkAssets[i].getAssetPath().equals(path)) {
-                    return i + 1;
-                }
-            }
-
-            final ApkAssets assets;
-            try {
-                if (overlay) {
-                    // TODO(b/70343104): This hardcoded path will be removed once
-                    // addAssetPathInternal is deleted.
-                    final String idmapPath = "/data/resource-cache/"
-                            + path.substring(1).replace('/', '@')
-                            + "@idmap";
-                    assets = ApkAssets.loadOverlayFromPath(idmapPath, false /*system*/);
-                } else {
-                    assets = ApkAssets.loadFromPath(path, false /*system*/, appAsLib);
-                }
-            } catch (IOException e) {
-                return 0;
-            }
-
-            final ApkAssets[] newApkAssets = Arrays.copyOf(mApkAssets, count + 1);
-            newApkAssets[count] = assets;
-            setApkAssets(newApkAssets, true);
-            return count + 1;
-        }
-    }
-
-    /**
-     * Ensures that the native implementation has not been destroyed.
-     * The AssetManager may have been closed, but references to it still exist
-     * and therefore the native implementation is not destroyed.
-     */
-    @GuardedBy("this")
-    private void ensureValidLocked() {
-        if (mObject == 0) {
-            throw new RuntimeException("AssetManager has been destroyed");
-        }
-    }
-
-    /**
-     * Ensures that the AssetManager has not been explicitly closed. If this method passes,
-     * then this implies that ensureValidLocked() also passes.
-     */
-    @GuardedBy("this")
-    private void ensureOpenLocked() {
-        if (!mOpen) {
-            throw new RuntimeException("AssetManager has been closed");
-        }
-    }
-
-    /**
-     * Populates {@code outValue} with the data associated a particular
-     * resource identifier for the current configuration.
-     *
-     * @param resId the resource identifier to load
-     * @param densityDpi the density bucket for which to load the resource
-     * @param outValue the typed value in which to put the data
-     * @param resolveRefs {@code true} to resolve references, {@code false}
-     *                    to leave them unresolved
-     * @return {@code true} if the data was loaded into {@code outValue},
-     *         {@code false} otherwise
-     */
-    boolean getResourceValue(@AnyRes int resId, int densityDpi, @NonNull TypedValue outValue,
-            boolean resolveRefs) {
-        Preconditions.checkNotNull(outValue, "outValue");
-        synchronized (this) {
-            ensureValidLocked();
-            final int cookie = nativeGetResourceValue(
-                    mObject, resId, (short) densityDpi, outValue, resolveRefs);
-            if (cookie <= 0) {
-                return false;
-            }
-
-            // Convert the changing configurations flags populated by native code.
-            outValue.changingConfigurations = ActivityInfo.activityInfoConfigNativeToJava(
-                    outValue.changingConfigurations);
-
-            if (outValue.type == TypedValue.TYPE_STRING) {
-                outValue.string = mApkAssets[cookie - 1].getStringFromPool(outValue.data);
-            }
-            return true;
         }
     }
 
@@ -394,7 +158,8 @@ public final class AssetManager implements AutoCloseable {
      * @param resId the resource identifier to load
      * @return the string value, or {@code null}
      */
-    @Nullable CharSequence getResourceText(@StringRes int resId) {
+    @Nullable
+    final CharSequence getResourceText(@StringRes int resId) {
         synchronized (this) {
             final TypedValue outValue = mValue;
             if (getResourceValue(resId, 0, outValue, true)) {
@@ -409,15 +174,15 @@ public final class AssetManager implements AutoCloseable {
      * identifier for the current configuration.
      *
      * @param resId the resource identifier to load
-     * @param bagEntryId the index into the bag to load
+     * @param bagEntryId
      * @return the string value, or {@code null}
      */
-    @Nullable CharSequence getResourceBagText(@StringRes int resId, int bagEntryId) {
+    @Nullable
+    final CharSequence getResourceBagText(@StringRes int resId, int bagEntryId) {
         synchronized (this) {
-            ensureValidLocked();
             final TypedValue outValue = mValue;
-            final int cookie = nativeGetResourceBagValue(mObject, resId, bagEntryId, outValue);
-            if (cookie <= 0) {
+            final int block = loadResourceBagValue(resId, bagEntryId, outValue, true);
+            if (block < 0) {
                 return null;
             }
 
@@ -426,46 +191,9 @@ public final class AssetManager implements AutoCloseable {
                     outValue.changingConfigurations);
 
             if (outValue.type == TypedValue.TYPE_STRING) {
-                return mApkAssets[cookie - 1].getStringFromPool(outValue.data);
+                return mStringBlocks[block].get(outValue.data);
             }
             return outValue.coerceToString();
-        }
-    }
-
-    int getResourceArraySize(@ArrayRes int resId) {
-        synchronized (this) {
-            ensureValidLocked();
-            return nativeGetResourceArraySize(mObject, resId);
-        }
-    }
-
-    /**
-     * Populates `outData` with array elements of `resId`. `outData` is normally
-     * used with
-     * {@link TypedArray}.
-     *
-     * Each logical element in `outData` is {@link TypedArray#STYLE_NUM_ENTRIES}
-     * long,
-     * with the indices of the data representing the type, value, asset cookie,
-     * resource ID,
-     * configuration change mask, and density of the element.
-     *
-     * @param resId The resource ID of an array resource.
-     * @param outData The array to populate with data.
-     * @return The length of the array.
-     *
-     * @see TypedArray#STYLE_TYPE
-     * @see TypedArray#STYLE_DATA
-     * @see TypedArray#STYLE_ASSET_COOKIE
-     * @see TypedArray#STYLE_RESOURCE_ID
-     * @see TypedArray#STYLE_CHANGING_CONFIGURATIONS
-     * @see TypedArray#STYLE_DENSITY
-     */
-    int getResourceArray(@ArrayRes int resId, @NonNull int[] outData) {
-        Preconditions.checkNotNull(outData, "outData");
-        synchronized (this) {
-            ensureValidLocked();
-            return nativeGetResourceArray(mObject, resId, outData);
         }
     }
 
@@ -476,10 +204,39 @@ public final class AssetManager implements AutoCloseable {
      * @param resId the resource identifier of the string array
      * @return the string array, or {@code null}
      */
-    @Nullable String[] getResourceStringArray(@ArrayRes int resId) {
+    @Nullable
+    final String[] getResourceStringArray(@ArrayRes int resId) {
+        return getArrayStringResource(resId);
+    }
+
+    /**
+     * Populates {@code outValue} with the data associated a particular
+     * resource identifier for the current configuration.
+     *
+     * @param resId the resource identifier to load
+     * @param densityDpi the density bucket for which to load the resource
+     * @param outValue the typed value in which to put the data
+     * @param resolveRefs {@code true} to resolve references, {@code false}
+     *                    to leave them unresolved
+     * @return {@code true} if the data was loaded into {@code outValue},
+     *         {@code false} otherwise
+     */
+    final boolean getResourceValue(@AnyRes int resId, int densityDpi, @NonNull TypedValue outValue,
+            boolean resolveRefs) {
         synchronized (this) {
-            ensureValidLocked();
-            return nativeGetResourceStringArray(mObject, resId);
+            final int block = loadResourceValue(resId, (short) densityDpi, outValue, resolveRefs);
+            if (block < 0) {
+                return false;
+            }
+
+            // Convert the changing configurations flags populated by native code.
+            outValue.changingConfigurations = ActivityInfo.activityInfoConfigNativeToJava(
+                    outValue.changingConfigurations);
+
+            if (outValue.type == TypedValue.TYPE_STRING) {
+                outValue.string = mStringBlocks[block].get(outValue.data);
+            }
+            return true;
         }
     }
 
@@ -489,45 +246,23 @@ public final class AssetManager implements AutoCloseable {
      *
      * @param resId the resource id of the string array
      */
-    @Nullable CharSequence[] getResourceTextArray(@ArrayRes int resId) {
+    final @Nullable CharSequence[] getResourceTextArray(@ArrayRes int resId) {
         synchronized (this) {
-            ensureValidLocked();
-            final int[] rawInfoArray = nativeGetResourceStringArrayInfo(mObject, resId);
+            final int[] rawInfoArray = getArrayStringInfo(resId);
             if (rawInfoArray == null) {
                 return null;
             }
-
             final int rawInfoArrayLen = rawInfoArray.length;
             final int infoArrayLen = rawInfoArrayLen / 2;
+            int block;
+            int index;
             final CharSequence[] retArray = new CharSequence[infoArrayLen];
             for (int i = 0, j = 0; i < rawInfoArrayLen; i = i + 2, j++) {
-                int cookie = rawInfoArray[i];
-                int index = rawInfoArray[i + 1];
-                retArray[j] = (index >= 0 && cookie > 0)
-                        ? mApkAssets[cookie - 1].getStringFromPool(index) : null;
+                block = rawInfoArray[i];
+                index = rawInfoArray[i + 1];
+                retArray[j] = index >= 0 ? mStringBlocks[block].get(index) : null;
             }
             return retArray;
-        }
-    }
-
-    @Nullable int[] getResourceIntArray(@ArrayRes int resId) {
-        synchronized (this) {
-            ensureValidLocked();
-            return nativeGetResourceIntArray(mObject, resId);
-        }
-    }
-
-    /**
-     * Get the attributes for a style resource. These are the &lt;item&gt;
-     * elements in
-     * a &lt;style&gt; resource.
-     * @param resId The resource ID of the style
-     * @return An array of attribute IDs.
-     */
-    @AttrRes int[] getStyleAttributes(@StyleRes int resId) {
-        synchronized (this) {
-            ensureValidLocked();
-            return nativeGetStyleAttributes(mObject, resId);
         }
     }
 
@@ -544,75 +279,59 @@ public final class AssetManager implements AutoCloseable {
      * @return {@code true} if the data was loaded into {@code outValue},
      *         {@code false} otherwise
      */
-    boolean getThemeValue(long theme, @AnyRes int resId, @NonNull TypedValue outValue,
+    final boolean getThemeValue(long theme, @AnyRes int resId, @NonNull TypedValue outValue,
             boolean resolveRefs) {
-        Preconditions.checkNotNull(outValue, "outValue");
+        final int block = loadThemeAttributeValue(theme, resId, outValue, resolveRefs);
+        if (block < 0) {
+            return false;
+        }
+
+        // Convert the changing configurations flags populated by native code.
+        outValue.changingConfigurations = ActivityInfo.activityInfoConfigNativeToJava(
+                outValue.changingConfigurations);
+
+        if (outValue.type == TypedValue.TYPE_STRING) {
+            final StringBlock[] blocks = ensureStringBlocks();
+            outValue.string = blocks[block].get(outValue.data);
+        }
+        return true;
+    }
+
+    /**
+     * Ensures the string blocks are loaded.
+     *
+     * @return the string blocks
+     */
+    @NonNull
+    final StringBlock[] ensureStringBlocks() {
         synchronized (this) {
-            ensureValidLocked();
-            final int cookie = nativeThemeGetAttributeValue(mObject, theme, resId, outValue,
-                    resolveRefs);
-            if (cookie <= 0) {
-                return false;
+            if (mStringBlocks == null) {
+                makeStringBlocks(sSystem.mStringBlocks);
             }
+            return mStringBlocks;
+        }
+    }
 
-            // Convert the changing configurations flags populated by native code.
-            outValue.changingConfigurations = ActivityInfo.activityInfoConfigNativeToJava(
-                    outValue.changingConfigurations);
-
-            if (outValue.type == TypedValue.TYPE_STRING) {
-                outValue.string = mApkAssets[cookie - 1].getStringFromPool(outValue.data);
+    /*package*/ final void makeStringBlocks(StringBlock[] seed) {
+        final int seedNum = (seed != null) ? seed.length : 0;
+        final int num = getStringBlockCount();
+        mStringBlocks = new StringBlock[num];
+        if (localLOGV) Log.v(TAG, "Making string blocks for " + this
+                + ": " + num);
+        for (int i=0; i<num; i++) {
+            if (i < seedNum) {
+                mStringBlocks[i] = seed[i];
+            } else {
+                mStringBlocks[i] = new StringBlock(getNativeStringBlock(i), true);
             }
-            return true;
         }
     }
 
-    void dumpTheme(long theme, int priority, String tag, String prefix) {
+    /*package*/ final CharSequence getPooledStringForCookie(int cookie, int id) {
         synchronized (this) {
-            ensureValidLocked();
-            nativeThemeDump(mObject, theme, priority, tag, prefix);
+            // Cookies map to string blocks starting at 1.
+            return mStringBlocks[cookie - 1].get(id);
         }
-    }
-
-    @Nullable String getResourceName(@AnyRes int resId) {
-        synchronized (this) {
-            ensureValidLocked();
-            return nativeGetResourceName(mObject, resId);
-        }
-    }
-
-    @Nullable String getResourcePackageName(@AnyRes int resId) {
-        synchronized (this) {
-            ensureValidLocked();
-            return nativeGetResourcePackageName(mObject, resId);
-        }
-    }
-
-    @Nullable String getResourceTypeName(@AnyRes int resId) {
-        synchronized (this) {
-            ensureValidLocked();
-            return nativeGetResourceTypeName(mObject, resId);
-        }
-    }
-
-    @Nullable String getResourceEntryName(@AnyRes int resId) {
-        synchronized (this) {
-            ensureValidLocked();
-            return nativeGetResourceEntryName(mObject, resId);
-        }
-    }
-
-    @AnyRes int getResourceIdentifier(@NonNull String name, @Nullable String defType,
-            @Nullable String defPackage) {
-        synchronized (this) {
-            ensureValidLocked();
-            // name is checked in JNI.
-            return nativeGetResourceIdentifier(mObject, name, defType, defPackage);
-        }
-    }
-
-    CharSequence getPooledStringForCookie(int cookie, int id) {
-        // Cookies map to ApkAssets starting at 1.
-        return getApkAssets()[cookie - 1].getStringFromPool(id);
     }
 
     /**
@@ -620,12 +339,13 @@ public final class AssetManager implements AutoCloseable {
      * files that have been bundled with an application as assets -- that is,
      * files placed in to the "assets" directory.
      * 
-     * @param fileName The name of the asset to open.  This name can be hierarchical.
+     * @param fileName The name of the asset to open.  This name can be
+     *                 hierarchical.
      * 
      * @see #open(String, int)
      * @see #list
      */
-    public @NonNull InputStream open(@NonNull String fileName) throws IOException {
+    public final InputStream open(String fileName) throws IOException {
         return open(fileName, ACCESS_STREAMING);
     }
 
@@ -635,7 +355,8 @@ public final class AssetManager implements AutoCloseable {
      * with an application as assets -- that is, files placed in to the
      * "assets" directory.
      * 
-     * @param fileName The name of the asset to open.  This name can be hierarchical.
+     * @param fileName The name of the asset to open.  This name can be
+     *                 hierarchical.
      * @param accessMode Desired access mode for retrieving the data.
      * 
      * @see #ACCESS_UNKNOWN
@@ -645,40 +366,34 @@ public final class AssetManager implements AutoCloseable {
      * @see #open(String)
      * @see #list
      */
-    public @NonNull InputStream open(@NonNull String fileName, int accessMode) throws IOException {
-        Preconditions.checkNotNull(fileName, "fileName");
+    public final InputStream open(String fileName, int accessMode)
+        throws IOException {
         synchronized (this) {
-            ensureOpenLocked();
-            final long asset = nativeOpenAsset(mObject, fileName, accessMode);
-            if (asset == 0) {
-                throw new FileNotFoundException("Asset file: " + fileName);
+            if (!mOpen) {
+                throw new RuntimeException("Assetmanager has been closed");
             }
-            final AssetInputStream assetInputStream = new AssetInputStream(asset);
-            incRefsLocked(assetInputStream.hashCode());
-            return assetInputStream;
+            long asset = openAsset(fileName, accessMode);
+            if (asset != 0) {
+                AssetInputStream res = new AssetInputStream(asset);
+                incRefsLocked(res.hashCode());
+                return res;
+            }
         }
+        throw new FileNotFoundException("Asset file: " + fileName);
     }
 
-    /**
-     * Open an uncompressed asset by mmapping it and returning an {@link AssetFileDescriptor}.
-     * This provides access to files that have been bundled with an application as assets -- that
-     * is, files placed in to the "assets" directory.
-     *
-     * The asset must be uncompressed, or an exception will be thrown.
-     *
-     * @param fileName The name of the asset to open.  This name can be hierarchical.
-     * @return An open AssetFileDescriptor.
-     */
-    public @NonNull AssetFileDescriptor openFd(@NonNull String fileName) throws IOException {
-        Preconditions.checkNotNull(fileName, "fileName");
+    public final AssetFileDescriptor openFd(String fileName)
+            throws IOException {
         synchronized (this) {
-            ensureOpenLocked();
-            final ParcelFileDescriptor pfd = nativeOpenAssetFd(mObject, fileName, mOffsets);
-            if (pfd == null) {
-                throw new FileNotFoundException("Asset file: " + fileName);
+            if (!mOpen) {
+                throw new RuntimeException("Assetmanager has been closed");
             }
-            return new AssetFileDescriptor(pfd, mOffsets[0], mOffsets[1]);
+            ParcelFileDescriptor pfd = openAssetFd(fileName, mOffsets);
+            if (pfd != null) {
+                return new AssetFileDescriptor(pfd, mOffsets[0], mOffsets[1]);
+            }
         }
+        throw new FileNotFoundException("Asset file: " + fileName);
     }
 
     /**
@@ -693,121 +408,90 @@ public final class AssetManager implements AutoCloseable {
      * 
      * @see #open
      */
-    public @Nullable String[] list(@NonNull String path) throws IOException {
-        Preconditions.checkNotNull(path, "path");
-        synchronized (this) {
-            ensureValidLocked();
-            return nativeList(mObject, path);
-        }
-    }
+    public native final String[] list(String path)
+        throws IOException;
 
     /**
+     * {@hide}
      * Open a non-asset file as an asset using ACCESS_STREAMING mode.  This
      * provides direct access to all of the files included in an application
      * package (not only its assets).  Applications should not normally use
      * this.
-     *
-     * @param fileName Name of the asset to retrieve.
-     *
+     * 
      * @see #open(String)
-     * @hide
      */
-    public @NonNull InputStream openNonAsset(@NonNull String fileName) throws IOException {
+    public final InputStream openNonAsset(String fileName) throws IOException {
         return openNonAsset(0, fileName, ACCESS_STREAMING);
     }
 
     /**
+     * {@hide}
      * Open a non-asset file as an asset using a specific access mode.  This
      * provides direct access to all of the files included in an application
      * package (not only its assets).  Applications should not normally use
      * this.
-     *
-     * @param fileName Name of the asset to retrieve.
-     * @param accessMode Desired access mode for retrieving the data.
-     *
-     * @see #ACCESS_UNKNOWN
-     * @see #ACCESS_STREAMING
-     * @see #ACCESS_RANDOM
-     * @see #ACCESS_BUFFER
+     * 
      * @see #open(String, int)
-     * @hide
      */
-    public @NonNull InputStream openNonAsset(@NonNull String fileName, int accessMode)
-            throws IOException {
+    public final InputStream openNonAsset(String fileName, int accessMode)
+        throws IOException {
         return openNonAsset(0, fileName, accessMode);
     }
 
     /**
+     * {@hide}
      * Open a non-asset in a specified package.  Not for use by applications.
-     *
+     * 
      * @param cookie Identifier of the package to be opened.
      * @param fileName Name of the asset to retrieve.
-     * @hide
      */
-    public @NonNull InputStream openNonAsset(int cookie, @NonNull String fileName)
-            throws IOException {
+    public final InputStream openNonAsset(int cookie, String fileName)
+        throws IOException {
         return openNonAsset(cookie, fileName, ACCESS_STREAMING);
     }
 
     /**
+     * {@hide}
      * Open a non-asset in a specified package.  Not for use by applications.
-     *
+     * 
      * @param cookie Identifier of the package to be opened.
      * @param fileName Name of the asset to retrieve.
      * @param accessMode Desired access mode for retrieving the data.
-     * @hide
      */
-    public @NonNull InputStream openNonAsset(int cookie, @NonNull String fileName, int accessMode)
-            throws IOException {
-        Preconditions.checkNotNull(fileName, "fileName");
+    public final InputStream openNonAsset(int cookie, String fileName, int accessMode)
+        throws IOException {
         synchronized (this) {
-            ensureOpenLocked();
-            final long asset = nativeOpenNonAsset(mObject, cookie, fileName, accessMode);
-            if (asset == 0) {
-                throw new FileNotFoundException("Asset absolute file: " + fileName);
+            if (!mOpen) {
+                throw new RuntimeException("Assetmanager has been closed");
             }
-            final AssetInputStream assetInputStream = new AssetInputStream(asset);
-            incRefsLocked(assetInputStream.hashCode());
-            return assetInputStream;
+            long asset = openNonAssetNative(cookie, fileName, accessMode);
+            if (asset != 0) {
+                AssetInputStream res = new AssetInputStream(asset);
+                incRefsLocked(res.hashCode());
+                return res;
+            }
         }
+        throw new FileNotFoundException("Asset absolute file: " + fileName);
     }
 
-    /**
-     * Open a non-asset as an asset by mmapping it and returning an {@link AssetFileDescriptor}.
-     * This provides direct access to all of the files included in an application
-     * package (not only its assets).  Applications should not normally use this.
-     *
-     * The asset must not be compressed, or an exception will be thrown.
-     *
-     * @param fileName Name of the asset to retrieve.
-     */
-    public @NonNull AssetFileDescriptor openNonAssetFd(@NonNull String fileName)
+    public final AssetFileDescriptor openNonAssetFd(String fileName)
             throws IOException {
         return openNonAssetFd(0, fileName);
     }
-
-    /**
-     * Open a non-asset as an asset by mmapping it and returning an {@link AssetFileDescriptor}.
-     * This provides direct access to all of the files included in an application
-     * package (not only its assets).  Applications should not normally use this.
-     *
-     * The asset must not be compressed, or an exception will be thrown.
-     *
-     * @param cookie Identifier of the package to be opened.
-     * @param fileName Name of the asset to retrieve.
-     */
-    public @NonNull AssetFileDescriptor openNonAssetFd(int cookie, @NonNull String fileName)
-            throws IOException {
-        Preconditions.checkNotNull(fileName, "fileName");
+    
+    public final AssetFileDescriptor openNonAssetFd(int cookie,
+            String fileName) throws IOException {
         synchronized (this) {
-            ensureOpenLocked();
-            final ParcelFileDescriptor pfd =
-                    nativeOpenNonAssetFd(mObject, cookie, fileName, mOffsets);
-            if (pfd == null) {
-                throw new FileNotFoundException("Asset absolute file: " + fileName);
+            if (!mOpen) {
+                throw new RuntimeException("Assetmanager has been closed");
             }
-            return new AssetFileDescriptor(pfd, mOffsets[0], mOffsets[1]);
+            ParcelFileDescriptor pfd = openNonAssetFdNative(cookie,
+                    fileName, mOffsets);
+            if (pfd != null) {
+                return new AssetFileDescriptor(pfd, mOffsets[0], mOffsets[1]);
+            }
         }
+        throw new FileNotFoundException("Asset absolute file: " + fileName);
     }
     
     /**
@@ -815,7 +499,7 @@ public final class AssetManager implements AutoCloseable {
      * 
      * @param fileName The name of the file to retrieve.
      */
-    public @NonNull XmlResourceParser openXmlResourceParser(@NonNull String fileName)
+    public final XmlResourceParser openXmlResourceParser(String fileName)
             throws IOException {
         return openXmlResourceParser(0, fileName);
     }
@@ -826,265 +510,270 @@ public final class AssetManager implements AutoCloseable {
      * @param cookie Identifier of the package to be opened.
      * @param fileName The name of the file to retrieve.
      */
-    public @NonNull XmlResourceParser openXmlResourceParser(int cookie, @NonNull String fileName)
-            throws IOException {
-        try (XmlBlock block = openXmlBlockAsset(cookie, fileName)) {
-            XmlResourceParser parser = block.newParser();
-            // If openXmlBlockAsset doesn't throw, it will always return an XmlBlock object with
-            // a valid native pointer, which makes newParser always return non-null. But let's
-            // be paranoid.
-            if (parser == null) {
-                throw new AssertionError("block.newParser() returned a null parser");
-            }
-            return parser;
-        }
+    public final XmlResourceParser openXmlResourceParser(int cookie,
+            String fileName) throws IOException {
+        XmlBlock block = openXmlBlockAsset(cookie, fileName);
+        XmlResourceParser rp = block.newParser();
+        block.close();
+        return rp;
     }
 
     /**
-     * Retrieve a non-asset as a compiled XML file.  Not for use by applications.
+     * {@hide}
+     * Retrieve a non-asset as a compiled XML file.  Not for use by
+     * applications.
      * 
      * @param fileName The name of the file to retrieve.
-     * @hide
      */
-    @NonNull XmlBlock openXmlBlockAsset(@NonNull String fileName) throws IOException {
+    /*package*/ final XmlBlock openXmlBlockAsset(String fileName)
+            throws IOException {
         return openXmlBlockAsset(0, fileName);
     }
 
     /**
+     * {@hide}
      * Retrieve a non-asset as a compiled XML file.  Not for use by
      * applications.
      * 
      * @param cookie Identifier of the package to be opened.
      * @param fileName Name of the asset to retrieve.
-     * @hide
      */
-    @NonNull XmlBlock openXmlBlockAsset(int cookie, @NonNull String fileName) throws IOException {
-        Preconditions.checkNotNull(fileName, "fileName");
+    /*package*/ final XmlBlock openXmlBlockAsset(int cookie, String fileName)
+        throws IOException {
         synchronized (this) {
-            ensureOpenLocked();
-            final long xmlBlock = nativeOpenXmlAsset(mObject, cookie, fileName);
-            if (xmlBlock == 0) {
-                throw new FileNotFoundException("Asset XML file: " + fileName);
+            if (!mOpen) {
+                throw new RuntimeException("Assetmanager has been closed");
             }
-            final XmlBlock block = new XmlBlock(this, xmlBlock);
-            incRefsLocked(block.hashCode());
-            return block;
+            long xmlBlock = openXmlAssetNative(cookie, fileName);
+            if (xmlBlock != 0) {
+                XmlBlock res = new XmlBlock(this, xmlBlock);
+                incRefsLocked(res.hashCode());
+                return res;
+            }
         }
+        throw new FileNotFoundException("Asset XML file: " + fileName);
     }
 
-    void xmlBlockGone(int id) {
+    /*package*/ void xmlBlockGone(int id) {
         synchronized (this) {
             decRefsLocked(id);
         }
     }
 
-    void applyStyle(long themePtr, @AttrRes int defStyleAttr, @StyleRes int defStyleRes,
-            @Nullable XmlBlock.Parser parser, @NonNull int[] inAttrs, long outValuesAddress,
-            long outIndicesAddress) {
-        Preconditions.checkNotNull(inAttrs, "inAttrs");
+    /*package*/ final long createTheme() {
         synchronized (this) {
-            // Need to synchronize on AssetManager because we will be accessing
-            // the native implementation of AssetManager.
-            ensureValidLocked();
-            nativeApplyStyle(mObject, themePtr, defStyleAttr, defStyleRes,
-                    parser != null ? parser.mParseState : 0, inAttrs, outValuesAddress,
-                    outIndicesAddress);
+            if (!mOpen) {
+                throw new RuntimeException("Assetmanager has been closed");
+            }
+            long res = newTheme();
+            incRefsLocked(res);
+            return res;
         }
     }
 
-    boolean resolveAttrs(long themePtr, @AttrRes int defStyleAttr, @StyleRes int defStyleRes,
-            @Nullable int[] inValues, @NonNull int[] inAttrs, @NonNull int[] outValues,
-            @NonNull int[] outIndices) {
-        Preconditions.checkNotNull(inAttrs, "inAttrs");
-        Preconditions.checkNotNull(outValues, "outValues");
-        Preconditions.checkNotNull(outIndices, "outIndices");
+    /*package*/ final void releaseTheme(long theme) {
         synchronized (this) {
-            // Need to synchronize on AssetManager because we will be accessing
-            // the native implementation of AssetManager.
-            ensureValidLocked();
-            return nativeResolveAttrs(mObject,
-                    themePtr, defStyleAttr, defStyleRes, inValues, inAttrs, outValues, outIndices);
+            deleteTheme(theme);
+            decRefsLocked(theme);
         }
     }
 
-    boolean retrieveAttributes(@NonNull XmlBlock.Parser parser, @NonNull int[] inAttrs,
-            @NonNull int[] outValues, @NonNull int[] outIndices) {
-        Preconditions.checkNotNull(parser, "parser");
-        Preconditions.checkNotNull(inAttrs, "inAttrs");
-        Preconditions.checkNotNull(outValues, "outValues");
-        Preconditions.checkNotNull(outIndices, "outIndices");
-        synchronized (this) {
-            // Need to synchronize on AssetManager because we will be accessing
-            // the native implementation of AssetManager.
-            ensureValidLocked();
-            return nativeRetrieveAttributes(
-                    mObject, parser.mParseState, inAttrs, outValues, outIndices);
-        }
-    }
-
-    long createTheme() {
-        synchronized (this) {
-            ensureValidLocked();
-            long themePtr = nativeThemeCreate(mObject);
-            incRefsLocked(themePtr);
-            return themePtr;
-        }
-    }
-
-    void releaseTheme(long themePtr) {
-        synchronized (this) {
-            nativeThemeDestroy(themePtr);
-            decRefsLocked(themePtr);
-        }
-    }
-
-    void applyStyleToTheme(long themePtr, @StyleRes int resId, boolean force) {
-        synchronized (this) {
-            // Need to synchronize on AssetManager because we will be accessing
-            // the native implementation of AssetManager.
-            ensureValidLocked();
-            nativeThemeApplyStyle(mObject, themePtr, resId, force);
-        }
-    }
-
-    @Override
     protected void finalize() throws Throwable {
-        if (DEBUG_REFS && mNumRefs != 0) {
-            Log.w(TAG, "AssetManager " + this + " finalized with non-zero refs: " + mNumRefs);
-            if (mRefStacks != null) {
-                for (RuntimeException e : mRefStacks.values()) {
-                    Log.w(TAG, "Reference from here", e);
+        try {
+            if (DEBUG_REFS && mNumRefs != 0) {
+                Log.w(TAG, "AssetManager " + this
+                        + " finalized with non-zero refs: " + mNumRefs);
+                if (mRefStacks != null) {
+                    for (RuntimeException e : mRefStacks.values()) {
+                        Log.w(TAG, "Reference from here", e);
+                    }
                 }
             }
-        }
-
-        if (mObject != 0) {
-            nativeDestroy(mObject);
+            destroy();
+        } finally {
+            super.finalize();
         }
     }
-
-    /* No Locking is needed for AssetInputStream because an AssetInputStream is not-thread
-    safe and it does not rely on AssetManager once it has been created. It completely owns the
-    underlying Asset. */
+    
     public final class AssetInputStream extends InputStream {
-        private long mAssetNativePtr;
-        private long mLength;
-        private long mMarkPos;
-
         /**
          * @hide
          */
         public final int getAssetInt() {
             throw new UnsupportedOperationException();
         }
-
         /**
          * @hide
          */
         public final long getNativeAsset() {
-            return mAssetNativePtr;
+            return mAsset;
         }
-
-        private AssetInputStream(long assetNativePtr) {
-            mAssetNativePtr = assetNativePtr;
-            mLength = nativeAssetGetLength(assetNativePtr);
+        private AssetInputStream(long asset)
+        {
+            mAsset = asset;
+            mLength = getAssetLength(asset);
         }
-
-        @Override
         public final int read() throws IOException {
-            ensureOpen();
-            return nativeAssetReadChar(mAssetNativePtr);
+            return readAssetChar(mAsset);
         }
-
-        @Override
-        public final int read(@NonNull byte[] b) throws IOException {
-            ensureOpen();
-            Preconditions.checkNotNull(b, "b");
-            return nativeAssetRead(mAssetNativePtr, b, 0, b.length);
-        }
-
-        @Override
-        public final int read(@NonNull byte[] b, int off, int len) throws IOException {
-            ensureOpen();
-            Preconditions.checkNotNull(b, "b");
-            return nativeAssetRead(mAssetNativePtr, b, off, len);
-        }
-
-        @Override
-        public final long skip(long n) throws IOException {
-            ensureOpen();
-            long pos = nativeAssetSeek(mAssetNativePtr, 0, 0);
-            if ((pos + n) > mLength) {
-                n = mLength - pos;
-            }
-            if (n > 0) {
-                nativeAssetSeek(mAssetNativePtr, n, 0);
-            }
-            return n;
-        }
-
-        @Override
-        public final int available() throws IOException {
-            ensureOpen();
-            final long len = nativeAssetGetRemainingLength(mAssetNativePtr);
-            return len > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) len;
-        }
-
-        @Override
         public final boolean markSupported() {
             return true;
         }
-
-        @Override
-        public final void mark(int readlimit) {
-            ensureOpen();
-            mMarkPos = nativeAssetSeek(mAssetNativePtr, 0, 0);
+        public final int available() throws IOException {
+            long len = getAssetRemainingLength(mAsset);
+            return len > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int)len;
         }
-
-        @Override
-        public final void reset() throws IOException {
-            ensureOpen();
-            nativeAssetSeek(mAssetNativePtr, mMarkPos, -1);
-        }
-
-        @Override
         public final void close() throws IOException {
-            if (mAssetNativePtr != 0) {
-                nativeAssetDestroy(mAssetNativePtr);
-                mAssetNativePtr = 0;
-
-                synchronized (AssetManager.this) {
+            synchronized (AssetManager.this) {
+                if (mAsset != 0) {
+                    destroyAsset(mAsset);
+                    mAsset = 0;
                     decRefsLocked(hashCode());
                 }
             }
         }
+        public final void mark(int readlimit) {
+            mMarkPos = seekAsset(mAsset, 0, 0);
+        }
+        public final void reset() throws IOException {
+            seekAsset(mAsset, mMarkPos, -1);
+        }
+        public final int read(byte[] b) throws IOException {
+            return readAsset(mAsset, b, 0, b.length);
+        }
+        public final int read(byte[] b, int off, int len) throws IOException {
+            return readAsset(mAsset, b, off, len);
+        }
+        public final long skip(long n) throws IOException {
+            long pos = seekAsset(mAsset, 0, 0);
+            if ((pos+n) > mLength) {
+                n = mLength-pos;
+            }
+            if (n > 0) {
+                seekAsset(mAsset, n, 0);
+            }
+            return n;
+        }
 
-        @Override
-        protected void finalize() throws Throwable {
+        protected void finalize() throws Throwable
+        {
             close();
         }
 
-        private void ensureOpen() {
-            if (mAssetNativePtr == 0) {
-                throw new IllegalStateException("AssetInputStream is closed");
-            }
+        private long mAsset;
+        private long mLength;
+        private long mMarkPos;
+    }
+
+    /**
+     * Add an additional set of assets to the asset manager.  This can be
+     * either a directory or ZIP file.  Not for use by applications.  Returns
+     * the cookie of the added asset, or 0 on failure.
+     * {@hide}
+     */
+    public final int addAssetPath(String path) {
+        return  addAssetPathInternal(path, false);
+    }
+
+    /**
+     * Add an application assets to the asset manager and loading it as shared library.
+     * This can be either a directory or ZIP file.  Not for use by applications.  Returns
+     * the cookie of the added asset, or 0 on failure.
+     * {@hide}
+     */
+    public final int addAssetPathAsSharedLibrary(String path) {
+        return addAssetPathInternal(path, true);
+    }
+
+    private final int addAssetPathInternal(String path, boolean appAsLib) {
+        synchronized (this) {
+            int res = addAssetPathNative(path, appAsLib);
+            makeStringBlocks(mStringBlocks);
+            return res;
         }
+    }
+
+    private native final int addAssetPathNative(String path, boolean appAsLib);
+
+    /**
+     * Add an additional set of assets to the asset manager from an already open
+     * FileDescriptor.  Not for use by applications.
+     * This does not give full AssetManager functionality for these assets,
+     * since the origin of the file is not known for purposes of sharing,
+     * overlay resolution, and other features.  However it does allow you
+     * to do simple access to the contents of the given fd as an apk file.
+     * Performs a dup of the underlying fd, so you must take care of still closing
+     * the FileDescriptor yourself (and can do that whenever you want).
+     * Returns the cookie of the added asset, or 0 on failure.
+     * {@hide}
+     */
+    public int addAssetFd(FileDescriptor fd, String debugPathName) {
+        return addAssetFdInternal(fd, debugPathName, false);
+    }
+
+    private int addAssetFdInternal(FileDescriptor fd, String debugPathName,
+            boolean appAsLib) {
+        synchronized (this) {
+            int res = addAssetFdNative(fd, debugPathName, appAsLib);
+            makeStringBlocks(mStringBlocks);
+            return res;
+        }
+    }
+
+    private native int addAssetFdNative(FileDescriptor fd, String debugPathName,
+            boolean appAsLib);
+
+    /**
+     * Add a set of assets to overlay an already added set of assets.
+     *
+     * This is only intended for application resources. System wide resources
+     * are handled before any Java code is executed.
+     *
+     * {@hide}
+     */
+
+    public final int addOverlayPath(String idmapPath) {
+        synchronized (this) {
+            int res = addOverlayPathNative(idmapPath);
+            makeStringBlocks(mStringBlocks);
+            return res;
+        }
+    }
+
+    /**
+     * See addOverlayPath.
+     *
+     * {@hide}
+     */
+    public native final int addOverlayPathNative(String idmapPath);
+
+    /**
+     * Add multiple sets of assets to the asset manager at once.  See
+     * {@link #addAssetPath(String)} for more information.  Returns array of
+     * cookies for each added asset with 0 indicating failure, or null if
+     * the input array of paths is null.
+     * {@hide}
+     */
+    public final int[] addAssetPaths(String[] paths) {
+        if (paths == null) {
+            return null;
+        }
+
+        int[] cookies = new int[paths.length];
+        for (int i = 0; i < paths.length; i++) {
+            cookies[i] = addAssetPath(paths[i]);
+        }
+
+        return cookies;
     }
 
     /**
      * Determine whether the state in this asset manager is up-to-date with
      * the files on the filesystem.  If false is returned, you need to
      * instantiate a new AssetManager class to see the new data.
-     * @hide
+     * {@hide}
      */
-    public boolean isUpToDate() {
-        for (ApkAssets apkAssets : getApkAssets()) {
-            if (!apkAssets.isUpToDate()) {
-                return false;
-            }
-        }
-        return true;
-    }
+    public native final boolean isUpToDate();
 
     /**
      * Get the locales that this asset manager contains data for.
@@ -1097,12 +786,7 @@ public final class AssetManager implements AutoCloseable {
      * are of the form {@code ll_CC} where {@code ll} is a two letter language code,
      * and {@code CC} is a two letter country code.
      */
-    public String[] getLocales() {
-        synchronized (this) {
-            ensureValidLocked();
-            return nativeGetLocales(mObject, false /*excludeSystem*/);
-        }
-    }
+    public native final String[] getLocales();
 
     /**
      * Same as getLocales(), except that locales that are only provided by the system (i.e. those
@@ -1112,58 +796,132 @@ public final class AssetManager implements AutoCloseable {
      * assets support Cherokee and French, getLocales() would return
      * [Cherokee, English, French, German], while getNonSystemLocales() would return
      * [Cherokee, French].
-     * @hide
+     * {@hide}
      */
-    public String[] getNonSystemLocales() {
-        synchronized (this) {
-            ensureValidLocked();
-            return nativeGetLocales(mObject, true /*excludeSystem*/);
-        }
-    }
+    public native final String[] getNonSystemLocales();
+
+    /** {@hide} */
+    public native final Configuration[] getSizeConfigurations();
 
     /**
-     * @hide
-     */
-    Configuration[] getSizeConfigurations() {
-        synchronized (this) {
-            ensureValidLocked();
-            return nativeGetSizeConfigurations(mObject);
-        }
-    }
-
-    /**
-     * Change the configuration used when retrieving resources.  Not for use by
+     * Change the configuation used when retrieving resources.  Not for use by
      * applications.
-     * @hide
+     * {@hide}
      */
-    public void setConfiguration(int mcc, int mnc, @Nullable String locale, int orientation,
-            int touchscreen, int density, int keyboard, int keyboardHidden, int navigation,
-            int screenWidth, int screenHeight, int smallestScreenWidthDp, int screenWidthDp,
-            int screenHeightDp, int screenLayout, int uiMode, int colorMode, int majorVersion) {
-        synchronized (this) {
-            ensureValidLocked();
-            nativeSetConfiguration(mObject, mcc, mnc, locale, orientation, touchscreen, density,
-                    keyboard, keyboardHidden, navigation, screenWidth, screenHeight,
-                    smallestScreenWidthDp, screenWidthDp, screenHeightDp, screenLayout, uiMode,
-                    colorMode, majorVersion);
-        }
-    }
+    public native final void setConfiguration(int mcc, int mnc, String locale,
+            int orientation, int touchscreen, int density, int keyboard,
+            int keyboardHidden, int navigation, int screenWidth, int screenHeight,
+            int smallestScreenWidthDp, int screenWidthDp, int screenHeightDp,
+            int screenLayout, int uiMode, int colorMode, int majorVersion);
 
     /**
-     * @hide
+     * Retrieve the resource identifier for the given resource name.
      */
-    public SparseArray<String> getAssignedPackageIdentifiers() {
-        synchronized (this) {
-            ensureValidLocked();
-            return nativeGetAssignedPackageIdentifiers(mObject);
-        }
-    }
+    /*package*/ native final int getResourceIdentifier(String name,
+                                                       String defType,
+                                                       String defPackage);
+
+    /*package*/ native final String getResourceName(int resid);
+    /*package*/ native final String getResourcePackageName(int resid);
+    /*package*/ native final String getResourceTypeName(int resid);
+    /*package*/ native final String getResourceEntryName(int resid);
+    
+    private native final long openAsset(String fileName, int accessMode);
+    private final native ParcelFileDescriptor openAssetFd(String fileName,
+            long[] outOffsets) throws IOException;
+    private native final long openNonAssetNative(int cookie, String fileName,
+            int accessMode);
+    private native ParcelFileDescriptor openNonAssetFdNative(int cookie,
+            String fileName, long[] outOffsets) throws IOException;
+    private native final void destroyAsset(long asset);
+    private native final int readAssetChar(long asset);
+    private native final int readAsset(long asset, byte[] b, int off, int len);
+    private native final long seekAsset(long asset, long offset, int whence);
+    private native final long getAssetLength(long asset);
+    private native final long getAssetRemainingLength(long asset);
+
+    /** Returns true if the resource was found, filling in mRetStringBlock and
+     *  mRetData. */
+    private native final int loadResourceValue(int ident, short density, TypedValue outValue,
+            boolean resolve);
+    /** Returns true if the resource was found, filling in mRetStringBlock and
+     *  mRetData. */
+    private native final int loadResourceBagValue(int ident, int bagEntryId, TypedValue outValue,
+                                               boolean resolve);
+    /*package*/ static final int STYLE_NUM_ENTRIES = 6;
+    /*package*/ static final int STYLE_TYPE = 0;
+    /*package*/ static final int STYLE_DATA = 1;
+    /*package*/ static final int STYLE_ASSET_COOKIE = 2;
+    /*package*/ static final int STYLE_RESOURCE_ID = 3;
+
+    /* Offset within typed data array for native changingConfigurations. */
+    static final int STYLE_CHANGING_CONFIGURATIONS = 4;
+
+    /*package*/ static final int STYLE_DENSITY = 5;
+    /*package*/ native static final void applyStyle(long theme,
+            int defStyleAttr, int defStyleRes, long xmlParser,
+            int[] inAttrs, int length, long outValuesAddress, long outIndicesAddress);
+    /*package*/ native static final boolean resolveAttrs(long theme,
+            int defStyleAttr, int defStyleRes, int[] inValues,
+            int[] inAttrs, int[] outValues, int[] outIndices);
+    /*package*/ native final boolean retrieveAttributes(
+            long xmlParser, int[] inAttrs, int[] outValues, int[] outIndices);
+    /*package*/ native final int getArraySize(int resource);
+    /*package*/ native final int retrieveArray(int resource, int[] outValues);
+    private native final int getStringBlockCount();
+    private native final long getNativeStringBlock(int block);
+
+    /**
+     * {@hide}
+     */
+    public native final String getCookieName(int cookie);
+
+    /**
+     * {@hide}
+     */
+    public native final SparseArray<String> getAssignedPackageIdentifiers();
+
+    /**
+     * {@hide}
+     */
+    public native static final int getGlobalAssetCount();
+    
+    /**
+     * {@hide}
+     */
+    public native static final String getAssetAllocations();
+    
+    /**
+     * {@hide}
+     */
+    public native static final int getGlobalAssetManagerCount();
+    
+    private native final long newTheme();
+    private native final void deleteTheme(long theme);
+    /*package*/ native static final void applyThemeStyle(long theme, int styleRes, boolean force);
+    /*package*/ native static final void copyTheme(long dest, long source);
+    /*package*/ native static final void clearTheme(long theme);
+    /*package*/ native static final int loadThemeAttributeValue(long theme, int ident,
+                                                                TypedValue outValue,
+                                                                boolean resolve);
+    /*package*/ native static final void dumpTheme(long theme, int priority, String tag, String prefix);
+    /*package*/ native static final @NativeConfig int getThemeChangingConfigurations(long theme);
+
+    private native final long openXmlAssetNative(int cookie, String fileName);
+
+    private native final String[] getArrayStringResource(int arrayRes);
+    private native final int[] getArrayStringInfo(int arrayRes);
+    /*package*/ native final int[] getArrayIntResource(int arrayRes);
+    /*package*/ native final int[] getStyleAttributes(int themeRes);
+
+    private native final void init(boolean isSystem);
+    private native final void destroy();
 
     @GuardedBy("this")
-    private void incRefsLocked(long id) {
+    private final void incRefsLocked(long id) {
         if (DEBUG_REFS) {
             if (mRefStacks == null) {
-                mRefStacks = new HashMap<>();
+                mRefStacks = new HashMap<Long, RuntimeException>();
             }
             RuntimeException ex = new RuntimeException();
             ex.fillInStackTrace();
@@ -1173,116 +931,15 @@ public final class AssetManager implements AutoCloseable {
     }
 
     @GuardedBy("this")
-    private void decRefsLocked(long id) {
+    private final void decRefsLocked(long id) {
         if (DEBUG_REFS && mRefStacks != null) {
             mRefStacks.remove(id);
         }
         mNumRefs--;
-        if (mNumRefs == 0 && mObject != 0) {
-            nativeDestroy(mObject);
-            mObject = 0;
+        //System.out.println("Dec streams: mNumRefs=" + mNumRefs
+        //                   + " mReleased=" + mReleased);
+        if (mNumRefs == 0) {
+            destroy();
         }
     }
-
-    // AssetManager setup native methods.
-    private static native long nativeCreate();
-    private static native void nativeDestroy(long ptr);
-    private static native void nativeSetApkAssets(long ptr, @NonNull ApkAssets[] apkAssets,
-            boolean invalidateCaches);
-    private static native void nativeSetConfiguration(long ptr, int mcc, int mnc,
-            @Nullable String locale, int orientation, int touchscreen, int density, int keyboard,
-            int keyboardHidden, int navigation, int screenWidth, int screenHeight,
-            int smallestScreenWidthDp, int screenWidthDp, int screenHeightDp, int screenLayout,
-            int uiMode, int colorMode, int majorVersion);
-    private static native @NonNull SparseArray<String> nativeGetAssignedPackageIdentifiers(
-            long ptr);
-
-    // File native methods.
-    private static native @Nullable String[] nativeList(long ptr, @NonNull String path)
-            throws IOException;
-    private static native long nativeOpenAsset(long ptr, @NonNull String fileName, int accessMode);
-    private static native @Nullable ParcelFileDescriptor nativeOpenAssetFd(long ptr,
-            @NonNull String fileName, long[] outOffsets) throws IOException;
-    private static native long nativeOpenNonAsset(long ptr, int cookie, @NonNull String fileName,
-            int accessMode);
-    private static native @Nullable ParcelFileDescriptor nativeOpenNonAssetFd(long ptr, int cookie,
-            @NonNull String fileName, @NonNull long[] outOffsets) throws IOException;
-    private static native long nativeOpenXmlAsset(long ptr, int cookie, @NonNull String fileName);
-
-    // Primitive resource native methods.
-    private static native int nativeGetResourceValue(long ptr, @AnyRes int resId, short density,
-            @NonNull TypedValue outValue, boolean resolveReferences);
-    private static native int nativeGetResourceBagValue(long ptr, @AnyRes int resId, int bagEntryId,
-            @NonNull TypedValue outValue);
-
-    private static native @Nullable @AttrRes int[] nativeGetStyleAttributes(long ptr,
-            @StyleRes int resId);
-    private static native @Nullable String[] nativeGetResourceStringArray(long ptr,
-            @ArrayRes int resId);
-    private static native @Nullable int[] nativeGetResourceStringArrayInfo(long ptr,
-            @ArrayRes int resId);
-    private static native @Nullable int[] nativeGetResourceIntArray(long ptr, @ArrayRes int resId);
-    private static native int nativeGetResourceArraySize(long ptr, @ArrayRes int resId);
-    private static native int nativeGetResourceArray(long ptr, @ArrayRes int resId,
-            @NonNull int[] outValues);
-
-    // Resource name/ID native methods.
-    private static native @AnyRes int nativeGetResourceIdentifier(long ptr, @NonNull String name,
-            @Nullable String defType, @Nullable String defPackage);
-    private static native @Nullable String nativeGetResourceName(long ptr, @AnyRes int resid);
-    private static native @Nullable String nativeGetResourcePackageName(long ptr,
-            @AnyRes int resid);
-    private static native @Nullable String nativeGetResourceTypeName(long ptr, @AnyRes int resid);
-    private static native @Nullable String nativeGetResourceEntryName(long ptr, @AnyRes int resid);
-    private static native @Nullable String[] nativeGetLocales(long ptr, boolean excludeSystem);
-    private static native @Nullable Configuration[] nativeGetSizeConfigurations(long ptr);
-
-    // Style attribute retrieval native methods.
-    private static native void nativeApplyStyle(long ptr, long themePtr, @AttrRes int defStyleAttr,
-            @StyleRes int defStyleRes, long xmlParserPtr, @NonNull int[] inAttrs,
-            long outValuesAddress, long outIndicesAddress);
-    private static native boolean nativeResolveAttrs(long ptr, long themePtr,
-            @AttrRes int defStyleAttr, @StyleRes int defStyleRes, @Nullable int[] inValues,
-            @NonNull int[] inAttrs, @NonNull int[] outValues, @NonNull int[] outIndices);
-    private static native boolean nativeRetrieveAttributes(long ptr, long xmlParserPtr,
-            @NonNull int[] inAttrs, @NonNull int[] outValues, @NonNull int[] outIndices);
-
-    // Theme related native methods
-    private static native long nativeThemeCreate(long ptr);
-    private static native void nativeThemeDestroy(long themePtr);
-    private static native void nativeThemeApplyStyle(long ptr, long themePtr, @StyleRes int resId,
-            boolean force);
-    static native void nativeThemeCopy(long destThemePtr, long sourceThemePtr);
-    static native void nativeThemeClear(long themePtr);
-    private static native int nativeThemeGetAttributeValue(long ptr, long themePtr,
-            @AttrRes int resId, @NonNull TypedValue outValue, boolean resolve);
-    private static native void nativeThemeDump(long ptr, long themePtr, int priority, String tag,
-            String prefix);
-    static native @NativeConfig int nativeThemeGetChangingConfigurations(long themePtr);
-
-    // AssetInputStream related native methods.
-    private static native void nativeAssetDestroy(long assetPtr);
-    private static native int nativeAssetReadChar(long assetPtr);
-    private static native int nativeAssetRead(long assetPtr, byte[] b, int off, int len);
-    private static native long nativeAssetSeek(long assetPtr, long offset, int whence);
-    private static native long nativeAssetGetLength(long assetPtr);
-    private static native long nativeAssetGetRemainingLength(long assetPtr);
-
-    private static native void nativeVerifySystemIdmaps();
-
-    // Global debug native methods.
-    /**
-     * @hide
-     */
-    public static native int getGlobalAssetCount();
-
-    /**
-     * @hide
-     */
-    public static native String getAssetAllocations();
-
-    /**
-     * @hide
-     */
-    public static native int getGlobalAssetManagerCount();
 }
