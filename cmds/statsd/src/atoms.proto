@@ -24,6 +24,7 @@ option java_outer_classname = "AtomsProto";
 import "frameworks/base/core/proto/android/app/enums.proto";
 import "frameworks/base/core/proto/android/os/enums.proto";
 import "frameworks/base/core/proto/android/server/enums.proto";
+import "frameworks/base/core/proto/android/telecomm/enums.proto";
 import "frameworks/base/core/proto/android/telephony/enums.proto";
 import "frameworks/base/core/proto/android/view/enums.proto";
 
@@ -98,6 +99,7 @@ message Atom {
         DaveyOccurred davey_occurred = 58;
         OverlayStateChanged overlay_state_changed = 59;
         ForegroundServiceStateChanged foreground_service_state_changed = 60;
+        CallStateChanged call_state_changed = 61;
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 
@@ -723,6 +725,33 @@ message BootSequenceReported {
 
     // Time since last boot in ms. Default: 0 if not available.
     optional int64 time_since_last_boot = 6;
+}
+
+
+/**
+ * Logs call state and disconnect cause (if applicable).
+ *
+ * Logged from:
+ *   packages/services/Telecomm/src/com/android/server/telecom/Call.java
+ */
+message CallStateChanged {
+    // The state of the call. Eg. DIALING, ACTIVE, ON_HOLD, DISCONNECTED.
+    // From frameworks/base/core/proto/android/telecomm/enums.proto.
+    optional android.telecom.CallStateEnum call_state = 1;
+
+    // The reason the call disconnected. Eg. ERROR, MISSED, REJECTED, BUSY.
+    // This value is only applicable when the call_state is DISCONNECTED, and
+    // should always be UNKNOWN if the call_state is not DISCONNECTED.
+    // From frameworks/base/core/proto/android/telecomm/enums.proto.
+    optional android.telecom.DisconnectCauseEnum disconnect_cause = 2;
+
+    // True if the call is self-managed, which are apps that use the
+    // telecom infrastructure to make their own calls.
+    optional bool self_managed = 3;
+
+    // True if call is external. External calls are calls on connected Wear
+    // devices but show up in Telecom so the user can pull them onto the device.
+    optional bool external_call = 4;
 }
 
 /**
