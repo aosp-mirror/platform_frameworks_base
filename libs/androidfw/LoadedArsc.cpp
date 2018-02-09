@@ -324,6 +324,8 @@ bool LoadedPackage::FindEntry(const TypeSpecPtr& type_spec_ptr, uint16_t entry_i
 
 bool LoadedPackage::FindEntry(uint8_t type_idx, uint16_t entry_idx, const ResTable_config& config,
                               FindEntryResult* out_entry) const {
+  ATRACE_CALL();
+
   // If the type IDs are offset in this package, we need to take that into account when searching
   // for a type.
   const TypeSpecPtr& ptr = type_specs_[type_idx - type_id_offset_];

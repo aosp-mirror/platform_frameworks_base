@@ -54,7 +54,6 @@ import android.content.pm.PackageParserCacheHelper.WriteHelper;
 import android.content.pm.split.DefaultSplitAssetLoader;
 import android.content.pm.split.SplitAssetDependencyLoader;
 import android.content.pm.split.SplitAssetLoader;
-import android.content.res.ApkAssets;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -1593,19 +1592,21 @@ public class PackageParser {
             int flags) throws PackageParserException {
         final String apkPath = fd != null ? debugPathName : apkFile.getAbsolutePath();
 
-        ApkAssets apkAssets = null;
+        AssetManager assets = null;
         XmlResourceParser parser = null;
         try {
-            try {
-                apkAssets = fd != null
-                        ? ApkAssets.loadFromFd(fd, debugPathName, false, false)
-                        : ApkAssets.loadFromPath(apkPath);
-            } catch (IOException e) {
+            assets = newConfiguredAssetManager();
+            int cookie = fd != null
+                    ? assets.addAssetFd(fd, debugPathName) : assets.addAssetPath(apkPath);
+            if (cookie == 0) {
                 throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
                         "Failed to parse " + apkPath);
             }
 
-            parser = apkAssets.openXml(ANDROID_MANIFEST_FILENAME);
+            final DisplayMetrics metrics = new DisplayMetrics();
+            metrics.setToDefaults();
+
+            parser = assets.openXmlResourceParser(cookie, ANDROID_MANIFEST_FILENAME);
 
             final SigningDetails signingDetails;
             if ((flags & PARSE_COLLECT_CERTIFICATES) != 0) {
@@ -1632,7 +1633,7 @@ public class PackageParser {
                     "Failed to parse " + apkPath, e);
         } finally {
             IoUtils.closeQuietly(parser);
-            IoUtils.closeQuietly(apkAssets);
+            IoUtils.closeQuietly(assets);
         }
     }
 
