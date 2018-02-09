@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define DEBUG true  // STOPSHIP if true
+#define DEBUG false  // STOPSHIP if true
 #include "Log.h"
 #include "statslog.h"
 
@@ -169,7 +169,7 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event) {
 
 void StatsLogProcessor::OnConfigUpdated(const ConfigKey& key, const StatsdConfig& config) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
-    ALOGD("Updated configuration for key %s", key.ToString().c_str());
+    VLOG("Updated configuration for key %s", key.ToString().c_str());
     sp<MetricsManager> newMetricsManager = new MetricsManager(key, config, mTimeBaseSec, mUidMap);
     auto it = mMetricsManagers.find(key);
     if (it == mMetricsManagers.end() && mMetricsManagers.size() > StatsdStats::kMaxConfigCount) {

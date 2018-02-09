@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define DEBUG true  // STOPSHIP if true
+#define DEBUG false  // STOPSHIP if true
 #include "logd/LogEvent.h"
 
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#define DEBUG false  // STOPSHIP if true
 #include "Log.h"
 
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"  // Alert
@@ -36,7 +37,7 @@ namespace os {
 namespace statsd {
 
 bool CollectPerfettoTraceAndUploadToDropbox(const PerfettoDetails& config) {
-    ALOGD("Starting trace collection through perfetto");
+    VLOG("Starting trace collection through perfetto");
 
     if (!config.has_trace_config()) {
         ALOGE("The perfetto trace config is empty, aborting");
@@ -118,7 +119,7 @@ bool CollectPerfettoTraceAndUploadToDropbox(const PerfettoDetails& config) {
         return false;
     }
 
-    ALOGD("CollectPerfettoTraceAndUploadToDropbox() succeeded");
+    VLOG("CollectPerfettoTraceAndUploadToDropbox() succeeded");
     return true;
 }
 

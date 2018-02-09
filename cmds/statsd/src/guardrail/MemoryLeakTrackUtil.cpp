@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define DEBUG true  // STOPSHIP if true
+#define DEBUG false  // STOPSHIP if true
 #include "Log.h"
 
 #include <sstream>
@@ -63,7 +63,7 @@ std::string dumpMemInfo(size_t limit) {
     size_t count;
     if (info == nullptr || overallSize == 0 || infoSize == 0 ||
         (count = overallSize / infoSize) == 0) {
-        ALOGD("no malloc info, libc.debug.malloc.program property should be set");
+        VLOG("no malloc info, libc.debug.malloc.program property should be set");
         return std::string();
     }
 

@@ -85,7 +85,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     public static final String RESULT_RECEIVER_CONTROLLER_KEY = "controller_activity";
 
     static final String TAG = "StatsCompanionService";
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = false;
 
     public static final int CODE_DATA_BROADCAST = 1;
     public static final int CODE_SUBSCRIBER_BROADCAST = 1;

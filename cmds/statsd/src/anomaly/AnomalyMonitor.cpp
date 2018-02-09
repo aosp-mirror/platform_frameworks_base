@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define DEBUG true
+#define DEBUG false
 #include "Log.h"
 
 #include "anomaly/AnomalyMonitor.h"
@@ -36,10 +36,10 @@ void AnomalyMonitor::setStatsCompanionService(sp<IStatsCompanionService> statsCo
     sp<IStatsCompanionService> tmpForLock = mStatsCompanionService;
     mStatsCompanionService = statsCompanionService;
     if (statsCompanionService == nullptr) {
-        if (DEBUG) ALOGD("Erasing link to statsCompanionService");
+        VLOG("Erasing link to statsCompanionService");
         return;
     }
-    if (DEBUG) ALOGD("Creating link to statsCompanionService");
+    VLOG("Creating link to statsCompanionService");
     const sp<const AnomalyAlarm> top = mPq.top();
     if (top != nullptr) {
         updateRegisteredAlarmTime_l(top->timestampSec);
@@ -58,7 +58,7 @@ void AnomalyMonitor::add(sp<const AnomalyAlarm> alarm) {
         return;
     }
     // TODO: Ensure that refractory period is respected.
-    if (DEBUG) ALOGD("Adding alarm with time %u", alarm->timestampSec);
+    VLOG("Adding alarm with time %u", alarm->timestampSec);
     mPq.push(alarm);
     if (mRegisteredAlarmTimeSec < 1 ||
         alarm->timestampSec + mMinUpdateTimeSec < mRegisteredAlarmTimeSec) {
@@ -72,16 +72,16 @@ void AnomalyMonitor::remove(sp<const AnomalyAlarm> alarm) {
         ALOGW("Asked to remove a null alarm.");
         return;
     }
-    if (DEBUG) ALOGD("Removing alarm with time %u", alarm->timestampSec);
+    VLOG("Removing alarm with time %u", alarm->timestampSec);
     bool wasPresent = mPq.remove(alarm);
     if (!wasPresent) return;
     if (mPq.empty()) {
-        if (DEBUG) ALOGD("Queue is empty. Cancel any alarm.");
+        VLOG("Queue is empty. Cancel any alarm.");
         cancelRegisteredAlarmTime_l();
         return;
     }
     uint32_t soonestAlarmTimeSec = mPq.top()->timestampSec;
-    if (DEBUG) ALOGD("Soonest alarm is %u", soonestAlarmTimeSec);
+    VLOG("Soonest alarm is %u", soonestAlarmTimeSec);
     if (soonestAlarmTimeSec > mRegisteredAlarmTimeSec + mMinUpdateTimeSec) {
         updateRegisteredAlarmTime_l(soonestAlarmTimeSec);
     }
@@ -91,7 +91,7 @@ void AnomalyMonitor::remove(sp<const AnomalyAlarm> alarm) {
 // updates to the registered alarm.
 unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> AnomalyMonitor::popSoonerThan(
         uint32_t timestampSec) {
-    if (DEBUG) ALOGD("Removing alarms with time <= %u", timestampSec);
+    VLOG("Removing alarms with time <= %u", timestampSec);
     unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> oldAlarms;
     std::lock_guard<std::mutex> lock(mLock);
 
@@ -103,7 +103,7 @@ unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> AnomalyMonitor::popS
     // Always update registered alarm time (if anything has changed).
     if (!oldAlarms.empty()) {
         if (mPq.empty()) {
-            if (DEBUG) ALOGD("Queue is empty. Cancel any alarm.");
+            VLOG("Queue is empty. Cancel any alarm.");
             cancelRegisteredAlarmTime_l();
         } else {
             // Always update the registered alarm in this case (unlike remove()).
@@ -114,7 +114,7 @@ unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> AnomalyMonitor::popS
 }
 
 void AnomalyMonitor::updateRegisteredAlarmTime_l(uint32_t timestampSec) {
-    if (DEBUG) ALOGD("Updating reg alarm time to %u", timestampSec);
+    VLOG("Updating reg alarm time to %u", timestampSec);
     mRegisteredAlarmTimeSec = timestampSec;
     if (mStatsCompanionService != nullptr) {
         mStatsCompanionService->setAnomalyAlarm(secToMs(mRegisteredAlarmTimeSec));
@@ -123,7 +123,7 @@ void AnomalyMonitor::updateRegisteredAlarmTime_l(uint32_t timestampSec) {
 }
 
 void AnomalyMonitor::cancelRegisteredAlarmTime_l() {
-    if (DEBUG) ALOGD("Cancelling reg alarm.");
+    VLOG("Cancelling reg alarm.");
     mRegisteredAlarmTimeSec = 0;
     if (mStatsCompanionService != nullptr) {
         mStatsCompanionService->cancelAnomalyAlarm();
