@@ -80,7 +80,7 @@ public abstract class ImsFeature {
     public static final String EXTRA_PHONE_ID = "android:phone_id";
 
     /**
-     * Invalid feature value\
+     * Invalid feature value
      * @hide
      */
     public static final int FEATURE_INVALID = -1;
