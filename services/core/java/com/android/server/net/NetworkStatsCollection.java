@@ -187,6 +187,7 @@ public class NetworkStatsCollection implements FileRotator.Reader {
      */
     @VisibleForTesting
     public static long multiplySafe(long value, long num, long den) {
+        if (den == 0) den = 1;
         long x = value;
         long y = num;
 
