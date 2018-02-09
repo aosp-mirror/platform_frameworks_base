@@ -19,14 +19,12 @@ package com.android.server.backup;
 import static com.android.server.backup.testing.TransportData.genericTransport;
 import static com.android.server.backup.testing.TransportTestUtils.mockTransport;
 import static com.android.server.backup.testing.TransportTestUtils.setUpTransportsForTransportManager;
+
 import static com.google.common.truth.Truth.assertThat;
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
-import static java.util.stream.Stream.concat;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -34,6 +32,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.shadow.api.Shadow.extract;
 import static org.testng.Assert.expectThrows;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Stream.concat;
 
 import android.annotation.Nullable;
 import android.app.backup.BackupManager;
@@ -43,6 +48,7 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.platform.test.annotations.Presubmit;
+
 import com.android.server.backup.testing.ShadowContextImplForBackup;
 import com.android.server.backup.testing.TransportData;
 import com.android.server.backup.testing.TransportTestUtils.TransportMock;
@@ -54,11 +60,7 @@ import com.android.server.testing.FrameworkRobolectricTestRunner;
 import com.android.server.testing.SystemLoaderPackages;
 import com.android.server.testing.shadows.FrameworkShadowContextImpl;
 import com.android.server.testing.shadows.FrameworkShadowPackageManager;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Stream;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -68,6 +70,12 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowPackageManager;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Stream;
 
 @RunWith(FrameworkRobolectricTestRunner.class)
 @Config(
@@ -80,6 +88,12 @@ import org.robolectric.shadows.ShadowPackageManager;
 public class TransportManagerTest {
     private static final String PACKAGE_A = "some.package.a";
     private static final String PACKAGE_B = "some.package.b";
+
+    /**
+     * GMSCore depends on this constant so we define it here on top of the definition in
+     * {@link TransportManager} to verify this extra is passed
+     */
+    private static final String EXTRA_TRANSPORT_REGISTRATION = "transport_registration";
 
     @Mock private OnTransportRegisteredListener mListener;
     @Mock private TransportClientManager mTransportClientManager;
@@ -192,6 +206,22 @@ public class TransportManagerTest {
 
         assertRegisteredTransports(transportManager, emptyList());
         verify(mListener, never()).onTransportRegistered(any(), any());
+    }
+
+    @Test
+    public void testRegisterTransports_passesRegistrationExtraToGetTransportClient()
+            throws Exception {
+        setUpPackage(PACKAGE_A, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
+        setUpTransports(mTransportA1);
+        TransportManager transportManager = createTransportManager(mTransportA1);
+
+        transportManager.registerTransports();
+
+        verify(mTransportClientManager)
+                .getTransportClient(
+                        eq(mTransportA1.getTransportComponent()),
+                        argThat(bundle -> bundle.getBoolean(EXTRA_TRANSPORT_REGISTRATION)),
+                        anyString());
     }
 
     @Test
@@ -579,6 +609,9 @@ public class TransportManagerTest {
             TransportMock transportMock = mockTransport(transport);
             when(mTransportClientManager.getTransportClient(
                             eq(transport.getTransportComponent()), any()))
+                    .thenReturn(transportMock.transportClient);
+            when(mTransportClientManager.getTransportClient(
+                            eq(transport.getTransportComponent()), any(), any()))
                     .thenReturn(transportMock.transportClient);
             transportMocks.add(transportMock);
         }
