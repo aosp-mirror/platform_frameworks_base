@@ -3895,6 +3895,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private void instantCollapseNotificationPanel() {
         mNotificationPanel.instantCollapse();
+        runPostCollapseRunnables();
     }
 
     @Override
@@ -5056,6 +5057,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         } else if (!isPresenterFullyCollapsed()) {
             instantCollapseNotificationPanel();
             visibilityChanged(false);
+        } else {
+            runPostCollapseRunnables();
         }
     }
 
