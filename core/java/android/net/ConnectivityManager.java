@@ -112,8 +112,14 @@ public class ConnectivityManager {
      * <p/>
      * For a disconnect event, the boolean extra EXTRA_NO_CONNECTIVITY
      * is set to {@code true} if there are no connected networks at all.
+     *
+     * @deprecated apps should use the more versatile {@link #requestNetwork},
+     *             {@link #registerNetworkCallback} or {@link #registerDefaultNetworkCallback}
+     *             functions instead for faster and more detailed updates about the network
+     *             changes they care about.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @Deprecated
     public static final String CONNECTIVITY_ACTION = "android.net.conn.CONNECTIVITY_CHANGE";
 
     /**
