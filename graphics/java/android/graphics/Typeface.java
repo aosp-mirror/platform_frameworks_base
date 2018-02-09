@@ -16,25 +16,17 @@
 
 package android.graphics;
 
-import static android.content.res.FontResourcesParser.ProviderResourceEntry;
-import static android.content.res.FontResourcesParser.FontFileResourceEntry;
-import static android.content.res.FontResourcesParser.FontFamilyFilesResourceEntry;
 import static android.content.res.FontResourcesParser.FamilyResourceEntry;
+import static android.content.res.FontResourcesParser.FontFamilyFilesResourceEntry;
+import static android.content.res.FontResourcesParser.FontFileResourceEntry;
+import static android.content.res.FontResourcesParser.ProviderResourceEntry;
 
-import static java.lang.annotation.RetentionPolicy.SOURCE;
-
-import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.AssetManager;
-import android.graphics.FontListParser;
 import android.graphics.fonts.FontVariationAxis;
 import android.net.Uri;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.ParcelFileDescriptor;
-import android.os.ResultReceiver;
 import android.provider.FontRequest;
 import android.provider.FontsContract;
 import android.text.FontConfig;
@@ -49,8 +41,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
-import libcore.io.IoUtils;
-
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
@@ -58,19 +48,15 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * The Typeface class specifies the typeface and intrinsic style of a font.
@@ -395,7 +381,7 @@ public class Typeface {
          * weight and italic information, so {@link #setWeight} and {@link #setItalic} are used
          * for style matching during font selection.
          *
-         * @param results The array of {@link FontsContract.FontInfo}
+         * @param fonts The array of {@link FontsContract.FontInfo}
          * @param buffers The mapping from URI to buffers to be used during building.
          * @hide
          */
@@ -879,14 +865,12 @@ public class Typeface {
      * also the font families in the fallback list.
      * @param fallbackName the family name. If given families don't support characters, the
      *               characters will be rendered with this family.
-     * @param weight the weight for this family. {@link RESOLVE_BY_FONT_TABLE} can be used. In that
-     *               case, the table information in the first family's font is used. If the first
-     *               family has multiple fonts, the closest to the regular weight and upright font
-     *               is used.
-     * @param italic the italic information for this family. {@link RESOLVE_BY_FONT_TABLE} can be
-     *               used. In that case, the table information in the first family's font is used.
-     *               If the first family has multiple fonts, the closest to the regular weight and
-     *               upright font is used.
+     * @param weight the weight for this family. In that case, the table information in the first
+     *               family's font is used. If the first family has multiple fonts, the closest to
+     *               the regular weight and upright font is used.
+     * @param italic the italic information for this family. In that case, the table information in
+     *               the first family's font is used. If the first family has multiple fonts, the
+     *               closest to the regular weight and upright font is used.
      * @param families array of font families
      */
     private static Typeface createFromFamiliesWithDefault(FontFamily[] families,

@@ -16,15 +16,12 @@
 
 package android.graphics;
 
-import android.text.FontConfig;
 import android.graphics.fonts.FontVariationAxis;
+import android.text.FontConfig;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-
-import android.annotation.Nullable;
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.IOException;
 import java.io.InputStream;
