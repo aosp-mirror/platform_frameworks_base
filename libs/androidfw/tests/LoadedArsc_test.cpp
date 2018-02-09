@@ -16,7 +16,6 @@
 
 #include "androidfw/LoadedArsc.h"
 
-#include "android-base/file.h"
 #include "androidfw/ResourceUtils.h"
 
 #include "TestHelpers.h"
@@ -30,7 +29,6 @@ namespace basic = com::android::basic;
 namespace libclient = com::android::libclient;
 namespace sparse = com::android::sparse;
 
-using ::android::base::ReadFileToString;
 using ::testing::Eq;
 using ::testing::Ge;
 using ::testing::IsNull;
@@ -177,46 +175,6 @@ TEST(LoadedArscTest, LoadFeatureSplit) {
   EXPECT_THAT(util::Utf16ToUtf8(StringPiece16(type_name16, len)), StrEq("string"));
 
   ASSERT_THAT(LoadedPackage::GetEntry(type_spec->types[0], entry_index), NotNull());
-}
-
-// AAPT(2) generates resource tables with chunks in a certain order. The rule is that
-// a RES_TABLE_TYPE_TYPE with id `i` must always be preceded by a RES_TABLE_TYPE_SPEC_TYPE with
-// id `i`. The RES_TABLE_TYPE_SPEC_TYPE does not need to be directly preceding, however.
-//
-// AAPT(2) generates something like:
-//   RES_TABLE_TYPE_SPEC_TYPE id=1
-//   RES_TABLE_TYPE_TYPE id=1
-//   RES_TABLE_TYPE_SPEC_TYPE id=2
-//   RES_TABLE_TYPE_TYPE id=2
-//
-// But the following is valid too:
-//   RES_TABLE_TYPE_SPEC_TYPE id=1
-//   RES_TABLE_TYPE_SPEC_TYPE id=2
-//   RES_TABLE_TYPE_TYPE id=1
-//   RES_TABLE_TYPE_TYPE id=2
-//
-TEST(LoadedArscTest, LoadOutOfOrderTypeSpecs) {
-  std::string contents;
-  ASSERT_TRUE(
-      ReadFileFromZipToString(GetTestDataPath() + "/out_of_order_types/out_of_order_types.apk",
-                              "resources.arsc", &contents));
-
-  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(StringPiece(contents));
-  ASSERT_THAT(loaded_arsc, NotNull());
-
-  ASSERT_THAT(loaded_arsc->GetPackages(), SizeIs(1u));
-  const auto& package = loaded_arsc->GetPackages()[0];
-  ASSERT_THAT(package, NotNull());
-
-  const TypeSpec* type_spec = package->GetTypeSpecByTypeIndex(0);
-  ASSERT_THAT(type_spec, NotNull());
-  ASSERT_THAT(type_spec->type_count, Ge(1u));
-  ASSERT_THAT(type_spec->types[0], NotNull());
-
-  type_spec = package->GetTypeSpecByTypeIndex(1);
-  ASSERT_THAT(type_spec, NotNull());
-  ASSERT_THAT(type_spec->type_count, Ge(1u));
-  ASSERT_THAT(type_spec->types[0], NotNull());
 }
 
 class MockLoadedIdmap : public LoadedIdmap {

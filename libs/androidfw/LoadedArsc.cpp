@@ -409,10 +409,14 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
   util::ReadUtf16StringFromDevice(header->name, arraysize(header->name),
                                   &loaded_package->package_name_);
 
-  // A map of TypeSpec builders, each associated with an type index.
-  // We use these to accumulate the set of Types available for a TypeSpec, and later build a single,
-  // contiguous block of memory that holds all the Types together with the TypeSpec.
-  std::unordered_map<int, std::unique_ptr<TypeSpecPtrBuilder>> type_builder_map;
+  // A TypeSpec builder. We use this to accumulate the set of Types
+  // available for a TypeSpec, and later build a single, contiguous block
+  // of memory that holds all the Types together with the TypeSpec.
+  std::unique_ptr<TypeSpecPtrBuilder> types_builder;
+
+  // Keep track of the last seen type index. Since type IDs are 1-based,
+  // this records their index, which is 0-based (type ID - 1).
+  uint8_t last_type_idx = 0;
 
   ChunkIterator iter(chunk.data_ptr(), chunk.data_size());
   while (iter.HasNext()) {
@@ -445,6 +449,28 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
 
       case RES_TABLE_TYPE_SPEC_TYPE: {
         ATRACE_NAME("LoadTableTypeSpec");
+
+        // Starting a new TypeSpec, so finish the old one if there was one.
+        if (types_builder) {
+          TypeSpecPtr type_spec_ptr = types_builder->Build();
+          if (type_spec_ptr == nullptr) {
+            LOG(ERROR) << "Too many type configurations, overflow detected.";
+            return {};
+          }
+
+          // We only add the type to the package if there is no IDMAP, or if the type is
+          // overlaying something.
+          if (loaded_idmap == nullptr || type_spec_ptr->idmap_entries != nullptr) {
+            // If this is an overlay, insert it at the target type ID.
+            if (type_spec_ptr->idmap_entries != nullptr) {
+              last_type_idx = dtohs(type_spec_ptr->idmap_entries->target_type_id) - 1;
+            }
+            loaded_package->type_specs_.editItemAt(last_type_idx) = std::move(type_spec_ptr);
+          }
+
+          types_builder = {};
+          last_type_idx = 0;
+        }
 
         const ResTable_typeSpec* type_spec = child_chunk.header<ResTable_typeSpec>();
         if (type_spec == nullptr) {
@@ -480,6 +506,8 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
           return {};
         }
 
+        last_type_idx = type_spec->id - 1;
+
         // If this is an overlay, associate the mapping of this type to the target type
         // from the IDMAP.
         const IdmapEntry_header* idmap_entry_header = nullptr;
@@ -487,13 +515,7 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
           idmap_entry_header = loaded_idmap->GetEntryMapForType(type_spec->id);
         }
 
-        std::unique_ptr<TypeSpecPtrBuilder>& builder_ptr = type_builder_map[type_spec->id - 1];
-        if (builder_ptr == nullptr) {
-          builder_ptr = util::make_unique<TypeSpecPtrBuilder>(type_spec, idmap_entry_header);
-        } else {
-          LOG(WARNING) << StringPrintf("RES_TABLE_TYPE_SPEC_TYPE already defined for ID %02x",
-                                       type_spec->id);
-        }
+        types_builder = util::make_unique<TypeSpecPtrBuilder>(type_spec, idmap_entry_header);
       } break;
 
       case RES_TABLE_TYPE_TYPE: {
@@ -508,15 +530,12 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
         }
 
         // Type chunks must be preceded by their TypeSpec chunks.
-        std::unique_ptr<TypeSpecPtrBuilder>& builder_ptr = type_builder_map[type->id - 1];
-        if (builder_ptr != nullptr) {
-          builder_ptr->AddType(type);
-        } else {
-          LOG(ERROR) << StringPrintf(
-              "RES_TABLE_TYPE_TYPE with ID %02x found without preceding RES_TABLE_TYPE_SPEC_TYPE.",
-              type->id);
+        if (!types_builder || type->id - 1 != last_type_idx) {
+          LOG(ERROR) << "RES_TABLE_TYPE_TYPE found without preceding RES_TABLE_TYPE_SPEC_TYPE.";
           return {};
         }
+
+        types_builder->AddType(type);
       } break;
 
       case RES_TABLE_LIBRARY_TYPE: {
@@ -542,7 +561,7 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
                                           arraysize(entry_iter->packageName), &package_name);
 
           if (dtohl(entry_iter->packageId) >= std::numeric_limits<uint8_t>::max()) {
-            LOG(ERROR) << StringPrintf(
+            LOG(ERROR) << base::StringPrintf(
                 "Package ID %02x in RES_TABLE_LIBRARY_TYPE too large for package '%s'.",
                 dtohl(entry_iter->packageId), package_name.c_str());
             return {};
@@ -555,20 +574,14 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
       } break;
 
       default:
-        LOG(WARNING) << StringPrintf("Unknown chunk type '%02x'.", chunk.type());
+        LOG(WARNING) << base::StringPrintf("Unknown chunk type '%02x'.", chunk.type());
         break;
     }
   }
 
-  if (iter.HadError()) {
-    LOG(ERROR) << iter.GetLastError();
-    return {};
-  }
-
-  // Flatten and construct the TypeSpecs.
-  for (auto& entry : type_builder_map) {
-    uint8_t type_idx = static_cast<uint8_t>(entry.first);
-    TypeSpecPtr type_spec_ptr = entry.second->Build();
+  // Finish the last TypeSpec.
+  if (types_builder) {
+    TypeSpecPtr type_spec_ptr = types_builder->Build();
     if (type_spec_ptr == nullptr) {
       LOG(ERROR) << "Too many type configurations, overflow detected.";
       return {};
@@ -579,14 +592,19 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
     if (loaded_idmap == nullptr || type_spec_ptr->idmap_entries != nullptr) {
       // If this is an overlay, insert it at the target type ID.
       if (type_spec_ptr->idmap_entries != nullptr) {
-        type_idx = dtohs(type_spec_ptr->idmap_entries->target_type_id) - 1;
+        last_type_idx = dtohs(type_spec_ptr->idmap_entries->target_type_id) - 1;
       }
-      loaded_package->type_specs_.editItemAt(type_idx) = std::move(type_spec_ptr);
+      loaded_package->type_specs_.editItemAt(last_type_idx) = std::move(type_spec_ptr);
     }
   }
 
+  if (iter.HadError()) {
+    LOG(ERROR) << iter.GetLastError();
+    return {};
+  }
   return std::move(loaded_package);
 }
+
 
 bool LoadedArsc::LoadTable(const Chunk& chunk, const LoadedIdmap* loaded_idmap,
                            bool load_as_shared_library) {
@@ -637,7 +655,7 @@ bool LoadedArsc::LoadTable(const Chunk& chunk, const LoadedIdmap* loaded_idmap,
       } break;
 
       default:
-        LOG(WARNING) << StringPrintf("Unknown chunk type '%02x'.", chunk.type());
+        LOG(WARNING) << base::StringPrintf("Unknown chunk type '%02x'.", chunk.type());
         break;
     }
   }
@@ -669,7 +687,7 @@ std::unique_ptr<const LoadedArsc> LoadedArsc::Load(const StringPiece& data,
         break;
 
       default:
-        LOG(WARNING) << StringPrintf("Unknown chunk type '%02x'.", chunk.type());
+        LOG(WARNING) << base::StringPrintf("Unknown chunk type '%02x'.", chunk.type());
         break;
     }
   }
