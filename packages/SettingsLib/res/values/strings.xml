@@ -805,12 +805,16 @@
         <item>Colors optimized for digital content</item>
     </string-array>
 
-    <!-- Settings item title for inactive apps [CHAR LIMIT=35] -->
-    <string name="inactive_apps_title">Inactive apps</string>
+    <!-- Settings item title for apps in standby (limiting background activity) [CHAR LIMIT=35] -->
+    <string name="inactive_apps_title">Standby apps</string>
     <!-- Settings item summary for inactive app [CHAR LIMIT=100] -->
     <string name="inactive_app_inactive_summary">Inactive. Tap to toggle.</string>
     <!-- Settings item summary for active app [CHAR LIMIT=100] -->
     <string name="inactive_app_active_summary">Active. Tap to toggle.</string>
+
+    <!-- Settings item summary for standby bucket value of an app. [CHAR LIMIT=100] -->
+    <string name="standby_bucket_summary">App standby
+        state:<xliff:g id="bucket"> %s</xliff:g></string>
 
     <!-- Services settings screen, setting option name for the user to go to the screen to view running services -->
     <string name="runningservices_settings_title">Running services</string>
