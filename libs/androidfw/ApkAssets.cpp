@@ -231,12 +231,16 @@ bool ApkAssets::ForEachFile(const std::string& root_path,
   while ((result = ::Next(cookie, &entry, &name)) == 0) {
     StringPiece full_file_path(reinterpret_cast<const char*>(name.name), name.name_length);
     StringPiece leaf_file_path = full_file_path.substr(root_path_full.size());
-    auto iter = std::find(leaf_file_path.begin(), leaf_file_path.end(), '/');
-    if (iter != leaf_file_path.end()) {
-      dirs.insert(
-          leaf_file_path.substr(0, std::distance(leaf_file_path.begin(), iter)).to_string());
-    } else if (!leaf_file_path.empty()) {
-      f(leaf_file_path, kFileTypeRegular);
+
+    if (!leaf_file_path.empty()) {
+      auto iter = std::find(leaf_file_path.begin(), leaf_file_path.end(), '/');
+      if (iter != leaf_file_path.end()) {
+        std::string dir =
+            leaf_file_path.substr(0, std::distance(leaf_file_path.begin(), iter)).to_string();
+        dirs.insert(std::move(dir));
+      } else {
+        f(leaf_file_path, kFileTypeRegular);
+      }
     }
   }
   ::EndIteration(cookie);
