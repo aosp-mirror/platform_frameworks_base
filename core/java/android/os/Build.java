@@ -894,6 +894,14 @@ public class Build {
 
         /**
          * P.
+         *
+         * <p>Applications targeting this or a later release will get these
+         * new changes in behavior:</p>
+         * <ul>
+         * <li>{@link android.app.Service#startForeground Service.startForeground} requires
+         * that apps hold the permission
+         * {@link android.Manifest.permission#FOREGROUND_SERVICE}.</li>
+         * </ul>
          */
         public static final int P = CUR_DEVELOPMENT; // STOPSHIP Replace with the real version.
     }
