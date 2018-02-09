@@ -558,14 +558,7 @@ public class Watchdog extends Thread {
                 Slog.w(TAG, "Restart not allowed: Watchdog is *not* killing the system process");
             } else {
                 Slog.w(TAG, "*** WATCHDOG KILLING SYSTEM PROCESS: " + subject);
-                for (int i=0; i<blockedCheckers.size(); i++) {
-                    Slog.w(TAG, blockedCheckers.get(i).getName() + " stack trace:");
-                    StackTraceElement[] stackTrace
-                            = blockedCheckers.get(i).getThread().getStackTrace();
-                    for (StackTraceElement element: stackTrace) {
-                        Slog.w(TAG, "    at " + element);
-                    }
-                }
+                WatchdogDiagnostics.diagnoseCheckers(blockedCheckers);
                 Slog.w(TAG, "*** GOODBYE!");
                 Process.killProcess(Process.myPid());
                 System.exit(10);
