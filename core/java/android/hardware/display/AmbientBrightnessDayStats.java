@@ -47,6 +47,11 @@ public final class AmbientBrightnessDayStats implements Parcelable {
     private final float[] mStats;
 
     /**
+     * Initialize day stats from the given state. The time spent in each of the bucket is
+     * initialized to 0.
+     *
+     * @param localDate        The date for which stats are being tracked
+     * @param bucketBoundaries Bucket boundaries used from creating the buckets from
      * @hide
      */
     public AmbientBrightnessDayStats(@NonNull LocalDate localDate,
@@ -55,6 +60,11 @@ public final class AmbientBrightnessDayStats implements Parcelable {
     }
 
     /**
+     * Initialize day stats from the given state
+     *
+     * @param localDate        The date for which stats are being tracked
+     * @param bucketBoundaries Bucket boundaries used from creating the buckets from
+     * @param stats            Time spent in each of the buckets (in seconds)
      * @hide
      */
     public AmbientBrightnessDayStats(@NonNull LocalDate localDate,
@@ -81,14 +91,26 @@ public final class AmbientBrightnessDayStats implements Parcelable {
         mStats = stats;
     }
 
+    /**
+     * @return The {@link LocalDate} for which brightness stats are being tracked.
+     */
     public LocalDate getLocalDate() {
         return mLocalDate;
     }
 
+    /**
+     * @return Aggregated stats of time spent (in seconds) in various buckets.
+     */
     public float[] getStats() {
         return mStats;
     }
 
+    /**
+     * Returns the bucket boundaries (in lux) used for creating buckets. For eg., if the bucket
+     * boundaries array is {b1, b2, b3}, the buckets will be [b1, b2), [b2, b3), [b3, inf).
+     *
+     * @return The list of bucket boundaries.
+     */
     public float[] getBucketBoundaries() {
         return mBucketBoundaries;
     }
@@ -169,7 +191,14 @@ public final class AmbientBrightnessDayStats implements Parcelable {
         dest.writeFloatArray(mStats);
     }
 
-    /** @hide */
+    /**
+     * Updates the stats by incrementing the time spent for the appropriate bucket based on ambient
+     * brightness reading.
+     *
+     * @param ambientBrightness Ambient brightness reading (in lux)
+     * @param durationSec       Time spent with the given reading (in seconds)
+     * @hide
+     */
     public void log(float ambientBrightness, float durationSec) {
         int bucketIndex = getBucketIndex(ambientBrightness);
         if (bucketIndex >= 0) {

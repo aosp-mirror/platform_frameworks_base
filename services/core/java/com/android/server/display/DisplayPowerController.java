@@ -51,7 +51,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.MathUtils;
 import android.util.Slog;
-import android.util.Spline;
 import android.util.TimeUtils;
 import android.view.Display;
 

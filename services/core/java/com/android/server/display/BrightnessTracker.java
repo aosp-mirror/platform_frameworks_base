@@ -115,12 +115,10 @@ public class BrightnessTracker {
             = new RingBuffer<>(BrightnessChangeEvent.class, MAX_EVENTS);
     @GuardedBy("mEventsLock")
     private boolean mEventsDirty;
-    private final Runnable mEventsWriter = () -> writeEvents();
-    private volatile boolean mWriteEventsScheduled;
+
+    private volatile boolean mWriteBrightnessTrackerStateScheduled;
 
     private AmbientBrightnessStatsTracker mAmbientBrightnessStatsTracker;
-    private final Runnable mAmbientBrightnessStatsWriter = () -> writeAmbientBrightnessStats();
-    private volatile boolean mWriteBrightnessStatsScheduled;
 
     private UserManager mUserManager;
     private final Context mContext;
@@ -167,13 +165,7 @@ public class BrightnessTracker {
         }
         mBgHandler = new TrackerHandler(mInjector.getBackgroundHandler().getLooper());
         mUserManager = mContext.getSystemService(UserManager.class);
-        try {
-            final ActivityManager.StackInfo focusedStack = mInjector.getFocusedStack();
-            mCurrentUserId = focusedStack.userId;
-        } catch (RemoteException e) {
-            // Really shouldn't be possible.
-            return;
-        }
+        mCurrentUserId = ActivityManager.getCurrentUser();
         mBgHandler.obtainMessage(MSG_BACKGROUND_START, (Float) initialBrightness).sendToTarget();
     }
 
@@ -355,18 +347,17 @@ public class BrightnessTracker {
     }
 
     private void scheduleWriteBrightnessTrackerState() {
-        if (!mWriteEventsScheduled) {
-            mBgHandler.post(mEventsWriter);
-            mWriteEventsScheduled = true;
-        }
-        if (!mWriteBrightnessStatsScheduled) {
-            mBgHandler.post(mAmbientBrightnessStatsWriter);
-            mWriteBrightnessStatsScheduled = true;
+        if (!mWriteBrightnessTrackerStateScheduled) {
+            mBgHandler.post(() -> {
+                mWriteBrightnessTrackerStateScheduled = false;
+                writeEvents();
+                writeAmbientBrightnessStats();
+            });
+            mWriteBrightnessTrackerStateScheduled = true;
         }
     }
 
     private void writeEvents() {
-        mWriteEventsScheduled = false;
         synchronized (mEventsLock) {
             if (!mEventsDirty) {
                 // Nothing to write
@@ -398,7 +389,6 @@ public class BrightnessTracker {
     }
 
     private void writeAmbientBrightnessStats() {
-        mWriteBrightnessStatsScheduled = false;
         final AtomicFile writeTo = mInjector.getFile(AMBIENT_BRIGHTNESS_STATS_FILE);
         if (writeTo == null) {
             return;
@@ -642,6 +632,7 @@ public class BrightnessTracker {
             }
         }
         if (mAmbientBrightnessStatsTracker != null) {
+            pw.println();
             mAmbientBrightnessStatsTracker.dump(pw);
         }
     }
