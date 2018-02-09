@@ -131,20 +131,9 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
 
         if (enabled) {
             if (connected) {
-                state.icon = ResourceIcon.get(R.drawable.ic_qs_bluetooth_connected);
+                state.icon = new BluetoothConnectedTileIcon();
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_bluetooth_name, state.label);
-
-                final CachedBluetoothDevice lastDevice = mController.getLastDevice();
-                if (lastDevice != null) {
-                    final int batteryLevel = lastDevice.getBatteryLevel();
-                    if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
-                        state.icon = new BluetoothBatteryTileIcon(
-                                batteryLevel,
-                                mContext.getResources().getFraction(
-                                        R.fraction.bt_battery_scale_fraction, 1, 1));
-                    }
-                }
 
                 state.label = mController.getLastDeviceName();
             } else if (state.isTransient) {
@@ -278,6 +267,25 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                     R.drawable.ic_qs_bluetooth_connected,
                     mBatteryLevel,
                     mIconScale);
+        }
+    }
+
+
+    /**
+     * Bluetooth icon wrapper (when connected with no battery indicator) for Quick Settings. This is
+     * used instead of {@link com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIcon} in order to
+     * use a context that reflects dark/light theme attributes.
+     */
+    private class BluetoothConnectedTileIcon extends Icon {
+
+        BluetoothConnectedTileIcon() {
+            // Do nothing. Default constructor to limit visibility.
+        }
+
+        @Override
+        public Drawable getDrawable(Context context) {
+            // This method returns Pair<Drawable, String> - the first value is the drawable.
+            return context.getDrawable(R.drawable.ic_qs_bluetooth_connected);
         }
     }
 
