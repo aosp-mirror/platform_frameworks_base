@@ -169,7 +169,12 @@ class SurfaceAnimationRunner {
         anim.addUpdateListener(animation -> {
             synchronized (mCancelLock) {
                 if (!a.mCancelled) {
-                    applyTransformation(a, mFrameTransaction, anim.getCurrentPlayTime());
+                    final long duration = anim.getDuration();
+                    long currentPlayTime = anim.getCurrentPlayTime();
+                    if (currentPlayTime > duration) {
+                        currentPlayTime = duration;
+                    }
+                    applyTransformation(a, mFrameTransaction, currentPlayTime);
                 }
             }
 
