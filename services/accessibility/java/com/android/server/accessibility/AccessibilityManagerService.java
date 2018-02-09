@@ -1020,7 +1020,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
             // Disconnect from services for the old user.
             UserState oldUserState = getCurrentUserStateLocked();
-            oldUserState.onSwitchToAnotherUser();
+            oldUserState.onSwitchToAnotherUserLocked();
 
             // Disable the local managers for the old user.
             if (oldUserState.mUserClients.getRegisteredCallbackCount() > 0) {
@@ -1349,21 +1349,29 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private void updateRelevantEventsLocked(UserState userState) {
         mMainHandler.post(() -> {
             broadcastToClients(userState, ignoreRemoteException(client -> {
-                int relevantEventTypes = computeRelevantEventTypes(userState, client);
+                int relevantEventTypes;
+                boolean changed = false;
+                synchronized (mLock) {
+                    relevantEventTypes = computeRelevantEventTypesLocked(userState, client);
 
-                if (client.mLastSentRelevantEventTypes != relevantEventTypes) {
-                    client.mLastSentRelevantEventTypes = relevantEventTypes;
+                    if (client.mLastSentRelevantEventTypes != relevantEventTypes) {
+                        client.mLastSentRelevantEventTypes = relevantEventTypes;
+                        changed = true;
+                    }
+                }
+                if (changed) {
                     client.mCallback.setRelevantEventTypes(relevantEventTypes);
                 }
             }));
         });
     }
 
-    private int computeRelevantEventTypes(UserState userState, Client client) {
+    private int computeRelevantEventTypesLocked(UserState userState, Client client) {
         int relevantEventTypes = 0;
 
-        // Use iterator for thread-safety
-        for (AccessibilityServiceConnection service : userState.mBoundServices) {
+        int serviceCount = userState.mBoundServices.size();
+        for (int i = 0; i < serviceCount; i++) {
+            AccessibilityServiceConnection service = userState.mBoundServices.get(i);
             relevantEventTypes |= isClientInPackageWhitelist(service.getServiceInfo(), client)
                     ? service.getRelevantEventTypes()
                     : 0;
@@ -3616,7 +3624,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         private Client(IAccessibilityManagerClient callback, int clientUid, UserState userState) {
             mCallback = callback;
             mPackageNames = mPackageManager.getPackagesForUid(clientUid);
-            mLastSentRelevantEventTypes = computeRelevantEventTypes(userState, this);
+            synchronized (mLock) {
+                mLastSentRelevantEventTypes = computeRelevantEventTypesLocked(userState, this);
+            }
         }
     }
 
@@ -3635,8 +3645,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         // Transient state.
 
-        public final CopyOnWriteArrayList<AccessibilityServiceConnection> mBoundServices =
-                new CopyOnWriteArrayList<>();
+        public final ArrayList<AccessibilityServiceConnection> mBoundServices = new ArrayList<>();
 
         public final Map<ComponentName, AccessibilityServiceConnection> mComponentNameToServiceMap =
                 new HashMap<>();
@@ -3698,7 +3707,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return !mBoundServices.isEmpty() || !mBindingServices.isEmpty();
         }
 
-        public void onSwitchToAnotherUser() {
+        public void onSwitchToAnotherUserLocked() {
             // Unbind all services.
             unbindAllServicesLocked(this);
 
