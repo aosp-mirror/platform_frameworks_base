@@ -161,9 +161,7 @@ public class BatteryStatsNoteTest extends TestCase {
 
         actualRunTimeUs = uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_FOREGROUND_SERVICE,
                 elapsedTimeUs, STATS_SINCE_CHARGED);
-        expectedRunTimeMs = stateRuntimeMap.get(
-                ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE)
-                + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        expectedRunTimeMs = stateRuntimeMap.get(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
         assertEquals(expectedRunTimeMs * 1000, actualRunTimeUs);
 
         actualRunTimeUs = uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_TOP_SLEEPING,
@@ -173,7 +171,8 @@ public class BatteryStatsNoteTest extends TestCase {
 
         actualRunTimeUs = uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_FOREGROUND,
                 elapsedTimeUs, STATS_SINCE_CHARGED);
-        expectedRunTimeMs = stateRuntimeMap.get(ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
+        expectedRunTimeMs = stateRuntimeMap.get(ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND)
+                + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
         assertEquals(expectedRunTimeMs * 1000, actualRunTimeUs);
 
         actualRunTimeUs = uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_BACKGROUND,
