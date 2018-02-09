@@ -30,7 +30,7 @@
         <item>com.google.android.apps.mediashell/.settings.CastSettingsActivity</item>
         <item>com.google.android.katniss.setting/.SpeechSettingsActivity</item>
         <item>com.google.android.katniss.setting/.SearchSettingsActivity</item>
-        <item>com.google.android.gsf.notouch/.UsageDiagnosticsSettingActivity</item>
+        <item>com.google.android.tungsten.setupwraith/.settings.usage.UsageDiagnosticsSettingActivity</item>
         <item>com.google.android.tvlauncher/.notifications.NotificationsSidePanelActivity</item>
     </string-array>
 </resources>
