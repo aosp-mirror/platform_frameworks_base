@@ -103,7 +103,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private DeadZone mDeadZone;
     private final NavigationBarTransitions mBarTransitions;
     private final OverviewProxyService mOverviewProxyService;
-    private boolean mRecentsAnimationStarted;
 
     // workaround for LayoutTransitions leaving the nav buttons in a weird state (bug 5549288)
     final static boolean WORKAROUND_INVALID_LAYOUT = true;
@@ -263,7 +262,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     }
 
     public void setRecentsAnimationStarted(boolean started) {
-        mRecentsAnimationStarted = started;
         if (mRecentsOnboarding != null) {
             mRecentsOnboarding.onRecentsAnimationStarted();
         }
@@ -277,22 +275,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        int action = event.getActionMasked();
-        if (action == MotionEvent.ACTION_DOWN) {
-            mRecentsAnimationStarted = false;
-        } else if (action == MotionEvent.ACTION_UP) {
-            // If the overview proxy service has not started the recents animation then clean up
-            // after it to ensure that the nav bar buttons still work
-            if (mOverviewProxyService.getProxy() != null && !mRecentsAnimationStarted) {
-                try {
-                    ActivityManager.getService().cancelRecentsAnimation();
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Could not cancel recents animation");
-                }
-            }
-        }
-
-        return mGestureHelper.onInterceptTouchEvent(event) || mRecentsAnimationStarted;
+        return mGestureHelper.onInterceptTouchEvent(event);
     }
 
     @Override
@@ -300,7 +283,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         if (mGestureHelper.onTouchEvent(event)) {
             return true;
         }
-        return mRecentsAnimationStarted || super.onTouchEvent(event);
+        return super.onTouchEvent(event);
     }
 
     public void abortCurrentGesture() {

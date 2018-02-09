@@ -63,7 +63,7 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
     private static final String TAG = "QuickScrubController";
     private static final int QUICK_SWITCH_FLING_VELOCITY = 0;
     private static final int ANIM_DURATION_MS = 200;
-    private static final long LONG_PRESS_DELAY_MS = 150;
+    private static final long LONG_PRESS_DELAY_MS = 225;
 
     /**
      * For quick step, set a damping value to allow the button to stick closer its origin position
@@ -76,6 +76,7 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
 
     private boolean mDraggingActive;
     private boolean mQuickScrubActive;
+    private boolean mAllowQuickSwitch;
     private float mDownOffset;
     private float mTranslation;
     private int mTouchDownX;
@@ -95,7 +96,6 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
     private final Paint mTrackPaint = new Paint();
     private final int mScrollTouchSlop;
     private final OverviewProxyService mOverviewEventSender;
-    private final Display mDisplay;
     private final int mTrackThickness;
     private final int mTrackPadding;
     private final ValueAnimator mTrackAnimator;
@@ -137,7 +137,8 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
         new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velX, float velY) {
-                if (!isQuickScrubEnabled() || mQuickScrubActive) {
+                if (!isQuickScrubEnabled() || mQuickScrubActive || !mAllowQuickSwitch ||
+                        !mHomeButtonRect.contains(mTouchDownX, mTouchDownY)) {
                     return false;
                 }
                 float velocityX = mIsRTL ? -velX : velX;
@@ -167,8 +168,6 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
     public QuickScrubController(Context context) {
         mContext = context;
         mScrollTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-        mDisplay = ((WindowManager) context.getSystemService(
-                Context.WINDOW_SERVICE)).getDefaultDisplay();
         mOverviewEventSender = Dependency.get(OverviewProxyService.class);
         mGestureDetector = new GestureDetector(mContext, mGestureListener);
         mTrackThickness = getDimensionPixelSize(mContext, R.dimen.nav_quick_scrub_track_thickness);
@@ -202,8 +201,24 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
             homeButton.setDelayTouchFeedback(false);
             return false;
         }
+
+        return handleTouchEvent(event);
+    }
+
+    /**
+     * @return true if we want to handle touch events for quick scrub/switch and prevent proxying
+     *         the event to the overview service.
+     */
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return handleTouchEvent(event);
+    }
+
+    private boolean handleTouchEvent(MotionEvent event) {
+        final IOverviewProxy overviewProxy = mOverviewEventSender.getProxy();
+        final ButtonDispatcher homeButton = mNavigationBarView.getHomeButton();
         if (mGestureDetector.onTouchEvent(event)) {
-            // If the fling has been handled, then skip proxying the UP
+            // If the fling has been handled on UP, then skip proxying the UP
             return true;
         }
         int action = event.getAction();
@@ -220,6 +235,7 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
                     homeButton.setDelayTouchFeedback(false);
                     mTouchDownX = mTouchDownY = -1;
                 }
+                mAllowQuickSwitch = true;
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
@@ -300,22 +316,6 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
             case MotionEvent.ACTION_UP:
                 endQuickScrub();
                 break;
-        }
-        return mDraggingActive || mQuickScrubActive;
-    }
-
-    /**
-     * @return true if we want to handle touch events for quick scrub/switch and prevent proxying
-     *         the event to the overview service.
-     */
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if (mGestureDetector.onTouchEvent(event)) {
-            // If the fling has been handled, then skip proxying the UP
-            return true;
-        }
-        if (event.getAction() == MotionEvent.ACTION_UP) {
-            endQuickScrub();
         }
         return mDraggingActive || mQuickScrubActive;
     }
@@ -418,6 +418,11 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
             }
         }
         mDraggingActive = false;
+    }
+
+    public void cancelQuickSwitch() {
+        mAllowQuickSwitch = false;
+        mHandler.removeCallbacks(mLongPressRunnable);
     }
 
     private int getDimensionPixelSize(Context context, @DimenRes int resId) {
