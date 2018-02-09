@@ -745,8 +745,6 @@ public class WindowManagerService extends IWindowManager.Stub
     private Session mHoldingScreenOn;
     private PowerManager.WakeLock mHoldingScreenWakeLock;
 
-    boolean mTurnOnScreen;
-
     // Whether or not a layout can cause a wake up when theater mode is enabled.
     boolean mAllowTheaterModeWakeFromLayout;
 

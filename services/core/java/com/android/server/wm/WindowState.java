@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.os.PowerManager.DRAW_WAKE_LOCK;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.SurfaceControl.Transaction;
@@ -167,6 +168,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
@@ -285,7 +287,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     int mLayer;
     boolean mHaveFrame;
     boolean mObscured;
-    boolean mTurnOnScreen;
 
     int mLayoutSeq = -1;
 
@@ -635,6 +636,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private TapExcludeRegionHolder mTapExcludeRegionHolder;
 
     /**
+     * Used for testing because the real PowerManager is final.
+     */
+    private PowerManagerWrapper mPowerManagerWrapper;
+
+    /**
      * Compares two window sub-layers and returns -1 if the first is lesser than the second in terms
      * of z-order and 1 otherwise.
      */
@@ -663,9 +669,34 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     private static final float DEFAULT_DIM_AMOUNT_DEAD_WINDOW = 0.5f;
 
+    interface PowerManagerWrapper {
+        void wakeUp(long time, String reason);
+
+        boolean isInteractive();
+
+    }
+
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
-           WindowState parentWindow, int appOp, int seq, WindowManager.LayoutParams a,
-           int viewVisibility, int ownerId, boolean ownerCanAddInternalSystemWindow) {
+            WindowState parentWindow, int appOp, int seq, WindowManager.LayoutParams a,
+            int viewVisibility, int ownerId, boolean ownerCanAddInternalSystemWindow) {
+        this(service, s, c, token, parentWindow, appOp, seq, a, viewVisibility, ownerId,
+                ownerCanAddInternalSystemWindow, new PowerManagerWrapper() {
+                    @Override
+                    public void wakeUp(long time, String reason) {
+                        service.mPowerManager.wakeUp(time, reason);
+                    }
+
+                    @Override
+                    public boolean isInteractive() {
+                        return service.mPowerManager.isInteractive();
+                    }
+                });
+    }
+
+    WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
+            WindowState parentWindow, int appOp, int seq, WindowManager.LayoutParams a,
+            int viewVisibility, int ownerId, boolean ownerCanAddInternalSystemWindow,
+            PowerManagerWrapper powerManagerWrapper) {
         super(service);
         mSession = s;
         mClient = c;
@@ -682,6 +713,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         DeathRecipient deathRecipient = new DeathRecipient();
         mSeq = seq;
         mEnforceSizeCompat = (mAttrs.privateFlags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0;
+        mPowerManagerWrapper = powerManagerWrapper;
         if (localLOGV) Slog.v(
             TAG, "Window " + this + " client=" + c.asBinder()
             + " token=" + token + " (" + mAttrs.token + ")" + " params=" + a);
@@ -2275,9 +2307,34 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void prepareWindowToDisplayDuringRelayout(boolean wasVisible) {
         // We need to turn on screen regardless of visibility.
-        if ((mAttrs.flags & FLAG_TURN_SCREEN_ON) != 0) {
-            if (DEBUG_VISIBILITY) Slog.v(TAG, "Relayout window turning screen on: " + this);
-            mTurnOnScreen = true;
+        boolean hasTurnScreenOnFlag = (mAttrs.flags & FLAG_TURN_SCREEN_ON) != 0;
+        boolean allowTheaterMode =
+                mService.mAllowTheaterModeWakeFromLayout || Settings.Global.getInt(
+                        mService.mContext.getContentResolver(), Settings.Global.THEATER_MODE_ON, 0)
+                        == 0;
+        boolean canTurnScreenOn = mAppToken == null || mAppToken.canTurnScreenOn();
+
+        // The screen will turn on if the following conditions are met
+        // 1. The window has the flag FLAG_TURN_SCREEN_ON
+        // 2. The WMS allows theater mode.
+        // 3. No AWT or the AWT allows the screen to be turned on. This should only be true once
+        // per resume to prevent the screen getting getting turned on for each relayout. Set
+        // canTurnScreenOn will be set to false so the window doesn't turn the screen on again
+        // during this resume.
+        // 4. When the screen is not interactive. This is because when the screen is already
+        // interactive, the value may persist until the next animation, which could potentially
+        // be occurring while turning off the screen. This would lead to the screen incorrectly
+        // turning back on.
+        if (hasTurnScreenOnFlag && allowTheaterMode && canTurnScreenOn
+                && !mPowerManagerWrapper.isInteractive()) {
+            if (DEBUG_VISIBILITY || DEBUG_POWER) {
+                Slog.v(TAG, "Relayout window turning screen on: " + this);
+            }
+            mPowerManagerWrapper.wakeUp(SystemClock.uptimeMillis(),
+                    "android.server.wm:TURN_ON");
+        }
+        if (mAppToken != null) {
+            mAppToken.setCanTurnScreenOn(false);
         }
 
         // If we were already visible, skip rest of preparation.
@@ -2571,8 +2628,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 // in wake lock statistics.  So in particular, we don't want to include the
                 // window's hash code as in toString().
                 final CharSequence tag = getWindowTag();
-                mDrawLock = mService.mPowerManager.newWakeLock(
-                        PowerManager.DRAW_WAKE_LOCK, "Window:" + tag);
+                mDrawLock = mService.mPowerManager.newWakeLock(DRAW_WAKE_LOCK, "Window:" + tag);
                 mDrawLock.setReferenceCounted(false);
                 mDrawLock.setWorkSource(new WorkSource(mOwnerUid, mAttrs.packageName));
             }
@@ -3327,15 +3383,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     pw.print(" mDestroying="); pw.print(mDestroying);
                     pw.print(" mRemoved="); pw.println(mRemoved);
         }
-        if (getOrientationChanging() || mAppFreezing || mTurnOnScreen
-                || mReportOrientationChanged) {
+        if (getOrientationChanging() || mAppFreezing || mReportOrientationChanged) {
             pw.print(prefix); pw.print("mOrientationChanging=");
                     pw.print(mOrientationChanging);
                     pw.print(" configOrientationChanging=");
                     pw.print(getLastReportedConfiguration().orientation
                             != getConfiguration().orientation);
                     pw.print(" mAppFreezing="); pw.print(mAppFreezing);
-                    pw.print(" mTurnOnScreen="); pw.print(mTurnOnScreen);
                     pw.print(" mReportOrientationChanged="); pw.println(mReportOrientationChanged);
         }
         if (mLastFreezeDuration != 0) {
