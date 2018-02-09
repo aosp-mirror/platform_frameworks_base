@@ -28,7 +28,7 @@ bool ExtractResourceName(const StringPiece& str, StringPiece* out_package, Strin
                          StringPiece* out_entry);
 
 inline uint32_t fix_package_id(uint32_t resid, uint8_t package_id) {
-  return (resid & 0x00ffffffu) | (static_cast<uint32_t>(package_id) << 24);
+  return resid | (static_cast<uint32_t>(package_id) << 24);
 }
 
 inline uint8_t get_package_id(uint32_t resid) {
