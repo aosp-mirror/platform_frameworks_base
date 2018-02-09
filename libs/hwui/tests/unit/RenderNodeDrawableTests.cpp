@@ -471,6 +471,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, projectionHwLayer) {
         sk_sp<SkSurface> onNewSurface(const SkImageInfo&) override { return nullptr; }
         void onCopyOnWrite(ContentChangeMode) override {}
         int* mDrawCounter;
+        void onWritePixels(const SkPixmap&, int x, int y) {}
     };
 
     auto receiverBackground = TestUtils::createSkiaNode(
