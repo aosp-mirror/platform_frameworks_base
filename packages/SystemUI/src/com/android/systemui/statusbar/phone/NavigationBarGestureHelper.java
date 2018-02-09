@@ -28,7 +28,6 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Rect;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -159,25 +158,19 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
                 mRecentsAnimationStarted = false;
                 break;
             }
-            case MotionEvent.ACTION_UP: {
-                // If the overview proxy service has not started the recents animation then clean up
-                // after it to ensure that the nav bar buttons still work
-                if (mOverviewProxyService.getProxy() != null && !mRecentsAnimationStarted) {
-                    try {
-                        ActivityManager.getService().cancelRecentsAnimation();
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Could not cancel recents animation", e);
-                    }
-                }
-                break;
-            }
         }
-        if (mStatusBar.isPresenterFullyCollapsed()
-                && !mQuickScrubController.onInterceptTouchEvent(event)) {
+        boolean handledByQuickscrub = mQuickScrubController.onInterceptTouchEvent(event);
+        if (mStatusBar.isPresenterFullyCollapsed() && !handledByQuickscrub) {
+            // Proxy motion events until we start intercepting for quickscrub
             proxyMotionEvents(event);
-            return false;
         }
-        return (mDockWindowEnabled && interceptDockWindowEvent(event)) || mRecentsAnimationStarted;
+
+        boolean result = handledByQuickscrub;
+        result |= mRecentsAnimationStarted;
+        if (mDockWindowEnabled) {
+            result |= interceptDockWindowEvent(event);
+        }
+        return result;
     }
 
     public boolean onTouchEvent(MotionEvent event) {
@@ -188,10 +181,11 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
                 && (mQuickScrubController.onTouchEvent(event)
                 || ignoreProxyDownEvent
                 || proxyMotionEvents(event));
+        result |= mRecentsAnimationStarted;
         if (mDockWindowEnabled) {
             result |= handleDockWindowEvent(event);
         }
-        return result || mRecentsAnimationStarted;
+        return result;
     }
 
     public void onDraw(Canvas canvas) {

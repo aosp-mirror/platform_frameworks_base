@@ -27,10 +27,12 @@ import android.media.AudioManager;
 import android.metrics.LogMaker;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.HapticFeedbackConstants;
 import android.view.InputDevice;
@@ -55,6 +57,7 @@ import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
 
 public class KeyButtonView extends ImageView implements ButtonInterface {
+    private static final String TAG = KeyButtonView.class.getSimpleName();
 
     private final boolean mPlaySounds;
     private int mContentDescriptionRes;
@@ -264,6 +267,13 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 }
                 if (mCode != 0) {
                     if (doIt) {
+                        // If there was a pending remote recents animation, then we need to
+                        // cancel the animation now before we handle the button itself
+                        try {
+                            ActivityManager.getService().cancelRecentsAnimation();
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Could not cancel recents animation", e);
+                        }
                         sendEvent(KeyEvent.ACTION_UP, 0);
                         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
                     } else {
