@@ -4186,7 +4186,7 @@ public class Editor {
                         primaryHorizontal,
                         layout.getLineTop(line),
                         primaryHorizontal,
-                        layout.getLineBottom(line) - layout.getLineBottom(line) + mHandleHeight);
+                        layout.getLineBottom(line) + mHandleHeight);
             }
             // Take TextView's padding and scroll into account.
             int textHorizontalOffset = mTextView.viewportToContentHorizontalOffset();
