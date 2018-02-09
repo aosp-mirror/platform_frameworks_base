@@ -32,7 +32,7 @@
 #include <arc/Future.h>
 #include <arc/IArcBridgeService.h>
 #include <arc/MojoProcessSupport.h>
-#include <video.mojom.h>
+#include <components/arc/common/video.mojom.h>
 
 namespace {
 
