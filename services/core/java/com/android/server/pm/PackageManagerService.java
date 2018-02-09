@@ -19102,8 +19102,21 @@ public class PackageManagerService extends IPackageManager.Stub
     public void deleteApplicationCacheFilesAsUser(final String packageName, final int userId,
             final IPackageDataObserver observer) {
         final int callingUid = Binder.getCallingUid();
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.DELETE_CACHE_FILES, null);
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.INTERNAL_DELETE_CACHE_FILES)
+                != PackageManager.PERMISSION_GRANTED) {
+            // If the caller has the old delete cache permission, silently ignore.  Else throw.
+            if (mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.DELETE_CACHE_FILES)
+                    == PackageManager.PERMISSION_GRANTED) {
+                Slog.w(TAG, "Calling uid " + callingUid + " does not have " +
+                        android.Manifest.permission.INTERNAL_DELETE_CACHE_FILES +
+                        ", silently ignoring");
+                return;
+            }
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.INTERNAL_DELETE_CACHE_FILES, null);
+        }
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 /* requireFullPermission= */ true, /* checkShell= */ false,
                 "delete application cache files");
