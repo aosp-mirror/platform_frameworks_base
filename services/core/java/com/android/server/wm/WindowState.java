@@ -265,7 +265,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     // This is a non-system overlay window that is currently force hidden.
     private boolean mForceHideNonSystemOverlayWindow;
     boolean mAppFreezing;
-    boolean mHidden;    // Used to determine if to show child windows.
+    boolean mHidden = true;    // Used to determine if to show child windows.
     boolean mWallpaperVisible;  // for wallpaper, what was last vis report?
     private boolean mDragResizing;
     private boolean mDragResizingChangeReported = true;
@@ -4505,13 +4505,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (!mAnimatingExit && mAppDied) {
             mIsDimming = true;
             dimmer.dimAbove(getPendingTransaction(), this, DEFAULT_DIM_AMOUNT_DEAD_WINDOW);
-        } else if ((mAttrs.flags & FLAG_DIM_BEHIND) != 0 && isVisibleNow()
-                && !mWinAnimator.mLastHidden) {
+        } else if ((mAttrs.flags & FLAG_DIM_BEHIND) != 0 && isVisibleNow() && !mHidden) {
             // Only show a dim behind when the following is satisfied:
             // 1. The window has the flag FLAG_DIM_BEHIND
             // 2. The WindowToken is not hidden so dims aren't shown when the window is exiting.
             // 3. The WS is considered visible according to the isVisible() method
-            // 4. The WSA is not hidden.
+            // 4. The WS is not hidden.
             mIsDimming = true;
             dimmer.dimBelow(getPendingTransaction(), this, mAttrs.dimAmount);
         }

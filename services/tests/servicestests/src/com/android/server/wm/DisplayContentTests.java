@@ -28,6 +28,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -38,7 +39,6 @@ import org.junit.runner.RunWith;
 import android.annotation.SuppressLint;
 import android.content.res.Configuration;
 import android.graphics.Path;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
@@ -166,6 +166,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertTrue(appWin.canBeImeTarget());
         WindowState imeTarget = mDisplayContent.computeImeTarget(false /* updateImeTarget */);
         assertEquals(appWin, imeTarget);
+        appWin.mHidden = false;
 
         // Verify that an child window can be an ime target.
         final WindowState childWin = createWindow(appWin,

@@ -36,6 +36,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -57,15 +58,17 @@ public class WindowStateTests extends WindowTestsBase {
         final WindowState child1 = createWindow(parentWindow, FIRST_SUB_WINDOW, "child1");
         final WindowState child2 = createWindow(parentWindow, FIRST_SUB_WINDOW, "child2");
 
-        assertFalse(parentWindow.mHidden);
+        // parentWindow is initially set to hidden.
+        assertTrue(parentWindow.mHidden);
+        assertFalse(parentWindow.isParentWindowHidden());
+        assertTrue(child1.isParentWindowHidden());
+        assertTrue(child2.isParentWindowHidden());
+
+        parentWindow.mHidden = false;
         assertFalse(parentWindow.isParentWindowHidden());
         assertFalse(child1.isParentWindowHidden());
         assertFalse(child2.isParentWindowHidden());
 
-        parentWindow.mHidden = true;
-        assertFalse(parentWindow.isParentWindowHidden());
-        assertTrue(child1.isParentWindowHidden());
-        assertTrue(child2.isParentWindowHidden());
     }
 
     @Test
