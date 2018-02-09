@@ -66,7 +66,7 @@ public:
     Bitmap(GraphicBuffer* buffer, const SkImageInfo& info);
 
     int rowBytesAsPixels() const {
-        return rowBytes() >> SkColorTypeShiftPerPixel(mInfo.colorType());
+        return rowBytes() >> mInfo.shiftPerPixel();
     }
 
     void reconfigure(const SkImageInfo& info, size_t rowBytes);
