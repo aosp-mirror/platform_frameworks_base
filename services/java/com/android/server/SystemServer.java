@@ -842,6 +842,14 @@ public final class SystemServer {
             ServiceManager.addService(Context.INPUT_SERVICE, inputManager);
             traceEnd();
 
+            traceBeginAndSlog("SetWindowManagerService");
+            mActivityManagerService.setWindowManager(wm);
+            traceEnd();
+
+            traceBeginAndSlog("WindowManagerServiceOnInitReady");
+            wm.onInitReady();
+            traceEnd();
+
             // Start receiving calls from HIDL services. Start in in a separate thread
             // because it need to connect to SensorManager. This have to start
             // after START_SENSOR_SERVICE is done.
@@ -858,10 +866,6 @@ public final class SystemServer {
                 mSystemServiceManager.startService(VrManagerService.class);
                 traceEnd();
             }
-
-            traceBeginAndSlog("SetWindowManagerService");
-            mActivityManagerService.setWindowManager(wm);
-            traceEnd();
 
             traceBeginAndSlog("StartInputManager");
             inputManager.setWindowManagerCallbacks(wm.getInputMonitor());

@@ -284,7 +284,8 @@ class WindowTestsBase {
         final int displayId = sNextDisplayId++;
         final Display display = new Display(DisplayManagerGlobal.getInstance(), displayId,
                 mDisplayInfo, DEFAULT_DISPLAY_ADJUSTMENTS);
-        return new DisplayContent(display, sWm, new WallpaperController(sWm));
+        return new DisplayContent(display, sWm, new WallpaperController(sWm),
+                mock(DisplayWindowController.class));
     }
 
     /** Creates a {@link com.android.server.wm.WindowTestUtils.TestWindowState} */

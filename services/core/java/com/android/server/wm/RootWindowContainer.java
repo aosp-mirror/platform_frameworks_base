@@ -193,30 +193,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         }
     }
 
-    /**
-     * Retrieve the DisplayContent for the specified displayId. Will create a new DisplayContent if
-     * there is a Display for the displayId.
-     *
-     * @param displayId The display the caller is interested in.
-     * @return The DisplayContent associated with displayId or null if there is no Display for it.
-     */
-    DisplayContent getDisplayContentOrCreate(int displayId) {
-        DisplayContent dc = getDisplayContent(displayId);
-
-        if (dc == null) {
-            final Display display = mService.mDisplayManager.getDisplay(displayId);
-            if (display != null) {
-                final long callingIdentity = Binder.clearCallingIdentity();
-                try {
-                    dc = createDisplayContent(display);
-                } finally {
-                    Binder.restoreCallingIdentity(callingIdentity);
-                }
-            }
-        }
-        return dc;
-    }
-
     DisplayContent getDisplayContent(int displayId) {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final DisplayContent current = mChildren.get(i);
@@ -227,9 +203,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         return null;
     }
 
-    private DisplayContent createDisplayContent(final Display display) {
-        final DisplayContent dc = new DisplayContent(display, mService,
-                mWallpaperController);
+    DisplayContent createDisplayContent(final Display display, DisplayWindowController controller) {
+        final DisplayContent dc =
+                new DisplayContent(display, mService, mWallpaperController, controller);
         final int displayId = display.getDisplayId();
 
         if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Adding display=" + display);
