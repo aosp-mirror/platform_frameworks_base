@@ -59,7 +59,7 @@ class AssetManager2Test : public ::testing::Test {
     libclient_assets_ = ApkAssets::Load(GetTestDataPath() + "/libclient/libclient.apk");
     ASSERT_NE(nullptr, libclient_assets_);
 
-    appaslib_assets_ = ApkAssets::LoadAsSharedLibrary(GetTestDataPath() + "/appaslib/appaslib.apk");
+    appaslib_assets_ = ApkAssets::Load(GetTestDataPath() + "/appaslib/appaslib.apk");
     ASSERT_NE(nullptr, appaslib_assets_);
 
     system_assets_ = ApkAssets::Load(GetTestDataPath() + "/system/system.apk", true /*system*/);
@@ -226,25 +226,6 @@ TEST_F(AssetManager2Test, FindsBagResourceFromSingleApkAssets) {
 TEST_F(AssetManager2Test, FindsBagResourceFromMultipleApkAssets) {}
 
 TEST_F(AssetManager2Test, FindsBagResourceFromSharedLibrary) {
-  AssetManager2 assetmanager;
-
-  // libclient is built with lib_one and then lib_two in order.
-  // Reverse the order to test that proper package ID re-assignment is happening.
-  assetmanager.SetApkAssets(
-      {lib_two_assets_.get(), lib_one_assets_.get(), libclient_assets_.get()});
-
-  const ResolvedBag* bag = assetmanager.GetBag(fix_package_id(lib_one::R::style::Theme, 0x03));
-  ASSERT_NE(nullptr, bag);
-  ASSERT_GE(bag->entry_count, 2u);
-
-  // First two attributes come from lib_one.
-  EXPECT_EQ(1, bag->entries[0].cookie);
-  EXPECT_EQ(0x03, get_package_id(bag->entries[0].key));
-  EXPECT_EQ(1, bag->entries[1].cookie);
-  EXPECT_EQ(0x03, get_package_id(bag->entries[1].key));
-}
-
-TEST_F(AssetManager2Test, FindsStyleResourceWithParentFromSharedLibrary) {
   AssetManager2 assetmanager;
 
   // libclient is built with lib_one and then lib_two in order.
