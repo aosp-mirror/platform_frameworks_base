@@ -21934,7 +21934,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         try {
             if (values != null) {
-                changes = updateGlobalConfiguration(values, initLocale, persistent, userId,
+                changes = updateGlobalConfigurationLocked(values, initLocale, persistent, userId,
                         deferResume);
             }
 
@@ -21952,8 +21952,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         return kept;
     }
 
+    /**
+     * Returns true if this configuration change is interesting enough to send an
+     * {@link Intent#ACTION_SPLIT_CONFIGURATION_CHANGED} broadcast.
+     */
+    private static boolean isSplitConfigurationChange(int configDiff) {
+        return (configDiff & (ActivityInfo.CONFIG_LOCALE | ActivityInfo.CONFIG_DENSITY)) != 0;
+    }
+
     /** Update default (global) configuration and notify listeners about changes. */
-    private int updateGlobalConfiguration(@NonNull Configuration values, boolean initLocale,
+    private int updateGlobalConfigurationLocked(@NonNull Configuration values, boolean initLocale,
             boolean persistent, int userId, boolean deferResume) {
         mTempConfig.setTo(getGlobalConfiguration());
         final int changes = mTempConfig.updateFrom(values);
@@ -22056,6 +22064,19 @@ public class ActivityManagerService extends IActivityManager.Stub
                     UserHandle.USER_ALL);
         }
 
+        // Send a broadcast to PackageInstallers if the configuration change is interesting
+        // for the purposes of installing additional splits.
+        if (!initLocale && isSplitConfigurationChange(changes)) {
+            intent = new Intent(Intent.ACTION_SPLIT_CONFIGURATION_CHANGED);
+            intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
+                    | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+
+            // Typically only app stores will have this permission.
+            String[] permissions = new String[] { android.Manifest.permission.INSTALL_PACKAGES };
+            broadcastIntentLocked(null, null, intent, null, null, 0, null, null, permissions,
+                    OP_NONE, null, false, false, MY_PID, SYSTEM_UID, UserHandle.USER_ALL);
+        }
+
         // Override configuration of the default display duplicates global config, so we need to
         // update it also. This will also notify WindowManager about changes.
         performDisplayOverrideConfigUpdate(mStackSupervisor.getConfiguration(), deferResume,
@@ -22128,7 +22149,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // Override configuration of the default display duplicates global config, so
                     // we're calling global config update instead for default display. It will also
                     // apply the correct override config.
-                    changes = updateGlobalConfiguration(values, false /* initLocale */,
+                    changes = updateGlobalConfigurationLocked(values, false /* initLocale */,
                             false /* persistent */, UserHandle.USER_NULL /* userId */, deferResume);
                 } else {
                     changes = performDisplayOverrideConfigUpdate(values, deferResume, displayId);

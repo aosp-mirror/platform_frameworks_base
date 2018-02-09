@@ -2399,6 +2399,26 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CONFIGURATION_CHANGED = "android.intent.action.CONFIGURATION_CHANGED";
+
+    /**
+     * Broadcast Action: The current device {@link android.content.res.Configuration} has changed
+     * such that the device may be eligible for the installation of additional configuration splits.
+     * Configuration properties that can trigger this broadcast include locale and display density.
+     *
+     * <p class="note">
+     * Unlike {@link #ACTION_CONFIGURATION_CHANGED}, you <em>can</em> receive this through
+     * components declared in manifests. However, the receiver <em>must</em> hold the
+     * {@link android.Manifest.permission#INSTALL_PACKAGES} permission.
+     *
+     * <p class="note">
+     * This is a protected intent that can only be sent by the system.
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SPLIT_CONFIGURATION_CHANGED =
+            "android.intent.action.SPLIT_CONFIGURATION_CHANGED";
     /**
      * Broadcast Action: The current device's locale has changed.
      *
