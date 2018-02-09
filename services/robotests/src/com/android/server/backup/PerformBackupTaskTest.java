@@ -26,6 +26,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -40,7 +42,9 @@ import android.app.Application;
 import android.app.IActivityManager;
 import android.app.IBackupAgent;
 import android.app.backup.BackupAgent;
+import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
+import android.app.backup.BackupTransport;
 import android.app.backup.FullBackupDataOutput;
 import android.app.backup.IBackupManager;
 import android.app.backup.IBackupManagerMonitor;
@@ -53,6 +57,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
@@ -80,6 +85,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadow.api.Shadow;
@@ -88,6 +95,7 @@ import org.robolectric.shadows.ShadowPackageManager;
 import org.robolectric.shadows.ShadowQueuedWork;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -184,32 +192,33 @@ public class PerformBackupTaskTest {
 
     @Test
     public void testRunTask_whenTransportProvidesFlags_passesThemToTheAgent() throws Exception {
-        BackupAgent agent = setUpAgent(PACKAGE_1);
+        AgentMock agentMock = setUpAgent(PACKAGE_1);
         int flags = BackupAgent.FLAG_CLIENT_SIDE_ENCRYPTION_ENABLED;
         when(mTransportBinder.getTransportFlags()).thenReturn(flags);
         PerformBackupTask task = createPerformBackupTask(emptyList(), false, true, PACKAGE_1);
 
         runTask(task);
 
-        verify(agent).onBackup(any(), argThat(dataOutputWithTransportFlags(flags)), any());
+        verify(agentMock.agent)
+                .onBackup(any(), argThat(dataOutputWithTransportFlags(flags)), any());
     }
 
     @Test
     public void testRunTask_whenTransportDoesNotProvidesFlags() throws Exception {
-        BackupAgent agent = setUpAgent(PACKAGE_1);
+        AgentMock agentMock = setUpAgent(PACKAGE_1);
         PerformBackupTask task = createPerformBackupTask(emptyList(), false, true, PACKAGE_1);
 
         runTask(task);
 
-        verify(agent).onBackup(any(), argThat(dataOutputWithTransportFlags(0)), any());
+        verify(agentMock.agent).onBackup(any(), argThat(dataOutputWithTransportFlags(0)), any());
     }
 
     @Test
     public void testRunTask_whenTransportProvidesFlagsAndMultipleAgents_passesToAll()
             throws Exception {
-        List<BackupAgent> agents = setUpAgents(PACKAGE_1, PACKAGE_2);
-        BackupAgent agent1 = agents.get(0);
-        BackupAgent agent2 = agents.get(1);
+        List<AgentMock> agentMocks = setUpAgents(PACKAGE_1, PACKAGE_2);
+        BackupAgent agent1 = agentMocks.get(0).agent;
+        BackupAgent agent2 = agentMocks.get(1).agent;
         int flags = BackupAgent.FLAG_CLIENT_SIDE_ENCRYPTION_ENABLED;
         when(mTransportBinder.getTransportFlags()).thenReturn(flags);
         PerformBackupTask task =
@@ -223,14 +232,103 @@ public class PerformBackupTaskTest {
 
     @Test
     public void testRunTask_whenTransportChangeFlagsAfterTaskCreation() throws Exception {
-        BackupAgent agent = setUpAgent(PACKAGE_1);
+        AgentMock agentMock = setUpAgent(PACKAGE_1);
         PerformBackupTask task = createPerformBackupTask(emptyList(), false, true, PACKAGE_1);
         int flags = BackupAgent.FLAG_CLIENT_SIDE_ENCRYPTION_ENABLED;
         when(mTransportBinder.getTransportFlags()).thenReturn(flags);
 
         runTask(task);
 
-        verify(agent).onBackup(any(), argThat(dataOutputWithTransportFlags(flags)), any());
+        verify(agentMock.agent)
+                .onBackup(any(), argThat(dataOutputWithTransportFlags(flags)), any());
+    }
+
+    @Test
+    public void testRunTask_callsListenerOnTaskFinished() throws Exception {
+        setUpAgent(PACKAGE_1);
+        PerformBackupTask task = createPerformBackupTask(emptyList(), false, true, PACKAGE_1);
+
+        runTask(task);
+
+        verify(mListener).onFinished(any());
+    }
+
+    @Test
+    public void testRunTask_callsTransportPerformBackup() throws Exception {
+        AgentMock agentMock = setUpAgent(PACKAGE_1);
+        agentOnBackupDo(
+                agentMock.agent,
+                (oldState, dataOutput, newState) -> {
+                    writeData(dataOutput, "key1", "foo".getBytes());
+                    writeData(dataOutput, "key2", "bar".getBytes());
+                });
+        PerformBackupTask task = createPerformBackupTask(emptyList(), false, true, PACKAGE_1);
+        // We need to verify at call time because the file is deleted right after
+        when(mTransportBinder.performBackup(argThat(packageInfo(PACKAGE_1)), any(), anyInt()))
+                .then(this::mockAndVerifyTransportPerformBackupData);
+
+        runTask(task);
+
+        // Already verified data in mockAndVerifyPerformBackupData
+        verify(mTransportBinder).performBackup(argThat(packageInfo(PACKAGE_1)), any(), anyInt());
+    }
+
+    private int mockAndVerifyTransportPerformBackupData(InvocationOnMock invocation)
+            throws IOException {
+        ParcelFileDescriptor data = invocation.getArgument(1);
+
+        // Verifying that what we passed to the transport is what the agent wrote
+        BackupDataInput dataInput = new BackupDataInput(data.getFileDescriptor());
+
+        // "key1" => "foo"
+        assertThat(dataInput.readNextHeader()).isTrue();
+        assertThat(dataInput.getKey()).isEqualTo("key1");
+        int size1 = dataInput.getDataSize();
+        byte[] data1 = new byte[size1];
+        dataInput.readEntityData(data1, 0, size1);
+        assertThat(data1).isEqualTo("foo".getBytes());
+
+        // "key2" => "bar"
+        assertThat(dataInput.readNextHeader()).isTrue();
+        assertThat(dataInput.getKey()).isEqualTo("key2");
+        int size2 = dataInput.getDataSize();
+        byte[] data2 = new byte[size2];
+        dataInput.readEntityData(data2, 0, size2);
+        assertThat(data2).isEqualTo("bar".getBytes());
+
+        // No more
+        assertThat(dataInput.readNextHeader()).isFalse();
+
+        return BackupTransport.TRANSPORT_OK;
+    }
+
+    @Test
+    public void testRunTask_whenPerformBackupSucceeds_callsTransportFinishBackup()
+            throws Exception {
+        setUpAgent(PACKAGE_1);
+        PerformBackupTask task = createPerformBackupTask(emptyList(), false, true, PACKAGE_1);
+        when(mTransportBinder.performBackup(argThat(packageInfo(PACKAGE_1)), any(), anyInt()))
+                .thenReturn(BackupTransport.TRANSPORT_OK);
+
+        runTask(task);
+
+        verify(mTransportBinder).finishBackup();
+    }
+
+    @Test
+    public void testRunTask_whenProhibitedKey_failsAgent() throws Exception {
+        AgentMock agentMock = setUpAgent(PACKAGE_1);
+        agentOnBackupDo(
+                agentMock.agent,
+                (oldState, dataOutput, newState) -> {
+                    char prohibitedChar = 0xff00;
+                    writeData(dataOutput, prohibitedChar + "key", "foo".getBytes());
+                });
+        PerformBackupTask task = createPerformBackupTask(emptyList(), false, true, PACKAGE_1);
+
+        runTask(task);
+
+        verify(agentMock.agentBinder).fail(any());
     }
 
     private void runTask(PerformBackupTask task) {
@@ -241,26 +339,34 @@ public class PerformBackupTaskTest {
         }
     }
 
-    private List<BackupAgent> setUpAgents(String... packageNames) {
+    private List<AgentMock> setUpAgents(String... packageNames) {
         return Stream.of(packageNames).map(this::setUpAgent).collect(toList());
     }
 
-    private BackupAgent setUpAgent(String packageName) {
-        PackageInfo packageInfo = new PackageInfo();
-        packageInfo.packageName = packageName;
-        packageInfo.applicationInfo = new ApplicationInfo();
-        packageInfo.applicationInfo.flags = ApplicationInfo.FLAG_ALLOW_BACKUP;
-        packageInfo.applicationInfo.backupAgentName = "BackupAgent" + packageName;
-        packageInfo.applicationInfo.packageName = packageName;
-        mShadowPackageManager.setApplicationEnabledSetting(
-                packageName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
-        mShadowPackageManager.addPackage(packageInfo);
-        BackupAgent backupAgent = spy(BackupAgent.class);
-        IBackupAgent backupAgentBinder = IBackupAgent.Stub.asInterface(backupAgent.onBind());
-        when(mBackupManagerService.bindToAgentSynchronous(
-                        eq(packageInfo.applicationInfo), anyInt()))
-                .thenReturn(backupAgentBinder);
-        return backupAgent;
+    private AgentMock setUpAgent(String packageName) {
+        try {
+            PackageInfo packageInfo = new PackageInfo();
+            packageInfo.packageName = packageName;
+            packageInfo.applicationInfo = new ApplicationInfo();
+            packageInfo.applicationInfo.flags = ApplicationInfo.FLAG_ALLOW_BACKUP;
+            packageInfo.applicationInfo.backupAgentName = "BackupAgent" + packageName;
+            packageInfo.applicationInfo.packageName = packageName;
+            mShadowPackageManager.setApplicationEnabledSetting(
+                    packageName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
+            mShadowPackageManager.addPackage(packageInfo);
+            BackupAgent backupAgent = spy(BackupAgent.class);
+            IBackupAgent backupAgentBinder =
+                    spy(IBackupAgent.Stub.asInterface(backupAgent.onBind()));
+            // Don't crash our only process (in production code this would crash the app, not us)
+            doNothing().when(backupAgentBinder).fail(any());
+            when(mBackupManagerService.bindToAgentSynchronous(
+                            eq(packageInfo.applicationInfo), anyInt()))
+                    .thenReturn(backupAgentBinder);
+            return new AgentMock(backupAgentBinder, backupAgent);
+        } catch (RemoteException e) {
+            // Never happens, compiler happy
+            throw new AssertionError(e);
+        }
     }
 
     private PerformBackupTask createPerformBackupTask(
@@ -288,8 +394,51 @@ public class PerformBackupTaskTest {
         return task;
     }
 
-    private ArgumentMatcher<BackupDataOutput> dataOutputWithTransportFlags(int flags) {
+    private static ArgumentMatcher<PackageInfo> packageInfo(String packageName) {
+        return packageInfo -> packageName.equals(packageInfo.packageName);
+    }
+
+    private static ArgumentMatcher<BackupDataOutput> dataOutputWithTransportFlags(int flags) {
         return dataOutput -> dataOutput.getTransportFlags() == flags;
+    }
+
+    private static void writeData(BackupDataOutput dataOutput, String key, byte[] data)
+            throws IOException {
+        dataOutput.writeEntityHeader(key, data.length);
+        dataOutput.writeEntityData(data, data.length);
+    }
+
+    private static void agentOnBackupDo(BackupAgent agent, BackupAgentOnBackup function)
+            throws Exception {
+        doAnswer(function).when(agent).onBackup(any(), any(), any());
+    }
+
+    @FunctionalInterface
+    private interface BackupAgentOnBackup extends Answer<Void> {
+        void onBackup(
+                ParcelFileDescriptor oldState,
+                BackupDataOutput dataOutput,
+                ParcelFileDescriptor newState)
+                throws IOException;
+
+        @Override
+        default Void answer(InvocationOnMock invocation) throws Throwable {
+            onBackup(
+                    invocation.getArgument(0),
+                    invocation.getArgument(1),
+                    invocation.getArgument(2));
+            return null;
+        }
+    }
+
+    private static class AgentMock {
+        private final IBackupAgent agentBinder;
+        private final BackupAgent agent;
+
+        public AgentMock(IBackupAgent agentBinder, BackupAgent agent) {
+            this.agentBinder = agentBinder;
+            this.agent = agent;
+        }
     }
 
     private abstract static class FakeIBackupManager extends IBackupManager.Stub {
