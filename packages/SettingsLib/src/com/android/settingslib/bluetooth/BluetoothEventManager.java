@@ -272,6 +272,14 @@ public class BluetoothEventManager {
         }
     }
 
+    void dispatchDeviceRemoved(CachedBluetoothDevice cachedDevice) {
+        synchronized (mCallbacks) {
+            for (BluetoothCallback callback : mCallbacks) {
+                callback.onDeviceDeleted(cachedDevice);
+            }
+        }
+    }
+
     private class DeviceDisappearedHandler implements Handler {
         public void onReceive(Context context, Intent intent,
                 BluetoothDevice device) {
@@ -331,6 +339,10 @@ public class BluetoothEventManager {
             cachedDevice.onBondingStateChanged(bondState);
 
             if (bondState == BluetoothDevice.BOND_NONE) {
+                /* Check if we need to remove other Hearing Aid devices */
+                if (cachedDevice.getHiSyncId() != BluetoothHearingAid.HI_SYNC_ID_INVALID) {
+                    mDeviceManager.onDeviceUnpaired(cachedDevice);
+                }
                 int reason = intent.getIntExtra(BluetoothDevice.EXTRA_REASON,
                         BluetoothDevice.ERROR);
 
