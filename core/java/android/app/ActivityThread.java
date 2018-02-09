@@ -167,9 +167,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.text.DateFormat;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -223,7 +223,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     private static final boolean REPORT_TO_ACTIVITY = true;
 
     // Maximum number of recent tokens to maintain for debugging purposes
-    private static final int MAX_RECENT_TOKENS = 10;
+    private static final int MAX_DESTROYED_ACTIVITIES = 10;
 
     /**
      * Denotes an invalid sequence number corresponding to a process state change.
@@ -257,7 +257,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     final H mH = new H();
     final Executor mExecutor = new HandlerExecutor(mH);
     final ArrayMap<IBinder, ActivityClientRecord> mActivities = new ArrayMap<>();
-    final ArrayDeque<Integer> mRecentTokens = new ArrayDeque<>();
+    final ArrayList<DestroyedActivityInfo> mRecentDestroyedActivities = new ArrayList<>();
 
     // List of new activities (via ActivityRecord.nextIdle) that should
     // be reported when next we idle.
@@ -337,6 +337,26 @@ public final class ActivityThread extends ClientTransactionHandler {
         @Override
         public int hashCode() {
             return ((authority != null) ? authority.hashCode() : 0) ^ userId;
+        }
+    }
+
+    /**
+     * TODO(b/71506345): Remove this once bug is resolved.
+     */
+    private static final class DestroyedActivityInfo {
+        private final Integer mToken;
+        private final String mReason;
+        private final long mTime;
+
+        DestroyedActivityInfo(Integer token, String reason) {
+            mToken = token;
+            mReason = reason;
+            mTime = System.currentTimeMillis();
+        }
+
+        void dump(PrintWriter pw, String prefix) {
+            pw.println(prefix + "[token:" + mToken + " | time:" + mTime + " | reason:" + mReason
+                    + "]");
         }
     }
 
@@ -2164,14 +2184,28 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     @Override
     public void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + "mActivities:");
+        pw.println(prefix + "Activities:");
 
-        for (ArrayMap.Entry<IBinder, ActivityClientRecord> entry : mActivities.entrySet()) {
-            pw.println(prefix + "  [token:" + entry.getKey().hashCode() + " record:"
-                    + entry.getValue().toString() + "]");
+        if (!mActivities.isEmpty()) {
+            final Iterator<Map.Entry<IBinder, ActivityClientRecord>> activitiesIterator =
+                    mActivities.entrySet().iterator();
+
+            while (activitiesIterator.hasNext()) {
+                final ArrayMap.Entry<IBinder, ActivityClientRecord> entry =
+                        activitiesIterator.next();
+                pw.println(prefix + "  [token:" + entry.getKey().hashCode() + " record:"
+                        + entry.getValue().toString() + "]");
+            }
         }
 
-        pw.println(prefix + "mRecentTokens:" + mRecentTokens);
+        if (!mRecentDestroyedActivities.isEmpty()) {
+            pw.println(prefix + "Recent destroyed activities:");
+            for (int i = 0, size = mRecentDestroyedActivities.size(); i < size; i++) {
+                final DestroyedActivityInfo info = mRecentDestroyedActivities.get(i);
+                pw.print(prefix);
+                info.dump(pw, "  ");
+            }
+        }
     }
 
     public static void dumpMemInfoTable(PrintWriter pw, Debug.MemoryInfo memInfo, boolean checkin,
@@ -2858,11 +2892,6 @@ public final class ActivityThread extends ClientTransactionHandler {
             r.setState(ON_CREATE);
 
             mActivities.put(r.token, r);
-            mRecentTokens.push(r.token.hashCode());
-
-            if (mRecentTokens.size() > MAX_RECENT_TOKENS) {
-                mRecentTokens.removeLast();
-            }
 
         } catch (SuperNotCalledException e) {
             throw e;
@@ -4419,7 +4448,7 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     /** Core implementation of activity destroy call. */
     ActivityClientRecord performDestroyActivity(IBinder token, boolean finishing,
-            int configChanges, boolean getNonConfigInstance) {
+            int configChanges, boolean getNonConfigInstance, String reason) {
         ActivityClientRecord r = mActivities.get(token);
         Class<? extends Activity> activityClass = null;
         if (localLOGV) Slog.v(TAG, "Performing finish of " + r);
@@ -4471,6 +4500,12 @@ public final class ActivityThread extends ClientTransactionHandler {
             r.setState(ON_DESTROY);
         }
         mActivities.remove(token);
+        mRecentDestroyedActivities.add(0, new DestroyedActivityInfo(token.hashCode(), reason));
+
+        final int recentDestroyedActivitiesSize = mRecentDestroyedActivities.size();
+        if (recentDestroyedActivitiesSize > MAX_DESTROYED_ACTIVITIES) {
+            mRecentDestroyedActivities.remove(recentDestroyedActivitiesSize - 1);
+        }
         StrictMode.decrementExpectedActivityCount(activityClass);
         return r;
     }
@@ -4482,9 +4517,9 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     @Override
     public void handleDestroyActivity(IBinder token, boolean finishing, int configChanges,
-            boolean getNonConfigInstance) {
+            boolean getNonConfigInstance, String reason) {
         ActivityClientRecord r = performDestroyActivity(token, finishing,
-                configChanges, getNonConfigInstance);
+                configChanges, getNonConfigInstance, reason);
         if (r != null) {
             cleanUpPendingRemoveWindows(r, finishing);
             WindowManager wm = r.activity.getWindowManager();
@@ -4709,7 +4744,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             callActivityOnStop(r, true /* saveState */, "handleRelaunchActivity");
         }
 
-        handleDestroyActivity(r.token, false, configChanges, true);
+        handleDestroyActivity(r.token, false, configChanges, true, "handleRelaunchActivity");
 
         r.activity = null;
         r.window = null;

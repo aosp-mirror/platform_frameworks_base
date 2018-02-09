@@ -61,7 +61,7 @@ public abstract class ClientTransactionHandler {
 
     /** Destroy the activity. */
     public abstract void handleDestroyActivity(IBinder token, boolean finishing, int configChanges,
-            boolean getNonConfigInstance);
+            boolean getNonConfigInstance, String reason);
 
     /** Pause the activity. */
     public abstract void handlePauseActivity(IBinder token, boolean finished, boolean userLeaving,

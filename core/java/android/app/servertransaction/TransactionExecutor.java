@@ -194,7 +194,9 @@ public class TransactionExecutor {
                     break;
                 case ON_DESTROY:
                     mTransactionHandler.handleDestroyActivity(r.token, false /* finishing */,
-                            0 /* configChanges */, false /* getNonConfigInstance */);
+                            0 /* configChanges */, false /* getNonConfigInstance */,
+                            "performLifecycleSequence. cycling to:"
+                                    + mLifecycleSequence.get(size - 1));
                     break;
                 case ON_RESTART:
                     mTransactionHandler.performRestartActivity(r.token, false /* start */);

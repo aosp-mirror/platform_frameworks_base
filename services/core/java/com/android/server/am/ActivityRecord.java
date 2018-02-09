@@ -380,7 +380,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     String getLifecycleDescription(String reason) {
-        return "packageName=" + packageName + ", state=" + state + ", reason=" + reason;
+        return "component:" + intent.getComponent().flattenToShortString() + ", state=" + state
+                + ", reason=" + reason + ", time=" + System.currentTimeMillis();
     }
 
     void dump(PrintWriter pw, String prefix) {
