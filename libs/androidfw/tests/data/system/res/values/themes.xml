@@ -18,7 +18,6 @@
     <public name="background" type="attr" id="0x01010000"/>
     <public name="foreground" type="attr" id="0x01010001"/>
     <public name="Theme.One" type="style" id="0x01020000"/>
-    <public type="integer" name="number" id="0x01030000" />
 
     <attr name="background" format="color|reference"/>
     <attr name="foreground" format="color|reference"/>

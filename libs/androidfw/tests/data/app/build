@@ -17,11 +17,4 @@
 
 set -e
 
-aapt2 compile --dir res -o compiled.flata
-aapt2 link \
-    --manifest AndroidManifest.xml \
-    -I ../system/system.apk \
-    -A assets \
-    -o app.apk \
-    compiled.flata
-rm compiled.flata
+aapt package -I ../system/system.apk -M AndroidManifest.xml -S res -F app.apk -f

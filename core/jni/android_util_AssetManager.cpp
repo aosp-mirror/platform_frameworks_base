@@ -403,30 +403,38 @@ static jobjectArray NativeList(JNIEnv* env, jclass /*clazz*/, jlong ptr, jstring
     return nullptr;
   }
 
-  ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
-  std::unique_ptr<AssetDir> asset_dir =
-      assetmanager->OpenDir(path_utf8.c_str());
-  if (asset_dir == nullptr) {
-    jniThrowException(env, "java/io/FileNotFoundException", path_utf8.c_str());
-    return nullptr;
+  std::vector<std::string> all_file_paths;
+  {
+    StringPiece normalized_path = path_utf8.c_str();
+    if (normalized_path.data()[0] == '/') {
+      normalized_path = normalized_path.substr(1);
+    }
+    std::string root_path = StringPrintf("assets/%s", normalized_path.data());
+    ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
+    for (const ApkAssets* assets : assetmanager->GetApkAssets()) {
+      assets->ForEachFile(root_path, [&](const StringPiece& file_path, FileType type) {
+        if (type == FileType::kFileTypeRegular) {
+          all_file_paths.push_back(file_path.to_string());
+        }
+      });
+    }
   }
 
-  const size_t file_count = asset_dir->getFileCount();
-
-  jobjectArray array = env->NewObjectArray(file_count, g_stringClass, nullptr);
+  jobjectArray array = env->NewObjectArray(all_file_paths.size(), g_stringClass, nullptr);
   if (array == nullptr) {
     return nullptr;
   }
 
-  for (size_t i = 0; i < file_count; i++) {
-    jstring java_string = env->NewStringUTF(asset_dir->getFileName(i).string());
+  jsize index = 0;
+  for (const std::string& file_path : all_file_paths) {
+    jstring java_string = env->NewStringUTF(file_path.c_str());
 
     // Check for errors creating the strings (if malformed or no memory).
     if (env->ExceptionCheck()) {
      return nullptr;
     }
 
-    env->SetObjectArrayElement(array, i, java_string);
+    env->SetObjectArrayElement(array, index++, java_string);
 
     // If we have a large amount of string in our array, we might overflow the
     // local reference table of the VM.
