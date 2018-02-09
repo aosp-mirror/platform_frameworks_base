@@ -64,7 +64,7 @@ public class DozeFactory {
                 createDozeTriggers(context, sensorManager, host, alarmManager, config, params,
                         handler, wakeLock, machine),
                 createDozeUi(context, host, wakeLock, machine, handler, alarmManager, params),
-                new DozeScreenState(wrappedService, handler),
+                new DozeScreenState(wrappedService, handler, params),
                 createDozeScreenBrightness(context, wrappedService, sensorManager, host, handler),
                 new DozeWallpaperState(context)
         });
