@@ -74,6 +74,14 @@ public final class StatsManager {
     }
 
     /**
+     * Temporary. Will be deleted.
+     */
+    @RequiresPermission(Manifest.permission.DUMP)
+    public boolean addConfiguration(long configKey, byte[] config, String a, String b) {
+        return addConfiguration(configKey, config);
+    }
+
+    /**
      * Clients can send a configuration and simultaneously registers the name of a broadcast
      * receiver that listens for when it should request data.
      *
