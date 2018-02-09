@@ -704,6 +704,8 @@
     <dimen name="volume_expander_margin_end">2dp</dimen>
     <dimen name="volume_expander_margin_top">6dp</dimen>
 
+    <dimen name="volume_panel_elevation">8dp</dimen>
+
     <!-- Padding between icon and text for managed profile toast -->
     <dimen name="managed_profile_toast_padding">4dp</dimen>
 
