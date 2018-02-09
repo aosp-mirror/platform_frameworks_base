@@ -745,8 +745,8 @@ package android.view {
   }
 
   public final class MotionEvent extends android.view.InputEvent implements android.os.Parcelable {
-    method public final void setActionButton(int);
-    method public final void setButtonState(int);
+    method public void setActionButton(int);
+    method public void setButtonState(int);
   }
 
   public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
