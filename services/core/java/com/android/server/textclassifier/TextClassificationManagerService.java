@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -43,7 +42,6 @@ import com.android.server.SystemService;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 /**
  * A manager for TextClassifier services.
@@ -53,9 +51,6 @@ import java.util.concurrent.TimeUnit;
 public final class TextClassificationManagerService extends ITextClassifierService.Stub {
 
     private static final String LOG_TAG = "TextClassificationManagerService";
-
-    // How long after the last interaction with the service we would unbind
-    private static final long TIMEOUT_IDLE_BIND_MILLIS = TimeUnit.MINUTES.toMillis(1);
 
     public static final class Lifecycle extends SystemService {
 
@@ -79,10 +74,8 @@ public final class TextClassificationManagerService extends ITextClassifierServi
     }
 
     private final Context mContext;
-    private final Handler mHandler;
     private final Intent mServiceIntent;
     private final ServiceConnection mConnection;
-    private final Runnable mUnbind;
     private final Object mLock;
     @GuardedBy("mLock")
     private final Queue<PendingRequest> mPendingRequests;
@@ -94,7 +87,6 @@ public final class TextClassificationManagerService extends ITextClassifierServi
 
     private TextClassificationManagerService(Context context) {
         mContext = Preconditions.checkNotNull(context);
-        mHandler = new Handler();
         mServiceIntent = new Intent(TextClassifierService.SERVICE_INTERFACE)
                 .setComponent(TextClassifierService.getServiceComponentName(mContext));
         mConnection = new ServiceConnection() {
@@ -131,7 +123,6 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             }
         };
         mPendingRequests = new LinkedList<>();
-        mUnbind = this::unbind;
         mLock = new Object();
     }
 
@@ -152,7 +143,6 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             if (isBoundLocked()) {
                 mService.onSuggestSelection(
                         text, selectionStartIndex, selectionEndIndex, options, callback);
-                scheduleUnbindLocked();
             } else {
                 final Callable<Void> request = () -> {
                     onSuggestSelection(
@@ -184,7 +174,6 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         synchronized (mLock) {
             if (isBoundLocked()) {
                 mService.onClassifyText(text, startIndex, endIndex, options, callback);
-                scheduleUnbindLocked();
             } else {
                 final Callable<Void> request = () -> {
                     onClassifyText(text, startIndex, endIndex, options, callback);
@@ -213,7 +202,6 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         synchronized (mLock) {
             if (isBoundLocked()) {
                 mService.onGenerateLinks(text, options, callback);
-                scheduleUnbindLocked();
             } else {
                 final Callable<Void> request = () -> {
                     onGenerateLinks(text, options, callback);
@@ -268,27 +256,6 @@ public final class TextClassificationManagerService extends ITextClassifierServi
     @GuardedBy("mLock")
     private void setBindingLocked(boolean binding) {
         mBinding = binding;
-    }
-
-    private void unbind() {
-        synchronized (mLock) {
-            if (!isBoundLocked()) {
-                return;
-            }
-
-            Slog.d(LOG_TAG, "Unbinding from " + mServiceIntent.getComponent());
-            mContext.unbindService(mConnection);
-
-            synchronized (mLock) {
-                mService = null;
-            }
-        }
-    }
-
-    @GuardedBy("mLock")
-    private void scheduleUnbindLocked() {
-        mHandler.removeCallbacks(mUnbind);
-        mHandler.postDelayed(mUnbind, TIMEOUT_IDLE_BIND_MILLIS);
     }
 
     @GuardedBy("mLock")
