@@ -155,7 +155,7 @@ public class PowerUITest extends SysuiTestCase {
         // hybrid but the threshold has been overriden to be too low
         boolean shouldShow =
                 mPowerUI.shouldShowLowBatteryWarning(UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
-                        ABOVE_WARNING_BUCKET, Long.MAX_VALUE, BELOW_HYBRID_THRESHOLD,
+                        ABOVE_WARNING_BUCKET, BELOW_HYBRID_THRESHOLD,
                         POWER_SAVER_OFF, BatteryManager.BATTERY_HEALTH_GOOD);
         assertFalse(shouldShow);
     }
@@ -172,7 +172,7 @@ public class PowerUITest extends SysuiTestCase {
         // hybrid since the threshold has been overriden to be much higher
         boolean shouldShow =
                 mPowerUI.shouldShowLowBatteryWarning(UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
-                        ABOVE_WARNING_BUCKET, Long.MAX_VALUE, ABOVE_HYBRID_THRESHOLD,
+                        ABOVE_WARNING_BUCKET, ABOVE_HYBRID_THRESHOLD,
                         POWER_SAVER_OFF, BatteryManager.BATTERY_HEALTH_GOOD);
         assertTrue(shouldShow);
     }
@@ -188,7 +188,7 @@ public class PowerUITest extends SysuiTestCase {
         // hybrid
         boolean shouldShow =
                 mPowerUI.shouldShowLowBatteryWarning(UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
-                        ABOVE_WARNING_BUCKET, Long.MAX_VALUE, BELOW_HYBRID_THRESHOLD,
+                        ABOVE_WARNING_BUCKET, BELOW_HYBRID_THRESHOLD,
                         POWER_SAVER_OFF, BatteryManager.BATTERY_HEALTH_GOOD);
         assertTrue(shouldShow);
     }
@@ -203,7 +203,7 @@ public class PowerUITest extends SysuiTestCase {
         // unplugged device that would show the non-hybrid notification and the hybrid
         boolean shouldShow =
                 mPowerUI.shouldShowLowBatteryWarning(UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
-                        BELOW_WARNING_BUCKET, Long.MAX_VALUE, BELOW_HYBRID_THRESHOLD,
+                        BELOW_WARNING_BUCKET, BELOW_HYBRID_THRESHOLD,
                         POWER_SAVER_OFF, BatteryManager.BATTERY_HEALTH_GOOD);
         assertTrue(shouldShow);
     }
@@ -218,7 +218,7 @@ public class PowerUITest extends SysuiTestCase {
         // unplugged device that would show the non-hybrid but not the hybrid
         boolean shouldShow =
                 mPowerUI.shouldShowLowBatteryWarning(UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
-                        BELOW_WARNING_BUCKET, Long.MAX_VALUE, ABOVE_HYBRID_THRESHOLD,
+                        BELOW_WARNING_BUCKET, ABOVE_HYBRID_THRESHOLD,
                         POWER_SAVER_OFF, BatteryManager.BATTERY_HEALTH_GOOD);
         assertTrue(shouldShow);
     }
@@ -233,7 +233,7 @@ public class PowerUITest extends SysuiTestCase {
         // unplugged device that would show the neither due to battery level being good
         boolean shouldShow =
                 mPowerUI.shouldShowLowBatteryWarning(UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
-                        ABOVE_WARNING_BUCKET, ABOVE_HYBRID_THRESHOLD, ABOVE_HYBRID_THRESHOLD,
+                        ABOVE_WARNING_BUCKET, ABOVE_HYBRID_THRESHOLD,
                         POWER_SAVER_OFF, BatteryManager.BATTERY_HEALTH_GOOD);
         assertFalse(shouldShow);
     }
@@ -248,7 +248,7 @@ public class PowerUITest extends SysuiTestCase {
         // plugged device that would show the neither due to being plugged
         boolean shouldShow =
                 mPowerUI.shouldShowLowBatteryWarning(!UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
-                        BELOW_WARNING_BUCKET, ABOVE_HYBRID_THRESHOLD, BELOW_HYBRID_THRESHOLD,
+                        BELOW_WARNING_BUCKET, BELOW_HYBRID_THRESHOLD,
                         POWER_SAVER_OFF, BatteryManager.BATTERY_HEALTH_GOOD);
         assertFalse(shouldShow);
    }
@@ -263,7 +263,7 @@ public class PowerUITest extends SysuiTestCase {
         // Unknown battery status device that would show the neither due
         boolean shouldShow =
                 mPowerUI.shouldShowLowBatteryWarning(UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
-                        BELOW_WARNING_BUCKET, ABOVE_HYBRID_THRESHOLD, BELOW_HYBRID_THRESHOLD,
+                        BELOW_WARNING_BUCKET, BELOW_HYBRID_THRESHOLD,
                         !POWER_SAVER_OFF, BatteryManager.BATTERY_STATUS_UNKNOWN);
         assertFalse(shouldShow);
     }
@@ -278,8 +278,27 @@ public class PowerUITest extends SysuiTestCase {
         // BatterySaverEnabled device that would show the neither due to battery saver
         boolean shouldShow =
                 mPowerUI.shouldShowLowBatteryWarning(UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
-                        BELOW_WARNING_BUCKET, ABOVE_HYBRID_THRESHOLD, BELOW_HYBRID_THRESHOLD,
+                        BELOW_WARNING_BUCKET, BELOW_HYBRID_THRESHOLD,
                         !POWER_SAVER_OFF, BatteryManager.BATTERY_HEALTH_GOOD);
+        assertFalse(shouldShow);
+    }
+
+    @Test
+    public void testShouldShowLowBatteryWarning_onlyShowsOncePerChargeCycle() {
+        mPowerUI.start();
+        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
+        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
+        when(mEnhancedEstimates.getEstimate())
+                .thenReturn(new Estimate(BELOW_HYBRID_THRESHOLD, true));
+        mPowerUI.mBatteryStatus = BatteryManager.BATTERY_HEALTH_GOOD;
+
+        mPowerUI.maybeShowBatteryWarning(UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
+                ABOVE_WARNING_BUCKET);
+        boolean shouldShow =
+                mPowerUI.shouldShowLowBatteryWarning(UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
+                        ABOVE_WARNING_BUCKET, BELOW_HYBRID_THRESHOLD,
+                        POWER_SAVER_OFF, BatteryManager.BATTERY_HEALTH_GOOD);
         assertFalse(shouldShow);
     }
 
