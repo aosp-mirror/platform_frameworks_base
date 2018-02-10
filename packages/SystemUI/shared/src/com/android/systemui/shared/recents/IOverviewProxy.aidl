@@ -36,25 +36,25 @@ oneway interface IOverviewProxy {
 
     /**
      * Sent when a user has quickly flinged on the nav bar to switch tasks. Once this event is sent
-     * the caller will stop sending any motion events.
+     * the caller will stop sending any motion events and will no longer preemptively cancel any
+     * recents animations started as a part of the motion event handling.
      */
     void onQuickSwitch();
 
     /**
      * Sent when the user starts to actively scrub the nav bar to switch tasks. Once this event is
-     * sent the caller will stop sending any motion events.
+     * sent the caller will stop sending any motion events and will no longer preemptively cancel
+     * any recents animations started as a part of the motion event handling.
      */
     void onQuickScrubStart();
 
     /**
-     * Sent when the user stops actively scrubbing the nav bar to switch tasks. Once this event is
-     * sent the caller will stop sending any motion events.
+     * Sent when the user stops actively scrubbing the nav bar to switch tasks.
      */
     void onQuickScrubEnd();
 
     /**
-     * Sent for each movement over the nav bar while the user is scrubbing it to switch tasks. Once
-     * this event is sent the caller will stop sending any motion events.
+     * Sent for each movement over the nav bar while the user is scrubbing it to switch tasks.
      */
     void onQuickScrubProgress(float progress);
 }
