@@ -101,6 +101,9 @@ message Atom {
         OverlayStateChanged overlay_state_changed = 59;
         ForegroundServiceStateChanged foreground_service_state_changed = 60;
         CallStateChanged call_state_changed = 61;
+        KeyguardStateChanged keyguard_state_changed = 62;
+        KeyguardBouncerStateChanged keyguard_bouncer_state_changed = 63;
+        KeyguardBouncerPasswordEntered keyguard_bouncer_password_entered = 64;
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 
@@ -744,6 +747,63 @@ message CallStateChanged {
     // True if call is external. External calls are calls on connected Wear
     // devices but show up in Telecom so the user can pull them onto the device.
     optional bool external_call = 4;
+}
+
+/**
+ * Logs keyguard state. The keyguard is the lock screen.
+ *
+ * Logged from:
+ *   frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBarKeyguardViewManager.java
+ */
+message KeyguardStateChanged {
+    enum State {
+        UNKNOWN = 0;
+        // The keyguard is hidden when the phone is unlocked.
+        HIDDEN = 1;
+        // The keyguard is shown when the phone is locked (screen turns off).
+        SHOWN= 2;
+        // The keyguard is occluded when something is overlaying the keyguard.
+        // Eg. Opening the camera while on the lock screen.
+        OCCLUDED = 3;
+    }
+    optional State state = 1;
+}
+
+/**
+ * Logs keyguard bouncer state. The bouncer is a part of the keyguard, and
+ * prompts the user to enter a password (pattern, pin, etc).
+ *
+ * Logged from:
+ *   frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/KeyguardBouncer.java
+ */
+
+message KeyguardBouncerStateChanged {
+    enum State {
+        UNKNOWN = 0;
+        // Bouncer is hidden, either as a result of successfully entering the
+        // password, screen timing out, or user going back to lock screen.
+        HIDDEN = 1;
+        // This is when the user is being prompted to enter the password.
+        SHOWN = 2;
+    }
+    optional State state = 1;
+}
+
+/**
+ * Logs the result of entering a password into the keyguard bouncer.
+ *
+ * Logged from:
+ *   frameworks/base/packages/SystemUI/src/com/android/keyguard/KeyguardSecurityContainer.java
+ */
+message KeyguardBouncerPasswordEntered {
+    enum BouncerResult {
+        UNKNOWN = 0;
+        // The password entered was incorrect.
+        FAILURE = 1;
+        // The password entered was correct.
+        SUCCESS = 2;
+    }
+    optional BouncerResult result = 1;
 }
 
 /**
