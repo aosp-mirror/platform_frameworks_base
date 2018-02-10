@@ -93,6 +93,9 @@ void AnomalyTracker::flushPastBuckets(const int64_t& latestPastBucketNum) {
 
 void AnomalyTracker::addPastBucket(const MetricDimensionKey& key, const int64_t& bucketValue,
                                    const int64_t& bucketNum) {
+    if (mNumOfPastBuckets == 0) {
+        return;
+    }
     flushPastBuckets(bucketNum);
 
     auto& bucket = mPastBuckets[index(bucketNum)];
@@ -107,6 +110,9 @@ void AnomalyTracker::addPastBucket(const MetricDimensionKey& key, const int64_t&
 void AnomalyTracker::addPastBucket(std::shared_ptr<DimToValMap> bucketValues,
                                    const int64_t& bucketNum) {
     VLOG("addPastBucket() called.");
+    if (mNumOfPastBuckets == 0) {
+        return;
+    }
     flushPastBuckets(bucketNum);
     // Replace the oldest bucket with the new bucket we are adding.
     mPastBuckets[index(bucketNum)] = bucketValues;
