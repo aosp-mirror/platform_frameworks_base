@@ -590,7 +590,7 @@ public class Resources {
      */
     @NonNull
     public int[] getIntArray(@ArrayRes int id) throws NotFoundException {
-        int[] res = mResourcesImpl.getAssets().getResourceIntArray(id);
+        int[] res = mResourcesImpl.getAssets().getArrayIntResource(id);
         if (res != null) {
             return res;
         }
@@ -613,13 +613,13 @@ public class Resources {
     @NonNull
     public TypedArray obtainTypedArray(@ArrayRes int id) throws NotFoundException {
         final ResourcesImpl impl = mResourcesImpl;
-        int len = impl.getAssets().getResourceArraySize(id);
+        int len = impl.getAssets().getArraySize(id);
         if (len < 0) {
             throw new NotFoundException("Array resource ID #0x" + Integer.toHexString(id));
         }
         
         TypedArray array = TypedArray.obtain(this, len);
-        array.mLength = impl.getAssets().getResourceArray(id, array.mData);
+        array.mLength = impl.getAssets().retrieveArray(id, array.mData);
         array.mIndices[0] = 0;
         
         return array;
@@ -1794,7 +1794,8 @@ public class Resources {
         // out the attributes from the XML file (applying type information
         // contained in the resources and such).
         XmlBlock.Parser parser = (XmlBlock.Parser)set;
-        mResourcesImpl.getAssets().retrieveAttributes(parser, attrs, array.mData, array.mIndices);
+        mResourcesImpl.getAssets().retrieveAttributes(parser.mParseState, attrs,
+                array.mData, array.mIndices);
 
         array.mXml = parser;
 

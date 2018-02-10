@@ -58,7 +58,6 @@ class BackTrackingAttributeFinder {
   BackTrackingAttributeFinder(const Iterator& begin, const Iterator& end);
 
   Iterator Find(uint32_t attr);
-  inline Iterator end();
 
  private:
   void JumpToClosestAttribute(uint32_t package_id);
@@ -199,11 +198,6 @@ Iterator BackTrackingAttributeFinder<Derived, Iterator>::Find(uint32_t attr) {
       return current_ - 1;
     }
   }
-  return end_;
-}
-
-template <typename Derived, typename Iterator>
-Iterator BackTrackingAttributeFinder<Derived, Iterator>::end() {
   return end_;
 }
 
