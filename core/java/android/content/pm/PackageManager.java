@@ -2070,6 +2070,15 @@ public abstract class PackageManager {
             "android.hardware.sensor.hifi_sensors";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device supports a hardware mechanism for invoking an assist gesture.
+     * @see android.provider.Settings.Secure#ASSIST_GESTURE_ENABLED
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_ASSIST_GESTURE = "android.hardware.sensor.assist";
+
+    /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device has a telephony radio with data
      * communication support.
