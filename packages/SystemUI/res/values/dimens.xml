@@ -822,8 +822,6 @@
     <dimen name="default_gear_space">18dp</dimen>
     <dimen name="cell_overlay_padding">18dp</dimen>
 
-    <dimen name="signal_icon_size">17dp</dimen>
-
     <dimen name="hwui_edge_margin">16dp</dimen>
 
     <dimen name="global_actions_panel_width">120dp</dimen>
@@ -849,11 +847,6 @@
     <dimen name="rounded_corner_radius">0dp</dimen>
     <dimen name="rounded_corner_content_padding">0dp</dimen>
     <dimen name="nav_content_padding">0dp</dimen>
-
-    <!-- Intended corner radius when drawing the mobile signal -->
-    <dimen name="stat_sys_mobile_signal_corner_radius">0.75dp</dimen>
-    <!-- How far to inset the rounded edges -->
-    <dimen name="stat_sys_mobile_signal_circle_inset">0.9dp</dimen>
 
     <!-- Home button padding for sizing -->
     <dimen name="home_padding">15dp</dimen>
