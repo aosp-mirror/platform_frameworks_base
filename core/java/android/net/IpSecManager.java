@@ -19,6 +19,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -761,6 +762,7 @@ public final class IpSecManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
     public IpSecTunnelInterface createIpSecTunnelInterface(@NonNull InetAddress localAddress,
             @NonNull InetAddress remoteAddress, @NonNull Network underlyingNetwork)
             throws ResourceUnavailableException, IOException {
@@ -780,6 +782,7 @@ public final class IpSecManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
     public void applyTunnelModeTransform(IpSecTunnelInterface tunnel, int direction,
             IpSecTransform transform) throws IOException {
         try {
