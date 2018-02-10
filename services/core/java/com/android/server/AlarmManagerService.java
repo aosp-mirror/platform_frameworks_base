@@ -55,6 +55,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
+import android.system.Os;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
@@ -158,6 +159,7 @@ class AlarmManagerService extends SystemService {
     private long mNextNonWakeup;
     private long mLastWakeupSet;
     private long mLastWakeup;
+    private long mLastTrigger;
     private long mLastTickSet;
     private long mLastTickIssued; // elapsed
     private long mLastTickReceived;
@@ -1851,12 +1853,17 @@ class AlarmManagerService extends SystemService {
             long nextNonWakeupRTC = mNextNonWakeup + (nowRTC - nowELAPSED);
             pw.print("  Next non-wakeup alarm: ");
                     TimeUtils.formatDuration(mNextNonWakeup, nowELAPSED, pw);
+                    pw.print(" = "); pw.print(mNextNonWakeup);
                     pw.print(" = "); pw.println(sdf.format(new Date(nextNonWakeupRTC)));
-            pw.print("  Next wakeup: "); TimeUtils.formatDuration(mNextWakeup, nowELAPSED, pw);
+            pw.print("  Next wakeup alarm: "); TimeUtils.formatDuration(mNextWakeup, nowELAPSED, pw);
+                    pw.print(" = "); pw.print(mNextWakeup);
                     pw.print(" = "); pw.println(sdf.format(new Date(nextWakeupRTC)));
+            pw.print("    set at "); TimeUtils.formatDuration(mLastWakeupSet, nowELAPSED, pw);
+                    pw.println();
             pw.print("  Last wakeup: "); TimeUtils.formatDuration(mLastWakeup, nowELAPSED, pw);
-            pw.print(" set at "); TimeUtils.formatDuration(mLastWakeupSet, nowELAPSED, pw);
-            pw.println();
+                    pw.print(" = "); pw.println(mLastWakeup);
+            pw.print("  Last trigger: "); TimeUtils.formatDuration(mLastTrigger, nowELAPSED, pw);
+                    pw.print(" = "); pw.println(mLastTrigger);
             pw.print("  Num time change events: "); pw.println(mNumTimeChanged);
 
             pw.println();
@@ -2884,7 +2891,14 @@ class AlarmManagerService extends SystemService {
                 alarmNanoseconds = (when % 1000) * 1000 * 1000;
             }
 
-            set(mNativeData, type, alarmSeconds, alarmNanoseconds);
+            final int result = set(mNativeData, type, alarmSeconds, alarmNanoseconds);
+            if (result != 0) {
+                final long nowElapsed = SystemClock.elapsedRealtime();
+                Slog.wtf(TAG, "Unable to set kernel alarm, now=" + nowElapsed
+                        + " type=" + type + " when=" + when
+                        + " @ (" + alarmSeconds + "," + alarmNanoseconds
+                        + "), ret = " + result + " = " + Os.strerror(result));
+            }
         } else {
             Message msg = Message.obtain();
             msg.what = ALARM_EVENT;
@@ -2944,7 +2958,7 @@ class AlarmManagerService extends SystemService {
 
     private native long init();
     private native void close(long nativeData);
-    private native void set(long nativeData, int type, long seconds, long nanoseconds);
+    private native int set(long nativeData, int type, long seconds, long nanoseconds);
     private native int waitForAlarm(long nativeData);
     private native int setKernelTime(long nativeData, long millis);
     private native int setKernelTimezone(long nativeData, int minuteswest);
@@ -3363,12 +3377,14 @@ class AlarmManagerService extends SystemService {
             while (true)
             {
                 int result = waitForAlarm(mNativeData);
-                mLastWakeup = SystemClock.elapsedRealtime();
-
-                triggerList.clear();
 
                 final long nowRTC = System.currentTimeMillis();
                 final long nowELAPSED = SystemClock.elapsedRealtime();
+                synchronized (mLock) {
+                    mLastWakeup = nowELAPSED;
+                }
+
+                triggerList.clear();
 
                 if ((result & TIME_CHANGED_MASK) != 0) {
                     // The kernel can give us spurious time change notifications due to
@@ -3434,6 +3450,7 @@ class AlarmManagerService extends SystemService {
                             }
                         }
 
+                        mLastTrigger = nowELAPSED;
                         boolean hasWakeup = triggerAlarmsLocked(triggerList, nowELAPSED, nowRTC);
                         if (!hasWakeup && checkAllowNonWakeupDelayLocked(nowELAPSED)) {
                             // if there are no wakeup alarms and the screen is off, we can
