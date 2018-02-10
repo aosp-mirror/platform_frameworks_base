@@ -83,4 +83,12 @@
     <dimen name="zen_mode_condition_detail_item_interline_spacing">4dp</dimen>
     <!-- Zen mode panel: bottom padding, a bit less than qs_panel_padding -->
     <dimen name="zen_mode_condition_detail_bottom_padding">4dp</dimen>
+
+    <!-- SignalDrawable -->
+    <dimen name="signal_icon_size">17dp</dimen>
+    <!-- How far to inset the rounded edges -->
+    <dimen name="stat_sys_mobile_signal_circle_inset">0.9dp</dimen>
+
+
+
 </resources>
