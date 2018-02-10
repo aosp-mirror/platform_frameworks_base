@@ -17,9 +17,12 @@
 #ifndef REPORTER_H
 #define REPORTER_H
 
+#include "frameworks/base/libs/incident/proto/android/os/metadata.pb.h"
+
 #include <android/os/IIncidentReportStatusListener.h>
 #include <android/os/IncidentReportArgs.h>
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -61,13 +64,20 @@ public:
     iterator end() { return mRequests.end(); }
 
     int mainFd() { return mMainFd; }
-    bool containsSection(int id);
     int mainDest() { return mMainDest; }
+    IncidentMetadata& metadata() { return mMetadata; }
+
+    bool containsSection(int id);
+    IncidentMetadata::SectionStats* sectionStats(int id);
+
 private:
     vector<sp<ReportRequest>> mRequests;
     IncidentReportArgs mSections;
     int mMainFd;
     int mMainDest;
+
+    IncidentMetadata mMetadata;
+    map<int, IncidentMetadata::SectionStats*> mSectionStats;
 };
 
 // ================================================================================
@@ -81,8 +91,8 @@ public:
 
     ReportRequestSet batch;
 
-    Reporter();
-    Reporter(const char* directory);
+    Reporter(); // PROD must use this constructor.
+    Reporter(const char* directory); // For testing purpose only.
     virtual ~Reporter();
 
     // Run the report as described in the batch and args parameters.

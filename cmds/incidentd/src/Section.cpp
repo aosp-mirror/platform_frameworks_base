@@ -45,6 +45,7 @@ using namespace std;
 
 // special section ids
 const int FIELD_ID_INCIDENT_HEADER = 1;
+const int FIELD_ID_INCIDENT_METADATA = 2;
 
 // incident section parameters
 const int   WAIT_MAX = 5;
@@ -149,6 +150,12 @@ write_report_requests(const int id, const FdBuffer& buffer, ReportRequestSet* re
     EncodedBuffer::iterator data = buffer.data();
     PrivacyBuffer privacyBuffer(get_privacy_of_section(id), data);
     int writeable = 0;
+    auto stats = requests->sectionStats(id);
+
+    stats->set_dump_size_bytes(data.size());
+    stats->set_dump_duration_ms(buffer.durationMs());
+    stats->set_timed_out(buffer.timedOut());
+    stats->set_is_truncated(buffer.truncated());
 
     // The streaming ones, group requests by spec in order to save unnecessary strip operations
     map<PrivacySpec, vector<sp<ReportRequest>>> requestsBySpec;
@@ -182,9 +189,7 @@ write_report_requests(const int id, const FdBuffer& buffer, ReportRequestSet* re
 
     // The dropbox file
     if (requests->mainFd() >= 0) {
-        PrivacySpec spec = requests->mainDest() < 0 ?
-                PrivacySpec::get_default_dropbox_spec() :
-                PrivacySpec::new_spec(requests->mainDest());
+        PrivacySpec spec = PrivacySpec::new_spec(requests->mainDest());
         err = privacyBuffer.strip(spec);
         if (err != NO_ERROR) return err; // the buffer data is corrupted.
         if (privacyBuffer.size() == 0) goto DONE;
@@ -196,6 +201,7 @@ write_report_requests(const int id, const FdBuffer& buffer, ReportRequestSet* re
         writeable++;
         ALOGD("Section %d flushed %zu bytes to dropbox %d with spec %d", id,
               privacyBuffer.size(), requests->mainFd(), spec.dest);
+        stats->set_report_size_bytes(privacyBuffer.size());
     }
 
 DONE:
@@ -236,7 +242,7 @@ HeaderSection::Execute(ReportRequestSet* requests) const
 
             // So the idea is only requests with negative fd are written to dropbox file.
             int fd = request->fd >= 0 ? request->fd : requests->mainFd();
-            write_section_header(fd, FIELD_ID_INCIDENT_HEADER, buf->size());
+            write_section_header(fd, id, buf->size());
             write_all(fd, (uint8_t const*)buf->data(), buf->size());
             // If there was an error now, there will be an error later and we will remove
             // it from the list then.
@@ -244,7 +250,35 @@ HeaderSection::Execute(ReportRequestSet* requests) const
     }
     return NO_ERROR;
 }
+// ================================================================================
+MetadataSection::MetadataSection()
+    :Section(FIELD_ID_INCIDENT_METADATA, 0)
+{
+}
 
+MetadataSection::~MetadataSection()
+{
+}
+
+status_t
+MetadataSection::Execute(ReportRequestSet* requests) const
+{
+    std::string metadataBuf;
+    requests->metadata().SerializeToString(&metadataBuf);
+    for (ReportRequestSet::iterator it=requests->begin(); it!=requests->end(); it++) {
+        const sp<ReportRequest> request = *it;
+        if (metadataBuf.empty() || request->fd < 0 || request->err != NO_ERROR) {
+            continue;
+        }
+        write_section_header(request->fd, id, metadataBuf.size());
+        write_all(request->fd, (uint8_t const*)metadataBuf.data(), metadataBuf.size());
+    }
+    if (requests->mainFd() >= 0 && !metadataBuf.empty()) {
+        write_section_header(requests->mainFd(), id, metadataBuf.size());
+        write_all(requests->mainFd(), (uint8_t const*)metadataBuf.data(), metadataBuf.size());
+    }
+    return NO_ERROR;
+}
 // ================================================================================
 FileSection::FileSection(int id, const char* filename, const int64_t timeoutMs)
     :Section(id, timeoutMs),

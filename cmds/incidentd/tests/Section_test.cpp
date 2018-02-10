@@ -18,6 +18,7 @@
 
 #include <android-base/file.h>
 #include <android-base/test_utils.h>
+#include <android/os/IncidentReportArgs.h>
 #include <frameworks/base/libs/incident/proto/android/os/header.pb.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -87,6 +88,18 @@ TEST(SectionTest, HeaderSection) {
 
     EXPECT_TRUE(ReadFileToString(output2.path, &content));
     EXPECT_THAT(content, StrEq("\n\x05\x12\x03pup"));
+}
+
+TEST(SectionTest, MetadataSection) {
+    MetadataSection ms;
+    ReportRequestSet requests;
+
+    requests.setMainFd(STDOUT_FILENO);
+    requests.sectionStats(1)->set_success(true);
+
+    CaptureStdout();
+    ASSERT_EQ(NO_ERROR, ms.Execute(&requests));
+    EXPECT_THAT(GetCapturedStdout(), StrEq("\x12\b\x18\x1\"\x4\b\x1\x10\x1"));
 }
 
 TEST(SectionTest, FileSection) {
@@ -243,8 +256,9 @@ TEST(SectionTest, TestMultipleRequests) {
 
     IncidentReportArgs args1, args2, args3;
     args1.setAll(true);
-    args1.setDest(0); // LOCAL
-    args2.setAll(true); // default to explicit
+    args1.setDest(android::os::DEST_LOCAL);
+    args2.setAll(true);
+    args2.setDest(android::os::DEST_EXPLICIT);
     sp<SimpleListener> l = new SimpleListener();
     requests.add(new ReportRequest(args1, l, output1.fd));
     requests.add(new ReportRequest(args2, l, output2.fd));
@@ -283,10 +297,12 @@ TEST(SectionTest, TestMultipleRequestsBySpec) {
 
     ASSERT_TRUE(WriteStringToFile(VARINT_FIELD_1 + STRING_FIELD_2 + FIX64_FIELD_3, input.path));
 
-    IncidentReportArgs args1, args2, args3, args4;
+    IncidentReportArgs args1, args2, args3;
     args1.setAll(true);
+    args1.setDest(android::os::DEST_EXPLICIT);
     args2.setAll(true);
-    args4.setAll(true);
+    args2.setDest(android::os::DEST_EXPLICIT);
+    args3.setAll(true);
     sp<SimpleListener> l = new SimpleListener();
     requests.add(new ReportRequest(args1, l, output1.fd));
     requests.add(new ReportRequest(args2, l, output2.fd));
@@ -307,7 +323,8 @@ TEST(SectionTest, TestMultipleRequestsBySpec) {
     EXPECT_TRUE(ReadFileToString(output2.path, &content));
     EXPECT_THAT(content, StrEq(string("\x02") + c + expect));
 
-    // because args3 doesn't set section, so it should receive nothing
+    // output3 has only auto field
+    c = (char) STRING_FIELD_2.size();
     EXPECT_TRUE(ReadFileToString(output3.path, &content));
-    EXPECT_THAT(content, StrEq(""));
+    EXPECT_THAT(content, StrEq(string("\x02") + c + STRING_FIELD_2));
 }

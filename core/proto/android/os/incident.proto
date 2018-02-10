@@ -46,17 +46,11 @@ import "frameworks/base/core/proto/android/service/usb.proto";
 import "frameworks/base/core/proto/android/util/event_log_tags.proto";
 import "frameworks/base/core/proto/android/util/log.proto";
 import "frameworks/base/libs/incident/proto/android/os/header.proto";
+import "frameworks/base/libs/incident/proto/android/os/metadata.proto";
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
 import "frameworks/base/libs/incident/proto/android/section.proto";
 
 package android.os;
-
-// This field contains internal metadata associated with an incident report,
-// such as the section ids and privacy policy specs from caller as well as how long
-// and how many bytes a section takes, etc.
-message IncidentMetadata {
-
-}
 
 // privacy field options must not be set at this level because all
 // the sections are able to be controlled and configured by section ids.

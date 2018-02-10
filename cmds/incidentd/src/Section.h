@@ -59,6 +59,18 @@ public:
 };
 
 /**
+ * Section that generates incident metadata.
+ */
+class MetadataSection : public Section
+{
+public:
+    MetadataSection();
+    virtual ~MetadataSection();
+
+    virtual status_t Execute(ReportRequestSet* requests) const;
+};
+
+/**
  * Section that reads in a file.
  */
 class FileSection : public Section

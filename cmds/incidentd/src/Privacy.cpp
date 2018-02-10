@@ -73,11 +73,6 @@ PrivacySpec PrivacySpec::new_spec(int dest)
         case android::os::DEST_LOCAL:
             return PrivacySpec(dest);
         default:
-            return PrivacySpec();
+            return PrivacySpec(android::os::DEST_AUTOMATIC);
     }
-}
-
-PrivacySpec PrivacySpec::get_default_dropbox_spec()
-{
-    return PrivacySpec(android::os::DEST_AUTOMATIC);
 }
