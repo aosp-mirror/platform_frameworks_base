@@ -37,7 +37,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
-import android.graphics.ImageDecoder;
 import android.graphics.Insets;
 import android.graphics.NinePatch;
 import android.graphics.Outline;
@@ -51,13 +50,11 @@ import android.graphics.Xfermode;
 import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.StateSet;
 import android.util.TypedValue;
 import android.util.Xml;
 import android.view.View;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
@@ -1180,10 +1177,6 @@ public abstract class Drawable {
             return null;
         }
 
-        if (opts == null) {
-            return getBitmapDrawable(res, value, is);
-        }
-
         /*  ugh. The decodeStream contract is that we have already allocated
             the pad rect, but if the bitmap does not had a ninepatch chunk,
             then the pad will be ignored. If we could change this to lazily
@@ -1212,33 +1205,6 @@ public abstract class Drawable {
             final Rect opticalInsets = new Rect();
             bm.getOpticalInsets(opticalInsets);
             return drawableFromBitmap(res, bm, np, pad, opticalInsets, srcName);
-        }
-        return null;
-    }
-
-    private static Drawable getBitmapDrawable(Resources res, TypedValue value, InputStream is) {
-        try {
-            ImageDecoder.Source source = null;
-            if (value != null) {
-                int density = Bitmap.DENSITY_NONE;
-                if (value.density == TypedValue.DENSITY_DEFAULT) {
-                    density = DisplayMetrics.DENSITY_DEFAULT;
-                } else if (value.density != TypedValue.DENSITY_NONE) {
-                    density = value.density;
-                }
-                source = ImageDecoder.createSource(res, is, density);
-            } else {
-                source = ImageDecoder.createSource(res, is);
-            }
-
-            return ImageDecoder.decodeDrawable(source, (decoder, info, src) -> {
-                decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
-            });
-        } catch (IOException e) {
-            /*  do nothing.
-                If the exception happened on decode, the drawable will be null.
-            */
-            Log.e("Drawable", "Unable to decode stream: " + e);
         }
         return null;
     }
@@ -1342,10 +1308,11 @@ public abstract class Drawable {
         }
 
         Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, pathName);
-        try (FileInputStream stream = new FileInputStream(pathName)) {
-            return getBitmapDrawable(null, null, stream);
-        } catch(IOException e) {
-            // Do nothing; we will just return null if the FileInputStream had an error
+        try {
+            Bitmap bm = BitmapFactory.decodeFile(pathName);
+            if (bm != null) {
+                return drawableFromBitmap(null, bm, null, null, null, pathName);
+            }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
         }
