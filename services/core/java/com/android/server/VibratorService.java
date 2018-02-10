@@ -912,6 +912,7 @@ public class VibratorService extends IVibratorService.Stub
         Vibration fallbackVib =
                 new Vibration(vib.token, effect, vib.usageHint, vib.uid, vib.opPkg);
         final int intensity = getCurrentIntensityLocked(fallbackVib);
+        linkVibration(fallbackVib);
         applyVibrationIntensityScalingLocked(fallbackVib, intensity);
         startVibrationInnerLocked(fallbackVib);
         return 0;
