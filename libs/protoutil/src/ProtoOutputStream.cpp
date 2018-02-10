@@ -36,6 +36,18 @@ ProtoOutputStream::~ProtoOutputStream()
 {
 }
 
+
+void
+ProtoOutputStream::clear()
+{
+    mBuffer.clear();
+    mCopyBegin = 0;
+    mCompact = false;
+    mDepth = 0;
+    mObjectId = 0;
+    mExpectedObjectToken = 0LL;
+}
+
 bool
 ProtoOutputStream::write(uint64_t fieldId, double val)
 {

@@ -64,6 +64,11 @@ public:
         size_t mOffset;
     };
 
+    /**
+     * Clears the buffer by rewinding its write pointer to avoid de/allocate buffers in heap.
+     */
+    void clear();
+
     /******************************** Write APIs ************************************************/
 
     /**

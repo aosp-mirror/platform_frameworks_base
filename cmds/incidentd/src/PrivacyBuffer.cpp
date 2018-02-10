@@ -142,7 +142,7 @@ void
 PrivacyBuffer::clear()
 {
     mSize = 0;
-    mProto = ProtoOutputStream();
+    mProto.clear();
 }
 
 size_t

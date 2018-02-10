@@ -19,7 +19,6 @@
 
 #include "AnomalyTracker.h"
 #include "external/Perfetto.h"
-#include "frameworks/base/libs/incident/proto/android/os/header.pb.h"
 #include "guardrail/StatsdStats.h"
 #include "subscriber/IncidentdReporter.h"
 #include "subscriber/SubscriberReporter.h"

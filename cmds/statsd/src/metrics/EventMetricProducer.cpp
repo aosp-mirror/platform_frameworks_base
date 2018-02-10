@@ -59,19 +59,13 @@ EventMetricProducer::EventMetricProducer(const ConfigKey& key, const EventMetric
                                metric.links().end());
         mConditionSliced = true;
     }
-
-    startNewProtoOutputStreamLocked();
-
+    mProto = std::make_unique<ProtoOutputStream>();
     VLOG("metric %lld created. bucket size %lld start_time: %lld", (long long)metric.id(),
          (long long)mBucketSizeNs, (long long)mStartTimeNs);
 }
 
 EventMetricProducer::~EventMetricProducer() {
     VLOG("~EventMetricProducer() called");
-}
-
-void EventMetricProducer::startNewProtoOutputStreamLocked() {
-    mProto = std::make_unique<ProtoOutputStream>();
 }
 
 void EventMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eventTime) {
@@ -113,7 +107,7 @@ void EventMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
     protoOutput->write(FIELD_TYPE_MESSAGE | FIELD_ID_EVENT_METRICS,
                        reinterpret_cast<char*>(buffer.get()->data()), buffer.get()->size());
 
-    startNewProtoOutputStreamLocked();
+    mProto->clear();
 }
 
 void EventMetricProducer::onConditionChangedLocked(const bool conditionMet,
