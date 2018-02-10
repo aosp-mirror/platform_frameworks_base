@@ -242,7 +242,8 @@ public class PermissionManagerService {
         return PackageManager.PERMISSION_DENIED;
     }
 
-    private int checkUidPermission(String permName, int uid, int callingUid) {
+    private int checkUidPermission(String permName, PackageParser.Package pkg, int uid,
+            int callingUid) {
         final int callingUserId = UserHandle.getUserId(callingUid);
         final boolean isCallerInstantApp =
                 mPackageManagerInt.getInstantAppPackageName(callingUid) != null;
@@ -253,28 +254,13 @@ public class PermissionManagerService {
             return PackageManager.PERMISSION_DENIED;
         }
 
-        final String[] packages = mContext.getPackageManager().getPackagesForUid(uid);
-        if (packages != null && packages.length > 0) {
-            PackageParser.Package pkg = null;
-            for (String packageName : packages) {
-                pkg = mPackageManagerInt.getPackage(packageName);
-                if (pkg != null) {
-                    break;
-                }
-            }
-            if (pkg == null) {
-Slog.e(TAG, "TODD: No package not found; UID: " + uid);
-Slog.e(TAG, "TODD: Packages: " + Arrays.toString(packages));
-                return PackageManager.PERMISSION_DENIED;
-            }
+        if (pkg != null) {
             if (pkg.mSharedUserId != null) {
                 if (isCallerInstantApp) {
                     return PackageManager.PERMISSION_DENIED;
                 }
-            } else {
-                if (mPackageManagerInt.filterAppAccess(pkg, callingUid, callingUserId)) {
-                    return PackageManager.PERMISSION_DENIED;
-                }
+            } else if (mPackageManagerInt.filterAppAccess(pkg, callingUid, callingUserId)) {
+                return PackageManager.PERMISSION_DENIED;
             }
             final PermissionsState permissionsState =
                     ((PackageSetting) pkg.mExtras).getPermissionsState();
@@ -2068,8 +2054,9 @@ Slog.e(TAG, "TODD: Packages: " + Arrays.toString(packages));
                     permName, packageName, callingUid, userId);
         }
         @Override
-        public int checkUidPermission(String permName, int uid, int callingUid) {
-            return PermissionManagerService.this.checkUidPermission(permName, uid, callingUid);
+        public int checkUidPermission(String permName, PackageParser.Package pkg, int uid,
+                int callingUid) {
+            return PermissionManagerService.this.checkUidPermission(permName, pkg, uid, callingUid);
         }
         @Override
         public PermissionGroupInfo getPermissionGroupInfo(String groupName, int flags,

@@ -5217,7 +5217,13 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public int checkUidPermission(String permName, int uid) {
-        return mPermissionManager.checkUidPermission(permName, uid, getCallingUid());
+        synchronized (mPackages) {
+            final String[] packageNames = getPackagesForUid(uid);
+            final PackageParser.Package pkg = (packageNames != null && packageNames.length > 0)
+                    ? mPackages.get(packageNames[0])
+                    : null;
+            return mPermissionManager.checkUidPermission(permName, pkg, uid, getCallingUid());
+        }
     }
 
     @Override
