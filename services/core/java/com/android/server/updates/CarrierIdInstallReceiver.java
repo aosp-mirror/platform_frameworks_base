@@ -33,7 +33,7 @@ public class CarrierIdInstallReceiver extends ConfigUpdateInstallReceiver {
     @Override
     protected void postInstall(Context context, Intent intent) {
         ContentResolver resolver = context.getContentResolver();
-        resolver.update(Uri.withAppendedPath(Telephony.CarrierIdentification.CONTENT_URI,
+        resolver.update(Uri.withAppendedPath(Telephony.CarrierIdentification.All.CONTENT_URI,
                 "update_db"), new ContentValues(), null, null);
     }
 }
