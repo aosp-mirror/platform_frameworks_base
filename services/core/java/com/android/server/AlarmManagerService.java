@@ -1836,16 +1836,16 @@ class AlarmManagerService extends SystemService {
                 pw.print("  Time since non-interactive: ");
                 TimeUtils.formatDuration(nowELAPSED - mNonInteractiveStartTime, pw);
                 pw.println();
-                pw.print("  Max wakeup delay: ");
-                TimeUtils.formatDuration(currentNonWakeupFuzzLocked(nowELAPSED), pw);
-                pw.println();
-                pw.print("  Time since last dispatch: ");
-                TimeUtils.formatDuration(nowELAPSED - mLastAlarmDeliveryTime, pw);
-                pw.println();
-                pw.print("  Next non-wakeup delivery time: ");
-                TimeUtils.formatDuration(nowELAPSED - mNextNonWakeupDeliveryTime, pw);
-                pw.println();
             }
+            pw.print("  Max wakeup delay: ");
+            TimeUtils.formatDuration(currentNonWakeupFuzzLocked(nowELAPSED), pw);
+            pw.println();
+            pw.print("  Time since last dispatch: ");
+            TimeUtils.formatDuration(nowELAPSED - mLastAlarmDeliveryTime, pw);
+            pw.println();
+            pw.print("  Next non-wakeup delivery time: ");
+            TimeUtils.formatDuration(nowELAPSED - mNextNonWakeupDeliveryTime, pw);
+            pw.println();
 
             long nextWakeupRTC = mNextWakeup + (nowRTC - nowELAPSED);
             long nextNonWakeupRTC = mNextNonWakeup + (nowRTC - nowELAPSED);
