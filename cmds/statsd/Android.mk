@@ -242,7 +242,8 @@ LOCAL_MODULE := statsd_benchmark
 LOCAL_SRC_FILES := $(statsd_common_src) \
                    benchmark/main.cpp \
                    benchmark/hello_world_benchmark.cpp \
-                   benchmark/log_event_benchmark.cpp
+                   benchmark/log_event_benchmark.cpp \
+                   benchmark/stats_write_benchmark.cpp
 
 LOCAL_C_INCLUDES := $(statsd_common_c_includes)
 
@@ -261,7 +262,8 @@ LOCAL_STATIC_LIBRARIES := \
     $(statsd_common_static_libraries)
 
 LOCAL_SHARED_LIBRARIES := $(statsd_common_shared_libraries) \
-    libgtest_prod
+    libgtest_prod \
+    libstatslog
 
 LOCAL_PROTOC_OPTIMIZE_TYPE := lite
 
