@@ -59,45 +59,71 @@ void ConfigManager::StartupForTest() {
 }
 
 void ConfigManager::AddListener(const sp<ConfigListener>& listener) {
+    lock_guard<mutex> lock(mMutex);
     mListeners.push_back(listener);
 }
 
 void ConfigManager::UpdateConfig(const ConfigKey& key, const StatsdConfig& config) {
-    // Add to set
-    mConfigs.insert(key);
+    vector<sp<ConfigListener>> broadcastList;
+    {
+        lock_guard <mutex> lock(mMutex);
 
-    // Save to disk
-    update_saved_configs(key, config);
+        // Add to set
+        mConfigs.insert(key);
+
+        // Save to disk
+        update_saved_configs_locked(key, config);
+
+        for (sp<ConfigListener> listener : mListeners) {
+            broadcastList.push_back(listener);
+        }
+    }
 
     // Tell everyone
-    for (auto& listener : mListeners) {
+    for (sp<ConfigListener> listener:broadcastList) {
         listener->OnConfigUpdated(key, config);
     }
 }
 
 void ConfigManager::SetConfigReceiver(const ConfigKey& key, const sp<IBinder>& intentSender) {
+    lock_guard<mutex> lock(mMutex);
     mConfigReceivers[key] = intentSender;
 }
 
 void ConfigManager::RemoveConfigReceiver(const ConfigKey& key) {
+    lock_guard<mutex> lock(mMutex);
     mConfigReceivers.erase(key);
 }
 
 void ConfigManager::RemoveConfig(const ConfigKey& key) {
-    auto it = mConfigs.find(key);
-    if (it != mConfigs.end()) {
-        // Remove from map
-        mConfigs.erase(it);
+    vector<sp<ConfigListener>> broadcastList;
+    {
+        lock_guard <mutex> lock(mMutex);
 
-        // Tell everyone
-        for (auto& listener : mListeners) {
-            listener->OnConfigRemoved(key);
+        auto it = mConfigs.find(key);
+        if (it != mConfigs.end()) {
+            // Remove from map
+            mConfigs.erase(it);
+
+            for (sp<ConfigListener> listener : mListeners) {
+                broadcastList.push_back(listener);
+            }
         }
+
+        auto itReceiver = mConfigReceivers.find(key);
+        if (itReceiver != mConfigReceivers.end()) {
+            // Remove from map
+            mConfigReceivers.erase(itReceiver);
+        }
+
+        // Remove from disk. There can still be a lingering file on disk so we check
+        // whether or not the config was on memory.
+        remove_saved_configs(key);
     }
 
-    // Remove from disk. There can still be a lingering file on disk so we check
-    // whether or not the config was on memory.
-    remove_saved_configs(key);
+    for (sp<ConfigListener> listener:broadcastList) {
+        listener->OnConfigRemoved(key);
+    }
 }
 
 void ConfigManager::remove_saved_configs(const ConfigKey& key) {
@@ -107,23 +133,32 @@ void ConfigManager::remove_saved_configs(const ConfigKey& key) {
 
 void ConfigManager::RemoveConfigs(int uid) {
     vector<ConfigKey> removed;
+    vector<sp<ConfigListener>> broadcastList;
+    {
+        lock_guard <mutex> lock(mMutex);
 
-    for (auto it = mConfigs.begin(); it != mConfigs.end();) {
-        // Remove from map
-        if (it->GetUid() == uid) {
-            remove_saved_configs(*it);
-            removed.push_back(*it);
-            mConfigReceivers.erase(*it);
-            it = mConfigs.erase(it);
-        } else {
-            it++;
+
+        for (auto it = mConfigs.begin(); it != mConfigs.end();) {
+            // Remove from map
+            if (it->GetUid() == uid) {
+                remove_saved_configs(*it);
+                removed.push_back(*it);
+                mConfigReceivers.erase(*it);
+                it = mConfigs.erase(it);
+            } else {
+                it++;
+            }
+        }
+
+        for (sp<ConfigListener> listener : mListeners) {
+            broadcastList.push_back(listener);
         }
     }
 
     // Remove separately so if they do anything in the callback they can't mess up our iteration.
     for (auto& key : removed) {
         // Tell everyone
-        for (auto& listener : mListeners) {
+        for (sp<ConfigListener> listener:broadcastList) {
             listener->OnConfigRemoved(key);
         }
     }
@@ -131,27 +166,38 @@ void ConfigManager::RemoveConfigs(int uid) {
 
 void ConfigManager::RemoveAllConfigs() {
     vector<ConfigKey> removed;
+    vector<sp<ConfigListener>> broadcastList;
+    {
+        lock_guard <mutex> lock(mMutex);
 
-    for (auto it = mConfigs.begin(); it != mConfigs.end();) {
-        // Remove from map
-        removed.push_back(*it);
-        auto receiverIt = mConfigReceivers.find(*it);
-        if (receiverIt != mConfigReceivers.end()) {
-            mConfigReceivers.erase(*it);
+
+        for (auto it = mConfigs.begin(); it != mConfigs.end();) {
+            // Remove from map
+            removed.push_back(*it);
+            auto receiverIt = mConfigReceivers.find(*it);
+            if (receiverIt != mConfigReceivers.end()) {
+                mConfigReceivers.erase(*it);
+            }
+            it = mConfigs.erase(it);
         }
-        it = mConfigs.erase(it);
+
+        for (sp<ConfigListener> listener : mListeners) {
+            broadcastList.push_back(listener);
+        }
     }
 
     // Remove separately so if they do anything in the callback they can't mess up our iteration.
     for (auto& key : removed) {
         // Tell everyone
-        for (auto& listener : mListeners) {
+        for (sp<ConfigListener> listener:broadcastList) {
             listener->OnConfigRemoved(key);
         }
     }
 }
 
 vector<ConfigKey> ConfigManager::GetAllConfigKeys() const {
+    lock_guard<mutex> lock(mMutex);
+
     vector<ConfigKey> ret;
     for (auto it = mConfigs.cbegin(); it != mConfigs.cend(); ++it) {
         ret.push_back(*it);
@@ -160,6 +206,8 @@ vector<ConfigKey> ConfigManager::GetAllConfigKeys() const {
 }
 
 const sp<android::IBinder> ConfigManager::GetConfigReceiver(const ConfigKey& key) const {
+    lock_guard<mutex> lock(mMutex);
+
     auto it = mConfigReceivers.find(key);
     if (it == mConfigReceivers.end()) {
         return nullptr;
@@ -169,6 +217,8 @@ const sp<android::IBinder> ConfigManager::GetConfigReceiver(const ConfigKey& key
 }
 
 void ConfigManager::Dump(FILE* out) {
+    lock_guard<mutex> lock(mMutex);
+
     fprintf(out, "CONFIGURATIONS (%d)\n", (int)mConfigs.size());
     fprintf(out, "     uid name\n");
     for (const auto& key : mConfigs) {
@@ -180,7 +230,7 @@ void ConfigManager::Dump(FILE* out) {
     }
 }
 
-void ConfigManager::update_saved_configs(const ConfigKey& key, const StatsdConfig& config) {
+void ConfigManager::update_saved_configs_locked(const ConfigKey& key, const StatsdConfig& config) {
     // If there is a pre-existing config with same key we should first delete it.
     remove_saved_configs(key);
 
