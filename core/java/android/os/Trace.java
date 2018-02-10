@@ -89,6 +89,8 @@ public final class Trace {
     public static final long TRACE_TAG_NETWORK = 1L << 21;
     /** @hide */
     public static final long TRACE_TAG_ADB = 1L << 22;
+    /** @hide */
+    public static final long TRACE_TAG_VIBRATOR = 1L << 23;
 
     private static final long TRACE_TAG_NOT_READY = 1L << 63;
     private static final int MAX_SECTION_NAME_LEN = 127;
