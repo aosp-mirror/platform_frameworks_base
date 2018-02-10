@@ -82,6 +82,7 @@ import com.android.internal.os.AtomicFile;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.net.NetworkPolicyManagerInternal;
@@ -128,6 +129,7 @@ public class DeviceIdleController extends SystemService
     private Intent mIdleIntent;
     private Intent mLightIdleIntent;
     private AnyMotionDetector mAnyMotionDetector;
+    private final AppStateTracker mAppStateTracker;
     private boolean mLightEnabled;
     private boolean mDeepEnabled;
     private boolean mForceIdle;
@@ -1371,6 +1373,8 @@ public class DeviceIdleController extends SystemService
         super(context);
         mConfigFile = new AtomicFile(new File(getSystemDir(), "deviceidle.xml"));
         mHandler = new MyHandler(BackgroundThread.getHandler().getLooper());
+        mAppStateTracker = new AppStateTracker(context, FgThread.get().getLooper());
+        LocalServices.addService(AppStateTracker.class, mAppStateTracker);
     }
 
     boolean isAppOnWhitelistInternal(int appid) {
@@ -1500,6 +1504,8 @@ public class DeviceIdleController extends SystemService
                 mAnyMotionDetector = new AnyMotionDetector(
                         (PowerManager) getContext().getSystemService(Context.POWER_SERVICE),
                         mHandler, mSensorManager, this, angleThreshold);
+
+                mAppStateTracker.onSystemServicesReady();
 
                 mIdleIntent = new Intent(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
                 mIdleIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
@@ -2615,7 +2621,7 @@ public class DeviceIdleController extends SystemService
     }
 
     private void passWhiteListToForceAppStandbyTrackerLocked() {
-        ForceAppStandbyTracker.getInstance(getContext()).setPowerSaveWhitelistAppIds(
+        mAppStateTracker.setPowerSaveWhitelistAppIds(
                 mPowerSaveWhitelistExceptIdleAppIdArray,
                 mTempWhitelistAppIdArray);
     }

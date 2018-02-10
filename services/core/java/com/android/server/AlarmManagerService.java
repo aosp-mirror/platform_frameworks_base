@@ -100,7 +100,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.LocalLog;
-import com.android.server.ForceAppStandbyTracker.Listener;
+import com.android.internal.util.Preconditions;
+import com.android.server.AppStateTracker.Listener;
 
 /**
  * Alarm manager implementaion.
@@ -252,7 +253,7 @@ class AlarmManagerService extends SystemService {
     private final SparseArray<AlarmManager.AlarmClockInfo> mHandlerSparseAlarmClockArray =
             new SparseArray<>();
 
-    private final ForceAppStandbyTracker mForceAppStandbyTracker;
+    private AppStateTracker mAppStateTracker;
     private boolean mAppStandbyParole;
     private ArrayMap<Pair<String, Integer>, Long> mLastAlarmDeliveredForPackage = new ArrayMap<>();
 
@@ -709,9 +710,6 @@ class AlarmManagerService extends SystemService {
     public AlarmManagerService(Context context) {
         super(context);
         mConstants = new Constants(mHandler);
-
-        mForceAppStandbyTracker = ForceAppStandbyTracker.getInstance(context);
-        mForceAppStandbyTracker.addListener(mForceAppStandbyListener);
 
         publishLocalService(AlarmManagerInternal.class, new LocalService());
     }
@@ -1332,13 +1330,15 @@ class AlarmManagerService extends SystemService {
     @Override
     public void onBootPhase(int phase) {
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
-            mForceAppStandbyTracker.start();
             mConstants.start(getContext().getContentResolver());
             mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
             mLocalDeviceIdleController
                     = LocalServices.getService(DeviceIdleController.LocalService.class);
             mUsageStatsManagerInternal = LocalServices.getService(UsageStatsManagerInternal.class);
             mUsageStatsManagerInternal.addAppIdleStateChangeListener(new AppStandbyTracker());
+
+            mAppStateTracker = LocalServices.getService(AppStateTracker.class);
+            mAppStateTracker.addListener(mForceAppStandbyListener);
         }
     }
 
@@ -1727,7 +1727,8 @@ class AlarmManagerService extends SystemService {
             // timing restrictions.
             } else if (workSource == null && (callingUid < Process.FIRST_APPLICATION_UID
                     || UserHandle.isSameApp(callingUid, mSystemUiUid)
-                    || mForceAppStandbyTracker.isUidPowerSaveWhitelisted(callingUid))) {
+                    || ((mAppStateTracker != null)
+                        && mAppStateTracker.isUidPowerSaveWhitelisted(callingUid)))) {
                 flags |= AlarmManager.FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED;
                 flags &= ~AlarmManager.FLAG_ALLOW_WHILE_IDLE;
             }
@@ -1810,8 +1811,10 @@ class AlarmManagerService extends SystemService {
             mConstants.dump(pw);
             pw.println();
 
-            mForceAppStandbyTracker.dump(pw, "  ");
-            pw.println();
+            if (mAppStateTracker != null) {
+                mAppStateTracker.dump(pw, "  ");
+                pw.println();
+            }
 
             pw.println("  App Standby Parole: " + mAppStandbyParole);
             pw.println();
@@ -2164,8 +2167,10 @@ class AlarmManagerService extends SystemService {
 
             mConstants.dumpProto(proto, AlarmManagerServiceProto.SETTINGS);
 
-            mForceAppStandbyTracker.dumpProto(proto,
-                    AlarmManagerServiceProto.FORCE_APP_STANDBY_TRACKER);
+            if (mAppStateTracker != null) {
+                mAppStateTracker.dumpProto(proto,
+                        AlarmManagerServiceProto.FORCE_APP_STANDBY_TRACKER);
+            }
 
             proto.write(AlarmManagerServiceProto.IS_INTERACTIVE, mInteractive);
             if (!mInteractive) {
@@ -2952,8 +2957,8 @@ class AlarmManagerService extends SystemService {
         }
         final String sourcePackage = alarm.sourcePackage;
         final int sourceUid = alarm.creatorUid;
-        return mForceAppStandbyTracker.areAlarmsRestricted(sourceUid, sourcePackage,
-                allowWhileIdle);
+        return (mAppStateTracker != null) &&
+                mAppStateTracker.areAlarmsRestricted(sourceUid, sourcePackage, allowWhileIdle);
     }
 
     private native long init();
@@ -2965,7 +2970,8 @@ class AlarmManagerService extends SystemService {
 
     private long getWhileIdleMinIntervalLocked(int uid) {
         final boolean dozing = mPendingIdleUntil != null;
-        final boolean ebs = mForceAppStandbyTracker.isForceAllAppsStandbyEnabled();
+        final boolean ebs = (mAppStateTracker != null)
+                && mAppStateTracker.isForceAllAppsStandbyEnabled();
         if (!dozing && !ebs) {
             return mConstants.ALLOW_WHILE_IDLE_SHORT_TIME;
         }
@@ -4156,7 +4162,8 @@ class AlarmManagerService extends SystemService {
             if (allowWhileIdle) {
                 // Record the last time this uid handled an ALLOW_WHILE_IDLE alarm.
                 mLastAllowWhileIdleDispatch.put(alarm.creatorUid, nowELAPSED);
-                if (mForceAppStandbyTracker.isUidInForeground(alarm.creatorUid)) {
+                if ((mAppStateTracker == null)
+                        || mAppStateTracker.isUidInForeground(alarm.creatorUid)) {
                     mUseAllowWhileIdleShortTime.put(alarm.creatorUid, true);
                 } else {
                     mUseAllowWhileIdleShortTime.put(alarm.creatorUid, false);
