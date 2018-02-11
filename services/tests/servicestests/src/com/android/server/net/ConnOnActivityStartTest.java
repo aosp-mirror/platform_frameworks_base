@@ -117,7 +117,8 @@ public class ConnOnActivityStartTest {
     }
 
     @AfterClass
-    public static void tearDownOnce() {
+    public static void tearDownOnce() throws Exception {
+        batteryReset();
         if (mAppIdleConstsUpdated) {
             Settings.Global.putString(mContext.getContentResolver(),
                     Settings.Global.APP_IDLE_CONSTANTS, mOriginalAppIdleConsts);
@@ -213,12 +214,12 @@ public class ConnOnActivityStartTest {
     @Test
     public void testStartActivity_appStandby() throws Exception {
         try{
-            turnBatteryOff();
+            turnBatteryOn();
             setAppIdle(true);
             turnScreenOn();
             startActivityAndCheckNetworkAccess();
         } finally {
-            turnBatteryOn();
+            turnBatteryOff();
             finishActivity();
             setAppIdle(false);
         }
@@ -251,11 +252,11 @@ public class ConnOnActivityStartTest {
     // create a static library which can be used by both servicestests and cts.
     private void setBatterySaverMode(boolean enabled) throws Exception {
         if (enabled) {
-            turnBatteryOff();
+            turnBatteryOn();
             executeCommand("settings put global low_power 1");
         } else {
             executeCommand("settings put global low_power 0");
-            turnBatteryOn();
+            turnBatteryOff();
         }
         final String result = executeCommand("settings get global low_power");
         assertEquals(enabled ? "1" : "0", result);
@@ -271,12 +272,12 @@ public class ConnOnActivityStartTest {
 
     private void setDozeMode(boolean enabled) throws Exception {
         if (enabled) {
-            turnBatteryOff();
+            turnBatteryOn();
             turnScreenOff();
             executeCommand("dumpsys deviceidle force-idle deep");
         } else {
             turnScreenOn();
-            turnBatteryOn();
+            turnBatteryOff();
             executeCommand("dumpsys deviceidle unforce");
         }
         assertDelayedCommandResult("dumpsys deviceidle get deep", enabled ? "IDLE" : "ACTIVE",
@@ -320,12 +321,12 @@ public class ConnOnActivityStartTest {
                 + ". Full list: " + uids);
     }
 
-    private void turnBatteryOff() throws Exception {
+    private void turnBatteryOn() throws Exception {
         executeCommand("cmd battery unplug");
-        assertBatteryOff();
+        assertBatteryOn();
     }
 
-    private void assertBatteryOff() throws Exception {
+    private void assertBatteryOn() throws Exception {
         final long endTime = SystemClock.uptimeMillis() + BATTERY_OFF_TIMEOUT_MS;
         while (mBatteryManager.isCharging() && SystemClock.uptimeMillis() < endTime) {
             SystemClock.sleep(BATTERY_OFF_CHECK_INTERVAL_MS);
@@ -333,7 +334,11 @@ public class ConnOnActivityStartTest {
         assertFalse("Power should be disconnected", mBatteryManager.isCharging());
     }
 
-    private void turnBatteryOn() throws Exception {
+    private void turnBatteryOff() throws Exception {
+        executeCommand("cmd battery set ac " + BatteryManager.BATTERY_PLUGGED_AC);
+    }
+
+    private static void batteryReset() throws Exception {
         executeCommand("cmd battery reset");
     }
 
@@ -348,7 +353,7 @@ public class ConnOnActivityStartTest {
         SystemClock.sleep(SCREEN_ON_DELAY_MS);
     }
 
-    private String executeCommand(String cmd) throws IOException {
+    private static String executeCommand(String cmd) throws IOException {
         final String result = executeSilentCommand(cmd);
         Log.d(TAG, String.format("Result for '%s': %s", cmd, result));
         return result;
