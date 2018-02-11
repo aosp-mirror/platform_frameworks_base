@@ -145,7 +145,6 @@ struct HDCPLevels {
 
 struct SecurityLevels {
     jint kSecurityLevelUnknown;
-    jint kSecurityLevelMax;
     jint kSecurityLevelSwSecureCrypto;
     jint kSecurityLevelSwSecureDecode;
     jint kSecurityLevelHwSecureCrypto;
@@ -684,10 +683,6 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
     GET_STATIC_FIELD_ID(field, clazz, "HW_SECURE_ALL", "I");
     gSecurityLevels.kSecurityLevelHwSecureAll = env->GetStaticIntField(clazz, field);
 
-    jmethodID getMaxSecurityLevel;
-    GET_STATIC_METHOD_ID(getMaxSecurityLevel, clazz, "getMaxSecurityLevel", "()I");
-    gSecurityLevels.kSecurityLevelMax = env->CallStaticIntMethod(clazz, getMaxSecurityLevel);
-
     FIND_CLASS(clazz, "android/media/MediaDrm$KeyRequest");
     GET_FIELD_ID(gFields.keyRequest.data, clazz, "mData", "[B");
     GET_FIELD_ID(gFields.keyRequest.defaultUrl, clazz, "mDefaultUrl", "Ljava/lang/String;");
@@ -818,7 +813,7 @@ static jboolean android_media_MediaDrm_isCryptoSchemeSupportedNative(
 }
 
 static jbyteArray android_media_MediaDrm_openSession(
-        JNIEnv *env, jobject thiz, jint jlevel) {
+    JNIEnv *env, jobject thiz) {
     sp<IDrm> drm = GetDrm(env, thiz);
 
     if (drm == NULL) {
@@ -828,26 +823,7 @@ static jbyteArray android_media_MediaDrm_openSession(
     }
 
     Vector<uint8_t> sessionId;
-    DrmPlugin::SecurityLevel level;
-
-    if (jlevel == gSecurityLevels.kSecurityLevelMax) {
-        level = DrmPlugin::kSecurityLevelMax;
-    }  else if (jlevel == gSecurityLevels.kSecurityLevelSwSecureCrypto) {
-        level = DrmPlugin::kSecurityLevelSwSecureCrypto;
-    } else if (jlevel == gSecurityLevels.kSecurityLevelSwSecureDecode) {
-        level = DrmPlugin::kSecurityLevelSwSecureDecode;
-    } else if (jlevel == gSecurityLevels.kSecurityLevelHwSecureCrypto) {
-        level = DrmPlugin::kSecurityLevelHwSecureCrypto;
-    } else if (jlevel == gSecurityLevels.kSecurityLevelHwSecureDecode) {
-        level = DrmPlugin::kSecurityLevelHwSecureDecode;
-    } else if (jlevel == gSecurityLevels.kSecurityLevelHwSecureAll) {
-        level = DrmPlugin::kSecurityLevelHwSecureAll;
-    } else {
-        jniThrowException(env, "java/lang/IllegalArgumentException", "Invalid security level");
-        return NULL;
-    }
-
-    status_t err = drm->openSession(level, sessionId);
+    status_t err = drm->openSession(sessionId);
 
     if (throwExceptionAsNecessary(env, err, "Failed to open session")) {
         return NULL;
@@ -1369,6 +1345,40 @@ static jint android_media_MediaDrm_getSecurityLevel(JNIEnv *env,
 }
 
 
+static void android_media_MediaDrm_setSecurityLevel(JNIEnv *env,
+        jobject thiz, jbyteArray jsessionId, jint jlevel) {
+    sp<IDrm> drm = GetDrm(env, thiz);
+
+    if (!CheckSession(env, drm, jsessionId)) {
+        return;
+    }
+
+    Vector<uint8_t> sessionId(JByteArrayToVector(env, jsessionId));
+    DrmPlugin::SecurityLevel level;
+
+    if (jlevel == gSecurityLevels.kSecurityLevelSwSecureCrypto) {
+        level = DrmPlugin::kSecurityLevelSwSecureCrypto;
+    } else if (jlevel == gSecurityLevels.kSecurityLevelSwSecureDecode) {
+        level = DrmPlugin::kSecurityLevelSwSecureDecode;
+    } else if (jlevel == gSecurityLevels.kSecurityLevelHwSecureCrypto) {
+        level = DrmPlugin::kSecurityLevelHwSecureCrypto;
+    } else if (jlevel == gSecurityLevels.kSecurityLevelHwSecureDecode) {
+        level = DrmPlugin::kSecurityLevelHwSecureDecode;
+    } else if (jlevel == gSecurityLevels.kSecurityLevelHwSecureAll) {
+        level = DrmPlugin::kSecurityLevelHwSecureAll;
+    } else {
+        jniThrowException(env, "java/lang/IllegalArgumentException", "Invalid security level");
+        return;
+    }
+
+    status_t err = drm->setSecurityLevel(sessionId, level);
+
+    if (throwExceptionAsNecessary(env, err, "Failed to set security level")) {
+        return;
+    }
+}
+
+
 static jstring android_media_MediaDrm_getPropertyString(
     JNIEnv *env, jobject thiz, jstring jname) {
     sp<IDrm> drm = GetDrm(env, thiz);
@@ -1714,7 +1724,7 @@ static const JNINativeMethod gMethods[] = {
     { "isCryptoSchemeSupportedNative", "([BLjava/lang/String;)Z",
       (void *)android_media_MediaDrm_isCryptoSchemeSupportedNative },
 
-    { "openSession", "(I)[B",
+    { "openSession", "()[B",
       (void *)android_media_MediaDrm_openSession },
 
     { "closeSession", "([B)V",
@@ -1774,6 +1784,9 @@ static const JNINativeMethod gMethods[] = {
 
     { "getSecurityLevel", "([B)I",
       (void *)android_media_MediaDrm_getSecurityLevel },
+
+    { "setSecurityLevel", "([BI)V",
+      (void *)android_media_MediaDrm_setSecurityLevel },
 
     { "getPropertyString", "(Ljava/lang/String;)Ljava/lang/String;",
       (void *)android_media_MediaDrm_getPropertyString },
