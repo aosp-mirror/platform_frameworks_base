@@ -21,16 +21,29 @@ import android.app.backup.BackupDataOutput;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 
+/**
+ * Shadow for {@link BackupDataOutput}. Format written does NOT match implementation. To read data
+ * written with this shadow you should also declare shadow {@link ShadowBackupDataInput}.
+ */
 @Implements(BackupDataOutput.class)
 public class ShadowBackupDataOutput {
     private long mQuota;
     private int mTransportFlags;
+    private ObjectOutputStream mOutput;
 
     @Implementation
     public void __constructor__(FileDescriptor fd, long quota, int transportFlags) {
+        try {
+            mOutput = new ObjectOutputStream(new FileOutputStream(fd));
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
         mQuota = quota;
         mTransportFlags = transportFlags;
     }
@@ -47,11 +60,27 @@ public class ShadowBackupDataOutput {
 
     @Implementation
     public int writeEntityHeader(String key, int dataSize) throws IOException {
-        return 0;
+        final int size;
+        try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream()) {
+            writeEntityHeader(new ObjectOutputStream(byteStream), key, dataSize);
+            size = byteStream.size();
+        }
+        writeEntityHeader(mOutput, key, dataSize);
+        return size;
+    }
+
+    private void writeEntityHeader(ObjectOutputStream stream, String key, int dataSize)
+            throws IOException {
+        // Write the int first because readInt() throws EOFException, to know when stream ends
+        stream.writeInt(dataSize);
+        stream.writeUTF(key);
+        stream.flush();
     }
 
     @Implementation
     public int writeEntityData(byte[] data, int size) throws IOException {
-        return 0;
+        mOutput.write(data, 0, size);
+        mOutput.flush();
+        return size;
     }
 }

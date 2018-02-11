@@ -285,6 +285,7 @@ public class BatterySavingStats {
         }
     }
 
+    @GuardedBy("mLock")
     private void transitionStateLocked(int newState) {
         if (mCurrentState == newState) {
             return;
@@ -298,6 +299,7 @@ public class BatterySavingStats {
         mMetricsLoggerHelper.transitionState(newState, now, batteryLevel, batteryPercent);
     }
 
+    @GuardedBy("mLock")
     private void endLastStateLocked(long now, int batteryLevel, int batteryPercent) {
         if (mCurrentState < 0) {
             return;
@@ -338,6 +340,7 @@ public class BatterySavingStats {
 
     }
 
+    @GuardedBy("mLock")
     private void startNewStateLocked(int newState, long now, int batteryLevel, int batteryPercent) {
         if (DEBUG) {
             Slog.d(TAG, "New state: " + stateToString(newState));

@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 
@@ -107,6 +108,13 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
             sWm = WindowManagerService.main(context, ims, true, false,
                     false, new TestWindowManagerPolicy());
+
+            sWm.onInitReady();
+
+            // Display creation is driven by the ActivityManagerService via ActivityStackSupervisor.
+            // We emulate those steps here.
+            sWm.mRoot.createDisplayContent(sWm.mDisplayManager.getDisplay(DEFAULT_DISPLAY),
+                    mock(DisplayWindowController.class));
         }
         return sWm;
     }

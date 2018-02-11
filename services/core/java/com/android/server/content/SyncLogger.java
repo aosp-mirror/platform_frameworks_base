@@ -194,6 +194,7 @@ public class SyncLogger {
             }
         }
 
+        @GuardedBy("mLock")
         private void openLogLocked(long now) {
             // If we already have a log file opened and the date has't changed, just use it.
             final long day = now % DateUtils.DAY_IN_MILLIS;
@@ -219,6 +220,7 @@ public class SyncLogger {
             }
         }
 
+        @GuardedBy("mLock")
         private void closeCurrentLogLocked() {
             IoUtils.closeQuietly(mLogWriter);
             mLogWriter = null;

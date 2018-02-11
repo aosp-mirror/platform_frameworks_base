@@ -225,4 +225,10 @@ void Canvas::drawTextOnPath(const uint16_t* text, int count, minikin::Bidi bidiF
     MinikinUtils::forFontRun(layout, &paintCopy, f);
 }
 
+int Canvas::sApiLevel = 1;
+
+void Canvas::setCompatibilityVersion(int apiLevel) {
+    sApiLevel = apiLevel;
+}
+
 }  // namespace android

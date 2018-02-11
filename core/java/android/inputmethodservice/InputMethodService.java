@@ -1818,9 +1818,9 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     /**
-     * Called when the input method window has been shown to the user, after
-     * previously not being visible.  This is done after all of the UI setup
-     * for the window has occurred (creating its views etc).
+     * Called immediately before the input method window is shown to the user.
+     * You could override this to prepare for the window to be shown
+     * (update view structure etc).
      */
     public void onWindowShown() {
         // Intentionally empty

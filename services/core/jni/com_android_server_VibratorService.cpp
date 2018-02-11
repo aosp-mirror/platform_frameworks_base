@@ -18,7 +18,10 @@
 
 #include <android/hardware/vibrator/1.0/IVibrator.h>
 #include <android/hardware/vibrator/1.0/types.h>
-#include <android/hardware/vibrator/1.1/IVibrator.h>
+#include <android/hardware/vibrator/1.0/IVibrator.h>
+#include <android/hardware/vibrator/1.1/types.h>
+#include <android/hardware/vibrator/1.2/IVibrator.h>
+#include <android/hardware/vibrator/1.2/types.h>
 
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
@@ -32,15 +35,15 @@
 #include <stdio.h>
 
 using android::hardware::Return;
-using android::hardware::vibrator::V1_0::Effect;
 using android::hardware::vibrator::V1_0::EffectStrength;
-using android::hardware::vibrator::V1_0::IVibrator;
 using android::hardware::vibrator::V1_0::Status;
 using android::hardware::vibrator::V1_1::Effect_1_1;
-using IVibrator_1_1 = android::hardware::vibrator::V1_1::IVibrator;
 
-namespace android
-{
+namespace V1_0 = android::hardware::vibrator::V1_0;
+namespace V1_1 = android::hardware::vibrator::V1_1;
+namespace V1_2 = android::hardware::vibrator::V1_2;
+
+namespace android {
 
 static constexpr int NUM_TRIES = 2;
 
@@ -84,19 +87,29 @@ Return<R> halCall(Return<R> (I::* fn)(Args0...), Args1&&... args1) {
     return ret;
 }
 
+template<class R>
+bool isValidEffect(jlong effect) {
+    if (effect < 0) {
+        return false;
+    }
+    R val = static_cast<R>(effect);
+    auto iter = hardware::hidl_enum_iterator<R>();
+    return val >= *iter.begin() && val < *std::prev(iter.end());
+}
+
 static void vibratorInit(JNIEnv /* env */, jobject /* clazz */)
 {
-    halCall(&IVibrator::ping).isOk();
+    halCall(&V1_0::IVibrator::ping).isOk();
 }
 
 static jboolean vibratorExists(JNIEnv* /* env */, jobject /* clazz */)
 {
-    return halCall(&IVibrator::ping).isOk() ? JNI_TRUE : JNI_FALSE;
+    return halCall(&V1_0::IVibrator::ping).isOk() ? JNI_TRUE : JNI_FALSE;
 }
 
 static void vibratorOn(JNIEnv* /* env */, jobject /* clazz */, jlong timeout_ms)
 {
-    Status retStatus = halCall(&IVibrator::on, timeout_ms).withDefault(Status::UNKNOWN_ERROR);
+    Status retStatus = halCall(&V1_0::IVibrator::on, timeout_ms).withDefault(Status::UNKNOWN_ERROR);
     if (retStatus != Status::OK) {
         ALOGE("vibratorOn command failed (%" PRIu32 ").", static_cast<uint32_t>(retStatus));
     }
@@ -104,18 +117,18 @@ static void vibratorOn(JNIEnv* /* env */, jobject /* clazz */, jlong timeout_ms)
 
 static void vibratorOff(JNIEnv* /* env */, jobject /* clazz */)
 {
-    Status retStatus = halCall(&IVibrator::off).withDefault(Status::UNKNOWN_ERROR);
+    Status retStatus = halCall(&V1_0::IVibrator::off).withDefault(Status::UNKNOWN_ERROR);
     if (retStatus != Status::OK) {
         ALOGE("vibratorOff command failed (%" PRIu32 ").", static_cast<uint32_t>(retStatus));
     }
 }
 
 static jlong vibratorSupportsAmplitudeControl(JNIEnv*, jobject) {
-    return halCall(&IVibrator::supportsAmplitudeControl).withDefault(false);
+    return halCall(&V1_0::IVibrator::supportsAmplitudeControl).withDefault(false);
 }
 
 static void vibratorSetAmplitude(JNIEnv*, jobject, jint amplitude) {
-    Status status = halCall(&IVibrator::setAmplitude, static_cast<uint32_t>(amplitude))
+    Status status = halCall(&V1_0::IVibrator::setAmplitude, static_cast<uint32_t>(amplitude))
         .withDefault(Status::UNKNOWN_ERROR);
     if (status != Status::OK) {
       ALOGE("Failed to set vibrator amplitude (%" PRIu32 ").",
@@ -132,22 +145,25 @@ static jlong vibratorPerformEffect(JNIEnv*, jobject, jlong effect, jint strength
     };
     EffectStrength effectStrength(static_cast<EffectStrength>(strength));
 
-    if (effect < 0  || effect > static_cast<uint32_t>(Effect_1_1::TICK)) {
+    Return<void> ret;
+    if (isValidEffect<V1_0::Effect>(effect)) {
+        ret = halCall(&V1_0::IVibrator::perform, static_cast<V1_0::Effect>(effect),
+                effectStrength, callback);
+    } else if (isValidEffect<Effect_1_1>(effect)) {
+        ret = halCall(&V1_1::IVibrator::perform_1_1, static_cast<Effect_1_1>(effect),
+                           effectStrength, callback);
+    } else if (isValidEffect<V1_2::Effect>(effect)) {
+        ret = halCall(&V1_2::IVibrator::perform_1_2, static_cast<V1_2::Effect>(effect),
+                           effectStrength, callback);
+    } else {
         ALOGW("Unable to perform haptic effect, invalid effect ID (%" PRId32 ")",
                 static_cast<int32_t>(effect));
-    } else if (effect == static_cast<uint32_t>(Effect_1_1::TICK)) {
-        auto ret = halCall(&IVibrator_1_1::perform_1_1, static_cast<Effect_1_1>(effect),
-                           effectStrength, callback);
-        if (!ret.isOk()) {
-            ALOGW("Failed to perform effect (%" PRId32 "), insufficient HAL version",
-                    static_cast<int32_t>(effect));
-        }
-    } else {
-        auto ret = halCall(&IVibrator::perform, static_cast<Effect>(effect), effectStrength,
-                           callback);
-        if (!ret.isOk()) {
-            ALOGW("Failed to perform effect (%" PRId32 ")", static_cast<int32_t>(effect));
-        }
+        return -1;
+    }
+
+    if (!ret.isOk()) {
+        ALOGW("Failed to perform effect (%" PRId32 ")", static_cast<int32_t>(effect));
+        return -1;
     }
 
     if (status == Status::OK) {
@@ -160,6 +176,7 @@ static jlong vibratorPerformEffect(JNIEnv*, jobject, jlong effect, jint strength
                 ", error=%" PRIu32 ").", static_cast<int64_t>(effect),
                 static_cast<int32_t>(strength), static_cast<uint32_t>(status));
     }
+
     return -1;
 }
 

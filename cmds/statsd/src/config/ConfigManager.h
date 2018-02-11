@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "binder/IBinder.h"
 #include "config/ConfigKey.h"
 #include "config/ConfigListener.h"
 
@@ -68,12 +69,12 @@ public:
     /**
      * Sets the broadcast receiver for a configuration key.
      */
-    void SetConfigReceiver(const ConfigKey& key, const std::string& pkg, const std::string& cls);
+    void SetConfigReceiver(const ConfigKey& key, const sp<IBinder>& intentSender);
 
     /**
      * Returns the package name and class name representing the broadcast receiver for this config.
      */
-    const std::pair<std::string, std::string> GetConfigReceiver(const ConfigKey& key) const;
+    const sp<android::IBinder> GetConfigReceiver(const ConfigKey& key) const;
 
     /**
      * Returns all config keys registered.
@@ -124,10 +125,10 @@ private:
     std::set<ConfigKey> mConfigs;
 
     /**
-     * Each config key can be subscribed by up to one receiver, specified as the package name and
-     * class name.
+     * Each config key can be subscribed by up to one receiver, specified as IBinder from
+     * PendingIntent.
      */
-    std::map<ConfigKey, std::pair<std::string, std::string>> mConfigReceivers;
+    std::map<ConfigKey, sp<android::IBinder>> mConfigReceivers;
 
     /**
      * The ConfigListeners that will be told about changes.

@@ -17,6 +17,7 @@
 package android.app.servertransaction;
 
 import static android.app.servertransaction.TestUtils.config;
+import static android.app.servertransaction.TestUtils.mergedConfig;
 import static android.app.servertransaction.TestUtils.referrerIntentList;
 import static android.app.servertransaction.TestUtils.resultInfoList;
 
@@ -27,7 +28,6 @@ import android.app.IApplicationThread;
 import android.app.IInstrumentationWatcher;
 import android.app.IUiAutomationConnection;
 import android.app.ProfilerInfo;
-import android.app.ResultInfo;
 import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.Intent;
@@ -53,7 +53,6 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.android.internal.app.IVoiceInteractor;
-import com.android.internal.content.ReferrerIntent;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -237,6 +236,22 @@ public class TransactionParcelTests {
 
         // Read from parcel and assert
         LaunchActivityItem result = LaunchActivityItem.CREATOR.createFromParcel(mParcel);
+
+        assertEquals(item.hashCode(), result.hashCode());
+        assertTrue(item.equals(result));
+    }
+
+    @Test
+    public void testRelaunch() {
+        // Write to parcel
+        Configuration overrideConfig = new Configuration();
+        overrideConfig.assetsSeq = 5;
+        ActivityRelaunchItem item = ActivityRelaunchItem.obtain(resultInfoList(),
+                referrerIntentList(), 35, mergedConfig(), true);
+        writeAndPrepareForReading(item);
+
+        // Read from parcel and assert
+        ActivityRelaunchItem result = ActivityRelaunchItem.CREATOR.createFromParcel(mParcel);
 
         assertEquals(item.hashCode(), result.hashCode());
         assertTrue(item.equals(result));
@@ -432,12 +447,6 @@ public class TransactionParcelTests {
 
         @Override
         public void scheduleLowMemory() throws RemoteException {
-        }
-
-        @Override
-        public void scheduleRelaunchActivity(IBinder iBinder, List<ResultInfo> list,
-                List<ReferrerIntent> list1, int i, boolean b, Configuration configuration,
-                Configuration configuration1, boolean b1) throws RemoteException {
         }
 
         @Override

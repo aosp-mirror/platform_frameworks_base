@@ -22,61 +22,63 @@ package android.util;
  * @hide
  */
 public final class ByteStringUtils {
-  private final static char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+    private static final char[] HEX_LOWERCASE_ARRAY = "0123456789abcdef".toCharArray();
+    private static final char[] HEX_UPPERCASE_ARRAY = "0123456789ABCDEF".toCharArray();
 
-  private ByteStringUtils() {
+    private ByteStringUtils() {
     /* hide constructor */
-  }
-
-  /**
-   * Returns the hex encoded string representation of bytes.
-   * @param bytes Byte array to encode.
-   * @return Hex encoded string representation of bytes.
-   */
-  public static String toHexString(byte[] bytes) {
-    if (bytes == null || bytes.length == 0 || bytes.length % 2 != 0) {
-      return null;
     }
 
-    final int byteLength = bytes.length;
-    final int charCount = 2 * byteLength;
-    final char[] chars = new char[charCount];
+    /**
+     * Returns the hex encoded string representation of bytes.
+     * @param bytes Byte array to encode.
+     * @return Hex encoded string representation of bytes.
+     */
+    public static String toHexString(byte[] bytes) {
+        if (bytes == null || bytes.length == 0 || bytes.length % 2 != 0) {
+            return null;
+        }
 
-    for (int i = 0; i < byteLength; i++) {
-      final int byteHex = bytes[i] & 0xFF;
-      chars[i * 2] = HEX_ARRAY[byteHex >>> 4];
-      chars[i * 2 + 1] = HEX_ARRAY[byteHex & 0x0F];
+        final int byteLength = bytes.length;
+        final int charCount = 2 * byteLength;
+        final char[] chars = new char[charCount];
+
+        for (int i = 0; i < byteLength; i++) {
+            final int byteHex = bytes[i] & 0xFF;
+            chars[i * 2] = HEX_UPPERCASE_ARRAY[byteHex >>> 4];
+            chars[i * 2 + 1] = HEX_UPPERCASE_ARRAY[byteHex & 0x0F];
+        }
+        return new String(chars);
     }
-    return new String(chars);
-  }
 
-  /**
-   * Returns the decoded byte array representation of str.
-   * @param str Hex encoded string to decode.
-   * @return Decoded byte array representation of str.
-   */
-  public static byte[] fromHexToByteArray(String str) {
-    if (str == null || str.length() == 0 || str.length() % 2 != 0) {
-      return null;
+    /**
+     * Returns the decoded byte array representation of str.
+     * @param str Hex encoded string to decode.
+     * @return Decoded byte array representation of str.
+     */
+    public static byte[] fromHexToByteArray(String str) {
+        if (str == null || str.length() == 0 || str.length() % 2 != 0) {
+            return null;
+        }
+
+        final char[] chars = str.toCharArray();
+        final int charLength = chars.length;
+        final byte[] bytes = new byte[charLength / 2];
+
+        for (int i = 0; i < bytes.length; i++) {
+            bytes[i] =
+                    (byte) (((getIndex(chars[i * 2]) << 4) & 0xF0)
+                            | (getIndex(chars[i * 2 + 1]) & 0x0F));
+        }
+        return bytes;
     }
 
-    final char[] chars = str.toCharArray();
-    final int charLength = chars.length;
-    final byte[] bytes = new byte[charLength / 2];
-
-    for (int i = 0; i < bytes.length; i++) {
-      bytes[i] =
-          (byte)(((getIndex(chars[i * 2]) << 4) & 0xF0) | (getIndex(chars[i * 2 + 1]) & 0x0F));
+    private static int getIndex(char c) {
+        for (int i = 0; i < HEX_UPPERCASE_ARRAY.length; i++) {
+            if (HEX_UPPERCASE_ARRAY[i] == c || HEX_LOWERCASE_ARRAY[i] == c) {
+                return i;
+            }
+        }
+        return -1;
     }
-    return bytes;
-  }
-
-  private static int getIndex(char c) {
-    for (int i = 0; i < HEX_ARRAY.length; i++) {
-      if (HEX_ARRAY[i] == c) {
-        return i;
-      }
-    }
-    return -1;
-  }
 }

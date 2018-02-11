@@ -704,6 +704,8 @@
     <dimen name="volume_expander_margin_end">2dp</dimen>
     <dimen name="volume_expander_margin_top">6dp</dimen>
 
+    <dimen name="volume_panel_elevation">8dp</dimen>
+
     <!-- Padding between icon and text for managed profile toast -->
     <dimen name="managed_profile_toast_padding">4dp</dimen>
 
@@ -901,13 +903,28 @@
     <dimen name="fingerprint_dialog_fp_icon_size">60dp</dimen>
     <dimen name="fingerprint_dialog_animation_translation_offset">350dp</dimen>
 
-    <!-- WirelessCharging Animation values -->
-    <!-- Starting text size of batteryLevel for wireless charging animation -->
-    <dimen name="config_batteryLevelTextSizeStart" format="float">5.0</dimen>
-    <!-- Ending text size of batteryLevel for wireless charging animation -->
-    <dimen name="config_batteryLevelTextSizeEnd" format="float">32.0</dimen>
-    <!-- Wireless Charging battery level text animation duration -->
-    <integer name="config_batteryLevelTextAnimationDuration">400</integer>
+    <!-- Wireless Charging Animation values -->
+    <dimen name="wireless_charging_dots_radius_start">0dp</dimen>
+    <dimen name="wireless_charging_dots_radius_end">4dp</dimen>
+    <dimen name="wireless_charging_circle_radius_start">28dp</dimen>
+    <dimen name="wireless_charging_circle_radius_end">92dp</dimen>
+    <integer name="wireless_charging_angle_offset">20</integer>
+    <integer name="wireless_charging_scale_dots_duration">83</integer>
+    <integer name="wireless_charging_num_dots">20</integer>
+    <!-- Starting text size in dp of batteryLevel for wireless charging animation -->
+    <dimen name="wireless_charging_anim_battery_level_text_size_start">0dp</dimen>
+    <!-- Ending text size in dp of batteryLevel for wireless charging animation -->
+    <dimen name="wireless_charging_anim_battery_level_text_size_end">14dp</dimen>
+    <!-- time until battery info is at full opacity-->
+    <integer name="wireless_charging_anim_opacity_offset">80</integer>
+    <!-- duration batteryLevel opacity goes from 0 to 1 duration -->
+    <integer name="wireless_charging_battery_level_text_opacity_duration">117</integer>
+    <!-- battery text scale animation duration -->
+    <integer name="wireless_charging_battery_level_text_scale_animation_duration">367</integer>
+    <!--time until wireless charging animation starts to fade-->
+    <integer name="wireless_charging_fade_offset">920</integer>
+    <!-- duration wireless charging animation takes to full fade to 0 opacity -->
+    <integer name="wireless_charging_fade_duration">200</integer>
 
     <!-- Wired charging on AOD, text animation duration -->
     <integer name="wired_charging_aod_text_animation_duration_down">500</integer>

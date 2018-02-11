@@ -450,7 +450,7 @@ static bool IsTransitionElement(const std::string& name) {
 
 static bool IsVectorElement(const std::string& name) {
   return name == "vector" || name == "animated-vector" || name == "pathInterpolator" ||
-         name == "objectAnimator" || name == "gradient";
+         name == "objectAnimator" || name == "gradient" || name == "animated-selector";
 }
 
 template <typename T>
@@ -1446,6 +1446,13 @@ class LinkCommand {
 
     ContainerReaderEntry* entry;
     ContainerReader reader(input_stream.get());
+
+    if (reader.HadError()) {
+      context_->GetDiagnostics()->Error(DiagMessage(src)
+                                        << "failed to read file: " << reader.GetError());
+      return false;
+    }
+
     while ((entry = reader.Next()) != nullptr) {
       if (entry->Type() == ContainerEntryType::kResTable) {
         pb::ResourceTable pb_table;

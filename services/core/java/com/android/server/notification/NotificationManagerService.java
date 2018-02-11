@@ -686,6 +686,7 @@ public class NotificationManagerService extends SystemService {
                         sbn.getId(), Notification.FLAG_AUTO_CANCEL,
                         Notification.FLAG_FOREGROUND_SERVICE, false, r.getUserId(),
                         REASON_CLICK, null);
+                reportUserInteraction(r);
             }
         }
 
@@ -706,7 +707,7 @@ public class NotificationManagerService extends SystemService {
                         .setSubtype(actionIndex));
                 EventLogTags.writeNotificationActionClicked(key, actionIndex,
                         r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now));
-                // TODO: Log action click via UsageStats.
+                reportUserInteraction(r);
             }
         }
 
@@ -827,6 +828,7 @@ public class NotificationManagerService extends SystemService {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r != null) {
                     r.recordDirectReplied();
+                    reportUserInteraction(r);
                 }
             }
         }
@@ -1758,12 +1760,27 @@ public class NotificationManagerService extends SystemService {
         return INotificationManager.Stub.asInterface(mService);
     }
 
+    /**
+     * Report to usage stats that the notification was seen.
+     * @param r notification record
+     */
     protected void reportSeen(NotificationRecord r) {
         final int userId = r.sbn.getUserId();
         mAppUsageStats.reportEvent(r.sbn.getPackageName(),
                 userId == UserHandle.USER_ALL ? USER_SYSTEM
                         : userId,
                 UsageEvents.Event.NOTIFICATION_SEEN);
+    }
+
+    /**
+     * Report to usage stats that the notification was clicked.
+     * @param r notification record
+     */
+    protected void reportUserInteraction(NotificationRecord r) {
+        final int userId = r.sbn.getUserId();
+        mAppUsageStats.reportEvent(r.sbn.getPackageName(),
+                userId == UserHandle.USER_ALL ? UserHandle.USER_SYSTEM : userId,
+                UsageEvents.Event.USER_INTERACTION);
     }
 
     @VisibleForTesting
@@ -3909,6 +3926,7 @@ public class NotificationManagerService extends SystemService {
         return true;
     }
 
+    @GuardedBy("mNotificationLock")
     protected int getNotificationCountLocked(String pkg, int userId, int excludedId,
             String excludedTag) {
         int count = 0;

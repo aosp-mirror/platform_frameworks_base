@@ -28,6 +28,8 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
 
+import com.android.internal.annotations.GuardedBy;
+
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -915,6 +917,7 @@ public final class AssetManager implements AutoCloseable {
     private native final void init(boolean isSystem);
     private native final void destroy();
 
+    @GuardedBy("this")
     private final void incRefsLocked(long id) {
         if (DEBUG_REFS) {
             if (mRefStacks == null) {
@@ -926,7 +929,8 @@ public final class AssetManager implements AutoCloseable {
         }
         mNumRefs++;
     }
-    
+
+    @GuardedBy("this")
     private final void decRefsLocked(long id) {
         if (DEBUG_REFS && mRefStacks != null) {
             mRefStacks.remove(id);

@@ -281,11 +281,13 @@ class TaskSnapshotPersister {
             mSnapshot = snapshot;
         }
 
+        @GuardedBy("mLock")
         @Override
         void onQueuedLocked() {
             mStoreQueueItems.offer(this);
         }
 
+        @GuardedBy("mLock")
         @Override
         void onDequeuedLocked() {
             mStoreQueueItems.remove(this);

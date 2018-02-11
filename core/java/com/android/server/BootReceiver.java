@@ -72,6 +72,7 @@ public class BootReceiver extends BroadcastReceiver {
         SystemProperties.getInt("ro.debuggable", 0) == 1 ? 98304 : 65536;
 
     private static final File TOMBSTONE_DIR = new File("/data/tombstones");
+    private static final String TAG_TOMBSTONE = "SYSTEM_TOMBSTONE";
 
     // The pre-froyo package and class of the system updater, which
     // ran in the system process.  We need to remove its packages here
@@ -265,7 +266,7 @@ public class BootReceiver extends BroadcastReceiver {
                     File file = new File(TOMBSTONE_DIR, path);
                     if (file.isFile()) {
                         addFileToDropBox(db, timestamps, headers, file.getPath(), LOG_SIZE,
-                                "SYSTEM_TOMBSTONE");
+                                TAG_TOMBSTONE);
                     }
                 } catch (IOException e) {
                     Slog.e(TAG, "Can't log tombstone", e);
@@ -299,9 +300,20 @@ public class BootReceiver extends BroadcastReceiver {
 
         timestamps.put(filename, fileTime);
 
+
+        String fileContents = FileUtils.readTextFile(file, maxSize, "[[TRUNCATED]]\n");
+        String text = headers + fileContents + footers;
+        // Create an additional report for system server native crashes, with a special tag.
+        if (tag.equals(TAG_TOMBSTONE) && fileContents.contains(">>> system_server <<<")) {
+            addTextToDropBox(db, "system_server_native_crash", text, filename, maxSize);
+        }
+        addTextToDropBox(db, tag, text, filename, maxSize);
+    }
+
+    private static void addTextToDropBox(DropBoxManager db, String tag, String text,
+            String filename, int maxSize) {
         Slog.i(TAG, "Copying " + filename + " to DropBox (" + tag + ")");
-        db.addText(tag, headers + FileUtils.readTextFile(file, maxSize, "[[TRUNCATED]]\n") +
-                footers);
+        db.addText(tag, text);
         EventLog.writeEvent(DropboxLogTags.DROPBOX_FILE_COPY, filename, maxSize, tag);
     }
 

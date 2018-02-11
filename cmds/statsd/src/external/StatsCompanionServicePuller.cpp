@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define DEBUG true
+#define DEBUG false
 #include "Log.h"
 
 #include <android/os/IStatsCompanionService.h>
@@ -64,7 +64,7 @@ bool StatsCompanionServicePuller::PullInternal(vector<shared_ptr<LogEvent> >* da
             std::copy(it.bytes.begin(), it.bytes.end(), tmp.buf + kLogMsgHeaderSize);
             data->push_back(make_shared<LogEvent>(tmp));
         }
-        ALOGD("StatsCompanionServicePuller::pull succeeded for %d", mTagId);
+        VLOG("StatsCompanionServicePuller::pull succeeded for %d", mTagId);
         return true;
     } else {
         ALOGW("statsCompanion not found!");

@@ -83,9 +83,6 @@ oneway interface IApplicationThread {
             int resultCode, in String data, in Bundle extras, boolean ordered,
             boolean sticky, int sendingUser, int processState);
     void scheduleLowMemory();
-    void scheduleRelaunchActivity(IBinder token, in List<ResultInfo> pendingResults,
-            in List<ReferrerIntent> pendingNewIntents, int configChanges, boolean notResumed,
-            in Configuration config, in Configuration overrideConfig, boolean preserveWindow);
     void scheduleSleeping(IBinder token, boolean sleeping);
     void profilerControl(boolean start, in ProfilerInfo profilerInfo, int profileType);
     void setSchedulingGroup(int group);

@@ -573,6 +573,11 @@ static void freeTextLayoutCaches(JNIEnv* env, jobject) {
     minikin::Layout::purgeCaches();
 }
 
+static void setCompatibilityVersion(JNIEnv* env, jobject, jint apiLevel) {
+    Canvas::setCompatibilityVersion(apiLevel);
+}
+
+
 }; // namespace CanvasJNI
 
 static const JNINativeMethod gMethods[] = {
@@ -580,6 +585,7 @@ static const JNINativeMethod gMethods[] = {
     {"nInitRaster", "(Landroid/graphics/Bitmap;)J", (void*) CanvasJNI::initRaster},
     {"nFreeCaches", "()V", (void*) CanvasJNI::freeCaches},
     {"nFreeTextLayoutCaches", "()V", (void*) CanvasJNI::freeTextLayoutCaches},
+    {"nSetCompatibilityVersion", "(I)V", (void*) CanvasJNI::setCompatibilityVersion},
 
     // ------------ @FastNative ----------------
     {"nSetBitmap", "(JLandroid/graphics/Bitmap;)V", (void*) CanvasJNI::setBitmap},

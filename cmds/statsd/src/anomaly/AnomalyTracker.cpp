@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-#define DEBUG true  // STOPSHIP if true
+#define DEBUG false  // STOPSHIP if true
 #include "Log.h"
 
 #include "AnomalyTracker.h"
 #include "external/Perfetto.h"
-#include "frameworks/base/libs/incident/proto/android/os/header.pb.h"
 #include "guardrail/StatsdStats.h"
 #include "subscriber/IncidentdReporter.h"
 #include "subscriber/SubscriberReporter.h"

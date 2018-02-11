@@ -530,6 +530,7 @@ public class ShortcutService extends IShortcutService.Stub {
         return processState <= PROCESS_STATE_FOREGROUND_THRESHOLD;
     }
 
+    @GuardedBy("mLock")
     boolean isUidForegroundLocked(int uid) {
         if (uid == Process.SYSTEM_UID) {
             // IUidObserver doesn't report the state of SYSTEM, but it always has bound services,
@@ -545,6 +546,7 @@ public class ShortcutService extends IShortcutService.Stub {
         return isProcessStateForeground(mActivityManagerInternal.getUidProcessState(uid));
     }
 
+    @GuardedBy("mLock")
     long getUidLastForegroundElapsedTimeLocked(int uid) {
         return mUidLastForegroundElapsedTime.get(uid);
     }
@@ -638,6 +640,7 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
+    @GuardedBy("mLock")
     private void unloadUserLocked(int userId) {
         if (DEBUG) {
             Slog.d(TAG, "unloadUserLocked: user=" + userId);
@@ -864,6 +867,7 @@ public class ShortcutService extends IShortcutService.Stub {
         writeAttr(out, name, intent.toUri(/* flags =*/ 0));
     }
 
+    @GuardedBy("mLock")
     @VisibleForTesting
     void saveBaseStateLocked() {
         final AtomicFile file = getBaseStateFile();
@@ -896,6 +900,7 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
+    @GuardedBy("mLock")
     private void loadBaseStateLocked() {
         mRawLastResetTime = 0;
 
@@ -948,6 +953,7 @@ public class ShortcutService extends IShortcutService.Stub {
         return new File(injectUserDataPath(userId), FILENAME_USER_PACKAGES);
     }
 
+    @GuardedBy("mLock")
     private void saveUserLocked(@UserIdInt int userId) {
         final File path = getUserFile(userId);
         if (DEBUG) {
@@ -974,6 +980,7 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
+    @GuardedBy("mLock")
     private void saveUserInternalLocked(@UserIdInt int userId, OutputStream os,
             boolean forBackup) throws IOException, XmlPullParserException {
 
@@ -1107,12 +1114,14 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     /** Return the last reset time. */
+    @GuardedBy("mLock")
     long getLastResetTimeLocked() {
         updateTimesLocked();
         return mRawLastResetTime;
     }
 
     /** Return the next reset time. */
+    @GuardedBy("mLock")
     long getNextResetTimeLocked() {
         updateTimesLocked();
         return mRawLastResetTime + mResetInterval;
@@ -1125,6 +1134,7 @@ public class ShortcutService extends IShortcutService.Stub {
     /**
      * Update the last reset time.
      */
+    @GuardedBy("mLock")
     private void updateTimesLocked() {
 
         final long now = injectCurrentTimeMillis();
@@ -1220,6 +1230,7 @@ public class ShortcutService extends IShortcutService.Stub {
         return ret;
     }
 
+    @GuardedBy("mLock")
     void forEachLoadedUserLocked(@NonNull Consumer<ShortcutUser> c) {
         for (int i = mUsers.size() - 1; i >= 0; i--) {
             c.accept(mUsers.valueAt(i));
@@ -1279,6 +1290,7 @@ public class ShortcutService extends IShortcutService.Stub {
      * {@link ShortcutBitmapSaver#waitForAllSavesLocked()} to make sure there's no pending bitmap
      * saves are going on.
      */
+    @GuardedBy("mLock")
     private void cleanupDanglingBitmapDirectoriesLocked(@UserIdInt int userId) {
         if (DEBUG) {
             Slog.d(TAG, "cleanupDanglingBitmaps: userId=" + userId);
@@ -2108,6 +2120,7 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
+    @GuardedBy("mLock")
     private ParceledListSlice<ShortcutInfo> getShortcutsWithQueryLocked(@NonNull String packageName,
             @UserIdInt int userId, int cloneFlags, @NonNull Predicate<ShortcutInfo> query) {
 
@@ -2418,6 +2431,7 @@ public class ShortcutService extends IShortcutService.Stub {
      *
      * This is called when an app is uninstalled, or an app gets "clear data"ed.
      */
+    @GuardedBy("mLock")
     @VisibleForTesting
     void cleanUpPackageLocked(String packageName, int owningUserId, int packageUserId,
             boolean appStillExists) {
@@ -2508,6 +2522,7 @@ public class ShortcutService extends IShortcutService.Stub {
             return setReturnedByServer(ret);
         }
 
+        @GuardedBy("ShortcutService.this.mLock")
         private void getShortcutsInnerLocked(int launcherUserId, @NonNull String callingPackage,
                 @Nullable String packageName, @Nullable List<String> shortcutIds, long changedSince,
                 @Nullable ComponentName componentName, int queryFlags,
@@ -2579,6 +2594,7 @@ public class ShortcutService extends IShortcutService.Stub {
             }
         }
 
+        @GuardedBy("ShortcutService.this.mLock")
         private ShortcutInfo getShortcutInfoLocked(
                 int launcherUserId, @NonNull String callingPackage,
                 @NonNull String packageName, @NonNull String shortcutId, int userId,
@@ -2940,6 +2956,7 @@ public class ShortcutService extends IShortcutService.Stub {
         verifyStates();
     }
 
+    @GuardedBy("mLock")
     private void rescanUpdatedPackagesLocked(@UserIdInt int userId, long lastScanTime) {
         final ShortcutUser user = getUserShortcutsLocked(userId);
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define DEBUG true  // STOPSHIP if true
+#define DEBUG false  // STOPSHIP if true
 #include "Log.h"
 #include "statslog.h"
 
@@ -32,6 +32,7 @@
 
 #include <log/log_event_list.h>
 #include <utils/Errors.h>
+#include <utils/SystemClock.h>
 
 using namespace android;
 using android::base::StringPrintf;
@@ -60,6 +61,8 @@ const int FIELD_ID_ID = 2;
 // for ConfigMetricsReport
 const int FIELD_ID_METRICS = 1;
 const int FIELD_ID_UID_MAP = 2;
+const int FIELD_ID_LAST_REPORT_NANOS = 3;
+const int FIELD_ID_CURRENT_REPORT_NANOS = 4;
 
 #define STATS_DATA_DIR "/data/misc/stats-data"
 
@@ -166,7 +169,7 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event) {
 
 void StatsLogProcessor::OnConfigUpdated(const ConfigKey& key, const StatsdConfig& config) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
-    ALOGD("Updated configuration for key %s", key.ToString().c_str());
+    VLOG("Updated configuration for key %s", key.ToString().c_str());
     sp<MetricsManager> newMetricsManager = new MetricsManager(key, config, mTimeBaseSec, mUidMap);
     auto it = mMetricsManagers.find(key);
     if (it == mMetricsManagers.end() && mMetricsManagers.size() > StatsdStats::kMaxConfigCount) {
@@ -263,6 +266,12 @@ void StatsLogProcessor::onDumpReportLocked(const ConfigKey& key, vector<uint8_t>
     char uidMapBuffer[uidMapSize];
     uidMap.SerializeToArray(&uidMapBuffer[0], uidMapSize);
     proto.write(FIELD_TYPE_MESSAGE | FIELD_ID_UID_MAP, uidMapBuffer, uidMapSize);
+
+    // Fill in the timestamps.
+    proto.write(FIELD_TYPE_INT64 | FIELD_ID_LAST_REPORT_NANOS,
+                (long long)it->second->getLastReportTimeNs());
+    proto.write(FIELD_TYPE_INT64 | FIELD_ID_CURRENT_REPORT_NANOS,
+                (long long)::android::elapsedRealtimeNano());
 
     // End of ConfigMetricsReport (reports).
     proto.end(reportsToken);

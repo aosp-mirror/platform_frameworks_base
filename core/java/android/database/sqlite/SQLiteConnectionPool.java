@@ -422,6 +422,7 @@ public final class SQLiteConnectionPool implements Closeable {
     }
 
     // Can't throw.
+    @GuardedBy("mLock")
     private boolean recycleConnectionLocked(SQLiteConnection connection,
             AcquiredConnectionStatus status) {
         if (status == AcquiredConnectionStatus.RECONFIGURE) {
@@ -531,6 +532,7 @@ public final class SQLiteConnectionPool implements Closeable {
     }
 
     // Can't throw.
+    @GuardedBy("mLock")
     private void closeAvailableConnectionsAndLogExceptionsLocked() {
         closeAvailableNonPrimaryConnectionsAndLogExceptionsLocked();
 
@@ -541,6 +543,7 @@ public final class SQLiteConnectionPool implements Closeable {
     }
 
     // Can't throw.
+    @GuardedBy("mLock")
     private boolean closeAvailableConnectionLocked(int connectionId) {
         final int count = mAvailableNonPrimaryConnections.size();
         for (int i = count - 1; i >= 0; i--) {
@@ -562,6 +565,7 @@ public final class SQLiteConnectionPool implements Closeable {
     }
 
     // Can't throw.
+    @GuardedBy("mLock")
     private void closeAvailableNonPrimaryConnectionsAndLogExceptionsLocked() {
         final int count = mAvailableNonPrimaryConnections.size();
         for (int i = 0; i < count; i++) {
@@ -581,6 +585,7 @@ public final class SQLiteConnectionPool implements Closeable {
     }
 
     // Can't throw.
+    @GuardedBy("mLock")
     private void closeExcessConnectionsAndLogExceptionsLocked() {
         int availableCount = mAvailableNonPrimaryConnections.size();
         while (availableCount-- > mMaxConnectionPoolSize - 1) {
@@ -591,6 +596,7 @@ public final class SQLiteConnectionPool implements Closeable {
     }
 
     // Can't throw.
+    @GuardedBy("mLock")
     private void closeConnectionAndLogExceptionsLocked(SQLiteConnection connection) {
         try {
             connection.close(); // might throw
@@ -609,6 +615,7 @@ public final class SQLiteConnectionPool implements Closeable {
     }
 
     // Can't throw.
+    @GuardedBy("mLock")
     private void reconfigureAllConnectionsLocked() {
         if (mAvailablePrimaryConnection != null) {
             try {
@@ -776,6 +783,7 @@ public final class SQLiteConnectionPool implements Closeable {
     }
 
     // Can't throw.
+    @GuardedBy("mLock")
     private void cancelConnectionWaiterLocked(ConnectionWaiter waiter) {
         if (waiter.mAssignedConnection != null || waiter.mException != null) {
             // Waiter is done waiting but has not woken up yet.
@@ -848,6 +856,7 @@ public final class SQLiteConnectionPool implements Closeable {
     }
 
     // Can't throw.
+    @GuardedBy("mLock")
     private void wakeConnectionWaitersLocked() {
         // Unpark all waiters that have requests that we can fulfill.
         // This method is designed to not throw runtime exceptions, although we might send
@@ -910,6 +919,7 @@ public final class SQLiteConnectionPool implements Closeable {
     }
 
     // Might throw.
+    @GuardedBy("mLock")
     private SQLiteConnection tryAcquirePrimaryConnectionLocked(int connectionFlags) {
         // If the primary connection is available, acquire it now.
         SQLiteConnection connection = mAvailablePrimaryConnection;
@@ -935,6 +945,7 @@ public final class SQLiteConnectionPool implements Closeable {
     }
 
     // Might throw.
+    @GuardedBy("mLock")
     private SQLiteConnection tryAcquireNonPrimaryConnectionLocked(
             String sql, int connectionFlags) {
         // Try to acquire the next connection in the queue.
@@ -974,6 +985,7 @@ public final class SQLiteConnectionPool implements Closeable {
     }
 
     // Might throw.
+    @GuardedBy("mLock")
     private void finishAcquireConnectionLocked(SQLiteConnection connection, int connectionFlags) {
         try {
             final boolean readOnly = (connectionFlags & CONNECTION_FLAG_READ_ONLY) != 0;

@@ -797,6 +797,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return overlayPackages;
         }
 
+        @GuardedBy("mInstallLock")
         final String[] getStaticOverlayPathsLocked(Collection<PackageParser.Package> allPackages,
                 String targetPackageName, String targetPath) {
             if ("android".equals(targetPackageName)) {
@@ -964,7 +965,7 @@ public class PackageManagerService extends IPackageManager.Stub
     volatile boolean mSystemReady;
     volatile boolean mSafeMode;
     volatile boolean mHasSystemUidErrors;
-    private volatile boolean mEphemeralAppsDisabled;
+    private volatile boolean mWebInstantAppsDisabled;
 
     ApplicationInfo mAndroidApplication;
     final ActivityInfo mResolveActivity = new ActivityInfo();
@@ -5216,7 +5217,13 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public int checkUidPermission(String permName, int uid) {
-        return mPermissionManager.checkUidPermission(permName, uid, getCallingUid());
+        synchronized (mPackages) {
+            final String[] packageNames = getPackagesForUid(uid);
+            final PackageParser.Package pkg = (packageNames != null && packageNames.length > 0)
+                    ? mPackages.get(packageNames[0])
+                    : null;
+            return mPermissionManager.checkUidPermission(permName, pkg, uid, getCallingUid());
+        }
     }
 
     @Override
@@ -5950,11 +5957,11 @@ public class PackageManagerService extends IPackageManager.Stub
     /**
      * Returns whether or not instant apps have been disabled remotely.
      */
-    private boolean isEphemeralDisabled() {
-        return mEphemeralAppsDisabled;
+    private boolean areWebInstantAppsDisabled() {
+        return mWebInstantAppsDisabled;
     }
 
-    private boolean isInstantAppAllowed(
+    private boolean isInstantAppResolutionAllowed(
             Intent intent, List<ResolveInfo> resolvedActivities, int userId,
             boolean skipPackageCheck) {
         if (mInstantAppResolverConnection == null) {
@@ -5979,8 +5986,12 @@ public class PackageManagerService extends IPackageManager.Stub
                     || (intent.getFlags() & Intent.FLAG_ACTIVITY_MATCH_EXTERNAL) == 0) {
                 return false;
             }
-        } else if (intent.getData() == null || TextUtils.isEmpty(intent.getData().getHost())) {
-            return false;
+        } else {
+            if (intent.getData() == null || TextUtils.isEmpty(intent.getData().getHost())) {
+                return false;
+            } else if (areWebInstantAppsDisabled()) {
+                return false;
+            }
         }
         // Deny ephemeral apps if the user chose _ALWAYS or _ALWAYS_ASK for intent resolution.
         // Or if there's already an ephemeral app installed that handles the action
@@ -6511,14 +6522,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
             return applyPostResolutionFilter(
-                    list, instantAppPkgName, allowDynamicSplits, filterCallingUid, userId);
+                    list, instantAppPkgName, allowDynamicSplits, filterCallingUid, userId, intent);
         }
 
         // reader
         boolean sortResult = false;
-        boolean addEphemeral = false;
+        boolean addInstant = false;
         List<ResolveInfo> result;
-        final boolean ephemeralDisabled = isEphemeralDisabled();
         synchronized (mPackages) {
             if (pkgName == null) {
                 List<CrossProfileIntentFilter> matchingFilters =
@@ -6531,14 +6541,14 @@ public class PackageManagerService extends IPackageManager.Stub
                     xpResult.add(xpResolveInfo);
                     return applyPostResolutionFilter(
                             filterIfNotSystemUser(xpResult, userId), instantAppPkgName,
-                            allowDynamicSplits, filterCallingUid, userId);
+                            allowDynamicSplits, filterCallingUid, userId, intent);
                 }
 
                 // Check for results in the current profile.
                 result = filterIfNotSystemUser(mActivities.queryIntent(
                         intent, resolvedType, flags, userId), userId);
-                addEphemeral = !ephemeralDisabled
-                        && isInstantAppAllowed(intent, result, userId, false /*skipPackageCheck*/);
+                addInstant = isInstantAppResolutionAllowed(intent, result, userId,
+                        false /*skipPackageCheck*/);
                 // Check for cross profile results.
                 boolean hasNonNegativePriorityResult = hasNonNegativePriority(result);
                 xpResolveInfo = queryCrossProfileIntents(
@@ -6565,20 +6575,20 @@ public class PackageManagerService extends IPackageManager.Stub
                             // in the result.
                             result.remove(xpResolveInfo);
                         }
-                        if (result.size() == 0 && !addEphemeral) {
+                        if (result.size() == 0 && !addInstant) {
                             // No result in current profile, but found candidate in parent user.
                             // And we are not going to add emphemeral app, so we can return the
                             // result straight away.
                             result.add(xpDomainInfo.resolveInfo);
                             return applyPostResolutionFilter(result, instantAppPkgName,
-                                    allowDynamicSplits, filterCallingUid, userId);
+                                    allowDynamicSplits, filterCallingUid, userId, intent);
                         }
-                    } else if (result.size() <= 1 && !addEphemeral) {
+                    } else if (result.size() <= 1 && !addInstant) {
                         // No result in parent user and <= 1 result in current profile, and we
                         // are not going to add emphemeral app, so we can return the result without
                         // further processing.
                         return applyPostResolutionFilter(result, instantAppPkgName,
-                                allowDynamicSplits, filterCallingUid, userId);
+                                allowDynamicSplits, filterCallingUid, userId, intent);
                     }
                     // We have more than one candidate (combining results from current and parent
                     // profile), so we need filtering and sorting.
@@ -6598,8 +6608,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (result == null || result.size() == 0) {
                     // the caller wants to resolve for a particular package; however, there
                     // were no installed results, so, try to find an ephemeral result
-                    addEphemeral = !ephemeralDisabled
-                            && isInstantAppAllowed(
+                    addInstant = isInstantAppResolutionAllowed(
                                     intent, null /*result*/, userId, true /*skipPackageCheck*/);
                     if (result == null) {
                         result = new ArrayList<>();
@@ -6607,7 +6616,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
         }
-        if (addEphemeral) {
+        if (addInstant) {
             result = maybeAddInstantAppInstaller(
                     result, intent, resolvedType, flags, userId, resolveForStart);
         }
@@ -6615,7 +6624,7 @@ public class PackageManagerService extends IPackageManager.Stub
             Collections.sort(result, mResolvePrioritySorter);
         }
         return applyPostResolutionFilter(
-                result, instantAppPkgName, allowDynamicSplits, filterCallingUid, userId);
+                result, instantAppPkgName, allowDynamicSplits, filterCallingUid, userId, intent);
     }
 
     private List<ResolveInfo> maybeAddInstantAppInstaller(List<ResolveInfo> result, Intent intent,
@@ -6819,12 +6828,20 @@ public class PackageManagerService extends IPackageManager.Stub
      * @param resolveInfos The pre-filtered list of resolved activities
      * @param ephemeralPkgName The ephemeral package name. If {@code null}, no filtering
      *          is performed.
+     * @param intent
      * @return A filtered list of resolved activities.
      */
     private List<ResolveInfo> applyPostResolutionFilter(List<ResolveInfo> resolveInfos,
-            String ephemeralPkgName, boolean allowDynamicSplits, int filterCallingUid, int userId) {
+            String ephemeralPkgName, boolean allowDynamicSplits, int filterCallingUid, int userId,
+            Intent intent) {
+        final boolean blockInstant = intent.isWebIntent() && areWebInstantAppsDisabled();
         for (int i = resolveInfos.size() - 1; i >= 0; i--) {
             final ResolveInfo info = resolveInfos.get(i);
+            // remove locally resolved instant app web results when disabled
+            if (info.isInstantAppAvailable && blockInstant) {
+                resolveInfos.remove(i);
+                continue;
+            }
             // allow activities that are defined in the provided package
             if (allowDynamicSplits
                     && info.activityInfo != null
@@ -7456,7 +7473,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
             return applyPostResolutionFilter(
-                    list, instantAppPkgName, allowDynamicSplits, callingUid, userId);
+                    list, instantAppPkgName, allowDynamicSplits, callingUid, userId, intent);
         }
 
         // reader
@@ -7466,14 +7483,14 @@ public class PackageManagerService extends IPackageManager.Stub
                 final List<ResolveInfo> result =
                         mReceivers.queryIntent(intent, resolvedType, flags, userId);
                 return applyPostResolutionFilter(
-                        result, instantAppPkgName, allowDynamicSplits, callingUid, userId);
+                        result, instantAppPkgName, allowDynamicSplits, callingUid, userId, intent);
             }
             final PackageParser.Package pkg = mPackages.get(pkgName);
             if (pkg != null) {
                 final List<ResolveInfo> result = mReceivers.queryIntentForPackage(
                         intent, resolvedType, flags, pkg.receivers, userId);
                 return applyPostResolutionFilter(
-                        result, instantAppPkgName, allowDynamicSplits, callingUid, userId);
+                        result, instantAppPkgName, allowDynamicSplits, callingUid, userId, intent);
             }
             return Collections.emptyList();
         }
@@ -7943,7 +7960,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public ParceledListSlice<InstantAppInfo> getInstantApps(int userId) {
-        if (HIDE_EPHEMERAL_APIS || isEphemeralDisabled()) {
+        if (HIDE_EPHEMERAL_APIS) {
             return null;
         }
         if (!canViewInstantApps(Binder.getCallingUid(), userId)) {
@@ -7968,7 +7985,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mPermissionManager.enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 true /* requireFullPermission */, false /* checkShell */,
                 "isInstantApp");
-        if (HIDE_EPHEMERAL_APIS || isEphemeralDisabled()) {
+        if (HIDE_EPHEMERAL_APIS) {
             return false;
         }
 
@@ -7994,7 +8011,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public byte[] getInstantAppCookie(String packageName, int userId) {
-        if (HIDE_EPHEMERAL_APIS || isEphemeralDisabled()) {
+        if (HIDE_EPHEMERAL_APIS) {
             return null;
         }
 
@@ -8012,7 +8029,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public boolean setInstantAppCookie(String packageName, byte[] cookie, int userId) {
-        if (HIDE_EPHEMERAL_APIS || isEphemeralDisabled()) {
+        if (HIDE_EPHEMERAL_APIS) {
             return true;
         }
 
@@ -8030,7 +8047,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public Bitmap getInstantAppIcon(String packageName, int userId) {
-        if (HIDE_EPHEMERAL_APIS || isEphemeralDisabled()) {
+        if (HIDE_EPHEMERAL_APIS) {
             return null;
         }
 
@@ -9015,6 +9032,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private void notifyPackageUseLocked(String packageName, int reason) {
         final PackageParser.Package p = mPackages.get(packageName);
         if (p == null) {
@@ -10625,8 +10643,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     ~ApplicationInfo.PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE;
             pkg.applicationInfo.privateFlags &=
                     ~ApplicationInfo.PRIVATE_FLAG_DIRECT_BOOT_AWARE;
-            // clear protected broadcasts
-            pkg.protectedBroadcasts = null;
             // cap permission priorities
             if (pkg.permissionGroups != null && pkg.permissionGroups.size() > 0) {
                 for (int i = pkg.permissionGroups.size() - 1; i >= 0; --i) {
@@ -10635,6 +10651,8 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
         if ((scanFlags & SCAN_AS_PRIVILEGED) == 0) {
+            // clear protected broadcasts
+            pkg.protectedBroadcasts = null;
             // ignore export request for single user receivers
             if (pkg.receivers != null) {
                 for (int i = pkg.receivers.size() - 1; i >= 0; --i) {
@@ -13954,6 +13972,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private boolean canSuspendPackageForUserLocked(String packageName, int userId) {
         if (isPackageDeviceAdmin(packageName, userId)) {
             Slog.w(TAG, "Cannot suspend/un-suspend package \"" + packageName
@@ -16610,6 +16629,12 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (userId != UserHandle.USER_ALL) {
                     ps.setInstalled(true, userId);
                     ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, userId, installerPackageName);
+                } else {
+                    for (int currentUserId : sUserManager.getUserIds()) {
+                        ps.setInstalled(true, currentUserId);
+                        ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, currentUserId,
+                                installerPackageName);
+                    }
                 }
 
                 // When replacing an existing package, preserve the original install reason for all
@@ -20696,7 +20721,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         ContentObserver co = new ContentObserver(mHandler) {
             @Override
             public void onChange(boolean selfChange) {
-                mEphemeralAppsDisabled =
+                mWebInstantAppsDisabled =
                         (Global.getInt(resolver, Global.ENABLE_EPHEMERAL_FEATURE, 1) == 0) ||
                                 (Secure.getInt(resolver, Secure.INSTANT_APPS_ENABLED, 1) == 0);
             }
@@ -20704,7 +20729,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         mContext.getContentResolver().registerContentObserver(android.provider.Settings.Global
                         .getUriFor(Global.ENABLE_EPHEMERAL_FEATURE),
                 false, co, UserHandle.USER_SYSTEM);
-        mContext.getContentResolver().registerContentObserver(android.provider.Settings.Global
+        mContext.getContentResolver().registerContentObserver(android.provider.Settings.Secure
                         .getUriFor(Secure.INSTANT_APPS_ENABLED), false, co, UserHandle.USER_SYSTEM);
         co.onChange(true);
 

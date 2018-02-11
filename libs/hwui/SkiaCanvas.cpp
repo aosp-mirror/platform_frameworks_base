@@ -742,6 +742,12 @@ void SkiaCanvas::drawGlyphs(ReadGlyphFunc glyphFunc, int count, const SkPaint& p
     SkPaint paintCopy(paint);
     paintCopy.setTextAlign(SkPaint::kLeft_Align);
     SkASSERT(paintCopy.getTextEncoding() == SkPaint::kGlyphID_TextEncoding);
+    // Stroke with a hairline is drawn on HW with a fill style for compatibility with Android O and
+    // older.
+    if (!mCanvasOwned && sApiLevel <= 27 && paintCopy.getStrokeWidth() <= 0
+            && paintCopy.getStyle() == SkPaint::kStroke_Style) {
+        paintCopy.setStyle(SkPaint::kFill_Style);
+    }
 
     SkRect bounds =
             SkRect::MakeLTRB(boundsLeft + x, boundsTop + y, boundsRight + x, boundsBottom + y);

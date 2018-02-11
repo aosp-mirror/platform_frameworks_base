@@ -306,6 +306,7 @@ public class FileUpdater {
         }
     }
 
+    @GuardedBy("mLock")
     private void saveDefaultValuesLocked() {
         final AtomicFile file = new AtomicFile(injectDefaultValuesFilename());
 
@@ -334,6 +335,7 @@ public class FileUpdater {
         }
     }
 
+    @GuardedBy("mLock")
     @VisibleForTesting
     boolean loadDefaultValuesLocked() {
         final AtomicFile file = new AtomicFile(injectDefaultValuesFilename());

@@ -77,6 +77,7 @@ public class SecurityLog {
             TAG_KEY_DESTRUCTION,
             TAG_CERT_AUTHORITY_INSTALLED,
             TAG_CERT_AUTHORITY_REMOVED,
+            TAG_CRYPTO_SELF_TEST_COMPLETED,
     })
     public @interface SecurityLogTag {}
 
@@ -400,6 +401,14 @@ public class SecurityLog {
             SecurityLogTags.SECURITY_USER_RESTRICTION_REMOVED;
 
     /**
+     * Indicates that cryptographic functionality self test has completed. The log entry contains an
+     * {@code Integer} payload, indicating the result of the test (0 if the test failed, 1 if
+     * succeeded) and accessible via {@link SecurityEvent#getData()}.
+     */
+    public static final int TAG_CRYPTO_SELF_TEST_COMPLETED =
+            SecurityLogTags.SECURITY_CRYPTO_SELF_TEST_COMPLETED;
+
+    /**
      * Event severity level indicating that the event corresponds to normal workflow.
      */
     public static final int LEVEL_INFO = 1;
@@ -529,6 +538,7 @@ public class SecurityLog {
                 case TAG_USER_RESTRICTION_REMOVED:
                     return LEVEL_INFO;
                 case TAG_CERT_AUTHORITY_REMOVED:
+                case TAG_CRYPTO_SELF_TEST_COMPLETED:
                     return getSuccess() ? LEVEL_INFO : LEVEL_ERROR;
                 case TAG_CERT_AUTHORITY_INSTALLED:
                 case TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT:

@@ -177,6 +177,12 @@ public class AppStandbyController {
     long mAppIdleParoleDurationMillis;
     long[] mAppStandbyScreenThresholds = SCREEN_TIME_THRESHOLDS;
     long[] mAppStandbyElapsedThresholds = ELAPSED_TIME_THRESHOLDS;
+    /** Minimum time a strong usage event should keep the bucket elevated. */
+    long mStrongUsageTimeoutMillis;
+    /** Minimum time a notification seen event should keep the bucket elevated. */
+    long mNotificationSeenTimeoutMillis;
+    /** Minimum time a system update event should keep the buckets elevated. */
+    long mSystemUpdateUsageTimeoutMillis;
 
     volatile boolean mAppIdleEnabled;
     boolean mAppIdleTempParoled;
@@ -330,7 +336,7 @@ public class AppStandbyController {
                     synchronized (mAppIdleLock) {
                         AppUsageHistory appUsage = mAppIdleHistory.reportUsage(packageName, userId,
                                 STANDBY_BUCKET_ACTIVE, elapsedRealtime,
-                                elapsedRealtime + 2 * ONE_HOUR);
+                                elapsedRealtime + mStrongUsageTimeoutMillis);
                         maybeInformListeners(packageName, userId, elapsedRealtime,
                                 appUsage.currentBucket, false);
                     }
@@ -539,6 +545,7 @@ public class AppStandbyController {
         }
     }
 
+    @GuardedBy("mAppIdleLock")
     @StandbyBuckets int getBucketForLocked(String packageName, int userId,
             long elapsedRealtime) {
         int bucketIndex = mAppIdleHistory.getThresholdIndex(packageName, userId,
@@ -627,11 +634,11 @@ public class AppStandbyController {
                 if (event.mEventType == UsageEvents.Event.NOTIFICATION_SEEN) {
                     mAppIdleHistory.reportUsage(appHistory, event.mPackage,
                             STANDBY_BUCKET_WORKING_SET,
-                            elapsedRealtime, elapsedRealtime + 2 * ONE_HOUR);
+                            elapsedRealtime, elapsedRealtime + mNotificationSeenTimeoutMillis);
                 } else {
                     mAppIdleHistory.reportUsage(event.mPackage, userId,
                             STANDBY_BUCKET_ACTIVE,
-                            elapsedRealtime, elapsedRealtime + 2 * ONE_HOUR);
+                            elapsedRealtime, elapsedRealtime + mStrongUsageTimeoutMillis);
                 }
 
                 final boolean userStartedInteracting =
@@ -1113,10 +1120,10 @@ public class AppStandbyController {
                 final PackageInfo pi = packages.get(i);
                 String packageName = pi.packageName;
                 if (pi.applicationInfo != null && pi.applicationInfo.isSystemApp()) {
-                    // Mark app as used for 4 hours. After that it can timeout to whatever the
+                    // Mark app as used for 2 hours. After that it can timeout to whatever the
                     // past usage pattern was.
                     mAppIdleHistory.reportUsage(packageName, userId, STANDBY_BUCKET_ACTIVE, 0,
-                            elapsedRealtime + 4 * ONE_HOUR);
+                            elapsedRealtime + mSystemUpdateUsageTimeoutMillis);
                 }
             }
         }
@@ -1395,6 +1402,12 @@ public class AppStandbyController {
         private static final String KEY_PAROLE_DURATION = "parole_duration";
         private static final String KEY_SCREEN_TIME_THRESHOLDS = "screen_thresholds";
         private static final String KEY_ELAPSED_TIME_THRESHOLDS = "elapsed_thresholds";
+        private static final String KEY_STRONG_USAGE_HOLD_DURATION = "strong_usage_duration";
+        private static final String KEY_NOTIFICATION_SEEN_HOLD_DURATION =
+                "notification_seen_duration";
+        private static final String KEY_SYSTEM_UPDATE_HOLD_DURATION =
+                "system_update_usage_duration";
+
 
         private final KeyValueListParser mParser = new KeyValueListParser(',');
 
@@ -1455,7 +1468,15 @@ public class AppStandbyController {
                         ELAPSED_TIME_THRESHOLDS);
                 mCheckIdleIntervalMillis = Math.min(mAppStandbyElapsedThresholds[1] / 4,
                         COMPRESS_TIME ? ONE_MINUTE : 4 * 60 * ONE_MINUTE); // 4 hours
-
+                mStrongUsageTimeoutMillis = mParser.getDurationMillis
+                        (KEY_STRONG_USAGE_HOLD_DURATION,
+                                COMPRESS_TIME ? ONE_MINUTE : 1 * ONE_HOUR);
+                mNotificationSeenTimeoutMillis = mParser.getDurationMillis
+                        (KEY_NOTIFICATION_SEEN_HOLD_DURATION,
+                                COMPRESS_TIME ? 12 * ONE_MINUTE : 12 * ONE_HOUR);
+                mSystemUpdateUsageTimeoutMillis = mParser.getDurationMillis
+                        (KEY_SYSTEM_UPDATE_HOLD_DURATION,
+                                COMPRESS_TIME ? 2 * ONE_MINUTE : 2 * ONE_HOUR);
             }
         }
 

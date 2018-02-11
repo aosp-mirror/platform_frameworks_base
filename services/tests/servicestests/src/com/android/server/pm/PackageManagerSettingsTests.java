@@ -294,7 +294,7 @@ public class PackageManagerSettingsTests {
                 null /*disabledPkg*/,
                 null /*sharedUser*/,
                 UPDATED_CODE_PATH /*codePath*/,
-                null /*resourcePath*/,
+                UPDATED_CODE_PATH /*resourcePath*/,
                 null /*legacyNativeLibraryPath*/,
                 "arm64-v8a" /*primaryCpuAbi*/,
                 "armeabi" /*secondaryCpuAbi*/,
@@ -328,7 +328,7 @@ public class PackageManagerSettingsTests {
                 null /*disabledPkg*/,
                 null /*sharedUser*/,
                 UPDATED_CODE_PATH /*codePath*/,
-                null /*resourcePath*/,
+                UPDATED_CODE_PATH /*resourcePath*/,
                 null /*legacyNativeLibraryPath*/,
                 "arm64-v8a" /*primaryCpuAbi*/,
                 "armeabi" /*secondaryCpuAbi*/,
@@ -559,34 +559,6 @@ public class PackageManagerSettingsTests {
         final PackageUserState userState = testPkgSetting01.readUserState(0);
         verifyUserState(userState, null /*oldUserState*/, false /*userStateChanged*/,
                 false /*notLaunched*/, false /*stopped*/, true /*installed*/);
-    }
-
-    @Test
-    public void testInsertPackageSetting() {
-        final PackageSetting ps = createPackageSetting(0 /*sharedUserId*/, 0 /*pkgFlags*/);
-        final PackageParser.Package pkg = new PackageParser.Package(PACKAGE_NAME);
-        pkg.applicationInfo.setCodePath(ps.codePathString);
-        pkg.applicationInfo.setResourcePath(ps.resourcePathString);
-        final Context context = InstrumentationRegistry.getContext();
-        final Object lock = new Object();
-        PermissionManagerInternal pmInt = PermissionManagerService.create(context, null, lock);
-        final Settings settings =
-                new Settings(context.getFilesDir(), pmInt.getPermissionSettings(), lock);
-        pkg.usesStaticLibraries = new ArrayList<>(
-                Arrays.asList("foo.bar1", "foo.bar2", "foo.bar3"));
-        pkg.usesStaticLibrariesVersions = new long[] {2, 4, 6};
-        settings.insertPackageSettingLPw(ps, pkg);
-        assertEquals(pkg, ps.pkg);
-        assertArrayEquals(pkg.usesStaticLibraries.toArray(new String[0]), ps.usesStaticLibraries);
-        assertArrayEquals(pkg.usesStaticLibrariesVersions, ps.usesStaticLibrariesVersions);
-
-        pkg.usesStaticLibraries = null;
-        pkg.usesStaticLibrariesVersions = null;
-        settings.insertPackageSettingLPw(ps, pkg);
-        assertEquals(pkg, ps.pkg);
-        assertNull("Actual: " + Arrays.toString(ps.usesStaticLibraries), ps.usesStaticLibraries);
-        assertNull("Actual: " + Arrays.toString(ps.usesStaticLibrariesVersions),
-                ps.usesStaticLibrariesVersions);
     }
 
     private <T> void assertArrayEquals(T[] a, T[] b) {

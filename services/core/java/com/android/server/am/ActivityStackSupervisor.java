@@ -166,6 +166,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.RemoteAnimationAdapter;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.logging.MetricsLoggerWrapper;
@@ -1508,6 +1509,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             Slog.w(TAG, "Activity " + r + " being launched, but already in LRU list");
         }
 
+        // TODO(lifecycler): Resume or pause requests are done as part of launch transaction,
+        // so updating the state should be done accordingly.
         if (andResume && readyToResume()) {
             // As part of the process of launching, ActivityThread also performs
             // a resume.
@@ -1858,6 +1861,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * Called when the frontmost task is idle.
      * @return the state of mService.mBooting before this was called.
      */
+    @GuardedBy("mService")
     private boolean checkFinishBootingLocked() {
         final boolean booting = mService.mBooting;
         boolean enableScreen = false;
@@ -1873,6 +1877,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     // Checked.
+    @GuardedBy("mService")
     final ActivityRecord activityIdleInternalLocked(final IBinder token, boolean fromTimeout,
             boolean processPausingActivities, Configuration config) {
         if (DEBUG_ALL) Slog.v(TAG, "Activity idle: " + token);
@@ -4087,25 +4092,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             if (activityDisplay == null) {
                 return;
             }
-            final boolean destroyContentOnRemoval
-                    = activityDisplay.shouldDestroyContentOnRemove();
-            while (activityDisplay.getChildCount() > 0) {
-                final ActivityStack stack = activityDisplay.getChildAt(0);
-                if (destroyContentOnRemoval) {
-                    moveStackToDisplayLocked(stack.mStackId, DEFAULT_DISPLAY, false /* onTop */);
-                    stack.finishAllActivitiesLocked(true /* immediately */);
-                } else {
-                    // Moving all tasks to fullscreen stack, because it's guaranteed to be
-                    // a valid launch stack for all activities. This way the task history from
-                    // external display will be preserved on primary after move.
-                    moveTasksToFullscreenStackLocked(stack, true /* onTop */);
-                }
-            }
+
+            activityDisplay.remove();
 
             releaseSleepTokens(activityDisplay);
 
             mActivityDisplays.remove(displayId);
-            mWindowManager.onDisplayRemoved(displayId);
         }
     }
 

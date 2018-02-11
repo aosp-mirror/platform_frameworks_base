@@ -30,8 +30,8 @@ package android {
     field public static final java.lang.String BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE = "android.permission.BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE";
     field public static final java.lang.String BIND_SETTINGS_SUGGESTIONS_SERVICE = "android.permission.BIND_SETTINGS_SUGGESTIONS_SERVICE";
     field public static final java.lang.String BIND_TELEPHONY_DATA_SERVICE = "android.permission.BIND_TELEPHONY_DATA_SERVICE";
-    field public static final java.lang.String BIND_TEXTCLASSIFIER_SERVICE = "android.permission.BIND_TEXTCLASSIFIER_SERVICE";
     field public static final java.lang.String BIND_TELEPHONY_NETWORK_SERVICE = "android.permission.BIND_TELEPHONY_NETWORK_SERVICE";
+    field public static final java.lang.String BIND_TEXTCLASSIFIER_SERVICE = "android.permission.BIND_TEXTCLASSIFIER_SERVICE";
     field public static final java.lang.String BIND_TRUST_AGENT = "android.permission.BIND_TRUST_AGENT";
     field public static final java.lang.String BIND_TV_REMOTE_SERVICE = "android.permission.BIND_TV_REMOTE_SERVICE";
     field public static final java.lang.String BLUETOOTH_PRIVILEGED = "android.permission.BLUETOOTH_PRIVILEGED";
@@ -362,10 +362,12 @@ package android.app {
 
   public final class StatsManager {
     method public boolean addConfiguration(long, byte[], java.lang.String, java.lang.String);
+    method public boolean addConfiguration(long, byte[]);
     method public byte[] getData(long);
     method public byte[] getMetadata();
     method public boolean removeConfiguration(long);
     method public boolean setBroadcastSubscriber(long, long, android.app.PendingIntent);
+    method public boolean setDataFetchOperation(long, android.app.PendingIntent);
     field public static final java.lang.String ACTION_STATSD_STARTED = "android.app.action.STATSD_STARTED";
     field public static final java.lang.String EXTRA_STATS_CONFIG_KEY = "android.app.extra.STATS_CONFIG_KEY";
     field public static final java.lang.String EXTRA_STATS_CONFIG_UID = "android.app.extra.STATS_CONFIG_UID";
@@ -687,6 +689,12 @@ package android.app.usage {
     field public static final java.lang.String SERVICE_INTERFACE = "android.app.usage.CacheQuotaService";
   }
 
+  public static final class UsageEvents.Event {
+    method public int getStandbyBucket();
+    field public static final int NOTIFICATION_SEEN = 10; // 0xa
+    field public static final int STANDBY_BUCKET_CHANGED = 11; // 0xb
+  }
+
   public final class UsageStatsManager {
     method public int getAppStandbyBucket(java.lang.String);
     method public java.util.Map<java.lang.String, java.lang.Integer> getAppStandbyBuckets();
@@ -791,7 +799,7 @@ package android.content {
     field public static final java.lang.String STATS_MANAGER = "stats";
     field public static final java.lang.String SYSTEM_UPDATE_SERVICE = "system_update";
     field public static final java.lang.String VR_SERVICE = "vrmanager";
-    field public static final java.lang.String WIFI_RTT_SERVICE = "rttmanager";
+    field public static final deprecated java.lang.String WIFI_RTT_SERVICE = "rttmanager";
     field public static final java.lang.String WIFI_SCANNING_SERVICE = "wifiscanner";
   }
 
@@ -821,6 +829,7 @@ package android.content {
     field public static final java.lang.String ACTION_RESOLVE_INSTANT_APP_PACKAGE = "android.intent.action.RESOLVE_INSTANT_APP_PACKAGE";
     field public static final java.lang.String ACTION_REVIEW_PERMISSIONS = "android.intent.action.REVIEW_PERMISSIONS";
     field public static final deprecated java.lang.String ACTION_SIM_STATE_CHANGED = "android.intent.action.SIM_STATE_CHANGED";
+    field public static final java.lang.String ACTION_SPLIT_CONFIGURATION_CHANGED = "android.intent.action.SPLIT_CONFIGURATION_CHANGED";
     field public static final java.lang.String ACTION_UPGRADE_SETUP = "android.intent.action.UPGRADE_SETUP";
     field public static final java.lang.String ACTION_USER_REMOVED = "android.intent.action.USER_REMOVED";
     field public static final java.lang.String ACTION_VOICE_ASSIST = "android.intent.action.VOICE_ASSIST";
@@ -3091,7 +3100,7 @@ package android.net.http {
 
 package android.net.wifi {
 
-  public class RttManager {
+  public deprecated class RttManager {
     method public void disableResponder(android.net.wifi.RttManager.ResponderCallback);
     method public void enableResponder(android.net.wifi.RttManager.ResponderCallback);
     method public deprecated android.net.wifi.RttManager.Capabilities getCapabilities();
@@ -3167,22 +3176,22 @@ package android.net.wifi {
     field public int supportedType;
   }
 
-  public static class RttManager.ParcelableRttParams implements android.os.Parcelable {
+  public static deprecated class RttManager.ParcelableRttParams implements android.os.Parcelable {
     field public android.net.wifi.RttManager.RttParams[] mParams;
   }
 
-  public static class RttManager.ParcelableRttResults implements android.os.Parcelable {
+  public static deprecated class RttManager.ParcelableRttResults implements android.os.Parcelable {
     ctor public RttManager.ParcelableRttResults(android.net.wifi.RttManager.RttResult[]);
     field public android.net.wifi.RttManager.RttResult[] mResults;
   }
 
-  public static abstract class RttManager.ResponderCallback {
+  public static abstract deprecated class RttManager.ResponderCallback {
     ctor public RttManager.ResponderCallback();
     method public abstract void onResponderEnableFailure(int);
     method public abstract void onResponderEnabled(android.net.wifi.RttManager.ResponderConfig);
   }
 
-  public static class RttManager.ResponderConfig implements android.os.Parcelable {
+  public static deprecated class RttManager.ResponderConfig implements android.os.Parcelable {
     ctor public RttManager.ResponderConfig();
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
@@ -3195,7 +3204,7 @@ package android.net.wifi {
     field public int preamble;
   }
 
-  public static class RttManager.RttCapabilities implements android.os.Parcelable {
+  public static deprecated class RttManager.RttCapabilities implements android.os.Parcelable {
     ctor public RttManager.RttCapabilities();
     field public int bwSupported;
     field public boolean lciSupported;
@@ -3210,13 +3219,13 @@ package android.net.wifi {
     field public boolean twoSided11McRttSupported;
   }
 
-  public static abstract interface RttManager.RttListener {
+  public static abstract deprecated interface RttManager.RttListener {
     method public abstract void onAborted();
     method public abstract void onFailure(int, java.lang.String);
     method public abstract void onSuccess(android.net.wifi.RttManager.RttResult[]);
   }
 
-  public static class RttManager.RttParams {
+  public static deprecated class RttManager.RttParams {
     ctor public RttManager.RttParams();
     field public boolean LCIRequest;
     field public boolean LCRRequest;
@@ -3240,7 +3249,7 @@ package android.net.wifi {
     field public boolean secure;
   }
 
-  public static class RttManager.RttResult {
+  public static deprecated class RttManager.RttResult {
     ctor public RttManager.RttResult();
     field public android.net.wifi.RttManager.WifiInformationElement LCI;
     field public android.net.wifi.RttManager.WifiInformationElement LCR;
@@ -3277,7 +3286,7 @@ package android.net.wifi {
     field public deprecated int tx_rate;
   }
 
-  public static class RttManager.WifiInformationElement {
+  public static deprecated class RttManager.WifiInformationElement {
     ctor public RttManager.WifiInformationElement();
     field public byte[] data;
     field public byte id;

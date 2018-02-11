@@ -28,6 +28,7 @@ import static com.android.systemui.utils.os.FakeHandler.Mode.QUEUEING;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 import android.os.Looper;
 import android.support.test.filters.SmallTest;
@@ -35,11 +36,14 @@ import android.support.test.runner.AndroidJUnit4;
 import android.view.Display;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.utils.os.FakeHandler;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -48,12 +52,16 @@ public class DozeScreenStateTest extends SysuiTestCase {
     DozeServiceFake mServiceFake;
     DozeScreenState mScreen;
     FakeHandler mHandlerFake;
+    @Mock
+    DozeParameters mDozeParameters;
 
     @Before
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+        when(mDozeParameters.getDisplayNeedsBlanking()).thenReturn(true);
         mServiceFake = new DozeServiceFake();
         mHandlerFake = new FakeHandler(Looper.getMainLooper());
-        mScreen = new DozeScreenState(mServiceFake, mHandlerFake);
+        mScreen = new DozeScreenState(mServiceFake, mHandlerFake, mDozeParameters);
     }
 
     @Test

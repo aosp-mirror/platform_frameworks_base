@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define DEBUG true  // STOPSHIP if true
+#define DEBUG false  // STOPSHIP if true
 #include "Log.h"
 #include "MetricsManager.h"
 #include "statslog.h"
@@ -29,6 +29,7 @@
 
 #include <log/logprint.h>
 #include <private/android_filesystem_config.h>
+#include <utils/SystemClock.h>
 
 using android::util::FIELD_COUNT_REPEATED;
 using android::util::FIELD_TYPE_MESSAGE;
@@ -48,7 +49,7 @@ const int FIELD_ID_METRICS = 1;
 
 MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
                                const long timeBaseSec, sp<UidMap> uidMap)
-    : mConfigKey(key), mUidMap(uidMap) {
+    : mConfigKey(key), mUidMap(uidMap), mLastReportTimeNs(0) {
     mConfigValid =
             initStatsdConfig(key, config, *uidMap, timeBaseSec, mTagIds, mAllAtomMatchers, mAllConditionTrackers,
                              mAllMetricProducers, mAllAnomalyTrackers, mConditionToMetricMap,
@@ -184,6 +185,7 @@ void MetricsManager::onDumpReport(ProtoOutputStream* protoOutput) {
             protoOutput->end(token);
         }
     }
+    mLastReportTimeNs = ::android::elapsedRealtimeNano();
     VLOG("=========================Metric Reports End==========================");
 }
 

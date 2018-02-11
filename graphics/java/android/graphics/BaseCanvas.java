@@ -22,7 +22,6 @@ import android.annotation.Nullable;
 import android.annotation.Size;
 import android.graphics.Canvas.VertexMode;
 import android.text.GraphicsOperations;
-import android.text.MeasuredParagraph;
 import android.text.MeasuredText;
 import android.text.SpannableString;
 import android.text.SpannedString;

@@ -92,6 +92,7 @@ public final class ConnectivityController extends StateController implements
         mNetPolicyManager.registerListener(mNetPolicyListener);
     }
 
+    @GuardedBy("mLock")
     @Override
     public void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob) {
         if (jobStatus.hasConnectivityConstraint()) {
@@ -101,6 +102,7 @@ public final class ConnectivityController extends StateController implements
         }
     }
 
+    @GuardedBy("mLock")
     @Override
     public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
             boolean forUpdate) {
@@ -325,6 +327,7 @@ public final class ConnectivityController extends StateController implements
         }
     };
 
+    @GuardedBy("mLock")
     @Override
     public void dumpControllerStateLocked(PrintWriter pw, int filterUid) {
         pw.print("Connectivity: connected=");
@@ -348,6 +351,7 @@ public final class ConnectivityController extends StateController implements
         }
     }
 
+    @GuardedBy("mLock")
     @Override
     public void dumpControllerStateLocked(ProtoOutputStream proto, long fieldId, int filterUid) {
         final long token = proto.start(fieldId);

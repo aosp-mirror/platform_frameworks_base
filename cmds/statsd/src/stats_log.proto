@@ -143,9 +143,7 @@ message UidMapping {
 message StatsLogReport {
   optional int64 metric_id = 1;
 
-  optional int64 start_report_nanos = 2;
-
-  optional int64 end_report_nanos = 3;
+  // Fields 2 and 3 are reserved.
 
   message EventMetricDataWrapper {
     repeated EventMetricData data = 1;
@@ -177,6 +175,10 @@ message ConfigMetricsReport {
   repeated StatsLogReport metrics = 1;
 
   optional UidMapping uid_map = 2;
+
+  optional int64 last_report_nanos = 3;
+
+  optional int64 current_report_nanos = 4;
 }
 
 message ConfigMetricsReportList {

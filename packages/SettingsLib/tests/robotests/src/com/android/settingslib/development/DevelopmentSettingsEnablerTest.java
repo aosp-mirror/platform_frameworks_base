@@ -23,7 +23,9 @@ import android.provider.Settings;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.TestConfig;
+import com.android.settingslib.testutils.shadow.ShadowUserManager;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,7 +33,9 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
+@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION, shadows = {
+        ShadowUserManager.class
+})
 public class DevelopmentSettingsEnablerTest {
 
     private Context mContext;
@@ -39,10 +43,16 @@ public class DevelopmentSettingsEnablerTest {
     @Before
     public void setUp() {
         mContext = RuntimeEnvironment.application;
+        ShadowUserManager.getShadow().setIsAdminUser(true);
+    }
+
+    @After
+    public void tearDown() {
+        ShadowUserManager.getShadow().reset();
     }
 
     @Test
-    public void testEnabling() {
+    public void isEnabled_settingsOn_noRestriction_isAdmin_shouldReturnTrue() {
         Settings.Global.putInt(mContext.getContentResolver(),
                 Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0);
 
@@ -54,13 +64,22 @@ public class DevelopmentSettingsEnablerTest {
     }
 
     @Test
-    public void testDisabling() {
+    public void isEnabled_settingsOff_noRestriction_isAdmin_shouldReturnFalse() {
         Settings.Global.putInt(mContext.getContentResolver(),
                 Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 1);
 
         assertThat(DevelopmentSettingsEnabler.isDevelopmentSettingsEnabled(mContext)).isTrue();
 
         DevelopmentSettingsEnabler.setDevelopmentSettingsEnabled(mContext, false);
+
+        assertThat(DevelopmentSettingsEnabler.isDevelopmentSettingsEnabled(mContext)).isFalse();
+    }
+
+    @Test
+    public void isEnabled_settingsOn_noRestriction_notAdmin_shouldReturnFalse() {
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 1);
+        ShadowUserManager.getShadow().setIsAdminUser(false);
 
         assertThat(DevelopmentSettingsEnabler.isDevelopmentSettingsEnabled(mContext)).isFalse();
     }

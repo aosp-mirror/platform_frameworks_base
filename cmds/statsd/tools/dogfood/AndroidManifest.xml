@@ -37,5 +37,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service android:name=".MainActivity$ReceiverIntentService" android:exported="true" />
     </application>
 </manifest>

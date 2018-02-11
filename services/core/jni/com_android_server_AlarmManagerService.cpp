@@ -385,20 +385,21 @@ static void android_server_AlarmManagerService_close(JNIEnv*, jobject, jlong nat
     delete impl;
 }
 
-static void android_server_AlarmManagerService_set(JNIEnv*, jobject, jlong nativeData, jint type, jlong seconds, jlong nanoseconds)
+static jint android_server_AlarmManagerService_set(JNIEnv*, jobject, jlong nativeData, jint type, jlong seconds, jlong nanoseconds)
 {
     AlarmImpl *impl = reinterpret_cast<AlarmImpl *>(nativeData);
     struct timespec ts;
     ts.tv_sec = seconds;
     ts.tv_nsec = nanoseconds;
 
-    int result = impl->set(type, &ts);
+    const int result = impl->set(type, &ts);
     if (result < 0)
     {
         ALOGE("Unable to set alarm to %lld.%09lld: %s\n",
               static_cast<long long>(seconds),
               static_cast<long long>(nanoseconds), strerror(errno));
     }
+    return result >= 0 ? 0 : errno;
 }
 
 static jint android_server_AlarmManagerService_waitForAlarm(JNIEnv*, jobject, jlong nativeData)
@@ -424,7 +425,7 @@ static const JNINativeMethod sMethods[] = {
      /* name, signature, funcPtr */
     {"init", "()J", (void*)android_server_AlarmManagerService_init},
     {"close", "(J)V", (void*)android_server_AlarmManagerService_close},
-    {"set", "(JIJJ)V", (void*)android_server_AlarmManagerService_set},
+    {"set", "(JIJJ)I", (void*)android_server_AlarmManagerService_set},
     {"waitForAlarm", "(J)I", (void*)android_server_AlarmManagerService_waitForAlarm},
     {"setKernelTime", "(JJ)I", (void*)android_server_AlarmManagerService_setKernelTime},
     {"setKernelTimezone", "(JI)I", (void*)android_server_AlarmManagerService_setKernelTimezone},

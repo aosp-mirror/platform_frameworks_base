@@ -161,7 +161,7 @@ public class WindowAnimator {
                 final int numDisplays = mDisplayContentsAnimators.size();
                 for (int i = 0; i < numDisplays; i++) {
                     final int displayId = mDisplayContentsAnimators.keyAt(i);
-                    final DisplayContent dc = mService.mRoot.getDisplayContentOrCreate(displayId);
+                    final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
                     DisplayContentsAnimator displayAnimator = mDisplayContentsAnimators.valueAt(i);
 
                     final ScreenRotationAnimation screenRotationAnimation =
@@ -195,7 +195,7 @@ public class WindowAnimator {
 
                 for (int i = 0; i < numDisplays; i++) {
                     final int displayId = mDisplayContentsAnimators.keyAt(i);
-                    final DisplayContent dc = mService.mRoot.getDisplayContentOrCreate(displayId);
+                    final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
 
                     dc.checkAppWindowsReadyToShow();
 
@@ -228,7 +228,7 @@ public class WindowAnimator {
             final int numDisplays = mDisplayContentsAnimators.size();
             for (int i = 0; i < numDisplays; i++) {
                 final int displayId = mDisplayContentsAnimators.keyAt(i);
-                final DisplayContent dc = mService.mRoot.getDisplayContentOrCreate(displayId);
+                final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
                 dc.onPendingTransactionApplied();
             }
 
@@ -305,7 +305,7 @@ public class WindowAnimator {
                     pw.println(":");
             final DisplayContentsAnimator displayAnimator = mDisplayContentsAnimators.valueAt(i);
             final DisplayContent dc =
-                    mService.mRoot.getDisplayContentOrCreate(mDisplayContentsAnimators.keyAt(i));
+                    mService.mRoot.getDisplayContent(mDisplayContentsAnimators.keyAt(i));
             dc.dumpWindowAnimators(pw, subPrefix);
             if (displayAnimator.mScreenRotationAnimation != null) {
                 pw.print(subPrefix); pw.println("mScreenRotationAnimation:");
@@ -339,7 +339,7 @@ public class WindowAnimator {
         if (displayId < 0) {
             return 0;
         }
-        final DisplayContent displayContent = mService.mRoot.getDisplayContentOrCreate(displayId);
+        final DisplayContent displayContent = mService.mRoot.getDisplayContent(displayId);
         return (displayContent != null) ? displayContent.pendingLayoutChanges : 0;
     }
 
@@ -347,7 +347,7 @@ public class WindowAnimator {
         if (displayId < 0) {
             return;
         }
-        final DisplayContent displayContent = mService.mRoot.getDisplayContentOrCreate(displayId);
+        final DisplayContent displayContent = mService.mRoot.getDisplayContent(displayId);
         if (displayContent != null) {
             displayContent.pendingLayoutChanges |= changes;
         }

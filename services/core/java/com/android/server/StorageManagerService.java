@@ -809,6 +809,7 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    @GuardedBy("mLock")
     private void addInternalVolumeLocked() {
         // Create a stub volume that represents internal storage
         final VolumeInfo internal = new VolumeInfo(VolumeInfo.ID_PRIVATE_INTERNAL,
@@ -1109,6 +1110,7 @@ class StorageManagerService extends IStorageManager.Stub
         }
     };
 
+    @GuardedBy("mLock")
     private void onDiskScannedLocked(DiskInfo disk) {
         int volumeCount = 0;
         for (int i = 0; i < mVolumes.size(); i++) {
@@ -1134,6 +1136,7 @@ class StorageManagerService extends IStorageManager.Stub
         mCallbacks.notifyDiskScanned(disk, volumeCount);
     }
 
+    @GuardedBy("mLock")
     private void onVolumeCreatedLocked(VolumeInfo vol) {
         if (mPms.isOnlyCoreApps()) {
             Slog.d(TAG, "System booted in core-only mode; ignoring volume " + vol.getId());
@@ -1209,6 +1212,7 @@ class StorageManagerService extends IStorageManager.Stub
         return true;
     }
 
+    @GuardedBy("mLock")
     private void onVolumeStateChangedLocked(VolumeInfo vol, int oldState, int newState) {
         // Remember that we saw this volume so we're ready to accept user
         // metadata, or so we can annoy them when a private volume is ejected
@@ -1299,6 +1303,7 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    @GuardedBy("mLock")
     private void onMoveStatusLocked(int status) {
         if (mMoveCallback == null) {
             Slog.w(TAG, "Odd, status but no move requested");
@@ -1515,6 +1520,7 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    @GuardedBy("mLock")
     private void readSettingsLocked() {
         mRecords.clear();
         mPrimaryStorageUuid = getDefaultPrimaryStorageUuid();
@@ -1559,6 +1565,7 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    @GuardedBy("mLock")
     private void writeSettingsLocked() {
         FileOutputStream fos = null;
         try {

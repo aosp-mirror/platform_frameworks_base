@@ -19,10 +19,8 @@ package android.graphics;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Size;
-import android.graphics.FontListParser;
 import android.graphics.fonts.FontVariationAxis;
 import android.os.LocaleList;
-import android.text.FontConfig;
 import android.text.GraphicsOperations;
 import android.text.SpannableString;
 import android.text.SpannedString;
@@ -33,13 +31,12 @@ import com.android.internal.annotations.GuardedBy;
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
 
+import libcore.util.NativeAllocationRegistry;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
-
-import libcore.util.NativeAllocationRegistry;
 
 /**
  * The Paint class holds the style and color information about how to draw

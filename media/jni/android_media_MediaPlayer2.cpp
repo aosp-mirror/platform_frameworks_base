@@ -154,7 +154,8 @@ class JNIMediaPlayer2Listener: public MediaPlayer2Listener
 public:
     JNIMediaPlayer2Listener(JNIEnv* env, jobject thiz, jobject weak_thiz);
     ~JNIMediaPlayer2Listener();
-    virtual void notify(int msg, int ext1, int ext2, const Parcel *obj = NULL);
+    virtual void notify(int64_t srcId, int msg, int ext1, int ext2,
+                        const Parcel *obj = NULL) override;
 private:
     JNIMediaPlayer2Listener();
     jclass      mClass;     // Reference to MediaPlayer2 class
@@ -187,7 +188,7 @@ JNIMediaPlayer2Listener::~JNIMediaPlayer2Listener()
     env->DeleteGlobalRef(mClass);
 }
 
-void JNIMediaPlayer2Listener::notify(int msg, int ext1, int ext2, const Parcel *obj)
+void JNIMediaPlayer2Listener::notify(int64_t srcId, int msg, int ext1, int ext2, const Parcel *obj)
 {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     if (obj && obj->dataSize() > 0) {
@@ -196,12 +197,12 @@ void JNIMediaPlayer2Listener::notify(int msg, int ext1, int ext2, const Parcel *
             Parcel* nativeParcel = parcelForJavaObject(env, jParcel);
             nativeParcel->setData(obj->data(), obj->dataSize());
             env->CallStaticVoidMethod(mClass, fields.post_event, mObject,
-                    msg, ext1, ext2, jParcel);
+                    srcId, msg, ext1, ext2, jParcel);
             env->DeleteLocalRef(jParcel);
         }
     } else {
         env->CallStaticVoidMethod(mClass, fields.post_event, mObject,
-                msg, ext1, ext2, NULL);
+                srcId, msg, ext1, ext2, NULL);
     }
     if (env->ExceptionCheck()) {
         ALOGW("An exception occurred while notifying an event.");
@@ -243,7 +244,11 @@ static void process_media_player_call(
     if (exception == NULL) {  // Don't throw exception. Instead, send an event.
         if (opStatus != (status_t) OK) {
             sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
-            if (mp != 0) mp->notify(MEDIA2_ERROR, opStatus, 0);
+            if (mp != 0) {
+                int64_t srcId = 0;
+                mp->getSrcId(&srcId);
+                mp->notify(srcId, MEDIA2_ERROR, opStatus, 0);
+            }
         }
     } else {  // Throw exception!
         if ( opStatus == (status_t) INVALID_OPERATION ) {
@@ -268,7 +273,7 @@ static void process_media_player_call(
 
 static void
 android_media_MediaPlayer2_setDataSourceAndHeaders(
-        JNIEnv *env, jobject thiz, jobject httpServiceObj, jstring path,
+        JNIEnv *env, jobject thiz, jlong srcId, jobject httpServiceObj, jstring path,
         jobjectArray keys, jobjectArray values) {
 
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
@@ -286,7 +291,7 @@ android_media_MediaPlayer2_setDataSourceAndHeaders(
     if (tmp == NULL) {  // Out of memory
         return;
     }
-    ALOGV("setDataSourceAndHeaders: path %s", tmp);
+    ALOGV("setDataSourceAndHeaders: path %s, srcId %lld", tmp, (long long)srcId);
 
     if (strncmp(tmp, "content://", 10) == 0) {
         ALOGE("setDataSourceAndHeaders: content scheme is not supported in native code");
@@ -296,6 +301,7 @@ android_media_MediaPlayer2_setDataSourceAndHeaders(
     }
 
     sp<DataSourceDesc> dsd = new DataSourceDesc();
+    dsd->mId = srcId;
     dsd->mType = DataSourceDesc::TYPE_URL;
     dsd->mUrl = tmp;
 
@@ -321,7 +327,7 @@ android_media_MediaPlayer2_setDataSourceAndHeaders(
 
 static void
 android_media_MediaPlayer2_setDataSourceFD(
-    JNIEnv *env, jobject thiz, jobject fileDescriptor, jlong offset, jlong length)
+    JNIEnv *env, jobject thiz, jlong srcId, jobject fileDescriptor, jlong offset, jlong length)
 {
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
     if (mp == NULL ) {
@@ -334,8 +340,8 @@ android_media_MediaPlayer2_setDataSourceFD(
         return;
     }
     int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
-    ALOGV("setDataSourceFD: fd=%d (%s), offset=%lld, length=%lld",
-          fd, nameForFd(fd).c_str(), (long long)offset, (long long)length);
+    ALOGV("setDataSourceFD: srcId=%lld, fd=%d (%s), offset=%lld, length=%lld",
+          (long long)srcId, fd, nameForFd(fd).c_str(), (long long)offset, (long long)length);
 
     struct stat sb;
     int ret = fstat(fd, &sb);
@@ -363,6 +369,7 @@ android_media_MediaPlayer2_setDataSourceFD(
     }
 
     sp<DataSourceDesc> dsd = new DataSourceDesc();
+    dsd->mId = srcId;
     dsd->mType = DataSourceDesc::TYPE_FD;
     dsd->mFD = fd;
     dsd->mFDOffset = offset;
@@ -373,7 +380,7 @@ android_media_MediaPlayer2_setDataSourceFD(
 
 static void
 android_media_MediaPlayer2_setDataSourceCallback(
-    JNIEnv *env, jobject thiz, jobject dataSource)
+    JNIEnv *env, jobject thiz, jlong srcId, jobject dataSource)
 {
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
     if (mp == NULL ) {
@@ -387,6 +394,7 @@ android_media_MediaPlayer2_setDataSourceCallback(
     }
     sp<DataSource> callbackDataSource = new JMedia2DataSource(env, dataSource);
     sp<DataSourceDesc> dsd = new DataSourceDesc();
+    dsd->mId = srcId;
     dsd->mType = DataSourceDesc::TYPE_CALLBACK;
     dsd->mCallbackSource = callbackDataSource;
     process_media_player_call(env, thiz, mp->setDataSource(dsd),
@@ -1012,7 +1020,7 @@ android_media_MediaPlayer2_native_init(JNIEnv *env)
     }
 
     fields.post_event = env->GetStaticMethodID(clazz, "postEventFromNative",
-                                               "(Ljava/lang/Object;IIILjava/lang/Object;)V");
+                                               "(Ljava/lang/Object;JIIILjava/lang/Object;)V");
     if (fields.post_event == NULL) {
         return;
     }
@@ -1382,13 +1390,13 @@ static void android_media_MediaPlayer2_enableDeviceCallback(
 static const JNINativeMethod gMethods[] = {
     {
         "nativeSetDataSource",
-        "(Landroid/media/Media2HTTPService;Ljava/lang/String;[Ljava/lang/String;"
+        "(JLandroid/media/Media2HTTPService;Ljava/lang/String;[Ljava/lang/String;"
         "[Ljava/lang/String;)V",
         (void *)android_media_MediaPlayer2_setDataSourceAndHeaders
     },
 
-    {"_setDataSource",      "(Ljava/io/FileDescriptor;JJ)V",    (void *)android_media_MediaPlayer2_setDataSourceFD},
-    {"_setDataSource",      "(Landroid/media/Media2DataSource;)V",(void *)android_media_MediaPlayer2_setDataSourceCallback },
+    {"_setDataSource",      "(JLjava/io/FileDescriptor;JJ)V",    (void *)android_media_MediaPlayer2_setDataSourceFD},
+    {"_setDataSource",      "(JLandroid/media/Media2DataSource;)V",(void *)android_media_MediaPlayer2_setDataSourceCallback },
     {"_setVideoSurface",    "(Landroid/view/Surface;)V",        (void *)android_media_MediaPlayer2_setVideoSurface},
     {"getBufferingParams", "()Landroid/media/BufferingParams;", (void *)android_media_MediaPlayer2_getBufferingParams},
     {"setBufferingParams", "(Landroid/media/BufferingParams;)V", (void *)android_media_MediaPlayer2_setBufferingParams},

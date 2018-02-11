@@ -116,6 +116,14 @@ public:
     static Canvas* create_canvas(SkCanvas* skiaCanvas);
 
     /**
+     *  Sets the target SDK version used to build the app.
+     *
+     *  @param apiLevel API level
+     *
+     */
+    static void setCompatibilityVersion(int apiLevel);
+
+    /**
      *  Provides a Skia SkCanvas interface that acts as a proxy to this Canvas.
      *  It is useful for testing and clients (e.g. Picture/Movie) that expect to
      *  draw their contents into an SkCanvas.
@@ -282,6 +290,8 @@ protected:
     virtual void drawLayoutOnPath(const minikin::Layout& layout, float hOffset, float vOffset,
                                   const SkPaint& paint, const SkPath& path, size_t start,
                                   size_t end) = 0;
+    static int sApiLevel;
+
     friend class DrawTextFunctor;
     friend class DrawTextOnPathFunctor;
     friend class uirenderer::SkiaCanvasProxy;

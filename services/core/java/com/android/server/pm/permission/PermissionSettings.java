@@ -201,34 +201,42 @@ public class PermissionSettings {
         }
     }
 
+    @GuardedBy("mLock")
     @Nullable BasePermission getPermissionLocked(@NonNull String permName) {
         return mPermissions.get(permName);
     }
 
+    @GuardedBy("mLock")
     @Nullable BasePermission getPermissionTreeLocked(@NonNull String permName) {
         return mPermissionTrees.get(permName);
     }
 
+    @GuardedBy("mLock")
     void putPermissionLocked(@NonNull String permName, @NonNull BasePermission permission) {
         mPermissions.put(permName, permission);
     }
 
+    @GuardedBy("mLock")
     void putPermissionTreeLocked(@NonNull String permName, @NonNull BasePermission permission) {
         mPermissionTrees.put(permName, permission);
     }
 
+    @GuardedBy("mLock")
     void removePermissionLocked(@NonNull String permName) {
         mPermissions.remove(permName);
     }
 
+    @GuardedBy("mLock")
     void removePermissionTreeLocked(@NonNull String permName) {
         mPermissionTrees.remove(permName);
     }
 
+    @GuardedBy("mLock")
     @NonNull Collection<BasePermission> getAllPermissionsLocked() {
         return mPermissions.values();
     }
 
+    @GuardedBy("mLock")
     @NonNull Collection<BasePermission> getAllPermissionTreesLocked() {
         return mPermissionTrees.values();
     }

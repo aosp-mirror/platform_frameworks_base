@@ -15,8 +15,8 @@
 -->
 <com.android.systemui.volume.VolumeUiLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:background="@android:color/transparent"
     android:theme="@style/qs_theme"
     android:clipChildren="false" >
@@ -29,7 +29,6 @@
         android:minWidth="@dimen/volume_dialog_panel_width"
         android:background="@android:color/transparent"
         android:layout_margin="@dimen/volume_dialog_base_margin"
-        android:translationZ="8dp"
         android:orientation="vertical"
         android:clipChildren="false" >
 
@@ -42,7 +41,7 @@
             android:paddingTop="10dp"
             android:paddingBottom="10dp"
             android:background="@drawable/rounded_bg_full"
-            android:translationZ="8dp"
+            android:translationZ="@dimen/volume_panel_elevation"
             android:orientation="horizontal" >
                 <!-- volume rows added and removed here! :-) -->
         </LinearLayout>
@@ -59,7 +58,7 @@
             android:background="@drawable/rounded_bg_full"
             android:gravity="center"
             android:layout_gravity="end"
-            android:translationZ="8dp"
+            android:translationZ="@dimen/volume_panel_elevation"
             android:clickable="true"
             android:orientation="vertical" >
 

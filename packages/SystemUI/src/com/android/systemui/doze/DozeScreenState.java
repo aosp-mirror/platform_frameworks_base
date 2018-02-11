@@ -19,6 +19,8 @@ package com.android.systemui.doze;
 import android.os.Handler;
 import android.view.Display;
 
+import com.android.systemui.statusbar.phone.DozeParameters;
+
 /**
  * Controls the screen when dozing.
  */
@@ -26,17 +28,20 @@ public class DozeScreenState implements DozeMachine.Part {
     private final DozeMachine.Service mDozeService;
     private final Handler mHandler;
     private final Runnable mApplyPendingScreenState = this::applyPendingScreenState;
+    private final DozeParameters mParameters;
 
     private int mPendingScreenState = Display.STATE_UNKNOWN;
 
-    public DozeScreenState(DozeMachine.Service service, Handler handler) {
+    public DozeScreenState(DozeMachine.Service service, Handler handler,
+            DozeParameters parameters) {
         mDozeService = service;
         mHandler = handler;
+        mParameters = parameters;
     }
 
     @Override
     public void transitionTo(DozeMachine.State oldState, DozeMachine.State newState) {
-        int screenState = newState.screenState();
+        int screenState = newState.screenState(mParameters);
 
         if (newState == DozeMachine.State.FINISH) {
             // Make sure not to apply the screen state after DozeService was destroyed.

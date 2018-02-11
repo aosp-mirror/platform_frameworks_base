@@ -169,7 +169,7 @@ class TunerCallback implements ITunerCallback {
 
     @Override
     public void onParametersUpdated(Map parameters) {
-        dispatch(() -> mClientCallback.onParametersUpdated(parameters));
+        Slog.e(TAG, "Not applicable for HAL 1.x");
     }
 
     @Override

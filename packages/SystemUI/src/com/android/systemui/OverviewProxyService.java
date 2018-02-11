@@ -99,9 +99,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         public void onRecentsAnimationStarted() {
             long token = Binder.clearCallingIdentity();
             try {
-                mHandler.post(() -> {
-                    notifyRecentsAnimationStarted();
-                });
+                mHandler.post(OverviewProxyService.this::notifyRecentsAnimationStarted);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

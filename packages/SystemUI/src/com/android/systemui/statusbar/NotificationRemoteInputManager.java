@@ -299,6 +299,11 @@ public class NotificationRemoteInputManager implements Dumpable {
                         }
                     }, REMOTE_INPUT_KEPT_ENTRY_AUTO_CANCEL_DELAY);
                 }
+                try {
+                    mBarService.onNotificationDirectReplied(entry.notification.getKey());
+                } catch (RemoteException e) {
+                    // Nothing to do, system going down
+                }
             }
         });
 

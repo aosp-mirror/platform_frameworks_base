@@ -2821,6 +2821,7 @@ public class AudioTrack extends PlayerBase
     /*
      * Call BEFORE adding a routing callback handler.
      */
+    @GuardedBy("mRoutingChangeListeners")
     private void testEnableNativeRoutingCallbacksLocked() {
         if (mRoutingChangeListeners.size() == 0) {
             native_enableDeviceCallback();
@@ -2830,6 +2831,7 @@ public class AudioTrack extends PlayerBase
     /*
      * Call AFTER removing a routing callback handler.
      */
+    @GuardedBy("mRoutingChangeListeners")
     private void testDisableNativeRoutingCallbacksLocked() {
         if (mRoutingChangeListeners.size() == 0) {
             native_disableDeviceCallback();

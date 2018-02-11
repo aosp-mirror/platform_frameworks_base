@@ -16,9 +16,14 @@
 
 package android.os;
 
-import android.hardware.vibrator.V1_0.Constants.EffectStrength;
-import android.hardware.vibrator.V1_1.Constants.Effect_1_1;
+import android.annotation.Nullable;
+import android.content.Context;
+import android.hardware.vibrator.V1_0.EffectStrength;
+import android.hardware.vibrator.V1_2.Effect;
+import android.net.Uri;
 import android.util.MathUtils;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Arrays;
 
@@ -49,7 +54,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(int)
      * @hide
      */
-    public static final int EFFECT_CLICK = Effect_1_1.CLICK;
+    public static final int EFFECT_CLICK = Effect.CLICK;
 
     /**
      * A double click effect.
@@ -57,14 +62,62 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(int)
      * @hide
      */
-    public static final int EFFECT_DOUBLE_CLICK = Effect_1_1.DOUBLE_CLICK;
+    public static final int EFFECT_DOUBLE_CLICK = Effect.DOUBLE_CLICK;
 
     /**
      * A tick effect.
      * @see #get(int)
      * @hide
      */
-    public static final int EFFECT_TICK = Effect_1_1.TICK;
+    public static final int EFFECT_TICK = Effect.TICK;
+
+    /**
+     * A thud effect.
+     * @see #get(int)
+     * @hide
+     */
+    public static final int EFFECT_THUD = Effect.THUD;
+
+    /**
+     * A pop effect.
+     * @see #get(int)
+     * @hide
+     */
+    public static final int EFFECT_POP = Effect.POP;
+
+    /**
+     * A heavy click effect.
+     * @see #get(int)
+     * @hide
+     */
+    public static final int EFFECT_HEAVY_CLICK = Effect.HEAVY_CLICK;
+
+
+    /**
+     * Ringtone patterns. They may correspond with the device's ringtone audio, or may just be a
+     * pattern that can be played as a ringtone with any audio, depending on the device.
+     *
+     * @see #get(Uri, Context)
+     * @hide
+     */
+    @VisibleForTesting
+    public static final int[] RINGTONES = {
+        Effect.RINGTONE_1,
+        Effect.RINGTONE_2,
+        Effect.RINGTONE_3,
+        Effect.RINGTONE_4,
+        Effect.RINGTONE_5,
+        Effect.RINGTONE_6,
+        Effect.RINGTONE_7,
+        Effect.RINGTONE_8,
+        Effect.RINGTONE_9,
+        Effect.RINGTONE_10,
+        Effect.RINGTONE_11,
+        Effect.RINGTONE_12,
+        Effect.RINGTONE_13,
+        Effect.RINGTONE_14,
+        Effect.RINGTONE_15
+    };
 
     /** @hide to prevent subclassing from outside of the framework */
     public VibrationEffect() { }
@@ -196,6 +249,37 @@ public abstract class VibrationEffect implements Parcelable {
         VibrationEffect effect = new Prebaked(effectId, fallback);
         effect.validate();
         return effect;
+    }
+
+    /**
+     * Get a predefined vibration effect associated with a given URI.
+     *
+     * Predefined effects are a set of common vibration effects that should be identical, regardless
+     * of the app they come from, in order to provide a cohesive experience for users across
+     * the entire device. They also may be custom tailored to the device hardware in order to
+     * provide a better experience than you could otherwise build using the generic building
+     * blocks.
+     *
+     * @param uri The URI associated with the haptic effect.
+     * @param context The context used to get the URI to haptic effect association.
+     *
+     * @return The desired effect, or {@code null} if there's no associated effect.
+     *
+     * @hide
+     */
+    @Nullable
+    public static VibrationEffect get(Uri uri, Context context) {
+        String[] uris = context.getResources().getStringArray(
+                com.android.internal.R.array.config_ringtoneEffectUris);
+        for (int i = 0; i < uris.length && i < RINGTONES.length; i++) {
+            if (uris[i] == null) {
+                continue;
+            }
+            if (Uri.parse(uris[i]).equals(uri)) {
+                return get(RINGTONES[i]);
+            }
+        }
+        return null;
     }
 
     @Override
@@ -548,10 +632,15 @@ public abstract class VibrationEffect implements Parcelable {
                 case EFFECT_CLICK:
                 case EFFECT_DOUBLE_CLICK:
                 case EFFECT_TICK:
+                case EFFECT_THUD:
+                case EFFECT_POP:
+                case EFFECT_HEAVY_CLICK:
                     break;
                 default:
-                    throw new IllegalArgumentException(
-                            "Unknown prebaked effect type (value=" + mEffectId + ")");
+                    if (mEffectId < RINGTONES[0] || mEffectId > RINGTONES[RINGTONES.length - 1]) {
+                        throw new IllegalArgumentException(
+                                "Unknown prebaked effect type (value=" + mEffectId + ")");
+                    }
             }
             if (!isValidEffectStrength(mEffectStrength)) {
                 throw new IllegalArgumentException(

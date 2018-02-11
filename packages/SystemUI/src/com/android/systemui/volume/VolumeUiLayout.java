@@ -37,10 +37,6 @@ import com.android.systemui.util.leak.RotationUtils;
 public class VolumeUiLayout extends FrameLayout  {
 
     private View mChild;
-    private int mOldHeight;
-    private boolean mAnimating;
-    private AnimatorSet mAnimation;
-    private boolean mHasOutsideTouch;
     private int mRotation = ROTATION_NONE;
     @Nullable
     private DisplayCutout mDisplayCutout;
@@ -52,13 +48,11 @@ public class VolumeUiLayout extends FrameLayout  {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        getViewTreeObserver().addOnComputeInternalInsetsListener(mInsetsListener);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        getViewTreeObserver().removeOnComputeInternalInsetsListener(mInsetsListener);
         mDisplayCutout = null;
     }
 
@@ -68,15 +62,10 @@ public class VolumeUiLayout extends FrameLayout  {
         if (mChild == null) {
             if (getChildCount() != 0) {
                 mChild = getChildAt(0);
-                mOldHeight = mChild.getMeasuredHeight();
                 updateRotation();
             } else {
                 return;
             }
-        }
-        int newHeight = mChild.getMeasuredHeight();
-        if (newHeight != mOldHeight) {
-            animateChild(mOldHeight, newHeight);
         }
     }
 
@@ -95,8 +84,13 @@ public class VolumeUiLayout extends FrameLayout  {
         }
     }
 
-    private void updateRotation() {
+    public void updateRotation() {
         setDisplayCutout();
+        if (mChild == null) {
+            if (getChildCount() != 0) {
+                mChild = getChildAt(0);
+            }
+        }
         int rotation = RotationUtils.getRotation(getContext());
         if (rotation != mRotation) {
             updateSafeInsets(rotation);
@@ -144,41 +138,9 @@ public class VolumeUiLayout extends FrameLayout  {
         return r.bottom - r.top;
     }
 
-
-    private void animateChild(int oldHeight, int newHeight) {
-        if (true) return;
-        if (mAnimating) {
-            mAnimation.cancel();
-        }
-        mAnimating = true;
-        mAnimation = new AnimatorSet();
-        mAnimation.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mAnimating = false;
-            }
-        });
-        int fromTop = mChild.getTop();
-        int fromBottom = mChild.getBottom();
-        int toTop = fromTop - ((newHeight - oldHeight) / 2);
-        int toBottom = fromBottom + ((newHeight - oldHeight) / 2);
-        ObjectAnimator top = ObjectAnimator.ofInt(mChild, "top", fromTop, toTop);
-        mAnimation.playTogether(top,
-                ObjectAnimator.ofInt(mChild, "bottom", fromBottom, toBottom));
-    }
-
-
     @Override
     public ViewOutlineProvider getOutlineProvider() {
         return super.getOutlineProvider();
-    }
-
-    public void setOutsideTouchListener(OnClickListener onClickListener) {
-        mHasOutsideTouch = true;
-        requestLayout();
-        setOnClickListener(onClickListener);
-        setClickable(true);
-        setFocusable(true);
     }
 
     public static VolumeUiLayout get(View v) {
@@ -188,16 +150,4 @@ public class VolumeUiLayout extends FrameLayout  {
         }
         return null;
     }
-
-    private final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsListener = inoutInfo -> {
-        if (mHasOutsideTouch || (mChild == null)) {
-            inoutInfo.setTouchableInsets(
-                    ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME);
-            return;
-        }
-        inoutInfo.setTouchableInsets(
-                ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT);
-        inoutInfo.contentInsets.set(mChild.getLeft(), mChild.getTop(),
-                0, getBottom() - mChild.getBottom());
-    };
 }

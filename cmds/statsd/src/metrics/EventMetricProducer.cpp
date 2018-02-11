@@ -42,8 +42,6 @@ namespace statsd {
 
 // for StatsLogReport
 const int FIELD_ID_ID = 1;
-const int FIELD_ID_START_REPORT_NANOS = 2;
-const int FIELD_ID_END_REPORT_NANOS = 3;
 const int FIELD_ID_EVENT_METRICS = 4;
 // for EventMetricDataWrapper
 const int FIELD_ID_DATA = 1;
@@ -61,19 +59,13 @@ EventMetricProducer::EventMetricProducer(const ConfigKey& key, const EventMetric
                                metric.links().end());
         mConditionSliced = true;
     }
-
-    startNewProtoOutputStreamLocked();
-
+    mProto = std::make_unique<ProtoOutputStream>();
     VLOG("metric %lld created. bucket size %lld start_time: %lld", (long long)metric.id(),
          (long long)mBucketSizeNs, (long long)mStartTimeNs);
 }
 
 EventMetricProducer::~EventMetricProducer() {
     VLOG("~EventMetricProducer() called");
-}
-
-void EventMetricProducer::startNewProtoOutputStreamLocked() {
-    mProto = std::make_unique<ProtoOutputStream>();
 }
 
 void EventMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eventTime) {
@@ -106,8 +98,6 @@ void EventMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
         return;
     }
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
-    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_START_REPORT_NANOS, (long long)mStartTimeNs);
-    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS, (long long)dumpTimeNs);
 
     size_t bufferSize = mProto->size();
     VLOG("metric %lld dump report now... proto size: %zu ",
@@ -117,7 +107,7 @@ void EventMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
     protoOutput->write(FIELD_TYPE_MESSAGE | FIELD_ID_EVENT_METRICS,
                        reinterpret_cast<char*>(buffer.get()->data()), buffer.get()->size());
 
-    startNewProtoOutputStreamLocked();
+    mProto->clear();
 }
 
 void EventMetricProducer::onConditionChangedLocked(const bool conditionMet,

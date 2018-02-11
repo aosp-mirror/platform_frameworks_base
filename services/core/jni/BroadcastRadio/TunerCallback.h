@@ -21,7 +21,7 @@
 #include "NativeCallbackThread.h"
 #include "types.h"
 
-#include <android/hardware/broadcastradio/1.2/ITunerCallback.h>
+#include <android/hardware/broadcastradio/1.1/ITunerCallback.h>
 #include <jni.h>
 
 namespace android {
@@ -32,7 +32,7 @@ namespace server {
 namespace BroadcastRadio {
 namespace TunerCallback {
 
-sp<hardware::broadcastradio::V1_2::ITunerCallback>
+sp<hardware::broadcastradio::V1_1::ITunerCallback>
 getNativeCallback(JNIEnv *env, jobject jTunerCallback);
 
 } // namespace TunerCallback

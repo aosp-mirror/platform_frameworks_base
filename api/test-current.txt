@@ -1038,6 +1038,7 @@ package android.view.accessibility {
 
   public class AccessibilityNodeInfo implements android.os.Parcelable {
     method public static void setNumInstancesInUseCounter(java.util.concurrent.atomic.AtomicInteger);
+    method public void writeToParcelNoRecycle(android.os.Parcel, int);
   }
 
   public final class AccessibilityWindowInfo implements android.os.Parcelable {

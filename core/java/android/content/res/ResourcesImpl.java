@@ -543,7 +543,7 @@ public class ResourcesImpl {
         }
     }
 
-    @Nullable
+    @NonNull
     Drawable loadDrawable(@NonNull Resources wrapper, @NonNull TypedValue value, int id,
             int density, @Nullable Resources.Theme theme)
             throws NotFoundException {
@@ -627,7 +627,7 @@ public class ResourcesImpl {
             } else if (isColorDrawable) {
                 dr = new ColorDrawable(value.data);
             } else {
-                dr = loadDrawableForCookie(wrapper, value, id, density, null);
+                dr = loadDrawableForCookie(wrapper, value, id, density);
             }
             // DrawableContainer' constant state has drawables instances. In order to leave the
             // constant state intact in the cache, we need to create a new DrawableContainer after
@@ -754,8 +754,9 @@ public class ResourcesImpl {
     /**
      * Loads a drawable from XML or resources stream.
      */
+    @NonNull
     private Drawable loadDrawableForCookie(@NonNull Resources wrapper, @NonNull TypedValue value,
-            int id, int density, @Nullable Resources.Theme theme) {
+            int id, int density) {
         if (value.string == null) {
             throw new NotFoundException("Resource \"" + getResourceName(id) + "\" ("
                     + Integer.toHexString(id) + ") is not a Drawable (color or path): " + value);
@@ -774,21 +775,22 @@ public class ResourcesImpl {
             }
         }
 
-        // For prelaod tracing.
+        // For preload tracing.
         long startTime = 0;
         int startBitmapCount = 0;
         long startBitmapSize = 0;
-        int startDrwableCount = 0;
+        int startDrawableCount = 0;
         if (TRACE_FOR_DETAILED_PRELOAD) {
             startTime = System.nanoTime();
             startBitmapCount = Bitmap.sPreloadTracingNumInstantiatedBitmaps;
             startBitmapSize = Bitmap.sPreloadTracingTotalBitmapsSize;
-            startDrwableCount = sPreloadTracingNumLoadedDrawables;
+            startDrawableCount = sPreloadTracingNumLoadedDrawables;
         }
 
         if (DEBUG_LOAD) {
             Log.v(TAG, "Loading drawable for cookie " + value.assetCookie + ": " + file);
         }
+
 
         final Drawable dr;
 
@@ -804,7 +806,7 @@ public class ResourcesImpl {
                 if (file.endsWith(".xml")) {
                     final XmlResourceParser rp = loadXmlResourceParser(
                             file, id, value.assetCookie, "drawable");
-                    dr = Drawable.createFromXmlForDensity(wrapper, rp, density, theme);
+                    dr = Drawable.createFromXmlForDensity(wrapper, rp, density, null);
                     rp.close();
                 } else {
                     final InputStream is = mAssets.openNonAsset(
@@ -834,7 +836,7 @@ public class ResourcesImpl {
                     final long loadedBitmapSize =
                             Bitmap.sPreloadTracingTotalBitmapsSize - startBitmapSize;
                     final int loadedDrawables =
-                            sPreloadTracingNumLoadedDrawables - startDrwableCount;
+                            sPreloadTracingNumLoadedDrawables - startDrawableCount;
 
                     sPreloadTracingNumLoadedDrawables++;
 
@@ -910,6 +912,7 @@ public class ResourcesImpl {
      * first try to load CSL from the cache. If not found, try to get from the constant state.
      * Last, parse the XML and generate the CSL.
      */
+    @NonNull
     private ComplexColor loadComplexColorFromName(Resources wrapper, Resources.Theme theme,
             TypedValue value, int id) {
         final long key = (((long) value.assetCookie) << 32) | value.data;
@@ -929,17 +932,15 @@ public class ResourcesImpl {
             complexColor = loadComplexColorForCookie(wrapper, value, id, theme);
         }
 
-        if (complexColor != null) {
-            complexColor.setBaseChangingConfigurations(value.changingConfigurations);
+        complexColor.setBaseChangingConfigurations(value.changingConfigurations);
 
-            if (mPreloading) {
-                if (verifyPreloadConfig(complexColor.getChangingConfigurations(),
-                        0, value.resourceId, "color")) {
-                    sPreloadedComplexColors.put(key, complexColor.getConstantState());
-                }
-            } else {
-                cache.put(key, theme, complexColor.getConstantState());
+        if (mPreloading) {
+            if (verifyPreloadConfig(complexColor.getChangingConfigurations(),
+                    0, value.resourceId, "color")) {
+                sPreloadedComplexColors.put(key, complexColor.getConstantState());
             }
+        } else {
+            cache.put(key, theme, complexColor.getConstantState());
         }
         return complexColor;
     }
@@ -985,7 +986,7 @@ public class ResourcesImpl {
         return complexColor;
     }
 
-    @Nullable
+    @NonNull
     ColorStateList loadColorStateList(Resources wrapper, TypedValue value, int id,
             Resources.Theme theme)
             throws NotFoundException {
@@ -1045,7 +1046,7 @@ public class ResourcesImpl {
      *
      * @return a ComplexColor (GradientColor or ColorStateList) based on the XML file content.
      */
-    @Nullable
+    @NonNull
     private ComplexColor loadComplexColorForCookie(Resources wrapper, TypedValue value, int id,
             Resources.Theme theme) {
         if (value.string == null) {

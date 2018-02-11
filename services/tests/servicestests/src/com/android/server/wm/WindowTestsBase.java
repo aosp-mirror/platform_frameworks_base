@@ -29,6 +29,7 @@ import android.view.DisplayInfo;
 import org.junit.Assert;
 import org.junit.After;
 import org.junit.Before;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import android.content.Context;
@@ -83,6 +84,9 @@ class WindowTestsBase {
     WindowState mChildAppWindowAbove;
     WindowState mChildAppWindowBelow;
     HashSet<WindowState> mCommonWindows;
+
+    @Mock
+    static WindowState.PowerManagerWrapper mPowerManagerWrapper;
 
     @Before
     public void setUp() throws Exception {
@@ -245,7 +249,7 @@ class WindowTestsBase {
         attrs.setTitle(name);
 
         final WindowState w = new WindowState(sWm, sMockSession, sIWindow, token, parent, OP_NONE,
-                0, attrs, VISIBLE, ownerId, ownerCanAddInternalSystemWindow);
+                0, attrs, VISIBLE, ownerId, ownerCanAddInternalSystemWindow, mPowerManagerWrapper);
         // TODO: Probably better to make this call in the WindowState ctor to avoid errors with
         // adding it to the token...
         token.addWindow(w);
@@ -284,7 +288,8 @@ class WindowTestsBase {
         final int displayId = sNextDisplayId++;
         final Display display = new Display(DisplayManagerGlobal.getInstance(), displayId,
                 mDisplayInfo, DEFAULT_DISPLAY_ADJUSTMENTS);
-        return new DisplayContent(display, sWm, new WallpaperController(sWm));
+        return new DisplayContent(display, sWm, new WallpaperController(sWm),
+                mock(DisplayWindowController.class));
     }
 
     /** Creates a {@link com.android.server.wm.WindowTestUtils.TestWindowState} */

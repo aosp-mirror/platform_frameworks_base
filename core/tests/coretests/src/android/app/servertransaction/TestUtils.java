@@ -21,6 +21,7 @@ import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import android.app.ResultInfo;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.util.MergedConfiguration;
 
 import com.android.internal.content.ReferrerIntent;
 
@@ -36,6 +37,15 @@ class TestUtils {
         config.screenHeightDp = 15;
         config.orientation = ORIENTATION_LANDSCAPE;
         return config;
+    }
+
+    static MergedConfiguration mergedConfig() {
+        Configuration config = config();
+        Configuration overrideConfig = new Configuration();
+        overrideConfig.densityDpi = 30;
+        overrideConfig.screenWidthDp = 40;
+        overrideConfig.smallestScreenWidthDp = 15;
+        return new MergedConfiguration(config, overrideConfig);
     }
 
     static List<ResultInfo> resultInfoList() {

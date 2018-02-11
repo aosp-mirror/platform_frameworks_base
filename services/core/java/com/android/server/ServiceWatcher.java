@@ -199,6 +199,7 @@ public class ServiceWatcher implements ServiceConnection {
      *            bound.
      * @returns {@code true} if a valid package was found to bind to.
      */
+    @GuardedBy("mLock")
     private boolean bindBestPackageLocked(String justCheckThisPackage, boolean forceRebind) {
         Intent intent = new Intent(mAction);
         if (justCheckThisPackage != null) {
@@ -273,6 +274,7 @@ public class ServiceWatcher implements ServiceConnection {
         return true;
     }
 
+    @GuardedBy("mLock")
     private void unbindLocked() {
         ComponentName component;
         component = mBoundComponent;
@@ -287,6 +289,7 @@ public class ServiceWatcher implements ServiceConnection {
         }
     }
 
+    @GuardedBy("mLock")
     private void bindToPackageLocked(ComponentName component, int version, int userId) {
         Intent intent = new Intent(mAction);
         intent.setComponent(component);

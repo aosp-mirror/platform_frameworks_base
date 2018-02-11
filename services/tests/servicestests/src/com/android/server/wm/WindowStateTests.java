@@ -36,10 +36,15 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
 
 /**
  * Tests for the {@link WindowState} class.
@@ -57,15 +62,17 @@ public class WindowStateTests extends WindowTestsBase {
         final WindowState child1 = createWindow(parentWindow, FIRST_SUB_WINDOW, "child1");
         final WindowState child2 = createWindow(parentWindow, FIRST_SUB_WINDOW, "child2");
 
-        assertFalse(parentWindow.mHidden);
+        // parentWindow is initially set to hidden.
+        assertTrue(parentWindow.mHidden);
+        assertFalse(parentWindow.isParentWindowHidden());
+        assertTrue(child1.isParentWindowHidden());
+        assertTrue(child2.isParentWindowHidden());
+
+        parentWindow.mHidden = false;
         assertFalse(parentWindow.isParentWindowHidden());
         assertFalse(child1.isParentWindowHidden());
         assertFalse(child2.isParentWindowHidden());
 
-        parentWindow.mHidden = true;
-        assertFalse(parentWindow.isParentWindowHidden());
-        assertTrue(child1.isParentWindowHidden());
-        assertTrue(child2.isParentWindowHidden());
     }
 
     @Test
@@ -237,11 +244,11 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     private void testPrepareWindowToDisplayDuringRelayout(boolean wasVisible) {
+        reset(mPowerManagerWrapper);
         final WindowState root = createWindow(null, TYPE_APPLICATION, "root");
         root.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
-        root.mTurnOnScreen = false;
 
         root.prepareWindowToDisplayDuringRelayout(wasVisible /*wasVisible*/);
-        assertTrue(root.mTurnOnScreen);
+        verify(mPowerManagerWrapper).wakeUp(anyLong(), anyString());
     }
 }

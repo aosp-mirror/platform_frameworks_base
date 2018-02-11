@@ -596,6 +596,7 @@ final class RemotePrintSpooler {
         }
     }
 
+    @GuardedBy("mLock")
     private void bindLocked() throws TimeoutException, InterruptedException {
         while (mIsBinding) {
             mLock.wait();

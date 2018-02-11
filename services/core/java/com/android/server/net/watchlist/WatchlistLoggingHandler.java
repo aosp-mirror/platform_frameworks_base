@@ -22,12 +22,14 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.UserInfo;
 import android.os.Bundle;
 import android.os.DropBoxManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -238,20 +240,34 @@ class WatchlistLoggingHandler extends Handler {
      * if an app is really visited C&C site.
      * (2) App digests that previously recorded in database.
      */
-    private List<String> getAllDigestsForReport(WatchlistReportDbHelper.AggregatedResult record) {
+    @VisibleForTesting
+    List<String> getAllDigestsForReport(WatchlistReportDbHelper.AggregatedResult record) {
         // Step 1: Get all installed application digests.
+        final List<UserInfo> users = ((UserManager) mContext.getSystemService(
+                Context.USER_SERVICE)).getUsers();
+        final int totalUsers = users.size();
         final List<ApplicationInfo> apps = mContext.getPackageManager().getInstalledApplications(
                 PackageManager.MATCH_ANY_USER | PackageManager.MATCH_ALL);
         final HashSet<String> result = new HashSet<>(apps.size() + record.appDigestCNCList.size());
         final int size = apps.size();
         for (int i = 0; i < size; i++) {
-            byte[] digest = getDigestFromUid(apps.get(i).uid);
-            if (digest == null) {
+            final int appUid = apps.get(i).uid;
+            boolean added = false;
+            // As the uid returned by getInstalledApplications() is for primary user only, it
+            // may exist in secondary users but not primary user, so we need to loop and see if
+            // that user has the app enabled.
+            for (int j = 0; j < totalUsers && !added; j++) {
+                int uid = UserHandle.getUid(users.get(j).id, appUid);
+                byte[] digest = getDigestFromUid(uid);
+                if (digest != null) {
+                    result.add(HexDump.toHexString(digest));
+                    added = true;
+                }
+            }
+            if (!added) {
                 Slog.e(TAG, "Cannot get digest from uid: " + apps.get(i).uid
                         + ",pkg: " + apps.get(i).packageName);
-                continue;
             }
-            result.add(HexDump.toHexString(digest));
         }
         // Step 2: Add all digests from records
         result.addAll(record.appDigestCNCList.keySet());
@@ -288,9 +304,9 @@ class WatchlistLoggingHandler extends Handler {
                         return null;
                     }
                 }
-            } else {
-                Slog.e(TAG, "Should not happen");
             }
+            // Not able to find a package name for this uid, possibly the package is installed on
+            // another user.
             return null;
         });
     }

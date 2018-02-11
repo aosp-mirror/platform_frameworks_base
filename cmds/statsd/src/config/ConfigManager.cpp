@@ -75,8 +75,8 @@ void ConfigManager::UpdateConfig(const ConfigKey& key, const StatsdConfig& confi
     }
 }
 
-void ConfigManager::SetConfigReceiver(const ConfigKey& key, const string& pkg, const string& cls) {
-    mConfigReceivers[key] = pair<string, string>(pkg, cls);
+void ConfigManager::SetConfigReceiver(const ConfigKey& key, const sp<IBinder>& intentSender) {
+    mConfigReceivers[key] = intentSender;
 }
 
 void ConfigManager::RemoveConfigReceiver(const ConfigKey& key) {
@@ -159,10 +159,10 @@ vector<ConfigKey> ConfigManager::GetAllConfigKeys() const {
     return ret;
 }
 
-const pair<string, string> ConfigManager::GetConfigReceiver(const ConfigKey& key) const {
+const sp<android::IBinder> ConfigManager::GetConfigReceiver(const ConfigKey& key) const {
     auto it = mConfigReceivers.find(key);
     if (it == mConfigReceivers.end()) {
-        return pair<string,string>();
+        return nullptr;
     } else {
         return it->second;
     }
@@ -175,8 +175,7 @@ void ConfigManager::Dump(FILE* out) {
         fprintf(out, "  %6d %lld\n", key.GetUid(), (long long)key.GetId());
         auto receiverIt = mConfigReceivers.find(key);
         if (receiverIt != mConfigReceivers.end()) {
-            fprintf(out, "    -> received by %s, %s\n", receiverIt->second.first.c_str(),
-                    receiverIt->second.second.c_str());
+            fprintf(out, "    -> received by PendingIntent as binder\n");
         }
     }
 }

@@ -37,6 +37,7 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
 import android.media.AudioSystem;
@@ -54,6 +55,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.view.ContextThemeWrapper;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.AccessibilityDelegate;
@@ -176,7 +178,15 @@ public class VolumeDialogImpl implements VolumeDialog {
         mWindow.setTitle(VolumeDialogImpl.class.getSimpleName());
         mWindow.setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
         mWindow.setWindowAnimations(com.android.internal.R.style.Animation_Toast);
+        final WindowManager.LayoutParams lp = mWindow.getAttributes();
+        lp.format = PixelFormat.TRANSLUCENT;
+        lp.setTitle(VolumeDialogImpl.class.getSimpleName());
+        lp.gravity = Gravity.RIGHT | Gravity.CENTER_VERTICAL;
+        lp.windowAnimations = -1;
+        mWindow.setAttributes(lp);
+        mWindow.setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
+        mDialog.setCanceledOnTouchOutside(true);
         mDialog.setContentView(R.layout.volume_dialog);
         mDialog.setOnShowListener(dialog -> {
             mDialogView.setTranslationX(mDialogView.getWidth() / 2);
@@ -199,8 +209,8 @@ public class VolumeDialogImpl implements VolumeDialog {
             rescheduleTimeoutH();
             return true;
         });
-        VolumeUiLayout hardwareLayout = VolumeUiLayout.get(mDialogView);
-        hardwareLayout.setOutsideTouchListener(view -> dismiss(DISMISS_REASON_TOUCH_OUTSIDE));
+        VolumeUiLayout uiLayout = VolumeUiLayout.get(mDialogView);
+        uiLayout.updateRotation();
 
         mDialogRowsView = mDialog.findViewById(R.id.volume_dialog_rows);
         mFooter = mDialog.findViewById(R.id.footer);
@@ -1015,14 +1025,20 @@ public class VolumeDialogImpl implements VolumeDialog {
         }
 
         @Override
+        public boolean onTouchEvent(MotionEvent event) {
+            if (isShowing()) {
+                if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
+                    dismissH(Events.DISMISS_REASON_TOUCH_OUTSIDE);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
         public boolean dispatchPopulateAccessibilityEvent(@NonNull AccessibilityEvent event) {
             event.setClassName(getClass().getSuperclass().getName());
             event.setPackageName(mContext.getPackageName());
-
-            ViewGroup.LayoutParams params = getWindow().getAttributes();
-            boolean isFullScreen = (params.width == ViewGroup.LayoutParams.MATCH_PARENT) &&
-                    (params.height == ViewGroup.LayoutParams.MATCH_PARENT);
-            event.setFullScreen(isFullScreen);
 
             if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
                 if (mShowing) {

@@ -518,10 +518,7 @@ void Tree::updateCache(sp<skiapipeline::VectorDrawableAtlas>& atlas, GrContext* 
             Bitmap& bitmap = getBitmapUpdateIfDirty();
             SkBitmap skiaBitmap;
             bitmap.getSkBitmap(&skiaBitmap);
-            if (!surface->getCanvas()->writePixels(skiaBitmap, dst.fLeft, dst.fTop)) {
-                ALOGD("VectorDrawable caching failed to efficiently upload");
-                surface->getCanvas()->drawBitmap(skiaBitmap, dst.fLeft, dst.fTop);
-            }
+            surface->writePixels(skiaBitmap, dst.fLeft, dst.fTop);
         }
         mCache.dirty = false;
     }
@@ -557,13 +554,12 @@ void Tree::Cache::clear() {
     mAtlasKey = INVALID_ATLAS_KEY;
 }
 
-void Tree::draw(SkCanvas* canvas) {
+void Tree::draw(SkCanvas* canvas, const SkRect& bounds) {
     SkRect src;
     sk_sp<SkSurface> vdSurface = mCache.getSurface(&src);
     if (vdSurface) {
         canvas->drawImageRect(vdSurface->makeImageSnapshot().get(), src,
-                              mutateProperties()->getBounds(), getPaint(),
-                              SkCanvas::kFast_SrcRectConstraint);
+                bounds, getPaint(), SkCanvas::kFast_SrcRectConstraint);
     } else {
         // Handle the case when VectorDrawableAtlas has been destroyed, because of memory pressure.
         // We render the VD into a temporary standalone buffer and mark the frame as dirty. Next
@@ -575,8 +571,7 @@ void Tree::draw(SkCanvas* canvas) {
         int scaledWidth = SkScalarCeilToInt(mProperties.getScaledWidth());
         int scaledHeight = SkScalarCeilToInt(mProperties.getScaledHeight());
         canvas->drawBitmapRect(skiaBitmap, SkRect::MakeWH(scaledWidth, scaledHeight),
-                               mutateProperties()->getBounds(), getPaint(),
-                               SkCanvas::kFast_SrcRectConstraint);
+                bounds, getPaint(), SkCanvas::kFast_SrcRectConstraint);
         mCache.clear();
         markDirty();
     }

@@ -725,8 +725,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      *                            wallpaper windows in the window list.
      */
     DisplayContent(Display display, WindowManagerService service,
-            WallpaperController wallpaperController) {
+            WallpaperController wallpaperController, DisplayWindowController controller) {
         super(service);
+        setController(controller);
         if (service.mRoot.getDisplayContent(display.getDisplayId()) != null) {
             throw new IllegalArgumentException("Display with ID=" + display.getDisplayId()
                     + " already exists=" + service.mRoot.getDisplayContent(display.getDisplayId())
@@ -1941,6 +1942,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         } finally {
             mRemovingDisplay = false;
         }
+
+        mService.onDisplayRemoved(mDisplayId);
     }
 
     /** Returns true if a removal action is still being deferred. */
@@ -1950,7 +1953,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         if (!stillDeferringRemoval && mDeferredRemoval) {
             removeImmediately();
-            mService.onDisplayRemoved(mDisplayId);
             return false;
         }
         return true;

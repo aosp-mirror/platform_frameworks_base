@@ -140,7 +140,6 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.ActivityStarterDelegate;
 import com.android.systemui.AutoReinflateContainer;
-import com.android.systemui.charging.WirelessChargingAnimation;
 import com.android.systemui.DemoMode;
 import com.android.systemui.Dependency;
 import com.android.systemui.EventLogTags;
@@ -152,6 +151,7 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.charging.WirelessChargingAnimation;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
@@ -181,6 +181,7 @@ import com.android.systemui.stackdivider.WindowManagerProxy;
 import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.DismissView;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.EmptyShadeView;
@@ -2460,14 +2461,25 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     @Override
-    public void showChargingAnimation(int batteryLevel) {
-        if (mDozing) {
-            // ambient
-        } else if (mKeyguardManager.isKeyguardLocked()) {
-            // lockscreen
-        } else {
+    public void showWirelessChargingAnimation(int batteryLevel) {
+        if (mDozing || mKeyguardManager.isKeyguardLocked()) {
+            // on ambient or lockscreen, hide notification panel
             WirelessChargingAnimation.makeWirelessChargingAnimation(mContext, null,
-                    batteryLevel).show();
+                    batteryLevel, new WirelessChargingAnimation.Callback() {
+                        @Override
+                        public void onAnimationStarting() {
+                            CrossFadeHelper.fadeOut(mNotificationPanel, 1);
+                        }
+
+                        @Override
+                        public void onAnimationEnded() {
+                            CrossFadeHelper.fadeIn(mNotificationPanel);
+                        }
+                    }).show();
+        } else {
+            // workspace
+            WirelessChargingAnimation.makeWirelessChargingAnimation(mContext, null,
+                    batteryLevel, null).show();
         }
     }
 
@@ -3883,6 +3895,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private void instantCollapseNotificationPanel() {
         mNotificationPanel.instantCollapse();
+        runPostCollapseRunnables();
     }
 
     @Override
@@ -5045,6 +5058,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         } else if (!isPresenterFullyCollapsed()) {
             instantCollapseNotificationPanel();
             visibilityChanged(false);
+        } else {
+            runPostCollapseRunnables();
         }
     }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define DEBUG true  // STOPSHIP if true
+#define DEBUG false  // STOPSHIP if true
 #include "Log.h"
 
 #include "../condition/CombinationConditionTracker.h"
@@ -541,7 +541,7 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config,
         ALOGE("initLogMatchingTrackers failed");
         return false;
     }
-    ALOGD("initLogMatchingTrackers succeed...");
+    VLOG("initLogMatchingTrackers succeed...");
 
     if (!initConditions(key, config, logTrackerMap, conditionTrackerMap, allConditionTrackers,
                         trackerToConditionMap)) {

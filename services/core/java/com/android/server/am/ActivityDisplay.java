@@ -657,6 +657,26 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         return false;
     }
 
+    void remove() {
+        final boolean destroyContentOnRemoval = shouldDestroyContentOnRemove();
+        while (getChildCount() > 0) {
+            final ActivityStack stack = getChildAt(0);
+            if (destroyContentOnRemoval) {
+                mSupervisor.moveStackToDisplayLocked(stack.mStackId, DEFAULT_DISPLAY,
+                        false /* onTop */);
+                stack.finishAllActivitiesLocked(true /* immediately */);
+            } else {
+                // Moving all tasks to fullscreen stack, because it's guaranteed to be
+                // a valid launch stack for all activities. This way the task history from
+                // external display will be preserved on primary after move.
+                mSupervisor.moveTasksToFullscreenStackLocked(stack, true /* onTop */);
+            }
+        }
+
+        mWindowContainerController.removeContainer();
+        mWindowContainerController = null;
+    }
+
     /** Update and get all UIDs that are present on the display and have access to it. */
     IntArray getPresentUIDs() {
         mDisplayAccessUIDs.clear();
@@ -666,7 +686,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         return mDisplayAccessUIDs;
     }
 
-    boolean shouldDestroyContentOnRemove() {
+    private boolean shouldDestroyContentOnRemove() {
         return mDisplay.getRemoveMode() == REMOVE_MODE_DESTROY_CONTENT;
     }
 

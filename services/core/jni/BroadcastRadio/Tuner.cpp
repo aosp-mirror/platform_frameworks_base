@@ -22,7 +22,7 @@
 #include "convert.h"
 #include "TunerCallback.h"
 
-#include <android/hardware/broadcastradio/1.2/IBroadcastRadioFactory.h>
+#include <android/hardware/broadcastradio/1.1/IBroadcastRadioFactory.h>
 #include <binder/IPCThreadState.h>
 #include <broadcastradio-utils-1x/Utils.h>
 #include <core_jni_helpers.h>
@@ -44,16 +44,15 @@ using hardware::hidl_vec;
 
 namespace V1_0 = hardware::broadcastradio::V1_0;
 namespace V1_1 = hardware::broadcastradio::V1_1;
-namespace V1_2 = hardware::broadcastradio::V1_2;
 namespace utils = hardware::broadcastradio::utils;
 
 using V1_0::Band;
 using V1_0::BandConfig;
 using V1_0::MetaData;
 using V1_0::Result;
+using V1_1::ITunerCallback;
 using V1_1::ProgramListResult;
 using V1_1::VendorKeyValue;
-using V1_2::ITunerCallback;
 using utils::HalRevision;
 
 static mutex gContextMutex;
@@ -94,7 +93,6 @@ struct TunerContext {
     wp<V1_1::IBroadcastRadio> mHalModule11;
     sp<V1_0::ITuner> mHalTuner;
     sp<V1_1::ITuner> mHalTuner11;
-    sp<V1_2::ITuner> mHalTuner12;
     sp<HalDeathRecipient> mHalDeathRecipient;
 
 private:
@@ -181,11 +179,8 @@ void assignHalInterfaces(JNIEnv *env, JavaRef<jobject> const &jTuner,
 
     ctx.mHalTuner = halTuner;
     ctx.mHalTuner11 = V1_1::ITuner::castFrom(halTuner).withDefault(nullptr);
-    ctx.mHalTuner12 = V1_2::ITuner::castFrom(halTuner).withDefault(nullptr);
     ALOGW_IF(ctx.mHalRev >= HalRevision::V1_1 && ctx.mHalTuner11 == nullptr,
             "Provided tuner does not implement 1.1 HAL");
-    ALOGW_IF(ctx.mHalRev >= HalRevision::V1_2 && ctx.mHalTuner12 == nullptr,
-            "Provided tuner does not implement 1.2 HAL");
 
     ctx.mHalDeathRecipient = new HalDeathRecipient(getNativeCallback(env, jTuner));
     halTuner->linkToDeath(ctx.mHalDeathRecipient, 0);
@@ -207,11 +202,6 @@ static sp<V1_0::ITuner> getHalTuner(jlong nativeContext) {
 static sp<V1_1::ITuner> getHalTuner11(jlong nativeContext) {
     lock_guard<mutex> lk(gContextMutex);
     return getNativeContext(nativeContext).mHalTuner11;
-}
-
-static sp<V1_2::ITuner> getHalTuner12(jlong nativeContext) {
-    lock_guard<mutex> lk(gContextMutex);
-    return getNativeContext(nativeContext).mHalTuner12;
 }
 
 sp<ITunerCallback> getNativeCallback(JNIEnv *env, JavaRef<jobject> const &tuner) {
@@ -243,7 +233,6 @@ static void nativeClose(JNIEnv *env, jobject obj, jlong nativeContext) {
     ctx.mHalDeathRecipient = nullptr;
 
     ctx.mHalTuner11 = nullptr;
-    ctx.mHalTuner12 = nullptr;
     ctx.mHalTuner = nullptr;
 }
 
@@ -466,48 +455,6 @@ static void nativeSetAnalogForced(JNIEnv *env, jobject obj, jlong nativeContext,
     convert::ThrowIfFailed(env, halResult);
 }
 
-static jobject nativeSetParameters(JNIEnv *env, jobject obj, jlong nativeContext, jobject jParameters) {
-    ALOGV("%s", __func__);
-
-    auto halTuner = getHalTuner12(nativeContext);
-    if (halTuner == nullptr) {
-        ALOGI("Parameters are not supported with HAL < 1.2");
-        return nullptr;
-    }
-
-    JavaRef<jobject> jResults = nullptr;
-    auto parameters = convert::VendorInfoToHal(env, jParameters);
-    auto hidlResult = halTuner->setParameters(parameters,
-            [&](const hidl_vec<VendorKeyValue> results) {
-        jResults = convert::VendorInfoFromHal(env, results);
-    });
-
-    if (convert::ThrowIfFailed(env, hidlResult)) return nullptr;
-
-    return jResults.release();
-}
-
-static jobject nativeGetParameters(JNIEnv *env, jobject obj, jlong nativeContext, jobject jKeys) {
-    ALOGV("%s", __func__);
-
-    auto halTuner = getHalTuner12(nativeContext);
-    if (halTuner == nullptr) {
-        ALOGI("Parameters are not supported with HAL < 1.2");
-        return nullptr;
-    }
-
-    JavaRef<jobject> jResults = nullptr;
-    auto keys = convert::StringListToHal(env, jKeys);
-    auto hidlResult = halTuner->getParameters(keys,
-            [&](const hidl_vec<VendorKeyValue> parameters) {
-        jResults = convert::VendorInfoFromHal(env, parameters);
-    });
-
-    if (convert::ThrowIfFailed(env, hidlResult)) return nullptr;
-
-    return jResults.release();
-}
-
 static const JNINativeMethod gTunerMethods[] = {
     { "nativeInit", "(IZI)J", (void*)nativeInit },
     { "nativeFinalize", "(J)V", (void*)nativeFinalize },
@@ -528,8 +475,6 @@ static const JNINativeMethod gTunerMethods[] = {
     { "nativeGetImage", "(JI)[B", (void*)nativeGetImage},
     { "nativeIsAnalogForced", "(J)Z", (void*)nativeIsAnalogForced },
     { "nativeSetAnalogForced", "(JZ)V", (void*)nativeSetAnalogForced },
-    { "nativeSetParameters", "(JLjava/util/Map;)Ljava/util/Map;", (void*)nativeSetParameters },
-    { "nativeGetParameters", "(JLjava/util/List;)Ljava/util/Map;", (void*)nativeGetParameters },
 };
 
 } // namespace Tuner
