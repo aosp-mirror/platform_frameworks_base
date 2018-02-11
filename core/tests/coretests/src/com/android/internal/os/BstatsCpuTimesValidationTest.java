@@ -59,6 +59,7 @@ import android.text.TextUtils;
 import android.util.DebugUtils;
 import android.util.Log;
 
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -118,6 +119,11 @@ public class BstatsCpuTimesValidationTest {
         checkCpuTimesAvailability();
     }
 
+    @AfterClass
+    public static void tearDownOnce() throws Exception {
+        batteryReset();
+    }
+
     // Checks cpu freq times of system uid as an indication of whether /proc/uid_time_in_state
     // and /proc/uid/<uid>/time_in_state kernel nodes are available.
     private static void checkCpuTimesAvailability() throws Exception {
@@ -127,7 +133,7 @@ public class BstatsCpuTimesValidationTest {
         final long[] totalCpuTimes = getAllCpuFreqTimes(Process.SYSTEM_UID);
         sCpuFreqTimesAvailable = totalCpuTimes != null;
         final long[] fgSvcCpuTimes = getAllCpuFreqTimes(Process.SYSTEM_UID,
-                PROCESS_STATE_FOREGROUND_SERVICE);
+                PROCESS_STATE_FOREGROUND);
         sPerProcStateTimesAvailable = fgSvcCpuTimes != null;
     }
 
@@ -868,12 +874,16 @@ public class BstatsCpuTimesValidationTest {
 
     private static void batteryOn() throws Exception {
         executeCmd("dumpsys battery unplug");
-        assertBatteryState(false);
+        assertBatteryState(false /* pluggedIn */);
     }
 
     private static void batteryOff() throws Exception {
+        executeCmd("dumpsys battery set ac " + BatteryManager.BATTERY_PLUGGED_AC);
+        assertBatteryState(true /* pluggedIn */);
+    }
+
+    private static void batteryReset() throws Exception {
         executeCmd("dumpsys battery reset");
-        assertBatteryState(true);
     }
 
     private void screenOn() throws Exception {
