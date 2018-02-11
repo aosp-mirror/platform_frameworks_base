@@ -78,10 +78,11 @@ public class KernelUidCpuTimeReader {
                 final long userTimeUs = Long.parseLong(splitter.next(), 10);
                 final long systemTimeUs = Long.parseLong(splitter.next(), 10);
 
+                boolean notifyCallback = false;
+                long userTimeDeltaUs = userTimeUs;
+                long systemTimeDeltaUs = systemTimeUs;
                 // Only report if there is a callback and if this is not the first read.
                 if (callback != null && mLastTimeReadUs != 0) {
-                    long userTimeDeltaUs = userTimeUs;
-                    long systemTimeDeltaUs = systemTimeUs;
                     int index = mLastUserTimeUs.indexOfKey(uid);
                     if (index >= 0) {
                         userTimeDeltaUs -= mLastUserTimeUs.valueAt(index);
@@ -114,12 +115,13 @@ public class KernelUidCpuTimeReader {
                         }
                     }
 
-                    if (userTimeDeltaUs != 0 || systemTimeDeltaUs != 0) {
-                        callback.onUidCpuTime(uid, userTimeDeltaUs, systemTimeDeltaUs);
-                    }
+                    notifyCallback = (userTimeDeltaUs != 0 || systemTimeDeltaUs != 0);
                 }
                 mLastUserTimeUs.put(uid, userTimeUs);
                 mLastSystemTimeUs.put(uid, systemTimeUs);
+                if (notifyCallback) {
+                    callback.onUidCpuTime(uid, userTimeDeltaUs, systemTimeDeltaUs);
+                }
             }
         } catch (IOException e) {
             Slog.e(TAG, "Failed to read uid_cputime: " + e.getMessage());
