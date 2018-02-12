@@ -13,89 +13,98 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:tag="row"
     android:layout_height="wrap_content"
     android:layout_width="@dimen/volume_dialog_panel_width"
     android:clipChildren="true"
     android:clipToPadding="true"
-    android:theme="@style/qs_theme"
-    android:gravity="center"
-    android:orientation="vertical" >
+    android:theme="@style/qs_theme">
 
     <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
         android:gravity="center"
-        android:padding="5dp">
-        <TextView
-            android:id="@+id/volume_row_header"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLength="10"
-            android:maxLines="1"
-            android:textColor="?android:attr/colorControlNormal"
-            android:textAppearance="@style/TextAppearance.Volume.Header" />
+        android:orientation="vertical" >
+
         <LinearLayout
-            android:id="@+id/output_chooser"
             android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            android:paddingTop="10dp"
-            android:background="?android:selectableItemBackgroundBorderless"
-            android:gravity="center">
+            android:gravity="center"
+            android:padding="5dp">
             <TextView
-                android:id="@+id/volume_row_connected_device"
-                android:visibility="gone"
+                android:id="@+id/volume_row_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:maxLength="10"
                 android:ellipsize="end"
+                android:maxLength="10"
                 android:maxLines="1"
-                android:textAppearance="@style/TextAppearance.Volume.Header.Secondary" />
-            <com.android.keyguard.AlphaOptimizedImageButton
-                android:id="@+id/output_chooser_button"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:textColor="?android:attr/colorControlNormal"
+                android:textAppearance="@style/TextAppearance.Volume.Header" />
+            <LinearLayout
+                android:id="@+id/output_chooser"
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                android:paddingTop="10dp"
                 android:background="?android:selectableItemBackgroundBorderless"
-                android:contentDescription="@string/accessibility_output_chooser"
-                style="@style/VolumeButtons"
-                android:clickable="false"
-                android:layout_centerVertical="true"
-                android:src="@drawable/ic_swap"
-                android:soundEffectsEnabled="false" />
+                android:gravity="center">
+                <TextView
+                    android:id="@+id/volume_row_connected_device"
+                    android:visibility="gone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLength="10"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textAppearance="@style/TextAppearance.Volume.Header.Secondary" />
+                <com.android.keyguard.AlphaOptimizedImageButton
+                    android:id="@+id/output_chooser_button"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="?android:selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/accessibility_output_chooser"
+                    style="@style/VolumeButtons"
+                    android:clickable="false"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/ic_swap"
+                    android:soundEffectsEnabled="false"/>
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
-    <FrameLayout
-        android:id="@+id/volume_row_slider_frame"
-        android:padding="0dp"
-        android:layout_width="@dimen/volume_dialog_panel_width"
-        android:layoutDirection="rtl"
-        android:layout_height="@dimen/volume_dialog_panel_width">
-        <SeekBar
-            android:id="@+id/volume_row_slider"
-            android:clickable="true"
+        <FrameLayout
+            android:id="@+id/volume_row_slider_frame"
             android:padding="0dp"
-            android:layout_margin="0dp"
             android:layout_width="@dimen/volume_dialog_panel_width"
-            android:layout_height="@dimen/volume_dialog_panel_width"
             android:layoutDirection="rtl"
-            android:layout_gravity="center"
-            android:rotation="90" />
-    </FrameLayout>
+            android:layout_height="@dimen/volume_dialog_panel_width">
+            <SeekBar
+                android:id="@+id/volume_row_slider"
+                android:clickable="true"
+                android:padding="0dp"
+                android:layout_margin="0dp"
+                android:layout_width="@dimen/volume_dialog_panel_width"
+                android:layout_height="@dimen/volume_dialog_panel_width"
+                android:layoutDirection="rtl"
+                android:layout_gravity="center"
+                android:rotation="90" />
+        </FrameLayout>
 
-    <com.android.keyguard.AlphaOptimizedImageButton
-        android:id="@+id/volume_row_icon"
-        style="@style/VolumeButtons"
-        android:padding="10dp"
-        android:layout_width="@dimen/volume_button_size"
-        android:layout_height="@dimen/volume_button_size"
-        android:background="?android:selectableItemBackgroundBorderless"
-        android:soundEffectsEnabled="false" />
+        <com.android.keyguard.AlphaOptimizedImageButton
+            android:id="@+id/volume_row_icon"
+            style="@style/VolumeButtons"
+            android:padding="10dp"
+            android:layout_width="@dimen/volume_button_size"
+            android:layout_height="@dimen/volume_button_size"
+            android:background="?android:selectableItemBackgroundBorderless"
+            android:soundEffectsEnabled="false" />
+    </LinearLayout>
 
-</LinearLayout>
+    <include layout="@layout/volume_dnd_icon"/>
+
+</FrameLayout>

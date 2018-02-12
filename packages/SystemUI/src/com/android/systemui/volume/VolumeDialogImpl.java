@@ -68,6 +68,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
@@ -109,7 +110,9 @@ public class VolumeDialogImpl implements VolumeDialog {
     private ViewGroup mDialogRowsView;
     private ViewGroup mFooter;
     private ImageButton mRingerIcon;
+    private ImageView mZenIcon;
     private TextView mRingerStatus;
+    private TextView mRingerTitle;
     private final List<VolumeRow> mRows = new ArrayList<>();
     private ConfigurableTexts mConfigurableTexts;
     private final SparseBooleanArray mDynamic = new SparseBooleanArray();
@@ -216,6 +219,8 @@ public class VolumeDialogImpl implements VolumeDialog {
         mFooter = mDialog.findViewById(R.id.footer);
         mRingerIcon = mFooter.findViewById(R.id.ringer_icon);
         mRingerStatus = mFooter.findViewById(R.id.ringer_status);
+        mRingerTitle = mFooter.findViewById(R.id.ringer_title);
+        mZenIcon = mFooter.findViewById(R.id.dnd_icon);
 
         if (mRows.isEmpty()) {
             addRow(AudioManager.STREAM_MUSIC,
@@ -349,6 +354,7 @@ public class VolumeDialogImpl implements VolumeDialog {
         if (stream == STREAM_ACCESSIBILITY) {
             row.header.setFilters(new InputFilter[] {new InputFilter.LengthFilter(13)});
         }
+        row.dndIcon = row.view.findViewById(R.id.dnd_icon);
         row.slider =  row.view.findViewById(R.id.volume_row_slider);
         row.slider.setOnSeekBarChangeListener(new VolumeSeekBarChangeListener(row));
         row.anim = null;
@@ -559,6 +565,8 @@ public class VolumeDialogImpl implements VolumeDialog {
             if (ss == null) {
                 return;
             }
+
+            enableRingerViewsH(mState.zenMode == Global.ZEN_MODE_OFF || !mState.disallowRinger);
             switch (mState.ringerModeInternal) {
                 case AudioManager.RINGER_MODE_VIBRATE:
                     mRingerStatus.setText(R.string.volume_ringer_status_vibrate);
@@ -601,6 +609,28 @@ public class VolumeDialogImpl implements VolumeDialog {
                     break;
             }
         }
+    }
+
+    /**
+     * Toggles enable state of views in a VolumeRow (not including seekbar, outputChooser or icon)
+     * Hides/shows zen icon
+     * @param enable whether to enable volume row views and hide dnd icon
+     */
+    private void enableVolumeRowViewsH(VolumeRow row, boolean enable) {
+        row.header.setEnabled(enable);
+        row.dndIcon.setVisibility(enable ? View.GONE : View.VISIBLE);
+    }
+
+    /**
+     * Toggles enable state of footer/ringer views
+     * Hides/shows zen icon
+     * @param enable whether to enable ringer views and hide dnd icon
+     */
+    private void enableRingerViewsH(boolean enable) {
+        mRingerTitle.setEnabled(enable);
+        mRingerStatus.setEnabled(enable);
+        mRingerIcon.setEnabled(enable);
+        mZenIcon.setVisibility(enable ? View.GONE : View.VISIBLE);
     }
 
     private void trimObsoleteH() {
@@ -748,6 +778,7 @@ public class VolumeDialogImpl implements VolumeDialog {
         if (zenMuted) {
             row.tracking = false;
         }
+        enableVolumeRowViewsH(row, !zenMuted);
 
         // update slider
         final boolean enableSlider = !zenMuted;
@@ -1178,5 +1209,6 @@ public class VolumeDialogImpl implements VolumeDialog {
         private int lastAudibleLevel = 1;
         private View outputChooser;
         private TextView connectedDevice;
+        private ImageView dndIcon;
     }
 }
