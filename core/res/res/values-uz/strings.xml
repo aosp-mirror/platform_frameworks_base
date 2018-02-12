@@ -355,6 +355,8 @@
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Ilovaga o‘zining komponentlarini xotirada doimiy saqlashga ruxsat beradi. Bu mavjud xotirani cheklashi va planshetni sekin ishlashiga sabab bo‘lishi mumkin."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Ilovaga o‘zining muayyan qismlarining xotiraning turg‘un qismiga aylantirish huquqini beradi. Bunda, boshqa ilovalar uchun xotiradan ajratilgan joy cheklanib, televizorning ishlashi sekinlashishi mumkin."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Ilovaga o‘zining komponentlarini xotirada doimiy saqlashga ruxsat beradi. Bu mavjud xotirani cheklashi va telefonni sekin ishlashiga sabab bo‘lishi mumkin."</string>
+    <string name="permlab_foregroundService" msgid="3310786367649133115">"faol xizmatlarni ishga tushirish"</string>
+    <string name="permdesc_foregroundService" msgid="6471634326171344622">"Ilovaga faol xizmatlardan foydalanishga ruxsat beradi."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"ilovalar egallagan xotira joyini hisoblash"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Ilova o‘zining kodi, ma’lumotlari va kesh o‘lchami to‘g‘risidagi ma’lumotlarni olishi mumkin"</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"tizim sozlamalarini o‘zgartirish"</string>
@@ -497,10 +499,8 @@
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Urinishlar soni ko‘payib ketdi. Keyinroq qayta urinib ko‘ring."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Urinishlar soni ko‘payib ketdi. Barmoq izi skaneri bloklandi."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Qayta urinib ko‘ring."</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (7654382120628334248) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_hw_not_present (5729436878065119329) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Hech qanday barmoq izi qayd qilinmagan."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Bu qurilmada barmoq izi skaneri yo‘q"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Barmoq izi <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -1212,23 +1212,15 @@
     <string name="no_permissions" msgid="7283357728219338112">"Hech qanday ruxsat talab qilinmaydi"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"buning uchun sizdan haq olinishi mumkin"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <!-- no translation found for usb_charging_notification_title (1595122345358177163) -->
-    <skip />
-    <!-- no translation found for usb_supplying_notification_title (4631045789893086181) -->
-    <skip />
-    <!-- no translation found for usb_mtp_notification_title (4238227258391151029) -->
-    <skip />
-    <!-- no translation found for usb_ptp_notification_title (5425857879922006878) -->
-    <skip />
-    <!-- no translation found for usb_tether_notification_title (3716143122035802501) -->
-    <skip />
-    <!-- no translation found for usb_midi_notification_title (5356040379749154805) -->
-    <skip />
-    <!-- no translation found for usb_accessory_notification_title (1899977434994900306) -->
-    <skip />
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"Bu qurilma USB orqali quvvatlanmoqda"</string>
+    <string name="usb_supplying_notification_title" msgid="4631045789893086181">"USB orqali ulangan qurilma quvvatlanmoqda"</string>
+    <string name="usb_mtp_notification_title" msgid="4238227258391151029">"USB orqali fayl uzatish yoqildi"</string>
+    <string name="usb_ptp_notification_title" msgid="5425857879922006878">"USB orqali PTP rejimi yoqildi"</string>
+    <string name="usb_tether_notification_title" msgid="3716143122035802501">"USB modem rejimi yoqildi"</string>
+    <string name="usb_midi_notification_title" msgid="5356040379749154805">"USB orqali MIDI rejimi yoqildi"</string>
+    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"USB qurilma ulandi"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Boshqa parametrlarini ko‘rish uchun bosing."</string>
-    <!-- no translation found for usb_power_notification_message (4647527153291917218) -->
-    <skip />
+    <string name="usb_power_notification_message" msgid="4647527153291917218">"Ulangan qurilma quvvatlanmoqda. Boshqa parametrlar uchun bosing."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Analogli audio uskuna aniqlandi"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Biriktirilgan qurilma mazkur telefon bilan mos emas. Batafsil axborot olish uchun bu yerga bosing."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB orqali nosozliklarni tuzatish"</string>
@@ -1831,8 +1823,7 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Ovoz uchun telefon taqiqlangan"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Qalqib chiquvchi oyna"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <!-- no translation found for shortcut_restored_on_lower_version (4860853725206702336) -->
-    <skip />
+    <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"Ilova versiyasi eski yoki bu yorliq bilan mos emas"</string>
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Ilovada zaxiralash va tiklash ishlamagani uchun yorliq tiklanmadi"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Ilova imzosi mos kelmagani uchun yorliq tiklanmadi"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Yorliq tiklanmadi"</string>
