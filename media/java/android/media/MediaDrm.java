@@ -634,39 +634,8 @@ public final class MediaDrm implements AutoCloseable {
      * @throws ResourceBusyException if required resources are in use
      */
     @NonNull
-    public byte[] openSession() throws NotProvisionedException,
-            ResourceBusyException {
-        return openSession(getMaxSecurityLevel());
-    }
-
-    /**
-     * Open a new session at a requested security level. The security level
-     * represents the robustness of the device's DRM implementation. By default,
-     * sessions are opened at the native security level of the device.
-     * Overriding the security level is necessary when the decrypted frames need
-     * to be manipulated, such as for image compositing. The security level
-     * parameter must be lower than the native level. Reducing the security
-     * level will typically limit the content to lower resolutions, as
-     * determined by the license policy. If the requested level is not
-     * supported, the next lower supported security level will be set. The level
-     * can be queried using {@link #getSecurityLevel}. A session
-     * ID is returned.
-     *
-     * @param level the new security level, one of
-     * {@link #SW_SECURE_CRYPTO}, {@link #SW_SECURE_DECODE},
-     * {@link #HW_SECURE_CRYPTO}, {@link #HW_SECURE_DECODE} or
-     * {@link #HW_SECURE_ALL}.
-     *
-     * @throws NotProvisionedException if provisioning is needed
-     * @throws ResourceBusyException if required resources are in use
-     * @throws IllegalArgumentException if the requested security level is
-     * higher than the native level or lower than the lowest supported level or
-     * if the device does not support specifying the security level when opening
-     * a session
-     */
-    @NonNull
-    public native byte[] openSession(@SecurityLevel int level) throws
-            NotProvisionedException, ResourceBusyException;
+    public native byte[] openSession() throws NotProvisionedException,
+            ResourceBusyException;
 
     /**
      * Close a session on the MediaDrm object that was previously opened
@@ -1140,7 +1109,7 @@ public final class MediaDrm implements AutoCloseable {
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SECURITY_LEVEL_UNKNOWN, SW_SECURE_CRYPTO, SW_SECURE_DECODE,
-            HW_SECURE_CRYPTO, HW_SECURE_DECODE, HW_SECURE_ALL})
+                        HW_SECURE_CRYPTO, HW_SECURE_DECODE, HW_SECURE_ALL})
     public @interface SecurityLevel {}
 
     /**
@@ -1150,55 +1119,39 @@ public final class MediaDrm implements AutoCloseable {
     public static final int SECURITY_LEVEL_UNKNOWN = 0;
 
     /**
-     * DRM key management uses software-based whitebox crypto.
+     *  Software-based whitebox crypto
      */
     public static final int SW_SECURE_CRYPTO = 1;
 
     /**
-     * DRM key management and decoding use software-based whitebox crypto.
+     * Software-based whitebox crypto and an obfuscated decoder
      */
-    public static final int SW_SECURE_DECODE = 2;
+     public static final int SW_SECURE_DECODE = 2;
 
     /**
-     * DRM key management and crypto operations are performed within a hardware
-     * backed trusted execution environment.
+     * DRM key management and crypto operations are performed within a
+     * hardware backed trusted execution environment
      */
     public static final int HW_SECURE_CRYPTO = 3;
 
     /**
-     * DRM key management, crypto operations and decoding of content are
-     * performed within a hardware backed trusted execution environment.
+     * DRM key management, crypto operations and decoding of content
+     * are performed within a hardware backed trusted execution environment
      */
-    public static final int HW_SECURE_DECODE = 4;
+     public static final int HW_SECURE_DECODE = 4;
 
     /**
      * DRM key management, crypto operations, decoding of content and all
-     * handling of the media (compressed and uncompressed) is handled within a
-     * hardware backed trusted execution environment.
+     * handling of the media (compressed and uncompressed) is handled within
+     * a hardware backed trusted execution environment.
      */
     public static final int HW_SECURE_ALL = 5;
 
     /**
-     * The maximum security level supported by the device. This is the default
-     * security level when a session is opened.
-     * @hide
-     */
-    public static final int SECURITY_LEVEL_MAX = 6;
-
-    /**
-     * The maximum security level supported by the device. This is the default
-     * security level when a session is opened.
-     */
-    @SecurityLevel
-    public static final int getMaxSecurityLevel() {
-        return SECURITY_LEVEL_MAX;
-    }
-
-    /**
-     * Return the current security level of a session. A session has an initial
-     * security level determined by the robustness of the DRM system's
-     * implementation on the device. The security level may be changed at the
-     * time a session is opened using {@link #openSession}.
+     * Return the current security level of a session. A session
+     * has an initial security level determined by the robustness of
+     * the DRM system's implementation on the device. The security
+     * level may be adjusted using {@link #setSecurityLevel}.
      * @param sessionId the session to query.
      * <p>
      * @return one of {@link #SECURITY_LEVEL_UNKNOWN},
@@ -1208,6 +1161,21 @@ public final class MediaDrm implements AutoCloseable {
      */
     @SecurityLevel
     public native int getSecurityLevel(@NonNull byte[] sessionId);
+
+    /**
+     * Set the security level of a session. This can be useful if specific
+     * attributes of a lower security level are needed by an application,
+     * such as image manipulation or compositing. Reducing the security
+     * level will typically limit decryption to lower content resolutions,
+     * depending on the license policy.
+     * @param sessionId the session to set the security level on.
+     * @param level the new security level, one of
+     * {@link #SW_SECURE_CRYPTO}, {@link #SW_SECURE_DECODE},
+     * {@link #HW_SECURE_CRYPTO}, {@link #HW_SECURE_DECODE} or
+     * {@link #HW_SECURE_ALL}.
+     */
+    public native void setSecurityLevel(@NonNull byte[] sessionId,
+            @SecurityLevel int level);
 
     /**
      * String property name: identifies the maker of the DRM plugin
