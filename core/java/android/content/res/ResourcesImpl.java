@@ -912,7 +912,7 @@ public class ResourcesImpl {
      * first try to load CSL from the cache. If not found, try to get from the constant state.
      * Last, parse the XML and generate the CSL.
      */
-    @NonNull
+    @Nullable
     private ComplexColor loadComplexColorFromName(Resources wrapper, Resources.Theme theme,
             TypedValue value, int id) {
         final long key = (((long) value.assetCookie) << 32) | value.data;
@@ -932,15 +932,17 @@ public class ResourcesImpl {
             complexColor = loadComplexColorForCookie(wrapper, value, id, theme);
         }
 
-        complexColor.setBaseChangingConfigurations(value.changingConfigurations);
+        if (complexColor != null) {
+            complexColor.setBaseChangingConfigurations(value.changingConfigurations);
 
-        if (mPreloading) {
-            if (verifyPreloadConfig(complexColor.getChangingConfigurations(),
-                    0, value.resourceId, "color")) {
-                sPreloadedComplexColors.put(key, complexColor.getConstantState());
+            if (mPreloading) {
+                if (verifyPreloadConfig(complexColor.getChangingConfigurations(),
+                        0, value.resourceId, "color")) {
+                    sPreloadedComplexColors.put(key, complexColor.getConstantState());
+                }
+            } else {
+                cache.put(key, theme, complexColor.getConstantState());
             }
-        } else {
-            cache.put(key, theme, complexColor.getConstantState());
         }
         return complexColor;
     }
@@ -1044,7 +1046,8 @@ public class ResourcesImpl {
      * We deferred the parser creation to this function b/c we need to differentiate b/t gradient
      * and selector tag.
      *
-     * @return a ComplexColor (GradientColor or ColorStateList) based on the XML file content.
+     * @return a ComplexColor (GradientColor or ColorStateList) based on the XML file content, or
+     *     {@code null} if the XML file is neither.
      */
     @NonNull
     private ComplexColor loadComplexColorForCookie(Resources wrapper, TypedValue value, int id,
