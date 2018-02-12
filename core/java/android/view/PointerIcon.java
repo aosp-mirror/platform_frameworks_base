@@ -23,10 +23,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -400,33 +396,6 @@ public final class PointerIcon implements Parcelable {
         return true;
     }
 
-    /**
-     *  Get the Bitmap from the Drawable.
-     *
-     *  If the Bitmap needed to be scaled up to account for density, BitmapDrawable
-     *  handles this at draw time. But this class doesn't actually draw the Bitmap;
-     *  it is just a holder for native code to access its SkBitmap. So this needs to
-     *  get a version that is scaled to account for density.
-     */
-    private Bitmap getBitmapFromDrawable(BitmapDrawable bitmapDrawable) {
-        Bitmap bitmap = bitmapDrawable.getBitmap();
-        final int scaledWidth  = bitmapDrawable.getIntrinsicWidth();
-        final int scaledHeight = bitmapDrawable.getIntrinsicHeight();
-        if (scaledWidth == bitmap.getWidth() && scaledHeight == bitmap.getHeight()) {
-            return bitmap;
-        }
-
-        Rect src = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-        RectF dst = new RectF(0, 0, scaledWidth, scaledHeight);
-
-        Bitmap scaled = Bitmap.createBitmap(scaledWidth, scaledHeight, bitmap.getConfig());
-        Canvas canvas = new Canvas(scaled);
-        Paint paint = new Paint();
-        paint.setFilterBitmap(true);
-        canvas.drawBitmap(bitmap, src, dst, paint);
-        return scaled;
-    }
-
     private void loadResource(Context context, Resources resources, @XmlRes int resourceId) {
         final XmlResourceParser parser = resources.getXml(resourceId);
         final int bitmapRes;
@@ -483,8 +452,7 @@ public final class PointerIcon implements Parcelable {
                                 + "is different. All frames should have the exact same size and "
                                 + "share the same hotspot.");
                     }
-                    BitmapDrawable bitmapDrawableFrame = (BitmapDrawable) drawableFrame;
-                    mBitmapFrames[i - 1] = getBitmapFromDrawable(bitmapDrawableFrame);
+                    mBitmapFrames[i - 1] = ((BitmapDrawable)drawableFrame).getBitmap();
                 }
             }
         }
@@ -493,8 +461,7 @@ public final class PointerIcon implements Parcelable {
                     + "refer to a bitmap drawable.");
         }
 
-        BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-        final Bitmap bitmap = getBitmapFromDrawable(bitmapDrawable);
+        final Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
         validateHotSpot(bitmap, hotSpotX, hotSpotY);
         // Set the properties now that we have successfully loaded the icon.
         mBitmap = bitmap;
