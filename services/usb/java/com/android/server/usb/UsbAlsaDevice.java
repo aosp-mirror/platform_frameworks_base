@@ -18,8 +18,10 @@ package com.android.server.usb;
 
 import android.annotation.NonNull;
 import android.service.usb.UsbAlsaDeviceProto;
+import android.util.Slog;
 
 import com.android.internal.util.dump.DualDumpOutputStream;
+import com.android.server.audio.AudioService;
 
 /**
  * Represents the ALSA specification, and attributes of an ALSA device.
@@ -30,8 +32,8 @@ public final class UsbAlsaDevice {
 
     private final int mCardNum;
     private final int mDeviceNum;
-    private final boolean mHasPlayback;
-    private final boolean mHasCapture;
+    private final boolean mHasOutput;
+    private final boolean mHasInput;
 
     private final boolean mIsInputHeadset;
     private final boolean mIsOutputHeadset;
@@ -42,13 +44,13 @@ public final class UsbAlsaDevice {
     private String mDeviceDescription = "";
 
     public UsbAlsaDevice(int card, int device, String deviceAddress,
-            boolean hasPlayback, boolean hasCapture,
+            boolean hasOutput, boolean hasInput,
             boolean isInputHeadset, boolean isOutputHeadset) {
         mCardNum = card;
         mDeviceNum = device;
         mDeviceAddress = deviceAddress;
-        mHasPlayback = hasPlayback;
-        mHasCapture = hasCapture;
+        mHasOutput = hasOutput;
+        mHasInput = hasInput;
         mIsInputHeadset = isInputHeadset;
         mIsOutputHeadset = isOutputHeadset;
     }
@@ -75,28 +77,40 @@ public final class UsbAlsaDevice {
     }
 
     /**
-     * @returns true if the device supports playback.
+     * @returns the ALSA card/device address string.
      */
-    public boolean hasPlayback() {
-        return mHasPlayback;
+    public String getAlsaCardDeviceString() {
+        if (mCardNum < 0 || mDeviceNum < 0) {
+            Slog.e(TAG, "Invalid alsa card or device alsaCard: " + mCardNum
+                        + " alsaDevice: " + mDeviceNum);
+            return null;
+        }
+        return AudioService.makeAlsaAddressString(mCardNum, mDeviceNum);
     }
 
     /**
-     * @returns true if the device supports capture (recording).
+     * @returns true if the device supports output.
      */
-    public boolean hasCapture() {
-        return mHasCapture;
+    public boolean hasOutput() {
+        return mHasOutput;
     }
 
     /**
-     * @returns true if the device is a headset for purposes of capture.
+     * @returns true if the device supports input (recording).
+     */
+    public boolean hasInput() {
+        return mHasInput;
+    }
+
+    /**
+     * @returns true if the device is a headset for purposes of input.
      */
     public boolean isInputHeadset() {
         return mIsInputHeadset;
     }
 
     /**
-     * @returns true if the device is a headset for purposes of playback.
+     * @returns true if the device is a headset for purposes of output.
      */
     public boolean isOutputHeadset() {
         return mIsOutputHeadset;
@@ -106,40 +120,40 @@ public final class UsbAlsaDevice {
      * @Override
      * @returns a string representation of the object.
      */
-    public String toString() {
+    public synchronized String toString() {
         return "UsbAlsaDevice: [card: " + mCardNum
             + ", device: " + mDeviceNum
             + ", name: " + mDeviceName
-            + ", hasPlayback: " + mHasPlayback
-            + ", hasCapture: " + mHasCapture + "]";
+            + ", hasOutput: " + mHasOutput
+            + ", hasInput: " + mHasInput + "]";
     }
 
     /**
      * Write a description of the device to a dump stream.
      */
-    public void dump(@NonNull DualDumpOutputStream dump, String idName, long id) {
+    public synchronized void dump(@NonNull DualDumpOutputStream dump, String idName, long id) {
         long token = dump.start(idName, id);
 
         dump.write("card", UsbAlsaDeviceProto.CARD, mCardNum);
         dump.write("device", UsbAlsaDeviceProto.DEVICE, mDeviceNum);
         dump.write("name", UsbAlsaDeviceProto.NAME, mDeviceName);
-        dump.write("has_playback", UsbAlsaDeviceProto.HAS_PLAYBACK, mHasPlayback);
-        dump.write("has_capture", UsbAlsaDeviceProto.HAS_CAPTURE, mHasCapture);
+        dump.write("has_output", UsbAlsaDeviceProto.HAS_PLAYBACK, mHasOutput);
+        dump.write("has_input", UsbAlsaDeviceProto.HAS_CAPTURE, mHasInput);
         dump.write("address", UsbAlsaDeviceProto.ADDRESS, mDeviceAddress);
 
         dump.end(token);
     }
 
     // called by logDevices
-    String toShortString() {
+    synchronized String toShortString() {
         return "[card:" + mCardNum + " device:" + mDeviceNum + " " + mDeviceName + "]";
     }
 
-    String getDeviceName() {
+    synchronized String getDeviceName() {
         return mDeviceName;
     }
 
-    void setDeviceNameAndDescription(String deviceName, String deviceDescription) {
+    synchronized void setDeviceNameAndDescription(String deviceName, String deviceDescription) {
         mDeviceName = deviceName;
         mDeviceDescription = deviceDescription;
     }
@@ -155,8 +169,8 @@ public final class UsbAlsaDevice {
         UsbAlsaDevice other = (UsbAlsaDevice) obj;
         return (mCardNum == other.mCardNum
                 && mDeviceNum == other.mDeviceNum
-                && mHasPlayback == other.mHasPlayback
-                && mHasCapture == other.mHasCapture
+                && mHasOutput == other.mHasOutput
+                && mHasInput == other.mHasInput
                 && mIsInputHeadset == other.mIsInputHeadset
                 && mIsOutputHeadset == other.mIsOutputHeadset);
     }
@@ -170,8 +184,8 @@ public final class UsbAlsaDevice {
         int result = 1;
         result = prime * result + mCardNum;
         result = prime * result + mDeviceNum;
-        result = prime * result + (mHasPlayback ? 0 : 1);
-        result = prime * result + (mHasCapture ? 0 : 1);
+        result = prime * result + (mHasOutput ? 0 : 1);
+        result = prime * result + (mHasInput ? 0 : 1);
         result = prime * result + (mIsInputHeadset ? 0 : 1);
         result = prime * result + (mIsOutputHeadset ? 0 : 1);
 

@@ -32,7 +32,6 @@ import android.util.Slog;
 
 import com.android.internal.alsa.AlsaCardsParser;
 import com.android.internal.util.dump.DualDumpOutputStream;
-import com.android.server.audio.AudioService;
 import com.android.server.usb.descriptors.UsbDescriptorParser;
 
 import libcore.io.IoUtils;
@@ -105,34 +104,34 @@ public final class UsbAlsaManager {
         int state = (enabled ? 1 : 0);
         int cardNum = alsaDevice.getCardNum();
         int deviceNum = alsaDevice.getDeviceNum();
-        if (cardNum < 0 || deviceNum < 0) {
-            Slog.e(TAG, "Invalid alsa card or device alsaCard: " + cardNum
-                        + " alsaDevice: " + deviceNum);
+        String alsaCardDeviceString = alsaDevice.getAlsaCardDeviceString();
+        if (alsaCardDeviceString == null) {
             return;
         }
 
-        String address = AudioService.makeAlsaAddressString(cardNum, deviceNum);
         try {
-            // Playback Device
-            if (alsaDevice.hasPlayback()) {
+            // Output Device
+            if (alsaDevice.hasOutput()) {
                 int device = alsaDevice.isOutputHeadset()
                         ? AudioSystem.DEVICE_OUT_USB_HEADSET
                         : AudioSystem.DEVICE_OUT_USB_DEVICE;
                 if (DEBUG) {
-                    Slog.i(TAG, "pre-call device:0x" + Integer.toHexString(device) +
-                            " addr:" + address + " name:" + alsaDevice.getDeviceName());
+                    Slog.i(TAG, "pre-call device:0x" + Integer.toHexString(device)
+                            + " addr:" + alsaCardDeviceString
+                            + " name:" + alsaDevice.getDeviceName());
                 }
                 mAudioService.setWiredDeviceConnectionState(
-                        device, state, address, alsaDevice.getDeviceName(), TAG);
+                        device, state, alsaCardDeviceString,
+                        alsaDevice.getDeviceName(), TAG);
             }
 
-            // Capture Device
-            if (alsaDevice.hasCapture()) {
+            // Input Device
+            if (alsaDevice.hasInput()) {
                 int device = alsaDevice.isInputHeadset()
                         ? AudioSystem.DEVICE_IN_USB_HEADSET
                         : AudioSystem.DEVICE_IN_USB_DEVICE;
                 mAudioService.setWiredDeviceConnectionState(
-                        device, state, address, alsaDevice.getDeviceName(), TAG);
+                        device, state, alsaCardDeviceString, alsaDevice.getDeviceName(), TAG);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "RemoteException in setWiredDeviceConnectionState");
@@ -265,7 +264,7 @@ public final class UsbAlsaManager {
         UsbAlsaDevice alsaDevice = removeAlsaDeviceFromList(deviceAddress);
         Slog.i(TAG, "USB Audio Device Removed: " + alsaDevice);
         if (alsaDevice != null) {
-            if (alsaDevice.hasPlayback() || alsaDevice.hasCapture()) {
+            if (alsaDevice.hasOutput() || alsaDevice.hasInput()) {
                 notifyDeviceState(alsaDevice, false /*enabled*/);
 
                 // if there any external devices left, select one of them
