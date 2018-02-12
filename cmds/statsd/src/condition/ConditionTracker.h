@@ -90,14 +90,13 @@ public:
     virtual void isConditionMet(
             const ConditionKey& conditionParameters,
             const std::vector<sp<ConditionTracker>>& allConditions,
-            const FieldMatcher& dimensionFields,
-            std::vector<ConditionState>& conditionCache,
-            std::unordered_set<HashableDimensionKey> &dimensionsKeySet) const = 0;
+            const vector<Matcher>& dimensionFields, std::vector<ConditionState>& conditionCache,
+            std::unordered_set<HashableDimensionKey>& dimensionsKeySet) const = 0;
 
     virtual ConditionState getMetConditionDimension(
             const std::vector<sp<ConditionTracker>>& allConditions,
-            const FieldMatcher& dimensionFields,
-            std::unordered_set<HashableDimensionKey> &dimensionsKeySet) const = 0;
+            const vector<Matcher>& dimensionFields,
+            std::unordered_set<HashableDimensionKey>& dimensionsKeySet) const = 0;
 
     // return the list of LogMatchingTracker index that this ConditionTracker uses.
     virtual const std::set<int>& getLogTrackerIndex() const {

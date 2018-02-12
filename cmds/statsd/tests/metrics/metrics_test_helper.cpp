@@ -19,20 +19,26 @@ namespace os {
 namespace statsd {
 
 HashableDimensionKey getMockedDimensionKey(int tagId, int key, string value) {
-    DimensionsValue dimensionsValue;
-    dimensionsValue.set_field(tagId);
-    dimensionsValue.mutable_value_tuple()->add_dimensions_value()->set_field(key);
-    dimensionsValue.mutable_value_tuple()->mutable_dimensions_value(0)->set_value_str(value);
-    return HashableDimensionKey(dimensionsValue);
+    HashableDimensionKey dimension;
+    int pos[] = {key, 0, 0};
+    dimension.addValue(FieldValue(Field(tagId, pos, 0), Value(value)));
+
+    return dimension;
 }
 
 MetricDimensionKey getMockedMetricDimensionKey(int tagId, int key, string value) {
-    DimensionsValue dimensionsValue;
-    dimensionsValue.set_field(tagId);
-    dimensionsValue.mutable_value_tuple()->add_dimensions_value()->set_field(key);
-    dimensionsValue.mutable_value_tuple()->mutable_dimensions_value(0)->set_value_str(value);
-    return MetricDimensionKey(HashableDimensionKey(dimensionsValue), DEFAULT_DIMENSION_KEY);
+    return MetricDimensionKey(getMockedDimensionKey(tagId, key, value), DEFAULT_DIMENSION_KEY);
 }
+
+void buildSimpleAtomFieldMatcher(const int tagId, FieldMatcher* matcher) {
+    matcher->set_field(tagId);
+}
+
+void buildSimpleAtomFieldMatcher(const int tagId, const int fieldNum, FieldMatcher* matcher) {
+    matcher->set_field(tagId);
+    matcher->add_child()->set_field(fieldNum);
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

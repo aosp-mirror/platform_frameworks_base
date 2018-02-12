@@ -19,11 +19,9 @@ statsd_common_src := \
     ../../core/java/android/os/IStatsManager.aidl \
     src/stats_log.proto \
     src/statsd_config.proto \
-    src/statsd_internal.proto \
     src/atoms.proto \
-    src/field_util.cpp \
+    src/FieldValue.cpp \
     src/stats_log_util.cpp \
-    src/dimension.cpp \
     src/anomaly/AnomalyMonitor.cpp \
     src/anomaly/AnomalyTracker.cpp \
     src/anomaly/DurationAnomalyTracker.cpp \
@@ -172,7 +170,6 @@ LOCAL_CFLAGS += \
 
 LOCAL_SRC_FILES := \
     $(statsd_common_src) \
-    tests/dimension_test.cpp \
     tests/AnomalyMonitor_test.cpp \
     tests/anomaly/AnomalyTracker_test.cpp \
     tests/ConfigManager_test.cpp \
@@ -184,6 +181,7 @@ LOCAL_SRC_FILES := \
     tests/MetricsManager_test.cpp \
     tests/StatsLogProcessor_test.cpp \
     tests/UidMap_test.cpp \
+    tests/FieldValue_test.cpp \
     tests/condition/CombinationConditionTracker_test.cpp \
     tests/condition/SimpleConditionTracker_test.cpp \
     tests/metrics/OringDurationTracker_test.cpp \

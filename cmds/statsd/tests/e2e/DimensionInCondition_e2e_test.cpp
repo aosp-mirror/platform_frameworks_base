@@ -43,8 +43,8 @@ StatsdConfig CreateCountMetricWithNoLinkConfig() {
     auto holdingWakelockPredicate = CreateHoldingWakelockPredicate();
     // The predicate is dimensioning by any attribution node and both by uid and tag.
     *holdingWakelockPredicate.mutable_simple_predicate()->mutable_dimensions() =
-        CreateAttributionUidAndTagDimensions(
-            android::util::WAKELOCK_STATE_CHANGED, {Position::FIRST});
+            CreateAttributionUidAndTagDimensions(android::util::WAKELOCK_STATE_CHANGED,
+                                                 {Position::FIRST});
     *config.add_predicate() = holdingWakelockPredicate;
 
     auto combinationPredicate = config.add_predicate();
@@ -57,8 +57,8 @@ StatsdConfig CreateCountMetricWithNoLinkConfig() {
     metric->set_id(StringToId("ScreenBrightnessChangeMetric"));
     metric->set_what(screenBrightnessChangeAtomMatcher.id());
     metric->set_condition(combinationPredicate->id());
-    *metric->mutable_dimensions_in_what() = CreateDimensions(
-            android::util::SCREEN_BRIGHTNESS_CHANGED, {1 /* level */});
+    *metric->mutable_dimensions_in_what() =
+            CreateDimensions(android::util::SCREEN_BRIGHTNESS_CHANGED, {1 /* level */});
     *metric->mutable_dimensions_in_condition() = CreateAttributionUidDimensions(
             android::util::WAKELOCK_STATE_CHANGED, {Position::FIRST});
     metric->set_bucket(ONE_MINUTE);
@@ -72,62 +72,54 @@ TEST(DimensionInConditionE2eTest, TestCountMetricNoLink) {
     auto config = CreateCountMetricWithNoLinkConfig();
     int64_t bucketStartTimeNs = 10000000000;
     int64_t bucketSizeNs =
-        TimeUnitToBucketSizeInMillis(config.count_metric(0).bucket()) * 1000000LL;
+            TimeUnitToBucketSizeInMillis(config.count_metric(0).bucket()) * 1000000LL;
 
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
 
-    std::vector<AttributionNode> attributions1 =
-        {CreateAttribution(111, "App1"), CreateAttribution(222, "GMSCoreModule1"),
-         CreateAttribution(222, "GMSCoreModule2")};
+    std::vector<AttributionNode> attributions1 = {CreateAttribution(111, "App1"),
+                                                  CreateAttribution(222, "GMSCoreModule1"),
+                                                  CreateAttribution(222, "GMSCoreModule2")};
 
-    std::vector<AttributionNode> attributions2 =
-        {CreateAttribution(333, "App2"), CreateAttribution(222, "GMSCoreModule1"),
-         CreateAttribution(555, "GMSCoreModule2")};
+    std::vector<AttributionNode> attributions2 = {CreateAttribution(333, "App2"),
+                                                  CreateAttribution(222, "GMSCoreModule1"),
+                                                  CreateAttribution(555, "GMSCoreModule2")};
 
     std::vector<std::unique_ptr<LogEvent>> events;
-    events.push_back(CreateScreenStateChangedEvent(
-        android::view::DISPLAY_STATE_ON, bucketStartTimeNs + 10));
-    events.push_back(CreateScreenStateChangedEvent(
-        android::view::DISPLAY_STATE_OFF, bucketStartTimeNs + 100));
-    events.push_back(CreateScreenStateChangedEvent(
-        android::view::DISPLAY_STATE_ON, bucketStartTimeNs + bucketSizeNs + 1));
-    events.push_back(CreateScreenStateChangedEvent(
-        android::view::DISPLAY_STATE_OFF, bucketStartTimeNs + 2 * bucketSizeNs - 10));
+    events.push_back(
+            CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_ON, bucketStartTimeNs + 10));
+    events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_OFF,
+                                                   bucketStartTimeNs + 100));
+    events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_ON,
+                                                   bucketStartTimeNs + bucketSizeNs + 1));
+    events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_OFF,
+                                                   bucketStartTimeNs + 2 * bucketSizeNs - 10));
 
-    events.push_back(CreateAcquireWakelockEvent(
-        attributions1, "wl1", bucketStartTimeNs + 200));
-    events.push_back(CreateReleaseWakelockEvent(
-        attributions1, "wl1", bucketStartTimeNs + bucketSizeNs + 1));
+    events.push_back(CreateAcquireWakelockEvent(attributions1, "wl1", bucketStartTimeNs + 200));
+    events.push_back(
+            CreateReleaseWakelockEvent(attributions1, "wl1", bucketStartTimeNs + bucketSizeNs + 1));
 
-    events.push_back(CreateAcquireWakelockEvent(
-        attributions2, "wl2", bucketStartTimeNs + bucketSizeNs - 100));
-    events.push_back(CreateReleaseWakelockEvent(
-        attributions2, "wl2", bucketStartTimeNs + 2 * bucketSizeNs - 50));
+    events.push_back(CreateAcquireWakelockEvent(attributions2, "wl2",
+                                                bucketStartTimeNs + bucketSizeNs - 100));
+    events.push_back(CreateReleaseWakelockEvent(attributions2, "wl2",
+                                                bucketStartTimeNs + 2 * bucketSizeNs - 50));
 
-    events.push_back(CreateScreenBrightnessChangedEvent(
-        123, bucketStartTimeNs + 11));
-    events.push_back(CreateScreenBrightnessChangedEvent(
-        123, bucketStartTimeNs + 101));
-    events.push_back(CreateScreenBrightnessChangedEvent(
-        123, bucketStartTimeNs + 201));
-    events.push_back(CreateScreenBrightnessChangedEvent(
-        456, bucketStartTimeNs + 203));
-    events.push_back(CreateScreenBrightnessChangedEvent(
-        456, bucketStartTimeNs + bucketSizeNs - 99));
-    events.push_back(CreateScreenBrightnessChangedEvent(
-        456, bucketStartTimeNs + bucketSizeNs - 2));
-    events.push_back(CreateScreenBrightnessChangedEvent(
-        789, bucketStartTimeNs + bucketSizeNs - 1));
-    events.push_back(CreateScreenBrightnessChangedEvent(
-        456, bucketStartTimeNs + bucketSizeNs + 2));
-    events.push_back(CreateScreenBrightnessChangedEvent(
-        789, bucketStartTimeNs + 2 * bucketSizeNs - 11));
-    events.push_back(CreateScreenBrightnessChangedEvent(
-        789, bucketStartTimeNs + 2 * bucketSizeNs - 9));
-    events.push_back(CreateScreenBrightnessChangedEvent(
-        789, bucketStartTimeNs + 2 * bucketSizeNs - 1));
+    events.push_back(CreateScreenBrightnessChangedEvent(123, bucketStartTimeNs + 11));
+    events.push_back(CreateScreenBrightnessChangedEvent(123, bucketStartTimeNs + 101));
+    events.push_back(CreateScreenBrightnessChangedEvent(123, bucketStartTimeNs + 201));
+    events.push_back(CreateScreenBrightnessChangedEvent(456, bucketStartTimeNs + 203));
+    events.push_back(
+            CreateScreenBrightnessChangedEvent(456, bucketStartTimeNs + bucketSizeNs - 99));
+    events.push_back(CreateScreenBrightnessChangedEvent(456, bucketStartTimeNs + bucketSizeNs - 2));
+    events.push_back(CreateScreenBrightnessChangedEvent(789, bucketStartTimeNs + bucketSizeNs - 1));
+    events.push_back(CreateScreenBrightnessChangedEvent(456, bucketStartTimeNs + bucketSizeNs + 2));
+    events.push_back(
+            CreateScreenBrightnessChangedEvent(789, bucketStartTimeNs + 2 * bucketSizeNs - 11));
+    events.push_back(
+            CreateScreenBrightnessChangedEvent(789, bucketStartTimeNs + 2 * bucketSizeNs - 9));
+    events.push_back(
+            CreateScreenBrightnessChangedEvent(789, bucketStartTimeNs + 2 * bucketSizeNs - 1));
 
     sortLogEventsByTimestamp(&events);
 
@@ -136,7 +128,10 @@ TEST(DimensionInConditionE2eTest, TestCountMetricNoLink) {
     }
 
     ConfigMetricsReportList reports;
-    processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, &reports);
+    vector<uint8_t> buffer;
+    processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, &buffer);
+    EXPECT_TRUE(buffer.size() > 0);
+    EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
 
     EXPECT_EQ(reports.reports_size(), 1);
     EXPECT_EQ(reports.reports(0).metrics_size(), 1);
@@ -147,7 +142,7 @@ TEST(DimensionInConditionE2eTest, TestCountMetricNoLink) {
     auto data = countMetrics.data(0);
     EXPECT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
-    EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs );
+    EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs);
     EXPECT_EQ(data.bucket_info(0).end_bucket_nanos(), bucketStartTimeNs + bucketSizeNs);
     EXPECT_EQ(data.dimensions_in_what().field(), android::util::SCREEN_BRIGHTNESS_CHANGED);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
@@ -164,7 +159,8 @@ TEST(DimensionInConditionE2eTest, TestCountMetricNoLink) {
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).value_int(), 123);
-    ValidateAttributionUidDimension(data.dimensions_in_condition(), android::util::WAKELOCK_STATE_CHANGED, 111);
+    ValidateAttributionUidDimension(data.dimensions_in_condition(),
+                                    android::util::WAKELOCK_STATE_CHANGED, 111);
 
     data = countMetrics.data(2);
     EXPECT_EQ(data.bucket_info_size(), 1);
@@ -175,7 +171,8 @@ TEST(DimensionInConditionE2eTest, TestCountMetricNoLink) {
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).value_int(), 456);
-    ValidateAttributionUidDimension(data.dimensions_in_condition(), android::util::WAKELOCK_STATE_CHANGED, 111);
+    ValidateAttributionUidDimension(data.dimensions_in_condition(),
+                                    android::util::WAKELOCK_STATE_CHANGED, 111);
 
     data = countMetrics.data(3);
     EXPECT_EQ(data.bucket_info_size(), 2);
@@ -189,7 +186,8 @@ TEST(DimensionInConditionE2eTest, TestCountMetricNoLink) {
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).value_int(), 456);
-    ValidateAttributionUidDimension(data.dimensions_in_condition(), android::util::WAKELOCK_STATE_CHANGED, 333);
+    ValidateAttributionUidDimension(data.dimensions_in_condition(),
+                                    android::util::WAKELOCK_STATE_CHANGED, 333);
 
     data = countMetrics.data(4);
     EXPECT_EQ(data.bucket_info_size(), 1);
@@ -211,7 +209,8 @@ TEST(DimensionInConditionE2eTest, TestCountMetricNoLink) {
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).value_int(), 789);
-    ValidateAttributionUidDimension(data.dimensions_in_condition(), android::util::WAKELOCK_STATE_CHANGED, 111);
+    ValidateAttributionUidDimension(data.dimensions_in_condition(),
+                                    android::util::WAKELOCK_STATE_CHANGED, 111);
 
     data = countMetrics.data(6);
     EXPECT_EQ(data.bucket_info_size(), 1);
@@ -222,7 +221,8 @@ TEST(DimensionInConditionE2eTest, TestCountMetricNoLink) {
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).value_int(), 789);
-    ValidateAttributionUidDimension(data.dimensions_in_condition(), android::util::WAKELOCK_STATE_CHANGED, 333);
+    ValidateAttributionUidDimension(data.dimensions_in_condition(),
+                                    android::util::WAKELOCK_STATE_CHANGED, 333);
 }
 
 namespace {
@@ -239,8 +239,8 @@ StatsdConfig CreateCountMetricWithLinkConfig() {
     auto screenIsOffPredicate = CreateScreenIsOffPredicate();
     auto isSyncingPredicate = CreateIsSyncingPredicate();
     auto syncDimension = isSyncingPredicate.mutable_simple_predicate()->mutable_dimensions();
-    *syncDimension = CreateAttributionUidAndTagDimensions(
-        android::util::SYNC_STATE_CHANGED, {Position::FIRST});
+    *syncDimension = CreateAttributionUidAndTagDimensions(android::util::SYNC_STATE_CHANGED,
+                                                          {Position::FIRST});
     syncDimension->add_child()->set_field(2 /* name field*/);
 
     *config.add_predicate() = screenIsOffPredicate;
@@ -256,8 +256,8 @@ StatsdConfig CreateCountMetricWithLinkConfig() {
     metric->set_id(StringToId("AppCrashMetric"));
     metric->set_what(appCrashMatcher.id());
     metric->set_condition(combinationPredicate->id());
-    *metric->mutable_dimensions_in_what() = CreateDimensions(
-            android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, {1 /* uid */});
+    *metric->mutable_dimensions_in_what() =
+            CreateDimensions(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, {1 /* uid */});
     *metric->mutable_dimensions_in_condition() = CreateAttributionUidAndTagDimensions(
             android::util::SYNC_STATE_CHANGED, {Position::FIRST});
 
@@ -267,8 +267,8 @@ StatsdConfig CreateCountMetricWithLinkConfig() {
     auto dimensionWhat = links->mutable_fields_in_what();
     dimensionWhat->set_field(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
     dimensionWhat->add_child()->set_field(1);  // uid field.
-    *links->mutable_fields_in_condition() = CreateAttributionUidDimensions(
-            android::util::SYNC_STATE_CHANGED, {Position::FIRST});
+    *links->mutable_fields_in_condition() =
+            CreateAttributionUidDimensions(android::util::SYNC_STATE_CHANGED, {Position::FIRST});
     return config;
 }
 
@@ -279,18 +279,18 @@ TEST(DimensionInConditionE2eTest, TestCountMetricWithLink) {
     auto config = CreateCountMetricWithLinkConfig();
     int64_t bucketStartTimeNs = 10000000000;
     int64_t bucketSizeNs =
-        TimeUnitToBucketSizeInMillis(config.count_metric(0).bucket()) * 1000000LL;
+            TimeUnitToBucketSizeInMillis(config.count_metric(0).bucket()) * 1000000LL;
 
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
-    std::vector<AttributionNode> attributions1 =
-        {CreateAttribution(111, "App1"), CreateAttribution(222, "GMSCoreModule1"),
-         CreateAttribution(222, "GMSCoreModule2")};
+    std::vector<AttributionNode> attributions1 = {CreateAttribution(111, "App1"),
+                                                  CreateAttribution(222, "GMSCoreModule1"),
+                                                  CreateAttribution(222, "GMSCoreModule2")};
 
-    std::vector<AttributionNode> attributions2 =
-        {CreateAttribution(333, "App2"), CreateAttribution(222, "GMSCoreModule1"),
-         CreateAttribution(555, "GMSCoreModule2")};
+    std::vector<AttributionNode> attributions2 = {CreateAttribution(333, "App2"),
+                                                  CreateAttribution(222, "GMSCoreModule1"),
+                                                  CreateAttribution(555, "GMSCoreModule2")};
 
     std::vector<std::unique_ptr<LogEvent>> events;
 
@@ -311,26 +311,26 @@ TEST(DimensionInConditionE2eTest, TestCountMetricWithLink) {
 
     events.push_back(CreateAppCrashEvent(777, bucketStartTimeNs + bucketSizeNs + 701));
 
-    events.push_back(CreateScreenStateChangedEvent(
-        android::view::DISPLAY_STATE_ON, bucketStartTimeNs + 10));
-    events.push_back(CreateScreenStateChangedEvent(
-        android::view::DISPLAY_STATE_OFF, bucketStartTimeNs + 100));
-    events.push_back(CreateScreenStateChangedEvent(
-        android::view::DISPLAY_STATE_ON, bucketStartTimeNs + 202));
-    events.push_back(CreateScreenStateChangedEvent(
-        android::view::DISPLAY_STATE_OFF, bucketStartTimeNs + bucketSizeNs + 700));
+    events.push_back(
+            CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_ON, bucketStartTimeNs + 10));
+    events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_OFF,
+                                                   bucketStartTimeNs + 100));
+    events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_ON,
+                                                   bucketStartTimeNs + 202));
+    events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_OFF,
+                                                   bucketStartTimeNs + bucketSizeNs + 700));
 
     events.push_back(CreateSyncStartEvent(attributions1, "ReadEmail", bucketStartTimeNs + 200));
-    events.push_back(CreateSyncEndEvent(attributions1, "ReadEmail",
-        bucketStartTimeNs + bucketSizeNs + 300));
+    events.push_back(
+            CreateSyncEndEvent(attributions1, "ReadEmail", bucketStartTimeNs + bucketSizeNs + 300));
 
     events.push_back(CreateSyncStartEvent(attributions1, "ReadDoc", bucketStartTimeNs + 400));
-    events.push_back(CreateSyncEndEvent(attributions1, "ReadDoc",
-        bucketStartTimeNs + bucketSizeNs - 1));
+    events.push_back(
+            CreateSyncEndEvent(attributions1, "ReadDoc", bucketStartTimeNs + bucketSizeNs - 1));
 
     events.push_back(CreateSyncStartEvent(attributions2, "ReadEmail", bucketStartTimeNs + 400));
-    events.push_back(CreateSyncEndEvent(attributions2, "ReadEmail",
-        bucketStartTimeNs + bucketSizeNs + 600));
+    events.push_back(
+            CreateSyncEndEvent(attributions2, "ReadEmail", bucketStartTimeNs + bucketSizeNs + 600));
 
     sortLogEventsByTimestamp(&events);
 
@@ -339,7 +339,10 @@ TEST(DimensionInConditionE2eTest, TestCountMetricWithLink) {
     }
 
     ConfigMetricsReportList reports;
-    processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, &reports);
+    vector<uint8_t> buffer;
+    processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, &buffer);
+    EXPECT_TRUE(buffer.size() > 0);
+    EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
 
     EXPECT_EQ(reports.reports_size(), 1);
     EXPECT_EQ(reports.reports(0).metrics_size(), 1);
@@ -363,8 +366,8 @@ TEST(DimensionInConditionE2eTest, TestCountMetricWithLink) {
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).value_int(), 111);
-    ValidateAttributionUidAndTagDimension(
-        data.dimensions_in_condition(), android::util::SYNC_STATE_CHANGED, 111, "App1");
+    ValidateAttributionUidAndTagDimension(data.dimensions_in_condition(),
+                                          android::util::SYNC_STATE_CHANGED, 111, "App1");
     EXPECT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 2);
     EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs);
@@ -386,8 +389,8 @@ TEST(DimensionInConditionE2eTest, TestCountMetricWithLink) {
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).value_int(), 333);
-    ValidateAttributionUidAndTagDimension(
-        data.dimensions_in_condition(), android::util::SYNC_STATE_CHANGED, 333, "App2");
+    ValidateAttributionUidAndTagDimension(data.dimensions_in_condition(),
+                                          android::util::SYNC_STATE_CHANGED, 333, "App2");
     EXPECT_EQ(data.bucket_info_size(), 2);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
     EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs);
@@ -424,8 +427,8 @@ StatsdConfig CreateDurationMetricConfigNoLink(DurationMetric::AggregationType ag
     auto screenIsOffPredicate = CreateScreenIsOffPredicate();
     auto isSyncingPredicate = CreateIsSyncingPredicate();
     auto syncDimension = isSyncingPredicate.mutable_simple_predicate()->mutable_dimensions();
-    *syncDimension = CreateAttributionUidAndTagDimensions(
-        android::util::SYNC_STATE_CHANGED, {Position::FIRST});
+    *syncDimension = CreateAttributionUidAndTagDimensions(android::util::SYNC_STATE_CHANGED,
+                                                          {Position::FIRST});
     syncDimension->add_child()->set_field(2 /* name field */);
 
     *config.add_predicate() = inBatterySaverModePredicate;
@@ -449,26 +452,25 @@ StatsdConfig CreateDurationMetricConfigNoLink(DurationMetric::AggregationType ag
 
 }  // namespace
 
-
 TEST(DimensionInConditionE2eTest, TestDurationMetricNoLink) {
-    for (auto aggregationType : { DurationMetric::SUM, DurationMetric::MAX_SPARSE}) {
+    for (auto aggregationType : {DurationMetric::SUM, DurationMetric::MAX_SPARSE}) {
         ConfigKey cfgKey;
         auto config = CreateDurationMetricConfigNoLink(aggregationType);
         int64_t bucketStartTimeNs = 10000000000;
         int64_t bucketSizeNs =
-            TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
+                TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
 
         auto processor = CreateStatsLogProcessor(bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
         EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
         EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
 
-        std::vector<AttributionNode> attributions1 =
-            {CreateAttribution(111, "App1"), CreateAttribution(222, "GMSCoreModule1"),
-             CreateAttribution(222, "GMSCoreModule2")};
+        std::vector<AttributionNode> attributions1 = {CreateAttribution(111, "App1"),
+                                                      CreateAttribution(222, "GMSCoreModule1"),
+                                                      CreateAttribution(222, "GMSCoreModule2")};
 
-        std::vector<AttributionNode> attributions2 =
-            {CreateAttribution(333, "App2"), CreateAttribution(222, "GMSCoreModule1"),
-             CreateAttribution(555, "GMSCoreModule2")};
+        std::vector<AttributionNode> attributions2 = {CreateAttribution(333, "App2"),
+                                                      CreateAttribution(222, "GMSCoreModule1"),
+                                                      CreateAttribution(555, "GMSCoreModule2")};
 
         std::vector<std::unique_ptr<LogEvent>> events;
 
@@ -485,26 +487,26 @@ TEST(DimensionInConditionE2eTest, TestDurationMetricNoLink) {
         events.push_back(CreateBatterySaverOnEvent(bucketStartTimeNs + bucketSizeNs + 870));
         events.push_back(CreateBatterySaverOffEvent(bucketStartTimeNs + bucketSizeNs + 900));
 
-        events.push_back(CreateScreenStateChangedEvent(
-            android::view::DISPLAY_STATE_ON, bucketStartTimeNs + 10));
-        events.push_back(CreateScreenStateChangedEvent(
-            android::view::DISPLAY_STATE_OFF, bucketStartTimeNs + 100));
-        events.push_back(CreateScreenStateChangedEvent(
-            android::view::DISPLAY_STATE_ON, bucketStartTimeNs + 202));
-        events.push_back(CreateScreenStateChangedEvent(
-            android::view::DISPLAY_STATE_OFF, bucketStartTimeNs + bucketSizeNs + 800));
+        events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_ON,
+                                                       bucketStartTimeNs + 10));
+        events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_OFF,
+                                                       bucketStartTimeNs + 100));
+        events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_ON,
+                                                       bucketStartTimeNs + 202));
+        events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_OFF,
+                                                       bucketStartTimeNs + bucketSizeNs + 800));
 
         events.push_back(CreateSyncStartEvent(attributions1, "ReadEmail", bucketStartTimeNs + 200));
         events.push_back(CreateSyncEndEvent(attributions1, "ReadEmail",
-            bucketStartTimeNs + bucketSizeNs + 300));
+                                            bucketStartTimeNs + bucketSizeNs + 300));
 
         events.push_back(CreateSyncStartEvent(attributions1, "ReadDoc", bucketStartTimeNs + 400));
-        events.push_back(CreateSyncEndEvent(attributions1, "ReadDoc",
-            bucketStartTimeNs + bucketSizeNs - 1));
+        events.push_back(
+                CreateSyncEndEvent(attributions1, "ReadDoc", bucketStartTimeNs + bucketSizeNs - 1));
 
         events.push_back(CreateSyncStartEvent(attributions2, "ReadEmail", bucketStartTimeNs + 401));
         events.push_back(CreateSyncEndEvent(attributions2, "ReadEmail",
-            bucketStartTimeNs + bucketSizeNs + 700));
+                                            bucketStartTimeNs + bucketSizeNs + 700));
 
         sortLogEventsByTimestamp(&events);
 
@@ -513,7 +515,10 @@ TEST(DimensionInConditionE2eTest, TestDurationMetricNoLink) {
         }
 
         ConfigMetricsReportList reports;
-        processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, &reports);
+        vector<uint8_t> buffer;
+        processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, &buffer);
+        EXPECT_TRUE(buffer.size() > 0);
+        EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
 
         EXPECT_EQ(reports.reports_size(), 1);
         EXPECT_EQ(reports.reports(0).metrics_size(), 1);
@@ -534,8 +539,8 @@ TEST(DimensionInConditionE2eTest, TestDurationMetricNoLink) {
 
         data = metrics.data(1);
         EXPECT_FALSE(data.dimensions_in_what().has_field());
-        ValidateAttributionUidAndTagDimension(
-            data.dimensions_in_condition(), android::util::SYNC_STATE_CHANGED, 111, "App1");
+        ValidateAttributionUidAndTagDimension(data.dimensions_in_condition(),
+                                              android::util::SYNC_STATE_CHANGED, 111, "App1");
         EXPECT_EQ(data.bucket_info_size(), 2);
         EXPECT_EQ(data.bucket_info(0).duration_nanos(), 500 - 201 + bucketSizeNs - 600);
         EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs);
@@ -546,8 +551,8 @@ TEST(DimensionInConditionE2eTest, TestDurationMetricNoLink) {
 
         data = metrics.data(2);
         EXPECT_FALSE(data.dimensions_in_what().has_field());
-        ValidateAttributionUidAndTagDimension(
-            data.dimensions_in_condition(), android::util::SYNC_STATE_CHANGED, 333, "App2");
+        ValidateAttributionUidAndTagDimension(data.dimensions_in_condition(),
+                                              android::util::SYNC_STATE_CHANGED, 333, "App2");
         EXPECT_EQ(data.bucket_info_size(), 2);
         EXPECT_EQ(data.bucket_info(0).duration_nanos(), 500 - 401 + bucketSizeNs - 600);
         EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs);
@@ -572,13 +577,13 @@ StatsdConfig CreateDurationMetricConfigWithLink(DurationMetric::AggregationType 
     auto screenIsOffPredicate = CreateScreenIsOffPredicate();
     auto isSyncingPredicate = CreateIsSyncingPredicate();
     auto syncDimension = isSyncingPredicate.mutable_simple_predicate()->mutable_dimensions();
-    *syncDimension = CreateAttributionUidAndTagDimensions(
-        android::util::SYNC_STATE_CHANGED, {Position::FIRST});
+    *syncDimension = CreateAttributionUidAndTagDimensions(android::util::SYNC_STATE_CHANGED,
+                                                          {Position::FIRST});
     syncDimension->add_child()->set_field(2 /* name field */);
 
     auto isInBackgroundPredicate = CreateIsInBackgroundPredicate();
     *isInBackgroundPredicate.mutable_simple_predicate()->mutable_dimensions() =
-        CreateDimensions(android::util::ACTIVITY_FOREGROUND_STATE_CHANGED, {1 /* uid field */ });
+            CreateDimensions(android::util::ACTIVITY_FOREGROUND_STATE_CHANGED, {1 /* uid field */});
 
     *config.add_predicate() = screenIsOffPredicate;
     *config.add_predicate() = isSyncingPredicate;
@@ -594,8 +599,8 @@ StatsdConfig CreateDurationMetricConfigWithLink(DurationMetric::AggregationType 
     metric->set_id(StringToId("AppInBackgroundMetric"));
     metric->set_what(isInBackgroundPredicate.id());
     metric->set_condition(combinationPredicate->id());
-    *metric->mutable_dimensions_in_what() = CreateDimensions(
-        android::util::ACTIVITY_FOREGROUND_STATE_CHANGED, {1 /* uid field */ });
+    *metric->mutable_dimensions_in_what() =
+            CreateDimensions(android::util::ACTIVITY_FOREGROUND_STATE_CHANGED, {1 /* uid field */});
     *metric->mutable_dimensions_in_condition() = CreateAttributionUidAndTagDimensions(
             android::util::SYNC_STATE_CHANGED, {Position::FIRST});
 
@@ -605,32 +610,32 @@ StatsdConfig CreateDurationMetricConfigWithLink(DurationMetric::AggregationType 
     auto dimensionWhat = links->mutable_fields_in_what();
     dimensionWhat->set_field(android::util::ACTIVITY_FOREGROUND_STATE_CHANGED);
     dimensionWhat->add_child()->set_field(1);  // uid field.
-    *links->mutable_fields_in_condition() = CreateAttributionUidDimensions(
-            android::util::SYNC_STATE_CHANGED, {Position::FIRST});
+    *links->mutable_fields_in_condition() =
+            CreateAttributionUidDimensions(android::util::SYNC_STATE_CHANGED, {Position::FIRST});
     return config;
 }
 
 }  // namespace
 
 TEST(DimensionInConditionE2eTest, TestDurationMetricWithLink) {
-    for (auto aggregationType : { DurationMetric::SUM, DurationMetric::MAX_SPARSE}) {
+    for (auto aggregationType : {DurationMetric::SUM, DurationMetric::MAX_SPARSE}) {
         ConfigKey cfgKey;
         auto config = CreateDurationMetricConfigWithLink(aggregationType);
         int64_t bucketStartTimeNs = 10000000000;
         int64_t bucketSizeNs =
-            TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
+                TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
 
         auto processor = CreateStatsLogProcessor(bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
         EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
         EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
 
-        std::vector<AttributionNode> attributions1 =
-            {CreateAttribution(111, "App1"), CreateAttribution(222, "GMSCoreModule1"),
-             CreateAttribution(222, "GMSCoreModule2")};
+        std::vector<AttributionNode> attributions1 = {CreateAttribution(111, "App1"),
+                                                      CreateAttribution(222, "GMSCoreModule1"),
+                                                      CreateAttribution(222, "GMSCoreModule2")};
 
-        std::vector<AttributionNode> attributions2 =
-            {CreateAttribution(333, "App2"), CreateAttribution(222, "GMSCoreModule1"),
-             CreateAttribution(555, "GMSCoreModule2")};
+        std::vector<AttributionNode> attributions2 = {CreateAttribution(333, "App2"),
+                                                      CreateAttribution(222, "GMSCoreModule1"),
+                                                      CreateAttribution(555, "GMSCoreModule2")};
 
         std::vector<std::unique_ptr<LogEvent>> events;
 
@@ -643,26 +648,26 @@ TEST(DimensionInConditionE2eTest, TestDurationMetricWithLink) {
         events.push_back(CreateMoveToBackgroundEvent(333, bucketStartTimeNs + 399));
         events.push_back(CreateMoveToForegroundEvent(333, bucketStartTimeNs + bucketSizeNs + 800));
 
-        events.push_back(CreateScreenStateChangedEvent(
-            android::view::DISPLAY_STATE_ON, bucketStartTimeNs + 10));
-        events.push_back(CreateScreenStateChangedEvent(
-            android::view::DISPLAY_STATE_OFF, bucketStartTimeNs + 100));
-        events.push_back(CreateScreenStateChangedEvent(
-            android::view::DISPLAY_STATE_ON, bucketStartTimeNs + 202));
-        events.push_back(CreateScreenStateChangedEvent(
-            android::view::DISPLAY_STATE_OFF, bucketStartTimeNs + bucketSizeNs + 801));
+        events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_ON,
+                                                       bucketStartTimeNs + 10));
+        events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_OFF,
+                                                       bucketStartTimeNs + 100));
+        events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_ON,
+                                                       bucketStartTimeNs + 202));
+        events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_OFF,
+                                                       bucketStartTimeNs + bucketSizeNs + 801));
 
         events.push_back(CreateSyncStartEvent(attributions1, "ReadEmail", bucketStartTimeNs + 200));
         events.push_back(CreateSyncEndEvent(attributions1, "ReadEmail",
-            bucketStartTimeNs + bucketSizeNs + 300));
+                                            bucketStartTimeNs + bucketSizeNs + 300));
 
         events.push_back(CreateSyncStartEvent(attributions1, "ReadDoc", bucketStartTimeNs + 400));
-        events.push_back(CreateSyncEndEvent(attributions1, "ReadDoc",
-            bucketStartTimeNs + bucketSizeNs - 1));
+        events.push_back(
+                CreateSyncEndEvent(attributions1, "ReadDoc", bucketStartTimeNs + bucketSizeNs - 1));
 
         events.push_back(CreateSyncStartEvent(attributions2, "ReadEmail", bucketStartTimeNs + 401));
         events.push_back(CreateSyncEndEvent(attributions2, "ReadEmail",
-            bucketStartTimeNs + bucketSizeNs + 700));
+                                            bucketStartTimeNs + bucketSizeNs + 700));
 
         sortLogEventsByTimestamp(&events);
 
@@ -671,7 +676,10 @@ TEST(DimensionInConditionE2eTest, TestDurationMetricWithLink) {
         }
 
         ConfigMetricsReportList reports;
-        processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, &reports);
+        vector<uint8_t> buffer;
+        processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, &buffer);
+        EXPECT_TRUE(buffer.size() > 0);
+        EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
 
         EXPECT_EQ(reports.reports_size(), 1);
         EXPECT_EQ(reports.reports(0).metrics_size(), 1);
@@ -691,8 +699,8 @@ TEST(DimensionInConditionE2eTest, TestDurationMetricWithLink) {
         data = metrics.data(1);
         EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1);
         EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).value_int(), 111);
-        ValidateAttributionUidAndTagDimension(
-            data.dimensions_in_condition(), android::util::SYNC_STATE_CHANGED, 111, "App1");
+        ValidateAttributionUidAndTagDimension(data.dimensions_in_condition(),
+                                              android::util::SYNC_STATE_CHANGED, 111, "App1");
         EXPECT_EQ(data.bucket_info_size(), 2);
         EXPECT_EQ(data.bucket_info(0).duration_nanos(), bucketSizeNs - 201);
         EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs);
@@ -704,8 +712,8 @@ TEST(DimensionInConditionE2eTest, TestDurationMetricWithLink) {
         data = metrics.data(2);
         EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1);
         EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).value_int(), 333);
-        ValidateAttributionUidAndTagDimension(
-            data.dimensions_in_condition(), android::util::SYNC_STATE_CHANGED, 333, "App2");
+        ValidateAttributionUidAndTagDimension(data.dimensions_in_condition(),
+                                              android::util::SYNC_STATE_CHANGED, 333, "App2");
         EXPECT_EQ(data.bucket_info_size(), 2);
         EXPECT_EQ(data.bucket_info(0).duration_nanos(), bucketSizeNs - 401);
         EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs);

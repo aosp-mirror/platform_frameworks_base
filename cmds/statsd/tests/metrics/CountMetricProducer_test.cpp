@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include "src/metrics/CountMetricProducer.h"
-#include "src/dimension.h"
 #include "src/stats_log_util.h"
 #include "metrics_test_helper.h"
 #include "tests/statsd_test_util.h"

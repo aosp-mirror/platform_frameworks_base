@@ -57,7 +57,6 @@ protected:
 private:
     void onDumpReportLocked(const uint64_t dumpTimeNs,
                             android::util::ProtoOutputStream* protoOutput) override;
-    void onDumpReportLocked(const uint64_t dumpTimeNs, StatsLogReport* report) override;
 
     // Internal interface to handle condition change.
     void onConditionChangedLocked(const bool conditionMet, const uint64_t eventTime) override;

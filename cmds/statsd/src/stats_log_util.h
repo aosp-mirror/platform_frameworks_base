@@ -17,7 +17,8 @@
 #pragma once
 
 #include <android/util/ProtoOutputStream.h>
-#include "field_util.h"
+#include "FieldValue.h"
+#include "HashableDimensionKey.h"
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "guardrail/StatsdStats.h"
@@ -26,16 +27,10 @@ namespace android {
 namespace os {
 namespace statsd {
 
-// Helper function to write DimensionsValue proto to ProtoOutputStream.
-void writeDimensionsValueProtoToStream(const DimensionsValue& fieldValue,
-                                       util::ProtoOutputStream* protoOutput);
-
-// Helper function to write Field proto to ProtoOutputStream.
-void writeFieldProtoToStream(const Field& field, util::ProtoOutputStream* protoOutput);
-
-// Helper function to construct the field value tree and write to ProtoOutputStream
-void writeFieldValueTreeToStream(const FieldValueMap& fieldValueMap,
+void writeFieldValueTreeToStream(int tagId, const std::vector<FieldValue>& values,
                                  util::ProtoOutputStream* protoOutput);
+void writeDimensionToProto(const HashableDimensionKey& dimension,
+                           util::ProtoOutputStream* protoOutput);
 
 // Convert the TimeUnit enum to the bucket size in millis.
 int64_t TimeUnitToBucketSizeInMillis(TimeUnit unit);

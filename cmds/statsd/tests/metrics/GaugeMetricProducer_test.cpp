@@ -80,9 +80,10 @@ TEST(GaugeMetricProducerTest, TestNoCondition) {
     gaugeProducer.onDataPulled(allData);
     EXPECT_EQ(1UL, gaugeProducer.mCurrentSlicedBucket->size());
     auto it = gaugeProducer.mCurrentSlicedBucket->begin()->second.front().mFields->begin();
-    EXPECT_EQ(10, it->second.value_int());
+    EXPECT_EQ(INT, it->mValue.getType());
+    EXPECT_EQ(10, it->mValue.int_value);
     it++;
-    EXPECT_EQ(11, it->second.value_int());
+    EXPECT_EQ(11, it->mValue.int_value);
     EXPECT_EQ(0UL, gaugeProducer.mPastBuckets.size());
 
     allData.clear();
@@ -96,16 +97,20 @@ TEST(GaugeMetricProducerTest, TestNoCondition) {
     gaugeProducer.onDataPulled(allData);
     EXPECT_EQ(1UL, gaugeProducer.mCurrentSlicedBucket->size());
     it = gaugeProducer.mCurrentSlicedBucket->begin()->second.front().mFields->begin();
-    EXPECT_EQ(24, it->second.value_int());
+    EXPECT_EQ(INT, it->mValue.getType());
+    EXPECT_EQ(24, it->mValue.int_value);
     it++;
-    EXPECT_EQ(25, it->second.value_int());
+    EXPECT_EQ(INT, it->mValue.getType());
+    EXPECT_EQ(25, it->mValue.int_value);
     // One dimension.
     EXPECT_EQ(1UL, gaugeProducer.mPastBuckets.size());
     EXPECT_EQ(1UL, gaugeProducer.mPastBuckets.begin()->second.size());
     it = gaugeProducer.mPastBuckets.begin()->second.back().mGaugeAtoms.front().mFields->begin();
-    EXPECT_EQ(10L, it->second.value_int());
+    EXPECT_EQ(INT, it->mValue.getType());
+    EXPECT_EQ(10L, it->mValue.int_value);
     it++;
-    EXPECT_EQ(11L, it->second.value_int());
+    EXPECT_EQ(INT, it->mValue.getType());
+    EXPECT_EQ(11L, it->mValue.int_value);
     EXPECT_EQ(1UL, gaugeProducer.mPastBuckets.begin()->second.back().mBucketNum);
 
     gaugeProducer.flushIfNeededLocked(bucket4StartTimeNs);
@@ -114,9 +119,11 @@ TEST(GaugeMetricProducerTest, TestNoCondition) {
     EXPECT_EQ(1UL, gaugeProducer.mPastBuckets.size());
     EXPECT_EQ(2UL, gaugeProducer.mPastBuckets.begin()->second.size());
     it = gaugeProducer.mPastBuckets.begin()->second.back().mGaugeAtoms.front().mFields->begin();
-    EXPECT_EQ(24L, it->second.value_int());
+    EXPECT_EQ(INT, it->mValue.getType());
+    EXPECT_EQ(24L, it->mValue.int_value);
     it++;
-    EXPECT_EQ(25L, it->second.value_int());
+    EXPECT_EQ(INT, it->mValue.getType());
+    EXPECT_EQ(25L, it->mValue.int_value);
     EXPECT_EQ(2UL, gaugeProducer.mPastBuckets.begin()->second.back().mBucketNum);
 }
 
@@ -230,7 +237,7 @@ TEST(GaugeMetricProducerTest, TestPulledWithUpgrade) {
     EXPECT_EQ(1, gaugeProducer.mCurrentSlicedBucket->begin()
                          ->second.front()
                          .mFields->begin()
-                         ->second.value_int());
+                         ->mValue.int_value);
 
     gaugeProducer.notifyAppUpgrade(eventUpgradeTimeNs, "ANY.APP", 1, 1);
     EXPECT_EQ(1UL, gaugeProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
@@ -240,7 +247,7 @@ TEST(GaugeMetricProducerTest, TestPulledWithUpgrade) {
     EXPECT_EQ(2, gaugeProducer.mCurrentSlicedBucket->begin()
                          ->second.front()
                          .mFields->begin()
-                         ->second.value_int());
+                         ->mValue.int_value);
 
     allData.clear();
     event = make_shared<LogEvent>(tagId, bucketStartTimeNs + bucketSizeNs + 1);
@@ -254,7 +261,7 @@ TEST(GaugeMetricProducerTest, TestPulledWithUpgrade) {
     EXPECT_EQ(3, gaugeProducer.mCurrentSlicedBucket->begin()
                          ->second.front()
                          .mFields->begin()
-                         ->second.value_int());
+                         ->mValue.int_value);
 }
 
 TEST(GaugeMetricProducerTest, TestWithCondition) {
@@ -288,9 +295,10 @@ TEST(GaugeMetricProducerTest, TestWithCondition) {
 
     gaugeProducer.onConditionChanged(true, bucketStartTimeNs + 8);
     EXPECT_EQ(1UL, gaugeProducer.mCurrentSlicedBucket->size());
-    EXPECT_EQ(100,
-        gaugeProducer.mCurrentSlicedBucket->begin()->
-            second.front().mFields->begin()->second.value_int());
+    EXPECT_EQ(100, gaugeProducer.mCurrentSlicedBucket->begin()
+                           ->second.front()
+                           .mFields->begin()
+                           ->mValue.int_value);
     EXPECT_EQ(0UL, gaugeProducer.mPastBuckets.size());
 
     vector<shared_ptr<LogEvent>> allData;
@@ -303,19 +311,26 @@ TEST(GaugeMetricProducerTest, TestWithCondition) {
     gaugeProducer.onDataPulled(allData);
 
     EXPECT_EQ(1UL, gaugeProducer.mCurrentSlicedBucket->size());
-    EXPECT_EQ(110,
-        gaugeProducer.mCurrentSlicedBucket->begin()->
-            second.front().mFields->begin()->second.value_int());
+    EXPECT_EQ(110, gaugeProducer.mCurrentSlicedBucket->begin()
+                           ->second.front()
+                           .mFields->begin()
+                           ->mValue.int_value);
     EXPECT_EQ(1UL, gaugeProducer.mPastBuckets.size());
-    EXPECT_EQ(100, gaugeProducer.mPastBuckets.begin()->second.back()
-        .mGaugeAtoms.front().mFields->begin()->second.value_int());
+    EXPECT_EQ(100, gaugeProducer.mPastBuckets.begin()
+                           ->second.back()
+                           .mGaugeAtoms.front()
+                           .mFields->begin()
+                           ->mValue.int_value);
 
     gaugeProducer.onConditionChanged(false, bucket2StartTimeNs + 10);
     gaugeProducer.flushIfNeededLocked(bucket3StartTimeNs + 10);
     EXPECT_EQ(1UL, gaugeProducer.mPastBuckets.size());
     EXPECT_EQ(2UL, gaugeProducer.mPastBuckets.begin()->second.size());
-    EXPECT_EQ(110L, gaugeProducer.mPastBuckets.begin()->second.back()
-        .mGaugeAtoms.front().mFields->begin()->second.value_int());
+    EXPECT_EQ(110L, gaugeProducer.mPastBuckets.begin()
+                            ->second.back()
+                            .mGaugeAtoms.front()
+                            .mFields->begin()
+                            ->mValue.int_value);
     EXPECT_EQ(1UL, gaugeProducer.mPastBuckets.begin()->second.back().mBucketNum);
 }
 
@@ -353,9 +368,10 @@ TEST(GaugeMetricProducerTest, TestAnomalyDetection) {
 
     gaugeProducer.onDataPulled({event1});
     EXPECT_EQ(1UL, gaugeProducer.mCurrentSlicedBucket->size());
-    EXPECT_EQ(13L,
-        gaugeProducer.mCurrentSlicedBucket->begin()->
-            second.front().mFields->begin()->second.value_int());
+    EXPECT_EQ(13L, gaugeProducer.mCurrentSlicedBucket->begin()
+                           ->second.front()
+                           .mFields->begin()
+                           ->mValue.int_value);
     EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_METRIC_DIMENSION_KEY), 0U);
 
     std::shared_ptr<LogEvent> event2 =
@@ -366,9 +382,10 @@ TEST(GaugeMetricProducerTest, TestAnomalyDetection) {
 
     gaugeProducer.onDataPulled({event2});
     EXPECT_EQ(1UL, gaugeProducer.mCurrentSlicedBucket->size());
-    EXPECT_EQ(15L,
-        gaugeProducer.mCurrentSlicedBucket->begin()->
-            second.front().mFields->begin()->second.value_int());
+    EXPECT_EQ(15L, gaugeProducer.mCurrentSlicedBucket->begin()
+                           ->second.front()
+                           .mFields->begin()
+                           ->mValue.int_value);
     EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_METRIC_DIMENSION_KEY),
             event2->GetTimestampNs() / NS_PER_SEC + refPeriodSec);
 
@@ -380,9 +397,10 @@ TEST(GaugeMetricProducerTest, TestAnomalyDetection) {
 
     gaugeProducer.onDataPulled({event3});
     EXPECT_EQ(1UL, gaugeProducer.mCurrentSlicedBucket->size());
-    EXPECT_EQ(26L,
-        gaugeProducer.mCurrentSlicedBucket->begin()->
-            second.front().mFields->begin()->second.value_int());
+    EXPECT_EQ(26L, gaugeProducer.mCurrentSlicedBucket->begin()
+                           ->second.front()
+                           .mFields->begin()
+                           ->mValue.int_value);
     EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_METRIC_DIMENSION_KEY),
             event2->GetTimestampNs() / NS_PER_SEC + refPeriodSec);
 

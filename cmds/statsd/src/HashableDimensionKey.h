@@ -17,44 +17,66 @@
 #pragma once
 
 #include <utils/JenkinsHash.h>
-#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
+#include <vector>
+#include "FieldValue.h"
+#include "android-base/stringprintf.h"
+#include "logd/LogEvent.h"
 
 namespace android {
 namespace os {
 namespace statsd {
 
+using android::base::StringPrintf;
+
+struct Metric2Condition {
+    int64_t conditionId;
+    std::vector<Matcher> metricFields;
+    std::vector<Matcher> conditionFields;
+};
+
 class HashableDimensionKey {
 public:
-    explicit HashableDimensionKey(const DimensionsValue& dimensionsValue)
-        : mDimensionsValue(dimensionsValue){};
+    explicit HashableDimensionKey(const std::vector<FieldValue>& values) {
+        mValues = values;
+    }
 
     HashableDimensionKey(){};
 
-    HashableDimensionKey(const HashableDimensionKey& that)
-        : mDimensionsValue(that.getDimensionsValue()){};
+    HashableDimensionKey(const HashableDimensionKey& that) : mValues(that.getValues()){};
 
-    HashableDimensionKey& operator=(const HashableDimensionKey& from) = default;
+    inline void addValue(const FieldValue& value) {
+        mValues.push_back(value);
+    }
+
+    inline const std::vector<FieldValue>& getValues() const {
+        return mValues;
+    }
+
+    inline std::vector<FieldValue>* mutableValues() {
+        return &mValues;
+    }
+
+    inline FieldValue* mutableValue(size_t i) {
+        if (i >= 0 && i < mValues.size()) {
+            return &(mValues[i]);
+        }
+        return nullptr;
+    }
 
     std::string toString() const;
 
-    inline const DimensionsValue& getDimensionsValue() const {
-        return mDimensionsValue;
-    }
-
-    inline DimensionsValue* getMutableDimensionsValue() {
-        return &mDimensionsValue;
+    inline const char* c_str() const {
+        return toString().c_str();
     }
 
     bool operator==(const HashableDimensionKey& that) const;
 
     bool operator<(const HashableDimensionKey& that) const;
 
-    inline const char* c_str() const {
-        return toString().c_str();
-    }
+    bool contains(const HashableDimensionKey& that) const;
 
 private:
-    DimensionsValue mDimensionsValue;
+    std::vector<FieldValue> mValues;
 };
 
 class MetricDimensionKey {
@@ -83,7 +105,7 @@ class MetricDimensionKey {
     }
 
     bool hasDimensionKeyInCondition() const {
-        return mDimensionKeyInCondition.getDimensionsValue().has_field();
+        return mDimensionKeyInCondition.getValues().size() > 0;
     }
 
     bool operator==(const MetricDimensionKey& that) const;
@@ -98,11 +120,32 @@ class MetricDimensionKey {
       HashableDimensionKey mDimensionKeyInCondition;
 };
 
-bool compareDimensionsValue(const DimensionsValue& s1, const DimensionsValue& s2);
+android::hash_t hashDimension(const HashableDimensionKey& key);
 
-android::hash_t hashDimensionsValue(int64_t seed, const DimensionsValue& value);
-android::hash_t hashDimensionsValue(const DimensionsValue& value);
-android::hash_t hashMetricDimensionKey(int64_t see, const MetricDimensionKey& dimensionKey);
+/**
+ * Creating HashableDimensionKeys from FieldValues using matcher.
+ *
+ * This function may make modifications to the Field if the matcher has Position=LAST or ANY in
+ * it. This is because: for example, when we create dimension from last uid in attribution chain,
+ * In one event, uid 1000 is at position 5 and it's the last
+ * In another event, uid 1000 is at position 6, and it's the last
+ * these 2 events should be mapped to the same dimension.  So we will remove the original position
+ * from the dimension key for the uid field (by applying 0x80 bit mask).
+ */
+bool filterValues(const std::vector<Matcher>& matcherFields, const std::vector<FieldValue>& values,
+                  std::vector<HashableDimensionKey>* output);
+
+/**
+ * Filter the values from FieldValues using the matchers.
+ *
+ * In contrast to the above function, this function will not do any modification to the original
+ * data. Considering it as taking a snapshot on the atom event.
+ */
+void filterGaugeValues(const std::vector<Matcher>& matchers, const std::vector<FieldValue>& values,
+                       std::vector<FieldValue>* output);
+
+void getDimensionForCondition(const LogEvent& event, Metric2Condition links,
+                              std::vector<HashableDimensionKey>* conditionDimension);
 
 }  // namespace statsd
 }  // namespace os
@@ -116,17 +159,15 @@ using android::os::statsd::MetricDimensionKey;
 template <>
 struct hash<HashableDimensionKey> {
     std::size_t operator()(const HashableDimensionKey& key) const {
-        return hashDimensionsValue(key.getDimensionsValue());
+        return hashDimension(key);
     }
 };
 
 template <>
 struct hash<MetricDimensionKey> {
     std::size_t operator()(const MetricDimensionKey& key) const {
-        android::hash_t hash = hashDimensionsValue(
-            key.getDimensionKeyInWhat().getDimensionsValue());
-        hash = android::JenkinsHashMix(hash,
-                    hashDimensionsValue(key.getDimensionKeyInCondition().getDimensionsValue()));
+        android::hash_t hash = hashDimension(key.getDimensionKeyInWhat());
+        hash = android::JenkinsHashMix(hash, hashDimension(key.getDimensionKeyInCondition()));
         return android::JenkinsHashWhiten(hash);
     }
 };

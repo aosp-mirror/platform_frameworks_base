@@ -17,7 +17,6 @@
 #pragma once
 
 #include <vector>
-#include "HashableDimensionKey.h"
 #include "StatsPuller.h"
 #include "logd/LogEvent.h"
 #include "packages/UidMap.h"

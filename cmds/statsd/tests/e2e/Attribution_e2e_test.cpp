@@ -146,9 +146,13 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSlice) {
         processor->OnLogEvent(event.get());
     }
     ConfigMetricsReportList reports;
-    processor->onDumpReport(cfgKey, bucketStartTimeNs + 4 * bucketSizeNs + 1, &reports);
+    vector<uint8_t> buffer;
+    processor->onDumpReport(cfgKey, bucketStartTimeNs + 4 * bucketSizeNs + 1, &buffer);
+    EXPECT_TRUE(buffer.size() > 0);
+    EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     EXPECT_EQ(reports.reports_size(), 1);
     EXPECT_EQ(reports.reports(0).metrics_size(), 1);
+
     StatsLogReport::CountMetricDataWrapper countMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).count_metrics(), &countMetrics);
     EXPECT_EQ(countMetrics.data_size(), 4);

@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "MetricProducer.h"
 
-#include "dimension.h"
+#define DEBUG true  // STOPSHIP if true
+#include "Log.h"
+#include "MetricProducer.h"
 
 namespace android {
 namespace os {
@@ -35,9 +36,10 @@ void MetricProducer::onMatchedLogEventLocked(const size_t matcherIndex, const Lo
 
     std::unordered_set<HashableDimensionKey> dimensionKeysInCondition;
     if (mConditionSliced) {
-        for (const auto& link : mConditionLinks) {
-            getDimensionKeysForCondition(event, link, &conditionKey[link.condition()]);
+        for (const auto& link : mMetric2ConditionLinks) {
+            getDimensionForCondition(event, link, &conditionKey[link.conditionId]);
         }
+
         auto conditionState =
             mWizard->query(mConditionTrackerIndex, conditionKey, mDimensionsInCondition,
                            &dimensionKeysInCondition);
@@ -46,20 +48,19 @@ void MetricProducer::onMatchedLogEventLocked(const size_t matcherIndex, const Lo
         condition = mCondition;
     }
 
-    vector<DimensionsValue> dimensionInWhatValues;
-    if (mDimensionsInWhat.has_field() && mDimensionsInWhat.child_size() > 0) {
-        getDimensionKeys(event, mDimensionsInWhat, &dimensionInWhatValues);
+    vector<HashableDimensionKey> dimensionInWhatValues;
+    if (mDimensionsInWhat.size() > 0) {
+        filterValues(mDimensionsInWhat, event.getValues(), &dimensionInWhatValues);
     }
 
     if (dimensionInWhatValues.empty() && dimensionKeysInCondition.empty()) {
         onMatchedLogEventInternalLocked(
             matcherIndex, DEFAULT_METRIC_DIMENSION_KEY, conditionKey, condition, event);
     } else if (dimensionKeysInCondition.empty()) {
-        for (const DimensionsValue& whatValue : dimensionInWhatValues) {
-            onMatchedLogEventInternalLocked(
-                matcherIndex,
-                MetricDimensionKey(HashableDimensionKey(whatValue), DEFAULT_DIMENSION_KEY),
-                conditionKey, condition, event);
+        for (const HashableDimensionKey& whatValue : dimensionInWhatValues) {
+            onMatchedLogEventInternalLocked(matcherIndex,
+                                            MetricDimensionKey(whatValue, DEFAULT_DIMENSION_KEY),
+                                            conditionKey, condition, event);
         }
     } else if (dimensionInWhatValues.empty()) {
         for (const auto& conditionDimensionKey : dimensionKeysInCondition) {
@@ -69,12 +70,11 @@ void MetricProducer::onMatchedLogEventLocked(const size_t matcherIndex, const Lo
                 conditionKey, condition, event);
         }
     } else {
-        for (const DimensionsValue& whatValue : dimensionInWhatValues) {
+        for (const auto& whatValue : dimensionInWhatValues) {
             for (const auto& conditionDimensionKey : dimensionKeysInCondition) {
                 onMatchedLogEventInternalLocked(
-                    matcherIndex,
-                    MetricDimensionKey(HashableDimensionKey(whatValue), conditionDimensionKey),
-                    conditionKey, condition, event);
+                        matcherIndex, MetricDimensionKey(whatValue, conditionDimensionKey),
+                        conditionKey, condition, event);
             }
         }
     }

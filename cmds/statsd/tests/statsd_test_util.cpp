@@ -186,7 +186,7 @@ Predicate CreateScreenIsOnPredicate() {
 
 Predicate CreateScreenIsOffPredicate() {
     Predicate predicate;
-    predicate.set_id(StringToId("ScreenIsOff"));
+    predicate.set_id(1111123);
     predicate.mutable_simple_predicate()->set_start(StringToId("ScreenTurnedOff"));
     predicate.mutable_simple_predicate()->set_stop(StringToId("ScreenTurnedOn"));
     return predicate;
@@ -202,7 +202,7 @@ Predicate CreateHoldingWakelockPredicate() {
 
 Predicate CreateIsSyncingPredicate() {
     Predicate predicate;
-    predicate.set_id(StringToId("IsSyncing"));
+    predicate.set_id(33333333333333);
     predicate.mutable_simple_predicate()->set_start(StringToId("SyncStart"));
     predicate.mutable_simple_predicate()->set_stop(StringToId("SyncEnd"));
     return predicate;
@@ -459,6 +459,93 @@ void ValidateAttributionUidAndTagDimension(
         .value_tuple().dimensions_value(1).field(), 2);
     EXPECT_EQ(value.value_tuple().dimensions_value(0)
         .value_tuple().dimensions_value(1).value_str(), tag);
+}
+
+bool EqualsTo(const DimensionsValue& s1, const DimensionsValue& s2) {
+    if (s1.field() != s2.field()) {
+        return false;
+    }
+    if (s1.value_case() != s2.value_case()) {
+        return false;
+    }
+    switch (s1.value_case()) {
+        case DimensionsValue::ValueCase::kValueStr:
+            return (s1.value_str() == s2.value_str());
+        case DimensionsValue::ValueCase::kValueInt:
+            return s1.value_int() == s2.value_int();
+        case DimensionsValue::ValueCase::kValueLong:
+            return s1.value_long() == s2.value_long();
+        case DimensionsValue::ValueCase::kValueBool:
+            return s1.value_bool() == s2.value_bool();
+        case DimensionsValue::ValueCase::kValueFloat:
+            return s1.value_float() == s2.value_float();
+        case DimensionsValue::ValueCase::kValueTuple: {
+            if (s1.value_tuple().dimensions_value_size() !=
+                s2.value_tuple().dimensions_value_size()) {
+                return false;
+            }
+            bool allMatched = true;
+            for (int i = 0; allMatched && i < s1.value_tuple().dimensions_value_size(); ++i) {
+                allMatched &= EqualsTo(s1.value_tuple().dimensions_value(i),
+                                       s2.value_tuple().dimensions_value(i));
+            }
+            return allMatched;
+        }
+        case DimensionsValue::ValueCase::VALUE_NOT_SET:
+        default:
+            return true;
+    }
+}
+
+bool LessThan(const DimensionsValue& s1, const DimensionsValue& s2) {
+    if (s1.field() != s2.field()) {
+        return s1.field() < s2.field();
+    }
+    if (s1.value_case() != s2.value_case()) {
+        return s1.value_case() < s2.value_case();
+    }
+    switch (s1.value_case()) {
+        case DimensionsValue::ValueCase::kValueStr:
+            return s1.value_str() < s2.value_str();
+        case DimensionsValue::ValueCase::kValueInt:
+            return s1.value_int() < s2.value_int();
+        case DimensionsValue::ValueCase::kValueLong:
+            return s1.value_long() < s2.value_long();
+        case DimensionsValue::ValueCase::kValueBool:
+            return (int)s1.value_bool() < (int)s2.value_bool();
+        case DimensionsValue::ValueCase::kValueFloat:
+            return s1.value_float() < s2.value_float();
+        case DimensionsValue::ValueCase::kValueTuple: {
+            if (s1.value_tuple().dimensions_value_size() !=
+                s2.value_tuple().dimensions_value_size()) {
+                return s1.value_tuple().dimensions_value_size() <
+                       s2.value_tuple().dimensions_value_size();
+            }
+            for (int i = 0; i < s1.value_tuple().dimensions_value_size(); ++i) {
+                if (EqualsTo(s1.value_tuple().dimensions_value(i),
+                             s2.value_tuple().dimensions_value(i))) {
+                    continue;
+                } else {
+                    return LessThan(s1.value_tuple().dimensions_value(i),
+                                    s2.value_tuple().dimensions_value(i));
+                }
+            }
+            return false;
+        }
+        case DimensionsValue::ValueCase::VALUE_NOT_SET:
+        default:
+            return false;
+    }
+}
+
+bool LessThan(const DimensionsPair& s1, const DimensionsPair& s2) {
+    if (LessThan(s1.dimInWhat, s2.dimInWhat)) {
+        return true;
+    } else if (LessThan(s2.dimInWhat, s1.dimInWhat)) {
+        return false;
+    }
+
+    return LessThan(s1.dimInCondition, s2.dimInCondition);
 }
 
 }  // namespace statsd

@@ -114,7 +114,7 @@ void FeedEvents(StatsdConfig config, sp<StatsLogProcessor> processor) {
 
 }  // namespace
 
-TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration) {
+TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration1) {
     ConfigKey cfgKey;
     auto config = CreateStatsdConfig(DurationMetric::SUM);
     uint64_t bucketStartTimeNs = 10000000000;
@@ -124,8 +124,11 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration) {
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     FeedEvents(config, processor);
+    vector<uint8_t> buffer;
     ConfigMetricsReportList reports;
-    processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs - 1, &reports);
+    processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs - 1, &buffer);
+    EXPECT_TRUE(buffer.size() > 0);
+    EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
 
     EXPECT_EQ(reports.reports_size(), 1);
     EXPECT_EQ(reports.reports(0).metrics_size(), 1);
@@ -142,15 +145,30 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration) {
     // The wakelock holding interval starts from the screen off event and to the end of the 1st
     // bucket.
     EXPECT_EQ((unsigned long long)data.bucket_info(0).duration_nanos(), bucketSizeNs - 200);
+}
 
-    reports.Clear();
-    processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, &reports);
+TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration2) {
+    ConfigKey cfgKey;
+    auto config = CreateStatsdConfig(DurationMetric::SUM);
+    uint64_t bucketStartTimeNs = 10000000000;
+    uint64_t bucketSizeNs =
+            TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
+    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
+    FeedEvents(config, processor);
+    vector<uint8_t> buffer;
+    ConfigMetricsReportList reports;
+
+    processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, &buffer);
+    EXPECT_TRUE(buffer.size() > 0);
+    EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     EXPECT_EQ(reports.reports_size(), 1);
     EXPECT_EQ(reports.reports(0).metrics_size(), 1);
     EXPECT_EQ(reports.reports(0).metrics(0).duration_metrics().data_size(), 1);
     // Dump the report after the end of 2nd bucket.
     EXPECT_EQ(reports.reports(0).metrics(0).duration_metrics().data(0).bucket_info_size(), 2);
-    data = reports.reports(0).metrics(0).duration_metrics().data(0);
+    auto data = reports.reports(0).metrics(0).duration_metrics().data(0);
     // Validate dimension value.
     ValidateAttributionUidDimension(data.dimensions_in_what(),
                                     android::util::WAKELOCK_STATE_CHANGED, 111);
@@ -162,6 +180,19 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration) {
     // The wakelock holding interval in the 2nd bucket starts at the beginning of the bucket and
     // ends at the second screen on event.
     EXPECT_EQ((unsigned long long)data.bucket_info(1).duration_nanos(), 500UL);
+}
+TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration3) {
+    ConfigKey cfgKey;
+    auto config = CreateStatsdConfig(DurationMetric::SUM);
+    uint64_t bucketStartTimeNs = 10000000000;
+    uint64_t bucketSizeNs =
+            TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
+    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
+    FeedEvents(config, processor);
+    vector<uint8_t> buffer;
+    ConfigMetricsReportList reports;
 
     std::vector<std::unique_ptr<LogEvent>> events;
     events.push_back(
@@ -175,13 +206,15 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration) {
     for (const auto& event : events) {
         processor->OnLogEvent(event.get());
     }
-    reports.Clear();
-    processor->onDumpReport(cfgKey, bucketStartTimeNs + 6 * bucketSizeNs + 1, &reports);
+
+    processor->onDumpReport(cfgKey, bucketStartTimeNs + 6 * bucketSizeNs + 1, &buffer);
+    EXPECT_TRUE(buffer.size() > 0);
+    EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     EXPECT_EQ(reports.reports_size(), 1);
     EXPECT_EQ(reports.reports(0).metrics_size(), 1);
     EXPECT_EQ(reports.reports(0).metrics(0).duration_metrics().data_size(), 1);
     EXPECT_EQ(reports.reports(0).metrics(0).duration_metrics().data(0).bucket_info_size(), 6);
-    data = reports.reports(0).metrics(0).duration_metrics().data(0);
+    auto data = reports.reports(0).metrics(0).duration_metrics().data(0);
     ValidateAttributionUidDimension(data.dimensions_in_what(),
                                     android::util::WAKELOCK_STATE_CHANGED, 111);
     // The last wakelock holding spans 4 buckets.
@@ -191,7 +224,7 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration) {
     EXPECT_EQ((unsigned long long)data.bucket_info(5).duration_nanos(), 100UL);
 }
 
-TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForMaxDuration) {
+TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForMaxDuration1) {
     ConfigKey cfgKey;
     auto config = CreateStatsdConfig(DurationMetric::MAX_SPARSE);
     uint64_t bucketStartTimeNs = 10000000000;
@@ -202,15 +235,35 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForMaxDuration) {
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     FeedEvents(config, processor);
     ConfigMetricsReportList reports;
-    processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs - 1, &reports);
+    vector<uint8_t> buffer;
+    processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs - 1, &buffer);
+    EXPECT_TRUE(buffer.size() > 0);
+
+    EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
 
     EXPECT_EQ(reports.reports_size(), 1);
-    EXPECT_EQ(reports.reports(0).metrics_size(), 1);
-    // Nothing has ended in the first bucket.
-    EXPECT_EQ(reports.reports(0).metrics(0).duration_metrics().data_size(), 0);
 
-    reports.Clear();
-    processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, &reports);
+    // When using ProtoOutputStream, if nothing written to a sub msg, it won't be treated as
+    // one. It was previsouly 1 because we had a fake onDumpReport which calls add_metric() by
+    // itself.
+    EXPECT_EQ(0, reports.reports(0).metrics_size());
+}
+
+TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForMaxDuration2) {
+    ConfigKey cfgKey;
+    auto config = CreateStatsdConfig(DurationMetric::MAX_SPARSE);
+    uint64_t bucketStartTimeNs = 10000000000;
+    uint64_t bucketSizeNs =
+            TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
+    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
+    FeedEvents(config, processor);
+    ConfigMetricsReportList reports;
+    vector<uint8_t> buffer;
+    processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, &buffer);
+    EXPECT_TRUE(buffer.size() > 0);
+    EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     EXPECT_EQ(reports.reports_size(), 1);
     EXPECT_EQ(reports.reports(0).metrics_size(), 1);
     EXPECT_EQ(reports.reports(0).metrics(0).duration_metrics().data_size(), 1);
@@ -222,6 +275,20 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForMaxDuration) {
                                     android::util::WAKELOCK_STATE_CHANGED, 111);
     // The max is acquire event for wl1 to screen off start.
     EXPECT_EQ((unsigned long long)data.bucket_info(0).duration_nanos(), bucketSizeNs + 2 - 200);
+}
+
+TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForMaxDuration3) {
+    ConfigKey cfgKey;
+    auto config = CreateStatsdConfig(DurationMetric::MAX_SPARSE);
+    uint64_t bucketStartTimeNs = 10000000000;
+    uint64_t bucketSizeNs =
+            TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
+    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
+    FeedEvents(config, processor);
+    ConfigMetricsReportList reports;
+    vector<uint8_t> buffer;
 
     std::vector<std::unique_ptr<LogEvent>> events;
     events.push_back(
@@ -235,13 +302,15 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForMaxDuration) {
     for (const auto& event : events) {
         processor->OnLogEvent(event.get());
     }
-    reports.Clear();
-    processor->onDumpReport(cfgKey, bucketStartTimeNs + 6 * bucketSizeNs + 1, &reports);
+
+    processor->onDumpReport(cfgKey, bucketStartTimeNs + 6 * bucketSizeNs + 1, &buffer);
+    EXPECT_TRUE(buffer.size() > 0);
+    EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     EXPECT_EQ(reports.reports_size(), 1);
     EXPECT_EQ(reports.reports(0).metrics_size(), 1);
     EXPECT_EQ(reports.reports(0).metrics(0).duration_metrics().data_size(), 1);
     EXPECT_EQ(reports.reports(0).metrics(0).duration_metrics().data(0).bucket_info_size(), 2);
-    data = reports.reports(0).metrics(0).duration_metrics().data(0);
+    auto data = reports.reports(0).metrics(0).duration_metrics().data(0);
     ValidateAttributionUidDimension(data.dimensions_in_what(),
                                     android::util::WAKELOCK_STATE_CHANGED, 111);
     // The last wakelock holding spans 4 buckets.

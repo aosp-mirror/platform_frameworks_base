@@ -18,7 +18,6 @@
 #include "Log.h"
 
 #include "StatsPullerManagerImpl.h"
-#include "field_util.h"
 #include "puller_util.h"
 #include "statslog.h"
 
@@ -30,125 +29,136 @@ using std::map;
 using std::shared_ptr;
 using std::vector;
 
-DimensionsValue* getFieldValue(shared_ptr<LogEvent> event, int tagId, int fieldNum) {
-  Field field;
-  buildSimpleAtomField(tagId, fieldNum, &field);
-  return event->findFieldValueOrNull(field);
-}
-
+namespace {
 bool shouldMerge(shared_ptr<LogEvent>& lhs, shared_ptr<LogEvent>& rhs,
-                 const vector<int>& nonAdditiveFields, int tagId) {
-  for (int f : nonAdditiveFields) {
-    DimensionsValue* lValue = getFieldValue(lhs, tagId, f);
-    DimensionsValue* rValue = getFieldValue(rhs, tagId, f);
-    if (!compareDimensionsValue(*lValue, *rValue)) {
-      return false;
+                 const vector<int>& nonAdditiveFields) {
+    const auto& l_values = lhs->getValues();
+    const auto& r_values = rhs->getValues();
+
+    for (size_t i : nonAdditiveFields) {
+        // We store everything starting from index 0, so we need to use i-1
+        if (!(l_values.size() > i - 1 && r_values.size() > i - 1 &&
+              l_values[i - 1].mValue == r_values[i - 1].mValue)) {
+            return false;
+        }
     }
-  }
-  return true;
+    return true;
 }
 
 // merge rhs to lhs
-void mergeEvent(shared_ptr<LogEvent>& lhs, shared_ptr<LogEvent>& rhs,
-                const vector<int>& additiveFields, int tagId) {
-  for (int f : additiveFields) {
-    DimensionsValue* lValue = getFieldValue(lhs, tagId, f);
-    DimensionsValue* rValue = getFieldValue(rhs, tagId, f);
-    if (lValue->has_value_int()) {
-      lValue->set_value_int(lValue->value_int() + rValue->value_int());
-    } else if (lValue->has_value_long()) {
-      lValue->set_value_long(lValue->value_long() + rValue->value_long());
+// when calling this function, all sanity check should be done already.
+// e.g., index boundary, nonAdditiveFields matching etc.
+bool mergeEvent(shared_ptr<LogEvent>& lhs, shared_ptr<LogEvent>& rhs,
+                const vector<int>& additiveFields) {
+    vector<FieldValue>* host_values = lhs->getMutableValues();
+    const auto& child_values = rhs->getValues();
+    for (int i : additiveFields) {
+        Value& host = (*host_values)[i - 1].mValue;
+        const Value& child = (child_values[i - 1]).mValue;
+        if (child.getType() != host.getType()) {
+            return false;
+        }
+        switch (child.getType()) {
+            case INT:
+                host.setInt(host.int_value + child.int_value);
+                break;
+            case LONG:
+                host.setLong(host.long_value + child.long_value);
+                break;
+            default:
+                ALOGE("Tried to merge 2 fields with unsupported type");
+                return false;
+        }
     }
-  }
+    return true;
 }
 
-// process all data and merge isolated with host if necessary
-void mergeIsolatedUidsToHostUid(vector<shared_ptr<LogEvent>>& data,
-                                const sp<UidMap>& uidMap, int tagId) {
-  if (StatsPullerManagerImpl::kAllPullAtomInfo.find(tagId) ==
-      StatsPullerManagerImpl::kAllPullAtomInfo.end()) {
-    VLOG("Unknown pull atom id %d", tagId);
-    return;
-  }
-  if (android::util::kAtomsWithUidField.find(tagId) ==
-      android::util::kAtomsWithUidField.end()) {
-    VLOG("No uid to merge for atom %d", tagId);
-    return;
-  }
-  const vector<int>& additiveFields =
-      StatsPullerManagerImpl::kAllPullAtomInfo.find(tagId)
-          ->second.additiveFields;
-  const vector<int>& nonAdditiveFields =
-      StatsPullerManagerImpl::kAllPullAtomInfo.find(tagId)
-          ->second.nonAdditiveFields;
-
-  // map of host uid to isolated uid data index in the original vector.
-  // because of non additive fields, there could be multiple of them that can't
-  // be merged into one
-  map<int, vector<int>> hostToIsolated;
-  // map of host uid to their position in the original vector
-  map<int, vector<int>> hostPosition;
-  vector<int> isolatedUidPos;
-  // all uids in the original vector
-  vector<int> allUids;
-  for (size_t i = 0; i < data.size(); i++) {
-    // uid field is always first primitive filed, if present
-    DimensionsValue* uidField = getFieldValue(data[i], tagId, 1);
-    if (!uidField) {
-      VLOG("Bad data for %d, %s", tagId, data[i]->ToString().c_str());
-      return;
-    }
-    int uid = uidField->value_int();
-    allUids.push_back(uid);
-    const int hostUid = uidMap->getHostUidOrSelf(uid);
-    if (hostUid != uid) {
-      uidField->set_value_int(hostUid);
-      hostToIsolated[hostUid].push_back(i);
-      isolatedUidPos.push_back(i);
-    }
-  }
-  vector<shared_ptr<LogEvent>> mergedData;
-  for (size_t i = 0; i < allUids.size(); i++) {
-    if (hostToIsolated.find(allUids[i]) != hostToIsolated.end()) {
-      hostPosition[allUids[i]].push_back(i);
-    } else if (std::find(isolatedUidPos.begin(), isolatedUidPos.end(), i) != isolatedUidPos.end()) {
-      continue;
-    } else {
-      mergedData.push_back(data[i]);
-    }
-  }
-  for (auto iter = hostToIsolated.begin(); iter != hostToIsolated.end();
-       iter++) {
-    int uid = iter->first;
-    vector<int>& isolated = hostToIsolated[uid];
-    vector<int> toBeMerged;
-    toBeMerged.insert(toBeMerged.begin(), isolated.begin(), isolated.end());
-    if (hostPosition.find(uid) != hostPosition.end()) {
-      vector<int>& host = hostPosition[uid];
-      toBeMerged.insert(toBeMerged.end(), host.begin(), host.end());
-    }
-    vector<bool> used(toBeMerged.size());
-    for (size_t i = 0; i < toBeMerged.size(); i++) {
-      if (used[i] == true) {
-        continue;
-      }
-      for (size_t j = i + 1; j < toBeMerged.size(); j++) {
-        shared_ptr<LogEvent>& lhs = data[toBeMerged[i]];
-        shared_ptr<LogEvent>& rhs = data[toBeMerged[j]];
-        if (shouldMerge(lhs, rhs, nonAdditiveFields, tagId)) {
-          mergeEvent(lhs, rhs, additiveFields, tagId);
-          used[j] = true;
+bool tryMerge(vector<shared_ptr<LogEvent>>& data, int child_pos, const vector<int>& host_pos,
+              const vector<int>& nonAdditiveFields, const vector<int>& additiveFields) {
+    for (const auto& pos : host_pos) {
+        if (shouldMerge(data[pos], data[child_pos], nonAdditiveFields) &&
+            mergeEvent(data[pos], data[child_pos], additiveFields)) {
+            return true;
         }
-      }
     }
-    for (size_t i = 0; i < toBeMerged.size(); i++) {
-      if (used[i] == false) {
-      mergedData.push_back(data[i]);
+    return false;
+}
+
+}  // namespace
+
+/**
+ * Process all data and merge isolated with host if necessary.
+ * For example:
+ *   NetworkBytesAtom {
+ *       int uid = 1;
+ *       State process_state = 2;
+ *       int byte_send = 3;
+ *       int byte_recv = 4;
+ *   }
+ *   additive fields are {3, 4}, non-additive field is {2}
+ * If we pulled the following events (uid1_child is an isolated uid which maps to uid1):
+ * [uid1, fg, 100, 200]
+ * [uid1_child, fg, 100, 200]
+ * [uid1, bg, 100, 200]
+ *
+ * We want to merge them and results should be:
+ * [uid1, fg, 200, 400]
+ * [uid1, bg, 100, 200]
+ */
+void mergeIsolatedUidsToHostUid(vector<shared_ptr<LogEvent>>& data, const sp<UidMap>& uidMap,
+                                int tagId) {
+    if (StatsPullerManagerImpl::kAllPullAtomInfo.find(tagId) ==
+        StatsPullerManagerImpl::kAllPullAtomInfo.end()) {
+        VLOG("Unknown pull atom id %d", tagId);
+        return;
     }
+    if (android::util::kAtomsWithUidField.find(tagId) == android::util::kAtomsWithUidField.end()) {
+        VLOG("No uid to merge for atom %d", tagId);
+        return;
     }
-  }
-  data.clear();
-  data = mergedData;
+    const vector<int>& additiveFields =
+            StatsPullerManagerImpl::kAllPullAtomInfo.find(tagId)->second.additiveFields;
+    const vector<int>& nonAdditiveFields =
+            StatsPullerManagerImpl::kAllPullAtomInfo.find(tagId)->second.nonAdditiveFields;
+
+    // map of host uid to their position in the original vector
+    map<int, vector<int>> hostPosition;
+    vector<bool> toRemove = vector<bool>(data.size(), false);
+
+    for (size_t i = 0; i < data.size(); i++) {
+        vector<FieldValue>* valueList = data[i]->getMutableValues();
+
+        int err = 0;
+        int uid = data[i]->GetInt(1, &err);
+        if (err != 0) {
+            VLOG("Bad uid field for %s", data[i]->ToString().c_str());
+            return;
+        }
+
+        const int hostUid = uidMap->getHostUidOrSelf(uid);
+
+        if (hostUid != uid) {
+            (*valueList)[0].mValue.setInt(hostUid);
+        }
+        if (hostPosition.find(hostUid) == hostPosition.end()) {
+            hostPosition[hostUid].push_back(i);
+        } else {
+            if (tryMerge(data, i, hostPosition[hostUid], nonAdditiveFields, additiveFields)) {
+                toRemove[i] = true;
+            } else {
+                hostPosition[hostUid].push_back(i);
+            }
+        }
+    }
+
+    vector<shared_ptr<LogEvent>> mergedData;
+    for (size_t i = 0; i < toRemove.size(); i++) {
+        if (!toRemove[i]) {
+            mergedData.push_back(data[i]);
+        }
+    }
+    data.clear();
+    data = mergedData;
 }
 
 }  // namespace statsd
