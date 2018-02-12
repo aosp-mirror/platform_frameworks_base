@@ -24,6 +24,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
+import android.view.View.AutofillImportance;
 import android.view.ViewRootImpl;
 import android.view.ViewStructure;
 import android.view.ViewStructure.HtmlInfo;
@@ -632,6 +633,7 @@ public class AssistStructure implements Parcelable {
         int mMaxEms = -1;
         int mMaxLength = -1;
         @Nullable String mTextIdEntry;
+        @AutofillImportance int mImportantForAutofill;
 
         // POJO used to override some autofill-related values when the node is parcelized.
         // Not written to parcel.
@@ -733,6 +735,7 @@ public class AssistStructure implements Parcelable {
                 mMaxEms = in.readInt();
                 mMaxLength = in.readInt();
                 mTextIdEntry = preader.readString();
+                mImportantForAutofill = in.readInt();
             }
             if ((flags&FLAGS_HAS_LARGE_COORDS) != 0) {
                 mX = in.readInt();
@@ -900,6 +903,7 @@ public class AssistStructure implements Parcelable {
                 out.writeInt(mMaxEms);
                 out.writeInt(mMaxLength);
                 pwriter.writeString(mTextIdEntry);
+                out.writeInt(mImportantForAutofill);
             }
             if ((flags&FLAGS_HAS_LARGE_COORDS) != 0) {
                 out.writeInt(mX);
@@ -1512,6 +1516,16 @@ public class AssistStructure implements Parcelable {
         public int getMaxTextLength() {
             return mMaxLength;
         }
+
+        /**
+         * Gets the {@link View#setImportantForAutofill(int) importantForAutofill mode} of
+         * the view associated with this node.
+         *
+         * <p>It's only relevant when the {@link AssistStructure} is used for autofill purposes.
+         */
+        public @AutofillImportance int getImportantForAutofill() {
+            return mImportantForAutofill;
+        }
     }
 
     /**
@@ -1844,6 +1858,11 @@ public class AssistStructure implements Parcelable {
         }
 
         @Override
+        public void setImportantForAutofill(@AutofillImportance int mode) {
+            mNode.mImportantForAutofill = mode;
+        }
+
+        @Override
         public void setInputType(int inputType) {
             mNode.mInputType = inputType;
         }
@@ -2144,7 +2163,8 @@ public class AssistStructure implements Parcelable {
                     + ", options=" + Arrays.toString(node.getAutofillOptions())
                     + ", hints=" + Arrays.toString(node.getAutofillHints())
                     + ", value=" + node.getAutofillValue()
-                    + ", sanitized=" + node.isSanitized());
+                    + ", sanitized=" + node.isSanitized()
+                    + ", importantFor=" + node.getImportantForAutofill());
         }
 
         final int NCHILDREN = node.getChildCount();
