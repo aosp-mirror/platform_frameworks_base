@@ -12,7 +12,7 @@
  * permissions and limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone;
+package com.android.settingslib.graph;
 
 import android.animation.ArgbEvaluator;
 import android.annotation.IntRange;
@@ -36,7 +36,6 @@ import android.util.LayoutDirection;
 
 import com.android.settingslib.R;
 import com.android.settingslib.Utils;
-import com.android.systemui.qs.SlashDrawable;
 
 public class SignalDrawable extends Drawable {
 
@@ -458,6 +457,7 @@ public class SignalDrawable extends Drawable {
     }
 
     private final class SlashArtist {
+        private static final float CORNER_RADIUS = 1f;
         // These values are derived in un-rotated (vertical) orientation
         private static final float SLASH_WIDTH = 1.8384776f;
         private static final float SLASH_HEIGHT = 22f;
@@ -478,7 +478,7 @@ public class SignalDrawable extends Drawable {
 
         void draw(int height, int width, @NonNull Canvas canvas, Paint paint) {
             Matrix m = new Matrix();
-            final float radius = scale(SlashDrawable.CORNER_RADIUS, width);
+            final float radius = scale(CORNER_RADIUS, width);
             updateRect(
                     scale(LEFT, width),
                     scale(TOP, height),
