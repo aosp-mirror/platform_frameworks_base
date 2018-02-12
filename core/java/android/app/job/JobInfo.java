@@ -365,9 +365,7 @@ public class JobInfo implements Parcelable {
 
     /** @hide */
     public boolean isExemptedFromAppStandby() {
-        return ((flags & FLAG_EXEMPT_FROM_APP_STANDBY) != 0)
-                && !hasEarlyConstraint()
-                && !hasLateConstraint();
+        return ((flags & FLAG_EXEMPT_FROM_APP_STANDBY) != 0) && !isPeriodic();
     }
 
     /**
