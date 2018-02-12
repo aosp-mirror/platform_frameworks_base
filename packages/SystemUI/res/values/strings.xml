@@ -1340,8 +1340,7 @@
     <string name="volume_stream_content_description_vibrate_a11y">%1$s. Tap to set to vibrate.</string>
     <string name="volume_stream_content_description_mute_a11y">%1$s. Tap to mute.</string>
 
-    <string name="volume_dialog_accessibility_shown_message">%s volume controls shown. Swipe up to dismiss.</string>
-    <string name="volume_dialog_accessibility_dismissed_message">Volume controls hidden</string>
+    <string name="volume_dialog_title">%s volume controls</string>
 
     <string name="output_title">Media output</string>
     <string name="output_calls_title">Phone call output</string>
