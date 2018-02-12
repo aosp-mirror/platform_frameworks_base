@@ -3806,6 +3806,7 @@ package android.os {
     method public void resume();
     method public void suspend();
     method public boolean unbind();
+    method public boolean verifyPayloadMetadata(java.lang.String);
   }
 
   public static final class UpdateEngine.ErrorCodeConstants {

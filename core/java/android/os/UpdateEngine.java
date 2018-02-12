@@ -271,4 +271,22 @@ public class UpdateEngine {
             }
         }
     }
+
+    /**
+     * Verifies that a payload associated with the given payload metadata
+     * {@code payloadMetadataFilename} can be safely applied to ths device.
+     * Returns {@code true} if the update can successfully be applied and
+     * returns {@code false} otherwise.
+     *
+     * @param payloadMetadataFilename the location of the metadata without the
+     * {@code file://} prefix.
+     */
+    @SystemApi
+    public boolean verifyPayloadMetadata(String payloadMetadataFilename) {
+        try {
+            return mUpdateEngine.verifyPayloadApplicable(payloadMetadataFilename);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }
