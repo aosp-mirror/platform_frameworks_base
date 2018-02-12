@@ -141,6 +141,18 @@ TEST(ManifestClassGeneratorTest, LastSeenPermissionWithSameLeafNameTakesPreceden
   EXPECT_THAT(actual, Not(HasSubstr("ACCESS_INTERNET=\"com.android.sample.ACCESS_INTERNET\";")));
 }
 
+TEST(ManifestClassGeneratorTest, NormalizePermissionNames) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<xml::XmlResource> manifest = test::BuildXmlDom(R"(
+        <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+          <permission android:name="android.permission.access-internet" />
+        </manifest>)");
+
+  std::string actual;
+  ASSERT_TRUE(GetManifestClassText(context.get(), manifest.get(), &actual));
+  EXPECT_THAT(actual, HasSubstr("access_internet=\"android.permission.access-internet\";"));
+}
+
 static ::testing::AssertionResult GetManifestClassText(IAaptContext* context, xml::XmlResource* res,
                                                        std::string* out_str) {
   std::unique_ptr<ClassDefinition> manifest_class =
