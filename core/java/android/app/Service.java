@@ -471,6 +471,14 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * {@link #onStart} and returns either {@link #START_STICKY}
      * or {@link #START_STICKY_COMPATIBILITY}.
      * 
+     * <p>If you need your application to run on platform versions prior to API
+     * level 5, you can use the following model to handle the older {@link #onStart}
+     * callback in that case.  The <code>handleCommand</code> method is implemented by
+     * you as appropriate:
+     * 
+     * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/ForegroundService.java
+     *   start_compatibility}
+     *
      * <p class="caution">Note that the system calls this on your
      * service's main thread.  A service's main thread is the same
      * thread where UI operations take place for Activities running in the
@@ -678,10 +686,6 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * itself, even though the name sounds like it.  You must always call
      * {@link #startService(Intent)} first to tell the system it should keep the service running,
      * and then use this method to tell it to keep it running harder.</p>
-     *
-     * <p>Apps targeting API {@link android.os.Build.VERSION_CODES#P} or later must request
-     * the permission {@link android.Manifest.permission#FOREGROUND_SERVICE} in order to use
-     * this API.</p>
      *
      * @param id The identifier for this notification as per
      * {@link NotificationManager#notify(int, Notification)
