@@ -948,8 +948,11 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         return true;
     }
 
-    private boolean startConsentUiIfNeeded(String packageName, int callingUid, String intentAction)
-            throws RemoteException {
+    private boolean startConsentUiIfNeeded(String packageName,
+            int callingUid, String intentAction) throws RemoteException {
+        if (checkBluetoothPermissionWhenPermissionReviewRequired()) {
+            return false;
+        }
         try {
             // Validate the package only if we are going to use it
             ApplicationInfo applicationInfo = mContext.getPackageManager()
@@ -957,7 +960,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                             PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
                             UserHandle.getUserId(callingUid));
             if (applicationInfo.uid != callingUid) {
-                throw new SecurityException("Package " + callingUid + " not in uid " + callingUid);
+                throw new SecurityException("Package " + packageName
+                        + " not in uid " + callingUid);
             }
 
             Intent intent = new Intent(intentAction);
@@ -975,6 +979,26 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         } catch (PackageManager.NameNotFoundException e) {
             throw new RemoteException(e.getMessage());
         }
+    }
+
+    /**
+     * Check if the caller must still pass permission check or if the caller is exempted
+     * from the consent UI via the MANAGE_BLUETOOTH_WHEN_PERMISSION_REVIEW_REQUIRED check.
+     *
+     * Commands from some callers may be exempted from triggering the consent UI when
+     * enabling bluetooth. This exemption is checked via the
+     * MANAGE_BLUETOOTH_WHEN_PERMISSION_REVIEW_REQUIRED and allows calls to skip
+     * the consent UI where it may otherwise be required.
+     *
+     * @hide
+     */
+    private boolean checkBluetoothPermissionWhenPermissionReviewRequired() {
+        if (!mPermissionReviewRequired) {
+            return false;
+        }
+        int result = mContext.checkCallingPermission(
+                android.Manifest.permission.MANAGE_BLUETOOTH_WHEN_PERMISSION_REVIEW_REQUIRED);
+        return result == PackageManager.PERMISSION_GRANTED;
     }
 
     public void unbindAndFinish() {
