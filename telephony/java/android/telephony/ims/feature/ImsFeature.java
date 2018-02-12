@@ -87,7 +87,9 @@ public abstract class ImsFeature {
     // ImsFeatures that are defined in the Manifests. Ensure that these values match the previously
     // defined values in ImsServiceClass for compatibility purposes.
     /**
-     * This feature supports emergency calling over MMTEL.
+     * This feature supports emergency calling over MMTEL. If defined, the framework will try to
+     * place an emergency call over IMS first. If it is not defined, the framework will only use
+     * CSFB for emergency calling.
      */
     public static final int FEATURE_EMERGENCY_MMTEL = 0;
     /**
