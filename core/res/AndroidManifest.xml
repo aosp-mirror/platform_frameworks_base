@@ -573,6 +573,10 @@
     <protected-broadcast android:name="android.media.tv.action.CHANNEL_BROWSABLE_REQUESTED" />
     <protected-broadcast android:name="com.android.server.InputMethodManagerService.SHOW_INPUT_METHOD_PICKER" />
 
+    <!-- Time zone rules update intents fired by the system server -->
+    <protected-broadcast android:name="com.android.intent.action.timezone.RULES_UPDATE_OPERATION" />
+    <protected-broadcast android:name="com.android.intent.action.timezone.TRIGGER_RULES_UPDATE_CHECK" />
+
     <!-- Made protected in P (was introduced in JB-MR2) -->
     <protected-broadcast android:name="android.intent.action.GET_RESTRICTION_ENTRIES" />
     <protected-broadcast android:name="android.telephony.euicc.action.OTA_STATUS_CHANGED" />

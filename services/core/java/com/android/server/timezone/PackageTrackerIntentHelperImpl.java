@@ -28,16 +28,16 @@ import android.os.UserHandle;
 import android.util.Slog;
 
 /**
- * The bona fide implementation of {@link IntentHelper}.
+ * The bona fide implementation of {@link PackageTrackerIntentHelper}.
  */
-final class IntentHelperImpl implements IntentHelper {
+final class PackageTrackerIntentHelperImpl implements PackageTrackerIntentHelper {
 
-    private final static String TAG = "timezone.IntentHelperImpl";
+    private final static String TAG = "timezone.PackageTrackerIntentHelperImpl";
 
     private final Context mContext;
     private String mUpdaterAppPackageName;
 
-    IntentHelperImpl(Context context) {
+    PackageTrackerIntentHelperImpl(Context context) {
         mContext = context;
     }
 
