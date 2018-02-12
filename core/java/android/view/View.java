@@ -8367,6 +8367,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         }
 
+        // If the app developer explicitly set hints for it, it's important.
+        if (getAutofillHints() != null) {
+            return true;
+        }
+
         // Otherwise, assume it's not important...
         return false;
     }
