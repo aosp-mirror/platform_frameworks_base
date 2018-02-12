@@ -206,7 +206,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private static final int UPDATE_NETWORK_STATE = 4;
     private static final int INJECT_NTP_TIME = 5;
     private static final int DOWNLOAD_XTRA_DATA = 6;
-    private static final int UPDATE_LOCATION = 7;
+    private static final int UPDATE_LOCATION = 7;  // Handle external location from network listener
     private static final int ADD_LISTENER = 8;
     private static final int REMOVE_LISTENER = 9;
     private static final int INJECT_NTP_TIME_FINISHED = 10;
@@ -256,6 +256,42 @@ public class GnssLocationProvider implements LocationProviderInterface {
         public GpsRequest(ProviderRequest request, WorkSource source) {
             this.request = request;
             this.source = source;
+        }
+    }
+
+    // Simple class to hold stats reported in the Extras Bundle
+    private static class LocationExtras {
+        private int mSvCount;
+        private int mMeanCn0;
+        private int mMaxCn0;
+        private final Bundle mBundle;
+
+        public LocationExtras() {
+            mBundle = new Bundle();
+        }
+
+        public void set(int svCount, int meanCn0, int maxCn0) {
+            mSvCount = svCount;
+            mMeanCn0 = meanCn0;
+            mMaxCn0 = maxCn0;
+            setBundle(mBundle);
+        }
+
+        public void reset() {
+            set(0,0,0);
+        }
+
+        // Also used by outside methods to add to other bundles
+        public void setBundle(Bundle extras) {
+            if (extras != null) {
+                extras.putInt("satellites", mSvCount);
+                extras.putInt("meanCn0", mMeanCn0);
+                extras.putInt("maxCn0", mMaxCn0);
+            }
+        }
+
+        public Bundle getBundle() {
+            return mBundle;
         }
     }
 
@@ -369,7 +405,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private final NtpTrustedTime mNtpTime;
     private final ILocationManager mILocationManager;
     private Location mLocation = new Location(LocationManager.GPS_PROVIDER);
-    private Bundle mLocationExtras = new Bundle();
+    private final LocationExtras mLocationExtras = new LocationExtras();
     private final GnssStatusListenerHelper mListenerHelper;
     private final GnssMeasurementsProvider mGnssMeasurementsProvider;
     private final GnssNavigationMessageProvider mGnssNavigationMessageProvider;
@@ -713,7 +749,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
         mNtpTime = NtpTrustedTime.getInstance(context);
         mILocationManager = ilocationManager;
 
-        mLocation.setExtras(mLocationExtras);
+        mLocation.setExtras(mLocationExtras.getBundle());
 
         // Create a wake lock
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
@@ -1245,26 +1281,14 @@ public class GnssLocationProvider implements LocationProviderInterface {
 
     @Override
     public int getStatus(Bundle extras) {
-        setLocationExtras(extras);
+        mLocationExtras.setBundle(extras);
         return mStatus;
     }
 
-    private void updateStatus(int status, int svCount, int meanCn0, int maxCn0) {
-        if (status != mStatus || svCount != mSvCount || meanCn0 != mMeanCn0 || maxCn0 != mMaxCn0) {
+    private void updateStatus(int status) {
+        if (status != mStatus) {
             mStatus = status;
-            mSvCount = svCount;
-            mMeanCn0 = meanCn0;
-            mMaxCn0 = maxCn0;
-            setLocationExtras(mLocationExtras);
             mStatusUpdateTime = SystemClock.elapsedRealtime();
-        }
-    }
-
-    private void setLocationExtras(Bundle extras) {
-        if (extras != null) {
-            extras.putInt("satellites", mSvCount);
-            extras.putInt("meanCn0", mMeanCn0);
-            extras.putInt("maxCn0", mMaxCn0);
         }
     }
 
@@ -1563,7 +1587,8 @@ public class GnssLocationProvider implements LocationProviderInterface {
             }
 
             // reset SV count to zero
-            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, 0, 0, 0);
+            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE);
+            mLocationExtras.reset();
             mFixRequestTime = SystemClock.elapsedRealtime();
             if (!hasCapability(GPS_CAPABILITY_SCHEDULING)) {
                 // set timer to give up if we do not receive a fix within NO_FIX_TIMEOUT
@@ -1586,7 +1611,8 @@ public class GnssLocationProvider implements LocationProviderInterface {
             mLastFixTime = 0;
 
             // reset SV count to zero
-            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, 0, 0, 0);
+            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE);
+            mLocationExtras.reset();
         }
     }
 
@@ -1626,7 +1652,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
             // It would be nice to push the elapsed real-time timestamp
             // further down the stack, but this is still useful
             mLocation.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
-            mLocation.setExtras(mLocationExtras);
+            mLocation.setExtras(mLocationExtras.getBundle());
 
             try {
                 mILocationManager.reportLocation(mLocation, false);
@@ -1662,8 +1688,9 @@ public class GnssLocationProvider implements LocationProviderInterface {
         }
 
         if (mStarted && mStatus != LocationProvider.AVAILABLE) {
-            // we want to time out if we do not receive a fix
-            // within the time out and we are requesting infrequent fixes
+            // For devices that use framework scheduling, a timer may be set to ensure we don't
+            // spend too much power searching for a location, when the requested update rate is slow.
+            // As we just recievied a location, we'll cancel that timer.
             if (!hasCapability(GPS_CAPABILITY_SCHEDULING) && mFixInterval < NO_FIX_TIMEOUT) {
                 mAlarmManager.cancel(mTimeoutIntent);
             }
@@ -1672,7 +1699,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
             Intent intent = new Intent(LocationManager.GPS_FIX_CHANGE_ACTION);
             intent.putExtra(LocationManager.EXTRA_GPS_ENABLED, true);
             mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
-            updateStatus(LocationProvider.AVAILABLE, mSvCount, mMeanCn0, mMaxCn0);
+            updateStatus(LocationProvider.AVAILABLE);
         }
 
         if (!hasCapability(GPS_CAPABILITY_SCHEDULING) && mStarted &&
@@ -1771,7 +1798,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
             meanCn0 /= usedInFixCount;
         }
         // return number of sats used in fix instead of total reported
-        updateStatus(mStatus, usedInFixCount, meanCn0, maxCn0);
+        mLocationExtras.set(usedInFixCount, meanCn0, maxCn0);
 
         if (mNavigating && mStatus == LocationProvider.AVAILABLE && mLastFixTime > 0 &&
                 SystemClock.elapsedRealtime() - mLastFixTime > RECENT_FIX_TIMEOUT) {
@@ -1779,7 +1806,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
             Intent intent = new Intent(LocationManager.GPS_FIX_CHANGE_ACTION);
             intent.putExtra(LocationManager.EXTRA_GPS_ENABLED, false);
             mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
-            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, mSvCount, mMeanCn0, mMaxCn0);
+            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE);
         }
     }
 
@@ -2726,9 +2753,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private float mSvElevations[] = new float[MAX_SVS];
     private float mSvAzimuths[] = new float[MAX_SVS];
     private float mSvCarrierFreqs[] = new float[MAX_SVS];
-    private int mSvCount;
-    private int mMeanCn0;
-    private int mMaxCn0;
     // preallocated to avoid memory allocation in reportNmea()
     private byte[] mNmeaBuffer = new byte[120];
 
