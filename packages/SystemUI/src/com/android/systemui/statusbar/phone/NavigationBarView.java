@@ -217,6 +217,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mShowAccessibilityButton = false;
         mLongClickableAccessibilityButton = false;
 
+        mOverviewProxyService = Dependency.get(OverviewProxyService.class);
+        mRecentsOnboarding = new RecentsOnboarding(context, mOverviewProxyService);
+
         mConfiguration = new Configuration();
         mConfiguration.updateFrom(context.getResources().getConfiguration());
         updateIcons(context, Configuration.EMPTY, mConfiguration);
@@ -232,9 +235,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 new ButtonDispatcher(R.id.accessibility_button));
         mButtonDispatchers.put(R.id.rotate_suggestion,
                 new ButtonDispatcher(R.id.rotate_suggestion));
-
-        mOverviewProxyService = Dependency.get(OverviewProxyService.class);
-        mRecentsOnboarding = new RecentsOnboarding(context, mOverviewProxyService);
     }
 
     public BarTransitions getBarTransitions() {
@@ -355,14 +355,23 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         }
         if (oldConfig.densityDpi != newConfig.densityDpi
                 || oldConfig.getLayoutDirection() != newConfig.getLayoutDirection()) {
-            mBackIcon = getDrawable(ctx, R.drawable.ic_sysbar_back, R.drawable.ic_sysbar_back_dark);
+            final boolean proxyAvailable = mOverviewProxyService.getProxy() != null;
+            mBackIcon = proxyAvailable
+                    ? getDrawable(ctx, R.drawable.ic_sysbar_back_quick_step,
+                            R.drawable.ic_sysbar_back_quick_step_dark)
+                    : getDrawable(ctx, R.drawable.ic_sysbar_back, R.drawable.ic_sysbar_back_dark);
             mBackLandIcon = mBackIcon;
-            mBackAltIcon = getDrawable(ctx,
-                    R.drawable.ic_sysbar_back_ime, R.drawable.ic_sysbar_back_ime_dark);
+            mBackAltIcon = proxyAvailable
+                    ? getDrawable(ctx, R.drawable.ic_sysbar_back_ime_quick_step,
+                            R.drawable.ic_sysbar_back_ime_quick_step_dark)
+                    : getDrawable(ctx, R.drawable.ic_sysbar_back_ime,
+                            R.drawable.ic_sysbar_back_ime_dark);
             mBackAltLandIcon = mBackAltIcon;
 
-            mHomeDefaultIcon = getDrawable(ctx,
-                    R.drawable.ic_sysbar_home, R.drawable.ic_sysbar_home_dark);
+            mHomeDefaultIcon = proxyAvailable
+                    ? getDrawable(ctx, R.drawable.ic_sysbar_home_quick_step,
+                            R.drawable.ic_sysbar_home_quick_step_dark)
+                    : getDrawable(ctx, R.drawable.ic_sysbar_home, R.drawable.ic_sysbar_home_dark);
             mRecentIcon = getDrawable(ctx,
                     R.drawable.ic_sysbar_recent, R.drawable.ic_sysbar_recent_dark);
             mMenuIcon = getDrawable(ctx, R.drawable.ic_sysbar_menu, R.drawable.ic_sysbar_menu_dark);
@@ -666,6 +675,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         setSlippery(!isConnected);
         setDisabledFlags(mDisabledFlags, true);
         setUpSwipeUpOnboarding(isConnected);
+        updateIcons(getContext(), Configuration.EMPTY, mConfiguration);
+        setNavigationIconHints(mNavigationIconHints, true);
     }
 
     @Override
