@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
@@ -378,7 +379,7 @@ public final class TextClassification implements Parcelable {
         final List<Drawable> drawables = new ArrayList<>(bitmaps.size());
         for (Bitmap bitmap : bitmaps) {
             if (bitmap != null) {
-                drawables.add(new BitmapDrawable(null, bitmap));
+                drawables.add(new BitmapDrawable(Resources.getSystem(), bitmap));
             } else {
                 drawables.add(null);
             }
@@ -681,7 +682,8 @@ public final class TextClassification implements Parcelable {
     private TextClassification(Parcel in) {
         mText = in.readString();
         mPrimaryIcon = in.readInt() == 0
-                ? null : new BitmapDrawable(null, Bitmap.CREATOR.createFromParcel(in));
+                ? null
+                : new BitmapDrawable(Resources.getSystem(), Bitmap.CREATOR.createFromParcel(in));
         mPrimaryLabel = in.readString();
         mPrimaryIntent = in.readInt() == 0 ? null : Intent.CREATOR.createFromParcel(in);
         mPrimaryOnClickListener = null;  // not parcelable
