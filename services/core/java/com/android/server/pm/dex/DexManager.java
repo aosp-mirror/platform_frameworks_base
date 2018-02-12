@@ -549,13 +549,12 @@ public class DexManager {
             mPackageDexUsage.maybeWriteAsync();
         }
 
-        // Try to optimize the package according to the install reason.
-        String compilerFilter = PackageManagerServiceCompilerMapping.getCompilerFilterForReason(
-                PackageManagerService.REASON_INSTALL);
         DexUseInfo dexUseInfo = mPackageDexUsage.getPackageUseInfo(searchResult.mOwningPackageName)
                 .getDexUseInfoMap().get(dexPath);
 
-        DexoptOptions options = new DexoptOptions(info.packageName, compilerFilter, /*flags*/0);
+        // Try to optimize the package according to the install reason.
+        DexoptOptions options = new DexoptOptions(info.packageName,
+                PackageManagerService.REASON_INSTALL, /*flags*/0);
 
         int result = mPackageDexOptimizer.dexOptSecondaryDexPath(info, dexPath, dexUseInfo,
                 options);
