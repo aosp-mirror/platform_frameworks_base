@@ -15,12 +15,15 @@
  */
 package android.service.autofill;
 
+import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Parcel;
@@ -29,9 +32,6 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.autofill.AutofillValue;
-
-import com.android.internal.os.HandlerCaller;
-import com.android.internal.os.SomeArgs;
 
 import java.util.Arrays;
 import java.util.List;
@@ -54,8 +54,6 @@ import java.util.List;
 public abstract class AutofillFieldClassificationService extends Service {
 
     private static final String TAG = "AutofillFieldClassificationService";
-
-    private static final int MSG_GET_SCORES = 1;
 
     /**
      * The {@link Intent} action that must be declared as handled by a service
@@ -83,35 +81,18 @@ public abstract class AutofillFieldClassificationService extends Service {
 
     private AutofillFieldClassificationServiceWrapper mWrapper;
 
-    private final HandlerCaller.Callback mHandlerCallback = (msg) -> {
-        final int action = msg.what;
+    private void getScores(RemoteCallback callback, String algorithmName, Bundle algorithmArgs,
+            List<AutofillValue> actualValues, String[] userDataValues) {
         final Bundle data = new Bundle();
-        final RemoteCallback callback;
-        switch (action) {
-            case MSG_GET_SCORES:
-                final SomeArgs args = (SomeArgs) msg.obj;
-                callback = (RemoteCallback) args.arg1;
-                final String algorithmName = (String) args.arg2;
-                final Bundle algorithmArgs = (Bundle) args.arg3;
-                @SuppressWarnings("unchecked")
-                final List<AutofillValue> actualValues = ((List<AutofillValue>) args.arg4);
-                @SuppressWarnings("unchecked")
-                final String[] userDataValues = (String[]) args.arg5;
-                final float[][] scores = onGetScores(algorithmName, algorithmArgs, actualValues,
-                        Arrays.asList(userDataValues));
-                if (scores != null) {
-                    data.putParcelable(EXTRA_SCORES, new Scores(scores));
-                }
-                break;
-            default:
-                Log.w(TAG, "Handling unknown message: " + action);
-                return;
+        final float[][] scores = onGetScores(algorithmName, algorithmArgs, actualValues,
+                Arrays.asList(userDataValues));
+        if (scores != null) {
+            data.putParcelable(EXTRA_SCORES, new Scores(scores));
         }
         callback.sendResult(data);
-    };
+    }
 
-    private final HandlerCaller mHandlerCaller = new HandlerCaller(null, Looper.getMainLooper(),
-            mHandlerCallback, true);
+    private final Handler mHandler = new Handler(Looper.getMainLooper(), null, true);
 
     /** @hide */
     public AutofillFieldClassificationService() {
@@ -160,9 +141,10 @@ public abstract class AutofillFieldClassificationService extends Service {
         public void getScores(RemoteCallback callback, String algorithmName, Bundle algorithmArgs,
                 List<AutofillValue> actualValues, String[] userDataValues)
                         throws RemoteException {
-            // TODO(b/70939974): refactor to use PooledLambda
-            mHandlerCaller.obtainMessageOOOOO(MSG_GET_SCORES, callback, algorithmName,
-                    algorithmArgs, actualValues, userDataValues).sendToTarget();
+            mHandler.sendMessage(obtainMessage(
+                    AutofillFieldClassificationService::getScores,
+                    AutofillFieldClassificationService.this,
+                    callback, algorithmName, algorithmArgs, actualValues, userDataValues));
         }
     }
 
