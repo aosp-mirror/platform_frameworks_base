@@ -59,6 +59,7 @@ public class RecentsAnimationController {
     private final IRecentsAnimationRunner mRunner;
     private final RecentsAnimationCallbacks mCallbacks;
     private final ArrayList<TaskAnimationAdapter> mPendingAnimations = new ArrayList<>();
+    private final int mDisplayId;
 
     // The recents component app token that is shown behind the visibile tasks
     private AppWindowToken mHomeAppToken;
@@ -159,8 +160,6 @@ public class RecentsAnimationController {
     };
 
     /**
-     * Initializes a new RecentsAnimationController.
-     *
      * @param remoteAnimationRunner The remote runner which should be notified when the animation is
      *                              ready to start or has been canceled
      * @param callbacks Callbacks to be made when the animation finishes
@@ -171,16 +170,19 @@ public class RecentsAnimationController {
         mService = service;
         mRunner = remoteAnimationRunner;
         mCallbacks = callbacks;
+        mDisplayId = displayId;
+    }
 
-        final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
-        final ArrayList<Task> visibleTasks = dc.getVisibleTasks();
-        if (visibleTasks.isEmpty()) {
-            cancelAnimation();
-            return;
-        }
-
+    /**
+     * Initializes the recents animation controller. This is a separate call from the constructor
+     * because it may call cancelAnimation() which needs to properly clean up the controller
+     * in the window manager.
+     */
+    public void initialize() {
         // Make leashes for each of the visible tasks and add it to the recents animation to be
         // started
+        final DisplayContent dc = mService.mRoot.getDisplayContent(mDisplayId);
+        final ArrayList<Task> visibleTasks = dc.getVisibleTasks();
         final int taskCount = visibleTasks.size();
         for (int i = 0; i < taskCount; i++) {
             final Task task = visibleTasks.get(i);
@@ -191,6 +193,12 @@ public class RecentsAnimationController {
                 continue;
             }
             addAnimation(task);
+        }
+
+        // Skip the animation if there is nothing to animate
+        if (mPendingAnimations.isEmpty()) {
+            cancelAnimation();
+            return;
         }
 
         // Adjust the wallpaper visibility for the showing home activity
@@ -222,8 +230,10 @@ public class RecentsAnimationController {
     }
 
     void startAnimation() {
-        if (DEBUG) Log.d(TAG, "startAnimation(): mPendingStart=" + mPendingStart);
-        if (!mPendingStart) {
+        if (DEBUG) Log.d(TAG, "startAnimation(): mPendingStart=" + mPendingStart
+                + " mCanceled=" + mCanceled);
+        if (!mPendingStart || mCanceled) {
+            // Skip starting if we've already started or canceled the animation
             return;
         }
         try {
