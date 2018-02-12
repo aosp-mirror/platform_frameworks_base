@@ -95,8 +95,10 @@ StatsdConfig CreateStatsdConfig() {
 }
 }  // namespace
 
-
-TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks) {
+// If we want to test multiple dump data, we must do it in separate tests, because in the e2e tests,
+// we should use the real API which will clear the data after dump data is called.
+// TODO: better refactor the code so that the tests are not so verbose.
+TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks1) {
     auto config = CreateStatsdConfig();
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs =
@@ -195,7 +197,10 @@ TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks) {
         processor->OnLogEvent(event.get());
     }
     ConfigMetricsReportList reports;
-    processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs - 1, &reports);
+    vector<uint8_t> buffer;
+    processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs - 1, &buffer);
+    EXPECT_TRUE(buffer.size() > 0);
+    EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     EXPECT_EQ(reports.reports_size(), 1);
     EXPECT_EQ(reports.reports(0).metrics_size(), 1);
     EXPECT_EQ(reports.reports(0).metrics(0).count_metrics().data_size(), 1);
@@ -208,16 +213,115 @@ TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks) {
     // Uid field.
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).value_int(), appUid);
+}
 
-    reports.Clear();
-    processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, &reports);
+TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks2) {
+    auto config = CreateStatsdConfig();
+    uint64_t bucketStartTimeNs = 10000000000;
+    uint64_t bucketSizeNs =
+            TimeUnitToBucketSizeInMillis(config.count_metric(0).bucket()) * 1000000LL;
+
+    ConfigKey cfgKey;
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
+    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
+
+    int appUid = 123;
+    auto crashEvent1 = CreateAppCrashEvent(appUid, bucketStartTimeNs + 1);
+    auto crashEvent2 = CreateAppCrashEvent(appUid, bucketStartTimeNs + 201);
+    auto crashEvent3 = CreateAppCrashEvent(appUid, bucketStartTimeNs + 2 * bucketSizeNs - 101);
+
+    auto crashEvent4 = CreateAppCrashEvent(appUid, bucketStartTimeNs + 51);
+    auto crashEvent5 = CreateAppCrashEvent(appUid, bucketStartTimeNs + bucketSizeNs + 299);
+    auto crashEvent6 = CreateAppCrashEvent(appUid, bucketStartTimeNs + bucketSizeNs + 2001);
+
+    auto crashEvent7 = CreateAppCrashEvent(appUid, bucketStartTimeNs + 16);
+    auto crashEvent8 = CreateAppCrashEvent(appUid, bucketStartTimeNs + bucketSizeNs + 249);
+
+    auto crashEvent9 = CreateAppCrashEvent(appUid, bucketStartTimeNs + bucketSizeNs + 351);
+    auto crashEvent10 = CreateAppCrashEvent(appUid, bucketStartTimeNs + 2 * bucketSizeNs - 2);
+
+    auto screenTurnedOnEvent = CreateScreenStateChangedEvent(
+            android::view::DisplayStateEnum::DISPLAY_STATE_ON, bucketStartTimeNs + 2);
+    auto screenTurnedOffEvent = CreateScreenStateChangedEvent(
+            android::view::DisplayStateEnum::DISPLAY_STATE_OFF, bucketStartTimeNs + 200);
+    auto screenTurnedOnEvent2 =
+            CreateScreenStateChangedEvent(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
+                                          bucketStartTimeNs + 2 * bucketSizeNs - 100);
+
+    std::vector<AttributionNode> attributions = {CreateAttribution(appUid, "App1"),
+                                                 CreateAttribution(appUid + 1, "GMSCoreModule1")};
+    auto syncOnEvent1 = CreateSyncStartEvent(attributions, "ReadEmail", bucketStartTimeNs + 50);
+    auto syncOffEvent1 =
+            CreateSyncEndEvent(attributions, "ReadEmail", bucketStartTimeNs + bucketSizeNs + 300);
+    auto syncOnEvent2 =
+            CreateSyncStartEvent(attributions, "ReadDoc", bucketStartTimeNs + bucketSizeNs + 2000);
+
+    auto moveToBackgroundEvent1 = CreateMoveToBackgroundEvent(appUid, bucketStartTimeNs + 15);
+    auto moveToForegroundEvent1 =
+            CreateMoveToForegroundEvent(appUid, bucketStartTimeNs + bucketSizeNs + 250);
+
+    auto moveToBackgroundEvent2 =
+            CreateMoveToBackgroundEvent(appUid, bucketStartTimeNs + bucketSizeNs + 350);
+    auto moveToForegroundEvent2 =
+            CreateMoveToForegroundEvent(appUid, bucketStartTimeNs + 2 * bucketSizeNs - 1);
+
+    /*
+                    bucket #1                               bucket #2
+
+
+       |      |   |  |                      |   |          |        |   |   |     (crashEvents)
+    |-------------------------------------|-----------------------------------|---------
+
+             |                                           |                        (MoveToBkground)
+
+                                             |                               |    (MoveToForeground)
+
+                |                                                 |                (SyncIsOn)
+                                                  |                                (SyncIsOff)
+          |                                                               |        (ScreenIsOn)
+                   |                                                               (ScreenIsOff)
+    */
+    std::vector<std::unique_ptr<LogEvent>> events;
+    events.push_back(std::move(crashEvent1));
+    events.push_back(std::move(crashEvent2));
+    events.push_back(std::move(crashEvent3));
+    events.push_back(std::move(crashEvent4));
+    events.push_back(std::move(crashEvent5));
+    events.push_back(std::move(crashEvent6));
+    events.push_back(std::move(crashEvent7));
+    events.push_back(std::move(crashEvent8));
+    events.push_back(std::move(crashEvent9));
+    events.push_back(std::move(crashEvent10));
+    events.push_back(std::move(screenTurnedOnEvent));
+    events.push_back(std::move(screenTurnedOffEvent));
+    events.push_back(std::move(screenTurnedOnEvent2));
+    events.push_back(std::move(syncOnEvent1));
+    events.push_back(std::move(syncOffEvent1));
+    events.push_back(std::move(syncOnEvent2));
+    events.push_back(std::move(moveToBackgroundEvent1));
+    events.push_back(std::move(moveToForegroundEvent1));
+    events.push_back(std::move(moveToBackgroundEvent2));
+    events.push_back(std::move(moveToForegroundEvent2));
+
+    sortLogEventsByTimestamp(&events);
+
+    for (const auto& event : events) {
+        processor->OnLogEvent(event.get());
+    }
+    ConfigMetricsReportList reports;
+    vector<uint8_t> buffer;
+
+    processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, &buffer);
+    EXPECT_TRUE(buffer.size() > 0);
+    EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     EXPECT_EQ(reports.reports_size(), 1);
     EXPECT_EQ(reports.reports(0).metrics_size(), 1);
     EXPECT_EQ(reports.reports(0).metrics(0).count_metrics().data_size(), 1);
     EXPECT_EQ(reports.reports(0).metrics(0).count_metrics().data(0).bucket_info_size(), 2);
     EXPECT_EQ(reports.reports(0).metrics(0).count_metrics().data(0).bucket_info(0).count(), 1);
     EXPECT_EQ(reports.reports(0).metrics(0).count_metrics().data(0).bucket_info(1).count(), 3);
-    data = reports.reports(0).metrics(0).count_metrics().data(0);
+    auto data = reports.reports(0).metrics(0).count_metrics().data(0);
     // Validate dimension value.
     EXPECT_EQ(data.dimensions_in_what().field(),
               android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);

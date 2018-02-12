@@ -14,6 +14,7 @@
 
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "matchers/matcher_util.h"
+#include "stats_log_util.h"
 #include "stats_util.h"
 
 #include <gtest/gtest.h>
@@ -35,8 +36,6 @@ const int FIELD_ID_3 = 2;
 const int ATTRIBUTION_UID_FIELD_ID = 1;
 const int ATTRIBUTION_TAG_FIELD_ID = 2;
 
-// Private API from liblog.
-extern "C" void android_log_rewind(android_log_context ctx);
 
 #ifdef __ANDROID__
 TEST(AtomMatcherTest, TestSimpleMatcher) {
@@ -597,7 +596,6 @@ TEST(AtomMatcherTest, TestNorMatcher) {
     matcherResults.push_back(MatchingState::kMatched);
     EXPECT_FALSE(combinationMatch(children, operation, matcherResults));
 }
-
 #else
 GTEST_LOG_(INFO) << "This test does nothing.\n";
 #endif

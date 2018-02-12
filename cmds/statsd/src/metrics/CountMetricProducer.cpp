@@ -21,7 +21,6 @@
 #include "guardrail/StatsdStats.h"
 #include "stats_util.h"
 #include "stats_log_util.h"
-#include "dimension.h"
 
 #include <limits.h>
 #include <stdlib.h>
@@ -69,16 +68,26 @@ CountMetricProducer::CountMetricProducer(const ConfigKey& key, const CountMetric
         mBucketSizeNs = LLONG_MAX;
     }
 
-    // TODO: use UidMap if uid->pkg_name is required
-    mDimensionsInWhat = metric.dimensions_in_what();
-    mDimensionsInCondition = metric.dimensions_in_condition();
+    if (metric.has_dimensions_in_what()) {
+        translateFieldMatcher(metric.dimensions_in_what(), &mDimensionsInWhat);
+    }
+
+    if (metric.has_dimensions_in_condition()) {
+        translateFieldMatcher(metric.dimensions_in_condition(), &mDimensionsInCondition);
+    }
 
     if (metric.links().size() > 0) {
-        mConditionLinks.insert(mConditionLinks.begin(), metric.links().begin(),
-                               metric.links().end());
+        for (const auto& link : metric.links()) {
+            Metric2Condition mc;
+            mc.conditionId = link.condition();
+            translateFieldMatcher(link.fields_in_what(), &mc.metricFields);
+            translateFieldMatcher(link.fields_in_condition(), &mc.conditionFields);
+            mMetric2ConditionLinks.push_back(mc);
+        }
+        mConditionSliced = true;
     }
-    mConditionSliced = (metric.links().size() > 0)||
-        (mDimensionsInCondition.has_field() && mDimensionsInCondition.child_size() > 0);
+
+    mConditionSliced = (metric.links().size() > 0) || (mDimensionsInCondition.size() > 0);
 
     VLOG("metric %lld created. bucket size %lld start_time: %lld", (long long)metric.id(),
          (long long)mBucketSizeNs, (long long)mStartTimeNs);
@@ -92,26 +101,6 @@ void CountMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eventT
     VLOG("Metric %lld onSlicedConditionMayChange", (long long)mMetricId);
 }
 
-void CountMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs, StatsLogReport* report) {
-    flushIfNeededLocked(dumpTimeNs);
-    report->set_metric_id(mMetricId);
-
-    auto count_metrics = report->mutable_count_metrics();
-    for (const auto& counter : mPastBuckets) {
-        CountMetricData* metricData = count_metrics->add_data();
-        *metricData->mutable_dimensions_in_what() =
-            counter.first.getDimensionKeyInWhat().getDimensionsValue();
-        *metricData->mutable_dimensions_in_condition() =
-            counter.first.getDimensionKeyInCondition().getDimensionsValue();
-        for (const auto& bucket : counter.second) {
-            CountBucketInfo* bucketInfo = metricData->add_bucket_info();
-            bucketInfo->set_start_bucket_nanos(bucket.mBucketStartNs);
-            bucketInfo->set_end_bucket_nanos(bucket.mBucketEndNs);
-            bucketInfo->set_count(bucket.mCount);
-        }
-    }
-}
-
 void CountMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
                                              ProtoOutputStream* protoOutput) {
     flushIfNeededLocked(dumpTimeNs);
@@ -121,8 +110,6 @@ void CountMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
 
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
     long long protoToken = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_COUNT_METRICS);
-
-    VLOG("metric %lld dump report now...",(long long)mMetricId);
 
     for (const auto& counter : mPastBuckets) {
         const MetricDimensionKey& dimensionKey = counter.first;
@@ -134,15 +121,13 @@ void CountMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
         // First fill dimension.
         long long dimensionInWhatToken = protoOutput->start(
                 FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_WHAT);
-        writeDimensionsValueProtoToStream(
-            dimensionKey.getDimensionKeyInWhat().getDimensionsValue(), protoOutput);
+        writeDimensionToProto(dimensionKey.getDimensionKeyInWhat(), protoOutput);
         protoOutput->end(dimensionInWhatToken);
 
         if (dimensionKey.hasDimensionKeyInCondition()) {
             long long dimensionInConditionToken = protoOutput->start(
                     FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_CONDITION);
-            writeDimensionsValueProtoToStream(
-                dimensionKey.getDimensionKeyInCondition().getDimensionsValue(), protoOutput);
+            writeDimensionToProto(dimensionKey.getDimensionKeyInCondition(), protoOutput);
             protoOutput->end(dimensionInConditionToken);
         }
 
@@ -200,7 +185,6 @@ void CountMetricProducer::onMatchedLogEventInternalLocked(
         const ConditionKey& conditionKey, bool condition,
         const LogEvent& event) {
     uint64_t eventTimeNs = event.GetTimestampNs();
-
     flushIfNeededLocked(eventTimeNs);
 
     if (condition == false) {

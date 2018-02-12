@@ -48,14 +48,14 @@ public:
 
     void isConditionMet(const ConditionKey& conditionParameters,
                         const std::vector<sp<ConditionTracker>>& allConditions,
-                        const FieldMatcher& dimensionFields,
+                        const vector<Matcher>& dimensionFields,
                         std::vector<ConditionState>& conditionCache,
-                        std::unordered_set<HashableDimensionKey> &dimensionsKeySet) const override;
+                        std::unordered_set<HashableDimensionKey>& dimensionsKeySet) const override;
 
     ConditionState getMetConditionDimension(
             const std::vector<sp<ConditionTracker>>& allConditions,
-            const FieldMatcher& dimensionFields,
-            std::unordered_set<HashableDimensionKey> &dimensionsKeySet) const override;
+            const vector<Matcher>& dimensionFields,
+            std::unordered_set<HashableDimensionKey>& dimensionsKeySet) const override;
 
 private:
     const ConfigKey mConfigKey;
@@ -73,17 +73,17 @@ private:
 
     ConditionState mInitialValue;
 
-    FieldMatcher mOutputDimensions;
+    std::vector<Matcher> mOutputDimensions;
+
+    int mDimensionTag;
 
     std::map<HashableDimensionKey, int> mSlicedConditionState;
 
     void handleStopAll(std::vector<ConditionState>& conditionCache,
                        std::vector<bool>& changedCache);
 
-    void handleConditionEvent(const HashableDimensionKey& outputKey,
-                              bool matchStart,
-                              std::vector<ConditionState>& conditionCache,
-                              std::vector<bool>& changedCache);
+    void handleConditionEvent(const HashableDimensionKey& outputKey, bool matchStart,
+                              ConditionState* conditionCache, bool* changedCache);
 
     bool hitGuardRail(const HashableDimensionKey& newKey);
 

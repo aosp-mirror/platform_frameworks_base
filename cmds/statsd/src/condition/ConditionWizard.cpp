@@ -24,11 +24,9 @@ using std::map;
 using std::string;
 using std::vector;
 
-ConditionState ConditionWizard::query(
-    const int index, const ConditionKey& parameters,
-    const FieldMatcher& dimensionFields,
-    std::unordered_set<HashableDimensionKey> *dimensionKeySet) {
-
+ConditionState ConditionWizard::query(const int index, const ConditionKey& parameters,
+                                      const vector<Matcher>& dimensionFields,
+                                      std::unordered_set<HashableDimensionKey>* dimensionKeySet) {
     vector<ConditionState> cache(mAllConditions.size(), ConditionState::kNotEvaluated);
 
     mAllConditions[index]->isConditionMet(
@@ -37,9 +35,8 @@ ConditionState ConditionWizard::query(
 }
 
 ConditionState ConditionWizard::getMetConditionDimension(
-    const int index, const FieldMatcher& dimensionFields,
-    std::unordered_set<HashableDimensionKey> *dimensionsKeySet) const {
-
+        const int index, const vector<Matcher>& dimensionFields,
+        std::unordered_set<HashableDimensionKey>* dimensionsKeySet) const {
     return mAllConditions[index]->getMetConditionDimension(mAllConditions, dimensionFields,
                                  *dimensionsKeySet);
 }

@@ -27,7 +27,7 @@ namespace statsd {
 MaxDurationTracker::MaxDurationTracker(const ConfigKey& key, const int64_t& id,
                                        const MetricDimensionKey& eventKey,
                                        sp<ConditionWizard> wizard, int conditionIndex,
-                                       const FieldMatcher& dimensionInCondition, bool nesting,
+                                       const vector<Matcher>& dimensionInCondition, bool nesting,
                                        uint64_t currentBucketStartNs, uint64_t currentBucketNum,
                                        uint64_t startTimeNs, uint64_t bucketSizeNs,
                                        bool conditionSliced,
@@ -55,9 +55,7 @@ bool MaxDurationTracker::hitGuardRail(const HashableDimensionKey& newKey) {
     // 1. Report the tuple count if the tuple count > soft limit
     if (mInfos.size() > StatsdStats::kDimensionKeySizeSoftLimit - 1) {
         size_t newTupleCount = mInfos.size() + 1;
-        StatsdStats::getInstance().noteMetricDimensionSize(
-            mConfigKey, hashMetricDimensionKey(mTrackerId, mEventKey),
-            newTupleCount);
+        StatsdStats::getInstance().noteMetricDimensionSize(mConfigKey, mTrackerId, newTupleCount);
         // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
         if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
             ALOGE("MaxDurTracker %lld dropping data for dimension key %s",
@@ -229,10 +227,11 @@ void MaxDurationTracker::onSlicedConditionMayChange(const uint64_t timestamp) {
         ConditionState conditionState = mWizard->query(
             mConditionTrackerIndex, pair.second.conditionKeys, mDimensionInCondition,
             &conditionDimensionKeySet);
-        bool conditionMet = (conditionState == ConditionState::kTrue) &&
-            (!mDimensionInCondition.has_field() ||
-             conditionDimensionKeySet.find(mEventKey.getDimensionKeyInCondition()) !=
-                conditionDimensionKeySet.end());
+        bool conditionMet =
+                (conditionState == ConditionState::kTrue) &&
+                (mDimensionInCondition.size() == 0 ||
+                 conditionDimensionKeySet.find(mEventKey.getDimensionKeyInCondition()) !=
+                         conditionDimensionKeySet.end());
         VLOG("key: %s, condition: %d", pair.first.c_str(), conditionMet);
         noteConditionChanged(pair.first, conditionMet, timestamp);
     }

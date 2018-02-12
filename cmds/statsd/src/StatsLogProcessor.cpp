@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define DEBUG false  // STOPSHIP if true
+#define DEBUG true  // STOPSHIP if true
 #include "Log.h"
 #include "statslog.h"
 
@@ -25,8 +25,6 @@
 #include "guardrail/StatsdStats.h"
 #include "metrics/CountMetricProducer.h"
 #include "external/StatsPullerManager.h"
-#include "dimension.h"
-#include "field_util.h"
 #include "stats_util.h"
 #include "storage/StorageManager.h"
 
@@ -93,27 +91,31 @@ void StatsLogProcessor::onAnomalyAlarmFired(
     }
 }
 
+void updateUid(Value* value, int hostUid) {
+    int uid = value->int_value;
+    if (uid != hostUid) {
+        value->setInt(hostUid);
+    }
+}
+
 void StatsLogProcessor::mapIsolatedUidToHostUidIfNecessaryLocked(LogEvent* event) const {
-    std::set<Field, FieldCmp> uidFields;
     if (android::util::kAtomsWithAttributionChain.find(event->GetTagId()) !=
         android::util::kAtomsWithAttributionChain.end()) {
-        FieldMatcher matcher;
-        buildAttributionUidFieldMatcher(event->GetTagId(), Position::ANY, &matcher);
-        findFields(event->getFieldValueMap(), matcher, &uidFields);
-    } else if (android::util::kAtomsWithUidField.find(event->GetTagId()) !=
-               android::util::kAtomsWithUidField.end()) {
-        FieldMatcher matcher;
-        buildSimpleAtomFieldMatcher(
-            event->GetTagId(), 1 /* uid is always the 1st field. */, &matcher);
-        findFields(event->getFieldValueMap(), matcher, &uidFields);
-    }
-
-    for (const auto& uidField : uidFields) {
-        DimensionsValue* value = event->findFieldValueOrNull(uidField);
-        if (value != nullptr && value->value_case() == DimensionsValue::ValueCase::kValueInt) {
-            const int uid = mUidMap->getHostUidOrSelf(value->value_int());
-            value->set_value_int(uid);
+        for (auto& value : *(event->getMutableValues())) {
+            if (value.mField.getPosAtDepth(0) > kAttributionField) {
+                break;
+            }
+            if (isAttributionUidField(value)) {
+                const int hostUid = mUidMap->getHostUidOrSelf(value.mValue.int_value);
+                updateUid(&value.mValue, hostUid);
+            }
         }
+    } else if (android::util::kAtomsWithUidField.find(event->GetTagId()) !=
+                       android::util::kAtomsWithUidField.end() &&
+               event->getValues().size() > 0 && (event->getValues())[0].mValue.getType() == INT) {
+        Value& value = (*event->getMutableValues())[0].mValue;
+        const int hostUid = mUidMap->getHostUidOrSelf(value.int_value);
+        updateUid(&value, hostUid);
     }
 }
 
@@ -212,27 +214,14 @@ void StatsLogProcessor::dumpStates(FILE* out, bool verbose) {
     }
 }
 
-void StatsLogProcessor::onDumpReport(const ConfigKey& key, const uint64_t& dumpTimeStampNs,
-                                     ConfigMetricsReportList* report) {
+void StatsLogProcessor::onDumpReport(const ConfigKey& key, const uint64_t dumpTimeStampNs,
+                                     vector<uint8_t>* outData) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
-    auto it = mMetricsManagers.find(key);
-    if (it == mMetricsManagers.end()) {
-        ALOGW("Config source %s does not exist", key.ToString().c_str());
-        return;
-    }
-    report->mutable_config_key()->set_uid(key.GetUid());
-    report->mutable_config_key()->set_id(key.GetId());
-    ConfigMetricsReport* configMetricsReport = report->add_reports();
-    it->second->onDumpReport(dumpTimeStampNs, configMetricsReport);
-    // TODO: dump uid mapping.
+    onDumpReportLocked(key, dumpTimeStampNs, outData);
 }
 
-void StatsLogProcessor::onDumpReport(const ConfigKey& key, vector<uint8_t>* outData) {
-    std::lock_guard<std::mutex> lock(mMetricsMutex);
-    onDumpReportLocked(key, outData);
-}
-
-void StatsLogProcessor::onDumpReportLocked(const ConfigKey& key, vector<uint8_t>* outData) {
+void StatsLogProcessor::onDumpReportLocked(const ConfigKey& key, const uint64_t dumpTimeStampNs,
+                                           vector<uint8_t>* outData) {
     auto it = mMetricsManagers.find(key);
     if (it == mMetricsManagers.end()) {
         ALOGW("Config source %s does not exist", key.ToString().c_str());
@@ -258,7 +247,7 @@ void StatsLogProcessor::onDumpReportLocked(const ConfigKey& key, vector<uint8_t>
 
     // First, fill in ConfigMetricsReport using current data on memory, which
     // starts from filling in StatsLogReport's.
-    it->second->onDumpReport(&proto);
+    it->second->onDumpReport(dumpTimeStampNs, &proto);
 
     // Fill in UidMap.
     auto uidMap = mUidMap->getOutput(key);
@@ -292,6 +281,7 @@ void StatsLogProcessor::onDumpReportLocked(const ConfigKey& key, vector<uint8_t>
             iter.rp()->move(toRead);
         }
     }
+
     StatsdStats::getInstance().noteMetricsReportSent(key);
 }
 
@@ -327,7 +317,7 @@ void StatsLogProcessor::flushIfNecessaryLocked(
         StatsdStats::kMaxMetricsBytesPerConfig) {  // Too late. We need to start clearing data.
         // TODO(b/70571383): By 12/15/2017 add API to drop data directly
         ProtoOutputStream proto;
-        metricsManager.onDumpReport(&proto);
+        metricsManager.onDumpReport(time(nullptr) * NS_PER_SEC, &proto);
         StatsdStats::getInstance().noteDataDropped(key);
         VLOG("StatsD had to toss out metrics for %s", key.ToString().c_str());
     } else if (totalBytes > .9 * StatsdStats::kMaxMetricsBytesPerConfig) {
@@ -351,7 +341,7 @@ void StatsLogProcessor::WriteDataToDisk() {
     for (auto& pair : mMetricsManagers) {
         const ConfigKey& key = pair.first;
         vector<uint8_t> data;
-        onDumpReportLocked(key, &data);
+        onDumpReportLocked(key, time(nullptr) * NS_PER_SEC, &data);
         // TODO: Add a guardrail to prevent accumulation of file on disk.
         string file_name = StringPrintf("%s/%ld_%d_%lld", STATS_DATA_DIR, time(nullptr),
                                         key.GetUid(), (long long)key.GetId());

@@ -46,9 +46,7 @@ public:
 
     size_t GetMetricsSize(const ConfigKey& key) const;
 
-    void onDumpReport(const ConfigKey& key, vector<uint8_t>* outData);
-    void onDumpReport(const ConfigKey& key, const uint64_t& dumpTimeStampNs,
-                      ConfigMetricsReportList* report);
+    void onDumpReport(const ConfigKey& key, const uint64_t dumpTimeNs, vector<uint8_t>* outData);
 
     /* Tells MetricsManager that the alarms in anomalySet have fired. Modifies anomalySet. */
     void onAnomalyAlarmFired(
@@ -80,7 +78,8 @@ private:
 
     sp<AnomalyMonitor> mAnomalyMonitor;
 
-    void onDumpReportLocked(const ConfigKey& key, vector<uint8_t>* outData);
+    void onDumpReportLocked(const ConfigKey& key, const uint64_t dumpTimeNs,
+                            vector<uint8_t>* outData);
 
     /* Check if we should send a broadcast if approaching memory limits and if we're over, we
      * actually delete the data. */
@@ -105,9 +104,14 @@ private:
     FRIEND_TEST(StatsLogProcessorTest, TestRateLimitBroadcast);
     FRIEND_TEST(StatsLogProcessorTest, TestDropWhenByteSizeTooLarge);
     FRIEND_TEST(StatsLogProcessorTest, TestDropWhenByteSizeTooLarge);
-    FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration);
-    FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForMaxDuration);
-    FRIEND_TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks);
+    FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration1);
+    FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration2);
+    FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration3);
+    FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForMaxDuration1);
+    FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForMaxDuration2);
+    FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForMaxDuration3);
+    FRIEND_TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks1);
+    FRIEND_TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks2);
     FRIEND_TEST(AttributionE2eTest, TestAttributionMatchAndSlice);
     FRIEND_TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent);
     FRIEND_TEST(DimensionInConditionE2eTest, TestCountMetricNoLink);

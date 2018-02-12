@@ -16,9 +16,10 @@
 
 #include "stats_log_util.h"
 
+#include <logd/LogEvent.h>
+#include <utils/Log.h>
 #include <set>
 #include <stack>
-#include <utils/Log.h>
 
 using android::util::FIELD_COUNT_REPEATED;
 using android::util::FIELD_TYPE_BOOL;
@@ -42,6 +43,8 @@ const int DIMENSIONS_VALUE_VALUE_BOOL = 5;
 const int DIMENSIONS_VALUE_VALUE_FLOAT = 6;
 const int DIMENSIONS_VALUE_VALUE_TUPLE = 7;
 
+const int DIMENSIONS_VALUE_TUPLE_VALUE = 1;
+
 // for MessageValue Proto
 const int FIELD_ID_FIELD_VALUE_IN_MESSAGE_VALUE_PROTO = 1;
 
@@ -51,52 +54,79 @@ const int FIELD_ID_PULL_ATOM_ID = 1;
 const int FIELD_ID_TOTAL_PULL = 2;
 const int FIELD_ID_TOTAL_PULL_FROM_CACHE = 3;
 const int FIELD_ID_MIN_PULL_INTERVAL_SEC = 4;
+namespace {
 
-void writeDimensionsValueProtoToStream(const DimensionsValue& dimensionsValue,
-                                       ProtoOutputStream* protoOutput) {
-    if (!dimensionsValue.has_field()) {
+void writeDimensionToProtoHelper(const std::vector<FieldValue>& dims, size_t* index, int depth,
+                                 int prefix, ProtoOutputStream* protoOutput) {
+    size_t count = dims.size();
+    while (*index < count) {
+        const auto& dim = dims[*index];
+        const int valueDepth = dim.mField.getDepth();
+        const int valuePrefix = dim.mField.getPrefix(depth);
+        const int fieldNum = dim.mField.getPosAtDepth(depth);
+        if (valueDepth > 2) {
+            ALOGE("Depth > 2 not supported");
+            return;
+        }
+
+        if (depth == valueDepth && valuePrefix == prefix) {
+            long long token = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
+                                                 DIMENSIONS_VALUE_TUPLE_VALUE);
+            protoOutput->write(FIELD_TYPE_INT32 | DIMENSIONS_VALUE_FIELD, fieldNum);
+            switch (dim.mValue.getType()) {
+                case INT:
+                    protoOutput->write(FIELD_TYPE_INT32 | DIMENSIONS_VALUE_VALUE_INT,
+                                       dim.mValue.int_value);
+                    break;
+                case LONG:
+                    protoOutput->write(FIELD_TYPE_INT64 | DIMENSIONS_VALUE_VALUE_LONG,
+                                       (long long)dim.mValue.long_value);
+                    break;
+                case FLOAT:
+                    protoOutput->write(FIELD_TYPE_FLOAT | DIMENSIONS_VALUE_VALUE_FLOAT,
+                                       dim.mValue.float_value);
+                    break;
+                case STRING:
+                    protoOutput->write(FIELD_TYPE_STRING | DIMENSIONS_VALUE_VALUE_STR,
+                                       dim.mValue.str_value);
+                    break;
+                default:
+                    break;
+            }
+            if (token != 0) {
+                protoOutput->end(token);
+            }
+            (*index)++;
+        } else if (valueDepth > depth && valuePrefix == prefix) {
+            // Writing the sub tree
+            long long dimensionToken = protoOutput->start(
+                    FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | DIMENSIONS_VALUE_TUPLE_VALUE);
+            protoOutput->write(FIELD_TYPE_INT32 | DIMENSIONS_VALUE_FIELD, fieldNum);
+            long long tupleToken =
+                    protoOutput->start(FIELD_TYPE_MESSAGE | DIMENSIONS_VALUE_VALUE_TUPLE);
+            writeDimensionToProtoHelper(dims, index, valueDepth, dim.mField.getPrefix(valueDepth),
+                                        protoOutput);
+            protoOutput->end(tupleToken);
+            protoOutput->end(dimensionToken);
+        } else {
+            // Done with the prev sub tree
+            return;
+        }
+    }
+}
+
+}  // namespace
+
+void writeDimensionToProto(const HashableDimensionKey& dimension, ProtoOutputStream* protoOutput) {
+    if (dimension.getValues().size() == 0) {
         return;
     }
-    protoOutput->write(FIELD_TYPE_INT32 | DIMENSIONS_VALUE_FIELD, dimensionsValue.field());
-    switch (dimensionsValue.value_case()) {
-        case DimensionsValue::ValueCase::kValueStr:
-            protoOutput->write(FIELD_TYPE_STRING | DIMENSIONS_VALUE_VALUE_STR,
-                dimensionsValue.value_str());
-            break;
-        case DimensionsValue::ValueCase::kValueInt:
-            protoOutput->write(FIELD_TYPE_INT32 | DIMENSIONS_VALUE_VALUE_INT,
-                dimensionsValue.value_int());
-            break;
-        case DimensionsValue::ValueCase::kValueLong:
-            protoOutput->write(FIELD_TYPE_INT64 | DIMENSIONS_VALUE_VALUE_LONG,
-                dimensionsValue.value_long());
-            break;
-        case DimensionsValue::ValueCase::kValueBool:
-            protoOutput->write(FIELD_TYPE_BOOL | DIMENSIONS_VALUE_VALUE_BOOL,
-                dimensionsValue.value_bool());
-            break;
-        case DimensionsValue::ValueCase::kValueFloat:
-            protoOutput->write(FIELD_TYPE_FLOAT | DIMENSIONS_VALUE_VALUE_FLOAT,
-                dimensionsValue.value_float());
-            break;
-        case DimensionsValue::ValueCase::kValueTuple:
-            {
-                long long tupleToken = protoOutput->start(
-                    FIELD_TYPE_MESSAGE | DIMENSIONS_VALUE_VALUE_TUPLE);
-                for (int i = 0; i < dimensionsValue.value_tuple().dimensions_value_size(); ++i) {
-                    long long token = protoOutput->start(
-                        FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED
-                        | FIELD_ID_FIELD_VALUE_IN_MESSAGE_VALUE_PROTO);
-                    writeDimensionsValueProtoToStream(
-                        dimensionsValue.value_tuple().dimensions_value(i), protoOutput);
-                    protoOutput->end(token);
-                }
-                protoOutput->end(tupleToken);
-            }
-            break;
-        default:
-            break;
-    }
+    protoOutput->write(FIELD_TYPE_INT32 | DIMENSIONS_VALUE_FIELD,
+                       dimension.getValues()[0].mField.getTag());
+    long long topToken = protoOutput->start(FIELD_TYPE_MESSAGE | DIMENSIONS_VALUE_VALUE_TUPLE);
+    size_t index = 0;
+    writeDimensionToProtoHelper(dimension.getValues(), &index, 0, 0, protoOutput);
+    protoOutput->end(topToken);
 }
 
 // for Field Proto
@@ -104,133 +134,92 @@ const int FIELD_FIELD = 1;
 const int FIELD_POSITION_INDEX = 2;
 const int FIELD_CHILD = 3;
 
-void writeFieldProtoToStream(
-    const Field& field, util::ProtoOutputStream* protoOutput) {
-    if (!field.has_field()) {
-        return;
-    }
-    protoOutput->write(FIELD_TYPE_INT32 | FIELD_FIELD, field.field());
-    if (field.has_position_index()) {
-      protoOutput->write(FIELD_TYPE_INT32 | FIELD_POSITION_INDEX, field.position_index());
-    }
-    for (int i = 0; i < field.child_size(); ++i) {
-        long long childToken = protoOutput->start(
-            FIELD_TYPE_MESSAGE| FIELD_COUNT_REPEATED | FIELD_CHILD);
-        writeFieldProtoToStream(field.child(i), protoOutput);
-        protoOutput->end(childToken);
-    }
-}
-
-namespace {
-
-void addOrUpdateChildrenMap(
-    const Field& root,
-    const Field& node,
-    std::map<Field, std::set<Field, FieldCmp>, FieldCmp> *childrenMap) {
-    Field parentNode = root;
-    if (node.has_position_index()) {
-        appendLeaf(&parentNode, node.field(), node.position_index());
-    } else {
-        appendLeaf(&parentNode, node.field());
-    }
-    if (childrenMap->find(parentNode) == childrenMap->end()) {
-        childrenMap->insert(std::make_pair(parentNode, std::set<Field, FieldCmp>{}));
-    }
-    auto it = childrenMap->find(parentNode);
-    for (int i = 0; i < node.child_size(); ++i) {
-        auto child = node.child(i);
-        Field childNode = parentNode;
-        if (child.has_position_index()) {
-            appendLeaf(&childNode, child.field(), child.position_index());
-        } else {
-            appendLeaf(&childNode, child.field());
+// Supported Atoms format
+// XYZ_Atom {
+//     repeated SubMsg field_1 = 1;
+//     SubMsg2 field_2 = 2;
+//     int32/float/string/int63 field_3 = 3;
+// }
+// logd's msg format, doesn't allow us to distinguish between the 2 cases below
+// Case (1):
+// Atom {
+//   SubMsg {
+//     int i = 1;
+//     int j = 2;
+//   }
+//   repeated SubMsg
+// }
+//
+// and case (2):
+// Atom {
+//   SubMsg {
+//     repeated int i = 1;
+//     repeated int j = 2;
+//   }
+//   optional SubMsg = 1;
+// }
+//
+//
+void writeFieldValueTreeToStreamHelper(const std::vector<FieldValue>& dims, size_t* index,
+                                       int depth, int prefix, ProtoOutputStream* protoOutput) {
+    size_t count = dims.size();
+    while (*index < count) {
+        const auto& dim = dims[*index];
+        const int valueDepth = dim.mField.getDepth();
+        const int valuePrefix = dim.mField.getPrefix(depth);
+        const int fieldNum = dim.mField.getPosAtDepth(depth);
+        if (valueDepth > 2) {
+            ALOGE("Depth > 2 not supported");
+            return;
         }
-        it->second.insert(childNode);
-        addOrUpdateChildrenMap(parentNode, child, childrenMap);
+
+        if (depth == valueDepth && valuePrefix == prefix) {
+            switch (dim.mValue.getType()) {
+                case INT:
+                    protoOutput->write(FIELD_TYPE_INT32 | fieldNum, dim.mValue.int_value);
+                    break;
+                case LONG:
+                    protoOutput->write(FIELD_TYPE_INT64 | fieldNum,
+                                       (long long)dim.mValue.long_value);
+                    break;
+                case FLOAT:
+                    protoOutput->write(FIELD_TYPE_FLOAT | fieldNum, dim.mValue.float_value);
+                    break;
+                case STRING:
+                    protoOutput->write(FIELD_TYPE_STRING | fieldNum, dim.mValue.str_value);
+                    break;
+            }
+            (*index)++;
+        } else if (valueDepth > depth && valuePrefix == prefix) {
+            // Writing the sub tree
+            long long msg_token = 0;
+            if (valueDepth == depth + 2) {
+                msg_token =
+                        protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | fieldNum);
+            } else if (valueDepth == depth + 1) {
+                msg_token = protoOutput->start(FIELD_TYPE_MESSAGE | fieldNum);
+            }
+            // Directly jump to the leaf value because the repeated position field is implied
+            // by the position of the sub msg in the parent field.
+            writeFieldValueTreeToStreamHelper(dims, index, valueDepth,
+                                              dim.mField.getPrefix(valueDepth), protoOutput);
+            if (msg_token != 0) {
+                protoOutput->end(msg_token);
+            }
+        } else {
+            // Done with the prev sub tree
+            return;
+        }
     }
 }
 
-void addOrUpdateChildrenMap(
-    const Field& field,
-    std::map<Field, std::set<Field, FieldCmp>, FieldCmp> *childrenMap) {
-    Field root;
-    addOrUpdateChildrenMap(root, field, childrenMap);
-}
-
-} // namespace
-
-void writeFieldValueTreeToStream(const FieldValueMap &fieldValueMap,
+void writeFieldValueTreeToStream(int tagId, const std::vector<FieldValue>& values,
                                  util::ProtoOutputStream* protoOutput) {
-    std::map<Field, std::set<Field, FieldCmp>, FieldCmp> childrenMap;
-    // Rebuild the field tree.
-    for (auto it = fieldValueMap.begin(); it != fieldValueMap.end(); ++it) {
-        addOrUpdateChildrenMap(it->first, &childrenMap);
-    }
-    std::stack<std::pair<long long, Field>> tokenStack;
-    // Iterate over the node tree to fill the Atom proto.
-    for (auto it = childrenMap.begin(); it != childrenMap.end(); ++it) {
-        const Field* nodeLeaf = getSingleLeaf(&it->first);
-        const int fieldNum = nodeLeaf->field();
-        while (!tokenStack.empty()) {
-            auto currentMsgNode = tokenStack.top().second;
-            auto currentMsgNodeChildrenIt = childrenMap.find(currentMsgNode);
-            if (currentMsgNodeChildrenIt->second.find(it->first) ==
-                currentMsgNodeChildrenIt->second.end()) {
-                protoOutput->end(tokenStack.top().first);
-                tokenStack.pop();
-            } else {
-                break;
-            }
-        }
-        if (it->second.size() == 0) {
-            auto itValue = fieldValueMap.find(it->first);
-            if (itValue != fieldValueMap.end()) {
-                const DimensionsValue& value = itValue->second;
-                switch (value.value_case()) {
-                        case DimensionsValue::ValueCase::kValueStr:
-                            protoOutput->write(FIELD_TYPE_STRING | fieldNum,
-                                value.value_str());
-                            break;
-                        case DimensionsValue::ValueCase::kValueInt:
-                            protoOutput->write(FIELD_TYPE_INT32 | fieldNum,
-                                value.value_int());
-                            break;
-                        case DimensionsValue::ValueCase::kValueLong:
-                            protoOutput->write(FIELD_TYPE_INT64 | fieldNum,
-                                value.value_long());
-                            break;
-                        case DimensionsValue::ValueCase::kValueBool:
-                            protoOutput->write(FIELD_TYPE_BOOL | fieldNum,
-                                value.value_bool());
-                            break;
-                        case DimensionsValue::ValueCase::kValueFloat:
-                            protoOutput->write(FIELD_TYPE_FLOAT | fieldNum,
-                                value.value_float());
-                            break;
-                        // This would not happen as the node has no child.
-                        case DimensionsValue::ValueCase::kValueTuple:
-                            break;
-                        default:
-                            break;
-                }
-            } else {
-                ALOGE("Leaf node value not found. This should never happen.");
-            }
-        } else {
-            long long token;
-            if (nodeLeaf->has_position_index()) {
-                token = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | fieldNum);
-            } else {
-                token = protoOutput->start(FIELD_TYPE_MESSAGE | fieldNum);
-            }
-            tokenStack.push(std::make_pair(token, it->first));
-        }
-    }
+    long long atomToken = protoOutput->start(FIELD_TYPE_MESSAGE | tagId);
 
-    while (!tokenStack.empty()) {
-        protoOutput->end(tokenStack.top().first);
-        tokenStack.pop();
-    }
+    size_t index = 0;
+    writeFieldValueTreeToStreamHelper(values, &index, 0, 0, protoOutput);
+    protoOutput->end(atomToken);
 }
 
 int64_t TimeUnitToBucketSizeInMillis(TimeUnit unit) {

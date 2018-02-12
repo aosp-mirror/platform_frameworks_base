@@ -45,9 +45,6 @@ bool combinationMatch(const std::vector<int>& children, const LogicalOperation& 
 bool matchesSimple(const UidMap& uidMap,
     const SimpleAtomMatcher& simpleMatcher, const LogEvent& wrapper);
 
-void getDimensionKeys(const LogEvent& event, const FieldMatcher& matcher,
-                      std::vector<DimensionsValue> *dimensionKeys);
-
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

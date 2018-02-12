@@ -53,7 +53,8 @@ TEST(MaxDurationTrackerTest, TestSimpleMaxDuration) {
     const HashableDimensionKey key1 = getMockedDimensionKey(TagId, 1, "1");
     const HashableDimensionKey key2 = getMockedDimensionKey(TagId, 1, "2");
 
-    FieldMatcher dimensionInCondition;
+    vector<Matcher> dimensionInCondition;
+
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
@@ -89,7 +90,7 @@ TEST(MaxDurationTrackerTest, TestStopAll) {
     const HashableDimensionKey key1 = getMockedDimensionKey(TagId, 1, "1");
     const HashableDimensionKey key2 = getMockedDimensionKey(TagId, 1, "2");
 
-    FieldMatcher dimensionInCondition;
+    vector<Matcher> dimensionInCondition;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
@@ -126,7 +127,7 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary) {
     const std::vector<HashableDimensionKey> conditionKey = {getMockedDimensionKey(TagId, 4, "1")};
     const HashableDimensionKey key1 = getMockedDimensionKey(TagId, 1, "1");
     const HashableDimensionKey key2 = getMockedDimensionKey(TagId, 1, "2");
-    FieldMatcher dimensionInCondition;
+    vector<Matcher> dimensionInCondition;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
@@ -168,7 +169,7 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary_nested) {
     const std::vector<HashableDimensionKey> conditionKey = {getMockedDimensionKey(TagId, 4, "1")};
     const HashableDimensionKey key1 = getMockedDimensionKey(TagId, 1, "1");
     const HashableDimensionKey key2 = getMockedDimensionKey(TagId, 1, "2");
-    FieldMatcher dimensionInCondition;
+    vector<Matcher> dimensionInCondition;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
@@ -206,7 +207,7 @@ TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition) {
     const std::vector<HashableDimensionKey> conditionKey = {getMockedDimensionKey(TagId, 4, "1")};
     const HashableDimensionKey key1 = getMockedDimensionKey(TagId, 1, "1");
 
-    FieldMatcher dimensionInCondition;
+    vector<Matcher> dimensionInCondition;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     ConditionKey conditionKey1;
