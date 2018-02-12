@@ -17,7 +17,6 @@
 package com.android.settingslib.drawer;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -54,7 +53,6 @@ import android.util.Pair;
 import android.widget.RemoteViews;
 
 import com.android.settingslib.R;
-import com.android.settingslib.TestConfig;
 import com.android.settingslib.suggestions.SuggestionParser;
 
 import org.junit.Before;
@@ -74,9 +72,7 @@ import java.util.List;
 import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH,
-        sdk = TestConfig.SDK_VERSION,
-        shadows = {TileUtilsTest.TileUtilsShadowRemoteViews.class})
+@Config(shadows = TileUtilsTest.TileUtilsShadowRemoteViews.class)
 public class TileUtilsTest {
 
     private Context mContext;

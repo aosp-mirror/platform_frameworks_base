@@ -22,7 +22,6 @@ import android.content.Context;
 import android.provider.Settings;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
-import com.android.settingslib.TestConfig;
 import com.android.settingslib.testutils.shadow.ShadowUserManager;
 
 import org.junit.After;
@@ -33,9 +32,7 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION, shadows = {
-        ShadowUserManager.class
-})
+@Config(shadows = ShadowUserManager.class)
 public class DevelopmentSettingsEnablerTest {
 
     private Context mContext;

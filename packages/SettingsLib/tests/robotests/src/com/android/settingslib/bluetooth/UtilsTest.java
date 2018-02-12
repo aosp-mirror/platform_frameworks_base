@@ -22,18 +22,13 @@ import android.graphics.drawable.Drawable;
 
 import com.android.settingslib.R;
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
-import com.android.settingslib.TestConfig;
 import com.android.settingslib.graph.BluetoothDeviceLayerDrawable;
-import com.android.settingslib.testutils.shadow.SettingsLibShadowResources;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION,
-        shadows = SettingsLibShadowResources.class)
 public class UtilsTest {
 
     @Test

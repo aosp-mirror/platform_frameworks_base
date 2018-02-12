@@ -17,7 +17,6 @@
 package com.android.settingslib.applications;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -27,24 +26,17 @@ import android.content.ComponentName;
 import android.provider.Settings;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
-import com.android.settingslib.TestConfig;
-import com.android.settingslib.testutils.shadow.ShadowPackageManagerWrapper;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION,
-    shadows = {ShadowPackageManagerWrapper.class})
 public class ServiceListingTest {
 
     private static final String TEST_SETTING = "testSetting";
     private static final String TEST_INTENT = "com.example.intent";
-    private static final String TEST_PERMISSION = "testPermission";
 
     private ServiceListing mServiceListing;
 
@@ -57,11 +49,6 @@ public class ServiceListingTest {
                 .setIntentAction(TEST_INTENT)
                 .setPermission("testPermission")
                 .build();
-    }
-
-    @After
-    public void tearDown() {
-        ShadowPackageManagerWrapper.reset();
     }
 
     @Test

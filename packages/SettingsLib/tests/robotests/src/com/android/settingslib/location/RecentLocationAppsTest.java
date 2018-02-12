@@ -1,8 +1,8 @@
 package com.android.settingslib.location;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.when;
-import static com.google.common.truth.Truth.assertThat;
 
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.OpEntry;
@@ -15,23 +15,21 @@ import android.content.res.Resources;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
+
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
-import com.android.settingslib.TestConfig;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.annotation.Config;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
-@Config(
-        manifest = TestConfig.MANIFEST_PATH,
-        sdk = TestConfig.SDK_VERSION)
 public class RecentLocationAppsTest {
 
     private static final int TEST_UID = 1234;

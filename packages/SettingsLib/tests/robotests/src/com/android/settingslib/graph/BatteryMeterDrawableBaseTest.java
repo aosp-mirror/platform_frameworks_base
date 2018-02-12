@@ -26,8 +26,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
-import com.android.settingslib.TestConfig;
-import com.android.settingslib.testutils.shadow.SettingsLibShadowResources;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -35,12 +33,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 import org.robolectric.util.ReflectionHelpers;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION,
-        shadows = SettingsLibShadowResources.class)
 public class BatteryMeterDrawableBaseTest {
     private static final int CRITICAL_LEVEL = 5;
     private static final int PADDING = 5;

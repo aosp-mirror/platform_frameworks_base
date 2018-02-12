@@ -15,6 +15,8 @@
  */
 package com.android.settingslib;
 
+import android.annotation.NonNull;
+
 import org.junit.runners.model.InitializationError;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
@@ -22,6 +24,8 @@ import org.robolectric.manifest.AndroidManifest;
 import org.robolectric.res.Fs;
 import org.robolectric.res.ResourcePath;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 public class SettingsLibRobolectricTestRunner extends RobolectricTestRunner {
@@ -30,33 +34,40 @@ public class SettingsLibRobolectricTestRunner extends RobolectricTestRunner {
         super(testClass);
     }
 
+    /**
+     * We are going to create our own custom manifest so we can add multiple resource paths to it.
+     */
     @Override
     protected AndroidManifest getAppManifest(Config config) {
-        // Using the manifest file's relative path, we can figure out the application directory.
-        final String appRoot = "frameworks/base/packages/SettingsLib";
-        final String manifestPath = appRoot + "/AndroidManifest.xml";
-        final String resDir = appRoot + "/tests/robotests/res";
-        final String assetsDir = appRoot + config.assetDir();
+        try {
+            // Using the manifest file's relative path, we can figure out the application directory.
+            final URL appRoot =
+                new URL("file:frameworks/base/packages/SettingsLib/tests/robotests");
+            final URL manifestPath = new URL(appRoot, "AndroidManifest.xml");
+            final URL resDir = new URL(appRoot, "res");
+            final URL assetsDir = new URL(appRoot, "assets");
 
-        return new AndroidManifest(Fs.fileFromPath(manifestPath), Fs.fileFromPath(resDir),
-            Fs.fileFromPath(assetsDir), "com.android.settingslib") {
-            @Override
-            public List<ResourcePath> getIncludedResourcePaths() {
-                List<ResourcePath> paths = super.getIncludedResourcePaths();
-                paths.add(new ResourcePath(
-                    null,
-                    Fs.fileFromPath("./frameworks/base/packages/SettingsLib/res"),
-                    null));
-                paths.add(new ResourcePath(
-                    null,
-                    Fs.fileFromPath("./frameworks/base/core/res/res"),
-                    null));
-                paths.add(new ResourcePath(
-                    null,
-                    Fs.fileFromPath("./frameworks/support/v7/appcompat/res"),
-                    null));
-                return paths;
-            }
-        };
+            return new AndroidManifest(Fs.fromURL(manifestPath), Fs.fromURL(resDir),
+                Fs.fromURL(assetsDir), "com.android.settingslib") {
+                @Override
+                public List<ResourcePath> getIncludedResourcePaths() {
+                    final List<ResourcePath> paths = super.getIncludedResourcePaths();
+                    paths.add(resourcePath("file:frameworks/base/packages/SettingsLib/res"));
+                    paths.add(resourcePath("file:frameworks/base/core/res/res"));
+                    paths.add(resourcePath("file:frameworks/support/v7/appcompat/res"));
+                    return paths;
+                }
+            };
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("SettingsLibRobolectricTestRunner failure", e);
+        }
+    }
+
+    private static ResourcePath resourcePath(@NonNull String spec) {
+        try {
+            return new ResourcePath(null, Fs.fromURL(new URL(spec)), null);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("SettingsLibRobolectricTestRunner failure", e);
+        }
     }
 }
