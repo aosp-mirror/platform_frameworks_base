@@ -102,7 +102,7 @@ protected:
 private:
     sk_sp<SkAnimatedImage> mSkAnimatedImage;
     bool mRunning = false;
-    bool mFinished = false;
+    bool mStarting = false;
 
     // A snapshot of the current frame to draw.
     Snapshot mSnapshot;
