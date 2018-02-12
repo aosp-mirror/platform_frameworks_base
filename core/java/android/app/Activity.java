@@ -6366,6 +6366,8 @@ public class Activity extends ContextThemeWrapper
         } else {
             writer.print(prefix); writer.println("No AutofillManager");
         }
+
+        ResourcesManager.getInstance().dump(prefix, writer);
     }
 
     /**

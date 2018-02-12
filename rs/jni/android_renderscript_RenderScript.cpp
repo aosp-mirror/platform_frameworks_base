@@ -24,8 +24,9 @@
 #include <utils/misc.h>
 #include <inttypes.h>
 
+#include <android-base/macros.h>
 #include <androidfw/Asset.h>
-#include <androidfw/AssetManager.h>
+#include <androidfw/AssetManager2.h>
 #include <androidfw/ResourceTypes.h>
 #include <android-base/macros.h>
 
@@ -1664,18 +1665,22 @@ nFileA3DCreateFromAssetStream(JNIEnv *_env, jobject _this, jlong con, jlong nati
 static jlong
 nFileA3DCreateFromAsset(JNIEnv *_env, jobject _this, jlong con, jobject _assetMgr, jstring _path)
 {
-    AssetManager* mgr = assetManagerForJavaObject(_env, _assetMgr);
+    Guarded<AssetManager2>* mgr = AssetManagerForJavaObject(_env, _assetMgr);
     if (mgr == nullptr) {
         return 0;
     }
 
     AutoJavaStringToUTF8 str(_env, _path);
-    Asset* asset = mgr->open(str.c_str(), Asset::ACCESS_BUFFER);
-    if (asset == nullptr) {
-        return 0;
+    std::unique_ptr<Asset> asset;
+    {
+        ScopedLock<AssetManager2> locked_mgr(*mgr);
+        asset = locked_mgr->Open(str.c_str(), Asset::ACCESS_BUFFER);
+        if (asset == nullptr) {
+            return 0;
+        }
     }
 
-    jlong id = (jlong)(uintptr_t)rsaFileA3DCreateFromAsset((RsContext)con, asset);
+    jlong id = (jlong)(uintptr_t)rsaFileA3DCreateFromAsset((RsContext)con, asset.release());
     return id;
 }
 
@@ -1752,22 +1757,25 @@ static jlong
 nFontCreateFromAsset(JNIEnv *_env, jobject _this, jlong con, jobject _assetMgr, jstring _path,
                      jfloat fontSize, jint dpi)
 {
-    AssetManager* mgr = assetManagerForJavaObject(_env, _assetMgr);
+    Guarded<AssetManager2>* mgr = AssetManagerForJavaObject(_env, _assetMgr);
     if (mgr == nullptr) {
         return 0;
     }
 
     AutoJavaStringToUTF8 str(_env, _path);
-    Asset* asset = mgr->open(str.c_str(), Asset::ACCESS_BUFFER);
-    if (asset == nullptr) {
-        return 0;
+    std::unique_ptr<Asset> asset;
+    {
+        ScopedLock<AssetManager2> locked_mgr(*mgr);
+        asset = locked_mgr->Open(str.c_str(), Asset::ACCESS_BUFFER);
+        if (asset == nullptr) {
+            return 0;
+        }
     }
 
     jlong id = (jlong)(uintptr_t)rsFontCreateFromMemory((RsContext)con,
                                            str.c_str(), str.length(),
                                            fontSize, dpi,
                                            asset->getBuffer(false), asset->getLength());
-    delete asset;
     return id;
 }
 
