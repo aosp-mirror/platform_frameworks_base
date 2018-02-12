@@ -1448,6 +1448,7 @@ Ljava/net/InetAddress;->isNumeric(Ljava/lang/String;)Z
 Ljava/net/InetAddress;->parseNumericAddress(Ljava/lang/String;)Ljava/net/InetAddress;
 Ljava/net/Socket;->impl:Ljava/net/SocketImpl;
 Ljava/net/URI;->host:Ljava/lang/String;
+Ljava/nio/Buffer;->address:J
 Ljava/nio/charset/CharsetEncoder;->canEncode(Ljava/nio/CharBuffer;)Z
 Ljava/security/spec/ECParameterSpec;->getCurveName()Ljava/lang/String;
 Ljava/security/spec/ECParameterSpec;->setCurveName(Ljava/lang/String;)V
