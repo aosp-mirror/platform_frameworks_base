@@ -914,16 +914,18 @@ public class RankingHelperTest extends UiServiceTestCase {
         final NotificationChannel update1 = getChannel();
         update1.setSound(new Uri.Builder().scheme("test").build(),
                 new AudioAttributes.Builder().build());
-        update1.lockFields(NotificationChannel.USER_LOCKED_PRIORITY); // should be ignored
+        update1.lockFields(NotificationChannel.USER_LOCKED_PRIORITY);
         mHelper.updateNotificationChannel(PKG, UID, update1, true);
-        assertEquals(NotificationChannel.USER_LOCKED_SOUND,
+        assertEquals(NotificationChannel.USER_LOCKED_PRIORITY
+                | NotificationChannel.USER_LOCKED_SOUND,
                 mHelper.getNotificationChannel(PKG, UID, update1.getId(), false)
                         .getUserLockedFields());
 
         NotificationChannel update2 = getChannel();
         update2.enableVibration(true);
         mHelper.updateNotificationChannel(PKG, UID, update2, true);
-        assertEquals(NotificationChannel.USER_LOCKED_SOUND
+        assertEquals(NotificationChannel.USER_LOCKED_PRIORITY
+                        | NotificationChannel.USER_LOCKED_SOUND
                         | NotificationChannel.USER_LOCKED_VIBRATION,
                 mHelper.getNotificationChannel(PKG, UID, update2.getId(), false)
                         .getUserLockedFields());

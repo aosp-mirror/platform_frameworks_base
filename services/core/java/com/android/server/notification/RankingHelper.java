@@ -640,9 +640,11 @@ public class RankingHelper implements RankingConfig {
         if (updatedChannel.getLockscreenVisibility() == Notification.VISIBILITY_PUBLIC) {
             updatedChannel.setLockscreenVisibility(Ranking.VISIBILITY_NO_OVERRIDE);
         }
-        updatedChannel.unlockFields(updatedChannel.getUserLockedFields());
-        updatedChannel.lockFields(channel.getUserLockedFields());
+        if (!fromUser) {
+            updatedChannel.unlockFields(updatedChannel.getUserLockedFields());
+        }
         if (fromUser) {
+            updatedChannel.lockFields(channel.getUserLockedFields());
             lockFieldsForUpdate(channel, updatedChannel);
         }
         r.channels.put(updatedChannel.getId(), updatedChannel);

@@ -16,7 +16,9 @@
 
 package com.android.systemui.statusbar;
 
+import static android.app.NotificationChannel.USER_LOCKED_IMPORTANCE;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
+import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static android.print.PrintManager.PRINT_SPOOLER_PACKAGE_NAME;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -95,6 +97,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         final LayoutInflater layoutInflater = LayoutInflater.from(mContext);
         mNotificationInfo = (NotificationInfo) layoutInflater.inflate(R.layout.notification_info,
                 null);
+        mNotificationInfo.setGutsParent(mock(NotificationGuts.class));
 
         // PackageManager must return a packageInfo and applicationInfo.
         final PackageInfo packageInfo = new PackageInfo();
@@ -323,24 +326,27 @@ public class NotificationInfoTest extends SysuiTestCase {
     @Test
     public void testHandleCloseControls_DoesNotUpdateNotificationChannelIfUnchanged()
             throws Exception {
+        int originalImportance = mNotificationChannel.getImportance();
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null, null);
 
         mNotificationInfo.handleCloseControls(true, false);
-        verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
+        verify(mMockINotificationManager, times(1)).updateNotificationChannelForPackage(
                 anyString(), eq(TEST_UID), any());
+        assertEquals(originalImportance, mNotificationChannel.getImportance());
     }
 
     @Test
     public void testHandleCloseControls_DoesNotUpdateNotificationChannelIfUnspecified()
             throws Exception {
-        mNotificationChannel.setImportance(NotificationManager.IMPORTANCE_UNSPECIFIED);
+        mNotificationChannel.setImportance(IMPORTANCE_UNSPECIFIED);
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null, null);
 
         mNotificationInfo.handleCloseControls(true, false);
-        verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
+        verify(mMockINotificationManager, times(1)).updateNotificationChannelForPackage(
                 anyString(), eq(TEST_UID), any());
+        assertEquals(IMPORTANCE_UNSPECIFIED, mNotificationChannel.getImportance());
     }
 
     @Test
@@ -370,16 +376,30 @@ public class NotificationInfoTest extends SysuiTestCase {
         verify(mMockINotificationManager, times(1)).updateNotificationChannelForPackage(
                 anyString(), eq(TEST_UID), updated.capture());
         assertTrue((updated.getValue().getUserLockedFields()
-                & NotificationChannel.USER_LOCKED_IMPORTANCE) != 0);
+                & USER_LOCKED_IMPORTANCE) != 0);
     }
 
     @Test
-    public void testBlockUndoDoesNotCallUpdateNotificationChannel() throws Exception {
+    public void testKeepUpdatesNotificationChannel() throws Exception {
         mNotificationChannel.setImportance(IMPORTANCE_LOW);
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
-                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null,
-                Collections.singleton(TEST_PACKAGE_NAME));
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null, null);
 
+        mNotificationInfo.handleCloseControls(true, false);
+
+        ArgumentCaptor<NotificationChannel> updated =
+                ArgumentCaptor.forClass(NotificationChannel.class);
+        verify(mMockINotificationManager, times(1)).updateNotificationChannelForPackage(
+                anyString(), eq(TEST_UID), updated.capture());
+        assertTrue(0 != (mNotificationChannel.getUserLockedFields() & USER_LOCKED_IMPORTANCE));
+        assertEquals(IMPORTANCE_LOW, mNotificationChannel.getImportance());
+    }
+
+    @Test
+    public void testBlockUndoDoesNotBlockNotificationChannel() throws Exception {
+        mNotificationChannel.setImportance(IMPORTANCE_LOW);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null, null);
 
         mNotificationInfo.findViewById(R.id.block).performClick();
         waitForUndoButton();
@@ -389,8 +409,9 @@ public class NotificationInfoTest extends SysuiTestCase {
 
         ArgumentCaptor<NotificationChannel> updated =
                 ArgumentCaptor.forClass(NotificationChannel.class);
-        verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
+        verify(mMockINotificationManager, times(1)).updateNotificationChannelForPackage(
                 anyString(), eq(TEST_UID), updated.capture());
+        assertTrue(0 != (mNotificationChannel.getUserLockedFields() & USER_LOCKED_IMPORTANCE));
         assertEquals(IMPORTANCE_LOW, mNotificationChannel.getImportance());
     }
 
