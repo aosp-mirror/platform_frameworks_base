@@ -33,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 /*package*/ class ZygoteStartFailedEx extends Exception {
     ZygoteStartFailedEx(String s) {
@@ -217,7 +218,8 @@ public class ZygoteProcess {
         try {
             return startViaZygote(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
-                    abi, instructionSet, appDataDir, invokeWith, zygoteArgs);
+                    abi, instructionSet, appDataDir, invokeWith, false /* startChildZygote */,
+                    zygoteArgs);
         } catch (ZygoteStartFailedEx ex) {
             Log.e(LOG_TAG,
                     "Starting VM process through Zygote failed");
@@ -333,6 +335,8 @@ public class ZygoteProcess {
      * @param abi the ABI the process should use.
      * @param instructionSet null-ok the instruction set to use.
      * @param appDataDir null-ok the data directory of the app.
+     * @param startChildZygote Start a sub-zygote. This creates a new zygote process
+     * that has its state cloned from this zygote process.
      * @param extraArgs Additional arguments to supply to the zygote process.
      * @return An object that describes the result of the attempt to start the process.
      * @throws ZygoteStartFailedEx if process start failed for any reason
@@ -348,6 +352,7 @@ public class ZygoteProcess {
                                                       String instructionSet,
                                                       String appDataDir,
                                                       String invokeWith,
+                                                      boolean startChildZygote,
                                                       String[] extraArgs)
                                                       throws ZygoteStartFailedEx {
         ArrayList<String> argsForZygote = new ArrayList<String>();
@@ -404,6 +409,10 @@ public class ZygoteProcess {
             argsForZygote.add(invokeWith);
         }
 
+        if (startChildZygote) {
+            argsForZygote.add("--start-child-zygote");
+        }
+
         argsForZygote.add(processClass);
 
         if (extraArgs != null) {
@@ -414,6 +423,18 @@ public class ZygoteProcess {
 
         synchronized(mLock) {
             return zygoteSendArgsAndGetResult(openZygoteSocketIfNeeded(abi), argsForZygote);
+        }
+    }
+
+    /**
+     * Closes the connections to the zygote, if they exist.
+     */
+    public void close() {
+        if (primaryZygoteState != null) {
+            primaryZygoteState.close();
+        }
+        if (secondaryZygoteState != null) {
+            secondaryZygoteState.close();
         }
     }
 
@@ -548,5 +569,37 @@ public class ZygoteProcess {
             }
         }
         Slog.wtf(LOG_TAG, "Failed to connect to Zygote through socket " + address.getName());
+    }
+
+    /**
+     * Starts a new zygote process as a child of this zygote. This is used to create
+     * secondary zygotes that inherit data from the zygote that this object
+     * communicates with. This returns a new ZygoteProcess representing a connection
+     * to the newly created zygote. Throws an exception if the zygote cannot be started.
+     */
+    public ChildZygoteProcess startChildZygote(final String processClass,
+                                               final String niceName,
+                                               int uid, int gid, int[] gids,
+                                               int runtimeFlags,
+                                               String seInfo,
+                                               String abi,
+                                               String instructionSet) {
+        // Create an unguessable address in the global abstract namespace.
+        final LocalSocketAddress serverAddress = new LocalSocketAddress(
+                processClass + "/" + UUID.randomUUID().toString());
+
+        final String[] extraArgs = {Zygote.CHILD_ZYGOTE_SOCKET_NAME_ARG + serverAddress.getName()};
+
+        Process.ProcessStartResult result;
+        try {
+            result = startViaZygote(processClass, niceName, uid, gid,
+                    gids, runtimeFlags, 0 /* mountExternal */, 0 /* targetSdkVersion */, seInfo,
+                    abi, instructionSet, null /* appDataDir */, null /* invokeWith */,
+                    true /* startChildZygote */, extraArgs);
+        } catch (ZygoteStartFailedEx ex) {
+            throw new RuntimeException("Starting child-zygote through Zygote failed", ex);
+        }
+
+        return new ChildZygoteProcess(serverAddress, result.pid);
     }
 }
