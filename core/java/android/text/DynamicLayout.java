@@ -363,7 +363,7 @@ public class DynamicLayout extends Layout {
                          @JustificationMode int justificationMode,
                          @Nullable TextUtils.TruncateAt ellipsize,
                          @IntRange(from = 0) int ellipsizedWidth) {
-        super(createEllipsizer(ellipsize, display),
+        super(createEllipsizer(ellipsize, display), null /* precomputed */,
               paint, width, align, textDir, spacingmult, spacingadd);
 
         final Builder b = Builder.obtain(base, paint, width)
