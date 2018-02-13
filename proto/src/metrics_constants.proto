@@ -5229,6 +5229,34 @@ message MetricsEvent {
     // OS: P
     DIALOG_TV_NETWORK_PROXY = 1301;
 
+    // Events for battery saver turning on/off and/or the interactive state changes.
+    // OS: P
+    BATTERY_SAVER = 1302;
+
+    // Device interactive state -- i.e. the screen ON (=1) or OFF (=1)
+    // OS: P
+    FIELD_INTERACTIVE = 1303;
+
+    // Time spent in milliseconds in the current mode.
+    // OS: P
+    FIELD_DURATION_MILLIS = 1304;
+
+    // Battery level in uA (0 - ~3,000,000 depending on device) when the current "mode" started.
+    // OS: P
+    FIELD_START_BATTERY_UA = 1305;
+
+    // Battery level in uA (0 - ~3,000,000 depending on device) when this event was created.
+    // OS: P
+    FIELD_END_BATTERY_UA = 1306;
+
+    // Battery level in % (0-100) when the current "mode" started.
+    // OS: P
+    FIELD_START_BATTERY_PERCENT = 1307;
+
+    // Battery level in % (0-100) when this event was created.
+    // OS: P
+    FIELD_END_BATTERY_PERCENT = 1308;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

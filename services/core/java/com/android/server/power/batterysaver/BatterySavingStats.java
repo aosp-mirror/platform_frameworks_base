@@ -15,6 +15,7 @@
  */
 package com.android.server.power.batterysaver;
 
+import android.metrics.LogMaker;
 import android.os.BatteryManagerInternal;
 import android.os.SystemClock;
 import android.util.ArrayMap;
@@ -23,6 +24,8 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.power.BatterySaverPolicy;
@@ -42,6 +45,9 @@ public class BatterySavingStats {
     private static final String TAG = "BatterySavingStats";
 
     private static final boolean DEBUG = BatterySaverPolicy.DEBUG;
+
+    @VisibleForTesting
+    static final boolean SEND_TRON_EVENTS = true;
 
     private final Object mLock = new Object();
 
@@ -131,15 +137,6 @@ public class BatterySavingStats {
                     + "}";
         }
     }
-
-    @VisibleForTesting
-    static final String COUNTER_POWER_PERCENT_PREFIX = "battery_saver_stats_percent_";
-
-    @VisibleForTesting
-    static final String COUNTER_POWER_MILLIAMPS_PREFIX = "battery_saver_stats_milliamps_";
-
-    @VisibleForTesting
-    static final String COUNTER_TIME_SECONDS_PREFIX = "battery_saver_stats_seconds_";
 
     private static BatterySavingStats sInstance;
 
@@ -427,10 +424,9 @@ public class BatterySavingStats {
             if (stateChanging) {
                 if (mLastState >= 0) {
                     final long deltaTime = now - mStartTime;
-                    final int deltaBattery = mStartBatteryLevel - batteryLevel;
-                    final int deltaPercent = mStartPercent - batteryPercent;
 
-                    report(mLastState, deltaTime, deltaBattery, deltaPercent);
+                    report(mLastState, deltaTime, mStartBatteryLevel, mStartPercent,
+                            batteryLevel, batteryPercent);
                 }
                 mStartTime = now;
                 mStartBatteryLevel = batteryLevel;
@@ -439,23 +435,28 @@ public class BatterySavingStats {
             mLastState = newState;
         }
 
-        String getCounterSuffix(int state) {
-            final boolean batterySaver =
+        void report(int state, long deltaTimeMs,
+                int startBatteryLevelUa, int startBatteryLevelPercent,
+                int endBatteryLevelUa, int endBatteryLevelPercent) {
+            if (!SEND_TRON_EVENTS) {
+                return;
+            }
+            final boolean batterySaverOn =
                     BatterySaverState.fromIndex(state) != BatterySaverState.OFF;
             final boolean interactive =
                     InteractiveState.fromIndex(state) != InteractiveState.NON_INTERACTIVE;
-            if (batterySaver) {
-                return interactive ? "11" : "10";
-            } else {
-                return interactive ? "01" : "00";
-            }
-        }
 
-        void report(int state, long deltaTimeMs, int deltaBatteryUa, int deltaPercent) {
-            final String suffix = getCounterSuffix(state);
-            mMetricsLogger.count(COUNTER_POWER_MILLIAMPS_PREFIX + suffix, deltaBatteryUa / 1000);
-            mMetricsLogger.count(COUNTER_POWER_PERCENT_PREFIX + suffix, deltaPercent);
-            mMetricsLogger.count(COUNTER_TIME_SECONDS_PREFIX + suffix, (int) (deltaTimeMs / 1000));
+            final LogMaker logMaker = new LogMaker(MetricsProto.MetricsEvent.BATTERY_SAVER)
+                    .setSubtype(batterySaverOn ? 1 : 0)
+                    .addTaggedData(MetricsEvent.FIELD_INTERACTIVE, interactive ? 1 : 0)
+                    .addTaggedData(MetricsEvent.FIELD_DURATION_MILLIS, deltaTimeMs)
+                    .addTaggedData(MetricsEvent.FIELD_START_BATTERY_UA, startBatteryLevelUa)
+                    .addTaggedData(MetricsEvent.FIELD_START_BATTERY_PERCENT,
+                            startBatteryLevelPercent)
+                    .addTaggedData(MetricsEvent.FIELD_END_BATTERY_UA, endBatteryLevelUa)
+                    .addTaggedData(MetricsEvent.FIELD_END_BATTERY_PERCENT, endBatteryLevelPercent);
+
+            mMetricsLogger.write(logMaker);
         }
     }
 }
