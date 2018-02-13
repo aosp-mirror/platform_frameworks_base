@@ -46,19 +46,6 @@ public abstract class PackageSettingBase extends SettingBase {
 
     private static final int[] EMPTY_INT_ARRAY = new int[0];
 
-    /**
-     * Indicates the state of installation. Used by PackageManager to figure out
-     * incomplete installations. Say a package is being installed (the state is
-     * set to PKG_INSTALL_INCOMPLETE) and remains so till the package
-     * installation is successful or unsuccessful in which case the
-     * PackageManager will no longer maintain state information associated with
-     * the package. If some exception(like device freeze or battery being pulled
-     * out) occurs during installation of a package, the PackageManager needs
-     * this information to clean up the previously failed installation.
-     */
-    static final int PKG_INSTALL_COMPLETE = 1;
-    static final int PKG_INSTALL_INCOMPLETE = 0;
-
     public final String name;
     final String realName;
 
@@ -121,8 +108,6 @@ public abstract class PackageSettingBase extends SettingBase {
     // Whether this package is currently stopped, thus can not be
     // started until explicitly launched by the user.
     private final SparseArray<PackageUserState> userState = new SparseArray<PackageUserState>();
-
-    int installStatus = PKG_INSTALL_COMPLETE;
 
     /**
      * Non-persisted value. During an "upgrade without restart", we need the set
@@ -209,14 +194,6 @@ public abstract class PackageSettingBase extends SettingBase {
         return volumeUuid;
     }
 
-    public void setInstallStatus(int newStatus) {
-        installStatus = newStatus;
-    }
-
-    public int getInstallStatus() {
-        return installStatus;
-    }
-
     public void setTimeStamp(long newStamp) {
         timeStamp = newStamp;
     }
@@ -260,7 +237,6 @@ public abstract class PackageSettingBase extends SettingBase {
         cpuAbiOverrideString = orig.cpuAbiOverrideString;
         firstInstallTime = orig.firstInstallTime;
         installPermissionsFixed = orig.installPermissionsFixed;
-        installStatus = orig.installStatus;
         installerPackageName = orig.installerPackageName;
         isOrphaned = orig.isOrphaned;
         keySetData = orig.keySetData;
