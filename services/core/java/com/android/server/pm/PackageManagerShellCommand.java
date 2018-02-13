@@ -34,6 +34,7 @@ import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
+import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageManager;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
@@ -89,12 +90,7 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -235,6 +231,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runSetHarmfulAppWarning();
                 case "get-harmful-app-warning":
                     return runGetHarmfulAppWarning();
+                case "uninstall-system-updates":
+                    return uninstallSystemUpdates();
                 default: {
                     String nextArg = getNextArg();
                     if (nextArg == null) {
@@ -255,6 +253,47 @@ class PackageManagerShellCommand extends ShellCommand {
             pw.println("Remote exception: " + e);
         }
         return -1;
+    }
+
+    private int uninstallSystemUpdates() {
+        final PrintWriter pw = getOutPrintWriter();
+        List<String> failedUninstalls = new LinkedList<>();
+        try {
+            final ParceledListSlice<ApplicationInfo> packages =
+                    mInterface.getInstalledApplications(
+                            PackageManager.MATCH_SYSTEM_ONLY, UserHandle.USER_SYSTEM);
+            final IPackageInstaller installer = mInterface.getPackageInstaller();
+            List<ApplicationInfo> list = packages.getList();
+            for (ApplicationInfo info : list) {
+                if (info.isUpdatedSystemApp()) {
+                    pw.println("Uninstalling updates to " + info.packageName + "...");
+                    final LocalIntentReceiver receiver = new LocalIntentReceiver();
+                    installer.uninstall(new VersionedPackage(info.packageName,
+                                    info.versionCode), null /*callerPackageName*/, 0 /* flags */,
+                            receiver.getIntentSender(), 0);
+
+                    final Intent result = receiver.getResult();
+                    final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
+                            PackageInstaller.STATUS_FAILURE);
+                    if (status != PackageInstaller.STATUS_SUCCESS) {
+                        failedUninstalls.add(info.packageName);
+                    }
+                }
+            }
+        } catch (RemoteException e) {
+            pw.println("Failure ["
+                    + e.getClass().getName() + " - "
+                    + e.getMessage() + "]");
+            return 0;
+        }
+        if (!failedUninstalls.isEmpty()) {
+            pw.println("Failure [Couldn't uninstall packages: "
+                    + TextUtils.join(", ", failedUninstalls)
+                    + "]");
+            return 0;
+        }
+        pw.println("Success");
+        return 1;
     }
 
     private void setParamsSize(InstallParams params, String inPath) {
@@ -2704,6 +2743,10 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("");
         pw.println("  get-harmful-app-warning [--user <USER_ID>] <PACKAGE>");
         pw.println("    Return the harmful app warning message for the given app, if present");
+        pw.println();
+        pw.println("  uninstall-system-updates");
+        pw.println("    Remove updates to all system applications and fall back to their /system " +
+                "version.");
         pw.println();
         Intent.printIntentArgsHelp(pw , "");
     }
