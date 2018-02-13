@@ -38,10 +38,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Picture;
 import android.graphics.PixelFormat;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -57,13 +59,10 @@ import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.view.Display;
-import android.view.DisplayListCanvas;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.RenderNode;
 import android.view.Surface;
 import android.view.SurfaceControl;
-import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -233,14 +232,12 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
      */
     private Bitmap generateAdjustedHwBitmap(Bitmap bitmap, int width, int height, Matrix matrix,
             Paint paint, int color) {
-        RenderNode node = RenderNode.create("ScreenshotCanvas", null);
-        node.setLeftTopRightBottom(0, 0, width, height);
-        node.setClipToBounds(false);
-        DisplayListCanvas canvas = node.start(width, height);
+        Picture picture = new Picture();
+        Canvas canvas = picture.beginRecording(width, height);
         canvas.drawColor(color);
         canvas.drawBitmap(bitmap, matrix, paint);
-        node.end(canvas);
-        return ThreadedRenderer.createHardwareBitmap(node, width, height);
+        picture.endRecording();
+        return Bitmap.createBitmap(picture);
     }
 
     @Override

@@ -21,7 +21,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Point;
+import android.graphics.Picture;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.os.Handler;
@@ -1782,27 +1782,18 @@ public class ViewDebug {
      * @hide
      */
     public static class HardwareCanvasProvider implements CanvasProvider {
-
-        private View mView;
-        private Point mSize;
-        private RenderNode mNode;
-        private DisplayListCanvas mCanvas;
+        private Picture mPicture;
 
         @Override
         public Canvas getCanvas(View view, int width, int height) {
-            mView = view;
-            mSize = new Point(width, height);
-            mNode = RenderNode.create("ViewDebug", mView);
-            mNode.setLeftTopRightBottom(0, 0, width, height);
-            mNode.setClipToBounds(false);
-            mCanvas = mNode.start(width, height);
-            return mCanvas;
+            mPicture = new Picture();
+            return mPicture.beginRecording(width, height);
         }
 
         @Override
         public Bitmap createBitmap() {
-            mNode.end(mCanvas);
-            return ThreadedRenderer.createHardwareBitmap(mNode, mSize.x, mSize.y);
+            mPicture.endRecording();
+            return Bitmap.createBitmap(mPicture);
         }
     }
 

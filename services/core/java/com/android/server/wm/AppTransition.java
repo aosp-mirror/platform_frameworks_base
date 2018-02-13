@@ -78,9 +78,12 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.GraphicBuffer;
 import android.graphics.Path;
+import android.graphics.Picture;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Binder;
@@ -96,11 +99,8 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.AppTransitionAnimationSpec;
-import android.view.DisplayListCanvas;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.RemoteAnimationAdapter;
-import android.view.RenderNode;
-import android.view.ThreadedRenderer;
 import android.view.WindowManager.TransitionFlags;
 import android.view.WindowManager.TransitionType;
 import android.view.animation.AlphaAnimation;
@@ -973,11 +973,8 @@ public class AppTransition implements Dump {
         final int width = frame.width();
         final int height = frame.height();
 
-        final RenderNode node = RenderNode.create("CrossProfileAppsThumbnail", null);
-        node.setLeftTopRightBottom(0, 0, width, height);
-        node.setClipToBounds(false);
-
-        final DisplayListCanvas canvas = node.start(width, height);
+        final Picture picture = new Picture();
+        final Canvas canvas = picture.beginRecording(width, height);
         canvas.drawColor(Color.argb(0.6f, 0, 0, 0));
         final int thumbnailSize = mService.mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.cross_profile_apps_thumbnail_size);
@@ -988,10 +985,9 @@ public class AppTransition implements Dump {
                 (width + thumbnailSize) / 2,
                 (height + thumbnailSize) / 2);
         drawable.draw(canvas);
-        node.end(canvas);
+        picture.endRecording();
 
-        return ThreadedRenderer.createHardwareBitmap(node, width, height)
-                .createGraphicBufferHandle();
+        return Bitmap.createBitmap(picture).createGraphicBufferHandle();
     }
 
     Animation createCrossProfileAppsThumbnailAnimationLocked(Rect appRect) {
