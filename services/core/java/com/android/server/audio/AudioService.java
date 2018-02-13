@@ -2543,14 +2543,24 @@ public class AudioService extends IAudioService.Stub
             mNm = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
         }
 
-        final boolean ringerModeMute = mRingerMode == AudioManager.RINGER_MODE_VIBRATE
-                || mRingerMode == AudioManager.RINGER_MODE_SILENT;
+        final int ringerMode = mRingerMode; // Read ringer mode as reading primitives is atomic
+        final boolean ringerModeMute = ringerMode == AudioManager.RINGER_MODE_VIBRATE
+                || ringerMode == AudioManager.RINGER_MODE_SILENT;
+        final boolean shouldRingSco = ringerMode == AudioManager.RINGER_MODE_VIBRATE
+                && isBluetoothScoOn();
+        // Ask audio policy engine to force use Bluetooth SCO channel if needed
+        final String eventSource = "muteRingerModeStreams() from u/pid:" + Binder.getCallingUid()
+                + "/" + Binder.getCallingPid();
+        sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SENDMSG_QUEUE, AudioSystem.FOR_VIBRATE_RINGING,
+                shouldRingSco ? AudioSystem.FORCE_BT_SCO : AudioSystem.FORCE_NONE, eventSource, 0);
 
         for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
             final boolean isMuted = isStreamMutedByRingerOrZenMode(streamType);
+            final boolean muteAllowedBySco =
+                    !(shouldRingSco && streamType == AudioSystem.STREAM_RING);
             final boolean shouldZenMute = shouldZenMuteStream(streamType);
             final boolean shouldMute = shouldZenMute || (ringerModeMute
-                    && isStreamAffectedByRingerMode(streamType));
+                    && isStreamAffectedByRingerMode(streamType) && muteAllowedBySco);
             if (isMuted == shouldMute) continue;
             if (!shouldMute) {
                 // unmute
@@ -3191,6 +3201,8 @@ public class AudioService extends IAudioService.Stub
                 AudioSystem.FOR_COMMUNICATION, mForcedUseForComm, eventSource, 0);
         sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SENDMSG_QUEUE,
                 AudioSystem.FOR_RECORD, mForcedUseForComm, eventSource, 0);
+        // Un-mute ringtone stream volume
+        setRingerModeInt(getRingerModeInternal(), false);
     }
 
     /** @see AudioManager#isBluetoothScoOn() */
@@ -4783,7 +4795,7 @@ public class AudioService extends IAudioService.Stub
         }
 
         public boolean setIndex(int index, int device, String caller) {
-            boolean changed = false;
+            boolean changed;
             int oldIndex;
             synchronized (mSettingsLock) {
                 synchronized (VolumeStreamState.class) {
@@ -4800,7 +4812,7 @@ public class AudioService extends IAudioService.Stub
                     // - there is no volume index stored for this device on alias stream.
                     // If changing volume of current device, also change volume of current
                     // device on aliased stream
-                    final boolean currentDevice = (device == getDeviceForStream(mStreamType));
+                    final boolean isCurrentDevice = (device == getDeviceForStream(mStreamType));
                     final int numStreamTypes = AudioSystem.getNumStreamTypes();
                     for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
                         final VolumeStreamState aliasStreamState = mStreamStates[streamType];
@@ -4809,9 +4821,19 @@ public class AudioService extends IAudioService.Stub
                                 (changed || !aliasStreamState.hasIndexForDevice(device))) {
                             final int scaledIndex = rescaleIndex(index, mStreamType, streamType);
                             aliasStreamState.setIndex(scaledIndex, device, caller);
-                            if (currentDevice) {
+                            if (isCurrentDevice) {
                                 aliasStreamState.setIndex(scaledIndex,
                                         getDeviceForStream(streamType), caller);
+                            }
+                        }
+                    }
+                    // Mirror changes in SPEAKER ringtone volume on SCO when
+                    if (changed && mStreamType == AudioSystem.STREAM_RING
+                            && device == AudioSystem.DEVICE_OUT_SPEAKER) {
+                        for (int i = 0; i < mIndexMap.size(); i++) {
+                            int otherDevice = mIndexMap.keyAt(i);
+                            if ((otherDevice & AudioSystem.DEVICE_OUT_ALL_SCO) != 0) {
+                                mIndexMap.put(otherDevice, index);
                             }
                         }
                     }
