@@ -98,10 +98,6 @@ public class ZygoteInit {
 
     private static final String SOCKET_NAME_ARG = "--socket-name=";
 
-    /* Dexopt flag to disable hidden API access checks when dexopting SystemServer.
-     * Must be kept in sync with com.android.server.pm.Installer. */
-    private static final int DEXOPT_DISABLE_HIDDEN_API_CHECKS = 1 << 10;
-
     /**
      * Used to pre-load resources.
      */
@@ -569,10 +565,7 @@ public class ZygoteInit {
             if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
                 final String packageName = "*";
                 final String outputPath = null;
-                // Dexopt with a flag which lifts restrictions on hidden API usage.
-                // Offending methods would otherwise be re-verified at runtime and
-                // we want to avoid the performance overhead of that.
-                final int dexFlags = DEXOPT_DISABLE_HIDDEN_API_CHECKS;
+                final int dexFlags = 0;
                 final String compilerFilter = systemServerFilter;
                 final String uuid = StorageManager.UUID_PRIVATE_INTERNAL;
                 final String seInfo = null;
