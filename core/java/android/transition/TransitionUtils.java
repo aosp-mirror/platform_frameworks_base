@@ -20,14 +20,13 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.TypeEvaluator;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Picture;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.view.DisplayListCanvas;
-import android.view.RenderNode;
-import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -128,10 +127,8 @@ public class TransitionUtils {
         }
         int bitmapWidth = (int) (width * scale);
         int bitmapHeight = (int) (height * scale);
-        final RenderNode node = RenderNode.create("TransitionUtils", hostView);
-        node.setLeftTopRightBottom(0, 0, width, height);
-        node.setClipToBounds(false);
-        final DisplayListCanvas canvas = node.start(width, height);
+        final Picture picture = new Picture();
+        final Canvas canvas = picture.beginRecording(width, height);
         // Do stuff with the canvas
         Rect existingBounds = drawable.getBounds();
         int left = existingBounds.left;
@@ -141,8 +138,8 @@ public class TransitionUtils {
         drawable.setBounds(0, 0, bitmapWidth, bitmapHeight);
         drawable.draw(canvas);
         drawable.setBounds(left, top, right, bottom);
-        node.end(canvas);
-        return ThreadedRenderer.createHardwareBitmap(node, width, height);
+        picture.endRecording();
+        return Bitmap.createBitmap(picture);
     }
 
     /**
@@ -183,14 +180,12 @@ public class TransitionUtils {
             matrix.postTranslate(-bounds.left, -bounds.top);
             matrix.postScale(scale, scale);
 
-            final RenderNode node = RenderNode.create("TransitionUtils", view);
-            node.setLeftTopRightBottom(0, 0, bitmapWidth, bitmapHeight);
-            node.setClipToBounds(false);
-            final DisplayListCanvas canvas = node.start(bitmapWidth, bitmapHeight);
+            final Picture picture = new Picture();
+            final Canvas canvas = picture.beginRecording(bitmapWidth, bitmapHeight);
             canvas.concat(matrix);
             view.draw(canvas);
-            node.end(canvas);
-            bitmap = ThreadedRenderer.createHardwareBitmap(node, bitmapWidth, bitmapHeight);
+            picture.endRecording();
+            bitmap = Bitmap.createBitmap(picture);
         }
         if (addToOverlay) {
             sceneRoot.getOverlay().remove(view);
