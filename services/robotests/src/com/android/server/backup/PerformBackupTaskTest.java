@@ -16,11 +16,13 @@
 
 package com.android.server.backup;
 
+import static com.android.server.backup.testing.BackupManagerServiceTestUtils.createBackupWakeLock;
+import static com.android.server.backup.testing.BackupManagerServiceTestUtils.setUpBackupManagerServiceBasics;
+import static com.android.server.backup.testing.BackupManagerServiceTestUtils.startBackupThreadAndGetLooper;
 import static com.android.server.backup.testing.TransportData.backupTransport;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -28,7 +30,6 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -41,7 +42,6 @@ import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 
 import android.app.Application;
-import android.app.IActivityManager;
 import android.app.IBackupAgent;
 import android.app.backup.BackupAgent;
 import android.app.backup.BackupDataInput;
@@ -52,12 +52,10 @@ import android.app.backup.FullBackupDataOutput;
 import android.app.backup.IBackupManager;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
-import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
@@ -65,7 +63,6 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
-import android.util.SparseArray;
 
 import com.android.internal.backup.IBackupTransport;
 import com.android.server.backup.internal.BackupHandler;
@@ -159,33 +156,24 @@ public class PerformBackupTaskTest {
         PackageManager packageManager = application.getPackageManager();
         mShadowPackageManager = Shadow.extract(packageManager);
 
-        PowerManager powerManager =
-                (PowerManager) application.getSystemService(Context.POWER_SERVICE);
-        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*backup*");
+        mWakeLock = createBackupWakeLock(application);
 
-        // Robolectric simulates multi-thread in a single-thread to avoid flakiness
-        HandlerThread backupThread = new HandlerThread("backup");
-        backupThread.setUncaughtExceptionHandler(
-                (t, e) -> fail("Uncaught exception " + e.getMessage()));
-        backupThread.start();
-        Looper backupLooper = backupThread.getLooper();
+        Looper backupLooper = startBackupThreadAndGetLooper();
         mShadowBackupLooper = shadowOf(backupLooper);
         mBackupHandler = new BackupHandler(mBackupManagerService, backupLooper);
 
         mBackupManager = spy(FakeIBackupManager.class);
 
-        when(mBackupManagerService.getTransportManager()).thenReturn(mTransportManager);
-        when(mBackupManagerService.getContext()).thenReturn(application);
-        when(mBackupManagerService.getPackageManager()).thenReturn(packageManager);
-        when(mBackupManagerService.getWakelock()).thenReturn(mWakeLock);
-        when(mBackupManagerService.getCurrentOpLock()).thenReturn(new Object());
-        when(mBackupManagerService.getQueueLock()).thenReturn(new Object());
+        setUpBackupManagerServiceBasics(
+                mBackupManagerService,
+                application,
+                mTransportManager,
+                packageManager,
+                mBackupHandler,
+                mWakeLock);
         when(mBackupManagerService.getBaseStateDir()).thenReturn(mBaseStateDir);
         when(mBackupManagerService.getDataDir()).thenReturn(dataDir);
-        when(mBackupManagerService.getCurrentOperations()).thenReturn(new SparseArray<>());
-        when(mBackupManagerService.getBackupHandler()).thenReturn(mBackupHandler);
         when(mBackupManagerService.getBackupManagerBinder()).thenReturn(mBackupManager);
-        when(mBackupManagerService.getActivityManager()).thenReturn(mock(IActivityManager.class));
     }
 
     @Test
@@ -280,6 +268,22 @@ public class PerformBackupTaskTest {
 
         verify(mListener).onFinished(any());
         verify(mObserver).backupFinished(eq(BackupManager.SUCCESS));
+    }
+
+    @Test
+    public void testRunTask_releasesWakeLock() throws Exception {
+        TransportMock transportMock = setUpTransport(mTransport);
+        setUpAgent(PACKAGE_1);
+        PerformBackupTask task =
+                createPerformBackupTask(
+                        transportMock.transportClient,
+                        mTransport.transportDirName,
+                        emptyList(),
+                        PACKAGE_1);
+
+        runTask(task);
+
+        assertThat(mWakeLock.isHeld()).isFalse();
     }
 
     @Test
