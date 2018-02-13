@@ -655,7 +655,7 @@ public class RecoverableKeyStoreManager {
                 // Ignore the exception to continue to recover the other application keys.
             }
         }
-        if (keyMaterialByAlias.isEmpty()) {
+        if (!applicationKeys.isEmpty() && keyMaterialByAlias.isEmpty()) {
             Log.e(TAG, "Failed to recover any of the application keys.");
             throw new ServiceSpecificException(ERROR_DECRYPTION_FAILED,
                     "Failed to recover any of the application keys.");
