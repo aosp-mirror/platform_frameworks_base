@@ -71,23 +71,19 @@
                 android:singleLine="true" />
         </LinearLayout>
 
-        <FrameLayout
+        <View
+            android:id="@+id/qs_drag_handle_view"
             android:layout_width="24dp"
-            android:layout_height="match_parent" >
-            <View
-                android:id="@+id/qs_drag_handle_view"
-                android:layout_width="match_parent"
-                android:layout_height="4dp"
-                android:layout_marginTop="28dp"
-                android:background="@drawable/qs_footer_drag_handle" />
-        </FrameLayout>
+            android:layout_height="4dp"
+            android:layout_gravity="center"
+            android:background="@drawable/qs_footer_drag_handle" />
 
-        <LinearLayout
+        <com.android.keyguard.AlphaOptimizedLinearLayout
             android:id="@+id/qs_footer_actions_container"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:gravity="end" >
+            android:gravity="center_vertical|end" >
             <com.android.systemui.statusbar.phone.MultiUserSwitch
                 android:id="@+id/multi_user_switch"
                 android:layout_width="48dp"
@@ -113,7 +109,7 @@
                 android:clipToPadding="false"
                 android:contentDescription="@string/accessibility_quick_settings_edit"
                 android:focusable="true"
-                android:padding="16dp"
+                android:padding="15dp"
                 android:src="@drawable/ic_mode_edit"
                 android:tint="?android:attr/colorForeground"/>
 
@@ -131,6 +127,7 @@
                     android:layout_height="match_parent"
                     android:background="@drawable/ripple_drawable"
                     android:contentDescription="@string/accessibility_quick_settings_settings"
+                    android:padding="15dp"
                     android:src="@drawable/ic_settings_16dp"
                     android:tint="?android:attr/colorForeground"/>
 
@@ -145,7 +142,7 @@
                     android:visibility="invisible"/>
 
             </com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
-        </LinearLayout>
+        </com.android.keyguard.AlphaOptimizedLinearLayout>
     </LinearLayout>
 
 </com.android.systemui.qs.QSFooterImpl>
