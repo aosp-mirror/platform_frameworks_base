@@ -884,7 +884,7 @@
     <dimen name="nav_quick_scrub_track_thickness">2dp</dimen>
 
     <!-- Home button padding for sizing -->
-    <dimen name="home_padding">15dp</dimen>
+    <dimen name="home_padding">16dp</dimen>
 
     <!-- Smart reply button -->
     <dimen name="smart_reply_button_corner_radius">24dip</dimen>
