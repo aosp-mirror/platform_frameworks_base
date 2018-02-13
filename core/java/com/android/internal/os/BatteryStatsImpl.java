@@ -5283,6 +5283,18 @@ public class BatteryStatsImpl extends BatteryStats {
                 case TelephonyManager.NETWORK_TYPE_HSPAP:
                     bin = DATA_CONNECTION_HSPAP;
                     break;
+                case TelephonyManager.NETWORK_TYPE_GSM:
+                    bin = DATA_CONNECTION_GSM;
+                    break;
+                case TelephonyManager.NETWORK_TYPE_TD_SCDMA:
+                    bin = DATA_CONNECTION_TD_SCDMA;
+                    break;
+                case TelephonyManager.NETWORK_TYPE_IWLAN:
+                    bin = DATA_CONNECTION_IWLAN;
+                    break;
+                case TelephonyManager.NETWORK_TYPE_LTE_CA:
+                    bin = DATA_CONNECTION_LTE_CA;
+                    break;
                 default:
                     bin = DATA_CONNECTION_OTHER;
                     break;
