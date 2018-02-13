@@ -55,10 +55,11 @@ public class UiccSlotInfo implements Parcelable {
     /** Card state restricted. */
     public static final int CARD_STATE_INFO_RESTRICTED = 4;
 
-    public final boolean isActive;
-    public final boolean isEuicc;
-    public final String cardId;
-    public final @CardStateInfo int cardStateInfo;
+    private final boolean mIsActive;
+    private final boolean mIsEuicc;
+    private final String mCardId;
+    private final @CardStateInfo int mCardStateInfo;
+    private final int mLogicalSlotIdx;
 
     public static final Creator<UiccSlotInfo> CREATOR = new Creator<UiccSlotInfo>() {
         @Override
@@ -73,18 +74,20 @@ public class UiccSlotInfo implements Parcelable {
     };
 
     private UiccSlotInfo(Parcel in) {
-        isActive = in.readByte() != 0;
-        isEuicc = in.readByte() != 0;
-        cardId = in.readString();
-        cardStateInfo = in.readInt();
+        mIsActive = in.readByte() != 0;
+        mIsEuicc = in.readByte() != 0;
+        mCardId = in.readString();
+        mCardStateInfo = in.readInt();
+        mLogicalSlotIdx = in.readInt();
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeByte((byte) (isActive ? 1 : 0));
-        dest.writeByte((byte) (isEuicc ? 1 : 0));
-        dest.writeString(cardId);
-        dest.writeInt(cardStateInfo);
+        dest.writeByte((byte) (mIsActive ? 1 : 0));
+        dest.writeByte((byte) (mIsEuicc ? 1 : 0));
+        dest.writeString(mCardId);
+        dest.writeInt(mCardStateInfo);
+        dest.writeInt(mLogicalSlotIdx);
     }
 
     @Override
@@ -93,28 +96,33 @@ public class UiccSlotInfo implements Parcelable {
     }
 
     public UiccSlotInfo(boolean isActive, boolean isEuicc, String cardId,
-            @CardStateInfo int cardStateInfo) {
-        this.isActive = isActive;
-        this.isEuicc = isEuicc;
-        this.cardId = cardId;
-        this.cardStateInfo = cardStateInfo;
+            @CardStateInfo int cardStateInfo, int logicalSlotIdx) {
+        this.mIsActive = isActive;
+        this.mIsEuicc = isEuicc;
+        this.mCardId = cardId;
+        this.mCardStateInfo = cardStateInfo;
+        this.mLogicalSlotIdx = logicalSlotIdx;
     }
 
     public boolean getIsActive() {
-        return isActive;
+        return mIsActive;
     }
 
     public boolean getIsEuicc() {
-        return isEuicc;
+        return mIsEuicc;
     }
 
     public String getCardId() {
-        return cardId;
+        return mCardId;
     }
 
     @CardStateInfo
     public int getCardStateInfo() {
-        return cardStateInfo;
+        return mCardStateInfo;
+    }
+
+    public int getLogicalSlotIdx() {
+        return mLogicalSlotIdx;
     }
 
     @Override
@@ -127,32 +135,36 @@ public class UiccSlotInfo implements Parcelable {
         }
 
         UiccSlotInfo that = (UiccSlotInfo) obj;
-        return (isActive == that.isActive)
-                && (isEuicc == that.isEuicc)
-                && (cardId == that.cardId)
-                && (cardStateInfo == that.cardStateInfo);
+        return (mIsActive == that.mIsActive)
+                && (mIsEuicc == that.mIsEuicc)
+                && (mCardId == that.mCardId)
+                && (mCardStateInfo == that.mCardStateInfo)
+                && (mLogicalSlotIdx == that.mLogicalSlotIdx);
     }
 
     @Override
     public int hashCode() {
         int result = 1;
-        result = 31 * result + (isActive ? 1 : 0);
-        result = 31 * result + (isEuicc ? 1 : 0);
-        result = 31 * result + Objects.hashCode(cardId);
-        result = 31 * result + cardStateInfo;
+        result = 31 * result + (mIsActive ? 1 : 0);
+        result = 31 * result + (mIsEuicc ? 1 : 0);
+        result = 31 * result + Objects.hashCode(mCardId);
+        result = 31 * result + mCardStateInfo;
+        result = 31 * result + mLogicalSlotIdx;
         return result;
     }
 
     @Override
     public String toString() {
-        return "UiccSlotInfo (isActive="
-                + isActive
-                + ", isEuicc="
-                + isEuicc
-                + ", cardId="
-                + cardId
+        return "UiccSlotInfo (mIsActive="
+                + mIsActive
+                + ", mIsEuicc="
+                + mIsEuicc
+                + ", mCardId="
+                + mCardId
                 + ", cardState="
-                + cardStateInfo
+                + mCardStateInfo
+                + ", phoneId="
+                + mLogicalSlotIdx
                 + ")";
     }
 }
