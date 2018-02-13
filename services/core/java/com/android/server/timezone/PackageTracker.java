@@ -59,7 +59,7 @@ public class PackageTracker {
     private static final String TAG = "timezone.PackageTracker";
 
     private final PackageManagerHelper mPackageManagerHelper;
-    private final IntentHelper mIntentHelper;
+    private final PackageTrackerIntentHelper mIntentHelper;
     private final ConfigHelper mConfigHelper;
     private final PackageStatusStorage mPackageStatusStorage;
     private final Clock mElapsedRealtimeClock;
@@ -103,13 +103,13 @@ public class PackageTracker {
                 helperImpl /* configHelper */,
                 helperImpl /* packageManagerHelper */,
                 new PackageStatusStorage(storageDir),
-                new IntentHelperImpl(context));
+                new PackageTrackerIntentHelperImpl(context));
     }
 
     // A constructor that can be used by tests to supply mocked / faked dependencies.
     PackageTracker(Clock elapsedRealtimeClock, ConfigHelper configHelper,
             PackageManagerHelper packageManagerHelper, PackageStatusStorage packageStatusStorage,
-            IntentHelper intentHelper) {
+            PackageTrackerIntentHelper intentHelper) {
         mElapsedRealtimeClock = elapsedRealtimeClock;
         mConfigHelper = configHelper;
         mPackageManagerHelper = packageManagerHelper;

@@ -111,7 +111,8 @@ public final class SelectionActionModeHelper {
         mSelectionTracker.onOriginalSelection(
                 getText(mTextView),
                 mTextView.getSelectionStart(),
-                mTextView.getSelectionEnd());
+                mTextView.getSelectionEnd(),
+                false /*isLink*/);
         cancelAsyncTask();
         if (skipTextClassification()) {
             startSelectionActionMode(null);
@@ -134,7 +135,11 @@ public final class SelectionActionModeHelper {
      * Starts Link ActionMode.
      */
     public void startLinkActionModeAsync(TextLinks.TextLink textLink) {
-        //TODO: tracking/logging
+        mSelectionTracker.onOriginalSelection(
+                getText(mTextView),
+                mTextView.getSelectionStart(),
+                mTextView.getSelectionEnd(),
+                true /*isLink*/);
         cancelAsyncTask();
         if (skipTextClassification()) {
             startLinkActionMode(null);
@@ -487,7 +492,8 @@ public final class SelectionActionModeHelper {
         /**
          * Called when the original selection happens, before smart selection is triggered.
          */
-        public void onOriginalSelection(CharSequence text, int selectionStart, int selectionEnd) {
+        public void onOriginalSelection(
+                CharSequence text, int selectionStart, int selectionEnd, boolean isLink) {
             // If we abandoned a selection and created a new one very shortly after, we may still
             // have a pending request to log ABANDON, which we flush here.
             mDelayedLogAbandon.flush();
@@ -496,7 +502,8 @@ public final class SelectionActionModeHelper {
             mOriginalEnd = mSelectionEnd = selectionEnd;
             mAllowReset = false;
             maybeInvalidateLogger();
-            mLogger.logSelectionStarted(text, selectionStart);
+            mLogger.logSelectionStarted(text, selectionStart,
+                    isLink ? SelectionEvent.INVOCATION_LINK : SelectionEvent.INVOCATION_MANUAL);
         }
 
         /**
@@ -679,7 +686,9 @@ public final class SelectionActionModeHelper {
             return Logger.WIDGET_UNSELECTABLE_TEXTVIEW;
         }
 
-        public void logSelectionStarted(CharSequence text, int index) {
+        public void logSelectionStarted(
+                CharSequence text, int index,
+                @SelectionEvent.InvocationMethod int invocationMethod) {
             try {
                 Preconditions.checkNotNull(text);
                 Preconditions.checkArgumentInRange(index, 0, text.length(), "index");
@@ -688,7 +697,7 @@ public final class SelectionActionModeHelper {
                 }
                 mTokenIterator.setText(mText);
                 mStartIndex = index;
-                mLogger.logSelectionStartedEvent(0);
+                mLogger.logSelectionStartedEvent(invocationMethod, 0);
             } catch (Exception e) {
                 // Avoid crashes due to logging.
                 Log.d(LOG_TAG, e.getMessage());

@@ -1112,8 +1112,8 @@ class SettingsProtoDumpUtil {
                 Settings.Global.ZRAM_ENABLED,
                 GlobalSettingsProto.ZRAM_ENABLED);
         dumpSetting(s, p,
-                Settings.Global.ENABLE_SMART_REPLIES_IN_NOTIFICATIONS,
-                GlobalSettingsProto.ENABLE_SMART_REPLIES_IN_NOTIFICATIONS);
+                Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS,
+                GlobalSettingsProto.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS);
         dumpSetting(s, p,
                 Settings.Global.SHOW_FIRST_CRASH_DIALOG,
                 GlobalSettingsProto.SHOW_FIRST_CRASH_DIALOG);

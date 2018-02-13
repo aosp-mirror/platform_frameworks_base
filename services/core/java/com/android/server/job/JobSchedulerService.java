@@ -2337,9 +2337,9 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 if (callingUid != Process.SYSTEM_UID) {
                     throw new SecurityException("Job has invalid flags");
                 }
-                if (job.hasLateConstraint() || job.hasEarlyConstraint()) {
-                    Slog.wtf(TAG, "Jobs with time-constraints mustn't have"
-                            +" FLAG_EXEMPT_FROM_APP_STANDBY. Job=" + job);
+                if (job.isPeriodic()) {
+                    Slog.wtf(TAG, "Periodic jobs mustn't have"
+                            + " FLAG_EXEMPT_FROM_APP_STANDBY. Job=" + job);
                 }
             }
         }

@@ -71,6 +71,7 @@ public abstract class Logger {
     public static final String WIDGET_CUSTOM_UNSELECTABLE_TEXTVIEW = "nosel-customview";
     public static final String WIDGET_UNKNOWN = "unknown";
 
+    private @SelectionEvent.InvocationMethod int mInvocationMethod;
     private SelectionEvent mPrevEvent;
     private SelectionEvent mSmartEvent;
     private SelectionEvent mStartEvent;
@@ -124,16 +125,19 @@ public abstract class Logger {
     /**
      * Logs a "selection started" event.
      *
+     * @param invocationMethod  the way the selection was triggered
      * @param start  the token index of the selected token
      */
-    public final void logSelectionStartedEvent(int start) {
+    public final void logSelectionStartedEvent(
+            @SelectionEvent.InvocationMethod int invocationMethod, int start) {
         if (mConfig == null) {
             return;
         }
 
+        mInvocationMethod = invocationMethod;
         logEvent(new SelectionEvent(
                 start, start + 1, SelectionEvent.EVENT_SELECTION_STARTED,
-                TextClassifier.TYPE_UNKNOWN, NO_SIGNATURE, mConfig));
+                TextClassifier.TYPE_UNKNOWN, mInvocationMethod, NO_SIGNATURE, mConfig));
     }
 
     /**
@@ -152,7 +156,7 @@ public abstract class Logger {
 
         logEvent(new SelectionEvent(
                 start, end, SelectionEvent.EVENT_SELECTION_MODIFIED,
-                TextClassifier.TYPE_UNKNOWN, NO_SIGNATURE, mConfig));
+                TextClassifier.TYPE_UNKNOWN, mInvocationMethod, NO_SIGNATURE, mConfig));
     }
 
     /**
@@ -179,7 +183,7 @@ public abstract class Logger {
         final String signature = classification.getSignature();
         logEvent(new SelectionEvent(
                 start, end, SelectionEvent.EVENT_SELECTION_MODIFIED,
-                entityType, signature, mConfig));
+                entityType, mInvocationMethod, signature, mConfig));
     }
 
     /**
@@ -213,7 +217,8 @@ public abstract class Logger {
                 ? selection.getEntity(0)
                 : TextClassifier.TYPE_UNKNOWN;
         final String signature = selection.getSignature();
-        logEvent(new SelectionEvent(start, end, eventType, entityType, signature, mConfig));
+        logEvent(new SelectionEvent(start, end, eventType, entityType, mInvocationMethod, signature,
+                mConfig));
     }
 
     /**
@@ -234,7 +239,8 @@ public abstract class Logger {
         }
 
         logEvent(new SelectionEvent(
-                start, end, actionType, TextClassifier.TYPE_UNKNOWN, NO_SIGNATURE, mConfig));
+                start, end, actionType, TextClassifier.TYPE_UNKNOWN, mInvocationMethod,
+                NO_SIGNATURE, mConfig));
     }
 
     /**
@@ -265,7 +271,8 @@ public abstract class Logger {
                 ? classification.getEntity(0)
                 : TextClassifier.TYPE_UNKNOWN;
         final String signature = classification.getSignature();
-        logEvent(new SelectionEvent(start, end, actionType, entityType, signature, mConfig));
+        logEvent(new SelectionEvent(start, end, actionType, entityType, mInvocationMethod,
+                signature, mConfig));
     }
 
     private void logEvent(@NonNull SelectionEvent event) {

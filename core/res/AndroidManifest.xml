@@ -573,6 +573,10 @@
     <protected-broadcast android:name="android.media.tv.action.CHANNEL_BROWSABLE_REQUESTED" />
     <protected-broadcast android:name="com.android.server.InputMethodManagerService.SHOW_INPUT_METHOD_PICKER" />
 
+    <!-- Time zone rules update intents fired by the system server -->
+    <protected-broadcast android:name="com.android.intent.action.timezone.RULES_UPDATE_OPERATION" />
+    <protected-broadcast android:name="com.android.intent.action.timezone.TRIGGER_RULES_UPDATE_CHECK" />
+
     <!-- Made protected in P (was introduced in JB-MR2) -->
     <protected-broadcast android:name="android.intent.action.GET_RESTRICTION_ENTRIES" />
     <protected-broadcast android:name="android.telephony.euicc.action.OTA_STATUS_CHANGED" />
@@ -1823,19 +1827,20 @@
     <permission android:name="android.permission.BIND_TELEPHONY_NETWORK_SERVICE"
                 android:protectionLevel="signature" />
 
-    <!-- Allows an application to manage embedded subscriptions (those on a eUICC) through
-         EuiccManager APIs.
+    <!-- @SystemApi Allows an application to manage embedded subscriptions (those on a eUICC)
+         through EuiccManager APIs.
          <p>Protection level: signature|privileged|development
-         TODO(b/35851809): Mark this as a SystemApi and remove com. prefix.
-         @hide -->
-    <permission android:name="com.android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS"
+         @hide
+    -->
+    <permission android:name="android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS"
                 android:protectionLevel="signature|privileged|development" />
 
-    <!-- Must be required by an EuiccService to ensure that only the system can bind to it.
+    <!-- @SystemApi Must be required by an EuiccService to ensure that only the system can bind to
+         it.
          <p>Protection level: signature
-         TODO(b/35851809): Mark this as a SystemApi and remove com. prefix.
-         @hide -->
-    <permission android:name="com.android.permission.BIND_EUICC_SERVICE"
+         @hide
+    -->
+    <permission android:name="android.permission.BIND_EUICC_SERVICE"
                 android:protectionLevel="signature" />
 
     <!-- ================================== -->
@@ -2966,10 +2971,15 @@
     <permission android:name="android.permission.MANAGE_SCOPED_ACCESS_DIRECTORY_PERMISSIONS"
         android:protectionLevel="signature" />
 
-    <!-- @SystemApi Allows an application to delete cache files.
-    <p>Not for use by third-party applications. -->
+    <!-- @SystemApi Old permission for deleting an app's cache files, no longer used,
+         but signals for us to quietly ignore calls instead of throwing an exception. -->
     <permission android:name="android.permission.DELETE_CACHE_FILES"
         android:protectionLevel="signature|privileged" />
+
+    <!-- Allows an application to delete cache files.
+         @hide -->
+    <permission android:name="android.permission.INTERNAL_DELETE_CACHE_FILES"
+        android:protectionLevel="signature" />
 
     <!-- @SystemApi Allows an application to delete packages.
          <p>Not for use by third-party applications.

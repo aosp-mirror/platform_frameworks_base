@@ -18,7 +18,6 @@ package com.android.frameworks.perftests.amteststestapp;
 
 import android.app.Activity;
 import android.os.Looper;
-import android.os.MessageQueue;
 
 import com.android.frameworks.perftests.am.util.Constants;
 import com.android.frameworks.perftests.am.util.Utils;

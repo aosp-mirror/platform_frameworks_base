@@ -1372,9 +1372,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>The origin for {@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation}.</p>
      * <p>Different calibration methods and use cases can produce better or worse results
      * depending on the selected coordinate origin.</p>
-     * <p>For devices designed to support the MOTION_TRACKING capability, the GYROSCOPE origin
-     * makes device calibration and later usage by applications combining camera and gyroscope
-     * information together simpler.</p>
      * <p><b>Possible values:</b>
      * <ul>
      *   <li>{@link #LENS_POSE_REFERENCE_PRIMARY_CAMERA PRIMARY_CAMERA}</li>

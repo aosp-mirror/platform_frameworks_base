@@ -43,9 +43,9 @@ import android.testing.TestableLooper;
 import android.util.Log;
 
 import com.android.internal.telephony.cdma.EriInfo;
+import com.android.settingslib.graph.SignalDrawable;
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.phone.SignalDrawable;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;

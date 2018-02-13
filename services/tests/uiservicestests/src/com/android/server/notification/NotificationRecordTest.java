@@ -15,10 +15,13 @@
  */
 package com.android.server.notification;
 
+import static android.app.NotificationChannel.USER_LOCKED_IMPORTANCE;
 import static android.service.notification.NotificationListenerService.Ranking
         .USER_SENTIMENT_NEGATIVE;
 import static android.service.notification.NotificationListenerService.Ranking
         .USER_SENTIMENT_NEUTRAL;
+import static android.service.notification.NotificationListenerService.Ranking
+        .USER_SENTIMENT_POSITIVE;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -315,7 +318,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
     @Test
     public void testImportance_locked_preUpgrade() throws Exception {
         defaultChannel.setImportance(NotificationManager.IMPORTANCE_LOW);
-        defaultChannel.lockFields(NotificationChannel.USER_LOCKED_IMPORTANCE);
+        defaultChannel.lockFields(USER_LOCKED_IMPORTANCE);
         StatusBarNotification sbn = getNotification(true /*preO */, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /* defaultLights */, null /* group */);
@@ -327,7 +330,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
     @Test
     public void testImportance_locked_unspecified_preUpgrade() throws Exception {
         defaultChannel.setImportance(NotificationManager.IMPORTANCE_UNSPECIFIED);
-        defaultChannel.lockFields(NotificationChannel.USER_LOCKED_IMPORTANCE);
+        defaultChannel.lockFields(USER_LOCKED_IMPORTANCE);
         StatusBarNotification sbn = getNotification(true /*preO */, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /* defaultLights */, null /* group */);
@@ -548,5 +551,24 @@ public class NotificationRecordTest extends UiServiceTestCase {
         record.applyAdjustments();
 
         assertEquals(USER_SENTIMENT_NEGATIVE, record.getUserSentiment());
+    }
+
+    @Test
+    public void testUserSentiment_userLocked() throws Exception {
+        channel.lockFields(USER_LOCKED_IMPORTANCE);
+        StatusBarNotification sbn = getNotification(false /*preO */, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertEquals(USER_SENTIMENT_POSITIVE, record.getUserSentiment());
+
+        Bundle signals = new Bundle();
+        signals.putInt(Adjustment.KEY_USER_SENTIMENT, USER_SENTIMENT_NEGATIVE);
+        record.addAdjustment(new Adjustment(pkg, record.getKey(), signals, null, sbn.getUserId()));
+
+        record.applyAdjustments();
+
+        assertEquals(USER_SENTIMENT_POSITIVE, record.getUserSentiment());
     }
 }

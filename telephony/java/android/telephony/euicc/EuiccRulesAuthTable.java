@@ -16,6 +16,7 @@
 package android.telephony.euicc;
 
 import android.annotation.IntDef;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.service.carrier.CarrierIdentifier;
@@ -27,20 +28,21 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This represents the RAT (Rules Authorisation Table) stored on eUICC.
- *
  * @hide
- *
- * TODO(b/35851809): Make this a @SystemApi.
  */
+@SystemApi
 public final class EuiccRulesAuthTable implements Parcelable {
     /** Profile policy rule flags */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = { "POLICY_RULE_FLAG_" }, value = {
             POLICY_RULE_FLAG_CONSENT_REQUIRED
     })
+    /** @hide */
     public @interface PolicyRuleFlag {}
 
     /** User consent is required to install the profile. */
@@ -89,12 +91,14 @@ public final class EuiccRulesAuthTable implements Parcelable {
          * @throws ArrayIndexOutOfBoundsException If the {@code mPosition} is larger than the size
          *     this table.
          */
-        public Builder add(int policyRules, CarrierIdentifier[] carrierId, int policyRuleFlags) {
+        public Builder add(int policyRules, List<CarrierIdentifier> carrierId, int policyRuleFlags) {
             if (mPosition >= mPolicyRules.length) {
                 throw new ArrayIndexOutOfBoundsException(mPosition);
             }
             mPolicyRules[mPosition] = policyRules;
-            mCarrierIds[mPosition] = carrierId;
+            if (carrierId != null && carrierId.size() > 0) {
+                mCarrierIds[mPosition] = carrierId.toArray(new CarrierIdentifier[carrierId.size()]);
+            }
             mPolicyRuleFlags[mPosition] = policyRuleFlags;
             mPosition++;
             return this;

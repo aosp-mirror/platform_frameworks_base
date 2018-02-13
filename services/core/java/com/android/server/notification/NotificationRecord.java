@@ -15,6 +15,7 @@
  */
 package com.android.server.notification;
 
+import static android.app.NotificationChannel.USER_LOCKED_IMPORTANCE;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
@@ -22,6 +23,8 @@ import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.service.notification.NotificationListenerService.Ranking
         .USER_SENTIMENT_NEUTRAL;
+import static android.service.notification.NotificationListenerService.Ranking
+        .USER_SENTIMENT_POSITIVE;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -163,6 +166,7 @@ public final class NotificationRecord {
         mLight = calculateLights();
         mAdjustments = new ArrayList<>();
         mStats = new NotificationStats();
+        calculateUserSentiment();
     }
 
     private boolean isPreChannelsNotification() {
@@ -320,7 +324,7 @@ public final class NotificationRecord {
         if (mPreChannelsNotification
                 && (importance == IMPORTANCE_UNSPECIFIED
                 || (getChannel().getUserLockedFields()
-                & NotificationChannel.USER_LOCKED_IMPORTANCE) == 0)) {
+                & USER_LOCKED_IMPORTANCE) == 0)) {
             if (!stats.isNoisy && requestedImportance > IMPORTANCE_LOW) {
                 requestedImportance = IMPORTANCE_LOW;
             }
@@ -585,8 +589,12 @@ public final class NotificationRecord {
                     setOverrideGroupKey(groupOverrideKey);
                 }
                 if (signals.containsKey(Adjustment.KEY_USER_SENTIMENT)) {
-                    setUserSentiment(adjustment.getSignals().getInt(
-                            Adjustment.KEY_USER_SENTIMENT, USER_SENTIMENT_NEUTRAL));
+                    // Only allow user sentiment update from assistant if user hasn't already
+                    // expressed a preference for this channel
+                    if ((getChannel().getUserLockedFields() & USER_LOCKED_IMPORTANCE) == 0) {
+                        setUserSentiment(adjustment.getSignals().getInt(
+                                Adjustment.KEY_USER_SENTIMENT, USER_SENTIMENT_NEUTRAL));
+                    }
                 }
             }
         }
@@ -845,10 +853,6 @@ public final class NotificationRecord {
         }
     }
 
-    public boolean isImportanceFromUser() {
-        return mImportance == mUserImportance;
-    }
-
     public NotificationChannel getChannel() {
         return mChannel;
     }
@@ -857,6 +861,7 @@ public final class NotificationRecord {
         if (channel != null) {
             mChannel = channel;
             calculateImportance();
+            calculateUserSentiment();
         }
     }
 
@@ -898,6 +903,12 @@ public final class NotificationRecord {
 
     protected void setSnoozeCriteria(ArrayList<SnoozeCriterion> snoozeCriteria) {
         mSnoozeCriteria = snoozeCriteria;
+    }
+
+    private void calculateUserSentiment() {
+        if ((getChannel().getUserLockedFields() & USER_LOCKED_IMPORTANCE) != 0) {
+            mUserSentiment = USER_SENTIMENT_POSITIVE;
+        }
     }
 
     private void setUserSentiment(int userSentiment) {

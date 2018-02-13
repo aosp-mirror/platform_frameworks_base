@@ -7871,6 +7871,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 structure.setAutofillHints(getAutofillHints());
                 structure.setAutofillValue(getAutofillValue());
             }
+            structure.setImportantForAutofill(getImportantForAutofill());
         }
 
         int ignoredParentLeft = 0;
@@ -8364,6 +8365,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (entry != null && pkg != null && pkg.equals(mContext.getPackageName())) {
                 return true;
             }
+        }
+
+        // If the app developer explicitly set hints for it, it's important.
+        if (getAutofillHints() != null) {
+            return true;
         }
 
         // Otherwise, assume it's not important...

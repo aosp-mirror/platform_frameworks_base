@@ -220,7 +220,7 @@ public class SettingsBackupTest {
                     Settings.Global.ENABLE_DELETION_HELPER_NO_THRESHOLD_TOGGLE,
                     Settings.Global.ENABLE_DISKSTATS_LOGGING,
                     Settings.Global.ENABLE_EPHEMERAL_FEATURE,
-                    Settings.Global.ENABLE_SMART_REPLIES_IN_NOTIFICATIONS,
+                    Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS,
                     Settings.Global.ENHANCED_4G_MODE_ENABLED,
                     Settings.Global.EPHEMERAL_COOKIE_MAX_SIZE_BYTES,
                     Settings.Global.ERROR_LOGCAT_PREFIX,

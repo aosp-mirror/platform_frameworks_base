@@ -2108,8 +2108,6 @@ public abstract class PackageManager {
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
      * supports embedded subscriptions on eUICCs.
-     * TODO(b/35851809): Make this public.
-     * @hide
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_TELEPHONY_EUICC = "android.hardware.telephony.euicc";

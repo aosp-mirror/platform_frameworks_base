@@ -16,18 +16,12 @@
 
 package android.util;
 
-import static android.os.Process.FIRST_APPLICATION_UID;
-
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
-import android.os.Process;
-
-import com.android.internal.annotations.GuardedBy;
-
-import dalvik.system.CloseGuard;
 
 import libcore.io.IoUtils;
+import dalvik.system.CloseGuard;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -55,18 +49,13 @@ import java.util.UUID;
  */
 public final class MemoryIntArray implements Parcelable, Closeable {
     private static final String TAG = "MemoryIntArray";
-    private static final boolean DEBUG = Process.myUid() < FIRST_APPLICATION_UID;
 
     private static final int MAX_SIZE = 1024;
 
-    private final Object mLock = new Object();
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
     private final boolean mIsOwner;
     private final long mMemoryAddr;
-
-    /** Fd for the shared memory object, -1 when closed */
-    @GuardedBy("mLock")
     private int mFd = -1;
 
     /**
@@ -85,7 +74,6 @@ public final class MemoryIntArray implements Parcelable, Closeable {
         mFd = nativeCreate(name, size);
         mMemoryAddr = nativeOpen(mFd, mIsOwner);
         mCloseGuard.open("close");
-        if (DEBUG) Log.i(TAG, "created " + getString());
     }
 
     private MemoryIntArray(Parcel parcel) throws IOException {
@@ -97,8 +85,6 @@ public final class MemoryIntArray implements Parcelable, Closeable {
         mFd = pfd.detachFd();
         mMemoryAddr = nativeOpen(mFd, mIsOwner);
         mCloseGuard.open("close");
-
-        if (DEBUG) Log.i(TAG, "created from parcel " + getString());
     }
 
     /**
@@ -155,31 +141,11 @@ public final class MemoryIntArray implements Parcelable, Closeable {
      */
     @Override
     public void close() throws IOException {
-        synchronized (mLock) {
-            if (!isClosed()) {
-                if (DEBUG) {
-                    try {
-                        throw new Exception();
-                    } catch (Exception here) {
-                        Log.i(TAG, "closing " + getString(), here);
-                    }
-                }
-                nativeClose(mFd, mMemoryAddr, mIsOwner);
-                mFd = -1;
-                mCloseGuard.close();
-            } else {
-                try {
-                    throw new Exception();
-                } catch (Exception here) {
-                    if (DEBUG) Log.i(TAG, getString() + " already closed", here);
-                }
-            }
+        if (!isClosed()) {
+            nativeClose(mFd, mMemoryAddr, mIsOwner);
+            mFd = -1;
+            mCloseGuard.close();
         }
-    }
-
-    private String getString() {
-        return this.getClass().getSimpleName() + "@" + System.identityHashCode(this)
-                + " mMemoryAddr=" + mMemoryAddr + " mFd=" + mFd;
     }
 
     /**
@@ -196,9 +162,7 @@ public final class MemoryIntArray implements Parcelable, Closeable {
                 mCloseGuard.warnIfOpen();
             }
 
-            if (!isClosed()) {
-                IoUtils.closeQuietly(this);
-            }
+            IoUtils.closeQuietly(this);
         } finally {
             super.finalize();
         }
@@ -242,8 +206,7 @@ public final class MemoryIntArray implements Parcelable, Closeable {
 
     private void enforceNotClosed() {
         if (isClosed()) {
-            throw new IllegalStateException("cannot interact with a closed instance "
-                    + getString());
+            throw new IllegalStateException("cannot interact with a closed instance");
         }
     }
 

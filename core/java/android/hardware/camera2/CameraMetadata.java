@@ -342,7 +342,7 @@ public abstract class CameraMetadata<TKey> {
     /**
      * <p>The value of {@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation} is relative to the optical center of
      * the largest camera device facing the same direction as this camera.</p>
-     * <p>This default value for API levels before Android P.</p>
+     * <p>This is the default value for API levels before Android P.</p>
      *
      * @see CameraCharacteristics#LENS_POSE_TRANSLATION
      * @see CameraCharacteristics#LENS_POSE_REFERENCE
@@ -352,7 +352,6 @@ public abstract class CameraMetadata<TKey> {
     /**
      * <p>The value of {@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation} is relative to the position of the
      * primary gyroscope of this Android device.</p>
-     * <p>This is the value reported by all devices that support the MOTION_TRACKING capability.</p>
      *
      * @see CameraCharacteristics#LENS_POSE_TRANSLATION
      * @see CameraCharacteristics#LENS_POSE_REFERENCE
@@ -801,46 +800,12 @@ public abstract class CameraMetadata<TKey> {
     public static final int REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO = 9;
 
     /**
-     * <p>The device supports controls and metadata required for accurate motion tracking for
-     * use cases such as augmented reality, electronic image stabilization, and so on.</p>
-     * <p>This means this camera device has accurate optical calibration and timestamps relative
-     * to the inertial sensors.</p>
-     * <p>This capability requires the camera device to support the following:</p>
-     * <ul>
-     * <li>Capture request templates {@link android.hardware.camera2.CameraDevice#TEMPLATE_MOTION_TRACKING_PREVIEW } and {@link android.hardware.camera2.CameraDevice#TEMPLATE_MOTION_TRACKING_BEST } are defined.</li>
-     * <li>The stream configurations listed in {@link android.hardware.camera2.CameraDevice#createCaptureSession } for MOTION_TRACKING are
-     *   supported, either at 30 or 60fps maximum frame rate.</li>
-     * <li>The following camera characteristics and capture result metadata are provided:<ul>
-     * <li>{@link CameraCharacteristics#LENS_INTRINSIC_CALIBRATION android.lens.intrinsicCalibration}</li>
-     * <li>{@link CameraCharacteristics#LENS_RADIAL_DISTORTION android.lens.radialDistortion}</li>
-     * <li>{@link CameraCharacteristics#LENS_POSE_ROTATION android.lens.poseRotation}</li>
-     * <li>{@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation}</li>
-     * <li>{@link CameraCharacteristics#LENS_POSE_REFERENCE android.lens.poseReference} with value GYROSCOPE</li>
-     * </ul>
-     * </li>
-     * <li>The {@link CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE android.sensor.info.timestampSource} field has value <code>REALTIME</code>. When compared to
-     *   timestamps from the device's gyroscopes, the clock difference for events occuring at
-     *   the same actual time instant will be less than 1 ms.</li>
-     * <li>The value of the {@link CaptureResult#SENSOR_ROLLING_SHUTTER_SKEW android.sensor.rollingShutterSkew} field is accurate to within 1 ms.</li>
-     * <li>The value of {@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime} is guaranteed to be available in the
-     *   capture result.</li>
-     * <li>The {@link CaptureRequest#CONTROL_CAPTURE_INTENT android.control.captureIntent} control supports MOTION_TRACKING to limit maximum
-     *   exposure to 20 milliseconds.</li>
-     * <li>The stream configurations required for MOTION_TRACKING (listed at {@link android.hardware.camera2.CameraDevice#createCaptureSession }) can operate at least at
-     *   30fps; optionally, they can operate at 60fps, and '[60, 60]' is listed in
-     *   {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES android.control.aeAvailableTargetFpsRanges}.</li>
-     * </ul>
+     * <p>The camera device supports the MOTION_TRACKING value for
+     * {@link CaptureRequest#CONTROL_CAPTURE_INTENT android.control.captureIntent}, which limits maximum exposure time to 20 ms.</p>
+     * <p>This limits the motion blur of capture images, resulting in better image tracking
+     * results for use cases such as image stabilization or augmented reality.</p>
      *
-     * @see CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES
      * @see CaptureRequest#CONTROL_CAPTURE_INTENT
-     * @see CameraCharacteristics#LENS_INTRINSIC_CALIBRATION
-     * @see CameraCharacteristics#LENS_POSE_REFERENCE
-     * @see CameraCharacteristics#LENS_POSE_ROTATION
-     * @see CameraCharacteristics#LENS_POSE_TRANSLATION
-     * @see CameraCharacteristics#LENS_RADIAL_DISTORTION
-     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
-     * @see CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE
-     * @see CaptureResult#SENSOR_ROLLING_SHUTTER_SKEW
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_MOTION_TRACKING = 10;

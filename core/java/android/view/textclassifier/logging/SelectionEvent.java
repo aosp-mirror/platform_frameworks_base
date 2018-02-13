@@ -98,6 +98,16 @@ public final class SelectionEvent {
     /** Something else other than User or the default TextClassifier triggered a selection. */
     public static final int EVENT_AUTO_SELECTION = 5;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({INVOCATION_MANUAL, INVOCATION_LINK})
+    public @interface InvocationMethod {}
+
+    /** Selection was invoked by the user long pressing, double tapping, or dragging to select. */
+    public static final int INVOCATION_MANUAL = 1;
+    /** Selection was invoked by the user tapping on a link. */
+    public static final int INVOCATION_LINK = 2;
+
     private final int mAbsoluteStart;
     private final int mAbsoluteEnd;
     private final @EventType int mEventType;
@@ -105,6 +115,7 @@ public final class SelectionEvent {
     @Nullable private final String mWidgetVersion;
     private final String mPackageName;
     private final String mWidgetType;
+    private final @InvocationMethod int mInvocationMethod;
 
     // These fields should only be set by creator of a SelectionEvent.
     private String mSignature;
@@ -121,7 +132,7 @@ public final class SelectionEvent {
     SelectionEvent(
             int start, int end,
             @EventType int eventType, @EntityType String entityType,
-            String signature, Logger.Config config) {
+            @InvocationMethod int invocationMethod, String signature, Logger.Config config) {
         Preconditions.checkArgument(end >= start, "end cannot be less than start");
         mAbsoluteStart = start;
         mAbsoluteEnd = end;
@@ -132,6 +143,7 @@ public final class SelectionEvent {
         mWidgetVersion = config.getWidgetVersion();
         mPackageName = Preconditions.checkNotNull(config.getPackageName());
         mWidgetType = Preconditions.checkNotNull(config.getWidgetType());
+        mInvocationMethod = invocationMethod;
     }
 
     int getAbsoluteStart() {
@@ -177,6 +189,13 @@ public final class SelectionEvent {
      */
     public String getWidgetVersion() {
         return mWidgetVersion;
+    }
+
+    /**
+     * Returns the way the selection mode was invoked.
+     */
+    public @InvocationMethod int getInvocationMethod() {
+        return mInvocationMethod;
     }
 
     /**

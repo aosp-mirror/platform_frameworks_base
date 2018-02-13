@@ -2757,11 +2757,11 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             new Key<Integer>("android.statistics.lensShadingMapMode", int.class);
 
     /**
-     * <p>Whether the camera device outputs the OIS data in output
+     * <p>A control for selecting whether OIS position information is included in output
      * result metadata.</p>
      * <p>When set to ON,
      * {@link CaptureResult#STATISTICS_OIS_TIMESTAMPS android.statistics.oisTimestamps}, android.statistics.oisShiftPixelX,
-     * android.statistics.oisShiftPixelY will provide OIS data in the output result metadata.</p>
+     * and android.statistics.oisShiftPixelY provide OIS data in the output result metadata.</p>
      * <p><b>Possible values:</b>
      * <ul>
      *   <li>{@link #STATISTICS_OIS_DATA_MODE_OFF OFF}</li>

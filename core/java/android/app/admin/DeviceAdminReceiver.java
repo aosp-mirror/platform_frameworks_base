@@ -19,6 +19,8 @@ package android.app.admin;
 import android.accounts.AccountManager;
 import android.annotation.BroadcastBehavior;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
@@ -33,9 +35,6 @@ import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.UserHandle;
 import android.security.KeyChain;
-
-import libcore.util.NonNull;
-import libcore.util.Nullable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -928,29 +927,29 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             int networkLogsCount) {
     }
 
-     /**
-      * Called when a user or profile is created.
-      *
-      * <p>This callback is only applicable to device owners.
-      *
-      * @param context The running context as per {@link #onReceive}.
-      * @param intent The received intent as per {@link #onReceive}.
-      * @param newUser The {@link UserHandle} of the user that has just been added.
-      */
-     public void onUserAdded(Context context, Intent intent, UserHandle newUser) {
-     }
+    /**
+     * Called when a user or profile is created.
+     *
+     * <p>This callback is only applicable to device owners.
+     *
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}.
+     * @param newUser The {@link UserHandle} of the user that has just been added.
+     */
+    public void onUserAdded(Context context, Intent intent, @NonNull UserHandle newUser) {
+    }
 
-     /**
-      * Called when a user or profile is removed.
-      *
-      * <p>This callback is only applicable to device owners.
-      *
-      * @param context The running context as per {@link #onReceive}.
-      * @param intent The received intent as per {@link #onReceive}.
-      * @param removedUser The {@link UserHandle} of the user that has just been removed.
-      */
-     public void onUserRemoved(Context context, Intent intent, UserHandle removedUser) {
-     }
+    /**
+     * Called when a user or profile is removed.
+     *
+     * <p>This callback is only applicable to device owners.
+     *
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}.
+     * @param removedUser The {@link UserHandle} of the user that has just been removed.
+     */
+    public void onUserRemoved(Context context, Intent intent, @NonNull UserHandle removedUser) {
+    }
 
     /**
      * Called when a user or profile is started.
@@ -961,7 +960,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @param intent The received intent as per {@link #onReceive}.
      * @param startedUser The {@link UserHandle} of the user that has just been started.
      */
-    public void onUserStarted(Context context, Intent intent, UserHandle startedUser) {
+    public void onUserStarted(Context context, Intent intent, @NonNull UserHandle startedUser) {
     }
 
     /**
@@ -973,7 +972,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @param intent The received intent as per {@link #onReceive}.
      * @param stoppedUser The {@link UserHandle} of the user that has just been stopped.
      */
-    public void onUserStopped(Context context, Intent intent, UserHandle stoppedUser) {
+    public void onUserStopped(Context context, Intent intent, @NonNull UserHandle stoppedUser) {
     }
 
     /**
@@ -985,7 +984,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @param intent The received intent as per {@link #onReceive}.
      * @param switchedUser The {@link UserHandle} of the user that has just been switched to.
      */
-    public void onUserSwitched(Context context, Intent intent, UserHandle switchedUser) {
+    public void onUserSwitched(Context context, Intent intent, @NonNull UserHandle switchedUser) {
     }
 
     /**

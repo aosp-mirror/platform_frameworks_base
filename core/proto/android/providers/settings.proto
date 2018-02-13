@@ -422,7 +422,7 @@ message GlobalSettingsProto {
     optional SettingProto notification_snooze_options = 341 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto enable_gnss_raw_meas_full_tracking = 346 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto zram_enabled = 347 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto enable_smart_replies_in_notifications = 348 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto smart_replies_in_notifications_flags = 348 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto show_first_crash_dialog = 349 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto show_restart_in_crash_dialog = 351 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto show_mute_in_crash_dialog = 352 [ (android.privacy).dest = DEST_AUTOMATIC ];

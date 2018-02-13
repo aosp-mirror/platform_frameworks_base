@@ -68,6 +68,23 @@ public final class RulesManager {
     private static final String TAG = "timezone.RulesManager";
     private static final boolean DEBUG = false;
 
+    /**
+     * The action of the intent that the Android system will broadcast when a time zone rules update
+     * operation has been successfully staged  (i.e. to be applied next reboot) or unstaged.
+     *
+     * <p>See {@link #EXTRA_OPERATION_STAGED}
+     *
+     * <p>This is a protected intent that can only be sent by the system.
+     */
+    public static final String ACTION_RULES_UPDATE_OPERATION =
+            "com.android.intent.action.timezone.RULES_UPDATE_OPERATION";
+
+    /**
+     * The key for a boolean extra for the {@link #ACTION_RULES_UPDATE_OPERATION} intent used to
+     * indicate whether the operation was a "stage" or an "unstage".
+     */
+    public static final String EXTRA_OPERATION_STAGED = "staged";
+
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "SUCCESS", "ERROR_" }, value = {
             SUCCESS,

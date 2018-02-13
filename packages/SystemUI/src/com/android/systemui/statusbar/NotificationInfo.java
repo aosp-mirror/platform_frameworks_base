@@ -50,7 +50,6 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 
-import java.lang.IllegalArgumentException;
 import java.util.List;
 import java.util.Set;
 
@@ -274,7 +273,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     }
 
     private void saveImportance() {
-        if (mNonblockable || !hasImportanceChanged()) {
+        if (mNonblockable) {
             return;
         }
         MetricsLogger.action(mContext, MetricsEvent.ACTION_SAVE_IMPORTANCE,
@@ -409,7 +408,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         final int centerY = v.getHeight() / 2;
         final int x = targetLoc[0] - parentLoc[0] + centerX;
         final int y = targetLoc[1] - parentLoc[1] + centerY;
-        mGutsContainer.closeControls(x, y, false /* save */, false /* force */);
+        mGutsContainer.closeControls(x, y, true /* save */, false /* force */);
     }
 
     @Override
@@ -429,7 +428,9 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
     @Override
     public boolean handleCloseControls(boolean save, boolean force) {
-        if (save && hasImportanceChanged()) {
+        // Save regardless of the importance so we can lock the importance field if the user wants
+        // to keep getting notifications
+        if (save) {
             if (mCheckSaveListener != null) {
                 mCheckSaveListener.checkSave(this::saveImportance, mSbn);
             } else {
