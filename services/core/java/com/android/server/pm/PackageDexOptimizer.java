@@ -57,7 +57,7 @@ import static com.android.server.pm.Installer.DEXOPT_FORCE;
 import static com.android.server.pm.Installer.DEXOPT_STORAGE_CE;
 import static com.android.server.pm.Installer.DEXOPT_STORAGE_DE;
 import static com.android.server.pm.Installer.DEXOPT_IDLE_BACKGROUND_JOB;
-import static com.android.server.pm.Installer.DEXOPT_DISABLE_HIDDEN_API_CHECKS;
+import static com.android.server.pm.Installer.DEXOPT_ENABLE_HIDDEN_API_CHECKS;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 
@@ -528,11 +528,9 @@ public class PackageDexOptimizer {
         boolean isPublic = !info.isForwardLocked() &&
                 (!isProfileGuidedFilter || options.isDexoptInstallWithDexMetadata());
         int profileFlag = isProfileGuidedFilter ? DEXOPT_PROFILE_GUIDED : 0;
-        // System apps are invoked with a runtime flag which exempts them from
-        // restrictions on hidden API usage. We dexopt with the same runtime flag
-        // otherwise offending methods would have to be re-verified at runtime
-        // and we want to avoid the performance overhead of that.
-        int hiddenApiFlag = info.isAllowedToUseHiddenApi() ? DEXOPT_DISABLE_HIDDEN_API_CHECKS : 0;
+        // Some apps are executed with restrictions on hidden API usage. If this app is one
+        // of them, pass a flag to dexopt to enable the same restrictions during compilation.
+        int hiddenApiFlag = info.isAllowedToUseHiddenApi() ? 0 : DEXOPT_ENABLE_HIDDEN_API_CHECKS;
         int dexFlags =
                 (isPublic ? DEXOPT_PUBLIC : 0)
                 | (debuggable ? DEXOPT_DEBUGGABLE : 0)
@@ -655,8 +653,8 @@ public class PackageDexOptimizer {
         if ((flags & DEXOPT_IDLE_BACKGROUND_JOB) == DEXOPT_IDLE_BACKGROUND_JOB) {
             flagsList.add("idle_background_job");
         }
-        if ((flags & DEXOPT_DISABLE_HIDDEN_API_CHECKS) == DEXOPT_DISABLE_HIDDEN_API_CHECKS) {
-            flagsList.add("disable_hidden_api_checks");
+        if ((flags & DEXOPT_ENABLE_HIDDEN_API_CHECKS) == DEXOPT_ENABLE_HIDDEN_API_CHECKS) {
+            flagsList.add("enable_hidden_api_checks");
         }
 
         return String.join(",", flagsList);
