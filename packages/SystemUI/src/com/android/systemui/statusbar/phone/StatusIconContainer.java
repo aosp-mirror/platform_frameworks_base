@@ -36,6 +36,7 @@ import com.android.systemui.statusbar.stack.ViewState;
 public class StatusIconContainer extends AlphaOptimizedLinearLayout {
 
     private static final String TAG = "StatusIconContainer";
+    private static final boolean DEBUG = false;
     private static final int MAX_ICONS = 5;
     private static final int MAX_DOTS = 3;
 
@@ -94,7 +95,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         int childCount = getChildCount();
         // Underflow === don't show content until that index
         int firstUnderflowIndex = -1;
-        android.util.Log.d(TAG, "calculateIconTransitions: start=" + translationX);
+        if (DEBUG) android.util.Log.d(TAG, "calculateIconTransitions: start=" + translationX);
 
         //TODO: Dots
         for (int i = childCount - 1; i >= 0; i--) {
