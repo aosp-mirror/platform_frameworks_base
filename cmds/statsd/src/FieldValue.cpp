@@ -23,6 +23,23 @@ namespace android {
 namespace os {
 namespace statsd {
 
+int32_t getEncodedField(int32_t pos[], int32_t depth, bool includeDepth) {
+    int32_t field = 0;
+    for (int32_t i = 0; i <= depth; i++) {
+        int32_t shiftBits = 8 * (kMaxLogDepth - i);
+        field |= (pos[i] << shiftBits);
+    }
+
+    if (includeDepth) {
+        field |= (depth << 24);
+    }
+    return field;
+}
+
+int32_t encodeMatcherMask(int32_t mask[], int32_t depth) {
+    return getEncodedField(mask, depth, false) | 0xff000000;
+}
+
 bool Field::matches(const Matcher& matcher) const {
     if (mTag != matcher.mMatcher.getTag()) {
         return false;
@@ -32,7 +49,7 @@ bool Field::matches(const Matcher& matcher) const {
     }
 
     return false;
-};
+}
 
 void translateFieldMatcher(int tag, const FieldMatcher& matcher, int depth, int* pos, int* mask,
                            std::vector<Matcher>* output) {
@@ -71,7 +88,6 @@ void translateFieldMatcher(int tag, const FieldMatcher& matcher, int depth, int*
 
     if (matcher.child_size() == 0) {
         output->push_back(Matcher(Field(tag, pos, depth), encodeMatcherMask(mask, depth)));
-        Matcher matcher = Matcher(Field(tag, pos, depth), encodeMatcherMask(mask, depth));
     } else {
         for (const auto& child : matcher.child()) {
             translateFieldMatcher(tag, child, depth + 1, pos, mask, output);

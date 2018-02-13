@@ -33,29 +33,14 @@ const int32_t kClearLastBitDeco = 0x7f;
 
 enum Type { INT, LONG, FLOAT, STRING };
 
+int32_t getEncodedField(int32_t pos[], int32_t depth, bool includeDepth);
 
-static int32_t getEncodedField(int32_t pos[], int32_t depth, bool includeDepth) {
-    int32_t field = 0;
-    for (int32_t i = 0; i <= depth; i++) {
-        int32_t shiftBits = 8 * (kMaxLogDepth - i);
-        field |= (pos[i] << shiftBits);
-    }
-
-    if (includeDepth) {
-        field |= (depth << 24);
-    }
-    return field;
-}
-
-static int32_t encodeMatcherMask(int32_t mask[], int32_t depth) {
-    return getEncodedField(mask, depth, false) | 0xff000000;
-}
+int32_t encodeMatcherMask(int32_t mask[], int32_t depth);
 
 // Get the encoded field for a leaf with a [field] number at depth 0;
-static int32_t getSimpleField(size_t field) {
+inline int32_t getSimpleField(size_t field) {
     return ((int32_t)field << 8 * 2);
 }
-
 /**
  * Field is a wrapper class for 2 integers that represents the field of a log element in its Atom
  * proto.

@@ -150,10 +150,9 @@ void DurationMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eve
 
 
     std::unordered_set<HashableDimensionKey> conditionDimensionsKeySet;
-    ConditionState conditionState = mWizard->getMetConditionDimension(
-        mConditionTrackerIndex, mDimensionsInCondition, &conditionDimensionsKeySet);
+    mWizard->getMetConditionDimension(mConditionTrackerIndex, mDimensionsInCondition,
+                                      &conditionDimensionsKeySet);
 
-    bool condition = (conditionState == ConditionState::kTrue);
     for (auto& pair : mCurrentSlicedDurationTrackerMap) {
         conditionDimensionsKeySet.erase(pair.first.getDimensionKeyInCondition());
     }

@@ -166,10 +166,6 @@ bool LogEvent::write(const AttributionNode& node) {
 void LogEvent::init(android_log_context context) {
     android_log_list_element elem;
     int i = 0;
-
-    int seenListStart = 0;
-
-    int32_t field = 0;
     int depth = -1;
     int pos[] = {1, 1, 1};
     do {

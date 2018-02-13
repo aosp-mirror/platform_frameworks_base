@@ -121,8 +121,6 @@ void StatsService::init_build_type_callback(void* cookie, const char* /*name*/, 
  */
 status_t StatsService::onTransact(uint32_t code, const Parcel& data, Parcel* reply,
                                   uint32_t flags) {
-    status_t err;
-
     switch (code) {
         case SHELL_COMMAND_TRANSACTION: {
             int in = data.readFileDescriptor();

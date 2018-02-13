@@ -39,14 +39,11 @@ const int DIMENSIONS_VALUE_FIELD = 1;
 const int DIMENSIONS_VALUE_VALUE_STR = 2;
 const int DIMENSIONS_VALUE_VALUE_INT = 3;
 const int DIMENSIONS_VALUE_VALUE_LONG = 4;
-const int DIMENSIONS_VALUE_VALUE_BOOL = 5;
+// const int DIMENSIONS_VALUE_VALUE_BOOL = 5; // logd doesn't have bool data type.
 const int DIMENSIONS_VALUE_VALUE_FLOAT = 6;
 const int DIMENSIONS_VALUE_VALUE_TUPLE = 7;
 
 const int DIMENSIONS_VALUE_TUPLE_VALUE = 1;
-
-// for MessageValue Proto
-const int FIELD_ID_FIELD_VALUE_IN_MESSAGE_VALUE_PROTO = 1;
 
 // for PulledAtomStats proto
 const int FIELD_ID_PULLED_ATOM_STATS = 10;
@@ -128,11 +125,6 @@ void writeDimensionToProto(const HashableDimensionKey& dimension, ProtoOutputStr
     writeDimensionToProtoHelper(dimension.getValues(), &index, 0, 0, protoOutput);
     protoOutput->end(topToken);
 }
-
-// for Field Proto
-const int FIELD_FIELD = 1;
-const int FIELD_POSITION_INDEX = 2;
-const int FIELD_CHILD = 3;
 
 // Supported Atoms format
 // XYZ_Atom {

@@ -116,10 +116,8 @@ LOCAL_SRC_FILES := \
 
 LOCAL_CFLAGS += \
     -Wall \
+    -Wextra \
     -Werror \
-    -Wno-missing-field-initializers \
-    -Wno-unused-variable \
-    -Wno-unused-function \
     -Wno-unused-parameter
 
 ifeq (debug,)
