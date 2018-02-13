@@ -19,7 +19,6 @@
             android:minSdkVersion="21"
             android:targetSdkVersion="27" />
     <application android:name=".TestApplication">
-        <activity android:name=".TestActivity" android:exported="true"/>
         <provider
                 android:authorities="com.android.frameworks.perftests.amteststestapp"
                 android:name=".TestContentProvider"
@@ -32,6 +31,9 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
+        <service
+                android:name=".StartProcessService"
+                android:exported="true" />
         <service
                 android:name=".TestService"
                 android:exported="true" />
