@@ -30,6 +30,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
+import android.util.EventLog;
 import android.util.Log;
 import android.util.Singleton;
 
@@ -164,7 +165,11 @@ public final class MediaCas implements AutoCloseable {
         }
 
         private ParcelableCasData(Parcel in) {
-            this();
+            EventLog.writeEvent(0x534e4554, "b/73085795", -1, "");
+
+            mData = in.createByteArray();
+            mOffset = 0;
+            mLength = (mData == null) ? 0 : mData.length;
         }
 
         void set(@NonNull byte[] data, int offset, int length) {
