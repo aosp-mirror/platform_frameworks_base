@@ -178,7 +178,6 @@ public class VolumeDialogImpl implements VolumeDialog {
                 | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                 | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
                 | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
-        mWindow.setTitle(VolumeDialogImpl.class.getSimpleName());
         mWindow.setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
         mWindow.setWindowAnimations(com.android.internal.R.style.Animation_Toast);
         final WindowManager.LayoutParams lp = mWindow.getAttributes();
@@ -491,15 +490,6 @@ public class VolumeDialogImpl implements VolumeDialog {
                 }, 50))
                 .start();
 
-        if (mAccessibilityMgr.isEnabled()) {
-            AccessibilityEvent event =
-                    AccessibilityEvent.obtain(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
-            event.setPackageName(mContext.getPackageName());
-            event.setClassName(CustomDialog.class.getSuperclass().getName());
-            event.getText().add(mContext.getString(
-                    R.string.volume_dialog_accessibility_dismissed_message));
-            mAccessibilityMgr.sendAccessibilityEvent(event);
-        }
         Events.writeEvent(mContext, Events.EVENT_DISMISS_DIALOG, reason);
         mController.notifyVisible(false);
         synchronized (mSafetyWarningLock) {
@@ -670,6 +660,8 @@ public class VolumeDialogImpl implements VolumeDialog {
             updateVolumeRowH(row);
         }
         updateRingerH();
+        mWindow.setTitle(mContext.getString(R.string.volume_dialog_title,
+                getStreamLabelH(getActiveRow().ss)));
     }
 
     private void updateVolumeRowH(VolumeRow row) {
@@ -1060,22 +1052,6 @@ public class VolumeDialogImpl implements VolumeDialog {
             if (isShowing()) {
                 if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
                     dismissH(Events.DISMISS_REASON_TOUCH_OUTSIDE);
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public boolean dispatchPopulateAccessibilityEvent(@NonNull AccessibilityEvent event) {
-            event.setClassName(getClass().getSuperclass().getName());
-            event.setPackageName(mContext.getPackageName());
-
-            if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-                if (mShowing) {
-                    event.getText().add(mContext.getString(
-                            R.string.volume_dialog_accessibility_shown_message,
-                            getStreamLabelH(getActiveRow().ss)));
                     return true;
                 }
             }
