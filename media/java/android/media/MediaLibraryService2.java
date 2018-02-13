@@ -82,22 +82,22 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          *
          * @param controller controller to notify
          * @param parentId
-         * @param options
+         * @param extras
          */
         public void notifyChildrenChanged(@NonNull ControllerInfo controller,
-                @NonNull String parentId, @NonNull Bundle options) {
-            mProvider.notifyChildrenChanged_impl(controller, parentId, options);
+                @NonNull String parentId, @NonNull Bundle extras) {
+            mProvider.notifyChildrenChanged_impl(controller, parentId, extras);
         }
 
         /**
          * Notify subscribed controller about change in a parent's children.
          *
          * @param parentId parent id
-         * @param options optional bundle
+         * @param extras extra bundle
          */
         // This is for the backward compatibility.
-        public void notifyChildrenChanged(@NonNull String parentId, @Nullable Bundle options) {
-            mProvider.notifyChildrenChanged_impl(parentId, options);
+        public void notifyChildrenChanged(@NonNull String parentId, @Nullable Bundle extras) {
+            mProvider.notifyChildrenChanged_impl(parentId, extras);
         }
     }
 
@@ -134,21 +134,6 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
         }
 
         /**
-         * Called to get the search result. Return search result here for the browser.
-         * <p>
-         * Return an empty list for no search result, and return {@code null} for the error.
-         *
-         * @param query The search query sent from the media browser. It contains keywords separated
-         *            by space.
-         * @param extras The bundle of service-specific arguments sent from the media browser.
-         * @return search result. {@code null} for error.
-         */
-        public @Nullable List<MediaItem2> onSearch(@NonNull ControllerInfo controllerInfo,
-                @NonNull String query, @Nullable Bundle extras) {
-            return null;
-        }
-
-        /**
          * Called to get an item. Return result here for the browser.
          * <p>
          * Return {@code null} for no result or error.
@@ -169,11 +154,11 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          * @param parentId parent id to get children
          * @param page number of page
          * @param pageSize size of the page
-         * @param options optional bundle
+         * @param extras extra bundle
          * @return list of children. Can be {@code null}.
          */
         public @Nullable List<MediaItem2> onLoadChildren(@NonNull ControllerInfo controller,
-                @NonNull String parentId, int page, int pageSize, @Nullable Bundle options) {
+                @NonNull String parentId, int page, int pageSize, @Nullable Bundle extras) {
             return null;
         }
 
@@ -182,10 +167,10 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          *
          * @param controller controller
          * @param parentId parent id
-         * @param options optional bundle
+         * @param extras extra bundle
          */
-        public void onSubscribed(@NonNull ControllerInfo controller,
-                String parentId, @Nullable Bundle options) {
+        public void onSubscribed(@NonNull ControllerInfo controller, String parentId,
+                @Nullable Bundle extras) {
         }
 
         /**
@@ -193,10 +178,41 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          *
          * @param controller controller
          * @param parentId parent id
-         * @param options optional bundle
+         * @param extras extra bundle
          */
-        public void onUnsubscribed(@NonNull ControllerInfo controller,
-                String parentId, @Nullable Bundle options) {
+        public void onUnsubscribed(@NonNull ControllerInfo controller, String parentId,
+                @Nullable Bundle extras) {
+        }
+
+        /**
+         * Called when a controller requests search.
+         *
+         * @param query The search query sent from the media browser. It contains keywords separated
+         *              by space.
+         * @param extras The bundle of service-specific arguments sent from the media browser.
+         */
+        public void onSearch(@NonNull ControllerInfo controllerInfo, @NonNull String query,
+                @Nullable Bundle extras) {
+
+        }
+
+        /**
+         * Called to get the search result. Return search result here for the browser which has
+         * requested search previously.
+         * <p>
+         * Return an empty list for no search result, and return {@code null} for the error.
+         *
+         * @param controllerInfo Information of the controller requesting the search result.
+         * @param query The search query which was previously sent through
+         *              {@link #onSearch(ControllerInfo, String, Bundle)} call.
+         * @param page page number. Starts from {@code 1}.
+         * @param pageSize page size. Should be greater or equal to {@code 1}.
+         * @param extras The bundle of service-specific arguments sent from the media browser.
+         * @return search result. {@code null} for error.
+         */
+        public @Nullable List<MediaItem2> onLoadSearchResult(@NonNull ControllerInfo controllerInfo,
+                @NonNull String query, int page, int pageSize, @Nullable Bundle extras) {
+            return null;
         }
     }
 

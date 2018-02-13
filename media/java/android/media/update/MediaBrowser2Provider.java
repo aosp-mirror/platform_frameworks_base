@@ -16,7 +16,6 @@
 
 package android.media.update;
 
-import android.annotation.SystemApi;
 import android.os.Bundle;
 
 /**
@@ -29,6 +28,7 @@ public interface MediaBrowser2Provider extends MediaController2Provider {
     void unsubscribe_impl(String parentId, Bundle options);
 
     void getItem_impl(String mediaId);
-    void getChildren_impl(String parentId, int page, int pageSize, Bundle options);
-    void search_impl(String query, int page, int pageSize, Bundle extras);
+    void getChildren_impl(String parentId, int page, int pageSize, Bundle extras);
+    void search_impl(String query, Bundle options);
+    void getSearchResult_impl(String query, int page, int pageSize, Bundle extras);
 }
