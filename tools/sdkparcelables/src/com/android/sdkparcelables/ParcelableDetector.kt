@@ -27,6 +27,8 @@ class ParcelableDetector {
             impl.build()
             return impl.parcelables
         }
+
+        const val PARCELABLE_CLASS = "android/os/Parcelable"
     }
 
     private class Impl(val ancestors: Map<String, Ancestors>) {
@@ -35,7 +37,7 @@ class ParcelableDetector {
 
         fun build() {
             val classList = ancestors.keys
-            classList.filterTo(parcelables, this::isParcelable)
+            classList.filterTo(parcelables, { (it != PARCELABLE_CLASS) && isParcelable(it) })
             parcelables.sort()
         }
 
@@ -44,7 +46,7 @@ class ParcelableDetector {
                 return false
             }
 
-            if (c == "android/os/Parcelable") {
+            if (c == PARCELABLE_CLASS) {
                 return true
             }
 
