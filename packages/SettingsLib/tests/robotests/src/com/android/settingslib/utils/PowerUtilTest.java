@@ -20,20 +20,19 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.spy;
 
 import android.content.Context;
+
 import com.android.settingslib.R;
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
-import com.android.settingslib.TestConfig;
-import com.android.settingslib.utils.PowerUtil;
-import java.time.Duration;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
+
+import java.time.Duration;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class PowerUtilTest {
     public static final String TEST_BATTERY_LEVEL_10 = "10%";
     public static final String FIFTEEN_MIN_FORMATTED = "15m";

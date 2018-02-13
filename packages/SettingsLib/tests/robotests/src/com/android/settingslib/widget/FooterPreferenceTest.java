@@ -16,6 +16,8 @@
 
 package com.android.settingslib.widget;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import android.content.Context;
 import android.support.v7.preference.PreferenceViewHolder;
 import android.text.method.LinkMovementMethod;
@@ -24,18 +26,13 @@ import android.widget.TextView;
 
 import com.android.settingslib.R;
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
-import com.android.settingslib.TestConfig;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowApplication;
 
-import static com.google.common.truth.Truth.assertThat;
-
 @RunWith(SettingsLibRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class FooterPreferenceTest {
 
     private Context mContext;

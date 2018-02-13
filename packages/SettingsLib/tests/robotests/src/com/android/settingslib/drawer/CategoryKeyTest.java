@@ -16,21 +16,17 @@
 
 package com.android.settingslib.drawer;
 
-import android.util.ArraySet;
+import static com.google.common.truth.Truth.assertThat;
 
-import com.android.settingslib.TestConfig;
+import android.util.ArraySet;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.Set;
 
-import static com.google.common.truth.Truth.assertThat;
-
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class CategoryKeyTest {
 
     @Test
@@ -64,5 +60,4 @@ public class CategoryKeyTest {
 
         assertThat(allKeys.size()).isEqualTo(15);
     }
-
 }

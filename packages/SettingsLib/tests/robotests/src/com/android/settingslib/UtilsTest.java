@@ -34,9 +34,9 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.text.TextUtils;
+
 import com.android.settingslib.wrapper.LocationManagerWrapper;
-import java.util.HashMap;
-import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,11 +50,11 @@ import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowSettings;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RunWith(SettingsLibRobolectricTestRunner.class)
-@Config(
-        manifest = TestConfig.MANIFEST_PATH,
-        sdk = TestConfig.SDK_VERSION,
-        shadows = {
+@Config(shadows = {
             UtilsTest.ShadowSecure.class,
             UtilsTest.ShadowLocationManagerWrapper.class})
 public class UtilsTest {

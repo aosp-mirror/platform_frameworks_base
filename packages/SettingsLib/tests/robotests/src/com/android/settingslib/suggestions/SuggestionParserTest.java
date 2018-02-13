@@ -17,11 +17,9 @@
 package com.android.settingslib.suggestions;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.robolectric.RuntimeEnvironment.application;
 import static org.robolectric.shadow.api.Shadow.extract;
 
-import android.app.ApplicationPackageManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -30,28 +28,22 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
-import com.android.settingslib.TestConfig;
 import com.android.settingslib.drawer.Tile;
 import com.android.settingslib.drawer.TileUtilsTest;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.annotation.Config;
-import org.robolectric.annotation.Implementation;
-import org.robolectric.annotation.Implements;
-import org.robolectric.shadows.ShadowApplicationPackageManager;
+import org.robolectric.shadows.ShadowPackageManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION,
-        shadows = SuggestionParserTest.TestPackageManager.class)
 public class SuggestionParserTest {
 
-    private TestPackageManager mPackageManager;
+    private ShadowPackageManager mPackageManager;
     private SuggestionParser mSuggestionParser;
     private SuggestionCategory mMultipleCategory;
     private SuggestionCategory mExclusiveCategory;
@@ -204,14 +196,5 @@ public class SuggestionParserTest {
         }
         mSuggestionParser.readSuggestions(
                 mMultipleCategory, mSuggestionsAfterDismiss, isSmartSuggestionEnabled);
-    }
-
-    @Implements(ApplicationPackageManager.class)
-    public static class TestPackageManager extends ShadowApplicationPackageManager {
-
-        @Implementation
-        public List<ResolveInfo> queryIntentActivitiesAsUser(Intent intent, int flags, int userId) {
-            return super.queryIntentActivities(intent, flags);
-        }
     }
 }

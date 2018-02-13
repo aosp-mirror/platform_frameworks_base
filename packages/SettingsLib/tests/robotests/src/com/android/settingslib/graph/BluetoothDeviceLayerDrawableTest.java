@@ -19,23 +19,17 @@ package com.android.settingslib.graph;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.VectorDrawable;
 
 import com.android.settingslib.R;
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
-import com.android.settingslib.TestConfig;
-import com.android.settingslib.testutils.shadow.SettingsLibShadowResources;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION,
-        shadows = SettingsLibShadowResources.class)
 public class BluetoothDeviceLayerDrawableTest {
     private static final int RES_ID = R.drawable.ic_bt_cellphone;
     private static final int BATTERY_LEVEL = 15;
