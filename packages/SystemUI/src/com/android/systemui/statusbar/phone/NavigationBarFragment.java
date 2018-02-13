@@ -111,8 +111,6 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     /** Allow some time inbetween the long press for back and recents. */
     private static final int LOCK_TO_APP_GESTURE_TOLERENCE = 200;
 
-    private static final int BUTTON_FADE_IN_OUT_DURATION_MS = 100;
-
     protected NavigationBarView mNavigationBarView = null;
     protected AssistManager mAssistManager;
 
@@ -149,7 +147,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     private RotationLockController mRotationLockController;
     private TaskStackListenerImpl mTaskStackListener;
 
-    private final Runnable mRemoveRotationProposal = () -> setRotateSuggestionButtonState(false);
+    private final Runnable mRemoveRotationProposal = () -> safeSetRotationButtonState(false);
     private Animator mRotateShowAnimator;
     private Animator mRotateHideAnimator;
 
@@ -344,19 +342,29 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         // rotate button if shown.
 
         if (!isValid) {
-            setRotateSuggestionButtonState(false);
+            safeSetRotationButtonState(false);
             return;
         }
 
         if (rotation == mWindowManager.getDefaultDisplay().getRotation()) {
             // Use this as a signal to remove any current suggestions
             getView().getHandler().removeCallbacks(mRemoveRotationProposal);
-            setRotateSuggestionButtonState(false);
+            safeSetRotationButtonState(false);
         } else {
             mLastRotationSuggestion = rotation; // Remember rotation for click
-            setRotateSuggestionButtonState(true);
+            safeSetRotationButtonState(true);
             rescheduleRotationTimeout(false);
             mMetricsLogger.visible(MetricsEvent.ROTATION_SUGGESTION_SHOWN);
+        }
+    }
+
+    private void safeSetRotationButtonState(boolean vis) {
+        if (mNavigationBarView != null) mNavigationBarView.setRotateSuggestionButtonState(vis);
+    }
+
+    private void safeSetRotationButtonState(boolean vis, boolean force) {
+        if (mNavigationBarView != null) {
+            mNavigationBarView.setRotateSuggestionButtonState(vis, force);
         }
     }
 
@@ -383,84 +391,6 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         if (mAccessibilityFeedbackEnabled) return 20000;
         if (mHoveringRotationSuggestion) return 16000;
         return 6000;
-    }
-
-    public void setRotateSuggestionButtonState(final boolean visible) {
-        setRotateSuggestionButtonState(visible, false);
-    }
-
-    public void setRotateSuggestionButtonState(final boolean visible, final boolean skipAnim) {
-        ButtonDispatcher rotBtn = mNavigationBarView.getRotateSuggestionButton();
-        final boolean currentlyVisible = rotBtn.getVisibility() == View.VISIBLE;
-
-        // Rerun a show animation to indicate change but don't rerun a hide animation
-        if (!visible && !currentlyVisible) return;
-
-        View currentView = rotBtn.getCurrentView();
-        if (currentView == null) return;
-
-        KeyButtonDrawable kbd = rotBtn.getImageDrawable();
-        if (kbd == null) return;
-
-        AnimatedVectorDrawable animIcon = null;
-        if (kbd.getDrawable(0) instanceof AnimatedVectorDrawable) {
-            animIcon = (AnimatedVectorDrawable) kbd.getDrawable(0);
-        }
-
-        if (visible) { // Appear and change
-            rotBtn.setVisibility(View.VISIBLE);
-            mNavigationBarView.notifySubtreeAccessibilityStateChangedIfNeeded();
-
-            if (skipAnim) {
-                currentView.setAlpha(1f);
-                return;
-            }
-
-            // Start a new animation if running
-            if (mRotateShowAnimator != null) mRotateShowAnimator.pause();
-            if (mRotateHideAnimator != null) mRotateHideAnimator.pause();
-
-            ObjectAnimator appearFade = ObjectAnimator.ofFloat(currentView, "alpha",
-                    0f, 1f);
-            appearFade.setDuration(BUTTON_FADE_IN_OUT_DURATION_MS);
-            appearFade.setInterpolator(Interpolators.LINEAR);
-            mRotateShowAnimator = appearFade;
-            appearFade.start();
-
-            // Run the rotate icon's animation if it has one
-            if (animIcon != null) {
-                animIcon.reset();
-                animIcon.start();
-            }
-
-        } else { // Hide
-
-            if (skipAnim) {
-                rotBtn.setVisibility(View.INVISIBLE);
-                mNavigationBarView.notifySubtreeAccessibilityStateChangedIfNeeded();
-                return;
-            }
-
-            // Don't start any new hide animations if one is running
-            if (mRotateHideAnimator != null && mRotateHideAnimator.isRunning()) return;
-            // Pause any active show animations but don't reset the AVD to avoid jumps
-            if (mRotateShowAnimator != null) mRotateShowAnimator.pause();
-
-            ObjectAnimator fadeOut = ObjectAnimator.ofFloat(currentView, "alpha",
-                    0f);
-            fadeOut.setDuration(BUTTON_FADE_IN_OUT_DURATION_MS);
-            fadeOut.setInterpolator(Interpolators.LINEAR);
-            fadeOut.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    rotBtn.setVisibility(View.INVISIBLE);
-                    mNavigationBarView.notifySubtreeAccessibilityStateChangedIfNeeded();
-                }
-            });
-
-            mRotateHideAnimator = fadeOut;
-            fadeOut.start();
-        }
     }
 
     // Injected from StatusBar at creation.
@@ -841,7 +771,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
                     if (shouldOverrideUserLockPrefs(rotation)) {
                         mRotationLockController.setRotationLockedAtAngle(true, rotation);
                     }
-                    setRotateSuggestionButtonState(false, true);
+                    safeSetRotationButtonState(false, true);
                 }
 
                 if (mNavigationBarView != null
@@ -877,22 +807,22 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
         @Override
         public void onTaskStackChanged() {
-            setRotateSuggestionButtonState(false);
+            safeSetRotationButtonState(false);
         }
 
         @Override
         public void onTaskRemoved(int taskId) {
-            setRotateSuggestionButtonState(false);
+            safeSetRotationButtonState(false);
         }
 
         @Override
         public void onTaskMovedToFront(int taskId) {
-            setRotateSuggestionButtonState(false);
+            safeSetRotationButtonState(false);
         }
 
         @Override
         public void onActivityRequestedOrientationChanged(int taskId, int requestedOrientation) {
-            setRotateSuggestionButtonState(false);
+            safeSetRotationButtonState(false);
         }
     }
 

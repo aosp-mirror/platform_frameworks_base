@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.LayoutTransition;
 import android.animation.LayoutTransition.TransitionListener;
 import android.animation.ObjectAnimator;
@@ -29,6 +31,7 @@ import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
@@ -49,6 +52,7 @@ import android.widget.FrameLayout;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.DockedStackExistsListener;
+import com.android.systemui.Interpolators;
 import com.android.systemui.OverviewProxyService;
 import com.android.systemui.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.R;
@@ -71,6 +75,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     final static boolean DEBUG = false;
     final static String TAG = "StatusBar/NavBarView";
 
+    final static int BUTTON_FADE_IN_OUT_DURATION_MS = 100;
+
     // slippery nav bar when everything is disabled, e.g. during setup
     final static boolean SLIPPERY_WHEN_DISABLED = true;
 
@@ -86,6 +92,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     boolean mShowMenu;
     boolean mShowAccessibilityButton;
     boolean mLongClickableAccessibilityButton;
+    boolean mShowRotateButton;
     int mDisabledFlags = 0;
     int mNavigationIconHints = 0;
 
@@ -128,6 +135,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private Divider mDivider;
     private SwipeUpOnboarding mSwipeUpOnboarding;
     private NotificationPanelView mPanelView;
+
+    private Animator mRotateHideAnimator;
 
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
@@ -479,21 +488,24 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             getHomeButton().setImageDrawable(mHomeDefaultIcon);
         }
 
-        // The Accessibility button always overrides the appearance of the IME switcher
+        // Update IME button visibility, a11y and rotate button always overrides the appearance
         final boolean showImeButton =
-                !mShowAccessibilityButton && ((hints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN)
-                        != 0);
+                !mShowAccessibilityButton &&
+                !mShowRotateButton &&
+                ((hints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) != 0);
         getImeSwitchButton().setVisibility(showImeButton ? View.VISIBLE : View.INVISIBLE);
         getImeSwitchButton().setImageDrawable(mImeIcon);
 
-        // Update menu button in case the IME state has changed.
+        // Update menu button, visibility logic in method
         setMenuVisibility(mShowMenu, true);
         getMenuButton().setImageDrawable(mMenuIcon);
 
+        // Update rotate button, visibility altered by a11y button logic
+        getRotateSuggestionButton().setImageDrawable(mRotateSuggestionIcon);
+
+        // Update a11y button, visibility logic in state method
         setAccessibilityButtonState(mShowAccessibilityButton, mLongClickableAccessibilityButton);
         getAccessibilityButton().setImageDrawable(mAccessibilityIcon);
-
-        getRotateSuggestionButton().setImageDrawable(mRotateSuggestionIcon);
 
         setDisabledFlags(mDisabledFlags, true);
 
@@ -635,8 +647,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         mShowMenu = show;
 
-        // Only show Menu if IME switcher and Accessibility button not shown.
-        final boolean shouldShow = mShowMenu && !mShowAccessibilityButton &&
+        // Only show Menu if IME switcher, rotate and Accessibility buttons are not shown.
+        final boolean shouldShow = mShowMenu &&
+                !mShowAccessibilityButton &&
+                !mShowRotateButton &&
                 ((mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) == 0);
 
         getMenuButton().setVisibility(shouldShow ? View.VISIBLE : View.INVISIBLE);
@@ -646,13 +660,94 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mShowAccessibilityButton = visible;
         mLongClickableAccessibilityButton = longClickable;
         if (visible) {
-            // Accessibility button overrides Menu and IME switcher buttons.
+            // Accessibility button overrides Menu, IME switcher and rotate buttons.
             setMenuVisibility(false, true);
             getImeSwitchButton().setVisibility(View.INVISIBLE);
+            setRotateSuggestionButtonState(false, true);
         }
 
         getAccessibilityButton().setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
         getAccessibilityButton().setLongClickable(longClickable);
+    }
+
+    public void setRotateSuggestionButtonState(final boolean visible) {
+        setRotateSuggestionButtonState(visible, false);
+    }
+
+    public void setRotateSuggestionButtonState(final boolean visible, final boolean force) {
+        ButtonDispatcher rotBtn = getRotateSuggestionButton();
+        final boolean currentlyVisible = mShowRotateButton;
+
+        // Rerun a show animation to indicate change but don't rerun a hide animation
+        if (!visible && !currentlyVisible) return;
+
+        View currentView = rotBtn.getCurrentView();
+        if (currentView == null) return;
+
+        KeyButtonDrawable kbd = rotBtn.getImageDrawable();
+        if (kbd == null) return;
+
+        AnimatedVectorDrawable animIcon = null;
+        if (kbd.getDrawable(0) instanceof AnimatedVectorDrawable) {
+            animIcon = (AnimatedVectorDrawable) kbd.getDrawable(0);
+        }
+
+        if (visible) { // Appear and change, cannot force
+            setRotateButtonVisibility(true);
+
+            // Stop any currently running hide animations
+            if (mRotateHideAnimator != null && mRotateHideAnimator.isRunning()) {
+                mRotateHideAnimator.pause();
+            }
+
+            // Reset the alpha if any has changed due to hide animation
+            currentView.setAlpha(1f);
+
+            // Run the rotate icon's animation if it has one
+            if (animIcon != null) {
+                animIcon.reset();
+                animIcon.start();
+            }
+
+        } else { // Hide
+            if (force) {
+                // If a hide animator is running stop it and instantly make invisible
+                if (mRotateHideAnimator != null && mRotateHideAnimator.isRunning()) {
+                    mRotateHideAnimator.pause();
+                }
+                setRotateButtonVisibility(false);
+                return;
+            }
+
+            // Don't start any new hide animations if one is running
+            if (mRotateHideAnimator != null && mRotateHideAnimator.isRunning()) return;
+
+            ObjectAnimator fadeOut = ObjectAnimator.ofFloat(currentView, "alpha",
+                    0f);
+            fadeOut.setDuration(BUTTON_FADE_IN_OUT_DURATION_MS);
+            fadeOut.setInterpolator(Interpolators.LINEAR);
+            fadeOut.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    setRotateButtonVisibility(false);
+                }
+            });
+
+            mRotateHideAnimator = fadeOut;
+            fadeOut.start();
+        }
+    }
+
+    private void setRotateButtonVisibility(final boolean visible) {
+        // Never show if a11y is visible
+        final boolean adjVisible = visible && !mShowAccessibilityButton;
+        final int vis = adjVisible ? View.VISIBLE : View.INVISIBLE;
+
+        getRotateSuggestionButton().setVisibility(vis);
+        mShowRotateButton = visible;
+
+        // Hide/restore other button visibility, if necessary
+        setNavigationIconHints(mNavigationIconHints, true);
     }
 
     @Override

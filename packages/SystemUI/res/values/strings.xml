@@ -1743,15 +1743,13 @@
     <string-array name="nav_bar_buttons">
         <item>Clipboard</item>
         <item>Keycode</item>
-        <item>Keyboard switcher</item>
-        <item>Rotation suggestion</item>
+        <item>Rotate confirm, keyboard switcher</item>
         <item>None</item>
     </string-array>
     <string-array name="nav_bar_button_values" translatable="false">
         <item>clipboard</item>
         <item>key</item>
         <item>menu_ime</item>
-        <item>rotate</item>
         <item>space</item>
     </string-array>
 
