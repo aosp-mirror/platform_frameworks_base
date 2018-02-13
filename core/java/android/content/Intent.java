@@ -2498,6 +2498,9 @@ public class Intent implements Parcelable, Cloneable {
      * off, not sleeping).  Once the broadcast is complete, the final shutdown
      * will proceed and all unsaved data lost.  Apps will not normally need
      * to handle this, since the foreground activity will be paused as well.
+     * <p>As of {@link Build.VERSION_CODES#P} this broadcast is only sent to receivers registered
+     * through {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
+     * Context.registerReceiver}.
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
