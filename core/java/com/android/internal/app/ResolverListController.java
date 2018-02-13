@@ -56,9 +56,6 @@ public class ResolverListController {
     private static final String TAG = "ResolverListController";
     private static final boolean DEBUG = false;
 
-    Object mLock = new Object();
-
-    @GuardedBy("mLock")
     private ResolverComparator mResolverComparator;
     private boolean isComputed = false;
 
@@ -73,10 +70,8 @@ public class ResolverListController {
         mLaunchedFromUid = launchedFromUid;
         mTargetIntent = targetIntent;
         mReferrerPackage = referrerPackage;
-        synchronized (mLock) {
-            mResolverComparator =
-                    new ResolverComparator(mContext, mTargetIntent, mReferrerPackage, null);
-        }
+        mResolverComparator =
+                new ResolverComparator(mContext, mTargetIntent, mReferrerPackage, null);
     }
 
     @VisibleForTesting
@@ -244,29 +239,27 @@ public class ResolverListController {
     @VisibleForTesting
     @WorkerThread
     public void sort(List<ResolverActivity.ResolvedComponentInfo> inputList) {
-        synchronized (mLock) {
-            if (mResolverComparator == null) {
-                Log.d(TAG, "Comparator has already been destroyed; skipped.");
-                return;
+        if (mResolverComparator == null) {
+            Log.d(TAG, "Comparator has already been destroyed; skipped.");
+            return;
+        }
+        try {
+            long beforeRank = System.currentTimeMillis();
+            if (!isComputed) {
+                final CountDownLatch finishComputeSignal = new CountDownLatch(1);
+                ComputeCallback callback = new ComputeCallback(finishComputeSignal);
+                mResolverComparator.setCallBack(callback);
+                mResolverComparator.compute(inputList);
+                finishComputeSignal.await();
+                isComputed = true;
             }
-            final CountDownLatch finishComputeSignal = new CountDownLatch(1);
-            ComputeCallback callback = new ComputeCallback(finishComputeSignal);
-            mResolverComparator.setCallBack(callback);
-            try {
-                long beforeRank = System.currentTimeMillis();
-                if (!isComputed) {
-                    mResolverComparator.compute(inputList);
-                    finishComputeSignal.await();
-                    isComputed = true;
-                }
-                Collections.sort(inputList, mResolverComparator);
-                long afterRank = System.currentTimeMillis();
-                if (DEBUG) {
-                    Log.d(TAG, "Time Cost: " + Long.toString(afterRank - beforeRank));
-                }
-            } catch (InterruptedException e) {
-                Log.e(TAG, "Compute & Sort was interrupted: " + e);
+            Collections.sort(inputList, mResolverComparator);
+            long afterRank = System.currentTimeMillis();
+            if (DEBUG) {
+                Log.d(TAG, "Time Cost: " + Long.toString(afterRank - beforeRank));
             }
+        } catch (InterruptedException e) {
+            Log.e(TAG, "Compute & Sort was interrupted: " + e);
         }
     }
 
@@ -287,36 +280,18 @@ public class ResolverListController {
 
     @VisibleForTesting
     public float getScore(ResolverActivity.DisplayResolveInfo target) {
-        synchronized (mLock) {
-            if (mResolverComparator == null) {
-                return 0.0f;
-            }
-            return mResolverComparator.getScore(target.getResolvedComponentName());
-        }
+        return mResolverComparator.getScore(target.getResolvedComponentName());
     }
 
     public void updateModel(ComponentName componentName) {
-        synchronized (mLock) {
-            if (mResolverComparator != null) {
-                mResolverComparator.updateModel(componentName);
-            }
-        }
+        mResolverComparator.updateModel(componentName);
     }
 
     public void updateChooserCounts(String packageName, int userId, String action) {
-        synchronized (mLock) {
-            if (mResolverComparator != null) {
-                mResolverComparator.updateChooserCounts(packageName, userId, action);
-            }
-        }
+        mResolverComparator.updateChooserCounts(packageName, userId, action);
     }
 
     public void destroy() {
-        synchronized (mLock) {
-            if (mResolverComparator != null) {
-                mResolverComparator.destroy();
-            }
-            mResolverComparator = null;
-        }
+        mResolverComparator.destroy();
     }
 }
