@@ -22,7 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.Size;
 import android.graphics.Canvas.VertexMode;
 import android.text.GraphicsOperations;
-import android.text.PrecomputedText;
+import android.text.MeasuredText;
 import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.TextUtils;
@@ -487,8 +487,8 @@ public abstract class BaseCanvas {
             TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
             long measuredTextPtr = 0;
             int measuredTextOffset = 0;
-            if (text instanceof PrecomputedText) {
-                PrecomputedText mt = (PrecomputedText) text;
+            if (text instanceof MeasuredText) {
+                MeasuredText mt = (MeasuredText) text;
                 int paraIndex = mt.findParaIndex(start);
                 if (end <= mt.getParagraphEnd(paraIndex)) {
                     // Only suppor the same paragraph.
@@ -647,7 +647,7 @@ public abstract class BaseCanvas {
 
     private static native void nDrawTextRun(long nativeCanvas, char[] text, int start, int count,
             int contextStart, int contextCount, float x, float y, boolean isRtl, long nativePaint,
-            long nativePrecomputedText, int measuredTextOffset);
+            long nativeMeasuredText, int measuredTextOffset);
 
     private static native void nDrawTextOnPath(long nativeCanvas, char[] text, int index, int count,
             long nativePath, float hOffset, float vOffset, int bidiFlags, long nativePaint);

@@ -245,13 +245,6 @@ public abstract class Layout {
     protected Layout(CharSequence text, TextPaint paint,
                      int width, Alignment align, TextDirectionHeuristic textDir,
                      float spacingMult, float spacingAdd) {
-        this(text, null /* precomputed */, paint, width, align, textDir, spacingMult, spacingAdd);
-    }
-
-    /** @hide */
-    protected Layout(CharSequence text, PrecomputedText precomputed, TextPaint paint,
-                     int width, Alignment align, TextDirectionHeuristic textDir,
-                     float spacingMult, float spacingAdd) {
 
         if (width < 0)
             throw new IllegalArgumentException("Layout: " + width + " < 0");
@@ -266,7 +259,6 @@ public abstract class Layout {
         }
 
         mText = text;
-        mPrecomputed = precomputed;
         mPaint = paint;
         mWidth = width;
         mAlignment = align;
@@ -570,7 +562,7 @@ public abstract class Layout {
                 // XXX: assumes there's nothing additional to be done
                 canvas.drawText(buf, start, end, x, lbaseline, paint);
             } else {
-                tl.set(paint, buf, mPrecomputed, start, end, dir, directions, hasTab, tabStops);
+                tl.set(paint, buf, start, end, dir, directions, hasTab, tabStops);
                 if (justify) {
                     tl.justify(right - left - indentWidth);
                 }
@@ -2272,7 +2264,6 @@ public abstract class Layout {
     }
 
     private CharSequence mText;
-    private PrecomputedText mPrecomputed;
     private TextPaint mPaint;
     private TextPaint mWorkPaint = new TextPaint();
     private int mWidth;
