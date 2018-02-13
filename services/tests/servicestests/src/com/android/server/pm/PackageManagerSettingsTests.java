@@ -612,7 +612,6 @@ public class PackageManagerSettingsTests {
         assertThat(origPkgSetting.installerPackageName, is(testPkgSetting.installerPackageName));
         assertThat(origPkgSetting.installPermissionsFixed,
                 is(testPkgSetting.installPermissionsFixed));
-        assertThat(origPkgSetting.installStatus, is(testPkgSetting.installStatus));
         assertThat(origPkgSetting.isOrphaned, is(testPkgSetting.isOrphaned));
         assertSame(origPkgSetting.keySetData, testPkgSetting.keySetData);
         assertThat(origPkgSetting.keySetData, is(testPkgSetting.keySetData));

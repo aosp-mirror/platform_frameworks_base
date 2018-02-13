@@ -455,15 +455,6 @@ public final class Settings {
         return mRenamedPackages.put(pkgName, origPkgName);
     }
 
-    void setInstallStatus(String pkgName, final int status) {
-        PackageSetting p = mPackages.get(pkgName);
-        if(p != null) {
-            if(p.getInstallStatus() != status) {
-                p.setInstallStatus(status);
-            }
-        }
-    }
-
     void applyPendingPermissionGrantsLPw(String packageName, int userId) {
         ArrayMap<String, ArraySet<RestoredPermissionGrant>> grantsByPackage =
                 mRestoredUserGrants.get(userId);
@@ -2839,9 +2830,6 @@ public final class Settings {
         if (pkg.uidError) {
             serializer.attribute(null, "uidError", "true");
         }
-        if (pkg.installStatus == PackageSettingBase.PKG_INSTALL_INCOMPLETE) {
-            serializer.attribute(null, "installStatus", "false");
-        }
         if (pkg.installerPackageName != null) {
             serializer.attribute(null, "installer", pkg.installerPackageName);
         }
@@ -2910,20 +2898,6 @@ public final class Settings {
 
     void writePermissionLPr(XmlSerializer serializer, BasePermission bp) throws IOException {
         bp.writeLPr(serializer);
-    }
-
-    ArrayList<PackageSetting> getListOfIncompleteInstallPackagesLPr() {
-        final ArraySet<String> kList = new ArraySet<String>(mPackages.keySet());
-        final Iterator<String> its = kList.iterator();
-        final ArrayList<PackageSetting> ret = new ArrayList<PackageSetting>();
-        while (its.hasNext()) {
-            final String key = its.next();
-            final PackageSetting ps = mPackages.get(key);
-            if (ps.getInstallStatus() == PackageSettingBase.PKG_INSTALL_INCOMPLETE) {
-                ret.add(ps);
-            }
-        }
-        return ret;
     }
 
     void addPackageToCleanLPw(PackageCleanItem pkg) {
@@ -3874,15 +3848,6 @@ public final class Settings {
                 mInstallerPackages.add(installerPackageName);
             }
 
-            final String installStatusStr = parser.getAttributeValue(null, "installStatus");
-            if (installStatusStr != null) {
-                if (installStatusStr.equalsIgnoreCase("false")) {
-                    packageSetting.installStatus = PackageSettingBase.PKG_INSTALL_INCOMPLETE;
-                } else {
-                    packageSetting.installStatus = PackageSettingBase.PKG_INSTALL_COMPLETE;
-                }
-            }
-
             int outerDepth = parser.getDepth();
             int type;
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -4668,7 +4633,7 @@ public final class Settings {
         pw.print(prefix); pw.print("  signatures="); pw.println(ps.signatures);
         pw.print(prefix); pw.print("  installPermissionsFixed=");
                 pw.print(ps.installPermissionsFixed);
-                pw.print(" installStatus="); pw.println(ps.installStatus);
+                pw.println();
         pw.print(prefix); pw.print("  pkgFlags="); printFlags(pw, ps.pkgFlags, FLAG_DUMP_SPEC);
                 pw.println();
 

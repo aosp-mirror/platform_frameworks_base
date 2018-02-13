@@ -2720,11 +2720,12 @@ public class PackageManagerService extends IPackageManager.Stub
                          * application can be scanned.
                          */
                         if (mSettings.isDisabledSystemPackageLPr(ps.name)) {
-                            logCriticalInfo(Log.WARN, "Expecting better updated system app for "
-                                    + ps.name + "; removing system app.  Last known codePath="
-                                    + ps.codePathString + ", installStatus=" + ps.installStatus
-                                    + ", versionCode=" + ps.versionCode + "; scanned versionCode="
-                                    + scannedPkg.getLongVersionCode());
+                            logCriticalInfo(Log.WARN,
+                                    "Expecting better updated system app for " + ps.name
+                                    + "; removing system app.  Last known"
+                                    + " codePath=" + ps.codePathString
+                                    + ", versionCode=" + ps.versionCode
+                                    + "; scanned versionCode=" + scannedPkg.getLongVersionCode());
                             removePackageLI(scannedPkg, true);
                             mExpectingBetter.put(ps.name, ps.codePath);
                         }
@@ -2750,18 +2751,6 @@ public class PackageManagerService extends IPackageManager.Stub
                             possiblyDeletedUpdatedSystemApps.add(ps.name);
                         }
                     }
-                }
-            }
-
-            //look for any incomplete package installations
-            ArrayList<PackageSetting> deletePkgsList = mSettings.getListOfIncompleteInstallPackagesLPr();
-            for (int i = 0; i < deletePkgsList.size(); i++) {
-                // Actual deletion of code and data will be handled by later
-                // reconciliation step
-                final String packageName = deletePkgsList.get(i).name;
-                logCriticalInfo(Log.WARN, "Cleaning up incompletely installed app: " + packageName);
-                synchronized (mPackages) {
-                    mSettings.removePackageLPw(packageName);
                 }
             }
 
@@ -16574,17 +16563,7 @@ public class PackageManagerService extends IPackageManager.Stub
             PackageInstalledInfo res, UserHandle user, int installReason) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "updateSettings");
 
-        String pkgName = pkg.packageName;
-        synchronized (mPackages) {
-            //write settings. the installStatus will be incomplete at this stage.
-            //note that the new package setting would have already been
-            //added to mPackages. It hasn't been persisted yet.
-            mSettings.setInstallStatus(pkgName, PackageSettingBase.PKG_INSTALL_INCOMPLETE);
-            // TODO: Remove this write? It's also written at the end of this method
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "writeSettings");
-            mSettings.writeLPr();
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-        }
+        final String pkgName = pkg.packageName;
 
         if (DEBUG_INSTALL) Slog.d(TAG, "New package installed in " + pkg.codePath);
         synchronized (mPackages) {
@@ -16665,7 +16644,6 @@ public class PackageManagerService extends IPackageManager.Stub
             res.name = pkgName;
             res.uid = pkg.applicationInfo.uid;
             res.pkg = pkg;
-            mSettings.setInstallStatus(pkgName, PackageSettingBase.PKG_INSTALL_COMPLETE);
             mSettings.setInstallerPackageName(pkgName, installerPackageName);
             res.setReturnCode(PackageManager.INSTALL_SUCCEEDED);
             //to update install status
