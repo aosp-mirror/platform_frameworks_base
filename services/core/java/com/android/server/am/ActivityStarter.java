@@ -930,6 +930,7 @@ class ActivityStarter {
         // Don't modify the client's object!
         intent = new Intent(intent);
         if (componentSpecified
+                && !(Intent.ACTION_VIEW.equals(intent.getAction()) && intent.getData() == null)
                 && !Intent.ACTION_INSTALL_INSTANT_APP_PACKAGE.equals(intent.getAction())
                 && !Intent.ACTION_RESOLVE_INSTANT_APP_PACKAGE.equals(intent.getAction())
                 && mService.getPackageManagerInternalLocked()
