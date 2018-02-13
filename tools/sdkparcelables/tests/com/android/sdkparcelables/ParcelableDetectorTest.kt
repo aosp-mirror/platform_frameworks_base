@@ -28,7 +28,7 @@ class ParcelableDetectorTest {
 
         val parcelables = ParcelableDetector.ancestorsToParcelables(ancestorMap)
 
-        assertEquals(parcelables, listOf("android/os/Parcelable", "android/test/Parcelable"))
+        assertEquals(parcelables, listOf("android/test/Parcelable"))
     }
 
     @Test
@@ -39,7 +39,7 @@ class ParcelableDetectorTest {
 
         val parcelables = ParcelableDetector.ancestorsToParcelables(ancestorMap)
 
-        assertEquals(parcelables, listOf("android/os/Parcelable", "android/test/Parcelable"))
+        assertEquals(parcelables, listOf("android/test/Parcelable"))
     }
 
     @Test
@@ -51,7 +51,7 @@ class ParcelableDetectorTest {
 
         val parcelables = ParcelableDetector.ancestorsToParcelables(ancestorMap)
 
-        assertEquals(parcelables, listOf("android/os/Parcelable", "android/test/Parcelable", "android/test/SuperParcelable"))
+        assertEquals(parcelables, listOf("android/test/Parcelable", "android/test/SuperParcelable"))
     }
 
     @Test
@@ -63,7 +63,7 @@ class ParcelableDetectorTest {
 
         val parcelables = ParcelableDetector.ancestorsToParcelables(ancestorMap)
 
-        assertEquals(parcelables, listOf("android/os/Parcelable", "android/test/IParcelable", "android/test/Parcelable"))
+        assertEquals(parcelables, listOf("android/test/IParcelable", "android/test/Parcelable"))
     }
 
 }
