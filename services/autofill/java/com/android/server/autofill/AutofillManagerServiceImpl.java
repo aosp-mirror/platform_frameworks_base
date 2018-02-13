@@ -857,7 +857,7 @@ final class AutofillManagerServiceImpl {
             }
             mUserData = userData;
             // Log it
-            int numberFields = mUserData == null ? 0: mUserData.getRemoteIds().length;
+            int numberFields = mUserData == null ? 0: mUserData.getCategoryIds().length;
             mMetricsLogger.write(Helper.newLogMaker(MetricsEvent.AUTOFILL_USERDATA_UPDATED,
                     getServicePackageName(), null)
                     .setCounterValue(numberFields));
