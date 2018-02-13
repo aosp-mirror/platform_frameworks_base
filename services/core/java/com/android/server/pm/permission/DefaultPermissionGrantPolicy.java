@@ -25,6 +25,7 @@ import android.app.ActivityManager;
 import android.app.DownloadManager;
 import android.app.admin.DevicePolicyManager;
 import android.companion.CompanionDeviceManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -52,6 +53,7 @@ import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.provider.Telephony.Sms.Intents;
 import android.security.Credentials;
+import android.service.textclassifier.TextClassifierService;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -824,6 +826,24 @@ public final class DefaultPermissionGrantPolicy {
                 && doesPackageSupportRuntimePermissions(ringtonePickerPackage)) {
             grantRuntimePermissions(ringtonePickerPackage,
                     STORAGE_PERMISSIONS, true, userId);
+        }
+
+        // TextClassifier Service
+        ComponentName textClassifierComponent =
+                TextClassifierService.getServiceComponentName(mContext);
+        if (textClassifierComponent != null) {
+            Intent textClassifierServiceIntent = new Intent(TextClassifierService.SERVICE_INTERFACE)
+                    .setComponent(textClassifierComponent);
+            PackageParser.Package textClassifierPackage =
+                    getDefaultSystemHandlerServicePackage(textClassifierServiceIntent, userId);
+            if (textClassifierPackage != null
+                    && doesPackageSupportRuntimePermissions(textClassifierPackage)) {
+                grantRuntimePermissions(textClassifierPackage, PHONE_PERMISSIONS, true, userId);
+                grantRuntimePermissions(textClassifierPackage, SMS_PERMISSIONS, true, userId);
+                grantRuntimePermissions(textClassifierPackage, CALENDAR_PERMISSIONS, true, userId);
+                grantRuntimePermissions(textClassifierPackage, LOCATION_PERMISSIONS, true, userId);
+                grantRuntimePermissions(textClassifierPackage, CONTACTS_PERMISSIONS, true, userId);
+            }
         }
 
         if (mPermissionGrantedCallback != null) {
