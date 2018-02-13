@@ -513,10 +513,12 @@ bool initAlerts(const StatsdConfig& config,
         const int metricIndex = itr->second;
         sp<MetricProducer> metric = allMetricProducers[metricIndex];
         sp<AnomalyTracker> anomalyTracker = metric->addAnomalyTracker(alert);
-        if (anomalyTracker != nullptr) {
-            anomalyTrackerMap.insert(std::make_pair(alert.id(), allAnomalyTrackers.size()));
-            allAnomalyTrackers.push_back(anomalyTracker);
+        if (anomalyTracker == nullptr) {
+            // The ALOGW for this invalid alert was already displayed in addAnomalyTracker().
+            return false;
         }
+        anomalyTrackerMap.insert(std::make_pair(alert.id(), allAnomalyTrackers.size()));
+        allAnomalyTrackers.push_back(anomalyTracker);
     }
     for (int i = 0; i < config.subscription_size(); ++i) {
         const Subscription& subscription = config.subscription(i);

@@ -92,8 +92,10 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
         ALOGE("This config is too big! Reject!");
         mConfigValid = false;
     }
-
-    // TODO: add alert size.
+    if (mAllAnomalyTrackers.size() > StatsdStats::kMaxAlertCountPerConfig) {
+        ALOGE("This config has too many alerts! Reject!");
+        mConfigValid = false;
+    }
     // no matter whether this config is valid, log it in the stats.
     StatsdStats::getInstance().noteConfigReceived(key, mAllMetricProducers.size(),
                                                   mAllConditionTrackers.size(),
