@@ -52,6 +52,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.OverviewProxyService;
 import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.phone.NavBarButtonProvider.ButtonInterface;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
 
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
@@ -269,11 +270,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                     if (doIt) {
                         // If there was a pending remote recents animation, then we need to
                         // cancel the animation now before we handle the button itself
-                        try {
-                            ActivityManager.getService().cancelRecentsAnimation();
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Could not cancel recents animation", e);
-                        }
+                        ActivityManagerWrapper.getInstance().cancelRecentsAnimation();
                         sendEvent(KeyEvent.ACTION_UP, 0);
                         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
                     } else {

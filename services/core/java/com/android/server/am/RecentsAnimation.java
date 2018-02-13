@@ -28,7 +28,9 @@ import android.app.ActivityOptions;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.os.Trace;
+import android.util.Slog;
 import android.view.IRecentsAnimationRunner;
 import com.android.server.wm.RecentsAnimationController.RecentsAnimationCallbacks;
 import com.android.server.wm.WindowManagerService;
@@ -63,6 +65,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
         mHandler = new Handler(mStackSupervisor.mLooper);
         mWindowManager = wm;
         mUserController = userController;
+
         mCancelAnimationRunnable = () -> {
             // The caller has not finished the animation in a predefined amount of time, so
             // force-cancel the animation
@@ -73,13 +76,33 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
     void startRecentsActivity(Intent intent, IRecentsAnimationRunner recentsAnimationRunner,
             ComponentName recentsComponent, int recentsUid) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "RecentsAnimation#startRecentsActivity");
+
+        if (!mWindowManager.canStartRecentsAnimation()) {
+            notifyAnimationCancelBeforeStart(recentsAnimationRunner);
+            return;
+        }
+
+        // If the existing home activity is already on top, then cancel
+        ActivityRecord homeActivity = mStackSupervisor.getHomeActivity();
+        final boolean hasExistingHomeActivity = homeActivity != null;
+        if (hasExistingHomeActivity) {
+            final ActivityDisplay display = homeActivity.getDisplay();
+            mRestoreHomeBehindStack = display.getStackAboveHome();
+            if (mRestoreHomeBehindStack == null) {
+                notifyAnimationCancelBeforeStart(recentsAnimationRunner);
+                return;
+            }
+        }
+
         mWindowManager.deferSurfaceLayout();
         try {
-            // Cancel the previous recents animation if necessary
-            mWindowManager.cancelRecentsAnimation();
 
-            final boolean hasExistingHomeActivity = mStackSupervisor.getHomeActivity() != null;
-            if (!hasExistingHomeActivity) {
+            final ActivityDisplay display;
+            if (hasExistingHomeActivity) {
+                // Move the home activity into place for the animation if it is not already top most
+                display = homeActivity.getDisplay();
+                display.moveHomeStackBehindBottomMostVisibleStack();
+            } else {
                 // No home activity
                 final ActivityOptions opts = ActivityOptions.makeBasic();
                 opts.setLaunchActivityType(ACTIVITY_TYPE_HOME);
@@ -95,24 +118,19 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
                         .execute();
                 mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
 
+                homeActivity = mStackSupervisor.getHomeActivity();
+                display = homeActivity.getDisplay();
+
                 // TODO: Maybe wait for app to draw in this particular case?
             }
-
-            final ActivityRecord homeActivity = mStackSupervisor.getHomeActivity();
-            final ActivityDisplay display = homeActivity.getDisplay();
-
-            // Save the initial position of the home activity stack to be restored to after the
-            // animation completes
-            mRestoreHomeBehindStack = hasExistingHomeActivity
-                    ? display.getStackAboveHome()
-                    : null;
-
-            // Move the home activity into place for the animation
-            display.moveHomeStackBehindBottomMostVisibleStack();
 
             // Mark the home activity as launch-behind to bump its visibility for the
             // duration of the gesture that is driven by the recents component
             homeActivity.mLaunchTaskBehind = true;
+
+            // Post a timeout for the animation. This needs to happen before initializing the
+            // recents animation on the WM side since we may decide to cancel the animation there
+            mHandler.postDelayed(mCancelAnimationRunnable, RECENTS_ANIMATION_TIMEOUT);
 
             // Fetch all the surface controls and pass them to the client to get the animation
             // started
@@ -122,9 +140,6 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
             // If we updated the launch-behind state, update the visibility of the activities after
             // we fetch the visible tasks to be controlled by the animation
             mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, PRESERVE_WINDOWS);
-
-            // Post a timeout for the animation
-            mHandler.postDelayed(mCancelAnimationRunnable, RECENTS_ANIMATION_TIMEOUT);
         } finally {
             mWindowManager.continueSurfaceLayout();
             Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
@@ -176,6 +191,17 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
                     Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
                 }
             });
+        }
+    }
+
+    /**
+     * Called only when the animation should be canceled prior to starting.
+     */
+    private void notifyAnimationCancelBeforeStart(IRecentsAnimationRunner recentsAnimationRunner) {
+        try {
+            recentsAnimationRunner.onAnimationCanceled();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to cancel recents animation before start", e);
         }
     }
 }
