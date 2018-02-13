@@ -36,7 +36,7 @@ aidl_parcelables :=
 define stubs-to-aidl-parcelables
   gen := $(TARGET_OUT_COMMON_INTERMEDIATES)/$1.aidl
   aidl_parcelables += $$(gen)
-  $$(gen): $(call java-lib-header-files,$1) | $(HOST_OUT_EXECUTABLES)/sdkparcelables
+  $$(gen): $(call java-lib-header-files,$1) $(HOST_OUT_EXECUTABLES)/sdkparcelables
 	@echo Extract SDK parcelables: $$@
 	rm -f $$@
 	$(HOST_OUT_EXECUTABLES)/sdkparcelables $$< $$@
