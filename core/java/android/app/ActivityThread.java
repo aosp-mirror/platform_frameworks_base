@@ -3904,62 +3904,6 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
-    private int mThumbnailWidth = -1;
-    private int mThumbnailHeight = -1;
-    private Bitmap mAvailThumbnailBitmap = null;
-    private Canvas mThumbnailCanvas = null;
-
-    private Bitmap createThumbnailBitmap(ActivityClientRecord r) {
-        Bitmap thumbnail = mAvailThumbnailBitmap;
-        try {
-            if (thumbnail == null) {
-                int w = mThumbnailWidth;
-                int h;
-                if (w < 0) {
-                    Resources res = r.activity.getResources();
-                    int wId = com.android.internal.R.dimen.thumbnail_width;
-                    int hId = com.android.internal.R.dimen.thumbnail_height;
-                    mThumbnailWidth = w = res.getDimensionPixelSize(wId);
-                    mThumbnailHeight = h = res.getDimensionPixelSize(hId);
-                } else {
-                    h = mThumbnailHeight;
-                }
-
-                // On platforms where we don't want thumbnails, set dims to (0,0)
-                if ((w > 0) && (h > 0)) {
-                    thumbnail = Bitmap.createBitmap(r.activity.getResources().getDisplayMetrics(),
-                            w, h, THUMBNAIL_FORMAT);
-                    thumbnail.eraseColor(0);
-                }
-            }
-
-            if (thumbnail != null) {
-                Canvas cv = mThumbnailCanvas;
-                if (cv == null) {
-                    mThumbnailCanvas = cv = new Canvas();
-                }
-
-                cv.setBitmap(thumbnail);
-                if (!r.activity.onCreateThumbnail(thumbnail, cv)) {
-                    mAvailThumbnailBitmap = thumbnail;
-                    thumbnail = null;
-                }
-                cv.setBitmap(null);
-            }
-
-        } catch (Exception e) {
-            if (!mInstrumentation.onException(r.activity, e)) {
-                throw new RuntimeException(
-                        "Unable to create thumbnail of "
-                        + r.intent.getComponent().toShortString()
-                        + ": " + e.toString(), e);
-            }
-            thumbnail = null;
-        }
-
-        return thumbnail;
-    }
-
     @Override
     public void handlePauseActivity(IBinder token, boolean finished, boolean userLeaving,
             int configChanges, boolean dontReport, PendingTransactionActions pendingActions) {
