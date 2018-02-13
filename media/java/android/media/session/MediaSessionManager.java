@@ -344,12 +344,12 @@ public final class MediaSessionManager {
      * @hide
      */
     // TODO(jaewan): System API
-    public boolean onSessionCreated(@NonNull SessionToken2 token) {
+    public boolean createSession2(@NonNull SessionToken2 token) {
         if (token == null) {
             return false;
         }
         try {
-            return mService.onSessionCreated(token.toBundle());
+            return mService.createSession2(token.toBundle());
         } catch (RemoteException e) {
             Log.wtf(TAG, "Cannot communicate with the service.", e);
         }
@@ -360,12 +360,12 @@ public final class MediaSessionManager {
      * @hide
      */
     // TODO(jaewan): System API
-    public void onSessionDestroyed(@NonNull SessionToken2 token) {
+    public void destroySession2(@NonNull SessionToken2 token) {
         if (token == null) {
             return;
         }
         try {
-            mService.onSessionDestroyed(token.toBundle());
+            mService.destroySession2(token.toBundle());
         } catch (RemoteException e) {
             Log.wtf(TAG, "Cannot communicate with the service.", e);
         }
