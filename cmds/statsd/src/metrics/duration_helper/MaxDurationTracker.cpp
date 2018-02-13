@@ -93,6 +93,7 @@ void MaxDurationTracker::noteStart(const HashableDimensionKey& key, bool conditi
             } else {
                 duration.state = DurationState::kStarted;
                 duration.lastStartTime = eventTime;
+                startAnomalyAlarm(eventTime);
             }
             duration.startCount = 1;
             break;
@@ -116,12 +117,18 @@ void MaxDurationTracker::noteStop(const HashableDimensionKey& key, const uint64_
         case DurationState::kStarted: {
             duration.startCount--;
             if (forceStop || !mNested || duration.startCount <= 0) {
+                stopAnomalyAlarm();
                 duration.state = DurationState::kStopped;
                 int64_t durationTime = eventTime - duration.lastStartTime;
                 VLOG("Max, key %s, Stop %lld %lld %lld", key.c_str(),
                      (long long)duration.lastStartTime, (long long)eventTime,
                      (long long)durationTime);
                 duration.lastDuration += durationTime;
+                if (anyStarted()) {
+                    // In case any other dimensions are still started, we need to keep the alarm
+                    // set.
+                    startAnomalyAlarm(eventTime);
+                }
                 VLOG("  record duration: %lld ", (long long)duration.lastDuration);
             }
             break;
@@ -144,6 +151,15 @@ void MaxDurationTracker::noteStop(const HashableDimensionKey& key, const uint64_
     if (duration.state == DurationState::kStopped) {
         mInfos.erase(key);
     }
+}
+
+bool MaxDurationTracker::anyStarted() {
+    for (auto& pair : mInfos) {
+        if (pair.second.state == kStarted) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void MaxDurationTracker::noteStopAll(const uint64_t eventTime) {
@@ -251,35 +267,52 @@ void MaxDurationTracker::noteConditionChanged(const HashableDimensionKey& key, b
 
     switch (it->second.state) {
         case kStarted:
-            // if condition becomes false, kStarted -> kPaused. Record the current duration.
+            // If condition becomes false, kStarted -> kPaused. Record the current duration and
+            // stop anomaly alarm.
             if (!conditionMet) {
+                stopAnomalyAlarm();
                 it->second.state = DurationState::kPaused;
                 it->second.lastDuration += (timestamp - it->second.lastStartTime);
+                if (anyStarted()) {
+                    // In case any other dimensions are still started, we need to set the alarm.
+                    startAnomalyAlarm(timestamp);
+                }
                 VLOG("MaxDurationTracker Key: %s Started->Paused ", key.c_str());
             }
             break;
         case kStopped:
-            // nothing to do if it's stopped.
+            // Nothing to do if it's stopped.
             break;
         case kPaused:
-            // if condition becomes true, kPaused -> kStarted. and the start time is the condition
+            // If condition becomes true, kPaused -> kStarted. and the start time is the condition
             // change time.
             if (conditionMet) {
                 it->second.state = DurationState::kStarted;
                 it->second.lastStartTime = timestamp;
+                startAnomalyAlarm(timestamp);
                 VLOG("MaxDurationTracker Key: %s Paused->Started", key.c_str());
             }
             break;
     }
-    if (it->second.lastDuration > mDuration) {
-        mDuration = it->second.lastDuration;
-    }
+    // Note that we don't update mDuration here since it's only updated during noteStop.
 }
 
 int64_t MaxDurationTracker::predictAnomalyTimestampNs(const DurationAnomalyTracker& anomalyTracker,
                                                       const uint64_t currentTimestamp) const {
-    ALOGE("Max duration producer does not support anomaly timestamp prediction!!!");
-    return currentTimestamp;
+    // The allowed time we can continue in the current state is the
+    // (anomaly threshold) - max(elapsed time of the started mInfos).
+    int64_t maxElapsed = 0;
+    for (auto it = mInfos.begin(); it != mInfos.end(); ++it) {
+        if (it->second.state == DurationState::kStarted) {
+            int64_t duration =
+                    it->second.lastDuration + (currentTimestamp - it->second.lastStartTime);
+            if (duration > maxElapsed) {
+                maxElapsed = duration;
+            }
+        }
+    }
+    int64_t threshold = anomalyTracker.getAnomalyThreshold();
+    return currentTimestamp + threshold - maxElapsed;
 }
 
 void MaxDurationTracker::dumpStates(FILE* out, bool verbose) const {
