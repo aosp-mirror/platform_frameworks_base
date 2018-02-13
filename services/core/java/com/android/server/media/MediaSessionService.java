@@ -1427,6 +1427,17 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
         }
 
+        /**
+         * Called when a {@link android.media.MediaSession2} instance is created.
+         * <p>
+         * This does two things.
+         *   1. Keep the newly created session in the service
+         *   2. Do sanity check to ensure unique id per package, and return result
+         *
+         * @param sessionToken SessionToken2 object in bundled form
+         * @return {@code true} if the session's id isn't used by the package now. {@code false}
+         *     otherwise.
+         */
         @Override
         public boolean onSessionCreated(Bundle sessionToken) {
             final int uid = Binder.getCallingUid();
@@ -1453,6 +1464,19 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
         }
 
+        /**
+         * Called when a {@link android.media.MediaSession2} instance is closed. (i.e. destroyed)
+         * <p>
+         * Ideally service should know that a session is destroyed through the
+         * {@link android.media.MediaController2.ControllerCallback#onDisconnected()}, which is
+         * asynchronous call. However, we also need synchronous way together to address timing
+         * issue. If the package recreates the session almost immediately, which happens commonly
+         * for tests, service will reject the creation through {@link #onSessionCreated(Bundle)}
+         * if the service hasn't notified previous destroy yet. This synchronous API will address
+         * the issue.
+         *
+         * @param sessionToken SessionToken2 object in bundled form
+         */
         @Override
         public void onSessionDestroyed(Bundle sessionToken) {
             final int uid = Binder.getCallingUid();
