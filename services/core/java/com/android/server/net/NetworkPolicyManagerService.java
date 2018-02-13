@@ -2338,7 +2338,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     private void setUidPolicyUncheckedUL(int uid, int oldPolicy, int policy, boolean persist) {
-        setUidPolicyUncheckedUL(uid, policy, persist);
+        setUidPolicyUncheckedUL(uid, policy, false);
 
         final boolean notifyApp;
         if (!isUidValidForWhitelistRules(uid)) {
@@ -2361,6 +2361,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
         mHandler.obtainMessage(MSG_POLICIES_CHANGED, uid, policy, Boolean.valueOf(notifyApp))
                 .sendToTarget();
+        if (persist) {
+            synchronized (mNetworkPoliciesSecondLock) {
+                writePolicyAL();
+            }
+        }
     }
 
     private void setUidPolicyUncheckedUL(int uid, int policy, boolean persist) {
