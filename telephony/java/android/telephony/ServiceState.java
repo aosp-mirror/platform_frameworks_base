@@ -1526,7 +1526,9 @@ public class ServiceState implements Parcelable {
      */
     @SystemApi
     public List<NetworkRegistrationState> getNetworkRegistrationStates() {
-        return mNetworkRegistrationStates;
+        synchronized (mNetworkRegistrationStates) {
+            return new ArrayList<>(mNetworkRegistrationStates);
+        }
     }
 
     /**
@@ -1539,11 +1541,15 @@ public class ServiceState implements Parcelable {
     @SystemApi
     public List<NetworkRegistrationState> getNetworkRegistrationStates(int transportType) {
         List<NetworkRegistrationState> list = new ArrayList<>();
-        for (NetworkRegistrationState networkRegistrationState : mNetworkRegistrationStates) {
-            if (networkRegistrationState.getTransportType() == transportType) {
-                list.add(networkRegistrationState);
+
+        synchronized (mNetworkRegistrationStates) {
+            for (NetworkRegistrationState networkRegistrationState : mNetworkRegistrationStates) {
+                if (networkRegistrationState.getTransportType() == transportType) {
+                    list.add(networkRegistrationState);
+                }
             }
         }
+
         return list;
     }
 
@@ -1557,12 +1563,36 @@ public class ServiceState implements Parcelable {
      */
     @SystemApi
     public NetworkRegistrationState getNetworkRegistrationStates(int transportType, int domain) {
-        for (NetworkRegistrationState networkRegistrationState : mNetworkRegistrationStates) {
-            if (networkRegistrationState.getTransportType() == transportType
-                    && networkRegistrationState.getDomain() == domain) {
-                return networkRegistrationState;
+        synchronized (mNetworkRegistrationStates) {
+            for (NetworkRegistrationState networkRegistrationState : mNetworkRegistrationStates) {
+                if (networkRegistrationState.getTransportType() == transportType
+                        && networkRegistrationState.getDomain() == domain) {
+                    return networkRegistrationState;
+                }
             }
         }
+
         return null;
     }
+
+    /**
+     * @hide
+     */
+    public void addNetworkRegistrationState(NetworkRegistrationState regState) {
+        if (regState == null) return;
+
+        synchronized (mNetworkRegistrationStates) {
+            for (int i = 0; i < mNetworkRegistrationStates.size(); i++) {
+                NetworkRegistrationState curRegState = mNetworkRegistrationStates.get(i);
+                if (curRegState.getTransportType() == regState.getTransportType()
+                        && curRegState.getDomain() == regState.getDomain()) {
+                    mNetworkRegistrationStates.remove(i);
+                    break;
+                }
+            }
+
+            mNetworkRegistrationStates.add(regState);
+        }
+    }
+
 }
