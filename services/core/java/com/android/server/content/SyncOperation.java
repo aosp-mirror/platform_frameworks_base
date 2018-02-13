@@ -408,6 +408,10 @@ public class SyncOperation {
                 extrasToStringBuilder(extras, sb);
             }
         }
+        if (retries > 0) {
+            sb.append(" Retries=");
+            sb.append(retries);
+        }
         return sb.toString();
     }
 
