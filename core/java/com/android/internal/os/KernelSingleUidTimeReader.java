@@ -16,6 +16,7 @@
 package com.android.internal.os;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
+import static com.android.internal.os.KernelUidCpuFreqTimeReader.UID_TIMES_PROC_FILE;
 
 import android.annotation.NonNull;
 import android.util.Slog;
@@ -54,6 +55,12 @@ public class KernelSingleUidTimeReader {
     private boolean mSingleUidCpuTimesAvailable = true;
     @GuardedBy("this")
     private boolean mHasStaleData;
+    // We use the freq count obtained from /proc/uid_time_in_state to decide how many longs
+    // to read from each /proc/uid/<uid>/time_in_state. On the first read, verify if this is
+    // correct and if not, set {@link #mSingleUidCpuTimesAvailable} to false. This flag will
+    // indicate whether we checked for validity or not.
+    @GuardedBy("this")
+    private boolean mCpuFreqsCountVerified;
 
     private final Injector mInjector;
 
@@ -82,15 +89,15 @@ public class KernelSingleUidTimeReader {
             final String procFile = new StringBuilder(PROC_FILE_DIR)
                     .append(uid)
                     .append(PROC_FILE_NAME).toString();
-            final long[] cpuTimesMs = new long[mCpuFreqsCount];
+            final long[] cpuTimesMs;
             try {
                 final byte[] data = mInjector.readData(procFile);
+                if (!mCpuFreqsCountVerified) {
+                    verifyCpuFreqsCount(data.length, procFile);
+                }
                 final ByteBuffer buffer = ByteBuffer.wrap(data);
                 buffer.order(ByteOrder.nativeOrder());
-                for (int i = 0; i < mCpuFreqsCount; ++i) {
-                    // Times read will be in units of 10ms
-                    cpuTimesMs[i] = buffer.getLong() * 10;
-                }
+                cpuTimesMs = readCpuTimesFromByteBuffer(buffer);
             } catch (Exception e) {
                 if (++mReadErrorCounter >= TOTAL_READ_ERROR_COUNT) {
                     mSingleUidCpuTimesAvailable = false;
@@ -101,6 +108,27 @@ public class KernelSingleUidTimeReader {
 
             return computeDelta(uid, cpuTimesMs);
         }
+    }
+
+    private void verifyCpuFreqsCount(int numBytes, String procFile) {
+        final int actualCount = (numBytes / Long.BYTES);
+        if (mCpuFreqsCount != actualCount) {
+            mSingleUidCpuTimesAvailable = false;
+            throw new IllegalStateException("Freq count didn't match,"
+                    + "count from " + UID_TIMES_PROC_FILE + "=" + mCpuFreqsCount + ", but"
+                    + "count from " + procFile + "=" + actualCount);
+        }
+        mCpuFreqsCountVerified = true;
+    }
+
+    private long[] readCpuTimesFromByteBuffer(ByteBuffer buffer) {
+        final long[] cpuTimesMs;
+        cpuTimesMs = new long[mCpuFreqsCount];
+        for (int i = 0; i < mCpuFreqsCount; ++i) {
+            // Times read will be in units of 10ms
+            cpuTimesMs[i] = buffer.getLong() * 10;
+        }
+        return cpuTimesMs;
     }
 
     /**
