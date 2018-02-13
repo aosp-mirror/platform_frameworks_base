@@ -960,6 +960,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
                 PixelFormat.TRANSLUCENT);
         lp.token = new Binder();
         lp.setTitle("NavigationBar");
+        lp.accessibilityTitle = context.getString(R.string.nav_bar);
         lp.windowAnimations = 0;
 
         View navigationBarView = LayoutInflater.from(context).inflate(

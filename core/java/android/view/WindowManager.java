@@ -63,6 +63,7 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -2344,7 +2345,7 @@ public interface WindowManager extends ViewManager {
          *
          * @hide
          */
-        public int accessibilityIdOfAnchor = -1;
+        public long accessibilityIdOfAnchor = AccessibilityNodeInfo.UNDEFINED_NODE_ID;
 
         /**
          * The window title isn't kept in sync with what is displayed in the title bar, so we
@@ -2538,7 +2539,7 @@ public interface WindowManager extends ViewManager {
             out.writeInt(hasManualSurfaceInsets ? 1 : 0);
             out.writeInt(preservePreviousSurfaceInsets ? 1 : 0);
             out.writeInt(needsMenuKey);
-            out.writeInt(accessibilityIdOfAnchor);
+            out.writeLong(accessibilityIdOfAnchor);
             TextUtils.writeToParcel(accessibilityTitle, out, parcelableFlags);
             out.writeInt(mColorMode);
             out.writeLong(hideTimeoutMilliseconds);
@@ -2594,7 +2595,7 @@ public interface WindowManager extends ViewManager {
             hasManualSurfaceInsets = in.readInt() != 0;
             preservePreviousSurfaceInsets = in.readInt() != 0;
             needsMenuKey = in.readInt();
-            accessibilityIdOfAnchor = in.readInt();
+            accessibilityIdOfAnchor = in.readLong();
             accessibilityTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             mColorMode = in.readInt();
             hideTimeoutMilliseconds = in.readLong();
