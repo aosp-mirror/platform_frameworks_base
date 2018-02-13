@@ -1618,7 +1618,15 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     @Override
     public SurfaceControl getAnimationLeashParent() {
-        return getAppAnimationLayer();
+        // All normal app transitions take place in an animation layer which is below the pinned
+        // stack but may be above the parent stacks of the given animating apps.
+        // For transitions in the pinned stack (menu activity) we just let them occur as a child
+        // of the pinned stack.
+        if (!inPinnedWindowingMode()) {
+            return getAppAnimationLayer();
+        } else {
+            return getStack().getSurfaceControl();
+        }
     }
 
     boolean applyAnimationLocked(WindowManager.LayoutParams lp, int transit, boolean enter,
@@ -1758,10 +1766,18 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     @Override
     public void onAnimationLeashCreated(Transaction t, SurfaceControl leash) {
-
         // The leash is parented to the animation layer. We need to preserve the z-order by using
         // the prefix order index, but we boost if necessary.
-        int layer = getPrefixOrderIndex();
+        int layer = 0;
+        if (!inPinnedWindowingMode()) {
+            layer = getPrefixOrderIndex();
+        } else {
+            // Pinned stacks have animations take place within themselves rather than an animation
+            // layer so we need to preserve the order relative to the stack (e.g. the order of our
+            // task/parent).
+            layer = getParent().getPrefixOrderIndex();
+        }
+
         if (mNeedsZBoost) {
             layer += Z_BOOST_BASE;
         }
