@@ -18,6 +18,7 @@ package com.android.server.print;
 
 import static com.android.internal.print.DumpUtils.writePrinterId;
 import static com.android.internal.util.dump.DumpUtils.writeComponentName;
+import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
@@ -33,8 +34,6 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
-import android.os.Looper;
-import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -86,8 +85,6 @@ final class RemotePrintService implements DeathRecipient {
 
     private final RemotePrintServiceClient mPrintServiceClient;
 
-    private final Handler mHandler;
-
     private IPrintService mPrintService;
 
     private boolean mBinding;
@@ -128,7 +125,6 @@ final class RemotePrintService implements DeathRecipient {
         mIntent = new Intent().setComponent(mComponentName);
         mUserId = userId;
         mSpooler = spooler;
-        mHandler = new MyHandler(context.getMainLooper());
         mPrintServiceClient = new RemotePrintServiceClient(this);
     }
 
@@ -137,7 +133,8 @@ final class RemotePrintService implements DeathRecipient {
     }
 
     public void destroy() {
-        mHandler.sendEmptyMessage(MyHandler.MSG_DESTROY);
+        Handler.getMain().sendMessage(obtainMessage(
+                RemotePrintService::handleDestroy, this));
     }
 
     private void handleDestroy() {
@@ -163,7 +160,8 @@ final class RemotePrintService implements DeathRecipient {
 
     @Override
     public void binderDied() {
-        mHandler.sendEmptyMessage(MyHandler.MSG_BINDER_DIED);
+        Handler.getMain().sendMessage(obtainMessage(
+                RemotePrintService::handleBinderDied, this));
     }
 
     private void handleBinderDied() {
@@ -177,7 +175,8 @@ final class RemotePrintService implements DeathRecipient {
     }
 
     public void onAllPrintJobsHandled() {
-        mHandler.sendEmptyMessage(MyHandler.MSG_ON_ALL_PRINT_JOBS_HANDLED);
+        Handler.getMain().sendMessage(obtainMessage(
+                RemotePrintService::handleOnAllPrintJobsHandled, this));
     }
 
     private void handleOnAllPrintJobsHandled() {
@@ -209,8 +208,8 @@ final class RemotePrintService implements DeathRecipient {
     }
 
     public void onRequestCancelPrintJob(PrintJobInfo printJob) {
-        mHandler.obtainMessage(MyHandler.MSG_ON_REQUEST_CANCEL_PRINT_JOB,
-                printJob).sendToTarget();
+        Handler.getMain().sendMessage(obtainMessage(
+                RemotePrintService::handleRequestCancelPrintJob, this, printJob));
     }
 
     private void handleRequestCancelPrintJob(final PrintJobInfo printJob) {
@@ -235,8 +234,8 @@ final class RemotePrintService implements DeathRecipient {
     }
 
     public void onPrintJobQueued(PrintJobInfo printJob) {
-        mHandler.obtainMessage(MyHandler.MSG_ON_PRINT_JOB_QUEUED,
-                printJob).sendToTarget();
+        Handler.getMain().sendMessage(obtainMessage(
+                RemotePrintService::handleOnPrintJobQueued, this, printJob));
     }
 
     private void handleOnPrintJobQueued(final PrintJobInfo printJob) {
@@ -262,7 +261,8 @@ final class RemotePrintService implements DeathRecipient {
     }
 
     public void createPrinterDiscoverySession() {
-        mHandler.sendEmptyMessage(MyHandler.MSG_CREATE_PRINTER_DISCOVERY_SESSION);
+        Handler.getMain().sendMessage(obtainMessage(
+                RemotePrintService::handleCreatePrinterDiscoverySession, this));
     }
 
     private void handleCreatePrinterDiscoverySession() {
@@ -288,7 +288,8 @@ final class RemotePrintService implements DeathRecipient {
     }
 
     public void destroyPrinterDiscoverySession() {
-        mHandler.sendEmptyMessage(MyHandler.MSG_DESTROY_PRINTER_DISCOVERY_SESSION);
+        Handler.getMain().sendMessage(obtainMessage(
+                RemotePrintService::handleDestroyPrinterDiscoverySession, this));
     }
 
     private void handleDestroyPrinterDiscoverySession() {
@@ -325,8 +326,8 @@ final class RemotePrintService implements DeathRecipient {
     }
 
     public void startPrinterDiscovery(List<PrinterId> priorityList) {
-        mHandler.obtainMessage(MyHandler.MSG_START_PRINTER_DISCOVERY,
-                priorityList).sendToTarget();
+        Handler.getMain().sendMessage(obtainMessage(
+                RemotePrintService::handleStartPrinterDiscovery, this, priorityList));
     }
 
     private void handleStartPrinterDiscovery(final List<PrinterId> priorityList) {
@@ -356,7 +357,8 @@ final class RemotePrintService implements DeathRecipient {
     }
 
     public void stopPrinterDiscovery() {
-        mHandler.sendEmptyMessage(MyHandler.MSG_STOP_PRINTER_DISCOVERY);
+        Handler.getMain().sendMessage(obtainMessage(
+                RemotePrintService::handleStopPrinterDiscovery, this));
     }
 
     private void handleStopPrinterDiscovery() {
@@ -387,8 +389,8 @@ final class RemotePrintService implements DeathRecipient {
     }
 
     public void validatePrinters(List<PrinterId> printerIds) {
-        mHandler.obtainMessage(MyHandler.MSG_VALIDATE_PRINTERS,
-                printerIds).sendToTarget();
+        Handler.getMain().sendMessage(obtainMessage(
+                RemotePrintService::handleValidatePrinters, this, printerIds));
     }
 
     private void handleValidatePrinters(final List<PrinterId> printerIds) {
@@ -413,8 +415,8 @@ final class RemotePrintService implements DeathRecipient {
     }
 
     public void startPrinterStateTracking(@NonNull PrinterId printerId) {
-        mHandler.obtainMessage(MyHandler.MSG_START_PRINTER_STATE_TRACKING,
-                printerId).sendToTarget();
+        Handler.getMain().sendMessage(obtainMessage(
+                RemotePrintService::handleStartPrinterStateTracking, this, printerId));
     }
 
     /**
@@ -424,8 +426,8 @@ final class RemotePrintService implements DeathRecipient {
      * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon
      */
     public void requestCustomPrinterIcon(@NonNull PrinterId printerId) {
-        mHandler.obtainMessage(MyHandler.MSG_REQUEST_CUSTOM_PRINTER_ICON,
-                printerId).sendToTarget();
+        Handler.getMain().sendMessage(obtainMessage(
+                RemotePrintService::handleRequestCustomPrinterIcon, this, printerId));
     }
 
     /**
@@ -481,8 +483,8 @@ final class RemotePrintService implements DeathRecipient {
     }
 
     public void stopPrinterStateTracking(PrinterId printerId) {
-        mHandler.obtainMessage(MyHandler.MSG_STOP_PRINTER_STATE_TRACKING,
-                printerId).sendToTarget();
+        Handler.getMain().sendMessage(obtainMessage(
+                RemotePrintService::handleStopPrinterStateTracking, this, printerId));
     }
 
     private void handleStopPrinterStateTracking(final PrinterId printerId) {
@@ -669,96 +671,6 @@ final class RemotePrintService implements DeathRecipient {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             mBinding = true;
-        }
-    }
-
-    private final class MyHandler extends Handler {
-        public static final int MSG_CREATE_PRINTER_DISCOVERY_SESSION = 1;
-        public static final int MSG_DESTROY_PRINTER_DISCOVERY_SESSION = 2;
-        public static final int MSG_START_PRINTER_DISCOVERY = 3;
-        public static final int MSG_STOP_PRINTER_DISCOVERY = 4;
-        public static final int MSG_VALIDATE_PRINTERS = 5;
-        public static final int MSG_START_PRINTER_STATE_TRACKING = 6;
-        public static final int MSG_STOP_PRINTER_STATE_TRACKING = 7;
-        public static final int MSG_ON_ALL_PRINT_JOBS_HANDLED = 8;
-        public static final int MSG_ON_REQUEST_CANCEL_PRINT_JOB = 9;
-        public static final int MSG_ON_PRINT_JOB_QUEUED = 10;
-        public static final int MSG_DESTROY = 11;
-        public static final int MSG_BINDER_DIED = 12;
-        public static final int MSG_REQUEST_CUSTOM_PRINTER_ICON = 13;
-
-        public MyHandler(Looper looper) {
-            super(looper, null, false);
-        }
-
-        @Override
-        @SuppressWarnings("unchecked")
-        public void handleMessage(Message message) {
-            if (mDestroyed) {
-                Slog.w(LOG_TAG, "Not handling " + message + " as service for " + mComponentName
-                        + " is already destroyed");
-                return;
-            }
-            switch (message.what) {
-                case MSG_CREATE_PRINTER_DISCOVERY_SESSION: {
-                    handleCreatePrinterDiscoverySession();
-                } break;
-
-                case MSG_DESTROY_PRINTER_DISCOVERY_SESSION: {
-                    handleDestroyPrinterDiscoverySession();
-                } break;
-
-                case MSG_START_PRINTER_DISCOVERY: {
-                    List<PrinterId> priorityList = (ArrayList<PrinterId>) message.obj;
-                    handleStartPrinterDiscovery(priorityList);
-                } break;
-
-                case MSG_STOP_PRINTER_DISCOVERY: {
-                    handleStopPrinterDiscovery();
-                } break;
-
-                case MSG_VALIDATE_PRINTERS: {
-                    List<PrinterId> printerIds = (List<PrinterId>) message.obj;
-                    handleValidatePrinters(printerIds);
-                } break;
-
-                case MSG_START_PRINTER_STATE_TRACKING: {
-                    PrinterId printerId = (PrinterId) message.obj;
-                    handleStartPrinterStateTracking(printerId);
-                } break;
-
-                case MSG_STOP_PRINTER_STATE_TRACKING: {
-                    PrinterId printerId = (PrinterId) message.obj;
-                    handleStopPrinterStateTracking(printerId);
-                } break;
-
-                case MSG_ON_ALL_PRINT_JOBS_HANDLED: {
-                    handleOnAllPrintJobsHandled();
-                } break;
-
-                case MSG_ON_REQUEST_CANCEL_PRINT_JOB: {
-                    PrintJobInfo printJob = (PrintJobInfo) message.obj;
-                    handleRequestCancelPrintJob(printJob);
-                } break;
-
-                case MSG_ON_PRINT_JOB_QUEUED: {
-                    PrintJobInfo printJob = (PrintJobInfo) message.obj;
-                    handleOnPrintJobQueued(printJob);
-                } break;
-
-                case MSG_DESTROY: {
-                    handleDestroy();
-                } break;
-
-                case MSG_BINDER_DIED: {
-                    handleBinderDied();
-                } break;
-
-                case MSG_REQUEST_CUSTOM_PRINTER_ICON: {
-                    PrinterId printerId = (PrinterId) message.obj;
-                    handleRequestCustomPrinterIcon(printerId);
-                } break;
-            }
         }
     }
 
