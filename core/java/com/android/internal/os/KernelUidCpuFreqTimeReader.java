@@ -32,6 +32,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 
 /**
  * Reads /proc/uid_time_in_state which has the format:
@@ -41,24 +43,45 @@ import java.io.IOException;
  * [uid2]: [time in freq1] [time in freq2] [time in freq3] ...
  * ...
  *
+ * Binary variation reads /proc/uid_cpupower/time_in_state in the following format:
+ * [n, uid0, time0a, time0b, ..., time0n,
+ * uid1, time1a, time1b, ..., time1n,
+ * uid2, time2a, time2b, ..., time2n, etc.]
+ * where n is the total number of frequencies.
+ *
  * This provides the times a UID's processes spent executing at each different cpu frequency.
  * The file contains a monotonically increasing count of time for a single boot. This class
  * maintains the previous results of a call to {@link #readDelta} in order to provide a proper
  * delta.
+ *
+ * This class uses a throttler to reject any {@link #readDelta} call within
+ * {@link #mThrottleInterval}. This is different from the throttler in {@link KernelCpuProcReader},
+ * which has a shorter throttle interval and returns cached result from last read when the request
+ * is throttled.
+ *
+ * This class is NOT thread-safe and NOT designed to be accessed by more than one caller (due to
+ * the nature of {@link #readDelta(Callback)}).
  */
 public class KernelUidCpuFreqTimeReader {
     private static final boolean DEBUG = false;
     private static final String TAG = "KernelUidCpuFreqTimeReader";
     static final String UID_TIMES_PROC_FILE = "/proc/uid_time_in_state";
+    // Throttle interval in milliseconds
+    private static final long DEFAULT_THROTTLE_INTERVAL = 10_000L;
 
     public interface Callback {
         void onUidCpuFreqTime(int uid, long[] cpuFreqTimeMs);
     }
 
     private long[] mCpuFreqs;
+    private long[] mCurTimes; // Reuse to prevent GC.
+    private long[] mDeltaTimes; // Reuse to prevent GC.
+    private long mThrottleInterval = DEFAULT_THROTTLE_INTERVAL;
     private int mCpuFreqsCount;
-    private long mLastTimeReadMs;
+    private long mLastTimeReadMs = Long.MIN_VALUE;
     private long mNowTimeMs;
+    private boolean mReadBinary = true;
+    private final KernelCpuProcReader mProcReader;
 
     private SparseArray<long[]> mLastUidCpuFreqTimeMs = new SparseArray<>();
 
@@ -68,6 +91,15 @@ public class KernelUidCpuFreqTimeReader {
     private int mReadErrorCounter;
     private boolean mPerClusterTimesAvailable;
     private boolean mAllUidTimesAvailable = true;
+
+    public KernelUidCpuFreqTimeReader() {
+        mProcReader = KernelCpuProcReader.getFreqTimeReaderInstance();
+    }
+
+    @VisibleForTesting
+    public KernelUidCpuFreqTimeReader(KernelCpuProcReader procReader) {
+        mProcReader = procReader;
+    }
 
     public boolean perClusterTimesAvailable() {
         return mPerClusterTimesAvailable;
@@ -83,7 +115,6 @@ public class KernelUidCpuFreqTimeReader {
 
     public long[] readFreqs(@NonNull PowerProfile powerProfile) {
         checkNotNull(powerProfile);
-
         if (mCpuFreqs != null) {
             // No need to read cpu freqs more than once.
             return mCpuFreqs;
@@ -115,19 +146,93 @@ public class KernelUidCpuFreqTimeReader {
         return readCpuFreqs(line, powerProfile);
     }
 
+    public void setReadBinary(boolean readBinary) {
+        mReadBinary = readBinary;
+    }
+
+    public void setThrottleInterval(long throttleInterval) {
+        if (throttleInterval >= 0) {
+            mThrottleInterval = throttleInterval;
+        }
+    }
+
     public void readDelta(@Nullable Callback callback) {
         if (mCpuFreqs == null) {
             return;
         }
+        if (SystemClock.elapsedRealtime() < mLastTimeReadMs + mThrottleInterval) {
+            Slog.w(TAG, "Throttle");
+            return;
+        }
+        mNowTimeMs = SystemClock.elapsedRealtime();
+        if (mReadBinary) {
+            readDeltaBinary(callback);
+        } else {
+            readDeltaString(callback);
+        }
+        mLastTimeReadMs = mNowTimeMs;
+    }
+
+    private void readDeltaString(@Nullable Callback callback) {
         final int oldMask = StrictMode.allowThreadDiskReadsMask();
         try (BufferedReader reader = new BufferedReader(new FileReader(UID_TIMES_PROC_FILE))) {
-            mNowTimeMs = SystemClock.elapsedRealtime();
             readDelta(reader, callback);
-            mLastTimeReadMs = mNowTimeMs;
         } catch (IOException e) {
             Slog.e(TAG, "Failed to read " + UID_TIMES_PROC_FILE + ": " + e);
         } finally {
             StrictMode.setThreadPolicyMask(oldMask);
+        }
+    }
+
+    @VisibleForTesting
+    public void readDeltaBinary(@Nullable Callback callback) {
+        synchronized (mProcReader) {
+            ByteBuffer bytes = mProcReader.readBytes();
+            if (bytes == null || bytes.remaining() <= 4) {
+                // Error already logged in mProcReader.
+                return;
+            }
+            if ((bytes.remaining() & 3) != 0) {
+                Slog.wtf(TAG, "Cannot parse cluster time proc bytes to int: " + bytes.remaining());
+                return;
+            }
+            IntBuffer buf = bytes.asIntBuffer();
+            final int freqs = buf.get();
+            if (freqs != mCpuFreqsCount) {
+                Slog.wtf(TAG, "Cpu freqs expect " + mCpuFreqsCount + " , got " + freqs);
+                return;
+            }
+            if (buf.remaining() % (freqs + 1) != 0) {
+                Slog.wtf(TAG, "Freq time format error: " + buf.remaining() + " / " + (freqs + 1));
+                return;
+            }
+            int numUids = buf.remaining() / (freqs + 1);
+            for (int i = 0; i < numUids; i++) {
+                int uid = buf.get();
+                long[] lastTimes = mLastUidCpuFreqTimeMs.get(uid);
+                if (lastTimes == null) {
+                    lastTimes = new long[mCpuFreqsCount];
+                    mLastUidCpuFreqTimeMs.put(uid, lastTimes);
+                }
+                boolean notify = false;
+                boolean corrupted = false;
+                for (int j = 0; j < freqs; j++) {
+                    mCurTimes[j] = (long) buf.get() * 10; // Unit is 10ms.
+                    mDeltaTimes[j] = mCurTimes[j] - lastTimes[j];
+                    if (mCurTimes[j] < 0 || mDeltaTimes[j] < 0) {
+                        Slog.e(TAG, "Unexpected data from freq time proc: " + mCurTimes[j]);
+                        corrupted = true;
+                    }
+                    notify |= mDeltaTimes[j] > 0;
+                }
+                if (notify && !corrupted) {
+                    System.arraycopy(mCurTimes, 0, lastTimes, 0, freqs);
+                    if (callback != null) {
+                        callback.onUidCpuFreqTime(uid, mDeltaTimes);
+                    }
+                }
+            }
+            // Slog.i(TAG, "Read uids: "+numUids);
         }
     }
 
@@ -212,6 +317,8 @@ public class KernelUidCpuFreqTimeReader {
         // First item would be "uid: " which needs to be ignored.
         mCpuFreqsCount = freqStr.length - 1;
         mCpuFreqs = new long[mCpuFreqsCount];
+        mCurTimes = new long[mCpuFreqsCount];
+        mDeltaTimes = new long[mCpuFreqsCount];
         for (int i = 0; i < mCpuFreqsCount; ++i) {
             mCpuFreqs[i] = Long.parseLong(freqStr[i + 1], 10);
         }
