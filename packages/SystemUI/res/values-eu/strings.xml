@@ -103,12 +103,9 @@
     <string name="camera_label" msgid="7261107956054836961">"ireki kamera"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Hautatu zereginen diseinua"</string>
     <string name="cancel" msgid="6442560571259935130">"Utzi"</string>
-    <!-- no translation found for accessibility_fingerprint_dialog_fingerprint_icon (3125122495414253226) -->
-    <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_app_icon (3228052542929174609) -->
-    <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_help_area (5730471601819225159) -->
-    <skip />
+    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Hatz-markaren ikonoa"</string>
+    <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"Aplikazioaren ikonoa"</string>
+    <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Laguntza-mezuaren eremua"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Zoom-bateragarritasunaren botoia."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Handiagotu pantaila txikia."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetootha konektatuta."</string>
@@ -313,6 +310,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi konexioa desaktibatuta"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Aktibatuta dago Wi-Fi konexioa"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Ez dago Wi-Fi sarerik erabilgarri"</string>
+    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"Alarma"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Igortzen"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Izenik gabeko gailua"</string>
@@ -329,9 +327,11 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"Konektatzen…"</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Konexioa partekatzea"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Sare publikoa"</string>
-    <!-- no translation found for quick_settings_hotspot_secondary_label_transient (7161046712706277215) -->
-    <skip />
-    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (2324635800672199428) -->
+    <string name="quick_settings_hotspot_secondary_label_transient" msgid="7161046712706277215">"Aktibatzen…"</string>
+    <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
+      <item quantity="other">%d gailu</item>
+      <item quantity="one">%d gailu</item>
+    </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Jakinarazpenak"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Linterna"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Datu mugikorrak"</string>
@@ -341,10 +341,8 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> erabilita"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Muga: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Abisua: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <!-- no translation found for quick_settings_work_mode_on_label (3421274215098764735) -->
-    <skip />
-    <!-- no translation found for quick_settings_work_mode_off_label (8856918707867192186) -->
-    <skip />
+    <string name="quick_settings_work_mode_on_label" msgid="3421274215098764735">"Laneko profila"</string>
+    <string name="quick_settings_work_mode_off_label" msgid="8856918707867192186">"Jakinarazpenak eta aplikazioak desaktibatuta daude"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Gaueko argia"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Ilunabarrean"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Ilunabarrera arte"</string>
@@ -362,8 +360,6 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> desgaituta dago modu seguruan."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Garbitu guztiak"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Arrastatu hau pantaila zatitzeko"</string>
-    <!-- no translation found for recents_swipe_up_onboarding (3824607135920170001) -->
-    <skip />
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Zatitze horizontala"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Zatitze bertikala"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Zatitze pertsonalizatua"</string>
@@ -504,11 +500,18 @@
     <string name="volume_zen_end_now" msgid="6930243045593601084">"Desaktibatu"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Zabaldu"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Tolestu"</string>
+    <string name="accessibility_output_chooser" msgid="8185317493017988680">"Aldatu irteerako gailua"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Pantaila ainguratuta dago"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, eduki sakatuta \"Atzera\" eta \"Ikuspegi orokorra\" botoiak."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, eduki sakatuta Atzera eta Hasiera botoiak."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, eduki sakatuta \"Ikuspegi orokorra\" botoia."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, eduki sakatuta Hasiera botoia."</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"Pantailari aingura kentzeko, eduki sakatuta Atzera eta Ikuspegi orokorra botoiak"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Pantailari aingura kentzeko, eduki sakatuta Atzera eta Hasiera botoiak"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Ados"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Ez, eskerrik asko"</string>
+    <string name="screen_pinning_start" msgid="1022122128489278317">"Ainguratu da pantaila"</string>
+    <string name="screen_pinning_exit" msgid="5187339744262325372">"Kendu zaio aingura pantailari"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ezkutatu nahi duzu?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Ezarpenetan aktibatzen duzun hurrengoan agertuko da berriro."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Ezkutatu"</string>
@@ -588,8 +591,7 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Bateria-mailaren arabera jakinarazpenak kontrolatzeko aukerekin, 0 eta 5 bitarteko garrantzi-mailetan sailka ditzakezu aplikazioen jakinarazpenak. \n\n"<b>"5. maila"</b>" \n- Erakutsi jakinarazpenen zerrendaren goialdean. \n- Baimendu etetea pantaila osoko moduan zaudenean. \n- Agerrarazi beti jakinarazpenak. \n\n"<b>"4. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Agerrarazi beti jakinarazpenak. \n\n"<b>"3. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Ez agerrarazi jakinarazpenik inoiz. \n\n"<b>"2. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Ez agerrarazi jakinarazpenik inoiz. \n- Ez egin soinurik edo dardararik inoiz. \n\n"<b>"1. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Ez agerrarazi jakinarazpenik inoiz. \n- Ez egin soinurik edo dardararik inoiz. \n- Ezkutatu pantaila blokeatutik eta egoera-barratik. \n- Erakutsi jakinarazpenen zerrendaren behealdean. \n\n"<b>"0. maila"</b>" \n- Blokeatu aplikazioaren jakinarazpen guztiak."</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Jakinarazpenak"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Aurrerantzean ez duzu ikusiko horrelako jakinarazpenik"</string>
-    <!-- no translation found for inline_blocking_helper (3055064577771478591) -->
-    <skip />
+    <string name="inline_blocking_helper" msgid="3055064577771478591">"Baztertu egin ohi dituzu jakinarazpen hauek. \nHaiek erakusten jarraitzea nahi duzu?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Jakinarazpenak erakusten jarraitzea nahi duzu?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Blokeatu jakinarazpenak"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Jarraitu erakusten"</string>

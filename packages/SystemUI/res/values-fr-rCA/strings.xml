@@ -310,8 +310,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi désactivé"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi activé"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Aucun réseau Wi-Fi à proximité"</string>
-    <!-- no translation found for quick_settings_alarm_title (2416759007342260676) -->
-    <skip />
+    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"Alarme"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Diffuser"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Diffusion"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Appareil sans nom"</string>
@@ -361,7 +360,6 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> est désactivée en mode sans échec."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Effacer tout"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Glissez l\'élément ici pour utiliser l\'écran partagé"</string>
-    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Balayez vers le haut pour changer d\'application"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Séparation horizontale"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Séparation verticale"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Séparation personnalisée"</string>
@@ -505,21 +503,15 @@
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Changer d\'appareil de sortie"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"L\'écran est épinglé"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Cet écran est épinglé jusqu\'à ce que vous annuliez l\'opération. Pour annuler l\'épinglage, maintenez le doigt sur « Retour » et « Aperçu »."</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible (8281145542163727971) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Cet écran est épinglé jusqu\'à ce que vous annuliez l\'opération. Pour annuler l\'épinglage, maintenez le doigt sur les touches Retour et Accueil."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Cet écran est épinglé jusqu\'à ce que vous annuliez l\'opération. Pour annuler l\'épinglage, maintenez le doigt sur « Aperçu »."</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible_accessible (6134833683151189507) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (2266705122951934150) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (8252402309499161281) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Cet écran est épinglé jusqu\'à ce que vous annuliez l\'opération. Pour annuler l\'épinglage, maintenez le doigt sur la touche Accueil."</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"Pour annuler l\'épinglage de cet écran, maintenez le doigt sur les touches Retour et Aperçu."</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Pour annuler l\'épinglage de cet écran, maintenez le doigt sur les touches Retour et Accueil."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"OK"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Non, merci"</string>
-    <!-- no translation found for screen_pinning_start (1022122128489278317) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (5187339744262325372) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="1022122128489278317">"Écran épinglé"</string>
+    <string name="screen_pinning_exit" msgid="5187339744262325372">"Épinglage d\'écran annulé"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Masquer <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Cet élément réapparaîtra la prochaine fois que vous l\'activerez dans les paramètres."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Masquer"</string>

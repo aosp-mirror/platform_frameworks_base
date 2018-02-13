@@ -53,6 +53,8 @@
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Hurrengo alarmak ordu honetan joko du: <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"Ezabatu"</string>
     <string name="disable_carrier_button_text" msgid="6914341927421916114">"Desgaitu eSIM txartela"</string>
+    <string name="error_disable_esim_title" msgid="4852978431156228006">"Ezin da desgaitu eSIM txartela"</string>
+    <string name="error_disable_esim_msg" msgid="676694908770135639">"Errore bat gertatu da eta ezin da desgaitu eSIM txartela."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Sartu"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Eredua ahaztu zaizu"</string>
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"Eredu hori ez da zuzena"</string>
@@ -65,7 +67,7 @@
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"Marraztu eredua"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"Idatzi SIM txartelaren PIN kodea."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"Idatzi \"<xliff:g id="CARRIER">%1$s</xliff:g>\" operadorearen SIM txartelaren PIN kodea."</string>
-    <string name="kg_sim_lock_instructions_esim" msgid="4957650659201013804">"Desgaitu eSIM txartela gailua zerbitzu mugikorrik gabe erabiltzeko."</string>
+    <string name="kg_sim_lock_esim_instructions" msgid="4416732549172148542">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Desgaitu eSIM txartela gailua zerbitzu mugikorrik gabe erabiltzeko."</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"Idatzi PIN kodea"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"Idatzi pasahitza"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"Desgaitu egin da SIM txartela. Aurrera egiteko, idatzi PUK kodea. Xehetasunak lortzeko, jarri operadorearekin harremanetan."</string>
