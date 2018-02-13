@@ -15,17 +15,17 @@
  */
 package android.speech.tts;
 
+import android.media.AudioTrack;
 import android.speech.tts.TextToSpeechService.AudioOutputParams;
 import android.speech.tts.TextToSpeechService.UtteranceProgressDispatcher;
-import android.media.AudioTrack;
 import android.util.Log;
 
 import java.util.LinkedList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Manages the playback of a list of byte arrays representing audio data that are queued by the
@@ -157,9 +157,16 @@ final class SynthesisPlaybackQueueItem extends PlaybackQueueItem
             mStopped = true;
             mStatusCode = statusCode;
 
+            // Wake up the synthesis thread if it was waiting on put(). Its
+            // buffers will no longer be copied since mStopped is true. The
+            // PlaybackSynthesisCallback that this synthesis corresponds to
+            // would also have been stopped, and so all calls to
+            // Callback.onDataAvailable( ) will return errors too.
+            mNotFull.signal();
+
             if (mRunState.getAndSet(STOP_CALLED) == NOT_RUN) {
-                // Dispatch the status code and just finish without signaling
-                // if run() has not even started.
+                // Dispatch the status code and just finish. Signaling audio
+                // playback is not necessary because run() hasn't started.
                 dispatchEndStatus();
                 return;
             }
@@ -168,13 +175,6 @@ final class SynthesisPlaybackQueueItem extends PlaybackQueueItem
             // take() will return null since mStopped was true, and will then
             // break out of the data write loop.
             mReadReady.signal();
-
-            // Wake up the synthesis thread if it was waiting on put(). Its
-            // buffers will no longer be copied since mStopped is true. The
-            // PlaybackSynthesisCallback that this synthesis corresponds to
-            // would also have been stopped, and so all calls to
-            // Callback.onDataAvailable( ) will return errors too.
-            mNotFull.signal();
         } finally {
             mListLock.unlock();
         }
