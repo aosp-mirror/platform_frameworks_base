@@ -16,6 +16,11 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.view.MotionEvent.ACTION_DOWN;
+import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_BACK;
+import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_HOME;
+import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_NONE;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.LayoutTransition;
@@ -61,6 +66,7 @@ import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.statusbar.phone.NavGesture;
 import com.android.systemui.plugins.statusbar.phone.NavGesture.GestureHelper;
 import com.android.systemui.recents.RecentsOnboarding;
+import com.android.systemui.shared.system.NavigationBarCompat;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.policy.DeadZone;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
@@ -94,6 +100,11 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     boolean mShowRotateButton;
     int mDisabledFlags = 0;
     int mNavigationIconHints = 0;
+
+    private @NavigationBarCompat.HitTarget int mDownHitTarget = HIT_TARGET_NONE;
+    private Rect mHomeButtonBounds = new Rect();
+    private Rect mBackButtonBounds = new Rect();
+    private int[] mTmpPosition = new int[2];
 
     private KeyButtonDrawable mBackIcon, mBackLandIcon, mBackAltIcon, mBackAltLandIcon;
     private KeyButtonDrawable mBackCarModeIcon, mBackLandCarModeIcon;
@@ -284,6 +295,18 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
+        switch (event.getActionMasked()) {
+            case ACTION_DOWN:
+                int x = (int) event.getX();
+                int y = (int) event.getY();
+                mDownHitTarget = HIT_TARGET_NONE;
+                if (mBackButtonBounds.contains(x, y)) {
+                    mDownHitTarget = HIT_TARGET_BACK;
+                } else if (mHomeButtonBounds.contains(x, y)) {
+                    mDownHitTarget = HIT_TARGET_HOME;
+                }
+                break;
+        }
         return mGestureHelper.onInterceptTouchEvent(event);
     }
 
@@ -293,6 +316,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             return true;
         }
         return super.onTouchEvent(event);
+    }
+
+    public @NavigationBarCompat.HitTarget int getDownHitTarget() {
+        return mDownHitTarget;
     }
 
     public void abortCurrentGesture() {
@@ -783,7 +810,21 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
+        updateButtonLocationOnScreen(getBackButton(), mBackButtonBounds);
+        updateButtonLocationOnScreen(getHomeButton(), mHomeButtonBounds);
         mGestureHelper.onLayout(changed, left, top, right, bottom);
+    }
+
+    private void updateButtonLocationOnScreen(ButtonDispatcher button, Rect buttonBounds) {
+        View view = button.getCurrentView();
+        if (view == null) {
+            buttonBounds.setEmpty();
+            return;
+        }
+        view.getLocationInWindow(mTmpPosition);
+        buttonBounds.set(mTmpPosition[0], mTmpPosition[1],
+                mTmpPosition[0] + view.getMeasuredWidth(),
+                mTmpPosition[1] + view.getMeasuredHeight());
     }
 
     private void updateRotatedViews() {

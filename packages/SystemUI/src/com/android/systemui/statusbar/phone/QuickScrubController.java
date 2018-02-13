@@ -53,6 +53,7 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_LEFT;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_BOTTOM;
 import static com.android.systemui.OverviewProxyService.DEBUG_OVERVIEW_PROXY;
 import static com.android.systemui.OverviewProxyService.TAG_OPS;
+import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_HOME;
 
 /**
  * Class to detect gestures on the navigation bar and implement quick scrub and switch.
@@ -92,7 +93,6 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
     private final Handler mHandler = new Handler();
     private final Interpolator mQuickScrubEndInterpolator = new DecelerateInterpolator();
     private final Rect mTrackRect = new Rect();
-    private final Rect mHomeButtonRect = new Rect();
     private final Paint mTrackPaint = new Paint();
     private final int mScrollTouchSlop;
     private final OverviewProxyService mOverviewEventSender;
@@ -138,7 +138,7 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velX, float velY) {
                 if (!isQuickScrubEnabled() || mQuickScrubActive || !mAllowQuickSwitch ||
-                        !mHomeButtonRect.contains(mTouchDownX, mTouchDownY)) {
+                        mNavigationBarView.getDownHitTarget() != HIT_TARGET_HOME) {
                     return false;
                 }
                 float velocityX = mIsRTL ? -velX : velX;
@@ -226,7 +226,8 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
             case MotionEvent.ACTION_DOWN: {
                 int x = (int) event.getX();
                 int y = (int) event.getY();
-                if (isQuickScrubEnabled() && mHomeButtonRect.contains(x, y)) {
+                if (isQuickScrubEnabled()
+                        && mNavigationBarView.getDownHitTarget() == HIT_TARGET_HOME) {
                     mTouchDownX = x;
                     mTouchDownY = y;
                     homeButton.setDelayTouchFeedback(true);
@@ -346,17 +347,6 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
             x2 = x1 + width / 2 - mTrackPadding;
         }
         mTrackRect.set(x1, y1, x2, y2);
-
-        // Get the touch rect of the home button location
-        View homeView = mNavigationBarView.getHomeButton().getCurrentView();
-        if (homeView != null) {
-            int[] globalHomePos = homeView.getLocationOnScreen();
-            int[] globalNavBarPos = mNavigationBarView.getLocationOnScreen();
-            int homeX = globalHomePos[0] - globalNavBarPos[0];
-            int homeY = globalHomePos[1] - globalNavBarPos[1];
-            mHomeButtonRect.set(homeX, homeY, homeX + homeView.getMeasuredWidth(),
-                    homeY + homeView.getMeasuredHeight());
-        }
     }
 
     @Override

@@ -23,6 +23,14 @@ oneway interface IOverviewProxy {
     void onBind(in ISystemUiProxy sysUiProxy);
 
     /**
+     * Called once immediately prior to the first onMotionEvent() call, providing a hint to the
+     * target the initial source of the subsequent motion events.
+     *
+     * @param downHitTarget is one of the {@link NavigationBarCompat.HitTarget}s
+     */
+    void onPreMotionEvent(int downHitTarget);
+
+    /**
      * Proxies motion events from the nav bar in SystemUI to the OverviewProxyService. The sender
      * guarantees the following order of events:
      *

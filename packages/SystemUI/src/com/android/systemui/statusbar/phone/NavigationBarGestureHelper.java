@@ -131,6 +131,9 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
             mNavigationBarView.requestUnbufferedDispatch(event);
             event.transform(mTransformGlobalMatrix);
             try {
+                if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                    overviewProxy.onPreMotionEvent(mNavigationBarView.getDownHitTarget());
+                }
                 overviewProxy.onMotionEvent(event);
                 if (DEBUG_OVERVIEW_PROXY) {
                     Log.d(TAG_OPS, "Send MotionEvent: " + event.toString());
@@ -146,8 +149,8 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
     }
 
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        int action = event.getAction();
-        switch (action & MotionEvent.ACTION_MASK) {
+        int action = event.getActionMasked();
+        switch (action) {
             case MotionEvent.ACTION_DOWN: {
                 mTouchDownX = (int) event.getX();
                 mTouchDownY = (int) event.getY();
