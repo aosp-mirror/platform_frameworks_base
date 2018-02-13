@@ -8862,6 +8862,7 @@ public class Notification implements Parcelable
         private static final String EXTRA_CONTENT_INTENT = "content_intent";
         private static final String EXTRA_DELETE_INTENT = "delete_intent";
         private static final String EXTRA_CHANNEL_ID = "channel_id";
+        private static final String EXTRA_SUPPRESS_SHOW_OVER_APPS = "suppressShowOverApps";
 
         // Flags bitwise-ored to mFlags
         private static final int FLAG_AVAILABLE_ON_TV = 0x1;
@@ -8870,6 +8871,7 @@ public class Notification implements Parcelable
         private String mChannelId;
         private PendingIntent mContentIntent;
         private PendingIntent mDeleteIntent;
+        private boolean mSuppressShowOverApps;
 
         /**
          * Create a {@link TvExtender} with default options.
@@ -8889,6 +8891,7 @@ public class Notification implements Parcelable
             if (bundle != null) {
                 mFlags = bundle.getInt(EXTRA_FLAGS);
                 mChannelId = bundle.getString(EXTRA_CHANNEL_ID);
+                mSuppressShowOverApps = bundle.getBoolean(EXTRA_SUPPRESS_SHOW_OVER_APPS);
                 mContentIntent = bundle.getParcelable(EXTRA_CONTENT_INTENT);
                 mDeleteIntent = bundle.getParcelable(EXTRA_DELETE_INTENT);
             }
@@ -8905,6 +8908,7 @@ public class Notification implements Parcelable
 
             bundle.putInt(EXTRA_FLAGS, mFlags);
             bundle.putString(EXTRA_CHANNEL_ID, mChannelId);
+            bundle.putBoolean(EXTRA_SUPPRESS_SHOW_OVER_APPS, mSuppressShowOverApps);
             if (mContentIntent != null) {
                 bundle.putParcelable(EXTRA_CONTENT_INTENT, mContentIntent);
             }
@@ -8996,6 +9000,23 @@ public class Notification implements Parcelable
          */
         public PendingIntent getDeleteIntent() {
             return mDeleteIntent;
+        }
+
+        /**
+         * Specifies whether this notification should suppress showing a message over top of apps
+         * outside of the launcher.
+         */
+        public TvExtender setSuppressShowOverApps(boolean suppress) {
+            mSuppressShowOverApps = suppress;
+            return this;
+        }
+
+        /**
+         * Returns true if this notification should not show messages over top of apps
+         * outside of the launcher.
+         */
+        public boolean getSuppressShowOverApps() {
+            return mSuppressShowOverApps;
         }
     }
 

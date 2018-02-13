@@ -343,11 +343,13 @@ package android.app {
     method public java.lang.String getChannelId();
     method public android.app.PendingIntent getContentIntent();
     method public android.app.PendingIntent getDeleteIntent();
+    method public boolean getSuppressShowOverApps();
     method public boolean isAvailableOnTv();
     method public android.app.Notification.TvExtender setChannel(java.lang.String);
     method public android.app.Notification.TvExtender setChannelId(java.lang.String);
     method public android.app.Notification.TvExtender setContentIntent(android.app.PendingIntent);
     method public android.app.Notification.TvExtender setDeleteIntent(android.app.PendingIntent);
+    method public android.app.Notification.TvExtender setSuppressShowOverApps(boolean);
   }
 
   public final class NotificationChannel implements android.os.Parcelable {
