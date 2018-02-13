@@ -4371,7 +4371,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 "updateUsageStats: comp=" + component + "res=" + resumed);
         final BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
         StatsLog.write(StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED,
-            component.userId, component.realActivity.getPackageName(),
+            component.app.uid, component.realActivity.getPackageName(),
             component.realActivity.getShortClassName(), resumed ?
                         StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED__ACTIVITY__MOVE_TO_FOREGROUND :
                         StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED__ACTIVITY__MOVE_TO_BACKGROUND);
