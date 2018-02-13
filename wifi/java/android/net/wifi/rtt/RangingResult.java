@@ -59,6 +59,19 @@ public final class RangingResult implements Parcelable {
      */
     public static final int STATUS_FAIL = 1;
 
+    /**
+     * Individual range request status, {@link #getStatus()}. Indicates that the ranging operation
+     * failed because the specified peer does not support IEEE 802.11mc RTT operations. Support by
+     * an Access Point can be confirmed using
+     * {@link android.net.wifi.ScanResult#is80211mcResponder()}.
+     * <p>
+     * On such a failure, the individual result fields of {@link RangingResult} such as
+     * {@link RangingResult#getDistanceMm()} are invalid.
+     *
+     * @hide
+     */
+    public static final int STATUS_RESPONDER_DOES_NOT_SUPPORT_IEEE80211MC = 2;
+
     private final int mStatus;
     private final MacAddress mMac;
     private final PeerHandle mPeerHandle;
