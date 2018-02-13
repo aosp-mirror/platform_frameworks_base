@@ -3501,6 +3501,11 @@ package android.net.wifi.rtt {
     method public android.net.wifi.rtt.RangingRequest.Builder addResponder(android.net.wifi.rtt.ResponderConfig);
   }
 
+  public final class RangingResult implements android.os.Parcelable {
+    method public byte[] getLci();
+    method public byte[] getLcr();
+  }
+
   public final class ResponderConfig implements android.os.Parcelable {
     ctor public ResponderConfig(android.net.MacAddress, int, boolean, int, int, int, int, int);
     ctor public ResponderConfig(android.net.wifi.aware.PeerHandle, int, boolean, int, int, int, int, int);
