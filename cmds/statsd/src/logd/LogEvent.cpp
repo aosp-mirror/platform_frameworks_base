@@ -241,10 +241,10 @@ void LogEvent::init(android_log_context context) {
                     // So that we can later easily match them with Position=Last matchers.
                     pos[prevDepth]--;
                     int path = getEncodedField(pos, prevDepth, false);
-                    for (size_t j = mValues.size() - 1; j >= 0; j--) {
-                        if (mValues[j].mField.getDepth() >= prevDepth &&
-                            mValues[j].mField.getPath(prevDepth) == path) {
-                            mValues[j].mField.decorateLastPos(prevDepth);
+                    for (auto it = mValues.rbegin(); it != mValues.rend(); ++it) {
+                        if (it->mField.getDepth() >= prevDepth &&
+                            it->mField.getPath(prevDepth) == path) {
+                            it->mField.decorateLastPos(prevDepth);
                         } else {
                             // Safe to break, because the items are in DFS order.
                             break;
