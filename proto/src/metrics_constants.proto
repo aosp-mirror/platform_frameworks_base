@@ -5274,6 +5274,16 @@ message MetricsEvent {
     // OS: P
     FIELD_QS_MODE = 1311;
 
+    // FIELD: The compiler filter used when when optimizing the package.
+    //        Logged together with app transition events.
+    // OS: P
+    PACKAGE_OPTIMIZATION_COMPILATION_FILTER = 1312;
+
+    // FIELD: The reason for optimizing the package.
+    //        Logged together with app transition events.
+    // OS: P
+    PACKAGE_OPTIMIZATION_COMPILATION_REASON = 1313;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
