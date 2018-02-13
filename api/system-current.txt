@@ -2524,17 +2524,26 @@ package android.media {
 
   public class AudioManager {
     method public deprecated int abandonAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, android.media.AudioAttributes);
+    method public void clearAudioServerStateCallback();
     method public int dispatchAudioFocusChange(android.media.AudioFocusInfo, int, android.media.audiopolicy.AudioPolicy);
+    method public boolean isAudioServerRunning();
     method public boolean isHdmiSystemAudioSupported();
     method public int registerAudioPolicy(android.media.audiopolicy.AudioPolicy);
     method public int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, android.media.AudioAttributes, int, int) throws java.lang.IllegalArgumentException;
     method public deprecated int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, android.media.AudioAttributes, int, int, android.media.audiopolicy.AudioPolicy) throws java.lang.IllegalArgumentException;
     method public int requestAudioFocus(android.media.AudioFocusRequest, android.media.audiopolicy.AudioPolicy);
+    method public void setAudioServerStateCallback(java.util.concurrent.Executor, android.media.AudioManager.AudioServerStateCallback);
     method public void setFocusRequestResult(android.media.AudioFocusInfo, int, android.media.audiopolicy.AudioPolicy);
     method public void unregisterAudioPolicyAsync(android.media.audiopolicy.AudioPolicy);
     field public static final int AUDIOFOCUS_FLAG_DELAY_OK = 1; // 0x1
     field public static final int AUDIOFOCUS_FLAG_LOCK = 4; // 0x4
     field public static final int AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS = 2; // 0x2
+  }
+
+  public static abstract class AudioManager.AudioServerStateCallback {
+    ctor public AudioManager.AudioServerStateCallback();
+    method public void onAudioServerDown();
+    method public void onAudioServerUp();
   }
 
   public final class AudioPlaybackConfiguration implements android.os.Parcelable {
