@@ -72,9 +72,6 @@ StatsLogProcessor::StatsLogProcessor(const sp<UidMap>& uidMap,
       mAnomalyMonitor(anomalyMonitor),
       mSendBroadcast(sendBroadcast),
       mTimeBaseSec(timeBaseSec) {
-    // On each initialization of StatsLogProcessor, check stats-data directory to see if there is
-    // any left over data to be read.
-    StorageManager::sendBroadcast(STATS_DATA_DIR, mSendBroadcast);
     StatsPullerManager statsPullerManager;
     statsPullerManager.SetTimeBaseSec(mTimeBaseSec);
 }
