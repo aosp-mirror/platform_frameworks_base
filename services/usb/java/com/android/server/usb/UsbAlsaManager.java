@@ -55,6 +55,7 @@ public final class UsbAlsaManager {
     // this is needed to map USB devices to ALSA Audio Devices, especially to remove an
     // ALSA device when we are notified that its associated USB device has been removed.
     private final ArrayList<UsbAlsaDevice> mAlsaDevices = new ArrayList<UsbAlsaDevice>();
+    private UsbAlsaDevice mSelectedDevice;
 
     /**
      * List of connected MIDI devices
@@ -75,12 +76,19 @@ public final class UsbAlsaManager {
                         ServiceManager.getService(Context.AUDIO_SERVICE));
     }
 
-    // Notifies AudioService when a device is added or removed
-    // alsaDevice - the AudioDevice that was added or removed
-    // enabled - if true, we're connecting a device (it's arrived), else disconnecting
-    private void notifyDeviceState(UsbAlsaDevice alsaDevice, boolean enabled) {
+    /**
+     * Select the AlsaDevice to be used for AudioService.
+     * AlsaDevice.start() notifies AudioService of it's connected state.
+     *
+     * @param alsaDevice The selected UsbAlsaDevice for system USB audio.
+     */
+    private synchronized void selectAlsaDevice(UsbAlsaDevice alsaDevice) {
         if (DEBUG) {
-            Slog.d(TAG, "notifyDeviceState " + enabled + " " + alsaDevice);
+            Slog.d(TAG, "selectAlsaDevice " + alsaDevice);
+        }
+
+        if (mSelectedDevice != null) {
+            deselectAlsaDevice();
         }
 
         // FIXME Does not yet handle the case where the setting is changed
@@ -94,10 +102,14 @@ public final class UsbAlsaManager {
             return;
         }
 
-        if (enabled) {
-            alsaDevice.start();
-        } else {
-            alsaDevice.stop();
+        mSelectedDevice = alsaDevice;
+        alsaDevice.start();
+    }
+
+    private synchronized void deselectAlsaDevice() {
+        if (mSelectedDevice != null) {
+            mSelectedDevice.stop();
+            mSelectedDevice = null;
         }
     }
 
@@ -130,7 +142,7 @@ public final class UsbAlsaManager {
                 Slog.d(TAG, "  alsaDevice:" + alsaDevice);
             }
             if (alsaDevice != null) {
-                notifyDeviceState(alsaDevice, true /*enabled*/);
+                selectAlsaDevice(alsaDevice);
             }
             return alsaDevice;
         } else {
@@ -174,13 +186,11 @@ public final class UsbAlsaManager {
                     new UsbAlsaDevice(mAudioService, cardRec.getCardNum(), 0 /*device*/,
                                       deviceAddress, hasOutput, hasInput,
                                       isInputHeadset, isOutputHeadset);
-            alsaDevice.setDeviceNameAndDescription(
-                    cardRec.getCardName(), cardRec.getCardDescription());
-            mAlsaDevices.add(0, alsaDevice);
-
-            // Select it
             if (alsaDevice != null) {
-                notifyDeviceState(alsaDevice, true /*enabled*/);
+                alsaDevice.setDeviceNameAndDescription(
+                          cardRec.getCardName(), cardRec.getCardDescription());
+                mAlsaDevices.add(0, alsaDevice);
+                selectAlsaDevice(alsaDevice);
             }
         }
 
@@ -225,7 +235,7 @@ public final class UsbAlsaManager {
         }
     }
 
-    /* package */ void usbDeviceRemoved(String deviceAddress/*UsbDevice usbDevice*/) {
+    /* package */ synchronized void usbDeviceRemoved(String deviceAddress/*UsbDevice usbDevice*/) {
         if (DEBUG) {
             Slog.d(TAG, "deviceRemoved(" + deviceAddress + ")");
         }
@@ -233,13 +243,9 @@ public final class UsbAlsaManager {
         // Audio
         UsbAlsaDevice alsaDevice = removeAlsaDeviceFromList(deviceAddress);
         Slog.i(TAG, "USB Audio Device Removed: " + alsaDevice);
-        if (alsaDevice != null) {
-            if (alsaDevice.hasOutput() || alsaDevice.hasInput()) {
-                notifyDeviceState(alsaDevice, false /*enabled*/);
-
-                // if there any external devices left, select one of them
-                selectDefaultDevice();
-            }
+        if (alsaDevice != null && alsaDevice == mSelectedDevice) {
+            deselectAlsaDevice();
+            selectDefaultDevice(); // if there any external devices left, select one of them
         }
 
         // MIDI
