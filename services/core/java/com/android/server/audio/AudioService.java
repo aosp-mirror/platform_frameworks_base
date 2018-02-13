@@ -547,8 +547,6 @@ public class AudioService extends IAudioService.Stub
     // Used to play ringtones outside system_server
     private volatile IRingtonePlayer mRingtonePlayer;
 
-    private int mDeviceOrientation = Configuration.ORIENTATION_UNDEFINED;
-
     // Request to override default use of A2DP for media.
     private boolean mBluetoothA2dpEnabled;
     private final Object mBluetoothA2dpEnabledLock = new Object();
@@ -567,8 +565,6 @@ public class AudioService extends IAudioService.Stub
             AudioSystem.DEVICE_OUT_AUX_LINE;
     int mFullVolumeDevices = 0;
 
-    // TODO merge orientation and rotation
-    private final boolean mMonitorOrientation;
     private final boolean mMonitorRotation;
 
     private boolean mDockAudioMediaEnabled = true;
@@ -784,13 +780,6 @@ public class AudioService extends IAudioService.Stub
         intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
 
         intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
-        // TODO merge orientation and rotation
-        mMonitorOrientation = SystemProperties.getBoolean("ro.audio.monitorOrientation", false);
-        if (mMonitorOrientation) {
-            Log.v(TAG, "monitoring device orientation");
-            // initialize orientation in AudioSystem
-            setOrientationForAudioSystem();
-        }
         mMonitorRotation = SystemProperties.getBoolean("ro.audio.monitorRotation", false);
         if (mMonitorRotation) {
             RotationHelper.init(mContext, mAudioHandler);
@@ -959,10 +948,7 @@ public class AudioService extends IAudioService.Stub
         // Restore ringer mode
         setRingerModeInt(getRingerModeInternal(), false);
 
-        // Reset device orientation (if monitored for this device)
-        if (mMonitorOrientation) {
-            setOrientationForAudioSystem();
-        }
+        // Reset device rotation (if monitored for this device)
         if (mMonitorRotation) {
             RotationHelper.updateOrientation();
         }
@@ -6169,24 +6155,15 @@ public class AudioService extends IAudioService.Stub
     // Device orientation
     //==========================================================================================
     /**
-     * Handles device configuration changes that may map to a change in the orientation
-     * or orientation.
-     * Monitoring orientation and rotation is optional, and is defined by the definition and value
-     * of the "ro.audio.monitorOrientation" and "ro.audio.monitorRotation" system properties.
+     * Handles device configuration changes that may map to a change in rotation.
+     * Monitoring rotation is optional, and is defined by the definition and value
+     * of the "ro.audio.monitorRotation" system property.
      */
     private void handleConfigurationChanged(Context context) {
         try {
-            // reading new orientation "safely" (i.e. under try catch) in case anything
-            // goes wrong when obtaining resources and configuration
+            // reading new configuration "safely" (i.e. under try catch) in case anything
+            // goes wrong.
             Configuration config = context.getResources().getConfiguration();
-            // TODO merge rotation and orientation
-            if (mMonitorOrientation) {
-                int newOrientation = config.orientation;
-                if (newOrientation != mDeviceOrientation) {
-                    mDeviceOrientation = newOrientation;
-                    setOrientationForAudioSystem();
-                }
-            }
             sendMsg(mAudioHandler,
                     MSG_CONFIGURE_SAFE_MEDIA_VOLUME,
                     SENDMSG_REPLACE,
@@ -6235,30 +6212,6 @@ public class AudioService extends IAudioService.Stub
             mVolumeController.setLayoutDirection(config.getLayoutDirection());
         } catch (Exception e) {
             Log.e(TAG, "Error handling configuration change: ", e);
-        }
-    }
-
-    //TODO move to an external "orientation helper" class
-    private void setOrientationForAudioSystem() {
-        switch (mDeviceOrientation) {
-            case Configuration.ORIENTATION_LANDSCAPE:
-                //Log.i(TAG, "orientation is landscape");
-                AudioSystem.setParameters("orientation=landscape");
-                break;
-            case Configuration.ORIENTATION_PORTRAIT:
-                //Log.i(TAG, "orientation is portrait");
-                AudioSystem.setParameters("orientation=portrait");
-                break;
-            case Configuration.ORIENTATION_SQUARE:
-                //Log.i(TAG, "orientation is square");
-                AudioSystem.setParameters("orientation=square");
-                break;
-            case Configuration.ORIENTATION_UNDEFINED:
-                //Log.i(TAG, "orientation is undefined");
-                AudioSystem.setParameters("orientation=undefined");
-                break;
-            default:
-                Log.e(TAG, "Unknown orientation");
         }
     }
 
