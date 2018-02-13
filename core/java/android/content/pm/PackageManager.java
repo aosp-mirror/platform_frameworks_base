@@ -5065,6 +5065,7 @@ public abstract class PackageManager {
      * which market the package came from.
      *
      * @param packageName The name of the package to query
+     * @throws IllegalArgumentException if the given package name is not installed
      */
     public abstract String getInstallerPackageName(String packageName);
 
