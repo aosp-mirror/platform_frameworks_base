@@ -268,7 +268,9 @@ int64_t LogEvent::GetLong(size_t key, status_t* err) const {
     int field = getSimpleField(key);
     for (const auto& value : mValues) {
         if (value.mField.getField() == field) {
-            if (value.mValue.getType() == INT) {
+            if (value.mValue.getType() == LONG) {
+                return value.mValue.long_value;
+            } else if (value.mValue.getType() == INT) {
                 return value.mValue.int_value;
             } else {
                 *err = BAD_TYPE;
