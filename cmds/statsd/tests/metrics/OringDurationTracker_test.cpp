@@ -59,7 +59,6 @@ TEST(OringDurationTrackerTest, TestDurationOverlap) {
 
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
     uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
     uint64_t bucketNum = 0;
     uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
     uint64_t durationTimeNs = 2 * 1000;
@@ -95,7 +94,6 @@ TEST(OringDurationTrackerTest, TestDurationNested) {
 
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
     uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
     uint64_t bucketNum = 0;
     uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
 
@@ -129,7 +127,6 @@ TEST(OringDurationTrackerTest, TestStopAll) {
 
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
     uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
     uint64_t bucketNum = 0;
     uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
 
@@ -162,7 +159,6 @@ TEST(OringDurationTrackerTest, TestCrossBucketBoundary) {
 
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
     uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
     uint64_t bucketNum = 0;
     uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
     uint64_t durationTimeNs = 2 * 1000;
@@ -210,7 +206,6 @@ TEST(OringDurationTrackerTest, TestDurationConditionChange) {
 
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
     uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
     uint64_t bucketNum = 0;
     uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
     uint64_t durationTimeNs = 2 * 1000;
@@ -253,7 +248,6 @@ TEST(OringDurationTrackerTest, TestDurationConditionChange2) {
 
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
-    uint64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
     uint64_t bucketNum = 0;
     uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
     uint64_t durationTimeNs = 2 * 1000;
@@ -296,7 +290,6 @@ TEST(OringDurationTrackerTest, TestDurationConditionChangeNested) {
 
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
-    uint64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
     uint64_t bucketNum = 0;
     uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
 
@@ -338,7 +331,6 @@ TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     uint64_t bucketStartTimeNs = 10 * NS_PER_SEC;
-    uint64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
     uint64_t bucketNum = 0;
     uint64_t eventStartTimeNs = bucketStartTimeNs + NS_PER_SEC + 1;
 
@@ -408,7 +400,6 @@ TEST(OringDurationTrackerTest, TestAnomalyDetectionExpiredAlarm) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     uint64_t bucketStartTimeNs = 10 * NS_PER_SEC;
-    uint64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
     uint64_t bucketNum = 0;
     uint64_t eventStartTimeNs = bucketStartTimeNs + NS_PER_SEC + 1;
 
@@ -421,15 +412,15 @@ TEST(OringDurationTrackerTest, TestAnomalyDetectionExpiredAlarm) {
     tracker.noteStop(kEventKey1, eventStartTimeNs + 10, false);
     EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(eventKey), 0U);
     EXPECT_TRUE(tracker.mStarted.empty());
-    EXPECT_EQ(10LL, tracker.mDuration);
+    EXPECT_EQ(10LL, tracker.mDuration); // 10ns
 
     EXPECT_EQ(0u, tracker.mStarted.size());
 
     tracker.noteStart(kEventKey1, true, eventStartTimeNs + 20, ConditionKey());
     EXPECT_EQ(1u, anomalyTracker->mAlarms.size());
-    EXPECT_EQ((long long)(51ULL * NS_PER_SEC),
+    EXPECT_EQ((long long)(52ULL * NS_PER_SEC),  // (10s + 1s + 1ns + 20ns) - 10ns + 40s, rounded up
               (long long)(anomalyTracker->mAlarms.begin()->second->timestampSec * NS_PER_SEC));
-    // The alarm is set to fire at 51s, and when it does, an anomaly would be declared. However,
+    // The alarm is set to fire at 52s, and when it does, an anomaly would be declared. However,
     // because this is a unit test, the alarm won't actually fire at all. Since the alarm fails
     // to fire in time, the anomaly is instead caught when noteStop is called, at around 71s.
     tracker.flushIfNeeded(eventStartTimeNs + 2 * bucketSizeNs + 25, &buckets);
@@ -460,7 +451,6 @@ TEST(OringDurationTrackerTest, TestAnomalyDetectionFiredAlarm) {
     ConditionKey conkey;
     conkey[StringToId("APP_BACKGROUND")] = kConditionKey1;
     uint64_t bucketStartTimeNs = 10 * NS_PER_SEC;
-    uint64_t eventStartTimeNs = bucketStartTimeNs + NS_PER_SEC + 1;
     uint64_t bucketSizeNs = 30 * NS_PER_SEC;
 
     sp<DurationAnomalyTracker> anomalyTracker = new DurationAnomalyTracker(alert, kConfigKey);
