@@ -52,28 +52,28 @@ protected:
 TEST_F(CpuInfoParserTest, Success) {
     const string testFile = kTestDataPath + "cpuinfo.txt";
     CpuInfoParser parser;
-    CpuInfo expected;
+    CpuInfoProto expected;
 
-    CpuInfo::TaskStats* taskStats = expected.mutable_task_stats();
+    CpuInfoProto::TaskStats* taskStats = expected.mutable_task_stats();
     taskStats->set_total(2038);
     taskStats->set_running(1);
     taskStats->set_sleeping(2033);
     taskStats->set_stopped(0);
     taskStats->set_zombie(0);
 
-    CpuInfo::MemStats* mem = expected.mutable_mem();
+    CpuInfoProto::MemStats* mem = expected.mutable_mem();
     mem->set_total(3842668);
     mem->set_used(3761936);
     mem->set_free(80732);
     mem->set_buffers(220188);
 
-    CpuInfo::MemStats* swap = expected.mutable_swap();
+    CpuInfoProto::MemStats* swap = expected.mutable_swap();
     swap->set_total(524284);
     swap->set_used(25892);
     swap->set_free(498392);
     swap->set_cached(1316952);
 
-    CpuInfo::CpuUsage* usage = expected.mutable_cpu_usage();
+    CpuInfoProto::CpuUsage* usage = expected.mutable_cpu_usage();
     usage->set_cpu(400);
     usage->set_user(17);
     usage->set_nice(0);
@@ -85,59 +85,59 @@ TEST_F(CpuInfoParserTest, Success) {
     usage->set_host(0);
 
     // This is a special line which is able to be parsed by the CpuInfoParser
-    CpuInfo::Task* task1 = expected.add_tasks();
+    CpuInfoProto::Task* task1 = expected.add_tasks();
     task1->set_pid(29438);
     task1->set_tid(29438);
     task1->set_user("rootabcdefghij");
     task1->set_pr("20");
     task1->set_ni(0);
     task1->set_cpu(57.9);
-    task1->set_s(CpuInfo::Task::STATUS_R);
+    task1->set_s(CpuInfoProto::Task::STATUS_R);
     task1->set_virt("14M");
     task1->set_res("3.8M");
-    task1->set_pcy(CpuInfo::Task::POLICY_UNKNOWN);
+    task1->set_pcy(CpuInfoProto::Task::POLICY_UNKNOWN);
     task1->set_cmd("top test");
     task1->set_name("top");
 
-    CpuInfo::Task* task2 = expected.add_tasks();
+    CpuInfoProto::Task* task2 = expected.add_tasks();
     task2->set_pid(916);
     task2->set_tid(916);
     task2->set_user("system");
     task2->set_pr("18");
     task2->set_ni(-2);
     task2->set_cpu(1.4);
-    task2->set_s(CpuInfo::Task::STATUS_S);
+    task2->set_s(CpuInfoProto::Task::STATUS_S);
     task2->set_virt("4.6G");
     task2->set_res("404M");
-    task2->set_pcy(CpuInfo::Task::POLICY_fg);
+    task2->set_pcy(CpuInfoProto::Task::POLICY_fg);
     task2->set_cmd("system_server");
     task2->set_name("system_server");
 
-    CpuInfo::Task* task3 = expected.add_tasks();
+    CpuInfoProto::Task* task3 = expected.add_tasks();
     task3->set_pid(28);
     task3->set_tid(28);
     task3->set_user("root");
     task3->set_pr("-2");
     task3->set_ni(0);
     task3->set_cpu(1.4);
-    task3->set_s(CpuInfo::Task::STATUS_S);
+    task3->set_s(CpuInfoProto::Task::STATUS_S);
     task3->set_virt("0");
     task3->set_res("0");
-    task3->set_pcy(CpuInfo::Task::POLICY_bg);
+    task3->set_pcy(CpuInfoProto::Task::POLICY_bg);
     task3->set_cmd("rcuc/3");
     task3->set_name("[rcuc/3]");
 
-    CpuInfo::Task* task4 = expected.add_tasks();
+    CpuInfoProto::Task* task4 = expected.add_tasks();
     task4->set_pid(27);
     task4->set_tid(27);
     task4->set_user("root");
     task4->set_pr("RT");
     task4->set_ni(0);
     task4->set_cpu(1.4);
-    task4->set_s(CpuInfo::Task::STATUS_S);
+    task4->set_s(CpuInfoProto::Task::STATUS_S);
     task4->set_virt("0");
     task4->set_res("0");
-    task4->set_pcy(CpuInfo::Task::POLICY_ta);
+    task4->set_pcy(CpuInfoProto::Task::POLICY_ta);
     task4->set_cmd("migration/3");
     task4->set_name("[migration/3]");
 

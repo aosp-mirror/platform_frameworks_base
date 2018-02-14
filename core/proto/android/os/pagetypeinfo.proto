@@ -16,7 +16,6 @@
 syntax = "proto2";
 
 option java_multiple_files = true;
-option java_outer_classname = "PageTypeInfoProto";
 
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
@@ -37,49 +36,47 @@ package android.os;
  *
  *  Next tag: 5
  */
-message PageTypeInfo {
+message PageTypeInfoProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional int32 page_block_order = 1;
 
     optional int32 pages_per_block = 2;
 
-    repeated MigrateTypeProto migrate_types = 3;
+    // Next tag: 5
+    message MigrateType {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    repeated BlockProto blocks = 4;
-}
+        optional int32 node = 1;
 
-// Next tag: 5
-message MigrateTypeProto {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+        optional string zone = 2;
 
-    optional int32 node = 1;
+        optional string type = 3;
 
-    optional string zone = 2;
+        // order level starts from 0 for 4KB to page_block_order defined above, e.g. 10 for 4096KB
+        repeated int32 free_pages_count = 4;
+    }
+    repeated MigrateType migrate_types = 3;
 
-    optional string type = 3;
+    // Next tag: 9
+    message Block {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    // order level starts from 0 for 4KB to page_block_order defined above, e.g. 10 for 4096KB
-    repeated int32 free_pages_count = 4;
-}
+        optional int32 node = 1;
 
-// Next tag: 9
-message BlockProto {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+        optional string zone = 2;
 
-    optional int32 node = 1;
+        optional int32 unmovable = 3;
 
-    optional string zone = 2;
+        optional int32 reclaimable = 4;
 
-    optional int32 unmovable = 3;
+        optional int32 movable = 5;
 
-    optional int32 reclaimable = 4;
+        optional int32 cma = 6;
 
-    optional int32 movable = 5;
+        optional int32 reserve = 7;
 
-    optional int32 cma = 6;
-
-    optional int32 reserve = 7;
-
-    optional int32 isolate = 8;
+        optional int32 isolate = 8;
+    }
+    repeated Block blocks = 4;
 }

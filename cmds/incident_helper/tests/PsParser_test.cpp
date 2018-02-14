@@ -52,10 +52,10 @@ protected:
 TEST_F(PsParserTest, Normal) {
     const string testFile = kTestDataPath + "ps.txt";
     PsParser parser;
-    PsDumpProto expected;
-    PsDumpProto got;
+    PsProto expected;
+    PsProto got;
 
-    PsDumpProto::Process* record1 = expected.add_processes();
+    PsProto::Process* record1 = expected.add_processes();
     record1->set_label("u:r:init:s0");
     record1->set_user("root");
     record1->set_pid(1);
@@ -65,16 +65,16 @@ TEST_F(PsParserTest, Normal) {
     record1->set_rss(2636);
     record1->set_wchan("SyS_epoll_wait");
     record1->set_addr("0");
-    record1->set_s(PsDumpProto_Process_ProcessStateCode_STATE_S);
+    record1->set_s(PsProto_Process_ProcessStateCode_STATE_S);
     record1->set_pri(19);
     record1->set_ni(0);
     record1->set_rtprio("-");
-    record1->set_sch(PsDumpProto_Process_SchedulingPolicy_SCH_NORMAL);
-    record1->set_pcy(PsDumpProto::Process::POLICY_FG);
+    record1->set_sch(PsProto_Process_SchedulingPolicy_SCH_NORMAL);
+    record1->set_pcy(PsProto::Process::POLICY_FG);
     record1->set_time("00:00:01");
     record1->set_cmd("init");
 
-    PsDumpProto::Process* record2 = expected.add_processes();
+    PsProto::Process* record2 = expected.add_processes();
     record2->set_label("u:r:kernel:s0");
     record2->set_user("root");
     record2->set_pid(2);
@@ -84,16 +84,16 @@ TEST_F(PsParserTest, Normal) {
     record2->set_rss(0);
     record2->set_wchan("kthreadd");
     record2->set_addr("0");
-    record2->set_s(PsDumpProto_Process_ProcessStateCode_STATE_S);
+    record2->set_s(PsProto_Process_ProcessStateCode_STATE_S);
     record2->set_pri(19);
     record2->set_ni(0);
     record2->set_rtprio("-");
-    record2->set_sch(PsDumpProto_Process_SchedulingPolicy_SCH_NORMAL);
-    record2->set_pcy(PsDumpProto::Process::POLICY_FG);
+    record2->set_sch(PsProto_Process_SchedulingPolicy_SCH_NORMAL);
+    record2->set_pcy(PsProto::Process::POLICY_FG);
     record2->set_time("00:00:00");
     record2->set_cmd("kthreadd");
 
-    PsDumpProto::Process* record3 = expected.add_processes();
+    PsProto::Process* record3 = expected.add_processes();
     record3->set_label("u:r:surfaceflinger:s0");
     record3->set_user("system");
     record3->set_pid(499);
@@ -103,16 +103,16 @@ TEST_F(PsParserTest, Normal) {
     record3->set_rss(22024);
     record3->set_wchan("futex_wait_queue_me");
     record3->set_addr("0");
-    record3->set_s(PsDumpProto_Process_ProcessStateCode_STATE_S);
+    record3->set_s(PsProto_Process_ProcessStateCode_STATE_S);
     record3->set_pri(42);
     record3->set_ni(-9);
     record3->set_rtprio("2");
-    record3->set_sch(PsDumpProto_Process_SchedulingPolicy_SCH_FIFO);
-    record3->set_pcy(PsDumpProto::Process::POLICY_FG);
+    record3->set_sch(PsProto_Process_SchedulingPolicy_SCH_FIFO);
+    record3->set_pcy(PsProto::Process::POLICY_FG);
     record3->set_time("00:00:00");
     record3->set_cmd("EventThread");
 
-    PsDumpProto::Process* record4 = expected.add_processes();
+    PsProto::Process* record4 = expected.add_processes();
     record4->set_label("u:r:hal_gnss_default:s0");
     record4->set_user("gps");
     record4->set_pid(670);
@@ -122,16 +122,16 @@ TEST_F(PsParserTest, Normal) {
     record4->set_rss(7272);
     record4->set_wchan("poll_schedule_timeout");
     record4->set_addr("0");
-    record4->set_s(PsDumpProto_Process_ProcessStateCode_STATE_S);
+    record4->set_s(PsProto_Process_ProcessStateCode_STATE_S);
     record4->set_pri(19);
     record4->set_ni(0);
     record4->set_rtprio("-");
-    record4->set_sch(PsDumpProto_Process_SchedulingPolicy_SCH_NORMAL);
-    record4->set_pcy(PsDumpProto::Process::POLICY_FG);
+    record4->set_sch(PsProto_Process_SchedulingPolicy_SCH_NORMAL);
+    record4->set_pcy(PsProto::Process::POLICY_FG);
     record4->set_time("00:00:00");
     record4->set_cmd("Loc_hal_worker");
 
-    PsDumpProto::Process* record5 = expected.add_processes();
+    PsProto::Process* record5 = expected.add_processes();
     record5->set_label("u:r:platform_app:s0:c512,c768");
     record5->set_user("u0_a48");
     record5->set_pid(1660);
@@ -141,16 +141,16 @@ TEST_F(PsParserTest, Normal) {
     record5->set_rss(138328);
     record5->set_wchan("binder_thread_read");
     record5->set_addr("0");
-    record5->set_s(PsDumpProto_Process_ProcessStateCode_STATE_S);
+    record5->set_s(PsProto_Process_ProcessStateCode_STATE_S);
     record5->set_pri(35);
     record5->set_ni(-16);
     record5->set_rtprio("-");
-    record5->set_sch(PsDumpProto_Process_SchedulingPolicy_SCH_NORMAL);
-    record5->set_pcy(PsDumpProto::Process::POLICY_TA);
+    record5->set_sch(PsProto_Process_SchedulingPolicy_SCH_NORMAL);
+    record5->set_pcy(PsProto::Process::POLICY_TA);
     record5->set_time("00:00:00");
     record5->set_cmd("HwBinder:1660_1");
 
-    PsDumpProto::Process* record6 = expected.add_processes();
+    PsProto::Process* record6 = expected.add_processes();
     record6->set_label("u:r:perfd:s0");
     record6->set_user("root");
     record6->set_pid(1939);
@@ -160,16 +160,16 @@ TEST_F(PsParserTest, Normal) {
     record6->set_rss(2088);
     record6->set_wchan("__skb_recv_datagram");
     record6->set_addr("7b9782fd14");
-    record6->set_s(PsDumpProto_Process_ProcessStateCode_STATE_S);
+    record6->set_s(PsProto_Process_ProcessStateCode_STATE_S);
     record6->set_pri(19);
     record6->set_ni(0);
     record6->set_rtprio("-");
-    record6->set_sch(PsDumpProto_Process_SchedulingPolicy_SCH_NORMAL);
-    record6->set_pcy(PsDumpProto::Process::POLICY_UNKNOWN);
+    record6->set_sch(PsProto_Process_SchedulingPolicy_SCH_NORMAL);
+    record6->set_pcy(PsProto::Process::POLICY_UNKNOWN);
     record6->set_time("00:00:00");
     record6->set_cmd("perfd");
 
-    PsDumpProto::Process* record7 = expected.add_processes();
+    PsProto::Process* record7 = expected.add_processes();
     record7->set_label("u:r:perfd:s0");
     record7->set_user("root");
     record7->set_pid(1939);
@@ -179,16 +179,16 @@ TEST_F(PsParserTest, Normal) {
     record7->set_rss(2088);
     record7->set_wchan("do_sigtimedwait");
     record7->set_addr("7b9782ff6c");
-    record7->set_s(PsDumpProto_Process_ProcessStateCode_STATE_S);
+    record7->set_s(PsProto_Process_ProcessStateCode_STATE_S);
     record7->set_pri(19);
     record7->set_ni(0);
     record7->set_rtprio("-");
-    record7->set_sch(PsDumpProto_Process_SchedulingPolicy_SCH_NORMAL);
-    record7->set_pcy(PsDumpProto::Process::POLICY_UNKNOWN);
+    record7->set_sch(PsProto_Process_SchedulingPolicy_SCH_NORMAL);
+    record7->set_pcy(PsProto::Process::POLICY_UNKNOWN);
     record7->set_time("00:00:00");
     record7->set_cmd("POSIX timer 0");
 
-    PsDumpProto::Process* record8 = expected.add_processes();
+    PsProto::Process* record8 = expected.add_processes();
     record8->set_label("u:r:shell:s0");
     record8->set_user("shell");
     record8->set_pid(2645);
@@ -198,12 +198,12 @@ TEST_F(PsParserTest, Normal) {
     record8->set_rss(2972);
     record8->set_wchan("0");
     record8->set_addr("7f67a2f8b4");
-    record8->set_s(PsDumpProto_Process_ProcessStateCode_STATE_R);
+    record8->set_s(PsProto_Process_ProcessStateCode_STATE_R);
     record8->set_pri(19);
     record8->set_ni(0);
     record8->set_rtprio("-");
-    record8->set_sch(PsDumpProto_Process_SchedulingPolicy_SCH_NORMAL);
-    record8->set_pcy(PsDumpProto::Process::POLICY_FG);
+    record8->set_sch(PsProto_Process_SchedulingPolicy_SCH_NORMAL);
+    record8->set_pcy(PsProto::Process::POLICY_FG);
     record8->set_time("00:00:00");
     record8->set_cmd("ps");
 
@@ -221,8 +221,8 @@ TEST_F(PsParserTest, Normal) {
     } else {
         int n = got.processes_size();
         for (int i = 0; i < n; i++) {
-            PsDumpProto::Process g = got.processes(i);
-            PsDumpProto::Process e = expected.processes(i);
+            PsProto::Process g = got.processes(i);
+            PsProto::Process e = expected.processes(i);
 
             if (g.label() != e.label()) {
                 fprintf(stderr, "prcs[%d]: Invalid label. Got %s, want %s\n", i, g.label().c_str(), e.label().c_str());

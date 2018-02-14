@@ -16,41 +16,40 @@
 syntax = "proto2";
 
 option java_multiple_files = true;
-option java_outer_classname = "WakeupSourcesProto";
 
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 package android.os;
 
-message KernelWakeSources {
+message KernelWakeSourcesProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     // Kernel records of what caused the application processor to wake up
-    repeated WakeupSourceProto wakeup_sources = 1;
-}
+    message WakeupSource {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-// Next Tag: 11
-message WakeupSourceProto {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+        // Name of the event which triggers application processor
+        optional string name = 1;
 
-    // Name of the event which triggers application processor
-    optional string name = 1;
+        optional int32 active_count = 2;
 
-    optional int32 active_count = 2;
+        optional int32 event_count = 3;
 
-    optional int32 event_count = 3;
+        optional int32 wakeup_count = 4;
 
-    optional int32 wakeup_count = 4;
+        optional int32 expire_count = 5;
 
-    optional int32 expire_count = 5;
+        optional int64 active_since = 6;
 
-    optional int64 active_since = 6;
+        optional int64 total_time = 7;
 
-    optional int64 total_time = 7;
+        optional int64 max_time = 8;
 
-    optional int64 max_time = 8;
+        optional int64 last_change = 9;
 
-    optional int64 last_change = 9;
+        optional int64 prevent_suspend_time = 10;
 
-    optional int64 prevent_suspend_time = 10;
+        // Next Tag: 11
+    }
+    repeated WakeupSource wakeup_sources = 1;
 }

@@ -33,7 +33,9 @@ PageTypeInfoParser::Parse(const int in, const int out) const
     header_t blockHeader;
 
     ProtoOutputStream proto;
-    Table table(BlockProto::_FIELD_NAMES, BlockProto::_FIELD_IDS, BlockProto::_FIELD_COUNT);
+    Table table(PageTypeInfoProto::Block::_FIELD_NAMES,
+            PageTypeInfoProto::Block::_FIELD_IDS,
+            PageTypeInfoProto::Block::_FIELD_COUNT);
 
     while (reader.readLine(&line)) {
         if (line.empty()) {
@@ -44,11 +46,11 @@ PageTypeInfoParser::Parse(const int in, const int out) const
 
         if (stripPrefix(&line, "Page block order:")) {
             pageBlockOrder = toInt(line);
-            proto.write(PageTypeInfo::PAGE_BLOCK_ORDER, pageBlockOrder);
+            proto.write(PageTypeInfoProto::PAGE_BLOCK_ORDER, pageBlockOrder);
             continue;
         }
         if (stripPrefix(&line, "Pages per block:")) {
-            proto.write(PageTypeInfo::PAGES_PER_BLOCK, toInt(line));
+            proto.write(PageTypeInfoProto::PAGES_PER_BLOCK, toInt(line));
             continue;
         }
         if (stripPrefix(&line, "Free pages count per migrate type at order")) {
@@ -62,14 +64,14 @@ PageTypeInfoParser::Parse(const int in, const int out) const
 
         record_t record = parseRecord(line, COMMA_DELIMITER);
         if (migrateTypeSession && record.size() == 3) {
-            long long token = proto.start(PageTypeInfo::MIGRATE_TYPES);
+            long long token = proto.start(PageTypeInfoProto::MIGRATE_TYPES);
             // expect part 0 starts with "Node"
             if (stripPrefix(&record[0], "Node")) {
-                proto.write(MigrateTypeProto::NODE, toInt(record[0]));
+                proto.write(PageTypeInfoProto::MigrateType::NODE, toInt(record[0]));
             } else return BAD_VALUE;
             // expect part 1 starts with "zone"
             if (stripPrefix(&record[1], "zone")) {
-                proto.write(MigrateTypeProto::ZONE, record[1]);
+                proto.write(PageTypeInfoProto::MigrateType::ZONE, record[1]);
             } else return BAD_VALUE;
             // expect part 2 starts with "type"
             if (stripPrefix(&record[2], "type")) {
@@ -83,22 +85,22 @@ PageTypeInfoParser::Parse(const int in, const int out) const
                 int pageCountsSize = pageBlockOrder + 2;
                 if ((int)pageCounts.size() != pageCountsSize) return BAD_VALUE;
 
-                proto.write(MigrateTypeProto::TYPE, pageCounts[0]);
+                proto.write(PageTypeInfoProto::MigrateType::TYPE, pageCounts[0]);
                 for (auto i=1; i<pageCountsSize; i++) {
-                    proto.write(MigrateTypeProto::FREE_PAGES_COUNT, toInt(pageCounts[i]));
+                    proto.write(PageTypeInfoProto::MigrateType::FREE_PAGES_COUNT, toInt(pageCounts[i]));
                 }
             } else return BAD_VALUE;
 
             proto.end(token);
         } else if (!blockHeader.empty() && record.size() == 2) {
-            long long token = proto.start(PageTypeInfo::BLOCKS);
+            long long token = proto.start(PageTypeInfoProto::BLOCKS);
             if (stripPrefix(&record[0], "Node")) {
-                proto.write(BlockProto::NODE, toInt(record[0]));
+                proto.write(PageTypeInfoProto::Block::NODE, toInt(record[0]));
             } else return BAD_VALUE;
 
             if (stripPrefix(&record[1], "zone")) {
                 record_t blockCounts = parseRecord(record[1]);
-                proto.write(BlockProto::ZONE, blockCounts[0]);
+                proto.write(PageTypeInfoProto::Block::ZONE, blockCounts[0]);
 
                 for (size_t i=0; i<blockHeader.size(); i++) {
                     if (!table.insertField(&proto, blockHeader[i], blockCounts[i+1])) {
