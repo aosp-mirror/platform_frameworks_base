@@ -58,9 +58,8 @@ public class Installer extends SystemService {
     public static final int DEXOPT_STORAGE_DE     = 1 << 8;
     /** Indicates that dexopt is invoked from the background service. */
     public static final int DEXOPT_IDLE_BACKGROUND_JOB = 1 << 9;
-    /* Indicates that dexopt should not restrict access to private APIs.
-     * Must be kept in sync with com.android.internal.os.ZygoteInit. */
-    public static final int DEXOPT_DISABLE_HIDDEN_API_CHECKS = 1 << 10;
+    /** Indicates that dexopt should restrict access to private APIs. */
+    public static final int DEXOPT_ENABLE_HIDDEN_API_CHECKS = 1 << 10;
 
     // NOTE: keep in sync with installd
     public static final int FLAG_CLEAR_CACHE_ONLY = 1 << 8;
