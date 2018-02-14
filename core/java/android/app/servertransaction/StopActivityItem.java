@@ -72,6 +72,7 @@ public class StopActivityItem extends ActivityLifecycleItem {
 
     @Override
     public void recycle() {
+        super.recycle();
         mShowWindow = false;
         mConfigChanges = 0;
         ObjectPool.recycle(this);
