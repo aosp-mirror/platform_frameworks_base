@@ -7751,7 +7751,6 @@ public class Activity extends ContextThemeWrapper
      * @param disable {@code true} to disable preview screenshots; {@code false} otherwise.
      * @hide
      */
-    @SystemApi
     public void setDisablePreviewScreenshots(boolean disable) {
         try {
             ActivityManager.getService().setDisablePreviewScreenshots(mToken, disable);
