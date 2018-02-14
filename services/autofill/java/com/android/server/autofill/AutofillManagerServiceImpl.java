@@ -64,6 +64,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.LocalLog;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -906,7 +907,10 @@ final class AutofillManagerServiceImpl {
         pw.print(prefix); pw.print("Disabled: "); pw.println(mDisabled);
         pw.print(prefix); pw.print("Field classification enabled: ");
             pw.println(isFieldClassificationEnabledLocked());
-        pw.print(prefix); pw.print("Compat pkgs: "); pw.println(getWhitelistedCompatModePackages());
+        final ArrayMap<String, Pair<Long, String>> compatPkgs = getCompatibilityPackagesLocked();
+        if (compatPkgs != null) {
+            pw.print(prefix); pw.print("Compat pkgs: "); pw.println(compatPkgs.keySet());
+        }
         pw.print(prefix); pw.print("Setup complete: "); pw.println(mSetupComplete);
         pw.print(prefix); pw.print("Last prune: "); pw.println(mLastPrune);
 
@@ -1030,23 +1034,11 @@ final class AutofillManagerServiceImpl {
     }
 
     @GuardedBy("mLock")
-    boolean isCompatibilityModeRequestedLocked(@NonNull String packageName,
-            long versionCode) {
-        if (mInfo == null || !mInfo.isCompatibilityModeRequested(packageName, versionCode)) {
-            return false;
+    @Nullable ArrayMap<String, Pair<Long, String>> getCompatibilityPackagesLocked() {
+        if (mInfo != null) {
+            return mInfo.getCompatibilityPackages();
         }
-        if (!Build.IS_ENG) {
-            // TODO: Build a map and watch for settings changes (this is called on app start)
-            final String whiteListedPackages = getWhitelistedCompatModePackages();
-            return whiteListedPackages != null && whiteListedPackages.contains(packageName);
-        }
-        return true;
-    }
-
-    private String getWhitelistedCompatModePackages() {
-        return Settings.Global.getString(
-                mContext.getContentResolver(),
-                Settings.Global.AUTOFILL_COMPAT_ALLOWED_PACKAGES);
+        return null;
     }
 
     private void sendStateToClients(boolean resetClient) {

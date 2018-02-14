@@ -24,7 +24,6 @@ import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sPartitionMaxCount;
 import static com.android.server.autofill.Helper.sVerbose;
 
-import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -56,7 +55,12 @@ import android.os.UserManagerInternal;
 import android.provider.Settings;
 import android.service.autofill.FillEventHistory;
 import android.service.autofill.UserData;
+import android.text.TextUtils;
+import android.text.TextUtils.SimpleStringSplitter;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.LocalLog;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -84,6 +88,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Entry point service for autofill management.
@@ -97,6 +102,8 @@ public final class AutofillManagerService extends SystemService {
     private static final String TAG = "AutofillManagerService";
 
     static final String RECEIVER_BUNDLE_EXTRA_SESSIONS = "sessions";
+
+    private static final char COMPAT_PACKAGE_DELIMITER = ':';
 
     private final Context mContext;
     private final AutoFillUI mUi;
@@ -122,6 +129,9 @@ public final class AutofillManagerService extends SystemService {
     private final LocalLog mRequestsHistory = new LocalLog(20);
     private final LocalLog mUiLatencyHistory = new LocalLog(20);
     private final LocalLog mWtfHistory = new LocalLog(50);
+
+    private final AutofillCompatState mAutofillCompatState = new AutofillCompatState();
+    private final LocalService mLocalService = new LocalService();
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -271,7 +281,7 @@ public final class AutofillManagerService extends SystemService {
     @Override
     public void onStart() {
         publishBinderService(AUTOFILL_MANAGER_SERVICE, new AutoFillManagerServiceStub());
-        publishLocalService(AutofillManagerInternal.class, new LocalService());
+        publishLocalService(AutofillManagerInternal.class, mLocalService);
     }
 
     @Override
@@ -317,6 +327,11 @@ public final class AutofillManagerService extends SystemService {
                     mUiLatencyHistory, mWtfHistory, resolvedUserId, mUi,
                     mDisabledUsers.get(resolvedUserId));
             mServicesCache.put(userId, service);
+            final ArrayMap<String, Pair<Long, String>> compatPackages =
+                    service.getCompatibilityPackagesLocked();
+            if (compatPackages != null) {
+                addCompatibilityModeRequests(compatPackages, userId);
+            }
         }
         return service;
     }
@@ -482,6 +497,7 @@ public final class AutofillManagerService extends SystemService {
         if (service != null) {
             mServicesCache.delete(userId);
             service.destroyLocked();
+            mAutofillCompatState.removeCompatibilityModeRequests(userId);
         }
     }
 
@@ -498,18 +514,60 @@ public final class AutofillManagerService extends SystemService {
      */
     @GuardedBy("mLock")
     private void updateCachedServiceLocked(int userId, boolean disabled) {
-        AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
+        AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
         if (service != null) {
             service.destroySessionsLocked();
             service.updateLocked(disabled);
             if (!service.isEnabledLocked()) {
                 removeCachedServiceLocked(userId);
+            } else {
+                final ArrayMap<String, Pair<Long, String>> compatPackages =
+                        service.getCompatibilityPackagesLocked();
+                if (compatPackages != null) {
+                    addCompatibilityModeRequests(compatPackages, userId);
+                }
             }
         }
     }
 
-    private final class LocalService extends AutofillManagerInternal {
+    private void addCompatibilityModeRequests(
+            @NonNull ArrayMap<String, Pair<Long, String>> compatPackages, int userId) {
+        final Set<String> whiteListedPackages = Build.IS_ENG ? null
+                : getWhitelistedCompatModePackages();
+        final int compatPackageCount = compatPackages.size();
+        for (int i = 0; i < compatPackageCount; i++) {
+            final String packageName = compatPackages.keyAt(i);
+            if (!Build.IS_ENG && (whiteListedPackages == null
+                    || !whiteListedPackages.contains(packageName))) {
+                Slog.w(TAG, "Ignoring not whitelisted compat package " + packageName);
+                continue;
+            }
+            final Long maxVersionCode = compatPackages.valueAt(i).first;
+            if (maxVersionCode != null) {
+                mAutofillCompatState.addCompatibilityModeRequest(packageName,
+                        maxVersionCode, userId);
+            }
+        }
+    }
 
+    private @Nullable Set<String> getWhitelistedCompatModePackages() {
+        final String compatPackagesSetting = Settings.Global.getString(
+                mContext.getContentResolver(),
+                Settings.Global.AUTOFILL_COMPAT_ALLOWED_PACKAGES);
+        if (TextUtils.isEmpty(compatPackagesSetting)) {
+            return null;
+        }
+        final Set<String> compatPackages = new ArraySet<>();
+        final SimpleStringSplitter splitter = new SimpleStringSplitter(
+                COMPAT_PACKAGE_DELIMITER);
+        splitter.setString(compatPackagesSetting);
+        while (splitter.hasNext()) {
+            compatPackages.add(splitter.next());
+        }
+        return compatPackages;
+    }
+
+    private final class LocalService extends AutofillManagerInternal {
         @Override
         public void onBackKeyPressed() {
             if (sDebug) Slog.d(TAG, "onBackKeyPressed()");
@@ -519,13 +577,59 @@ public final class AutofillManagerService extends SystemService {
         @Override
         public boolean isCompatibilityModeRequested(@NonNull String packageName,
                 long versionCode, @UserIdInt int userId) {
+            return mAutofillCompatState.isCompatibilityModeRequested(
+                    packageName, versionCode, userId);
+        }
+    }
+
+    private static class AutofillCompatState {
+        private final Object mLock = new Object();
+
+        @GuardedBy("mLock")
+        private SparseArray<ArrayMap<String, Long>> mUserSpecs;
+
+        boolean isCompatibilityModeRequested(@NonNull String packageName,
+                long versionCode, @UserIdInt int userId) {
             synchronized (mLock) {
-                final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
-                if (service != null) {
-                    return service.isCompatibilityModeRequestedLocked(packageName, versionCode);
+                if (mUserSpecs == null) {
+                    return false;
+                }
+                final ArrayMap<String, Long> userSpec = mUserSpecs.get(userId);
+                if (userSpec == null) {
+                    return false;
+                }
+                final Long maxVersionCode = userSpec.get(packageName);
+                if (maxVersionCode == null) {
+                    return false;
+                }
+                return versionCode <= maxVersionCode;
+            }
+        }
+
+        void addCompatibilityModeRequest(@NonNull String packageName,
+                long versionCode, @UserIdInt int userId) {
+            synchronized (mLock) {
+                if (mUserSpecs == null) {
+                    mUserSpecs = new SparseArray<>();
+                }
+                ArrayMap<String, Long> userSpec = mUserSpecs.get(userId);
+                if (userSpec == null) {
+                    userSpec = new ArrayMap<>();
+                    mUserSpecs.put(userId, userSpec);
+                }
+                userSpec.put(packageName, versionCode);
+            }
+        }
+
+        void removeCompatibilityModeRequests(@UserIdInt int userId) {
+            synchronized (mLock) {
+                if (mUserSpecs != null) {
+                    mUserSpecs.remove(userId);
+                    if (mUserSpecs.size() <= 0) {
+                        mUserSpecs = null;
+                    }
                 }
             }
-            return false;
         }
     }
 

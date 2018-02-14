@@ -11382,7 +11382,8 @@ public final class Settings {
                 "chained_battery_attribution_enabled";
 
         /**
-         * The packages whitelisted to be run in autofill compatibility mode.
+         * The packages whitelisted to be run in autofill compatibility mode. The list
+         * of packages is ":" colon delimited.
          *
          * @hide
          */
