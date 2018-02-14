@@ -165,6 +165,9 @@ std::unique_ptr<BinaryPrimitive> MakeBool(bool val);
  */
 std::unique_ptr<BinaryPrimitive> TryParseInt(const android::StringPiece& str);
 
+// Returns an integer BinaryPrimitive.
+std::unique_ptr<BinaryPrimitive> MakeInt(uint32_t value);
+
 /*
  * Returns a BinaryPrimitve object representing a floating point number
  * (float, dimension, etc) if the string was parsed as one.
