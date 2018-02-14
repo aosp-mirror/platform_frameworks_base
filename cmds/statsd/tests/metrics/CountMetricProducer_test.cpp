@@ -54,6 +54,7 @@ TEST(CountMetricProducerTest, TestNonDimensionalEvents) {
 
     CountMetricProducer countProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
                                       bucketStartTimeNs);
+    countProducer.setBucketSize(60 * NS_PER_SEC);
 
     // 2 events in bucket 1.
     countProducer.onMatchedLogEvent(1 /*log matcher index*/, event1);
@@ -111,6 +112,7 @@ TEST(CountMetricProducerTest, TestEventsWithNonSlicedCondition) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     CountMetricProducer countProducer(kConfigKey, metric, 1, wizard, bucketStartTimeNs);
+    countProducer.setBucketSize(60 * NS_PER_SEC);
 
     countProducer.onConditionChanged(true, bucketStartTimeNs);
     countProducer.onMatchedLogEvent(1 /*matcher index*/, event1);
@@ -172,6 +174,7 @@ TEST(CountMetricProducerTest, TestEventsWithSlicedCondition) {
 
     CountMetricProducer countProducer(kConfigKey, metric, 1 /*condition tracker index*/, wizard,
                                       bucketStartTimeNs);
+    countProducer.setBucketSize(60 * NS_PER_SEC);
 
     countProducer.onMatchedLogEvent(1 /*log matcher index*/, event1);
     countProducer.flushIfNeededLocked(bucketStartTimeNs + 1);
@@ -210,6 +213,8 @@ TEST(CountMetricProducerTest, TestEventWithAppUpgrade) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     CountMetricProducer countProducer(kConfigKey, metric, -1 /* no condition */, wizard,
                                       bucketStartTimeNs);
+    countProducer.setBucketSize(60 * NS_PER_SEC);
+
     sp<AnomalyTracker> anomalyTracker = countProducer.addAnomalyTracker(alert);
     EXPECT_TRUE(anomalyTracker != nullptr);
 
@@ -267,6 +272,7 @@ TEST(CountMetricProducerTest, TestEventWithAppUpgradeInNextBucket) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     CountMetricProducer countProducer(kConfigKey, metric, -1 /* no condition */, wizard,
                                       bucketStartTimeNs);
+    countProducer.setBucketSize(60 * NS_PER_SEC);
 
     // Bucket is flushed yet.
     countProducer.onMatchedLogEvent(1 /*log matcher index*/, event1);
@@ -322,6 +328,8 @@ TEST(CountMetricProducerTest, TestAnomalyDetectionUnSliced) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     CountMetricProducer countProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
                                       bucketStartTimeNs);
+    countProducer.setBucketSize(60 * NS_PER_SEC);
+
     sp<AnomalyTracker> anomalyTracker = countProducer.addAnomalyTracker(alert);
 
     int tagId = 1;

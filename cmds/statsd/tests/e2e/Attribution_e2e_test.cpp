@@ -47,7 +47,7 @@ StatsdConfig CreateStatsdConfig() {
     *countMetric->mutable_dimensions_in_what() =
         CreateAttributionUidAndTagDimensions(
             android::util::WAKELOCK_STATE_CHANGED, {Position::FIRST});
-    countMetric->set_bucket(ONE_MINUTE);
+    countMetric->set_bucket(FIVE_MINUTES);
     return config;
 }
 

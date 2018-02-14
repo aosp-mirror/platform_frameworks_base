@@ -57,6 +57,7 @@ TEST(DurationMetricTrackerTest, TestNoCondition) {
     DurationMetricProducer durationProducer(
             kConfigKey, metric, -1 /*no condition*/, 1 /* start index */, 2 /* stop index */,
             3 /* stop_all index */, false /*nesting*/, wizard, dimensions, bucketStartTimeNs);
+    durationProducer.setBucketSize(60 * NS_PER_SEC);
 
     durationProducer.onMatchedLogEvent(1 /* start index*/, event1);
     durationProducer.onMatchedLogEvent(2 /* stop index*/, event2);
@@ -94,6 +95,8 @@ TEST(DurationMetricTrackerTest, TestNonSlicedCondition) {
     DurationMetricProducer durationProducer(
             kConfigKey, metric, 0 /* condition index */, 1 /* start index */, 2 /* stop index */,
             3 /* stop_all index */, false /*nesting*/, wizard, dimensions, bucketStartTimeNs);
+    durationProducer.setBucketSize(60 * NS_PER_SEC);
+
     EXPECT_FALSE(durationProducer.mCondition);
     EXPECT_FALSE(durationProducer.isConditionSliced());
 
@@ -143,6 +146,7 @@ TEST(DurationMetricTrackerTest, TestSumDurationWithUpgrade) {
     DurationMetricProducer durationProducer(
             kConfigKey, metric, -1 /* no condition */, 1 /* start index */, 2 /* stop index */,
             3 /* stop_all index */, false /*nesting*/, wizard, dimensions, bucketStartTimeNs);
+    durationProducer.setBucketSize(60 * NS_PER_SEC);
 
     durationProducer.onMatchedLogEvent(1 /* start index*/, LogEvent(tagId, startTimeNs));
     EXPECT_EQ(0UL, durationProducer.mPastBuckets.size());
@@ -193,6 +197,7 @@ TEST(DurationMetricTrackerTest, TestSumDurationWithUpgradeInFollowingBucket) {
     DurationMetricProducer durationProducer(
             kConfigKey, metric, -1 /* no condition */, 1 /* start index */, 2 /* stop index */,
             3 /* stop_all index */, false /*nesting*/, wizard, dimensions, bucketStartTimeNs);
+    durationProducer.setBucketSize(60 * NS_PER_SEC);
 
     durationProducer.onMatchedLogEvent(1 /* start index*/, LogEvent(tagId, startTimeNs));
     EXPECT_EQ(0UL, durationProducer.mPastBuckets.size());
@@ -242,6 +247,8 @@ TEST(DurationMetricTrackerTest, TestSumDurationAnomalyWithUpgrade) {
     DurationMetricProducer durationProducer(
             kConfigKey, metric, -1 /* no condition */, 1 /* start index */, 2 /* stop index */,
             3 /* stop_all index */, false /*nesting*/, wizard, dimensions, bucketStartTimeNs);
+    durationProducer.setBucketSize(60 * NS_PER_SEC);
+
     sp<AnomalyTracker> anomalyTracker = durationProducer.addAnomalyTracker(alert);
     EXPECT_TRUE(anomalyTracker != nullptr);
 
@@ -275,6 +282,7 @@ TEST(DurationMetricTrackerTest, TestMaxDurationWithUpgrade) {
     DurationMetricProducer durationProducer(
             kConfigKey, metric, -1 /* no condition */, 1 /* start index */, 2 /* stop index */,
             3 /* stop_all index */, false /*nesting*/, wizard, dimensions, bucketStartTimeNs);
+    durationProducer.setBucketSize(60 * NS_PER_SEC);
 
     durationProducer.onMatchedLogEvent(1 /* start index*/, LogEvent(tagId, startTimeNs));
     EXPECT_EQ(0UL, durationProducer.mPastBuckets.size());
@@ -318,6 +326,7 @@ TEST(DurationMetricTrackerTest, TestMaxDurationWithUpgradeInNextBucket) {
     DurationMetricProducer durationProducer(
             kConfigKey, metric, -1 /* no condition */, 1 /* start index */, 2 /* stop index */,
             3 /* stop_all index */, false /*nesting*/, wizard, dimensions, bucketStartTimeNs);
+    durationProducer.setBucketSize(60 * NS_PER_SEC);
 
     durationProducer.onMatchedLogEvent(1 /* start index*/, LogEvent(tagId, startTimeNs));
     EXPECT_EQ(0UL, durationProducer.mPastBuckets.size());

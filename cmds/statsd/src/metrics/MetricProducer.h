@@ -137,6 +137,11 @@ public:
         return mBucketSizeNs;
     }
 
+    // Only needed for unit-testing to override guardrail.
+    void setBucketSize(int64_t bucketSize) {
+        mBucketSizeNs = bucketSize;
+    }
+
     inline const int64_t& getMetricId() {
         return mMetricId;
     }

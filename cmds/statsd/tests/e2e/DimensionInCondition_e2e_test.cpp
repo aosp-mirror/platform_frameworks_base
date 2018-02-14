@@ -61,7 +61,7 @@ StatsdConfig CreateCountMetricWithNoLinkConfig() {
             CreateDimensions(android::util::SCREEN_BRIGHTNESS_CHANGED, {1 /* level */});
     *metric->mutable_dimensions_in_condition() = CreateAttributionUidDimensions(
             android::util::WAKELOCK_STATE_CHANGED, {Position::FIRST});
-    metric->set_bucket(ONE_MINUTE);
+    metric->set_bucket(FIVE_MINUTES);
     return config;
 }
 
@@ -252,7 +252,7 @@ StatsdConfig CreateCountMetricWithLinkConfig() {
     addPredicateToPredicateCombination(isSyncingPredicate, combinationPredicate);
 
     auto metric = config.add_count_metric();
-    metric->set_bucket(ONE_MINUTE);
+    metric->set_bucket(FIVE_MINUTES);
     metric->set_id(StringToId("AppCrashMetric"));
     metric->set_what(appCrashMatcher.id());
     metric->set_condition(combinationPredicate->id());
@@ -441,7 +441,7 @@ StatsdConfig CreateDurationMetricConfigNoLink(DurationMetric::AggregationType ag
     addPredicateToPredicateCombination(isSyncingPredicate, combinationPredicate);
 
     auto metric = config.add_duration_metric();
-    metric->set_bucket(ONE_MINUTE);
+    metric->set_bucket(FIVE_MINUTES);
     metric->set_id(StringToId("BatterySaverModeDurationMetric"));
     metric->set_what(inBatterySaverModePredicate.id());
     metric->set_condition(combinationPredicate->id());
@@ -595,7 +595,7 @@ StatsdConfig CreateDurationMetricConfigWithLink(DurationMetric::AggregationType 
     addPredicateToPredicateCombination(isSyncingPredicate, combinationPredicate);
 
     auto metric = config.add_duration_metric();
-    metric->set_bucket(ONE_MINUTE);
+    metric->set_bucket(FIVE_MINUTES);
     metric->set_id(StringToId("AppInBackgroundMetric"));
     metric->set_what(isInBackgroundPredicate.id());
     metric->set_condition(combinationPredicate->id());
