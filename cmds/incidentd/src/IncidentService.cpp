@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define DEBUG false
 #include "Log.h"
 
 #include "IncidentService.h"
@@ -38,8 +39,10 @@ using namespace android::base;
 
 enum { WHAT_RUN_REPORT = 1, WHAT_SEND_BACKLOG_TO_DROPBOX = 2 };
 
-//#define DEFAULT_BACKLOG_DELAY_NS (1000000000LL * 60 * 5)
 #define DEFAULT_BACKLOG_DELAY_NS (1000000000LL)
+
+#define DEFAULT_BYTES_SIZE_LIMIT (20 * 1024 * 1024)        // 20MB
+#define DEFAULT_REFACTORY_PERIOD_MS (24 * 60 * 60 * 1000)  // 1 Day
 
 // ================================================================================
 String16 const DUMP_PERMISSION("android.permission.DUMP");
@@ -113,8 +116,12 @@ sp<ReportRequest> ReportRequestQueue::getNextRequest() {
 }
 
 // ================================================================================
-ReportHandler::ReportHandler(const sp<Looper>& handlerLooper, const sp<ReportRequestQueue>& queue)
-    : mBacklogDelay(DEFAULT_BACKLOG_DELAY_NS), mHandlerLooper(handlerLooper), mQueue(queue) {}
+ReportHandler::ReportHandler(const sp<Looper>& handlerLooper, const sp<ReportRequestQueue>& queue,
+                             const sp<Throttler>& throttler)
+    : mBacklogDelay(DEFAULT_BACKLOG_DELAY_NS),
+      mHandlerLooper(handlerLooper),
+      mQueue(queue),
+      mThrottler(throttler) {}
 
 ReportHandler::~ReportHandler() {}
 
@@ -159,10 +166,17 @@ void ReportHandler::run_report() {
         reporter->batch.add(request);
     }
 
+    if (mThrottler->shouldThrottle()) {
+        ALOGW("RunReport got throttled.");
+        return;
+    }
+
     // Take the report, which might take a while. More requests might queue
     // up while we're doing this, and we'll handle them in their next batch.
     // TODO: We should further rate-limit the reports to no more than N per time-period.
-    Reporter::run_report_status_t reportStatus = reporter->runReport();
+    size_t reportByteSize = 0;
+    Reporter::run_report_status_t reportStatus = reporter->runReport(&reportByteSize);
+    mThrottler->addReportSize(reportByteSize);
     if (reportStatus == Reporter::REPORT_NEEDS_DROPBOX) {
         unique_lock<mutex> lock(mLock);
         schedule_send_backlog_to_dropbox_locked();
@@ -184,8 +198,9 @@ void ReportHandler::send_backlog_to_dropbox() {
 
 // ================================================================================
 IncidentService::IncidentService(const sp<Looper>& handlerLooper)
-    : mQueue(new ReportRequestQueue()) {
-    mHandler = new ReportHandler(handlerLooper, mQueue);
+    : mQueue(new ReportRequestQueue()),
+      mThrottler(new Throttler(DEFAULT_BYTES_SIZE_LIMIT, DEFAULT_REFACTORY_PERIOD_MS)) {
+    mHandler = new ReportHandler(handlerLooper, mQueue, mThrottler);
 }
 
 IncidentService::~IncidentService() {}
@@ -294,6 +309,10 @@ status_t IncidentService::command(FILE* in, FILE* out, FILE* err, Vector<String8
         if (!args[0].compare(String8("privacy"))) {
             return cmd_privacy(in, out, err, args);
         }
+        if (!args[0].compare(String8("throttler"))) {
+            mThrottler->dump(out);
+            return NO_ERROR;
+        }
     }
     return cmd_help(out);
 }
@@ -302,6 +321,9 @@ status_t IncidentService::cmd_help(FILE* out) {
     fprintf(out, "usage: adb shell cmd incident privacy print <section_id>\n");
     fprintf(out, "usage: adb shell cmd incident privacy parse <section_id> < proto.txt\n");
     fprintf(out, "    Prints/parses for the section id.\n");
+    fprintf(out, "\n");
+    fprintf(out, "usage: adb shell cmd incident throttler\n");
+    fprintf(out, "    Prints the current throttler state\n");
     return NO_ERROR;
 }
 

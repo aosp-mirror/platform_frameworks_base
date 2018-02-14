@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+#define DEBUG false
 #include "Log.h"
 
 #include "Reporter.h"
@@ -106,6 +107,7 @@ protected:
     ReportRequestSet requests;
     sp<Reporter> reporter;
     sp<TestListener> l;
+    size_t size;
 };
 
 TEST_F(ReporterTest, IncidentReportArgs) {
@@ -125,7 +127,7 @@ TEST_F(ReporterTest, ReportRequestSetEmpty) {
 }
 
 TEST_F(ReporterTest, RunReportEmpty) {
-    ASSERT_EQ(Reporter::REPORT_FINISHED, reporter->runReport());
+    ASSERT_EQ(Reporter::REPORT_FINISHED, reporter->runReport(&size));
     EXPECT_EQ(l->startInvoked, 0);
     EXPECT_EQ(l->finishInvoked, 0);
     EXPECT_TRUE(l->startSections.empty());
@@ -147,7 +149,7 @@ TEST_F(ReporterTest, RunReportWithHeaders) {
     reporter->batch.add(r1);
     reporter->batch.add(r2);
 
-    ASSERT_EQ(Reporter::REPORT_FINISHED, reporter->runReport());
+    ASSERT_EQ(Reporter::REPORT_FINISHED, reporter->runReport(&size));
 
     string result;
     ReadFileToString(tf.path, &result);
@@ -171,7 +173,7 @@ TEST_F(ReporterTest, RunReportToGivenDirectory) {
     sp<ReportRequest> r = new ReportRequest(args, l, -1);
     reporter->batch.add(r);
 
-    ASSERT_EQ(Reporter::REPORT_FINISHED, reporter->runReport());
+    ASSERT_EQ(Reporter::REPORT_FINISHED, reporter->runReport(&size));
     vector<string> results = InspectFiles();
     ASSERT_EQ((int)results.size(), 1);
     EXPECT_EQ(results[0],
@@ -188,7 +190,7 @@ TEST_F(ReporterTest, ReportMetadata) {
     sp<ReportRequest> r = new ReportRequest(args, l, -1);
     reporter->batch.add(r);
 
-    ASSERT_EQ(Reporter::REPORT_FINISHED, reporter->runReport());
+    ASSERT_EQ(Reporter::REPORT_FINISHED, reporter->runReport(&size));
     auto metadata = reporter->batch.metadata();
     EXPECT_EQ(IncidentMetadata_Destination_EXPLICIT, metadata.dest());
     EXPECT_EQ(1, metadata.request_size());

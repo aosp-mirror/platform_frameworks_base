@@ -23,7 +23,6 @@
 #pragma once
 
 #define LOG_TAG "incidentd"
-#define DEBUG false
 
 #include <log/log.h>
 
