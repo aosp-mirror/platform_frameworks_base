@@ -38,7 +38,7 @@ interface IAutoFillManager {
     void removeClient(in IAutoFillManagerClient client, int userId);
     int startSession(IBinder activityToken, in IBinder appCallback, in AutofillId autoFillId,
             in Rect bounds, in AutofillValue value, int userId, boolean hasCallback, int flags,
-            in ComponentName componentName);
+            in ComponentName componentName, boolean compatMode);
     FillEventHistory getFillEventHistory();
     boolean restoreSession(int sessionId, in IBinder activityToken, in IBinder appCallback);
     void updateSession(int sessionId, in AutofillId id, in Rect bounds,
@@ -46,7 +46,7 @@ interface IAutoFillManager {
     int updateOrRestartSession(IBinder activityToken, in IBinder appCallback,
             in AutofillId autoFillId, in Rect bounds, in AutofillValue value, int userId,
             boolean hasCallback, int flags, in ComponentName componentName, int sessionId,
-            int action);
+            int action, boolean compatMode);
     void finishSession(int sessionId, int userId);
     void cancelSession(int sessionId, int userId);
     void setAuthenticationResult(in Bundle data, int sessionId, int authenticationId, int userId);

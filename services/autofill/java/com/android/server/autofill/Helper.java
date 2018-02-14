@@ -18,11 +18,14 @@ package com.android.server.autofill;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.assist.AssistStructure;
+import android.app.assist.AssistStructure.ViewNode;
 import android.metrics.LogMaker;
 import android.os.Bundle;
 import android.service.autofill.Dataset;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Slog;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 
@@ -31,10 +34,13 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Set;
 
 public final class Helper {
+
+    private static final String TAG = "AutofillHelper";
 
     /**
      * Defines a logging flag that can be dynamically changed at runtime using
@@ -120,5 +126,62 @@ public final class Helper {
         } else {
             pw.print(text.length()); pw.println("_chars");
         }
+    }
+
+    /**
+     * Finds the {@link ViewNode} that has the requested {@code autofillId}, if any.
+     */
+    @Nullable
+    public static ViewNode findViewNodeByAutofillId(@NonNull AssistStructure structure,
+            @NonNull AutofillId autofillId) {
+        return findViewNode(structure, (node) -> {
+            return autofillId.equals(node.getAutofillId());
+        });
+    }
+
+    private static ViewNode findViewNode(@NonNull AssistStructure structure,
+            @NonNull ViewNodeFilter filter) {
+        final LinkedList<ViewNode> nodesToProcess = new LinkedList<>();
+        final int numWindowNodes = structure.getWindowNodeCount();
+        for (int i = 0; i < numWindowNodes; i++) {
+            nodesToProcess.add(structure.getWindowNodeAt(i).getRootViewNode());
+        }
+        while (!nodesToProcess.isEmpty()) {
+            final ViewNode node = nodesToProcess.removeFirst();
+            if (filter.matches(node)) {
+                return node;
+            }
+            for (int i = 0; i < node.getChildCount(); i++) {
+                nodesToProcess.addLast(node.getChildAt(i));
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Sanitize the {@code webDomain} property of the URL bar node on compat mode.
+     */
+    public static void sanitizeUrlBar(@NonNull AssistStructure structure,
+            @NonNull String urlBarId) {
+        final ViewNode urlBarNode = findViewNode(structure, (node) -> {
+            return urlBarId.equals(node.getIdEntry());
+        });
+        if (urlBarNode != null) {
+            final String domain = urlBarNode.getText().toString();
+            if (domain.isEmpty()) {
+                if (sDebug) Slog.d(TAG, "sanitizeUrlBar(): empty on " + urlBarId);
+                return;
+            }
+            urlBarNode.setWebDomain(domain);
+            if (sDebug) {
+                Slog.d(TAG, "sanitizeUrlBar(): id=" + urlBarId + ", domain="
+                        + urlBarNode.getWebDomain());
+            }
+        }
+    }
+
+    private interface ViewNodeFilter {
+        boolean matches(ViewNode node);
     }
 }

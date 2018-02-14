@@ -580,7 +580,7 @@ public final class AutofillManagerService extends SystemService {
         @Override
         public int startSession(IBinder activityToken, IBinder appCallback, AutofillId autofillId,
                 Rect bounds, AutofillValue value, int userId, boolean hasCallback, int flags,
-                ComponentName componentName) {
+                ComponentName componentName, boolean compatMode) {
 
             activityToken = Preconditions.checkNotNull(activityToken, "activityToken");
             appCallback = Preconditions.checkNotNull(appCallback, "appCallback");
@@ -599,7 +599,7 @@ public final class AutofillManagerService extends SystemService {
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
                 return service.startSessionLocked(activityToken, getCallingUid(), appCallback,
-                        autofillId, bounds, value, hasCallback, flags, componentName);
+                        autofillId, bounds, value, hasCallback, flags, componentName, compatMode);
             }
         }
 
@@ -770,7 +770,7 @@ public final class AutofillManagerService extends SystemService {
         public int updateOrRestartSession(IBinder activityToken, IBinder appCallback,
                 AutofillId autoFillId, Rect bounds, AutofillValue value, int userId,
                 boolean hasCallback, int flags, ComponentName componentName, int sessionId,
-                int action) {
+                int action, boolean compatMode) {
             boolean restart = false;
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
@@ -783,7 +783,7 @@ public final class AutofillManagerService extends SystemService {
             }
             if (restart) {
                 return startSession(activityToken, appCallback, autoFillId, bounds, value, userId,
-                        hasCallback, flags, componentName);
+                        hasCallback, flags, componentName, compatMode);
             }
 
             // Nothing changed...
