@@ -29,13 +29,10 @@ LOCAL_MODULE_TAGS := tests
 LOCAL_SRC_FILES:= \
   native.cpp
 
-# All of the shard libraries we link against.
-LOCAL_SHARED_LIBRARIES := liblog
+LOCAL_LDLIBS := -llog
 
 LOCAL_CFLAGS += -Wall -Wextra -Werror
 
-# Also need the JNI headers.
-LOCAL_C_INCLUDES += \
-	$(JNI_H_INCLUDE)
+LOCAL_SDK_VERSION := current
 
 include $(BUILD_SHARED_LIBRARY)
