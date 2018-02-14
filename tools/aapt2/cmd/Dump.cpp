@@ -38,6 +38,13 @@ using ::android::base::StringPrintf;
 
 namespace aapt {
 
+struct DumpOptions {
+  DebugPrintTableOptions print_options;
+
+  // The path to a file within an APK to dump.
+  Maybe<std::string> file_to_dump_path;
+};
+
 static const char* ResourceFileTypeToString(const ResourceFile::Type& type) {
   switch (type) {
     case ResourceFile::Type::kPng:
@@ -69,8 +76,52 @@ static void DumpCompiledFile(const ResourceFile& file, const Source& source, off
   printer->Println(StringPrintf("Data:     offset=%" PRIi64 " length=%zd", offset, len));
 }
 
+static bool DumpXmlFile(IAaptContext* context, io::IFile* file, bool proto,
+                        text::Printer* printer) {
+  std::unique_ptr<xml::XmlResource> doc;
+  if (proto) {
+    std::unique_ptr<io::InputStream> in = file->OpenInputStream();
+    if (in == nullptr) {
+      context->GetDiagnostics()->Error(DiagMessage() << "failed to open file");
+      return false;
+    }
+
+    io::ZeroCopyInputAdaptor adaptor(in.get());
+    pb::XmlNode pb_node;
+    if (!pb_node.ParseFromZeroCopyStream(&adaptor)) {
+      context->GetDiagnostics()->Error(DiagMessage() << "failed to parse file as proto XML");
+      return false;
+    }
+
+    std::string err;
+    doc = DeserializeXmlResourceFromPb(pb_node, &err);
+    if (doc == nullptr) {
+      context->GetDiagnostics()->Error(DiagMessage() << "failed to deserialize proto XML");
+      return false;
+    }
+    printer->Println("Proto XML");
+  } else {
+    std::unique_ptr<io::IData> data = file->OpenAsData();
+    if (data == nullptr) {
+      context->GetDiagnostics()->Error(DiagMessage() << "failed to open file");
+      return false;
+    }
+
+    std::string err;
+    doc = xml::Inflate(data->data(), data->size(), &err);
+    if (doc == nullptr) {
+      context->GetDiagnostics()->Error(DiagMessage() << "failed to parse file as binary XML");
+      return false;
+    }
+    printer->Println("Binary XML");
+  }
+
+  Debug::DumpXml(*doc, printer);
+  return true;
+}
+
 static bool TryDumpFile(IAaptContext* context, const std::string& file_path,
-                        const DebugPrintTableOptions& print_options) {
+                        const DumpOptions& options) {
   // Use a smaller buffer so that there is less latency for dumping to stdout.
   constexpr size_t kStdOutBufferSize = 1024u;
   io::FileOutputStream fout(STDOUT_FILENO, kStdOutBufferSize);
@@ -80,7 +131,10 @@ static bool TryDumpFile(IAaptContext* context, const std::string& file_path,
   std::unique_ptr<io::ZipFileCollection> zip = io::ZipFileCollection::Create(file_path, &err);
   if (zip) {
     ResourceTable table;
+    bool proto = false;
     if (io::IFile* file = zip->FindFile("resources.pb")) {
+      proto = true;
+
       std::unique_ptr<io::IData> data = file->OpenAsData();
       if (data == nullptr) {
         context->GetDiagnostics()->Error(DiagMessage(file_path) << "failed to open resources.pb");
@@ -98,8 +152,6 @@ static bool TryDumpFile(IAaptContext* context, const std::string& file_path,
                                          << "failed to parse table: " << err);
         return false;
       }
-
-      printer.Println("Proto APK");
     } else if (io::IFile* file = zip->FindFile("resources.arsc")) {
       std::unique_ptr<io::IData> data = file->OpenAsData();
       if (!data) {
@@ -112,12 +164,26 @@ static bool TryDumpFile(IAaptContext* context, const std::string& file_path,
       if (!parser.Parse()) {
         return false;
       }
-
-      printer.Println("Binary APK");
     }
 
-    Debug::PrintTable(table, print_options, &printer);
-    return true;
+    if (!options.file_to_dump_path) {
+      if (proto) {
+        printer.Println("Proto APK");
+      } else {
+        printer.Println("Binary APK");
+      }
+      Debug::PrintTable(table, options.print_options, &printer);
+      return true;
+    }
+
+    io::IFile* file = zip->FindFile(options.file_to_dump_path.value());
+    if (file == nullptr) {
+      context->GetDiagnostics()->Error(DiagMessage(file_path)
+                                       << "file '" << options.file_to_dump_path.value()
+                                       << "' not found in APK");
+      return false;
+    }
+    return DumpXmlFile(context, file, proto, &printer);
   }
 
   err.clear();
@@ -159,7 +225,7 @@ static bool TryDumpFile(IAaptContext* context, const std::string& file_path,
       }
 
       printer.Indent();
-      Debug::PrintTable(table, print_options, &printer);
+      Debug::PrintTable(table, options.print_options, &printer);
       printer.Undent();
     } else if (entry->Type() == ContainerEntryType::kResFile) {
       printer.Println("kResFile");
@@ -243,10 +309,13 @@ class DumpContext : public IAaptContext {
 int Dump(const std::vector<StringPiece>& args) {
   bool verbose = false;
   bool no_values = false;
+  DumpOptions options;
   Flags flags = Flags()
                     .OptionalSwitch("--no-values",
                                     "Suppresses output of values when displaying resource tables.",
                                     &no_values)
+                    .OptionalFlag("--file", "Dumps the specified file from the APK passed as arg.",
+                                  &options.file_to_dump_path)
                     .OptionalSwitch("-v", "increase verbosity of output", &verbose);
   if (!flags.Parse("aapt2 dump", args, &std::cerr)) {
     return 1;
@@ -255,11 +324,10 @@ int Dump(const std::vector<StringPiece>& args) {
   DumpContext context;
   context.SetVerbose(verbose);
 
-  DebugPrintTableOptions dump_table_options;
-  dump_table_options.show_sources = true;
-  dump_table_options.show_values = !no_values;
+  options.print_options.show_sources = true;
+  options.print_options.show_values = !no_values;
   for (const std::string& arg : flags.GetArgs()) {
-    if (!TryDumpFile(&context, arg, dump_table_options)) {
+    if (!TryDumpFile(&context, arg, options)) {
       return 1;
     }
   }
