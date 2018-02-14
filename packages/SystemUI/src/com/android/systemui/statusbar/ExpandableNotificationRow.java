@@ -370,14 +370,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mNotificationInflater.inflateNotificationViews();
     }
 
-    @Override
-    public void setPressed(boolean pressed) {
-        if (isOnKeyguard() || mEntry.notification.getNotification().contentIntent == null) {
-            // We're dropping the ripple if we have a collapse / launch animation
-            super.setPressed(pressed);
-        }
-    }
-
     public void onNotificationUpdated() {
         for (NotificationContentView l : mLayouts) {
             l.onNotificationUpdated(mEntry);
@@ -407,6 +399,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
         showBlockingHelper(mEntry.userSentiment ==
                 NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE);
+        updateRippleAllowed();
     }
 
     @VisibleForTesting
@@ -1805,6 +1798,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 mAboveShelfChangedListener.onAboveShelfStateChanged(!wasAboveShelf);
             }
         }
+        updateRippleAllowed();
+    }
+
+    private void updateRippleAllowed() {
+        boolean allowed = isOnKeyguard()
+                || mEntry.notification.getNotification().contentIntent == null;
+        setRippleAllowed(allowed);
     }
 
     /**
