@@ -11391,6 +11391,14 @@ public final class Settings {
                 "autofill_compat_allowed_packages";
 
         /**
+         * Exemptions to the hidden API blacklist.
+         *
+         * @hide
+         */
+        public static final String HIDDEN_API_BLACKLIST_EXEMPTIONS =
+                "hidden_api_blacklist_exemptions";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *

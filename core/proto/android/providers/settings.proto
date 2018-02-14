@@ -399,6 +399,7 @@ message GlobalSettingsProto {
     optional SettingProto euicc_factory_reset_timeout_millis = 333 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto storage_settings_clobber_threshold = 334 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto chained_battery_attribution_enabled = 353 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto hidden_api_blacklist_exemptions = 355 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Subscription to be used for voice call on a multi sim device. The
     // supported values are 0 = SUB1, 1 = SUB2 and etc.
     optional SettingProto multi_sim_voice_call_subscription = 276 [ (android.privacy).dest = DEST_AUTOMATIC ];
@@ -430,7 +431,7 @@ message GlobalSettingsProto {
 
     // Please insert fields in the same order as in
     // frameworks/base/core/java/android/provider/Settings.java.
-    // Next tag = 355;
+    // Next tag = 356;
 }
 
 message SecureSettingsProto {
