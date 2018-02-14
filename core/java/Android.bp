@@ -7,33 +7,3 @@ filegroup {
     name: "IDropBoxManagerService.aidl",
     srcs: ["com/android/internal/os/IDropBoxManagerService.aidl"],
 }
-
-// only used by key_store_service
-cc_library_shared {
-    name: "libkeystore_aidl",
-    srcs: ["android/security/IKeystoreService.aidl",
-           "android/security/IConfirmationPromptCallback.aidl"],
-    aidl: {
-        export_aidl_headers: true,
-        include_dirs: [
-            "frameworks/base/core/java/",
-            "system/security/keystore/",
-        ],
-    },
-    shared_libs: [
-        "libbinder",
-        "libcutils",
-        "libhardware",
-        "libhidlbase",
-        "libhidltransport",
-        "libhwbinder",
-        "liblog",
-        "libkeystore_parcelables",
-        "libselinux",
-        "libutils",
-    ],
-    export_shared_lib_headers: [
-        "libbinder",
-        "libkeystore_parcelables",
-    ],
-}

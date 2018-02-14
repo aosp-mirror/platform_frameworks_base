@@ -249,8 +249,7 @@ java_library {
         "core/java/android/os/storage/IStorageEventListener.aidl",
         "core/java/android/os/storage/IStorageShutdownObserver.aidl",
         "core/java/android/os/storage/IObbActionListener.aidl",
-        "core/java/android/security/IConfirmationPromptCallback.aidl",
-        "core/java/android/security/IKeystoreService.aidl",
+        ":keystore_aidl",
         "core/java/android/security/keymaster/IKeyAttestationApplicationIdProvider.aidl",
         "core/java/android/service/autofill/IAutoFillService.aidl",
         "core/java/android/service/autofill/IAutofillFieldClassificationService.aidl",
@@ -643,6 +642,7 @@ java_library {
             "system/netd/server/binder",
             "system/vold/binder",
             "system/bt/binder",
+            "system/security/keystore/binder",
         ],
     },
 
