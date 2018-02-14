@@ -219,19 +219,19 @@ void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
         }
         // For scheduled pulled data, the effective event time is snap to the nearest
         // bucket boundary to make bucket finalize.
-        uint64_t realEventTime = allData.at(0)->GetTimestampNs();
+        uint64_t realEventTime = allData.at(0)->GetElapsedTimestampNs();
         uint64_t eventTime = mStartTimeNs +
-            ((realEventTime - mStartTimeNs)/mBucketSizeNs) * mBucketSizeNs;
+            ((realEventTime - mStartTimeNs) / mBucketSizeNs) * mBucketSizeNs;
 
         mCondition = false;
         for (const auto& data : allData) {
-            data->setTimestampNs(eventTime-1);
+            data->setElapsedTimestampNs(eventTime - 1);
             onMatchedLogEventLocked(0, *data);
         }
 
         mCondition = true;
         for (const auto& data : allData) {
-            data->setTimestampNs(eventTime);
+            data->setElapsedTimestampNs(eventTime);
             onMatchedLogEventLocked(0, *data);
         }
     }
@@ -261,7 +261,7 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(
         const size_t matcherIndex, const MetricDimensionKey& eventKey,
         const ConditionKey& conditionKey, bool condition,
         const LogEvent& event) {
-    uint64_t eventTimeNs = event.GetTimestampNs();
+    uint64_t eventTimeNs = event.GetElapsedTimestampNs();
     if (eventTimeNs < mCurrentBucketStartTimeNs) {
         VLOG("Skip event due to late arrival: %lld vs %lld", (long long)eventTimeNs,
              (long long)mCurrentBucketStartTimeNs);

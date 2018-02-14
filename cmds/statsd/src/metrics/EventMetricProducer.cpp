@@ -19,6 +19,7 @@
 
 #include "EventMetricProducer.h"
 #include "stats_util.h"
+#include "stats_log_util.h"
 
 #include <limits.h>
 #include <stdlib.h>
@@ -46,8 +47,9 @@ const int FIELD_ID_EVENT_METRICS = 4;
 // for EventMetricDataWrapper
 const int FIELD_ID_DATA = 1;
 // for EventMetricData
-const int FIELD_ID_TIMESTAMP_NANOS = 1;
+const int FIELD_ID_ELAPSED_TIMESTAMP_NANOS = 1;
 const int FIELD_ID_ATOMS = 2;
+const int FIELD_ID_WALL_CLOCK_TIMESTAMP_NANOS = 3;
 
 EventMetricProducer::EventMetricProducer(const ConfigKey& key, const EventMetric& metric,
                                          const int conditionIndex,
@@ -127,9 +129,12 @@ void EventMetricProducer::onMatchedLogEventInternalLocked(
 
     long long wrapperToken =
             mProto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DATA);
-    mProto->write(FIELD_TYPE_INT64 | FIELD_ID_TIMESTAMP_NANOS, (long long)event.GetTimestampNs());
+    mProto->write(FIELD_TYPE_INT64 | FIELD_ID_ELAPSED_TIMESTAMP_NANOS,
+        (long long)event.GetElapsedTimestampNs());
     long long eventToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_ATOMS);
     event.ToProto(*mProto);
+    mProto->write(FIELD_TYPE_INT64 | FIELD_ID_WALL_CLOCK_TIMESTAMP_NANOS,
+        (long long)getWallClockNs());
     mProto->end(eventToken);
     mProto->end(wrapperToken);
 }

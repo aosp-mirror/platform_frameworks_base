@@ -406,16 +406,16 @@ TEST(ValueMetricProducerTest, TestAnomalyDetection) {
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event4);
     // Anomaly at event 4 since Value sum == 131 > 130!
     EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_METRIC_DIMENSION_KEY),
-            event4->GetTimestampNs() / NS_PER_SEC + refPeriodSec);
+            event4->GetElapsedTimestampNs() / NS_PER_SEC + refPeriodSec);
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event5);
     // Event 5 is within 3 sec refractory period. Thus last alarm timestamp is still event4.
     EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_METRIC_DIMENSION_KEY),
-            event4->GetTimestampNs() / NS_PER_SEC + refPeriodSec);
+            event4->GetElapsedTimestampNs() / NS_PER_SEC + refPeriodSec);
 
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event6);
     // Anomaly at event 6 since Value sum == 160 > 130 and after refractory period.
     EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_METRIC_DIMENSION_KEY),
-            event6->GetTimestampNs() / NS_PER_SEC + refPeriodSec);
+            event6->GetElapsedTimestampNs() / NS_PER_SEC + refPeriodSec);
 }
 
 }  // namespace statsd

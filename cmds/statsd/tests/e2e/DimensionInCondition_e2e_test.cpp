@@ -142,8 +142,8 @@ TEST(DimensionInConditionE2eTest, TestCountMetricNoLink) {
     auto data = countMetrics.data(0);
     EXPECT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
-    EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs);
-    EXPECT_EQ(data.bucket_info(0).end_bucket_nanos(), bucketStartTimeNs + bucketSizeNs);
+    EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
+    EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
     EXPECT_EQ(data.dimensions_in_what().field(), android::util::SCREEN_BRIGHTNESS_CHANGED);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1);
@@ -153,8 +153,8 @@ TEST(DimensionInConditionE2eTest, TestCountMetricNoLink) {
     data = countMetrics.data(1);
     EXPECT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
-    EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs);
-    EXPECT_EQ(data.bucket_info(0).end_bucket_nanos(), bucketStartTimeNs + bucketSizeNs);
+    EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
+    EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
     EXPECT_EQ(data.dimensions_in_what().field(), android::util::SCREEN_BRIGHTNESS_CHANGED);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1);
@@ -165,8 +165,8 @@ TEST(DimensionInConditionE2eTest, TestCountMetricNoLink) {
     data = countMetrics.data(2);
     EXPECT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 3);
-    EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs);
-    EXPECT_EQ(data.bucket_info(0).end_bucket_nanos(), bucketStartTimeNs + bucketSizeNs);
+    EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
+    EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
     EXPECT_EQ(data.dimensions_in_what().field(), android::util::SCREEN_BRIGHTNESS_CHANGED);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1);
@@ -177,11 +177,11 @@ TEST(DimensionInConditionE2eTest, TestCountMetricNoLink) {
     data = countMetrics.data(3);
     EXPECT_EQ(data.bucket_info_size(), 2);
     EXPECT_EQ(data.bucket_info(0).count(), 2);
-    EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs);
-    EXPECT_EQ(data.bucket_info(0).end_bucket_nanos(), bucketStartTimeNs + bucketSizeNs);
+    EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
+    EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
     EXPECT_EQ(data.bucket_info(1).count(), 1);
-    EXPECT_EQ(data.bucket_info(1).start_bucket_nanos(), bucketStartTimeNs + bucketSizeNs);
-    EXPECT_EQ(data.bucket_info(1).end_bucket_nanos(), bucketStartTimeNs + 2 * bucketSizeNs);
+    EXPECT_EQ(data.bucket_info(1).start_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
+    EXPECT_EQ(data.bucket_info(1).end_bucket_elapsed_nanos(), bucketStartTimeNs + 2 * bucketSizeNs);
     EXPECT_EQ(data.dimensions_in_what().field(), android::util::SCREEN_BRIGHTNESS_CHANGED);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1);
@@ -192,8 +192,8 @@ TEST(DimensionInConditionE2eTest, TestCountMetricNoLink) {
     data = countMetrics.data(4);
     EXPECT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 2);
-    EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs + bucketSizeNs);
-    EXPECT_EQ(data.bucket_info(0).end_bucket_nanos(), bucketStartTimeNs + 2 * bucketSizeNs);
+    EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
+    EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + 2 * bucketSizeNs);
     EXPECT_EQ(data.dimensions_in_what().field(), android::util::SCREEN_BRIGHTNESS_CHANGED);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1);
@@ -203,8 +203,8 @@ TEST(DimensionInConditionE2eTest, TestCountMetricNoLink) {
     data = countMetrics.data(5);
     EXPECT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
-    EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs);
-    EXPECT_EQ(data.bucket_info(0).end_bucket_nanos(), bucketStartTimeNs + bucketSizeNs);
+    EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
+    EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
     EXPECT_EQ(data.dimensions_in_what().field(), android::util::SCREEN_BRIGHTNESS_CHANGED);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1);
@@ -215,8 +215,8 @@ TEST(DimensionInConditionE2eTest, TestCountMetricNoLink) {
     data = countMetrics.data(6);
     EXPECT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
-    EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs);
-    EXPECT_EQ(data.bucket_info(0).end_bucket_nanos(), bucketStartTimeNs + bucketSizeNs);
+    EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
+    EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
     EXPECT_EQ(data.dimensions_in_what().field(), android::util::SCREEN_BRIGHTNESS_CHANGED);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1);
@@ -358,8 +358,8 @@ TEST(DimensionInConditionE2eTest, TestCountMetricWithLink) {
     EXPECT_FALSE(data.dimensions_in_condition().has_field());
     EXPECT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
-    EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs);
-    EXPECT_EQ(data.bucket_info(0).end_bucket_nanos(), bucketStartTimeNs + bucketSizeNs);
+    EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
+    EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
 
     data = countMetrics.data(1);
     EXPECT_EQ(data.dimensions_in_what().field(), android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
@@ -370,8 +370,8 @@ TEST(DimensionInConditionE2eTest, TestCountMetricWithLink) {
                                           android::util::SYNC_STATE_CHANGED, 111, "App1");
     EXPECT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 2);
-    EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs);
-    EXPECT_EQ(data.bucket_info(0).end_bucket_nanos(), bucketStartTimeNs + bucketSizeNs);
+    EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
+    EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
 
     data = countMetrics.data(2);
     EXPECT_EQ(data.dimensions_in_what().field(), android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
@@ -381,8 +381,8 @@ TEST(DimensionInConditionE2eTest, TestCountMetricWithLink) {
     EXPECT_FALSE(data.dimensions_in_condition().has_field());
     EXPECT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 2);
-    EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs);
-    EXPECT_EQ(data.bucket_info(0).end_bucket_nanos(), bucketStartTimeNs + bucketSizeNs);
+    EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
+    EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
 
     data = countMetrics.data(3);
     EXPECT_EQ(data.dimensions_in_what().field(), android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
@@ -393,11 +393,11 @@ TEST(DimensionInConditionE2eTest, TestCountMetricWithLink) {
                                           android::util::SYNC_STATE_CHANGED, 333, "App2");
     EXPECT_EQ(data.bucket_info_size(), 2);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
-    EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs);
-    EXPECT_EQ(data.bucket_info(0).end_bucket_nanos(), bucketStartTimeNs + bucketSizeNs);
+    EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
+    EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
     EXPECT_EQ(data.bucket_info(1).count(), 1);
-    EXPECT_EQ(data.bucket_info(1).start_bucket_nanos(), bucketStartTimeNs + bucketSizeNs);
-    EXPECT_EQ(data.bucket_info(1).end_bucket_nanos(), bucketStartTimeNs + 2 * bucketSizeNs);
+    EXPECT_EQ(data.bucket_info(1).start_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
+    EXPECT_EQ(data.bucket_info(1).end_bucket_elapsed_nanos(), bucketStartTimeNs + 2 * bucketSizeNs);
 
     data = countMetrics.data(4);
     EXPECT_EQ(data.dimensions_in_what().field(), android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
@@ -407,8 +407,8 @@ TEST(DimensionInConditionE2eTest, TestCountMetricWithLink) {
     EXPECT_FALSE(data.dimensions_in_condition().has_field());
     EXPECT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
-    EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs + bucketSizeNs);
-    EXPECT_EQ(data.bucket_info(0).end_bucket_nanos(), bucketStartTimeNs + 2 * bucketSizeNs);
+    EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
+    EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + 2 * bucketSizeNs);
 }
 
 namespace {
@@ -531,11 +531,11 @@ TEST(DimensionInConditionE2eTest, TestDurationMetricNoLink) {
         EXPECT_FALSE(data.dimensions_in_condition().has_field());
         EXPECT_EQ(data.bucket_info_size(), 2);
         EXPECT_EQ(data.bucket_info(0).duration_nanos(), 9);
-        EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs);
-        EXPECT_EQ(data.bucket_info(0).end_bucket_nanos(), bucketStartTimeNs + bucketSizeNs);
+        EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
+        EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
         EXPECT_EQ(data.bucket_info(1).duration_nanos(), 30);
-        EXPECT_EQ(data.bucket_info(1).start_bucket_nanos(), bucketStartTimeNs + bucketSizeNs);
-        EXPECT_EQ(data.bucket_info(1).end_bucket_nanos(), bucketStartTimeNs + 2 * bucketSizeNs);
+        EXPECT_EQ(data.bucket_info(1).start_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
+        EXPECT_EQ(data.bucket_info(1).end_bucket_elapsed_nanos(), bucketStartTimeNs + 2 * bucketSizeNs);
 
         data = metrics.data(1);
         EXPECT_FALSE(data.dimensions_in_what().has_field());
@@ -543,11 +543,11 @@ TEST(DimensionInConditionE2eTest, TestDurationMetricNoLink) {
                                               android::util::SYNC_STATE_CHANGED, 111, "App1");
         EXPECT_EQ(data.bucket_info_size(), 2);
         EXPECT_EQ(data.bucket_info(0).duration_nanos(), 500 - 201 + bucketSizeNs - 600);
-        EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs);
-        EXPECT_EQ(data.bucket_info(0).end_bucket_nanos(), bucketStartTimeNs + bucketSizeNs);
+        EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
+        EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
         EXPECT_EQ(data.bucket_info(1).duration_nanos(), 300);
-        EXPECT_EQ(data.bucket_info(1).start_bucket_nanos(), bucketStartTimeNs + bucketSizeNs);
-        EXPECT_EQ(data.bucket_info(1).end_bucket_nanos(), bucketStartTimeNs + 2 * bucketSizeNs);
+        EXPECT_EQ(data.bucket_info(1).start_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
+        EXPECT_EQ(data.bucket_info(1).end_bucket_elapsed_nanos(), bucketStartTimeNs + 2 * bucketSizeNs);
 
         data = metrics.data(2);
         EXPECT_FALSE(data.dimensions_in_what().has_field());
@@ -555,11 +555,11 @@ TEST(DimensionInConditionE2eTest, TestDurationMetricNoLink) {
                                               android::util::SYNC_STATE_CHANGED, 333, "App2");
         EXPECT_EQ(data.bucket_info_size(), 2);
         EXPECT_EQ(data.bucket_info(0).duration_nanos(), 500 - 401 + bucketSizeNs - 600);
-        EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs);
-        EXPECT_EQ(data.bucket_info(0).end_bucket_nanos(), bucketStartTimeNs + bucketSizeNs);
+        EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
+        EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
         EXPECT_EQ(data.bucket_info(1).duration_nanos(), 700);
-        EXPECT_EQ(data.bucket_info(1).start_bucket_nanos(), bucketStartTimeNs + bucketSizeNs);
-        EXPECT_EQ(data.bucket_info(1).end_bucket_nanos(), bucketStartTimeNs + 2 * bucketSizeNs);
+        EXPECT_EQ(data.bucket_info(1).start_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
+        EXPECT_EQ(data.bucket_info(1).end_bucket_elapsed_nanos(), bucketStartTimeNs + 2 * bucketSizeNs);
     }
 }
 
@@ -693,8 +693,8 @@ TEST(DimensionInConditionE2eTest, TestDurationMetricWithLink) {
         EXPECT_FALSE(data.dimensions_in_condition().has_field());
         EXPECT_EQ(data.bucket_info_size(), 1);
         EXPECT_EQ(data.bucket_info(0).duration_nanos(), 9);
-        EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs);
-        EXPECT_EQ(data.bucket_info(0).end_bucket_nanos(), bucketStartTimeNs + bucketSizeNs);
+        EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
+        EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
 
         data = metrics.data(1);
         EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1);
@@ -703,11 +703,11 @@ TEST(DimensionInConditionE2eTest, TestDurationMetricWithLink) {
                                               android::util::SYNC_STATE_CHANGED, 111, "App1");
         EXPECT_EQ(data.bucket_info_size(), 2);
         EXPECT_EQ(data.bucket_info(0).duration_nanos(), bucketSizeNs - 201);
-        EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs);
-        EXPECT_EQ(data.bucket_info(0).end_bucket_nanos(), bucketStartTimeNs + bucketSizeNs);
+        EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
+        EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
         EXPECT_EQ(data.bucket_info(1).duration_nanos(), 100);
-        EXPECT_EQ(data.bucket_info(1).start_bucket_nanos(), bucketStartTimeNs + bucketSizeNs);
-        EXPECT_EQ(data.bucket_info(1).end_bucket_nanos(), bucketStartTimeNs + 2 * bucketSizeNs);
+        EXPECT_EQ(data.bucket_info(1).start_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
+        EXPECT_EQ(data.bucket_info(1).end_bucket_elapsed_nanos(), bucketStartTimeNs + 2 * bucketSizeNs);
 
         data = metrics.data(2);
         EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1);
@@ -716,11 +716,11 @@ TEST(DimensionInConditionE2eTest, TestDurationMetricWithLink) {
                                               android::util::SYNC_STATE_CHANGED, 333, "App2");
         EXPECT_EQ(data.bucket_info_size(), 2);
         EXPECT_EQ(data.bucket_info(0).duration_nanos(), bucketSizeNs - 401);
-        EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs);
-        EXPECT_EQ(data.bucket_info(0).end_bucket_nanos(), bucketStartTimeNs + bucketSizeNs);
+        EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
+        EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
         EXPECT_EQ(data.bucket_info(1).duration_nanos(), 700);
-        EXPECT_EQ(data.bucket_info(1).start_bucket_nanos(), bucketStartTimeNs + bucketSizeNs);
-        EXPECT_EQ(data.bucket_info(1).end_bucket_nanos(), bucketStartTimeNs + 2 * bucketSizeNs);
+        EXPECT_EQ(data.bucket_info(1).start_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
+        EXPECT_EQ(data.bucket_info(1).end_bucket_elapsed_nanos(), bucketStartTimeNs + 2 * bucketSizeNs);
     }
 }
 

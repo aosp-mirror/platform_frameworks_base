@@ -20,6 +20,7 @@
 #include "StatsPuller.h"
 #include "guardrail/StatsdStats.h"
 #include "puller_util.h"
+#include "stats_log_util.h"
 
 namespace android {
 namespace os {
@@ -44,7 +45,7 @@ StatsPuller::StatsPuller(const int tagId)
 bool StatsPuller::Pull(std::vector<std::shared_ptr<LogEvent>>* data) {
     lock_guard<std::mutex> lock(mLock);
     StatsdStats::getInstance().notePull(mTagId);
-    long curTime = time(nullptr);
+    long curTime = getElapsedRealtimeSec();
     if (curTime - mLastPullTimeSec < mCoolDownSec) {
         (*data) = mCachedData;
         StatsdStats::getInstance().notePullFromCache(mTagId);

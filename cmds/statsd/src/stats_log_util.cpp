@@ -20,6 +20,8 @@
 #include <utils/Log.h>
 #include <set>
 #include <stack>
+#include <utils/Log.h>
+#include <utils/SystemClock.h>
 
 using android::util::FIELD_COUNT_REPEATED;
 using android::util::FIELD_TYPE_BOOL;
@@ -261,6 +263,30 @@ void writePullerStatsToStream(const std::pair<int, StatsdStats::PulledAtomStats>
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_MIN_PULL_INTERVAL_SEC,
                        (long long)pair.second.minPullIntervalSec);
     protoOutput->end(token);
+}
+
+int64_t getElapsedRealtimeNs() {
+    return ::android::elapsedRealtimeNano();
+}
+
+int64_t getElapsedRealtimeSec() {
+    return ::android::elapsedRealtimeNano() / NS_PER_SEC;
+}
+
+int64_t getElapsedRealtimeMillis() {
+    return ::android::elapsedRealtime();
+}
+
+int64_t getWallClockNs() {
+    return time(nullptr) * NS_PER_SEC;
+}
+
+int64_t getWallClockSec() {
+    return time(nullptr);
+}
+
+int64_t getWallClockMillis() {
+    return time(nullptr) * MS_PER_SEC;
 }
 
 }  // namespace statsd

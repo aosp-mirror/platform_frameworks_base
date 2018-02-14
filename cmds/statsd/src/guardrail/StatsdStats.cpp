@@ -80,7 +80,7 @@ std::map<int, long> StatsdStats::kPullerCooldownMap = {
 // TODO: add stats for pulled atoms.
 StatsdStats::StatsdStats() {
     mPushedAtomStats.resize(android::util::kMaxPushedAtomId + 1);
-    mStartTimeSec = time(nullptr);
+    mStartTimeSec = getWallClockSec();
 }
 
 StatsdStats& StatsdStats::getInstance() {
@@ -99,7 +99,7 @@ void StatsdStats::addToIceBoxLocked(const StatsdStatsReport_ConfigStats& stats) 
 void StatsdStats::noteConfigReceived(const ConfigKey& key, int metricsCount, int conditionsCount,
                                      int matchersCount, int alertsCount, bool isValid) {
     lock_guard<std::mutex> lock(mLock);
-    int32_t nowTimeSec = time(nullptr);
+    int32_t nowTimeSec = getWallClockSec();
 
     // If there is an existing config for the same key, icebox the old config.
     noteConfigRemovedInternalLocked(key);
@@ -125,7 +125,7 @@ void StatsdStats::noteConfigReceived(const ConfigKey& key, int metricsCount, int
 void StatsdStats::noteConfigRemovedInternalLocked(const ConfigKey& key) {
     auto it = mConfigStats.find(key);
     if (it != mConfigStats.end()) {
-        int32_t nowTimeSec = time(nullptr);
+        int32_t nowTimeSec = getWallClockSec();
         it->second.set_deletion_time_sec(nowTimeSec);
         // Add condition stats, metrics stats, matcher stats, alert stats
         addSubStatsToConfigLocked(key, it->second);
@@ -145,7 +145,7 @@ void StatsdStats::noteConfigRemoved(const ConfigKey& key) {
 }
 
 void StatsdStats::noteBroadcastSent(const ConfigKey& key) {
-    noteBroadcastSent(key, time(nullptr));
+    noteBroadcastSent(key, getWallClockSec());
 }
 
 void StatsdStats::noteBroadcastSent(const ConfigKey& key, int32_t timeSec) {
@@ -164,7 +164,7 @@ void StatsdStats::noteBroadcastSent(const ConfigKey& key, int32_t timeSec) {
 }
 
 void StatsdStats::noteDataDropped(const ConfigKey& key) {
-    noteDataDropped(key, time(nullptr));
+    noteDataDropped(key, getWallClockSec());
 }
 
 void StatsdStats::noteDataDropped(const ConfigKey& key, int32_t timeSec) {
@@ -183,7 +183,7 @@ void StatsdStats::noteDataDropped(const ConfigKey& key, int32_t timeSec) {
 }
 
 void StatsdStats::noteMetricsReportSent(const ConfigKey& key) {
-    noteMetricsReportSent(key, time(nullptr));
+    noteMetricsReportSent(key, getWallClockSec());
 }
 
 void StatsdStats::noteMetricsReportSent(const ConfigKey& key, int32_t timeSec) {
@@ -275,10 +275,6 @@ void StatsdStats::notePullFromCache(int pullAtomId) {
 void StatsdStats::noteAtomLogged(int atomId, int32_t timeSec) {
     lock_guard<std::mutex> lock(mLock);
 
-    if (timeSec < mStartTimeSec) {
-        return;
-    }
-
     if (atomId > android::util::kMaxPushedAtomId) {
         ALOGW("not interested in atom %d", atomId);
         return;
@@ -293,7 +289,7 @@ void StatsdStats::noteLoggerError(int error) {
     if (mLoggerErrors.size() == kMaxLoggerErrors) {
         mLoggerErrors.pop_front();
     }
-    mLoggerErrors.push_back(std::make_pair(time(nullptr), error));
+    mLoggerErrors.push_back(std::make_pair(getWallClockSec(), error));
 }
 
 void StatsdStats::reset() {
@@ -303,7 +299,7 @@ void StatsdStats::reset() {
 
 void StatsdStats::resetInternalLocked() {
     // Reset the historical data, but keep the active ConfigStats
-    mStartTimeSec = time(nullptr);
+    mStartTimeSec = getWallClockSec();
     mIceBox.clear();
     mConditionStats.clear();
     mMetricsStats.clear();
@@ -495,7 +491,7 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
 
     ProtoOutputStream proto;
     proto.write(FIELD_TYPE_INT32 | FIELD_ID_BEGIN_TIME, mStartTimeSec);
-    proto.write(FIELD_TYPE_INT32 | FIELD_ID_END_TIME, (int32_t)time(nullptr));
+    proto.write(FIELD_TYPE_INT32 | FIELD_ID_END_TIME, (int32_t)getWallClockSec());
 
     for (const auto& configStats : mIceBox) {
         const int numBytes = configStats.ByteSize();
