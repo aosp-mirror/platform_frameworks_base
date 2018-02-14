@@ -89,6 +89,7 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
     private int mLightTrackColor;
     private int mDarkTrackColor;
     private float mDarkIntensity;
+    private View mHomeButtonView;
 
     private final Handler mHandler = new Handler();
     private final Interpolator mQuickScrubEndInterpolator = new DecelerateInterpolator();
@@ -114,11 +115,10 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
         if (!mQuickScrubActive) {
             pos = mDragPositive ? Math.min((int) mTranslation, pos) : Math.max((int) mTranslation, pos);
         }
-        final View homeView = mNavigationBarView.getHomeButton().getCurrentView();
         if (mIsVertical) {
-            homeView.setTranslationY(pos);
+            mHomeButtonView.setTranslationY(pos);
         } else {
-            homeView.setTranslationX(pos);
+            mHomeButtonView.setTranslationX(pos);
         }
     };
 
@@ -126,6 +126,7 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
         @Override
         public void onAnimationEnd(Animator animation) {
             mNavigationBarView.getHomeButton().setClickable(true);
+            mHomeButtonView = null;
             mQuickScrubActive = false;
             mTranslation = 0;
         }
@@ -226,6 +227,7 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
             case MotionEvent.ACTION_DOWN: {
                 int x = (int) event.getX();
                 int y = (int) event.getY();
+                mHomeButtonView = homeButton.getCurrentView();
                 if (isQuickScrubEnabled()
                         && mNavigationBarView.getDownHitTarget() == HIT_TARGET_HOME) {
                     mTouchDownX = x;
@@ -305,9 +307,9 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
                             mTranslation /= SWITCH_STICKINESS;
                         }
                         if (mIsVertical) {
-                            homeButton.getCurrentView().setTranslationY(mTranslation);
+                            mHomeButtonView.setTranslationY(mTranslation);
                         } else {
-                            homeButton.getCurrentView().setTranslationX(mTranslation);
+                            mHomeButtonView.setTranslationX(mTranslation);
                         }
                     }
                 }
@@ -315,7 +317,7 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
             }
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
-                endQuickScrub();
+                endQuickScrub(true /* animate */);
                 break;
         }
         return mDraggingActive || mQuickScrubActive;
@@ -357,6 +359,11 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
 
     @Override
     public void setBarState(boolean isVertical, boolean isRTL) {
+        final boolean changed = (mIsVertical != isVertical) || (mIsRTL != isRTL);
+        if (changed) {
+            // End quickscrub if the state changes mid-transition
+            endQuickScrub(false /* animate */);
+        }
         mIsVertical = isVertical;
         mIsRTL = isRTL;
         try {
@@ -392,7 +399,7 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
         }
     }
 
-    private void endQuickScrub() {
+    private void endQuickScrub(boolean animate) {
         mHandler.removeCallbacks(mLongPressRunnable);
         if (mDraggingActive || mQuickScrubActive) {
             mButtonAnimator.setIntValues((int) mTranslation, 0);
@@ -405,6 +412,9 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
                 }
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to send end of quick scrub.", e);
+            }
+            if (!animate) {
+                mQuickScrubEndAnimator.end();
             }
         }
         mDraggingActive = false;
