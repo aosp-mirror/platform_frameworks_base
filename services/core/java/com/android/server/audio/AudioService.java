@@ -70,6 +70,7 @@ import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
 import android.media.IAudioFocusDispatcher;
 import android.media.IAudioRoutesObserver;
+import android.media.IAudioServerStateDispatcher;
 import android.media.IAudioService;
 import android.media.IPlaybackConfigDispatcher;
 import android.media.IRecordingConfigDispatcher;
@@ -242,6 +243,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_INDICATE_SYSTEM_READY = 26;
     private static final int MSG_ACCESSORY_PLUG_MEDIA_UNMUTE = 27;
     private static final int MSG_NOTIFY_VOL_EVENT = 28;
+    private static final int MSG_DISPATCH_AUDIO_SERVER_STATE = 29;
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
     //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
@@ -390,6 +392,8 @@ public class AudioService extends IAudioService.Stub
             case AudioSystem.AUDIO_STATUS_SERVER_DIED:
                 sendMsg(mAudioHandler, MSG_AUDIO_SERVER_DIED,
                         SENDMSG_NOOP, 0, 0, null, 0);
+                sendMsg(mAudioHandler, MSG_DISPATCH_AUDIO_SERVER_STATE,
+                        SENDMSG_QUEUE, 0, 0, null, 0);
                 break;
             default:
                 break;
@@ -1000,6 +1004,21 @@ public class AudioService extends IAudioService.Stub
         onIndicateSystemReady();
         // indicate the end of reconfiguration phase to audio HAL
         AudioSystem.setParameters("restarting=false");
+
+        sendMsg(mAudioHandler, MSG_DISPATCH_AUDIO_SERVER_STATE,
+                SENDMSG_QUEUE, 1, 0, null, 0);
+    }
+
+    private void onDispatchAudioServerStateChange(boolean state) {
+        synchronized (mAudioServerStateListeners) {
+            for (AsdProxy asdp : mAudioServerStateListeners.values()) {
+                try {
+                    asdp.callback().dispatchAudioServerStateChange(state);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Could not call dispatchAudioServerStateChange()", e);
+                }
+            }
+        }
     }
 
     private void createAudioSystemThread() {
@@ -5089,6 +5108,10 @@ public class AudioService extends IAudioService.Stub
                     onAudioServerDied();
                     break;
 
+                case MSG_DISPATCH_AUDIO_SERVER_STATE:
+                    onDispatchAudioServerStateChange(msg.arg1 == 1);
+                    break;
+
                 case MSG_UNLOAD_SOUND_EFFECTS:
                     onUnloadSoundEffects();
                     break;
@@ -7339,6 +7362,77 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+
+    //======================
+    // Audioserver state displatch
+    //======================
+    private class AsdProxy implements IBinder.DeathRecipient {
+        private final IAudioServerStateDispatcher mAsd;
+
+        AsdProxy(IAudioServerStateDispatcher asd) {
+            mAsd = asd;
+        }
+
+        public void binderDied() {
+            synchronized (mAudioServerStateListeners) {
+                mAudioServerStateListeners.remove(mAsd.asBinder());
+            }
+        }
+
+        IAudioServerStateDispatcher callback() {
+            return mAsd;
+        }
+    }
+
+    private HashMap<IBinder, AsdProxy> mAudioServerStateListeners =
+            new HashMap<IBinder, AsdProxy>();
+
+    private void checkMonitorAudioServerStatePermission() {
+        if (!(mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.MODIFY_PHONE_STATE) ==
+                PackageManager.PERMISSION_GRANTED ||
+              mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.MODIFY_AUDIO_ROUTING) ==
+                PackageManager.PERMISSION_GRANTED)) {
+            throw new SecurityException("Not allowed to monitor audioserver state");
+        }
+    }
+
+    public void registerAudioServerStateDispatcher(IAudioServerStateDispatcher asd) {
+        checkMonitorAudioServerStatePermission();
+        synchronized (mAudioServerStateListeners) {
+            if (mAudioServerStateListeners.containsKey(asd.asBinder())) {
+                Slog.w(TAG, "Cannot re-register audio server state dispatcher");
+                return;
+            }
+            AsdProxy asdp = new AsdProxy(asd);
+            try {
+                asd.asBinder().linkToDeath(asdp, 0/*flags*/);
+            } catch (RemoteException e) {
+
+            }
+            mAudioServerStateListeners.put(asd.asBinder(), asdp);
+        }
+    }
+
+    public void unregisterAudioServerStateDispatcher(IAudioServerStateDispatcher asd) {
+        checkMonitorAudioServerStatePermission();
+        synchronized (mAudioServerStateListeners) {
+            AsdProxy asdp = mAudioServerStateListeners.remove(asd.asBinder());
+            if (asdp == null) {
+                Slog.w(TAG, "Trying to unregister unknown audioserver state dispatcher for pid "
+                        + Binder.getCallingPid() + " / uid " + Binder.getCallingUid());
+                return;
+            } else {
+                asd.asBinder().unlinkToDeath(asdp, 0/*flags*/);
+            }
+        }
+    }
+
+    public boolean isAudioServerRunning() {
+        checkMonitorAudioServerStatePermission();
+        return (AudioSystem.checkAudioFlinger() == AudioSystem.AUDIO_STATUS_OK);
+    }
 
     //======================
     // misc

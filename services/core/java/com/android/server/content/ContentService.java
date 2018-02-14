@@ -97,9 +97,7 @@ public final class ContentService extends IContentService.Stub {
 
         @Override
         public void onBootPhase(int phase) {
-            if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
-                mService.systemReady();
-            }
+            mService.onBootPhase(phase);
         }
 
 
@@ -300,8 +298,15 @@ public final class ContentService extends IContentService.Stub {
                 localeFilter, null, null);
     }
 
-    void systemReady() {
-        getSyncManager();
+    void onBootPhase(int phase) {
+        switch (phase) {
+            case SystemService.PHASE_SYSTEM_SERVICES_READY:
+                getSyncManager();
+                break;
+        }
+        if (mSyncManager != null) {
+            mSyncManager.onBootPhase(phase);
+        }
     }
 
     /**

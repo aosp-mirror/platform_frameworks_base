@@ -23,16 +23,14 @@ import android.net.WifiKey;
 import android.os.Parcel;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
-import com.android.settingslib.TestConfig;
-import java.util.Date;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
+
+import java.util.Date;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class TimestampedScoredNetworkTest {
   private TimestampedScoredNetwork impl;
 

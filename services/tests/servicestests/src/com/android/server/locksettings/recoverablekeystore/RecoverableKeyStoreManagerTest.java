@@ -503,6 +503,30 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
+    public void recoverKeys_doesNotThrowIfNoApplicationKeysToBeDecrypted() throws Exception {
+        mRecoverableKeyStoreManager.startRecoverySession(
+                TEST_SESSION_ID,
+                TEST_PUBLIC_KEY,
+                TEST_VAULT_PARAMS,
+                TEST_VAULT_CHALLENGE,
+                ImmutableList.of(new KeyChainProtectionParams(
+                        TYPE_LOCKSCREEN,
+                        UI_FORMAT_PASSWORD,
+                        KeyDerivationParams.createSha256Params(TEST_SALT),
+                        TEST_SECRET)));
+        byte[] keyClaimant = mRecoverySessionStorage.get(Binder.getCallingUid(), TEST_SESSION_ID)
+                .getKeyClaimant();
+        SecretKey recoveryKey = randomRecoveryKey();
+        byte[] encryptedClaimResponse = encryptClaimResponse(
+                keyClaimant, TEST_SECRET, TEST_VAULT_PARAMS, recoveryKey);
+
+        mRecoverableKeyStoreManager.recoverKeys(
+                TEST_SESSION_ID,
+                /*encryptedRecoveryKey=*/ encryptedClaimResponse,
+                /*applicationKeys=*/ ImmutableList.of());
+    }
+
+    @Test
     public void recoverKeys_returnsDecryptedKeys() throws Exception {
         mRecoverableKeyStoreManager.startRecoverySession(
                 TEST_SESSION_ID,

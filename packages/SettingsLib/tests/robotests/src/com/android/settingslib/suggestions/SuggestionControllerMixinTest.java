@@ -18,9 +18,7 @@ package com.android.settingslib.suggestions;
 
 import static android.arch.lifecycle.Lifecycle.Event.ON_START;
 import static android.arch.lifecycle.Lifecycle.Event.ON_STOP;
-
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,7 +28,6 @@ import android.arch.lifecycle.LifecycleOwner;
 import android.content.ComponentName;
 import android.content.Context;
 
-import com.android.settingslib.TestConfig;
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.core.lifecycle.Lifecycle;
 
@@ -44,10 +41,7 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION,
-        shadows = {
-                ShadowSuggestionController.class
-        })
+@Config(shadows = ShadowSuggestionController.class)
 public class SuggestionControllerMixinTest {
 
     @Mock

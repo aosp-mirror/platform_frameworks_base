@@ -45,7 +45,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
-import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
 
 import com.android.internal.logging.MetricsLogger;
@@ -111,6 +111,7 @@ public class NotificationPanelView extends PanelView implements
                 }
             };
     private final PowerManager mPowerManager;
+    private final AccessibilityManager mAccessibilityManager;
 
     private KeyguardAffordanceHelper mAffordanceHelper;
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
@@ -249,6 +250,8 @@ public class NotificationPanelView extends PanelView implements
         setWillNotDraw(!DEBUG);
         mFalsingManager = FalsingManager.getInstance(context);
         mPowerManager = context.getSystemService(PowerManager.class);
+        mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
+        setAccessibilityPaneTitle(determineAccessibilityPaneTitle());
     }
 
     public void setStatusBar(StatusBar bar) {
@@ -658,16 +661,6 @@ public class NotificationPanelView extends PanelView implements
         mHeadsUpTouchHelper.notifyFling(!expand);
         setClosingWithAlphaFadeout(!expand && getFadeoutAlpha() == 1.0f);
         super.flingToHeight(vel, expand, target, collapseSpeedUpFactor, expandBecauseOfFalsing);
-    }
-
-    @Override
-    public boolean dispatchPopulateAccessibilityEventInternal(AccessibilityEvent event) {
-        if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            event.getText().add(getKeyguardOrLockScreenString());
-            mLastAnnouncementWasQuickSettings = false;
-            return true;
-        }
-        return super.dispatchPopulateAccessibilityEventInternal(event);
     }
 
     @Override
@@ -1300,10 +1293,6 @@ public class NotificationPanelView extends PanelView implements
             setQsExpanded(true);
         } else if (height <= mQsMinExpansionHeight && mQsExpanded) {
             setQsExpanded(false);
-            if (mLastAnnouncementWasQuickSettings && !mTracking && !isCollapsing()) {
-                announceForAccessibility(getKeyguardOrLockScreenString());
-                mLastAnnouncementWasQuickSettings = false;
-            }
         }
         mQsExpansionHeight = height;
         updateQsExpansion();
@@ -1329,13 +1318,10 @@ public class NotificationPanelView extends PanelView implements
             updateClock(mClockPositionResult.clockAlpha, mClockPositionResult.clockScale);
         }
 
-        // Upon initialisation when we are not layouted yet we don't want to announce that we are
-        // fully expanded, hence the != 0.0f check.
-        if (height != 0.0f && mQsFullyExpanded && !mLastAnnouncementWasQuickSettings) {
-            announceForAccessibility(getContext().getString(
-                    R.string.accessibility_desc_quick_settings));
-            mLastAnnouncementWasQuickSettings = true;
+        if (mAccessibilityManager.isEnabled()) {
+            setAccessibilityPaneTitle(determineAccessibilityPaneTitle());
         }
+
         if (mQsFullyExpanded && mFalsingManager.shouldEnforceBouncer()) {
             mStatusBar.executeRunnableDismissingKeyguard(null, null /* cancelAction */,
                     false /* dismissShade */, true /* afterKeyguardGone */, false /* deferred */);
@@ -1350,9 +1336,13 @@ public class NotificationPanelView extends PanelView implements
         mQs.setQsExpansion(getQsExpansionFraction(), getHeaderTranslation());
     }
 
-    private String getKeyguardOrLockScreenString() {
+    private String determineAccessibilityPaneTitle() {
         if (mQs != null && mQs.isCustomizing()) {
             return getContext().getString(R.string.accessibility_desc_quick_settings_edit);
+        } else if (mQsExpansionHeight != 0.0f && mQsFullyExpanded) {
+            // Upon initialisation when we are not layouted yet we don't want to announce that we
+            // are fully expanded, hence the != 0.0f check.
+            return getContext().getString(R.string.accessibility_desc_quick_settings);
         } else if (mStatusBarState == StatusBarState.KEYGUARD) {
             return getContext().getString(R.string.accessibility_desc_lock_screen);
         } else {
@@ -1879,6 +1869,9 @@ public class NotificationPanelView extends PanelView implements
             mQsExpansionHeight = mQsMaxExpansionHeight;
             requestScrollerTopPaddingUpdate(false /* animate */);
             requestPanelHeightUpdate();
+        }
+        if (mAccessibilityManager.isEnabled()) {
+            setAccessibilityPaneTitle(determineAccessibilityPaneTitle());
         }
     }
 

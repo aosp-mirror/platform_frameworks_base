@@ -53,16 +53,25 @@
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Déconnecté"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Déconnexion…"</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Connexion en cours…"</string>
-    <string name="bluetooth_connected" msgid="6038755206916626419">"Connecté"</string>
+    <!-- no translation found for bluetooth_connected (5427152882755735944) -->
+    <skip />
     <string name="bluetooth_pairing" msgid="1426882272690346242">"Association…"</string>
-    <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"Connecté (sans audio pour appels tél.)"</string>
-    <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Connecté (sans audio contenu mutimédia)"</string>
-    <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Connecté (sans accès aux messages)"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Connecté (sans audio tel./multimédia)"</string>
-    <string name="bluetooth_connected_battery_level" msgid="7049181126136692368">"Connecté. Pile : <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_battery_level" msgid="5504193961248406027">"Connecté (sans téléphone). Pile : <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="4751724026365870779">"Connecté (sans média). Pile : <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1549265779323455261">"Connecté (sans téléphone ni média). Pile : <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <!-- no translation found for bluetooth_connected_no_headset (616068069034994802) -->
+    <skip />
+    <!-- no translation found for bluetooth_connected_no_a2dp (3736431800395923868) -->
+    <skip />
+    <!-- no translation found for bluetooth_connected_no_map (3200033913678466453) -->
+    <skip />
+    <!-- no translation found for bluetooth_connected_no_headset_no_a2dp (2047403011284187056) -->
+    <skip />
+    <!-- no translation found for bluetooth_connected_battery_level (5162924691231307748) -->
+    <skip />
+    <!-- no translation found for bluetooth_connected_no_headset_battery_level (1610296229139400266) -->
+    <skip />
+    <!-- no translation found for bluetooth_connected_no_a2dp_battery_level (3908466636369853652) -->
+    <skip />
+    <!-- no translation found for bluetooth_connected_no_headset_no_a2dp_battery_level (1163440823807659316) -->
+    <skip />
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Paramètres audio du support"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Appels téléphoniques"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Transfert de fichier"</string>
@@ -327,9 +336,12 @@
     <item msgid="8280754435979370728">"Couleurs naturelles, comme l\'œil les voit"</item>
     <item msgid="5363960654009010371">"Couleurs optimisées pour le contenu numérique"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="1317817863508274533">"Applications inactives"</string>
+    <!-- no translation found for inactive_apps_title (9042996804461901648) -->
+    <skip />
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Application inactive. Touchez ici pour l\'activer."</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Application active. Touchez ici pour la désactiver."</string>
+    <!-- no translation found for standby_bucket_summary (6567835350910684727) -->
+    <skip />
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Services en cours d\'exécution"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Afficher et contrôler les services en cours d\'exécution"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Mise en œuvre WebView"</string>
@@ -351,16 +363,34 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Correction des couleurs"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Cette fonctionnalité est expérimentale et peut affecter les performances."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Remplacé par <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"Il reste environ <xliff:g id="TIME">^1</xliff:g>"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Il reste environ <xliff:g id="TIME">^1</xliff:g> en fonction de votre usage"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">^1</xliff:g> jusqu\'à la charge complète"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Temps restant : <xliff:g id="TIME">^1</xliff:g>"</string>
-    <string name="power_remaining_duration_only_short_enhanced" msgid="7450425624026394823">"Il reste <xliff:g id="TIME">^1</xliff:g> en fonction de votre usage"</string>
-    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">^1</xliff:g> : il reste environ <xliff:g id="TIME">^2</xliff:g>"</string>
-    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">^1</xliff:g> : il reste environ <xliff:g id="TIME">^2</xliff:g> en fonction de votre usage"</string>
-    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> – Temps restant : <xliff:g id="TIME">^2</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"Il reste environ <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Il reste environ <xliff:g id="TIME">%1$s</xliff:g> en fonction de votre usage"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> jusqu\'à la charge complète"</string>
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Temps restant : <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_remaining_less_than_duration_only (5996752448813295329) -->
+    <skip />
+    <!-- no translation found for power_remaining_less_than_duration (7967078125657859046) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (6846716609975752316) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (8884488700395194194) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (8168317165722752881) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (5957064378548718872) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (9055596817716471373) -->
+    <skip />
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> : il reste environ <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">%1$s</xliff:g> : il reste environ <xliff:g id="TIME">%2$s</xliff:g> en fonction de votre usage"</string>
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (7679005631124015335) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (261050880878965621) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (2020049829798578618) -->
+    <skip />
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> : <xliff:g id="TIME">^2</xliff:g> jusqu\'à la charge complète"</string>
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> : <xliff:g id="TIME">%2$s</xliff:g> jusqu\'à la charge complète"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Inconnu"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Charge en cours…"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"en cours de charge"</string>
@@ -414,4 +444,12 @@
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"Jamais"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"Priorités seulement"</string>
     <string name="zen_mode_and_condition" msgid="4927230238450354412">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_alarm_warning_indef (3007988140196673193) -->
+    <skip />
+    <!-- no translation found for zen_alarm_warning (6236690803924413088) -->
+    <skip />
+    <!-- no translation found for alarm_template (4996153414057676512) -->
+    <skip />
+    <!-- no translation found for alarm_template_far (3779172822607461675) -->
+    <skip />
 </resources>

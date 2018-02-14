@@ -94,7 +94,7 @@ public class ZenModeConfig implements Parcelable {
     private static final boolean DEFAULT_ALLOW_SCREEN_OFF = true;
     private static final boolean DEFAULT_ALLOW_SCREEN_ON = true;
 
-    private static final int XML_VERSION = 2;
+    public static final int XML_VERSION = 3;
     public static final String ZEN_TAG = "zen";
     private static final String ZEN_ATT_VERSION = "version";
     private static final String ZEN_ATT_USER = "user";
@@ -145,6 +145,7 @@ public class ZenModeConfig implements Parcelable {
     public int user = UserHandle.USER_SYSTEM;
     public boolean allowWhenScreenOff = DEFAULT_ALLOW_SCREEN_OFF;
     public boolean allowWhenScreenOn = DEFAULT_ALLOW_SCREEN_ON;
+    public int version;
 
     public ZenRule manualRule;
     public ArrayMap<String, ZenRule> automaticRules = new ArrayMap<>();
@@ -431,6 +432,7 @@ public class ZenModeConfig implements Parcelable {
         String tag = parser.getName();
         if (!ZEN_TAG.equals(tag)) return null;
         final ZenModeConfig rt = new ZenModeConfig();
+        rt.version = safeInt(parser, ZEN_ATT_VERSION, XML_VERSION);
         rt.user = safeInt(parser, ZEN_ATT_USER, rt.user);
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
             tag = parser.getName();

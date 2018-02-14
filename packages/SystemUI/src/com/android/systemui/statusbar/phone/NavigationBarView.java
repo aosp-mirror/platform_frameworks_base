@@ -16,6 +16,13 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.view.MotionEvent.ACTION_DOWN;
+import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_BACK;
+import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_HOME;
+import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_NONE;
+
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.LayoutTransition;
 import android.animation.LayoutTransition.TransitionListener;
 import android.animation.ObjectAnimator;
@@ -29,6 +36,7 @@ import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
@@ -49,6 +57,7 @@ import android.widget.FrameLayout;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.DockedStackExistsListener;
+import com.android.systemui.Interpolators;
 import com.android.systemui.OverviewProxyService;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
@@ -57,6 +66,7 @@ import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.statusbar.phone.NavGesture;
 import com.android.systemui.plugins.statusbar.phone.NavGesture.GestureHelper;
 import com.android.systemui.recents.RecentsOnboarding;
+import com.android.systemui.shared.system.NavigationBarCompat;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.policy.DeadZone;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
@@ -69,6 +79,8 @@ import java.util.function.Consumer;
 public class NavigationBarView extends FrameLayout implements PluginListener<NavGesture> {
     final static boolean DEBUG = false;
     final static String TAG = "StatusBar/NavBarView";
+
+    final static int BUTTON_FADE_IN_OUT_DURATION_MS = 100;
 
     // slippery nav bar when everything is disabled, e.g. during setup
     final static boolean SLIPPERY_WHEN_DISABLED = true;
@@ -85,8 +97,14 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     boolean mShowMenu;
     boolean mShowAccessibilityButton;
     boolean mLongClickableAccessibilityButton;
+    boolean mShowRotateButton;
     int mDisabledFlags = 0;
     int mNavigationIconHints = 0;
+
+    private @NavigationBarCompat.HitTarget int mDownHitTarget = HIT_TARGET_NONE;
+    private Rect mHomeButtonBounds = new Rect();
+    private Rect mBackButtonBounds = new Rect();
+    private int[] mTmpPosition = new int[2];
 
     private KeyButtonDrawable mBackIcon, mBackLandIcon, mBackAltIcon, mBackAltLandIcon;
     private KeyButtonDrawable mBackCarModeIcon, mBackLandCarModeIcon;
@@ -126,6 +144,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private Divider mDivider;
     private RecentsOnboarding mRecentsOnboarding;
     private NotificationPanelView mPanelView;
+
+    private Animator mRotateHideAnimator;
 
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
@@ -217,6 +237,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mShowAccessibilityButton = false;
         mLongClickableAccessibilityButton = false;
 
+        mOverviewProxyService = Dependency.get(OverviewProxyService.class);
+        mRecentsOnboarding = new RecentsOnboarding(context, mOverviewProxyService);
+
         mConfiguration = new Configuration();
         mConfiguration.updateFrom(context.getResources().getConfiguration());
         updateIcons(context, Configuration.EMPTY, mConfiguration);
@@ -232,9 +255,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 new ButtonDispatcher(R.id.accessibility_button));
         mButtonDispatchers.put(R.id.rotate_suggestion,
                 new ButtonDispatcher(R.id.rotate_suggestion));
-
-        mOverviewProxyService = Dependency.get(OverviewProxyService.class);
-        mRecentsOnboarding = new RecentsOnboarding(context, mOverviewProxyService);
     }
 
     public BarTransitions getBarTransitions() {
@@ -275,6 +295,18 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
+        switch (event.getActionMasked()) {
+            case ACTION_DOWN:
+                int x = (int) event.getX();
+                int y = (int) event.getY();
+                mDownHitTarget = HIT_TARGET_NONE;
+                if (mBackButtonBounds.contains(x, y)) {
+                    mDownHitTarget = HIT_TARGET_BACK;
+                } else if (mHomeButtonBounds.contains(x, y)) {
+                    mDownHitTarget = HIT_TARGET_HOME;
+                }
+                break;
+        }
         return mGestureHelper.onInterceptTouchEvent(event);
     }
 
@@ -284,6 +316,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             return true;
         }
         return super.onTouchEvent(event);
+    }
+
+    public @NavigationBarCompat.HitTarget int getDownHitTarget() {
+        return mDownHitTarget;
     }
 
     public void abortCurrentGesture() {
@@ -355,14 +391,23 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         }
         if (oldConfig.densityDpi != newConfig.densityDpi
                 || oldConfig.getLayoutDirection() != newConfig.getLayoutDirection()) {
-            mBackIcon = getDrawable(ctx, R.drawable.ic_sysbar_back, R.drawable.ic_sysbar_back_dark);
+            final boolean proxyAvailable = mOverviewProxyService.getProxy() != null;
+            mBackIcon = proxyAvailable
+                    ? getDrawable(ctx, R.drawable.ic_sysbar_back_quick_step,
+                            R.drawable.ic_sysbar_back_quick_step_dark)
+                    : getDrawable(ctx, R.drawable.ic_sysbar_back, R.drawable.ic_sysbar_back_dark);
             mBackLandIcon = mBackIcon;
-            mBackAltIcon = getDrawable(ctx,
-                    R.drawable.ic_sysbar_back_ime, R.drawable.ic_sysbar_back_ime_dark);
+            mBackAltIcon = proxyAvailable
+                    ? getDrawable(ctx, R.drawable.ic_sysbar_back_ime_quick_step,
+                            R.drawable.ic_sysbar_back_ime_quick_step_dark)
+                    : getDrawable(ctx, R.drawable.ic_sysbar_back_ime,
+                            R.drawable.ic_sysbar_back_ime_dark);
             mBackAltLandIcon = mBackAltIcon;
 
-            mHomeDefaultIcon = getDrawable(ctx,
-                    R.drawable.ic_sysbar_home, R.drawable.ic_sysbar_home_dark);
+            mHomeDefaultIcon = proxyAvailable
+                    ? getDrawable(ctx, R.drawable.ic_sysbar_home_quick_step,
+                            R.drawable.ic_sysbar_home_quick_step_dark)
+                    : getDrawable(ctx, R.drawable.ic_sysbar_home, R.drawable.ic_sysbar_home_dark);
             mRecentIcon = getDrawable(ctx,
                     R.drawable.ic_sysbar_recent, R.drawable.ic_sysbar_recent_dark);
             mMenuIcon = getDrawable(ctx, R.drawable.ic_sysbar_menu, R.drawable.ic_sysbar_menu_dark);
@@ -462,21 +507,24 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             getHomeButton().setImageDrawable(mHomeDefaultIcon);
         }
 
-        // The Accessibility button always overrides the appearance of the IME switcher
+        // Update IME button visibility, a11y and rotate button always overrides the appearance
         final boolean showImeButton =
-                !mShowAccessibilityButton && ((hints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN)
-                        != 0);
+                !mShowAccessibilityButton &&
+                !mShowRotateButton &&
+                ((hints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) != 0);
         getImeSwitchButton().setVisibility(showImeButton ? View.VISIBLE : View.INVISIBLE);
         getImeSwitchButton().setImageDrawable(mImeIcon);
 
-        // Update menu button in case the IME state has changed.
+        // Update menu button, visibility logic in method
         setMenuVisibility(mShowMenu, true);
         getMenuButton().setImageDrawable(mMenuIcon);
 
+        // Update rotate button, visibility altered by a11y button logic
+        getRotateSuggestionButton().setImageDrawable(mRotateSuggestionIcon);
+
+        // Update a11y button, visibility logic in state method
         setAccessibilityButtonState(mShowAccessibilityButton, mLongClickableAccessibilityButton);
         getAccessibilityButton().setImageDrawable(mAccessibilityIcon);
-
-        getRotateSuggestionButton().setImageDrawable(mRotateSuggestionIcon);
 
         setDisabledFlags(mDisabledFlags, true);
 
@@ -621,8 +669,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         mShowMenu = show;
 
-        // Only show Menu if IME switcher and Accessibility button not shown.
-        final boolean shouldShow = mShowMenu && !mShowAccessibilityButton &&
+        // Only show Menu if IME switcher, rotate and Accessibility buttons are not shown.
+        final boolean shouldShow = mShowMenu &&
+                !mShowAccessibilityButton &&
+                !mShowRotateButton &&
                 ((mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) == 0);
 
         getMenuButton().setVisibility(shouldShow ? View.VISIBLE : View.INVISIBLE);
@@ -632,13 +682,94 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mShowAccessibilityButton = visible;
         mLongClickableAccessibilityButton = longClickable;
         if (visible) {
-            // Accessibility button overrides Menu and IME switcher buttons.
+            // Accessibility button overrides Menu, IME switcher and rotate buttons.
             setMenuVisibility(false, true);
             getImeSwitchButton().setVisibility(View.INVISIBLE);
+            setRotateSuggestionButtonState(false, true);
         }
 
         getAccessibilityButton().setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
         getAccessibilityButton().setLongClickable(longClickable);
+    }
+
+    public void setRotateSuggestionButtonState(final boolean visible) {
+        setRotateSuggestionButtonState(visible, false);
+    }
+
+    public void setRotateSuggestionButtonState(final boolean visible, final boolean force) {
+        ButtonDispatcher rotBtn = getRotateSuggestionButton();
+        final boolean currentlyVisible = mShowRotateButton;
+
+        // Rerun a show animation to indicate change but don't rerun a hide animation
+        if (!visible && !currentlyVisible) return;
+
+        View currentView = rotBtn.getCurrentView();
+        if (currentView == null) return;
+
+        KeyButtonDrawable kbd = rotBtn.getImageDrawable();
+        if (kbd == null) return;
+
+        AnimatedVectorDrawable animIcon = null;
+        if (kbd.getDrawable(0) instanceof AnimatedVectorDrawable) {
+            animIcon = (AnimatedVectorDrawable) kbd.getDrawable(0);
+        }
+
+        if (visible) { // Appear and change, cannot force
+            setRotateButtonVisibility(true);
+
+            // Stop any currently running hide animations
+            if (mRotateHideAnimator != null && mRotateHideAnimator.isRunning()) {
+                mRotateHideAnimator.pause();
+            }
+
+            // Reset the alpha if any has changed due to hide animation
+            currentView.setAlpha(1f);
+
+            // Run the rotate icon's animation if it has one
+            if (animIcon != null) {
+                animIcon.reset();
+                animIcon.start();
+            }
+
+        } else { // Hide
+            if (force) {
+                // If a hide animator is running stop it and instantly make invisible
+                if (mRotateHideAnimator != null && mRotateHideAnimator.isRunning()) {
+                    mRotateHideAnimator.pause();
+                }
+                setRotateButtonVisibility(false);
+                return;
+            }
+
+            // Don't start any new hide animations if one is running
+            if (mRotateHideAnimator != null && mRotateHideAnimator.isRunning()) return;
+
+            ObjectAnimator fadeOut = ObjectAnimator.ofFloat(currentView, "alpha",
+                    0f);
+            fadeOut.setDuration(BUTTON_FADE_IN_OUT_DURATION_MS);
+            fadeOut.setInterpolator(Interpolators.LINEAR);
+            fadeOut.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    setRotateButtonVisibility(false);
+                }
+            });
+
+            mRotateHideAnimator = fadeOut;
+            fadeOut.start();
+        }
+    }
+
+    private void setRotateButtonVisibility(final boolean visible) {
+        // Never show if a11y is visible
+        final boolean adjVisible = visible && !mShowAccessibilityButton;
+        final int vis = adjVisible ? View.VISIBLE : View.INVISIBLE;
+
+        getRotateSuggestionButton().setVisibility(vis);
+        mShowRotateButton = visible;
+
+        // Hide/restore other button visibility, if necessary
+        setNavigationIconHints(mNavigationIconHints, true);
     }
 
     @Override
@@ -666,6 +797,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         setSlippery(!isConnected);
         setDisabledFlags(mDisabledFlags, true);
         setUpSwipeUpOnboarding(isConnected);
+        updateIcons(getContext(), Configuration.EMPTY, mConfiguration);
+        setNavigationIconHints(mNavigationIconHints, true);
     }
 
     @Override
@@ -677,7 +810,21 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
+        updateButtonLocationOnScreen(getBackButton(), mBackButtonBounds);
+        updateButtonLocationOnScreen(getHomeButton(), mHomeButtonBounds);
         mGestureHelper.onLayout(changed, left, top, right, bottom);
+    }
+
+    private void updateButtonLocationOnScreen(ButtonDispatcher button, Rect buttonBounds) {
+        View view = button.getCurrentView();
+        if (view == null) {
+            buttonBounds.setEmpty();
+            return;
+        }
+        view.getLocationInWindow(mTmpPosition);
+        buttonBounds.set(mTmpPosition[0], mTmpPosition[1],
+                mTmpPosition[0] + view.getMeasuredWidth(),
+                mTmpPosition[1] + view.getMeasuredHeight());
     }
 
     private void updateRotatedViews() {

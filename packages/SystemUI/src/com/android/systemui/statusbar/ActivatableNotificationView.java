@@ -308,6 +308,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         }
     }
 
+    public void setRippleAllowed(boolean allowed) {
+        mBackgroundNormal.setPressedAllowed(allowed);
+    }
+
     private boolean handleTouchEventDimmed(MotionEvent event) {
         if (mNeedsDimming && !mDimmed) {
             // We're actually dimmed, but our content isn't dimmable, let's ensure we have a ripple

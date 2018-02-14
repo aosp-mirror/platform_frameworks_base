@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.settingslib;
+package android.media;
 
-import android.os.Build;
+/**
+ * AIDL for the AudioService to signal audio server state changes
+ *
+ * {@hide}
+ */
+oneway interface IAudioServerStateDispatcher {
 
-public class TestConfig {
-    public static final int SDK_VERSION = Build.VERSION_CODES.O;
-    public static final String MANIFEST_PATH =
-            "frameworks/base/packages/SettingsLib/tests/robotests/AndroidManifest.xml";
+    void dispatchAudioServerStateChange(boolean state);
+
 }

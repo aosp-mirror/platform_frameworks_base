@@ -7308,6 +7308,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return mAccessibilityPaneTitle;
     }
 
+    private boolean isAccessibilityPane() {
+        return !TextUtils.isEmpty(mAccessibilityPaneTitle);
+    }
+
     /**
      * Sends an accessibility event of the given type. If accessibility is
      * not enabled this method has no effect. The default implementation calls
@@ -11637,7 +11641,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return mode == IMPORTANT_FOR_ACCESSIBILITY_YES || isActionableForAccessibility()
                 || hasListenersForAccessibility() || getAccessibilityNodeProvider() != null
                 || getAccessibilityLiveRegion() != ACCESSIBILITY_LIVE_REGION_NONE
-                || (mAccessibilityPaneTitle != null);
+                || isAccessibilityPane();
     }
 
     /**
@@ -11734,18 +11738,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         // Changes to views with a pane title count as window state changes, as the pane title
         // marks them as significant parts of the UI.
-        if (!TextUtils.isEmpty(getAccessibilityPaneTitle())) {
-            final AccessibilityEvent event = AccessibilityEvent.obtain();
-            event.setEventType(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
-            event.setContentChangeTypes(changeType);
-            onPopulateAccessibilityEvent(event);
-            if (mParent != null) {
-                try {
-                    mParent.requestSendAccessibilityEvent(this, event);
-                } catch (AbstractMethodError e) {
-                    Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName()
-                            + " does not fully implement ViewParent", e);
+        if ((changeType != AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE)
+                && isAccessibilityPane()) {
+            // If the pane isn't visible, content changed events are sufficient unless we're
+            // reporting that the view just disappeared
+            if ((getVisibility() == VISIBLE)
+                    || (changeType == AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_DISAPPEARED)) {
+                final AccessibilityEvent event = AccessibilityEvent.obtain();
+                event.setEventType(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+                event.setContentChangeTypes(changeType);
+                event.setSource(this);
+                onPopulateAccessibilityEvent(event);
+                if (mParent != null) {
+                    try {
+                        mParent.requestSendAccessibilityEvent(this, event);
+                    } catch (AbstractMethodError e) {
+                        Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName()
+                                + " does not fully implement ViewParent", e);
+                    }
                 }
+                return;
             }
         }
 
@@ -14035,6 +14047,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         if (accessibilityEnabled) {
+            // If we're an accessibility pane and the visibility changed, we already have sent
+            // a state change, so we really don't need to report other changes.
+            if (isAccessibilityPane()) {
+                changed &= ~VISIBILITY_MASK;
+            }
             if ((changed & FOCUSABLE) != 0 || (changed & VISIBILITY_MASK) != 0
                     || (changed & CLICKABLE) != 0 || (changed & LONG_CLICKABLE) != 0
                     || (changed & CONTEXT_CLICKABLE) != 0) {

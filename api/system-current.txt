@@ -343,11 +343,13 @@ package android.app {
     method public java.lang.String getChannelId();
     method public android.app.PendingIntent getContentIntent();
     method public android.app.PendingIntent getDeleteIntent();
+    method public boolean getSuppressShowOverApps();
     method public boolean isAvailableOnTv();
     method public android.app.Notification.TvExtender setChannel(java.lang.String);
     method public android.app.Notification.TvExtender setChannelId(java.lang.String);
     method public android.app.Notification.TvExtender setContentIntent(android.app.PendingIntent);
     method public android.app.Notification.TvExtender setDeleteIntent(android.app.PendingIntent);
+    method public android.app.Notification.TvExtender setSuppressShowOverApps(boolean);
   }
 
   public final class NotificationChannel implements android.os.Parcelable {
@@ -433,6 +435,19 @@ package android.app.admin {
     field public static final int STATE_USER_SETUP_FINALIZED = 3; // 0x3
     field public static final int STATE_USER_SETUP_INCOMPLETE = 1; // 0x1
     field public static final int STATE_USER_UNMANAGED = 0; // 0x0
+  }
+
+  public class SystemUpdatePolicy implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.app.admin.SystemUpdatePolicy.InstallationOption getInstallationOptionAt(long);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.admin.SystemUpdatePolicy> CREATOR;
+    field public static final int TYPE_PAUSE = 4; // 0x4
+  }
+
+  public static class SystemUpdatePolicy.InstallationOption {
+    method public long getEffectiveTime();
+    method public int getType();
   }
 
 }
@@ -2522,17 +2537,26 @@ package android.media {
 
   public class AudioManager {
     method public deprecated int abandonAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, android.media.AudioAttributes);
+    method public void clearAudioServerStateCallback();
     method public int dispatchAudioFocusChange(android.media.AudioFocusInfo, int, android.media.audiopolicy.AudioPolicy);
+    method public boolean isAudioServerRunning();
     method public boolean isHdmiSystemAudioSupported();
     method public int registerAudioPolicy(android.media.audiopolicy.AudioPolicy);
     method public int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, android.media.AudioAttributes, int, int) throws java.lang.IllegalArgumentException;
     method public deprecated int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, android.media.AudioAttributes, int, int, android.media.audiopolicy.AudioPolicy) throws java.lang.IllegalArgumentException;
     method public int requestAudioFocus(android.media.AudioFocusRequest, android.media.audiopolicy.AudioPolicy);
+    method public void setAudioServerStateCallback(java.util.concurrent.Executor, android.media.AudioManager.AudioServerStateCallback);
     method public void setFocusRequestResult(android.media.AudioFocusInfo, int, android.media.audiopolicy.AudioPolicy);
     method public void unregisterAudioPolicyAsync(android.media.audiopolicy.AudioPolicy);
     field public static final int AUDIOFOCUS_FLAG_DELAY_OK = 1; // 0x1
     field public static final int AUDIOFOCUS_FLAG_LOCK = 4; // 0x4
     field public static final int AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS = 2; // 0x2
+  }
+
+  public static abstract class AudioManager.AudioServerStateCallback {
+    ctor public AudioManager.AudioServerStateCallback();
+    method public void onAudioServerDown();
+    method public void onAudioServerUp();
   }
 
   public final class AudioPlaybackConfiguration implements android.os.Parcelable {

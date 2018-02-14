@@ -49,7 +49,7 @@ import java.io.IOException;
 public class KernelUidCpuFreqTimeReader {
     private static final boolean DEBUG = false;
     private static final String TAG = "KernelUidCpuFreqTimeReader";
-    private static final String UID_TIMES_PROC_FILE = "/proc/uid_time_in_state";
+    static final String UID_TIMES_PROC_FILE = "/proc/uid_time_in_state";
 
     public interface Callback {
         void onUidCpuFreqTime(int uid, long[] cpuFreqTimeMs);

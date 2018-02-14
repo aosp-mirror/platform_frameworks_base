@@ -18,12 +18,10 @@ package com.android.settingslib.license;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.android.settingslib.TestConfig;
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.annotation.Config;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
@@ -35,7 +33,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class LicenseHtmlGeneratorFromXmlTest {
     private static final String VALILD_XML_STRING =
             "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"

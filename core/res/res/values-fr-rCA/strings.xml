@@ -355,6 +355,8 @@
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Permet à l\'application de rendre certains de ces composants persistants dans la mémoire. Cette autorisation peut limiter la mémoire disponible pour d\'autres applications et ralentir la tablette."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Permet à l\'application de placer certaines de ses parties en permanence dans la mémoire. Cela peut limiter la mémoire disponible pour les autres applications et ralentir le téléviseur."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Permet à l\'application de rendre certains de ces composants persistants dans la mémoire. Cette autorisation peut limiter la mémoire disponible pour d\'autres applications et ralentir le téléphone."</string>
+    <string name="permlab_foregroundService" msgid="3310786367649133115">"exécuter le service en premier plan"</string>
+    <string name="permdesc_foregroundService" msgid="6471634326171344622">"Permet à l\'application d\'utiliser les services en premier plan."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"évaluer l\'espace de stockage de l\'application"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Permet à l\'application de récupérer la taille de son code, de ses données et de sa mémoire cache."</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"modifier les paramètres du système"</string>
@@ -497,10 +499,8 @@
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Trop de tentatives. Veuillez réessayer plus tard."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Trop de tentatives. Capteur d\'empreintes digitales désactivé."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Réessayer."</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (7654382120628334248) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_hw_not_present (5729436878065119329) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Aucune empreinte digitale enregistrée."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Cet appareil ne possède pas de capteur d\'empreintes digitales"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Doigt <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -1211,23 +1211,15 @@
     <string name="no_permissions" msgid="7283357728219338112">"Aucune autorisation requise"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"cela peut engendrer des frais"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <!-- no translation found for usb_charging_notification_title (1595122345358177163) -->
-    <skip />
-    <!-- no translation found for usb_supplying_notification_title (4631045789893086181) -->
-    <skip />
-    <!-- no translation found for usb_mtp_notification_title (4238227258391151029) -->
-    <skip />
-    <!-- no translation found for usb_ptp_notification_title (5425857879922006878) -->
-    <skip />
-    <!-- no translation found for usb_tether_notification_title (3716143122035802501) -->
-    <skip />
-    <!-- no translation found for usb_midi_notification_title (5356040379749154805) -->
-    <skip />
-    <!-- no translation found for usb_accessory_notification_title (1899977434994900306) -->
-    <skip />
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"Chargement de cet appareil par USB"</string>
+    <string name="usb_supplying_notification_title" msgid="4631045789893086181">"Chargement de l\'appareil connecté par USB"</string>
+    <string name="usb_mtp_notification_title" msgid="4238227258391151029">"Transfert de fichiers USB activé"</string>
+    <string name="usb_ptp_notification_title" msgid="5425857879922006878">"Mode PTP par USB activé"</string>
+    <string name="usb_tether_notification_title" msgid="3716143122035802501">"Partage de connexion USB activé"</string>
+    <string name="usb_midi_notification_title" msgid="5356040379749154805">"Mode MIDI par USB activé"</string>
+    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"Mode accessoire USB activé"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Touchez pour afficher plus d\'options."</string>
-    <!-- no translation found for usb_power_notification_message (4647527153291917218) -->
-    <skip />
+    <string name="usb_power_notification_message" msgid="4647527153291917218">"Chargement de l\'appareil connecté. Touchez l\'écran pour afficher plus d\'options."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Un accessoire audio analogique a été détecté"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"L\'appareil connecté n\'est pas compatible avec ce téléphone. Touchez ici en savoir plus."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Débogage USB activé"</string>
@@ -1830,8 +1822,7 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Ce téléphone n\'est pas autorisé pour la voix"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Fenêtre contextuelle"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <!-- no translation found for shortcut_restored_on_lower_version (4860853725206702336) -->
-    <skip />
+    <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"La version de l\'application a été rétrogradée ou n\'est pas compatible avec ce raccourci"</string>
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Impossible de restaurer le raccourci, car l\'application ne prend pas en charge la sauvegarde et la restauration"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Impossible de restaurer le raccourci en raison d\'une erreur de correspondance des signature d\'applications"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Impossible de restaurer le raccourci"</string>

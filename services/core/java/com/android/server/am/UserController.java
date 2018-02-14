@@ -1489,9 +1489,8 @@ class UserController implements Handler.Callback {
                 }
             }
         }
-        if (!allowAll && targetUserId < 0) {
-            throw new IllegalArgumentException(
-                    "Call does not support special user #" + targetUserId);
+        if (!allowAll) {
+            ensureNotSpecialUser(targetUserId);
         }
         // Check shell permission
         if (callingUid == Process.SHELL_UID && targetUserId >= UserHandle.USER_SYSTEM) {
@@ -1506,6 +1505,13 @@ class UserController implements Handler.Callback {
     int unsafeConvertIncomingUser(int userId) {
         return (userId == UserHandle.USER_CURRENT || userId == UserHandle.USER_CURRENT_OR_SELF)
                 ? getCurrentUserId(): userId;
+    }
+
+    void ensureNotSpecialUser(int userId) {
+        if (userId >= 0) {
+            return;
+        }
+        throw new IllegalArgumentException("Call does not support special user #" + userId);
     }
 
     void registerUserSwitchObserver(IUserSwitchObserver observer, String name) {

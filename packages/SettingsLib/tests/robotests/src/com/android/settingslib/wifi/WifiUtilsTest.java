@@ -16,7 +16,6 @@
 package com.android.settingslib.wifi;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
@@ -35,7 +34,6 @@ import android.text.format.DateUtils;
 
 import com.android.settingslib.R;
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
-import com.android.settingslib.TestConfig;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -43,12 +41,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class WifiUtilsTest {
     private static final String TEST_SSID = "\"test_ssid\"";
     private static final String TEST_BSSID = "00:00:00:00:00:00";

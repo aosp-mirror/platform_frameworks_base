@@ -106,6 +106,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
         mLp.gravity = Gravity.TOP;
         mLp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
         mLp.setTitle("StatusBar");
+        mLp.accessibilityTitle = mContext.getString(R.string.status_bar);
         mLp.packageName = mContext.getPackageName();
         mStatusBarView = statusBarView;
         mBarHeight = barHeight;

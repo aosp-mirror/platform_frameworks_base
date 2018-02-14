@@ -45,20 +45,15 @@ import android.support.v7.preference.PreferenceScreen;
 
 import com.android.settingslib.R;
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
-import com.android.settingslib.TestConfig;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION,
-        shadows = SystemPropertiesTestImpl.class)
 public class LogdSizePreferenceControllerTest {
 
     @Mock
@@ -93,11 +88,6 @@ public class LogdSizePreferenceControllerTest {
                 .findPreference(mController.getPreferenceKey());
 
         mController.displayPreference(mPreferenceScreen);
-    }
-
-    @After
-    public void tearDown() {
-        SystemPropertiesTestImpl.clear();
     }
 
     @Test

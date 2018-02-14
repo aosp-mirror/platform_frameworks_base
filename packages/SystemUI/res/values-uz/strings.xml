@@ -310,8 +310,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi o‘chiq"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi yoqilgan"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Hech qanday Wi-Fi tarmog‘i mavjud emas"</string>
-    <!-- no translation found for quick_settings_alarm_title (2416759007342260676) -->
-    <skip />
+    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"Signal"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Translatsiya"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Translatsiya qilinmoqda"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Nomsiz qurilma"</string>
@@ -361,7 +360,6 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Xavfsiz rejimda <xliff:g id="APP">%s</xliff:g> ilovasi o‘chirib qo‘yildi."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Hammasini tozalash"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Ekranni bo‘lish xususiyatidan foydalanish uchun bu yerga torting"</string>
-    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Ilovalarni almashtirish uchun ekranni tepaga suring"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Gorizontal yo‘nalishda bo‘lish"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Vertikal yo‘nalishda bo‘lish"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Boshqa usulda bo‘lish"</string>
@@ -502,25 +500,18 @@
     <string name="volume_zen_end_now" msgid="6930243045593601084">"O‘chiring"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Yoyish"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Yig‘ish"</string>
-    <!-- no translation found for accessibility_output_chooser (8185317493017988680) -->
-    <skip />
+    <string name="accessibility_output_chooser" msgid="8185317493017988680">"Audiochiqish qurilmasini almashtirish"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekran qadaldi"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Ekran yechilmaguncha u o‘zgarmas holatda qoladi. Uni yechish uchun “Orqaga” va “Umumiy ma’lumot” tugmalarini bosib turing."</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible (8281145542163727971) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Ekran yechilmaguncha u o‘zgarmas holatda qoladi. Uni yechish uchun Orqaga va Boshi tugmalarini bosib turing."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Ekran yechilmaguncha u o‘zgarmas holatda qoladi. Uni yechish uchun “Umumiy ma’lumot” tugmasini bosib turing."</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible_accessible (6134833683151189507) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (2266705122951934150) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (8252402309499161281) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Ekran yechilmaguncha u o‘zgarmas holatda qoladi. Uni yechish uchun Orqaga va Boshi tugmlarini bosib turing."</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"Bu ekrandan chiqish uchun Orqaga va Menyu tugmalarini bosib turing"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Bu ekrandan chiqish uchun Orqaga va Boshi tugmalarini bosib turing"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"OK"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Yo‘q, kerakmas"</string>
-    <!-- no translation found for screen_pinning_start (1022122128489278317) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (5187339744262325372) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="1022122128489278317">"Ekran mahkamlandi"</string>
+    <string name="screen_pinning_exit" msgid="5187339744262325372">"Ekran olib tashlandi"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> berkitilsinmi?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Keyingi safar sozlamalardan yoqilgan paydo bo‘ladi."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Berkitish"</string>

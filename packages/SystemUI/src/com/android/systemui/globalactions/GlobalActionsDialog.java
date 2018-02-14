@@ -1369,6 +1369,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mListView = findViewById(android.R.id.list);
             mHardwareLayout = HardwareUiLayout.get(mListView);
             mHardwareLayout.setOutsideTouchListener(view -> dismiss());
+            setTitle(R.string.global_actions);
         }
 
         private void updateList() {
@@ -1461,20 +1462,6 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         private float getAnimTranslation() {
             return getContext().getResources().getDimension(
                     com.android.systemui.R.dimen.global_actions_panel_width) / 2;
-        }
-
-        @Override
-        public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
-            if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-                for (int i = 0; i < mAdapter.getCount(); ++i) {
-                    CharSequence label =
-                            mAdapter.getItem(i).getLabelForAccessibility(getContext());
-                    if (label != null) {
-                        event.getText().add(label);
-                    }
-                }
-            }
-            return super.dispatchPopulateAccessibilityEvent(event);
         }
 
         @Override

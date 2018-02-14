@@ -28,7 +28,6 @@ import android.content.Intent;
 import android.util.Pair;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.settingslib.TestConfig;
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
 
 import org.junit.Before;
@@ -39,14 +38,12 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 import org.robolectric.util.ReflectionHelpers;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class MetricsFeatureProviderTest {
     private static int CATEGORY = 10;
     private static boolean SUBTYPE_BOOLEAN = true;

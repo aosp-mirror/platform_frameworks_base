@@ -171,8 +171,6 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             queryTiles();
             mNotifQsContainer.setCustomizerAnimating(true);
             mNotifQsContainer.setCustomizerShowing(true);
-            announceForAccessibility(mContext.getString(
-                    R.string.accessibility_desc_quick_settings_edit));
             Dependency.get(KeyguardMonitor.class).addCallback(mKeyguardCallback);
             updateNavColors();
         }
@@ -213,8 +211,6 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             mClipper.animateCircularClip(mX, mY, false, mCollapseAnimationListener);
             mNotifQsContainer.setCustomizerAnimating(true);
             mNotifQsContainer.setCustomizerShowing(false);
-            announceForAccessibility(mContext.getString(
-                    R.string.accessibility_desc_quick_settings));
             Dependency.get(KeyguardMonitor.class).removeCallback(mKeyguardCallback);
             updateNavColors();
         }

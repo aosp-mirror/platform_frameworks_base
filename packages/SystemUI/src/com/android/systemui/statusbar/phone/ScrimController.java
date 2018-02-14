@@ -138,7 +138,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     protected float mScrimBehindAlphaKeyguard = SCRIM_BEHIND_ALPHA_KEYGUARD;
     protected float mScrimBehindAlphaUnlocking = SCRIM_BEHIND_ALPHA_UNLOCKING;
 
-    private float mFraction;
+    // Assuming the shade is expanded during initialization
+    private float mExpansionFraction = 1f;
 
     private boolean mDarkenWhileDragging;
     protected boolean mAnimateChange;
@@ -166,6 +167,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private boolean mScreenBlankingCallbackCalled;
     private Callback mCallback;
     private boolean mWallpaperSupportsAmbientMode;
+    private boolean mScreenOn;
 
     // Scrim blanking callbacks
     private Choreographer.FrameCallback mPendingFrameCallback;
@@ -251,6 +253,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         mCurrentBehindTint = state.getBehindTint();
         mCurrentInFrontAlpha = state.getFrontAlpha();
         mCurrentBehindAlpha = state.getBehindAlpha();
+        applyExpansionToAlpha();
 
         // Cancel blanking transitions that were pending before we requested a new state
         if (mPendingFrameCallback != null) {
@@ -362,42 +365,47 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
      * @param fraction From 0 to 1 where 0 means collapse and 1 expanded.
      */
     public void setPanelExpansion(float fraction) {
-        if (mFraction != fraction) {
-            mFraction = fraction;
+        if (mExpansionFraction != fraction) {
+            mExpansionFraction = fraction;
 
-            if (mState == ScrimState.UNLOCKED) {
-                // Darken scrim as you pull down the shade when unlocked
-                float behindFraction = getInterpolatedFraction();
-                behindFraction = (float) Math.pow(behindFraction, 0.8f);
-                mCurrentBehindAlpha = behindFraction * mScrimBehindAlphaKeyguard;
-                mCurrentInFrontAlpha = 0;
-            } else if (mState == ScrimState.KEYGUARD) {
-                if (mUpdatePending) {
-                    return;
-                }
+            if (!(mState == ScrimState.UNLOCKED || mState == ScrimState.KEYGUARD)) {
+                return;
+            }
 
-                // Either darken of make the scrim transparent when you
-                // pull down the shade
-                float interpolatedFract = getInterpolatedFraction();
-                if (mDarkenWhileDragging) {
-                    mCurrentBehindAlpha = MathUtils.lerp(mScrimBehindAlphaUnlocking,
-                            mScrimBehindAlphaKeyguard, interpolatedFract);
-                    mCurrentInFrontAlpha = (1f - interpolatedFract) * SCRIM_IN_FRONT_ALPHA_LOCKED;
-                } else {
-                    mCurrentBehindAlpha = MathUtils.lerp(0 /* start */, mScrimBehindAlphaKeyguard,
-                            interpolatedFract);
-                    mCurrentInFrontAlpha = 0;
-                }
-            } else {
+            applyExpansionToAlpha();
+
+            if (mUpdatePending) {
                 return;
             }
 
             if (mPinnedHeadsUpCount != 0) {
                 updateHeadsUpScrim(false);
             }
-
             updateScrim(false /* animate */, mScrimInFront, mCurrentInFrontAlpha);
             updateScrim(false /* animate */, mScrimBehind, mCurrentBehindAlpha);
+        }
+    }
+
+    private void applyExpansionToAlpha() {
+        if (mState == ScrimState.UNLOCKED) {
+            // Darken scrim as you pull down the shade when unlocked
+            float behindFraction = getInterpolatedFraction();
+            behindFraction = (float) Math.pow(behindFraction, 0.8f);
+            mCurrentBehindAlpha = behindFraction * mScrimBehindAlphaKeyguard;
+            mCurrentInFrontAlpha = 0;
+        } else if (mState == ScrimState.KEYGUARD) {
+            // Either darken of make the scrim transparent when you
+            // pull down the shade
+            float interpolatedFract = getInterpolatedFraction();
+            if (mDarkenWhileDragging) {
+                mCurrentBehindAlpha = MathUtils.lerp(mScrimBehindAlphaUnlocking,
+                        mScrimBehindAlphaKeyguard, interpolatedFract);
+                mCurrentInFrontAlpha = (1f - interpolatedFract) * SCRIM_IN_FRONT_ALPHA_LOCKED;
+            } else {
+                mCurrentBehindAlpha = MathUtils.lerp(0 /* start */, mScrimBehindAlphaKeyguard,
+                        interpolatedFract);
+                mCurrentInFrontAlpha = 0;
+            }
         }
     }
 
@@ -496,7 +504,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     }
 
     private float getInterpolatedFraction() {
-        float frac = mFraction;
+        float frac = mExpansionFraction;
         // let's start this 20% of the way down the screen
         frac = frac * 1.2f - 0.2f;
         if (frac <= 0) {
@@ -785,10 +793,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
 
             // Setting power states can happen after we push out the frame. Make sure we
             // stay fully opaque until the power state request reaches the lower levels.
+            final int delay = mScreenOn ? 16 : 500;
             if (DEBUG) {
-                Log.d(TAG, "Waiting for the screen to turn on...");
+                Log.d(TAG, "Fading out scrims with delay: " + delay);
             }
-            getHandler().postDelayed(mBlankingTransitionRunnable, 500);
+            getHandler().postDelayed(mBlankingTransitionRunnable, delay);
         };
         doOnTheNextFrame(mPendingFrameCallback);
     }
@@ -825,7 +834,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         } else {
             alpha = 1.0f - mTopHeadsUpDragAmount;
         }
-        float expandFactor = (1.0f - mFraction);
+        float expandFactor = (1.0f - mExpansionFraction);
         expandFactor = Math.max(expandFactor, 0.0f);
         return alpha * expandFactor;
     }
@@ -904,6 +913,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
      * Interrupts blanking transitions once the display notifies that it's already on.
      */
     public void onScreenTurnedOn() {
+        mScreenOn = true;
         final Handler handler = getHandler();
         if (handler.hasCallbacks(mBlankingTransitionRunnable)) {
             if (DEBUG) {
@@ -912,6 +922,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             handler.removeCallbacks(mBlankingTransitionRunnable);
             mBlankingTransitionRunnable.run();
         }
+    }
+
+    public void onScreenTurnedOff() {
+        mScreenOn = false;
     }
 
     public interface Callback {

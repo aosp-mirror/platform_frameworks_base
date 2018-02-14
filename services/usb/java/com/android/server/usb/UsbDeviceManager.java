@@ -1786,7 +1786,7 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
                         mGadgetProxy = IUsbGadget.getService();
                         mGadgetProxy.linkToDeath(new UsbGadgetDeathRecipient(),
                                 USB_GADGET_HAL_DEATH_COOKIE);
-                        if (!mCurrentFunctionsApplied) {
+                        if (!mCurrentFunctionsApplied && !mCurrentUsbFunctionsRequested) {
                             setEnabledFunctions(mCurrentFunctions, false);
                         }
                     } catch (NoSuchElementException e) {

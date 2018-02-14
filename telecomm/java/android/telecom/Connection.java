@@ -2299,7 +2299,7 @@ public abstract class Connection extends Conferenceable {
      *
      * @hide
      */
-    public final void setConnectElapsedTimeMillis(long connectElapsedTimeMillis) {
+    public final void setConnectionStartElapsedRealTime(long connectElapsedTimeMillis) {
         mConnectElapsedTimeMillis = connectElapsedTimeMillis;
     }
 
@@ -2743,7 +2743,20 @@ public abstract class Connection extends Conferenceable {
     /**
      * Notifies this Connection, which is in {@link #STATE_RINGING}, of
      * a request to accept.
-     *
+     * <p>
+     * For managed {@link ConnectionService}s, this will be called when the user answers a call via
+     * the default dialer's {@link InCallService}.
+     * <p>
+     * Although a self-managed {@link ConnectionService} provides its own incoming call UI, the
+     * Telecom framework may request that the call is answered in the following circumstances:
+     * <ul>
+     *     <li>The user chooses to answer an incoming call via a Bluetooth device.</li>
+     *     <li>A car mode {@link InCallService} is in use which has declared
+     *     {@link TelecomManager#METADATA_INCLUDE_SELF_MANAGED_CALLS} in its manifest.  Such an
+     *     {@link InCallService} will be able to see calls from self-managed
+     *     {@link ConnectionService}s, and will be able to display an incoming call UI on their
+     *     behalf.</li>
+     * </ul>
      * @param videoState The video state in which to answer the connection.
      */
     public void onAnswer(int videoState) {}
@@ -2751,6 +2764,20 @@ public abstract class Connection extends Conferenceable {
     /**
      * Notifies this Connection, which is in {@link #STATE_RINGING}, of
      * a request to accept.
+     * <p>
+     * For managed {@link ConnectionService}s, this will be called when the user answers a call via
+     * the default dialer's {@link InCallService}.
+     * <p>
+     * Although a self-managed {@link ConnectionService} provides its own incoming call UI, the
+     * Telecom framework may request that the call is answered in the following circumstances:
+     * <ul>
+     *     <li>The user chooses to answer an incoming call via a Bluetooth device.</li>
+     *     <li>A car mode {@link InCallService} is in use which has declared
+     *     {@link TelecomManager#METADATA_INCLUDE_SELF_MANAGED_CALLS} in its manifest.  Such an
+     *     {@link InCallService} will be able to see calls from self-managed
+     *     {@link ConnectionService}s, and will be able to display an incoming call UI on their
+     *     behalf.</li>
+     * </ul>
      */
     public void onAnswer() {
         onAnswer(VideoProfile.STATE_AUDIO_ONLY);
@@ -2765,6 +2792,20 @@ public abstract class Connection extends Conferenceable {
     /**
      * Notifies this Connection, which is in {@link #STATE_RINGING}, of
      * a request to reject.
+     * <p>
+     * For managed {@link ConnectionService}s, this will be called when the user rejects a call via
+     * the default dialer's {@link InCallService}.
+     * <p>
+     * Although a self-managed {@link ConnectionService} provides its own incoming call UI, the
+     * Telecom framework may request that the call is rejected in the following circumstances:
+     * <ul>
+     *     <li>The user chooses to reject an incoming call via a Bluetooth device.</li>
+     *     <li>A car mode {@link InCallService} is in use which has declared
+     *     {@link TelecomManager#METADATA_INCLUDE_SELF_MANAGED_CALLS} in its manifest.  Such an
+     *     {@link InCallService} will be able to see calls from self-managed
+     *     {@link ConnectionService}s, and will be able to display an incoming call UI on their
+     *     behalf.</li>
+     * </ul>
      */
     public void onReject() {}
 
@@ -2847,9 +2888,10 @@ public abstract class Connection extends Conferenceable {
      * should show its own incoming call user interface.
      * <p>
      * Where there are ongoing calls in other self-managed {@link ConnectionService}s, or in a
-     * regular {@link ConnectionService}, the Telecom framework will display its own incoming call
-     * user interface to allow the user to choose whether to answer the new incoming call and
-     * disconnect other ongoing calls, or to reject the new incoming call.
+     * regular {@link ConnectionService}, and it is not possible to hold these other calls, the
+     * Telecom framework will display its own incoming call user interface to allow the user to
+     * choose whether to answer the new incoming call and disconnect other ongoing calls, or to
+     * reject the new incoming call.
      * <p>
      * You should trigger the display of the incoming call user interface for your application by
      * showing a {@link Notification} with a full-screen {@link Intent} specified.

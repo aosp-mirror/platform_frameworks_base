@@ -28,6 +28,7 @@
 #include <media/NdkWrapper.h>
 #include <media/stagefright/Utils.h>
 #include <media/stagefright/foundation/ByteUtils.h>  // for FOURCC definition
+#include <mediaplayer2/JAudioTrack.h>
 #include <mediaplayer2/mediaplayer2.h>
 #include <stdio.h>
 #include <assert.h>
@@ -1387,6 +1388,65 @@ static void android_media_MediaPlayer2_enableDeviceCallback(
 // AudioRouting end
 // ----------------------------------------------------------------------------
 
+/////////////////////////////////////////////////////////////////////////////////////
+// AudioTrack.StreamEventCallback begin
+static void android_media_MediaPlayer2_native_on_tear_down(JNIEnv *env __unused,
+        jobject thiz __unused, jlong callbackPtr, jlong userDataPtr)
+{
+    JAudioTrack::callback_t callback = (JAudioTrack::callback_t) callbackPtr;
+    if (callback != NULL) {
+        callback(JAudioTrack::EVENT_NEW_IAUDIOTRACK, (void *) userDataPtr, NULL);
+    }
+}
+
+static void android_media_MediaPlayer2_native_on_stream_presentation_end(JNIEnv *env __unused,
+        jobject thiz __unused, jlong callbackPtr, jlong userDataPtr)
+{
+    JAudioTrack::callback_t callback = (JAudioTrack::callback_t) callbackPtr;
+    if (callback != NULL) {
+        callback(JAudioTrack::EVENT_STREAM_END, (void *) userDataPtr, NULL);
+    }
+}
+
+static void android_media_MediaPlayer2_native_on_stream_data_request(JNIEnv *env __unused,
+        jobject thiz __unused, jlong jAudioTrackPtr, jlong callbackPtr, jlong userDataPtr)
+{
+    JAudioTrack::callback_t callback = (JAudioTrack::callback_t) callbackPtr;
+    JAudioTrack* track = (JAudioTrack *) jAudioTrackPtr;
+    if (callback != NULL && track != NULL) {
+        JAudioTrack::Buffer* buffer = new JAudioTrack::Buffer();
+
+        size_t bufferSizeInFrames = track->frameCount();
+        audio_format_t format = track->format();
+
+        size_t bufferSizeInBytes;
+        if (audio_has_proportional_frames(format)) {
+            bufferSizeInBytes =
+                    bufferSizeInFrames * audio_bytes_per_sample(format) * track->channelCount();
+        } else {
+            // See Javadoc of AudioTrack::getBufferSizeInFrames().
+            bufferSizeInBytes = bufferSizeInFrames;
+        }
+
+        uint8_t* byteBuffer = new uint8_t[bufferSizeInBytes];
+        buffer->mSize = bufferSizeInBytes;
+        buffer->mData = (void *) byteBuffer;
+
+        callback(JAudioTrack::EVENT_MORE_DATA, (void *) userDataPtr, buffer);
+
+        if (buffer->mSize > 0 && buffer->mData == byteBuffer) {
+            track->write(buffer->mData, buffer->mSize, true /* Blocking */);
+        }
+
+        delete[] byteBuffer;
+        delete buffer;
+    }
+}
+
+
+// AudioTrack.StreamEventCallback end
+// ----------------------------------------------------------------------------
+
 static const JNINativeMethod gMethods[] = {
     {
         "nativeSetDataSource",
@@ -1443,6 +1503,11 @@ static const JNINativeMethod gMethods[] = {
     {"native_setOutputDevice", "(I)Z",                          (void *)android_media_MediaPlayer2_setOutputDevice},
     {"native_getRoutedDeviceId", "()I",                         (void *)android_media_MediaPlayer2_getRoutedDeviceId},
     {"native_enableDeviceCallback", "(Z)V",                     (void *)android_media_MediaPlayer2_enableDeviceCallback},
+
+    // StreamEventCallback for JAudioTrack
+    {"native_stream_event_onTearDown",                "(JJ)V",  (void *)android_media_MediaPlayer2_native_on_tear_down},
+    {"native_stream_event_onStreamPresentationEnd",   "(JJ)V",  (void *)android_media_MediaPlayer2_native_on_stream_presentation_end},
+    {"native_stream_event_onStreamDataRequest",       "(JJJ)V", (void *)android_media_MediaPlayer2_native_on_stream_data_request},
 };
 
 // This function only registers the native methods

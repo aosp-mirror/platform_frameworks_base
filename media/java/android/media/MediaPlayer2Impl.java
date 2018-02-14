@@ -17,7 +17,6 @@
 package android.media;
 
 import android.annotation.CallbackExecutor;
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
@@ -26,7 +25,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -48,17 +46,8 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.widget.VideoView;
 import android.graphics.SurfaceTexture;
-import android.media.AudioManager;
-import android.media.MediaDrm;
-import android.media.MediaFormat;
-import android.media.MediaPlayer2;
-import android.media.MediaTimeProvider;
-import android.media.PlaybackParams;
-import android.media.SubtitleController;
 import android.media.SubtitleController.Anchor;
-import android.media.SubtitleData;
 import android.media.SubtitleTrack.RenderingWidget;
-import android.media.SyncParams;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
@@ -74,16 +63,12 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.AutoCloseable;
 import java.lang.Runnable;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.HttpCookie;
 import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
 import java.net.URL;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -2190,6 +2175,13 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     private native final void native_setup(Object mediaplayer2_this);
     private native final void native_finalize();
 
+    private static native final void native_stream_event_onTearDown(
+            long nativeCallbackPtr, long userDataPtr);
+    private static native final void native_stream_event_onStreamPresentationEnd(
+            long nativeCallbackPtr, long userDataPtr);
+    private static native final void native_stream_event_onStreamDataRequest(
+            long jAudioTrackPtr, long nativeCallbackPtr, long userDataPtr);
+
     /**
      * Class for MediaPlayer2 to return each audio/video/subtitle track's metadata.
      *
@@ -4226,6 +4218,65 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             throw e;
         }
 
+    }
+
+    // Called from the native side
+    @SuppressWarnings("unused")
+    private static boolean setAudioOutputDeviceById(AudioTrack track, int deviceId) {
+        if (track == null) {
+            return false;
+        }
+
+        if (deviceId == 0) {
+            // Use default routing.
+            track.setPreferredDevice(null);
+            return true;
+        }
+
+        // TODO: Unhide AudioManager.getDevicesStatic.
+        AudioDeviceInfo[] outputDevices =
+                AudioManager.getDevicesStatic(AudioManager.GET_DEVICES_OUTPUTS);
+
+        boolean success = false;
+        for (AudioDeviceInfo device : outputDevices) {
+            if (device.getId() == deviceId) {
+                track.setPreferredDevice(device);
+                success = true;
+                break;
+            }
+        }
+        return success;
+    }
+
+    // Instantiated from the native side
+    @SuppressWarnings("unused")
+    private static class StreamEventCallback extends AudioTrack.StreamEventCallback {
+        public long mJAudioTrackPtr;
+        public long mNativeCallbackPtr;
+        public long mUserDataPtr;
+
+        public StreamEventCallback(long jAudioTrackPtr, long nativeCallbackPtr, long userDataPtr) {
+            super();
+            mJAudioTrackPtr = jAudioTrackPtr;
+            mNativeCallbackPtr = nativeCallbackPtr;
+            mUserDataPtr = userDataPtr;
+        }
+
+        @Override
+        public void onTearDown(AudioTrack track) {
+            native_stream_event_onTearDown(mNativeCallbackPtr, mUserDataPtr);
+        }
+
+        @Override
+        public void onStreamPresentationEnd(AudioTrack track) {
+            native_stream_event_onStreamPresentationEnd(mNativeCallbackPtr, mUserDataPtr);
+        }
+
+        @Override
+        public void onStreamDataRequest(AudioTrack track) {
+            native_stream_event_onStreamDataRequest(
+                    mJAudioTrackPtr, mNativeCallbackPtr, mUserDataPtr);
+        }
     }
 
     private class ProvisioningThread extends Thread {

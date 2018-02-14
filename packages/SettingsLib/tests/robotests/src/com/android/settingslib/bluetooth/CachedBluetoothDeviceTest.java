@@ -16,7 +16,6 @@
 package com.android.settingslib.bluetooth;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -30,9 +29,6 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 
-import com.android.settingslib.R;
-import com.android.settingslib.TestConfig;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,8 +39,7 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION, resourceDir =
-        "../../res")
+@Config(resourceDir = "../../res")
 public class CachedBluetoothDeviceTest {
     private final static String DEVICE_NAME = "TestName";
     private final static String DEVICE_ALIAS = "TestAlias";

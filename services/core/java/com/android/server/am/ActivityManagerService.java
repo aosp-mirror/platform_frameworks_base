@@ -4090,10 +4090,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 runtimeFlags |= Zygote.ONLY_USE_SYSTEM_OAT_FILES;
             }
 
-            if (app.info.isAllowedToUseHiddenApi()) {
-                // This app is allowed to use undocumented and private APIs. Set
-                // up its runtime with the appropriate flag.
-                runtimeFlags |= Zygote.DISABLE_HIDDEN_API_CHECKS;
+            if (!app.info.isAllowedToUseHiddenApi()) {
+                // This app is not allowed to use undocumented and private APIs.
+                // Set up its runtime with the appropriate flag.
+                runtimeFlags |= Zygote.ENABLE_HIDDEN_API_CHECKS;
             }
 
             String invokeWith = null;
@@ -4371,7 +4371,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 "updateUsageStats: comp=" + component + "res=" + resumed);
         final BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
         StatsLog.write(StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED,
-            component.userId, component.realActivity.getPackageName(),
+            component.app.uid, component.realActivity.getPackageName(),
             component.realActivity.getShortClassName(), resumed ?
                         StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED__ACTIVITY__MOVE_TO_FOREGROUND :
                         StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED__ACTIVITY__MOVE_TO_BACKGROUND);
@@ -25683,9 +25683,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             synchronized (ActivityManagerService.this) {
-                return mActivityStartController.startActivitiesInPackage(packageUid, packageName,
+                return mActivityStartController.startActivitiesInPackage(
+                        packageUid, packageName,
                         intents, resolvedTypes, null /* resultTo */,
-                        SafeActivityOptions.fromBundle(bOptions), userId);
+                        SafeActivityOptions.fromBundle(bOptions), userId,
+                        false /* validateIncomingUser */);
             }
         }
 

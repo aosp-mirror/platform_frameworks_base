@@ -1123,6 +1123,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.SHOW_MUTE_IN_CRASH_DIALOG,
                 GlobalSettingsProto.SHOW_MUTE_IN_CRASH_DIALOG);
+        dumpSetting(s, p,
+                Settings.Global.SHOW_ZEN_UPGRADE_NOTIFICATION,
+                GlobalSettingsProto.SHOW_ZEN_UPGRADE_NOTIFICATION);
 
         // Please insert new settings using the same order as in Settings.Global.
     }

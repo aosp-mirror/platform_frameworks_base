@@ -11,8 +11,8 @@
      limitations under the License.
 -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:color="?attr/colorButtonNormal" android:alpha="?attr/disabledAlpha"
+    <item android:color="?attr/colorPrimary" android:alpha="?attr/disabledAlpha"
             android:state_enabled="false" />
     <item android:color="?attr/colorControlActivated" android:state_checked="true" />
-    <item android:color="?attr/colorButtonNormal" />
+    <item android:color="?attr/colorPrimary" />
 </selector>

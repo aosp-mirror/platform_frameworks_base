@@ -42,7 +42,7 @@ import java.util.Random;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
-public class MeasuredTextPerfTest {
+public class PrecomputedTextPerfTest {
     private static final int WORD_LENGTH = 9;  // Random word has 9 characters.
     private static final int WORDS_IN_LINE = 8;  // Roughly, 8 words in a line.
     private static final boolean NO_STYLE_TEXT = false;
@@ -51,7 +51,7 @@ public class MeasuredTextPerfTest {
     private static TextPaint PAINT = new TextPaint();
     private static final int TEXT_WIDTH = WORDS_IN_LINE * WORD_LENGTH * (int) PAINT.getTextSize();
 
-    public MeasuredTextPerfTest() {}
+    public PrecomputedTextPerfTest() {}
 
     @Rule
     public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
@@ -66,120 +66,136 @@ public class MeasuredTextPerfTest {
     @Test
     public void testCreate_NoStyled_Hyphenation() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final PrecomputedText.Params param = new PrecomputedText.Params.Builder(PAINT)
+                .setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED)
+                .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL)
+                .build();
+
         while (state.keepRunning()) {
             state.pauseTiming();
             final CharSequence text = mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT);
             state.resumeTiming();
 
-            new MeasuredText.Builder(text, PAINT)
-                    .setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED)
-                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL)
-                    .build(true /* do full layout */);
+            PrecomputedText.create(text, param);
         }
     }
 
     @Test
     public void testCreate_NoStyled_NoHyphenation() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final PrecomputedText.Params param = new PrecomputedText.Params.Builder(PAINT)
+                .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
+                .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
+                .build();
+
         while (state.keepRunning()) {
             state.pauseTiming();
             final CharSequence text = mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT);
             state.resumeTiming();
 
-            new MeasuredText.Builder(text, PAINT)
-                    .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
-                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
-                    .build(true /* do full layout */);
+            PrecomputedText.create(text, param);
         }
     }
 
     @Test
     public void testCreate_NoStyled_Hyphenation_WidthOnly() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final PrecomputedText.Params param = new PrecomputedText.Params.Builder(PAINT)
+                .setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED)
+                .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL)
+                .build();
+
         while (state.keepRunning()) {
             state.pauseTiming();
             final CharSequence text = mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT);
             state.resumeTiming();
 
-            new MeasuredText.Builder(text, PAINT)
-                    .setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED)
-                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL)
-                    .build(false /* width only */);
+            PrecomputedText.create(text, param);
         }
     }
 
     @Test
     public void testCreate_NoStyled_NoHyphenation_WidthOnly() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final PrecomputedText.Params param = new PrecomputedText.Params.Builder(PAINT)
+                .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
+                .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
+                .build();
+
         while (state.keepRunning()) {
             state.pauseTiming();
             final CharSequence text = mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT);
             state.resumeTiming();
 
-            new MeasuredText.Builder(text, PAINT)
-                    .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
-                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
-                    .build(false /* width only */);
+            PrecomputedText.create(text, param);
         }
     }
 
     @Test
     public void testCreate_Styled_Hyphenation() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final PrecomputedText.Params param = new PrecomputedText.Params.Builder(PAINT)
+                .setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED)
+                .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL)
+                .build();
+
         while (state.keepRunning()) {
             state.pauseTiming();
             final CharSequence text = mTextUtil.nextRandomParagraph(WORD_LENGTH, STYLE_TEXT);
             state.resumeTiming();
 
-            new MeasuredText.Builder(text, PAINT)
-                    .setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED)
-                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL)
-                    .build(true /* do full layout */);
+            PrecomputedText.create(text, param);
         }
     }
 
     @Test
     public void testCreate_Styled_NoHyphenation() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final PrecomputedText.Params param = new PrecomputedText.Params.Builder(PAINT)
+                .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
+                .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
+                .build();
+
         while (state.keepRunning()) {
             state.pauseTiming();
             final CharSequence text = mTextUtil.nextRandomParagraph(WORD_LENGTH, STYLE_TEXT);
             state.resumeTiming();
 
-            new MeasuredText.Builder(text, PAINT)
-                    .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
-                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
-                    .build(true /* do full layout */);
+            PrecomputedText.create(text, param);
         }
     }
 
     @Test
     public void testCreate_Styled_Hyphenation_WidthOnly() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final PrecomputedText.Params param = new PrecomputedText.Params.Builder(PAINT)
+                .setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED)
+                .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL)
+                .build();
+
         while (state.keepRunning()) {
             state.pauseTiming();
             final CharSequence text = mTextUtil.nextRandomParagraph(WORD_LENGTH, STYLE_TEXT);
             state.resumeTiming();
 
-            new MeasuredText.Builder(text, PAINT)
-                    .setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED)
-                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL)
-                    .build(false /* width only */);
+            PrecomputedText.create(text, param);
         }
     }
 
     @Test
     public void testCreate_Styled_NoHyphenation_WidthOnly() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final PrecomputedText.Params param = new PrecomputedText.Params.Builder(PAINT)
+                .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
+                .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
+                .build();
+
         while (state.keepRunning()) {
             state.pauseTiming();
             final CharSequence text = mTextUtil.nextRandomParagraph(WORD_LENGTH, STYLE_TEXT);
             state.resumeTiming();
 
-            new MeasuredText.Builder(text, PAINT)
-                    .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
-                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
-                    .build(false /* width only */);
+            PrecomputedText.create(text, param);
         }
     }
 }

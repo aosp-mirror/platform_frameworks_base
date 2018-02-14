@@ -17,7 +17,6 @@
 package com.android.settingslib.deviceinfo;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.robolectric.shadow.api.Shadow.extract;
 
 import android.net.ConnectivityManager;
@@ -25,7 +24,6 @@ import android.os.UserManager;
 import android.util.SparseBooleanArray;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
-import com.android.settingslib.TestConfig;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,8 +34,7 @@ import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION,
-        shadows = {SimStatusImeiInfoPreferenceControllerTest.ShadowUserManager.class,
+@Config(shadows = {SimStatusImeiInfoPreferenceControllerTest.ShadowUserManager.class,
                 SimStatusImeiInfoPreferenceControllerTest.ShadowConnectivityManager.class})
 public class SimStatusImeiInfoPreferenceControllerTest {
 

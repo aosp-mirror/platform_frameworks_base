@@ -2680,11 +2680,25 @@ public class WindowManagerService extends IWindowManager.Stub
             cancelRecentsAnimation();
             mRecentsAnimationController = new RecentsAnimationController(this,
                     recentsAnimationRunner, callbacks, displayId);
+            mRecentsAnimationController.initialize();
         }
     }
 
     public RecentsAnimationController getRecentsAnimationController() {
         return mRecentsAnimationController;
+    }
+
+    /**
+     * @return Whether the next recents animation can continue to start. Called from
+     *         {@link RecentsAnimation#startRecentsActivity}.
+     */
+    public boolean canStartRecentsAnimation() {
+        synchronized (mWindowMap) {
+            if (mAppTransition.isTransitionSet()) {
+                return false;
+            }
+            return true;
+        }
     }
 
     public void cancelRecentsAnimation() {
