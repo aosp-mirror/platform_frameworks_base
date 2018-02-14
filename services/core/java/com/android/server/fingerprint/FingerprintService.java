@@ -915,7 +915,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         notifyLockoutResetMonitors();
     }
 
-    private class FingerprintServiceLockoutResetMonitor {
+    private class FingerprintServiceLockoutResetMonitor implements IBinder.DeathRecipient {
 
         private static final long WAKELOCK_TIMEOUT_MS = 2000;
         private final IFingerprintServiceLockoutResetCallback mCallback;
@@ -926,6 +926,11 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
             mCallback = callback;
             mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                     "lockout reset callback");
+            try {
+                mCallback.asBinder().linkToDeath(FingerprintServiceLockoutResetMonitor.this, 0);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "caught remote exception in linkToDeath", e);
+            }
         }
 
         public void sendLockoutReset() {
@@ -959,6 +964,12 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                 removeLockoutResetCallback(FingerprintServiceLockoutResetMonitor.this);
             }
         };
+
+        @Override
+        public void binderDied() {
+            Slog.e(TAG, "Lockout reset callback binder died");
+            mHandler.post(mRemoveCallbackRunnable);
+        }
     }
 
     private IBiometricsFingerprintClientCallback mDaemonCallback =
