@@ -17,6 +17,7 @@ package android.service.euicc;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.service.carrier.CarrierIdentifier;
@@ -26,15 +27,15 @@ import android.text.TextUtils;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
  * Information about an embedded profile (subscription) on an eUICC.
  *
  * @hide
- *
- * TODO(b/35851809): Make this a SystemApi.
  */
+@SystemApi
 public final class EuiccProfileInfo implements Parcelable {
 
     /** Profile policy rules (bit mask) */
@@ -44,6 +45,7 @@ public final class EuiccProfileInfo implements Parcelable {
             POLICY_RULE_DO_NOT_DELETE,
             POLICY_RULE_DELETE_AFTER_DISABLING
     })
+    /** @hide */
     public @interface PolicyRule {}
     /** Once this profile is enabled, it cannot be disabled. */
     public static final int POLICY_RULE_DO_NOT_DISABLE = 1;
@@ -60,6 +62,7 @@ public final class EuiccProfileInfo implements Parcelable {
             PROFILE_CLASS_OPERATIONAL,
             PROFILE_CLASS_UNSET
     })
+    /** @hide */
     public @interface ProfileClass {}
     /** Testing profiles */
     public static final int PROFILE_CLASS_TESTING = 0;
@@ -80,6 +83,7 @@ public final class EuiccProfileInfo implements Parcelable {
             PROFILE_STATE_ENABLED,
             PROFILE_STATE_UNSET
     })
+    /** @hide */
     public @interface ProfileState {}
     /** Disabled profiles */
     public static final int PROFILE_STATE_DISABLED = 0;
@@ -92,34 +96,34 @@ public final class EuiccProfileInfo implements Parcelable {
     public static final int PROFILE_STATE_UNSET = -1;
 
     /** The iccid of the subscription. */
-    public final String iccid;
+    private final String mIccid;
 
     /** An optional nickname for the subscription. */
-    public final @Nullable String nickname;
+    private final @Nullable String mNickname;
 
     /** The service provider name for the subscription. */
-    public final String serviceProviderName;
+    private final String mServiceProviderName;
 
     /** The profile name for the subscription. */
-    public final String profileName;
+    private final String mProfileName;
 
     /** Profile class for the subscription. */
-    @ProfileClass public final int profileClass;
+    @ProfileClass private final int mProfileClass;
 
     /** The profile state of the subscription. */
-    @ProfileState public final int state;
+    @ProfileState private final int mState;
 
     /** The operator Id of the subscription. */
-    public final CarrierIdentifier carrierIdentifier;
+    private final CarrierIdentifier mCarrierIdentifier;
 
     /** The policy rules of the subscription. */
-    @PolicyRule public final int policyRules;
+    @PolicyRule private final int mPolicyRules;
 
     /**
      * Optional access rules defining which apps can manage this subscription. If unset, only the
      * platform can manage it.
      */
-    public final @Nullable UiccAccessRule[] accessRules;
+    private final @Nullable UiccAccessRule[] mAccessRules;
 
     public static final Creator<EuiccProfileInfo> CREATOR = new Creator<EuiccProfileInfo>() {
         @Override
@@ -144,51 +148,51 @@ public final class EuiccProfileInfo implements Parcelable {
         if (!TextUtils.isDigitsOnly(iccid)) {
             throw new IllegalArgumentException("iccid contains invalid characters: " + iccid);
         }
-        this.iccid = iccid;
-        this.accessRules = accessRules;
-        this.nickname = nickname;
+        this.mIccid = iccid;
+        this.mAccessRules = accessRules;
+        this.mNickname = nickname;
 
-        this.serviceProviderName = null;
-        this.profileName = null;
-        this.profileClass = PROFILE_CLASS_UNSET;
-        this.state = PROFILE_CLASS_UNSET;
-        this.carrierIdentifier = null;
-        this.policyRules = 0;
+        this.mServiceProviderName = null;
+        this.mProfileName = null;
+        this.mProfileClass = PROFILE_CLASS_UNSET;
+        this.mState = PROFILE_STATE_UNSET;
+        this.mCarrierIdentifier = null;
+        this.mPolicyRules = 0;
     }
 
     private EuiccProfileInfo(Parcel in) {
-        iccid = in.readString();
-        nickname = in.readString();
-        serviceProviderName = in.readString();
-        profileName = in.readString();
-        profileClass = in.readInt();
-        state = in.readInt();
+        mIccid = in.readString();
+        mNickname = in.readString();
+        mServiceProviderName = in.readString();
+        mProfileName = in.readString();
+        mProfileClass = in.readInt();
+        mState = in.readInt();
         byte exist = in.readByte();
         if (exist == (byte) 1) {
-            carrierIdentifier = CarrierIdentifier.CREATOR.createFromParcel(in);
+            mCarrierIdentifier = CarrierIdentifier.CREATOR.createFromParcel(in);
         } else {
-            carrierIdentifier = null;
+            mCarrierIdentifier = null;
         }
-        policyRules = in.readInt();
-        accessRules = in.createTypedArray(UiccAccessRule.CREATOR);
+        mPolicyRules = in.readInt();
+        mAccessRules = in.createTypedArray(UiccAccessRule.CREATOR);
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(iccid);
-        dest.writeString(nickname);
-        dest.writeString(serviceProviderName);
-        dest.writeString(profileName);
-        dest.writeInt(profileClass);
-        dest.writeInt(state);
-        if (carrierIdentifier != null) {
+        dest.writeString(mIccid);
+        dest.writeString(mNickname);
+        dest.writeString(mServiceProviderName);
+        dest.writeString(mProfileName);
+        dest.writeInt(mProfileClass);
+        dest.writeInt(mState);
+        if (mCarrierIdentifier != null) {
             dest.writeByte((byte) 1);
-            carrierIdentifier.writeToParcel(dest, flags);
+            mCarrierIdentifier.writeToParcel(dest, flags);
         } else {
             dest.writeByte((byte) 0);
         }
-        dest.writeInt(policyRules);
-        dest.writeTypedArray(accessRules, flags);
+        dest.writeInt(mPolicyRules);
+        dest.writeTypedArray(mAccessRules, flags);
     }
 
     @Override
@@ -198,45 +202,50 @@ public final class EuiccProfileInfo implements Parcelable {
 
     /** The builder to build a new {@link EuiccProfileInfo} instance. */
     public static final class Builder {
-        public String iccid;
-        public UiccAccessRule[] accessRules;
-        public String nickname;
-        public String serviceProviderName;
-        public String profileName;
-        @ProfileClass public int profileClass;
-        @ProfileState public int state;
-        public CarrierIdentifier carrierIdentifier;
-        @PolicyRule public int policyRules;
+        private String mIccid;
+        private List<UiccAccessRule> mAccessRules;
+        private String mNickname;
+        private String mServiceProviderName;
+        private String mProfileName;
+        @ProfileClass private int mProfileClass;
+        @ProfileState private int mState;
+        private CarrierIdentifier mCarrierIdentifier;
+        @PolicyRule private int mPolicyRules;
 
-        public Builder() {}
+        public Builder(String value) {
+            if (!TextUtils.isDigitsOnly(value)) {
+                throw new IllegalArgumentException("iccid contains invalid characters: " + value);
+            }
+            mIccid = value;
+        }
 
         public Builder(EuiccProfileInfo baseProfile) {
-            iccid = baseProfile.iccid;
-            nickname = baseProfile.nickname;
-            serviceProviderName = baseProfile.serviceProviderName;
-            profileName = baseProfile.profileName;
-            profileClass = baseProfile.profileClass;
-            state = baseProfile.state;
-            carrierIdentifier = baseProfile.carrierIdentifier;
-            policyRules = baseProfile.policyRules;
-            accessRules = baseProfile.accessRules;
+            mIccid = baseProfile.mIccid;
+            mNickname = baseProfile.mNickname;
+            mServiceProviderName = baseProfile.mServiceProviderName;
+            mProfileName = baseProfile.mProfileName;
+            mProfileClass = baseProfile.mProfileClass;
+            mState = baseProfile.mState;
+            mCarrierIdentifier = baseProfile.mCarrierIdentifier;
+            mPolicyRules = baseProfile.mPolicyRules;
+            mAccessRules = Arrays.asList(baseProfile.mAccessRules);
         }
 
         /** Builds the profile instance. */
         public EuiccProfileInfo build() {
-            if (iccid == null) {
+            if (mIccid == null) {
                 throw new IllegalStateException("ICCID must be set for a profile.");
             }
             return new EuiccProfileInfo(
-                    iccid,
-                    nickname,
-                    serviceProviderName,
-                    profileName,
-                    profileClass,
-                    state,
-                    carrierIdentifier,
-                    policyRules,
-                    accessRules);
+                    mIccid,
+                    mNickname,
+                    mServiceProviderName,
+                    mProfileName,
+                    mProfileClass,
+                    mState,
+                    mCarrierIdentifier,
+                    mPolicyRules,
+                    mAccessRules);
         }
 
         /** Sets the iccId of the subscription. */
@@ -244,55 +253,55 @@ public final class EuiccProfileInfo implements Parcelable {
             if (!TextUtils.isDigitsOnly(value)) {
                 throw new IllegalArgumentException("iccid contains invalid characters: " + value);
             }
-            iccid = value;
+            mIccid = value;
             return this;
         }
 
         /** Sets the nickname of the subscription. */
         public Builder setNickname(String value) {
-            nickname = value;
+            mNickname = value;
             return this;
         }
 
         /** Sets the service provider name of the subscription. */
         public Builder setServiceProviderName(String value) {
-            serviceProviderName = value;
+            mServiceProviderName = value;
             return this;
         }
 
         /** Sets the profile name of the subscription. */
         public Builder setProfileName(String value) {
-            profileName = value;
+            mProfileName = value;
             return this;
         }
 
         /** Sets the profile class of the subscription. */
         public Builder setProfileClass(@ProfileClass int value) {
-            profileClass = value;
+            mProfileClass = value;
             return this;
         }
 
         /** Sets the state of the subscription. */
         public Builder setState(@ProfileState int value) {
-            state = value;
+            mState = value;
             return this;
         }
 
         /** Sets the carrier identifier of the subscription. */
         public Builder setCarrierIdentifier(CarrierIdentifier value) {
-            carrierIdentifier = value;
+            mCarrierIdentifier = value;
             return this;
         }
 
         /** Sets the policy rules of the subscription. */
         public Builder setPolicyRules(@PolicyRule int value) {
-            policyRules = value;
+            mPolicyRules = value;
             return this;
         }
 
         /** Sets the access rules of the subscription. */
-        public Builder setUiccAccessRule(@Nullable UiccAccessRule[] value) {
-            accessRules = value;
+        public Builder setUiccAccessRule(@Nullable List<UiccAccessRule> value) {
+            mAccessRules = value;
             return this;
         }
     }
@@ -306,75 +315,81 @@ public final class EuiccProfileInfo implements Parcelable {
             @ProfileState int state,
             CarrierIdentifier carrierIdentifier,
             @PolicyRule int policyRules,
-            @Nullable UiccAccessRule[] accessRules) {
-        this.iccid = iccid;
-        this.nickname = nickname;
-        this.serviceProviderName = serviceProviderName;
-        this.profileName = profileName;
-        this.profileClass = profileClass;
-        this.state = state;
-        this.carrierIdentifier = carrierIdentifier;
-        this.policyRules = policyRules;
-        this.accessRules = accessRules;
+            @Nullable List<UiccAccessRule> accessRules) {
+        this.mIccid = iccid;
+        this.mNickname = nickname;
+        this.mServiceProviderName = serviceProviderName;
+        this.mProfileName = profileName;
+        this.mProfileClass = profileClass;
+        this.mState = state;
+        this.mCarrierIdentifier = carrierIdentifier;
+        this.mPolicyRules = policyRules;
+        if (accessRules != null && accessRules.size() > 0) {
+            this.mAccessRules = accessRules.toArray(new UiccAccessRule[accessRules.size()]);
+        } else {
+            this.mAccessRules = null;
+        }
     }
 
     /** Gets the ICCID string. */
     public String getIccid() {
-        return iccid;
+        return mIccid;
     }
 
     /** Gets the access rules. */
     @Nullable
-    public UiccAccessRule[] getUiccAccessRules() {
-        return accessRules;
+    public List<UiccAccessRule> getUiccAccessRules() {
+        if (mAccessRules == null) return null;
+        return Arrays.asList(mAccessRules);
     }
 
     /** Gets the nickname. */
+    @Nullable
     public String getNickname() {
-        return nickname;
+        return mNickname;
     }
 
     /** Gets the service provider name. */
     public String getServiceProviderName() {
-        return serviceProviderName;
+        return mServiceProviderName;
     }
 
     /** Gets the profile name. */
     public String getProfileName() {
-        return profileName;
+        return mProfileName;
     }
 
     /** Gets the profile class. */
     @ProfileClass
     public int getProfileClass() {
-        return profileClass;
+        return mProfileClass;
     }
 
     /** Gets the state of the subscription. */
     @ProfileState
     public int getState() {
-        return state;
+        return mState;
     }
 
     /** Gets the carrier identifier. */
     public CarrierIdentifier getCarrierIdentifier() {
-        return carrierIdentifier;
+        return mCarrierIdentifier;
     }
 
     /** Gets the policy rules. */
     @PolicyRule
     public int getPolicyRules() {
-        return policyRules;
+        return mPolicyRules;
     }
 
     /** Returns whether any policy rule exists. */
     public boolean hasPolicyRules() {
-        return policyRules != 0;
+        return mPolicyRules != 0;
     }
 
     /** Checks whether a certain policy rule exists. */
     public boolean hasPolicyRule(@PolicyRule int policy) {
-        return (policyRules & policy) != 0;
+        return (mPolicyRules & policy) != 0;
     }
 
     @Override
@@ -387,50 +402,50 @@ public final class EuiccProfileInfo implements Parcelable {
         }
 
         EuiccProfileInfo that = (EuiccProfileInfo) obj;
-        return Objects.equals(iccid, that.iccid)
-                && Objects.equals(nickname, that.nickname)
-                && Objects.equals(serviceProviderName, that.serviceProviderName)
-                && Objects.equals(profileName, that.profileName)
-                && profileClass == that.profileClass
-                && state == that.state
-                && Objects.equals(carrierIdentifier, that.carrierIdentifier)
-                && policyRules == that.policyRules
-                && Arrays.equals(accessRules, that.accessRules);
+        return Objects.equals(mIccid, that.mIccid)
+                && Objects.equals(mNickname, that.mNickname)
+                && Objects.equals(mServiceProviderName, that.mServiceProviderName)
+                && Objects.equals(mProfileName, that.mProfileName)
+                && mProfileClass == that.mProfileClass
+                && mState == that.mState
+                && Objects.equals(mCarrierIdentifier, that.mCarrierIdentifier)
+                && mPolicyRules == that.mPolicyRules
+                && Arrays.equals(mAccessRules, that.mAccessRules);
     }
 
     @Override
     public int hashCode() {
         int result = 1;
-        result = 31 * result + Objects.hashCode(iccid);
-        result = 31 * result + Objects.hashCode(nickname);
-        result = 31 * result + Objects.hashCode(serviceProviderName);
-        result = 31 * result + Objects.hashCode(profileName);
-        result = 31 * result + profileClass;
-        result = 31 * result + state;
-        result = 31 * result + Objects.hashCode(carrierIdentifier);
-        result = 31 * result + policyRules;
-        result = 31 * result + Arrays.hashCode(accessRules);
+        result = 31 * result + Objects.hashCode(mIccid);
+        result = 31 * result + Objects.hashCode(mNickname);
+        result = 31 * result + Objects.hashCode(mServiceProviderName);
+        result = 31 * result + Objects.hashCode(mProfileName);
+        result = 31 * result + mProfileClass;
+        result = 31 * result + mState;
+        result = 31 * result + Objects.hashCode(mCarrierIdentifier);
+        result = 31 * result + mPolicyRules;
+        result = 31 * result + Arrays.hashCode(mAccessRules);
         return result;
     }
 
     @Override
     public String toString() {
         return "EuiccProfileInfo (nickname="
-                + nickname
+                + mNickname
                 + ", serviceProviderName="
-                + serviceProviderName
+                + mServiceProviderName
                 + ", profileName="
-                + profileName
+                + mProfileName
                 + ", profileClass="
-                + profileClass
+                + mProfileClass
                 + ", state="
-                + state
+                + mState
                 + ", CarrierIdentifier="
-                + carrierIdentifier.toString()
+                + mCarrierIdentifier.toString()
                 + ", policyRules="
-                + policyRules
+                + mPolicyRules
                 + ", accessRules="
-                + Arrays.toString(accessRules)
+                + Arrays.toString(mAccessRules)
                 + ")";
     }
 }
