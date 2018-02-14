@@ -58,7 +58,7 @@ public abstract class SQLiteOpenHelper {
 
     private SQLiteDatabase mDatabase;
     private boolean mIsInitializing;
-    private final SQLiteDatabase.OpenParams.Builder mOpenParamsBuilder;
+    private SQLiteDatabase.OpenParams.Builder mOpenParamsBuilder;
 
     /**
      * Create a helper object to create, open, and/or manage a database.
@@ -163,8 +163,7 @@ public abstract class SQLiteOpenHelper {
         mName = name;
         mNewVersion = version;
         mMinimumSupportedVersion = Math.max(0, minimumSupportedVersion);
-        mOpenParamsBuilder = openParamsBuilder;
-        mOpenParamsBuilder.addOpenFlags(SQLiteDatabase.CREATE_IF_NECESSARY);
+        setOpenParamsBuilder(openParamsBuilder);
     }
 
     /**
@@ -227,6 +226,30 @@ public abstract class SQLiteOpenHelper {
             }
             mOpenParamsBuilder.setLookasideConfig(slotSize, slotCount);
         }
+    }
+
+    /**
+     * Sets configuration parameters that are used for opening {@link SQLiteDatabase}.
+     * <p>Please note that {@link SQLiteDatabase#CREATE_IF_NECESSARY} flag will always be set when
+     * opening the database
+     *
+     * @param openParams configuration parameters that are used for opening {@link SQLiteDatabase}.
+     * @throws IllegalStateException if the database is already open
+     */
+    public void setOpenParams(@NonNull SQLiteDatabase.OpenParams openParams) {
+        Preconditions.checkNotNull(openParams);
+        synchronized (this) {
+            if (mDatabase != null && mDatabase.isOpen()) {
+                throw new IllegalStateException(
+                        "OpenParams cannot be set after opening the database");
+            }
+            setOpenParamsBuilder(new SQLiteDatabase.OpenParams.Builder(openParams));
+        }
+    }
+
+    private void setOpenParamsBuilder(SQLiteDatabase.OpenParams.Builder openParamsBuilder) {
+        mOpenParamsBuilder = openParamsBuilder;
+        mOpenParamsBuilder.addOpenFlags(SQLiteDatabase.CREATE_IF_NECESSARY);
     }
 
     /**
