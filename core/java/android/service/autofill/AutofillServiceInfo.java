@@ -32,12 +32,12 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Xml;
 
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -80,7 +80,7 @@ public final class AutofillServiceInfo {
     private final String mSettingsActivity;
 
     @Nullable
-    private final Map<String, Long> mCompatibilityPackages;
+    private final Map<String, Pair<Long, String>> mCompatibilityPackages;
 
     public AutofillServiceInfo(Context context, ComponentName comp, int userHandle)
             throws PackageManager.NameNotFoundException {
@@ -118,7 +118,7 @@ public final class AutofillServiceInfo {
         }
 
         String settingsActivity = null;
-        Map<String, Long> compatibilityPackages = null;
+        Map<String, Pair<Long, String>> compatibilityPackages = null;
 
         try {
             final Resources resources = context.getPackageManager().getResourcesForApplication(
@@ -154,9 +154,10 @@ public final class AutofillServiceInfo {
         mCompatibilityPackages = compatibilityPackages;
     }
 
-    private Map<String, Long> parseCompatibilityPackages(XmlPullParser parser, Resources resources)
+    private Map<String, Pair<Long, String>> parseCompatibilityPackages(XmlPullParser parser,
+            Resources resources)
             throws IOException, XmlPullParserException {
-        Map<String, Long> compatibilityPackages = null;
+        Map<String, Pair<Long, String>> compatibilityPackages = null;
 
         final int outerDepth = parser.getDepth();
         int type;
@@ -200,11 +201,13 @@ public final class AutofillServiceInfo {
                     } else {
                         maxVersionCode = Long.MAX_VALUE;
                     }
+                    final String urlBarResourceId = cpAttributes.getString(
+                            R.styleable.AutofillService_CompatibilityPackage_urlBarResourceId);
 
                     if (compatibilityPackages == null) {
                         compatibilityPackages = new ArrayMap<>();
                     }
-                    compatibilityPackages.put(name, maxVersionCode);
+                    compatibilityPackages.put(name, new Pair<>(maxVersionCode, urlBarResourceId));
                 } finally {
                     XmlUtils.skipCurrentTag(parser);
                     if (cpAttributes != null) {
@@ -226,16 +229,28 @@ public final class AutofillServiceInfo {
         return mSettingsActivity;
     }
 
-    @Nullable
     public boolean isCompatibilityModeRequested(String packageName, long versionCode) {
         if (mCompatibilityPackages == null) {
             return false;
         }
-        final Long maxVersionCode = mCompatibilityPackages.get(packageName);
-        if (maxVersionCode == null) {
+        final Pair<Long, String> pair = mCompatibilityPackages.get(packageName);
+        if (pair == null) {
             return false;
         }
-        return versionCode <= maxVersionCode;
+        return versionCode <= pair.first;
+    }
+
+    /**
+     * Gets the resource id of the URL bar for a package. Used in compat mode
+     */
+    // TODO: return a list of strings instead
+    @Nullable
+    public String getUrlBarResourceId(String packageName) {
+        if (mCompatibilityPackages == null) {
+            return null;
+        }
+        final Pair<Long, String> pair = mCompatibilityPackages.get(packageName);
+        return pair == null ? null : pair.second;
     }
 
     @Override

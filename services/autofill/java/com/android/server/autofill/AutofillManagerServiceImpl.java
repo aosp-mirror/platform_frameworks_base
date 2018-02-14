@@ -220,6 +220,17 @@ final class AutofillManagerServiceImpl {
         return mInfo.getServiceInfo().applicationInfo.uid;
     }
 
+
+    @GuardedBy("mLock")
+    @Nullable
+    String getUrlBarResourceIdForCompatModeLocked(@NonNull String packageName) {
+        if (mInfo == null) {
+            Slog.w(TAG,  "getUrlBarResourceIdForCompatModeLocked(): no mInfo");
+            return null;
+        }
+        return mInfo.getUrlBarResourceId(packageName);
+    }
+
     @Nullable
     String getServicePackageName() {
         final ComponentName serviceComponent = getServiceComponentName();
@@ -345,7 +356,7 @@ final class AutofillManagerServiceImpl {
     int startSessionLocked(@NonNull IBinder activityToken, int uid,
             @NonNull IBinder appCallbackToken, @NonNull AutofillId autofillId,
             @NonNull Rect virtualBounds, @Nullable AutofillValue value, boolean hasCallback,
-            int flags, @NonNull ComponentName componentName) {
+            int flags, @NonNull ComponentName componentName, boolean compatMode) {
         if (!isEnabledLocked()) {
             return 0;
         }
@@ -375,7 +386,7 @@ final class AutofillManagerServiceImpl {
         pruneAbandonedSessionsLocked();
 
         final Session newSession = createSessionByTokenLocked(activityToken, uid, appCallbackToken,
-                hasCallback, componentName, flags);
+                hasCallback, componentName, compatMode, flags);
         if (newSession == null) {
             return NO_SESSION;
         }
@@ -481,7 +492,7 @@ final class AutofillManagerServiceImpl {
     @GuardedBy("mLock")
     private Session createSessionByTokenLocked(@NonNull IBinder activityToken, int uid,
             @NonNull IBinder appCallbackToken, boolean hasCallback,
-            @NonNull ComponentName componentName, int flags) {
+            @NonNull ComponentName componentName, boolean compatMode, int flags) {
         // use random ids so that one app cannot know that another app creates sessions
         int sessionId;
         int tries = 0;
@@ -499,7 +510,8 @@ final class AutofillManagerServiceImpl {
 
         final Session newSession = new Session(this, mUi, mContext, mHandlerCaller, mUserId, mLock,
                 sessionId, uid, activityToken, appCallbackToken, hasCallback, mUiLatencyHistory,
-                mWtfHistory, mInfo.getServiceInfo().getComponentName(), componentName, flags);
+                mWtfHistory, mInfo.getServiceInfo().getComponentName(), componentName, compatMode,
+                flags);
         mSessions.put(newSession.id, newSession);
 
         return newSession;

@@ -1407,7 +1407,8 @@ public final class AutofillManager {
 
             mSessionId = mService.startSession(client.autofillClientGetActivityToken(),
                     mServiceClient.asBinder(), id, bounds, value, mContext.getUserId(),
-                    mCallback != null, flags, client.autofillClientGetComponentName());
+                    mCallback != null, flags, client.autofillClientGetComponentName(),
+                    isCompatibilityModeEnabledLocked());
             if (mSessionId != NO_SESSION) {
                 mState = STATE_ACTIVE;
             }
@@ -1474,7 +1475,7 @@ public final class AutofillManager {
                         client.autofillClientGetActivityToken(),
                         mServiceClient.asBinder(), id, bounds, value, mContext.getUserId(),
                         mCallback != null, flags, client.autofillClientGetComponentName(),
-                        mSessionId, action);
+                        mSessionId, action, isCompatibilityModeEnabledLocked());
                 if (newId != mSessionId) {
                     if (sDebug) Log.d(TAG, "Session restarted: " + mSessionId + "=>" + newId);
                     mSessionId = newId;
