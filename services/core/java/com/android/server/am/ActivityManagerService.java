@@ -11362,9 +11362,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             throw new IllegalArgumentException("Invalid task, not in foreground");
         }
 
-        // When a task is locked, dismiss the pinned stack if it exists
-        mStackSupervisor.removeStacksInWindowingModes(WINDOWING_MODE_PINNED);
-
         // {@code isSystemCaller} is used to distinguish whether this request is initiated by the
         // system or a specific app.
         // * System-initiated requests will only start the pinned mode (screen pinning)
@@ -11374,6 +11371,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int callingUid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
         try {
+            // When a task is locked, dismiss the pinned stack if it exists
+            mStackSupervisor.removeStacksInWindowingModes(WINDOWING_MODE_PINNED);
+
             mLockTaskController.startLockTaskMode(task, isSystemCaller, callingUid);
         } finally {
             Binder.restoreCallingIdentity(ident);
