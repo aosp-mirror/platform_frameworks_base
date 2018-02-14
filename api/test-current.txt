@@ -167,6 +167,17 @@ package android.app.admin {
 
 }
 
+package android.app.backup {
+
+  public class BackupManager {
+    method public android.content.Intent getConfigurationIntent(java.lang.String);
+    method public android.content.Intent getDataManagementIntent(java.lang.String);
+    method public java.lang.String getDataManagementLabel(java.lang.String);
+    method public java.lang.String getDestinationString(java.lang.String);
+  }
+
+}
+
 package android.app.usage {
 
   public class StorageStatsManager {
