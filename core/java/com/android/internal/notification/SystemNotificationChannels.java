@@ -49,6 +49,7 @@ public class SystemNotificationChannels {
     public static String USB = "USB";
     public static String FOREGROUND_SERVICE = "FOREGROUND_SERVICE";
     public static String HEAVY_WEIGHT_APP = "HEAVY_WEIGHT_APP";
+    public static String SYSTEM_CHANGES = "SYSTEM_CHANGES";
 
     public static void createAll(Context context) {
         final NotificationManager nm = context.getSystemService(NotificationManager.class);
@@ -151,6 +152,11 @@ public class SystemNotificationChannels {
                 .setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT)
                 .build());
         channelsList.add(heavyWeightChannel);
+
+        NotificationChannel systemChanges = new NotificationChannel(SYSTEM_CHANGES,
+                context.getString(R.string.notification_channel_system_changes),
+                NotificationManager.IMPORTANCE_LOW);
+        channelsList.add(systemChanges);
 
         nm.createNotificationChannels(channelsList);
     }

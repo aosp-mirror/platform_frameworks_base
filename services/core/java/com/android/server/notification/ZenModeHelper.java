@@ -18,8 +18,10 @@ package com.android.server.notification;
 
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -44,6 +46,7 @@ import android.os.Message;
 import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.notification.Condition;
 import android.service.notification.ConditionProviderService;
@@ -61,6 +64,8 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.server.LocalServices;
 
 import libcore.io.IoUtils;
@@ -89,6 +94,7 @@ public class ZenModeHelper {
     private final H mHandler;
     private final SettingsObserver mSettingsObserver;
     @VisibleForTesting protected final AppOpsManager mAppOps;
+    @VisibleForTesting protected final NotificationManager mNotificationManager;
     protected ZenModeConfig mDefaultConfig;
     private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
     private final ZenModeFiltering mFiltering;
@@ -112,12 +118,14 @@ public class ZenModeHelper {
 
     protected String mDefaultRuleEveryNightName;
     protected String mDefaultRuleEventsName;
+    @VisibleForTesting protected boolean mIsBootComplete;
 
     public ZenModeHelper(Context context, Looper looper, ConditionProviders conditionProviders) {
         mContext = context;
         mHandler = new H(looper);
         addCallback(mMetrics);
         mAppOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+        mNotificationManager =  context.getSystemService(NotificationManager.class);
 
         mDefaultConfig = new ZenModeConfig();
         setDefaultZenRules(mContext);
@@ -197,6 +205,8 @@ public class ZenModeHelper {
         mHandler.postMetricsTimer();
         cleanUpZenRules();
         evaluateZenMode("onSystemReady", true);
+        mIsBootComplete = true;
+        showZenUpgradeNotification(mZenMode);
     }
 
     public void onUserSwitched(int user) {
@@ -612,6 +622,10 @@ public class ZenModeHelper {
             throws XmlPullParserException, IOException {
         final ZenModeConfig config = ZenModeConfig.readXml(parser);
         if (config != null) {
+            if (config.version < ZenModeConfig.XML_VERSION) {
+                Settings.Global.putInt(mContext.getContentResolver(),
+                        Global.SHOW_ZEN_UPGRADE_NOTIFICATION, 1);
+            }
             if (forRestore) {
                 //TODO: http://b/22388012
                 if (config.user != UserHandle.USER_SYSTEM) {
@@ -755,8 +769,10 @@ public class ZenModeHelper {
         return Global.getInt(mContext.getContentResolver(), Global.ZEN_MODE, Global.ZEN_MODE_OFF);
     }
 
-    private void setZenModeSetting(int zen) {
+    @VisibleForTesting
+    protected void setZenModeSetting(int zen) {
         Global.putInt(mContext.getContentResolver(), Global.ZEN_MODE, zen);
+        showZenUpgradeNotification(zen);
     }
 
     private int getPreviousRingerModeSetting() {
@@ -1137,6 +1153,41 @@ public class ZenModeHelper {
                 }
             }
         }
+    }
+
+    private void showZenUpgradeNotification(int zen) {
+        final boolean showNotification = mIsBootComplete
+                && zen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
+                && Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.SHOW_ZEN_UPGRADE_NOTIFICATION, 0) != 0;
+
+        if (showNotification) {
+            mNotificationManager.notify(TAG, SystemMessage.NOTE_ZEN_UPGRADE,
+                    createZenUpgradeNotification());
+            Settings.Global.putInt(mContext.getContentResolver(),
+                    Global.SHOW_ZEN_UPGRADE_NOTIFICATION, 0);
+        }
+    }
+
+    @VisibleForTesting
+    protected Notification createZenUpgradeNotification() {
+        Intent intent = new Intent(Settings.ACTION_ZEN_MODE_PRIORITY_SETTINGS)
+                .setPackage("com.android.settings")
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        final Bundle extras = new Bundle();
+        extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
+                mContext.getResources().getString(R.string.global_action_settings));
+        return new Notification.Builder(mContext, SystemNotificationChannels.SYSTEM_CHANGES)
+                .setSmallIcon(R.drawable.ic_settings)
+                .setContentTitle(mContext.getResources().getString(
+                        R.string.zen_upgrade_notification_title))
+                .setContentText(mContext.getResources().getString(
+                        R.string.zen_upgrade_notification_content))
+                .setAutoCancel(true)
+                .setLocalOnly(true)
+                .addExtras(extras)
+                .setContentIntent(PendingIntent.getActivity(mContext, 0, intent, 0, null))
+                .build();
     }
 
     private final class Metrics extends Callback {

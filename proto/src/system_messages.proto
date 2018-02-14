@@ -204,6 +204,10 @@ message SystemMessage {
     // Package: android
     NOTE_USB_TETHER = 47;
 
+    // Inform that DND settings have changed on OS upgrade
+    // Package: android
+    NOTE_ZEN_UPGRADE = 48;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release
@@ -253,6 +257,7 @@ message SystemMessage {
 
     // Notify the user about public volume state changes..
     // Package: com.android.systemui
+
     NOTE_STORAGE_PUBLIC = 0x53505542;  // 1397773634
 
     // Notify the user about private volume state changes.

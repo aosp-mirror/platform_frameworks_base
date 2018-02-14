@@ -17,21 +17,32 @@
 package com.android.server.notification;
 
 import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import android.app.NotificationManager;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.res.Resources;
 import android.media.AudioAttributes;
 import android.provider.Settings;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.server.UiServiceTestCase;
 
 import org.junit.Before;
@@ -46,15 +57,24 @@ import org.mockito.MockitoAnnotations;
 public class ZenModeHelperTest extends UiServiceTestCase {
 
     @Mock ConditionProviders mConditionProviders;
+    @Mock NotificationManager mNotificationManager;
+    @Mock private Resources mResources;
     private TestableLooper mTestableLooper;
     private ZenModeHelper mZenModeHelperSpy;
+    private Context mContext;
+    private ContentResolver mContentResolver;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         mTestableLooper = TestableLooper.get(this);
-        mZenModeHelperSpy = spy(new ZenModeHelper(getContext(), mTestableLooper.getLooper(),
+        mContext = spy(getContext());
+        mContentResolver = mContext.getContentResolver();
+        when(mContext.getResources()).thenReturn(mResources);
+        when(mContext.getSystemService(NotificationManager.class)).thenReturn(mNotificationManager);
+
+        mZenModeHelperSpy = spy(new ZenModeHelper(mContext, mTestableLooper.getLooper(),
                 mConditionProviders));
     }
 
@@ -193,5 +213,32 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                     != AudioAttributes.SUPPRESSIBLE_NEVER;
             verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(shouldMute, usage);
         }
+    }
+
+    @Test
+    public void testZenUpgradeNotification() {
+        // shows zen upgrade notification if stored settings says to shows, boot is completed
+        // and we're setting zen mode on
+        Settings.Global.putInt(mContentResolver, Settings.Global.SHOW_ZEN_UPGRADE_NOTIFICATION, 1);
+        mZenModeHelperSpy.mIsBootComplete = true;
+        mZenModeHelperSpy.setZenModeSetting(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
+
+        verify(mZenModeHelperSpy, times(1)).createZenUpgradeNotification();
+        verify(mNotificationManager, times(1)).notify(eq(ZenModeHelper.TAG),
+                eq(SystemMessage.NOTE_ZEN_UPGRADE), any());
+        assertEquals(0, Settings.Global.getInt(mContentResolver,
+                Settings.Global.SHOW_ZEN_UPGRADE_NOTIFICATION, -1));
+    }
+
+    @Test
+    public void testNoZenUpgradeNotification() {
+        // doesn't show upgrade notification if stored settings says don't show
+        Settings.Global.putInt(mContentResolver, Settings.Global.SHOW_ZEN_UPGRADE_NOTIFICATION, 0);
+        mZenModeHelperSpy.mIsBootComplete = true;
+        mZenModeHelperSpy.setZenModeSetting(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
+
+        verify(mZenModeHelperSpy, never()).createZenUpgradeNotification();
+        verify(mNotificationManager, never()).notify(eq(ZenModeHelper.TAG),
+                eq(SystemMessage.NOTE_ZEN_UPGRADE), any());
     }
 }
