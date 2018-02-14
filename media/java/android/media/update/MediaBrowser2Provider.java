@@ -24,11 +24,11 @@ import android.os.Bundle;
 public interface MediaBrowser2Provider extends MediaController2Provider {
     void getLibraryRoot_impl(Bundle rootHints);
 
-    void subscribe_impl(String parentId, Bundle options);
-    void unsubscribe_impl(String parentId, Bundle options);
+    void subscribe_impl(String parentId, Bundle extras);
+    void unsubscribe_impl(String parentId, Bundle extras);
 
     void getItem_impl(String mediaId);
     void getChildren_impl(String parentId, int page, int pageSize, Bundle extras);
-    void search_impl(String query, Bundle options);
+    void search_impl(String query, Bundle extras);
     void getSearchResult_impl(String query, int page, int pageSize, Bundle extras);
 }

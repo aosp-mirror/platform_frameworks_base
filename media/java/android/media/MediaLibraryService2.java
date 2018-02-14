@@ -99,6 +99,19 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
         public void notifyChildrenChanged(@NonNull String parentId, @Nullable Bundle extras) {
             mProvider.notifyChildrenChanged_impl(parentId, extras);
         }
+
+        /**
+         * Notify controller about change in the search result.
+         *
+         * @param controller controller to notify
+         * @param query previously sent search query from the controller.
+         * @param extras extra bundle
+         * @param itemCount the number of items that have been found in the search.
+         */
+        public void notifySearchResultChanged(@NonNull ControllerInfo controller,
+                @NonNull String query, @NonNull Bundle extras, int itemCount) {
+            mProvider.notifySearchResultChanged_impl(controller, query, extras, itemCount);
+        }
     }
 
     /**
