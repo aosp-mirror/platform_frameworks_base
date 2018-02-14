@@ -1486,6 +1486,23 @@ public class UserManagerService extends IUserManager.Stub {
         return restrictions != null && restrictions.getBoolean(restrictionKey);
     }
 
+    /** @return if any user has the given restriction. */
+    @Override
+    public boolean hasUserRestrictionOnAnyUser(String restrictionKey) {
+        if (!UserRestrictionsUtils.isValidRestriction(restrictionKey)) {
+            return false;
+        }
+        final List<UserInfo> users = getUsers(/* excludeDying= */ true);
+        for (int i = 0; i < users.size(); i++) {
+            final int userId = users.get(i).id;
+            Bundle restrictions = getEffectiveUserRestrictions(userId);
+            if (restrictions != null && restrictions.getBoolean(restrictionKey)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * @hide
      *

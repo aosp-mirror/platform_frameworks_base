@@ -71,6 +71,7 @@ interface IUserManager {
     Bundle getUserRestrictions(int userHandle);
     boolean hasBaseUserRestriction(String restrictionKey, int userHandle);
     boolean hasUserRestriction(in String restrictionKey, int userHandle);
+    boolean hasUserRestrictionOnAnyUser(in String restrictionKey);
     void setUserRestriction(String key, boolean value, int userHandle);
     void setApplicationRestrictions(in String packageName, in Bundle restrictions,
             int userHandle);

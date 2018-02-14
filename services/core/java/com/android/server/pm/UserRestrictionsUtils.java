@@ -33,6 +33,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.provider.Settings;
+import android.provider.Settings.Global;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.util.Log;
@@ -579,6 +580,15 @@ public class UserRestrictionsUtils {
                         android.provider.Settings.Secure.putString(
                                 context.getContentResolver(),
                                 Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP, "0");
+                    }
+                    break;
+                case UserManager.DISALLOW_CONFIG_LOCATION:
+                    // When DISALLOW_CONFIG_LOCATION is set on any user, we undo the global
+                    // kill switch.
+                    if (newValue) {
+                        android.provider.Settings.Global.putString(
+                                context.getContentResolver(),
+                                Global.LOCATION_GLOBAL_KILL_SWITCH, "0");
                     }
                     break;
             }
