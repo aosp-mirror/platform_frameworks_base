@@ -2649,8 +2649,10 @@ package android.media.audiopolicy {
   }
 
   public class AudioPolicy {
+    method public int attachMixes(java.util.List<android.media.audiopolicy.AudioMix>);
     method public android.media.AudioRecord createAudioRecordSink(android.media.audiopolicy.AudioMix) throws java.lang.IllegalArgumentException;
     method public android.media.AudioTrack createAudioTrackSource(android.media.audiopolicy.AudioMix) throws java.lang.IllegalArgumentException;
+    method public int detachMixes(java.util.List<android.media.audiopolicy.AudioMix>);
     method public int getFocusDuckingBehavior();
     method public int getStatus();
     method public int setFocusDuckingBehavior(int) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException;
