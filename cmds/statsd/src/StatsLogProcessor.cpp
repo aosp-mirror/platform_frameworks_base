@@ -58,7 +58,7 @@ const int FIELD_ID_REPORTS = 2;
 const int FIELD_ID_UID = 1;
 const int FIELD_ID_ID = 2;
 // for ConfigMetricsReport
-const int FIELD_ID_METRICS = 1;
+// const int FIELD_ID_METRICS = 1; // written in MetricsManager.cpp
 const int FIELD_ID_UID_MAP = 2;
 const int FIELD_ID_LAST_REPORT_ELAPSED_NANOS = 3;
 const int FIELD_ID_CURRENT_REPORT_ELAPSED_NANOS = 4;

@@ -334,7 +334,6 @@ void GaugeMetricProducer::onMatchedLogEventInternalLocked(
 }
 
 void GaugeMetricProducer::updateCurrentSlicedBucketForAnomaly() {
-    status_t err = NO_ERROR;
     for (const auto& slice : *mCurrentSlicedBucket) {
         if (slice.second.empty()) {
             continue;

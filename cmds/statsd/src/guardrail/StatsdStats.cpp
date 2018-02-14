@@ -45,17 +45,8 @@ const int FIELD_ID_CONFIG_STATS = 3;
 const int FIELD_ID_ATOM_STATS = 7;
 const int FIELD_ID_UIDMAP_STATS = 8;
 const int FIELD_ID_ANOMALY_ALARM_STATS = 9;
-const int FIELD_ID_PULLED_ATOM_STATS = 10;
+// const int FIELD_ID_PULLED_ATOM_STATS = 10; // The proto is written in stats_log_util.cpp
 const int FIELD_ID_LOGGER_ERROR_STATS = 11;
-
-const int FIELD_ID_MATCHER_STATS_NAME = 1;
-const int FIELD_ID_MATCHER_STATS_COUNT = 2;
-
-const int FIELD_ID_CONDITION_STATS_NAME = 1;
-const int FIELD_ID_CONDITION_STATS_COUNT = 2;
-
-const int FIELD_ID_METRIC_STATS_NAME = 1;
-const int FIELD_ID_METRIC_STATS_COUNT = 2;
 
 const int FIELD_ID_ATOM_STATS_TAG = 1;
 const int FIELD_ID_ATOM_STATS_COUNT = 2;
