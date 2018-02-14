@@ -1178,7 +1178,7 @@ public class ZenModeHelper {
         extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
                 mContext.getResources().getString(R.string.global_action_settings));
         return new Notification.Builder(mContext, SystemNotificationChannels.SYSTEM_CHANGES)
-                .setSmallIcon(R.drawable.ic_settings)
+                .setSmallIcon(R.drawable.ic_settings_24dp)
                 .setContentTitle(mContext.getResources().getString(
                         R.string.zen_upgrade_notification_title))
                 .setContentText(mContext.getResources().getString(
