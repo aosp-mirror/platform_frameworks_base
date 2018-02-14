@@ -55,8 +55,8 @@ public final class Zygote {
     public static final int DISABLE_VERIFIER = 1 << 9;
     /** Only use oat files located in /system. Otherwise use dex/jar/apk . */
     public static final int ONLY_USE_SYSTEM_OAT_FILES = 1 << 10;
-    /** Do not enfore hidden API access restrictions. */
-    public static final int DISABLE_HIDDEN_API_CHECKS = 1 << 11;
+    /** Do enfore hidden API access restrictions. */
+    public static final int ENABLE_HIDDEN_API_CHECKS = 1 << 11;
     /** Force generation of native debugging information for backtraces. */
     public static final int DEBUG_GENERATE_MINI_DEBUG_INFO = 1 << 12;
 
@@ -162,9 +162,6 @@ public final class Zygote {
      */
     public static int forkSystemServer(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, long permittedCapabilities, long effectiveCapabilities) {
-        // SystemServer is always allowed to use hidden APIs.
-        runtimeFlags |= DISABLE_HIDDEN_API_CHECKS;
-
         VM_HOOKS.preFork();
         // Resets nice priority for zygote process.
         resetNicePriority();
