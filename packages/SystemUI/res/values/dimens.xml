@@ -920,15 +920,16 @@
     <integer name="wireless_charging_fade_duration">200</integer>
 
     <!-- Wired charging on AOD, text animation duration -->
-    <integer name="wired_charging_aod_text_animation_duration_down">500</integer>
+    <integer name="wired_charging_keyguard_text_animation_duration_down">500</integer>
     <!-- Wired charging on AOD, text animation duration -->
-    <integer name="wired_charging_aod_text_animation_duration_up">300</integer>
+    <integer name="wired_charging_keyguard_text_animation_duration_up">300</integer>
     <!-- Wired charging on AOD, text animation distance -->
-    <integer name="wired_charging_aod_text_animation_distance">-30</integer>
+    <integer name="wired_charging_keyguard_text_animation_distance">-30</integer>
 
     <!-- Logout button -->
     <dimen name="logout_button_layout_height">32dp</dimen>
     <dimen name="logout_button_padding_horizontal">16dp</dimen>
     <dimen name="logout_button_margin_bottom">12dp</dimen>
     <dimen name="logout_button_corner_radius">2dp</dimen>
+
 </resources>
