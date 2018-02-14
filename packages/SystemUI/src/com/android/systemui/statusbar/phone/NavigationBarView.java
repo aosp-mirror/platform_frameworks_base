@@ -881,6 +881,11 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             Log.d(TAG, "reorient(): rot=" + mCurrentRotation);
         }
 
+        // Resolve layout direction if not resolved since components changing layout direction such
+        // as changing languages will recreate this view and the direction will be resolved later
+        if (!isLayoutDirectionResolved()) {
+            resolveLayoutDirection();
+        }
         updateTaskSwitchHelper();
         setNavigationIconHints(mNavigationIconHints, true);
 
