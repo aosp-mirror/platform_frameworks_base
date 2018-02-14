@@ -1602,7 +1602,11 @@ public class ConnectivityManager {
         /** The hardware returned an error. */
         public static final int ERROR_HARDWARE_ERROR = -31;
 
+        /** The NAT-T destination port for IPsec */
         public static final int NATT_PORT = 4500;
+
+        /** The minimum interval in seconds between keepalive packet transmissions */
+        public static final int MIN_INTERVAL = 10;
 
         private final Network mNetwork;
         private final PacketKeepaliveCallback mCallback;

@@ -3125,6 +3125,9 @@ public class ConnectivityServiceTest {
         InetAddress dstIPv4 = InetAddress.getByName("8.8.8.8");
         InetAddress dstIPv6 = InetAddress.getByName("2001:4860:4860::8888");
 
+        final int validKaInterval = 15;
+        final int invalidKaInterval = 9;
+
         LinkProperties lp = new LinkProperties();
         lp.setInterfaceName("wlan12");
         lp.addLinkAddress(new LinkAddress(myIPv6, 64));
@@ -3139,36 +3142,37 @@ public class ConnectivityServiceTest {
         PacketKeepalive ka;
 
         // Attempt to start keepalives with invalid parameters and check for errors.
-        ka = mCm.startNattKeepalive(notMyNet, 25, callback, myIPv4, 1234, dstIPv4);
+        ka = mCm.startNattKeepalive(notMyNet, validKaInterval, callback, myIPv4, 1234, dstIPv4);
         callback.expectError(PacketKeepalive.ERROR_INVALID_NETWORK);
 
-        ka = mCm.startNattKeepalive(myNet, 19, callback, notMyIPv4, 1234, dstIPv4);
+        ka = mCm.startNattKeepalive(myNet, invalidKaInterval, callback, myIPv4, 1234, dstIPv4);
         callback.expectError(PacketKeepalive.ERROR_INVALID_INTERVAL);
 
-        ka = mCm.startNattKeepalive(myNet, 25, callback, myIPv4, 1234, dstIPv6);
+        ka = mCm.startNattKeepalive(myNet, validKaInterval, callback, myIPv4, 1234, dstIPv6);
         callback.expectError(PacketKeepalive.ERROR_INVALID_IP_ADDRESS);
 
-        ka = mCm.startNattKeepalive(myNet, 25, callback, myIPv6, 1234, dstIPv4);
+        ka = mCm.startNattKeepalive(myNet, validKaInterval, callback, myIPv6, 1234, dstIPv4);
         callback.expectError(PacketKeepalive.ERROR_INVALID_IP_ADDRESS);
 
-        ka = mCm.startNattKeepalive(myNet, 25, callback, myIPv6, 1234, dstIPv6);
-        callback.expectError(PacketKeepalive.ERROR_INVALID_IP_ADDRESS);  // NAT-T is IPv4-only.
+        // NAT-T is only supported for IPv4.
+        ka = mCm.startNattKeepalive(myNet, validKaInterval, callback, myIPv6, 1234, dstIPv6);
+        callback.expectError(PacketKeepalive.ERROR_INVALID_IP_ADDRESS);
 
-        ka = mCm.startNattKeepalive(myNet, 25, callback, myIPv4, 123456, dstIPv4);
+        ka = mCm.startNattKeepalive(myNet, validKaInterval, callback, myIPv4, 123456, dstIPv4);
         callback.expectError(PacketKeepalive.ERROR_INVALID_PORT);
 
-        ka = mCm.startNattKeepalive(myNet, 25, callback, myIPv4, 123456, dstIPv4);
+        ka = mCm.startNattKeepalive(myNet, validKaInterval, callback, myIPv4, 123456, dstIPv4);
         callback.expectError(PacketKeepalive.ERROR_INVALID_PORT);
 
-        ka = mCm.startNattKeepalive(myNet, 25, callback, myIPv4, 12345, dstIPv4);
+        ka = mCm.startNattKeepalive(myNet, validKaInterval, callback, myIPv4, 12345, dstIPv4);
         callback.expectError(PacketKeepalive.ERROR_HARDWARE_UNSUPPORTED);
 
-        ka = mCm.startNattKeepalive(myNet, 25, callback, myIPv4, 12345, dstIPv4);
+        ka = mCm.startNattKeepalive(myNet, validKaInterval, callback, myIPv4, 12345, dstIPv4);
         callback.expectError(PacketKeepalive.ERROR_HARDWARE_UNSUPPORTED);
 
         // Check that a started keepalive can be stopped.
         mWiFiNetworkAgent.setStartKeepaliveError(PacketKeepalive.SUCCESS);
-        ka = mCm.startNattKeepalive(myNet, 25, callback, myIPv4, 12345, dstIPv4);
+        ka = mCm.startNattKeepalive(myNet, validKaInterval, callback, myIPv4, 12345, dstIPv4);
         callback.expectStarted();
         mWiFiNetworkAgent.setStopKeepaliveError(PacketKeepalive.SUCCESS);
         ka.stop();
@@ -3176,7 +3180,7 @@ public class ConnectivityServiceTest {
 
         // Check that deleting the IP address stops the keepalive.
         LinkProperties bogusLp = new LinkProperties(lp);
-        ka = mCm.startNattKeepalive(myNet, 25, callback, myIPv4, 12345, dstIPv4);
+        ka = mCm.startNattKeepalive(myNet, validKaInterval, callback, myIPv4, 12345, dstIPv4);
         callback.expectStarted();
         bogusLp.removeLinkAddress(new LinkAddress(myIPv4, 25));
         bogusLp.addLinkAddress(new LinkAddress(notMyIPv4, 25));
@@ -3185,7 +3189,7 @@ public class ConnectivityServiceTest {
         mWiFiNetworkAgent.sendLinkProperties(lp);
 
         // Check that a started keepalive is stopped correctly when the network disconnects.
-        ka = mCm.startNattKeepalive(myNet, 25, callback, myIPv4, 12345, dstIPv4);
+        ka = mCm.startNattKeepalive(myNet, validKaInterval, callback, myIPv4, 12345, dstIPv4);
         callback.expectStarted();
         mWiFiNetworkAgent.disconnect();
         waitFor(mWiFiNetworkAgent.getDisconnectedCV());
@@ -3202,7 +3206,7 @@ public class ConnectivityServiceTest {
         mWiFiNetworkAgent.setStartKeepaliveError(PacketKeepalive.SUCCESS);
 
         // Check things work as expected when the keepalive is stopped and the network disconnects.
-        ka = mCm.startNattKeepalive(myNet, 25, callback, myIPv4, 12345, dstIPv4);
+        ka = mCm.startNattKeepalive(myNet, validKaInterval, callback, myIPv4, 12345, dstIPv4);
         callback.expectStarted();
         ka.stop();
         mWiFiNetworkAgent.disconnect();
@@ -3216,13 +3220,14 @@ public class ConnectivityServiceTest {
 
         // Check that keepalive slots start from 1 and increment. The first one gets slot 1.
         mWiFiNetworkAgent.setExpectedKeepaliveSlot(1);
-        ka = mCm.startNattKeepalive(myNet, 25, callback, myIPv4, 12345, dstIPv4);
+        ka = mCm.startNattKeepalive(myNet, validKaInterval, callback, myIPv4, 12345, dstIPv4);
         callback.expectStarted();
 
         // The second one gets slot 2.
         mWiFiNetworkAgent.setExpectedKeepaliveSlot(2);
         TestKeepaliveCallback callback2 = new TestKeepaliveCallback();
-        PacketKeepalive ka2 = mCm.startNattKeepalive(myNet, 25, callback2, myIPv4, 6789, dstIPv4);
+        PacketKeepalive ka2 = mCm.startNattKeepalive(
+                myNet, validKaInterval, callback2, myIPv4, 6789, dstIPv4);
         callback2.expectStarted();
 
         // Now stop the first one and create a third. This also gets slot 1.
@@ -3231,7 +3236,8 @@ public class ConnectivityServiceTest {
 
         mWiFiNetworkAgent.setExpectedKeepaliveSlot(1);
         TestKeepaliveCallback callback3 = new TestKeepaliveCallback();
-        PacketKeepalive ka3 = mCm.startNattKeepalive(myNet, 25, callback3, myIPv4, 9876, dstIPv4);
+        PacketKeepalive ka3 = mCm.startNattKeepalive(
+                myNet, validKaInterval, callback3, myIPv4, 9876, dstIPv4);
         callback3.expectStarted();
 
         ka2.stop();
