@@ -2978,7 +2978,18 @@
          settings app.  This permission cannot be granted to third-party apps.
          <p>Protection level: signature
     -->
-    <permission android:name="android.permission.MANAGE_SCOPED_ACCESS_DIRECTORY_PERMISSIONS"
+    <permission
+         android:name="android.permission.MANAGE_SCOPED_ACCESS_DIRECTORY_PERMISSIONS"
+         android:protectionLevel="signature" />
+
+    <!-- @hide
+         Allows an application to change the status of a persistable URI permission granted
+         to another application.
+         <p>This permission should <em>only</em> be requested by the platform
+         settings app.  This permission cannot be granted to third-party apps.
+         <p>Protection level: signature
+    -->
+    <permission android:name="android.permission.FORCE_PERSISTABLE_URI_PERMISSIONS"
         android:protectionLevel="signature" />
 
     <!-- @SystemApi Old permission for deleting an app's cache files, no longer used,

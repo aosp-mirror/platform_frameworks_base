@@ -423,10 +423,8 @@ interface IActivityManager {
     void reportActivityFullyDrawn(in IBinder token, boolean restoredFromBundle);
     void restart();
     void performIdleMaintenance();
-    void takePersistableUriPermission(in Uri uri, int modeFlags, int userId);
-    boolean updatePersistableUriPermission(in Uri uri, boolean prefix, String packageName,
-                                           boolean grant, int userId);
-    void releasePersistableUriPermission(in Uri uri, int modeFlags, int userId);
+    void takePersistableUriPermission(in Uri uri, int modeFlags, String toPackage, int userId);
+    void releasePersistableUriPermission(in Uri uri, int modeFlags, String toPackage, int userId);
     ParceledListSlice getPersistedUriPermissions(in String packageName, boolean incoming);
     void appNotRespondingViaProvider(in IBinder connection);
     Rect getTaskBounds(int taskId);
