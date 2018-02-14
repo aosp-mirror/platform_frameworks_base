@@ -173,6 +173,15 @@ public class KeyguardSecurityViewFlipper extends ViewFlipper implements Keyguard
     }
 
     @Override
+    public CharSequence getTitle() {
+        KeyguardSecurityView ksv = getSecurityView();
+        if (ksv != null) {
+            return ksv.getTitle();
+        }
+        return "";
+    }
+
+    @Override
     protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
         return p instanceof LayoutParams;
     }

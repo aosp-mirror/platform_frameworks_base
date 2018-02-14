@@ -197,16 +197,6 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
         return false;
     }
 
-    @Override
-    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
-        if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            event.getText().add(mSecurityContainer.getCurrentSecurityModeContentDescription());
-            return true;
-        } else {
-            return super.dispatchPopulateAccessibilityEvent(event);
-        }
-    }
-
     protected KeyguardSecurityContainer getSecurityContainer() {
         return mSecurityContainer;
     }
@@ -253,6 +243,10 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
         if (mViewMediatorCallback != null) {
             mViewMediatorCallback.setNeedsInput(needsInput);
         }
+    }
+
+    public CharSequence getAccessibilityTitleForCurrentMode() {
+        return mSecurityContainer.getTitle();
     }
 
     public void userActivity() {
