@@ -798,7 +798,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         mService.enableScreenIfNeededLocked();
 
         mService.scheduleAnimationLocked();
-        mService.mWindowPlacerLocked.destroyPendingSurfaces();
 
         if (DEBUG_WINDOW_TRACE) Slog.e(TAG,
                 "performSurfacePlacementInner exit: animating=" + mService.mAnimator.isAnimating());
