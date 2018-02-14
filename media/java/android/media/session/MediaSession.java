@@ -119,7 +119,8 @@ public final class MediaSession {
     private final ISession mBinder;
     private final CallbackStub mCbStub;
 
-    private CallbackMessageHandler mCallbackHandler;
+    // Do not change the name of mCallback. Support lib accesses this by using reflection.
+    private CallbackMessageHandler mCallback;
     private VolumeProvider mVolumeProvider;
     private PlaybackState mPlaybackState;
 
@@ -194,13 +195,13 @@ public final class MediaSession {
      */
     public void setCallback(@Nullable Callback callback, @Nullable Handler handler) {
         synchronized (mLock) {
-            if (mCallbackHandler != null) {
+            if (mCallback != null) {
                 // We're updating the callback, clear the session from the old one.
-                mCallbackHandler.mCallback.mSession = null;
-                mCallbackHandler.removeCallbacksAndMessages(null);
+                mCallback.mCallback.mSession = null;
+                mCallback.removeCallbacksAndMessages(null);
             }
             if (callback == null) {
-                mCallbackHandler = null;
+                mCallback = null;
                 return;
             }
             if (handler == null) {
@@ -209,7 +210,7 @@ public final class MediaSession {
             callback.mSession = this;
             CallbackMessageHandler msgHandler = new CallbackMessageHandler(handler.getLooper(),
                     callback);
-            mCallbackHandler = msgHandler;
+            mCallback = msgHandler;
         }
     }
 
@@ -634,8 +635,8 @@ public final class MediaSession {
 
     private void postToCallback(int what, Object obj, Bundle extras) {
         synchronized (mLock) {
-            if (mCallbackHandler != null) {
-                mCallbackHandler.post(what, obj, extras);
+            if (mCallback != null) {
+                mCallback.post(what, obj, extras);
             }
         }
     }
