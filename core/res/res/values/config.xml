@@ -2913,8 +2913,8 @@
     <item name="config_pictureInPictureAspectRatioLimitForMinSize" format="float" type="dimen">1.777778</item>
 
     <!-- The default gravity for the picture-in-picture window.
-         Currently, this maps to Gravity.BOTTOM | Gravity.RIGHT -->
-    <integer name="config_defaultPictureInPictureGravity">0x55</integer>
+         Currently, this maps to Gravity.TOP | Gravity.RIGHT -->
+    <integer name="config_defaultPictureInPictureGravity">0x35</integer>
 
     <!-- The minimum aspect ratio (width/height) that is supported for picture-in-picture.  Any
          ratio smaller than this is considered too tall and thin to be usable. Currently, this
