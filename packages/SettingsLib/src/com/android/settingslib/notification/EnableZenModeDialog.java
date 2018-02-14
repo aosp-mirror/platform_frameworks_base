@@ -76,6 +76,8 @@ public class EnableZenModeDialog {
     protected Uri mForeverId;
     private int mBucketIndex = -1;
 
+    @VisibleForTesting
+    protected NotificationManager mNotificationManager;
     private AlarmManager mAlarmManager;
     private int mUserId;
     private boolean mAttached;
@@ -98,7 +100,7 @@ public class EnableZenModeDialog {
     }
 
     public Dialog createDialog() {
-        NotificationManager noMan = (NotificationManager) mContext.
+        mNotificationManager = (NotificationManager) mContext.
                 getSystemService(Context.NOTIFICATION_SERVICE);
         mForeverId =  Condition.newId(mContext).appendPath("forever").build();
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
@@ -131,7 +133,8 @@ public class EnableZenModeDialog {
                                     Slog.d(TAG, "Invalid manual condition: " + tag.condition);
                                 }
                                 // always triggers priority-only dnd with chosen condition
-                                noMan.setZenMode(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                                mNotificationManager.setZenMode(
+                                        Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                                         getRealConditionId(tag.condition), TAG);
                             }
                         });
@@ -465,7 +468,16 @@ public class EnableZenModeDialog {
         mZenAlarmWarning.setVisibility(warningText == null ? View.GONE : View.VISIBLE);
     }
 
-    private String computeAlarmWarningText(Condition condition) {
+    @VisibleForTesting
+    protected String computeAlarmWarningText(Condition condition) {
+        boolean allowAlarms = (mNotificationManager.getNotificationPolicy().priorityCategories
+                & NotificationManager.Policy.PRIORITY_CATEGORY_ALARMS) != 0;
+
+        // don't show alarm warning if alarms are allowed to bypass dnd
+        if (allowAlarms) {
+            return null;
+        }
+
         final long now = System.currentTimeMillis();
         final long nextAlarm = getNextAlarm();
         if (nextAlarm < now) {
@@ -483,14 +495,19 @@ public class EnableZenModeDialog {
         if (warningRes == 0) {
             return null;
         }
+
+        return mContext.getResources().getString(warningRes, getTime(nextAlarm, now));
+    }
+
+    @VisibleForTesting
+    protected String getTime(long nextAlarm, long now) {
         final boolean soon = (nextAlarm - now) < 24 * 60 * 60 * 1000;
         final boolean is24 = DateFormat.is24HourFormat(mContext, ActivityManager.getCurrentUser());
         final String skeleton = soon ? (is24 ? "Hm" : "hma") : (is24 ? "EEEHm" : "EEEhma");
         final String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
         final CharSequence formattedTime = DateFormat.format(pattern, nextAlarm);
         final int templateRes = soon ? R.string.alarm_template : R.string.alarm_template_far;
-        final String template = mContext.getResources().getString(templateRes, formattedTime);
-        return mContext.getResources().getString(warningRes, template);
+        return mContext.getResources().getString(templateRes, formattedTime);
     }
 
     // used as the view tag on condition rows
