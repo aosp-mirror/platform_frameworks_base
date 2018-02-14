@@ -167,6 +167,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private boolean mScreenBlankingCallbackCalled;
     private Callback mCallback;
     private boolean mWallpaperSupportsAmbientMode;
+    private boolean mScreenOn;
 
     // Scrim blanking callbacks
     private Choreographer.FrameCallback mPendingFrameCallback;
@@ -792,10 +793,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
 
             // Setting power states can happen after we push out the frame. Make sure we
             // stay fully opaque until the power state request reaches the lower levels.
+            final int delay = mScreenOn ? 16 : 500;
             if (DEBUG) {
-                Log.d(TAG, "Waiting for the screen to turn on...");
+                Log.d(TAG, "Fading out scrims with delay: " + delay);
             }
-            getHandler().postDelayed(mBlankingTransitionRunnable, 500);
+            getHandler().postDelayed(mBlankingTransitionRunnable, delay);
         };
         doOnTheNextFrame(mPendingFrameCallback);
     }
@@ -911,6 +913,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
      * Interrupts blanking transitions once the display notifies that it's already on.
      */
     public void onScreenTurnedOn() {
+        mScreenOn = true;
         final Handler handler = getHandler();
         if (handler.hasCallbacks(mBlankingTransitionRunnable)) {
             if (DEBUG) {
@@ -919,6 +922,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             handler.removeCallbacks(mBlankingTransitionRunnable);
             mBlankingTransitionRunnable.run();
         }
+    }
+
+    public void onScreenTurnedOff() {
+        mScreenOn = false;
     }
 
     public interface Callback {

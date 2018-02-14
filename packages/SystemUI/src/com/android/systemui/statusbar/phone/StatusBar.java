@@ -4413,6 +4413,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         @Override
         public void onScreenTurnedOff() {
             mFalsingManager.onScreenOff();
+            mScrimController.onScreenTurnedOff();
             // If we pulse in from AOD, we turn the screen off first. However, updatingIsKeyguard
             // in that case destroys the HeadsUpManager state, so don't do it in that case.
             if (!isPulsing()) {
