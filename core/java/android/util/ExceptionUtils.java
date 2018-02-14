@@ -86,4 +86,16 @@ public class ExceptionUtils {
         while (t.getCause() != null) t = t.getCause();
         return t;
     }
+
+    /**
+     * Appends {@code cause} at the end of the causal chain of {@code t}
+     *
+     * @return {@code t} for convenience
+     */
+    public static @NonNull Throwable appendCause(@NonNull Throwable t, @Nullable Throwable cause) {
+        if (cause != null) {
+            getRootCause(t).initCause(cause);
+        }
+        return t;
+    }
 }
