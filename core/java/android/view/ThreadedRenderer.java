@@ -331,6 +331,7 @@ public final class ThreadedRenderer {
 
     private static final int FLAG_DUMP_FRAMESTATS   = 1 << 0;
     private static final int FLAG_DUMP_RESET        = 1 << 1;
+    private static final int FLAG_DUMP_ALL          = FLAG_DUMP_FRAMESTATS;
 
     @IntDef(flag = true, prefix = { "FLAG_DUMP_" }, value = {
             FLAG_DUMP_FRAMESTATS,
@@ -636,7 +637,10 @@ public final class ThreadedRenderer {
      */
     void dumpGfxInfo(PrintWriter pw, FileDescriptor fd, String[] args) {
         pw.flush();
-        int flags = 0;
+        // If there's no arguments, eg 'dumpsys gfxinfo', then dump everything.
+        // If there's a targetted package, eg 'dumpsys gfxinfo com.android.systemui', then only
+        // dump the summary information
+        int flags = (args == null || args.length == 0) ? FLAG_DUMP_ALL : 0;
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
                 case "framestats":
@@ -644,6 +648,9 @@ public final class ThreadedRenderer {
                     break;
                 case "reset":
                     flags |= FLAG_DUMP_RESET;
+                    break;
+                case "-a": // magic option passed when dumping a bugreport.
+                    flags = FLAG_DUMP_ALL;
                     break;
             }
         }
