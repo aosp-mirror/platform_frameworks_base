@@ -1284,7 +1284,6 @@ Landroid/os/Process;->getPids(Ljava/lang/String;[I)[I
 Landroid/os/Process;->getTotalMemory()J
 Landroid/os/Process;->getUidForPid(I)I
 Landroid/os/Process;->isIsolated(I)Z
-Landroid/os/Process;->isIsolated()Z
 Landroid/os/Process;->readProcFile(Ljava/lang/String;[I[Ljava/lang/String;[J[F)Z
 Landroid/os/Process;->readProcLines(Ljava/lang/String;[Ljava/lang/String;[J)V
 Landroid/os/RecoverySystem;->cancelScheduledUpdate(Landroid/content/Context;)V

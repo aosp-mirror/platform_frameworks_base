@@ -599,7 +599,6 @@ public class Process {
 
     /**
      * Returns whether the current process is in an isolated sandbox.
-     * @hide
      */
     public static final boolean isIsolated() {
         return isIsolated(myUid());
