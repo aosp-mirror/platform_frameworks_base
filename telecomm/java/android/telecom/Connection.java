@@ -2298,7 +2298,7 @@ public abstract class Connection extends Conferenceable {
      *
      * @hide
      */
-    public final void setConnectElapsedTimeMillis(long connectElapsedTimeMillis) {
+    public final void setConnectionStartElapsedRealTime(long connectElapsedTimeMillis) {
         mConnectElapsedTimeMillis = connectElapsedTimeMillis;
     }
 
