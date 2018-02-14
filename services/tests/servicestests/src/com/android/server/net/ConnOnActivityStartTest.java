@@ -323,6 +323,7 @@ public class ConnOnActivityStartTest {
 
     private void turnBatteryOn() throws Exception {
         executeCommand("cmd battery unplug");
+        executeCommand("cmd battery set status " + BatteryManager.BATTERY_STATUS_NOT_CHARGING);
         assertBatteryOn();
     }
 
@@ -336,6 +337,7 @@ public class ConnOnActivityStartTest {
 
     private void turnBatteryOff() throws Exception {
         executeCommand("cmd battery set ac " + BatteryManager.BATTERY_PLUGGED_AC);
+        executeCommand("cmd battery set status " + BatteryManager.BATTERY_STATUS_CHARGING);
     }
 
     private static void batteryReset() throws Exception {
