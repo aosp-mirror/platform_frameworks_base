@@ -3005,7 +3005,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void dismissKeyguard(IKeyguardDismissCallback callback, CharSequence message) {
-        checkCallingPermission(permission.CONTROL_KEYGUARD, "dismissKeyguard");
+        if (!checkCallingPermission(permission.CONTROL_KEYGUARD, "dismissKeyguard")) {
+            throw new SecurityException("Requires CONTROL_KEYGUARD permission");
+        }
         synchronized(mWindowMap) {
             mPolicy.dismissKeyguardLw(callback, message);
         }
