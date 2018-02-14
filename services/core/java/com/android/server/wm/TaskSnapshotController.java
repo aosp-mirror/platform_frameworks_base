@@ -92,6 +92,7 @@ class TaskSnapshotController {
     private final TaskSnapshotPersister mPersister = new TaskSnapshotPersister(
             Environment::getDataSystemCeDirectory);
     private final TaskSnapshotLoader mLoader = new TaskSnapshotLoader(mPersister);
+    private final ArraySet<Task> mSkipClosingAppSnapshotTasks = new ArraySet<>();
     private final ArraySet<Task> mTmpTasks = new ArraySet<>();
     private final Handler mHandler = new Handler();
 
@@ -149,10 +150,20 @@ class TaskSnapshotController {
         // either closing or hidden.
         getClosingTasks(closingApps, mTmpTasks);
         snapshotTasks(mTmpTasks);
-
+        mSkipClosingAppSnapshotTasks.clear();
     }
 
-    private void snapshotTasks(ArraySet<Task> tasks) {
+    /**
+     * Adds the given {@param tasks} to the list of tasks which should not have their snapshots
+     * taken upon the next processing of the set of closing apps. The caller is responsible for
+     * calling {@link #snapshotTasks} to ensure that the task has an up-to-date snapshot.
+     */
+    @VisibleForTesting
+    void addSkipClosingAppSnapshotTasks(ArraySet<Task> tasks) {
+        mSkipClosingAppSnapshotTasks.addAll(tasks);
+    }
+
+    void snapshotTasks(ArraySet<Task> tasks) {
         for (int i = tasks.size() - 1; i >= 0; i--) {
             final Task task = tasks.valueAt(i);
             final int mode = getSnapshotMode(task);
@@ -295,7 +306,7 @@ class TaskSnapshotController {
 
             // If the task of the app is not visible anymore, it means no other app in that task
             // is opening. Thus, the task is closing.
-            if (task != null && !task.isVisible()) {
+            if (task != null && !task.isVisible() && !mSkipClosingAppSnapshotTasks.contains(task)) {
                 outClosingTasks.add(task);
             }
         }
