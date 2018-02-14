@@ -41,6 +41,15 @@
         android:scaleType="centerInside"
         />
     <com.android.systemui.statusbar.policy.KeyButtonView
+        android:id="@+id/rotate_suggestion"
+        android:layout_width="@dimen/navigation_extra_key_width"
+        android:layout_height="match_parent"
+        android:layout_marginEnd="2dp"
+        android:visibility="invisible"
+        android:scaleType="centerInside"
+        android:contentDescription="@string/accessibility_rotate_button"
+        />
+    <com.android.systemui.statusbar.policy.KeyButtonView
         android:id="@+id/accessibility_button"
         android:layout_width="@dimen/navigation_extra_key_width"
         android:layout_height="match_parent"
