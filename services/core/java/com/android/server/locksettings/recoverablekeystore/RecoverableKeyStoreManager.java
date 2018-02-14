@@ -170,11 +170,13 @@ public class RecoverableKeyStoreManager {
             certXml = CertXml.parse(recoveryServiceCertFile);
         } catch (CertParsingException e) {
             // TODO: Do not use raw key bytes anymore once the other components are updated
-            Log.d(TAG, "Failed to parse the cert file", e);
+            Log.d(TAG, "Failed to parse the input as a cert file: " + HexDump.toHexString(
+                    recoveryServiceCertFile));
             PublicKey publicKey = parseEcPublicKey(recoveryServiceCertFile);
             if (mDatabase.setRecoveryServicePublicKey(userId, uid, publicKey) > 0) {
                 mDatabase.setShouldCreateSnapshot(userId, uid, true);
             }
+            Log.d(TAG, "Successfully set the input as the raw public key");
             return;
         }
 
