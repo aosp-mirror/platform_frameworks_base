@@ -863,11 +863,8 @@ public abstract class CameraDevice implements AutoCloseable {
      * request for a specific physical camera. The settings are chosen
      * to be the best options for the specific logical camera device. If
      * additional physical camera ids are passed, then they will also use the
-     * same settings template. Requests containing individual physical camera
-     * settings can be passed only to {@link CameraCaptureSession#capture} or
-     * {@link CameraCaptureSession#captureBurst} and not to
-     * {@link CameraCaptureSession#setRepeatingRequest} or
-     * {@link CameraCaptureSession#setRepeatingBurst}</p>
+     * same settings template. Clients can further modify individual camera
+     * settings by calling {@link CaptureRequest.Builder#setPhysicalCameraKey}.</p>
      *
      * <p>Individual physical camera settings will only be honored for camera session
      * that was initialiazed with corresponding physical camera id output configuration
@@ -896,8 +893,8 @@ public abstract class CameraDevice implements AutoCloseable {
      * @see #TEMPLATE_STILL_CAPTURE
      * @see #TEMPLATE_VIDEO_SNAPSHOT
      * @see #TEMPLATE_MANUAL
-     * @see CaptureRequest.Builder#setKey
-     * @see CaptureRequest.Builder#getKey
+     * @see CaptureRequest.Builder#setPhysicalCameraKey
+     * @see CaptureRequest.Builder#getPhysicalCameraKey
      */
     @NonNull
     public CaptureRequest.Builder createCaptureRequest(@RequestTemplate int templateType,
