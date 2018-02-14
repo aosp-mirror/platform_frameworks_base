@@ -371,7 +371,7 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
     }
 
     boolean isQuickScrubEnabled() {
-        return SystemProperties.getBoolean("persist.quickstep.scrub.enabled", false);
+        return SystemProperties.getBoolean("persist.quickstep.scrub.enabled", true);
     }
 
     private void startQuickScrub() {
