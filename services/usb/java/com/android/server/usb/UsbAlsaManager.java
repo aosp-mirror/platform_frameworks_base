@@ -20,11 +20,9 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.hardware.usb.UsbDevice;
-import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.midi.MidiDeviceInfo;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.service.usb.UsbAlsaManagerProto;
@@ -32,7 +30,6 @@ import android.util.Slog;
 
 import com.android.internal.alsa.AlsaCardsParser;
 import com.android.internal.util.dump.DualDumpOutputStream;
-import com.android.server.audio.AudioService;
 import com.android.server.usb.descriptors.UsbDescriptorParser;
 
 import libcore.io.IoUtils;
@@ -58,6 +55,7 @@ public final class UsbAlsaManager {
     // this is needed to map USB devices to ALSA Audio Devices, especially to remove an
     // ALSA device when we are notified that its associated USB device has been removed.
     private final ArrayList<UsbAlsaDevice> mAlsaDevices = new ArrayList<UsbAlsaDevice>();
+    private UsbAlsaDevice mSelectedDevice;
 
     /**
      * List of connected MIDI devices
@@ -78,17 +76,19 @@ public final class UsbAlsaManager {
                         ServiceManager.getService(Context.AUDIO_SERVICE));
     }
 
-    // Notifies AudioService when a device is added or removed
-    // audioDevice - the AudioDevice that was added or removed
-    // enabled - if true, we're connecting a device (it's arrived), else disconnecting
-    private void notifyDeviceState(UsbAlsaDevice alsaDevice, boolean enabled) {
+    /**
+     * Select the AlsaDevice to be used for AudioService.
+     * AlsaDevice.start() notifies AudioService of it's connected state.
+     *
+     * @param alsaDevice The selected UsbAlsaDevice for system USB audio.
+     */
+    private synchronized void selectAlsaDevice(UsbAlsaDevice alsaDevice) {
         if (DEBUG) {
-            Slog.d(TAG, "notifyDeviceState " + enabled + " " + alsaDevice);
+            Slog.d(TAG, "selectAlsaDevice " + alsaDevice);
         }
 
-        if (mAudioService == null) {
-            Slog.e(TAG, "no AudioService");
-            return;
+        if (mSelectedDevice != null) {
+            deselectAlsaDevice();
         }
 
         // FIXME Does not yet handle the case where the setting is changed
@@ -102,40 +102,14 @@ public final class UsbAlsaManager {
             return;
         }
 
-        int state = (enabled ? 1 : 0);
-        int cardNum = alsaDevice.getCardNum();
-        int deviceNum = alsaDevice.getDeviceNum();
-        if (cardNum < 0 || deviceNum < 0) {
-            Slog.e(TAG, "Invalid alsa card or device alsaCard: " + cardNum
-                        + " alsaDevice: " + deviceNum);
-            return;
-        }
+        mSelectedDevice = alsaDevice;
+        alsaDevice.start();
+    }
 
-        String address = AudioService.makeAlsaAddressString(cardNum, deviceNum);
-        try {
-            // Playback Device
-            if (alsaDevice.hasPlayback()) {
-                int device = alsaDevice.isOutputHeadset()
-                        ? AudioSystem.DEVICE_OUT_USB_HEADSET
-                        : AudioSystem.DEVICE_OUT_USB_DEVICE;
-                if (DEBUG) {
-                    Slog.i(TAG, "pre-call device:0x" + Integer.toHexString(device) +
-                            " addr:" + address + " name:" + alsaDevice.getDeviceName());
-                }
-                mAudioService.setWiredDeviceConnectionState(
-                        device, state, address, alsaDevice.getDeviceName(), TAG);
-            }
-
-            // Capture Device
-            if (alsaDevice.hasCapture()) {
-                int device = alsaDevice.isInputHeadset()
-                        ? AudioSystem.DEVICE_IN_USB_HEADSET
-                        : AudioSystem.DEVICE_IN_USB_DEVICE;
-                mAudioService.setWiredDeviceConnectionState(
-                        device, state, address, alsaDevice.getDeviceName(), TAG);
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "RemoteException in setWiredDeviceConnectionState");
+    private synchronized void deselectAlsaDevice() {
+        if (mSelectedDevice != null) {
+            mSelectedDevice.stop();
+            mSelectedDevice = null;
         }
     }
 
@@ -168,7 +142,7 @@ public final class UsbAlsaManager {
                 Slog.d(TAG, "  alsaDevice:" + alsaDevice);
             }
             if (alsaDevice != null) {
-                notifyDeviceState(alsaDevice, true /*enabled*/);
+                selectAlsaDevice(alsaDevice);
             }
             return alsaDevice;
         } else {
@@ -202,16 +176,21 @@ public final class UsbAlsaManager {
         if (hasInput || hasOutput) {
             boolean isInputHeadset = parser.isInputHeadset();
             boolean isOutputHeadset = parser.isOutputHeadset();
-            UsbAlsaDevice alsaDevice =
-                    new UsbAlsaDevice(cardRec.getCardNum(), 0 /*device*/, deviceAddress,
-                            hasOutput, hasInput, isInputHeadset, isOutputHeadset);
-            alsaDevice.setDeviceNameAndDescription(
-                    cardRec.getCardName(), cardRec.getCardDescription());
-            mAlsaDevices.add(0, alsaDevice);
 
-            // Select it
+            if (mAudioService == null) {
+                Slog.e(TAG, "no AudioService");
+                return;
+            }
+
+            UsbAlsaDevice alsaDevice =
+                    new UsbAlsaDevice(mAudioService, cardRec.getCardNum(), 0 /*device*/,
+                                      deviceAddress, hasOutput, hasInput,
+                                      isInputHeadset, isOutputHeadset);
             if (alsaDevice != null) {
-                notifyDeviceState(alsaDevice, true /*enabled*/);
+                alsaDevice.setDeviceNameAndDescription(
+                          cardRec.getCardName(), cardRec.getCardDescription());
+                mAlsaDevices.add(0, alsaDevice);
+                selectAlsaDevice(alsaDevice);
             }
         }
 
@@ -256,7 +235,7 @@ public final class UsbAlsaManager {
         }
     }
 
-    /* package */ void usbDeviceRemoved(String deviceAddress/*UsbDevice usbDevice*/) {
+    /* package */ synchronized void usbDeviceRemoved(String deviceAddress/*UsbDevice usbDevice*/) {
         if (DEBUG) {
             Slog.d(TAG, "deviceRemoved(" + deviceAddress + ")");
         }
@@ -264,13 +243,9 @@ public final class UsbAlsaManager {
         // Audio
         UsbAlsaDevice alsaDevice = removeAlsaDeviceFromList(deviceAddress);
         Slog.i(TAG, "USB Audio Device Removed: " + alsaDevice);
-        if (alsaDevice != null) {
-            if (alsaDevice.hasPlayback() || alsaDevice.hasCapture()) {
-                notifyDeviceState(alsaDevice, false /*enabled*/);
-
-                // if there any external devices left, select one of them
-                selectDefaultDevice();
-            }
+        if (alsaDevice != null && alsaDevice == mSelectedDevice) {
+            deselectAlsaDevice();
+            selectDefaultDevice(); // if there any external devices left, select one of them
         }
 
         // MIDI
