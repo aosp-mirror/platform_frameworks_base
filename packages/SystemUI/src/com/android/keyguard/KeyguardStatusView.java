@@ -16,13 +16,16 @@
 
 package com.android.keyguard;
 
+import android.app.ActivityManager;
 import android.app.AlarmManager;
+import android.app.IActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.support.v4.graphics.ColorUtils;
 import android.text.TextUtils;
@@ -51,9 +54,11 @@ public class KeyguardStatusView extends GridLayout {
 
     private final LockPatternUtils mLockPatternUtils;
     private final AlarmManager mAlarmManager;
+    private final IActivityManager mIActivityManager;
     private final float mSmallClockScale;
     private final float mWidgetPadding;
 
+    private TextView mLogoutView;
     private TextClock mClockView;
     private View mClockSeparator;
     private TextView mOwnerInfo;
@@ -80,6 +85,7 @@ public class KeyguardStatusView extends GridLayout {
                 if (DEBUG) Slog.v(TAG, "refresh statusview showing:" + showing);
                 refresh();
                 updateOwnerInfo();
+                updateLogoutView();
             }
         }
 
@@ -97,6 +103,12 @@ public class KeyguardStatusView extends GridLayout {
         public void onUserSwitchComplete(int userId) {
             refresh();
             updateOwnerInfo();
+            updateLogoutView();
+        }
+
+        @Override
+        public void onLogoutEnabledChanged() {
+            updateLogoutView();
         }
     };
 
@@ -111,6 +123,7 @@ public class KeyguardStatusView extends GridLayout {
     public KeyguardStatusView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        mIActivityManager = ActivityManager.getService();
         mLockPatternUtils = new LockPatternUtils(getContext());
         mHandler = new Handler(Looper.myLooper());
         mSmallClockScale = getResources().getDimension(R.dimen.widget_small_font_size)
@@ -145,6 +158,9 @@ public class KeyguardStatusView extends GridLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mLogoutView = findViewById(R.id.logout);
+        mLogoutView.setOnClickListener(this::onLogoutClicked);
+
         mClockContainer = findViewById(R.id.keyguard_clock_container);
         mClockView = findViewById(R.id.clock_view);
         mClockView.setShowCurrentUserTime(true);
@@ -164,6 +180,7 @@ public class KeyguardStatusView extends GridLayout {
         setEnableMarquee(shouldMarquee);
         refresh();
         updateOwnerInfo();
+        updateLogoutView();
 
         // Disable elegant text height because our fancy colon makes the ymin value huge for no
         // reason.
@@ -213,12 +230,26 @@ public class KeyguardStatusView extends GridLayout {
     }
 
     public int getClockBottom() {
-        return mKeyguardSlice.getVisibility() == VISIBLE ? mKeyguardSlice.getBottom()
-                : mClockView.getBottom();
+        if (mOwnerInfo != null && mOwnerInfo.getVisibility() == VISIBLE) {
+            return mOwnerInfo.getBottom();
+        } else {
+            return mClockContainer.getBottom();
+        }
+    }
+
+    public int getLogoutButtonHeight() {
+        return mLogoutView.getVisibility() == VISIBLE ? mLogoutView.getHeight() : 0;
     }
 
     public float getClockTextSize() {
         return mClockView.getTextSize();
+    }
+
+    private void updateLogoutView() {
+        mLogoutView.setVisibility(shouldShowLogout() ? VISIBLE : GONE);
+        // Logout button will stay in language of user 0 if we don't set that manually.
+        mLogoutView.setText(mContext.getResources().getString(
+                com.android.internal.R.string.global_action_logout));
     }
 
     private void updateOwnerInfo() {
@@ -309,6 +340,7 @@ public class KeyguardStatusView extends GridLayout {
         mDarkAmount = darkAmount;
 
         boolean dark = darkAmount == 1;
+        mLogoutView.setAlpha(dark ? 0 : 1);
         final int N = mClockContainer.getChildCount();
         for (int i = 0; i < N; i++) {
             View child = mClockContainer.getChildAt(i);
@@ -338,6 +370,21 @@ public class KeyguardStatusView extends GridLayout {
     private void updateDozeVisibleViews() {
         for (View child : mVisibleInDoze) {
             child.setAlpha(mDarkAmount == 1 && mPulsing ? 0.8f : 1);
+        }
+    }
+
+    private boolean shouldShowLogout() {
+        return KeyguardUpdateMonitor.getInstance(mContext).isLogoutEnabled()
+                && KeyguardUpdateMonitor.getCurrentUser() != UserHandle.USER_SYSTEM;
+    }
+
+    private void onLogoutClicked(View view) {
+        int currentUserId = KeyguardUpdateMonitor.getCurrentUser();
+        try {
+            mIActivityManager.switchUser(UserHandle.USER_SYSTEM);
+            mIActivityManager.stopUser(currentUserId, true /*force*/, null);
+        } catch (RemoteException re) {
+            Log.e(TAG, "Failed to logout user", re);
         }
     }
 }
