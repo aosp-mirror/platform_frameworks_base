@@ -27,12 +27,8 @@ java_library {
     // Needs to be consistent with the repackaged version of this make target.
     java_version: "1.8",
 
-    no_framework_libs: true,
+    sdk_version: "current",
     hostdex: true,
-    libs: [
-        "framework",
-    ],
-
 }
 
 // Build the legacy-test library
@@ -42,12 +38,9 @@ java_library {
 // Also contains the com.android.internal.util.Predicate[s] classes.
 java_library {
     name: "legacy-test",
-    static_libs: ["android.test.base"],
 
-    no_framework_libs: true,
-    libs: [
-        "framework",
-    ],
+    sdk_version: "current",
+    static_libs: ["android.test.base"],
 }
 
 // Build the repackaged.android.test.base library
@@ -57,11 +50,8 @@ java_library {
 java_library_static {
     name: "repackaged.android.test.base",
 
+    sdk_version: "current",
     static_libs: ["android.test.base"],
-    no_framework_libs: true,
-    libs: [
-        "framework",
-    ],
 
     jarjar_rules: "jarjar-rules.txt",
     // Pin java_version until jarjar is certified to support later versions. http://b/72703434
