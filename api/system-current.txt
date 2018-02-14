@@ -229,7 +229,6 @@ package android.app {
     method public boolean convertToTranslucent(android.app.Activity.TranslucentConversionListener, android.app.ActivityOptions);
     method public deprecated boolean isBackgroundVisibleBehind();
     method public deprecated void onBackgroundVisibleBehindChanged(boolean);
-    method public void setDisablePreviewScreenshots(boolean);
   }
 
   public static abstract interface Activity.TranslucentConversionListener {
