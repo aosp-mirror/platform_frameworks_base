@@ -34,8 +34,8 @@ import java.util.Objects;
 
 /**
  * Ranging result for a request started by
- * {@link WifiRttManager#startRanging(RangingRequest, RangingResultCallback, Handler)}. Results are
- * returned in {@link RangingResultCallback#onRangingResults(List)}.
+ * {@link WifiRttManager#startRanging(RangingRequest, java.util.concurrent.Executor, RangingResultCallback)}.
+ * Results are returned in {@link RangingResultCallback#onRangingResults(List)}.
  * <p>
  * A ranging result is the distance measurement result for a single device specified in the
  * {@link RangingRequest}.
