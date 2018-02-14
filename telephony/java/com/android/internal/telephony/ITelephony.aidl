@@ -952,6 +952,11 @@ interface ITelephony {
     int getCarrierPrivilegeStatus(int subId);
 
     /**
+     * Similar to above, but check for the given uid.
+     */
+    int getCarrierPrivilegeStatusForUid(int subId, int uid);
+
+    /**
      * Similar to above, but check for the package whose name is pkgName.
      */
     int checkCarrierPrivilegesForPackage(String pkgName);
