@@ -171,6 +171,20 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
             return null;
         }
 
+        @Override
+        public Future<?> scheduleCpuSyncDueToScreenStateChange(
+                boolean onBattery, boolean onBatteryScreenOff) {
+            return null;
+        }
+
+        @Override
+        public Future<?> scheduleCpuSyncDueToWakelockChange(long delayMillis) {
+            return null;
+        }
+
+        @Override
+        public void cancelCpuSyncDueToWakelockChange() {
+        }
     }
 }
 
