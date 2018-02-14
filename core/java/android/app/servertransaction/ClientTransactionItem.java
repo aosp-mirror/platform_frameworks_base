@@ -32,12 +32,6 @@ import android.os.Parcelable;
  */
 public abstract class ClientTransactionItem implements BaseClientRequest, Parcelable {
 
-    /** Get the state in which this callback can be executed. */
-    @LifecycleState
-    public int getPreExecutionState() {
-        return UNDEFINED;
-    }
-
     /** Get the state that must follow this callback. */
     @LifecycleState
     public int getPostExecutionState() {

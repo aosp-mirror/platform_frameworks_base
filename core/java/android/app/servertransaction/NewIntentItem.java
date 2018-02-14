@@ -38,11 +38,6 @@ public class NewIntentItem extends ClientTransactionItem {
 
     // TODO(lifecycler): Switch new intent handling to this scheme.
     /*@Override
-    public int getPreExecutionState() {
-        return ON_PAUSE;
-    }
-
-    @Override
     public int getPostExecutionState() {
         return ON_RESUME;
     }*/

@@ -24,6 +24,9 @@ import static android.app.servertransaction.ActivityLifecycleItem.ON_RESUME;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_START;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 import static android.app.servertransaction.ActivityLifecycleItem.PRE_ON_CREATE;
+import static android.app.servertransaction.ActivityLifecycleItem.UNDEFINED;
+
+import static junit.framework.Assert.assertEquals;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -48,6 +51,10 @@ import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /** Test {@link TransactionExecutor} logic. */
 @RunWith(AndroidJUnit4.class)
@@ -56,6 +63,7 @@ import java.util.ArrayList;
 public class TransactionExecutorTests {
 
     private TransactionExecutor mExecutor;
+    private TransactionExecutorHelper mExecutorHelper;
     private ClientTransactionHandler mTransactionHandler;
     private ActivityClientRecord mClientRecord;
 
@@ -67,6 +75,7 @@ public class TransactionExecutorTests {
         when(mTransactionHandler.getActivityClient(any())).thenReturn(mClientRecord);
 
         mExecutor = spy(new TransactionExecutor(mTransactionHandler));
+        mExecutorHelper = new TransactionExecutorHelper();
     }
 
     @Test
@@ -166,10 +175,42 @@ public class TransactionExecutorTests {
                 pathExcludeLast(ON_DESTROY));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testLifecycleUndefinedStartState() {
+        mClientRecord.setState(UNDEFINED);
+        path(ON_CREATE);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testLifecycleUndefinedFinishState() {
+        mClientRecord.setState(PRE_ON_CREATE);
+        path(UNDEFINED);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testLifecycleInvalidPreOnCreateFinishState() {
+        mClientRecord.setState(ON_CREATE);
+        path(PRE_ON_CREATE);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testLifecycleInvalidOnRestartStartState() {
+        mClientRecord.setState(ON_RESTART);
+        path(ON_RESUME);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testLifecycleInvalidOnRestartFinishState() {
+        mClientRecord.setState(ON_CREATE);
+        path(ON_RESTART);
+    }
+
     @Test
     public void testTransactionResolution() {
         ClientTransactionItem callback1 = mock(ClientTransactionItem.class);
+        when(callback1.getPostExecutionState()).thenReturn(UNDEFINED);
         ClientTransactionItem callback2 = mock(ClientTransactionItem.class);
+        when(callback2.getPostExecutionState()).thenReturn(UNDEFINED);
         ActivityLifecycleItem stateRequest = mock(ActivityLifecycleItem.class);
         IBinder token = mock(IBinder.class);
 
@@ -189,7 +230,7 @@ public class TransactionExecutorTests {
     }
 
     @Test
-    public void testRequiredStateResolution() {
+    public void testActivityResultRequiredStateResolution() {
         ActivityResultItem activityResultItem = ActivityResultItem.obtain(new ArrayList<>());
 
         IBinder token = mock(IBinder.class);
@@ -197,20 +238,161 @@ public class TransactionExecutorTests {
                 token /* activityToken */);
         transaction.addCallback(activityResultItem);
 
+        // Verify resolution that should get to onPause
+        mClientRecord.setState(ON_RESUME);
         mExecutor.executeCallbacks(transaction);
-
         verify(mExecutor, times(1)).cycleToPath(eq(mClientRecord), eq(ON_PAUSE));
+
+        // Verify resolution that should get to onStart
+        mClientRecord.setState(ON_STOP);
+        mExecutor.executeCallbacks(transaction);
+        verify(mExecutor, times(1)).cycleToPath(eq(mClientRecord), eq(ON_START));
+    }
+
+    @Test
+    public void testClosestStateResolutionForSameState() {
+        final int[] allStates = new int[] {
+                ON_CREATE, ON_START, ON_RESUME, ON_PAUSE, ON_STOP, ON_DESTROY};
+
+        mClientRecord.setState(ON_CREATE);
+        assertEquals(ON_CREATE, mExecutorHelper.getClosestOfStates(mClientRecord,
+                shuffledArray(allStates)));
+
+        mClientRecord.setState(ON_START);
+        assertEquals(ON_START, mExecutorHelper.getClosestOfStates(mClientRecord,
+                shuffledArray(allStates)));
+
+        mClientRecord.setState(ON_RESUME);
+        assertEquals(ON_RESUME, mExecutorHelper.getClosestOfStates(mClientRecord,
+                shuffledArray(allStates)));
+
+        mClientRecord.setState(ON_PAUSE);
+        assertEquals(ON_PAUSE, mExecutorHelper.getClosestOfStates(mClientRecord,
+                shuffledArray(allStates)));
+
+        mClientRecord.setState(ON_STOP);
+        assertEquals(ON_STOP, mExecutorHelper.getClosestOfStates(mClientRecord,
+                shuffledArray(allStates)));
+
+        mClientRecord.setState(ON_DESTROY);
+        assertEquals(ON_DESTROY, mExecutorHelper.getClosestOfStates(mClientRecord,
+                shuffledArray(allStates)));
+
+        mClientRecord.setState(PRE_ON_CREATE);
+        assertEquals(PRE_ON_CREATE, mExecutorHelper.getClosestOfStates(mClientRecord,
+                new int[] {PRE_ON_CREATE}));
+    }
+
+    @Test
+    public void testClosestStateResolution() {
+        mClientRecord.setState(PRE_ON_CREATE);
+        assertEquals(ON_CREATE, mExecutorHelper.getClosestOfStates(mClientRecord, shuffledArray(
+                new int[] {ON_CREATE, ON_START, ON_RESUME, ON_PAUSE, ON_STOP, ON_DESTROY})));
+        assertEquals(ON_START, mExecutorHelper.getClosestOfStates(mClientRecord, shuffledArray(
+                new int[] {ON_START, ON_RESUME, ON_PAUSE, ON_STOP, ON_DESTROY})));
+        assertEquals(ON_RESUME, mExecutorHelper.getClosestOfStates(mClientRecord, shuffledArray(
+                new int[] {ON_RESUME, ON_PAUSE, ON_STOP, ON_DESTROY})));
+        assertEquals(ON_PAUSE, mExecutorHelper.getClosestOfStates(mClientRecord, shuffledArray(
+                new int[] {ON_PAUSE, ON_STOP, ON_DESTROY})));
+        assertEquals(ON_STOP, mExecutorHelper.getClosestOfStates(mClientRecord, shuffledArray(
+                new int[] {ON_STOP, ON_DESTROY})));
+        assertEquals(ON_DESTROY, mExecutorHelper.getClosestOfStates(mClientRecord, shuffledArray(
+                new int[] {ON_DESTROY})));
+    }
+
+    @Test
+    public void testClosestStateResolutionFromOnCreate() {
+        mClientRecord.setState(ON_CREATE);
+        assertEquals(ON_START, mExecutorHelper.getClosestOfStates(mClientRecord, shuffledArray(
+                new int[] {ON_START, ON_RESUME, ON_PAUSE, ON_STOP, ON_DESTROY})));
+    }
+
+    @Test
+    public void testClosestStateResolutionFromOnStart() {
+        mClientRecord.setState(ON_START);
+        assertEquals(ON_RESUME, mExecutorHelper.getClosestOfStates(mClientRecord, shuffledArray(
+                new int[] {ON_CREATE, ON_RESUME, ON_PAUSE, ON_STOP, ON_DESTROY})));
+        assertEquals(ON_CREATE, mExecutorHelper.getClosestOfStates(mClientRecord, shuffledArray(
+                new int[] {ON_CREATE})));
+    }
+
+    @Test
+    public void testClosestStateResolutionFromOnResume() {
+        mClientRecord.setState(ON_RESUME);
+        assertEquals(ON_PAUSE, mExecutorHelper.getClosestOfStates(mClientRecord, shuffledArray(
+                new int[] {ON_CREATE, ON_START, ON_PAUSE, ON_STOP, ON_DESTROY})));
+        assertEquals(ON_DESTROY, mExecutorHelper.getClosestOfStates(mClientRecord, shuffledArray(
+                new int[] {ON_CREATE, ON_DESTROY})));
+        assertEquals(ON_START, mExecutorHelper.getClosestOfStates(mClientRecord, shuffledArray(
+                new int[] {ON_CREATE, ON_START})));
+        assertEquals(ON_CREATE, mExecutorHelper.getClosestOfStates(mClientRecord, shuffledArray(
+                new int[] {ON_CREATE})));
+    }
+
+    @Test
+    public void testClosestStateResolutionFromOnPause() {
+        mClientRecord.setState(ON_PAUSE);
+        assertEquals(ON_RESUME, mExecutorHelper.getClosestOfStates(mClientRecord, shuffledArray(
+                new int[] {ON_CREATE, ON_START, ON_RESUME, ON_DESTROY})));
+        assertEquals(ON_STOP, mExecutorHelper.getClosestOfStates(mClientRecord, shuffledArray(
+                new int[] {ON_CREATE, ON_START, ON_STOP, ON_DESTROY})));
+        assertEquals(ON_START, mExecutorHelper.getClosestOfStates(mClientRecord, shuffledArray(
+                new int[] {ON_CREATE, ON_START})));
+        assertEquals(ON_CREATE, mExecutorHelper.getClosestOfStates(mClientRecord, shuffledArray(
+                new int[] {ON_CREATE})));
+    }
+
+    @Test
+    public void testClosestStateResolutionFromOnStop() {
+        mClientRecord.setState(ON_STOP);
+        assertEquals(ON_RESUME, mExecutorHelper.getClosestOfStates(mClientRecord, shuffledArray(
+                new int[] {ON_CREATE, ON_RESUME, ON_PAUSE, ON_DESTROY})));
+        assertEquals(ON_DESTROY, mExecutorHelper.getClosestOfStates(mClientRecord, shuffledArray(
+                new int[] {ON_CREATE, ON_DESTROY})));
+        assertEquals(ON_START, mExecutorHelper.getClosestOfStates(mClientRecord, shuffledArray(
+                new int[] {ON_CREATE, ON_START, ON_RESUME, ON_PAUSE})));
+    }
+
+    @Test
+    public void testClosestStateResolutionFromOnDestroy() {
+        mClientRecord.setState(ON_DESTROY);
+        assertEquals(ON_CREATE, mExecutorHelper.getClosestOfStates(mClientRecord, shuffledArray(
+                new int[] {ON_CREATE, ON_START, ON_RESUME, ON_PAUSE, ON_STOP})));
+    }
+
+    @Test
+    public void testClosestStateResolutionToUndefined() {
+        mClientRecord.setState(ON_CREATE);
+        assertEquals(UNDEFINED,
+                mExecutorHelper.getClosestPreExecutionState(mClientRecord, UNDEFINED));
+    }
+
+    @Test
+    public void testClosestStateResolutionToOnResume() {
+        mClientRecord.setState(ON_DESTROY);
+        assertEquals(ON_START,
+                mExecutorHelper.getClosestPreExecutionState(mClientRecord, ON_RESUME));
+        mClientRecord.setState(ON_START);
+        assertEquals(ON_START,
+                mExecutorHelper.getClosestPreExecutionState(mClientRecord, ON_RESUME));
+        mClientRecord.setState(ON_PAUSE);
+        assertEquals(ON_PAUSE,
+                mExecutorHelper.getClosestPreExecutionState(mClientRecord, ON_RESUME));
+    }
+
+    private static int[] shuffledArray(int[] inputArray) {
+        final List<Integer> list = Arrays.stream(inputArray).boxed().collect(Collectors.toList());
+        Collections.shuffle(list);
+        return list.stream().mapToInt(Integer::intValue).toArray();
     }
 
     private int[] path(int finish) {
-        mExecutor.initLifecyclePath(mClientRecord.getLifecycleState(), finish,
-                false /* excludeLastState */);
-        return mExecutor.getLifecycleSequence();
+        return mExecutorHelper.getLifecyclePath(mClientRecord.getLifecycleState(), finish,
+                false /* excludeLastState */).toArray();
     }
 
     private int[] pathExcludeLast(int finish) {
-        mExecutor.initLifecyclePath(mClientRecord.getLifecycleState(), finish,
-                true /* excludeLastState */);
-        return mExecutor.getLifecycleSequence();
+        return mExecutorHelper.getLifecyclePath(mClientRecord.getLifecycleState(), finish,
+                true /* excludeLastState */).toArray();
     }
 }

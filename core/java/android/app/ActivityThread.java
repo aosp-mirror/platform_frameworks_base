@@ -3716,6 +3716,10 @@ public final class ActivityThread extends ClientTransactionHandler {
         if (localLOGV) Slog.v(TAG, "Performing resume of " + r
                 + " finished=" + r.activity.mFinished);
         if (r != null && !r.activity.mFinished) {
+            if (r.getLifecycleState() == ON_RESUME) {
+                throw new IllegalStateException(
+                        "Trying to resume activity which is already resumed");
+            }
             if (clearHide) {
                 r.hideForNow = false;
                 r.activity.mStartedActivity = false;
