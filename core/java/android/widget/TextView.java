@@ -791,11 +791,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     // mAutoSizeStepGranularityInPx.
     private boolean mHasPresetAutoSizeValues = false;
 
+    // Autofill-related attributes
+    //
     // Indicates whether the text was set statically or dynamically, so it can be used to
     // sanitize autofill requests.
     private boolean mTextSetFromXmlOrResourceId = false;
-    // Resource id used to set the text - used for autofill purposes.
+    // Resource id used to set the text.
     private @StringRes int mTextId = ResourceId.ID_NULL;
+    // Last value used on AFM.notifyValueChanged(), used to optimize autofill workflow by avoiding
+    // calls when the value did not change
+    private CharSequence mLastValueSentToAutofillManager;
+    //
+    // End of autofill-related attributes
 
     /**
      * Kick-start the font cache for the zygote process (to pay the cost of
@@ -5665,7 +5672,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (needEditableForNotification) {
             sendAfterTextChanged((Editable) text);
         } else {
-            // Always notify AutoFillManager - it will return right away if autofill is disabled.
             notifyAutoFillManagerAfterTextChangedIfNeeded();
         }
 
@@ -9697,11 +9703,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return;
         }
         final AutofillManager afm = mContext.getSystemService(AutofillManager.class);
-        if (afm != null) {
+        if (afm == null) {
+            return;
+        }
+
+        if (mLastValueSentToAutofillManager == null
+                || !mLastValueSentToAutofillManager.equals(mText)) {
             if (android.view.autofill.Helper.sVerbose) {
-                Log.v(LOG_TAG, "sendAfterTextChanged(): notify AFM for text=" + mText);
+                Log.v(LOG_TAG, "notifying AFM after text changed");
             }
             afm.notifyValueChanged(TextView.this);
+            mLastValueSentToAutofillManager = mText;
+        } else {
+            if (android.view.autofill.Helper.sVerbose) {
+                Log.v(LOG_TAG, "not notifying AFM on unchanged text");
+            }
         }
     }
 
