@@ -308,6 +308,7 @@ public class AppStandbyControllerTests {
     private void reportEvent(AppStandbyController controller, int eventType,
             long elapsedTime) {
         // Back to ACTIVE on event
+        mInjector.mElapsedRealtime = elapsedTime;
         UsageEvents.Event ev = new UsageEvents.Event();
         ev.mPackage = PACKAGE_1;
         ev.mEventType = eventType;
@@ -484,6 +485,89 @@ public class AppStandbyControllerTests {
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_FREQUENT,
                 REASON_PREDICTED, mInjector.mElapsedRealtime);
         assertBucket(STANDBY_BUCKET_FREQUENT);
+    }
+
+    @Test
+    public void testCascadingTimeouts() throws Exception {
+        setChargingState(mController, false);
+
+        reportEvent(mController, USER_INTERACTION, 0);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        reportEvent(mController, NOTIFICATION_SEEN, 1000);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_WORKING_SET,
+                REASON_PREDICTED, 1000);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_FREQUENT,
+                REASON_PREDICTED, 2000 + mController.mStrongUsageTimeoutMillis);
+        assertBucket(STANDBY_BUCKET_WORKING_SET);
+
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_FREQUENT,
+                REASON_PREDICTED, 2000 + mController.mNotificationSeenTimeoutMillis);
+        assertBucket(STANDBY_BUCKET_FREQUENT);
+    }
+
+    @Test
+    public void testOverlappingTimeouts() throws Exception {
+        setChargingState(mController, false);
+
+        reportEvent(mController, USER_INTERACTION, 0);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        reportEvent(mController, NOTIFICATION_SEEN, 1000);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        // Overlapping USER_INTERACTION before previous one times out
+        reportEvent(mController, USER_INTERACTION, mController.mStrongUsageTimeoutMillis - 1000);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        // Still in ACTIVE after first USER_INTERACTION times out
+        mInjector.mElapsedRealtime = mController.mStrongUsageTimeoutMillis + 1000;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_FREQUENT,
+                REASON_PREDICTED, mInjector.mElapsedRealtime);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        // Both timed out, so NOTIFICATION_SEEN timeout should be effective
+        mInjector.mElapsedRealtime = mController.mStrongUsageTimeoutMillis * 2 + 2000;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_FREQUENT,
+                REASON_PREDICTED, mInjector.mElapsedRealtime);
+        assertBucket(STANDBY_BUCKET_WORKING_SET);
+
+        mInjector.mElapsedRealtime = mController.mNotificationSeenTimeoutMillis + 2000;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
+                REASON_PREDICTED, mInjector.mElapsedRealtime);
+        assertBucket(STANDBY_BUCKET_RARE);
+    }
+
+    @Test
+    public void testPredictionNotOverridden() throws Exception {
+        setChargingState(mController, false);
+
+        reportEvent(mController, USER_INTERACTION, 0);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        mInjector.mElapsedRealtime = WORKING_SET_THRESHOLD - 1000;
+        reportEvent(mController, NOTIFICATION_SEEN, mInjector.mElapsedRealtime);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        // Falls back to WORKING_SET
+        mInjector.mElapsedRealtime += 5000;
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_WORKING_SET);
+
+        // Predict to ACTIVE
+        mInjector.mElapsedRealtime += 1000;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_ACTIVE,
+                REASON_PREDICTED, mInjector.mElapsedRealtime);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        // CheckIdleStates should not change the prediction
+        mInjector.mElapsedRealtime += 1000;
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
     }
 
     @Test
