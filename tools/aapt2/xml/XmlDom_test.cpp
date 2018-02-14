@@ -23,8 +23,10 @@
 #include "test/Test.h"
 
 using ::aapt::io::StringInputStream;
+using ::aapt::test::ValueEq;
 using ::testing::Eq;
 using ::testing::NotNull;
+using ::testing::Pointee;
 using ::testing::SizeIs;
 using ::testing::StrEq;
 
@@ -59,6 +61,16 @@ TEST(XmlDomTest, BinaryInflate) {
   doc->root->name = "Layout";
   doc->root->line_number = 2u;
 
+  xml::Attribute attr;
+  attr.name = "text";
+  attr.namespace_uri = kSchemaAndroid;
+  attr.compiled_attribute = AaptAttribute(
+      aapt::Attribute(android::ResTable_map::TYPE_REFERENCE | android::ResTable_map::TYPE_STRING),
+      ResourceId(0x01010001u));
+  attr.value = "@string/foo";
+  attr.compiled_value = test::BuildReference("string/foo", ResourceId(0x7f010000u));
+  doc->root->attributes.push_back(std::move(attr));
+
   NamespaceDecl decl;
   decl.uri = kSchemaAndroid;
   decl.prefix = "android";
@@ -66,7 +78,9 @@ TEST(XmlDomTest, BinaryInflate) {
   doc->root->namespace_decls.push_back(decl);
 
   BigBuffer buffer(4096);
-  XmlFlattener flattener(&buffer, {});
+  XmlFlattenerOptions options;
+  options.keep_raw_values = true;
+  XmlFlattener flattener(&buffer, options);
   ASSERT_TRUE(flattener.Consume(context.get(), doc.get()));
 
   auto block = util::Copy(buffer);
@@ -75,6 +89,21 @@ TEST(XmlDomTest, BinaryInflate) {
 
   EXPECT_THAT(new_doc->root->name, StrEq("Layout"));
   EXPECT_THAT(new_doc->root->line_number, Eq(2u));
+
+  ASSERT_THAT(new_doc->root->attributes, SizeIs(1u));
+  EXPECT_THAT(new_doc->root->attributes[0].name, StrEq("text"));
+  EXPECT_THAT(new_doc->root->attributes[0].namespace_uri, StrEq(kSchemaAndroid));
+
+  // We only check that the resource ID was preserved. There is no where to encode the types that
+  // the Attribute accepts (eg: string|reference).
+  ASSERT_TRUE(new_doc->root->attributes[0].compiled_attribute);
+  EXPECT_THAT(new_doc->root->attributes[0].compiled_attribute.value().id,
+              Eq(make_value(ResourceId(0x01010001u))));
+
+  EXPECT_THAT(new_doc->root->attributes[0].value, StrEq("@string/foo"));
+  EXPECT_THAT(new_doc->root->attributes[0].compiled_value,
+              Pointee(ValueEq(Reference(ResourceId(0x7f010000u)))));
+
   ASSERT_THAT(new_doc->root->namespace_decls, SizeIs(1u));
   EXPECT_THAT(new_doc->root->namespace_decls[0].uri, StrEq(kSchemaAndroid));
   EXPECT_THAT(new_doc->root->namespace_decls[0].prefix, StrEq("android"));

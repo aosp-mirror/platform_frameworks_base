@@ -139,6 +139,7 @@ class BinaryApkSerializer : public IApkSerializer {
     BigBuffer buffer(4096);
     XmlFlattenerOptions options = {};
     options.use_utf16 = utf16;
+    options.keep_raw_values = true;
     XmlFlattener flattener(&buffer, options);
     if (!flattener.Consume(context_, xml)) {
       return false;
