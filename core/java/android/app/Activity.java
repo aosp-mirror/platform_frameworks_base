@@ -7077,8 +7077,8 @@ public class Activity extends ContextThemeWrapper
 
                 String appName = getApplicationInfo().loadLabel(getPackageManager())
                         .toString();
-                String warning = "Detected problems with API compatiblity\n"
-                                 + "(please consult log for detail)";
+                String warning = "Detected problems with API compatibility\n"
+                                 + "(visit g.co/dev/appcompat for more info)";
                 if (isAppDebuggable) {
                     new AlertDialog.Builder(this)
                         .setTitle(appName)
