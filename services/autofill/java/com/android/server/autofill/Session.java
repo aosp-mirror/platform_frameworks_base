@@ -140,6 +140,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     /** Component that's being auto-filled */
     @NonNull private final ComponentName mComponentName;
 
+    /** Whether the app being autofilled is running in compat mode. */
+    private final boolean mCompatMode;
+
     @GuardedBy("mLock")
     private final ArrayMap<AutofillId, ViewState> mViewStates = new ArrayMap<>();
 
@@ -262,6 +265,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                             .addTaggedData(MetricsEvent.FIELD_AUTOFILL_FORGED_COMPONENT_NAME,
                                     componentNameFromApp == null ? "null"
                                             : componentNameFromApp.flattenToShortString()));
+                }
+                if (mCompatMode) {
+                    // Sanitize URL bar, if needed
+                    final String urlBarId = mService.getUrlBarResourceIdForCompatModeLocked(
+                            mComponentName.getPackageName());
+                    if (sDebug) Slog.d(TAG, "url_bar in compat mode: " + urlBarId);
+                    if (urlBarId != null) {
+                        Helper.sanitizeUrlBar(structure, urlBarId);
+                    }
                 }
                 structure.sanitizeForParceling(true);
 
@@ -476,7 +488,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             @NonNull IBinder client, boolean hasCallback, @NonNull LocalLog uiLatencyHistory,
             @NonNull LocalLog wtfHistory,
             @NonNull ComponentName serviceComponentName, @NonNull ComponentName componentName,
-            int flags) {
+            boolean compatMode, int flags) {
         id = sessionId;
         mFlags = flags;
         this.uid = uid;
@@ -491,6 +503,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mUiLatencyHistory = uiLatencyHistory;
         mWtfHistory = wtfHistory;
         mComponentName = componentName;
+        mCompatMode = compatMode;
         mClient = IAutoFillManagerClient.Stub.asInterface(client);
 
         mMetricsLogger.write(newLogMaker(MetricsEvent.AUTOFILL_SESSION_STARTED)
@@ -1537,7 +1550,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final int numContexts = mContexts.size();
         for (int i = numContexts - 1; i >= 0; i--) {
             final FillContext context = mContexts.get(i);
-            final ViewNode node = context.findViewNodeByAutofillId(id);
+            final ViewNode node = Helper.findViewNodeByAutofillId(context.getStructure(), id);
             if (node != null) {
                 final AutofillValue value = node.getAutofillValue();
                 if (sDebug) {
@@ -1561,7 +1574,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         for (int i = numContexts - 1; i >= 0; i--) {
             final FillContext context = mContexts.get(i);
-            final ViewNode node = context.findViewNodeByAutofillId(id);
+            final ViewNode node = Helper.findViewNodeByAutofillId(context.getStructure(), id);
             if (node != null && node.getAutofillOptions() != null) {
                 return node.getAutofillOptions();
             }
@@ -2288,6 +2301,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         pw.print(prefix); pw.print("mHasCallback: "); pw.println(mHasCallback);
         pw.print(prefix); pw.print("mClientState: "); pw.println(
                 Helper.bundleToString(mClientState));
+        pw.print(prefix); pw.print("mCompatMode: "); pw.println(mCompatMode);
         pw.print(prefix); pw.print("mSelectedDatasetIds: "); pw.println(mSelectedDatasetIds);
         mRemoteFillService.dump(prefix, pw);
     }

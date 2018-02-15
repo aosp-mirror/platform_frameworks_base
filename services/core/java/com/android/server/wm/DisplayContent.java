@@ -380,11 +380,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     private int mSurfaceSize;
 
-    /**
-     * A list of surfaces to be destroyed after {@link #mPendingTransaction} is applied.
-     */
-    private final ArrayList<SurfaceControl> mPendingDestroyingSurfaces = new ArrayList<>();
-
     /** Temporary float array to retrieve 3x3 matrix values. */
     private final float[] mTmpFloats = new float[9];
 
@@ -1935,10 +1930,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 }
             }
             mService.mAnimator.removeDisplayLocked(mDisplayId);
-
-            // The pending transaction won't be applied so we should
-            // just clean up any surfaces pending destruction.
-            onPendingTransactionApplied();
         } finally {
             mRemovingDisplay = false;
         }
@@ -3533,39 +3524,47 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         @Override
         void assignChildLayers(SurfaceControl.Transaction t) {
+            assignStackOrdering(t);
 
+            for (int i = 0; i < mChildren.size(); i++) {
+                final TaskStack s = mChildren.get(i);
+                s.assignChildLayers(t);
+            }
+        }
+
+        void assignStackOrdering(SurfaceControl.Transaction t) {
             final int HOME_STACK_STATE = 0;
             final int NORMAL_STACK_STATE = 1;
             final int ALWAYS_ON_TOP_STATE = 2;
 
             int layer = 0;
+            int layerForAnimationLayer = 0;
+
             for (int state = 0; state <= ALWAYS_ON_TOP_STATE; state++) {
                 for (int i = 0; i < mChildren.size(); i++) {
                     final TaskStack s = mChildren.get(i);
-                    if (state == HOME_STACK_STATE && s.isActivityTypeHome()) {
-                        s.assignLayer(t, layer++);
-                    } else if (state == NORMAL_STACK_STATE && !s.isActivityTypeHome()
-                            && !s.isAlwaysOnTop()) {
-                        s.assignLayer(t, layer++);
-                        if (s.inSplitScreenWindowingMode() && mSplitScreenDividerAnchor != null) {
-                            t.setLayer(mSplitScreenDividerAnchor, layer++);
-                        }
-                    } else if (state == ALWAYS_ON_TOP_STATE && s.isAlwaysOnTop()) {
-                        s.assignLayer(t, layer++);
+                    if (state == HOME_STACK_STATE && !s.isActivityTypeHome()) {
+                        continue;
+                    } else if (state == NORMAL_STACK_STATE && (s.isActivityTypeHome()
+                            || s.isAlwaysOnTop())) {
+                        continue;
+                    } else if (state == ALWAYS_ON_TOP_STATE && !s.isAlwaysOnTop()) {
+                        continue;
+                    }
+                    s.assignLayer(t, layer++);
+                    if (s.inSplitScreenWindowingMode() && mSplitScreenDividerAnchor != null) {
+                        t.setLayer(mSplitScreenDividerAnchor, layer++);
+                    }
+                    if (s.isSelfOrChildAnimating()) {
+                        // Ensure the animation layer ends up above the
+                        // highest animating stack and no higher.
+                        layerForAnimationLayer = layer++;
                     }
                 }
-                // The appropriate place for App-Transitions to occur is right
-                // above all other animations but still below things in the Picture-and-Picture
-                // windowing mode.
-                if (state == NORMAL_STACK_STATE && mAppAnimationLayer != null) {
-                    t.setLayer(mAppAnimationLayer, layer++);
-                }
             }
-            for (int i = 0; i < mChildren.size(); i++) {
-                final TaskStack s = mChildren.get(i);
-                s.assignChildLayers(t);
+            if (mAppAnimationLayer != null) {
+                t.setLayer(mAppAnimationLayer, layerForAnimationLayer);
             }
-
         }
 
         @Override
@@ -3847,22 +3846,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     @Override
-    public void destroyAfterPendingTransaction(SurfaceControl surface) {
-        mPendingDestroyingSurfaces.add(surface);
-    }
-
-    /**
-     * Destroys any surfaces that have been put into the pending list with
-     * {@link #destroyAfterPendingTransaction}.
-     */
-    void onPendingTransactionApplied() {
-        for (int i = mPendingDestroyingSurfaces.size() - 1; i >= 0; i--) {
-            mPendingDestroyingSurfaces.get(i).destroy();
-        }
-        mPendingDestroyingSurfaces.clear();
-    }
-
-    @Override
     void prepareSurfaces() {
         final ScreenRotationAnimation screenRotationAnimation =
                 mService.mAnimator.getScreenRotationAnimationLocked(mDisplayId);
@@ -3876,6 +3859,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mPendingTransaction.setAlpha(mWindowingLayer,
                     screenRotationAnimation.getEnterTransformation().getAlpha());
         }
+
         super.prepareSurfaces();
+    }
+
+    void assignStackOrdering(SurfaceControl.Transaction t) {
+        mTaskStackContainers.assignStackOrdering(t);
     }
 }

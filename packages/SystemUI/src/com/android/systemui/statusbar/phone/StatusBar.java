@@ -111,6 +111,7 @@ import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.RemoteAnimationAdapter;
 import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.ViewGroup;
@@ -2849,7 +2850,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             int result = ActivityManager.START_CANCELED;
             ActivityOptions options = new ActivityOptions(getActivityOptions(
-                    null /* sourceNotification */));
+                    null /* remoteAnimation */));
             options.setDisallowEnterPictureInPictureWhileLaunching(
                     disallowEnterPictureInPictureWhileLaunching);
             if (intent == KeyguardBottomAreaView.INSECURE_CAMERA_INTENT) {
@@ -5001,11 +5002,15 @@ public class StatusBar extends SystemUI implements DemoMode,
                         fillInIntent = new Intent().putExtra(Notification.EXTRA_REMOTE_INPUT_DRAFT,
                                 remoteInputText.toString());
                     }
+                    RemoteAnimationAdapter adapter = mActivityLaunchAnimator.getLaunchAnimation(
+                            row);
                     try {
+                        ActivityManager.getService().registerRemoteAnimationForNextActivityStart(
+                                intent.getCreatorPackage(), adapter);
                         launchResult = intent.sendAndReturnResult(mContext, 0, fillInIntent, null,
-                                null, null, getActivityOptions(row));
+                                null, null, getActivityOptions(adapter));
                         mActivityLaunchAnimator.setLaunchResult(launchResult);
-                    } catch (PendingIntent.CanceledException e) {
+                    } catch (RemoteException | PendingIntent.CanceledException e) {
                         // the stack trace isn't very helpful here.
                         // Just log the exception message.
                         Log.w(TAG, "Sending contentIntent failed: " + e);
@@ -5165,7 +5170,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             AsyncTask.execute(() -> {
                 int launchResult = TaskStackBuilder.create(mContext)
                         .addNextIntentWithParentStack(intent)
-                        .startActivities(getActivityOptions(row),
+                        .startActivities(getActivityOptions(
+                                mActivityLaunchAnimator.getLaunchAnimation(row)),
                                 new UserHandle(UserHandle.getUserId(appUid)));
                 mActivityLaunchAnimator.setLaunchResult(launchResult);
                 if (shouldCollapse()) {
@@ -5300,7 +5306,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 }
                 try {
                     intent.send(null, 0, null, null, null, null, getActivityOptions(
-                            null /* sourceNotification */));
+                            null /* animationAdapter */));
                 } catch (PendingIntent.CanceledException e) {
                     // the stack trace isn't very helpful here.
                     // Just log the exception message.
@@ -5328,10 +5334,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         return true;
     }
 
-    protected Bundle getActivityOptions(ExpandableNotificationRow sourceNotification) {
+    protected Bundle getActivityOptions(@Nullable RemoteAnimationAdapter animationAdapter) {
         ActivityOptions options;
-        if (sourceNotification != null) {
-            options = mActivityLaunchAnimator.getLaunchAnimation(sourceNotification);
+        if (animationAdapter != null) {
+            options = ActivityOptions.makeRemoteAnimation(animationAdapter);
         } else {
             options = ActivityOptions.makeBasic();
         }

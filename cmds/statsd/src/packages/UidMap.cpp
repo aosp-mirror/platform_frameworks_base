@@ -16,6 +16,7 @@
 #define DEBUG true  // STOPSHIP if true
 #include "Log.h"
 
+#include "stats_log_util.h"
 #include "guardrail/StatsdStats.h"
 #include "packages/UidMap.h"
 
@@ -82,7 +83,7 @@ int64_t UidMap::getAppVersion(int uid, const string& packageName) const {
 
 void UidMap::updateMap(const vector<int32_t>& uid, const vector<int64_t>& versionCode,
                        const vector<String16>& packageName) {
-    updateMap(time(nullptr) * NS_PER_SEC, uid, versionCode, packageName);
+    updateMap(getElapsedRealtimeNs(), uid, versionCode, packageName);
 }
 
 void UidMap::updateMap(const int64_t& timestamp, const vector<int32_t>& uid,
@@ -98,7 +99,7 @@ void UidMap::updateMap(const int64_t& timestamp, const vector<int32_t>& uid,
         }
 
         auto snapshot = mOutput.add_snapshots();
-        snapshot->set_timestamp_nanos(timestamp);
+        snapshot->set_elapsed_timestamp_nanos(timestamp);
         for (size_t j = 0; j < uid.size(); j++) {
             auto t = snapshot->add_package_info();
             t->set_name(string(String8(packageName[j]).string()));
@@ -125,7 +126,7 @@ void UidMap::updateMap(const int64_t& timestamp, const vector<int32_t>& uid,
 }
 
 void UidMap::updateApp(const String16& app_16, const int32_t& uid, const int64_t& versionCode) {
-    updateApp(time(nullptr) * NS_PER_SEC, app_16, uid, versionCode);
+    updateApp(getElapsedRealtimeNs(), app_16, uid, versionCode);
 }
 
 void UidMap::updateApp(const int64_t& timestamp, const String16& app_16, const int32_t& uid,
@@ -137,7 +138,7 @@ void UidMap::updateApp(const int64_t& timestamp, const String16& app_16, const i
 
         auto log = mOutput.add_changes();
         log->set_deletion(false);
-        log->set_timestamp_nanos(timestamp);
+        log->set_elapsed_timestamp_nanos(timestamp);
         log->set_app(appName);
         log->set_uid(uid);
         log->set_version(versionCode);
@@ -194,7 +195,7 @@ void UidMap::ensureBytesUsedBelowLimit() {
 }
 
 void UidMap::removeApp(const String16& app_16, const int32_t& uid) {
-    removeApp(time(nullptr) * NS_PER_SEC, app_16, uid);
+    removeApp(getElapsedRealtimeNs(), app_16, uid);
 }
 
 void UidMap::getListenerListCopyLocked(vector<wp<PackageInfoListener>>* output) {
@@ -218,7 +219,7 @@ void UidMap::removeApp(const int64_t& timestamp, const String16& app_16, const i
 
         auto log = mOutput.add_changes();
         log->set_deletion(true);
-        log->set_timestamp_nanos(timestamp);
+        log->set_elapsed_timestamp_nanos(timestamp);
         log->set_app(app);
         log->set_uid(uid);
         mBytesUsed += log->ByteSize();
@@ -305,7 +306,7 @@ size_t UidMap::getBytesUsed() const {
 }
 
 UidMapping UidMap::getOutput(const ConfigKey& key) {
-    return getOutput(time(nullptr) * NS_PER_SEC, key);
+    return getOutput(getElapsedRealtimeNs(), key);
 }
 
 UidMapping UidMap::getOutput(const int64_t& timestamp, const ConfigKey& key) {
@@ -321,7 +322,7 @@ UidMapping UidMap::getOutput(const int64_t& timestamp, const ConfigKey& key) {
         auto snapshots = mOutput.mutable_snapshots();
         auto it_snapshots = snapshots->cbegin();
         while (it_snapshots != snapshots->cend()) {
-            if (it_snapshots->timestamp_nanos() < cutoff_nanos) {
+            if (it_snapshots->elapsed_timestamp_nanos() < cutoff_nanos) {
                 // it_snapshots points to the following element after erasing.
                 it_snapshots = snapshots->erase(it_snapshots);
             } else {
@@ -331,7 +332,7 @@ UidMapping UidMap::getOutput(const int64_t& timestamp, const ConfigKey& key) {
         auto deltas = mOutput.mutable_changes();
         auto it_deltas = deltas->cbegin();
         while (it_deltas != deltas->cend()) {
-            if (it_deltas->timestamp_nanos() < cutoff_nanos) {
+            if (it_deltas->elapsed_timestamp_nanos() < cutoff_nanos) {
                 // it_snapshots points to the following element after erasing.
                 it_deltas = deltas->erase(it_deltas);
             } else {
@@ -343,7 +344,7 @@ UidMapping UidMap::getOutput(const int64_t& timestamp, const ConfigKey& key) {
             // Produce another snapshot. This results in extra data being uploaded but helps
             // ensure we can re-construct the UID->app name, versionCode mapping in server.
             auto snapshot = mOutput.add_snapshots();
-            snapshot->set_timestamp_nanos(timestamp);
+            snapshot->set_elapsed_timestamp_nanos(timestamp);
             for (auto it : mMap) {
                 auto t = snapshot->add_package_info();
                 t->set_name(it.second.packageName);

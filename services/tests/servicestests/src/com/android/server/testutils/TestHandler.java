@@ -16,10 +16,11 @@
 package com.android.server.testutils;
 
 
-import static android.util.ExceptionUtils.getRootCause;
+import static android.util.ExceptionUtils.appendCause;
 import static android.util.ExceptionUtils.propagate;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.util.ArrayMap;
@@ -60,7 +61,7 @@ public class TestHandler extends Handler {
     }
 
     public TestHandler(Callback callback, LongSupplier clock) {
-        super(callback);
+        super(Looper.getMainLooper(), callback);
         mClock = clock;
     }
 
@@ -132,7 +133,7 @@ public class TestHandler extends Handler {
         } catch (Throwable t) {
             // Append stack trace of this message being posted as a cause for a helpful
             // test error message
-            throw propagate(getRootCause(t).initCause(msg.postPoint));
+            throw propagate(appendCause(t, msg.postPoint));
         } finally {
             msg.message.recycle();
         }

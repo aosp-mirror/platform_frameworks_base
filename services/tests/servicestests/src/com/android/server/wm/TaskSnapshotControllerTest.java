@@ -29,6 +29,7 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.ArraySet;
 
+import com.google.android.collect.Sets;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -69,6 +70,21 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         final ArraySet<AppWindowToken> closingApps = new ArraySet<>();
         closingApps.add(closingWindow.mAppToken);
         final ArraySet<Task> closingTasks = new ArraySet<>();
+        sWm.mTaskSnapshotController.getClosingTasks(closingApps, closingTasks);
+        assertEquals(0, closingTasks.size());
+    }
+
+    @Test
+    public void testGetClosingApps_skipClosingAppsSnapshotTasks() throws Exception {
+        final WindowState closingWindow = createWindow(null, FIRST_APPLICATION_WINDOW,
+                "closingWindow");
+        closingWindow.mAppToken.setVisibility(null, false /* visible */, TRANSIT_UNSET,
+                true /* performLayout */, false /* isVoiceInteraction */);
+        final ArraySet<AppWindowToken> closingApps = new ArraySet<>();
+        closingApps.add(closingWindow.mAppToken);
+        final ArraySet<Task> closingTasks = new ArraySet<>();
+        sWm.mTaskSnapshotController.addSkipClosingAppSnapshotTasks(
+                Sets.newArraySet(closingWindow.mAppToken.getTask()));
         sWm.mTaskSnapshotController.getClosingTasks(closingApps, closingTasks);
         assertEquals(0, closingTasks.size());
     }

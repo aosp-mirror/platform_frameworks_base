@@ -40,6 +40,7 @@ import android.graphics.drawable.AnimatedVectorDrawable;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.support.annotation.ColorInt;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -75,6 +76,11 @@ import com.android.systemui.statusbar.policy.TintedKeyButtonDrawable;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.function.Consumer;
+
+import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_DISABLE_QUICK_SCRUB;
+import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_DISABLE_SWIPE_UP;
+import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_HIDE_BACK_BUTTON;
+import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_SHOW_OVERVIEW_BUTTON;
 
 public class NavigationBarView extends FrameLayout implements PluginListener<NavGesture> {
     final static boolean DEBUG = false;
@@ -372,6 +378,19 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         return getRecentsButton().getVisibility() == View.VISIBLE;
     }
 
+    public boolean isQuickStepSwipeUpEnabled() {
+        return mOverviewProxyService.getProxy() != null
+                && ((mOverviewProxyService.getInteractionFlags()
+                        & FLAG_DISABLE_SWIPE_UP) == 0);
+    }
+
+    public boolean isQuickScrubEnabled() {
+        return SystemProperties.getBoolean("persist.quickstep.scrub.enabled", true)
+                && mOverviewProxyService.getProxy() != null && !isRecentsButtonVisible()
+                && ((mOverviewProxyService.getInteractionFlags()
+                        & FLAG_DISABLE_QUICK_SCRUB) == 0);
+    }
+
     private void updateCarModeIcons(Context ctx) {
         mBackCarModeIcon = getDrawable(ctx,
                 R.drawable.ic_sysbar_back_carmode, R.drawable.ic_sysbar_back_carmode);
@@ -391,20 +410,20 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         }
         if (oldConfig.densityDpi != newConfig.densityDpi
                 || oldConfig.getLayoutDirection() != newConfig.getLayoutDirection()) {
-            final boolean proxyAvailable = mOverviewProxyService.getProxy() != null;
-            mBackIcon = proxyAvailable
+            final boolean quickStepEnabled = isQuickStepSwipeUpEnabled() || isQuickScrubEnabled();
+            mBackIcon = quickStepEnabled
                     ? getDrawable(ctx, R.drawable.ic_sysbar_back_quick_step,
                             R.drawable.ic_sysbar_back_quick_step_dark)
                     : getDrawable(ctx, R.drawable.ic_sysbar_back, R.drawable.ic_sysbar_back_dark);
             mBackLandIcon = mBackIcon;
-            mBackAltIcon = proxyAvailable
+            mBackAltIcon = quickStepEnabled
                     ? getDrawable(ctx, R.drawable.ic_sysbar_back_ime_quick_step,
                             R.drawable.ic_sysbar_back_ime_quick_step_dark)
                     : getDrawable(ctx, R.drawable.ic_sysbar_back_ime,
                             R.drawable.ic_sysbar_back_ime_dark);
             mBackAltLandIcon = mBackAltIcon;
 
-            mHomeDefaultIcon = proxyAvailable
+            mHomeDefaultIcon = quickStepEnabled
                     ? getDrawable(ctx, R.drawable.ic_sysbar_home_quick_step,
                             R.drawable.ic_sysbar_home_quick_step_dark)
                     : getDrawable(ctx, R.drawable.ic_sysbar_home, R.drawable.ic_sysbar_home_dark);
@@ -555,9 +574,14 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             disableBack = false;
             disableRecent = false;
         }
+
         if (mOverviewProxyService.getProxy() != null) {
-            // When overview is connected to the launcher service, disable the recents button
-            disableRecent = true;
+            // When overview is connected to the launcher service, disable the recents button by
+            // default unless overwritten by interaction flags. Similar with the back button but
+            // shown by default.
+            final int flags = mOverviewProxyService.getInteractionFlags();
+            disableRecent |= (flags & FLAG_SHOW_OVERVIEW_BUTTON) == 0;
+            disableBack |= (flags & FLAG_HIDE_BACK_BUTTON) != 0;
         }
 
         ViewGroup navButtons = (ViewGroup) getCurrentView().findViewById(R.id.nav_buttons);
@@ -633,6 +657,11 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     public void onPanelExpandedChange(boolean expanded) {
         updateSlippery();
+    }
+
+    public void updateStates() {
+        updateSlippery();
+        setDisabledFlags(mDisabledFlags, true);
     }
 
     private void updateSlippery() {
@@ -794,9 +823,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     }
 
     public void onOverviewProxyConnectionChanged(boolean isConnected) {
-        setSlippery(!isConnected);
-        setDisabledFlags(mDisabledFlags, true);
-        setUpSwipeUpOnboarding(isConnected);
+        updateStates();
+        setUpSwipeUpOnboarding(isQuickStepSwipeUpEnabled());
         updateIcons(getContext(), Configuration.EMPTY, mConfiguration);
         setNavigationIconHints(mNavigationIconHints, true);
     }

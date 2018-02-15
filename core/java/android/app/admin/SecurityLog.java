@@ -78,6 +78,8 @@ public class SecurityLog {
             TAG_CERT_AUTHORITY_INSTALLED,
             TAG_CERT_AUTHORITY_REMOVED,
             TAG_CRYPTO_SELF_TEST_COMPLETED,
+            TAG_KEY_INTEGRITY_VIOLATION,
+            TAG_CERT_VALIDATION_FAILURE,
     })
     public @interface SecurityLogTag {}
 
@@ -317,6 +319,7 @@ public class SecurityLog {
      * {@link SecurityEvent#getData()}:
      * <li> [0] admin package name ({@code String}),
      * <li> [1] admin user ID ({@code Integer}).
+     * <li> [2] target user ID ({@code Integer})
      */
     public static final int TAG_REMOTE_LOCK = SecurityLogTags.SECURITY_REMOTE_LOCK;
 
@@ -407,6 +410,23 @@ public class SecurityLog {
      */
     public static final int TAG_CRYPTO_SELF_TEST_COMPLETED =
             SecurityLogTags.SECURITY_CRYPTO_SELF_TEST_COMPLETED;
+
+    /**
+     * Indicates a failed cryptographic key integrity check. The log entry contains the following
+     * information about the event, encapsulated in an {@link Object} array and accessible via
+     * {@link SecurityEvent#getData()}:
+     * <li> [0] alias of the key ({@code String})
+     * <li> [1] owner application uid ({@code Integer}).
+     */
+    public static final int TAG_KEY_INTEGRITY_VIOLATION =
+            SecurityLogTags.SECURITY_KEY_INTEGRITY_VIOLATION;
+
+    /**
+     * Indicates a failure to validate X.509v3 certificate. The log entry contains a {@code String}
+     * payload indicating the failure reason, accessible via {@link SecurityEvent#getData()}.
+     */
+    public static final int TAG_CERT_VALIDATION_FAILURE =
+            SecurityLogTags.SECURITY_CERT_VALIDATION_FAILURE;
 
     /**
      * Event severity level indicating that the event corresponds to normal workflow.
@@ -548,7 +568,10 @@ public class SecurityLog {
                     return getSuccess() ? LEVEL_INFO : LEVEL_WARNING;
                 case TAG_LOG_BUFFER_SIZE_CRITICAL:
                 case TAG_WIPE_FAILURE:
+                case TAG_KEY_INTEGRITY_VIOLATION:
                     return LEVEL_ERROR;
+                case TAG_CERT_VALIDATION_FAILURE:
+                    return LEVEL_WARNING;
                 default:
                     return LEVEL_INFO;
             }

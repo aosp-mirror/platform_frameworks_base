@@ -113,38 +113,6 @@ public class AccessPointTest {
     }
 
     @Test
-    public void testCopyAccessPoint_dataShouldMatch() {
-        WifiConfiguration configuration = createWifiConfiguration();
-        configuration.meteredHint = true;
-
-        NetworkInfo networkInfo =
-                new NetworkInfo(ConnectivityManager.TYPE_WIFI, 2, "WIFI", "WIFI_SUBTYPE");
-        AccessPoint originalAccessPoint = new AccessPoint(mContext, configuration);
-        WifiInfo wifiInfo = new WifiInfo();
-        wifiInfo.setSSID(WifiSsid.createFromAsciiEncoded(configuration.SSID));
-        wifiInfo.setBSSID(configuration.BSSID);
-        originalAccessPoint.update(configuration, wifiInfo, networkInfo);
-        AccessPoint copy = new AccessPoint(mContext, originalAccessPoint);
-
-        assertThat(originalAccessPoint.getSsid().toString()).isEqualTo(copy.getSsid().toString());
-        assertThat(originalAccessPoint.getBssid()).isEqualTo(copy.getBssid());
-        assertThat(originalAccessPoint.getConfig()).isEqualTo(copy.getConfig());
-        assertThat(originalAccessPoint.getSecurity()).isEqualTo(copy.getSecurity());
-        assertThat(originalAccessPoint.isMetered()).isEqualTo(copy.isMetered());
-        assertThat(originalAccessPoint.compareTo(copy) == 0).isTrue();
-    }
-
-    @Test
-    public void testThatCopyAccessPoint_scanCacheShouldMatch() {
-        AccessPoint original = createAccessPointWithScanResultCache();
-        assertThat(original.getRssi()).isEqualTo(4);
-        AccessPoint copy = new AccessPoint(mContext, createWifiConfiguration());
-        assertThat(copy.getRssi()).isEqualTo(AccessPoint.UNREACHABLE_RSSI);
-        copy.copyFrom(original);
-        assertThat(original.getRssi()).isEqualTo(copy.getRssi());
-    }
-
-    @Test
     public void testCompareTo_GivesActiveBeforeInactive() {
         AccessPoint activeAp = new TestAccessPointBuilder(mContext).setActive(true).build();
         AccessPoint inactiveAp = new TestAccessPointBuilder(mContext).setActive(false).build();

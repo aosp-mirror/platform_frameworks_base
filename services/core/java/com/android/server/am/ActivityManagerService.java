@@ -38,7 +38,6 @@ import static android.app.ActivityManagerInternal.ASSIST_KEY_STRUCTURE;
 import static android.app.ActivityThread.PROC_START_SEQ_IDENT;
 import static android.app.AppOpsManager.OP_ASSIST_STRUCTURE;
 import static android.app.AppOpsManager.OP_NONE;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
@@ -381,6 +380,7 @@ import android.util.proto.ProtoUtils;
 import android.view.Gravity;
 import android.view.IRecentsAnimationRunner;
 import android.view.LayoutInflater;
+import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.View;
 import android.view.WindowManager;
@@ -454,7 +454,6 @@ import com.android.server.pm.Installer.InstallerException;
 import com.android.server.utils.PriorityDump;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.PinnedStackWindowController;
-import com.android.server.wm.RecentsAnimationController;
 import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;
@@ -1908,6 +1907,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     final ActivityManagerConstants mConstants;
 
+    // Encapsulates the global setting "hidden_api_blacklist_exemptions"
+    final HiddenApiBlacklist mHiddenApiBlacklist;
+
     PackageManagerInternal mPackageManagerInt;
 
     // VoiceInteraction session ID that changes for each new request except when
@@ -2825,6 +2827,42 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    /**
+     * Encapsulates the globla setting "hidden_api_blacklist_exemptions", including tracking the
+     * latest value via a content observer.
+     */
+    static class HiddenApiBlacklist extends ContentObserver {
+
+        private final Context mContext;
+        private boolean mBlacklistDisabled;
+
+        public HiddenApiBlacklist(Handler handler, Context context) {
+            super(handler);
+            mContext = context;
+        }
+
+        public void registerObserver() {
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.HIDDEN_API_BLACKLIST_EXEMPTIONS),
+                    false,
+                    this);
+            update();
+        }
+
+        private void update() {
+            mBlacklistDisabled = "*".equals(Settings.Global.getString(mContext.getContentResolver(),
+                    Settings.Global.HIDDEN_API_BLACKLIST_EXEMPTIONS));
+        }
+
+        boolean isDisabled() {
+            return mBlacklistDisabled;
+        }
+
+        public void onChange(boolean selfChange) {
+            update();
+        }
+    }
+
     @VisibleForTesting
     public ActivityManagerService(Injector injector) {
         mInjector = injector;
@@ -2859,6 +2897,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mLifecycleManager = null;
         mProcStartHandlerThread = null;
         mProcStartHandler = null;
+        mHiddenApiBlacklist = null;
     }
 
     // Note: This method is invoked on the main thread but may need to attach various
@@ -3001,6 +3040,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
         };
+
+        mHiddenApiBlacklist = new HiddenApiBlacklist(mHandler, mContext);
 
         Watchdog.getInstance().addMonitor(this);
         Watchdog.getInstance().addThread(mHandler);
@@ -4090,9 +4131,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 runtimeFlags |= Zygote.ONLY_USE_SYSTEM_OAT_FILES;
             }
 
-            if (!app.info.isAllowedToUseHiddenApi()) {
-                // This app is not allowed to use undocumented and private APIs.
-                // Set up its runtime with the appropriate flag.
+            if (!app.info.isAllowedToUseHiddenApi() && !mHiddenApiBlacklist.isDisabled()) {
+                // This app is not allowed to use undocumented and private APIs, or blacklisting is
+                // enabled. Set up its runtime with the appropriate flag.
                 runtimeFlags |= Zygote.ENABLE_HIDDEN_API_CHECKS;
             }
 
@@ -10059,6 +10100,75 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
+     * Updates (grants or revokes) a persitable URI permission.
+     *
+     * @param uri URI to be granted or revoked.
+     * @param prefix if {@code false}, permission apply to this specific URI; if {@code true}, it
+     * applies to all URIs that are prefixed by this URI.
+     * @param packageName target package.
+     * @param grant if {@code true} a new permission will be granted, otherwise an existing
+     * permission will be revoked.
+     * @param userId user handle
+     *
+     * @return whether or not the requested succeeded.
+     *
+     * @deprecated TODO(b/72055774): caller should use takePersistableUriPermission() or
+     * releasePersistableUriPermission() instead, but such change will be made in a separate CL
+     * so it can be easily reverted if it breaks existing functionality.
+     */
+    @Deprecated // STOPSHIP if not removed
+    @Override
+    public boolean updatePersistableUriPermission(Uri uri, boolean prefix, String packageName,
+            boolean grant, int userId) {
+        enforceCallingPermission(android.Manifest.permission.GET_APP_GRANTED_URI_PERMISSIONS,
+                "updatePersistableUriPermission");
+        final int uid = mPackageManagerInt.getPackageUid(packageName, 0, userId);
+
+        final GrantUri grantUri = new GrantUri(userId, uri, prefix);
+
+        boolean persistChanged = false;
+        synchronized (this) {
+            if (grant) { // Grant
+                final String authority = uri.getAuthority();
+                final ProviderInfo pi = getProviderInfoLocked(authority, userId, 0);
+                if (pi == null) {
+                    Slog.w(TAG, "No content provider found for authority " + authority);
+                    return false;
+                }
+                final UriPermission permission = findOrCreateUriPermissionLocked(pi.packageName,
+                        packageName, uid, grantUri);
+                if (permission.isNew()) {
+                    final int modeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
+                    permission.initPersistedModes(modeFlags, System.currentTimeMillis());
+                    persistChanged = true;
+                } else {
+                    // Caller should not try to grant permission that is already granted.
+                    Slog.w(TAG_URI_PERMISSION,
+                            "permission already granted for " + grantUri.toSafeString());
+                    return false;
+                }
+                persistChanged |= maybePrunePersistedUriGrantsLocked(uid);
+            } else { // Revoke
+                final UriPermission permission = findUriPermissionLocked(uid, grantUri);
+                if (permission == null) {
+                    // Caller should not try to revoke permission that is not granted.
+                    Slog.v(TAG_URI_PERMISSION, "no permission for " + grantUri.toSafeString());
+                    return false;
+                } else {
+                    permission.modeFlags = 0;
+                    removeUriPermissionIfNeededLocked(permission);
+                    persistChanged = true;
+                }
+            }
+            if (persistChanged) {
+                schedulePersistUriGrants();
+            }
+        }
+        return true;
+    }
+
+    /**
      * @param uri This uri must NOT contain an embedded userId.
      * @param userId The userId in which the uri is to be resolved.
      */
@@ -11322,9 +11432,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             throw new IllegalArgumentException("Invalid task, not in foreground");
         }
 
-        // When a task is locked, dismiss the pinned stack if it exists
-        mStackSupervisor.removeStacksInWindowingModes(WINDOWING_MODE_PINNED);
-
         // {@code isSystemCaller} is used to distinguish whether this request is initiated by the
         // system or a specific app.
         // * System-initiated requests will only start the pinned mode (screen pinning)
@@ -11334,6 +11441,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int callingUid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
         try {
+            // When a task is locked, dismiss the pinned stack if it exists
+            mStackSupervisor.removeStacksInWindowingModes(WINDOWING_MODE_PINNED);
+
             mLockTaskController.startLockTaskMode(task, isSystemCaller, callingUid);
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -14578,6 +14688,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 NETWORK_ACCESS_TIMEOUT_MS, NETWORK_ACCESS_TIMEOUT_DEFAULT_MS);
         final boolean supportsLeanbackOnly =
                 mContext.getPackageManager().hasSystemFeature(FEATURE_LEANBACK_ONLY);
+        mHiddenApiBlacklist.registerObserver();
 
         // Transfer any global setting for forcing RTL layout, into a System Property
         SystemProperties.set(DEVELOPMENT_FORCE_RTL, forceRtl ? "1":"0");
@@ -18550,6 +18661,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         final long myTotalPss = mi.getTotalPss();
                         final long myTotalSwapPss = mi.getTotalSwappedOutPss();
                         totalPss += myTotalPss;
+                        totalSwapPss += myTotalSwapPss;
                         nativeProcTotalPss += myTotalPss;
 
                         MemItem pssItem = new MemItem(st.name + " (pid " + st.pid + ")",
@@ -26289,6 +26401,22 @@ public class ActivityManagerService extends IActivityManager.Stub
             final long origId = Binder.clearCallingIdentity();
             try {
                 r.registerRemoteAnimations(definition);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
+        }
+    }
+
+    @Override
+    public void registerRemoteAnimationForNextActivityStart(String packageName,
+            RemoteAnimationAdapter adapter) throws RemoteException {
+        enforceCallingPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS,
+                "registerRemoteAnimationForNextActivityStart");
+        synchronized (this) {
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                mActivityStartController.registerRemoteAnimationForNextActivityStart(packageName,
+                        adapter);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }

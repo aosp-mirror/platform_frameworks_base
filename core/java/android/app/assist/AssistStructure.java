@@ -1303,6 +1303,17 @@ public class AssistStructure implements Parcelable {
         }
 
         /**
+         * @hide
+         */
+        public void setWebDomain(@Nullable String domain) {
+            if (domain == null) return;
+
+            final Uri uri = Uri.parse(domain);
+            mWebScheme = uri.getScheme();
+            mWebDomain = uri.getHost();
+        }
+
+        /**
          * Returns the scheme of the HTML document represented by this view.
          *
          * <p>Typically used when the view associated with the view is a container for an HTML
@@ -1889,14 +1900,7 @@ public class AssistStructure implements Parcelable {
 
         @Override
         public void setWebDomain(@Nullable String domain) {
-            if (domain == null) {
-                mNode.mWebScheme = null;
-                mNode.mWebDomain = null;
-                return;
-            }
-            Uri uri = Uri.parse(domain);
-            mNode.mWebScheme = uri.getScheme();
-            mNode.mWebDomain = uri.getHost();
+            mNode.setWebDomain(domain);
         }
 
         @Override

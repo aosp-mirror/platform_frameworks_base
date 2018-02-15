@@ -52,10 +52,10 @@ const int FIELD_ID_DIMENSION_IN_WHAT = 1;
 const int FIELD_ID_DIMENSION_IN_CONDITION = 2;
 const int FIELD_ID_BUCKET_INFO = 3;
 // for GaugeBucketInfo
-const int FIELD_ID_START_BUCKET_NANOS = 1;
-const int FIELD_ID_END_BUCKET_NANOS = 2;
+const int FIELD_ID_START_BUCKET_ELAPSED_NANOS = 1;
+const int FIELD_ID_END_BUCKET_ELAPSED_NANOS = 2;
 const int FIELD_ID_ATOM = 3;
-const int FIELD_ID_TIMESTAMP = 4;
+const int FIELD_ID_ELAPSED_ATOM_TIMESTAMP = 4;
 
 GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric& metric,
                                          const int conditionIndex,
@@ -69,7 +69,7 @@ GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric
     mCurrentSlicedBucketForAnomaly = std::make_shared<DimToValMap>();
     int64_t bucketSizeMills = 0;
     if (metric.has_bucket()) {
-        bucketSizeMills = TimeUnitToBucketSizeInMillis(metric.bucket());
+        bucketSizeMills = TimeUnitToBucketSizeInMillisGuardrailed(key.GetUid(), metric.bucket());
     } else {
         bucketSizeMills = TimeUnitToBucketSizeInMillis(ONE_HOUR);
     }
@@ -161,9 +161,9 @@ void GaugeMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
         for (const auto& bucket : pair.second) {
             long long bucketInfoToken = protoOutput->start(
                     FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_BUCKET_INFO);
-            protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_START_BUCKET_NANOS,
+            protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_START_BUCKET_ELAPSED_NANOS,
                                (long long)bucket.mBucketStartNs);
-            protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_END_BUCKET_NANOS,
+            protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_END_BUCKET_ELAPSED_NANOS,
                                (long long)bucket.mBucketEndNs);
 
             if (!bucket.mGaugeAtoms.empty()) {
@@ -175,8 +175,9 @@ void GaugeMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
                 protoOutput->end(atomsToken);
 
                 for (const auto& atom : bucket.mGaugeAtoms) {
-                    protoOutput->write(FIELD_TYPE_INT64 | FIELD_COUNT_REPEATED | FIELD_ID_TIMESTAMP,
-                                       (long long)atom.mTimestamps);
+                    protoOutput->write(
+                        FIELD_TYPE_INT64 | FIELD_COUNT_REPEATED | FIELD_ID_ELAPSED_ATOM_TIMESTAMP,
+                        (long long)atom.mTimestamps);
                 }
             }
             protoOutput->end(bucketInfoToken);
@@ -293,7 +294,7 @@ void GaugeMetricProducer::onMatchedLogEventInternalLocked(
     if (condition == false) {
         return;
     }
-    uint64_t eventTimeNs = event.GetTimestampNs();
+    uint64_t eventTimeNs = event.GetElapsedTimestampNs();
     mTagId = event.GetTagId();
     if (eventTimeNs < mCurrentBucketStartTimeNs) {
         VLOG("Skip event due to late arrival: %lld vs %lld", (long long)eventTimeNs,
@@ -333,7 +334,6 @@ void GaugeMetricProducer::onMatchedLogEventInternalLocked(
 }
 
 void GaugeMetricProducer::updateCurrentSlicedBucketForAnomaly() {
-    status_t err = NO_ERROR;
     for (const auto& slice : *mCurrentSlicedBucket) {
         if (slice.second.empty()) {
             continue;

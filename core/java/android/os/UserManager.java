@@ -1678,6 +1678,18 @@ public class UserManager {
     }
 
     /**
+     * @hide
+     * Returns whether any user on the device has the given user restriction set.
+     */
+    public boolean hasUserRestrictionOnAnyUser(String restrictionKey) {
+        try {
+            return mService.hasUserRestrictionOnAnyUser(restrictionKey);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Return the serial number for a user.  This is a device-unique
      * number assigned to that user; if the user is deleted and then a new
      * user created, the new users will not be given the same serial number.

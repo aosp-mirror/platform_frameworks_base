@@ -64,6 +64,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.LocalLog;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -220,6 +221,17 @@ final class AutofillManagerServiceImpl {
         return mInfo.getServiceInfo().applicationInfo.uid;
     }
 
+
+    @GuardedBy("mLock")
+    @Nullable
+    String getUrlBarResourceIdForCompatModeLocked(@NonNull String packageName) {
+        if (mInfo == null) {
+            Slog.w(TAG,  "getUrlBarResourceIdForCompatModeLocked(): no mInfo");
+            return null;
+        }
+        return mInfo.getUrlBarResourceId(packageName);
+    }
+
     @Nullable
     String getServicePackageName() {
         final ComponentName serviceComponent = getServiceComponentName();
@@ -345,7 +357,7 @@ final class AutofillManagerServiceImpl {
     int startSessionLocked(@NonNull IBinder activityToken, int uid,
             @NonNull IBinder appCallbackToken, @NonNull AutofillId autofillId,
             @NonNull Rect virtualBounds, @Nullable AutofillValue value, boolean hasCallback,
-            int flags, @NonNull ComponentName componentName) {
+            int flags, @NonNull ComponentName componentName, boolean compatMode) {
         if (!isEnabledLocked()) {
             return 0;
         }
@@ -375,7 +387,7 @@ final class AutofillManagerServiceImpl {
         pruneAbandonedSessionsLocked();
 
         final Session newSession = createSessionByTokenLocked(activityToken, uid, appCallbackToken,
-                hasCallback, componentName, flags);
+                hasCallback, componentName, compatMode, flags);
         if (newSession == null) {
             return NO_SESSION;
         }
@@ -481,7 +493,7 @@ final class AutofillManagerServiceImpl {
     @GuardedBy("mLock")
     private Session createSessionByTokenLocked(@NonNull IBinder activityToken, int uid,
             @NonNull IBinder appCallbackToken, boolean hasCallback,
-            @NonNull ComponentName componentName, int flags) {
+            @NonNull ComponentName componentName, boolean compatMode, int flags) {
         // use random ids so that one app cannot know that another app creates sessions
         int sessionId;
         int tries = 0;
@@ -499,7 +511,8 @@ final class AutofillManagerServiceImpl {
 
         final Session newSession = new Session(this, mUi, mContext, mHandlerCaller, mUserId, mLock,
                 sessionId, uid, activityToken, appCallbackToken, hasCallback, mUiLatencyHistory,
-                mWtfHistory, mInfo.getServiceInfo().getComponentName(), componentName, flags);
+                mWtfHistory, mInfo.getServiceInfo().getComponentName(), componentName, compatMode,
+                flags);
         mSessions.put(newSession.id, newSession);
 
         return newSession;
@@ -894,7 +907,10 @@ final class AutofillManagerServiceImpl {
         pw.print(prefix); pw.print("Disabled: "); pw.println(mDisabled);
         pw.print(prefix); pw.print("Field classification enabled: ");
             pw.println(isFieldClassificationEnabledLocked());
-        pw.print(prefix); pw.print("Compat pkgs: "); pw.println(getWhitelistedCompatModePackages());
+        final ArrayMap<String, Pair<Long, String>> compatPkgs = getCompatibilityPackagesLocked();
+        if (compatPkgs != null) {
+            pw.print(prefix); pw.print("Compat pkgs: "); pw.println(compatPkgs.keySet());
+        }
         pw.print(prefix); pw.print("Setup complete: "); pw.println(mSetupComplete);
         pw.print(prefix); pw.print("Last prune: "); pw.println(mLastPrune);
 
@@ -1018,23 +1034,11 @@ final class AutofillManagerServiceImpl {
     }
 
     @GuardedBy("mLock")
-    boolean isCompatibilityModeRequestedLocked(@NonNull String packageName,
-            long versionCode) {
-        if (mInfo == null || !mInfo.isCompatibilityModeRequested(packageName, versionCode)) {
-            return false;
+    @Nullable ArrayMap<String, Pair<Long, String>> getCompatibilityPackagesLocked() {
+        if (mInfo != null) {
+            return mInfo.getCompatibilityPackages();
         }
-        if (!Build.IS_ENG) {
-            // TODO: Build a map and watch for settings changes (this is called on app start)
-            final String whiteListedPackages = getWhitelistedCompatModePackages();
-            return whiteListedPackages != null && whiteListedPackages.contains(packageName);
-        }
-        return true;
-    }
-
-    private String getWhitelistedCompatModePackages() {
-        return Settings.Global.getString(
-                mContext.getContentResolver(),
-                Settings.Global.AUTOFILL_COMPAT_ALLOWED_PACKAGES);
+        return null;
     }
 
     private void sendStateToClients(boolean resetClient) {

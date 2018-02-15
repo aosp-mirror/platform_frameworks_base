@@ -92,6 +92,7 @@ public class WindowAnimator {
      * executed and the corresponding transaction is closed and applied.
      */
     private final ArrayList<Runnable> mAfterPrepareSurfacesRunnables = new ArrayList<>();
+    private boolean mInExecuteAfterPrepareSurfacesRunnables;
 
     WindowAnimator(final WindowManagerService service) {
         mService = service;
@@ -225,13 +226,6 @@ public class WindowAnimator {
                 if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION animate");
             }
 
-            final int numDisplays = mDisplayContentsAnimators.size();
-            for (int i = 0; i < numDisplays; i++) {
-                final int displayId = mDisplayContentsAnimators.keyAt(i);
-                final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
-                dc.onPendingTransactionApplied();
-            }
-
             boolean hasPendingLayoutChanges = mService.mRoot.hasPendingLayoutChanges(this);
             boolean doRequest = false;
             if (mBulkUpdateParams != 0) {
@@ -265,7 +259,6 @@ public class WindowAnimator {
             }
 
             mService.destroyPreservedSurfaceLocked();
-            mService.mWindowPlacerLocked.destroyPendingSurfaces();
 
             executeAfterPrepareSurfacesRunnables();
 
@@ -434,11 +427,24 @@ public class WindowAnimator {
      * the corresponding transaction is closed and applied.
      */
     void addAfterPrepareSurfacesRunnable(Runnable r) {
+        // If runnables are already being handled in executeAfterPrepareSurfacesRunnable, then just
+        // immediately execute the runnable passed in.
+        if (mInExecuteAfterPrepareSurfacesRunnables) {
+            r.run();
+            return;
+        }
+
         mAfterPrepareSurfacesRunnables.add(r);
         scheduleAnimation();
     }
 
-    private void executeAfterPrepareSurfacesRunnables() {
+    void executeAfterPrepareSurfacesRunnables() {
+
+        // Don't even think about to start recursing!
+        if (mInExecuteAfterPrepareSurfacesRunnables) {
+            return;
+        }
+        mInExecuteAfterPrepareSurfacesRunnables = true;
 
         // Traverse in order they were added.
         final int size = mAfterPrepareSurfacesRunnables.size();
@@ -446,5 +452,6 @@ public class WindowAnimator {
             mAfterPrepareSurfacesRunnables.get(i).run();
         }
         mAfterPrepareSurfacesRunnables.clear();
+        mInExecuteAfterPrepareSurfacesRunnables = false;
     }
 }

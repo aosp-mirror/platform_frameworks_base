@@ -63,18 +63,6 @@ public class StaticLayoutPerfTest {
         mTextUtil.resetRandom(0 /* seed */);
     }
 
-    private PrecomputedText makeMeasured(CharSequence text, TextPaint paint) {
-        PrecomputedText.Params param = new PrecomputedText.Params.Builder(paint).build();
-        return PrecomputedText.create(text, param);
-    }
-
-    private PrecomputedText makeMeasured(CharSequence text, TextPaint paint, int strategy,
-                                      int frequency) {
-        PrecomputedText.Params param = new PrecomputedText.Params.Builder(paint)
-                .setHyphenationFrequency(frequency).setBreakStrategy(strategy).build();
-        return PrecomputedText.create(text, param);
-    }
-
     @Test
     public void testCreate_FixedText_NoStyle_Greedy_NoHyphenation() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
@@ -163,16 +151,18 @@ public class StaticLayoutPerfTest {
     }
 
     @Test
-    public void testCreate_PrecomputedText_NoStyled_Greedy_NoHyphenation() {
+    public void testCreate_MeasuredText_NoStyled_Greedy_NoHyphenation() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             state.pauseTiming();
-            final PrecomputedText text = makeMeasured(
-                    mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT,
-                    Layout.BREAK_STRATEGY_SIMPLE, Layout.HYPHENATION_FREQUENCY_NONE);
+            final MeasuredText text = new MeasuredText.Builder(
+                    mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT)
+                    .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
+                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
+                    .build();
             state.resumeTiming();
 
-            StaticLayout.Builder.obtain(text, 0, text.getText().length(), PAINT, TEXT_WIDTH)
+            StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH)
                     .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
                     .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
                     .build();
@@ -180,16 +170,18 @@ public class StaticLayoutPerfTest {
     }
 
     @Test
-    public void testCreate_PrecomputedText_NoStyled_Greedy_Hyphenation() {
+    public void testCreate_MeasuredText_NoStyled_Greedy_Hyphenation() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             state.pauseTiming();
-            final PrecomputedText text = makeMeasured(
-                    mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT,
-                    Layout.BREAK_STRATEGY_SIMPLE, Layout.HYPHENATION_FREQUENCY_NORMAL);
+            final MeasuredText text = new MeasuredText.Builder(
+                    mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT)
+                    .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
+                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL)
+                    .build();
             state.resumeTiming();
 
-            StaticLayout.Builder.obtain(text, 0, text.getText().length(), PAINT, TEXT_WIDTH)
+            StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH)
                     .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL)
                     .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
                     .build();
@@ -197,16 +189,18 @@ public class StaticLayoutPerfTest {
     }
 
     @Test
-    public void testCreate_PrecomputedText_NoStyled_Balanced_NoHyphenation() {
+    public void testCreate_MeasuredText_NoStyled_Balanced_NoHyphenation() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             state.pauseTiming();
-            final PrecomputedText text = makeMeasured(
-                    mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT,
-                    Layout.BREAK_STRATEGY_BALANCED, Layout.HYPHENATION_FREQUENCY_NONE);
+            final MeasuredText text = new MeasuredText.Builder(
+                    mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT)
+                    .setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED)
+                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
+                    .build();
             state.resumeTiming();
 
-            StaticLayout.Builder.obtain(text, 0, text.getText().length(), PAINT, TEXT_WIDTH)
+            StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH)
                     .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
                     .setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED)
                     .build();
@@ -214,16 +208,18 @@ public class StaticLayoutPerfTest {
     }
 
     @Test
-    public void testCreate_PrecomputedText_NoStyled_Balanced_Hyphenation() {
+    public void testCreate_MeasuredText_NoStyled_Balanced_Hyphenation() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             state.pauseTiming();
-            final PrecomputedText text = makeMeasured(
-                    mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT,
-                    Layout.BREAK_STRATEGY_BALANCED, Layout.HYPHENATION_FREQUENCY_NORMAL);
+            final MeasuredText text = new MeasuredText.Builder(
+                    mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT)
+                    .setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED)
+                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL)
+                    .build();
             state.resumeTiming();
 
-            StaticLayout.Builder.obtain(text, 0, text.getText().length(), PAINT, TEXT_WIDTH)
+            StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH)
                     .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL)
                     .setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED)
                     .build();
@@ -231,16 +227,18 @@ public class StaticLayoutPerfTest {
     }
 
     @Test
-    public void testCreate_PrecomputedText_Styled_Greedy_NoHyphenation() {
+    public void testCreate_MeasuredText_Styled_Greedy_NoHyphenation() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             state.pauseTiming();
-            final PrecomputedText text = makeMeasured(
-                    mTextUtil.nextRandomParagraph(WORD_LENGTH, STYLE_TEXT), PAINT,
-                    Layout.BREAK_STRATEGY_SIMPLE, Layout.HYPHENATION_FREQUENCY_NONE);
+            final MeasuredText text = new MeasuredText.Builder(
+                    mTextUtil.nextRandomParagraph(WORD_LENGTH, STYLE_TEXT), PAINT)
+                    .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
+                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
+                    .build();
             state.resumeTiming();
 
-            StaticLayout.Builder.obtain(text, 0, text.getText().length(), PAINT, TEXT_WIDTH)
+            StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH)
                     .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
                     .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
                     .build();
@@ -330,16 +328,15 @@ public class StaticLayoutPerfTest {
     }
 
     @Test
-    public void testDraw_PrecomputedText_Styled() {
+    public void testDraw_MeasuredText_Styled() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         final RenderNode node = RenderNode.create("benchmark", null);
         while (state.keepRunning()) {
             state.pauseTiming();
-            final PrecomputedText text = makeMeasured(
-                    mTextUtil.nextRandomParagraph(WORD_LENGTH, STYLE_TEXT), PAINT);
+            final MeasuredText text = new MeasuredText.Builder(
+                    mTextUtil.nextRandomParagraph(WORD_LENGTH, STYLE_TEXT), PAINT).build();
             final StaticLayout layout =
-                    StaticLayout.Builder.obtain(
-                            text, 0, text.getText().length(), PAINT, TEXT_WIDTH).build();
+                    StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH).build();
             final DisplayListCanvas c = node.start(1200, 200);
             state.resumeTiming();
 
@@ -348,16 +345,15 @@ public class StaticLayoutPerfTest {
     }
 
     @Test
-    public void testDraw_PrecomputedText_NoStyled() {
+    public void testDraw_MeasuredText_NoStyled() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         final RenderNode node = RenderNode.create("benchmark", null);
         while (state.keepRunning()) {
             state.pauseTiming();
-            final PrecomputedText text = makeMeasured(
-                    mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT);
+            final MeasuredText text = new MeasuredText.Builder(
+                    mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT).build();
             final StaticLayout layout =
-                    StaticLayout.Builder.obtain(
-                            text, 0, text.getText().length(), PAINT, TEXT_WIDTH).build();
+                    StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH).build();
             final DisplayListCanvas c = node.start(1200, 200);
             state.resumeTiming();
 
@@ -366,16 +362,15 @@ public class StaticLayoutPerfTest {
     }
 
     @Test
-    public void testDraw_PrecomputedText_Styled_WithoutCache() {
+    public void testDraw_MeasuredText_Styled_WithoutCache() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         final RenderNode node = RenderNode.create("benchmark", null);
         while (state.keepRunning()) {
             state.pauseTiming();
-            final PrecomputedText text = makeMeasured(
-                    mTextUtil.nextRandomParagraph(WORD_LENGTH, STYLE_TEXT), PAINT);
+            final MeasuredText text = new MeasuredText.Builder(
+                    mTextUtil.nextRandomParagraph(WORD_LENGTH, STYLE_TEXT), PAINT).build();
             final StaticLayout layout =
-                    StaticLayout.Builder.obtain(
-                            text, 0, text.getText().length(), PAINT, TEXT_WIDTH).build();
+                    StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH).build();
             final DisplayListCanvas c = node.start(1200, 200);
             Canvas.freeTextLayoutCaches();
             state.resumeTiming();
@@ -385,16 +380,15 @@ public class StaticLayoutPerfTest {
     }
 
     @Test
-    public void testDraw_PrecomputedText_NoStyled_WithoutCache() {
+    public void testDraw_MeasuredText_NoStyled_WithoutCache() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         final RenderNode node = RenderNode.create("benchmark", null);
         while (state.keepRunning()) {
             state.pauseTiming();
-            final PrecomputedText text = makeMeasured(
-                    mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT);
+            final MeasuredText text = new MeasuredText.Builder(
+                    mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT).build();
             final StaticLayout layout =
-                    StaticLayout.Builder.obtain(
-                            text, 0, text.getText().length(), PAINT, TEXT_WIDTH).build();
+                    StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH).build();
             final DisplayListCanvas c = node.start(1200, 200);
             Canvas.freeTextLayoutCaches();
             state.resumeTiming();

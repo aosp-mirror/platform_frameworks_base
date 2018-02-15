@@ -33,6 +33,7 @@
 #include "SubsystemSleepStatePuller.h"
 #include "logd/LogEvent.h"
 #include "statslog.h"
+#include "stats_log_util.h"
 
 #include <iostream>
 
@@ -165,8 +166,9 @@ void StatsPullerManagerImpl::RegisterReceiver(int tagId, wp<PullDataReceiver> re
     if (roundedIntervalMs < mCurrentPullingInterval) {
         VLOG("Updating pulling interval %ld", intervalMs);
         mCurrentPullingInterval = roundedIntervalMs;
-        long currentTimeMs = time(nullptr) * 1000;
-        long nextAlarmTimeMs = currentTimeMs + mCurrentPullingInterval - (currentTimeMs - mTimeBaseSec * 1000) % mCurrentPullingInterval;
+        long currentTimeMs = getElapsedRealtimeMillis();
+        long nextAlarmTimeMs = currentTimeMs + mCurrentPullingInterval -
+            (currentTimeMs - mTimeBaseSec * 1000) % mCurrentPullingInterval;
         if (mStatsCompanionService != nullptr) {
             mStatsCompanionService->setPullingAlarms(nextAlarmTimeMs, mCurrentPullingInterval);
         } else {
@@ -195,7 +197,7 @@ void StatsPullerManagerImpl::UnRegisterReceiver(int tagId, wp<PullDataReceiver> 
 void StatsPullerManagerImpl::OnAlarmFired() {
     AutoMutex _l(mReceiversLock);
 
-    uint64_t currentTimeMs = time(nullptr) /60 * 60 * 1000;
+    uint64_t currentTimeMs = getElapsedRealtimeMillis();
 
     vector<pair<int, vector<ReceiverInfo*>>> needToPull =
             vector<pair<int, vector<ReceiverInfo*>>>();

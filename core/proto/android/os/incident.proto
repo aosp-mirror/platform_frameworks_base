@@ -122,32 +122,32 @@ message IncidentProto {
     ];
 
     // Linux services
-    optional Procrank procrank = 2000 [
+    optional ProcrankProto procrank = 2000 [
         (section).type = SECTION_NONE, // disable procrank until figure out permission
         (section).args = "/system/xbin/procrank"
     ];
 
-    optional PageTypeInfo page_type_info = 2001 [
+    optional PageTypeInfoProto page_type_info = 2001 [
         (section).type = SECTION_FILE,
         (section).args = "/proc/pagetypeinfo"
     ];
 
-    optional KernelWakeSources kernel_wake_sources = 2002 [
+    optional KernelWakeSourcesProto kernel_wake_sources = 2002 [
         (section).type = SECTION_FILE,
         (section).args = "/d/wakeup_sources"
     ];
 
-    optional CpuInfo cpu_info = 2003 [
+    optional CpuInfoProto cpu_info = 2003 [
         (section).type = SECTION_COMMAND,
         (section).args = "top -b -n 1 -H -s 6 -o pid,tid,user,pr,ni,%cpu,s,virt,res,pcy,cmd,name"
     ];
 
-    optional CpuFreq cpu_freq = 2004 [
+    optional CpuFreqProto cpu_freq = 2004 [
         (section).type = SECTION_FILE,
         (section).args = "/sys/devices/system/cpu/cpufreq/all_time_in_state"
     ];
 
-    optional PsDumpProto processes_and_threads = 2005 [
+    optional PsProto processes_and_threads = 2005 [
         (section).type = SECTION_COMMAND,
         (section).args = "ps -A -T -Z -O pri,nice,rtprio,sched,pcy,time"
     ];

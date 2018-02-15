@@ -51,8 +51,8 @@ const int FIELD_ID_DIMENSION_IN_WHAT = 1;
 const int FIELD_ID_DIMENSION_IN_CONDITION = 2;
 const int FIELD_ID_BUCKET_INFO = 3;
 // for DurationBucketInfo
-const int FIELD_ID_START_BUCKET_NANOS = 1;
-const int FIELD_ID_END_BUCKET_NANOS = 2;
+const int FIELD_ID_START_BUCKET_ELAPSED_NANOS = 1;
+const int FIELD_ID_END_BUCKET_ELAPSED_NANOS = 2;
 const int FIELD_ID_DURATION = 3;
 
 DurationMetricProducer::DurationMetricProducer(const ConfigKey& key, const DurationMetric& metric,
@@ -72,7 +72,8 @@ DurationMetricProducer::DurationMetricProducer(const ConfigKey& key, const Durat
     // them in the base class, because the proto generated CountMetric, and DurationMetric are
     // not related. Maybe we should add a template in the future??
     if (metric.has_bucket()) {
-        mBucketSizeNs = TimeUnitToBucketSizeInMillis(metric.bucket()) * 1000000;
+        mBucketSizeNs =
+                TimeUnitToBucketSizeInMillisGuardrailed(key.GetUid(), metric.bucket()) * 1000000;
     } else {
         mBucketSizeNs = LLONG_MAX;
     }
@@ -150,10 +151,9 @@ void DurationMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eve
 
 
     std::unordered_set<HashableDimensionKey> conditionDimensionsKeySet;
-    ConditionState conditionState = mWizard->getMetConditionDimension(
-        mConditionTrackerIndex, mDimensionsInCondition, &conditionDimensionsKeySet);
+    mWizard->getMetConditionDimension(mConditionTrackerIndex, mDimensionsInCondition,
+                                      &conditionDimensionsKeySet);
 
-    bool condition = (conditionState == ConditionState::kTrue);
     for (auto& pair : mCurrentSlicedDurationTrackerMap) {
         conditionDimensionsKeySet.erase(pair.first.getDimensionKeyInCondition());
     }
@@ -221,9 +221,9 @@ void DurationMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
         for (const auto& bucket : pair.second) {
             long long bucketInfoToken = protoOutput->start(
                     FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_BUCKET_INFO);
-            protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_START_BUCKET_NANOS,
+            protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_START_BUCKET_ELAPSED_NANOS,
                                (long long)bucket.mBucketStartNs);
-            protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_END_BUCKET_NANOS,
+            protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_END_BUCKET_ELAPSED_NANOS,
                                (long long)bucket.mBucketEndNs);
             protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_DURATION, (long long)bucket.mDuration);
             protoOutput->end(bucketInfoToken);
@@ -310,11 +310,11 @@ void DurationMetricProducer::onMatchedLogEventInternalLocked(
         const size_t matcherIndex, const MetricDimensionKey& eventKey,
         const ConditionKey& conditionKeys, bool condition,
         const LogEvent& event) {
-    flushIfNeededLocked(event.GetTimestampNs());
+    flushIfNeededLocked(event.GetElapsedTimestampNs());
 
     if (matcherIndex == mStopAllIndex) {
         for (auto& pair : mCurrentSlicedDurationTrackerMap) {
-            pair.second->noteStopAll(event.GetTimestampNs());
+            pair.second->noteStopAll(event.GetElapsedTimestampNs());
         }
         return;
     }
@@ -333,16 +333,16 @@ void DurationMetricProducer::onMatchedLogEventInternalLocked(
     if (values.empty()) {
         if (matcherIndex == mStartIndex) {
             it->second->noteStart(DEFAULT_DIMENSION_KEY, condition,
-                                  event.GetTimestampNs(), conditionKeys);
+                                  event.GetElapsedTimestampNs(), conditionKeys);
         } else if (matcherIndex == mStopIndex) {
-            it->second->noteStop(DEFAULT_DIMENSION_KEY, event.GetTimestampNs(), false);
+            it->second->noteStop(DEFAULT_DIMENSION_KEY, event.GetElapsedTimestampNs(), false);
         }
     } else {
         for (const auto& value : values) {
             if (matcherIndex == mStartIndex) {
-                it->second->noteStart(value, condition, event.GetTimestampNs(), conditionKeys);
+                it->second->noteStart(value, condition, event.GetElapsedTimestampNs(), conditionKeys);
             } else if (matcherIndex == mStopIndex) {
-                it->second->noteStop(value, event.GetTimestampNs(), false);
+                it->second->noteStop(value, event.GetElapsedTimestampNs(), false);
             }
         }
     }

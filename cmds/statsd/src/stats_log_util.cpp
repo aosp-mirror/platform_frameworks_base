@@ -17,9 +17,12 @@
 #include "stats_log_util.h"
 
 #include <logd/LogEvent.h>
+#include <private/android_filesystem_config.h>
 #include <utils/Log.h>
 #include <set>
 #include <stack>
+#include <utils/Log.h>
+#include <utils/SystemClock.h>
 
 using android::util::FIELD_COUNT_REPEATED;
 using android::util::FIELD_TYPE_BOOL;
@@ -39,14 +42,11 @@ const int DIMENSIONS_VALUE_FIELD = 1;
 const int DIMENSIONS_VALUE_VALUE_STR = 2;
 const int DIMENSIONS_VALUE_VALUE_INT = 3;
 const int DIMENSIONS_VALUE_VALUE_LONG = 4;
-const int DIMENSIONS_VALUE_VALUE_BOOL = 5;
+// const int DIMENSIONS_VALUE_VALUE_BOOL = 5; // logd doesn't have bool data type.
 const int DIMENSIONS_VALUE_VALUE_FLOAT = 6;
 const int DIMENSIONS_VALUE_VALUE_TUPLE = 7;
 
 const int DIMENSIONS_VALUE_TUPLE_VALUE = 1;
-
-// for MessageValue Proto
-const int FIELD_ID_FIELD_VALUE_IN_MESSAGE_VALUE_PROTO = 1;
 
 // for PulledAtomStats proto
 const int FIELD_ID_PULLED_ATOM_STATS = 10;
@@ -128,11 +128,6 @@ void writeDimensionToProto(const HashableDimensionKey& dimension, ProtoOutputStr
     writeDimensionToProtoHelper(dimension.getValues(), &index, 0, 0, protoOutput);
     protoOutput->end(topToken);
 }
-
-// for Field Proto
-const int FIELD_FIELD = 1;
-const int FIELD_POSITION_INDEX = 2;
-const int FIELD_CHILD = 3;
 
 // Supported Atoms format
 // XYZ_Atom {
@@ -222,6 +217,14 @@ void writeFieldValueTreeToStream(int tagId, const std::vector<FieldValue>& value
     protoOutput->end(atomToken);
 }
 
+int64_t TimeUnitToBucketSizeInMillisGuardrailed(int uid, TimeUnit unit) {
+    int64_t bucketSizeMillis = TimeUnitToBucketSizeInMillis(unit);
+    if (bucketSizeMillis > 1000 && bucketSizeMillis < 5 * 60 * 1000LL && uid != AID_SHELL) {
+        bucketSizeMillis = 5 * 60 * 1000LL;
+    }
+    return bucketSizeMillis;
+}
+
 int64_t TimeUnitToBucketSizeInMillis(TimeUnit unit) {
     switch (unit) {
         case ONE_MINUTE:
@@ -261,6 +264,30 @@ void writePullerStatsToStream(const std::pair<int, StatsdStats::PulledAtomStats>
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_MIN_PULL_INTERVAL_SEC,
                        (long long)pair.second.minPullIntervalSec);
     protoOutput->end(token);
+}
+
+int64_t getElapsedRealtimeNs() {
+    return ::android::elapsedRealtimeNano();
+}
+
+int64_t getElapsedRealtimeSec() {
+    return ::android::elapsedRealtimeNano() / NS_PER_SEC;
+}
+
+int64_t getElapsedRealtimeMillis() {
+    return ::android::elapsedRealtime();
+}
+
+int64_t getWallClockNs() {
+    return time(nullptr) * NS_PER_SEC;
+}
+
+int64_t getWallClockSec() {
+    return time(nullptr);
+}
+
+int64_t getWallClockMillis() {
+    return time(nullptr) * MS_PER_SEC;
 }
 
 }  // namespace statsd

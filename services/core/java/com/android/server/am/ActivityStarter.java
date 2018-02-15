@@ -708,6 +708,8 @@ class ActivityStarter {
         ActivityOptions checkedOptions = options != null
                 ? options.getOptions(intent, aInfo, callerApp, mSupervisor)
                 : null;
+        checkedOptions = mService.getActivityStartController().getPendingRemoteAnimationRegistry()
+                .overrideOptionsIfNeeded(callingPackage, checkedOptions);
         if (mService.mController != null) {
             try {
                 // The Intent we give to the watcher has the extra data

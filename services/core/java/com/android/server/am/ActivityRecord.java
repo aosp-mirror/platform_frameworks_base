@@ -380,8 +380,9 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     String getLifecycleDescription(String reason) {
-        return "component:" + intent.getComponent().flattenToShortString() + ", state=" + state
-                + ", reason=" + reason + ", time=" + System.currentTimeMillis();
+        return "name= " + this + ", component=" + intent.getComponent().flattenToShortString()
+                + ", package=" + packageName + ", state=" + state + ", reason=" + reason + ", time="
+                + System.currentTimeMillis();
     }
 
     void dump(PrintWriter pw, String prefix) {
@@ -2583,7 +2584,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             if (andResume) {
                 lifecycleItem = ResumeActivityItem.obtain(service.isNextTransitionForward());
             } else {
-                lifecycleItem = PauseActivityItem.obtain();
+                lifecycleItem = PauseActivityItem.obtain()
+                        .setDescription(getLifecycleDescription("relaunchActivityLocked"));
             }
             final ClientTransaction transaction = ClientTransaction.obtain(app.thread, appToken);
             transaction.addCallback(callbackItem);

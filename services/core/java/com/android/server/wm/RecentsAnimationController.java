@@ -24,15 +24,15 @@ import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_W
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
-import android.app.ActivityManager;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.WindowConfiguration;
-import android.graphics.GraphicBuffer;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 import android.view.IRecentsAnimationController;
@@ -41,6 +41,7 @@ import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
+import com.google.android.collect.Sets;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -99,17 +100,13 @@ public class RecentsAnimationController {
                         final TaskAnimationAdapter adapter = mPendingAnimations.get(i);
                         final Task task = adapter.mTask;
                         if (task.mTaskId == taskId) {
-                            // TODO: Save this screenshot as the task snapshot?
-                            final Rect taskFrame = new Rect();
-                            task.getBounds(taskFrame);
-                            final GraphicBuffer buffer = SurfaceControl.captureLayers(
-                                    task.getSurfaceControl().getHandle(), taskFrame, 1f);
-                            final AppWindowToken topChild = task.getTopChild();
-                            final WindowState mainWindow = topChild.findMainWindow();
-                            return new TaskSnapshot(buffer, topChild.getConfiguration().orientation,
-                                    mainWindow.mContentInsets,
-                                    ActivityManager.isLowRamDeviceStatic() /* reduced */,
-                                    1.0f /* scale */);
+                            final TaskSnapshotController snapshotController =
+                                    mService.mTaskSnapshotController;
+                            final ArraySet<Task> tasks = Sets.newArraySet(task);
+                            snapshotController.snapshotTasks(tasks);
+                            snapshotController.addSkipClosingAppSnapshotTasks(tasks);
+                            return snapshotController.getSnapshot(taskId, 0 /* userId */,
+                                    false /* restoreFromDisk */, false /* reducedResolution */);
                         }
                     }
                     return null;
@@ -222,7 +219,7 @@ public class RecentsAnimationController {
     private void addAnimation(Task task) {
         if (DEBUG) Log.d(TAG, "addAnimation(" + task.getName() + ")");
         final SurfaceAnimator anim = new SurfaceAnimator(task, null /* animationFinishedCallback */,
-                mService.mAnimator::addAfterPrepareSurfacesRunnable, mService);
+                mService);
         final TaskAnimationAdapter taskAdapter = new TaskAnimationAdapter(task);
         anim.startAnimation(task.getPendingTransaction(), taskAdapter, false /* hidden */);
         task.commitPendingTransaction();

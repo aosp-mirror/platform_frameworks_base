@@ -446,8 +446,10 @@ class MagnificationController implements Handler.Callback {
             mMagnificationRegion.getBounds(viewport);
             final MagnificationSpec spec = mCurrentMagnificationSpec;
             final float oldScale = spec.scale;
-            final float oldCenterX = (viewport.width() / 2.0f - spec.offsetX) / oldScale;
-            final float oldCenterY = (viewport.height() / 2.0f - spec.offsetY) / oldScale;
+            final float oldCenterX
+                    = (viewport.width() / 2.0f - spec.offsetX + viewport.left) / oldScale;
+            final float oldCenterY
+                    = (viewport.height() / 2.0f - spec.offsetY + viewport.top) / oldScale;
             final float normPivotX = (pivotX - spec.offsetX) / oldScale;
             final float normPivotY = (pivotY - spec.offsetY) / oldScale;
             final float offsetX = (oldCenterX - normPivotX) * (oldScale / scale);

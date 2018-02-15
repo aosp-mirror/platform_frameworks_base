@@ -283,4 +283,11 @@ public class KeyguardUpdateMonitorCallback {
      * @see KeyguardIndicationController#showTransientIndication(CharSequence)
      */
     public void onTrustAgentErrorMessage(CharSequence message) { }
+
+
+    /**
+     * Called when a value of logout enabled is change.
+     */
+    public void onLogoutEnabledChanged() { }
+
 }

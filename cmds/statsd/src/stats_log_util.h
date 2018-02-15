@@ -32,8 +32,30 @@ void writeFieldValueTreeToStream(int tagId, const std::vector<FieldValue>& value
 void writeDimensionToProto(const HashableDimensionKey& dimension,
                            util::ProtoOutputStream* protoOutput);
 
+// Convert the TimeUnit enum to the bucket size in millis with a guardrail on
+// bucket size.
+int64_t TimeUnitToBucketSizeInMillisGuardrailed(int uid, TimeUnit unit);
+
 // Convert the TimeUnit enum to the bucket size in millis.
 int64_t TimeUnitToBucketSizeInMillis(TimeUnit unit);
+
+// Gets the elapsed timestamp in ns.
+int64_t getElapsedRealtimeNs();
+
+// Gets the elapsed timestamp in millis.
+int64_t getElapsedRealtimeMillis();
+
+// Gets the elapsed timestamp in seconds.
+int64_t getElapsedRealtimeSec();
+
+// Gets the wall clock timestamp in ns.
+int64_t getWallClockNs();
+
+// Gets the wall clock timestamp in millis.
+int64_t getWallClockMillis();
+
+// Gets the wall clock timestamp in seconds.
+int64_t getWallClockSec();
 
 // Helper function to write PulledAtomStats to ProtoOutputStream
 void writePullerStatsToStream(const std::pair<int, StatsdStats::PulledAtomStats>& pair,

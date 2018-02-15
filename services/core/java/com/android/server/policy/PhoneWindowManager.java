@@ -1326,30 +1326,38 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // When interactive, we're already awake.
                 // Wait for a long press or for the button to be released to decide what to do.
                 if (hasLongPressOnPowerBehavior()) {
-                    Message msg = mHandler.obtainMessage(MSG_POWER_LONG_PRESS);
-                    msg.setAsynchronous(true);
-                    mHandler.sendMessageDelayed(msg,
-                            ViewConfiguration.get(mContext).getDeviceGlobalActionKeyTimeout());
+                    if ((event.getFlags() & KeyEvent.FLAG_LONG_PRESS) != 0) {
+                        powerLongPress();
+                    } else {
+                        Message msg = mHandler.obtainMessage(MSG_POWER_LONG_PRESS);
+                        msg.setAsynchronous(true);
+                        mHandler.sendMessageDelayed(msg,
+                                ViewConfiguration.get(mContext).getDeviceGlobalActionKeyTimeout());
 
-                    if (hasVeryLongPressOnPowerBehavior()) {
-                        Message longMsg = mHandler.obtainMessage(MSG_POWER_VERY_LONG_PRESS);
-                        longMsg.setAsynchronous(true);
-                        mHandler.sendMessageDelayed(longMsg, mVeryLongPressTimeout);
+                        if (hasVeryLongPressOnPowerBehavior()) {
+                            Message longMsg = mHandler.obtainMessage(MSG_POWER_VERY_LONG_PRESS);
+                            longMsg.setAsynchronous(true);
+                            mHandler.sendMessageDelayed(longMsg, mVeryLongPressTimeout);
+                        }
                     }
                 }
             } else {
                 wakeUpFromPowerKey(event.getDownTime());
 
                 if (mSupportLongPressPowerWhenNonInteractive && hasLongPressOnPowerBehavior()) {
-                    Message msg = mHandler.obtainMessage(MSG_POWER_LONG_PRESS);
-                    msg.setAsynchronous(true);
-                    mHandler.sendMessageDelayed(msg,
-                            ViewConfiguration.get(mContext).getDeviceGlobalActionKeyTimeout());
+                    if ((event.getFlags() & KeyEvent.FLAG_LONG_PRESS) != 0) {
+                        powerLongPress();
+                    } else {
+                        Message msg = mHandler.obtainMessage(MSG_POWER_LONG_PRESS);
+                        msg.setAsynchronous(true);
+                        mHandler.sendMessageDelayed(msg,
+                                ViewConfiguration.get(mContext).getDeviceGlobalActionKeyTimeout());
 
-                    if (hasVeryLongPressOnPowerBehavior()) {
-                        Message longMsg = mHandler.obtainMessage(MSG_POWER_VERY_LONG_PRESS);
-                        longMsg.setAsynchronous(true);
-                        mHandler.sendMessageDelayed(longMsg, mVeryLongPressTimeout);
+                        if (hasVeryLongPressOnPowerBehavior()) {
+                            Message longMsg = mHandler.obtainMessage(MSG_POWER_VERY_LONG_PRESS);
+                            longMsg.setAsynchronous(true);
+                            mHandler.sendMessageDelayed(longMsg, mVeryLongPressTimeout);
+                        }
                     }
 
                     mBeganFromNonInteractive = true;

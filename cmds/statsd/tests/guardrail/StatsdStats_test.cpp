@@ -225,7 +225,7 @@ TEST(StatsdStatsTest, TestAtomLog) {
     bool dropboxAtomGood = false;
 
     for (const auto& atomStats : report.atom_stats()) {
-        if (atomStats.tag() == android::util::SENSOR_STATE_CHANGED && atomStats.count() == 2) {
+        if (atomStats.tag() == android::util::SENSOR_STATE_CHANGED && atomStats.count() == 3) {
             sensorAtomGood = true;
         }
         if (atomStats.tag() == android::util::DROPBOX_ERROR_CHANGED && atomStats.count() == 1) {

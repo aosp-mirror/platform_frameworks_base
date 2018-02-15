@@ -177,6 +177,11 @@
     <!-- Bluetooth settings. Similar to bluetooth_profile_a2dp_high_quality, but used when the device supports high quality audio but we don't know which codec that will be used. -->
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec">HD audio</string>
 
+    <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the Hearing Aid profile. -->
+    <string name="bluetooth_profile_hearing_aid">Hearing Aid</string>
+    <!-- Bluetooth settings.  Connection options screen.  The summary for the Hearing Aid checkbox preference when Hearing Aid is connected. -->
+    <string name="bluetooth_hearing_aid_profile_summary_connected">Connected to Hearing Aid</string>
+
     <!-- Bluetooth settings.  Connection options screen.  The summary for the A2DP checkbox preference when A2DP is connected. -->
     <string name="bluetooth_a2dp_profile_summary_connected">Connected to media audio</string>
     <!-- Bluetooth settings.  Connection options screen.  The summary for the headset checkbox preference when headset is connected. -->
@@ -214,6 +219,8 @@
          for the HID checkbox preference that describes how checking it
          will set the HID profile as preferred. -->
     <string name="bluetooth_hid_profile_summary_use_for">Use for input</string>
+    <!-- Bluetooth settings.  Connection options screen.  The summary for the Hearing Aid checkbox preference that describes how checking it will set the Hearing Aid profile as preferred. -->
+    <string name="bluetooth_hearing_aid_profile_summary_use_for">Use for Hearing Aid</string>
 
     <!-- Button text for accepting an incoming pairing request. [CHAR LIMIT=20] -->
     <string name="bluetooth_pairing_accept">Pair</string>

@@ -16,78 +16,73 @@
 
 syntax = "proto2";
 option java_multiple_files = true;
-option java_outer_classname = "ProcrankProto";
 
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 package android.os;
 
 //Memory usage of running processes
-message Procrank {
+message ProcrankProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     // Currently running process
-    repeated ProcessProto processes = 1;
+    // Next Tag: 11
+    message Process {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        // ID of the process
+        optional int32 pid = 1;
+
+        // virtual set size, unit KB
+        optional int64 vss = 2;
+
+        // resident set size, unit KB
+        optional int64 rss = 3;
+
+        // proportional set size, unit KB
+        optional int64 pss = 4;
+
+        // unique set size, unit KB
+        optional int64 uss = 5;
+
+        // swap size, unit KB
+        optional int64 swap = 6;
+
+        // proportional swap size, unit KB
+        optional int64 pswap = 7;
+
+        // unique swap size, unit KB
+        optional int64 uswap = 8;
+
+        // zswap size, unit KB
+        optional int64 zswap = 9;
+
+        // process command
+        optional string cmdline = 10;
+    }
+    repeated Process processes = 1;
 
     // Summary
-    optional SummaryProto summary = 2;
-}
+    // Next Tag: 3
+    message Summary {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-// Next Tag: 11
-message ProcessProto {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+        optional Process total = 1;
 
-    // ID of the process
-    optional int32 pid = 1;
+        // TODO: sync on how to use these values
+        message Zram {
+            option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    // virtual set size, unit KB
-    optional int64 vss = 2;
+            optional string raw_text = 1;
+        }
+        optional Zram zram = 2;
 
-    // resident set size, unit KB
-    optional int64 rss = 3;
+        message Ram {
+            option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    // proportional set size, unit KB
-    optional int64 pss = 4;
-
-    // unique set size, unit KB
-    optional int64 uss = 5;
-
-    // swap size, unit KB
-    optional int64 swap = 6;
-
-    // proportional swap size, unit KB
-    optional int64 pswap = 7;
-
-    // unique swap size, unit KB
-    optional int64 uswap = 8;
-
-    // zswap size, unit KB
-    optional int64 zswap = 9;
-
-    // process command
-    optional string cmdline = 10;
-}
-
-// Next Tag: 3
-message SummaryProto {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    optional ProcessProto total = 1;
-
-    optional ZramProto zram = 2;
-
-    optional RamProto ram = 3;
-}
-
-// TODO: sync on how to use these values
-message ZramProto {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    optional string raw_text = 1;
-}
-
-message RamProto {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    optional string raw_text = 1;
+            optional string raw_text = 1;
+        }
+        optional Ram ram = 3;
+    }
+    optional Summary summary = 2;
 }

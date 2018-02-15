@@ -22,6 +22,7 @@
 #include "guardrail/StatsdStats.h"
 #include "logd/LogEvent.h"
 #include "statslog.h"
+#include "stats_log_util.h"
 
 using std::make_shared;
 using std::shared_ptr;
@@ -56,7 +57,8 @@ bool KernelUidCpuClusterTimeReader::PullInternal(vector<shared_ptr<LogEvent>>* d
         return false;
     }
 
-    uint64_t timestamp = time(nullptr) * NS_PER_SEC;
+    int64_t wallClockTimestampNs = getWallClockNs();
+    int64_t elapsedTimestampNs = getElapsedRealtimeNs();
     char buf[kLineBufferSize];
     char* pch;
     while (!fin.eof()) {
@@ -69,7 +71,7 @@ bool KernelUidCpuClusterTimeReader::PullInternal(vector<shared_ptr<LogEvent>>* d
         int idx = 0;
         do {
             timeMs = std::stoull(pch);
-            auto ptr = make_shared<LogEvent>(mTagId, timestamp);
+            auto ptr = make_shared<LogEvent>(mTagId, wallClockTimestampNs, elapsedTimestampNs);
             ptr->write(uid);
             ptr->write(idx);
             ptr->write(timeMs);

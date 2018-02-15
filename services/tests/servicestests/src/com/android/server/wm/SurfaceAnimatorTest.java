@@ -23,11 +23,11 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.SurfaceControl;
@@ -39,7 +39,6 @@ import com.android.server.wm.SurfaceAnimator.Animatable;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -47,7 +46,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * Test class for {@link SurfaceAnimatorTest}.
@@ -87,7 +85,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         callbackCaptor.getValue().onAnimationFinished(mSpec);
         assertNotAnimating(mAnimatable);
         assertTrue(mAnimatable.mFinishedCallbackCalled);
-        assertTrue(mAnimatable.mPendingDestroySurfaces.contains(mAnimatable.mLeash));
+        verify(mTransaction).destroy(eq(mAnimatable.mLeash));
         // TODO: Verify reparenting once we use mPendingTransaction to reparent it back
     }
 
@@ -97,7 +95,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         final SurfaceControl firstLeash = mAnimatable.mLeash;
         mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec2, true /* hidden */);
 
-        assertTrue(mAnimatable.mPendingDestroySurfaces.contains(firstLeash));
+        verify(mTransaction).destroy(eq(firstLeash));
         assertFalse(mAnimatable.mFinishedCallbackCalled);
 
         final ArgumentCaptor<OnAnimationFinishedCallback> callbackCaptor = ArgumentCaptor.forClass(
@@ -124,7 +122,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         assertNotAnimating(mAnimatable);
         verify(mSpec).onAnimationCancelled(any());
         assertTrue(mAnimatable.mFinishedCallbackCalled);
-        assertTrue(mAnimatable.mPendingDestroySurfaces.contains(mAnimatable.mLeash));
+        verify(mTransaction).destroy(eq(mAnimatable.mLeash));
     }
 
     @Test
@@ -145,7 +143,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         verifyZeroInteractions(mSpec);
         assertNotAnimating(mAnimatable);
         assertTrue(mAnimatable.mFinishedCallbackCalled);
-        assertTrue(mAnimatable.mPendingDestroySurfaces.contains(mAnimatable.mLeash));
+        verify(mTransaction).destroy(eq(mAnimatable.mLeash));
     }
 
     @Test
@@ -161,11 +159,11 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         assertNotAnimating(mAnimatable);
         assertAnimating(mAnimatable2);
         assertEquals(leash, mAnimatable2.mSurfaceAnimator.mLeash);
-        assertFalse(mAnimatable.mPendingDestroySurfaces.contains(leash));
+        verify(mTransaction, never()).destroy(eq(leash));
         callbackCaptor.getValue().onAnimationFinished(mSpec);
         assertNotAnimating(mAnimatable2);
         assertTrue(mAnimatable2.mFinishedCallbackCalled);
-        assertTrue(mAnimatable2.mPendingDestroySurfaces.contains(leash));
+        verify(mTransaction).destroy(eq(leash));
     }
 
     private void assertAnimating(MyAnimatable animatable) {
@@ -182,7 +180,6 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
 
         final SurfaceControl mParent;
         final SurfaceControl mSurface;
-        final ArrayList<SurfaceControl> mPendingDestroySurfaces = new ArrayList<>();
         final SurfaceAnimator mSurfaceAnimator;
         SurfaceControl mLeash;
         boolean mFinishedCallbackCalled;
@@ -198,7 +195,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
                     .build();
             mFinishedCallbackCalled = false;
             mLeash = null;
-            mSurfaceAnimator = new SurfaceAnimator(this, mFinishedCallback, Runnable::run, sWm);
+            mSurfaceAnimator = new SurfaceAnimator(this, mFinishedCallback, sWm);
         }
 
         @Override
@@ -216,11 +213,6 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
 
         @Override
         public void onAnimationLeashDestroyed(Transaction t) {
-        }
-
-        @Override
-        public void destroyAfterPendingTransaction(SurfaceControl surface) {
-            mPendingDestroySurfaces.add(surface);
         }
 
         @Override

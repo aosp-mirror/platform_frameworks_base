@@ -42,15 +42,17 @@ message DimensionsValueTuple {
 }
 
 message EventMetricData {
-  optional int64 timestamp_nanos = 1;
+  optional int64 elapsed_timestamp_nanos = 1;
 
   optional Atom atom = 2;
+
+  optional int64 wall_clock_timestamp_sec = 3;
 }
 
 message CountBucketInfo {
-  optional int64 start_bucket_nanos = 1;
+  optional int64 start_bucket_elapsed_nanos = 1;
 
-  optional int64 end_bucket_nanos = 2;
+  optional int64 end_bucket_elapsed_nanos = 2;
 
   optional int64 count = 3;
 }
@@ -64,9 +66,9 @@ message CountMetricData {
 }
 
 message DurationBucketInfo {
-  optional int64 start_bucket_nanos = 1;
+  optional int64 start_bucket_elapsed_nanos = 1;
 
-  optional int64 end_bucket_nanos = 2;
+  optional int64 end_bucket_elapsed_nanos = 2;
 
   optional int64 duration_nanos = 3;
 }
@@ -80,9 +82,9 @@ message DurationMetricData {
 }
 
 message ValueBucketInfo {
-  optional int64 start_bucket_nanos = 1;
+  optional int64 start_bucket_elapsed_nanos = 1;
 
-  optional int64 end_bucket_nanos = 2;
+  optional int64 end_bucket_elapsed_nanos = 2;
 
   optional int64 value = 3;
 }
@@ -102,7 +104,7 @@ message GaugeBucketInfo {
 
   repeated Atom atom = 3;
 
-  repeated int64 timestamp_nanos = 4;
+  repeated int64 elapsed_timestamp_nanos = 4;
 }
 
 message GaugeMetricData {
@@ -122,7 +124,7 @@ message UidMapping {
 
       optional int32 uid = 3;
     }
-    optional int64 timestamp_nanos = 1;
+    optional int64 elapsed_timestamp_nanos = 1;
 
     repeated PackageInfo package_info = 2;
   }
@@ -131,7 +133,7 @@ message UidMapping {
   message Change {
     optional bool deletion = 1;
 
-    optional int64 timestamp_nanos = 2;
+    optional int64 elapsed_timestamp_nanos = 2;
     optional string app = 3;
     optional int32 uid = 4;
 
@@ -176,9 +178,9 @@ message ConfigMetricsReport {
 
   optional UidMapping uid_map = 2;
 
-  optional int64 last_report_nanos = 3;
+  optional int64 last_report_elapsed_nanos = 3;
 
-  optional int64 current_report_nanos = 4;
+  optional int64 current_report_elapsed_nanos = 4;
 }
 
 message ConfigMetricsReportList {

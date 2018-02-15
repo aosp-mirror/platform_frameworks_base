@@ -1055,6 +1055,9 @@ class SettingsProtoDumpUtil {
                 Global.CHAINED_BATTERY_ATTRIBUTION_ENABLED,
                 GlobalSettingsProto.CHAINED_BATTERY_ATTRIBUTION_ENABLED);
         dumpSetting(s, p,
+                Global.HIDDEN_API_BLACKLIST_EXEMPTIONS,
+                GlobalSettingsProto.HIDDEN_API_BLACKLIST_EXEMPTIONS);
+        dumpSetting(s, p,
                 Settings.Global.MULTI_SIM_VOICE_CALL_SUBSCRIPTION,
                 GlobalSettingsProto.MULTI_SIM_VOICE_CALL_SUBSCRIPTION);
         dumpSetting(s, p,

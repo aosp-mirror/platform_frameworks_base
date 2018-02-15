@@ -145,6 +145,7 @@ import android.net.TrafficStats;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -2756,6 +2757,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final String defaultPackage = mCarrierConfigManager.getDefaultCarrierServicePackageName();
         if (!TextUtils.isEmpty(defaultPackage)
                 && Objects.equals(defaultPackage, callingPackage)) {
+            return;
+        }
+
+        // Fourth check: is caller a testing app on a debug build?
+        final boolean enableDebug = Build.IS_USERDEBUG || Build.IS_ENG;
+        if (enableDebug && callingPackage
+                .equals(SystemProperties.get("fw.sub_plan_owner." + subId, null))) {
             return;
         }
 

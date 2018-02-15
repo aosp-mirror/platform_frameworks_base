@@ -56,7 +56,7 @@ StatsdConfig CreateStatsdConfig(DurationMetric::AggregationType aggregationType)
     *durationMetric->mutable_dimensions_in_what() =
         CreateAttributionUidDimensions(
             android::util::WAKELOCK_STATE_CHANGED, {Position::FIRST});
-    durationMetric->set_bucket(ONE_MINUTE);
+    durationMetric->set_bucket(FIVE_MINUTES);
     return config;
 }
 
@@ -315,9 +315,9 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForMaxDuration3) 
                                     android::util::WAKELOCK_STATE_CHANGED, 111);
     // The last wakelock holding spans 4 buckets.
     EXPECT_EQ((unsigned long long)data.bucket_info(1).duration_nanos(), 3 * bucketSizeNs);
-    EXPECT_EQ((unsigned long long)data.bucket_info(1).start_bucket_nanos(),
+    EXPECT_EQ((unsigned long long)data.bucket_info(1).start_bucket_elapsed_nanos(),
               bucketStartTimeNs + 5 * bucketSizeNs);
-    EXPECT_EQ((unsigned long long)data.bucket_info(1).end_bucket_nanos(),
+    EXPECT_EQ((unsigned long long)data.bucket_info(1).end_bucket_elapsed_nanos(),
               bucketStartTimeNs + 6 * bucketSizeNs);
 }
 

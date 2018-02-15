@@ -68,7 +68,6 @@ bool filterValues(const vector<Matcher>& matcherFields, const vector<FieldValue>
         for (const auto& value : values) {
             // TODO: potential optimization here to break early because all fields are naturally
             // sorted.
-            int32_t filteredField;
             if (value.mField.matches(matcher)) {
                 matchedResults.push_back(FieldValue(
                         Field(value.mField.getTag(), (value.mField.getField() & matcher.mMask)),
@@ -148,7 +147,6 @@ void filterGaugeValues(const std::vector<Matcher>& matcherFields,
                        const std::vector<FieldValue>& values, std::vector<FieldValue>* output) {
     for (const auto& field : matcherFields) {
         for (const auto& value : values) {
-            int filteredField;
             if (value.mField.matches(field)) {
                 output->push_back(value);
             }

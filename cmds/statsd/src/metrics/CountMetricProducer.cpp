@@ -52,8 +52,8 @@ const int FIELD_ID_DIMENSION_IN_WHAT = 1;
 const int FIELD_ID_DIMENSION_IN_CONDITION = 2;
 const int FIELD_ID_BUCKET_INFO = 3;
 // for CountBucketInfo
-const int FIELD_ID_START_BUCKET_NANOS = 1;
-const int FIELD_ID_END_BUCKET_NANOS = 2;
+const int FIELD_ID_START_BUCKET_ELAPSED_NANOS = 1;
+const int FIELD_ID_END_BUCKET_ELAPSED_NANOS = 2;
 const int FIELD_ID_COUNT = 3;
 
 CountMetricProducer::CountMetricProducer(const ConfigKey& key, const CountMetric& metric,
@@ -63,7 +63,8 @@ CountMetricProducer::CountMetricProducer(const ConfigKey& key, const CountMetric
     : MetricProducer(metric.id(), key, startTimeNs, conditionIndex, wizard) {
     // TODO: evaluate initial conditions. and set mConditionMet.
     if (metric.has_bucket()) {
-        mBucketSizeNs = TimeUnitToBucketSizeInMillis(metric.bucket()) * 1000000;
+        mBucketSizeNs =
+                TimeUnitToBucketSizeInMillisGuardrailed(key.GetUid(), metric.bucket()) * 1000000;
     } else {
         mBucketSizeNs = LLONG_MAX;
     }
@@ -107,7 +108,6 @@ void CountMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
     if (mPastBuckets.empty()) {
         return;
     }
-
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
     long long protoToken = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_COUNT_METRICS);
 
@@ -132,12 +132,13 @@ void CountMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
         }
 
         // Then fill bucket_info (CountBucketInfo).
+
         for (const auto& bucket : counter.second) {
             long long bucketInfoToken = protoOutput->start(
                     FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_BUCKET_INFO);
-            protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_START_BUCKET_NANOS,
+            protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_START_BUCKET_ELAPSED_NANOS,
                                (long long)bucket.mBucketStartNs);
-            protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_END_BUCKET_NANOS,
+            protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_END_BUCKET_ELAPSED_NANOS,
                                (long long)bucket.mBucketEndNs);
             protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_COUNT, (long long)bucket.mCount);
             protoOutput->end(bucketInfoToken);
@@ -184,7 +185,7 @@ void CountMetricProducer::onMatchedLogEventInternalLocked(
         const size_t matcherIndex, const MetricDimensionKey& eventKey,
         const ConditionKey& conditionKey, bool condition,
         const LogEvent& event) {
-    uint64_t eventTimeNs = event.GetTimestampNs();
+    uint64_t eventTimeNs = event.GetElapsedTimestampNs();
     flushIfNeededLocked(eventTimeNs);
 
     if (condition == false) {

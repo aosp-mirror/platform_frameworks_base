@@ -26,6 +26,7 @@
 #include "matchers/SimpleLogMatchingTracker.h"
 #include "metrics_manager_util.h"
 #include "stats_util.h"
+#include "stats_log_util.h"
 
 #include <log/logprint.h>
 #include <private/android_filesystem_config.h>
@@ -49,9 +50,10 @@ const int FIELD_ID_METRICS = 1;
 
 MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
                                const long timeBaseSec, sp<UidMap> uidMap)
-    : mConfigKey(key), mUidMap(uidMap), mLastReportTimeNs(0) {
+    : mConfigKey(key), mUidMap(uidMap), mLastReportTimeNs(timeBaseSec * NS_PER_SEC) {
     mConfigValid =
-            initStatsdConfig(key, config, *uidMap, timeBaseSec, mTagIds, mAllAtomMatchers, mAllConditionTrackers,
+            initStatsdConfig(key, config, *uidMap, timeBaseSec, mTagIds, mAllAtomMatchers,
+                             mAllConditionTrackers,
                              mAllMetricProducers, mAllAnomalyTrackers, mConditionToMetricMap,
                              mTrackerToMetricMap, mTrackerToConditionMap, mNoReportMetricIds);
 
@@ -176,7 +178,7 @@ void MetricsManager::onDumpReport(const uint64_t dumpTimeStampNs, ProtoOutputStr
             protoOutput->end(token);
         }
     }
-    mLastReportTimeNs = ::android::elapsedRealtimeNano();
+    mLastReportTimeNs = dumpTimeStampNs;
     VLOG("=========================Metric Reports End==========================");
 }
 
@@ -186,7 +188,7 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
         return;
     }
 
-    if (event.GetTagId() == android::util::APP_HOOK) { // Check that app hook fields are valid.
+    if (event.GetTagId() == android::util::APP_BREADCRUMB_REPORTED) { // Check that app hook fields are valid.
         // TODO: Find a way to make these checks easier to maintain if the app hooks get changed.
         status_t err = NO_ERROR;
 
@@ -230,7 +232,7 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
     }
 
     int tagId = event.GetTagId();
-    uint64_t eventTime = event.GetTimestampNs();
+    uint64_t eventTime = event.GetElapsedTimestampNs();
     if (mTagIds.find(tagId) == mTagIds.end()) {
         // not interesting...
         return;

@@ -452,7 +452,8 @@ public class SettingsBackupTest {
                     Settings.Global.ZEN_MODE_RINGER_LEVEL,
                     Settings.Global.ZRAM_ENABLED,
                     Settings.Global.OVERRIDE_SETTINGS_PROVIDER_RESTORE_ANY_VERSION,
-                    Settings.Global.CHAINED_BATTERY_ATTRIBUTION_ENABLED);
+                    Settings.Global.CHAINED_BATTERY_ATTRIBUTION_ENABLED,
+                    Settings.Global.HIDDEN_API_BLACKLIST_EXEMPTIONS);
 
     private static final Set<String> BACKUP_BLACKLISTED_SECURE_SETTINGS =
              newHashSet(
@@ -494,6 +495,7 @@ public class SettingsBackupTest {
                  Settings.Secure.DOZE_ALWAYS_ON,
                  Settings.Secure.DOZE_PULSE_ON_LONG_PRESS,
                  Settings.Secure.EMERGENCY_ASSISTANCE_APPLICATION,
+                 Settings.Secure.ENABLED_INPUT_METHODS,  // Intentionally removed in P
                  Settings.Secure.ENABLED_NOTIFICATION_ASSISTANT,
                  Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
                  Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,

@@ -102,6 +102,7 @@ public class PauseActivityItem extends ActivityLifecycleItem {
 
     @Override
     public void recycle() {
+        super.recycle();
         mFinished = false;
         mUserLeaving = false;
         mConfigChanges = 0;

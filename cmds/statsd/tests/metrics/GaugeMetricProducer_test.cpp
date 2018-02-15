@@ -67,6 +67,7 @@ TEST(GaugeMetricProducerTest, TestNoCondition) {
 
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
                                       tagId, bucketStartTimeNs, pullerManager);
+    gaugeProducer.setBucketSize(60 * NS_PER_SEC);
 
     vector<shared_ptr<LogEvent>> allData;
     allData.clear();
@@ -144,6 +145,7 @@ TEST(GaugeMetricProducerTest, TestPushedEventsWithUpgrade) {
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
                                       -1 /* -1 means no pulling */, bucketStartTimeNs,
                                       pullerManager);
+    gaugeProducer.setBucketSize(60 * NS_PER_SEC);
     sp<AnomalyTracker> anomalyTracker = gaugeProducer.addAnomalyTracker(alert);
     EXPECT_TRUE(anomalyTracker != nullptr);
 
@@ -225,6 +227,7 @@ TEST(GaugeMetricProducerTest, TestPulledWithUpgrade) {
 
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
                                       tagId, bucketStartTimeNs, pullerManager);
+    gaugeProducer.setBucketSize(60 * NS_PER_SEC);
 
     vector<shared_ptr<LogEvent>> allData;
     shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 1);
@@ -292,6 +295,7 @@ TEST(GaugeMetricProducerTest, TestWithCondition) {
 
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, 1, wizard, tagId,
                                       bucketStartTimeNs, pullerManager);
+    gaugeProducer.setBucketSize(60 * NS_PER_SEC);
 
     gaugeProducer.onConditionChanged(true, bucketStartTimeNs + 8);
     EXPECT_EQ(1UL, gaugeProducer.mCurrentSlicedBucket->size());
@@ -350,6 +354,7 @@ TEST(GaugeMetricProducerTest, TestAnomalyDetection) {
     gaugeFieldMatcher->add_child()->set_field(2);
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
                                       tagId, bucketStartTimeNs, pullerManager);
+    gaugeProducer.setBucketSize(60 * NS_PER_SEC);
 
     Alert alert;
     alert.set_id(101);
@@ -387,7 +392,7 @@ TEST(GaugeMetricProducerTest, TestAnomalyDetection) {
                            .mFields->begin()
                            ->mValue.int_value);
     EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_METRIC_DIMENSION_KEY),
-            event2->GetTimestampNs() / NS_PER_SEC + refPeriodSec);
+            event2->GetElapsedTimestampNs() / NS_PER_SEC + refPeriodSec);
 
     std::shared_ptr<LogEvent> event3 =
             std::make_shared<LogEvent>(tagId, bucketStartTimeNs + 2 * bucketSizeNs + 10);
@@ -402,7 +407,7 @@ TEST(GaugeMetricProducerTest, TestAnomalyDetection) {
                            .mFields->begin()
                            ->mValue.int_value);
     EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_METRIC_DIMENSION_KEY),
-            event2->GetTimestampNs() / NS_PER_SEC + refPeriodSec);
+            event2->GetElapsedTimestampNs() / NS_PER_SEC + refPeriodSec);
 
     // The event4 does not have the gauge field. Thus the current bucket value is 0.
     std::shared_ptr<LogEvent> event4 =

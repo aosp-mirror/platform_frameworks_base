@@ -174,7 +174,8 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
                 .addFloat(mDivider, "alpha", 0, 1)
                 .addFloat(mCarrierText, "alpha", 0, 1)
                 .addFloat(mActionsContainer, "alpha", 0, 1)
-                .addFloat(mDragHandle, "translationY", 0, -mDragHandleExpandOffset)
+                .addFloat(mDragHandle, "translationY", mDragHandleExpandOffset, 0)
+                .addFloat(mDragHandle, "alpha", 1, 0)
                 .build();
     }
 

@@ -101,7 +101,7 @@ void ConfigManager::RemoveConfig(const ConfigKey& key) {
 }
 
 void ConfigManager::remove_saved_configs(const ConfigKey& key) {
-    string suffix = StringPrintf("%d-%lld", key.GetUid(), (long long)key.GetId());
+    string suffix = StringPrintf("%d_%lld", key.GetUid(), (long long)key.GetId());
     StorageManager::deleteSuffixedFiles(STATS_SERVICE_DIR, suffix.c_str());
 }
 

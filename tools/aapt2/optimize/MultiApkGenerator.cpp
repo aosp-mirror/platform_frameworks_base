@@ -322,22 +322,56 @@ bool MultiApkGenerator::UpdateManifest(const OutputArtifact& artifact,
       std::unique_ptr<xml::Element> new_screens_el = util::make_unique<xml::Element>();
       new_screens_el->name = "compatible-screens";
       screens_el = new_screens_el.get();
-      manifest_el->InsertChild(0, std::move(new_screens_el));
+      manifest_el->AppendChild(std::move(new_screens_el));
     } else {
       // clear out the old element.
       screens_el->GetChildElements().clear();
     }
 
     for (const auto& density : artifact.screen_densities) {
-      std::unique_ptr<xml::Element> screen_el = util::make_unique<xml::Element>();
-      screen_el->name = "screen";
-      const char* density_str = density.toString().string();
-      screen_el->attributes.push_back(xml::Attribute{kSchemaAndroid, "screenDensity", density_str});
-      screens_el->AppendChild(std::move(screen_el));
+      AddScreens(density, screens_el);
     }
   }
 
   return true;
+}
+
+/**
+ * Adds a screen element with both screenSize and screenDensity set. Since we only know the density
+ * we add it for all screen sizes.
+ *
+ * This requires the resource IDs for the attributes from the framework library. Since these IDs are
+ * a part of the public API (and in public.xml) we hard code the values.
+ *
+ * The excert from the framework is as follows:
+ *    <public type="attr" name="screenSize" id="0x010102ca" />
+ *    <public type="attr" name="screenDensity" id="0x010102cb" />
+ */
+void MultiApkGenerator::AddScreens(const ConfigDescription& config, xml::Element* parent) {
+  // Hard coded integer representation of the supported screen sizes:
+  //  small   = 200
+  //  normal  = 300
+  //  large   = 400
+  //  xlarge  = 500
+  constexpr const uint32_t kScreenSizes[4] = {200, 300, 400, 500,};
+  constexpr const uint32_t kScreenSizeResourceId = 0x010102ca;
+  constexpr const uint32_t kScreenDensityResourceId = 0x010102cb;
+
+  for (uint32_t screen_size : kScreenSizes) {
+    std::unique_ptr<xml::Element> screen = util::make_unique<xml::Element>();
+    screen->name = "screen";
+
+    xml::Attribute* size = screen->FindOrCreateAttribute(kSchemaAndroid, "screenSize");
+    size->compiled_attribute = xml::AaptAttribute(Attribute(), {kScreenSizeResourceId});
+    size->compiled_value = ResourceUtils::MakeInt(screen_size);
+
+    xml::Attribute* density = screen->FindOrCreateAttribute(kSchemaAndroid, "screenDensity");
+    density->compiled_attribute = xml::AaptAttribute(Attribute(), {kScreenDensityResourceId});
+    density->compiled_value = ResourceUtils::MakeInt(config.density);
+
+
+    parent->AppendChild(std::move(screen));
+  }
 }
 
 }  // namespace aapt

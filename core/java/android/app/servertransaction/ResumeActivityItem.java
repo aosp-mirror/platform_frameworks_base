@@ -101,6 +101,7 @@ public class ResumeActivityItem extends ActivityLifecycleItem {
 
     @Override
     public void recycle() {
+        super.recycle();
         mProcState = ActivityManager.PROCESS_STATE_UNKNOWN;
         mUpdateProcState = false;
         mIsForward = false;

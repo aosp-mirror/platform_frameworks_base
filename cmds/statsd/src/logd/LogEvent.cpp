@@ -33,7 +33,7 @@ using android::util::ProtoOutputStream;
 LogEvent::LogEvent(log_msg& msg) {
     mContext =
             create_android_log_parser(msg.msg() + sizeof(uint32_t), msg.len() - sizeof(uint32_t));
-    mTimestampNs = msg.entry_v1.sec * NS_PER_SEC + msg.entry_v1.nsec;
+    mLogdTimestampNs = msg.entry_v1.sec * NS_PER_SEC + msg.entry_v1.nsec;
     mLogUid = msg.entry_v4.uid;
     init(mContext);
     if (mContext) {
@@ -42,12 +42,24 @@ LogEvent::LogEvent(log_msg& msg) {
     }
 }
 
-LogEvent::LogEvent(int32_t tagId, uint64_t timestampNs) {
-    mTimestampNs = timestampNs;
+LogEvent::LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedTimestampNs) {
+    mLogdTimestampNs = wallClockTimestampNs;
     mTagId = tagId;
     mLogUid = 0;
     mContext = create_android_logger(1937006964); // the event tag shared by all stats logs
     if (mContext) {
+        android_log_write_int64(mContext, elapsedTimestampNs);
+        android_log_write_int32(mContext, tagId);
+    }
+}
+
+LogEvent::LogEvent(int32_t tagId, int64_t timestampNs) {
+    mLogdTimestampNs = timestampNs;
+    mTagId = tagId;
+    mLogUid = 0;
+    mContext = create_android_logger(1937006964); // the event tag shared by all stats logs
+    if (mContext) {
+        android_log_write_int64(mContext, timestampNs);
         android_log_write_int32(mContext, tagId);
     }
 }
@@ -166,18 +178,14 @@ bool LogEvent::write(const AttributionNode& node) {
 void LogEvent::init(android_log_context context) {
     android_log_list_element elem;
     int i = 0;
-
-    int seenListStart = 0;
-
-    int32_t field = 0;
     int depth = -1;
     int pos[] = {1, 1, 1};
     do {
         elem = android_log_read_next(context);
         switch ((int)elem.type) {
             case EVENT_TYPE_INT:
-                // elem at [0] is EVENT_TYPE_LIST, [1] is the tag id.
-                if (i == 1) {
+                // elem at [0] is EVENT_TYPE_LIST, [1] is the timestamp, [2] is tag id.
+                if (i == 2) {
                     mTagId = elem.data.int32;
                 } else {
                     if (depth < 0 || depth > 2) {
@@ -214,15 +222,18 @@ void LogEvent::init(android_log_context context) {
 
             } break;
             case EVENT_TYPE_LONG: {
-                if (depth < 0 || depth > 2) {
-                    ALOGE("Depth > 2. Not supported!");
-                    return;
+                if (i == 1) {
+                    mElapsedTimestampNs = elem.data.int64;
+                } else {
+                    if (depth < 0 || depth > 2) {
+                        ALOGE("Depth > 2. Not supported!");
+                        return;
+                    }
+                    mValues.push_back(
+                            FieldValue(Field(mTagId, pos, depth), Value((int64_t)elem.data.int64)));
+
+                    pos[depth]++;
                 }
-                mValues.push_back(
-                        FieldValue(Field(mTagId, pos, depth), Value((int64_t)elem.data.int64)));
-
-                pos[depth]++;
-
             } break;
             case EVENT_TYPE_LIST:
                 depth++;
@@ -370,7 +381,7 @@ float LogEvent::GetFloat(size_t key, status_t* err) const {
 
 string LogEvent::ToString() const {
     ostringstream result;
-    result << "{ " << mTimestampNs << " (" << mTagId << ")";
+    result << "{ " << mLogdTimestampNs << " "  << mElapsedTimestampNs << " (" << mTagId << ")";
     for (const auto& value : mValues) {
         result << StringPrintf("%#x", value.mField.getField());
         result << "->";

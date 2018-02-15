@@ -406,7 +406,7 @@ AttributionNode CreateAttribution(const int& uid, const string& tag) {
 void sortLogEventsByTimestamp(std::vector<std::unique_ptr<LogEvent>> *events) {
   std::sort(events->begin(), events->end(),
             [](const std::unique_ptr<LogEvent>& a, const std::unique_ptr<LogEvent>& b) {
-              return a->GetTimestampNs() < b->GetTimestampNs();
+              return a->GetElapsedTimestampNs() < b->GetElapsedTimestampNs();
             });
 }
 

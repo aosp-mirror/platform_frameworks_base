@@ -244,14 +244,13 @@ static void CopyAttributes(Element* el, android::ResXMLParser* parser, StringPoo
       str16 = parser->getAttributeStringValue(i, &len);
       if (str16) {
         attr.value = util::Utf16ToUtf8(StringPiece16(str16, len));
-      } else {
-        android::Res_value res_value;
-        if (parser->getAttributeValue(i, &res_value) > 0) {
-          attr.compiled_value = ResourceUtils::ParseBinaryResValue(
-              ResourceType::kAnim, {}, parser->getStrings(), res_value, out_pool);
-        }
       }
 
+      android::Res_value res_value;
+      if (parser->getAttributeValue(i, &res_value) > 0) {
+        attr.compiled_value = ResourceUtils::ParseBinaryResValue(
+            ResourceType::kAnim, {}, parser->getStrings(), res_value, out_pool);
+      }
 
       el->attributes.push_back(std::move(attr));
     }

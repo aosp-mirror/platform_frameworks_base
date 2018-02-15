@@ -5213,6 +5213,22 @@ message MetricsEvent {
     // OS: P
     ACTION_OUTPUT_CHOOSER_DISCONNECT = 1297;
 
+    // OPEN: TV Settings > Home theater control
+    // OS: P
+    SETTINGS_TV_HOME_THEATER_CONTROL_CATEGORY = 1298;
+
+    // OPEN: TV Settings > TV Inputs (Inputs & Devices)
+    // OS: P
+    SETTINGS_TV_INPUTS_CATEGORY = 1299;
+
+    // OPEN: TV Settings > Device
+    // OS: P
+    SETTINGS_TV_DEVICE_CATEGORY = 1300;
+
+    // OPEN: TV Settings > Network > Proxy settings
+    // OS: P
+    DIALOG_TV_NETWORK_PROXY = 1301;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

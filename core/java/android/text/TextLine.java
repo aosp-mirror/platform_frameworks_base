@@ -16,7 +16,6 @@
 
 package android.text;
 
-import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Canvas;
@@ -61,7 +60,7 @@ public class TextLine {
     private char[] mChars;
     private boolean mCharsValid;
     private Spanned mSpanned;
-    private PrecomputedText mComputed;
+    private MeasuredText mMeasured;
 
     // Additional width of whitespace for justification. This value is per whitespace, thus
     // the line width will increase by mAddedWidth x (number of stretchable whitespaces).
@@ -120,7 +119,7 @@ public class TextLine {
         tl.mSpanned = null;
         tl.mTabs = null;
         tl.mChars = null;
-        tl.mComputed = null;
+        tl.mMeasured = null;
 
         tl.mMetricAffectingSpanSpanSet.recycle();
         tl.mCharacterStyleSpanSet.recycle();
@@ -150,31 +149,10 @@ public class TextLine {
      * @param tabStops the tabStops. Can be null.
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    public void set(TextPaint paint, CharSequence text, int start,
-            int limit, int dir, Directions directions, boolean hasTabs, TabStops tabStops) {
-        set(paint, text, null, start, limit, dir, directions, hasTabs, tabStops);
-    }
-
-    /**
-     * Initializes a TextLine and prepares it for use.
-     *
-     * @param paint the base paint for the line
-     * @param text the text, can be Styled
-     * @param precomputed the precomputed text
-     * @param start the start of the line relative to the text
-     * @param limit the limit of the line relative to the text
-     * @param dir the paragraph direction of this line
-     * @param directions the directions information of this line
-     * @param hasTabs true if the line might contain tabs
-     * @param tabStops the tabStops.
-     */
-    public void set(@NonNull TextPaint paint, @NonNull CharSequence text,
-            @Nullable PrecomputedText precomputed, @IntRange(from = 0) int start,
-            @IntRange(from = 0) int limit, int dir, @NonNull Directions directions, boolean hasTabs,
-            @Nullable TabStops tabStops) {
+    public void set(TextPaint paint, CharSequence text, int start, int limit, int dir,
+            Directions directions, boolean hasTabs, TabStops tabStops) {
         mPaint = paint;
         mText = text;
-        mComputed = precomputed;
         mStart = start;
         mLen = limit - start;
         mDir = dir;
@@ -190,6 +168,14 @@ public class TextLine {
             mSpanned = (Spanned) text;
             mReplacementSpanSpanSet.init(mSpanned, start, limit);
             hasReplacement = mReplacementSpanSpanSet.numberOfSpans > 0;
+        }
+
+        mMeasured = null;
+        if (text instanceof MeasuredText) {
+            MeasuredText mt = (MeasuredText) text;
+            if (mt.canUseMeasuredResult(paint)) {
+                mMeasured = mt;
+            }
         }
 
         mCharsValid = hasReplacement || hasTabs || directions != Layout.DIRS_ALL_LEFT_TO_RIGHT;
@@ -760,12 +746,12 @@ public class TextLine {
             return wp.getRunAdvance(mChars, start, end, contextStart, contextEnd, runIsRtl, offset);
         } else {
             final int delta = mStart;
-            if (mComputed == null) {
+            if (mMeasured == null) {
                 // TODO: Enable measured getRunAdvance for ReplacementSpan and RTL text.
                 return wp.getRunAdvance(mText, delta + start, delta + end,
                         delta + contextStart, delta + contextEnd, runIsRtl, delta + offset);
             } else {
-                return mComputed.getWidth(start + delta, end + delta);
+                return mMeasured.getWidth(start + delta, end + delta);
             }
         }
     }

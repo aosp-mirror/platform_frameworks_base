@@ -1591,6 +1591,7 @@ public class SettingsProvider extends ContentProvider {
     private boolean isGlobalOrSecureSettingRestrictedForUser(String setting, int userId,
             String value, int callingUid) {
         String restriction;
+        boolean checkAllUser = false;
         switch (setting) {
             case Settings.Secure.LOCATION_MODE:
                 // Note LOCATION_MODE will be converted into LOCATION_PROVIDERS_ALLOWED
@@ -1656,6 +1657,12 @@ public class SettingsProvider extends ContentProvider {
                 restriction = UserManager.DISALLOW_AMBIENT_DISPLAY;
                 break;
 
+            case Global.LOCATION_GLOBAL_KILL_SWITCH:
+                if ("0".equals(value)) return false;
+                restriction = UserManager.DISALLOW_CONFIG_LOCATION;
+                checkAllUser = true;
+                break;
+
             default:
                 if (setting != null && setting.startsWith(Settings.Global.DATA_ROAMING)) {
                     if ("0".equals(value)) return false;
@@ -1665,7 +1672,11 @@ public class SettingsProvider extends ContentProvider {
                 return false;
         }
 
-        return mUserManager.hasUserRestriction(restriction, UserHandle.of(userId));
+        if (checkAllUser) {
+            return mUserManager.hasUserRestrictionOnAnyUser(restriction);
+        } else {
+            return mUserManager.hasUserRestriction(restriction, UserHandle.of(userId));
+        }
     }
 
     private int resolveOwningUserIdForSecureSettingLocked(int userId, String setting) {

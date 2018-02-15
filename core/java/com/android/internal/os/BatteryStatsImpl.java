@@ -187,7 +187,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public final AtomicFile mCheckinFile;
     public final AtomicFile mDailyFile;
 
-    static final int MSG_UPDATE_WAKELOCKS = 1;
+    static final int MSG_REPORT_CPU_UPDATE_NEEDED = 1;
     static final int MSG_REPORT_POWER_CHANGE = 2;
     static final int MSG_REPORT_CHARGING = 3;
     static final long DELAY_UPDATE_WAKELOCKS = 5*1000;
@@ -273,10 +273,7 @@ public class BatteryStatsImpl extends BatteryStats {
         public void handleMessage(Message msg) {
             BatteryCallback cb = mCallback;
             switch (msg.what) {
-                case MSG_UPDATE_WAKELOCKS:
-                    synchronized (BatteryStatsImpl.this) {
-                        updateCpuTimeLocked();
-                    }
+                case MSG_REPORT_CPU_UPDATE_NEEDED:
                     if (cb != null) {
                         cb.batteryNeedsCpuUpdate();
                     }
@@ -300,6 +297,10 @@ public class BatteryStatsImpl extends BatteryStats {
                     break;
             }
         }
+    }
+
+    public void postBatteryNeedsCpuUpdateMsg() {
+        mHandler.sendEmptyMessage(MSG_REPORT_CPU_UPDATE_NEEDED);
     }
 
     /**
@@ -487,6 +488,10 @@ public class BatteryStatsImpl extends BatteryStats {
         Future<?> scheduleReadProcStateCpuTimes(boolean onBattery, boolean onBatteryScreenOff);
         Future<?> scheduleCopyFromAllUidsCpuTimes(boolean onBattery, boolean onBatteryScreenOff);
         Future<?> scheduleCpuSyncDueToSettingChange();
+        Future<?> scheduleCpuSyncDueToScreenStateChange(boolean onBattery,
+                boolean onBatteryScreenOff);
+        Future<?> scheduleCpuSyncDueToWakelockChange(long delayMillis);
+        void cancelCpuSyncDueToWakelockChange();
     }
 
     public Handler mHandler;
@@ -1453,12 +1458,10 @@ public class BatteryStatsImpl extends BatteryStats {
         long mCount;
         long mLoadedCount;
         long mUnpluggedCount;
-        long mPluggedCount;
 
         LongSamplingCounter(TimeBase timeBase, Parcel in) {
             mTimeBase = timeBase;
-            mPluggedCount = in.readLong();
-            mCount = mPluggedCount;
+            mCount = in.readLong();
             mLoadedCount = in.readLong();
             mUnpluggedCount = in.readLong();
             timeBase.add(this);
@@ -1477,16 +1480,15 @@ public class BatteryStatsImpl extends BatteryStats {
 
         @Override
         public void onTimeStarted(long elapsedRealtime, long baseUptime, long baseRealtime) {
-            mUnpluggedCount = mPluggedCount;
+            mUnpluggedCount = mCount;
         }
 
         @Override
         public void onTimeStopped(long elapsedRealtime, long baseUptime, long baseRealtime) {
-            mPluggedCount = mCount;
         }
 
         public long getCountLocked(int which) {
-            long val = mTimeBase.isRunning() ? mCount : mPluggedCount;
+            long val = mCount;
             if (which == STATS_SINCE_UNPLUGGED) {
                 val -= mUnpluggedCount;
             } else if (which != STATS_SINCE_CHARGED) {
@@ -1499,12 +1501,15 @@ public class BatteryStatsImpl extends BatteryStats {
         public void logState(Printer pw, String prefix) {
             pw.println(prefix + "mCount=" + mCount
                     + " mLoadedCount=" + mLoadedCount
-                    + " mUnpluggedCount=" + mUnpluggedCount
-                    + " mPluggedCount=" + mPluggedCount);
+                    + " mUnpluggedCount=" + mUnpluggedCount);
         }
 
         void addCountLocked(long count) {
-            if (mTimeBase.isRunning()) {
+            addCountLocked(count, mTimeBase.isRunning());
+        }
+
+        void addCountLocked(long count, boolean isRunning) {
+            if (isRunning) {
                 mCount += count;
             }
         }
@@ -1514,7 +1519,7 @@ public class BatteryStatsImpl extends BatteryStats {
          */
         void reset(boolean detachIfReset) {
             mCount = 0;
-            mLoadedCount = mPluggedCount = mUnpluggedCount = 0;
+            mLoadedCount = mUnpluggedCount = 0;
             if (detachIfReset) {
                 detach();
             }
@@ -1531,7 +1536,7 @@ public class BatteryStatsImpl extends BatteryStats {
         void readSummaryFromParcelLocked(Parcel in) {
             mLoadedCount = in.readLong();
             mCount = mLoadedCount;
-            mUnpluggedCount = mPluggedCount = mLoadedCount;
+            mUnpluggedCount = mLoadedCount;
         }
     }
 
@@ -3852,9 +3857,6 @@ public class BatteryStatsImpl extends BatteryStats {
                         + Display.stateToString(screenState)
                         + " and battery is " + (unplugged ? "on" : "off"));
             }
-            updateCpuTimeLocked();
-            mExternalSync.scheduleCopyFromAllUidsCpuTimes(mOnBatteryTimeBase.isRunning(),
-                    mOnBatteryScreenOffTimeBase.isRunning());
 
             mOnBatteryTimeBase.setRunning(unplugged, uptime, realtime);
             if (updateOnBatteryTimeBase) {
@@ -4143,15 +4145,11 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     private void requestWakelockCpuUpdate() {
-        if (!mHandler.hasMessages(MSG_UPDATE_WAKELOCKS)) {
-            Message m = mHandler.obtainMessage(MSG_UPDATE_WAKELOCKS);
-            mHandler.sendMessageDelayed(m, DELAY_UPDATE_WAKELOCKS);
-        }
+        mExternalSync.scheduleCpuSyncDueToWakelockChange(DELAY_UPDATE_WAKELOCKS);
     }
 
     private void requestImmediateCpuUpdate() {
-        mHandler.removeMessages(MSG_UPDATE_WAKELOCKS);
-        mHandler.sendEmptyMessage(MSG_UPDATE_WAKELOCKS);
+        mExternalSync.scheduleCpuSyncDueToWakelockChange(0 /* delayMillis */);
     }
 
     public void setRecordAllHistoryLocked(boolean enabled) {
@@ -4554,7 +4552,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     public boolean startAddingCpuLocked() {
-        mHandler.removeMessages(MSG_UPDATE_WAKELOCKS);
+        mExternalSync.cancelCpuSyncDueToWakelockChange();
         return mOnBatteryInternal;
     }
 
@@ -4807,6 +4805,8 @@ public class BatteryStatsImpl extends BatteryStats {
                         + Display.stateToString(state));
                 addHistoryRecordLocked(elapsedRealtime, uptime);
             }
+            mExternalSync.scheduleCpuSyncDueToScreenStateChange(
+                    mOnBatteryTimeBase.isRunning(), mOnBatteryScreenOffTimeBase.isRunning());
             if (isScreenOn(state)) {
                 updateTimeBasesLocked(mOnBatteryTimeBase.isRunning(), state,
                         mClocks.uptimeMillis() * 1000, elapsedRealtime * 1000);
@@ -9196,8 +9196,14 @@ public class BatteryStatsImpl extends BatteryStats {
             }
 
             public void addCpuTimeLocked(int utime, int stime) {
-                mUserTime += utime;
-                mSystemTime += stime;
+                addCpuTimeLocked(utime, stime, mBsi.mOnBatteryTimeBase.isRunning());
+            }
+
+            public void addCpuTimeLocked(int utime, int stime, boolean isRunning) {
+                if (isRunning) {
+                    mUserTime += utime;
+                    mSystemTime += stime;
+                }
             }
 
             public void addForegroundTimeLocked(long ttime) {
@@ -11761,13 +11767,24 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    public boolean isOnBatteryLocked() {
+        return mOnBatteryTimeBase.isRunning();
+    }
+
+    public boolean isOnBatteryScreenOffLocked() {
+        return mOnBatteryScreenOffTimeBase.isRunning();
+    }
+
     /**
      * Read and distribute CPU usage across apps. If their are partial wakelocks being held
      * and we are on battery with screen off, we give more of the cpu time to those apps holding
      * wakelocks. If the screen is on, we just assign the actual cpu time an app used.
+     * It's possible this will be invoked after the internal battery/screen states are updated, so
+     * passing the appropriate battery/screen states to try attribute the cpu times to correct
+     * buckets.
      */
     @GuardedBy("this")
-    public void updateCpuTimeLocked() {
+    public void updateCpuTimeLocked(boolean onBattery, boolean onBatteryScreenOff) {
         if (mPowerProfile == null) {
             return;
         }
@@ -11784,7 +11801,7 @@ public class BatteryStatsImpl extends BatteryStats {
         // usually holding the wakelock on behalf of an app.
         // And Only distribute cpu power to wakelocks if the screen is off and we're on battery.
         ArrayList<StopwatchTimer> partialTimersToConsider = null;
-        if (mOnBatteryScreenOffTimeBase.isRunning()) {
+        if (onBatteryScreenOff) {
             partialTimersToConsider = new ArrayList<>();
             for (int i = mPartialTimers.size() - 1; i >= 0; --i) {
                 final StopwatchTimer timer = mPartialTimers.get(i);
@@ -11802,7 +11819,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         // When the battery is not on, we don't attribute the cpu times to any timers but we still
         // need to take the snapshots.
-        if (!mOnBatteryInternal) {
+        if (!onBattery) {
             mKernelUidCpuTimeReader.readDelta(null);
             mKernelUidCpuFreqTimeReader.readDelta(null);
             if (mConstants.TRACK_CPU_ACTIVE_CLUSTER_TIME) {
@@ -11818,16 +11835,16 @@ public class BatteryStatsImpl extends BatteryStats {
         mUserInfoProvider.refreshUserIds();
         final SparseLongArray updatedUids = mKernelUidCpuFreqTimeReader.perClusterTimesAvailable()
                 ? null : new SparseLongArray();
-        readKernelUidCpuTimesLocked(partialTimersToConsider, updatedUids);
+        readKernelUidCpuTimesLocked(partialTimersToConsider, updatedUids, onBattery);
         // updatedUids=null means /proc/uid_time_in_state provides snapshots of per-cluster cpu
         // freqs, so no need to approximate these values.
         if (updatedUids != null) {
-            updateClusterSpeedTimes(updatedUids);
+            updateClusterSpeedTimes(updatedUids, onBattery);
         }
-        readKernelUidCpuFreqTimesLocked(partialTimersToConsider);
+        readKernelUidCpuFreqTimesLocked(partialTimersToConsider, onBattery, onBatteryScreenOff);
         if (mConstants.TRACK_CPU_ACTIVE_CLUSTER_TIME) {
-            readKernelUidCpuActiveTimesLocked();
-            readKernelUidCpuClusterTimesLocked();
+            readKernelUidCpuActiveTimesLocked(onBattery);
+            readKernelUidCpuClusterTimesLocked(onBattery);
         }
     }
 
@@ -11867,7 +11884,7 @@ public class BatteryStatsImpl extends BatteryStats {
      * @param updatedUids The uids for which times spent at different frequencies are calculated.
      */
     @VisibleForTesting
-    public void updateClusterSpeedTimes(@NonNull SparseLongArray updatedUids) {
+    public void updateClusterSpeedTimes(@NonNull SparseLongArray updatedUids, boolean onBattery) {
         long totalCpuClustersTimeMs = 0;
         // Read the time spent for each cluster at various cpu frequencies.
         final long[][] clusterSpeedTimesMs = new long[mKernelCpuSpeedReaders.length][];
@@ -11909,7 +11926,7 @@ public class BatteryStatsImpl extends BatteryStats {
                         }
                         cpuSpeeds[speed].addCountLocked(appCpuTimeUs
                                 * clusterSpeedTimesMs[cluster][speed]
-                                / totalCpuClustersTimeMs);
+                                / totalCpuClustersTimeMs, onBattery);
                     }
                 }
             }
@@ -11926,7 +11943,7 @@ public class BatteryStatsImpl extends BatteryStats {
      */
     @VisibleForTesting
     public void readKernelUidCpuTimesLocked(@Nullable ArrayList<StopwatchTimer> partialTimers,
-            @Nullable SparseLongArray updatedUids) {
+            @Nullable SparseLongArray updatedUids, boolean onBattery) {
         mTempTotalCpuUserTimeUs = mTempTotalCpuSystemTimeUs = 0;
         final int numWakelocks = partialTimers == null ? 0 : partialTimers.size();
         final long startTimeMs = mClocks.uptimeMillis();
@@ -11977,8 +11994,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 Slog.d(TAG, sb.toString());
             }
 
-            u.mUserCpuTime.addCountLocked(userTimeUs);
-            u.mSystemCpuTime.addCountLocked(systemTimeUs);
+            u.mUserCpuTime.addCountLocked(userTimeUs, onBattery);
+            u.mSystemCpuTime.addCountLocked(systemTimeUs, onBattery);
             if (updatedUids != null) {
                 updatedUids.put(u.getUid(), userTimeUs + systemTimeUs);
             }
@@ -12010,15 +12027,15 @@ public class BatteryStatsImpl extends BatteryStats {
                     Slog.d(TAG, sb.toString());
                 }
 
-                timer.mUid.mUserCpuTime.addCountLocked(userTimeUs);
-                timer.mUid.mSystemCpuTime.addCountLocked(systemTimeUs);
+                timer.mUid.mUserCpuTime.addCountLocked(userTimeUs, onBattery);
+                timer.mUid.mSystemCpuTime.addCountLocked(systemTimeUs, onBattery);
                 if (updatedUids != null) {
                     final int uid = timer.mUid.getUid();
                     updatedUids.put(uid, updatedUids.get(uid, 0) + userTimeUs + systemTimeUs);
                 }
 
                 final Uid.Proc proc = timer.mUid.getProcessStatsLocked("*wakelock*");
-                proc.addCpuTimeLocked(userTimeUs / 1000, systemTimeUs / 1000);
+                proc.addCpuTimeLocked(userTimeUs / 1000, systemTimeUs / 1000, onBattery);
 
                 mTempTotalCpuUserTimeUs -= userTimeUs;
                 mTempTotalCpuSystemTimeUs -= systemTimeUs;
@@ -12033,7 +12050,8 @@ public class BatteryStatsImpl extends BatteryStats {
      * @param partialTimers The wakelock holders among which the cpu freq times will be distributed.
      */
     @VisibleForTesting
-    public void readKernelUidCpuFreqTimesLocked(@Nullable ArrayList<StopwatchTimer> partialTimers) {
+    public void readKernelUidCpuFreqTimesLocked(@Nullable ArrayList<StopwatchTimer> partialTimers,
+            boolean onBattery, boolean onBatteryScreenOff) {
         final boolean perClusterTimesAvailable =
                 mKernelUidCpuFreqTimeReader.perClusterTimesAvailable();
         final int numWakelocks = partialTimers == null ? 0 : partialTimers.size();
@@ -12056,13 +12074,13 @@ public class BatteryStatsImpl extends BatteryStats {
             if (u.mCpuFreqTimeMs == null || u.mCpuFreqTimeMs.getSize() != cpuFreqTimeMs.length) {
                 u.mCpuFreqTimeMs = new LongSamplingCounterArray(mOnBatteryTimeBase);
             }
-            u.mCpuFreqTimeMs.addCountLocked(cpuFreqTimeMs);
+            u.mCpuFreqTimeMs.addCountLocked(cpuFreqTimeMs, onBattery);
             if (u.mScreenOffCpuFreqTimeMs == null ||
                     u.mScreenOffCpuFreqTimeMs.getSize() != cpuFreqTimeMs.length) {
                 u.mScreenOffCpuFreqTimeMs = new LongSamplingCounterArray(
                         mOnBatteryScreenOffTimeBase);
             }
-            u.mScreenOffCpuFreqTimeMs.addCountLocked(cpuFreqTimeMs);
+            u.mScreenOffCpuFreqTimeMs.addCountLocked(cpuFreqTimeMs, onBatteryScreenOff);
 
             if (perClusterTimesAvailable) {
                 if (u.mCpuClusterSpeedTimesUs == null ||
@@ -12098,7 +12116,7 @@ public class BatteryStatsImpl extends BatteryStats {
                         } else {
                             appAllocationUs = cpuFreqTimeMs[freqIndex] * 1000;
                         }
-                        cpuTimesUs[speed].addCountLocked(appAllocationUs);
+                        cpuTimesUs[speed].addCountLocked(appAllocationUs, onBattery);
                         freqIndex++;
                     }
                 }
@@ -12132,7 +12150,7 @@ public class BatteryStatsImpl extends BatteryStats {
                         }
                         final long allocationUs =
                                 mWakeLockAllocationsUs[cluster][speed] / (numWakelocks - i);
-                        cpuTimeUs[speed].addCountLocked(allocationUs);
+                        cpuTimeUs[speed].addCountLocked(allocationUs, onBattery);
                         mWakeLockAllocationsUs[cluster][speed] -= allocationUs;
                     }
                 }
@@ -12145,7 +12163,7 @@ public class BatteryStatsImpl extends BatteryStats {
      * counters.
      */
     @VisibleForTesting
-    public void readKernelUidCpuActiveTimesLocked() {
+    public void readKernelUidCpuActiveTimesLocked(boolean onBattery) {
         final long startTimeMs = mClocks.uptimeMillis();
         mKernelUidCpuActiveTimeReader.readDelta((uid, cpuActiveTimesUs) -> {
             uid = mapUid(uid);
@@ -12160,7 +12178,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 return;
             }
             final Uid u = getUidStatsLocked(uid);
-            u.mCpuActiveTimeMs.addCountLocked(cpuActiveTimesUs);
+            u.mCpuActiveTimeMs.addCountLocked(cpuActiveTimesUs, onBattery);
         });
 
         final long elapsedTimeMs = mClocks.uptimeMillis() - startTimeMs;
@@ -12174,7 +12192,7 @@ public class BatteryStatsImpl extends BatteryStats {
      * counters.
      */
     @VisibleForTesting
-    public void readKernelUidCpuClusterTimesLocked() {
+    public void readKernelUidCpuClusterTimesLocked(boolean onBattery) {
         final long startTimeMs = mClocks.uptimeMillis();
         mKernelUidCpuClusterTimeReader.readDelta((uid, cpuClusterTimesUs) -> {
             uid = mapUid(uid);
@@ -12189,7 +12207,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 return;
             }
             final Uid u = getUidStatsLocked(uid);
-            u.mCpuClusterTimesMs.addCountLocked(cpuClusterTimesUs);
+            u.mCpuClusterTimesMs.addCountLocked(cpuClusterTimesUs, onBattery);
         });
 
         final long elapsedTimeMs = mClocks.uptimeMillis() - startTimeMs;
@@ -12399,9 +12417,7 @@ public class BatteryStatsImpl extends BatteryStats {
         reportChangesToStatsLog(mHaveBatteryLevel ? mHistoryCur : null,
                 status, plugType, level, temp);
 
-        final boolean onBattery =
-            plugType == BATTERY_PLUGGED_NONE &&
-            status != BatteryManager.BATTERY_STATUS_UNKNOWN;
+        final boolean onBattery = isOnBattery(plugType, status);
         final long uptime = mClocks.uptimeMillis();
         final long elapsedRealtime = mClocks.elapsedRealtime();
         if (!mHaveBatteryLevel) {
@@ -12589,6 +12605,10 @@ public class BatteryStatsImpl extends BatteryStats {
             Math.min(mMinLearnedBatteryCapacity, chargeFullUAh);
         }
         mMaxLearnedBatteryCapacity = Math.max(mMaxLearnedBatteryCapacity, chargeFullUAh);
+    }
+
+    public static boolean isOnBattery(int plugType, int status) {
+        return plugType == BATTERY_PLUGGED_NONE && status != BatteryManager.BATTERY_STATUS_UNKNOWN;
     }
 
     // Inform StatsLog of setBatteryState changes.

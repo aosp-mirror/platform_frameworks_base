@@ -20,6 +20,7 @@ import static android.view.autofill.Helper.sDebug;
 
 import android.annotation.NonNull;
 import android.annotation.TestApi;
+import android.icu.text.DateFormat;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -30,7 +31,6 @@ import android.widget.TextView;
 
 import com.android.internal.util.Preconditions;
 
-import java.text.DateFormat;
 import java.util.Date;
 
 /**

@@ -520,6 +520,10 @@ std::unique_ptr<BinaryPrimitive> TryParseInt(const StringPiece& str) {
   return util::make_unique<BinaryPrimitive>(value);
 }
 
+std::unique_ptr<BinaryPrimitive> MakeInt(uint32_t val) {
+  return util::make_unique<BinaryPrimitive>(android::Res_value::TYPE_INT_DEC, val);
+}
+
 std::unique_ptr<BinaryPrimitive> TryParseFloat(const StringPiece& str) {
   std::u16string str16 = util::Utf8ToUtf16(util::TrimWhitespace(str));
   android::Res_value value;

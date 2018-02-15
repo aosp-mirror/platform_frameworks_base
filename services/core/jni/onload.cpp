@@ -34,6 +34,7 @@ int register_android_server_PowerManagerService(JNIEnv* env);
 int register_android_server_storage_AppFuse(JNIEnv* env);
 int register_android_server_SerialService(JNIEnv* env);
 int register_android_server_SystemServer(JNIEnv* env);
+int register_android_server_UsbAlsaJackDetector(JNIEnv* env);
 int register_android_server_UsbDeviceManager(JNIEnv* env);
 int register_android_server_UsbMidiDevice(JNIEnv* env);
 int register_android_server_UsbHostManager(JNIEnv* env);
@@ -82,6 +83,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_android_server_AlarmManagerService(env);
     register_android_server_UsbDeviceManager(env);
     register_android_server_UsbMidiDevice(env);
+    register_android_server_UsbAlsaJackDetector(env);
     register_android_server_UsbHostManager(env);
     register_android_server_vr_VrManagerService(env);
     register_android_server_VibratorService(env);

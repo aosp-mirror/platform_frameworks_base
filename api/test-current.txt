@@ -1047,6 +1047,15 @@ package android.view.accessibility {
 
 }
 
+package android.view.animation {
+
+  public class AnimationUtils {
+    method public static void lockAnimationClock(long);
+    method public static void unlockAnimationClock();
+  }
+
+}
+
 package android.view.autofill {
 
   public final class AutofillId implements android.os.Parcelable {

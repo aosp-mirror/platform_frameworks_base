@@ -43,7 +43,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -65,12 +68,13 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     // There is some accuracy error in wifi reports so allow some slop in the results.
     private static final long MAX_WIFI_STATS_SAMPLE_ERROR_MILLIS = 750;
 
-    private final ExecutorService mExecutorService = Executors.newSingleThreadExecutor(
-            (ThreadFactory) r -> {
-                Thread t = new Thread(r, "batterystats-worker");
-                t.setPriority(Thread.NORM_PRIORITY);
-                return t;
-            });
+    private final ScheduledExecutorService mExecutorService =
+            Executors.newSingleThreadScheduledExecutor(
+                    (ThreadFactory) r -> {
+                        Thread t = new Thread(r, "batterystats-worker");
+                        t.setPriority(Thread.NORM_PRIORITY);
+                        return t;
+                    });
 
     private final Context mContext;
     private final BatteryStatsImpl mStats;
@@ -85,7 +89,19 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     private String mCurrentReason = null;
 
     @GuardedBy("this")
+    private boolean mOnBattery;
+
+    @GuardedBy("this")
+    private boolean mOnBatteryScreenOff;
+
+    @GuardedBy("this")
+    private boolean mUseLatestStates = true;
+
+    @GuardedBy("this")
     private final IntArray mUidsToRemove = new IntArray();
+
+    @GuardedBy("this")
+    private Future<?> mWakelockChangesUpdate;
 
     private final Object mWorkerLock = new Object();
 
@@ -157,6 +173,50 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         return null;
     }
 
+    @Override
+    public Future<?> scheduleCpuSyncDueToScreenStateChange(
+            boolean onBattery, boolean onBatteryScreenOff) {
+        synchronized (BatteryExternalStatsWorker.this) {
+            if (mCurrentFuture == null || (mUpdateFlags & UPDATE_CPU) == 0) {
+                mOnBattery = onBattery;
+                mOnBatteryScreenOff = onBatteryScreenOff;
+                mUseLatestStates = false;
+            }
+            return scheduleSyncLocked("screen-state", UPDATE_CPU);
+        }
+    }
+
+    @Override
+    public Future<?> scheduleCpuSyncDueToWakelockChange(long delayMillis) {
+        if (mExecutorService.isShutdown()) {
+            return CompletableFuture.failedFuture(new IllegalStateException("worker shutdown"));
+        }
+
+        if (mWakelockChangesUpdate != null) {
+            // If there's already a scheduled task, leave it as is if we're trying to re-schedule
+            // it again with a delay, otherwise cancel and re-schedule it.
+            if (delayMillis == 0) {
+                mWakelockChangesUpdate.cancel(false);
+            } else {
+                return mWakelockChangesUpdate;
+            }
+        }
+
+        mWakelockChangesUpdate = mExecutorService.schedule(() -> {
+            scheduleSync("wakelock-change", UPDATE_CPU);
+            scheduleRunnable(() -> mStats.postBatteryNeedsCpuUpdateMsg());
+            mWakelockChangesUpdate = null;
+        }, delayMillis, TimeUnit.MILLISECONDS);
+        return mWakelockChangesUpdate;
+    }
+
+    @Override
+    public void cancelCpuSyncDueToWakelockChange() {
+        if (mWakelockChangesUpdate != null) {
+            mWakelockChangesUpdate.cancel(false);
+        }
+    }
+
     public synchronized Future<?> scheduleWrite() {
         if (mExecutorService.isShutdown()) {
             return CompletableFuture.failedFuture(new IllegalStateException("worker shutdown"));
@@ -204,14 +264,21 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             final int updateFlags;
             final String reason;
             final int[] uidsToRemove;
+            final boolean onBattery;
+            final boolean onBatteryScreenOff;
+            final boolean useLatestStates;
             synchronized (BatteryExternalStatsWorker.this) {
                 updateFlags = mUpdateFlags;
                 reason = mCurrentReason;
                 uidsToRemove = mUidsToRemove.size() > 0 ? mUidsToRemove.toArray() : EmptyArray.INT;
+                onBattery = mOnBattery;
+                onBatteryScreenOff = mOnBatteryScreenOff;
+                useLatestStates = mUseLatestStates;
                 mUpdateFlags = 0;
                 mCurrentReason = null;
                 mUidsToRemove.clear();
                 mCurrentFuture = null;
+                mUseLatestStates = true;
             }
 
             synchronized (mWorkerLock) {
@@ -219,7 +286,8 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                     Slog.d(TAG, "begin updateExternalStatsSync reason=" + reason);
                 }
                 try {
-                    updateExternalStatsLocked(reason, updateFlags);
+                    updateExternalStatsLocked(reason, updateFlags, onBattery,
+                            onBatteryScreenOff, useLatestStates);
                 } finally {
                     if (DEBUG) {
                         Slog.d(TAG, "end updateExternalStatsSync");
@@ -250,7 +318,8 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     };
 
     @GuardedBy("mWorkerLock")
-    private void updateExternalStatsLocked(final String reason, int updateFlags) {
+    private void updateExternalStatsLocked(final String reason, int updateFlags,
+            boolean onBattery, boolean onBatteryScreenOff, boolean useLatestStates) {
         // We will request data from external processes asynchronously, and wait on a timeout.
         SynchronousResultReceiver wifiReceiver = null;
         SynchronousResultReceiver bluetoothReceiver = null;
@@ -306,7 +375,14 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                     reason, 0);
 
             if ((updateFlags & UPDATE_CPU) != 0) {
-                mStats.updateCpuTimeLocked();
+                if (useLatestStates) {
+                    onBattery = mStats.isOnBatteryLocked();
+                    onBatteryScreenOff = mStats.isOnBatteryScreenOffLocked();
+                }
+                mStats.updateCpuTimeLocked(onBattery, onBatteryScreenOff);
+            }
+
+            if ((updateFlags & UPDATE_ALL) != 0) {
                 mStats.updateKernelWakelocksLocked();
                 mStats.updateKernelMemoryBandwidthLocked();
             }

@@ -45,7 +45,7 @@ import java.util.Random;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
-public class PrecomputedTextMemoryUsageTest {
+public class MeasuredTextMemoryUsageTest {
     private static final int WORD_LENGTH = 9;  // Random word has 9 characters.
     private static final boolean NO_STYLE_TEXT = false;
 
@@ -53,7 +53,7 @@ public class PrecomputedTextMemoryUsageTest {
 
     private static int TRIAL_COUNT = 100;
 
-    public PrecomputedTextMemoryUsageTest() {}
+    public MeasuredTextMemoryUsageTest() {}
 
     private TextPerfUtils mTextUtil = new TextPerfUtils();
 
@@ -77,16 +77,13 @@ public class PrecomputedTextMemoryUsageTest {
     @Test
     public void testMemoryUsage_NoHyphenation() {
         int[] memories = new int[TRIAL_COUNT];
-        final PrecomputedText.Params param = new PrecomputedText.Params.Builder(PAINT)
+        // Report median of randomly generated MeasuredText.
+        for (int i = 0; i < TRIAL_COUNT; ++i) {
+            memories[i] = new MeasuredText.Builder(
+                    mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT)
                 .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
                 .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
-                .build();
-
-        // Report median of randomly generated PrecomputedText.
-        for (int i = 0; i < TRIAL_COUNT; ++i) {
-            memories[i] = PrecomputedText.create(
-                    mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), param)
-                .getMemoryUsage();
+                .build().getMemoryUsage();
         }
         reportMemoryUsage(median(memories), "MemoryUsage_NoHyphenation");
     }
@@ -94,16 +91,13 @@ public class PrecomputedTextMemoryUsageTest {
     @Test
     public void testMemoryUsage_Hyphenation() {
         int[] memories = new int[TRIAL_COUNT];
-        final PrecomputedText.Params param = new PrecomputedText.Params.Builder(PAINT)
+        // Report median of randomly generated MeasuredText.
+        for (int i = 0; i < TRIAL_COUNT; ++i) {
+            memories[i] = new MeasuredText.Builder(
+                    mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT)
                 .setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED)
                 .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL)
-                .build();
-
-        // Report median of randomly generated PrecomputedText.
-        for (int i = 0; i < TRIAL_COUNT; ++i) {
-            memories[i] = PrecomputedText.create(
-                    mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), param)
-                .getMemoryUsage();
+                .build().getMemoryUsage();
         }
         reportMemoryUsage(median(memories), "MemoryUsage_Hyphenation");
     }
@@ -111,16 +105,13 @@ public class PrecomputedTextMemoryUsageTest {
     @Test
     public void testMemoryUsage_NoHyphenation_WidthOnly() {
         int[] memories = new int[TRIAL_COUNT];
-        final PrecomputedText.Params param = new PrecomputedText.Params.Builder(PAINT)
+        // Report median of randomly generated MeasuredText.
+        for (int i = 0; i < TRIAL_COUNT; ++i) {
+            memories[i] = new MeasuredText.Builder(
+                    mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT)
                 .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
                 .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
-                .build();
-
-        // Report median of randomly generated PrecomputedText.
-        for (int i = 0; i < TRIAL_COUNT; ++i) {
-            CharSequence cs = mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT);
-            memories[i] = PrecomputedText.createWidthOnly(cs, param, 0, cs.length())
-                .getMemoryUsage();
+                .build(false /* width only */).getMemoryUsage();
         }
         reportMemoryUsage(median(memories), "MemoryUsage_NoHyphenation_WidthOnly");
     }
@@ -128,16 +119,13 @@ public class PrecomputedTextMemoryUsageTest {
     @Test
     public void testMemoryUsage_Hyphenatation_WidthOnly() {
         int[] memories = new int[TRIAL_COUNT];
-        final PrecomputedText.Params param = new PrecomputedText.Params.Builder(PAINT)
+        // Report median of randomly generated MeasuredText.
+        for (int i = 0; i < TRIAL_COUNT; ++i) {
+            memories[i] = new MeasuredText.Builder(
+                    mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT)
                 .setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED)
                 .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL)
-                .build();
-
-        // Report median of randomly generated PrecomputedText.
-        for (int i = 0; i < TRIAL_COUNT; ++i) {
-            CharSequence cs = mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT);
-            memories[i] = PrecomputedText.createWidthOnly(cs, param, 0, cs.length())
-                .getMemoryUsage();
+                .build(false /* width only */).getMemoryUsage();
         }
         reportMemoryUsage(median(memories), "MemoryUsage_Hyphenation_WidthOnly");
     }

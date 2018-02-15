@@ -44,4 +44,9 @@ interface ISystemUiProxy {
      * Specifies the text to be shown for onboarding the new swipe-up gesture to access recents.
      */
     void setRecentsOnboardingText(CharSequence text);
+
+    /**
+     * Enables/disables launcher/overview interaction features {@link InteractionType}.
+     */
+    void setInteractionState(int flags);
 }

@@ -23,6 +23,7 @@ import static android.app.usage.UsageStatsManager.REASON_USAGE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_NEVER;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
+import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
 
 import android.app.usage.UsageStatsManager;
 import android.os.SystemClock;
@@ -87,7 +88,9 @@ public class AppIdleHistory {
     // The last time a job was run for this app
     private static final String ATTR_LAST_RUN_JOB_TIME = "lastJobRunTime";
     // The time when the forced active state can be overridden.
-    private static final String ATTR_BUCKET_TIMEOUT_TIME = "bucketTimeoutTime";
+    private static final String ATTR_BUCKET_ACTIVE_TIMEOUT_TIME = "activeTimeoutTime";
+    // The time when the forced working_set state can be overridden.
+    private static final String ATTR_BUCKET_WORKING_SET_TIMEOUT_TIME = "workingSetTimeoutTime";
 
     // device on time = mElapsedDuration + (timeNow - mElapsedSnapshot)
     private long mElapsedSnapshot; // Elapsed time snapshot when last write of mDeviceOnDuration
@@ -117,11 +120,15 @@ public class AppIdleHistory {
         int lastInformedBucket;
         // The last time a job was run for this app, using elapsed timebase
         long lastJobRunTime;
-        // When should the bucket state timeout, in elapsed timebase, if greater than
+        // When should the bucket active state timeout, in elapsed timebase, if greater than
         // lastUsedElapsedTime.
         // This is used to keep the app in a high bucket regardless of other timeouts and
         // predictions.
-        long bucketTimeoutTime;
+        long bucketActiveTimeoutTime;
+        // If there's a forced working_set state, this is when it times out. This can be sitting
+        // under any active state timeout, so that it becomes applicable after the active state
+        // timeout expires.
+        long bucketWorkingSetTimeoutTime;
     }
 
     AppIdleHistory(File storageDir, long elapsedRealtime) {
@@ -208,11 +215,28 @@ public class AppIdleHistory {
      * @param packageName name of the app being updated, for logging purposes
      * @param newBucket the bucket to set the app to
      * @param elapsedRealtime mark as used time if non-zero
-     * @param timeout set the timeout of the specified bucket, if non-zero
+     * @param timeout set the timeout of the specified bucket, if non-zero. Can only be used
+     *                with bucket values of ACTIVE and WORKING_SET.
      * @return
      */
     public AppUsageHistory reportUsage(AppUsageHistory appUsageHistory, String packageName,
             int newBucket, long elapsedRealtime, long timeout) {
+        // Set the timeout if applicable
+        if (timeout > elapsedRealtime) {
+            // Convert to elapsed timebase
+            final long timeoutTime = mElapsedDuration + (timeout - mElapsedSnapshot);
+            if (newBucket == STANDBY_BUCKET_ACTIVE) {
+                appUsageHistory.bucketActiveTimeoutTime = Math.max(timeoutTime,
+                        appUsageHistory.bucketActiveTimeoutTime);
+            } else if (newBucket == STANDBY_BUCKET_WORKING_SET) {
+                appUsageHistory.bucketWorkingSetTimeoutTime = Math.max(timeoutTime,
+                        appUsageHistory.bucketWorkingSetTimeoutTime);
+            } else {
+                throw new IllegalArgumentException("Cannot set a timeout on bucket=" +
+                        newBucket);
+            }
+        }
+
         if (elapsedRealtime != 0) {
             appUsageHistory.lastUsedElapsedTime = mElapsedDuration
                     + (elapsedRealtime - mElapsedSnapshot);
@@ -225,12 +249,6 @@ public class AppIdleHistory {
                 Slog.d(TAG, "Moved " + packageName + " to bucket=" + appUsageHistory
                         .currentBucket
                         + ", reason=" + appUsageHistory.bucketingReason);
-            }
-            if (timeout > elapsedRealtime) {
-                // Convert to elapsed timebase
-                appUsageHistory.bucketTimeoutTime =
-                        Math.max(appUsageHistory.bucketTimeoutTime,
-                                mElapsedDuration + (timeout - mElapsedSnapshot));
             }
         }
         appUsageHistory.bucketingReason = REASON_USAGE;
@@ -247,7 +265,8 @@ public class AppIdleHistory {
      * @param userId
      * @param newBucket the bucket to set the app to
      * @param elapsedRealtime mark as used time if non-zero
-     * @param timeout set the timeout of the specified bucket, if non-zero
+     * @param timeout set the timeout of the specified bucket, if non-zero. Can only be used
+     *                with bucket values of ACTIVE and WORKING_SET.
      * @return
      */
     public AppUsageHistory reportUsage(String packageName, int userId, int newBucket,
@@ -504,8 +523,10 @@ public class AppIdleHistory {
                                 parser.getAttributeValue(null, ATTR_BUCKETING_REASON);
                         appUsageHistory.lastJobRunTime = getLongValue(parser,
                                 ATTR_LAST_RUN_JOB_TIME, Long.MIN_VALUE);
-                        appUsageHistory.bucketTimeoutTime = getLongValue(parser,
-                                ATTR_BUCKET_TIMEOUT_TIME, 0L);
+                        appUsageHistory.bucketActiveTimeoutTime = getLongValue(parser,
+                                ATTR_BUCKET_ACTIVE_TIMEOUT_TIME, 0L);
+                        appUsageHistory.bucketWorkingSetTimeoutTime = getLongValue(parser,
+                                ATTR_BUCKET_WORKING_SET_TIMEOUT_TIME, 0L);
                         if (appUsageHistory.bucketingReason == null) {
                             appUsageHistory.bucketingReason = REASON_DEFAULT;
                         }
@@ -557,9 +578,13 @@ public class AppIdleHistory {
                 xml.attribute(null, ATTR_CURRENT_BUCKET,
                         Integer.toString(history.currentBucket));
                 xml.attribute(null, ATTR_BUCKETING_REASON, history.bucketingReason);
-                if (history.bucketTimeoutTime > 0) {
-                    xml.attribute(null, ATTR_BUCKET_TIMEOUT_TIME, Long.toString(history
-                            .bucketTimeoutTime));
+                if (history.bucketActiveTimeoutTime > 0) {
+                    xml.attribute(null, ATTR_BUCKET_ACTIVE_TIMEOUT_TIME, Long.toString(history
+                            .bucketActiveTimeoutTime));
+                }
+                if (history.bucketWorkingSetTimeoutTime > 0) {
+                    xml.attribute(null, ATTR_BUCKET_WORKING_SET_TIMEOUT_TIME, Long.toString(history
+                            .bucketWorkingSetTimeoutTime));
                 }
                 if (history.lastJobRunTime != Long.MIN_VALUE) {
                     xml.attribute(null, ATTR_LAST_RUN_JOB_TIME, Long.toString(history
@@ -593,14 +618,19 @@ public class AppIdleHistory {
                 continue;
             }
             idpw.print("package=" + packageName);
+            idpw.print(" userId=" + userId);
             idpw.print(" lastUsedElapsed=");
             TimeUtils.formatDuration(totalElapsedTime - appUsageHistory.lastUsedElapsedTime, idpw);
             idpw.print(" lastUsedScreenOn=");
             TimeUtils.formatDuration(screenOnTime - appUsageHistory.lastUsedScreenTime, idpw);
             idpw.print(" lastPredictedTime=");
             TimeUtils.formatDuration(totalElapsedTime - appUsageHistory.lastPredictedTime, idpw);
-            idpw.print(" bucketTimeoutTime=");
-            TimeUtils.formatDuration(totalElapsedTime - appUsageHistory.bucketTimeoutTime, idpw);
+            idpw.print(" bucketActiveTimeoutTime=");
+            TimeUtils.formatDuration(totalElapsedTime - appUsageHistory.bucketActiveTimeoutTime,
+                    idpw);
+            idpw.print(" bucketWorkingSetTimeoutTime=");
+            TimeUtils.formatDuration(totalElapsedTime - appUsageHistory.bucketWorkingSetTimeoutTime,
+                    idpw);
             idpw.print(" lastJobRunTime=");
             TimeUtils.formatDuration(totalElapsedTime - appUsageHistory.lastJobRunTime, idpw);
             idpw.print(" idle=" + (isIdle(packageName, userId, elapsedRealtime) ? "y" : "n"));

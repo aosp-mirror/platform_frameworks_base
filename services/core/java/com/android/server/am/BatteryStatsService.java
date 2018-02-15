@@ -1057,7 +1057,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         // to block such a low level service like BatteryService on external stats like WiFi.
         mWorker.scheduleRunnable(() -> {
             synchronized (mStats) {
-                final boolean onBattery = plugType == BatteryStatsImpl.BATTERY_PLUGGED_NONE;
+                final boolean onBattery = BatteryStatsImpl.isOnBattery(plugType, status);
                 if (mStats.isOnBattery() == onBattery) {
                     // The battery state has not changed, so we don't need to sync external
                     // stats immediately.

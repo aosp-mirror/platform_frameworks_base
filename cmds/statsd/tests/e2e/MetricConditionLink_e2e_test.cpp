@@ -71,7 +71,7 @@ StatsdConfig CreateStatsdConfig() {
     // The metric is dimensioning by uid only.
     *countMetric->mutable_dimensions_in_what() =
         CreateDimensions(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, {1});
-    countMetric->set_bucket(ONE_MINUTE);
+    countMetric->set_bucket(FIVE_MINUTES);
 
     // Links between crash atom and condition of app is in syncing.
     auto links = countMetric->add_links();

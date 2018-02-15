@@ -1733,7 +1733,7 @@ public class Activity extends ContextThemeWrapper
      *
      * <p>This callback and {@link #onUserInteraction} are intended to help
      * activities manage status bar notifications intelligently; specifically,
-     * for helping activities determine the proper time to cancel a notfication.
+     * for helping activities determine the proper time to cancel a notification.
      *
      * @see #onUserInteraction()
      */
@@ -1741,32 +1741,16 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Generate a new thumbnail for this activity.  This method is called before
-     * pausing the activity, and should draw into <var>outBitmap</var> the
-     * imagery for the desired thumbnail in the dimensions of that bitmap.  It
-     * can use the given <var>canvas</var>, which is configured to draw into the
-     * bitmap, for rendering if desired.
-     *
-     * <p>The default implementation returns fails and does not draw a thumbnail;
-     * this will result in the platform creating its own thumbnail if needed.
-     *
-     * @param outBitmap The bitmap to contain the thumbnail.
-     * @param canvas Can be used to render into the bitmap.
-     *
-     * @return Return true if you have drawn into the bitmap; otherwise after
-     *         you return it will be filled with a default thumbnail.
-     *
-     * @see #onCreateDescription
-     * @see #onSaveInstanceState
-     * @see #onPause
+     * @deprecated Method doesn't do anything and will be removed in the future.
      */
+    @Deprecated
     public boolean onCreateThumbnail(Bitmap outBitmap, Canvas canvas) {
         return false;
     }
 
     /**
      * Generate a new description for this activity.  This method is called
-     * before pausing the activity and can, if desired, return some textual
+     * before stopping the activity and can, if desired, return some textual
      * description of its current state to be displayed to the user.
      *
      * <p>The default implementation returns null, which will cause you to
@@ -1777,9 +1761,8 @@ public class Activity extends ContextThemeWrapper
      * @return A description of what the user is doing.  It should be short and
      *         sweet (only a few words).
      *
-     * @see #onCreateThumbnail
      * @see #onSaveInstanceState
-     * @see #onPause
+     * @see #onStop
      */
     @Nullable
     public CharSequence onCreateDescription() {
@@ -7768,7 +7751,6 @@ public class Activity extends ContextThemeWrapper
      * @param disable {@code true} to disable preview screenshots; {@code false} otherwise.
      * @hide
      */
-    @SystemApi
     public void setDisablePreviewScreenshots(boolean disable) {
         try {
             ActivityManager.getService().setDisablePreviewScreenshots(mToken, disable);

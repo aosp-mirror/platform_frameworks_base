@@ -18,6 +18,7 @@
 #include "Log.h"
 
 #include "StatsService.h"
+#include "stats_log_util.h"
 #include "android-base/stringprintf.h"
 #include "config/ConfigKey.h"
 #include "config/ConfigManager.h"
@@ -79,18 +80,20 @@ StatsService::StatsService(const sp<Looper>& handlerLooper)
     mUidMap = new UidMap();
     StatsPuller::SetUidMap(mUidMap);
     mConfigManager = new ConfigManager();
-    mProcessor = new StatsLogProcessor(mUidMap, mAnomalyMonitor, time(nullptr), [this](const ConfigKey& key) {
-        sp<IStatsCompanionService> sc = getStatsCompanionService();
-        auto receiver = mConfigManager->GetConfigReceiver(key);
-        if (sc == nullptr) {
-            VLOG("Could not find StatsCompanionService");
-        } else if (receiver == nullptr) {
-            VLOG("Statscompanion could not find a broadcast receiver for %s",
-                 key.ToString().c_str());
-        } else {
-            sc->sendDataBroadcast(receiver);
+    mProcessor = new StatsLogProcessor(mUidMap, mAnomalyMonitor, getElapsedRealtimeSec(),
+        [this](const ConfigKey& key) {
+            sp<IStatsCompanionService> sc = getStatsCompanionService();
+            auto receiver = mConfigManager->GetConfigReceiver(key);
+            if (sc == nullptr) {
+                VLOG("Could not find StatsCompanionService");
+            } else if (receiver == nullptr) {
+                VLOG("Statscompanion could not find a broadcast receiver for %s",
+                     key.ToString().c_str());
+            } else {
+                sc->sendDataBroadcast(receiver);
+            }
         }
-    });
+    );
 
     mConfigManager->AddListener(mProcessor);
 
@@ -121,8 +124,6 @@ void StatsService::init_build_type_callback(void* cookie, const char* /*name*/, 
  */
 status_t StatsService::onTransact(uint32_t code, const Parcel& data, Parcel* reply,
                                   uint32_t flags) {
-    status_t err;
-
     switch (code) {
         case SHELL_COMMAND_TRANSACTION: {
             int in = data.readFileDescriptor();
@@ -237,8 +238,8 @@ status_t StatsService::command(FILE* in, FILE* out, FILE* err, Vector<String8>& 
             return cmd_write_data_to_disk(out);
         }
 
-        if (!args[0].compare(String8("log-app-hook"))) {
-            return cmd_log_app_hook(out, args);
+        if (!args[0].compare(String8("log-app-breadcrumb"))) {
+            return cmd_log_app_breadcrumb(out, args);
         }
 
         if (!args[0].compare(String8("clear-puller-cache"))) {
@@ -281,8 +282,8 @@ void StatsService::print_cmd_help(FILE* out) {
     fprintf(out, "  Flushes all data on memory to disk.\n");
     fprintf(out, "\n");
     fprintf(out, "\n");
-    fprintf(out, "usage: adb shell cmd stats log-app-hook [UID] LABEL STATE\n");
-    fprintf(out, "  Writes an AppHook event to the statslog buffer.\n");
+    fprintf(out, "usage: adb shell cmd stats log-app-breadcrumb [UID] LABEL STATE\n");
+    fprintf(out, "  Writes an AppBreadcrumbReported event to the statslog buffer.\n");
     fprintf(out, "  UID           The uid to use. It is only possible to pass a UID\n");
     fprintf(out, "                parameter on eng builds. If UID is omitted the calling\n");
     fprintf(out, "                uid is used.\n");
@@ -548,7 +549,7 @@ status_t StatsService::cmd_write_data_to_disk(FILE* out) {
     return NO_ERROR;
 }
 
-status_t StatsService::cmd_log_app_hook(FILE* out, const Vector<String8>& args) {
+status_t StatsService::cmd_log_app_breadcrumb(FILE* out, const Vector<String8>& args) {
     bool good = false;
     int32_t uid;
     int32_t label;
@@ -570,13 +571,13 @@ status_t StatsService::cmd_log_app_hook(FILE* out, const Vector<String8>& args) 
             good = true;
         } else {
             fprintf(out,
-                    "Selecting a UID for writing AppHook can only be dumped for other UIDs on eng"
+                    "Selecting a UID for writing Appbreadcrumb can only be dumped for other UIDs on eng"
                             " or userdebug builds.\n");
         }
     }
     if (good) {
-        fprintf(out, "Logging AppHook(%d, %d, %d) to statslog.\n", uid, label, state);
-        android::util::stats_write(android::util::APP_HOOK, uid, label, state);
+        fprintf(out, "Logging AppBreadcrumbReported(%d, %d, %d) to statslog.\n", uid, label, state);
+        android::util::stats_write(android::util::APP_BREADCRUMB_REPORTED, uid, label, state);
     } else {
         print_cmd_help(out);
         return UNKNOWN_ERROR;
@@ -668,11 +669,7 @@ Status StatsService::informAnomalyAlarmFired() {
         return Status::fromExceptionCode(Status::EX_SECURITY,
                                          "Only system uid can call informAnomalyAlarmFired");
     }
-
-    // TODO: This may be a bug. time(nullptr) can be off (wrt AlarmManager's time) and cause us to
-    //       miss the alarm! Eventually we will switch to using elapsedRealTime everywhere,
-    //       which may hopefully fix the problem, so we'll leave this alone for now.
-    uint64_t currentTimeSec = time(nullptr);
+    uint64_t currentTimeSec = getElapsedRealtimeSec();
     std::unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> anomalySet =
             mAnomalyMonitor->popSoonerThan(static_cast<uint32_t>(currentTimeSec));
     if (anomalySet.size() > 0) {

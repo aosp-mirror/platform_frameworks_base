@@ -230,7 +230,7 @@
 
     <!-- The height of the quick settings footer that holds the user switcher, settings icon,
          etc. -->
-    <dimen name="qs_footer_height">48dp</dimen>
+    <dimen name="qs_footer_height">56dp</dimen>
 
     <!-- The padding between the notifications and the quick settings container -->
     <dimen name="qs_notification_padding">@dimen/notification_side_paddings</dimen>
@@ -337,7 +337,7 @@
     <dimen name="qs_footer_padding_end">24dp</dimen>
     <dimen name="qs_footer_icon_size">16dp</dimen>
     <!-- Difference between drag handle margin in QQS and expanded QS -->
-    <dimen name="qs_footer_drag_handle_offset">6dp</dimen>
+    <dimen name="qs_footer_drag_handle_offset">10dp</dimen>
 
     <dimen name="qs_notif_collapsed_space">64dp</dimen>
 
@@ -513,7 +513,7 @@
     <dimen name="multi_user_avatar_keyguard_size">22dp</dimen>
 
     <!-- The width of user avatar when expanded -->
-    <dimen name="multi_user_avatar_expanded_size">16dp</dimen>
+    <dimen name="multi_user_avatar_expanded_size">18dp</dimen>
 
     <!-- The font size of the time when collapsed in QS -->
     <dimen name="qs_time_collapsed_size">14sp</dimen>
@@ -925,4 +925,10 @@
     <integer name="wired_charging_aod_text_animation_duration_up">300</integer>
     <!-- Wired charging on AOD, text animation distance -->
     <integer name="wired_charging_aod_text_animation_distance">-30</integer>
+
+    <!-- Logout button -->
+    <dimen name="logout_button_layout_height">32dp</dimen>
+    <dimen name="logout_button_padding_horizontal">16dp</dimen>
+    <dimen name="logout_button_margin_bottom">12dp</dimen>
+    <dimen name="logout_button_corner_radius">2dp</dimen>
 </resources>

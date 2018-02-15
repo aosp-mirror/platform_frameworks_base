@@ -33,7 +33,9 @@ KernelWakesParser::Parse(const int in, const int out) const
     int nline = 0;
 
     ProtoOutputStream proto;
-    Table table(WakeupSourceProto::_FIELD_NAMES, WakeupSourceProto::_FIELD_IDS, WakeupSourceProto::_FIELD_COUNT);
+    Table table(KernelWakeSourcesProto::WakeupSource::_FIELD_NAMES,
+            KernelWakeSourcesProto::WakeupSource::_FIELD_IDS,
+            KernelWakeSourcesProto::WakeupSource::_FIELD_COUNT);
 
     // parse line by line
     while (reader.readLine(&line)) {
@@ -57,7 +59,7 @@ KernelWakesParser::Parse(const int in, const int out) const
             continue;
         }
 
-        long long token = proto.start(KernelWakeSources::WAKEUP_SOURCES);
+        long long token = proto.start(KernelWakeSourcesProto::WAKEUP_SOURCES);
         for (int i=0; i<(int)record.size(); i++) {
             if (!table.insertField(&proto, header[i], record[i])) {
                 fprintf(stderr, "[%s]Line %d has bad value %s of %s\n",
