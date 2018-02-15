@@ -403,14 +403,18 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     }
 
     private void updateIcons(Context ctx, Configuration oldConfig, Configuration newConfig) {
+        final boolean quickStepEnabled = isQuickStepSwipeUpEnabled() || isQuickScrubEnabled();
         if (oldConfig.orientation != newConfig.orientation
                 || oldConfig.densityDpi != newConfig.densityDpi) {
             mDockedIcon = getDrawable(ctx,
                     R.drawable.ic_sysbar_docked, R.drawable.ic_sysbar_docked_dark);
+            mHomeDefaultIcon = quickStepEnabled
+                    ? getDrawable(ctx, R.drawable.ic_sysbar_home_quick_step,
+                    R.drawable.ic_sysbar_home_quick_step_dark)
+                    : getDrawable(ctx, R.drawable.ic_sysbar_home, R.drawable.ic_sysbar_home_dark);
         }
         if (oldConfig.densityDpi != newConfig.densityDpi
                 || oldConfig.getLayoutDirection() != newConfig.getLayoutDirection()) {
-            final boolean quickStepEnabled = isQuickStepSwipeUpEnabled() || isQuickScrubEnabled();
             mBackIcon = quickStepEnabled
                     ? getDrawable(ctx, R.drawable.ic_sysbar_back_quick_step,
                             R.drawable.ic_sysbar_back_quick_step_dark)
@@ -422,11 +426,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                     : getDrawable(ctx, R.drawable.ic_sysbar_back_ime,
                             R.drawable.ic_sysbar_back_ime_dark);
             mBackAltLandIcon = mBackAltIcon;
-
-            mHomeDefaultIcon = quickStepEnabled
-                    ? getDrawable(ctx, R.drawable.ic_sysbar_home_quick_step,
-                            R.drawable.ic_sysbar_home_quick_step_dark)
-                    : getDrawable(ctx, R.drawable.ic_sysbar_home, R.drawable.ic_sysbar_home_dark);
             mRecentIcon = getDrawable(ctx,
                     R.drawable.ic_sysbar_recent, R.drawable.ic_sysbar_recent_dark);
             mMenuIcon = getDrawable(ctx, R.drawable.ic_sysbar_menu, R.drawable.ic_sysbar_menu_dark);
