@@ -1453,7 +1453,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     lifecycleItem = ResumeActivityItem.obtain(mService.isNextTransitionForward())
                             .setDescription(r.getLifecycleDescription("realStartActivityLocked"));
                 } else {
-                    lifecycleItem = PauseActivityItem.obtain();
+                    lifecycleItem = PauseActivityItem.obtain()
+                            .setDescription(r.getLifecycleDescription("realStartActivityLocked"));
                 }
                 clientTransaction.setLifecycleStateRequest(lifecycleItem);
 
@@ -1955,7 +1956,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             final ActivityStack stack = r.getStack();
             if (stack != null) {
                 if (r.finishing) {
-                    stack.finishCurrentActivityLocked(r, ActivityStack.FINISH_IMMEDIATELY, false);
+                    stack.finishCurrentActivityLocked(r, ActivityStack.FINISH_IMMEDIATELY, false,
+                            "activityIdleInternalLocked");
                 } else {
                     stack.stopActivityLocked(r);
                 }

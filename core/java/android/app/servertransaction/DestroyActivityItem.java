@@ -65,6 +65,7 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
 
     @Override
     public void recycle() {
+        super.recycle();
         mFinished = false;
         mConfigChanges = 0;
         ObjectPool.recycle(this);

@@ -91,4 +91,9 @@ public abstract class ActivityLifecycleItem extends ClientTransactionItem {
         pw.println(prefix + "target state:" + getTargetState());
         pw.println(prefix + "description: " + mDescription);
     }
+
+    @Override
+    public void recycle() {
+        setDescription(null);
+    }
 }
