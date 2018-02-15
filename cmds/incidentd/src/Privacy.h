@@ -75,7 +75,6 @@ public:
 
     // Constructs spec using static methods below.
     static PrivacySpec new_spec(int dest);
-    static PrivacySpec get_default_dropbox_spec();
 private:
     PrivacySpec(uint8_t dest) : dest(dest) {}
 };

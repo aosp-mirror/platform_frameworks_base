@@ -56,6 +56,7 @@ LOCAL_SHARED_LIBRARIES := \
         libcutils \
         libincident \
         liblog \
+        libprotobuf-cpp-lite \
         libprotoutil \
         libselinux \
         libservices \

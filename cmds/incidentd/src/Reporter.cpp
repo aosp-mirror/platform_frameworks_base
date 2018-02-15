@@ -18,6 +18,7 @@
 
 #include "Reporter.h"
 
+#include "Privacy.h"
 #include "report_directory.h"
 #include "section_list.h"
 
@@ -65,7 +66,9 @@ ReportRequestSet::ReportRequestSet()
     :mRequests(),
      mSections(),
      mMainFd(-1),
-     mMainDest(-1)
+     mMainDest(-1),
+     mMetadata(),
+     mSectionStats()
 {
 }
 
@@ -79,23 +82,47 @@ ReportRequestSet::add(const sp<ReportRequest>& request)
 {
     mRequests.push_back(request);
     mSections.merge(request->args);
+    mMetadata.set_request_size(mMetadata.request_size() + 1);
 }
 
 void
 ReportRequestSet::setMainFd(int fd)
 {
     mMainFd = fd;
+    mMetadata.set_use_dropbox(fd > 0);
 }
 
 void
 ReportRequestSet::setMainDest(int dest)
 {
     mMainDest = dest;
+    PrivacySpec spec = PrivacySpec::new_spec(dest);
+    switch (spec.dest) {
+        case android::os::DEST_AUTOMATIC:
+            mMetadata.set_dest(IncidentMetadata_Destination_AUTOMATIC);
+            break;
+        case android::os::DEST_EXPLICIT:
+            mMetadata.set_dest(IncidentMetadata_Destination_EXPLICIT);
+            break;
+        case android::os::DEST_LOCAL:
+            mMetadata.set_dest(IncidentMetadata_Destination_LOCAL);
+            break;
+    }
 }
 
 bool
 ReportRequestSet::containsSection(int id) {
     return mSections.containsSection(id);
+}
+
+IncidentMetadata::SectionStats*
+ReportRequestSet::sectionStats(int id) {
+    if (mSectionStats.find(id) == mSectionStats.end()) {
+        auto stats = mMetadata.add_sections();
+        stats->set_id(id);
+        mSectionStats[id] = stats;
+    }
+    return mSectionStats[id];
 }
 
 // ================================================================================
@@ -128,12 +155,12 @@ Reporter::~Reporter()
 Reporter::run_report_status_t
 Reporter::runReport()
 {
-
     status_t err = NO_ERROR;
     bool needMainFd = false;
     int mainFd = -1;
     int mainDest = -1;
     HeaderSection headers;
+    MetadataSection metadataSection;
 
     // See if we need the main file
     for (ReportRequestSet::iterator it=batch.begin(); it!=batch.end(); it++) {
@@ -182,7 +209,7 @@ Reporter::runReport()
         const int id = (*section)->id;
         if (this->batch.containsSection(id)) {
             ALOGD("Taking incident report section %d '%s'", id, (*section)->name.string());
-            // Notify listener of starting
+            // Notify listener of starting.
             for (ReportRequestSet::iterator it=batch.begin(); it!=batch.end(); it++) {
                 if ((*it)->listener != NULL && (*it)->args.containsSection(id)) {
                     (*it)->listener->onReportSectionStatus(id,
@@ -191,14 +218,20 @@ Reporter::runReport()
             }
 
             // Execute - go get the data and write it into the file descriptors.
+            auto stats = batch.sectionStats(id);
+            int64_t startTime = uptimeMillis();
             err = (*section)->Execute(&batch);
+            int64_t endTime = uptimeMillis();
+
+            stats->set_success(err == NO_ERROR);
+            stats->set_exec_duration_ms(endTime - startTime);
             if (err != NO_ERROR) {
                 ALOGW("Incident section %s (%d) failed: %s. Stopping report.",
                         (*section)->name.string(), id, strerror(-err));
                 goto DONE;
             }
 
-            // Notify listener of starting
+            // Notify listener of ending.
             for (ReportRequestSet::iterator it=batch.begin(); it!=batch.end(); it++) {
                 if ((*it)->listener != NULL && (*it)->args.containsSection(id)) {
                     (*it)->listener->onReportSectionStatus(id,
@@ -210,6 +243,9 @@ Reporter::runReport()
     }
 
 DONE:
+    // Reports the metdadata when taking the incident report.
+    if (!isTest) metadataSection.Execute(&batch);
+
     // Close the file.
     if (mainFd >= 0) {
         close(mainFd);

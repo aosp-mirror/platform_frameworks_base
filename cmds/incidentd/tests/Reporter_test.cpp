@@ -180,3 +180,18 @@ TEST_F(ReporterTest, RunReportToGivenDirectory) {
     ASSERT_EQ((int)results.size(), 1);
     EXPECT_EQ(results[0], "\n\x2" "\b\f\n\x6" "\x12\x4" "abcd");
 }
+
+TEST_F(ReporterTest, ReportMetadata) {
+    IncidentReportArgs args;
+    args.addSection(1);
+    args.setDest(android::os::DEST_EXPLICIT);
+    sp<ReportRequest> r = new ReportRequest(args, l, -1);
+    reporter->batch.add(r);
+
+    ASSERT_EQ(Reporter::REPORT_FINISHED, reporter->runReport());
+    auto metadata = reporter->batch.metadata();
+    EXPECT_EQ(IncidentMetadata_Destination_EXPLICIT, metadata.dest());
+    EXPECT_EQ(1, metadata.request_size());
+    EXPECT_TRUE(metadata.use_dropbox());
+    EXPECT_EQ(0, metadata.sections_size());
+}
