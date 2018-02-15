@@ -37,6 +37,7 @@ import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.SurfaceControl;
 import android.view.WindowManager;
 
 import com.android.internal.util.ArrayUtils;
@@ -128,6 +129,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     private final Handler mHandler;
 
     private String mCloseSystemDialogsReason;
+
+    // Only a seperate transaction until we seperate the apply surface changes
+    // transaction from the global transaction.
+    private final SurfaceControl.Transaction mDisplayTransaction = new SurfaceControl.Transaction();
+
     private final Consumer<WindowState> mCloseSystemDialogsConsumer = w -> {
         if (w.mHasSurface) {
             try {
@@ -725,7 +731,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
             if (DEBUG_ORIENTATION) Slog.d(TAG, "Performing post-rotate rotation");
             // TODO(multi-display): Update rotation for different displays separately.
             final int displayId = defaultDisplay.getDisplayId();
-            if (defaultDisplay.updateRotationUnchecked(false /* inTransaction */)) {
+            if (defaultDisplay.updateRotationUnchecked()) {
                 mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, displayId).sendToTarget();
             } else {
                 mUpdateRotation = false;
@@ -735,7 +741,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
             // PhoneWindowManager.
             final DisplayContent vrDisplay = mService.mVr2dDisplayId != INVALID_DISPLAY
                     ? getDisplayContent(mService.mVr2dDisplayId) : null;
-            if (vrDisplay != null && vrDisplay.updateRotationUnchecked(false /* inTransaction */)) {
+            if (vrDisplay != null && vrDisplay.updateRotationUnchecked()) {
                 mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, mService.mVr2dDisplayId)
                         .sendToTarget();
             }
@@ -835,7 +841,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
         // Give the display manager a chance to adjust properties like display rotation if it needs
         // to.
-        mService.mDisplayManagerInternal.performTraversalInTransactionFromWindowManager();
+        mService.mDisplayManagerInternal.performTraversal(mDisplayTransaction);
+        SurfaceControl.mergeToGlobalTransaction(mDisplayTransaction);
     }
 
     /**

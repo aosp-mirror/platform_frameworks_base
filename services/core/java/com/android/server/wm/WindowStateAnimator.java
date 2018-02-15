@@ -1415,7 +1415,8 @@ class WindowStateAnimator {
         }
     }
 
-    void seamlesslyRotateWindow(int oldRotation, int newRotation) {
+    void seamlesslyRotateWindow(SurfaceControl.Transaction t,
+            int oldRotation, int newRotation) {
         final WindowState w = mWin;
         if (!w.isVisibleNow() || w.mIsWallpaper) {
             return;
@@ -1456,11 +1457,11 @@ class WindowStateAnimator {
         float DsDy = mService.mTmpFloats[Matrix.MSCALE_Y];
         float nx = mService.mTmpFloats[Matrix.MTRANS_X];
         float ny = mService.mTmpFloats[Matrix.MTRANS_Y];
-        mSurfaceController.setPositionInTransaction(nx, ny, false);
-        mSurfaceController.setMatrixInTransaction(DsDx * w.mHScale,
+        t.setPosition(mSurfaceController.mSurfaceControl, nx, ny);
+        t.setMatrix(mSurfaceController.mSurfaceControl, DsDx * w.mHScale,
                 DtDx * w.mVScale,
                 DtDy * w.mHScale,
-                DsDy * w.mVScale, false);
+                DsDy * w.mVScale);
     }
 
     /** The force-scaled state for a given window can persist past

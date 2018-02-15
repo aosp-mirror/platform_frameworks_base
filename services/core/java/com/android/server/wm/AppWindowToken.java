@@ -1092,7 +1092,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 mService.registerAppFreezeListener(this);
                 mService.mAppsFreezingScreen++;
                 if (mService.mAppsFreezingScreen == 1) {
-                    mService.startFreezingDisplayLocked(false, 0, 0, getDisplayContent());
+                    mService.startFreezingDisplayLocked(0, 0, getDisplayContent());
                     mService.mH.removeMessages(H.APP_FREEZE_TIMEOUT);
                     mService.mH.sendEmptyMessageDelayed(H.APP_FREEZE_TIMEOUT, 2000);
                 }
