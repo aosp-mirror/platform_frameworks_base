@@ -20644,10 +20644,6 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
     @Override
     public String getInstallerPackageName(String packageName) {
         final int callingUid = Binder.getCallingUid();
-        if (getInstantAppPackageName(callingUid) != null) {
-            return null;
-        }
-        // reader
         synchronized (mPackages) {
             final PackageSetting ps = mSettings.mPackages.get(packageName);
             if (filterAppAccessLPr(ps, callingUid, UserHandle.getUserId(callingUid))) {
