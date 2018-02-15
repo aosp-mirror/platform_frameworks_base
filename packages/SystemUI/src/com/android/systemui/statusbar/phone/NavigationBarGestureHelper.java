@@ -127,7 +127,7 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
 
     private boolean proxyMotionEvents(MotionEvent event) {
         final IOverviewProxy overviewProxy = mOverviewProxyService.getProxy();
-        if (overviewProxy != null) {
+        if (overviewProxy != null && mNavigationBarView.isQuickStepSwipeUpEnabled()) {
             mNavigationBarView.requestUnbufferedDispatch(event);
             event.transform(mTransformGlobalMatrix);
             try {
@@ -192,7 +192,7 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
     }
 
     public void onDraw(Canvas canvas) {
-        if (mOverviewProxyService.getProxy() != null) {
+        if (mNavigationBarView.isQuickScrubEnabled()) {
             mQuickScrubController.onDraw(canvas);
         }
     }
