@@ -8807,6 +8807,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Computes whether this virtual autofill view is visible to the user.
      *
+     * <p><b>Note: </b>By default it returns {@code true}, but views providing a virtual hierarchy
+     * view must override it.
+     *
      * @return Whether the view is visible on the screen.
      */
     public boolean isVisibleToUserForAutofill(int virtualId) {
@@ -8819,7 +8822,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 }
             }
         }
-        return false;
+        return true;
     }
 
     /**
