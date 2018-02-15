@@ -380,6 +380,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     private int mSurfaceSize;
 
+    /**
+     * A list of surfaces to be destroyed after {@link #mPendingTransaction} is applied.
+     */
+    private final ArrayList<SurfaceControl> mPendingDestroyingSurfaces = new ArrayList<>();
+
     /** Temporary float array to retrieve 3x3 matrix values. */
     private final float[] mTmpFloats = new float[9];
 
@@ -1930,6 +1935,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 }
             }
             mService.mAnimator.removeDisplayLocked(mDisplayId);
+
+            // The pending transaction won't be applied so we should
+            // just clean up any surfaces pending destruction.
+            onPendingTransactionApplied();
         } finally {
             mRemovingDisplay = false;
         }
@@ -3838,6 +3847,22 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     @Override
+    public void destroyAfterPendingTransaction(SurfaceControl surface) {
+        mPendingDestroyingSurfaces.add(surface);
+    }
+
+    /**
+     * Destroys any surfaces that have been put into the pending list with
+     * {@link #destroyAfterPendingTransaction}.
+     */
+    void onPendingTransactionApplied() {
+        for (int i = mPendingDestroyingSurfaces.size() - 1; i >= 0; i--) {
+            mPendingDestroyingSurfaces.get(i).destroy();
+        }
+        mPendingDestroyingSurfaces.clear();
+    }
+
+    @Override
     void prepareSurfaces() {
         final ScreenRotationAnimation screenRotationAnimation =
                 mService.mAnimator.getScreenRotationAnimationLocked(mDisplayId);
@@ -3851,7 +3876,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mPendingTransaction.setAlpha(mWindowingLayer,
                     screenRotationAnimation.getEnterTransformation().getAlpha());
         }
-
         super.prepareSurfaces();
     }
 }
