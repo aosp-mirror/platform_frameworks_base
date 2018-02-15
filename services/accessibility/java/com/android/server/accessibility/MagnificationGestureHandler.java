@@ -402,9 +402,9 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
                     com.android.internal.R.dimen.config_screen_magnification_scaling_threshold,
                     scaleValue, false);
             mScalingThreshold = scaleValue.getFloat();
-            mScaleGestureDetector = new ScaleGestureDetector(context, this);
+            mScaleGestureDetector = new ScaleGestureDetector(context, this, Handler.getMain());
             mScaleGestureDetector.setQuickScaleEnabled(false);
-            mScrollGestureDetector = new GestureDetector(context, this);
+            mScrollGestureDetector = new GestureDetector(context, this, Handler.getMain());
         }
 
         @Override
@@ -638,7 +638,7 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
 
         @VisibleForTesting boolean mShortcutTriggered;
 
-        @VisibleForTesting Handler mHandler = new Handler(this);
+        @VisibleForTesting Handler mHandler = new Handler(Looper.getMainLooper(), this);
 
         public DetectingState(Context context) {
             mLongTapMinDelay = ViewConfiguration.getLongPressTimeout();
@@ -654,7 +654,9 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
             final int type = message.what;
             switch (type) {
                 case MESSAGE_ON_TRIPLE_TAP_AND_HOLD: {
-                    onTripleTapAndHold(/* down */ (MotionEvent) message.obj);
+                    MotionEvent down = (MotionEvent) message.obj;
+                    transitionToViewportDraggingStateAndClear(down);
+                    down.recycle();
                 }
                 break;
                 case MESSAGE_TRANSITION_TO_DELEGATING_STATE: {
@@ -720,8 +722,7 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
                         // over insta-delegating on 3tap&swipe
                         // (which is a rare combo to be used aside from magnification)
                         if (isMultiTapTriggered(2 /* taps */)) {
-                            transitionTo(mViewportDraggingState);
-                            clear();
+                            transitionToViewportDraggingStateAndClear(event);
                         } else {
                             transitionToDelegatingStateAndClear();
                         }
@@ -806,7 +807,8 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
         /** -> {@link ViewportDraggingState} */
         public void afterLongTapTimeoutTransitionToDraggingState(MotionEvent event) {
             mHandler.sendMessageDelayed(
-                    mHandler.obtainMessage(MESSAGE_ON_TRIPLE_TAP_AND_HOLD, event),
+                    mHandler.obtainMessage(MESSAGE_ON_TRIPLE_TAP_AND_HOLD,
+                            MotionEvent.obtain(event)),
                     ViewConfiguration.getLongPressTimeout());
         }
 
@@ -890,7 +892,7 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
             }
         }
 
-        void onTripleTapAndHold(MotionEvent down) {
+        void transitionToViewportDraggingStateAndClear(MotionEvent down) {
 
             if (DEBUG_DETECTING) Slog.i(LOG_TAG, "onTripleTapAndHold()");
             clear();

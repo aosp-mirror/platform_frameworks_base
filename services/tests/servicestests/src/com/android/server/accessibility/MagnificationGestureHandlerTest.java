@@ -34,7 +34,6 @@ import static org.mockito.Mockito.verify;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.os.Handler;
 import android.os.Message;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
@@ -49,9 +48,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.function.IntConsumer;
-import java.util.function.Supplier;
 
 
 /**
@@ -283,6 +280,19 @@ public class MagnificationGestureHandlerTest {
         verify(mMgh.getNext(), times(2)).onMotionEvent(any(), any(), anyInt());
     }
 
+    @Test
+    public void testTripleTapAndHold_zoomsImmediately() {
+        assertZoomsImmediatelyOnSwipeFrom(STATE_2TAPS);
+        assertZoomsImmediatelyOnSwipeFrom(STATE_SHORTCUT_TRIGGERED);
+    }
+
+    private void assertZoomsImmediatelyOnSwipeFrom(int state) {
+        goFromStateIdleTo(state);
+        swipeAndHold();
+        assertIn(STATE_DRAGGING_TMP);
+        returnToNormalFrom(STATE_DRAGGING_TMP);
+    }
+
     private void assertTransition(int fromState, Runnable transitionAction, int toState) {
         goFromStateIdleTo(fromState);
         transitionAction.run();
@@ -339,11 +349,13 @@ public class MagnificationGestureHandlerTest {
                 check(tapCount() == 2, state);
             } break;
             case STATE_DRAGGING: {
+                check(isZoomed(), state);
                 check(mMgh.mCurrentState == mMgh.mViewportDraggingState,
                         state);
                 check(mMgh.mViewportDraggingState.mZoomedInBeforeDrag, state);
             } break;
             case STATE_DRAGGING_TMP: {
+                check(isZoomed(), state);
                 check(mMgh.mCurrentState == mMgh.mViewportDraggingState,
                         state);
                 check(!mMgh.mViewportDraggingState.mZoomedInBeforeDrag, state);
@@ -353,11 +365,13 @@ public class MagnificationGestureHandlerTest {
                 check(!isZoomed(), state);
             } break;
             case STATE_PANNING: {
+                check(isZoomed(), state);
                 check(mMgh.mCurrentState == mMgh.mPanningScalingState,
                         state);
                 check(!mMgh.mPanningScalingState.mScaling, state);
             } break;
             case STATE_SCALING_AND_PANNING: {
+                check(isZoomed(), state);
                 check(mMgh.mCurrentState == mMgh.mPanningScalingState,
                         state);
                 check(mMgh.mPanningScalingState.mScaling, state);
