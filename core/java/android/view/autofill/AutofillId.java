@@ -38,6 +38,7 @@ public final class AutofillId implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     public AutofillId(AutofillId parent, int virtualChildId) {
         mVirtual = true;
         mViewId = parent.mViewId;
