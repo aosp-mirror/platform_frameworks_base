@@ -5385,6 +5385,17 @@ public final class Settings {
                 "autofill_user_data_max_field_classification_size";
 
         /**
+         * Defines value returned by
+         * {@link android.service.autofill.UserData#getMaxCategoryCount()}.
+         *
+         * @hide
+         */
+        @SystemApi
+        @TestApi
+        public static final String AUTOFILL_USER_DATA_MAX_CATEGORY_COUNT =
+                "autofill_user_data_max_category_count";
+
+        /**
          * Defines value returned by {@link android.service.autofill.UserData#getMaxValueLength()}.
          *
          * @hide

@@ -15,6 +15,7 @@
  */
 package android.service.autofill;
 
+import static android.provider.Settings.Secure.AUTOFILL_USER_DATA_MAX_CATEGORY_COUNT;
 import static android.provider.Settings.Secure.AUTOFILL_USER_DATA_MAX_FIELD_CLASSIFICATION_IDS_SIZE;
 import static android.provider.Settings.Secure.AUTOFILL_USER_DATA_MAX_USER_DATA_SIZE;
 import static android.provider.Settings.Secure.AUTOFILL_USER_DATA_MAX_VALUE_LENGTH;
@@ -31,6 +32,7 @@ import android.os.Parcelable;
 import android.provider.Settings;
 import android.service.autofill.FieldClassification.Match;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Log;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.Helper;
@@ -48,23 +50,24 @@ public final class UserData implements Parcelable {
 
     private static final String TAG = "UserData";
 
-    private static final int DEFAULT_MAX_USER_DATA_SIZE = 10;
+    private static final int DEFAULT_MAX_USER_DATA_SIZE = 50;
+    private static final int DEFAULT_MAX_CATEGORY_COUNT = 10;
     private static final int DEFAULT_MAX_FIELD_CLASSIFICATION_IDS_SIZE = 10;
-    private static final int DEFAULT_MIN_VALUE_LENGTH = 5;
+    private static final int DEFAULT_MIN_VALUE_LENGTH = 3;
     private static final int DEFAULT_MAX_VALUE_LENGTH = 100;
 
     private final String mId;
     private final String mAlgorithm;
     private final Bundle mAlgorithmArgs;
-    private final String[] mRemoteIds;
+    private final String[] mCategoryIds;
     private final String[] mValues;
 
     private UserData(Builder builder) {
         mId = builder.mId;
         mAlgorithm = builder.mAlgorithm;
         mAlgorithmArgs = builder.mAlgorithmArgs;
-        mRemoteIds = new String[builder.mRemoteIds.size()];
-        builder.mRemoteIds.toArray(mRemoteIds);
+        mCategoryIds = new String[builder.mCategoryIds.size()];
+        builder.mCategoryIds.toArray(mCategoryIds);
         mValues = new String[builder.mValues.size()];
         builder.mValues.toArray(mValues);
     }
@@ -91,8 +94,8 @@ public final class UserData implements Parcelable {
     }
 
     /** @hide */
-    public String[] getRemoteIds() {
-        return mRemoteIds;
+    public String[] getCategoryIds() {
+        return mCategoryIds;
     }
 
     /** @hide */
@@ -106,11 +109,11 @@ public final class UserData implements Parcelable {
         pw.print(prefix); pw.print("Algorithm: "); pw.print(mAlgorithm);
         pw.print(" Args: "); pw.println(mAlgorithmArgs);
 
-        // Cannot disclose remote ids or values because they could contain PII
-        pw.print(prefix); pw.print("Remote ids size: "); pw.println(mRemoteIds.length);
-        for (int i = 0; i < mRemoteIds.length; i++) {
+        // Cannot disclose field ids or values because they could contain PII
+        pw.print(prefix); pw.print("Field ids size: "); pw.println(mCategoryIds.length);
+        for (int i = 0; i < mCategoryIds.length; i++) {
             pw.print(prefix); pw.print(prefix); pw.print(i); pw.print(": ");
-            pw.println(Helper.getRedacted(mRemoteIds[i]));
+            pw.println(Helper.getRedacted(mCategoryIds[i]));
         }
         pw.print(prefix); pw.print("Values size: "); pw.println(mValues.length);
         for (int i = 0; i < mValues.length; i++) {
@@ -124,6 +127,7 @@ public final class UserData implements Parcelable {
         pw.print(prefix); pw.print("maxUserDataSize: "); pw.println(getMaxUserDataSize());
         pw.print(prefix); pw.print("maxFieldClassificationIdsSize: ");
         pw.println(getMaxFieldClassificationIdsSize());
+        pw.print(prefix); pw.print("maxCategoryCount: "); pw.println(getMaxCategoryCount());
         pw.print(prefix); pw.print("minValueLength: "); pw.println(getMinValueLength());
         pw.print(prefix); pw.print("maxValueLength: "); pw.println(getMaxValueLength());
     }
@@ -133,44 +137,59 @@ public final class UserData implements Parcelable {
      */
     public static final class Builder {
         private final String mId;
-        private final ArrayList<String> mRemoteIds;
+        private final ArrayList<String> mCategoryIds;
         private final ArrayList<String> mValues;
         private String mAlgorithm;
         private Bundle mAlgorithmArgs;
         private boolean mDestroyed;
 
+        // Non-persistent array used to limit the number of unique ids.
+        private final ArraySet<String> mUniqueCategoryIds;
+
         /**
          * Creates a new builder for the user data used for <a href="#FieldClassification">field
          * classification</a>.
          *
-         * <p>The user data must contain at least one pair of {@code remoteId} -> {@code value}, and
-         * more pairs can be added through the {@link #add(String, String)} method.
+         * <p>The user data must contain at least one pair of {@code value} -> {@code categoryId},
+         * and more pairs can be added through the {@link #add(String, String)} method. For example:
+         *
+         * <pre class="prettyprint">
+         * new UserData.Builder("v1", "Bart Simpson", "name")
+         *   .add("bart.simpson@example.com", "email")
+         *   .add("el_barto@example.com", "email")
+         *   .build();
+         * </pre>
          *
          * @param id id used to identify the whole {@link UserData} object. This id is also returned
          * by {@link AutofillManager#getUserDataId()}, which can be used to check if the
          * {@link UserData} is up-to-date without fetching the whole object (through
          * {@link AutofillManager#getUserData()}).
-         * @param remoteId unique string used to identify a user data value.
+         *
          * @param value value of the user data.
+         * @param categoryId string used to identify the category the value is associated with.
          *
          * @throws IllegalArgumentException if any of the following occurs:
          * <ol>
-         *   <li>{@code id} is empty
-         *   <li>{@code remoteId} is empty
-         *   <li>{@code value} is empty
-         *   <li>the length of {@code value} is lower than {@link UserData#getMinValueLength()}
-         *   <li>the length of {@code value} is higher than {@link UserData#getMaxValueLength()}
+         *   <li>{@code id} is empty</li>
+         *   <li>{@code categoryId} is empty</li>
+         *   <li>{@code value} is empty</li>
+         *   <li>the length of {@code value} is lower than {@link UserData#getMinValueLength()}</li>
+         *   <li>the length of {@code value} is higher than
+         *       {@link UserData#getMaxValueLength()}</li>
          * </ol>
+         *
          */
-        public Builder(@NonNull String id, @NonNull String remoteId, @NonNull String value) {
+        // TODO(b/70407264): ignore entry instead of throwing exception when settings changed
+        public Builder(@NonNull String id, @NonNull String value, @NonNull String categoryId) {
             mId = checkNotEmpty("id", id);
-            checkNotEmpty("remoteId", remoteId);
+            checkNotEmpty("categoryId", categoryId);
             checkValidValue(value);
-            final int capacity = getMaxUserDataSize();
-            mRemoteIds = new ArrayList<>(capacity);
-            mValues = new ArrayList<>(capacity);
-            mRemoteIds.add(remoteId);
-            mValues.add(value);
+            final int maxUserDataSize = getMaxUserDataSize();
+            mCategoryIds = new ArrayList<>(maxUserDataSize);
+            mValues = new ArrayList<>(maxUserDataSize);
+            mUniqueCategoryIds = new ArraySet<>(getMaxCategoryCount());
+
+            addMapping(value, categoryId);
         }
 
         /**
@@ -190,6 +209,7 @@ public final class UserData implements Parcelable {
          */
         public Builder setFieldClassificationAlgorithm(@Nullable String name,
                 @Nullable Bundle args) {
+            throwIfDestroyed();
             mAlgorithm = name;
             mAlgorithmArgs = args;
             return this;
@@ -198,35 +218,56 @@ public final class UserData implements Parcelable {
         /**
          * Adds a new value for user data.
          *
-         * @param remoteId unique string used to identify the user data.
          * @param value value of the user data.
+         * @param categoryId string used to identify the category the value is associated with.
          *
-         * @throws IllegalStateException if {@link #build()} or
-         * {@link #add(String, String)} with the same {@code remoteId} has already
-         * been called, or if the number of values add (i.e., calls made to this method plus
-         * constructor) is more than {@link UserData#getMaxUserDataSize()}.
+         * @throws IllegalStateException if:
+         * <ol>
+         *   <li>{@link #build()} already called</li>
+         *   <li>the {@code value} has already been added</li>
+         *   <li>the number of unique {@code categoryId} values added so far is more than
+         *       {@link UserData#getMaxCategoryCount()}</li>
+         *   <li>the number of {@code values} added so far is is more than
+         *       {@link UserData#getMaxUserDataSize()}</li>
+         * </ol>
          *
-         * @throws IllegalArgumentException if {@code remoteId} or {@code value} are empty or if the
-         * length of {@code value} is lower than {@link UserData#getMinValueLength()}
-         * or higher than {@link UserData#getMaxValueLength()}.
+         * @throws IllegalArgumentException if any of the following occurs:
+         * <ol>
+         *   <li>{@code id} is empty</li>
+         *   <li>{@code categoryId} is empty</li>
+         *   <li>{@code value} is empty</li>
+         *   <li>the length of {@code value} is lower than {@link UserData#getMinValueLength()}</li>
+         *   <li>the length of {@code value} is higher than
+         *       {@link UserData#getMaxValueLength()}</li>
+         * </ol>
          */
-        public Builder add(@NonNull String remoteId, @NonNull String value) {
+        // TODO(b/70407264): ignore entry instead of throwing exception when settings changed
+        public Builder add(@NonNull String value, @NonNull String categoryId) {
             throwIfDestroyed();
-            checkNotEmpty("remoteId", remoteId);
+            checkNotEmpty("categoryId", categoryId);
             checkValidValue(value);
 
-            Preconditions.checkState(!mRemoteIds.contains(remoteId),
-                    // Don't include remoteId on message because it could contain PII
-                    "already has entry with same remoteId");
+            if (!mUniqueCategoryIds.contains(categoryId)) {
+                // New category - check size
+                Preconditions.checkState(mUniqueCategoryIds.size() < getMaxCategoryCount(),
+                        "already added " + mUniqueCategoryIds.size() + " unique category ids");
+
+            }
+
             Preconditions.checkState(!mValues.contains(value),
-                    // Don't include remoteId on message because it could contain PII
+                    // Don't include value on message because it could contain PII
                     "already has entry with same value");
-            Preconditions.checkState(mRemoteIds.size() < getMaxUserDataSize(),
-                    "already added " + mRemoteIds.size() + " elements");
-            mRemoteIds.add(remoteId);
-            mValues.add(value);
+            Preconditions.checkState(mValues.size() < getMaxUserDataSize(),
+                    "already added " + mValues.size() + " elements");
+            addMapping(value, categoryId);
 
             return this;
+        }
+
+        private void addMapping(@NonNull String value, @NonNull String categoryId) {
+            mCategoryIds.add(categoryId);
+            mValues.add(value);
+            mUniqueCategoryIds.add(categoryId);
         }
 
         private String checkNotEmpty(@NonNull String name, @Nullable String value) {
@@ -273,9 +314,9 @@ public final class UserData implements Parcelable {
 
         final StringBuilder builder = new StringBuilder("UserData: [id=").append(mId)
                 .append(", algorithm=").append(mAlgorithm);
-        // Cannot disclose remote ids or values because they could contain PII
-        builder.append(", remoteIds=");
-        Helper.appendRedacted(builder, mRemoteIds);
+        // Cannot disclose category ids or values because they could contain PII
+        builder.append(", categoryIds=");
+        Helper.appendRedacted(builder, mCategoryIds);
         builder.append(", values=");
         Helper.appendRedacted(builder, mValues);
         return builder.append("]").toString();
@@ -293,7 +334,7 @@ public final class UserData implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeString(mId);
-        parcel.writeStringArray(mRemoteIds);
+        parcel.writeStringArray(mCategoryIds);
         parcel.writeStringArray(mValues);
         parcel.writeString(mAlgorithm);
         parcel.writeBundle(mAlgorithmArgs);
@@ -307,12 +348,12 @@ public final class UserData implements Parcelable {
             // the system obeys the contract of the builder to avoid attacks
             // using specially crafted parcels.
             final String id = parcel.readString();
-            final String[] remoteIds = parcel.readStringArray();
+            final String[] categoryIds = parcel.readStringArray();
             final String[] values = parcel.readStringArray();
-            final Builder builder = new Builder(id, remoteIds[0], values[0])
+            final Builder builder = new Builder(id, values[0], categoryIds[0])
                     .setFieldClassificationAlgorithm(parcel.readString(), parcel.readBundle());
-            for (int i = 1; i < remoteIds.length; i++) {
-                builder.add(remoteIds[i], values[i]);
+            for (int i = 1; i < categoryIds.length; i++) {
+                builder.add(values[i], categoryIds[i]);
             }
             return builder.build();
         }
@@ -337,6 +378,14 @@ public final class UserData implements Parcelable {
     public static int getMaxFieldClassificationIdsSize() {
         return getInt(AUTOFILL_USER_DATA_MAX_FIELD_CLASSIFICATION_IDS_SIZE,
             DEFAULT_MAX_FIELD_CLASSIFICATION_IDS_SIZE);
+    }
+
+    /**
+     * Gets the maximum number of unique category ids that can be passed to
+     * the builder's constructor and {@link Builder#add(String, String)}.
+     */
+    public static int getMaxCategoryCount() {
+        return getInt(AUTOFILL_USER_DATA_MAX_CATEGORY_COUNT, DEFAULT_MAX_CATEGORY_COUNT);
     }
 
     /**
