@@ -172,6 +172,8 @@ public class Am extends BaseCommand {
             } else if (opt.equals("--no_window_animation")
                     || opt.equals("--no-window-animation")) {
                 instrument.noWindowAnimation = true;
+            } else if (opt.equals("--no-hidden-api-checks")) {
+                instrument.disableHiddenApiChecks = true;
             } else if (opt.equals("--user")) {
                 instrument.userId = parseUserArg(nextArgRequired());
             } else if (opt.equals("--abi")) {
