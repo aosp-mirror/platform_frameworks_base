@@ -28,6 +28,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.dex.ArtManager;
 import android.content.pm.split.SplitDependencyLoader;
 import android.content.res.AssetManager;
 import android.content.res.CompatibilityInfo;
@@ -35,7 +36,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
@@ -49,13 +49,15 @@ import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.util.LogPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayAdjustments;
+
 import com.android.internal.util.ArrayUtils;
+
 import dalvik.system.VMRuntime;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -729,13 +731,6 @@ public final class LoadedApk {
         }
     }
 
-    // Keep in sync with installd (frameworks/native/cmds/installd/commands.cpp).
-    private static File getPrimaryProfileFile(String packageName) {
-        File profileDir = Environment.getDataProfilesDePackageDirectory(
-                UserHandle.myUserId(), packageName);
-        return new File(profileDir, "primary.prof");
-    }
-
     private void setupJitProfileSupport() {
         if (!SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false)) {
             return;
@@ -763,10 +758,12 @@ public final class LoadedApk {
             return;
         }
 
-        final File profileFile = getPrimaryProfileFile(mPackageName);
-
-        VMRuntime.registerAppInfo(profileFile.getPath(),
-                codePaths.toArray(new String[codePaths.size()]));
+        for (int i = codePaths.size() - 1; i >= 0; i--) {
+            String splitName = i == 0 ? null : mApplicationInfo.splitNames[i - 1];
+            String profileFile = ArtManager.getCurrentProfilePath(
+                    mPackageName, UserHandle.myUserId(), splitName);
+            VMRuntime.registerAppInfo(profileFile, new String[] {codePaths.get(i)});
+        }
 
         // Register the app data directory with the reporter. It will
         // help deciding whether or not a dex file is the primary apk or a

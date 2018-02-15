@@ -3618,6 +3618,11 @@
     <permission android:name="android.permission.INSTANT_APP_FOREGROUND_SERVICE"
         android:protectionLevel="signature|development|instant|appop" />
 
+    <!-- @SystemApi Allows an application to read the runtime profiles of other apps.
+         @hide <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.READ_RUNTIME_PROFILES"
+                android:protectionLevel="signature|privileged" />
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"

@@ -133,6 +133,8 @@ java_library {
         "core/java/android/content/pm/IPackageStatsObserver.aidl",
         "core/java/android/content/pm/IPinItemRequest.aidl",
         "core/java/android/content/pm/IShortcutService.aidl",
+        "core/java/android/content/pm/dex/IArtManager.aidl",
+        "core/java/android/content/pm/dex/ISnapshotRuntimeProfileCallback.aidl",
         "core/java/android/content/pm/permission/IRuntimePermissionPresenter.aidl",
         "core/java/android/database/IContentObserver.aidl",
         ":libcamera_client_aidl",
