@@ -380,6 +380,7 @@ import android.util.proto.ProtoUtils;
 import android.view.Gravity;
 import android.view.IRecentsAnimationRunner;
 import android.view.LayoutInflater;
+import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.View;
 import android.view.WindowManager;
@@ -26331,6 +26332,22 @@ public class ActivityManagerService extends IActivityManager.Stub
             final long origId = Binder.clearCallingIdentity();
             try {
                 r.registerRemoteAnimations(definition);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
+        }
+    }
+
+    @Override
+    public void registerRemoteAnimationForNextActivityStart(String packageName,
+            RemoteAnimationAdapter adapter) throws RemoteException {
+        enforceCallingPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS,
+                "registerRemoteAnimationForNextActivityStart");
+        synchronized (this) {
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                mActivityStartController.registerRemoteAnimationForNextActivityStart(packageName,
+                        adapter);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }

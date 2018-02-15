@@ -41,6 +41,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.provider.Settings;
 import android.util.Slog;
+import android.view.RemoteAnimationAdapter;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.am.ActivityStackSupervisor.PendingActivityLaunch;
@@ -85,6 +86,8 @@ public class ActivityStartController {
 
     private final Handler mHandler;
 
+    private final PendingRemoteAnimationRegistry mPendingRemoteAnimationRegistry;
+
     private final class StartHandler extends Handler {
         public StartHandler(Looper looper) {
             super(looper, null, true);
@@ -123,6 +126,8 @@ public class ActivityStartController {
         mHandler = new StartHandler(mService.mHandlerThread.getLooper());
         mFactory = factory;
         mFactory.setController(this);
+        mPendingRemoteAnimationRegistry = new PendingRemoteAnimationRegistry(service,
+                service.mHandler);
     }
 
     /**
@@ -397,6 +402,15 @@ public class ActivityStartController {
             }
         }
         return mPendingActivityLaunches.size() < pendingLaunches;
+    }
+
+    void registerRemoteAnimationForNextActivityStart(String packageName,
+            RemoteAnimationAdapter adapter) {
+        mPendingRemoteAnimationRegistry.addPendingAnimation(packageName, adapter);
+    }
+
+    PendingRemoteAnimationRegistry getPendingRemoteAnimationRegistry() {
+        return mPendingRemoteAnimationRegistry;
     }
 
     void dump(PrintWriter pw, String prefix, String dumpPackage) {

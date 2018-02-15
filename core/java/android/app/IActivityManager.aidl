@@ -68,6 +68,7 @@ import android.os.WorkSource;
 import android.service.voice.IVoiceInteractionSession;
 import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationDefinition;
+import android.view.RemoteAnimationAdapter;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.policy.IKeyguardDismissCallback;
@@ -696,4 +697,11 @@ interface IActivityManager {
       * Registers remote animations for a specific activity.
       */
      void registerRemoteAnimations(in IBinder token, in RemoteAnimationDefinition definition);
+
+     /**
+      * Registers a remote animation to be run for all activity starts from a certain package during
+      * a short predefined amount of time.
+      */
+     void registerRemoteAnimationForNextActivityStart(in String packageName,
+            in RemoteAnimationAdapter adapter);
 }
