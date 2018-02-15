@@ -214,6 +214,7 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
         fprintf(out, "{\n");
         argIndex = 1;
         fprintf(out, "    android_log_event_list event(kStatsEventTag);\n");
+        fprintf(out, "    event << android::elapsedRealtimeNano();\n\n");
         fprintf(out, "    event << code;\n\n");
         for (vector<java_type_t>::const_iterator arg = signature->begin();
             arg != signature->end(); arg++) {
