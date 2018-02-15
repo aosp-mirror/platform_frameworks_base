@@ -122,6 +122,11 @@ public final class RangingRequest implements Parcelable {
          * Add the device specified by the {@link ScanResult} to the list of devices with
          * which to measure range. The total number of peers added to a request cannot exceed the
          * limit specified by {@link #getMaxPeers()}.
+         * <p>
+         * Ranging may not be supported if the Access Point does not support IEEE 802.11mc. Use
+         * {@link ScanResult#is80211mcResponder()} to verify the Access Point's capabilities. If
+         * not supported the result status will be
+         * {@link RangingResult#STATUS_RESPONDER_DOES_NOT_SUPPORT_IEEE80211MC}.
          *
          * @param apInfo Information of an Access Point (AP) obtained in a Scan Result.
          * @return The builder to facilitate chaining
@@ -138,6 +143,11 @@ public final class RangingRequest implements Parcelable {
          * Add the devices specified by the {@link ScanResult}s to the list of devices with
          * which to measure range. The total number of peers added to a request cannot exceed the
          * limit specified by {@link #getMaxPeers()}.
+         * <p>
+         * Ranging may not be supported if the Access Point does not support IEEE 802.11mc. Use
+         * {@link ScanResult#is80211mcResponder()} to verify the Access Point's capabilities. If
+         * not supported the result status will be
+         * {@link RangingResult#STATUS_RESPONDER_DOES_NOT_SUPPORT_IEEE80211MC}.
          *
          * @param apInfos Information of an Access Points (APs) obtained in a Scan Result.
          * @return The builder to facilitate chaining

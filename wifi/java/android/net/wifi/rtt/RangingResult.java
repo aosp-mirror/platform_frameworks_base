@@ -42,7 +42,7 @@ public final class RangingResult implements Parcelable {
     private static final String TAG = "RangingResult";
 
     /** @hide */
-    @IntDef({STATUS_SUCCESS, STATUS_FAIL})
+    @IntDef({STATUS_SUCCESS, STATUS_FAIL, STATUS_RESPONDER_DOES_NOT_SUPPORT_IEEE80211MC})
     @Retention(RetentionPolicy.SOURCE)
     public @interface RangeResultStatus {
     }
@@ -67,8 +67,6 @@ public final class RangingResult implements Parcelable {
      * <p>
      * On such a failure, the individual result fields of {@link RangingResult} such as
      * {@link RangingResult#getDistanceMm()} are invalid.
-     *
-     * @hide
      */
     public static final int STATUS_RESPONDER_DOES_NOT_SUPPORT_IEEE80211MC = 2;
 
