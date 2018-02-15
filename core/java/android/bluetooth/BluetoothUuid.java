@@ -79,6 +79,9 @@ public final class BluetoothUuid {
             ParcelUuid.fromString("00001132-0000-1000-8000-00805F9B34FB");
     public static final ParcelUuid SAP =
             ParcelUuid.fromString("0000112D-0000-1000-8000-00805F9B34FB");
+    /* TODO: b/69623109 update this value. It will change to 16bit UUID!! */
+    public static final ParcelUuid HearingAid =
+            ParcelUuid.fromString("7312C48F-22CC-497F-85FD-A0616A3B9E05");
 
     public static final ParcelUuid BASE_UUID =
             ParcelUuid.fromString("00000000-0000-1000-8000-00805F9B34FB");
