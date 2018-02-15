@@ -86,8 +86,6 @@ class WindowSurfaceController {
     private final int mWindowType;
     private final Session mWindowSession;
 
-    private final SurfaceControl.Transaction mTmpTransaction = new SurfaceControl.Transaction();
-
     public WindowSurfaceController(SurfaceSession s, String name, int w, int h, int format,
             int flags, WindowStateAnimator animator, int windowType, int ownerUid) {
         mAnimator = animator;
@@ -150,23 +148,21 @@ class WindowSurfaceController {
         }
     }
 
-    void hide(SurfaceControl.Transaction transaction, String reason) {
+    void hideInTransaction(String reason) {
         if (SHOW_TRANSACTIONS) logSurface("HIDE ( " + reason + " )", null);
         mHiddenForOtherReasons = true;
 
         mAnimator.destroyPreservedSurfaceLocked();
-        if (mSurfaceShown) {
-            hideSurface(transaction);
-        }
+        updateVisibility();
     }
 
-    private void hideSurface(SurfaceControl.Transaction transaction) {
+    private void hideSurface() {
         if (mSurfaceControl == null) {
             return;
         }
         setShown(false);
         try {
-            transaction.hide(mSurfaceControl);
+            mSurfaceControl.hide();
         } catch (RuntimeException e) {
             Slog.w(TAG, "Exception hiding surface in " + this);
         }
@@ -425,8 +421,7 @@ class WindowSurfaceController {
     private boolean updateVisibility() {
         if (mHiddenForCrop || mHiddenForOtherReasons) {
             if (mSurfaceShown) {
-                hideSurface(mTmpTransaction);
-                SurfaceControl.mergeToGlobalTransaction(mTmpTransaction);
+                hideSurface();
             }
             return false;
         } else {

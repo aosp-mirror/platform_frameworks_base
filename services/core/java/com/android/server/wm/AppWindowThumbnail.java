@@ -53,7 +53,8 @@ class AppWindowThumbnail implements Animatable {
 
     AppWindowThumbnail(Transaction t, AppWindowToken appToken, GraphicBuffer thumbnailHeader) {
         mAppToken = appToken;
-        mSurfaceAnimator = new SurfaceAnimator(this, this::onAnimationFinished, appToken.mService);
+        mSurfaceAnimator = new SurfaceAnimator(this, this::onAnimationFinished,
+                appToken.mService.mAnimator::addAfterPrepareSurfacesRunnable, appToken.mService);
         mWidth = thumbnailHeader.getWidth();
         mHeight = thumbnailHeader.getHeight();
 
@@ -141,6 +142,11 @@ class AppWindowThumbnail implements Animatable {
     @Override
     public void commitPendingTransaction() {
         mAppToken.commitPendingTransaction();
+    }
+
+    @Override
+    public void destroyAfterPendingTransaction(SurfaceControl surface) {
+        mAppToken.destroyAfterPendingTransaction(surface);
     }
 
     @Override

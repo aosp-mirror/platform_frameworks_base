@@ -226,6 +226,13 @@ public class WindowAnimator {
                 if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION animate");
             }
 
+            final int numDisplays = mDisplayContentsAnimators.size();
+            for (int i = 0; i < numDisplays; i++) {
+                final int displayId = mDisplayContentsAnimators.keyAt(i);
+                final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
+                dc.onPendingTransactionApplied();
+            }
+
             boolean hasPendingLayoutChanges = mService.mRoot.hasPendingLayoutChanges(this);
             boolean doRequest = false;
             if (mBulkUpdateParams != 0) {
@@ -259,6 +266,7 @@ public class WindowAnimator {
             }
 
             mService.destroyPreservedSurfaceLocked();
+            mService.mWindowPlacerLocked.destroyPendingSurfaces();
 
             executeAfterPrepareSurfacesRunnables();
 

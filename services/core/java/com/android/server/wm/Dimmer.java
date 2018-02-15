@@ -55,6 +55,11 @@ class Dimmer {
         }
 
         @Override
+        public void destroyAfterPendingTransaction(SurfaceControl surface) {
+            mHost.destroyAfterPendingTransaction(surface);
+        }
+
+        @Override
         public SurfaceControl.Builder makeAnimationLeash() {
             return mHost.makeAnimationLeash();
         }
@@ -114,7 +119,7 @@ class Dimmer {
                 if (!mDimming) {
                     mDimLayer.destroy();
                 }
-            }, mHost.mService);
+            }, mHost.mService.mAnimator::addAfterPrepareSurfacesRunnable, mHost.mService);
         }
     }
 

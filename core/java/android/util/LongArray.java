@@ -18,10 +18,8 @@ package android.util;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
-
-import libcore.util.EmptyArray;
-
 import java.util.Arrays;
+import libcore.util.EmptyArray;
 
 /**
  * Implements a growing array of long primitives.
@@ -217,18 +215,5 @@ public class LongArray implements Cloneable {
         if (index < 0 || mSize <= index) {
             throw new ArrayIndexOutOfBoundsException(mSize, index);
         }
-    }
-
-    /**
-     * Test if each element of {@code a} equals corresponding element from {@code b}
-     */
-    public static boolean elementsEqual(LongArray a, LongArray b) {
-        if (a.mSize != b.mSize) return false;
-        for (int i = 0; i < a.mSize; i++) {
-            if (a.get(i) != b.get(i)) {
-                return false;
-            }
-        }
-        return true;
     }
 }

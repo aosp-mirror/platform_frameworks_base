@@ -109,7 +109,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     WindowContainer(WindowManagerService service) {
         mService = service;
         mPendingTransaction = service.mTransactionFactory.make();
-        mSurfaceAnimator = new SurfaceAnimator(this, this::onAnimationFinished, service);
+        mSurfaceAnimator = new SurfaceAnimator(this, this::onAnimationFinished,
+                service.mAnimator::addAfterPrepareSurfacesRunnable, service);
     }
 
     @Override
@@ -285,9 +286,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
 
         if (mSurfaceControl != null) {
-            getPendingTransaction().destroy(mSurfaceControl);
+            destroyAfterPendingTransaction(mSurfaceControl);
             mSurfaceControl = null;
-            scheduleAnimation();
         }
 
         if (mParent != null) {
@@ -1073,6 +1073,19 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     @Override
     public SurfaceControl getSurfaceControl() {
         return mSurfaceControl;
+    }
+
+    /**
+     * Destroy a given surface after executing mPendingTransaction. This is
+     * largely a workaround for destroy not being part of transactions
+     * rather than an intentional design, so please take care when
+     * expanding use.
+     */
+    @Override
+    public void destroyAfterPendingTransaction(SurfaceControl surface) {
+        if (mParent != null) {
+            mParent.destroyAfterPendingTransaction(surface);
+        }
     }
 
     @Override
