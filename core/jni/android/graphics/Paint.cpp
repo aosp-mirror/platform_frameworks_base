@@ -1008,23 +1008,6 @@ namespace PaintGlue {
         return paint->getLooper() && paint->getLooper()->asABlurShadow(nullptr);
     }
 
-    static jboolean equalsForTextMeasurement(jlong lPaint, jlong rPaint) {
-        if (lPaint == rPaint) {
-            return true;
-        }
-        Paint* leftPaint = reinterpret_cast<Paint*>(lPaint);
-        Paint* rightPaint = reinterpret_cast<Paint*>(rPaint);
-
-        const Typeface* leftTypeface = Typeface::resolveDefault(leftPaint->getAndroidTypeface());
-        const Typeface* rightTypeface = Typeface::resolveDefault(rightPaint->getAndroidTypeface());
-        minikin::MinikinPaint leftMinikinPaint
-                = MinikinUtils::prepareMinikinPaint(leftPaint, leftTypeface);
-        minikin::MinikinPaint rightMinikinPaint
-                = MinikinUtils::prepareMinikinPaint(rightPaint, rightTypeface);
-
-        return leftMinikinPaint == rightMinikinPaint;
-    }
-
 }; // namespace PaintGlue
 
 static const JNINativeMethod methods[] = {
@@ -1124,8 +1107,7 @@ static const JNINativeMethod methods[] = {
     {"nGetStrikeThruPosition","(J)F", (void*) PaintGlue::getStrikeThruPosition},
     {"nGetStrikeThruThickness","(J)F", (void*) PaintGlue::getStrikeThruThickness},
     {"nSetShadowLayer", "(JFFFI)V", (void*)PaintGlue::setShadowLayer},
-    {"nHasShadowLayer", "(J)Z", (void*)PaintGlue::hasShadowLayer},
-    {"nEqualsForTextMeasurement", "(JJ)Z", (void*)PaintGlue::equalsForTextMeasurement},
+    {"nHasShadowLayer", "(J)Z", (void*)PaintGlue::hasShadowLayer}
 };
 
 int register_android_graphics_Paint(JNIEnv* env) {

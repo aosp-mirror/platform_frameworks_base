@@ -78,23 +78,6 @@ public class StaticLayout extends Layout {
         /**
          * Obtain a builder for constructing StaticLayout objects.
          *
-         * @param source The precomputed text.
-         * @param start The index of the start of the text
-         * @param end The index + 1 of the end of the text
-         * @param paint The base paint used for layout
-         * @param width The width in pixels
-         * @return a builder object used for constructing the StaticLayout
-         */
-        @NonNull
-        public static Builder obtain(@NonNull PrecomputedText source, @IntRange(from = 0) int start,
-                @IntRange(from = 0) int end, @NonNull TextPaint paint,
-                @IntRange(from = 0) int width) {
-            return obtain(source.getText(), source, start, end, paint, width);
-        }
-
-        /**
-         * Obtain a builder for constructing StaticLayout objects.
-         *
          * @param source The text to be laid out, optionally with spans
          * @param start The index of the start of the text
          * @param end The index + 1 of the end of the text
@@ -106,12 +89,6 @@ public class StaticLayout extends Layout {
         public static Builder obtain(@NonNull CharSequence source, @IntRange(from = 0) int start,
                 @IntRange(from = 0) int end, @NonNull TextPaint paint,
                 @IntRange(from = 0) int width) {
-            return obtain(source, null, start, end, paint, width);
-        }
-
-        private static Builder obtain(@NonNull CharSequence source, @Nullable PrecomputedText text,
-                @IntRange(from = 0) int start, @IntRange(from = 0) int end,
-                @NonNull TextPaint paint, @IntRange(from = 0) int width) {
             Builder b = sPool.acquire();
             if (b == null) {
                 b = new Builder();
@@ -119,7 +96,6 @@ public class StaticLayout extends Layout {
 
             // set default initial values
             b.mText = source;
-            b.mPrecomputed = text;
             b.mStart = start;
             b.mEnd = end;
             b.mPaint = paint;
@@ -452,7 +428,6 @@ public class StaticLayout extends Layout {
         }
 
         private CharSequence mText;
-        private PrecomputedText mPrecomputed;
         private int mStart;
         private int mEnd;
         private TextPaint mPaint;
@@ -515,7 +490,7 @@ public class StaticLayout extends Layout {
             float spacingmult, float spacingadd,
             boolean includepad,
             TextUtils.TruncateAt ellipsize, int ellipsizedWidth) {
-        this(source, null /* precomputed */, bufstart, bufend, paint, outerwidth, align,
+        this(source, bufstart, bufend, paint, outerwidth, align,
                 TextDirectionHeuristics.FIRSTSTRONG_LTR,
                 spacingmult, spacingadd, includepad, ellipsize, ellipsizedWidth, Integer.MAX_VALUE);
     }
@@ -525,16 +500,7 @@ public class StaticLayout extends Layout {
      * @deprecated Use {@link Builder} instead.
      */
     @Deprecated
-    public StaticLayout(CharSequence source, int bufstart, int bufend, TextPaint paint,
-                        int outerwidth, Alignment align, TextDirectionHeuristic textDir,
-                        float spacingmult, float spacingadd, boolean includepad,
-                        TextUtils.TruncateAt ellipsize, int ellipsizedWidth, int maxLines) {
-        this(source, null /* precomputed */, bufstart, bufend, paint, outerwidth, align, textDir,
-                spacingmult, spacingadd, includepad, ellipsize, ellipsizedWidth, maxLines);
-    }
-
-    /** @hide */
-    public StaticLayout(CharSequence source, PrecomputedText precomputed, int bufstart, int bufend,
+    public StaticLayout(CharSequence source, int bufstart, int bufend,
                         TextPaint paint, int outerwidth,
                         Alignment align, TextDirectionHeuristic textDir,
                         float spacingmult, float spacingadd,
@@ -545,7 +511,6 @@ public class StaticLayout extends Layout {
                 : (source instanceof Spanned)
                     ? new SpannedEllipsizer(source)
                     : new Ellipsizer(source),
-              (ellipsize == null) ? precomputed : null,
               paint, outerwidth, align, textDir, spacingmult, spacingadd);
 
         Builder b = Builder.obtain(source, bufstart, bufend, paint, outerwidth)
@@ -686,20 +651,43 @@ public class StaticLayout extends Layout {
                 b.mJustificationMode != Layout.JUSTIFICATION_MODE_NONE,
                 indents, mLeftPaddings, mRightPaddings);
 
-        PrecomputedText measured = null;
-        final Spanned spanned = (b.mText instanceof Spanned) ? (Spanned) b.mText : null;
-        if (b.mPrecomputed != null) {
-            if (b.mPrecomputed.canUseMeasuredResult(bufStart, bufEnd, textDir, paint,
-                      b.mBreakStrategy, b.mHyphenationFrequency)) {
-                measured = b.mPrecomputed;
+        MeasuredText measured = null;
+        final Spanned spanned;
+        final boolean canUseMeasuredText;
+        if (source instanceof MeasuredText) {
+            measured = (MeasuredText) source;
+
+            if (bufStart != measured.getStart() || bufEnd != measured.getEnd()) {
+                // The buffer position has changed. Re-measure here.
+                canUseMeasuredText = false;
+            } else if (b.mBreakStrategy != measured.getBreakStrategy()
+                    || b.mHyphenationFrequency != measured.getHyphenationFrequency()) {
+                // The computed hyphenation pieces may not be able to used. Re-measure it.
+                canUseMeasuredText = false;
+            } else {
+                // We can use measured information.
+                canUseMeasuredText = true;
             }
-        }
-        if (measured == null) {
-            final PrecomputedText.Params param = new PrecomputedText.Params(paint, textDir,
-                    b.mBreakStrategy, b.mHyphenationFrequency);
-            measured = PrecomputedText.createWidthOnly(source, param, bufStart, bufEnd);
+        } else {
+            canUseMeasuredText = false;
         }
 
+        if (!canUseMeasuredText) {
+            measured = new MeasuredText.Builder(source, paint)
+                    .setRange(bufStart, bufEnd)
+                    .setTextDirection(textDir)
+                    .setBreakStrategy(b.mBreakStrategy)
+                    .setHyphenationFrequency(b.mHyphenationFrequency)
+                    .build(false /* full layout is not necessary for line breaking */);
+            spanned = (source instanceof Spanned) ? (Spanned) source : null;
+        } else {
+            final CharSequence original = measured.getText();
+            spanned = (original instanceof Spanned) ? (Spanned) original : null;
+            // Overwrite with the one when measured.
+            // TODO: Give an option for developer not to overwrite and measure again here?
+            textDir = measured.getTextDir();
+            paint = measured.getPaint();
+        }
 
         try {
             for (int paraIndex = 0; paraIndex < measured.getParagraphCount(); paraIndex++) {

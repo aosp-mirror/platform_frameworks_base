@@ -34,7 +34,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.TemporaryBuffer;
 import android.text.GraphicsOperations;
-import android.text.PrecomputedText;
+import android.text.MeasuredText;
 import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.TextUtils;
@@ -507,8 +507,8 @@ public class RecordingCanvas extends Canvas {
             TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
             long measuredTextPtr = 0;
             int measuredTextOffset = 0;
-            if (text instanceof PrecomputedText) {
-                PrecomputedText mt = (PrecomputedText) text;
+            if (text instanceof MeasuredText) {
+                MeasuredText mt = (MeasuredText) text;
                 int paraIndex = mt.findParaIndex(start);
                 if (end <= mt.getParagraphEnd(paraIndex)) {
                     // Only support if the target is in the same paragraph.
@@ -641,7 +641,7 @@ public class RecordingCanvas extends Canvas {
     @FastNative
     private static native void nDrawTextRun(long nativeCanvas, char[] text, int start, int count,
             int contextStart, int contextCount, float x, float y, boolean isRtl, long nativePaint,
-            long nativePrecomputedText, int measuredTextOffset);
+            long nativeMeasuredText, int measuredTextOffset);
 
     @FastNative
     private static native void nDrawTextOnPath(long nativeCanvas, char[] text, int index, int count,

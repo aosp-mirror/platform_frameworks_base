@@ -80,8 +80,8 @@ import android.text.GraphicsOperations;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Layout;
+import android.text.MeasuredText;
 import android.text.ParcelableSpan;
-import android.text.PrecomputedText;
 import android.text.Selection;
 import android.text.SpanWatcher;
 import android.text.Spannable;
@@ -637,7 +637,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private CharSequence mText;
     private CharSequence mTransformed;
     private BufferType mBufferType = BufferType.NORMAL;
-    private PrecomputedText mPrecomputed;
 
     private CharSequence mHint;
     private Layout mHintLayout;
@@ -4086,80 +4085,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Gets the parameters for text layout precomputation, for use with {@link PrecomputedText}
-     *
-     * @return A current {@link PrecomputedText.Params}
-     */
-    public @NonNull PrecomputedText.Params getTextMetricsParams() {
-        return new PrecomputedText.Params(new TextPaint(mTextPaint), getTextDirectionHeuristic(),
-                mBreakStrategy, mHyphenationFrequency);
-    }
-
-    /**
-     * Apply the text layout parameter.
-     */
-    public void setTextMetricsParams(@NonNull PrecomputedText.Params params) {
-        mTextPaint.set(params.getTextPaint());
-        mTextDir = params.getTextDirection();
-        mBreakStrategy = params.getBreakStrategy();
-        mHyphenationFrequency = params.getHyphenationFrequency();
-        if (mLayout != null) {
-            nullLayouts();
-            requestLayout();
-            invalidate();
-        }
-    }
-
-    /**
-     * Sets the precomputed text.
-     *
-     * If the parameters for the precomputed text is different from current text view parameters,
-     * apply the parameteres to the text view too.
-     *
-     * @param text A precomputed text.
-     */
-    public void setPrecomputedTextAndParams(@NonNull PrecomputedText text) {
-        Preconditions.checkNotNull(text);
-        final PrecomputedText.Params params = text.getParams();
-        if (!params.sameTextMetrics(getTextMetricsParams())) {
-            setTextMetricsParams(params);
-        }
-        setText(text.getText());
-        if (mTransformed != text.getText()) {
-            // setText modified given text for some reasons, selection, transformation, etc.
-            // Can't use computed result.
-            return;
-        } else {
-            mPrecomputed = text;
-        }
-    }
-
-    /**
-     * Sets the precomputed text.
-     *
-     * If the parameters for the precomputed text is different from current text view parameters,
-     * throws {@link IllegalArgumentException}.
-     *
-     * @param text A precomputed text.
-     */
-    public void setPrecomputedTextOrThrow(@NonNull PrecomputedText text) {
-        Preconditions.checkNotNull(text);
-        final PrecomputedText.Params params = text.getParams();
-        if (!params.sameTextMetrics(getTextMetricsParams())) {
-            throw new IllegalArgumentException(
-                "The precomputed configuration is different from this TextView.");
-        }
-        setText(text.getText());
-        if (mTransformed != text.getText()) {
-            // setText modified given text for some reasons, selection, transformation, etc.
-            // Can't use computed result.
-            // TODO: Do we throw an exception here too?
-        } else {
-            mPrecomputed = text;
-        }
-    }
-
-    /**
      * Set justification mode. The default value is {@link Layout#JUSTIFICATION_MODE_NONE}. If the
      * last line is too short for justification, the last line will be displayed with the
      * alignment set by {@link android.view.View#setTextAlignment}.
@@ -5594,7 +5519,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private void setText(CharSequence text, BufferType type,
                          boolean notifyBefore, int oldlen) {
-        mPrecomputed = null;
         mTextSetFromXmlOrResourceId = false;
         if (text == null) {
             text = "";
@@ -5653,7 +5577,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (imm != null) imm.restartInput(this);
         } else if (type == BufferType.SPANNABLE || mMovement != null) {
             text = mSpannableFactory.newSpannable(text);
-        } else if (!(text instanceof CharWrapper)) {
+        } else if (!(text instanceof MeasuredText || text instanceof CharWrapper)) {
             text = TextUtils.stringOrSpannedString(text);
         }
 
@@ -8320,8 +8244,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             result = builder.build();
         } else {
             if (boring == UNKNOWN_BORING) {
-                boring = BoringLayout.isBoring(mTransformed, mPrecomputed, mTextPaint, mTextDir,
-                        mBoring);
+                boring = BoringLayout.isBoring(mTransformed, mTextPaint, mTextDir, mBoring);
                 if (boring != null) {
                     mBoring = boring;
                 }
@@ -8359,15 +8282,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
         if (result == null) {
-            StaticLayout.Builder builder;
-            if (mPrecomputed != null) {
-                builder = StaticLayout.Builder.obtain(mPrecomputed, 0,
-                        mPrecomputed.getText().length(), mTextPaint, wantWidth);
-            } else {
-                builder = StaticLayout.Builder.obtain(mTransformed, 0, mTransformed.length(),
-                        mTextPaint, wantWidth);
-            }
-            builder.setAlignment(alignment)
+            StaticLayout.Builder builder = StaticLayout.Builder.obtain(mTransformed,
+                    0, mTransformed.length(), mTextPaint, wantWidth)
+                    .setAlignment(alignment)
                     .setTextDirection(mTextDir)
                     .setLineSpacing(mSpacingAdd, mSpacingMult)
                     .setIncludePad(mIncludePad)
@@ -8494,8 +8411,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
 
             if (des < 0) {
-                boring = BoringLayout.isBoring(mTransformed, mPrecomputed, mTextPaint, mTextDir,
-                        mBoring);
+                boring = BoringLayout.isBoring(mTransformed, mTextPaint, mTextDir, mBoring);
                 if (boring != null) {
                     mBoring = boring;
                 }
@@ -11780,9 +11696,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Returns the current {@link TextDirectionHeuristic}
-     *
-     * @return A {@link TextDirectionHeuristic}.
      * @hide
      */
     protected TextDirectionHeuristic getTextDirectionHeuristic() {
