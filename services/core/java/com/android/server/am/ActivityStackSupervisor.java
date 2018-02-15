@@ -4516,7 +4516,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     int startActivityFromRecents(int callingPid, int callingUid, int taskId,
             SafeActivityOptions options) {
-        final TaskRecord task;
+        TaskRecord task = null;
         final String callingPackage;
         final Intent intent;
         final int userId;
@@ -4579,13 +4579,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                             targetActivity);
                 }
 
-                // If we are launching the task in the docked stack, put it into resizing mode so
-                // the window renders full-screen with the background filling the void. Also only
-                // call this at the end to make sure that tasks exists on the window manager side.
-                if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-                    setResizingDuringAnimation(task);
-                }
-
                 mService.getActivityStartController().postStartActivityProcessingForLastStarter(
                         task.getTopActivity(), ActivityManager.START_TASK_TO_FRONT,
                         task.getStack());
@@ -4595,15 +4588,28 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             intent = task.intent;
             intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
             userId = task.userId;
-            int result = mService.getActivityStartController().startActivityInPackage(
+            return mService.getActivityStartController().startActivityInPackage(
                     task.mCallingUid, callingPid, callingUid, callingPackage, intent, null, null,
-                    null, 0, 0, options, userId, task,
-                    "startActivityFromRecents");
-            if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-                setResizingDuringAnimation(task);
-            }
-            return result;
+                    null, 0, 0, options, userId, task, "startActivityFromRecents");
         } finally {
+            if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY && task != null) {
+                // If we are launching the task in the docked stack, put it into resizing mode so
+                // the window renders full-screen with the background filling the void. Also only
+                // call this at the end to make sure that tasks exists on the window manager side.
+                setResizingDuringAnimation(task);
+
+                final ActivityDisplay display = task.getStack().getDisplay();
+                final ActivityStack topSecondaryStack =
+                        display.getTopStackInWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+                if (topSecondaryStack.isActivityTypeHome()) {
+                    // If the home activity if the top split-screen secondary stack, then the
+                    // primary split-screen stack is in the minimized mode which means it can't
+                    // receive input keys, so we should move the focused app to the home app so that
+                    // window manager can correctly calculate the focus window that can receive
+                    // input keys.
+                    moveHomeStackToFront("startActivityFromRecents: homeVisibleInSplitScreen");
+                }
+            }
             mWindowManager.continueSurfaceLayout();
         }
     }
