@@ -1008,6 +1008,8 @@ public final class ThreadedRenderer {
             final long vsync = AnimationUtils.currentAnimationTimeMillis() * 1000000L;
             mFrameInfo.setVsync(vsync, vsync);
             mFrameInfo.addFlags(1 << 2 /* VSYNC */);
+            // TODO: remove this fence
+            nFence(mNativeProxy);
             if (callback != null) {
                 callback.onFrameDraw(mSurface.getNextFrameNumber());
             }

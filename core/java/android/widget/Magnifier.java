@@ -31,6 +31,8 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Message;
 import android.view.Display;
 import android.view.DisplayListCanvas;
 import android.view.LayoutInflater;
@@ -55,6 +57,11 @@ import com.android.internal.util.Preconditions;
 public final class Magnifier {
     // Use this to specify that a previous configuration value does not exist.
     private static final int NONEXISTENT_PREVIOUS_CONFIG_VALUE = -1;
+    // The callbacks of the pixel copy requests will be invoked on
+    // the Handler of this Thread when the copy is finished.
+    private static final HandlerThread sPixelCopyHandlerThread =
+            new HandlerThread("magnifier pixel copy result handler");
+
     // The view to which this magnifier is attached.
     private final View mView;
     // The coordinates of the view in the surface.
@@ -67,17 +74,14 @@ public final class Magnifier {
     private final int mWindowWidth;
     // The height of the window containing the magnifier.
     private final int mWindowHeight;
-    // The bitmap used to display the contents of the magnifier.
-    private final Bitmap mBitmap;
+    // The width of the bitmaps where the magnifier content is copied.
+    private final int mBitmapWidth;
+    // The height of the bitmaps where the magnifier content is copied.
+    private final int mBitmapHeight;
     // The elevation of the window containing the magnifier.
     private final float mWindowElevation;
     // The center coordinates of the content that is to be magnified.
     private final Point mCenterZoomCoords = new Point();
-    // The callback of the pixel copy request will be invoked on this Handler when
-    // the copy is finished.
-    private final Handler mPixelCopyHandler = Handler.getMain();
-    // Current magnification scale.
-    private final float mZoomScale;
     // Variables holding previous states, used for detecting redundant calls and invalidation.
     private final Point mPrevStartCoordsInSurface = new Point(
             NONEXISTENT_PREVIOUS_CONFIG_VALUE, NONEXISTENT_PREVIOUS_CONFIG_VALUE);
@@ -103,14 +107,16 @@ public final class Magnifier {
                 com.android.internal.R.dimen.magnifier_height);
         mWindowElevation = context.getResources().getDimension(
                 com.android.internal.R.dimen.magnifier_elevation);
-        mZoomScale = context.getResources().getFloat(
+        final float zoomScale = context.getResources().getFloat(
                 com.android.internal.R.dimen.magnifier_zoom_scale);
+        mBitmapWidth = Math.round(mWindowWidth / zoomScale);
+        mBitmapHeight = Math.round(mWindowHeight / zoomScale);
         // The view's surface coordinates will not be updated until the magnifier is first shown.
         mViewCoordinatesInSurface = new int[2];
+    }
 
-        final int bitmapWidth = Math.round(mWindowWidth / mZoomScale);
-        final int bitmapHeight = Math.round(mWindowHeight / mZoomScale);
-        mBitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
+    static {
+        sPixelCopyHandlerThread.start();
     }
 
     /**
@@ -158,14 +164,15 @@ public final class Magnifier {
         }
 
         final int startX = Math.max(zeroScrollXInSurface, Math.min(
-                mCenterZoomCoords.x - mBitmap.getWidth() / 2,
-                zeroScrollXInSurface + actualWidth - mBitmap.getWidth()));
-        final int startY = mCenterZoomCoords.y - mBitmap.getHeight() / 2;
+                mCenterZoomCoords.x - mBitmapWidth / 2,
+                zeroScrollXInSurface + actualWidth - mBitmapWidth));
+        final int startY = mCenterZoomCoords.y - mBitmapHeight / 2;
 
         if (xPosInView != mPrevPosInView.x || yPosInView != mPrevPosInView.y) {
             if (mWindow == null) {
                 mWindow = new InternalPopupWindow(mView.getContext(), mView.getDisplay(),
-                        getValidViewSurface(), mWindowWidth, mWindowHeight, mWindowElevation);
+                        getValidViewSurface(), mWindowWidth, mWindowHeight, mWindowElevation,
+                        Handler.getMain() /* draw the magnifier on the UI thread */);
             }
             performPixelCopy(startX, startY, true /* update window position */);
             mPrevPosInView.x = xPosInView;
@@ -270,21 +277,26 @@ public final class Magnifier {
         // Perform the pixel copy.
         mPixelCopyRequestRect.set(clampedStartXInSurface,
                 clampedStartYInSurface,
-                clampedStartXInSurface + mBitmap.getWidth(),
-                clampedStartYInSurface + mBitmap.getHeight());
+                clampedStartXInSurface + mBitmapWidth,
+                clampedStartYInSurface + mBitmapHeight);
         final int windowCoordsX = mWindowCoords.x;
         final int windowCoordsY = mWindowCoords.y;
-        PixelCopy.request(surface, mPixelCopyRequestRect, mBitmap,
+
+        final Bitmap bitmap =
+                Bitmap.createBitmap(mBitmapWidth, mBitmapHeight, Bitmap.Config.ARGB_8888);
+        PixelCopy.request(surface, mPixelCopyRequestRect, bitmap,
                 result -> {
-                    if (mWindow != null) {
-                        if (updateWindowPosition) {
-                            // TODO: pull the magnifier position update outside #performPixelCopy
-                            mWindow.setContentPositionForNextDraw(windowCoordsX, windowCoordsY);
+                    synchronized (mWindow.mLock) {
+                        if (mWindow != null) {
+                            if (updateWindowPosition) {
+                                // TODO: pull the position update outside #performPixelCopy
+                                mWindow.setContentPositionForNextDraw(windowCoordsX, windowCoordsY);
+                            }
+                            mWindow.updateContent(bitmap);
                         }
-                        mWindow.updateContent(mBitmap);
                     }
                 },
-                mPixelCopyHandler);
+                sPixelCopyHandlerThread.getThreadHandler());
         mPrevStartCoordsInSurface.x = startXInSurface;
         mPrevStartCoordsInSurface.y = startYInSurface;
     }
@@ -307,13 +319,6 @@ public final class Magnifier {
         // The insets of the content inside the allocated surface.
         private final int mOffsetX;
         private final int mOffsetY;
-        // Whether the next draw will be the first one for the current instance.
-        private boolean mFirstDraw = true;
-        // The window position in the parent surface. Might be applied during the next draw,
-        // when mPendingWindowPositionUpdate is true.
-        private int mWindowPositionX;
-        private int mWindowPositionY;
-        private boolean mPendingWindowPositionUpdate;
         // The surface we allocate for the magnifier content + shadow.
         private final SurfaceSession mSurfaceSession;
         private final SurfaceControl mSurfaceControl;
@@ -322,10 +327,31 @@ public final class Magnifier {
         private final ThreadedRenderer.SimpleRenderer mRenderer;
         // The RenderNode used to draw the magnifier content in the surface.
         private final RenderNode mBitmapRenderNode;
+        // The job that will be post'd to apply the pending magnifier updates to the surface.
+        private final Runnable mMagnifierUpdater;
+        // The handler where the magnifier updater jobs will be post'd.
+        private final Handler mHandler;
+
+        // Members below describe the state of the magnifier. Reads/writes to them
+        // have to be synchronized between the UI thread and the thread that handles
+        // the pixel copy results. This is the purpose of mLock.
+        private final Object mLock = new Object();
+        // Whether a magnifier frame draw is currently pending in the UI thread queue.
+        private boolean mFrameDrawScheduled;
+        // The content bitmap.
+        private Bitmap mBitmap;
+        // Whether the next draw will be the first one for the current instance.
+        private boolean mFirstDraw = true;
+        // The window position in the parent surface. Might be applied during the next draw,
+        // when mPendingWindowPositionUpdate is true.
+        private int mWindowPositionX;
+        private int mWindowPositionY;
+        private boolean mPendingWindowPositionUpdate;
 
         InternalPopupWindow(final Context context, final Display display,
                 final Surface parentSurface,
-                final int width, final int height, final float elevation) {
+                final int width, final int height, final float elevation,
+                final Handler handler) {
             mDisplay = display;
 
             mContentWidth = width;
@@ -355,6 +381,7 @@ public final class Magnifier {
                     "magnifier content",
                     elevation
             );
+
             final DisplayListCanvas canvas = mRenderer.getRootNode().start(width, height);
             try {
                 canvas.insertReorderBarrier();
@@ -363,6 +390,11 @@ public final class Magnifier {
             } finally {
                 mRenderer.getRootNode().end(canvas);
             }
+
+            // Initialize the update job and the handler where this will be post'd.
+            mHandler = handler;
+            mMagnifierUpdater = this::doDraw;
+            mFrameDrawScheduled = false;
         }
 
         private RenderNode createRenderNodeForBitmap(final String name, final float elevation) {
@@ -394,6 +426,7 @@ public final class Magnifier {
         /**
          * Sets the position of the magnifier content relative to the parent surface.
          * The position update will happen in the same frame with the next draw.
+         * The method has to be called in a context that holds {@link #mLock}.
          *
          * @param contentX the x coordinate of the content
          * @param contentY the y coordinate of the content
@@ -402,28 +435,33 @@ public final class Magnifier {
             mWindowPositionX = contentX - mOffsetX;
             mWindowPositionY = contentY - mOffsetY;
             mPendingWindowPositionUpdate = true;
+            requestUpdate();
         }
 
         /**
          * Sets the content that should be displayed in the magnifier.
          * The update happens immediately, and possibly triggers a pending window movement set
          * by {@link #setContentPositionForNextDraw(int, int)}.
+         * The method has to be called in a context that holds {@link #mLock}.
          *
          * @param bitmap the content bitmap
          */
-        public void updateContent(final Bitmap bitmap) {
-            final DisplayListCanvas canvas = mBitmapRenderNode.start(mContentWidth, mContentHeight);
-            try {
-                final Rect srcRect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-                final Rect dstRect = new Rect(0, 0, mContentWidth, mContentHeight);
-                final Paint paint = new Paint();
-                paint.setFilterBitmap(true);
-                canvas.drawBitmap(bitmap, srcRect, dstRect, paint);
-            } finally {
-                mBitmapRenderNode.end(canvas);
+        public void updateContent(final @NonNull Bitmap bitmap) {
+            if (mBitmap != null) {
+                mBitmap.recycle();
             }
+            mBitmap = bitmap;
+            requestUpdate();
+        }
 
-            doDraw();
+        private void requestUpdate() {
+            if (mFrameDrawScheduled) {
+                return;
+            }
+            final Message request = Message.obtain(mHandler, mMagnifierUpdater);
+            request.setAsynchronous(true);
+            request.sendToTarget();
+            mFrameDrawScheduled = true;
         }
 
         /**
@@ -435,34 +473,65 @@ public final class Magnifier {
             mSurfaceControl.destroy();
             mSurfaceSession.kill();
             mBitmapRenderNode.destroy();
+            synchronized (mLock) {
+                mHandler.removeCallbacks(mMagnifierUpdater);
+                if (mBitmap != null) {
+                    mBitmap.recycle();
+                }
+            }
         }
 
         private void doDraw() {
             final ThreadedRenderer.FrameDrawingCallback callback;
-            if (mPendingWindowPositionUpdate || mFirstDraw) {
-                // If the window has to be shown or moved, defer this until the next draw.
-                final boolean firstDraw = mFirstDraw;
-                mFirstDraw = false;
-                final boolean updateWindowPosition = mPendingWindowPositionUpdate;
-                mPendingWindowPositionUpdate = false;
-                final int pendingX = mWindowPositionX;
-                final int pendingY = mWindowPositionY;
 
-                callback = frame -> {
-                    mRenderer.setLightCenter(mDisplay, pendingX, pendingY);
-                    // Show or move the window at the content draw frame.
-                    SurfaceControl.openTransaction();
-                    mSurfaceControl.deferTransactionUntil(mSurface, frame);
-                    if (updateWindowPosition) {
-                        mSurfaceControl.setPosition(pendingX, pendingY);
-                    }
-                    if (firstDraw) {
-                        mSurfaceControl.show();
-                    }
-                    SurfaceControl.closeTransaction();
-                };
-            } else {
-                callback = null;
+            // Draw the current bitmap to the surface, and prepare the callback which updates the
+            // surface position. These have to be in the same synchronized block, in order to
+            // guarantee the consistency between the bitmap content and the surface position.
+            synchronized (mLock) {
+                if (!mSurface.isValid()) {
+                    // Probably #destroy() was called for the current instance, so we skip the draw.
+                    return;
+                }
+
+                final DisplayListCanvas canvas =
+                        mBitmapRenderNode.start(mContentWidth, mContentHeight);
+                try {
+                    final Rect srcRect = new Rect(0, 0, mBitmap.getWidth(), mBitmap.getHeight());
+                    final Rect dstRect = new Rect(0, 0, mContentWidth, mContentHeight);
+                    final Paint paint = new Paint();
+                    paint.setFilterBitmap(true);
+                    canvas.drawBitmap(mBitmap, srcRect, dstRect, paint);
+                } finally {
+                    mBitmapRenderNode.end(canvas);
+                }
+
+                if (mPendingWindowPositionUpdate || mFirstDraw) {
+                    // If the window has to be shown or moved, defer this until the next draw.
+                    final boolean firstDraw = mFirstDraw;
+                    mFirstDraw = false;
+                    final boolean updateWindowPosition = mPendingWindowPositionUpdate;
+                    mPendingWindowPositionUpdate = false;
+                    final int pendingX = mWindowPositionX;
+                    final int pendingY = mWindowPositionY;
+
+                    callback = frame -> {
+                        mRenderer.setLightCenter(mDisplay, pendingX, pendingY);
+                        // Show or move the window at the content draw frame.
+                        SurfaceControl.openTransaction();
+                        mSurfaceControl.deferTransactionUntil(mSurface, frame);
+                        if (updateWindowPosition) {
+                            mSurfaceControl.setPosition(pendingX, pendingY);
+                        }
+                        if (firstDraw) {
+                            mSurfaceControl.show();
+                        }
+                        SurfaceControl.closeTransaction();
+                    };
+                } else {
+                    callback = null;
+                }
+
+                mFrameDrawScheduled = false;
             }
 
             mRenderer.draw(callback);
@@ -475,8 +544,13 @@ public final class Magnifier {
      * @hide
      */
     @TestApi
-    public Bitmap getContent() {
-        return mBitmap;
+    public @Nullable Bitmap getContent() {
+        if (mWindow == null) {
+            return null;
+        }
+        synchronized (mWindow.mLock) {
+            return mWindow.mBitmap;
+        }
     }
 
     /**
