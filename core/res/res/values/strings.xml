@@ -547,7 +547,7 @@
     <string name="global_action_voice_assist">Voice Assist</string>
 
     <!-- label for item that locks the phone and enforces that it can't be unlocked without strong authentication. [CHAR LIMIT=15] -->
-    <string name="global_action_lockdown">Enter lockdown</string>
+    <string name="global_action_lockdown">Lockdown</string>
 
     <!-- Text to use when the number in a notification info is too large
          (greater than status_bar_notification_info_maxnum, defined in
