@@ -55,7 +55,6 @@ public class SyncManagerConstants extends ContentObserver {
     protected SyncManagerConstants(Context context) {
         super(null);
         mContext = context;
-        refresh();
     }
 
     public void start() {
