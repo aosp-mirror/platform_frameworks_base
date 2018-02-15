@@ -42,6 +42,7 @@ public:
     const static int kDimensionKeySizeHardLimit = 500;
 
     const static int kMaxConfigCount = 10;
+    const static int kMaxAlertCountPerConfig = 100;
     const static int kMaxConditionCountPerConfig = 200;
     const static int kMaxMetricCountPerConfig = 300;
     const static int kMaxMatcherCountPerConfig = 500;

@@ -172,7 +172,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     public void sendSubscriberBroadcast(IBinder intentSenderBinder, long configUid, long configKey,
                                         long subscriptionId, long subscriptionRuleId,
                                         StatsDimensionsValue dimensionsValue) {
-        if (DEBUG) Slog.d(TAG, "Statsd requested to sendSubscriberBroadcast.");
         enforceCallingPermission();
         IntentSender intentSender = new IntentSender(intentSenderBinder);
         Intent intent = new Intent()
@@ -181,16 +180,16 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 .putExtra(StatsManager.EXTRA_STATS_SUBSCRIPTION_ID, subscriptionId)
                 .putExtra(StatsManager.EXTRA_STATS_SUBSCRIPTION_RULE_ID, subscriptionRuleId)
                 .putExtra(StatsManager.EXTRA_STATS_DIMENSIONS_VALUE, dimensionsValue);
+        if (DEBUG) {
+            Slog.d(TAG, String.format("Statsd sendSubscriberBroadcast with params {%d %d %d %d %s}",
+                    configUid, configKey, subscriptionId,
+                    subscriptionRuleId, dimensionsValue));
+        }
         try {
             intentSender.sendIntent(mContext, CODE_SUBSCRIBER_BROADCAST, intent, null, null);
         } catch (IntentSender.SendIntentException e) {
             Slog.w(TAG, "Unable to send using IntentSender from uid " + configUid
                     + "; presumably it had been cancelled.");
-            if (DEBUG) {
-                Slog.d(TAG, String.format("SubscriberBroadcast params {%d %d %d %d %s}",
-                        configUid, configKey, subscriptionId,
-                        subscriptionRuleId, dimensionsValue));
-            }
         }
     }
 
