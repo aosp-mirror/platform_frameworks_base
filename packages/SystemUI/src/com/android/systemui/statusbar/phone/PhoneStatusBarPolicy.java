@@ -575,7 +575,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
 
         Intent browserIntent = getTaskIntent(taskId, userId);
         Notification.Builder builder = new Notification.Builder(mContext, NotificationChannels.GENERAL);
-        if (browserIntent != null) {
+        if (browserIntent != null && browserIntent.isWebIntent()) {
             // Make sure that this doesn't resolve back to an instant app
             browserIntent.setComponent(null)
                     .setPackage(null)
@@ -597,8 +597,9 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
                     .addCategory("unique:" + System.currentTimeMillis())
                     .putExtra(Intent.EXTRA_PACKAGE_NAME, appInfo.packageName)
                     .putExtra(Intent.EXTRA_VERSION_CODE, (int) (appInfo.versionCode & 0x7fffffff))
-                    .putExtra(Intent.EXTRA_VERSION_CODE, appInfo.versionCode)
-                    .putExtra(Intent.EXTRA_EPHEMERAL_FAILURE, pendingIntent);
+                    .putExtra(Intent.EXTRA_LONG_VERSION_CODE, appInfo.versionCode)
+                    .putExtra(Intent.EXTRA_EPHEMERAL_FAILURE, pendingIntent)
+                    .putExtra(Intent.EXTRA_INSTANT_APP_FAILURE, pendingIntent);
 
             PendingIntent webPendingIntent = PendingIntent.getActivity(mContext, 0, goToWebIntent, 0);
             Action webAction = new Notification.Action.Builder(null, mContext.getString(R.string.go_to_web),
