@@ -999,7 +999,7 @@
     <integer name="config_shortPressOnSleepBehavior">0</integer>
 
     <!-- Time to wait while a button is pressed before triggering a very long press. -->
-    <integer name="config_veryLongPressTimeout">6000</integer>
+    <integer name="config_veryLongPressTimeout">3500</integer>
 
     <!-- Package name for default keyguard appwidget [DO NOT TRANSLATE] -->
     <string name="widget_default_package_name" translatable="false"></string>
