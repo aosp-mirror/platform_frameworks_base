@@ -222,7 +222,9 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, ResourceTable* split_table
 
     } else if (manifest != nullptr && path == "AndroidManifest.xml") {
       BigBuffer buffer(8192);
-      XmlFlattener xml_flattener(&buffer, {});
+      XmlFlattenerOptions xml_flattener_options;
+      xml_flattener_options.use_utf16 = true;
+      XmlFlattener xml_flattener(&buffer, xml_flattener_options);
       if (!xml_flattener.Consume(context, manifest)) {
         context->GetDiagnostics()->Error(DiagMessage(path) << "flattening failed");
         return false;

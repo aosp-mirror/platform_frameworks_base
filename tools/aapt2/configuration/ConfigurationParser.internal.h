@@ -33,17 +33,30 @@ namespace configuration {
 
 template <typename T>
 struct OrderedEntry {
-  size_t order;
+  int32_t order;
   std::vector<T> entry;
 };
-
-/** A mapping of group labels to group of configuration items. */
-template <class T>
-using Group = std::unordered_map<std::string, OrderedEntry<T>>;
 
 /** A mapping of group label to a single configuration item. */
 template <class T>
 using Entry = std::unordered_map<std::string, T>;
+
+/** A mapping of group labels to group of configuration items. */
+template <class T>
+using Group = Entry<OrderedEntry<T>>;
+
+template<typename T>
+bool IsGroupValid(const Group<T>& group, const std::string& name, IDiagnostics* diag) {
+  std::set<int32_t> orders;
+  for (const auto& p : group) {
+    orders.insert(p.second.order);
+  }
+  bool valid = orders.size() == group.size();
+  if (!valid) {
+    diag->Error(DiagMessage() << name << " have overlapping version-code-order attributes");
+  }
+  return valid;
+}
 
 /** Retrieves an entry from the provided Group, creating a new instance if one does not exist. */
 template <typename T>
@@ -93,7 +106,7 @@ class ComparisonChain {
 
  private:
   template <typename T>
-  inline size_t GetGroupOrder(const Group<T>& groups, const Maybe<std::string>& label) {
+  inline size_t GetGroupOrder(const Entry<T>& groups, const Maybe<std::string>& label) {
     if (!label) {
       return std::numeric_limits<size_t>::max();
     }
@@ -140,6 +153,15 @@ struct PostProcessingConfiguration {
   Group<DeviceFeature> device_feature_groups;
   Group<GlTexture> gl_texture_groups;
   Entry<AndroidSdk> android_sdks;
+
+  bool ValidateVersionCodeOrdering(IDiagnostics* diag) {
+    bool valid = IsGroupValid(abi_groups, "abi-groups", diag);
+    valid &= IsGroupValid(screen_density_groups, "screen-density-groups", diag);
+    valid &= IsGroupValid(locale_groups, "locale-groups", diag);
+    valid &= IsGroupValid(device_feature_groups, "device-feature-groups", diag);
+    valid &= IsGroupValid(gl_texture_groups, "gl-texture-groups", diag);
+    return valid;
+  }
 
   /**
    * Sorts the configured artifacts based on the ordering of the groups in the configuration file.
