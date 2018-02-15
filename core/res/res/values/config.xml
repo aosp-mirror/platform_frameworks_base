@@ -3316,4 +3316,5 @@
     <string-array name="config_wearActivityModeRadios">
         <item>"wifi"</item>
     </string-array>
+
 </resources>
