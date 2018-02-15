@@ -102,6 +102,7 @@ class WindowSurfacePlacer {
     }
     private final LayerAndToken mTmpLayerAndToken = new LayerAndToken();
 
+    private final ArrayList<SurfaceControl> mPendingDestroyingSurfaces = new ArrayList<>();
     private final SparseIntArray mTempTransitionReasons = new SparseIntArray();
 
     private final Runnable mPerformSurfacePlacement;
@@ -694,6 +695,25 @@ class WindowSurfacePlacer {
             mTraversalScheduled = true;
             mService.mAnimationHandler.post(mPerformSurfacePlacement);
         }
+    }
+
+    /**
+     * Puts the {@param surface} into a pending list to be destroyed after the current transaction
+     * has been committed.
+     */
+    void destroyAfterTransaction(SurfaceControl surface) {
+        mPendingDestroyingSurfaces.add(surface);
+    }
+
+    /**
+     * Destroys any surfaces that have been put into the pending list with
+     * {@link #destroyAfterTransaction}.
+     */
+    void destroyPendingSurfaces() {
+        for (int i = mPendingDestroyingSurfaces.size() - 1; i >= 0; i--) {
+            mPendingDestroyingSurfaces.get(i).destroy();
+        }
+        mPendingDestroyingSurfaces.clear();
     }
 
     public void dump(PrintWriter pw, String prefix) {
