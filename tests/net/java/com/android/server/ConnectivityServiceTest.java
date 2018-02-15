@@ -35,6 +35,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_MMS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_RCS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_SUPL;
@@ -528,6 +529,11 @@ public class ConnectivityServiceTest {
             mNetworkAgent.sendNetworkInfo(mNetworkInfo);
         }
 
+        public void resume() {
+            mNetworkInfo.setDetailedState(DetailedState.CONNECTED, null, null);
+            mNetworkAgent.sendNetworkInfo(mNetworkInfo);
+        }
+
         public void disconnect() {
             mNetworkInfo.setDetailedState(DetailedState.DISCONNECTED, null, null);
             mNetworkAgent.sendNetworkInfo(mNetworkInfo);
@@ -568,6 +574,10 @@ public class ConnectivityServiceTest {
         public String waitForRedirectUrl() {
             assertTrue(mNetworkStatusReceived.block(TIMEOUT_MS));
             return mRedirectUrl;
+        }
+
+        public NetworkCapabilities getNetworkCapabilities() {
+            return mNetworkCapabilities;
         }
     }
 
@@ -1273,6 +1283,7 @@ public class ConnectivityServiceTest {
         NETWORK_CAPABILITIES,
         LINK_PROPERTIES,
         SUSPENDED,
+        RESUMED,
         LOSING,
         LOST,
         UNAVAILABLE
@@ -1341,6 +1352,11 @@ public class ConnectivityServiceTest {
         @Override
         public void onNetworkSuspended(Network network) {
             setLastCallback(CallbackState.SUSPENDED, network, null);
+        }
+
+        @Override
+        public void onNetworkResumed(Network network) {
+            setLastCallback(CallbackState.RESUMED, network, null);
         }
 
         @Override
@@ -2459,15 +2475,30 @@ public class ConnectivityServiceTest {
 
         // Suspend the network.
         mCellNetworkAgent.suspend();
+        cellNetworkCallback.expectCapabilitiesWithout(NET_CAPABILITY_NOT_SUSPENDED,
+                mCellNetworkAgent);
         cellNetworkCallback.expectCallback(CallbackState.SUSPENDED, mCellNetworkAgent);
         cellNetworkCallback.assertNoCallback();
 
         // Register a garden variety default network request.
-        final TestNetworkCallback dfltNetworkCallback = new TestNetworkCallback();
+        TestNetworkCallback dfltNetworkCallback = new TestNetworkCallback();
         mCm.registerDefaultNetworkCallback(dfltNetworkCallback);
         // We should get onAvailable(), onCapabilitiesChanged(), onLinkPropertiesChanged(),
         // as well as onNetworkSuspended() in rapid succession.
         dfltNetworkCallback.expectAvailableAndSuspendedCallbacks(mCellNetworkAgent, true);
+        dfltNetworkCallback.assertNoCallback();
+        mCm.unregisterNetworkCallback(dfltNetworkCallback);
+
+        mCellNetworkAgent.resume();
+        cellNetworkCallback.expectCapabilitiesWith(NET_CAPABILITY_NOT_SUSPENDED,
+                mCellNetworkAgent);
+        cellNetworkCallback.expectCallback(CallbackState.RESUMED, mCellNetworkAgent);
+        cellNetworkCallback.assertNoCallback();
+
+        dfltNetworkCallback = new TestNetworkCallback();
+        mCm.registerDefaultNetworkCallback(dfltNetworkCallback);
+        // This time onNetworkSuspended should not be called.
+        dfltNetworkCallback.expectAvailableCallbacksValidated(mCellNetworkAgent);
         dfltNetworkCallback.assertNoCallback();
 
         mCm.unregisterNetworkCallback(dfltNetworkCallback);
@@ -3682,8 +3713,7 @@ public class ConnectivityServiceTest {
         vpnNetworkCallback.expectAvailableCallbacksUnvalidated(vpnNetworkAgent);
 
         genericNetworkCallback.expectCallback(CallbackState.NETWORK_CAPABILITIES, vpnNetworkAgent);
-        vpnNetworkCallback.expectCapabilitiesLike(
-                nc -> nc.appliesToUid(uid) && !nc.appliesToUid(uid + 1), vpnNetworkAgent);
+        vpnNetworkCallback.expectCapabilitiesLike(nc -> null == nc.getUids(), vpnNetworkAgent);
 
         ranges.clear();
         vpnNetworkAgent.setUids(ranges);
