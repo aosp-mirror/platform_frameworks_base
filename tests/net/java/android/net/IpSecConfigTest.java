@@ -17,6 +17,7 @@
 package android.net;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -48,18 +49,12 @@ public class IpSecConfigTest {
         assertEquals(IpSecManager.INVALID_RESOURCE_ID, c.getSpiResourceId());
     }
 
-    @Test
-    public void testParcelUnparcel() throws Exception {
-        assertParcelingIsLossless(new IpSecConfig());
-
+    private IpSecConfig getSampleConfig() {
         IpSecConfig c = new IpSecConfig();
         c.setMode(IpSecTransform.MODE_TUNNEL);
         c.setSourceAddress("0.0.0.0");
         c.setDestinationAddress("1.2.3.4");
-        c.setEncapType(android.system.OsConstants.UDP_ENCAP_ESPINUDP);
-        c.setEncapSocketResourceId(7);
-        c.setEncapRemotePort(22);
-        c.setNattKeepaliveInterval(42);
+        c.setSpiResourceId(1984);
         c.setEncryption(
                 new IpSecAlgorithm(
                         IpSecAlgorithm.CRYPT_AES_CBC,
@@ -68,7 +63,37 @@ public class IpSecConfigTest {
                 new IpSecAlgorithm(
                         IpSecAlgorithm.AUTH_HMAC_MD5,
                         new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF, 0}));
-        c.setSpiResourceId(1984);
+        c.setAuthenticatedEncryption(
+                new IpSecAlgorithm(
+                        IpSecAlgorithm.AUTH_CRYPT_AES_GCM,
+                        new byte[] {
+                            1, 2, 3, 4, 5, 6, 7, 8, 9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF, 0, 1, 2, 3, 4
+                        },
+                        128));
+        c.setEncapType(android.system.OsConstants.UDP_ENCAP_ESPINUDP);
+        c.setEncapSocketResourceId(7);
+        c.setEncapRemotePort(22);
+        c.setNattKeepaliveInterval(42);
+        c.setMarkValue(12);
+        c.setMarkMask(23);
+
+        return c;
+    }
+
+    @Test
+    public void testCopyConstructor() {
+        IpSecConfig original = getSampleConfig();
+        IpSecConfig copy = new IpSecConfig(original);
+
+        assertTrue(IpSecConfig.equals(original, copy));
+        assertFalse(original == copy);
+    }
+
+    @Test
+    public void testParcelUnparcel() throws Exception {
+        assertParcelingIsLossless(new IpSecConfig());
+
+        IpSecConfig c = getSampleConfig();
         assertParcelingIsLossless(c);
     }
 
