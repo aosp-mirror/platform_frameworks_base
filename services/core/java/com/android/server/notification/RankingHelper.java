@@ -102,7 +102,7 @@ public class RankingHelper implements RankingConfig {
     private SparseBooleanArray mBadgingEnabled;
 
     public RankingHelper(Context context, PackageManager pm, RankingHandler rankingHandler,
-            NotificationUsageStats usageStats, String[] extractorNames) {
+            ZenModeHelper zenHelper, NotificationUsageStats usageStats, String[] extractorNames) {
         mContext = context;
         mRankingHandler = rankingHandler;
         mPm = pm;
@@ -120,6 +120,7 @@ public class RankingHelper implements RankingConfig {
                         (NotificationSignalExtractor) extractorClass.newInstance();
                 extractor.initialize(mContext, usageStats);
                 extractor.setConfig(this);
+                extractor.setZenHelper(zenHelper);
                 mSignalExtractors[i] = extractor;
             } catch (ClassNotFoundException e) {
                 Slog.w(TAG, "Couldn't find extractor " + extractorNames[i] + ".", e);

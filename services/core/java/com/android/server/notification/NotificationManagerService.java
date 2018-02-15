@@ -1312,11 +1312,6 @@ public class NotificationManagerService extends SystemService {
         }
         mUsageStats = usageStats;
         mRankingHandler = new RankingHandlerWorker(mRankingThread.getLooper());
-        mRankingHelper = new RankingHelper(getContext(),
-                mPackageManagerClient,
-                mRankingHandler,
-                mUsageStats,
-                extractorNames);
         mConditionProviders = conditionProviders;
         mZenModeHelper = new ZenModeHelper(getContext(), mHandler.getLooper(), mConditionProviders);
         mZenModeHelper.addCallback(new ZenModeHelper.Callback() {
@@ -1335,6 +1330,7 @@ public class NotificationManagerService extends SystemService {
                 synchronized (mNotificationLock) {
                     updateInterruptionFilterLocked();
                 }
+                mRankingHandler.requestSort();
             }
 
             @Override
@@ -1342,6 +1338,12 @@ public class NotificationManagerService extends SystemService {
                 sendRegisteredOnlyBroadcast(NotificationManager.ACTION_NOTIFICATION_POLICY_CHANGED);
             }
         });
+        mRankingHelper = new RankingHelper(getContext(),
+                mPackageManagerClient,
+                mRankingHandler,
+                mZenModeHelper,
+                mUsageStats,
+                extractorNames);
         mSnoozeHelper = snoozeHelper;
         mGroupHelper = groupHelper;
 
@@ -4730,6 +4732,7 @@ public class NotificationManagerService extends SystemService {
             ArrayList<ArrayList<String>> overridePeopleBefore = new ArrayList<>(N);
             ArrayList<ArrayList<SnoozeCriterion>> snoozeCriteriaBefore = new ArrayList<>(N);
             ArrayList<Integer> userSentimentBefore = new ArrayList<>(N);
+            ArrayList<Integer> suppressVisuallyBefore = new ArrayList<>(N);
             for (int i = 0; i < N; i++) {
                 final NotificationRecord r = mNotificationList.get(i);
                 orderBefore.add(r.getKey());
@@ -4740,6 +4743,7 @@ public class NotificationManagerService extends SystemService {
                 overridePeopleBefore.add(r.getPeopleOverride());
                 snoozeCriteriaBefore.add(r.getSnoozeCriteria());
                 userSentimentBefore.add(r.getUserSentiment());
+                suppressVisuallyBefore.add(r.getSuppressedVisualEffects());
                 mRankingHelper.extractSignals(r);
             }
             mRankingHelper.sort(mNotificationList);
@@ -4752,7 +4756,9 @@ public class NotificationManagerService extends SystemService {
                         || !Objects.equals(groupKeyBefore.get(i), r.getGroupKey())
                         || !Objects.equals(overridePeopleBefore.get(i), r.getPeopleOverride())
                         || !Objects.equals(snoozeCriteriaBefore.get(i), r.getSnoozeCriteria())
-                        || !Objects.equals(userSentimentBefore.get(i), r.getUserSentiment())) {
+                        || !Objects.equals(userSentimentBefore.get(i), r.getUserSentiment())
+                        || !Objects.equals(suppressVisuallyBefore.get(i),
+                        r.getSuppressedVisualEffects())) {
                     mHandler.scheduleSendRankingUpdate();
                     return;
                 }

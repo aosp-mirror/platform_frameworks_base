@@ -1,5 +1,5 @@
-/**
-* Copyright (C) 2017 The Android Open Source Project
+/*
+* Copyright (C) 2018 The Android Open Source Project
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -13,19 +13,24 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
+
 package com.android.server.notification;
 
+import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_OFF;
+import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_ON;
+
 import android.content.Context;
+import android.util.Log;
 import android.util.Slog;
 
 /**
- * Determines whether a badge should be shown for this notification
+ * This {@link ZenModeExtractor} updates intercepted and visual interruption states.
  */
-public class BadgeExtractor implements NotificationSignalExtractor {
-    private static final String TAG = "BadgeExtractor";
-    private static final boolean DBG = false;
+public class ZenModeExtractor implements NotificationSignalExtractor {
+    private static final String TAG = "ZenModeExtractor";
+    private static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private RankingConfig mConfig;
+    private ZenModeHelper mZenModeHelper;
 
     public void initialize(Context ctx, NotificationUsageStats usageStats) {
         if (DBG) Slog.d(TAG, "Initializing  " + getClass().getSimpleName() + ".");
@@ -37,21 +42,20 @@ public class BadgeExtractor implements NotificationSignalExtractor {
             return null;
         }
 
-        if (mConfig == null) {
-            if (DBG) Slog.d(TAG, "missing config");
+        if (mZenModeHelper == null) {
+            if (DBG) Slog.d(TAG, "skipping - no zen info available");
             return null;
         }
-        boolean userWantsBadges = mConfig.badgingEnabled(record.sbn.getUser());
-        boolean appCanShowBadge =
-                mConfig.canShowBadge(record.sbn.getPackageName(), record.sbn.getUid());
-        if (!userWantsBadges || !appCanShowBadge) {
-            record.setShowBadge(false);
+
+        record.setIntercepted(mZenModeHelper.shouldIntercept(record));
+        if (record.isIntercepted()) {
+            int suppressed = (mZenModeHelper.shouldSuppressWhenScreenOff()
+                    ? SUPPRESSED_EFFECT_SCREEN_OFF : 0)
+                    | (mZenModeHelper.shouldSuppressWhenScreenOn()
+                    ? SUPPRESSED_EFFECT_SCREEN_ON : 0);
+            record.setSuppressedVisualEffects(suppressed);
         } else {
-            if (record.getChannel() != null) {
-                record.setShowBadge(record.getChannel().canShowBadge() && appCanShowBadge);
-            } else {
-                record.setShowBadge(appCanShowBadge);
-            }
+            record.setSuppressedVisualEffects(0);
         }
 
         return null;
@@ -59,11 +63,11 @@ public class BadgeExtractor implements NotificationSignalExtractor {
 
     @Override
     public void setConfig(RankingConfig config) {
-        mConfig = config;
+        // ignore: config has no relevant information yet.
     }
 
     @Override
     public void setZenHelper(ZenModeHelper helper) {
-
+        mZenModeHelper = helper;
     }
 }

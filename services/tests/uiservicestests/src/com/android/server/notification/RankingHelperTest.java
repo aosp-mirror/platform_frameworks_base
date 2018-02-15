@@ -161,8 +161,8 @@ public class RankingHelperTest extends UiServiceTestCase {
         when(mTestIContentProvider.uncanonicalize(any(), eq(CANONICAL_SOUND_URI)))
                 .thenReturn(SOUND_URI);
 
-        mHelper = new RankingHelper(getContext(), mPm, mHandler, mUsageStats,
-                new String[] {ImportanceExtractor.class.getName()});
+        mHelper = new RankingHelper(getContext(), mPm, mHandler, mock(ZenModeHelper.class),
+                mUsageStats, new String[] {ImportanceExtractor.class.getName()});
 
         mNotiGroupGSortA = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setContentTitle("A")

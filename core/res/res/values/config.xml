@@ -2368,7 +2368,7 @@
          obtain user consent to access their location through other means. -->
     <string-array name="config_disabledUntilUsedPreinstalledCarrierApps" translatable="false" />
 
-    <!-- The list of classes that should be added to the notification ranking pipline.
+    <!-- The list of classes that should be added to the notification ranking pipeline.
      See {@link com.android.server.notification.NotificationSignalExtractor}
       If you add a new extractor to this list make sure to update
       NotificationManagerService.handleRankingSort()-->
@@ -2380,11 +2380,14 @@
         <!-- depends on AdjustmentExtractor-->
         <item>com.android.server.notification.ValidateNotificationPeople</item>
         <item>com.android.server.notification.PriorityExtractor</item>
+        <!-- depends on PriorityExtractor -->
+        <item>com.android.server.notification.ZenModeExtractor</item>
         <item>com.android.server.notification.ImportanceExtractor</item>
         <!-- depends on ImportanceExtractor-->
         <item>com.android.server.notification.NotificationIntrusivenessExtractor</item>
         <item>com.android.server.notification.VisibilityExtractor</item>
         <item>com.android.server.notification.BadgeExtractor</item>
+
     </string-array>
 
     <!-- Flag indicating that this device does not rotate and will always remain in its default
