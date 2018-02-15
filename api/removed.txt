@@ -257,6 +257,12 @@ package android.os {
     ctor public RecoverySystem();
   }
 
+  public final class SystemClock {
+    method public static java.time.Clock elapsedRealtimeClock();
+    method public static java.time.Clock uptimeClock();
+    method public static deprecated java.time.Clock uptimeMillisClock();
+  }
+
   public class TestLooperManager {
     method public deprecated android.os.MessageQueue getQueue();
   }

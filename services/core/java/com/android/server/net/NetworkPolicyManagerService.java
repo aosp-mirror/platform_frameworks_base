@@ -147,6 +147,7 @@ import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Environment;
+import android.os.BestClock;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IDeviceIdleController;
@@ -164,6 +165,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ShellCallback;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -183,7 +185,6 @@ import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.DataUnit;
 import android.util.Log;
-import android.util.NtpTrustedTime;
 import android.util.Pair;
 import android.util.RecurrenceRule;
 import android.util.Slog;
@@ -191,7 +192,6 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.SparseLongArray;
-import android.util.TrustedTime;
 import android.util.Xml;
 
 import com.android.internal.R;
@@ -226,7 +226,9 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -335,8 +337,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String ACTION_SNOOZE_RAPID =
             "com.android.server.net.action.SNOOZE_RAPID";
 
-    private static final long TIME_CACHE_MAX_AGE = DAY_IN_MILLIS;
-
     /**
      * Indicates the maximum wait time for admin data to be available;
      */
@@ -362,7 +362,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private final INetworkStatsService mNetworkStats;
     private final INetworkManagementService mNetworkManager;
     private UsageStatsManagerInternal mUsageStats;
-    private final TrustedTime mTime;
+    private final Clock mClock;
     private final UserManager mUserManager;
     private final CarrierConfigManager mCarrierConfigManager;
 
@@ -518,24 +518,29 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     public NetworkPolicyManagerService(Context context, IActivityManager activityManager,
             INetworkStatsService networkStats, INetworkManagementService networkManagement) {
         this(context, activityManager, networkStats, networkManagement,
-                AppGlobals.getPackageManager(), NtpTrustedTime.getInstance(context), getSystemDir(),
+                AppGlobals.getPackageManager(), getDefaultClock(), getDefaultSystemDir(),
                 false);
     }
 
-    private static File getSystemDir() {
+    private static @NonNull File getDefaultSystemDir() {
         return new File(Environment.getDataDirectory(), "system");
+    }
+
+    private static @NonNull Clock getDefaultClock() {
+        return new BestClock(ZoneOffset.UTC, SystemClock.currentNetworkTimeClock(),
+                Clock.systemUTC());
     }
 
     public NetworkPolicyManagerService(Context context, IActivityManager activityManager,
             INetworkStatsService networkStats, INetworkManagementService networkManagement,
-            IPackageManager pm, TrustedTime time, File systemDir, boolean suppressDefaultPolicy) {
+            IPackageManager pm, Clock clock, File systemDir, boolean suppressDefaultPolicy) {
         mContext = checkNotNull(context, "missing context");
         mActivityManager = checkNotNull(activityManager, "missing activityManager");
         mNetworkStats = checkNotNull(networkStats, "missing networkStats");
         mNetworkManager = checkNotNull(networkManagement, "missing networkManagement");
         mDeviceIdleController = IDeviceIdleController.Stub.asInterface(ServiceManager.getService(
                 Context.DEVICE_IDLE_CONTROLLER));
-        mTime = checkNotNull(time, "missing TrustedTime");
+        mClock = checkNotNull(clock, "missing Clock");
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mCarrierConfigManager = mContext.getSystemService(CarrierConfigManager.class);
         mIPm = pm;
@@ -932,7 +937,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // on background handler thread, and verified
             // READ_NETWORK_USAGE_HISTORY permission above.
 
-            maybeRefreshTrustedTime();
             synchronized (mNetworkPoliciesSecondLock) {
                 updateNetworkEnabledNL();
                 updateNotificationsNL();
@@ -1042,7 +1046,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // cycle boundary to recompute notifications.
 
         // examine stats for each active policy
-        final long now = currentTimeMillis();
+        final long now = mClock.millis();
         for (int i = mNetworkPolicy.size()-1; i >= 0; i--) {
             final NetworkPolicy policy = mNetworkPolicy.valueAt(i);
             // ignore policies that aren't relevant to user
@@ -1299,7 +1303,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // on background handler thread, and verified CONNECTIVITY_INTERNAL
             // permission above.
 
-            maybeRefreshTrustedTime();
             synchronized (mUidRulesFirstLock) {
                 synchronized (mNetworkPoliciesSecondLock) {
                     ensureActiveMobilePolicyAL();
@@ -1462,7 +1465,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final TelephonyManager tele = mContext.getSystemService(TelephonyManager.class);
             final String subscriberId = tele.getSubscriberId(subId);
 
-            maybeRefreshTrustedTime();
             synchronized (mUidRulesFirstLock) {
                 synchronized (mNetworkPoliciesSecondLock) {
                     final boolean added = ensureActiveMobilePolicyAL(subId, subscriberId);
@@ -1723,7 +1725,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final long totalBytes = getTotalBytes(
                         NetworkTemplate.buildTemplateMobileAll(state.subscriberId), start, end);
                 final long remainingBytes = limitBytes - totalBytes;
-                final long remainingDays = Math.max(1, (end - currentTimeMillis())
+                final long remainingDays = Math.max(1, (end - mClock.millis())
                         / TimeUnit.DAYS.toMillis(1));
                 if (remainingBytes > 0) {
                     quotaBytes = (remainingBytes / remainingDays) / 10;
@@ -2444,7 +2446,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         final long token = Binder.clearCallingIdentity();
         try {
-            maybeRefreshTrustedTime();
             synchronized (mUidRulesFirstLock) {
                 synchronized (mNetworkPoliciesSecondLock) {
                     normalizePoliciesNL(policies);
@@ -2524,8 +2525,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     void performSnooze(NetworkTemplate template, int type) {
-        maybeRefreshTrustedTime();
-        final long currentTime = currentTimeMillis();
+        final long currentTime = mClock.millis();
         synchronized (mUidRulesFirstLock) {
             synchronized (mNetworkPoliciesSecondLock) {
                 // find and snooze local policy that matches
@@ -2571,7 +2571,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
             final long token = Binder.clearCallingIdentity();
             try {
-                maybeRefreshTrustedTime();
                 synchronized (mUidRulesFirstLock) {
                     setRestrictBackgroundUL(restrictBackground);
                 }
@@ -2916,7 +2915,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         final long token = Binder.clearCallingIdentity();
         try {
-            maybeRefreshTrustedTime();
             synchronized (mUidRulesFirstLock) {
                 synchronized (mNetworkPoliciesSecondLock) {
                     mSubscriptionPlans.put(subId, plans);
@@ -4028,7 +4026,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 case MSG_LIMIT_REACHED: {
                     final String iface = (String) msg.obj;
 
-                    maybeRefreshTrustedTime();
                     synchronized (mNetworkPoliciesSecondLock) {
                         if (mMeteredIfaces.contains(iface)) {
                             try {
@@ -4391,19 +4388,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(token);
         }
-    }
-
-    /**
-     * Try refreshing {@link #mTime} when stale.
-     */
-    void maybeRefreshTrustedTime() {
-        if (mTime.getCacheAge() > TIME_CACHE_MAX_AGE) {
-            mTime.forceRefresh();
-        }
-    }
-
-    private long currentTimeMillis() {
-        return mTime.hasCache() ? mTime.currentTimeMillis() : System.currentTimeMillis();
     }
 
     private static Intent buildAllowBackgroundDataIntent() {

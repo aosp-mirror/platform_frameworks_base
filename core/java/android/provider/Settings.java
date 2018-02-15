@@ -8760,6 +8760,7 @@ public final class Settings {
        /** {@hide} */
        public static final String NETSTATS_POLL_INTERVAL = "netstats_poll_interval";
        /** {@hide} */
+       @Deprecated
        public static final String NETSTATS_TIME_CACHE_MAX_AGE = "netstats_time_cache_max_age";
        /** {@hide} */
        public static final String NETSTATS_GLOBAL_ALERT_BYTES = "netstats_global_alert_bytes";

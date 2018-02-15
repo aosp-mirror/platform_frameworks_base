@@ -104,6 +104,7 @@ import android.os.PersistableBundle;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.RemoteException;
+import android.os.SimpleClock;
 import android.os.UserHandle;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
@@ -118,7 +119,6 @@ import android.util.DataUnit;
 import android.util.Log;
 import android.util.Pair;
 import android.util.RecurrenceRule;
-import android.util.TrustedTime;
 
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.test.BroadcastInterceptingContext;
@@ -158,6 +158,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.Period;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -215,7 +216,6 @@ public class NetworkPolicyManagerServiceTest {
     private @Mock IActivityManager mActivityManager;
     private @Mock INetworkStatsService mStatsService;
     private @Mock INetworkManagementService mNetworkManager;
-    private @Mock TrustedTime mTime;
     private @Mock IConnectivityManager mConnManager;
     private @Mock NotificationManager mNotifManager;
     private @Mock PackageManager mPackageManager;
@@ -266,6 +266,13 @@ public class NetworkPolicyManagerServiceTest {
     private static final String PKG_NAME_A = "name.is.A,pkg.A";
 
     public final @Rule NetPolicyMethodRule mNetPolicyXmlRule = new NetPolicyMethodRule();
+
+    private final Clock mClock = new SimpleClock(ZoneOffset.UTC) {
+        @Override
+        public long millis() {
+            return currentTimeMillis();
+        }
+    };
 
     private void registerLocalServices() {
         addLocalServiceMock(DeviceIdleController.LocalService.class);
@@ -341,7 +348,7 @@ public class NetworkPolicyManagerServiceTest {
 
         mFutureIntent = newRestrictBackgroundChangedFuture();
         mService = new NetworkPolicyManagerService(mServiceContext, mActivityManager, mStatsService,
-                mNetworkManager, mIpm, mTime, mPolicyDir, true);
+                mNetworkManager, mIpm, mClock, mPolicyDir, true);
         mService.bindConnectivityManager(mConnManager);
         mPolicyListener = new NetworkPolicyListenerAnswer(mService);
 
@@ -370,7 +377,6 @@ public class NetworkPolicyManagerServiceTest {
         when(mPackageManager.getPackagesForUid(UID_A)).thenReturn(new String[] {PKG_NAME_A});
         when(mNetworkManager.isBandwidthControlEnabled()).thenReturn(true);
         when(mNetworkManager.setDataSaverModeEnabled(anyBoolean())).thenReturn(true);
-        expectCurrentTime();
 
         // Prepare NPMS.
         mService.systemReady(mService.networkScoreAndNetworkManagementServiceReady());
@@ -940,7 +946,6 @@ public class NetworkPolicyManagerServiceTest {
         // which means we shouldn't push limit to interface.
         state = new NetworkState[] { buildWifi() };
         when(mConnManager.getAllNetworkState()).thenReturn(state);
-        expectCurrentTime();
 
         mPolicyListener.expect().onMeteredIfacesChanged(any());
         mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
@@ -949,7 +954,6 @@ public class NetworkPolicyManagerServiceTest {
         // now change cycle to be on 15th, and test in early march, to verify we
         // pick cycle day in previous month.
         when(mConnManager.getAllNetworkState()).thenReturn(state);
-        expectCurrentTime();
 
         // pretend that 512 bytes total have happened
         stats = new NetworkStats(getElapsedRealtime(), 1)
@@ -996,7 +1000,6 @@ public class NetworkPolicyManagerServiceTest {
         final long start = parseTime("2015-11-01T00:00Z");
         final long end = parseTime("2015-11-07T00:00Z");
         setCurrentTimeMillis(end);
-        expectCurrentTime();
 
         // Normal usage means no notification
         {
@@ -1096,7 +1099,6 @@ public class NetworkPolicyManagerServiceTest {
         final long start = parseTime("2015-11-01T00:00Z");
         final long end = parseTime("2015-11-07T00:00Z");
         setCurrentTimeMillis(end);
-        expectCurrentTime();
 
         // Using 20% data in 20% time is normal
         {
@@ -1139,7 +1141,6 @@ public class NetworkPolicyManagerServiceTest {
                 .addIfaceValues(TEST_IFACE, 0L, 0L, 0L, 0L);
 
         {
-            expectCurrentTime();
             when(mConnManager.getAllNetworkState()).thenReturn(state);
             when(mStatsService.getNetworkTotalBytes(sTemplateWifi, TIME_FEB_15,
                     currentTimeMillis())).thenReturn(stats.getTotalBytes());
@@ -1472,14 +1473,6 @@ public class NetworkPolicyManagerServiceTest {
         prop.setInterfaceName(TEST_IFACE);
         final NetworkCapabilities networkCapabilities = new NetworkCapabilities();
         return new NetworkState(info, prop, networkCapabilities, null, null, TEST_SSID);
-    }
-
-    private void expectCurrentTime() throws Exception {
-        when(mTime.forceRefresh()).thenReturn(false);
-        when(mTime.hasCache()).thenReturn(true);
-        when(mTime.currentTimeMillis()).thenReturn(currentTimeMillis());
-        when(mTime.getCacheAge()).thenReturn(0L);
-        when(mTime.getCacheCertainty()).thenReturn(0L);
     }
 
     private void expectHasInternetPermission(int uid, boolean hasIt) throws Exception {
