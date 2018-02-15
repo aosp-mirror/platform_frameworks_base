@@ -118,7 +118,7 @@ public class DexoptOptionsTests {
     public void testCreateDexoptOptionsSplit() {
         int flags = DexoptOptions.DEXOPT_FORCE | DexoptOptions.DEXOPT_BOOT_COMPLETE;
 
-        DexoptOptions opt = new DexoptOptions(mPackageName, mCompilerFilter, mSplitName, flags);
+        DexoptOptions opt = new DexoptOptions(mPackageName, -1, mCompilerFilter, mSplitName, flags);
         assertEquals(mPackageName, opt.getPackageName());
         assertEquals(mCompilerFilter, opt.getCompilerFilter());
         assertEquals(mSplitName, opt.getSplitName());
