@@ -408,6 +408,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected NotificationEntryManager mEntryManager;
     protected NotificationViewHierarchyManager mViewHierarchyManager;
     protected AppOpsListener mAppOpsListener;
+    protected KeyguardViewMediator mKeyguardViewMediator;
     private ZenModeController mZenController;
 
     /**
@@ -632,6 +633,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mAppOpsListener = Dependency.get(AppOpsListener.class);
         mAppOpsListener.setUpWithPresenter(this, mEntryManager);
         mZenController = Dependency.get(ZenModeController.class);
+        mKeyguardViewMediator = getComponent(KeyguardViewMediator.class);
 
         mColorExtractor = Dependency.get(SysuiColorExtractor.class);
         mColorExtractor.addOnColorsChangedListener(this);
@@ -4628,6 +4630,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         boolean dozing = mDozingRequested && mState == StatusBarState.KEYGUARD
                 || mFingerprintUnlockController.getMode()
                         == FingerprintUnlockController.MODE_WAKE_AND_UNLOCK_PULSING;
+        final boolean alwaysOn = DozeParameters.getInstance(mContext).getAlwaysOn();
         // When in wake-and-unlock we may not have received a change to mState
         // but we still should not be dozing, manually set to false.
         if (mFingerprintUnlockController.getMode() ==
@@ -4635,6 +4638,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             dozing = false;
         }
         mDozing = dozing;
+        mKeyguardViewMediator.setAodShowing(mDozing && alwaysOn);
         mStatusBarWindowManager.setDozing(mDozing);
         mStatusBarKeyguardViewManager.setDozing(mDozing);
         if (mAmbientIndicationContainer instanceof DozeReceiver) {
