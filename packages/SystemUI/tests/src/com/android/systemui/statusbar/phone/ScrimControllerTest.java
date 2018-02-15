@@ -180,7 +180,6 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void transitionToUnlocked() {
-        mScrimController.setPanelExpansion(0f);
         mScrimController.transitionTo(ScrimState.UNLOCKED);
         mScrimController.finishAnimationsImmediately();
         // Front scrim should be transparent
@@ -198,7 +197,6 @@ public class ScrimControllerTest extends SysuiTestCase {
     public void transitionToUnlockedFromAod() {
         // Simulate unlock with fingerprint
         mScrimController.transitionTo(ScrimState.AOD);
-        mScrimController.setPanelExpansion(0f);
         mScrimController.finishAnimationsImmediately();
         mScrimController.transitionTo(ScrimState.UNLOCKED);
         // Immediately tinted after the transition starts
@@ -324,23 +322,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         verify(mAlarmManager).setExact(anyInt(), anyLong(), any(), any(), any());
         mScrimController.transitionTo(ScrimState.KEYGUARD);
         verify(mAlarmManager).cancel(any(AlarmManager.OnAlarmListener.class));
-    }
-
-    @Test
-    public void testConservesExpansionOpacityAfterTransition() {
-        mScrimController.transitionTo(ScrimState.UNLOCKED);
-        mScrimController.setPanelExpansion(0.5f);
-        mScrimController.finishAnimationsImmediately();
-
-        final float expandedAlpha = mScrimBehind.getViewAlpha();
-
-        mScrimController.transitionTo(ScrimState.BRIGHTNESS_MIRROR);
-        mScrimController.finishAnimationsImmediately();
-        mScrimController.transitionTo(ScrimState.UNLOCKED);
-        mScrimController.finishAnimationsImmediately();
-
-        Assert.assertEquals("Scrim expansion opacity wasn't conserved when transitioning back",
-                expandedAlpha, mScrimBehind.getViewAlpha(), 0.01f);
     }
 
     private void assertScrimTint(ScrimView scrimView, boolean tinted) {
