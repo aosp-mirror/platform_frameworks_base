@@ -26,6 +26,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
@@ -56,6 +57,8 @@ public class TransportManager {
 
     @VisibleForTesting
     public static final String SERVICE_ACTION_TRANSPORT_HOST = "android.backup.TRANSPORT_HOST";
+
+    private static final String EXTRA_TRANSPORT_REGISTRATION = "transport_registration";
 
     private final Intent mTransportServiceIntent = new Intent(SERVICE_ACTION_TRANSPORT_HOST);
     private final Context mContext;
@@ -582,8 +585,12 @@ public class TransportManager {
 
         String transportString = transportComponent.flattenToShortString();
         String callerLogString = "TransportManager.registerTransport()";
-        TransportClient transportClient =
-                mTransportClientManager.getTransportClient(transportComponent, callerLogString);
+
+        Bundle extras = new Bundle();
+        extras.putBoolean(EXTRA_TRANSPORT_REGISTRATION, true);
+
+        TransportClient transportClient = mTransportClientManager.getTransportClient(
+            transportComponent, extras, callerLogString);
         final IBackupTransport transport;
         try {
             transport = transportClient.connectOrThrow(callerLogString);
