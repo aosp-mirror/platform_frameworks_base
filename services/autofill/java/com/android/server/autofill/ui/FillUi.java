@@ -24,6 +24,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.service.autofill.Dataset;
@@ -37,6 +38,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.view.autofill.AutofillId;
@@ -98,22 +100,28 @@ final class FillUi {
 
     private @Nullable AnnounceFilterResult mAnnounceFilterResult;
 
+    private final boolean mFullScreen;
     private int mContentWidth;
     private int mContentHeight;
 
     private boolean mDestroyed;
 
+    public static boolean isFullScreen(Context context) {
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK);
+    }
+
     FillUi(@NonNull Context context, @NonNull FillResponse response,
-            @NonNull AutofillId focusedViewId, @NonNull @Nullable String filterText,
-            @NonNull OverlayControl overlayControl, @NonNull Callback callback) {
+           @NonNull AutofillId focusedViewId, @NonNull @Nullable String filterText,
+           @NonNull OverlayControl overlayControl, @NonNull Callback callback) {
         mContext = context;
         mCallback = callback;
+        mFullScreen = isFullScreen(context);
 
         final LayoutInflater inflater = LayoutInflater.from(context);
 
         final ViewGroup decor = (ViewGroup) inflater.inflate(
-                R.layout.autofill_dataset_picker, null);
-
+                mFullScreen ? R.layout.autofill_dataset_picker_fullscreen
+                        : R.layout.autofill_dataset_picker, null);
 
         final RemoteViews.OnClickHandler interceptionHandler = new RemoteViews.OnClickHandler() {
             @Override
@@ -130,31 +138,41 @@ final class FillUi {
             mListView = null;
             mAdapter = null;
 
+            // insert authentication item under autofill_dataset_container or decor
+            ViewGroup container = decor.findViewById(R.id.autofill_dataset_container);
+            if (container == null) {
+                container = decor;
+            }
             final View content;
             try {
                 content = response.getPresentation().apply(context, decor, interceptionHandler);
-                decor.addView(content);
+                container.addView(content);
             } catch (RuntimeException e) {
                 callback.onCanceled();
                 Slog.e(TAG, "Error inflating remote views", e);
                 mWindow = null;
                 return;
             }
+            content.setFocusable(true);
+            content.setOnClickListener(v -> mCallback.onResponsePicked(response));
 
             Point maxSize = mTempPoint;
             resolveMaxWindowSize(context, maxSize);
+            // fullScreen mode occupy the full width defined by autofill_dataset_picker_max_width
+            content.getLayoutParams().width = mFullScreen ? maxSize.x
+                    : ViewGroup.LayoutParams.WRAP_CONTENT;
+            content.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
             final int widthMeasureSpec = MeasureSpec.makeMeasureSpec(maxSize.x,
                     MeasureSpec.AT_MOST);
             final int heightMeasureSpec = MeasureSpec.makeMeasureSpec(maxSize.y,
                     MeasureSpec.AT_MOST);
 
             decor.measure(widthMeasureSpec, heightMeasureSpec);
-            decor.setOnClickListener(v -> mCallback.onResponsePicked(response));
             mContentWidth = content.getMeasuredWidth();
             mContentHeight = content.getMeasuredHeight();
 
             mWindow = new AnchoredWindow(decor, overlayControl);
-            mCallback.requestShowFillUi(mContentWidth, mContentHeight, mWindowPresenter);
+            requestShowFillUi();
         } else {
             final int datasetCount = response.getDatasets().size();
 
@@ -261,6 +279,15 @@ final class FillUi {
         }
     }
 
+    void requestShowFillUi() {
+        if (mFullScreen) {
+            mCallback.requestShowFillUi(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
+                    mWindowPresenter);
+        } else {
+            mCallback.requestShowFillUi(mContentWidth, mContentHeight, mWindowPresenter);
+        }
+    }
+
     /**
      * Creates a remoteview interceptor used to block clicks.
      */
@@ -289,7 +316,13 @@ final class FillUi {
                 mCallback.requestHideFillUi();
             } else {
                 if (updateContentSize()) {
-                    mCallback.requestShowFillUi(mContentWidth, mContentHeight, mWindowPresenter);
+                    if (mFullScreen) {
+                        LayoutParams lp = mListView.getLayoutParams();
+                        lp.width = mContentWidth;
+                        lp.height = mContentHeight;
+                        mListView.setLayoutParams(lp);
+                    }
+                    requestShowFillUi();
                 }
                 if (mAdapter.getCount() > VISIBLE_OPTIONS_MAX_COUNT) {
                     mListView.setVerticalScrollBarEnabled(true);
@@ -310,7 +343,7 @@ final class FillUi {
             // ViewState doesn't not support filtering - typically when it's for an authenticated
             // FillResponse.
             if (TextUtils.isEmpty(filterText)) {
-                mCallback.requestShowFillUi(mContentWidth, mContentHeight, mWindowPresenter);
+                requestShowFillUi();
             } else {
                 mCallback.requestHideFillUi();
             }
@@ -366,22 +399,38 @@ final class FillUi {
         final int heightMeasureSpec = MeasureSpec.makeMeasureSpec(maxSize.y,
                 MeasureSpec.AT_MOST);
         final int itemCount = mAdapter.getCount();
+        if (mFullScreen) {
+            // fullScreen mode occupy the full width defined by autofill_dataset_picker_max_width
+            changed = true;
+            mContentWidth = maxSize.x;
+        }
         for (int i = 0; i < itemCount; i++) {
             final View view = mAdapter.getItem(i).view;
             view.measure(widthMeasureSpec, heightMeasureSpec);
-            final int clampedMeasuredWidth = Math.min(view.getMeasuredWidth(), maxSize.x);
-            final int newContentWidth = Math.max(mContentWidth, clampedMeasuredWidth);
-            if (newContentWidth != mContentWidth) {
-                mContentWidth = newContentWidth;
-                changed = true;
-            }
-            // Update the width to fit only the first items up to max count
-            if (i < VISIBLE_OPTIONS_MAX_COUNT) {
-                final int clampedMeasuredHeight = Math.min(view.getMeasuredHeight(), maxSize.y);
-                final int newContentHeight = mContentHeight + clampedMeasuredHeight;
-                if (newContentHeight != mContentHeight) {
-                    mContentHeight = newContentHeight;
+            if (mFullScreen) {
+                // for fullscreen, add up all children height until hit max height.
+                final int newContentHeight = mContentHeight + view.getMeasuredHeight();
+                final int clampedNewHeight = Math.min(newContentHeight, maxSize.y);
+                if (clampedNewHeight != mContentHeight) {
+                    mContentHeight = clampedNewHeight;
+                } else if (view.getMeasuredHeight() > 0) {
+                    break;
+                }
+            } else {
+                final int clampedMeasuredWidth = Math.min(view.getMeasuredWidth(), maxSize.x);
+                final int newContentWidth = Math.max(mContentWidth, clampedMeasuredWidth);
+                if (newContentWidth != mContentWidth) {
+                    mContentWidth = newContentWidth;
                     changed = true;
+                }
+                // Update the width to fit only the first items up to max count
+                if (i < VISIBLE_OPTIONS_MAX_COUNT) {
+                    final int clampedMeasuredHeight = Math.min(view.getMeasuredHeight(), maxSize.y);
+                    final int newContentHeight = mContentHeight + clampedMeasuredHeight;
+                    if (newContentHeight != mContentHeight) {
+                        mContentHeight = newContentHeight;
+                        changed = true;
+                    }
                 }
             }
         }
@@ -575,6 +624,7 @@ final class FillUi {
 
     public void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("mCallback: "); pw.println(mCallback != null);
+        pw.print(prefix); pw.print("mFullScreen: "); pw.println(mFullScreen);
         pw.print(prefix); pw.print("mListView: "); pw.println(mListView);
         pw.print(prefix); pw.print("mAdapter: "); pw.println(mAdapter);
         pw.print(prefix); pw.print("mFilterText: ");
