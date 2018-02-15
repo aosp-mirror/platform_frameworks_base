@@ -356,19 +356,14 @@ public class WifiTrackerTest {
 
     private void waitForHandlersToProcessCurrentlyEnqueuedMessages(WifiTracker tracker)
             throws InterruptedException {
+        // TODO(sghuman): This should no longer be necessary in a single work handler model
+
         CountDownLatch workerLatch = new CountDownLatch(1);
         tracker.mWorkHandler.post(() -> {
             workerLatch.countDown();
         });
         assertTrue("Latch timed out while waiting for WorkerHandler",
                 workerLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
-
-        CountDownLatch mainLatch = new CountDownLatch(1);
-        tracker.mMainHandler.post(() -> {
-            mainLatch.countDown();
-        });
-        assertTrue("Latch timed out while waiting for MainHandler",
-                mainLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
     }
 
     private void switchToNetwork2(WifiTracker tracker) throws InterruptedException {
@@ -387,38 +382,6 @@ public class WifiTrackerTest {
         intent.putExtra(WifiManager.EXTRA_NETWORK_INFO, networkInfo);
         tracker.mReceiver.onReceive(mContext, intent);
         waitForHandlersToProcessCurrentlyEnqueuedMessages(tracker);
-    }
-
-    @Test
-    public void testAccessPointListenerSetWhenLookingUpUsingScanResults() {
-        ScanResult scanResult = new ScanResult();
-        scanResult.level = 123;
-        scanResult.BSSID = "bssid-" + 111;
-        scanResult.timestamp = SystemClock.elapsedRealtime() * 1000;
-        scanResult.capabilities = "";
-
-        WifiTracker tracker = new WifiTracker(
-                InstrumentationRegistry.getTargetContext(), null, true, true);
-
-        AccessPoint result = tracker.getCachedOrCreate(
-                Collections.singletonList(scanResult), new ArrayList<AccessPoint>());
-        assertTrue(result.mAccessPointListener != null);
-    }
-
-    @Test
-    public void testAccessPointListenerSetWhenLookingUpUsingWifiConfiguration() {
-        WifiConfiguration configuration = new WifiConfiguration();
-        configuration.SSID = "test123";
-        configuration.BSSID="bssid";
-        configuration.networkId = 123;
-        configuration.allowedKeyManagement = new BitSet();
-        configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
-
-        WifiTracker tracker = new WifiTracker(
-                InstrumentationRegistry.getTargetContext(), null, true, true);
-
-        AccessPoint result = tracker.getCachedOrCreate(configuration, new ArrayList<AccessPoint>());
-        assertTrue(result.mAccessPointListener != null);
     }
 
     @Test
@@ -534,7 +497,6 @@ public class WifiTrackerTest {
         waitForHandlersToProcessCurrentlyEnqueuedMessages(tracker);
     }
 
-    @FlakyTest
     @Test
     public void scoreCacheUpdateScoresShouldChangeSortOrder() throws InterruptedException {
         WifiTracker tracker =  createTrackerWithImmediateBroadcastsAndInjectInitialScanResults();
@@ -634,9 +596,9 @@ public class WifiTrackerTest {
     public void scoresShouldBeRequestedForNewScanResultOnly()  throws InterruptedException {
         // Scores can be requested together or serially depending on how the scan results are
         // processed.
-        mRequestScoresLatch = new CountDownLatch(2);
+        mRequestScoresLatch = new CountDownLatch(1);
         WifiTracker tracker = createTrackerWithImmediateBroadcastsAndInjectInitialScanResults();
-        mRequestScoresLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS);
+        assertTrue(mRequestScoresLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
         mRequestedKeys.clear();
 
         String ssid = "ssid3";
@@ -770,7 +732,7 @@ public class WifiTrackerTest {
         CountDownLatch ready = new CountDownLatch(1);
         CountDownLatch latch = new CountDownLatch(1);
         CountDownLatch lock = new CountDownLatch(1);
-        tracker.mMainHandler.post(() -> {
+        tracker.mWorkHandler.post(() -> {
             try {
                 ready.countDown();
                 lock.await();
@@ -781,12 +743,7 @@ public class WifiTrackerTest {
         });
 
         // Enqueue messages
-        tracker.mMainHandler.sendEmptyMessage(
-                WifiTracker.MainHandler.MSG_ACCESS_POINT_CHANGED);
-        tracker.mMainHandler.sendEmptyMessage(
-                WifiTracker.MainHandler.MSG_CONNECTED_CHANGED);
-        tracker.mMainHandler.sendEmptyMessage(
-                WifiTracker.MainHandler.MSG_WIFI_STATE_CHANGED);
+        tracker.mWorkHandler.sendEmptyMessage(WifiTracker.WorkHandler.MSG_UPDATE_ACCESS_POINTS);
 
         try {
             ready.await(); // Make sure we have entered the first message handler
@@ -800,12 +757,9 @@ public class WifiTrackerTest {
         lock.countDown();
         assertTrue("Latch timed out", latch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
 
-        assertThat(tracker.mMainHandler.hasMessages(
-                WifiTracker.MainHandler.MSG_ACCESS_POINT_CHANGED)).isFalse();
-        assertThat(tracker.mMainHandler.hasMessages(
-                WifiTracker.MainHandler.MSG_CONNECTED_CHANGED)).isFalse();
-        assertThat(tracker.mMainHandler.hasMessages(
-                WifiTracker.MainHandler.MSG_WIFI_STATE_CHANGED)).isFalse();
+        assertThat(tracker.mWorkHandler.hasMessages(
+                WifiTracker.WorkHandler.MSG_UPDATE_ACCESS_POINTS)).isFalse();
+        waitForHandlersToProcessCurrentlyEnqueuedMessages(tracker);
 
         verifyNoMoreInteractions(mockWifiListener);
     }
@@ -862,7 +816,7 @@ public class WifiTrackerTest {
         mAccessPointsChangedLatch = new CountDownLatch(1);
         tracker.mReceiver.onReceive(mContext, new Intent(WifiManager.WIFI_STATE_CHANGED_ACTION));
 
-        mAccessPointsChangedLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS);
+        assertTrue(mAccessPointsChangedLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
         waitForHandlersToProcessCurrentlyEnqueuedMessages(tracker);
 
         assertThat(tracker.getAccessPoints()).isEmpty();
