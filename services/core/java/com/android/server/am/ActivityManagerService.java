@@ -8655,8 +8655,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     final PinnedActivityStack stack = r.getStack();
                     stack.setPictureInPictureAspectRatio(aspectRatio);
                     stack.setPictureInPictureActions(actions);
-
-                    MetricsLoggerWrapper.logPictureInPictureEnter(mContext, r.supportsEnterPipOnTaskSwitch);
+                    MetricsLoggerWrapper.logPictureInPictureEnter(mContext, r.appInfo.uid,
+                            r.shortComponentName, r.supportsEnterPipOnTaskSwitch);
                     logPictureInPictureArgs(params);
                 };
 

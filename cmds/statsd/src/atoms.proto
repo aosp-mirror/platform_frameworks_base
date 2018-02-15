@@ -993,21 +993,18 @@ message AppStartFullyDrawnChanged {
  *      frameworks/base/packages/SystemUI/src/com/android/systemui/pip/phone/PipTouchHandler.java
  */
 message PictureInPictureStateChanged {
+    // -1 if it is not available
     optional int32 uid = 1;
 
-    optional string package_name = 2;
+    optional string short_name = 2;
 
-    optional string class_name = 3;
-
-    // Picture-in-Picture action occurred, similar to
-    // frameworks/base/proto/src/metrics_constants.proto
     enum State {
         ENTERED = 1;
         EXPANDED_TO_FULL_SCREEN = 2;
         MINIMIZED = 3;
         DISMISSED = 4;
     }
-    optional State state = 4;
+    optional State state = 3;
 }
 
 /**
