@@ -571,8 +571,8 @@ status_t StatsService::cmd_log_app_breadcrumb(FILE* out, const Vector<String8>& 
             good = true;
         } else {
             fprintf(out,
-                    "Selecting a UID for writing Appbreadcrumb can only be dumped for other UIDs on eng"
-                            " or userdebug builds.\n");
+                    "Selecting a UID for writing AppBreadcrumb can only be done for other UIDs "
+                            "on eng or userdebug builds.\n");
         }
     }
     if (good) {

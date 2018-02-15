@@ -1471,7 +1471,7 @@ message SystemUptime {
  */
 message CpuActiveTime {
     optional uint64 uid = 1;
-    optional uint32 cluster_number =2;
+    optional uint32 cluster_number = 2;
     optional uint64 idx = 3;
     optional uint64 time_millis = 4;
 }
