@@ -2240,12 +2240,16 @@ public abstract class BatteryStats implements Parcelable {
     public static final int DATA_CONNECTION_LTE = 13;
     public static final int DATA_CONNECTION_EHRPD = 14;
     public static final int DATA_CONNECTION_HSPAP = 15;
-    public static final int DATA_CONNECTION_OTHER = 16;
+    public static final int DATA_CONNECTION_GSM = 16;
+    public static final int DATA_CONNECTION_TD_SCDMA = 17;
+    public static final int DATA_CONNECTION_IWLAN = 18;
+    public static final int DATA_CONNECTION_LTE_CA = 19;
+    public static final int DATA_CONNECTION_OTHER = 20;
 
     static final String[] DATA_CONNECTION_NAMES = {
         "none", "gprs", "edge", "umts", "cdma", "evdo_0", "evdo_A",
         "1xrtt", "hsdpa", "hsupa", "hspa", "iden", "evdo_b", "lte",
-        "ehrpd", "hspap", "other"
+        "ehrpd", "hspap", "gsm", "td_scdma", "iwlan", "lte_ca", "other"
     };
 
     public static final int NUM_DATA_CONNECTION_TYPES = DATA_CONNECTION_OTHER+1;
