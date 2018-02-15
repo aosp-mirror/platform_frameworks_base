@@ -15,6 +15,7 @@ import android.net.wifi.rtt.WifiRttManager;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -986,11 +987,16 @@ public class RttManager {
                         legacyResults[i] = new RttResult();
                         legacyResults[i].status = result.getStatus();
                         legacyResults[i].bssid = result.getMacAddress().toString();
-                        legacyResults[i].distance = result.getDistanceMm() / 10;
-                        legacyResults[i].distanceStandardDeviation =
-                                result.getDistanceStdDevMm() / 10;
-                        legacyResults[i].rssi = result.getRssi();
-                        legacyResults[i].ts = result.getRangingTimestampUs();
+                        if (result.getStatus() == RangingResult.STATUS_SUCCESS) {
+                            legacyResults[i].distance = result.getDistanceMm() / 10;
+                            legacyResults[i].distanceStandardDeviation =
+                                    result.getDistanceStdDevMm() / 10;
+                            legacyResults[i].rssi = result.getRssi();
+                            legacyResults[i].ts = result.getRangingTimestampUs();
+                        } else {
+                            // just in case legacy API needed some relatively real timestamp
+                            legacyResults[i].ts = SystemClock.elapsedRealtime() * 1000;
+                        }
                     }
                     listener.onSuccess(legacyResults);
                 }
