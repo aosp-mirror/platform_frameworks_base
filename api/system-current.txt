@@ -10,6 +10,7 @@ package android {
     field public static final java.lang.String ACCESS_MTP = "android.permission.ACCESS_MTP";
     field public static final java.lang.String ACCESS_NETWORK_CONDITIONS = "android.permission.ACCESS_NETWORK_CONDITIONS";
     field public static final java.lang.String ACCESS_NOTIFICATIONS = "android.permission.ACCESS_NOTIFICATIONS";
+    field public static final java.lang.String ACCESS_SHORTCUTS = "android.permission.ACCESS_SHORTCUTS";
     field public static final java.lang.String ACCESS_SURFACE_FLINGER = "android.permission.ACCESS_SURFACE_FLINGER";
     field public static final java.lang.String ACCOUNT_MANAGER = "android.permission.ACCOUNT_MANAGER";
     field public static final java.lang.String ACTIVITY_EMBEDDING = "android.permission.ACTIVITY_EMBEDDING";
@@ -179,6 +180,7 @@ package android {
     field public static final java.lang.String TETHER_PRIVILEGED = "android.permission.TETHER_PRIVILEGED";
     field public static final java.lang.String TV_INPUT_HARDWARE = "android.permission.TV_INPUT_HARDWARE";
     field public static final java.lang.String TV_VIRTUAL_REMOTE_CONTROLLER = "android.permission.TV_VIRTUAL_REMOTE_CONTROLLER";
+    field public static final java.lang.String UNLIMITED_SHORTCUTS_API_CALLS = "android.permission.UNLIMITED_SHORTCUTS_API_CALLS";
     field public static final java.lang.String UPDATE_APP_OPS_STATS = "android.permission.UPDATE_APP_OPS_STATS";
     field public static final java.lang.String UPDATE_DEVICE_STATS = "android.permission.UPDATE_DEVICE_STATS";
     field public static final java.lang.String UPDATE_LOCK = "android.permission.UPDATE_LOCK";
@@ -1085,6 +1087,7 @@ package android.content.pm {
   public class PermissionInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
     field public static final int FLAG_REMOVED = 2; // 0x2
     field public static final int PROTECTION_FLAG_OEM = 16384; // 0x4000
+    field public static final int PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER = 65536; // 0x10000
     field public int requestRes;
   }
 

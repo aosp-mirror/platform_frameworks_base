@@ -237,6 +237,7 @@ import android.provider.Settings.Secure;
 import android.security.KeyStore;
 import android.security.SystemKeyStore;
 import android.service.pm.PackageServiceDumpProto;
+import android.service.textclassifier.TextClassifierService;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.text.TextUtils;
@@ -1391,6 +1392,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final @NonNull String mRequiredUninstallerPackage;
     final @Nullable String mSetupWizardPackage;
     final @Nullable String mStorageManagerPackage;
+    final @Nullable String mSystemTextClassifierPackage;
     final @NonNull String mServicesSystemSharedLibraryPackageName;
     final @NonNull String mSharedSystemSharedLibraryPackageName;
 
@@ -2951,6 +2953,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     filter.setPriority(0);
                 }
             }
+
+            mSystemTextClassifierPackage = getSystemTextClassifierPackageName();
+
             mDeferProtectedFilters = false;
             mProtectedFilters.clear();
 
@@ -20247,6 +20252,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
     }
 
     @Override
+    public String getSystemTextClassifierPackageName() {
+        return mContext.getString(R.string.config_defaultTextClassifierPackage);
+    }
+
+    @Override
     public void setApplicationEnabledSetting(String appPackageName,
             int newState, int flags, int userId, String callingPackage) {
         if (!sUserManager.exists(userId)) return;
@@ -23374,6 +23384,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                     return "android";
                 case PackageManagerInternal.PACKAGE_VERIFIER:
                     return mRequiredVerifierPackage;
+                case PackageManagerInternal.PACKAGE_SYSTEM_TEXT_CLASSIFIER:
+                    return mSystemTextClassifierPackage;
             }
             return null;
         }
