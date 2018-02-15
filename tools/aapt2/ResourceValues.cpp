@@ -369,6 +369,19 @@ FileReference* FileReference::Clone(StringPool* new_pool) const {
 
 void FileReference::Print(std::ostream* out) const {
   *out << "(file) " << *path;
+  switch (type) {
+    case ResourceFile::Type::kBinaryXml:
+      *out << " type=XML";
+      break;
+    case ResourceFile::Type::kProtoXml:
+      *out << " type=protoXML";
+      break;
+    case ResourceFile::Type::kPng:
+      *out << " type=PNG";
+      break;
+    default:
+      break;
+  }
 }
 
 BinaryPrimitive::BinaryPrimitive(const android::Res_value& val) : value(val) {
