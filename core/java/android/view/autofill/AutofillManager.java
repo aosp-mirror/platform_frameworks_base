@@ -1089,16 +1089,16 @@ public final class AutofillManager {
      *
      * @hide
      */
-    public void onActivityFinished() {
+    public void onActivityFinishing() {
         if (!hasAutofillFeature()) {
             return;
         }
         synchronized (mLock) {
             if (mSaveOnFinish) {
-                if (sDebug) Log.d(TAG, "Committing session on finish() as requested by service");
+                if (sDebug) Log.d(TAG, "onActivityFinishing(): calling commitLocked()");
                 commitLocked();
             } else {
-                if (sDebug) Log.d(TAG, "Cancelling session on finish() as requested by service");
+                if (sDebug) Log.d(TAG, "onActivityFinishing(): calling cancelLocked()");
                 cancelLocked();
             }
         }
@@ -1119,6 +1119,7 @@ public final class AutofillManager {
         if (!hasAutofillFeature()) {
             return;
         }
+        if (sVerbose) Log.v(TAG, "commit() called by app");
         synchronized (mLock) {
             commitLocked();
         }
@@ -2332,6 +2333,7 @@ public final class AutofillManager {
                 final boolean[] isVisible;
 
                 if (client.autofillClientIsVisibleForAutofill()) {
+                    if (sVerbose) Log.v(TAG, "client is visible, check tracked ids");
                     isVisible = client.autofillClientGetViewVisibility(trackedIds);
                 } else {
                     // All false
@@ -2351,7 +2353,7 @@ public final class AutofillManager {
             }
 
             if (sVerbose) {
-                Log.v(TAG, "TrackedViews(trackedIds=" + trackedIds + "): "
+                Log.v(TAG, "TrackedViews(trackedIds=" + Arrays.toString(trackedIds) + "): "
                         + " mVisibleTrackedIds=" + mVisibleTrackedIds
                         + " mInvisibleTrackedIds=" + mInvisibleTrackedIds);
             }
@@ -2457,6 +2459,9 @@ public final class AutofillManager {
             }
 
             if (mVisibleTrackedIds == null) {
+                if (sVerbose) {
+                    Log.v(TAG, "onVisibleForAutofillChangedLocked(): no more visible ids");
+                }
                 finishSessionLocked();
             }
         }
