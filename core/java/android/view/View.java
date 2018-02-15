@@ -7272,7 +7272,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         // becomes true where it should issue notifyViewEntered().
                         afm.notifyViewEntered(this);
                     }
-                } else if (!isFocused()) {
+                } else if (!enter && !isFocused()) {
                     afm.notifyViewExited(this);
                 }
             }
