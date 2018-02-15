@@ -319,6 +319,7 @@ public class SecurityLog {
      * {@link SecurityEvent#getData()}:
      * <li> [0] admin package name ({@code String}),
      * <li> [1] admin user ID ({@code Integer}).
+     * <li> [2] target user ID ({@code Integer})
      */
     public static final int TAG_REMOTE_LOCK = SecurityLogTags.SECURITY_REMOTE_LOCK;
 
