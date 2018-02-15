@@ -414,59 +414,70 @@ class XmlPrinter : public xml::ConstVisitor {
  public:
   using xml::ConstVisitor::Visit;
 
+  XmlPrinter(Printer* printer) : printer_(printer) {
+  }
+
   void Visit(const xml::Element* el) override {
-    const size_t previous_size = prefix_.size();
-
     for (const xml::NamespaceDecl& decl : el->namespace_decls) {
-      std::cerr << prefix_ << "N: " << decl.prefix << "=" << decl.uri
-                << " (line=" << decl.line_number << ")\n";
-      prefix_ += "  ";
+      printer_->Println(StringPrintf("N: %s=%s (line=%zu)", decl.prefix.c_str(), decl.uri.c_str(),
+                                     decl.line_number));
+      printer_->Indent();
     }
 
-    std::cerr << prefix_ << "E: ";
+    printer_->Print("E: ");
     if (!el->namespace_uri.empty()) {
-      std::cerr << el->namespace_uri << ":";
+      printer_->Print(el->namespace_uri);
+      printer_->Print(":");
     }
-    std::cerr << el->name << " (line=" << el->line_number << ")\n";
+    printer_->Println(StringPrintf("%s (line=%zu)", el->name.c_str(), el->line_number));
+    printer_->Indent();
 
     for (const xml::Attribute& attr : el->attributes) {
-      std::cerr << prefix_ << "  A: ";
+      printer_->Print("A: ");
       if (!attr.namespace_uri.empty()) {
-        std::cerr << attr.namespace_uri << ":";
+        printer_->Print(attr.namespace_uri);
+        printer_->Print(":");
       }
-      std::cerr << attr.name;
+      printer_->Print(attr.name);
 
       if (attr.compiled_attribute) {
-        std::cerr << "(" << attr.compiled_attribute.value().id.value_or_default(ResourceId(0x0))
-                  << ")";
+        printer_->Print("(");
+        printer_->Print(
+            attr.compiled_attribute.value().id.value_or_default(ResourceId(0)).to_string());
+        printer_->Print(")");
       }
-      std::cerr << "=";
+      printer_->Print("=");
       if (attr.compiled_value != nullptr) {
-        std::cerr << *attr.compiled_value;
+        attr.compiled_value->PrettyPrint(printer_);
       } else {
-        std::cerr << attr.value;
+        printer_->Print(attr.value);
       }
-      std::cerr << "\n";
+      printer_->Println();
     }
 
-    prefix_ += "  ";
+    printer_->Indent();
     xml::ConstVisitor::Visit(el);
-    prefix_.resize(previous_size);
+    printer_->Undent();
+    printer_->Undent();
+
+    for (size_t i = 0; i < el->namespace_decls.size(); i++) {
+      printer_->Undent();
+    }
   }
 
   void Visit(const xml::Text* text) override {
-    std::cerr << prefix_ << "T: '" << text->text << "'\n";
+    printer_->Println(StringPrintf("T: '%s'", text->text.c_str()));
   }
 
  private:
-  std::string prefix_;
+  Printer* printer_;
 };
 
 }  // namespace
 
-void Debug::DumpXml(const xml::XmlResource& doc) {
-  XmlPrinter printer;
-  doc.root->Accept(&printer);
+void Debug::DumpXml(const xml::XmlResource& doc, Printer* printer) {
+  XmlPrinter xml_visitor(printer);
+  doc.root->Accept(&xml_visitor);
 }
 
 }  // namespace aapt
