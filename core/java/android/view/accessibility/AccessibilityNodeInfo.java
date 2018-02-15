@@ -3203,7 +3203,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         fieldIndex++;
         if (mConnectionId != DEFAULT.mConnectionId) nonDefaultFields |= bitAt(fieldIndex);
         fieldIndex++;
-        if (!LongArray.elementsEqual(mChildNodeIds, DEFAULT.mChildNodeIds)) {
+        if (!Objects.equals(mChildNodeIds, DEFAULT.mChildNodeIds)) {
             nonDefaultFields |= bitAt(fieldIndex);
         }
         fieldIndex++;
