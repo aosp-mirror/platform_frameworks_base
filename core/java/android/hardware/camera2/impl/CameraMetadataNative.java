@@ -22,12 +22,12 @@ import android.graphics.Rect;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
-import android.hardware.camera2.marshal.Marshaler;
 import android.hardware.camera2.marshal.MarshalQueryable;
 import android.hardware.camera2.marshal.MarshalRegistry;
+import android.hardware.camera2.marshal.Marshaler;
 import android.hardware.camera2.marshal.impl.MarshalQueryableArray;
-import android.hardware.camera2.marshal.impl.MarshalQueryableBoolean;
 import android.hardware.camera2.marshal.impl.MarshalQueryableBlackLevelPattern;
+import android.hardware.camera2.marshal.impl.MarshalQueryableBoolean;
 import android.hardware.camera2.marshal.impl.MarshalQueryableColorSpaceTransform;
 import android.hardware.camera2.marshal.impl.MarshalQueryableEnum;
 import android.hardware.camera2.marshal.impl.MarshalQueryableHighSpeedVideoConfiguration;
@@ -48,6 +48,7 @@ import android.hardware.camera2.marshal.impl.MarshalQueryableString;
 import android.hardware.camera2.params.Face;
 import android.hardware.camera2.params.HighSpeedVideoConfiguration;
 import android.hardware.camera2.params.LensShadingMap;
+import android.hardware.camera2.params.OisSample;
 import android.hardware.camera2.params.ReprocessFormatsMap;
 import android.hardware.camera2.params.StreamConfiguration;
 import android.hardware.camera2.params.StreamConfigurationDuration;
@@ -56,8 +57,8 @@ import android.hardware.camera2.params.TonemapCurve;
 import android.hardware.camera2.utils.TypeReference;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.Parcelable;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.ServiceSpecificException;
 import android.util.Log;
 import android.util.Size;
@@ -614,6 +615,15 @@ public class CameraMetadataNative implements Parcelable {
                         return (T) metadata.getLensShadingMap();
                     }
                 });
+        sGetCommandMap.put(
+                CaptureResult.STATISTICS_OIS_SAMPLES.getNativeKey(),
+                        new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getOisSamples();
+                    }
+                });
     }
 
     private int[] getAvailableFormats() {
@@ -960,6 +970,50 @@ public class CameraMetadataNative implements Parcelable {
         }
         TonemapCurve tc = new TonemapCurve(red, green, blue);
         return tc;
+    }
+
+    private OisSample[] getOisSamples() {
+        long[] timestamps = getBase(CaptureResult.STATISTICS_OIS_TIMESTAMPS);
+        float[] xShifts = getBase(CaptureResult.STATISTICS_OIS_X_SHIFTS);
+        float[] yShifts = getBase(CaptureResult.STATISTICS_OIS_Y_SHIFTS);
+
+        if (timestamps == null) {
+            if (xShifts != null) {
+                throw new AssertionError("timestamps is null but xShifts is not");
+            }
+
+            if (yShifts != null) {
+                throw new AssertionError("timestamps is null but yShifts is not");
+            }
+
+            return null;
+        }
+
+        if (xShifts == null) {
+            throw new AssertionError("timestamps is not null but xShifts is");
+        }
+
+        if (yShifts == null) {
+            throw new AssertionError("timestamps is not null but yShifts is");
+        }
+
+        if (xShifts.length != timestamps.length) {
+            throw new AssertionError(String.format(
+                    "timestamps has %d entries but xShifts has %d", timestamps.length,
+                    xShifts.length));
+        }
+
+        if (yShifts.length != timestamps.length) {
+            throw new AssertionError(String.format(
+                    "timestamps has %d entries but yShifts has %d", timestamps.length,
+                    yShifts.length));
+        }
+
+        OisSample[] samples = new OisSample[timestamps.length];
+        for (int i = 0; i < timestamps.length; i++) {
+            samples[i] = new OisSample(timestamps[i], xShifts[i], yShifts[i]);
+        }
+        return samples;
     }
 
     private <T> void setBase(CameraCharacteristics.Key<T> key, T value) {
