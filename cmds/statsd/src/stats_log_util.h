@@ -32,6 +32,10 @@ void writeFieldValueTreeToStream(int tagId, const std::vector<FieldValue>& value
 void writeDimensionToProto(const HashableDimensionKey& dimension,
                            util::ProtoOutputStream* protoOutput);
 
+// Convert the TimeUnit enum to the bucket size in millis with a guardrail on
+// bucket size.
+int64_t TimeUnitToBucketSizeInMillisGuardrailed(int uid, TimeUnit unit);
+
 // Convert the TimeUnit enum to the bucket size in millis.
 int64_t TimeUnitToBucketSizeInMillis(TimeUnit unit);
 

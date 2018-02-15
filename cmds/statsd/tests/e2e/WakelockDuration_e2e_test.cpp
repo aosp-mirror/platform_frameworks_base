@@ -56,7 +56,7 @@ StatsdConfig CreateStatsdConfig(DurationMetric::AggregationType aggregationType)
     *durationMetric->mutable_dimensions_in_what() =
         CreateAttributionUidDimensions(
             android::util::WAKELOCK_STATE_CHANGED, {Position::FIRST});
-    durationMetric->set_bucket(ONE_MINUTE);
+    durationMetric->set_bucket(FIVE_MINUTES);
     return config;
 }
 

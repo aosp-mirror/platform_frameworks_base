@@ -69,7 +69,7 @@ GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric
     mCurrentSlicedBucketForAnomaly = std::make_shared<DimToValMap>();
     int64_t bucketSizeMills = 0;
     if (metric.has_bucket()) {
-        bucketSizeMills = TimeUnitToBucketSizeInMillis(metric.bucket());
+        bucketSizeMills = TimeUnitToBucketSizeInMillisGuardrailed(key.GetUid(), metric.bucket());
     } else {
         bucketSizeMills = TimeUnitToBucketSizeInMillis(ONE_HOUR);
     }

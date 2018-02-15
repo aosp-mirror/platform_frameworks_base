@@ -66,6 +66,7 @@ TEST(ValueMetricProducerTest, TestNonDimensionalEvents) {
 
     ValueMetricProducer valueProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
                                       tagId, bucketStartTimeNs, pullerManager);
+    valueProducer.setBucketSize(60 * NS_PER_SEC);
 
     vector<shared_ptr<LogEvent>> allData;
     allData.clear();
@@ -79,6 +80,8 @@ TEST(ValueMetricProducerTest, TestNonDimensionalEvents) {
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
     ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    valueProducer.setBucketSize(60 * NS_PER_SEC);
+
     // startUpdated:true tainted:0 sum:0 start:11
     EXPECT_EQ(true, curInterval.startUpdated);
     EXPECT_EQ(0, curInterval.tainted);
@@ -162,7 +165,7 @@ TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
 
     ValueMetricProducer valueProducer(kConfigKey, metric, 1, wizard, tagId, bucketStartTimeNs,
                                       pullerManager);
-
+    valueProducer.setBucketSize(60 * NS_PER_SEC);
     valueProducer.onConditionChanged(true, bucketStartTimeNs + 8);
 
     // has one slice
@@ -215,6 +218,7 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithUpgrade) {
             make_shared<StrictMock<MockStatsPullerManager>>();
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, -1, bucketStartTimeNs,
                                       pullerManager);
+    valueProducer.setBucketSize(60 * NS_PER_SEC);
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
     event1->write(1);
@@ -269,6 +273,7 @@ TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade) {
             }));
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, tagId, bucketStartTimeNs,
                                       pullerManager);
+    valueProducer.setBucketSize(60 * NS_PER_SEC);
 
     vector<shared_ptr<LogEvent>> allData;
     allData.clear();
@@ -311,6 +316,7 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition) {
 
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, -1, bucketStartTimeNs,
                                       pullerManager);
+    valueProducer.setBucketSize(60 * NS_PER_SEC);
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
     event1->write(1);
@@ -357,6 +363,8 @@ TEST(ValueMetricProducerTest, TestAnomalyDetection) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     ValueMetricProducer valueProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
                                       -1 /*not pulled*/, bucketStartTimeNs);
+    valueProducer.setBucketSize(60 * NS_PER_SEC);
+
     sp<AnomalyTracker> anomalyTracker = valueProducer.addAnomalyTracker(alert);
 
 

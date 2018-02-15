@@ -53,7 +53,7 @@ StatsdConfig CreateStatsdConfigForPushedEvent() {
     fieldMatcher->add_child()->set_field(7);  // activity_start_msec(int64)
     *gaugeMetric->mutable_dimensions_in_what() =
         CreateDimensions(android::util::APP_START_CHANGED, {1 /* uid field */ });
-    gaugeMetric->set_bucket(ONE_MINUTE);
+    gaugeMetric->set_bucket(FIVE_MINUTES);
 
     auto links = gaugeMetric->add_links();
     links->set_condition(isInBackgroundPredicate.id());

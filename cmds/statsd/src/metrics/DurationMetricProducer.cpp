@@ -72,7 +72,8 @@ DurationMetricProducer::DurationMetricProducer(const ConfigKey& key, const Durat
     // them in the base class, because the proto generated CountMetric, and DurationMetric are
     // not related. Maybe we should add a template in the future??
     if (metric.has_bucket()) {
-        mBucketSizeNs = TimeUnitToBucketSizeInMillis(metric.bucket()) * 1000000;
+        mBucketSizeNs =
+                TimeUnitToBucketSizeInMillisGuardrailed(key.GetUid(), metric.bucket()) * 1000000;
     } else {
         mBucketSizeNs = LLONG_MAX;
     }

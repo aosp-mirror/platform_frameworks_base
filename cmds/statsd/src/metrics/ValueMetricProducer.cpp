@@ -72,7 +72,7 @@ ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric
     // TODO: valuemetric for pushed events may need unlimited bucket length
     int64_t bucketSizeMills = 0;
     if (metric.has_bucket()) {
-        bucketSizeMills = TimeUnitToBucketSizeInMillis(metric.bucket());
+        bucketSizeMills = TimeUnitToBucketSizeInMillisGuardrailed(key.GetUid(), metric.bucket());
     } else {
         bucketSizeMills = TimeUnitToBucketSizeInMillis(ONE_HOUR);
     }

@@ -63,7 +63,8 @@ CountMetricProducer::CountMetricProducer(const ConfigKey& key, const CountMetric
     : MetricProducer(metric.id(), key, startTimeNs, conditionIndex, wizard) {
     // TODO: evaluate initial conditions. and set mConditionMet.
     if (metric.has_bucket()) {
-        mBucketSizeNs = TimeUnitToBucketSizeInMillis(metric.bucket()) * 1000000;
+        mBucketSizeNs =
+                TimeUnitToBucketSizeInMillisGuardrailed(key.GetUid(), metric.bucket()) * 1000000;
     } else {
         mBucketSizeNs = LLONG_MAX;
     }

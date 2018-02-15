@@ -17,6 +17,7 @@
 #include "stats_log_util.h"
 
 #include <logd/LogEvent.h>
+#include <private/android_filesystem_config.h>
 #include <utils/Log.h>
 #include <set>
 #include <stack>
@@ -214,6 +215,14 @@ void writeFieldValueTreeToStream(int tagId, const std::vector<FieldValue>& value
     size_t index = 0;
     writeFieldValueTreeToStreamHelper(values, &index, 0, 0, protoOutput);
     protoOutput->end(atomToken);
+}
+
+int64_t TimeUnitToBucketSizeInMillisGuardrailed(int uid, TimeUnit unit) {
+    int64_t bucketSizeMillis = TimeUnitToBucketSizeInMillis(unit);
+    if (bucketSizeMillis > 1000 && bucketSizeMillis < 5 * 60 * 1000LL && uid != AID_SHELL) {
+        bucketSizeMillis = 5 * 60 * 1000LL;
+    }
+    return bucketSizeMillis;
 }
 
 int64_t TimeUnitToBucketSizeInMillis(TimeUnit unit) {
