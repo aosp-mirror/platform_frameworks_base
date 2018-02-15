@@ -3017,9 +3017,9 @@ public class NotificationManagerService extends SystemService {
 
         /**
          * Sets the notification policy.  Apps that target API levels below
-         * {@link android.os.Build.VERSION_CODES#P} cannot make DND silence
-         * {@link Policy#PRIORITY_CATEGORY_ALARMS} or
-         * {@link Policy#PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER}
+         * {@link android.os.Build.VERSION_CODES#P} cannot change user-designated values to
+         * allow or disallow {@link Policy#PRIORITY_CATEGORY_ALARMS} and
+         * {@link Policy#PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER} from bypassing dnd
          */
         @Override
         public void setNotificationPolicy(String pkg, Policy policy) {
@@ -3032,10 +3032,14 @@ public class NotificationManagerService extends SystemService {
                 if (applicationInfo.targetSdkVersion <= Build.VERSION_CODES.O_MR1) {
                     Policy currPolicy = mZenModeHelper.getNotificationPolicy();
 
-                    int priorityCategories = policy.priorityCategories
-                            | (currPolicy.priorityCategories & Policy.PRIORITY_CATEGORY_ALARMS)
-                            | (currPolicy.priorityCategories &
-                            Policy.PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER);
+                    int priorityCategories = policy.priorityCategories;
+                    // ignore alarm and media values from new policy
+                    priorityCategories &= ~Policy.PRIORITY_CATEGORY_ALARMS;
+                    priorityCategories &= ~Policy.PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER;
+                    // use user-designated values
+                    priorityCategories |= currPolicy.PRIORITY_CATEGORY_ALARMS;
+                    priorityCategories |= currPolicy.PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER;
+
                     policy = new Policy(priorityCategories,
                             policy.priorityCallSenders, policy.priorityMessageSenders,
                             policy.suppressedVisualEffects);
