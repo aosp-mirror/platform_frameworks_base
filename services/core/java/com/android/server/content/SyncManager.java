@@ -2078,8 +2078,33 @@ public class SyncManager {
     protected void dumpSyncState(PrintWriter pw) {
         final StringBuilder sb = new StringBuilder();
 
-        pw.print("data connected: "); pw.println(mDataConnectionIsConnected);
-        pw.print("auto sync: ");
+        pw.print("Data connected: "); pw.println(mDataConnectionIsConnected);
+        pw.print("Battery saver: ");
+        pw.println((mPowerManager != null) && mPowerManager.isPowerSaveMode());
+
+        pw.print("Background network restriction: ");
+        {
+            final ConnectivityManager cm = getConnectivityManager();
+            final int status = (cm == null) ? -1 : cm.getRestrictBackgroundStatus();
+            switch (status) {
+                case ConnectivityManager.RESTRICT_BACKGROUND_STATUS_DISABLED:
+                    pw.println(" disabled");
+                    break;
+                case ConnectivityManager.RESTRICT_BACKGROUND_STATUS_WHITELISTED:
+                    pw.println(" whitelisted");
+                    break;
+                case ConnectivityManager.RESTRICT_BACKGROUND_STATUS_ENABLED:
+                    pw.println(" enabled");
+                    break;
+                default:
+                    pw.print("Unknown(");
+                    pw.print(status);
+                    pw.println(")");
+                    break;
+            }
+        }
+
+        pw.print("Auto sync: ");
         List<UserInfo> users = getAllUsers();
         if (users != null) {
             for (UserInfo user : users) {
@@ -2088,26 +2113,26 @@ public class SyncManager {
             }
             pw.println();
         }
-        pw.print("memory low: "); pw.println(mStorageIsLow);
-        pw.print("device idle: "); pw.println(mDeviceIsIdle);
-        pw.print("reported active: "); pw.println(mReportedSyncActive);
+        pw.print("Memory low: "); pw.println(mStorageIsLow);
+        pw.print("Device idle: "); pw.println(mDeviceIsIdle);
+        pw.print("Reported active: "); pw.println(mReportedSyncActive);
 
         final AccountAndUser[] accounts = AccountManagerService.getSingleton().getAllAccounts();
 
-        pw.print("accounts: ");
+        pw.print("Accounts: ");
         if (accounts != INITIAL_ACCOUNTS_ARRAY) {
             pw.println(accounts.length);
         } else {
             pw.println("not known yet");
         }
         final long now = SystemClock.elapsedRealtime();
-        pw.print("now: "); pw.print(now);
+        pw.print("Now: "); pw.print(now);
         pw.println(" (" + formatTime(System.currentTimeMillis()) + ")");
 
         sb.setLength(0);
-        pw.print("uptime: "); pw.print(formatDurationHMS(sb, now));
+        pw.print("Uptime: "); pw.print(formatDurationHMS(sb, now));
         pw.println();
-        pw.print("time spent syncing: ");
+        pw.print("Time spent syncing: ");
 
         sb.setLength(0);
         pw.print(formatDurationHMS(sb,
