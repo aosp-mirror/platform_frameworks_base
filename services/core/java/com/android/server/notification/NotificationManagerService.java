@@ -1836,6 +1836,10 @@ public class NotificationManagerService extends SystemService {
                     if (index >= 0) {
                         record = mToastQueue.get(index);
                         record.update(duration);
+                        try {
+                            record.callback.hide();
+                        } catch (RemoteException e) {
+                        }
                         record.update(callback);
                     } else {
                         Binder token = new Binder();
