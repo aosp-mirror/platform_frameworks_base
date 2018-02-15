@@ -15,25 +15,30 @@
  */
 package com.android.server.power.batterysaver;
 
+import static com.android.server.power.batterysaver.BatterySavingStats.SEND_TRON_EVENTS;
+
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.metrics.LogMaker;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.power.batterysaver.BatterySavingStats.BatterySaverState;
 import com.android.server.power.batterysaver.BatterySavingStats.DozeState;
 import com.android.server.power.batterysaver.BatterySavingStats.InteractiveState;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
@@ -222,8 +227,28 @@ public class BatterySavingStatsTest {
                 target.toDebugString());
     }
 
-    private void assertMetricsLog(String counter, int value) {
-        verify(mMetricsLogger, times(1)).count(eq(counter), eq(value));
+    private void assertLog(boolean batterySaver, boolean interactive, long deltaTimeMs,
+            int deltaBatteryLevelUa, int deltaBatteryLevelPercent) {
+        if (SEND_TRON_EVENTS) {
+            ArgumentCaptor<LogMaker> ac = ArgumentCaptor.forClass(LogMaker.class);
+            verify(mMetricsLogger, times(1)).write(ac.capture());
+
+            LogMaker lm = ac.getValue();
+            assertEquals(MetricsEvent.BATTERY_SAVER, lm.getCategory());
+            assertEquals(batterySaver ? 1 : 0,
+                    lm.getTaggedData(MetricsEvent.RESERVED_FOR_LOGBUILDER_SUBTYPE));
+            assertEquals(interactive ? 1 : 0, lm.getTaggedData(MetricsEvent.FIELD_INTERACTIVE));
+            assertEquals(deltaTimeMs, lm.getTaggedData(MetricsEvent.FIELD_DURATION_MILLIS));
+
+            assertEquals(deltaBatteryLevelUa,
+                    (int) lm.getTaggedData(MetricsEvent.FIELD_START_BATTERY_UA)
+                            - (int) lm.getTaggedData(MetricsEvent.FIELD_END_BATTERY_UA));
+            assertEquals(deltaBatteryLevelPercent,
+                    (int) lm.getTaggedData(MetricsEvent.FIELD_START_BATTERY_PERCENT)
+                            - (int) lm.getTaggedData(MetricsEvent.FIELD_END_BATTERY_PERCENT));
+        } else {
+            verify(mMetricsLogger, times(0)).write(any(LogMaker.class));
+        }
     }
 
     @Test
@@ -249,9 +274,7 @@ public class BatterySavingStatsTest {
                 InteractiveState.NON_INTERACTIVE,
                 DozeState.NOT_DOZING);
 
-        assertMetricsLog(BatterySavingStats.COUNTER_POWER_MILLIAMPS_PREFIX + "01", 2);
-        assertMetricsLog(BatterySavingStats.COUNTER_POWER_PERCENT_PREFIX + "01", 200);
-        assertMetricsLog(BatterySavingStats.COUNTER_TIME_SECONDS_PREFIX + "01", 60);
+        assertLog(false, true, 60_000, 2000, 200);
 
         target.advanceClock(1);
         target.drainBattery(2000);
@@ -282,9 +305,7 @@ public class BatterySavingStatsTest {
                 InteractiveState.INTERACTIVE,
                 DozeState.NOT_DOZING);
 
-        assertMetricsLog(BatterySavingStats.COUNTER_POWER_MILLIAMPS_PREFIX + "00", 2 * 3);
-        assertMetricsLog(BatterySavingStats.COUNTER_POWER_PERCENT_PREFIX + "00", 200 * 3);
-        assertMetricsLog(BatterySavingStats.COUNTER_TIME_SECONDS_PREFIX + "00", 60 * 3);
+        assertLog(false, false, 60_000 * 3, 2000 * 3, 200 * 3);
 
         target.advanceClock(10);
         target.drainBattery(10000);
@@ -292,9 +313,7 @@ public class BatterySavingStatsTest {
         reset(mMetricsLogger);
         target.startCharging();
 
-        assertMetricsLog(BatterySavingStats.COUNTER_POWER_MILLIAMPS_PREFIX + "11", 10);
-        assertMetricsLog(BatterySavingStats.COUNTER_POWER_PERCENT_PREFIX + "11", 1000);
-        assertMetricsLog(BatterySavingStats.COUNTER_TIME_SECONDS_PREFIX + "11", 60 * 10);
+        assertLog(true, true, 60_000 * 10, 10000, 1000);
 
         target.advanceClock(1);
         target.drainBattery(2000);
@@ -312,8 +331,6 @@ public class BatterySavingStatsTest {
 
         target.startCharging();
 
-        assertMetricsLog(BatterySavingStats.COUNTER_POWER_MILLIAMPS_PREFIX + "10", 2);
-        assertMetricsLog(BatterySavingStats.COUNTER_POWER_PERCENT_PREFIX + "10", 200);
-        assertMetricsLog(BatterySavingStats.COUNTER_TIME_SECONDS_PREFIX + "10", 60);
+        assertLog(true, false, 60_000, 2000, 200);
     }
 }
