@@ -450,7 +450,15 @@ class XmlPrinter : public xml::ConstVisitor {
       if (attr.compiled_value != nullptr) {
         attr.compiled_value->PrettyPrint(printer_);
       } else {
+        printer_->Print("\"");
         printer_->Print(attr.value);
+        printer_->Print("\"");
+      }
+
+      if (!attr.value.empty()) {
+        printer_->Print(" (Raw: \"");
+        printer_->Print(attr.value);
+        printer_->Print("\")");
       }
       printer_->Println();
     }
