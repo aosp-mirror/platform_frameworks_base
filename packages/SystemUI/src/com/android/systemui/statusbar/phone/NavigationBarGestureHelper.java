@@ -149,6 +149,10 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
     }
 
     public boolean onInterceptTouchEvent(MotionEvent event) {
+        if (mNavigationBarView.inScreenPinning()) {
+            return false;
+        }
+
         int action = event.getActionMasked();
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
@@ -177,6 +181,10 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
     }
 
     public boolean onTouchEvent(MotionEvent event) {
+        if (mNavigationBarView.inScreenPinning()) {
+            return false;
+        }
+
         // The same down event was just sent on intercept and therefore can be ignored here
         boolean ignoreProxyDownEvent = event.getAction() == MotionEvent.ACTION_DOWN
                 && mOverviewProxyService.getProxy() != null;

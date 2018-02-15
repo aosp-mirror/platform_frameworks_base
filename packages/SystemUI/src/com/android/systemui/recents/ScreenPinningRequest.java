@@ -36,6 +36,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -254,6 +255,11 @@ public class ScreenPinningRequest implements View.OnClickListener {
                         ? R.string.screen_pinning_description_recents_invisible_accessible
                         : R.string.screen_pinning_description_recents_invisible;
             }
+
+            ((ImageView) mLayout.findViewById(R.id.screen_pinning_back_icon))
+                    .setImageDrawable(navigationBarView.getBackDrawable(mContext));
+            ((ImageView) mLayout.findViewById(R.id.screen_pinning_home_icon))
+                    .setImageDrawable(navigationBarView.getHomeDrawable(mContext));
 
             ((TextView) mLayout.findViewById(R.id.screen_pinning_description))
                     .setText(descriptionStringResId);
