@@ -45,7 +45,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Map;
 
 /**
  * {@link ServiceInfo} and meta-data about an {@link AutofillService}.
@@ -80,7 +79,7 @@ public final class AutofillServiceInfo {
     private final String mSettingsActivity;
 
     @Nullable
-    private final Map<String, Pair<Long, String>> mCompatibilityPackages;
+    private final ArrayMap<String, Pair<Long, String>> mCompatibilityPackages;
 
     public AutofillServiceInfo(Context context, ComponentName comp, int userHandle)
             throws PackageManager.NameNotFoundException {
@@ -118,7 +117,7 @@ public final class AutofillServiceInfo {
         }
 
         String settingsActivity = null;
-        Map<String, Pair<Long, String>> compatibilityPackages = null;
+        ArrayMap<String, Pair<Long, String>> compatibilityPackages = null;
 
         try {
             final Resources resources = context.getPackageManager().getResourcesForApplication(
@@ -154,10 +153,10 @@ public final class AutofillServiceInfo {
         mCompatibilityPackages = compatibilityPackages;
     }
 
-    private Map<String, Pair<Long, String>> parseCompatibilityPackages(XmlPullParser parser,
+    private ArrayMap<String, Pair<Long, String>> parseCompatibilityPackages(XmlPullParser parser,
             Resources resources)
             throws IOException, XmlPullParserException {
-        Map<String, Pair<Long, String>> compatibilityPackages = null;
+        ArrayMap<String, Pair<Long, String>> compatibilityPackages = null;
 
         final int outerDepth = parser.getDepth();
         int type;
@@ -229,15 +228,8 @@ public final class AutofillServiceInfo {
         return mSettingsActivity;
     }
 
-    public boolean isCompatibilityModeRequested(String packageName, long versionCode) {
-        if (mCompatibilityPackages == null) {
-            return false;
-        }
-        final Pair<Long, String> pair = mCompatibilityPackages.get(packageName);
-        if (pair == null) {
-            return false;
-        }
-        return versionCode <= pair.first;
+    public ArrayMap<String, Pair<Long, String>> getCompatibilityPackages() {
+        return mCompatibilityPackages;
     }
 
     /**
