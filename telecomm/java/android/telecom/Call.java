@@ -425,8 +425,14 @@ public final class Call {
          */
         public static final int PROPERTY_ASSISTED_DIALING_USED = 0x00000200;
 
+        /**
+         * Indicates that the call is an RTT call. Use {@link #getRttCall()} to get the
+         * {@link RttCall} object that is used to send and receive text.
+         */
+        public static final int PROPERTY_RTT = 0x00000400;
+
         //******************************************************************************************
-        // Next PROPERTY value: 0x00000400
+        // Next PROPERTY value: 0x00000800
         //******************************************************************************************
 
         private final String mTelecomCallId;
@@ -1189,6 +1195,23 @@ public final class Call {
                 return null;
             }
         }
+
+        /**
+         * Closes the underlying file descriptors
+         * @hide
+         */
+        public void close() {
+            try {
+                mReceiveStream.close();
+            } catch (IOException e) {
+                // ignore
+            }
+            try {
+                mTransmitStream.close();
+            } catch (IOException e) {
+                // ignore
+            }
+        }
     }
 
     /**
@@ -1664,7 +1687,7 @@ public final class Call {
      * @return true if there is a connection, false otherwise.
      */
     public boolean isRttActive() {
-        return mRttCall != null;
+        return mRttCall != null && mDetails.hasProperty(Details.PROPERTY_RTT);
     }
 
     /**
@@ -1867,7 +1890,8 @@ public final class Call {
 
         boolean isRttChanged = false;
         boolean rttModeChanged = false;
-        if (parcelableCall.getParcelableRttCall() != null && parcelableCall.getIsRttCallChanged()) {
+        if (parcelableCall.getIsRttCallChanged()
+                && mDetails.hasProperty(Details.PROPERTY_RTT)) {
             ParcelableRttCall parcelableRttCall = parcelableCall.getParcelableRttCall();
             InputStreamReader receiveStream = new InputStreamReader(
                     new ParcelFileDescriptor.AutoCloseInputStream(
