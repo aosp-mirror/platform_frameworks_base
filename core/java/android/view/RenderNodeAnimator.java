@@ -158,7 +158,7 @@ public class RenderNodeAnimator extends Animator {
     }
 
     private void applyInterpolator() {
-        if (mInterpolator == null) return;
+        if (mInterpolator == null || mNativePtr == null) return;
 
         long ni;
         if (isNativeInterpolator(mInterpolator)) {
