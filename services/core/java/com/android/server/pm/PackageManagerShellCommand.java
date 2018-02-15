@@ -42,6 +42,7 @@ import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.VersionedPackage;
+import android.content.pm.dex.DexMetadataHelper;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.net.Uri;
@@ -1479,6 +1480,14 @@ class PackageManagerShellCommand extends ShellCommand {
         try {
             session = new PackageInstaller.Session(
                     mInterface.getPackageInstaller().openSession(sessionId));
+
+            // Sanity check that all .dm files match an apk.
+            // (The installer does not support standalone .dm files and will not process them.)
+            try {
+                DexMetadataHelper.validateDexPaths(session.getNames());
+            } catch (IllegalStateException | IOException e) {
+                pw.println("Warning [Could not validate the dex paths: " + e.getMessage() + "]");
+            }
 
             final LocalIntentReceiver receiver = new LocalIntentReceiver();
             session.commit(receiver.getIntentSender());
