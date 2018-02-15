@@ -196,9 +196,14 @@ public final class StrictMode {
      */
     public static final int DETECT_UNBUFFERED_IO = 0x20;  // for ThreadPolicy
 
+    /**
+     * @hide
+     */
+    public static final int DETECT_EXPLICIT_GC = 0x40;  // for ThreadPolicy
+
     private static final int ALL_THREAD_DETECT_BITS =
             DETECT_DISK_WRITE | DETECT_DISK_READ | DETECT_NETWORK | DETECT_CUSTOM |
-            DETECT_RESOURCE_MISMATCH | DETECT_UNBUFFERED_IO;
+            DETECT_RESOURCE_MISMATCH | DETECT_UNBUFFERED_IO | DETECT_EXPLICIT_GC;
 
     // Byte 2: Process-policy
 
@@ -554,6 +559,27 @@ public final class StrictMode {
              */
             public Builder permitDiskWrites() {
                 return disable(DETECT_DISK_WRITE);
+            }
+
+            /**
+             * Detect explicit GC requests, i.e. calls to Runtime.gc().
+             *
+             * @hide
+             */
+            public Builder detectExplicitGc() {
+                // TODO(b/3400644): Un-hide this for next API update
+                // TODO(b/3400644): Call this from detectAll in next API update
+                return enable(DETECT_EXPLICIT_GC);
+            }
+
+            /**
+             * Disable detection of explicit GC requests, i.e. calls to Runtime.gc().
+             *
+             * @hide
+             */
+            public Builder permitExplicitGc() {
+                // TODO(b/3400644): Un-hide this for next API update
+                return disable(DETECT_EXPLICIT_GC);
             }
 
             /**
@@ -1094,6 +1120,15 @@ public final class StrictMode {
     }
 
     /**
+     * @hide
+     */
+    private static class StrictModeExplicitGcViolation extends StrictModeViolation {
+        StrictModeExplicitGcViolation(int policyMask) {
+            super(policyMask, DETECT_EXPLICIT_GC, null);
+        }
+    }
+
+    /**
      * Returns the bitmask of the current thread's policy.
      *
      * @return the bitmask of all the DETECT_* and PENALTY_* bits currently enabled
@@ -1414,7 +1449,7 @@ public final class StrictMode {
             startHandlingViolationException(e);
         }
 
-        // Part of BlockGuard.Policy; just part of StrictMode:
+        // Part of BlockGuard.Policy interface:
         public void onUnbufferedIO() {
             if ((mPolicyMask & DETECT_UNBUFFERED_IO) == 0) {
                 return;
@@ -1453,6 +1488,20 @@ public final class StrictMode {
                 return;
             }
             BlockGuard.BlockGuardPolicyException e = new StrictModeNetworkViolation(mPolicyMask);
+            e.fillInStackTrace();
+            startHandlingViolationException(e);
+        }
+
+        // Part of BlockGuard.Policy interface:
+        public void onExplicitGc() {
+            if ((mPolicyMask & DETECT_EXPLICIT_GC) == 0) {
+                return;
+            }
+            if (tooManyViolationsThisLoop()) {
+                return;
+            }
+            BlockGuard.BlockGuardPolicyException e =
+                    new StrictModeExplicitGcViolation(mPolicyMask);
             e.fillInStackTrace();
             startHandlingViolationException(e);
         }
