@@ -22160,6 +22160,25 @@ public class ActivityManagerService extends IActivityManager.Stub
                 "Updating global configuration to: " + values);
 
         EventLog.writeEvent(EventLogTags.CONFIGURATION_CHANGED, changes);
+        StatsLog.write(StatsLog.RESOURCE_CONFIGURATION_CHANGED,
+                values.colorMode,
+                values.densityDpi,
+                values.fontScale,
+                values.hardKeyboardHidden,
+                values.keyboard,
+                values.keyboardHidden,
+                values.mcc,
+                values.mnc,
+                values.navigation,
+                values.navigationHidden,
+                values.orientation,
+                values.screenHeightDp,
+                values.screenLayout,
+                values.screenWidthDp,
+                values.smallestScreenWidthDp,
+                values.touchscreen,
+                values.uiMode);
+
 
         if (!initLocale && !values.getLocales().isEmpty() && values.userSetLocale) {
             final LocaleList locales = values.getLocales();
