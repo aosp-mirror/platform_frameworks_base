@@ -285,6 +285,11 @@ public final class SelectPrinterActivity extends Activity implements
             final int position = ((AdapterContextMenuInfo) menuInfo).position;
             PrinterInfo printer = (PrinterInfo) mListView.getAdapter().getItem(position);
 
+            // Printer is null if this is a context menu for the "add printer" entry
+            if (printer == null) {
+                return;
+            }
+
             menu.setHeaderTitle(printer.getName());
 
             // Add the select menu item if applicable.
