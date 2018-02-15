@@ -87,6 +87,8 @@ final class AccessibilityController {
 
     private WindowsForAccessibilityObserver mWindowsForAccessibilityObserver;
 
+    private boolean mScreenMagnificationActive;
+
     public void setMagnificationCallbacksLocked(MagnificationCallbacks callbacks) {
         if (callbacks != null) {
             if (mDisplayMagnifier != null) {
@@ -135,6 +137,11 @@ final class AccessibilityController {
         }
         if (mWindowsForAccessibilityObserver != null) {
             mWindowsForAccessibilityObserver.scheduleComputeChangedWindowsLocked();
+        }
+        boolean nowActive = !spec.isNop();
+        if (nowActive != mScreenMagnificationActive) {
+            mScreenMagnificationActive = nowActive;
+            mService.mPolicy.onScreenMagnificationStateChanged(nowActive);
         }
     }
 
