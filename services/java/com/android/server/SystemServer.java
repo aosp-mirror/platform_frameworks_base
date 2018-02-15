@@ -196,7 +196,7 @@ public final class SystemServer {
     private static final String THERMAL_OBSERVER_CLASS =
             "com.google.android.clockwork.ThermalObserver";
     private static final String WEAR_CONNECTIVITY_SERVICE_CLASS =
-            "com.google.android.clockwork.connectivity.WearConnectivityService";
+            "com.android.clockwork.connectivity.WearConnectivityService";
     private static final String WEAR_SIDEKICK_SERVICE_CLASS =
             "com.google.android.clockwork.sidekick.SidekickService";
     private static final String WEAR_DISPLAY_SERVICE_CLASS =
