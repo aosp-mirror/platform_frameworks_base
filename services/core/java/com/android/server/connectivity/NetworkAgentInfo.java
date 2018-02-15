@@ -392,6 +392,15 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         return !isVPN() && numForegroundNetworkRequests() == 0 && mNumBackgroundNetworkRequests > 0;
     }
 
+    /**
+     * Returns whether this network is currently suspended. A network is suspended if it is still
+     * connected but data temporarily fails to transfer. See {@link NetworkInfo.State#SUSPENDED}
+     * and {@link NetworkCapabilities#NET_CAPABILITY_NOT_SUSPENDED}.
+     */
+    public boolean isSuspended() {
+        return networkInfo.getState() == NetworkInfo.State.SUSPENDED;
+    }
+
     // Does this network satisfy request?
     public boolean satisfies(NetworkRequest request) {
         return created &&
@@ -458,7 +467,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
 
     public NetworkState getNetworkState() {
         synchronized (this) {
-            // Network objects are outwardly immutable so there is no point to duplicating.
+            // Network objects are outwardly immutable so there is no point in duplicating.
             // Duplicating also precludes sharing socket factories and connection pools.
             final String subscriberId = (networkMisc != null) ? networkMisc.subscriberId : null;
             return new NetworkState(new NetworkInfo(networkInfo),
