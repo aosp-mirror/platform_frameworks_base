@@ -291,7 +291,7 @@ public class Environment {
     }
 
     /** {@hide} */
-    public static File getReferenceProfile(String packageName) {
+    public static File getDataRefProfilesDePackageDirectory(String packageName) {
         return buildPath(getDataDirectory(), "misc", "profiles", "ref", packageName);
     }
 
