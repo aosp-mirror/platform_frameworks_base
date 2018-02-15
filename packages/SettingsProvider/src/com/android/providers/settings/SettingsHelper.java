@@ -76,11 +76,10 @@ public class SettingsHelper {
      */
     private static final ArraySet<String> sBroadcastOnRestore;
     static {
-        sBroadcastOnRestore = new ArraySet<String>(5);
+        sBroadcastOnRestore = new ArraySet<String>(4);
         sBroadcastOnRestore.add(Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
         sBroadcastOnRestore.add(Settings.Secure.ENABLED_VR_LISTENERS);
         sBroadcastOnRestore.add(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
-        sBroadcastOnRestore.add(Settings.Secure.ENABLED_INPUT_METHODS);
         sBroadcastOnRestore.add(Settings.Global.BLUETOOTH_ON);
     }
 

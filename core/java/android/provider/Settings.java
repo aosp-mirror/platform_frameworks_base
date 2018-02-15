@@ -5443,32 +5443,6 @@ public final class Settings {
          */
         public static final String ENABLED_INPUT_METHODS = "enabled_input_methods";
 
-        private static final Validator ENABLED_INPUT_METHODS_VALIDATOR = new Validator() {
-            @Override
-            public boolean validate(String value) {
-                if (value == null) {
-                    return false;
-                }
-                String[] inputMethods = value.split(":");
-                boolean valid = true;
-                for (String inputMethod : inputMethods) {
-                    if (inputMethod.length() == 0) {
-                        return false;
-                    }
-                    String[] subparts = inputMethod.split(";");
-                    for (String subpart : subparts) {
-                        // allow either a non negative integer or a ComponentName
-                        valid |= (NON_NEGATIVE_INTEGER_VALIDATOR.validate(subpart)
-                                || COMPONENT_NAME_VALIDATOR.validate(subpart));
-                    }
-                    if (!valid) {
-                        return false;
-                    }
-                }
-                return valid;
-            }
-        };
-
         /**
          * List of system input methods that are currently disabled.  This is a string
          * containing the IDs of all disabled input methods, each ID separated
@@ -7709,7 +7683,6 @@ public final class Settings {
             ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
             ENABLED_ACCESSIBILITY_SERVICES,
             ENABLED_VR_LISTENERS,
-            ENABLED_INPUT_METHODS,
             TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
             TOUCH_EXPLORATION_ENABLED,
             ACCESSIBILITY_ENABLED,
@@ -7815,7 +7788,6 @@ public final class Settings {
             VALIDATORS.put(ENABLED_ACCESSIBILITY_SERVICES,
                     ENABLED_ACCESSIBILITY_SERVICES_VALIDATOR);
             VALIDATORS.put(ENABLED_VR_LISTENERS, ENABLED_VR_LISTENERS_VALIDATOR);
-            VALIDATORS.put(ENABLED_INPUT_METHODS, ENABLED_INPUT_METHODS_VALIDATOR);
             VALIDATORS.put(TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
                     TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES_VALIDATOR);
             VALIDATORS.put(TOUCH_EXPLORATION_ENABLED, TOUCH_EXPLORATION_ENABLED_VALIDATOR);

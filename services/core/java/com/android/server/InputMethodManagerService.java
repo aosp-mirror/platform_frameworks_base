@@ -120,7 +120,6 @@ import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
 import android.text.TextUtils;
 import android.text.style.SuggestionSpan;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.EventLog;
@@ -183,7 +182,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class InputMethodManagerService extends IInputMethodManager.Stub
         implements ServiceConnection, Handler.Callback {
     static final boolean DEBUG = false;
-    static final boolean DEBUG_RESTORE = DEBUG || false;
     static final String TAG = "InputMethodManagerService";
 
     @Retention(SOURCE)
@@ -911,15 +909,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     || Intent.ACTION_USER_REMOVED.equals(action)) {
                 updateCurrentProfileIds();
                 return;
-            } else if (Intent.ACTION_SETTING_RESTORED.equals(action)) {
-                final String name = intent.getStringExtra(Intent.EXTRA_SETTING_NAME);
-                if (Settings.Secure.ENABLED_INPUT_METHODS.equals(name)) {
-                    final String prevValue = intent.getStringExtra(
-                            Intent.EXTRA_SETTING_PREVIOUS_VALUE);
-                    final String newValue = intent.getStringExtra(
-                            Intent.EXTRA_SETTING_NEW_VALUE);
-                    restoreEnabledInputMethods(mContext, prevValue, newValue);
-                }
             } else if (Intent.ACTION_LOCALE_CHANGED.equals(action)) {
                 onActionLocaleChanged();
             } else if (ACTION_SHOW_INPUT_METHOD_PICKER.equals(action)) {
@@ -982,44 +971,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             updateFromSettingsLocked(true);
             mLastSystemLocales = possibleNewLocale;
         }
-    }
-
-    // Apply the results of a restore operation to the set of enabled IMEs.  Note that this
-    // does not attempt to validate on the fly with any installed device policy, so must only
-    // be run in the context of initial device setup.
-    //
-    // TODO: Move this method to InputMethodUtils with adding unit tests.
-    static void restoreEnabledInputMethods(Context context, String prevValue, String newValue) {
-        if (DEBUG_RESTORE) {
-            Slog.i(TAG, "Restoring enabled input methods:");
-            Slog.i(TAG, "prev=" + prevValue);
-            Slog.i(TAG, " new=" + newValue);
-        }
-        // 'new' is the just-restored state, 'prev' is what was in settings prior to the restore
-        ArrayMap<String, ArraySet<String>> prevMap =
-                InputMethodUtils.parseInputMethodsAndSubtypesString(prevValue);
-        ArrayMap<String, ArraySet<String>> newMap =
-                InputMethodUtils.parseInputMethodsAndSubtypesString(newValue);
-
-        // Merge the restored ime+subtype enabled states into the live state
-        for (ArrayMap.Entry<String, ArraySet<String>> entry : newMap.entrySet()) {
-            final String imeId = entry.getKey();
-            ArraySet<String> prevSubtypes = prevMap.get(imeId);
-            if (prevSubtypes == null) {
-                prevSubtypes = new ArraySet<>(2);
-                prevMap.put(imeId, prevSubtypes);
-            }
-            prevSubtypes.addAll(entry.getValue());
-        }
-
-        final String mergedImesAndSubtypesString =
-                InputMethodUtils.buildInputMethodsAndSubtypesString(prevMap);
-        if (DEBUG_RESTORE) {
-            Slog.i(TAG, "Merged IME string:");
-            Slog.i(TAG, "     " + mergedImesAndSubtypesString);
-        }
-        Settings.Secure.putString(context.getContentResolver(),
-                Settings.Secure.ENABLED_INPUT_METHODS, mergedImesAndSubtypesString);
     }
 
     final class MyPackageMonitor extends PackageMonitor {
@@ -1577,7 +1528,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 broadcastFilter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
                 broadcastFilter.addAction(Intent.ACTION_USER_ADDED);
                 broadcastFilter.addAction(Intent.ACTION_USER_REMOVED);
-                broadcastFilter.addAction(Intent.ACTION_SETTING_RESTORED);
                 broadcastFilter.addAction(Intent.ACTION_LOCALE_CHANGED);
                 broadcastFilter.addAction(ACTION_SHOW_INPUT_METHOD_PICKER);
                 mContext.registerReceiver(new ImmsBroadcastReceiver(), broadcastFilter);
