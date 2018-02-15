@@ -1000,7 +1000,7 @@ public class ContextWrapper extends Context {
      */
     @Override
     public boolean isAutofillCompatibilityEnabled() {
-        return mBase.isAutofillCompatibilityEnabled();
+        return mBase != null && mBase.isAutofillCompatibilityEnabled();
     }
 
     /**
@@ -1008,6 +1008,8 @@ public class ContextWrapper extends Context {
      */
     @Override
     public void setAutofillCompatibilityEnabled(boolean  autofillCompatEnabled) {
-        mBase.setAutofillCompatibilityEnabled(autofillCompatEnabled);
+        if (mBase != null) {
+            mBase.setAutofillCompatibilityEnabled(autofillCompatEnabled);
+        }
     }
 }
