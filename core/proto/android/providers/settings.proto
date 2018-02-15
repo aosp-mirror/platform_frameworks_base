@@ -335,6 +335,7 @@ message GlobalSettingsProto {
     SettingProto uninstalled_instant_app_min_cache_period = 290;
     SettingProto uninstalled_instant_app_max_cache_period = 291;
     SettingProto unused_static_shared_lib_min_cache_period = 292;
+    SettingProto hidden_api_blacklist_exemptions = 293;
 }
 
 message SecureSettingsProto {
