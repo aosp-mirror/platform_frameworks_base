@@ -44,6 +44,7 @@ import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Build;
@@ -2744,6 +2745,30 @@ public class ActivityManager {
         try {
             getService().clearGrantedUriPermissions(packageName,
                     mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Updates (grants or revokes) a persitable URI permission.
+     *
+     * @param uri URI to be granted or revoked.
+     * @param prefix if {@code false}, permission apply to this specific URI; if {@code true}, it
+     * applies to all URIs that are prefixed by this URI.
+     * @param packageName target package.
+     * @param grant if {@code true} a new permission will be granted, otherwise an existing
+     * permission will be revoked.
+     *
+     * @return whether or not the requested succeeded.
+     *
+     * @hide
+     */
+    public boolean updatePersistableUriPermission(Uri uri, boolean prefix, String packageName,
+            boolean grant) {
+        try {
+            return getService().updatePersistableUriPermission(uri, prefix, packageName, grant,
+                    UserHandle.myUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
