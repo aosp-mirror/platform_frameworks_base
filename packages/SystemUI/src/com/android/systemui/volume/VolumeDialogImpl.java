@@ -691,7 +691,8 @@ public class VolumeDialogImpl implements VolumeDialog {
                 : isZenNone ? (isRingStream || isSystemStream || isAlarmStream || isMusicStream)
                 : isZenPriorityOnly ? ((isAlarmStream && mState.disallowAlarms) ||
                         (isMusicStream && mState.disallowMedia) ||
-                        (isRingStream && mState.disallowRinger))
+                        (isRingStream && mState.disallowRinger) ||
+                        (isSystemStream && mState.disallowSystem))
                 : false;
 
         // update slider max

@@ -1697,8 +1697,6 @@ public class KeyguardViewMediator extends SystemUI {
             mUiOffloadThread.submit(() -> {
                 // If the stream is muted, don't play the sound
                 if (mAudioManager.isStreamMute(mUiSoundsStreamType)) return;
-                // If DND blocks the sound, don't play the sound
-                if (areSystemSoundsZenModeBlocked(mContext)) return;
 
                 int id = mLockSounds.play(soundId,
                         mLockSoundVolume, mLockSoundVolume, 1/*priortiy*/, 0/*loop*/, 1.0f/*rate*/);
@@ -1707,25 +1705,6 @@ public class KeyguardViewMediator extends SystemUI {
                 }
             });
 
-        }
-    }
-
-    private boolean areSystemSoundsZenModeBlocked(Context context) {
-        int zenMode = Settings.Global.getInt(context.getContentResolver(),
-                Settings.Global.ZEN_MODE, 0);
-
-        switch (zenMode) {
-            case Settings.Global.ZEN_MODE_NO_INTERRUPTIONS:
-            case Settings.Global.ZEN_MODE_ALARMS:
-                return true;
-            case Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
-                final NotificationManager noMan = (NotificationManager) context
-                        .getSystemService(Context.NOTIFICATION_SERVICE);
-                return (noMan.getNotificationPolicy().priorityCategories
-                        & NotificationManager.Policy.PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER) == 0;
-            case Settings.Global.ZEN_MODE_OFF:
-            default:
-                return false;
         }
     }
 

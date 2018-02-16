@@ -163,11 +163,16 @@ public class ZenModeFiltering {
                     }
                     return false;
                 }
-                AudioAttributes aa = record.getAudioAttributes();
-                if (aa != null && AudioAttributes.SUPPRESSIBLE_USAGES.get(aa.getUsage()) ==
-                        AudioAttributes.SUPPRESSIBLE_MEDIA_SYSTEM_OTHER) {
-                    if (!config.allowMediaSystemOther) {
-                        ZenLog.traceIntercepted(record, "!allowMediaSystemOther");
+                if (isMedia(record)) {
+                    if (!config.allowMedia) {
+                        ZenLog.traceIntercepted(record, "!allowMedia");
+                        return true;
+                    }
+                    return false;
+                }
+                if (isSystem(record)) {
+                    if (!config.allowSystem) {
+                        ZenLog.traceIntercepted(record, "!allowSystem");
                         return true;
                     }
                     return false;
@@ -204,6 +209,18 @@ public class ZenModeFiltering {
     public boolean isCall(NotificationRecord record) {
         return record != null && (isDefaultPhoneApp(record.sbn.getPackageName())
                 || record.isCategory(Notification.CATEGORY_CALL));
+    }
+
+    public boolean isMedia(NotificationRecord record) {
+        AudioAttributes aa = record.getAudioAttributes();
+        return aa != null && AudioAttributes.SUPPRESSIBLE_USAGES.get(aa.getUsage()) ==
+                AudioAttributes.SUPPRESSIBLE_MEDIA;
+    }
+
+    public boolean isSystem(NotificationRecord record) {
+        AudioAttributes aa = record.getAudioAttributes();
+        return aa != null && AudioAttributes.SUPPRESSIBLE_USAGES.get(aa.getUsage()) ==
+                AudioAttributes.SUPPRESSIBLE_SYSTEM;
     }
 
     private boolean isDefaultPhoneApp(String pkg) {
