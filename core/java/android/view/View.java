@@ -8010,6 +8010,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *   <li>Call {@link
      *    android.view.autofill.AutofillManager#notifyViewVisibilityChanged(View, int, boolean)}
      *       when the visibility of a virtual child changed.
+     *   <li>Call
+     *    {@link android.view.autofill.AutofillManager#notifyViewClicked(View, int)} when a virtual
+     *       child is clicked.
      *   <li>Call {@link AutofillManager#commit()} when the autofill context of the view structure
      *       changed and the current context should be committed (for example, when the user tapped
      *       a {@code SUBMIT} button in an HTML page).

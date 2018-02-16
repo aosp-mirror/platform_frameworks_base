@@ -71,9 +71,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+//TODO: use java.lang.ref.Cleaner once Android supports Java 9
 import sun.misc.Cleaner;
-
-// TODO: use java.lang.ref.Cleaner once Android supports Java 9
 
 /**
  * The {@link AutofillManager} provides ways for apps and custom views to integrate with the
@@ -1065,16 +1064,34 @@ public final class AutofillManager {
     }
 
     /**
-     * Called when a {@link View} is clicked. Currently only used by views that should trigger save.
+     * Called to indicate a {@link View} is clicked.
      *
-     * @hide
+     * @param view view that has been clicked.
      */
-    public void notifyViewClicked(View view) {
-        final AutofillId id = view.getAutofillId();
+    public void notifyViewClicked(@NonNull View view) {
+        notifyViewClicked(view.getAutofillId());
+    }
 
+    /**
+     * Called to indicate a virtual view has been clicked.
+     *
+     * @param view the virtual view parent.
+     * @param virtualId id identifying the virtual child inside the parent view.
+     */
+    public void notifyViewClicked(@NonNull View view, int virtualId) {
+        notifyViewClicked(getAutofillId(view, virtualId));
+    }
+
+    private void notifyViewClicked(AutofillId id) {
+        if (!hasAutofillFeature()) {
+            return;
+        }
         if (sVerbose) Log.v(TAG, "notifyViewClicked(): id=" + id + ", trigger=" + mSaveTriggerId);
 
         synchronized (mLock) {
+            if (!mEnabled || !isActiveLocked()) {
+                return;
+            }
             if (mSaveTriggerId != null && mSaveTriggerId.equals(id)) {
                 if (sDebug) Log.d(TAG, "triggering commit by click of " + id);
                 commitLocked();
