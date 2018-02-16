@@ -87,7 +87,6 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     private View mActionsContainer;
     private View mDragHandle;
     private final int mDragHandleExpandOffset;
-    private View mBackground;
 
     public QSFooterImpl(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -100,7 +99,6 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mBackground = findViewById(R.id.qs_footer_background);
         mDivider = findViewById(R.id.qs_footer_divider);
         mEdit = findViewById(android.R.id.edit);
         mEdit.setOnClickListener(view ->
@@ -170,7 +168,6 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     @Nullable
     private TouchAnimator createFooterAnimator() {
         return new TouchAnimator.Builder()
-                .addFloat(mBackground, "alpha", 0, 0.90f)
                 .addFloat(mDivider, "alpha", 0, 1)
                 .addFloat(mCarrierText, "alpha", 0, 1)
                 .addFloat(mActionsContainer, "alpha", 0, 1)

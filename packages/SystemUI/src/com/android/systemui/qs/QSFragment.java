@@ -209,7 +209,7 @@ public class QSFragment extends Fragment implements QS {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        return isCustomizing() || mQSPanel.onInterceptTouchEvent(event);
+        return isCustomizing();
     }
 
     @Override
