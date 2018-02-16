@@ -29,20 +29,9 @@ please see themes_device_defaults.xml.
 ===============================================================
  -->
 <resources>
-    <!-- The default theme for apps on API level 10 and lower. This is the theme used for
-         activities that have not explicitly set their own theme.
-         <p>You can count on this being a dark
-         background with light text on top, but should try to make no
-         other assumptions about its appearance. In particular, the text
-         inside of widgets using this theme may be completely different,
-         with the widget container being a light color and the text on top
-         of it a dark color.
-         <p>If you're developing for API level 11 and higher, you should instead use {@link
-         #Theme_Holo} or {@link #Theme_DeviceDefault}.</p>
-    -->
 
     <!-- Honeycomb holographic theme (dark version).
-         <p>This is the default system theme for apps that target API level 11 - 13. Starting
+         <p>This is the default system theme for apps that target API level 11 - 20. Starting
          with API level 14, the default system theme is supplied by {@link #Theme_DeviceDefault},
          which might apply a different style on different devices. If you want to ensure that your
          app consistently uses the Holo theme at all times, you must explicitly declare it in your
@@ -60,7 +49,9 @@ please see themes_device_defaults.xml.
          TextAppearance.Holo.Widget.PopupMenu.Large}).
          Specific resources used by Holo are named using the convention @type/foo_bar_baz_holo
          with trailing _dark or _light specifiers if they are not shared between both light and
-         dark versions of the theme. -->
+         dark versions of the theme.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo">
         <item name="colorForeground">@color/bright_foreground_holo_dark</item>
         <item name="colorForegroundInverse">@color/bright_foreground_inverse_holo_dark</item>
@@ -68,21 +59,10 @@ please see themes_device_defaults.xml.
         <item name="colorBackgroundFloating">@color/background_holo_dark</item>
         <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_holo_dark</item>
         <item name="disabledAlpha">0.5</item>
+        <item name="primaryContentAlpha">@dimen/primary_content_alpha_material_dark</item>
+        <item name="secondaryContentAlpha">@dimen/secondary_content_alpha_material_dark</item>
         <item name="backgroundDimAmount">0.6</item>
-
-        <item name="colorPressedHighlight">@color/holo_gray_light</item>
-        <item name="colorLongPressedHighlight">@color/holo_gray_bright</item>
-        <item name="colorFocusedHighlight">@color/holo_blue_dark</item>
-        <item name="colorMultiSelectHighlight">@color/holo_green_light</item>
-        <item name="colorActivatedHighlight">@color/holo_blue_dark</item>
-
-        <item name="colorPrimaryDark">@color/holo_primary_dark</item>
-        <item name="colorPrimary">@color/holo_primary</item>
-        <item name="colorControlActivated">@color/holo_control_activated</item>
-        <item name="colorControlNormal">@color/holo_control_normal</item>
-        <item name="colorControlHighlight">@color/holo_button_pressed</item>
-        <item name="colorButtonNormal">@color/holo_button_normal</item>
-        <item name="colorEdgeEffect">?attr/colorPrimary</item>
+        <item name="colorError">@color/error_color_material_dark</item>
 
         <!-- Text styles -->
         <item name="textAppearance">@style/TextAppearance.Holo</item>
@@ -132,6 +112,7 @@ please see themes_device_defaults.xml.
 
         <item name="textAppearanceLargePopupMenu">@style/TextAppearance.Holo.Widget.PopupMenu.Large</item>
         <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.Holo.Widget.PopupMenu.Small</item>
+        <item name="textAppearancePopupMenuHeader">@null</item>
 
         <item name="textEditSuggestionItemLayout">@layout/text_edit_suggestion_item</item>
         <item name="textEditSuggestionContainerLayout">@layout/text_edit_suggestion_container</item>
@@ -144,6 +125,8 @@ please see themes_device_defaults.xml.
         <item name="buttonStyleInset">@style/Widget.Holo.Button.Inset</item>
 
         <item name="buttonStyleToggle">@style/Widget.Holo.Button.Toggle</item>
+        <item name="buttonCornerRadius">0dp</item>
+
         <item name="switchStyle">@style/Widget.Holo.CompoundButton.Switch</item>
         <item name="mediaRouteButtonStyle">@style/Widget.Holo.MediaRouteButton</item>
 
@@ -157,6 +140,7 @@ please see themes_device_defaults.xml.
         <item name="listPreferredItemHeightSmall">48dip</item>
         <item name="listPreferredItemHeightLarge">80dip</item>
         <item name="dropdownListPreferredItemHeight">?attr/listPreferredItemHeightSmall</item>
+        <item name="textAppearanceListItem">?attr/textAppearanceLarge</item>
         <item name="textAppearanceListItemSmall">?attr/textAppearanceMedium</item>
         <item name="textAppearanceListItemSecondary">?attr/textAppearanceSmall</item>
         <item name="listPreferredItemPaddingLeft">8dip</item>
@@ -212,6 +196,8 @@ please see themes_device_defaults.xml.
         <item name="dialogTitleIconsDecorLayout">@layout/dialog_title_icons_holo</item>
         <item name="dialogCustomTitleDecorLayout">@layout/dialog_custom_title_holo</item>
         <item name="dialogTitleDecorLayout">@layout/dialog_title_holo</item>
+        <item name="dialogPreferredPadding">@dimen/dialog_padding</item>
+        <item name="dialogCornerRadius">0dp</item>
 
         <!-- AlertDialog attributes -->
         <item name="alertDialogTheme">@style/Theme.Holo.Dialog.Alert</item>
@@ -251,6 +237,9 @@ please see themes_device_defaults.xml.
         <item name="textSelectHandleRight">@drawable/text_select_handle_right_material</item>
         <item name="textSelectHandle">@drawable/text_select_handle_middle_material</item>
         <item name="textSelectHandleWindowStyle">@style/Widget.Holo.TextSelectHandle</item>
+        <item name="textEditSuggestionItemLayout">@layout/text_edit_suggestion_item</item>
+        <item name="textEditSuggestionContainerLayout">@layout/text_edit_suggestion_container</item>
+        <item name="textEditSuggestionHighlightStyle">@style/TextAppearance.Holo.SuggestionHighlight</item>
         <item name="textCursorDrawable">@drawable/text_cursor_holo_dark</item>
 
         <!-- Widget styles -->
@@ -268,6 +257,7 @@ please see themes_device_defaults.xml.
         <item name="gridViewStyle">@style/Widget.Holo.GridView</item>
         <item name="imageButtonStyle">@style/Widget.Holo.ImageButton</item>
         <item name="imageWellStyle">@style/Widget.Holo.ImageWell</item>
+        <item name="listMenuViewStyle">@null</item>
         <item name="listViewStyle">@style/Widget.Holo.ListView</item>
         <item name="listViewWhiteStyle">@style/Widget.Holo.ListView.White</item>
         <item name="popupWindowStyle">@style/Widget.Holo.PopupWindow</item>
@@ -308,9 +298,11 @@ please see themes_device_defaults.xml.
         <item name="quickContactBadgeStyleSmallWindowLarge">@style/Widget.Holo.QuickContactBadgeSmall.WindowLarge</item>
         <item name="listPopupWindowStyle">@style/Widget.Holo.ListPopupWindow</item>
         <item name="popupMenuStyle">@style/Widget.Holo.PopupMenu</item>
+        <item name="popupTheme">@null</item>
         <item name="stackViewStyle">@style/Widget.Holo.StackView</item>
         <item name="activityChooserViewStyle">@style/Widget.Holo.ActivityChooserView</item>
         <item name="fragmentBreadCrumbsStyle">@style/Widget.Holo.FragmentBreadCrumbs</item>
+        <item name="contextPopupMenuStyle">?attr/popupMenuStyle</item>
 
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@style/Preference.Holo.PreferenceScreen</item>
@@ -327,7 +319,15 @@ please see themes_device_defaults.xml.
         <item name="editTextPreferenceStyle">@style/Preference.Holo.DialogPreference.EditTextPreference</item>
         <item name="ringtonePreferenceStyle">@style/Preference.Holo.RingtonePreference</item>
         <item name="preferenceLayoutChild">@layout/preference_child_holo</item>
+        <item name="preferencePanelStyle">@null</item>
+        <item name="preferenceHeaderPanelStyle">@null</item>
+        <item name="preferenceListStyle">@null</item>
+        <item name="preferenceFragmentListStyle">@null</item>
+        <item name="preferenceFragmentPaddingSide">@null</item>
         <item name="detailsElementBackground">@drawable/panel_bg_holo_dark</item>
+
+        <!-- PreferenceFrameLayout attributes -->
+        <item name="preferenceFrameLayoutStyle">@style/Widget.Holo.PreferenceFrameLayout</item>
 
         <!-- Search widget styles -->
         <item name="searchWidgetCorpusItemBackground">@color/search_widget_corpus_item_background</item>
@@ -348,9 +348,13 @@ please see themes_device_defaults.xml.
         <item name="actionBarStyle">@style/Widget.Holo.ActionBar</item>
         <item name="actionBarSize">@dimen/action_bar_default_height</item>
         <item name="actionModePopupWindowStyle">@style/Widget.Holo.PopupWindow.ActionMode</item>
+        <item name="actionMenuTextAppearance">@null</item>
+        <item name="actionMenuTextColor">@null</item>
         <item name="actionBarWidgetTheme">@null</item>
-        <item name="actionBarPopupTheme">@null</item>
+        <item name="actionBarPopupTheme">?attr/popupTheme</item>
         <item name="actionBarTheme">@null</item>
+        <item name="actionBarDivider">?attr/dividerVertical</item>
+        <item name="actionBarItemBackground">@null</item>
 
         <item name="actionModeCutDrawable">@drawable/ic_menu_cut_holo_dark</item>
         <item name="actionModeCopyDrawable">@drawable/ic_menu_copy_holo_dark</item>
@@ -359,6 +363,8 @@ please see themes_device_defaults.xml.
         <item name="actionModeShareDrawable">@drawable/ic_menu_share_holo_dark</item>
         <item name="actionModeFindDrawable">@drawable/ic_menu_find_holo_dark</item>
         <item name="actionModeWebSearchDrawable">@drawable/ic_menu_search_holo_dark</item>
+
+        <item name="toolbarStyle">@null</item>
 
         <item name="dividerVertical">?attr/listDivider</item>
         <item name="dividerHorizontal">?attr/listDivider</item>
@@ -397,13 +403,39 @@ please see themes_device_defaults.xml.
         <item name="fastScrollTrackDrawable">@drawable/fastscroll_track_holo_dark</item>
         <item name="fastScrollOverlayPosition">atThumb</item>
 
+
+        <item name="colorPrimaryDark">@color/holo_primary_dark</item>
+        <item name="colorPrimary">@color/holo_primary</item>
+        <item name="colorAccent">@color/holo_blue_dark</item>
+        <item name="colorEdgeEffect">?attr/colorPrimary</item>
+
+        <item name="colorControlNormal">@color/holo_control_normal</item>
+        <item name="colorControlActivated">@color/holo_control_activated</item>
+
+        <item name="colorControlHighlight">@color/holo_button_pressed</item>
+        <item name="colorButtonNormal">@color/holo_button_normal</item>
+        <item name="colorSwitchThumbNormal">@color/switch_thumb_material_light</item>
+
+        <!-- Tooltip popup properties -->
+        <item name="tooltipForegroundColor">@null</item>
+        <item name="tooltipBackgroundColor">@null</item>
+
+        <!-- Holo-only color attributes -->
+        <item name="colorPressedHighlight">@color/holo_gray_light</item>
+        <item name="colorLongPressedHighlight">@color/holo_gray_bright</item>
+        <item name="colorFocusedHighlight">@color/holo_blue_dark</item>
+        <item name="colorMultiSelectHighlight">@color/holo_green_light</item>
+        <item name="colorActivatedHighlight">@color/holo_blue_dark</item>
+
     </style>
 
     <!-- Honeycomb holographic theme (light version).  The widgets in the
          holographic theme are translucent on their brackground, so applications
          must ensure that any background they use with this theme is itself
          light; otherwise, it will be difficult to see the widgets.  This
-         UI style also includes a full action bar by default. -->
+         UI style also includes a full action bar by default.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Light" parent="Theme.Light">
         <item name="colorForeground">@color/bright_foreground_holo_light</item>
         <item name="colorForegroundInverse">@color/bright_foreground_inverse_holo_light</item>
@@ -411,46 +443,36 @@ please see themes_device_defaults.xml.
         <item name="colorBackgroundFloating">@color/background_holo_light</item>
         <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_holo_light</item>
         <item name="disabledAlpha">0.5</item>
+        <item name="primaryContentAlpha">@dimen/primary_content_alpha_material_dark</item>
+        <item name="secondaryContentAlpha">@dimen/secondary_content_alpha_material_dark</item>
         <item name="backgroundDimAmount">0.6</item>
-
-        <item name="colorPressedHighlight">@color/holo_gray_light</item>
-        <item name="colorLongPressedHighlight">@color/holo_gray_bright</item>
-        <item name="colorFocusedHighlight">@color/holo_blue_dark</item>
-        <item name="colorMultiSelectHighlight">@color/holo_green_light</item>
-        <item name="colorActivatedHighlight">@color/holo_blue_dark</item>
-
-        <item name="colorPrimaryDark">@color/holo_light_primary_dark</item>
-        <item name="colorPrimary">@color/holo_light_primary</item>
-        <item name="colorControlActivated">@color/holo_light_control_activated</item>
-        <item name="colorControlNormal">@color/holo_light_control_normal</item>
-        <item name="colorControlHighlight">@color/holo_light_button_pressed</item>
-        <item name="colorButtonNormal">@color/holo_light_button_normal</item>
+        <item name="colorError">@color/error_color_material_light</item>
 
         <!-- Text styles -->
         <item name="textAppearance">@style/TextAppearance.Holo.Light</item>
         <item name="textAppearanceInverse">@style/TextAppearance.Holo.Light.Inverse</item>
 
         <item name="textColorPrimary">@color/primary_text_holo_light</item>
-        <item name="textColorSecondary">@color/secondary_text_holo_light</item>
-        <item name="textColorTertiary">@color/tertiary_text_holo_light</item>
         <item name="textColorPrimaryInverse">@color/primary_text_holo_dark</item>
-        <item name="textColorSecondaryInverse">@color/secondary_text_holo_dark</item>
-        <item name="textColorTertiaryInverse">@color/tertiary_text_holo_dark</item>
         <item name="textColorPrimaryActivated">@color/primary_text_holo_light</item>
-        <item name="textColorSecondaryActivated">@color/secondary_text_holo_light</item>
         <item name="textColorPrimaryDisableOnly">@color/primary_text_disable_only_holo_light</item>
         <item name="textColorPrimaryInverseDisableOnly">@color/primary_text_disable_only_holo_dark</item>
-        <item name="textColorPrimaryNoDisable">@color/primary_text_nodisable_holo_light</item>
-        <item name="textColorSecondaryNoDisable">@color/secondary_text_nodisable_holo_light</item>
         <item name="textColorPrimaryInverseNoDisable">@color/primary_text_nodisable_holo_dark</item>
+        <item name="textColorPrimaryNoDisable">@color/primary_text_nodisable_holo_light</item>
+        <item name="textColorSecondary">@color/secondary_text_holo_light</item>
+        <item name="textColorSecondaryInverse">@color/secondary_text_holo_dark</item>
+        <item name="textColorSecondaryActivated">@color/secondary_text_holo_light</item>
+        <item name="textColorSecondaryNoDisable">@color/secondary_text_nodisable_holo_light</item>
         <item name="textColorSecondaryInverseNoDisable">@color/secondary_text_nodisable_holo_dark</item>
+        <item name="textColorTertiary">@color/tertiary_text_holo_light</item>
+        <item name="textColorTertiaryInverse">@color/tertiary_text_holo_dark</item>
         <item name="textColorHint">@color/hint_foreground_holo_light</item>
         <item name="textColorHintInverse">@color/hint_foreground_holo_dark</item>
-        <item name="textColorSearchUrl">@color/search_url_text_holo</item>
         <item name="textColorHighlight">@color/highlighted_text_holo_light</item>
         <item name="textColorHighlightInverse">@color/highlighted_text_holo_dark</item>
         <item name="textColorLink">@color/holo_blue_light</item>
         <item name="textColorLinkInverse">@color/holo_blue_light</item>
+        <item name="textColorSearchUrl">@color/search_url_text_holo</item>
         <item name="textColorAlertDialogListItem">@color/primary_text_holo_light</item>
 
         <item name="textAppearanceLarge">@style/TextAppearance.Holo.Light.Large</item>
@@ -466,9 +488,6 @@ please see themes_device_defaults.xml.
 
         <item name="editTextColor">?attr/textColorPrimary</item>
         <item name="editTextBackground">@drawable/edit_text_holo_light</item>
-        <item name="textEditSuggestionItemLayout">@layout/text_edit_suggestion_item</item>
-        <item name="textEditSuggestionContainerLayout">@layout/text_edit_suggestion_container</item>
-        <item name="textEditSuggestionHighlightStyle">@style/TextAppearance.Holo.SuggestionHighlight</item>
 
         <item name="candidatesTextStyleSpans">@string/candidates_style</item>
 
@@ -477,6 +496,7 @@ please see themes_device_defaults.xml.
 
         <item name="textAppearanceLargePopupMenu">@style/TextAppearance.Holo.Light.Widget.PopupMenu.Large</item>
         <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.Holo.Light.Widget.PopupMenu.Small</item>
+        <item name="textAppearancePopupMenuHeader">@null</item>
 
         <!-- Button styles -->
         <item name="buttonStyle">@style/Widget.Holo.Light.Button</item>
@@ -485,6 +505,8 @@ please see themes_device_defaults.xml.
         <item name="buttonStyleInset">@style/Widget.Holo.Light.Button.Inset</item>
 
         <item name="buttonStyleToggle">@style/Widget.Holo.Light.Button.Toggle</item>
+        <item name="buttonCornerRadius">0dp</item>
+
         <item name="switchStyle">@style/Widget.Holo.Light.CompoundButton.Switch</item>
         <item name="mediaRouteButtonStyle">@style/Widget.Holo.Light.MediaRouteButton</item>
 
@@ -498,6 +520,7 @@ please see themes_device_defaults.xml.
         <item name="listPreferredItemHeightSmall">48dip</item>
         <item name="listPreferredItemHeightLarge">80dip</item>
         <item name="dropdownListPreferredItemHeight">?attr/listPreferredItemHeightSmall</item>
+        <item name="textAppearanceListItem">?attr/textAppearanceLarge</item>
         <item name="textAppearanceListItemSmall">?attr/textAppearanceMedium</item>
         <item name="textAppearanceListItemSecondary">?attr/textAppearanceSmall</item>
         <item name="listPreferredItemPaddingLeft">8dip</item>
@@ -514,8 +537,9 @@ please see themes_device_defaults.xml.
         <item name="listChoiceIndicatorMultiple">@drawable/btn_check_holo_light</item>
 
         <item name="listChoiceBackgroundIndicator">@drawable/list_selector_holo_light</item>
-
         <item name="activatedBackgroundIndicator">@drawable/activated_background_holo_light</item>
+
+        <item name="listDividerAlertDialog">@drawable/list_divider_holo_light</item>
 
         <item name="expandableListPreferredItemPaddingLeft">40dip</item>
         <item name="expandableListPreferredChildPaddingLeft">?attr/expandableListPreferredItemPaddingLeft</item>
@@ -524,8 +548,6 @@ please see themes_device_defaults.xml.
         <item name="expandableListPreferredItemIndicatorRight">0dip</item>
         <item name="expandableListPreferredChildIndicatorLeft">?attr/expandableListPreferredItemIndicatorLeft</item>
         <item name="expandableListPreferredChildIndicatorRight">?attr/expandableListPreferredItemIndicatorRight</item>
-
-        <item name="listDividerAlertDialog">@drawable/list_divider_holo_light</item>
         <item name="findOnPageNextDrawable">@drawable/ic_find_next_holo_light</item>
         <item name="findOnPagePreviousDrawable">@drawable/ic_find_previous_holo_light</item>
 
@@ -553,6 +575,8 @@ please see themes_device_defaults.xml.
         <item name="dialogTitleIconsDecorLayout">@layout/dialog_title_icons_holo</item>
         <item name="dialogCustomTitleDecorLayout">@layout/dialog_custom_title_holo</item>
         <item name="dialogTitleDecorLayout">@layout/dialog_title_holo</item>
+        <item name="dialogPreferredPadding">@dimen/dialog_padding</item>
+        <item name="dialogCornerRadius">0dp</item>
 
         <!-- AlertDialog attributes -->
         <item name="alertDialogTheme">@style/Theme.Holo.Light.Dialog.Alert</item>
@@ -592,6 +616,9 @@ please see themes_device_defaults.xml.
         <item name="textSelectHandleRight">@drawable/text_select_handle_right_material</item>
         <item name="textSelectHandle">@drawable/text_select_handle_middle_material</item>
         <item name="textSelectHandleWindowStyle">@style/Widget.Holo.TextSelectHandle</item>
+        <item name="textEditSuggestionItemLayout">@layout/text_edit_suggestion_item</item>
+        <item name="textEditSuggestionContainerLayout">@layout/text_edit_suggestion_container</item>
+        <item name="textEditSuggestionHighlightStyle">@style/TextAppearance.Holo.SuggestionHighlight</item>
         <item name="textCursorDrawable">@drawable/text_cursor_holo_light</item>
 
         <!-- Widget styles -->
@@ -609,6 +636,7 @@ please see themes_device_defaults.xml.
         <item name="gridViewStyle">@style/Widget.Holo.Light.GridView</item>
         <item name="imageButtonStyle">@style/Widget.Holo.Light.ImageButton</item>
         <item name="imageWellStyle">@style/Widget.Holo.Light.ImageWell</item>
+        <item name="listMenuViewStyle">@null</item>
         <item name="listViewStyle">@style/Widget.Holo.Light.ListView</item>
         <item name="listViewWhiteStyle">@style/Widget.Holo.Light.ListView.White</item>
         <item name="popupWindowStyle">@style/Widget.Holo.Light.PopupWindow</item>
@@ -649,9 +677,11 @@ please see themes_device_defaults.xml.
         <item name="quickContactBadgeStyleSmallWindowLarge">@style/Widget.Holo.QuickContactBadgeSmall.WindowLarge</item>
         <item name="listPopupWindowStyle">@style/Widget.Holo.Light.ListPopupWindow</item>
         <item name="popupMenuStyle">@style/Widget.Holo.Light.PopupMenu</item>
+        <item name="popupTheme">@null</item>
         <item name="stackViewStyle">@style/Widget.Holo.StackView</item>
         <item name="activityChooserViewStyle">@style/Widget.Holo.Light.ActivityChooserView</item>
         <item name="fragmentBreadCrumbsStyle">@style/Widget.Holo.Light.FragmentBreadCrumbs</item>
+        <item name="contextPopupMenuStyle">@null</item>
 
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@style/Preference.Holo.PreferenceScreen</item>
@@ -668,6 +698,11 @@ please see themes_device_defaults.xml.
         <item name="editTextPreferenceStyle">@style/Preference.Holo.DialogPreference.EditTextPreference</item>
         <item name="ringtonePreferenceStyle">@style/Preference.Holo.RingtonePreference</item>
         <item name="preferenceLayoutChild">@layout/preference_child_holo</item>
+        <item name="preferencePanelStyle">@null</item>
+        <item name="preferenceHeaderPanelStyle">@null</item>
+        <item name="preferenceListStyle">@null</item>
+        <item name="preferenceFragmentListStyle">@null</item>
+        <item name="preferenceFragmentPaddingSide">@null</item>
         <item name="detailsElementBackground">@drawable/panel_bg_holo_light</item>
 
         <!-- PreferenceFrameLayout attributes -->
@@ -680,6 +715,7 @@ please see themes_device_defaults.xml.
         <item name="actionDropDownStyle">@style/Widget.Holo.Light.Spinner.DropDown.ActionBar</item>
         <item name="actionButtonStyle">@style/Widget.Holo.Light.ActionButton</item>
         <item name="actionOverflowButtonStyle">@style/Widget.Holo.Light.ActionButton.Overflow</item>
+        <item name="actionOverflowMenuStyle">?attr/popupMenuStyle</item>
         <item name="actionModeBackground">@drawable/cab_background_top_holo_light</item>
         <item name="actionModeSplitBackground">@drawable/cab_background_bottom_holo_light</item>
         <item name="actionModeCloseDrawable">@drawable/ic_cab_done_holo_light</item>
@@ -691,8 +727,12 @@ please see themes_device_defaults.xml.
         <item name="actionBarStyle">@style/Widget.Holo.Light.ActionBar.Solid</item>
         <item name="actionBarSize">@dimen/action_bar_default_height</item>
         <item name="actionModePopupWindowStyle">@style/Widget.Holo.Light.PopupWindow.ActionMode</item>
+        <item name="actionMenuTextAppearance">@null</item>
+        <item name="actionMenuTextColor">@null</item>
         <item name="actionBarWidgetTheme">@null</item>
+        <item name="actionBarPopupTheme">?attr/popupTheme</item>
         <item name="actionBarTheme">@null</item>
+        <item name="actionBarItemBackground">@null</item>
 
         <item name="actionModeCutDrawable">@drawable/ic_menu_cut_holo_light</item>
         <item name="actionModeCopyDrawable">@drawable/ic_menu_copy_holo_light</item>
@@ -701,6 +741,8 @@ please see themes_device_defaults.xml.
         <item name="actionModeShareDrawable">@drawable/ic_menu_share_holo_light</item>
         <item name="actionModeFindDrawable">@drawable/ic_menu_find_holo_light</item>
         <item name="actionModeWebSearchDrawable">@drawable/ic_menu_search_holo_light</item>
+
+        <item name="toolbarStyle">@null</item>
 
         <item name="dividerVertical">?attr/listDivider</item>
         <item name="dividerHorizontal">?attr/listDivider</item>
@@ -736,11 +778,37 @@ please see themes_device_defaults.xml.
         <item name="fastScrollTrackDrawable">@drawable/fastscroll_track_holo_light</item>
         <item name="fastScrollOverlayPosition">atThumb</item>
 
+        <!-- Color palette -->
+        <item name="colorPrimaryDark">@color/holo_light_primary_dark</item>
+        <item name="colorPrimary">@color/holo_light_primary</item>
+        <item name="colorAccent">@color/holo_blue_light</item>
+        <item name="colorEdgeEffect">?attr/colorPrimary</item>
+
+        <item name="colorControlNormal">@color/holo_light_control_normal</item>
+        <item name="colorControlActivated">@color/holo_light_control_activated</item>
+
+        <item name="colorControlHighlight">@color/holo_light_button_pressed</item>
+        <item name="colorButtonNormal">@color/holo_light_button_normal</item>
+        <item name="colorSwitchThumbNormal">@color/switch_thumb_material_light</item>
+
+        <!-- Tooltip popup properties -->
+        <item name="tooltipForegroundColor">@null</item>
+        <item name="tooltipBackgroundColor">@null</item>
+
+        <!-- Holo-only color attributes -->
+        <item name="colorPressedHighlight">@color/holo_gray_light</item>
+        <item name="colorLongPressedHighlight">@color/holo_gray_bright</item>
+        <item name="colorFocusedHighlight">@color/holo_blue_dark</item>
+        <item name="colorMultiSelectHighlight">@color/holo_green_light</item>
+        <item name="colorActivatedHighlight">@color/holo_blue_dark</item>
+
     </style>
 
     <!-- Variant of the holographic (light) theme that has a solid (opaque) action bar
          with an inverse color profile. The dark action bar sharply stands out against
-         the light content. -->
+         the light content.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Light.DarkActionBar">
         <item name="windowContentOverlay">@drawable/ab_solid_shadow_holo</item>
         <item name="actionBarStyle">@style/Widget.Holo.Light.ActionBar.Solid.Inverse</item>
@@ -773,7 +841,9 @@ please see themes_device_defaults.xml.
         <item name="actionModeWebSearchDrawable">@drawable/ic_menu_search_holo_dark</item>
     </style>
 
-    <!-- Variant of the holographic (dark) theme with no action bar. -->
+    <!-- Variant of the holographic (dark) theme with no action bar.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
@@ -781,7 +851,9 @@ please see themes_device_defaults.xml.
 
     <!-- Variant of the holographic (dark) theme that has no title bar and fills
          the entire screen.  This theme
-         sets {@link android.R.attr#windowFullscreen} to true.  -->
+         sets {@link android.R.attr#windowFullscreen} to true.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.NoActionBar.Fullscreen">
         <item name="windowFullscreen">true</item>
         <item name="windowContentOverlay">@null</item>
@@ -790,7 +862,9 @@ please see themes_device_defaults.xml.
     <!-- Variant of the holographic (dark) theme that has no title bar and fills
          the entire screen and extends into the display overscan region.  This theme
          sets {@link android.R.attr#windowFullscreen} and {@link android.R.attr#windowOverscan}
-         to true. -->
+         to true.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.NoActionBar.Overscan">
         <item name="windowFullscreen">true</item>
         <item name="windowOverscan">true</item>
@@ -799,14 +873,18 @@ please see themes_device_defaults.xml.
 
     <!-- Variant of the holographic (dark) theme that has no title bar and translucent
          system decor.  This theme sets {@link android.R.attr#windowTranslucentStatus} and
-         {@link android.R.attr#windowTranslucentNavigation} to true. -->
+         {@link android.R.attr#windowTranslucentNavigation} to true.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.NoActionBar.TranslucentDecor">
         <item name="windowTranslucentStatus">true</item>
         <item name="windowTranslucentNavigation">true</item>
         <item name="windowContentOverlay">@null</item>
     </style>
 
-    <!-- Variant of the holographic (light) theme with no action bar. -->
+    <!-- Variant of the holographic (light) theme with no action bar.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Light.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
@@ -814,7 +892,9 @@ please see themes_device_defaults.xml.
 
     <!-- Variant of the holographic (light) theme that has no title bar and fills
          the entire screen.  This theme
-         sets {@link android.R.attr#windowFullscreen} to true.  -->
+         sets {@link android.R.attr#windowFullscreen} to true.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Light.NoActionBar.Fullscreen">
         <item name="windowFullscreen">true</item>
         <item name="windowContentOverlay">@null</item>
@@ -823,7 +903,9 @@ please see themes_device_defaults.xml.
     <!-- Variant of the holographic (light) theme that has no title bar and fills
          the entire screen and extends into the display overscan region.  This theme
          sets {@link android.R.attr#windowFullscreen} and {@link android.R.attr#windowOverscan}
-         to true. -->
+         to true.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Light.NoActionBar.Overscan">
         <item name="windowFullscreen">true</item>
         <item name="windowOverscan">true</item>
@@ -832,7 +914,9 @@ please see themes_device_defaults.xml.
 
     <!-- Variant of the holographic (light) theme that has no title bar and translucent
          system decor.  This theme sets {@link android.R.attr#windowTranslucentStatus} and
-         {@link android.R.attr#windowTranslucentNavigation} to true. -->
+         {@link android.R.attr#windowTranslucentNavigation} to true.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Light.NoActionBar.TranslucentDecor">
         <item name="windowTranslucentStatus">true</item>
         <item name="windowTranslucentNavigation">true</item>
@@ -848,7 +932,9 @@ please see themes_device_defaults.xml.
          contents.  You can set this theme on an activity if you would like to
          make an activity that looks like a Dialog.
          This is the default Dialog theme for applications targeting Honeycomb
-         or newer. -->
+         or newer.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Dialog">
         <item name="windowFrame">@null</item>
         <item name="windowTitleStyle">@style/DialogWindowTitle.Holo</item>
@@ -878,26 +964,34 @@ please see themes_device_defaults.xml.
     </style>
 
     <!-- Variant of Theme.Holo.Dialog that has a nice minimum width for
-         a regular dialog. -->
+         a regular dialog.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Dialog.MinWidth">
         <item name="windowMinWidthMajor">@dimen/dialog_min_width_major</item>
         <item name="windowMinWidthMinor">@dimen/dialog_min_width_minor</item>
     </style>
 
-    <!-- Variant of Theme.Holo.Dialog that does not include a title bar. -->
+    <!-- Variant of Theme.Holo.Dialog that does not include a title bar.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Dialog.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
 
     <!-- Variant of Theme.Holo.Dialog.NoActionBar that has a nice minimum width for
-         a regular dialog. -->
+         a regular dialog.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Dialog.NoActionBar.MinWidth">
         <item name="windowMinWidthMajor">@dimen/dialog_min_width_major</item>
         <item name="windowMinWidthMinor">@dimen/dialog_min_width_minor</item>
     </style>
 
-    <!-- Variant of Theme.Holo.Dialog that has a fixed size. -->
+    <!-- Variant of Theme.Holo.Dialog that has a fixed size.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Dialog.FixedSize">
         <item name="windowFixedWidthMajor">@dimen/dialog_fixed_width_major</item>
         <item name="windowFixedWidthMinor">@dimen/dialog_fixed_width_minor</item>
@@ -905,7 +999,9 @@ please see themes_device_defaults.xml.
         <item name="windowFixedHeightMinor">@dimen/dialog_fixed_height_minor</item>
     </style>
 
-    <!-- Variant of Theme.Holo.Dialog.NoActionBar that has a fixed size. -->
+    <!-- Variant of Theme.Holo.Dialog.NoActionBar that has a fixed size.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Dialog.NoActionBar.FixedSize">
         <item name="windowFixedWidthMajor">@dimen/dialog_fixed_width_major</item>
         <item name="windowFixedWidthMinor">@dimen/dialog_fixed_width_minor</item>
@@ -915,7 +1011,9 @@ please see themes_device_defaults.xml.
 
     <!-- Variant of Theme.Holo.Dialog that does not include a frame (or background).
          The view hierarchy of the dialog is responsible for drawing all of
-         its pixels. -->
+         its pixels.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Dialog.NoFrame">
         <item name="windowBackground">@color/transparent</item>
         <item name="windowFrame">@null</item>
@@ -939,20 +1037,28 @@ please see themes_device_defaults.xml.
          {@link android.app.AlertDialog} class.  This is basically a dialog
          but sets the background to empty so it can do two-tone backgrounds.
          For applications targeting Honeycomb or newer, this is the default
-         AlertDialog theme. -->
+         AlertDialog theme.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Dialog.Alert" parent="Theme.Holo.Dialog.BaseAlert" />
 
     <!-- Theme for a window that will be displayed either full-screen on
          smaller screens (small, normal) or as a dialog on larger screens
-         (large, xlarge). -->
+         (large, xlarge).
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.DialogWhenLarge" parent="Theme.Holo" />
 
     <!-- Theme for a window without a title bar that will be displayed either
          full-screen on smaller screens (small, normal) or as a dialog on larger screens
-         (large, xlarge). -->
+         (large, xlarge).
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.DialogWhenLarge.NoActionBar" parent="Theme.Holo.NoActionBar" />
 
-    <!-- Theme for a presentation window on a secondary display. -->
+    <!-- Theme for a presentation window on a secondary display.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Dialog.Presentation" parent="Theme.Holo.NoActionBar.Fullscreen" />
 
     <!-- Light holo dialog themes -->
@@ -963,7 +1069,9 @@ please see themes_device_defaults.xml.
          contents.  You can set this theme on an activity if you would like to
          make an activity that looks like a Dialog.
          This is the default Dialog theme for applications targeting Honeycomb
-         or newer. -->
+         or newer.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Light.Dialog">
         <item name="windowFrame">@null</item>
         <item name="windowTitleStyle">@style/DialogWindowTitle.Holo.Light</item>
@@ -993,26 +1101,34 @@ please see themes_device_defaults.xml.
     </style>
 
     <!-- Variant of Theme.Holo.Light.Dialog that has a nice minimum width for
-         a regular dialog. -->
+         a regular dialog.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Light.Dialog.MinWidth">
         <item name="windowMinWidthMajor">@dimen/dialog_min_width_major</item>
         <item name="windowMinWidthMinor">@dimen/dialog_min_width_minor</item>
     </style>
 
-    <!-- Variant of Theme.Holo.Light.Dialog that does not include a title bar. -->
+    <!-- Variant of Theme.Holo.Light.Dialog that does not include a title bar.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Light.Dialog.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
 
     <!-- Variant of Theme.Holo.Light.Dialog.NoActionBar that has a nice minimum width for
-         a regular dialog. -->
+         a regular dialog.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Light.Dialog.NoActionBar.MinWidth">
         <item name="windowMinWidthMajor">@dimen/dialog_min_width_major</item>
         <item name="windowMinWidthMinor">@dimen/dialog_min_width_minor</item>
     </style>
 
-    <!-- Variant of Theme.Holo.Light.Dialog that has a fixed size. -->
+    <!-- Variant of Theme.Holo.Light.Dialog that has a fixed size.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Light.Dialog.FixedSize">
         <item name="windowFixedWidthMajor">@dimen/dialog_fixed_width_major</item>
         <item name="windowFixedWidthMinor">@dimen/dialog_fixed_width_minor</item>
@@ -1020,7 +1136,9 @@ please see themes_device_defaults.xml.
         <item name="windowFixedHeightMinor">@dimen/dialog_fixed_height_minor</item>
     </style>
 
-    <!-- Variant of Theme.Holo.Light.Dialog.NoActionBar that has a fixed size. -->
+    <!-- Variant of Theme.Holo.Light.Dialog.NoActionBar that has a fixed size.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Light.Dialog.NoActionBar.FixedSize">
         <item name="windowFixedWidthMajor">@dimen/dialog_fixed_width_major</item>
         <item name="windowFixedWidthMinor">@dimen/dialog_fixed_width_minor</item>
@@ -1030,12 +1148,16 @@ please see themes_device_defaults.xml.
 
     <!-- Theme for a window that will be displayed either full-screen on
          smaller screens (small, normal) or as a dialog on larger screens
-         (large, xlarge). -->
+         (large, xlarge).
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Light.DialogWhenLarge" parent="Theme.Holo.Light" />
 
     <!-- Theme for a window without an action bar that will be displayed either full-screen
          on smaller screens (small, normal) or as a dialog on larger screens
-         (large, xlarge). -->
+         (large, xlarge).
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Light.DialogWhenLarge.NoActionBar" parent="Theme.Holo.Light.NoActionBar" />
 
     <style name="Theme.Holo.Light.Dialog.BaseAlert">
@@ -1050,14 +1172,20 @@ please see themes_device_defaults.xml.
          {@link android.app.AlertDialog} class.  This is basically a dialog
          but sets the background to empty so it can do two-tone backgrounds.
          For applications targeting Honeycomb or newer, this is the default
-         AlertDialog theme. -->
+         AlertDialog theme.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Light.Dialog.Alert" parent="Theme.Holo.Light.Dialog.BaseAlert" />
 
-    <!-- Theme for a presentation window on a secondary display. -->
+    <!-- Theme for a presentation window on a secondary display.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Light.Dialog.Presentation" parent="Theme.Holo.Light.NoActionBar.Fullscreen" />
 
     <!-- Default holographic (dark) for windows that want to have the user's selected
-         wallpaper appear behind them.  -->
+         wallpaper appear behind them.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Wallpaper">
         <item name="windowBackground">@color/transparent</item>
         <item name="colorBackgroundCacheHint">@null</item>
@@ -1065,7 +1193,9 @@ please see themes_device_defaults.xml.
     </style>
 
     <!--Default holographic (dark) for windows that want to have the user's selected
-         wallpaper appear behind them and without an action bar. -->
+         wallpaper appear behind them and without an action bar.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Wallpaper.NoTitleBar">
         <item name="windowNoTitle">true</item>
     </style>
@@ -1073,7 +1203,9 @@ please see themes_device_defaults.xml.
     <!-- Default holo dark theme for panel windows.  This removes all extraneous
          window decorations, so you basically have an empty rectangle in which
          to place your content.  It makes the window floating, with a transparent
-         background, and turns off dimming behind the window. -->
+         background, and turns off dimming behind the window.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Panel">
         <item name="windowBackground">@color/transparent</item>
         <item name="colorBackgroundCacheHint">@null</item>
@@ -1089,7 +1221,9 @@ please see themes_device_defaults.xml.
     <!-- Default holo light theme for panel windows.  This removes all extraneous
          window decorations, so you basically have an empty rectangle in which
          to place your content.  It makes the window floating, with a transparent
-         background, and turns off dimming behind the window. -->
+         background, and turns off dimming behind the window.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Light.Panel">
         <item name="windowBackground">@color/transparent</item>
         <item name="colorBackgroundCacheHint">@null</item>
@@ -1105,7 +1239,9 @@ please see themes_device_defaults.xml.
     <!-- Default theme for holo style input methods, which is used by the
          {@link android.inputmethodservice.InputMethodService} class.
          this inherits from Theme.Panel, but sets up IME appropriate animations
-         and a few custom attributes. -->
+         and a few custom attributes.
+
+         @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.InputMethod" parent="Theme.Holo.Light.Panel">
         <item name="windowAnimationStyle">@style/Animation.InputMethod</item>
         <item name="imeFullscreenBackground">@drawable/screen_background_selector_light</item>
@@ -1113,17 +1249,19 @@ please see themes_device_defaults.xml.
         <item name="imeExtractExitAnimation">@anim/input_method_extract_exit</item>
     </style>
 
-
+    <!-- @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.SearchBar" parent="Theme.Holo.Panel">
         <item name="actionModeBackground">@drawable/cab_background_top_holo_dark</item>
         <item name="actionModeSplitBackground">@drawable/cab_background_bottom_holo_light</item>
     </style>
 
+    <!-- @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Light.SearchBar" parent="Theme.Holo.Light.Panel">
         <item name="actionModeBackground">@drawable/cab_background_top_holo_light</item>
         <item name="actionModeSplitBackground">@drawable/cab_background_bottom_holo_light</item>
     </style>
 
+    <!-- @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.CompactMenu">
         <!-- Menu/item attributes -->
         <item name="itemTextAppearance">?attr/textAppearanceMedium</item>
@@ -1132,6 +1270,7 @@ please see themes_device_defaults.xml.
         <item name="background">@null</item>
     </style>
 
+    <!-- @deprecated Use Material themes on API 21+ or AppCompat on supported APIs. -->
     <style name="Theme.Holo.Light.CompactMenu">
         <!-- Menu/item attributes -->
         <item name="itemTextAppearance">?attr/textAppearanceMedium</item>
