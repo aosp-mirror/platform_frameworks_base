@@ -233,6 +233,11 @@ bool matchesSimple(const UidMap& uidMap, const FieldValueMatcher& matcher,
                     (matcher.eq_int() == values[i].mValue.int_value)) {
                     return true;
                 }
+                // eq_int covers both int and long.
+                if (values[i].mValue.getType() == LONG &&
+                    (matcher.eq_int() == values[i].mValue.long_value)) {
+                    return true;
+                }
             }
             return false;
         case FieldValueMatcher::ValueMatcherCase::kLtInt:
@@ -241,12 +246,22 @@ bool matchesSimple(const UidMap& uidMap, const FieldValueMatcher& matcher,
                     (values[i].mValue.int_value < matcher.lt_int())) {
                     return true;
                 }
+                // lt_int covers both int and long.
+                if (values[i].mValue.getType() == LONG &&
+                    (values[i].mValue.long_value < matcher.lt_int())) {
+                    return true;
+                }
             }
             return false;
         case FieldValueMatcher::ValueMatcherCase::kGtInt:
             for (int i = start; i < end; i++) {
                 if (values[i].mValue.getType() == INT &&
                     (values[i].mValue.int_value > matcher.gt_int())) {
+                    return true;
+                }
+                // gt_int covers both int and long.
+                if (values[i].mValue.getType() == LONG &&
+                    (values[i].mValue.long_value > matcher.gt_int())) {
                     return true;
                 }
             }
@@ -273,12 +288,22 @@ bool matchesSimple(const UidMap& uidMap, const FieldValueMatcher& matcher,
                     (values[i].mValue.int_value <= matcher.lte_int())) {
                     return true;
                 }
+                // lte_int covers both int and long.
+                if (values[i].mValue.getType() == LONG &&
+                    (values[i].mValue.long_value <= matcher.lte_int())) {
+                    return true;
+                }
             }
             return false;
         case FieldValueMatcher::ValueMatcherCase::kGteInt:
             for (int i = start; i < end; i++) {
                 if (values[i].mValue.getType() == INT &&
                     (values[i].mValue.int_value >= matcher.gte_int())) {
+                    return true;
+                }
+                // gte_int covers both int and long.
+                if (values[i].mValue.getType() == LONG &&
+                    (values[i].mValue.long_value >= matcher.gte_int())) {
                     return true;
                 }
             }
