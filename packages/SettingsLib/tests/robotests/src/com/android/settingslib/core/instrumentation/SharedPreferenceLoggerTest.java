@@ -31,7 +31,6 @@ import android.content.SharedPreferences;
 import android.util.Pair;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
-import com.google.common.truth.Platform;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -160,18 +159,23 @@ public class SharedPreferenceLoggerTest {
     }
 
     private ArgumentMatcher<Pair<Integer, Object>> pairMatches(int tag, Class clazz) {
-        return pair -> pair.first == tag && Platform.isInstanceOfType(pair.second, clazz);
+        return pair -> pair.first == tag && isInstanceOfType(pair.second, clazz);
     }
 
     private ArgumentMatcher<Pair<Integer, Object>> pairMatches(int tag, boolean bool) {
         return pair -> pair.first == tag
-                && Platform.isInstanceOfType(pair.second, Integer.class)
+                && isInstanceOfType(pair.second, Integer.class)
                 && pair.second.equals((bool ? 1 : 0));
     }
 
     private ArgumentMatcher<Pair<Integer, Object>> pairMatches(int tag, int val) {
         return pair -> pair.first == tag
-                && Platform.isInstanceOfType(pair.second, Integer.class)
+                && isInstanceOfType(pair.second, Integer.class)
                 && pair.second.equals(val);
+    }
+
+    /** Returns true if the instance is assignable to the type Clazz. */
+    private static boolean isInstanceOfType(Object instance, Class<?> clazz) {
+        return clazz.isInstance(instance);
     }
 }
