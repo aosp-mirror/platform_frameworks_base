@@ -72,7 +72,7 @@ message Atom {
         BatteryLevelChanged battery_level_changed = 30;
         ChargingStateChanged charging_state_changed = 31;
         PluggedStateChanged plugged_state_changed = 32;
-        DeviceTemperatureReported device_temperature_reported = 33;
+        // TODO: 33 is blank, but is available for use.
         DeviceOnStatusChanged device_on_status_changed = 34;
         WakeupAlarmOccurred wakeup_alarm_occurred = 35;
         KernelWakeupReported kernel_wakeup_reported = 36;
@@ -105,7 +105,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10021
+    // Next: 10022
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -128,6 +128,7 @@ message Atom {
         DiskSpace disk_space = 10018;
         RemainingBatteryCapacity remaining_battery_capacity = 10019;
         FullBatteryCapacity full_battery_capacity = 10020;
+        Temperature temperature = 10021;
     }
 }
 
@@ -534,17 +535,6 @@ message ChargingStateChanged {
 message PluggedStateChanged {
     // Whether the device is plugged in, from frameworks/base/core/proto/android/os/enums.proto.
     optional android.os.BatteryPluggedStateEnum state = 1;
-}
-
-/**
- * Logs the temperature of the device, in tenths of a degree Celsius.
- *
- * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
- */
-message DeviceTemperatureReported {
-    // Temperature in tenths of a degree C.
-    optional int32 temperature = 1;
 }
 
 // TODO: Define this more precisely.
@@ -1508,7 +1498,8 @@ message DiskSpace {
 
 /**
  * Pulls battery coulomb counter, which is the remaining battery charge in uAh.
- * Logged from: frameworks/base/cmds/statsd/src/external/ResourceHealthManagerPuller.cpp
+ * Pulled from:
+ *   frameworks/base/cmds/statsd/src/external/ResourceHealthManagerPuller.cpp
  */
 message RemainingBatteryCapacity {
     optional int32 charge_uAh = 1;
@@ -1516,8 +1507,26 @@ message RemainingBatteryCapacity {
 
 /**
  * Pulls battery capacity, which is the battery capacity when full in uAh.
- * Logged from: frameworks/base/cmds/statsd/src/external/ResourceHealthManagerPuller.cpp
+ * Pulled from:
+ *   frameworks/base/cmds/statsd/src/external/ResourceHealthManagerPuller.cpp
  */
 message FullBatteryCapacity {
     optional int32 capacity_uAh = 1;
+}
+
+/**
+ * Pulls the temperature of various parts of the device, in Celsius.
+ *
+ * Pulled from:
+ *   frameworks/base/cmds/statsd/src/external/ResourceThermalManagerPuller.cpp
+ */
+message Temperature {
+    // The type of temperature being reported. Eg. CPU, GPU, SKIN, BATTERY.
+    optional android.os.TemperatureTypeEnum sensor_location = 1;
+
+    // The name of the temperature source. Eg. CPU0
+    optional string sensor_name = 2;
+
+    // Temperature in degrees C.
+    optional float temperature_C = 3;
 }

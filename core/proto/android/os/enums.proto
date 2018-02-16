@@ -56,6 +56,17 @@ enum BatteryStatusEnum {
     BATTERY_STATUS_FULL = 5;
 }
 
+// These constants are defined in hardware/interfaces/thermal/1.0/types.hal
+// They are primarily used by android/os/HardwarePropertiesManager.java.
+// Any change to the types in the thermal hal should be made here as well.
+enum TemperatureTypeEnum {
+    TEMPERATURE_TYPE_UKNOWN = -1;
+    TEMPERATURE_TYPE_CPU = 0;
+    TEMPERATURE_TYPE_GPU = 1;
+    TEMPERATURE_TYPE_BATTERY = 2;
+    TEMPERATURE_TYPE_SKIN = 3;
+}
+
 // Wakelock types, primarily used by android/os/PowerManager.java.
 enum WakeLockLevelEnum {
     // NOTE: Wake lock levels were previously defined as a bit field, except
