@@ -24,6 +24,7 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.SystemService;
 import android.content.ComponentName;
 import android.content.Context;
@@ -135,6 +136,7 @@ import sun.misc.Cleaner;
  * <p>It is safe to call into its methods from any thread.
  */
 @SystemService(Context.AUTOFILL_MANAGER_SERVICE)
+@RequiresFeature(PackageManager.FEATURE_AUTOFILL)
 public final class AutofillManager {
 
     private static final String TAG = "AutofillManager";

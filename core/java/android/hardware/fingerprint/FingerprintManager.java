@@ -23,10 +23,12 @@ import static android.Manifest.permission.USE_FINGERPRINT;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.os.Binder;
@@ -59,6 +61,7 @@ import javax.crypto.Mac;
  */
 @Deprecated
 @SystemService(Context.FINGERPRINT_SERVICE)
+@RequiresFeature(PackageManager.FEATURE_FINGERPRINT)
 public class FingerprintManager implements BiometricFingerprintConstants {
     private static final String TAG = "FingerprintManager";
     private static final boolean DEBUG = true;
