@@ -17,6 +17,7 @@
 package android.net;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import android.support.test.filters.SmallTest;
 
@@ -56,6 +57,6 @@ public class IpSecTransformTest {
         IpSecTransform config1 = new IpSecTransform(null, config);
         IpSecTransform config2 = new IpSecTransform(null, config);
 
-        assertFalse(IpSecTransform.equals(config1, config2));
+        assertTrue(IpSecTransform.equals(config1, config2));
     }
 }
