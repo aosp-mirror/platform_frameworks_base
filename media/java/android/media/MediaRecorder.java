@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.app.ActivityThread;
 import android.hardware.Camera;
@@ -278,6 +279,7 @@ public class MediaRecorder implements AudioRouting
          * third-party applications.
          * </p>
          */
+        @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_OUTPUT)
         public static final int REMOTE_SUBMIX = 8;
 
         /** Microphone audio source tuned for unprocessed (raw) sound if available, behaves like
@@ -303,6 +305,7 @@ public class MediaRecorder implements AudioRouting
          * @hide
          */
         @SystemApi
+        @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_HOTWORD)
         public static final int HOTWORD = 1999;
     }
 
