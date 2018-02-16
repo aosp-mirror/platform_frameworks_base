@@ -18,7 +18,6 @@ package com.android.systemui.qs;
 
 import static com.android.systemui.qs.tileimpl.QSTileImpl.getColorForState;
 
-import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -59,7 +58,6 @@ import java.util.Collection;
 public class QSPanel extends LinearLayout implements Tunable, Callback, BrightnessMirrorListener {
 
     public static final String QS_SHOW_BRIGHTNESS = "qs_show_brightness";
-    public static final String QS_SHOW_LONG_PRESS_TOOLTIP = "qs_show_long_press";
 
     protected final Context mContext;
     protected final ArrayList<TileRecord> mRecords = new ArrayList<TileRecord>();
@@ -74,7 +72,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     private BrightnessController mBrightnessController;
     protected QSTileHost mHost;
 
-    protected QSTooltipView mTooltipView;
     protected QSSecurityFooter mFooter;
     private boolean mGridContentVisible = true;
 
@@ -97,9 +94,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
         setOrientation(VERTICAL);
 
-        mTooltipView = (QSTooltipView) LayoutInflater.from(mContext)
-                .inflate(R.layout.quick_settings_header, this, false);
-
         mBrightnessView = LayoutInflater.from(mContext).inflate(
             R.layout.quick_settings_brightness_dialog, this, false);
         mTileLayout = new TileLayout(mContext);
@@ -107,12 +101,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         Space space = new Space(mContext);
         space.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
                 mContext.getResources().getDimensionPixelSize(R.dimen.qs_footer_height)));
-        mScrollLayout = new QSScrollLayout(
-                mContext,
-                mTooltipView,
-                mBrightnessView,
-                (View) mTileLayout,
-                space);
+        mScrollLayout = new QSScrollLayout(mContext, mBrightnessView, (View) mTileLayout, space);
         addView(mScrollLayout);
 
         addDivider();
@@ -145,10 +134,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        final TunerService tunerService = Dependency.get(TunerService.class);
-        tunerService.addTunable(this, QS_SHOW_BRIGHTNESS);
-        tunerService.addTunable(this, QS_SHOW_LONG_PRESS_TOOLTIP);
-
+        Dependency.get(TunerService.class).addTunable(this, QS_SHOW_BRIGHTNESS);
         if (mHost != null) {
             setTiles(mHost.getTiles());
         }
@@ -180,14 +166,9 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     @Override
     public void onTuningChanged(String key, String newValue) {
         if (QS_SHOW_BRIGHTNESS.equals(key)) {
-            updateViewVisibilityForTuningValue(mBrightnessView, newValue);
-        } else if (QS_SHOW_LONG_PRESS_TOOLTIP.equals(key)) {
-            updateViewVisibilityForTuningValue(mTooltipView, newValue);
+            mBrightnessView.setVisibility(newValue == null || Integer.parseInt(newValue) != 0
+                    ? VISIBLE : GONE);
         }
-    }
-
-    private void updateViewVisibilityForTuningValue(View view, @Nullable String newValue) {
-        view.setVisibility(newValue == null || Integer.parseInt(newValue) != 0 ? VISIBLE : GONE);
     }
 
     public void openDetails(String subPanel) {
@@ -222,10 +203,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     View getBrightnessView() {
         return mBrightnessView;
-    }
-
-    View getHeaderView() {
-        return mTooltipView;
     }
 
     public void setCallback(QSDetail.Callback callback) {
@@ -289,27 +266,11 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         if (mCustomizePanel != null && mCustomizePanel.isShown()) {
             mCustomizePanel.hide(mCustomizePanel.getWidth() / 2, mCustomizePanel.getHeight() / 2);
         }
-
-        // Instantly hide the header here since we don't want it to still be animating.
-        mTooltipView.setVisibility(View.INVISIBLE);
-    }
-
-    /**
-     * Called when the panel is fully animated out/expanded. This is different from the state
-     * tracked by {@link #mExpanded}, which only checks if the panel is even partially pulled out.
-     */
-    public void onExpanded() {
-        mTooltipView.fadeIn();
-    }
-
-    public void onAnimating() {
-        mTooltipView.fadeOut();
     }
 
     public void setExpanded(boolean expanded) {
         if (mExpanded == expanded) return;
         mExpanded = expanded;
-
         if (!mExpanded) {
             if (mTileLayout instanceof PagedTileLayout) {
                 ((PagedTileLayout) mTileLayout).setCurrentItem(0, false);

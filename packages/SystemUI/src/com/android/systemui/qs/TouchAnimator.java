@@ -107,7 +107,7 @@ public class TouchAnimator {
         void onAnimationAtStart();
 
         /**
-         * Called when the animator moves into a position of "1". Start and end delays are
+         * Called when the animator moves into a position of "0". Start and end delays are
          * taken into account, so this position may cover a range of fractional inputs.
          */
         void onAnimationAtEnd();
