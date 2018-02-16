@@ -553,9 +553,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
     public static final String PLATFORM_PACKAGE_NAME = "android";
 
-    static final String DEFAULT_CONTAINER_PACKAGE = "com.android.defcontainer";
+    public static final String DEFAULT_CONTAINER_PACKAGE = "com.android.defcontainer";
 
-    static final ComponentName DEFAULT_CONTAINER_COMPONENT = new ComponentName(
+    public static final ComponentName DEFAULT_CONTAINER_COMPONENT = new ComponentName(
             DEFAULT_CONTAINER_PACKAGE,
             "com.android.defcontainer.DefaultContainerService");
 

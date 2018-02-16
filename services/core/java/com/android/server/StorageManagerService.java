@@ -16,6 +16,15 @@
 
 package com.android.server;
 
+import static android.os.storage.OnObbStateChangeListener.ERROR_ALREADY_MOUNTED;
+import static android.os.storage.OnObbStateChangeListener.ERROR_COULD_NOT_MOUNT;
+import static android.os.storage.OnObbStateChangeListener.ERROR_COULD_NOT_UNMOUNT;
+import static android.os.storage.OnObbStateChangeListener.ERROR_INTERNAL;
+import static android.os.storage.OnObbStateChangeListener.ERROR_NOT_MOUNTED;
+import static android.os.storage.OnObbStateChangeListener.ERROR_PERMISSION_DENIED;
+import static android.os.storage.OnObbStateChangeListener.MOUNTED;
+import static android.os.storage.OnObbStateChangeListener.UNMOUNTED;
+
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.readLongAttribute;
@@ -60,7 +69,6 @@ import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.IProgressListener;
 import android.os.IStoraged;
 import android.os.IVold;
 import android.os.IVoldListener;
@@ -87,7 +95,6 @@ import android.os.storage.IStorageShutdownObserver;
 import android.os.storage.OnObbStateChangeListener;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
-import android.os.storage.StorageResultCode;
 import android.os.storage.StorageVolume;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
@@ -137,8 +144,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
+import java.security.GeneralSecurityException;
 import java.security.spec.KeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -3032,8 +3038,8 @@ class StorageManagerService extends IStorageManager.Stub
                         // If this is the only one pending we might
                         // have to bind to the service again.
                         if (!connectToService()) {
-                            Slog.e(TAG, "Failed to bind to media container service");
-                            action.handleError();
+                            action.notifyObbStateChange(new ObbException(ERROR_INTERNAL,
+                                    "Failed to bind to media container service"));
                             return;
                         }
                     }
@@ -3049,10 +3055,10 @@ class StorageManagerService extends IStorageManager.Stub
                     }
                     if (mContainerService == null) {
                         // Something seriously wrong. Bail out
-                        Slog.e(TAG, "Cannot bind to media container service");
                         for (ObbAction action : mActions) {
                             // Indicate service bind error
-                            action.handleError();
+                            action.notifyObbStateChange(new ObbException(ERROR_INTERNAL,
+                                    "Failed to bind to media container service"));
                         }
                         mActions.clear();
                     } else if (mActions.size() > 0) {
@@ -3074,10 +3080,10 @@ class StorageManagerService extends IStorageManager.Stub
                             disconnectService();
                         }
                         if (!connectToService()) {
-                            Slog.e(TAG, "Failed to bind to media container service");
                             for (ObbAction action : mActions) {
                                 // Indicate service bind error
-                                action.handleError();
+                                action.notifyObbStateChange(new ObbException(ERROR_INTERNAL,
+                                        "Failed to bind to media container service"));
                             }
                             mActions.clear();
                         }
@@ -3167,6 +3173,20 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    private static class ObbException extends Exception {
+        public final int status;
+
+        public ObbException(int status, String message) {
+            super(message);
+            this.status = status;
+        }
+
+        public ObbException(int status, Throwable cause) {
+            super(cause.getMessage(), cause);
+            this.status = status;
+        }
+    }
+
     abstract class ObbAction {
         private static final int MAX_RETRIES = 3;
         private int mRetries;
@@ -3183,46 +3203,44 @@ class StorageManagerService extends IStorageManager.Stub
                     Slog.i(TAG, "Starting to execute action: " + toString());
                 mRetries++;
                 if (mRetries > MAX_RETRIES) {
-                    Slog.w(TAG, "Failed to invoke remote methods on default container service. Giving up");
                     mObbActionHandler.sendEmptyMessage(OBB_MCS_UNBIND);
-                    handleError();
+                    notifyObbStateChange(new ObbException(ERROR_INTERNAL,
+                            "Failed to bind to media container service"));
                 } else {
                     handleExecute();
                     if (DEBUG_OBB)
                         Slog.i(TAG, "Posting install MCS_UNBIND");
                     mObbActionHandler.sendEmptyMessage(OBB_MCS_UNBIND);
                 }
-            } catch (RemoteException e) {
-                if (DEBUG_OBB)
-                    Slog.i(TAG, "Posting install MCS_RECONNECT");
-                mObbActionHandler.sendEmptyMessage(OBB_MCS_RECONNECT);
-            } catch (Exception e) {
-                if (DEBUG_OBB)
-                    Slog.d(TAG, "Error handling OBB action", e);
-                handleError();
+            } catch (ObbException e) {
+                notifyObbStateChange(e);
                 mObbActionHandler.sendEmptyMessage(OBB_MCS_UNBIND);
             }
         }
 
-        abstract void handleExecute() throws RemoteException, IOException;
-        abstract void handleError();
+        abstract void handleExecute() throws ObbException;
 
-        protected ObbInfo getObbInfo() throws IOException {
-            ObbInfo obbInfo;
+        protected ObbInfo getObbInfo() throws ObbException {
+            final ObbInfo obbInfo;
             try {
                 obbInfo = mContainerService.getObbInfo(mObbState.canonicalPath);
-            } catch (RemoteException e) {
-                Slog.d(TAG, "Couldn't call DefaultContainerService to fetch OBB info for "
-                        + mObbState.canonicalPath);
-                obbInfo = null;
+            } catch (Exception e) {
+                throw new ObbException(ERROR_PERMISSION_DENIED, e);
             }
-            if (obbInfo == null) {
-                throw new IOException("Couldn't read OBB file: " + mObbState.canonicalPath);
+            if (obbInfo != null) {
+                return obbInfo;
+            } else {
+                throw new ObbException(ERROR_INTERNAL,
+                        "Missing OBB info for: " + mObbState.canonicalPath);
             }
-            return obbInfo;
         }
 
-        protected void sendNewStatusOrIgnore(int status) {
+        protected void notifyObbStateChange(ObbException e) {
+            Slog.w(TAG, e);
+            notifyObbStateChange(e.status);
+        }
+
+        protected void notifyObbStateChange(int status) {
             if (mObbState == null || mObbState.token == null) {
                 return;
             }
@@ -3246,16 +3264,14 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         @Override
-        public void handleExecute() throws IOException, RemoteException {
+        public void handleExecute() throws ObbException {
             warnOnNotMounted();
 
             final ObbInfo obbInfo = getObbInfo();
 
             if (!isUidOwnerOfPackageOrSystem(obbInfo.packageName, mCallingUid)) {
-                Slog.w(TAG, "Denied attempt to mount OBB " + obbInfo.filename
-                        + " which is owned by " + obbInfo.packageName);
-                sendNewStatusOrIgnore(OnObbStateChangeListener.ERROR_PERMISSION_DENIED);
-                return;
+                throw new ObbException(ERROR_PERMISSION_DENIED, "Denied attempt to mount OBB "
+                        + obbInfo.filename + " which is owned by " + obbInfo.packageName);
             }
 
             final boolean isMounted;
@@ -3263,9 +3279,8 @@ class StorageManagerService extends IStorageManager.Stub
                 isMounted = mObbPathToStateMap.containsKey(mObbState.rawPath);
             }
             if (isMounted) {
-                Slog.w(TAG, "Attempt to mount OBB which is already mounted: " + obbInfo.filename);
-                sendNewStatusOrIgnore(OnObbStateChangeListener.ERROR_ALREADY_MOUNTED);
-                return;
+                throw new ObbException(ERROR_ALREADY_MOUNTED,
+                        "Attempt to mount OBB which is already mounted: " + obbInfo.filename);
             }
 
             final String hashedKey;
@@ -3283,28 +3298,16 @@ class StorageManagerService extends IStorageManager.Stub
                     BigInteger bi = new BigInteger(key.getEncoded());
                     hashedKey = bi.toString(16);
                     binderKey = hashedKey;
-                } catch (NoSuchAlgorithmException e) {
-                    Slog.e(TAG, "Could not load PBKDF2 algorithm", e);
-                    sendNewStatusOrIgnore(OnObbStateChangeListener.ERROR_INTERNAL);
-                    return;
-                } catch (InvalidKeySpecException e) {
-                    Slog.e(TAG, "Invalid key spec when loading PBKDF2 algorithm", e);
-                    sendNewStatusOrIgnore(OnObbStateChangeListener.ERROR_INTERNAL);
-                    return;
+                } catch (GeneralSecurityException e) {
+                    throw new ObbException(ERROR_INTERNAL, e);
                 }
             }
 
-            int rc = StorageResultCode.OperationSucceeded;
             try {
                 mObbState.volId = mVold.createObb(mObbState.canonicalPath, binderKey,
                         mObbState.ownerGid);
                 mVold.mount(mObbState.volId, 0, -1);
-            } catch (Exception e) {
-                Slog.w(TAG, e);
-                rc = StorageResultCode.OperationFailedInternalError;
-            }
 
-            if (rc == StorageResultCode.OperationSucceeded) {
                 if (DEBUG_OBB)
                     Slog.d(TAG, "Successfully mounted OBB " + mObbState.canonicalPath);
 
@@ -3312,17 +3315,10 @@ class StorageManagerService extends IStorageManager.Stub
                     addObbStateLocked(mObbState);
                 }
 
-                sendNewStatusOrIgnore(OnObbStateChangeListener.MOUNTED);
-            } else {
-                Slog.e(TAG, "Couldn't mount OBB file: " + rc);
-
-                sendNewStatusOrIgnore(OnObbStateChangeListener.ERROR_COULD_NOT_MOUNT);
+                notifyObbStateChange(MOUNTED);
+            } catch (Exception e) {
+                throw new ObbException(ERROR_COULD_NOT_MOUNT, e);
             }
-        }
-
-        @Override
-        public void handleError() {
-            sendNewStatusOrIgnore(OnObbStateChangeListener.ERROR_INTERNAL);
         }
 
         @Override
@@ -3344,7 +3340,7 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         @Override
-        public void handleExecute() throws IOException {
+        public void handleExecute() throws ObbException {
             warnOnNotMounted();
 
             final ObbState existingState;
@@ -3353,42 +3349,29 @@ class StorageManagerService extends IStorageManager.Stub
             }
 
             if (existingState == null) {
-                sendNewStatusOrIgnore(OnObbStateChangeListener.ERROR_NOT_MOUNTED);
-                return;
+                throw new ObbException(ERROR_NOT_MOUNTED, "Missing existingState");
             }
 
             if (existingState.ownerGid != mObbState.ownerGid) {
-                Slog.w(TAG, "Permission denied attempting to unmount OBB " + existingState.rawPath
-                        + " (owned by GID " + existingState.ownerGid + ")");
-                sendNewStatusOrIgnore(OnObbStateChangeListener.ERROR_PERMISSION_DENIED);
+                notifyObbStateChange(new ObbException(ERROR_PERMISSION_DENIED,
+                        "Permission denied to unmount OBB " + existingState.rawPath
+                                + " (owned by GID " + existingState.ownerGid + ")"));
                 return;
             }
 
-            int rc = StorageResultCode.OperationSucceeded;
             try {
                 mVold.unmount(mObbState.volId);
                 mVold.destroyObb(mObbState.volId);
                 mObbState.volId = null;
-            } catch (Exception e) {
-                Slog.w(TAG, e);
-                rc = StorageResultCode.OperationFailedInternalError;
-            }
 
-            if (rc == StorageResultCode.OperationSucceeded) {
                 synchronized (mObbMounts) {
                     removeObbStateLocked(existingState);
                 }
 
-                sendNewStatusOrIgnore(OnObbStateChangeListener.UNMOUNTED);
-            } else {
-                Slog.w(TAG, "Could not unmount OBB: " + existingState);
-                sendNewStatusOrIgnore(OnObbStateChangeListener.ERROR_COULD_NOT_UNMOUNT);
+                notifyObbStateChange(UNMOUNTED);
+            } catch (Exception e) {
+                throw new ObbException(ERROR_COULD_NOT_UNMOUNT, e);
             }
-        }
-
-        @Override
-        public void handleError() {
-            sendNewStatusOrIgnore(OnObbStateChangeListener.ERROR_INTERNAL);
         }
 
         @Override

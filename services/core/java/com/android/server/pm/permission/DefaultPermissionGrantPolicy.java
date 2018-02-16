@@ -16,7 +16,7 @@
 
 package com.android.server.pm.permission;
 
-import static com.android.server.pm.PackageManagerServiceUtils.compareSignatures;
+import static android.os.Process.FIRST_APPLICATION_UID;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -28,15 +28,14 @@ import android.companion.CompanionDeviceManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageList;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.PackageManagerInternal.PackagesProvider;
+import android.content.pm.PackageManagerInternal.SyncAdapterPackagesProvider;
 import android.content.pm.PackageParser;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
-import android.content.pm.PackageManagerInternal.PackagesProvider;
-import android.content.pm.PackageManagerInternal.SyncAdapterPackagesProvider;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Binder;
@@ -52,15 +51,17 @@ import android.provider.CalendarContract;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.provider.Telephony.Sms.Intents;
-import android.telephony.TelephonyManager;
 import android.security.Credentials;
+import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 import android.util.Xml;
+
 import com.android.internal.util.XmlUtils;
 import com.android.server.LocalServices;
+import com.android.server.pm.PackageManagerService;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -71,13 +72,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static android.os.Process.FIRST_APPLICATION_UID;
 
 /**
  * This class is the policy for granting runtime permissions to
@@ -431,6 +429,13 @@ public final class DefaultPermissionGrantPolicy {
                 "com.android.externalstorage.documents", userId);
         if (storagePackage != null) {
             grantRuntimePermissions(storagePackage, STORAGE_PERMISSIONS, true, userId);
+        }
+
+        // Container service
+        PackageParser.Package containerPackage = getSystemPackage(
+                PackageManagerService.DEFAULT_CONTAINER_PACKAGE);
+        if (containerPackage != null) {
+            grantRuntimePermissions(containerPackage, STORAGE_PERMISSIONS, true, userId);
         }
 
         // CertInstaller
