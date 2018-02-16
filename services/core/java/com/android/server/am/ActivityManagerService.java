@@ -5689,8 +5689,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             final long origId = Binder.clearCallingIdentity();
 
-            if (self.state == ActivityState.RESUMED
-                    || self.state == ActivityState.PAUSING) {
+            if (self.isState(ActivityState.RESUMED, ActivityState.PAUSING)) {
                 mWindowManager.overridePendingAppTransition(packageName,
                         enterAnim, exitAnim, null);
             }
@@ -22774,7 +22773,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         }
                     }
                     break;
-                } else if (r.state == ActivityState.PAUSING || r.state == ActivityState.PAUSED) {
+                } else if (r.isState(ActivityState.PAUSING, ActivityState.PAUSED)) {
                     if (adj > ProcessList.PERCEPTIBLE_APP_ADJ) {
                         adj = ProcessList.PERCEPTIBLE_APP_ADJ;
                         app.adjType = "pause-activity";
@@ -22789,7 +22788,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     app.cached = false;
                     app.empty = false;
                     foregroundActivities = true;
-                } else if (r.state == ActivityState.STOPPING) {
+                } else if (r.isState(ActivityState.STOPPING)) {
                     if (adj > ProcessList.PERCEPTIBLE_APP_ADJ) {
                         adj = ProcessList.PERCEPTIBLE_APP_ADJ;
                         app.adjType = "stop-activity";
@@ -23183,9 +23182,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     final ActivityRecord a = cr.activity;
                     if ((cr.flags&Context.BIND_ADJUST_WITH_ACTIVITY) != 0) {
-                        if (a != null && adj > ProcessList.FOREGROUND_APP_ADJ &&
-                            (a.visible || a.state == ActivityState.RESUMED ||
-                             a.state == ActivityState.PAUSING)) {
+                        if (a != null && adj > ProcessList.FOREGROUND_APP_ADJ && (a.visible
+                                || a.isState(ActivityState.RESUMED, ActivityState.PAUSING))) {
                             adj = ProcessList.FOREGROUND_APP_ADJ;
                             if ((cr.flags&Context.BIND_NOT_FOREGROUND) == 0) {
                                 if ((cr.flags&Context.BIND_IMPORTANT) != 0) {

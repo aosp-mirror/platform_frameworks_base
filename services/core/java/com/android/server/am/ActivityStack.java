@@ -70,7 +70,12 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_USER_LEAV
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBILITY;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityStack.ActivityState.DESTROYED;
+import static com.android.server.am.ActivityStack.ActivityState.DESTROYING;
+import static com.android.server.am.ActivityStack.ActivityState.FINISHING;
 import static com.android.server.am.ActivityStack.ActivityState.PAUSED;
+import static com.android.server.am.ActivityStack.ActivityState.PAUSING;
+import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.am.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.am.ActivityStack.ActivityState.STOPPING;
 import static com.android.server.am.ActivityStackSupervisor.FindTaskResult;
@@ -1353,8 +1358,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = activities.get(activityNdx);
-                if (r.state == STOPPING || r.state == STOPPED
-                        || r.state == ActivityState.PAUSED || r.state == ActivityState.PAUSING) {
+                if (r.isState(STOPPING, STOPPED, PAUSED, PAUSING)) {
                     r.setSleeping(true);
                 }
             }
@@ -1401,7 +1405,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             ActivityRecord resuming, boolean pauseImmediately) {
         if (mPausingActivity != null) {
             Slog.wtf(TAG, "Going to pause when pause is already pending for " + mPausingActivity
-                    + " state=" + mPausingActivity.state);
+                    + " state=" + mPausingActivity.getState());
             if (!shouldSleepActivities()) {
                 // Avoid recursion among check for sleep and complete pause during sleeping.
                 // Because activity will be paused immediately after resume, just let pause
@@ -1431,7 +1435,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mLastPausedActivity = prev;
         mLastNoHistoryActivity = (prev.intent.getFlags() & Intent.FLAG_ACTIVITY_NO_HISTORY) != 0
                 || (prev.info.flags & ActivityInfo.FLAG_NO_HISTORY) != 0 ? prev : null;
-        prev.state = ActivityState.PAUSING;
+        prev.setState(PAUSING, "startPausingLocked");
         prev.getTask().touchActiveTime();
         clearLaunchTime(prev);
         final ActivityRecord next = mStackSupervisor.topRunningActivityLocked();
@@ -1525,8 +1529,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         r.userId, System.identityHashCode(r), r.shortComponentName,
                         mPausingActivity != null
                             ? mPausingActivity.shortComponentName : "(none)");
-                if (r.state == ActivityState.PAUSING) {
-                    r.state = ActivityState.PAUSED;
+                if (r.isState(PAUSING)) {
+                    r.setState(PAUSED, "activityPausedLocked");
                     if (r.finishing) {
                         if (DEBUG_PAUSE) Slog.v(TAG,
                                 "Executing finish of failed to pause activity: " + r);
@@ -1544,8 +1548,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Complete pause: " + prev);
 
         if (prev != null) {
-            final boolean wasStopping = prev.state == STOPPING;
-            prev.state = ActivityState.PAUSED;
+            final boolean wasStopping = prev.isState(STOPPING);
+            prev.setState(PAUSED, "completePausedLocked");
             if (prev.finishing) {
                 if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Executing finish of activity: " + prev);
                 prev = finishCurrentActivityLocked(prev, FINISH_AFTER_VISIBLE, false,
@@ -1566,7 +1570,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     // We are also stopping, the stop request must have gone soon after the pause.
                     // We can't clobber it, because the stop confirmation will not be handled.
                     // We don't need to schedule another stop, we only need to let it happen.
-                    prev.state = STOPPING;
+                    prev.setState(STOPPING, "completePausedLocked");
                 } else if (!prev.visible || shouldSleepOrShutDownActivities()) {
                     // Clear out any deferred client hide we might currently have.
                     prev.setDeferHidingClient(false);
@@ -1843,7 +1847,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     }
                     if (reallyVisible) {
                         if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Make visible? " + r
-                                + " finishing=" + r.finishing + " state=" + r.state);
+                                + " finishing=" + r.finishing + " state=" + r.getState());
                         // First: if this is not the current activity being started, make
                         // sure it matches the current configuration.
                         if (r != starting) {
@@ -1875,7 +1879,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         configChanges |= r.configChangeFlags;
                     } else {
                         if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Make invisible? " + r
-                                + " finishing=" + r.finishing + " state=" + r.state
+                                + " finishing=" + r.finishing + " state=" + r.getState()
                                 + " stackShouldBeVisible=" + stackShouldBeVisible
                                 + " behindFullscreenActivity=" + behindFullscreenActivity
                                 + " mLaunchTaskBehind=" + r.mLaunchTaskBehind);
@@ -2059,7 +2063,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
         // Now for any activities that aren't visible to the user, make sure they no longer are
         // keeping the screen frozen.
-        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Making invisible: " + r + " " + r.state);
+        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Making invisible: " + r + " " + r.getState());
         try {
             final boolean canEnterPictureInPicture = r.checkEnterPictureInPictureState(
                     "makeInvisible", true /* beforeStopping */);
@@ -2071,11 +2075,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // the current contract for "auto-Pip" is that the app should enter it before onPause
             // returns. Just need to confirm this reasoning makes sense.
             final boolean deferHidingClient = canEnterPictureInPicture
-                    && r.state != STOPPING && r.state != STOPPED && r.state != PAUSED;
+                    && !r.isState(STOPPING, STOPPED, PAUSED);
             r.setDeferHidingClient(deferHidingClient);
             r.setVisible(false);
 
-            switch (r.state) {
+            switch (r.getState()) {
                 case STOPPING:
                 case STOPPED:
                     if (r.app != null && r.app.thread != null) {
@@ -2255,7 +2259,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // TODO: move mResumedActivity to stack supervisor,
         // there should only be 1 global copy of resumed activity.
         mResumedActivity = r;
-        r.state = ActivityState.RESUMED;
+        r.setState(RESUMED, "setResumedActivityLocked");
         mService.setResumedActivityUncheckLocked(r, reason);
         mStackSupervisor.mRecentTasks.add(r.getTask());
     }
@@ -2294,8 +2298,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         next.delayedResume = false;
 
         // If the top activity is the resumed one, nothing to do.
-        if (mResumedActivity == next && next.state == ActivityState.RESUMED &&
-                    mStackSupervisor.allResumedActivitiesComplete()) {
+        if (mResumedActivity == next && next.isState(RESUMED)
+                && mStackSupervisor.allResumedActivitiesComplete()) {
             // Make sure we have executed any pending transitions, since there
             // should be nothing left to do at this point.
             executeAppTransition(options);
@@ -2389,8 +2393,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             }
             if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
             return true;
-        } else if (mResumedActivity == next && next.state == ActivityState.RESUMED &&
-                mStackSupervisor.allResumedActivitiesComplete()) {
+        } else if (mResumedActivity == next && next.isState(RESUMED)
+                && mStackSupervisor.allResumedActivitiesComplete()) {
             // It is possible for the activity to be resumed when we paused back stacks above if the
             // next activity doesn't have to wait for pause to complete.
             // So, nothing else to-do except:
@@ -2539,7 +2543,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
                 ActivityRecord lastResumedActivity =
                         lastStack == null ? null :lastStack.mResumedActivity;
-                ActivityState lastState = next.state;
+                final ActivityState lastState = next.getState();
 
                 mService.updateCpuStats();
 
@@ -2645,7 +2649,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     // Whoops, need to restart this activity!
                     if (DEBUG_STATES) Slog.v(TAG_STATES, "Resume failed; resetting state to "
                             + lastState + ": " + next);
-                    next.state = lastState;
+                    next.setState(lastState, "resumeTopActivityInnerLocked");
                     if (lastStack != null) {
                         lastStack.mResumedActivity = lastResumedActivity;
                     }
@@ -3408,7 +3412,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 r.stopped = false;
                 if (DEBUG_STATES) Slog.v(TAG_STATES,
                         "Moving to STOPPING: " + r + " (stop requested)");
-                r.state = STOPPING;
+                r.setState(STOPPING, "stopActivityLocked");
                 if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
                         "Stopping visible=" + r.visible + " for " + r);
                 if (!r.visible) {
@@ -3432,7 +3436,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 // Just in case, assume it to be stopped.
                 r.stopped = true;
                 if (DEBUG_STATES) Slog.v(TAG_STATES, "Stop failed; moving to STOPPED: " + r);
-                r.state = STOPPED;
+                r.setState(STOPPED, "stopActivityLocked");
                 if (r.deferRelaunchUntilPaused) {
                     destroyActivityLocked(r, true, "stop-except");
                 }
@@ -3505,9 +3509,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
         if (activityNdx >= 0) {
             r = mTaskHistory.get(taskNdx).mActivities.get(activityNdx);
-            if (r.state == ActivityState.RESUMED
-                    || r.state == ActivityState.PAUSING
-                    || r.state == ActivityState.PAUSED) {
+            if (r.isState(RESUMED, PAUSING, PAUSED)) {
                 if (!r.isActivityTypeHome() || mService.mHomeProcess != r.app) {
                     Slog.w(TAG, "  Force finishing activity "
                             + r.intent.getComponent().flattenToShortString());
@@ -3671,7 +3673,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 if (endTask) {
                     mService.mLockTaskController.clearLockedTask(task);
                 }
-            } else if (r.state != ActivityState.PAUSING) {
+            } else if (!r.isState(PAUSING)) {
                 // If the activity is PAUSING, we will complete the finish once
                 // it is done pausing; else we can just directly finish it here.
                 if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Finish not pausing: " + r);
@@ -3738,7 +3740,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             }
             if (DEBUG_STATES) Slog.v(TAG_STATES,
                     "Moving to STOPPING: "+ r + " (finish requested)");
-            r.state = STOPPING;
+            r.setState(STOPPING, "finishCurrentActivityLocked");
             if (oomAdj) {
                 mService.updateOomAdjLocked();
             }
@@ -3752,15 +3754,15 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         if (mResumedActivity == r) {
             mResumedActivity = null;
         }
-        final ActivityState prevState = r.state;
+        final ActivityState prevState = r.getState();
         if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to FINISHING: " + r);
-        r.state = ActivityState.FINISHING;
+        r.setState(FINISHING, "finishCurrentActivityLocked");
         final boolean finishingActivityInNonFocusedStack
                 = r.getStack() != mStackSupervisor.getFocusedStack()
-                && prevState == ActivityState.PAUSED && mode == FINISH_AFTER_VISIBLE;
+                && prevState == PAUSED && mode == FINISH_AFTER_VISIBLE;
 
         if (mode == FINISH_IMMEDIATELY
-                || (prevState == ActivityState.PAUSED
+                || (prevState == PAUSED
                     && (mode == FINISH_AFTER_PAUSE || inPinnedWindowingMode()))
                 || finishingActivityInNonFocusedStack
                 || prevState == STOPPING
@@ -3981,7 +3983,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         if (setState) {
             if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to DESTROYED: " + r + " (cleaning up)");
-            r.state = ActivityState.DESTROYED;
+            r.setState(DESTROYED, "cleanupActivityLocked");
             if (DEBUG_APP) Slog.v(TAG_APP, "Clearing app during cleanUp for activity " + r);
             r.app = null;
         }
@@ -4030,7 +4032,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         removeTimeoutsForActivityLocked(r);
         if (DEBUG_STATES) Slog.v(TAG_STATES,
                 "Moving to DESTROYED: " + r + " (removed from history)");
-        r.state = ActivityState.DESTROYED;
+        r.setState(DESTROYED, "removeActivityFromHistoryLocked");
         if (DEBUG_APP) Slog.v(TAG_APP, "Clearing app during remove for activity " + r);
         r.app = null;
         r.removeWindowContainer();
@@ -4114,7 +4116,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     continue;
                 }
                 if (r.isDestroyable()) {
-                    if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Destroying " + r + " in state " + r.state
+                    if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Destroying " + r
+                            + " in state " + r.getState()
                             + " resumed=" + mResumedActivity
                             + " pausing=" + mPausingActivity + " for reason " + reason);
                     if (destroyActivityLocked(r, true, reason)) {
@@ -4131,7 +4134,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     final boolean safelyDestroyActivityLocked(ActivityRecord r, String reason) {
         if (r.isDestroyable()) {
             if (DEBUG_SWITCH) Slog.v(TAG_SWITCH,
-                    "Destroying " + r + " in state " + r.state + " resumed=" + mResumedActivity
+                    "Destroying " + r + " in state " + r.getState() + " resumed=" + mResumedActivity
                     + " pausing=" + mPausingActivity + " for reason " + reason);
             return destroyActivityLocked(r, true, reason);
         }
@@ -4159,7 +4162,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 final ActivityRecord activity = activities.get(actNdx);
                 if (activity.app == app && activity.isDestroyable()) {
                     if (DEBUG_RELEASE) Slog.v(TAG_RELEASE, "Destroying " + activity
-                            + " in state " + activity.state + " resumed=" + mResumedActivity
+                            + " in state " + activity.getState() + " resumed=" + mResumedActivity
                             + " pausing=" + mPausingActivity + " for reason " + reason);
                     destroyActivityLocked(activity, true, reason);
                     if (activities.get(actNdx) != activity) {
@@ -4253,13 +4256,15 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             if (r.finishing && !skipDestroy) {
                 if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to DESTROYING: " + r
                         + " (destroy requested)");
-                r.state = ActivityState.DESTROYING;
+                r.setState(DESTROYING,
+                        "destroyActivityLocked. finishing and not skipping destroy");
                 Message msg = mHandler.obtainMessage(DESTROY_TIMEOUT_MSG, r);
                 mHandler.sendMessageDelayed(msg, DESTROY_TIMEOUT);
             } else {
                 if (DEBUG_STATES) Slog.v(TAG_STATES,
                         "Moving to DESTROYED: " + r + " (destroy skipped)");
-                r.state = ActivityState.DESTROYED;
+                r.setState(DESTROYED,
+                        "destroyActivityLocked. not finishing or skipping destroy");
                 if (DEBUG_APP) Slog.v(TAG_APP, "Clearing app during destroy for activity " + r);
                 r.app = null;
             }
@@ -4270,7 +4275,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 removedFromHistory = true;
             } else {
                 if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to DESTROYED: " + r + " (no app)");
-                r.state = ActivityState.DESTROYED;
+                r.setState(DESTROYED, "destroyActivityLocked. not finishing and had no app");
                 if (DEBUG_APP) Slog.v(TAG_APP, "Clearing app during destroy for activity " + r);
                 r.app = null;
             }
@@ -4288,22 +4293,27 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     final void activityDestroyedLocked(IBinder token, String reason) {
         final long origId = Binder.clearCallingIdentity();
         try {
-            ActivityRecord r = ActivityRecord.forTokenLocked(token);
-            if (r != null) {
-                mHandler.removeMessages(DESTROY_TIMEOUT_MSG, r);
-            }
-            if (DEBUG_CONTAINERS) Slog.d(TAG_CONTAINERS, "activityDestroyedLocked: r=" + r);
-
-            if (isInStackLocked(r) != null) {
-                if (r.state == ActivityState.DESTROYING) {
-                    cleanUpActivityLocked(r, true, false);
-                    removeActivityFromHistoryLocked(r, reason);
-                }
-            }
-            mStackSupervisor.resumeFocusedStackTopActivityLocked();
+            activityDestroyedLocked(ActivityRecord.forTokenLocked(token), reason);
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
+    }
+
+    final void activityDestroyedLocked(ActivityRecord record, String reason) {
+        if (record != null) {
+            mHandler.removeMessages(DESTROY_TIMEOUT_MSG, record);
+        }
+
+        if (DEBUG_CONTAINERS) Slog.d(TAG_CONTAINERS, "activityDestroyedLocked: r=" + record);
+
+        if (isInStackLocked(record) != null) {
+            if (record.isState(DESTROYING, DESTROYED)) {
+                cleanUpActivityLocked(record, true, false);
+                removeActivityFromHistoryLocked(record, reason);
+            }
+        }
+
+        mStackSupervisor.resumeFocusedStackTopActivityLocked();
     }
 
     private void removeHistoryRecordsForAppLocked(ArrayList<ActivityRecord> list,
@@ -4374,14 +4384,14 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                                 + ": haveState=" + r.haveState
                                 + " stateNotNeeded=" + r.stateNotNeeded
                                 + " finishing=" + r.finishing
-                                + " state=" + r.state + " callers=" + Debug.getCallers(5));
+                                + " state=" + r.getState() + " callers=" + Debug.getCallers(5));
                         if (!r.finishing) {
                             Slog.w(TAG, "Force removing " + r + ": app died, no saved state");
                             EventLog.writeEvent(EventLogTags.AM_FINISH_ACTIVITY,
                                     r.userId, System.identityHashCode(r),
                                     r.getTask().taskId, r.shortComponentName,
                                     "proc died without state saved");
-                            if (r.state == ActivityState.RESUMED) {
+                            if (r.getState() == RESUMED) {
                                 mService.updateUsageStats(r, false);
                             }
                         }
@@ -4417,7 +4427,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     private void updateTransitLocked(int transit, ActivityOptions options) {
         if (options != null) {
             ActivityRecord r = topRunningActivityLocked();
-            if (r != null && r.state != ActivityState.RESUMED) {
+            if (r != null && !r.isState(RESUMED)) {
                 r.updateOptionsLocked(options);
             } else {
                 ActivityOptions.abort(options);
