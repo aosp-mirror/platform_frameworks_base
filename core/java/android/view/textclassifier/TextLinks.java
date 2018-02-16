@@ -108,6 +108,7 @@ public final class TextLinks implements Parcelable {
      * @param text the text to apply the links to. Must match the original text
      * @param applyStrategy strategy for resolving link conflicts
      * @param spanFactory a factory to generate spans from TextLinks. Will use a default if null
+     * @param allowPrefix whether to allow applying links only to a prefix of the text.
      *
      * @return a status code indicating whether or not the links were successfully applied
      *
@@ -117,10 +118,12 @@ public final class TextLinks implements Parcelable {
     public int apply(
             @NonNull Spannable text,
             @ApplyStrategy int applyStrategy,
-            @Nullable Function<TextLink, TextLinkSpan> spanFactory) {
+            @Nullable Function<TextLink, TextLinkSpan> spanFactory,
+            boolean allowPrefix) {
         Preconditions.checkNotNull(text);
         checkValidApplyStrategy(applyStrategy);
-        if (!mFullText.equals(text.toString())) {
+        final String textString = text.toString();
+        if (!mFullText.equals(textString) && !(allowPrefix && textString.startsWith(mFullText))) {
             return STATUS_DIFFERENT_TEXT;
         }
         if (mLinks.isEmpty()) {

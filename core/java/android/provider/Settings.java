@@ -10457,6 +10457,9 @@ public final class Settings {
          * <pre>
          * smart_selection_dark_launch              (boolean)
          * smart_selection_enabled_for_edit_text    (boolean)
+         * suggest_selection_max_range_length       (int)
+         * classify_text_max_range_length           (int)
+         * generate_links_max_text_length           (int)
          * </pre>
          *
          * <p>

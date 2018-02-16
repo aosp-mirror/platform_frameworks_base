@@ -19,6 +19,7 @@ package android.view.textclassifier;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import android.os.LocaleList;
@@ -32,6 +33,8 @@ import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.Arrays;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -183,6 +186,7 @@ public class TextClassificationManagerTest {
     @Test
     public void testGenerateLinks_none_config() {
         if (isTextClassifierDisabled()) return;
+
         String text = "The number is +12122537077. See you tonight!";
         assertThat(mClassifier.generateLinks(text, mLinksOptions.setEntityConfig(
                 new TextClassifier.EntityConfig(TextClassifier.ENTITY_PRESET_NONE))),
@@ -207,6 +211,25 @@ public class TextClassificationManagerTest {
                         .includeEntities(TextClassifier.TYPE_ADDRESS))),
                 isTextLinksContaining(text, "1600 Amphitheater Parkway, Mountain View, CA",
                         TextClassifier.TYPE_ADDRESS));
+    }
+
+    @Test
+    public void testGenerateLinks_maxLength() {
+        if (isTextClassifierDisabled()) return;
+        char[] manySpaces = new char[mClassifier.getMaxGenerateLinksTextLength()];
+        Arrays.fill(manySpaces, ' ');
+        TextLinks links = mClassifier.generateLinks(new String(manySpaces), null);
+        assertTrue(links.getLinks().isEmpty());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGenerateLinks_tooLong() {
+        if (isTextClassifierDisabled()) {
+            throw new IllegalArgumentException("pass if disabled");
+        }
+        char[] manySpaces = new char[mClassifier.getMaxGenerateLinksTextLength() + 1];
+        Arrays.fill(manySpaces, ' ');
+        mClassifier.generateLinks(new String(manySpaces), null);
     }
 
     @Test

@@ -644,7 +644,13 @@ public class Linkify {
             @Nullable Runnable modifyTextView) {
         Preconditions.checkNotNull(text);
         Preconditions.checkNotNull(classifier);
-        final Supplier<TextLinks> supplier = () -> classifier.generateLinks(text, options);
+
+        // The input text may exceed the maximum length the text classifier can handle. In such
+        // cases, we process the text up to the maximum length.
+        final CharSequence truncatedText = text.subSequence(
+                0, Math.min(text.length(), classifier.getMaxGenerateLinksTextLength()));
+
+        final Supplier<TextLinks> supplier = () -> classifier.generateLinks(truncatedText, options);
         final Consumer<TextLinks> consumer = links -> {
             if (links.getLinks().isEmpty()) {
                 if (callback != null) {
@@ -653,7 +659,8 @@ public class Linkify {
                 return;
             }
 
-            final TextLinkSpan[] old = text.getSpans(0, text.length(), TextLinkSpan.class);
+            // Remove spans only for the part of the text we generated links for.
+            final TextLinkSpan[] old = text.getSpans(0, truncatedText.length(), TextLinkSpan.class);
             for (int i = old.length - 1; i >= 0; i--) {
                 text.removeSpan(old[i]);
             }
@@ -662,7 +669,8 @@ public class Linkify {
                     ? null : options.getSpanFactory();
             final @TextLinks.ApplyStrategy int applyStrategy = (options == null)
                     ? TextLinks.APPLY_STRATEGY_IGNORE : options.getApplyStrategy();
-            final @TextLinks.Status int result =  links.apply(text, applyStrategy, spanFactory);
+            final @TextLinks.Status int result = links.apply(text, applyStrategy, spanFactory,
+                    true /*allowPrefix*/);
             if (result == TextLinks.STATUS_LINKS_APPLIED) {
                 if (modifyTextView != null) {
                     modifyTextView.run();
