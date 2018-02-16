@@ -1123,33 +1123,33 @@ interface ITelephony {
     boolean isHearingAidCompatibilitySupported();
 
     /**
-     * Get IMS Registration Status
-     */
-    boolean isImsRegistered();
-
-    /**
      * Get IMS Registration Status on a particular subid.
      *
      * @param subId user preferred subId.
      *
      * @return {@code true} if the IMS status is registered.
      */
-    boolean isImsRegisteredForSubscriber(int subId);
+    boolean isImsRegistered(int subId);
 
     /**
-     * Returns the Status of Wi-Fi Calling
+     * Returns the Status of Wi-Fi Calling for the subscription id specified.
      */
-    boolean isWifiCallingAvailable();
+    boolean isWifiCallingAvailable(int subId);
 
     /**
-     * Returns the Status of Volte
+     * Returns the Status of VoLTE for the subscription ID specified.
      */
-    boolean isVolteAvailable();
+    boolean isVolteAvailable(int subId);
 
      /**
-     * Returns the Status of VT (video telephony)
+     * Returns the Status of VT (video telephony) for the subscription ID specified.
      */
-    boolean isVideoTelephonyAvailable();
+    boolean isVideoTelephonyAvailable(int subId);
+
+    /**
+    * Returns the MMTEL IMS registration technology for the subsciption ID specified.
+    */
+    int getImsRegTechnologyForMmTel(int subId);
 
     /**
       * Returns the unique device ID of phone, for example, the IMEI for
