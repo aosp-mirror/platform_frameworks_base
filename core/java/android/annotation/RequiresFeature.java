@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,32 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package android.annotation;
 
+import static java.lang.annotation.ElementType.CONSTRUCTOR;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
-import android.content.Context;
+import android.content.pm.PackageManager;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Description of a system service available through
- * {@link Context#getSystemService(Class)}. This is used to auto-generate
- * documentation explaining how to obtain a reference to the service.
+ * Denotes that the annotated element requires one or more device features. This
+ * is used to auto-generate documentation.
  *
+ * @see PackageManager#hasSystemFeature(String)
  * @hide
  */
 @Retention(SOURCE)
-@Target(TYPE)
-public @interface SystemService {
+@Target({TYPE,FIELD,METHOD,CONSTRUCTOR})
+public @interface RequiresFeature {
     /**
-     * The string name of the system service that can be passed to
-     * {@link Context#getSystemService(String)}.
+     * The name of the device feature that is required.
      *
-     * @see Context#getSystemServiceName(Class)
+     * @see PackageManager#hasSystemFeature(String)
      */
     String value();
 }

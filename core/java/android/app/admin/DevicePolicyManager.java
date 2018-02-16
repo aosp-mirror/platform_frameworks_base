@@ -21,6 +21,7 @@ import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -116,6 +117,7 @@ import java.util.concurrent.Executor;
  * guide. </div>
  */
 @SystemService(Context.DEVICE_POLICY_SERVICE)
+@RequiresFeature(PackageManager.FEATURE_DEVICE_ADMIN)
 public class DevicePolicyManager {
     private static String TAG = "DevicePolicyManager";
 
