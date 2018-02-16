@@ -574,6 +574,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     // Compilation reasons.
+    public static final int REASON_UNKNOWN = -1;
     public static final int REASON_FIRST_BOOT = 0;
     public static final int REASON_BOOT = 1;
     public static final int REASON_INSTALL = 2;
@@ -9721,7 +9722,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final long startTime = System.nanoTime();
         final int[] stats = performDexOptUpgrade(pkgs, mIsPreNUpgrade /* showDialog */,
-                    getCompilerFilterForReason(causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT),
+                    causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT,
                     false /* bootComplete */);
 
         final int elapsedTimeSeconds =
@@ -9748,7 +9749,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * and {@code numberOfPackagesFailed}.
      */
     private int[] performDexOptUpgrade(List<PackageParser.Package> pkgs, boolean showDialog,
-            final String compilerFilter, boolean bootComplete) {
+            final int compilationReason, boolean bootComplete) {
 
         int numberOfPackagesVisited = 0;
         int numberOfPackagesOptimized = 0;
@@ -9848,13 +9849,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            String pkgCompilerFilter = compilerFilter;
+            int pkgCompilationReason = compilationReason;
             if (useProfileForDexopt) {
                 // Use background dexopt mode to try and use the profile. Note that this does not
                 // guarantee usage of the profile.
-                pkgCompilerFilter =
-                        PackageManagerServiceCompilerMapping.getCompilerFilterForReason(
-                                PackageManagerService.REASON_BACKGROUND_DEXOPT);
+                pkgCompilationReason = PackageManagerService.REASON_BACKGROUND_DEXOPT;
             }
 
             // checkProfiles is false to avoid merging profiles during boot which
@@ -9865,7 +9864,7 @@ public class PackageManagerService extends IPackageManager.Stub
             int dexoptFlags = bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0;
             int primaryDexOptStaus = performDexOptTraced(new DexoptOptions(
                     pkg.packageName,
-                    pkgCompilerFilter,
+                    pkgCompilationReason,
                     dexoptFlags));
 
             switch (primaryDexOptStaus) {
@@ -9965,8 +9964,8 @@ public class PackageManagerService extends IPackageManager.Stub
         int flags = (checkProfiles ? DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES : 0) |
                 (force ? DexoptOptions.DEXOPT_FORCE : 0) |
                 (bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0);
-        return performDexOpt(new DexoptOptions(packageName, targetCompilerFilter,
-                splitName, flags));
+        return performDexOpt(new DexoptOptions(packageName, REASON_UNKNOWN,
+                targetCompilerFilter, splitName, flags));
     }
 
     /**
@@ -10075,7 +10074,8 @@ public class PackageManagerService extends IPackageManager.Stub
         final String[] instructionSets = getAppDexInstructionSets(p.applicationInfo);
         if (!deps.isEmpty()) {
             DexoptOptions libraryOptions = new DexoptOptions(options.getPackageName(),
-                    options.getCompilerFilter(), options.getSplitName(),
+                    options.getCompilationReason(), options.getCompilerFilter(),
+                    options.getSplitName(),
                     options.getFlags() | DexoptOptions.DEXOPT_AS_SHARED_LIBRARY);
             for (PackageParser.Package depPackage : deps) {
                 // TODO: Analyze and investigate if we (should) profile libraries.

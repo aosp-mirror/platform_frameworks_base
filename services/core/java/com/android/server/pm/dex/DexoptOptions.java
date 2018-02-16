@@ -77,15 +77,21 @@ public final class DexoptOptions {
     // It only applies for primary apk and it's always null if mOnlySecondaryDex is true.
     private final String mSplitName;
 
+    // The reason for invoking dexopt (see PackageManagerService.REASON_* constants).
+    // A -1 value denotes an unknown reason.
+    private final int mCompilationReason;
+
     public DexoptOptions(String packageName, String compilerFilter, int flags) {
-        this(packageName, compilerFilter, /*splitName*/ null, flags);
+        this(packageName, /*compilationReason*/ -1, compilerFilter, /*splitName*/ null, flags);
     }
 
-    public DexoptOptions(String packageName, int compilerReason, int flags) {
-        this(packageName, getCompilerFilterForReason(compilerReason), flags);
+    public DexoptOptions(String packageName, int compilationReason, int flags) {
+        this(packageName, compilationReason, getCompilerFilterForReason(compilationReason),
+                /*splitName*/ null, flags);
     }
 
-    public DexoptOptions(String packageName, String compilerFilter, String splitName, int flags) {
+    public DexoptOptions(String packageName, int compilationReason, String compilerFilter,
+                String splitName, int flags) {
         int validityMask =
                 DEXOPT_CHECK_FOR_PROFILES_UPDATES |
                 DEXOPT_FORCE |
@@ -104,6 +110,7 @@ public final class DexoptOptions {
         mCompilerFilter = compilerFilter;
         mFlags = flags;
         mSplitName = splitName;
+        mCompilationReason = compilationReason;
     }
 
     public String getPackageName() {
@@ -156,5 +163,9 @@ public final class DexoptOptions {
 
     public int getFlags() {
         return mFlags;
+    }
+
+    public int getCompilationReason() {
+        return mCompilationReason;
     }
 }
