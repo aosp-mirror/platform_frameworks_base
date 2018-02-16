@@ -226,18 +226,6 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
                     canvas->drawRect(bounds, transparentPaint);
                 }
             }
-
-            // composing a software layer with alpha
-        } else if (properties.effectiveLayerType() == LayerType::Software) {
-            SkPaint paint;
-            bool needsLayer = layerNeedsPaint(layerProperties, alphaMultiplier, &paint);
-            if (needsLayer) {
-                canvas->saveLayer(bounds, &paint);
-            }
-            displayList->draw(canvas);
-            if (needsLayer) {
-                canvas->restore();
-            }
         } else {
             if (alphaMultiplier < 1.0f) {
                 // Non-layer draw for a view with getHasOverlappingRendering=false, will apply

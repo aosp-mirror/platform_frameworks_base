@@ -56,11 +56,10 @@ class RenderProperties;
 // Keep in sync with View.java:LAYER_TYPE_*
 enum class LayerType {
     None = 0,
-    // Although we cannot build the software layer directly (must be done at
-    // record time), this information is used when applying alpha.
+    // We cannot build the software layer directly (must be done at record time) and all management
+    // of software layers is handled in Java.
     Software = 1,
     RenderLayer = 2,
-    // TODO: LayerTypeSurfaceTexture? Maybe?
 };
 
 enum ClippingFlags {
