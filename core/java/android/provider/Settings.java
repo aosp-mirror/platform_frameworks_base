@@ -3671,6 +3671,20 @@ public final class Settings {
         public static final Validator TTY_MODE_VALIDATOR = new InclusiveIntegerRangeValidator(0, 3);
 
         /**
+         * User-selected RTT mode
+         * 0 = OFF
+         * 1 = FULL
+         * 2 = VCO
+         * 3 = HCO
+         * Uses the same constants as TTY (e.g. {@link android.telecom.TelecomManager#TTY_MODE_OFF})
+         * @hide
+         */
+        public static final String RTT_CALLING_MODE = "rtt_calling_mode";
+
+        /** @hide */
+        public static final Validator RTT_CALLING_MODE_VALIDATOR = TTY_MODE_VALIDATOR;
+
+        /**
          * Whether the sounds effects (key clicks, lid open ...) are enabled. The value is
          * boolean (1 or 0).
          */
@@ -3990,6 +4004,7 @@ public final class Settings {
             DTMF_TONE_WHEN_DIALING,
             DTMF_TONE_TYPE_WHEN_DIALING,
             HEARING_AID,
+            RTT_CALLING_MODE,
             TTY_MODE,
             MASTER_MONO,
             SOUND_EFFECTS_ENABLED,
@@ -4173,6 +4188,7 @@ public final class Settings {
             VALIDATORS.put(DTMF_TONE_TYPE_WHEN_DIALING, DTMF_TONE_TYPE_WHEN_DIALING_VALIDATOR);
             VALIDATORS.put(HEARING_AID, HEARING_AID_VALIDATOR);
             VALIDATORS.put(TTY_MODE, TTY_MODE_VALIDATOR);
+            VALIDATORS.put(RTT_CALLING_MODE, RTT_CALLING_MODE_VALIDATOR);
             VALIDATORS.put(NOTIFICATION_LIGHT_PULSE, NOTIFICATION_LIGHT_PULSE_VALIDATOR);
             VALIDATORS.put(POINTER_LOCATION, POINTER_LOCATION_VALIDATOR);
             VALIDATORS.put(SHOW_TOUCHES, SHOW_TOUCHES_VALIDATOR);
