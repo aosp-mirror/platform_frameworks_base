@@ -13,19 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#define LOG_TAG "incidentd"
+#include "Log.h"
 
 #include "report_directory.h"
 
-#include <cutils/log.h>
 #include <private/android_filesystem_config.h>
 #include <utils/String8.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <dirent.h>
 #include <libgen.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #include <vector>
@@ -33,9 +31,7 @@
 using namespace android;
 using namespace std;
 
-status_t
-create_directory(const char* directory)
-{
+status_t create_directory(const char* directory) {
     struct stat st;
     status_t err = NO_ERROR;
     char* dir = strdup(directory);
@@ -75,14 +71,14 @@ create_directory(const char* directory)
         goto done;
     }
     if ((st.st_mode & 0777) != 0770) {
-        ALOGE("No incident reports today. Mode is %0o on report directory %s",
-                st.st_mode, directory);
+        ALOGE("No incident reports today. Mode is %0o on report directory %s", st.st_mode,
+              directory);
         err = BAD_VALUE;
         goto done;
     }
     if (st.st_uid != AID_INCIDENTD || st.st_gid != AID_INCIDENTD) {
         ALOGE("No incident reports today. Owner is %d and group is %d on report directory %s",
-                st.st_uid, st.st_gid, directory);
+              st.st_uid, st.st_gid, directory);
         err = BAD_VALUE;
         goto done;
     }
@@ -92,20 +88,17 @@ done:
     return err;
 }
 
-static bool
-stat_mtime_cmp(const pair<String8,struct stat>& a, const pair<String8,struct stat>& b)
-{
+static bool stat_mtime_cmp(const pair<String8, struct stat>& a,
+                           const pair<String8, struct stat>& b) {
     return a.second.st_mtime < b.second.st_mtime;
 }
 
-void
-clean_directory(const char* directory, off_t maxSize, size_t maxCount)
-{
+void clean_directory(const char* directory, off_t maxSize, size_t maxCount) {
     DIR* dir;
     struct dirent* entry;
     struct stat st;
 
-    vector<pair<String8,struct stat>> files;
+    vector<pair<String8, struct stat>> files;
 
     if ((dir = opendir(directory)) == NULL) {
         ALOGE("Couldn't open incident directory: %s", directory);
@@ -131,7 +124,7 @@ clean_directory(const char* directory, off_t maxSize, size_t maxCount)
         if (!S_ISREG(st.st_mode)) {
             continue;
         }
-        files.push_back(pair<String8,struct stat>(filename, st));
+        files.push_back(pair<String8, struct stat>(filename, st));
 
         totalSize += st.st_size;
         totalCount++;
@@ -148,8 +141,8 @@ clean_directory(const char* directory, off_t maxSize, size_t maxCount)
     sort(files.begin(), files.end(), stat_mtime_cmp);
 
     // Remove files until we're under our limits.
-    for (vector<pair<String8,struct stat>>::iterator it = files.begin();
-            it != files.end() && totalSize >= maxSize && totalCount >= maxCount; it++) {
+    for (vector<pair<String8, struct stat>>::iterator it = files.begin();
+         it != files.end() && totalSize >= maxSize && totalCount >= maxCount; it++) {
         remove(it->first.string());
         totalSize -= it->second.st_size;
         totalCount--;

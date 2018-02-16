@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#pragma once
 
 #ifndef FD_BUFFER_H
 #define FD_BUFFER_H
@@ -27,8 +28,7 @@ using namespace std;
 /**
  * Reads a file into a buffer, and then writes that data to an FdSet.
  */
-class FdBuffer
-{
+class FdBuffer {
 public:
     FdBuffer();
     ~FdBuffer();
@@ -50,7 +50,8 @@ public:
      *
      * Poll will return POLLERR if fd is from sysfs, handle this edge case.
      */
-    status_t readProcessedDataInStream(int fd, int toFd, int fromFd, int64_t timeoutMs, const bool isSysfs=false);
+    status_t readProcessedDataInStream(int fd, int toFd, int fromFd, int64_t timeoutMs,
+                                       const bool isSysfs = false);
 
     /**
      * Whether we timed out.
@@ -90,4 +91,4 @@ private:
     bool mTruncated;
 };
 
-#endif // FD_BUFFER_H
+#endif  // FD_BUFFER_H

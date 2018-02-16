@@ -11,11 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-#define LOG_TAG "incidentd"
+#include "Log.h"
 
 #include "FdBuffer.h"
-#include "io_util.h"
+#include "incidentd_util.h"
 
 #include <android-base/file.h>
 #include <android-base/test_utils.h>
@@ -48,7 +47,7 @@ public:
     }
 
     void AssertBufferContent(const char* expected) {
-        int i=0;
+        int i = 0;
         EncodedBuffer::iterator it = buffer.data();
         while (it.hasNext()) {
             ASSERT_EQ(it.next(), expected[i++]);
@@ -100,7 +99,7 @@ TEST_F(FdBufferTest, ReadAndIterate) {
     ASSERT_TRUE(WriteStringToFile(testdata, tf.path));
     ASSERT_EQ(NO_ERROR, buffer.read(tf.fd, READ_TIMEOUT));
 
-    int i=0;
+    int i = 0;
     EncodedBuffer::iterator it = buffer.data();
     while (it.hasNext()) {
         EXPECT_EQ(it.next(), (uint8_t)testdata[i++]);
@@ -118,7 +117,7 @@ TEST_F(FdBufferTest, ReadTimeout) {
 
     if (pid == 0) {
         close(c2pPipe.readFd());
-        while(true) {
+        while (true) {
             write(c2pPipe.writeFd(), "poo", 3);
             sleep(1);
         }
@@ -130,7 +129,7 @@ TEST_F(FdBufferTest, ReadTimeout) {
         ASSERT_EQ(NO_ERROR, status);
         EXPECT_TRUE(buffer.timedOut());
 
-        kill(pid, SIGKILL); // reap the child process
+        kill(pid, SIGKILL);  // reap the child process
     }
 }
 
@@ -155,8 +154,8 @@ TEST_F(FdBufferTest, ReadInStreamAndWrite) {
         close(p2cPipe.readFd());
         close(c2pPipe.writeFd());
 
-        ASSERT_EQ(NO_ERROR, buffer.readProcessedDataInStream(tf.fd,
-            p2cPipe.writeFd(), c2pPipe.readFd(), READ_TIMEOUT));
+        ASSERT_EQ(NO_ERROR, buffer.readProcessedDataInStream(tf.fd, p2cPipe.writeFd(),
+                                                             c2pPipe.readFd(), READ_TIMEOUT));
         AssertBufferReadSuccessful(HEAD.size() + testdata.size());
         AssertBufferContent(expected.c_str());
         wait(&pid);
@@ -187,8 +186,8 @@ TEST_F(FdBufferTest, ReadInStreamAndWriteAllAtOnce) {
         close(p2cPipe.readFd());
         close(c2pPipe.writeFd());
 
-        ASSERT_EQ(NO_ERROR, buffer.readProcessedDataInStream(tf.fd,
-            p2cPipe.writeFd(), c2pPipe.readFd(), READ_TIMEOUT));
+        ASSERT_EQ(NO_ERROR, buffer.readProcessedDataInStream(tf.fd, p2cPipe.writeFd(),
+                                                             c2pPipe.readFd(), READ_TIMEOUT));
         AssertBufferReadSuccessful(HEAD.size() + testdata.size());
         AssertBufferContent(expected.c_str());
         wait(&pid);
@@ -212,8 +211,8 @@ TEST_F(FdBufferTest, ReadInStreamEmpty) {
         close(p2cPipe.readFd());
         close(c2pPipe.writeFd());
 
-        ASSERT_EQ(NO_ERROR, buffer.readProcessedDataInStream(tf.fd,
-            p2cPipe.writeFd(), c2pPipe.readFd(), READ_TIMEOUT));
+        ASSERT_EQ(NO_ERROR, buffer.readProcessedDataInStream(tf.fd, p2cPipe.writeFd(),
+                                                             c2pPipe.readFd(), READ_TIMEOUT));
         AssertBufferReadSuccessful(0);
         AssertBufferContent("");
         wait(&pid);
@@ -222,7 +221,7 @@ TEST_F(FdBufferTest, ReadInStreamEmpty) {
 
 TEST_F(FdBufferTest, ReadInStreamMoreThan4MB) {
     const std::string testFile = kTestDataPath + "morethan4MB.txt";
-    size_t fourMB = (size_t) 4 * 1024 * 1024;
+    size_t fourMB = (size_t)4 * 1024 * 1024;
     int fd = open(testFile.c_str(), O_RDONLY | O_CLOEXEC);
     ASSERT_NE(fd, -1);
     int pid = fork();
@@ -239,8 +238,8 @@ TEST_F(FdBufferTest, ReadInStreamMoreThan4MB) {
         close(p2cPipe.readFd());
         close(c2pPipe.writeFd());
 
-        ASSERT_EQ(NO_ERROR, buffer.readProcessedDataInStream(fd,
-            p2cPipe.writeFd(), c2pPipe.readFd(), READ_TIMEOUT));
+        ASSERT_EQ(NO_ERROR, buffer.readProcessedDataInStream(fd, p2cPipe.writeFd(),
+                                                             c2pPipe.readFd(), READ_TIMEOUT));
         EXPECT_EQ(buffer.size(), fourMB);
         EXPECT_FALSE(buffer.timedOut());
         EXPECT_TRUE(buffer.truncated());
@@ -276,9 +275,9 @@ TEST_F(FdBufferTest, ReadInStreamTimeOut) {
         close(p2cPipe.readFd());
         close(c2pPipe.writeFd());
 
-        ASSERT_EQ(NO_ERROR, buffer.readProcessedDataInStream(tf.fd,
-            p2cPipe.writeFd(), c2pPipe.readFd(), QUICK_TIMEOUT_MS));
+        ASSERT_EQ(NO_ERROR, buffer.readProcessedDataInStream(tf.fd, p2cPipe.writeFd(),
+                                                             c2pPipe.readFd(), QUICK_TIMEOUT_MS));
         EXPECT_TRUE(buffer.timedOut());
-        kill(pid, SIGKILL); // reap the child process
+        kill(pid, SIGKILL);  // reap the child process
     }
 }

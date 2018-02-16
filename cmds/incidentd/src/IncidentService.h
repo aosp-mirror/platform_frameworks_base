@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#pragma once
 
 #ifndef INCIDENT_SERVICE_H
 #define INCIDENT_SERVICE_H
@@ -32,8 +33,7 @@ using namespace android::os;
 using namespace std;
 
 // ================================================================================
-class ReportRequestQueue : public virtual RefBase
-{
+class ReportRequestQueue : public virtual RefBase {
 public:
     ReportRequestQueue();
     virtual ~ReportRequestQueue();
@@ -46,10 +46,8 @@ private:
     deque<sp<ReportRequest> > mQueue;
 };
 
-
 // ================================================================================
-class ReportHandler : public MessageHandler
-{
+class ReportHandler : public MessageHandler {
 public:
     ReportHandler(const sp<Looper>& handlerLooper, const sp<ReportRequestQueue>& queue);
     virtual ~ReportHandler();
@@ -89,7 +87,6 @@ private:
     void send_backlog_to_dropbox();
 };
 
-
 // ================================================================================
 class IncidentService : public BnIncidentManager {
 public:
@@ -99,14 +96,29 @@ public:
     virtual Status reportIncident(const IncidentReportArgs& args);
 
     virtual Status reportIncidentToStream(const IncidentReportArgs& args,
-            const sp<IIncidentReportStatusListener>& listener, const unique_fd& stream);
+                                          const sp<IIncidentReportStatusListener>& listener,
+                                          const unique_fd& stream);
 
     virtual Status systemRunning();
+
+    // Implement commands for debugging purpose.
+    virtual status_t onTransact(uint32_t code, const Parcel& data, Parcel* reply,
+                                uint32_t flags) override;
+    virtual status_t command(FILE* in, FILE* out, FILE* err, Vector<String8>& args);
 
 private:
     sp<ReportRequestQueue> mQueue;
     sp<ReportHandler> mHandler;
+
+    /**
+     * Commands print out help.
+     */
+    status_t cmd_help(FILE* out);
+
+    /**
+     * Commands related to privacy filtering.
+     */
+    status_t cmd_privacy(FILE* in, FILE* out, FILE* err, Vector<String8>& args);
 };
 
-
-#endif // INCIDENT_SERVICE_H
+#endif  // INCIDENT_SERVICE_H

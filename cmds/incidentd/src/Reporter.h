@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#pragma once
 
 #ifndef REPORTER_H
 #define REPORTER_H
@@ -33,23 +34,21 @@ using namespace android::os;
 using namespace std;
 
 // ================================================================================
-struct ReportRequest : public virtual RefBase
-{
+struct ReportRequest : public virtual RefBase {
     IncidentReportArgs args;
     sp<IIncidentReportStatusListener> listener;
     int fd;
     status_t err;
 
-    ReportRequest(const IncidentReportArgs& args,
-            const sp<IIncidentReportStatusListener> &listener, int fd);
+    ReportRequest(const IncidentReportArgs& args, const sp<IIncidentReportStatusListener>& listener,
+                  int fd);
     virtual ~ReportRequest();
 
-    bool ok(); // returns true if the request is ok for write.
+    bool ok();  // returns true if the request is ok for write.
 };
 
 // ================================================================================
-class ReportRequestSet
-{
+class ReportRequestSet {
 public:
     ReportRequestSet();
     ~ReportRequestSet();
@@ -81,18 +80,14 @@ private:
 };
 
 // ================================================================================
-class Reporter : public virtual RefBase
-{
+class Reporter : public virtual RefBase {
 public:
-    enum run_report_status_t {
-        REPORT_FINISHED = 0,
-        REPORT_NEEDS_DROPBOX = 1
-    };
+    enum run_report_status_t { REPORT_FINISHED = 0, REPORT_NEEDS_DROPBOX = 1 };
 
     ReportRequestSet batch;
 
-    Reporter(); // PROD must use this constructor.
-    Reporter(const char* directory); // For testing purpose only.
+    Reporter();                       // PROD must use this constructor.
+    Reporter(const char* directory);  // For testing purpose only.
     virtual ~Reporter();
 
     // Run the report as described in the batch and args parameters.
@@ -110,8 +105,7 @@ private:
 
     status_t create_file(int* fd);
 
-    bool isTest = true; // default to true for testing
+    bool isTest = true;  // default to true for testing
 };
 
-
-#endif // REPORTER_H
+#endif  // REPORTER_H

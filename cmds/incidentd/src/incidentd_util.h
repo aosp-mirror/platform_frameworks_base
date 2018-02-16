@@ -13,16 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#pragma once
 
-#ifndef IO_UTIL_H
-#define IO_UTIL_H
+#ifndef INCIDENTD_UTIL_H
+#define INCIDENTD_UTIL_H
 
-#include <stdint.h>
-#include <utils/Errors.h>
+#include <android-base/unique_fd.h>
 
-using namespace android;
+#include "Privacy.h"
 
-status_t write_all(int fd, uint8_t const* buf, size_t size);
+using namespace android::base;
+
+const Privacy* get_privacy_of_section(int id);
 
 class Fpipe {
 public:
@@ -35,7 +37,8 @@ public:
     int writeFd() const;
 
 private:
-    int mFds[2];
+    unique_fd mRead;
+    unique_fd mWrite;
 };
 
-#endif // IO_UTIL_H
+#endif  // INCIDENTD_UTIL_H
