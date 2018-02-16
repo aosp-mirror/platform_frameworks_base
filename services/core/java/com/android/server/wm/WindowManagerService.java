@@ -667,11 +667,18 @@ public class WindowManagerService extends IWindowManager.Stub
     WindowManagerInternal.OnHardKeyboardStatusChangeListener mHardKeyboardStatusChangeListener;
     SettingsObserver mSettingsObserver;
 
-    // A count of the windows which are 'seamlessly rotated', e.g. a surface
-    // at an old orientation is being transformed. We freeze orientation updates
-    // while any windows are seamlessly rotated, so we need to track when this
-    // hits zero so we can apply deferred orientation updates.
-    int mSeamlessRotationCount = 0;
+    /**
+     * A count of the windows which are 'seamlessly rotated', e.g. a surface
+     * at an old orientation is being transformed. We freeze orientation updates
+     * while any windows are seamlessly rotated, so we need to track when this
+     * hits zero so we can apply deferred orientation updates.
+     */
+    private int mSeamlessRotationCount = 0;
+    /**
+     * True in the interval from starting seamless rotation until the last rotated
+     * window draws in the new orientation.
+     */
+    private boolean mRotatingSeamlessly = false;
 
     private final class SettingsObserver extends ContentObserver {
         private final Uri mDisplayInversionEnabledUri =
@@ -5657,7 +5664,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void startFreezingDisplayLocked(int exitAnim, int enterAnim,
             DisplayContent displayContent) {
-        if (mDisplayFrozen) {
+        if (mDisplayFrozen || mRotatingSeamlessly) {
             return;
         }
 
@@ -7026,6 +7033,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_ORIENTATION) {
                 Slog.i(TAG, "Performing post-rotate rotation after seamless rotation");
             }
+            finishSeamlessRotation();
 
             final DisplayContent displayContent = w.getDisplayContent();
             if (displayContent.updateRotationUnchecked()) {
@@ -7437,6 +7445,18 @@ public class WindowManagerService extends IWindowManager.Stub
     void sendSetRunningRemoteAnimation(int pid, boolean runningRemoteAnimation) {
         mH.obtainMessage(H.SET_RUNNING_REMOTE_ANIMATION, pid, runningRemoteAnimation ? 1 : 0)
                 .sendToTarget();
+    }
+
+    void startSeamlessRotation() {
+        // We are careful to reset this in case a window was removed before it finished
+        // seamless rotation.
+        mSeamlessRotationCount = 0;
+
+        mRotatingSeamlessly = true;
+    }
+
+    void finishSeamlessRotation() {
+        mRotatingSeamlessly = false;
     }
 
     /**

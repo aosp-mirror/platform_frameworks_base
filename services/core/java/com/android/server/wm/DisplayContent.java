@@ -1041,9 +1041,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // to their rotated state independently and without a freeze required.
             screenRotationAnimation = null;
 
-            // We have to reset this in case a window was removed before it
-            // finished seamless rotation.
-            mService.mSeamlessRotationCount = 0;
+            mService.startSeamlessRotation();
         }
 
         // We need to update our screen size information to match the new rotation. If the rotation
