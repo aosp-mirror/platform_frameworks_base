@@ -123,4 +123,14 @@ public class PackageManagerServiceCompilerMapping {
 
         return value;
     }
+
+    public static String getReasonName(int reason) {
+        if (reason == PackageManagerService.REASON_UNKNOWN) {
+            return "unknown";
+        }
+        if (reason < 0 || reason >= REASON_STRINGS.length) {
+            throw new IllegalArgumentException("reason " + reason + " invalid");
+        }
+        return REASON_STRINGS[reason];
+    }
 }
