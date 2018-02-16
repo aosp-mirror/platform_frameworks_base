@@ -3342,7 +3342,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     stack.goToSleepIfPossible(false /* shuttingDown */);
                 } else {
                     stack.awakeFromSleepingLocked();
-                    if (isFocusedStack(stack)) {
+                    if (isFocusedStack(stack)
+                            && !mKeyguardController.isKeyguardActive(display.mDisplayId)) {
+                        // If there is no keyguard on this display - resume immediately. Otherwise
+                        // we'll wait for keyguard visibility callback and resume while ensuring
+                        // activities visibility
                         resumeFocusedStackTopActivityLocked();
                     }
                 }
