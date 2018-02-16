@@ -152,7 +152,7 @@ import java.util.Vector;
  *         {@link #getVideoWidth()}, {@link #setAudioAttributes(AudioAttributes)},
  *         {@link #setLooping(boolean)},
  *         {@link #setVolume(float, float)}, {@link #pause()}, {@link #play()},
- *         {@link #seekTo(long, int)}, {@link #prepare()} or
+ *         {@link #seekTo(long, int)} or
  *         {@link #prepareAsync()} in the <em>Idle</em> state for both cases. If any of these
  *         methods is called right after a MediaPlayer2 object is constructed,
  *         the user supplied callback method OnErrorListener.onError() won't be
@@ -199,7 +199,7 @@ import java.util.Vector;
  *         register a OnErrorListener to look out for error notifications from
  *         the internal player engine.</li>
  *         <li>IllegalStateException is
- *         thrown to prevent programming errors such as calling {@link #prepare()},
+ *         thrown to prevent programming errors such as calling
  *         {@link #prepareAsync()}, {@link #setDataSource(DataSourceDesc)}, or
  *         {@code setPlaylist} methods in an invalid state. </li>
  *         </ul>
@@ -221,15 +221,11 @@ import java.util.Vector;
  *     <li>A MediaPlayer2 object must first enter the <em>Prepared</em> state
  *         before playback can be started.
  *         <ul>
- *         <li>There are two ways (synchronous vs.
- *         asynchronous) that the <em>Prepared</em> state can be reached:
- *         either a call to {@link #prepare()} (synchronous) which
- *         transfers the object to the <em>Prepared</em> state once the method call
- *         returns, or a call to {@link #prepareAsync()} (asynchronous) which
- *         first transfers the object to the <em>Preparing</em> state after the
+ *         <li>{@link #prepareAsync()} first transfers the object to the
+ *         <em>Preparing</em> state after the
  *         call returns (which occurs almost right way) while the internal
  *         player engine continues working on the rest of preparation work
- *         until the preparation work completes. When the preparation completes or when {@link #prepare()} call returns,
+ *         until the preparation work completes. When the preparation completes,
  *         the internal player engine then calls a user supplied callback method,
  *         onPrepared() of the EventCallback interface, if an
  *         EventCallback is registered beforehand via {@link
@@ -239,7 +235,7 @@ import java.util.Vector;
  *         of calling any method with side effect while a MediaPlayer2 object is
  *         in the <em>Preparing</em> state is undefined.</li>
  *         <li>An IllegalStateException is
- *         thrown if {@link #prepare()} or {@link #prepareAsync()} is called in
+ *         thrown if {@link #prepareAsync()} is called in
  *         any other state.</li>
  *         <li>While in the <em>Prepared</em> state, properties
  *         such as audio/sound volume, screenOnWhilePlaying, looping can be
@@ -410,7 +406,7 @@ import java.util.Vector;
  *     <td>{Error}</p></td>
  *     <td>Successful invoke of this method does not change the state. In order for the
  *         target audio attributes type to become effective, this method must be called before
- *         prepare() or prepareAsync().</p></td></tr>
+ *         prepareAsync().</p></td></tr>
  * <tr><td>setAudioSessionId </p></td>
  *     <td>{Idle} </p></td>
  *     <td>{Initialized, Prepared, Started, Paused, Stopped, PlaybackCompleted,
@@ -424,7 +420,7 @@ import java.util.Vector;
  *     <td>{Error}</p></td>
  *     <td>Successful invoke of this method does not change the state. In order for the
  *         target audio stream type to become effective, this method must be called before
- *         prepare() or prepareAsync().</p></td></tr>
+ *         prepareAsync().</p></td></tr>
  * <tr><td>setAuxEffectSendLevel </p></td>
  *     <td>any</p></td>
  *     <td>{} </p></td>
@@ -576,9 +572,12 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     private boolean mBypassInterruptionPolicy;
     private final CloseGuard mGuard = CloseGuard.get();
 
+    private final Object mPlLock = new Object();
     private List<DataSourceDesc> mPlaylist;
-    private int mPLCurrentIndex = 0;
-    private int mPLNextIndex = -1;
+    private int mPlCurrentIndex = 0;
+    private int mPlNextIndex = -1;
+    private int mPlNextSourceState = NEXT_SOURCE_STATE_INIT;
+    private boolean mPlNextSourcePlayPending = false;
     private int mLoopingMode = LOOPING_MODE_NONE;
 
     // Modular DRM
@@ -619,6 +618,11 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
          */
         native_setup(new WeakReference<MediaPlayer2Impl>(this));
     }
+
+    private static final int NEXT_SOURCE_STATE_ERROR = -1;
+    private static final int NEXT_SOURCE_STATE_INIT = 0;
+    private static final int NEXT_SOURCE_STATE_PREPARING = 1;
+    private static final int NEXT_SOURCE_STATE_PREPARED = 2;
 
     /*
      * Update the MediaPlayer2Impl SurfaceTexture.
@@ -789,10 +793,13 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     @Override
     public void setDataSource(@NonNull DataSourceDesc dsd) throws IOException {
         Preconditions.checkNotNull(dsd, "the DataSourceDesc cannot be null");
-        mPlaylist = Collections.synchronizedList(new ArrayList<DataSourceDesc>(1));
-        mPlaylist.add(dsd);
-        mPLCurrentIndex = 0;
-        setDataSourcePriv(dsd);
+        synchronized (mPlLock) {
+            mPlaylist = Collections.synchronizedList(new ArrayList<DataSourceDesc>(1));
+            mPlaylist.add(dsd);
+            mPlCurrentIndex = 0;
+            mPlNextIndex = -1;
+            handleDataSource(true /* isCurrent */, dsd);
+        }
     }
 
     /**
@@ -802,10 +809,12 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      */
     @Override
     public DataSourceDesc getCurrentDataSource() {
-        if (mPlaylist == null) {
-            return null;
+        synchronized (mPlLock) {
+            if (mPlaylist == null) {
+                return null;
+            }
+            return mPlaylist.get(mPlCurrentIndex);
         }
-        return mPlaylist.get(mPLCurrentIndex);
     }
 
     /**
@@ -841,11 +850,14 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             startIndex = pl.size() - 1;
         }
 
-        mPlaylist = Collections.synchronizedList(new ArrayList(pl));
-        mPLCurrentIndex = startIndex;
-        setDataSourcePriv(mPlaylist.get(startIndex));
-        // TODO: handle the preparation of next source in the play list.
-        // It should be processed after current source is prepared.
+        synchronized (mPlLock) {
+            mPlaylist = Collections.synchronizedList(new ArrayList(pl));
+            mPlCurrentIndex = startIndex;
+            handleDataSource(true /* isCurrent */, mPlaylist.get(startIndex));
+            // TODO: handle the preparation of next source in the play list.
+            // It should be processed after current source is prepared.
+            mPlNextIndex = getNextIndex_l();
+        }
     }
 
     /**
@@ -855,10 +867,12 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      */
     @Override
     public List<DataSourceDesc> getPlaylist() {
-        if (mPlaylist == null) {
-            return null;
+        synchronized (mPlLock) {
+            if (mPlaylist == null) {
+                return null;
+            }
+            return new ArrayList(mPlaylist);
         }
-        return new ArrayList(mPlaylist);
     }
 
     /**
@@ -870,19 +884,21 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      */
     @Override
     public void setCurrentPlaylistItem(int index) {
-        if (mPlaylist == null) {
-            throw new IllegalArgumentException("play list has not been set yet.");
-        }
-        if (index < 0 || index >= mPlaylist.size()) {
-            throw new IndexOutOfBoundsException("index is out of play list range.");
-        }
+        synchronized (mPlLock) {
+            if (mPlaylist == null) {
+                throw new IllegalArgumentException("play list has not been set yet.");
+            }
+            if (index < 0 || index >= mPlaylist.size()) {
+                throw new IndexOutOfBoundsException("index is out of play list range.");
+            }
 
-        if (index == mPLCurrentIndex) {
-            return;
-        }
+            if (index == mPlCurrentIndex) {
+                return;
+            }
 
-        // TODO: in playing state, stop current source and start to play source of index.
-        mPLCurrentIndex = index;
+            // TODO: in playing state, stop current source and start to play source of index.
+            mPlCurrentIndex = index;
+        }
     }
 
     /**
@@ -894,19 +910,21 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      */
     @Override
     public void setNextPlaylistItem(int index) {
-        if (mPlaylist == null) {
-            throw new IllegalArgumentException("play list has not been set yet.");
-        }
-        if (index < 0 || index >= mPlaylist.size()) {
-            throw new IndexOutOfBoundsException("index is out of play list range.");
-        }
+        synchronized (mPlLock) {
+            if (mPlaylist == null) {
+                throw new IllegalArgumentException("play list has not been set yet.");
+            }
+            if (index < 0 || index >= mPlaylist.size()) {
+                throw new IndexOutOfBoundsException("index is out of play list range.");
+            }
 
-        if (index == mPLNextIndex) {
-            return;
-        }
+            if (index == mPlNextIndex) {
+                return;
+            }
 
-        // TODO: prepare the new next-to-be-played DataSourceDesc
-        mPLNextIndex = index;
+            // TODO: prepare the new next-to-be-played DataSourceDesc
+            mPlNextIndex = index;
+        }
     }
 
     /**
@@ -916,7 +934,9 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      */
     @Override
     public int getCurrentPlaylistItemIndex() {
-        return mPLCurrentIndex;
+        synchronized (mPlLock) {
+            return mPlCurrentIndex;
+        }
     }
 
     /**
@@ -935,12 +955,15 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             && mode != LOOPING_MODE_SHUFFLE) {
             throw new IllegalArgumentException("mode is not supported.");
         }
-        mLoopingMode = mode;
-        if (mPlaylist == null) {
-            return;
-        }
 
-        // TODO: handle the new mode if necessary.
+        synchronized (mPlLock) {
+            mLoopingMode = mode;
+            if (mPlaylist == null) {
+                return;
+            }
+
+            // TODO: handle the new mode if necessary.
+        }
     }
 
     /**
@@ -950,7 +973,9 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      */
     @Override
     public int getLoopingMode() {
-        return mPLCurrentIndex;
+        synchronized (mPlLock) {
+            return mPlCurrentIndex;
+        }
     }
 
     /**
@@ -961,10 +986,12 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      */
     @Override
     public void movePlaylistItem(int indexFrom, int indexTo) {
-        if (mPlaylist == null) {
-            throw new IllegalArgumentException("play list has not been set yet.");
+        synchronized (mPlLock) {
+            if (mPlaylist == null) {
+                throw new IllegalArgumentException("play list has not been set yet.");
+            }
+            // TODO: move the DataSourceDesc from indexFrom to indexTo.
         }
-        // TODO: move the DataSourceDesc from indexFrom to indexTo.
     }
 
     /**
@@ -979,14 +1006,16 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      */
     @Override
     public DataSourceDesc removePlaylistItem(int index) {
-        if (mPlaylist == null) {
-            throw new IllegalArgumentException("play list has not been set yet.");
-        }
+        synchronized (mPlLock) {
+            if (mPlaylist == null) {
+                throw new IllegalArgumentException("play list has not been set yet.");
+            }
 
-        DataSourceDesc oldDsd = mPlaylist.remove(index);
-        // TODO: if index == mPLCurrentIndex, stop current source and move to next one.
-        // if index == mPLNextIndex, prepare the new next-to-be-played source.
-        return oldDsd;
+            DataSourceDesc oldDsd = mPlaylist.remove(index);
+            // TODO: if index == mPlCurrentIndex, stop current source and move to next one.
+            // if index == mPlNextIndex, prepare the new next-to-be-played source.
+            return oldDsd;
+        }
     }
 
     /**
@@ -1005,26 +1034,28 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     public void addPlaylistItem(int index, DataSourceDesc dsd) {
         Preconditions.checkNotNull(dsd, "the DataSourceDesc cannot be null");
 
-        if (mPlaylist == null) {
-            if (index == 0) {
-                mPlaylist = Collections.synchronizedList(new ArrayList<DataSourceDesc>());
-                mPlaylist.add(dsd);
-                mPLCurrentIndex = 0;
-                return;
+        synchronized (mPlLock) {
+            if (mPlaylist == null) {
+                if (index == 0) {
+                    mPlaylist = Collections.synchronizedList(new ArrayList<DataSourceDesc>());
+                    mPlaylist.add(dsd);
+                    mPlCurrentIndex = 0;
+                    return;
+                }
+                throw new IllegalArgumentException("index should be 0 for first DataSourceDesc.");
             }
-            throw new IllegalArgumentException("index should be 0 for first DataSourceDesc.");
-        }
 
-        long id = dsd.getId();
-        for (DataSourceDesc pldsd : mPlaylist) {
-            if (id == pldsd.getId()) {
-                throw new IllegalArgumentException("Id of dsd already exists in the play list.");
+            long id = dsd.getId();
+            for (DataSourceDesc pldsd : mPlaylist) {
+                if (id == pldsd.getId()) {
+                    throw new IllegalArgumentException("Id of dsd already exists in the play list.");
+                }
             }
-        }
 
-        mPlaylist.add(index, dsd);
-        if (index <= mPLCurrentIndex) {
-            ++mPLCurrentIndex;
+            mPlaylist.add(index, dsd);
+            if (index <= mPlCurrentIndex) {
+                ++mPlCurrentIndex;
+            }
         }
     }
 
@@ -1051,42 +1082,62 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         Preconditions.checkNotNull(mPlaylist, "the play list cannot be null");
 
         long id = dsd.getId();
-        for (int i = 0; i < mPlaylist.size(); ++i) {
-            if (i == index) {
-                continue;
+        synchronized (mPlLock) {
+            for (int i = 0; i < mPlaylist.size(); ++i) {
+                if (i == index) {
+                    continue;
+                }
+                if (id == mPlaylist.get(i).getId()) {
+                    throw new IllegalArgumentException(
+                            "Id of dsd already exists in the play list.");
+                }
             }
-            if (id == mPlaylist.get(i).getId()) {
-                throw new IllegalArgumentException("Id of dsd already exists in the play list.");
-            }
-        }
 
-        // TODO: if needed, stop playback of current source, and start new dsd.
-        DataSourceDesc oldDsd = mPlaylist.set(index, dsd);
-        return mPlaylist.set(index, dsd);
+            // TODO: if needed, stop playback of current source, and start new dsd.
+            DataSourceDesc oldDsd = mPlaylist.set(index, dsd);
+            return mPlaylist.set(index, dsd);
+        }
     }
 
-    private void setDataSourcePriv(@NonNull DataSourceDesc dsd) throws IOException {
+    // Called with mPlLock acquired.
+    // TODO: support all looping modes
+    private int getNextIndex_l() {
+        if (mPlaylist.size() <= 1) {
+            return -1;
+        }
+        int index = mPlCurrentIndex + 1;
+        if (index >= mPlaylist.size()) {
+            index = 0;
+        }
+        return index;
+    }
+
+    private void handleDataSource(boolean isCurrent, @NonNull DataSourceDesc dsd)
+            throws IOException {
         Preconditions.checkNotNull(dsd, "the DataSourceDesc cannot be null");
 
         switch (dsd.getType()) {
             case DataSourceDesc.TYPE_CALLBACK:
-                setDataSourcePriv(dsd.getId(),
-                                  dsd.getMedia2DataSource());
+                handleDataSource(isCurrent,
+                                 dsd.getId(),
+                                 dsd.getMedia2DataSource());
                 break;
 
             case DataSourceDesc.TYPE_FD:
-                setDataSourcePriv(dsd.getId(),
-                                  dsd.getFileDescriptor(),
-                                  dsd.getFileDescriptorOffset(),
-                                  dsd.getFileDescriptorLength());
+                handleDataSource(isCurrent,
+                                 dsd.getId(),
+                                 dsd.getFileDescriptor(),
+                                 dsd.getFileDescriptorOffset(),
+                                 dsd.getFileDescriptorLength());
                 break;
 
             case DataSourceDesc.TYPE_URI:
-                setDataSourcePriv(dsd.getId(),
-                                  dsd.getUriContext(),
-                                  dsd.getUri(),
-                                  dsd.getUriHeaders(),
-                                  dsd.getUriCookies());
+                handleDataSource(isCurrent,
+                                 dsd.getId(),
+                                 dsd.getUriContext(),
+                                 dsd.getUri(),
+                                 dsd.getUriHeaders(),
+                                 dsd.getUriCookies());
                 break;
 
             default:
@@ -1113,66 +1164,59 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * @throws NullPointerException     if context or uri is null
      * @throws IOException              if uri has a file scheme and an I/O error occurs
      */
-    private void setDataSourcePriv(long srcId, @NonNull Context context, @NonNull Uri uri,
+    private void handleDataSource(
+            boolean isCurrent, long srcId,
+            @NonNull Context context, @NonNull Uri uri,
             @Nullable Map<String, String> headers, @Nullable List<HttpCookie> cookies)
             throws IOException {
-        if (context == null) {
-            throw new NullPointerException("context param can not be null.");
-        }
-
-        if (uri == null) {
-            throw new NullPointerException("uri param can not be null.");
-        }
-
-        if (cookies != null) {
-            CookieHandler cookieHandler = CookieHandler.getDefault();
-            if (cookieHandler != null && !(cookieHandler instanceof CookieManager)) {
-                throw new IllegalArgumentException("The cookie handler has to be of CookieManager "
-                        + "type when cookies are provided.");
-            }
-        }
-
         // The context and URI usually belong to the calling user. Get a resolver for that user
         // and strip out the userId from the URI if present.
         final ContentResolver resolver = context.getContentResolver();
         final String scheme = uri.getScheme();
         final String authority = ContentProvider.getAuthorityWithoutUserId(uri.getAuthority());
         if (ContentResolver.SCHEME_FILE.equals(scheme)) {
-            setDataSourcePriv(srcId, uri.getPath(), null, null);
+            handleDataSource(isCurrent, srcId, uri.getPath(), null, null);
             return;
-        } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)
+        }
+
+        if (ContentResolver.SCHEME_CONTENT.equals(scheme)
                 && Settings.AUTHORITY.equals(authority)) {
             // Try cached ringtone first since the actual provider may not be
             // encryption aware, or it may be stored on CE media storage
             final int type = RingtoneManager.getDefaultType(uri);
             final Uri cacheUri = RingtoneManager.getCacheForType(type, context.getUserId());
             final Uri actualUri = RingtoneManager.getActualDefaultRingtoneUri(context, type);
-            if (attemptDataSource(srcId, resolver, cacheUri)) {
+            if (attemptDataSource(isCurrent, srcId, resolver, cacheUri)) {
                 return;
-            } else if (attemptDataSource(srcId, resolver, actualUri)) {
-                return;
-            } else {
-                setDataSourcePriv(srcId, uri.toString(), headers, cookies);
             }
+            if (attemptDataSource(isCurrent, srcId, resolver, actualUri)) {
+                return;
+            }
+            handleDataSource(isCurrent, srcId, uri.toString(), headers, cookies);
         } else {
             // Try requested Uri locally first, or fallback to media server
-            if (attemptDataSource(srcId, resolver, uri)) {
+            if (attemptDataSource(isCurrent, srcId, resolver, uri)) {
                 return;
-            } else {
-                setDataSourcePriv(srcId, uri.toString(), headers, cookies);
             }
+            handleDataSource(isCurrent, srcId, uri.toString(), headers, cookies);
         }
     }
 
-    private boolean attemptDataSource(long srcId, ContentResolver resolver, Uri uri) {
+    private boolean attemptDataSource(
+            boolean isCurrent, long srcId, ContentResolver resolver, Uri uri) {
         try (AssetFileDescriptor afd = resolver.openAssetFileDescriptor(uri, "r")) {
             if (afd.getDeclaredLength() < 0) {
-                setDataSourcePriv(srcId, afd.getFileDescriptor(), 0, DataSourceDesc.LONG_MAX);
+                handleDataSource(isCurrent,
+                                 srcId,
+                                 afd.getFileDescriptor(),
+                                 0,
+                                 DataSourceDesc.LONG_MAX);
             } else {
-                setDataSourcePriv(srcId,
-                                  afd.getFileDescriptor(),
-                                  afd.getStartOffset(),
-                                  afd.getDeclaredLength());
+                handleDataSource(isCurrent,
+                                 srcId,
+                                 afd.getFileDescriptor(),
+                                 afd.getStartOffset(),
+                                 afd.getDeclaredLength());
             }
             return true;
         } catch (NullPointerException | SecurityException | IOException ex) {
@@ -1181,10 +1225,10 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         }
     }
 
-    private void setDataSourcePriv(
-            long srcId, String path, Map<String, String> headers, List<HttpCookie> cookies)
-            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException
-    {
+    private void handleDataSource(
+            boolean isCurrent, long srcId,
+            String path, Map<String, String> headers, List<HttpCookie> cookies)
+            throws IOException {
         String[] keys = null;
         String[] values = null;
 
@@ -1199,19 +1243,20 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 ++i;
             }
         }
-        setDataSourcePriv(srcId, path, keys, values, cookies);
+        handleDataSource(isCurrent, srcId, path, keys, values, cookies);
     }
 
-    private void setDataSourcePriv(long srcId, String path, String[] keys, String[] values,
-            List<HttpCookie> cookies)
-            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
+    private void handleDataSource(boolean isCurrent, long srcId,
+            String path, String[] keys, String[] values, List<HttpCookie> cookies)
+            throws IOException {
         final Uri uri = Uri.parse(path);
         final String scheme = uri.getScheme();
         if ("file".equals(scheme)) {
             path = uri.getPath();
         } else if (scheme != null) {
             // handle non-file sources
-            nativeSetDataSource(
+            nativeHandleDataSourceUrl(
+                isCurrent,
                 srcId,
                 Media2HTTPService.createHTTPService(path, cookies),
                 path,
@@ -1224,16 +1269,17 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         if (file.exists()) {
             FileInputStream is = new FileInputStream(file);
             FileDescriptor fd = is.getFD();
-            setDataSourcePriv(srcId, fd, 0, DataSourceDesc.LONG_MAX);
+            handleDataSource(isCurrent, srcId, fd, 0, DataSourceDesc.LONG_MAX);
             is.close();
         } else {
-            throw new IOException("setDataSourcePriv failed.");
+            throw new IOException("handleDataSource failed.");
         }
     }
 
-    private native void nativeSetDataSource(
-        long srcId, Media2HTTPService httpService, String path, String[] keys, String[] values)
-        throws IOException, IllegalArgumentException, SecurityException, IllegalStateException;
+    private native void nativeHandleDataSourceUrl(
+            boolean isCurrent, long srcId,
+            Media2HTTPService httpService, String path, String[] keys, String[] values)
+            throws IOException;
 
     /**
      * Sets the data source (FileDescriptor) to use. The FileDescriptor must be
@@ -1244,53 +1290,92 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * @throws IllegalArgumentException if fd is not a valid FileDescriptor
      * @throws IOException if fd can not be read
      */
-    private void setDataSourcePriv(long srcId, FileDescriptor fd, long offset, long length)
-            throws IOException {
-        _setDataSource(srcId, fd, offset, length);
+    private void handleDataSource(
+            boolean isCurrent, long srcId,
+            FileDescriptor fd, long offset, long length) throws IOException {
+        nativeHandleDataSourceFD(isCurrent, srcId, fd, offset, length);
     }
 
-    private native void _setDataSource(long srcId, FileDescriptor fd, long offset, long length)
-            throws IOException;
+    private native void nativeHandleDataSourceFD(boolean isCurrent, long srcId,
+            FileDescriptor fd, long offset, long length) throws IOException;
 
     /**
      * @throws IllegalStateException if it is called in an invalid state
      * @throws IllegalArgumentException if dataSource is not a valid Media2DataSource
      */
-    private void setDataSourcePriv(long srcId, Media2DataSource dataSource) {
-        _setDataSource(srcId, dataSource);
+    private void handleDataSource(boolean isCurrent, long srcId, Media2DataSource dataSource) {
+        nativeHandleDataSourceCallback(isCurrent, srcId, dataSource);
     }
 
-    private native void _setDataSource(long srcId, Media2DataSource dataSource);
+    private native void nativeHandleDataSourceCallback(
+            boolean isCurrent, long srcId, Media2DataSource dataSource);
 
-    /**
-     * Prepares the player for playback, synchronously.
-     *
-     * After setting the datasource and the display surface, you need to either
-     * call prepare() or prepareAsync(). For files, it is OK to call prepare(),
-     * which blocks until MediaPlayer2 is ready for playback.
-     *
-     * @throws IOException if source can not be accessed
-     * @throws IllegalStateException if it is called in an invalid state
-     * @hide
-     */
-    @Override
-    public void prepare() throws IOException {
-        _prepare();
-        scanInternalSubtitleTracks();
+    // This function shall be called with |mPlLock| acquired.
+    private void prepareNextDataSource_l() {
+        if (mPlNextIndex < 0 || mPlNextSourceState != NEXT_SOURCE_STATE_INIT) {
+            // There is no next source or it's in preparing or prepared state.
+            return;
+        }
 
-        // DrmInfo, if any, has been resolved by now.
-        synchronized (mDrmLock) {
-            mDrmInfoResolved = true;
+        try {
+            mPlNextSourceState = NEXT_SOURCE_STATE_PREPARING;
+            handleDataSource(false /* isCurrent */, mPlaylist.get(mPlNextIndex));
+        } catch (Exception e) {
+            Message msg2 = mEventHandler.obtainMessage(
+                    MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, MEDIA_ERROR_UNSUPPORTED, null);
+            final long nextSrcId = mPlaylist.get(mPlNextIndex).getId();
+            mEventHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mEventHandler.handleMessage(msg2, nextSrcId);
+                }
+            });
         }
     }
 
-    private native void _prepare() throws IOException, IllegalStateException;
+    // This function shall be called with |mPlLock| acquired.
+    private void playNextDataSource_l() {
+        if (mPlNextIndex < 0) {
+            return;
+        }
+
+        if (mPlNextSourceState == NEXT_SOURCE_STATE_PREPARED) {
+            // Switch to next source only when it's in prepared state.
+            mPlCurrentIndex = mPlNextIndex;
+            mPlNextIndex = getNextIndex_l();
+            mPlNextSourceState = NEXT_SOURCE_STATE_INIT;
+            mPlNextSourcePlayPending = false;
+
+            long srcId = mPlaylist.get(mPlCurrentIndex).getId();
+            try {
+                nativePlayNextDataSource(srcId);
+            } catch (Exception e) {
+                Message msg2 = mEventHandler.obtainMessage(
+                        MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, MEDIA_ERROR_UNSUPPORTED, null);
+                mEventHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mEventHandler.handleMessage(msg2, srcId);
+                    }
+                });
+            }
+
+            // Wait for MEDIA2_INFO_STARTED_AS_NEXT to prepare next source.
+        } else {
+            if (mPlNextSourceState == NEXT_SOURCE_STATE_INIT) {
+                prepareNextDataSource_l();
+            }
+            mPlNextSourcePlayPending = true;
+        }
+    }
+
+    private native void nativePlayNextDataSource(long srcId);
 
     /**
      * Prepares the player for playback, asynchronously.
      *
      * After setting the datasource and the display surface, you need to either
-     * call prepare() or prepareAsync(). For streams, you should call prepareAsync(),
+     * call prepareAsync(). For streams, you should call prepareAsync(),
      * which returns immediately, rather than blocking until enough data has been
      * buffered.
      *
@@ -1940,7 +2025,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     /**
      * Resets the MediaPlayer2 to its uninitialized state. After calling
      * this method, you will have to initialize it again by setting the
-     * data source and calling prepare().
+     * data source and calling prepareAsync().
      */
     @Override
     public void reset() {
@@ -2015,7 +2100,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     /**
      * Sets the audio attributes for this MediaPlayer2.
      * See {@link AudioAttributes} for how to build and configure an instance of this class.
-     * You must call this method before {@link #prepare()} or {@link #prepareAsync()} in order
+     * You must call this method before {@link #prepareAsync()} in order
      * for the audio attributes to become effective thereafter.
      * @param attributes a non-null set of audio attributes
      * @throws IllegalArgumentException if the attributes are null or invalid.
@@ -3097,6 +3182,19 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                     sendMessage(msg2);
                 }
 
+                synchronized (mPlLock) {
+                    Log.i(TAG, "MEDIA_PREPARED: srcId=" + srcId
+                            + ", currentIndex=" + mPlCurrentIndex + ", nextIndex=" + mPlNextIndex);
+                    if (mPlCurrentIndex >= 0 && srcId == mPlaylist.get(mPlCurrentIndex).getId()) {
+                        prepareNextDataSource_l();
+                    } else if (mPlNextIndex >= 0 && srcId == mPlaylist.get(mPlNextIndex).getId()) {
+                        mPlNextSourceState = NEXT_SOURCE_STATE_PREPARED;
+                        if (mPlNextSourcePlayPending) {
+                            playNextDataSource_l();
+                        }
+                    }
+                }
+
                 synchronized (mEventCbLock) {
                     for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
                         cb.first.execute(() -> cb.second.onInfo(
@@ -3135,6 +3233,14 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 return;
 
             case MEDIA_PLAYBACK_COMPLETE:
+                synchronized (mPlLock) {
+                    if (mPlCurrentIndex >= 0 && srcId == mPlaylist.get(mPlCurrentIndex).getId()) {
+                        Log.i(TAG, "MEDIA_PLAYBACK_COMPLETE: srcId=" + srcId
+                                + ", currentIndex=" + mPlCurrentIndex + ", nextIndex=" + mPlNextIndex);
+                        playNextDataSource_l();
+                    }
+                }
+
                 synchronized (mEventCbLock) {
                     for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
                         cb.first.execute(() -> cb.second.onInfo(
@@ -3217,6 +3323,12 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
             case MEDIA_INFO:
                 switch (msg.arg1) {
+                    case MEDIA_INFO_STARTED_AS_NEXT:
+                        if (mPlCurrentIndex >= 0 && srcId == mPlaylist.get(mPlCurrentIndex).getId()) {
+                            prepareNextDataSource_l();
+                        }
+                        break;
+
                     case MEDIA_INFO_VIDEO_TRACK_LAGGING:
                         Log.i(TAG, "Info (" + msg.arg1 + "," + msg.arg2 + ")");
                         break;
@@ -3525,7 +3637,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     /**
      * Retrieves the DRM Info associated with the current source
      *
-     * @throws IllegalStateException if called before prepare()
+     * @throws IllegalStateException if called before prepareAsync()
      */
     @Override
     public DrmInfo getDrmInfo() {
@@ -3576,7 +3688,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * @param uuid The UUID of the crypto scheme. If not known beforehand, it can be retrieved
      * from the source through {@code getDrmInfo} or registering a {@code onDrmInfoListener}.
      *
-     * @throws IllegalStateException              if called before prepare(), or the DRM was
+     * @throws IllegalStateException              if called before prepareAsync(), or the DRM was
      *                                            prepared already
      * @throws UnsupportedSchemeException         if the crypto scheme is not supported
      * @throws ResourceBusyException              if required DRM resources are in use
