@@ -172,7 +172,7 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
     }
 
     /**
-     * Get the timing advance value for LTE, as a value between 0..63.
+     * Get the timing advance value for LTE, as a value in range of 0..1282.
      * Integer.MAX_VALUE is reported when there is no active RRC
      * connection. Refer to 3GPP 36.213 Sec 4.2.3
      * @return the LTE timing advance, if available.
