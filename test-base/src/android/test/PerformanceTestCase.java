@@ -21,6 +21,11 @@ package android.test;
  *
  * If you want your test to be used as a performance test, you must
  * implement this interface.
+ *
+ * @deprecated Use
+ * <a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">
+ * AndroidJUnitRunner</a> instead. New tests should be written using the
+ * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
  */
 @Deprecated
 public interface PerformanceTestCase
