@@ -185,6 +185,7 @@ package android.content {
   public abstract class Context {
     method public android.os.UserHandle getUser();
     method public int getUserId();
+    method public void setAutofillCompatibilityEnabled(boolean);
   }
 
 }
@@ -532,6 +533,7 @@ package android.provider {
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
+    field public static final java.lang.String AUTOFILL_COMPAT_ALLOWED_PACKAGES = "autofill_compat_allowed_packages";
     field public static final java.lang.String LOCATION_GLOBAL_KILL_SWITCH = "location_global_kill_switch";
     field public static final java.lang.String LOW_POWER_MODE = "low_power";
     field public static final java.lang.String USE_OPEN_WIFI_PACKAGE = "use_open_wifi_package";

@@ -17,6 +17,7 @@
 package android.content;
 
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.content.pm.ApplicationInfo;
@@ -1006,6 +1007,7 @@ public class ContextWrapper extends Context {
     /**
      * @hide
      */
+    @TestApi
     @Override
     public void setAutofillCompatibilityEnabled(boolean  autofillCompatEnabled) {
         if (mBase != null) {

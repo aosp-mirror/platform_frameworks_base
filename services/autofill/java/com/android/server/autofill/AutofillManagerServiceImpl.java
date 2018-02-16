@@ -40,7 +40,6 @@ import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
 import android.os.AsyncTask;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
@@ -907,9 +906,12 @@ final class AutofillManagerServiceImpl {
         pw.print(prefix); pw.print("Disabled: "); pw.println(mDisabled);
         pw.print(prefix); pw.print("Field classification enabled: ");
             pw.println(isFieldClassificationEnabledLocked());
+        pw.print(prefix); pw.print("Compat pkgs: ");
         final ArrayMap<String, Pair<Long, String>> compatPkgs = getCompatibilityPackagesLocked();
-        if (compatPkgs != null) {
-            pw.print(prefix); pw.print("Compat pkgs: "); pw.println(compatPkgs.keySet());
+        if (compatPkgs == null) {
+            pw.println("N/A");
+        } else {
+            pw.println(compatPkgs);
         }
         pw.print(prefix); pw.print("Setup complete: "); pw.println(mSetupComplete);
         pw.print(prefix); pw.print("Last prune: "); pw.println(mLastPrune);

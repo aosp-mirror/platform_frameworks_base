@@ -376,6 +376,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     /**
      * Updates values of the nodes in the context's structure so that:
+     *
      * - proper node is focused
      * - autofillValue is sent back to service when it was previously autofilled
      * - autofillValue is sent in the view used to force a request
@@ -395,7 +396,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             final ViewNode node = nodes[i];
             if (node == null) {
                 if (sVerbose) {
-                    Slog.v(TAG, "fillStructureWithAllowedValues(): no node for " + viewState.id);
+                    Slog.v(TAG,
+                            "fillContextWithAllowedValuesLocked(): no node for " + viewState.id);
                 }
                 continue;
             }

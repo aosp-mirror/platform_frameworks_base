@@ -11371,6 +11371,7 @@ public final class Settings {
          * @hide
          */
         @SystemApi
+        @TestApi
         public static final String AUTOFILL_COMPAT_ALLOWED_PACKAGES =
                 "autofill_compat_allowed_packages";
 
