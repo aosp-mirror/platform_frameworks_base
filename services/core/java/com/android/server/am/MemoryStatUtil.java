@@ -28,7 +28,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,8 +52,9 @@ final class MemoryStatUtil {
     /**
      * Reads memory.stat of a process from memcg.
      */
-    static @Nullable MemoryStat readMemoryStatFromMemcg(int uid, int pid) {
-        final String memoryStatPath = String.format(MEMORY_STAT_FILE_FMT, uid, pid);
+    @Nullable
+    static MemoryStat readMemoryStatFromMemcg(int uid, int pid) {
+        final String memoryStatPath = String.format(Locale.US, MEMORY_STAT_FILE_FMT, uid, pid);
         final File memoryStatFile = new File(memoryStatPath);
         if (!memoryStatFile.exists()) {
             if (DEBUG_METRICS) Slog.i(TAG, memoryStatPath + " not found");
@@ -74,7 +75,8 @@ final class MemoryStatUtil {
      * Parses relevant statistics out from the contents of a memory.stat file in memcg.
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
-    static @Nullable MemoryStat parseMemoryStat(String memoryStatContents) {
+    @Nullable
+    static MemoryStat parseMemoryStat(String memoryStatContents) {
         MemoryStat memoryStat = new MemoryStat();
         if (memoryStatContents == null) {
             return memoryStat;

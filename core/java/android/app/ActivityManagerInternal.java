@@ -356,4 +356,9 @@ public abstract class ActivityManagerInternal {
      * Whether an UID is active or idle.
      */
     public abstract boolean isUidActive(int uid);
+
+    /**
+     * Returns a list that contains the memory stats for currently running processes.
+     */
+    public abstract List<ProcessMemoryState> getMemoryStateForProcesses();
 }
