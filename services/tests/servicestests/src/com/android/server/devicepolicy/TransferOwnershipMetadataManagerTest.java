@@ -21,6 +21,10 @@ import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.A
 
 import static com.android.server.devicepolicy.TransferOwnershipMetadataManager
         .OWNER_TRANSFER_METADATA_XML;
+import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.TAG_ADMIN_TYPE;
+import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.TAG_SOURCE_COMPONENT;
+import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.TAG_TARGET_COMPONENT;
+import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.TAG_USER_ID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -53,11 +57,13 @@ import java.nio.file.Paths;
 
 @RunWith(AndroidJUnit4.class)
 public class TransferOwnershipMetadataManagerTest {
-    private final static String ADMIN_PACKAGE = "com.dummy.admin.package";
-    private final static String TARGET_PACKAGE = "com.dummy.target.package";
+    private final static String SOURCE_COMPONENT =
+            "com.dummy.admin.package/com.dummy.admin.package.SourceClassName";
+    private final static String TARGET_COMPONENT =
+            "com.dummy.target.package/com.dummy.target.package.TargetClassName";
     private final static int USER_ID = 123;
-    private final static Metadata TEST_PARAMS = new Metadata(ADMIN_PACKAGE,
-            TARGET_PACKAGE, USER_ID, ADMIN_TYPE_DEVICE_OWNER);
+    private final static Metadata TEST_PARAMS = new Metadata(SOURCE_COMPONENT,
+            TARGET_COMPONENT, USER_ID, ADMIN_TYPE_DEVICE_OWNER);
 
     private MockInjector mMockInjector;
 
@@ -84,10 +90,13 @@ public class TransferOwnershipMetadataManagerTest {
             String contents = new String(Files.readAllBytes(path), Charset.forName("UTF-8"));
             assertEquals(
                 "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
-                    + "<user-id>" + USER_ID + "</user-id>\n"
-                    + "<admin-component>" + ADMIN_PACKAGE + "</admin-component>\n"
-                    + "<target-component>" + TARGET_PACKAGE + "</target-component>\n"
-                    + "<admin-type>" + ADMIN_TYPE_DEVICE_OWNER + "</admin-type>\n",
+                    + "<" + TAG_USER_ID + ">" + USER_ID + "</" + TAG_USER_ID + ">\n"
+                    + "<" + TAG_SOURCE_COMPONENT + ">" + SOURCE_COMPONENT + "</"
+                        + TAG_SOURCE_COMPONENT + ">\n"
+                    + "<" + TAG_TARGET_COMPONENT + ">" + TARGET_COMPONENT + "</"
+                        + TAG_TARGET_COMPONENT + ">\n"
+                    + "<" + TAG_ADMIN_TYPE + ">" + ADMIN_TYPE_DEVICE_OWNER + "</"
+                        + TAG_ADMIN_TYPE + ">\n",
                 contents);
         } catch (IOException e) {
             e.printStackTrace();
