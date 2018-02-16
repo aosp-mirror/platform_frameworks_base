@@ -2190,6 +2190,10 @@
     players. -->
     <integer name="config_safe_media_volume_index">10</integer>
 
+    <!-- Safe USB headset gain. This value is used to ensure that the SPL on the USB
+    headset output is compliant to EN 60950 requirements for portable music players. -->
+    <integer name="config_safe_media_volume_usb_mB">-3700</integer>
+
     <!-- Configure mobile network MTU. The standard default is set here but each carrier
          may have a specific value set in an overlay config.xml file. -->
     <integer name="config_mobile_mtu">1500</integer>
