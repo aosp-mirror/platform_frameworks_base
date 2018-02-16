@@ -446,7 +446,7 @@ public final class Slice implements Parcelable {
         }
 
         /**
-         * Add a color to the slice being constructed
+         * Add an integer to the slice being constructed
          * @param subType Optional template-specific type information
          * @see {@link SliceItem#getSubType()}
          */
@@ -456,7 +456,7 @@ public final class Slice implements Parcelable {
         }
 
         /**
-         * Add a color to the slice being constructed
+         * Add an integer to the slice being constructed
          * @param subType Optional template-specific type information
          * @see {@link SliceItem#getSubType()}
          */
