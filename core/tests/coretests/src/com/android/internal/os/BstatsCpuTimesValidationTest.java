@@ -25,6 +25,7 @@ import static android.os.BatteryStats.Uid.PROCESS_STATE_TOP;
 import static android.os.BatteryStats.Uid.PROCESS_STATE_TOP_SLEEPING;
 import static android.os.BatteryStats.Uid.UID_PROCESS_TYPES;
 
+import static com.android.internal.os.BatteryStatsImpl.Constants.KEY_PROC_STATE_CPU_TIMES_READ_DELAY_MS;
 import static com.android.internal.os.BatteryStatsImpl.Constants.KEY_TRACK_CPU_TIMES_BY_PROC_STATE;
 
 import static junit.framework.Assert.assertNotNull;
@@ -101,6 +102,11 @@ public class BstatsCpuTimesValidationTest {
 
     private static final int WORK_DURATION_MS = 2000;
 
+    private static final String DESIRED_PROC_STATE_CPU_TIMES_DELAY = "0";
+
+    private static boolean sBatteryStatsConstsUpdated;
+    private static String sOriginalBatteryStatsConsts;
+
     private static Context sContext;
     private static UiDevice sUiDevice;
     private static int sTestPkgUid;
@@ -117,11 +123,41 @@ public class BstatsCpuTimesValidationTest {
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
         sTestPkgUid = sContext.getPackageManager().getPackageUid(TEST_PKG, 0);
         checkCpuTimesAvailability();
+        if (sPerProcStateTimesAvailable && sCpuFreqTimesAvailable) {
+            setDesiredReadyDelay();
+        }
     }
 
     @AfterClass
     public static void tearDownOnce() throws Exception {
+        if (sBatteryStatsConstsUpdated) {
+            Settings.Global.putString(sContext.getContentResolver(),
+                    Settings.Global.BATTERY_STATS_CONSTANTS, sOriginalBatteryStatsConsts);
+        }
         batteryReset();
+    }
+
+    private static void setDesiredReadyDelay() {
+        sOriginalBatteryStatsConsts = Settings.Global.getString(sContext.getContentResolver(),
+                Settings.Global.BATTERY_STATS_CONSTANTS);
+        String newBatteryStatsConstants;
+        final String newConstant = KEY_PROC_STATE_CPU_TIMES_READ_DELAY_MS
+                + "=" + DESIRED_PROC_STATE_CPU_TIMES_DELAY;
+        if (sOriginalBatteryStatsConsts == null || "null".equals(sOriginalBatteryStatsConsts)) {
+            // battery_stats_constants is initially empty, so just assign the desired value.
+            newBatteryStatsConstants = newConstant;
+        } else if (sOriginalBatteryStatsConsts.contains(KEY_PROC_STATE_CPU_TIMES_READ_DELAY_MS)) {
+            // battery_stats_constants contains delay duration, so replace it
+            // with the desired value.
+            newBatteryStatsConstants = sOriginalBatteryStatsConsts.replaceAll(
+                    KEY_PROC_STATE_CPU_TIMES_READ_DELAY_MS + "=\\d+", newConstant);
+        } else {
+            // battery_stats_constants didn't contain any delay, so append the desired value.
+            newBatteryStatsConstants = sOriginalBatteryStatsConsts + "," + newConstant;
+        }
+        Settings.Global.putString(sContext.getContentResolver(),
+                Settings.Global.BATTERY_STATS_CONSTANTS, newBatteryStatsConstants);
+        sBatteryStatsConstsUpdated = true;
     }
 
     // Checks cpu freq times of system uid as an indication of whether /proc/uid_time_in_state
@@ -132,9 +168,9 @@ public class BstatsCpuTimesValidationTest {
         batteryOff();
         final long[] totalCpuTimes = getAllCpuFreqTimes(Process.SYSTEM_UID);
         sCpuFreqTimesAvailable = totalCpuTimes != null;
-        final long[] fgSvcCpuTimes = getAllCpuFreqTimes(Process.SYSTEM_UID,
+        final long[] fgCpuTimes = getAllCpuFreqTimes(Process.SYSTEM_UID,
                 PROCESS_STATE_FOREGROUND);
-        sPerProcStateTimesAvailable = fgSvcCpuTimes != null;
+        sPerProcStateTimesAvailable = fgCpuTimes != null;
     }
 
     @Test
