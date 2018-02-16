@@ -111,12 +111,6 @@ DurationMetricProducer::~DurationMetricProducer() {
 
 sp<AnomalyTracker> DurationMetricProducer::addAnomalyTracker(const Alert &alert) {
     std::lock_guard<std::mutex> lock(mMutex);
-    if (alert.trigger_if_sum_gt() > alert.num_buckets() * mBucketSizeNs) {
-        ALOGW("invalid alert: threshold (%f) > possible recordable value (%d x %lld)",
-              alert.trigger_if_sum_gt(), alert.num_buckets(),
-              (long long)mBucketSizeNs);
-        return nullptr;
-    }
     sp<DurationAnomalyTracker> anomalyTracker = new DurationAnomalyTracker(alert, mConfigKey);
     if (anomalyTracker != nullptr) {
         mAnomalyTrackers.push_back(anomalyTracker);
