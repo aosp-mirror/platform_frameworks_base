@@ -152,7 +152,6 @@ public class SurfaceControl implements Parcelable {
     private static native void nativeSeverChildren(long transactionObj, long nativeObject);
     private static native void nativeSetOverrideScalingMode(long transactionObj, long nativeObject,
             int scalingMode);
-    private static native void nativeDestroy(long transactionObj, long nativeObject);
     private static native IBinder nativeGetHandle(long nativeObject);
     private static native boolean nativeGetTransformToDisplayInverse(long nativeObject);
 
@@ -1568,16 +1567,6 @@ public class SurfaceControl implements Parcelable {
             } else {
                 nativeSetFlags(mNativeObject, sc.mNativeObject, 0, SURFACE_OPAQUE);
             }
-            return this;
-        }
-
-        /**
-         * Same as {@link #destroy()} except this is invoked in a transaction instead of
-         * immediately.
-         */
-        public Transaction destroy(SurfaceControl sc) {
-            sc.checkNotReleased();
-            nativeDestroy(mNativeObject, sc.mNativeObject);
             return this;
         }
 

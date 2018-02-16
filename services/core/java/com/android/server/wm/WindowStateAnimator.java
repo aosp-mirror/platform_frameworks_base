@@ -164,8 +164,6 @@ class WindowStateAnimator {
 
     private boolean mAnimationStartDelayed;
 
-    private final SurfaceControl.Transaction mTmpTransaction = new SurfaceControl.Transaction();
-
     /** The pixel format of the underlying SurfaceControl */
     int mSurfaceFormat;
 
@@ -282,19 +280,14 @@ class WindowStateAnimator {
         }
     }
 
-    void hide(SurfaceControl.Transaction transaction, String reason) {
+    void hide(String reason) {
         if (!mLastHidden) {
             //dump();
             mLastHidden = true;
             if (mSurfaceController != null) {
-                mSurfaceController.hide(transaction, reason);
+                mSurfaceController.hideInTransaction(reason);
             }
         }
-    }
-
-    void hide(String reason) {
-        hide(mTmpTransaction, reason);
-        SurfaceControl.mergeToGlobalTransaction(mTmpTransaction);
     }
 
     boolean finishDrawingLocked() {
