@@ -747,9 +747,9 @@ public class SyncManager {
     }
 
     public void onBootPhase(int phase) {
-        // Note SyncManager only receives PHASE_SYSTEM_SERVICES_READY and after.
+        // Note SyncManager only receives PHASE_ACTIVITY_MANAGER_READY and after.
         switch (phase) {
-            case SystemService.PHASE_SYSTEM_SERVICES_READY:
+            case SystemService.PHASE_ACTIVITY_MANAGER_READY:
                 mConstants.start();
                 break;
         }
