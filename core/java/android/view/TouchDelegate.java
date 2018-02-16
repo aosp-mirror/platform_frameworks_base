@@ -105,11 +105,13 @@ public class TouchDelegate {
         boolean hit = true;
         boolean handled = false;
 
-        switch (event.getAction()) {
+        switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 mDelegateTargeted = mBounds.contains(x, y);
                 sendToDelegate = mDelegateTargeted;
                 break;
+            case MotionEvent.ACTION_POINTER_DOWN:
+            case MotionEvent.ACTION_POINTER_UP:
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_MOVE:
                 sendToDelegate = mDelegateTargeted;
