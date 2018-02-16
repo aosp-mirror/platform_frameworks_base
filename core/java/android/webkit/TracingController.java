@@ -16,9 +16,12 @@
 
 package android.webkit;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.Handler;
+
+import java.io.OutputStream;
+import java.util.concurrent.Executor;
 
 /**
  * Manages tracing of WebViews. In particular provides functionality for the app
@@ -29,40 +32,22 @@ import android.os.Handler;
  * The resulting trace data is sent back as a byte sequence in json format. This
  * file can be loaded in "chrome://tracing" for further analysis.
  * <p>
- * Note: All methods in this class must be called on the UI thread. All callbacks
- * are also called on the UI thread.
- * <p>
  * Example usage:
  * <pre class="prettyprint">
  * TracingController tracingController = TracingController.getInstance();
- * tracingController.start(new TraceConfig(CATEGORIES_WEB_DEVELOPER));
+ * tracingController.start(new TraceConfig.Builder()
+ *                  .addCategories(CATEGORIES_WEB_DEVELOPER).build());
  * [..]
- * tracingController.stopAndFlush(new TraceFileOutput("trace.json"), null);
+ * tracingController.stop(new FileOutputStream("trace.json"),
+ *                        Executors.newSingleThreadExecutor());
  * </pre></p>
  */
 public abstract class TracingController {
 
     /**
-     * Interface for capturing tracing data.
-     */
-    public interface TracingOutputStream {
-        /**
-         * Will be called to return tracing data in chunks.
-         * Tracing data is returned in json format an array of bytes.
-         */
-        void write(byte[] chunk);
-
-        /**
-         * Called when tracing is finished and the data collection is over.
-         * There will be no calls to #write after #complete is called.
-         */
-        void complete();
-    }
-
-    /**
      * Returns the default TracingController instance. At present there is
      * only one TracingController instance for all WebView instances,
-     * however this restriction may be relaxed in the future.
+     * however this restriction may be relaxed in a future Android release.
      *
      * @return the default TracingController instance
      */
@@ -72,55 +57,38 @@ public abstract class TracingController {
     }
 
     /**
-     * Starts tracing all webviews. Depeding on the trace mode in traceConfig
+     * Starts tracing all webviews. Depending on the trace mode in traceConfig
      * specifies how the trace events are recorded.
      *
      * For tracing modes {@link TracingConfig#RECORD_UNTIL_FULL},
      * {@link TracingConfig#RECORD_CONTINUOUSLY} and
      * {@link TracingConfig#RECORD_UNTIL_FULL_LARGE_BUFFER} the events are recorded
      * using an internal buffer and flushed to the outputStream when
-     * {@link #stopAndFlush(TracingOutputStream, Handler)} is called.
+     * {@link #stop(OutputStream, Executor)} is called.
      *
      * @param tracingConfig configuration options to use for tracing
-     * @return false if the system is already tracing, true otherwise.
+     * @throws IllegalStateException if the system is already tracing.
      */
-    public abstract boolean start(TracingConfig tracingConfig);
+    public abstract void start(@NonNull TracingConfig tracingConfig);
 
     /**
-     * Stops tracing and discards all tracing data.
+     * Stops tracing and flushes tracing data to the specified outputStream.
      *
-     * This method is particularly useful in conjunction with the
-     * {@link TracingConfig#RECORD_TO_CONSOLE} tracing mode because tracing data is logged to
-     * console and not sent to an outputStream as with
-     * {@link #stopAndFlush(TracingOutputStream, Handler)}.
+     * The data is sent to the specified output stream in json format typically
+     * in chunks by invoking {@link java.io.OutputStream#write(byte[])}. On completion
+     * the {@link java.io.OutputStream#close()} method is called.
      *
+     * @param outputStream the output steam the tracing data will be sent to. If null
+     *                     the tracing data will be discarded.
+     * @param executor the {@link java.util.concurrent.Executor} on which the
+     *        outputStream #write and #close methods will be invoked.
      * @return false if the system was not tracing at the time of the call, true
      *         otherwise.
      */
-    public abstract boolean stop();
-
-    /**
-     * Stops tracing and flushes tracing data to the specifid outputStream.
-     *
-     * Note that if the {@link TracingConfig#RECORD_TO_CONSOLE} tracing mode is used
-     * nothing will be sent to the outputStream and no TracingOuputStream methods will be
-     * called. In that case it is more convenient to just use {@link #stop()} instead.
-     *
-     * @param outputStream the output steam the tracing data will be sent to.
-     * @param handler the {@link android.os.Handler} on which the outputStream callbacks
-     *                will be invoked. If the handler is null the current thread's Looper
-     *                will be used.
-     * @return false if the system was not tracing at the time of the call, true
-     *         otherwise.
-     */
-    public abstract boolean stopAndFlush(TracingOutputStream outputStream,
-            @Nullable Handler handler);
+    public abstract boolean stop(@Nullable OutputStream outputStream,
+            @NonNull @CallbackExecutor Executor executor);
 
     /** True if the system is tracing */
     public abstract boolean isTracing();
-
-    // TODO: consider adding getTraceBufferUsage, percentage and approx event count.
-    // TODO: consider adding String getCategories(), for obtaining the actual list
-    // of categories used (given that presets are ints).
 
 }
