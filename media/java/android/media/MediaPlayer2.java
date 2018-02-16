@@ -804,19 +804,6 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
     public abstract DataSourceDesc editPlaylistItem(int index, DataSourceDesc dsd);
 
     /**
-     * Prepares the player for playback, synchronously.
-     *
-     * After setting the datasource and the display surface, you need to either
-     * call prepare() or prepareAsync(). For files, it is OK to call prepare(),
-     * which blocks until MediaPlayer2 is ready for playback.
-     *
-     * @throws IOException if source can not be accessed
-     * @throws IllegalStateException if it is called in an invalid state
-     * @hide
-     */
-    public void prepare() throws IOException { }
-
-    /**
      * Prepares the player for playback, asynchronously.
      *
      * After setting the datasource and the display surface, you need to
