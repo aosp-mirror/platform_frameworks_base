@@ -1438,9 +1438,9 @@ public class ConnectivityServiceTest {
                 expectCallback(CallbackState.SUSPENDED, agent, timeoutMs);
             }
             if (expectValidated) {
-                expectCapabilitiesWith(NET_CAPABILITY_VALIDATED, agent);
+                expectCapabilitiesWith(NET_CAPABILITY_VALIDATED, agent, timeoutMs);
             } else {
-                expectCapabilitiesWithout(NET_CAPABILITY_VALIDATED, agent);
+                expectCapabilitiesWithout(NET_CAPABILITY_VALIDATED, agent, timeoutMs);
             }
             expectCallback(CallbackState.LINK_PROPERTIES, agent, timeoutMs);
         }
@@ -1479,14 +1479,24 @@ public class ConnectivityServiceTest {
         }
 
         NetworkCapabilities expectCapabilitiesWith(int capability, MockNetworkAgent agent) {
-            CallbackInfo cbi = expectCallback(CallbackState.NETWORK_CAPABILITIES, agent);
+            return expectCapabilitiesWith(capability, agent, TIMEOUT_MS);
+        }
+
+        NetworkCapabilities expectCapabilitiesWith(int capability, MockNetworkAgent agent,
+                int timeoutMs) {
+            CallbackInfo cbi = expectCallback(CallbackState.NETWORK_CAPABILITIES, agent, timeoutMs);
             NetworkCapabilities nc = (NetworkCapabilities) cbi.arg;
             assertTrue(nc.hasCapability(capability));
             return nc;
         }
 
         NetworkCapabilities expectCapabilitiesWithout(int capability, MockNetworkAgent agent) {
-            CallbackInfo cbi = expectCallback(CallbackState.NETWORK_CAPABILITIES, agent);
+            return expectCapabilitiesWithout(capability, agent, TIMEOUT_MS);
+        }
+
+        NetworkCapabilities expectCapabilitiesWithout(int capability, MockNetworkAgent agent,
+                int timeoutMs) {
+            CallbackInfo cbi = expectCallback(CallbackState.NETWORK_CAPABILITIES, agent, timeoutMs);
             NetworkCapabilities nc = (NetworkCapabilities) cbi.arg;
             assertFalse(nc.hasCapability(capability));
             return nc;
@@ -1828,6 +1838,52 @@ public class ConnectivityServiceTest {
         mCm.unregisterNetworkCallback(callback);
         mCm.unregisterNetworkCallback(defaultCallback);
         mCm.unregisterNetworkCallback(trackDefaultCallback);
+    }
+
+    @Test
+    public void testNetworkGoesIntoBackgroundAfterLinger() {
+        setMobileDataAlwaysOn(true);
+        NetworkRequest request = new NetworkRequest.Builder()
+                .clearCapabilities()
+                .build();
+        TestNetworkCallback callback = new TestNetworkCallback();
+        mCm.registerNetworkCallback(request, callback);
+
+        TestNetworkCallback defaultCallback = new TestNetworkCallback();
+        mCm.registerDefaultNetworkCallback(defaultCallback);
+
+        mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+
+        mCellNetworkAgent.connect(true);
+        callback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
+        defaultCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
+
+        // Wifi comes up and cell lingers.
+        mWiFiNetworkAgent.connect(true);
+        defaultCallback.expectAvailableDoubleValidatedCallbacks(mWiFiNetworkAgent);
+        callback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+        callback.expectCallback(CallbackState.LOSING, mCellNetworkAgent);
+        callback.expectCapabilitiesWith(NET_CAPABILITY_VALIDATED, mWiFiNetworkAgent);
+
+        // File a request for cellular, then release it.
+        NetworkRequest cellRequest = new NetworkRequest.Builder()
+                .addTransportType(TRANSPORT_CELLULAR).build();
+        NetworkCallback noopCallback = new NetworkCallback();
+        mCm.requestNetwork(cellRequest, noopCallback);
+        mCm.unregisterNetworkCallback(noopCallback);
+        callback.expectCallback(CallbackState.LOSING, mCellNetworkAgent);
+
+        // Let linger run its course.
+        // TODO : the callback should be delayed by the linger delay. Fix this.
+        //        callback.assertNoCallback();
+        final int lingerTimeoutMs = TEST_LINGER_DELAY_MS + TEST_LINGER_DELAY_MS / 4;
+        callback.expectCapabilitiesWithout(NET_CAPABILITY_FOREGROUND, mCellNetworkAgent,
+                lingerTimeoutMs);
+
+        // Clean up.
+        mCm.unregisterNetworkCallback(defaultCallback);
+        mCm.unregisterNetworkCallback(callback);
     }
 
     @Test
