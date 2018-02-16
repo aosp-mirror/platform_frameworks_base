@@ -24,8 +24,7 @@ import android.util.Slog;
 import dalvik.annotation.optimization.CriticalNative;
 
 import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
+import java.time.DateTimeException;
 import java.time.ZoneOffset;
 
 /**
@@ -148,8 +147,8 @@ public final class SystemClock {
      * @return if the clock was successfully set to the specified time.
      */
     public static boolean setCurrentTimeMillis(long millis) {
-        IBinder b = ServiceManager.getService(Context.ALARM_SERVICE);
-        IAlarmManager mgr = IAlarmManager.Stub.asInterface(b);
+        final IAlarmManager mgr = IAlarmManager.Stub
+                .asInterface(ServiceManager.getService(Context.ALARM_SERVICE));
         if (mgr == null) {
             return false;
         }
@@ -174,26 +173,24 @@ public final class SystemClock {
     native public static long uptimeMillis();
 
     /**
+     * @removed
+     */
+    @Deprecated
+    public static @NonNull Clock uptimeMillisClock() {
+        return uptimeClock();
+    }
+
+    /**
      * Return {@link Clock} that starts at system boot, not counting time spent
      * in deep sleep.
+     *
+     * @removed
      */
-    public static @NonNull Clock uptimeMillisClock() {
-        return new Clock() {
-            @Override
-            public ZoneId getZone() {
-                return ZoneOffset.UTC;
-            }
-            @Override
-            public Clock withZone(ZoneId zone) {
-                throw new UnsupportedOperationException();
-            }
+    public static @NonNull Clock uptimeClock() {
+        return new SimpleClock(ZoneOffset.UTC) {
             @Override
             public long millis() {
                 return SystemClock.uptimeMillis();
-            }
-            @Override
-            public Instant instant() {
-                return Instant.ofEpochMilli(millis());
             }
         };
     }
@@ -209,24 +206,14 @@ public final class SystemClock {
     /**
      * Return {@link Clock} that starts at system boot, including time spent in
      * sleep.
+     *
+     * @removed
      */
     public static @NonNull Clock elapsedRealtimeClock() {
-        return new Clock() {
-            @Override
-            public ZoneId getZone() {
-                return ZoneOffset.UTC;
-            }
-            @Override
-            public Clock withZone(ZoneId zone) {
-                throw new UnsupportedOperationException();
-            }
+        return new SimpleClock(ZoneOffset.UTC) {
             @Override
             public long millis() {
                 return SystemClock.elapsedRealtime();
-            }
-            @Override
-            public Instant instant() {
-                return Instant.ofEpochMilli(millis());
             }
         };
     }
@@ -266,4 +253,62 @@ public final class SystemClock {
      */
     @CriticalNative
     public static native long currentTimeMicro();
+
+    /**
+     * Returns milliseconds since January 1, 1970 00:00:00.0 UTC, synchronized
+     * using a remote network source outside the device.
+     * <p>
+     * While the time returned by {@link System#currentTimeMillis()} can be
+     * adjusted by the user, the time returned by this method cannot be adjusted
+     * by the user. Note that synchronization may occur using an insecure
+     * network protocol, so the returned time should not be used for security
+     * purposes.
+     * <p>
+     * This performs no blocking network operations and returns values based on
+     * a recent successful synchronization event; it will either return a valid
+     * time or throw.
+     *
+     * @throws DateTimeException when no accurate network time can be provided.
+     */
+    public static long currentNetworkTimeMillis() {
+        final IAlarmManager mgr = IAlarmManager.Stub
+                .asInterface(ServiceManager.getService(Context.ALARM_SERVICE));
+        if (mgr != null) {
+            try {
+                return mgr.currentNetworkTimeMillis();
+            } catch (ParcelableException e) {
+                e.maybeRethrow(DateTimeException.class);
+                throw new RuntimeException(e);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } else {
+            throw new RuntimeException(new DeadSystemException());
+        }
+    }
+
+    /**
+     * Returns a {@link Clock} that starts at January 1, 1970 00:00:00.0 UTC,
+     * synchronized using a remote network source outside the device.
+     * <p>
+     * While the time returned by {@link System#currentTimeMillis()} can be
+     * adjusted by the user, the time returned by this method cannot be adjusted
+     * by the user. Note that synchronization may occur using an insecure
+     * network protocol, so the returned time should not be used for security
+     * purposes.
+     * <p>
+     * This performs no blocking network operations and returns values based on
+     * a recent successful synchronization event; it will either return a valid
+     * time or throw.
+     *
+     * @throws DateTimeException when no accurate network time can be provided.
+     */
+    public static @NonNull Clock currentNetworkTimeClock() {
+        return new SimpleClock(ZoneOffset.UTC) {
+            @Override
+            public long millis() {
+                return SystemClock.currentNetworkTimeMillis();
+            }
+        };
+    }
 }

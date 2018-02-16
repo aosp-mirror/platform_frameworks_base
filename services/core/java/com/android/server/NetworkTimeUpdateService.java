@@ -23,7 +23,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
@@ -33,13 +32,12 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
-import android.os.SystemClock;
 import android.os.PowerManager;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.NtpTrustedTime;
 import android.util.TimeUtils;
-import android.util.TrustedTime;
 
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.DumpUtils;
@@ -75,19 +73,17 @@ public class NetworkTimeUpdateService extends Binder {
     private long mNitzTimeSetTime = NOT_SET;
     private Network mDefaultNetwork = null;
 
-    private Context mContext;
-    private TrustedTime mTime;
+    private final Context mContext;
+    private final NtpTrustedTime mTime;
+    private final AlarmManager mAlarmManager;
+    private final ConnectivityManager mCM;
+    private final PendingIntent mPendingPollIntent;
+    private final PowerManager.WakeLock mWakeLock;
 
     // NTP lookup is done on this thread and handler
     private Handler mHandler;
-    private AlarmManager mAlarmManager;
-    private PendingIntent mPendingPollIntent;
     private SettingsObserver mSettingsObserver;
-    private ConnectivityManager mCM;
     private NetworkTimeUpdateCallback mNetworkTimeUpdateCallback;
-    // The last time that we successfully fetched the NTP time.
-    private long mLastNtpFetchTime = NOT_SET;
-    private final PowerManager.WakeLock mWakeLock;
 
     // Normal polling frequency
     private final long mPollingIntervalMs;
@@ -105,8 +101,9 @@ public class NetworkTimeUpdateService extends Binder {
     public NetworkTimeUpdateService(Context context) {
         mContext = context;
         mTime = NtpTrustedTime.getInstance(context);
-        mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-        mCM = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        mAlarmManager = mContext.getSystemService(AlarmManager.class);
+        mCM = mContext.getSystemService(ConnectivityManager.class);
+
         Intent pollIntent = new Intent(ACTION_POLL, null);
         mPendingPollIntent = PendingIntent.getBroadcast(mContext, POLL_REQUEST, pollIntent, 0);
 
@@ -119,7 +116,7 @@ public class NetworkTimeUpdateService extends Binder {
         mTimeErrorThresholdMs = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_ntpThreshold);
 
-        mWakeLock = ((PowerManager) context.getSystemService(Context.POWER_SERVICE)).newWakeLock(
+        mWakeLock = context.getSystemService(PowerManager.class).newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK, TAG);
     }
 
@@ -157,7 +154,7 @@ public class NetworkTimeUpdateService extends Binder {
     private void onPollNetworkTime(int event) {
         // If Automatic time is not set, don't bother. Similarly, if we don't
         // have any default network, don't bother.
-        if (!isAutomaticTimeRequested() || mDefaultNetwork == null) return;
+        if (mDefaultNetwork == null) return;
         mWakeLock.acquire();
         try {
             onPollNetworkTimeUnderWakeLock(event);
@@ -167,61 +164,60 @@ public class NetworkTimeUpdateService extends Binder {
     }
 
     private void onPollNetworkTimeUnderWakeLock(int event) {
-        final long refTime = SystemClock.elapsedRealtime();
-        // If NITZ time was received less than mPollingIntervalMs time ago,
-        // no need to sync to NTP.
-        if (mNitzTimeSetTime != NOT_SET && refTime - mNitzTimeSetTime < mPollingIntervalMs) {
-            resetAlarm(mPollingIntervalMs);
-            return;
+        // Force an NTP fix when outdated
+        if (mTime.getCacheAge() >= mPollingIntervalMs) {
+            if (DBG) Log.d(TAG, "Stale NTP fix; forcing refresh");
+            mTime.forceRefresh();
         }
-        final long currentTime = System.currentTimeMillis();
-        if (DBG) Log.d(TAG, "System time = " + currentTime);
-        // Get the NTP time
-        if (mLastNtpFetchTime == NOT_SET || refTime >= mLastNtpFetchTime + mPollingIntervalMs
-                || event == EVENT_AUTO_TIME_CHANGED) {
-            if (DBG) Log.d(TAG, "Before Ntp fetch");
 
-            // force refresh NTP cache when outdated
-            if (mTime.getCacheAge() >= mPollingIntervalMs) {
-                mTime.forceRefresh();
+        if (mTime.getCacheAge() < mPollingIntervalMs) {
+            // Obtained fresh fix; schedule next normal update
+            resetAlarm(mPollingIntervalMs);
+            if (isAutomaticTimeRequested()) {
+                updateSystemClock(event);
             }
 
-            // only update when NTP time is fresh
-            if (mTime.getCacheAge() < mPollingIntervalMs) {
-                final long ntp = mTime.currentTimeMillis();
-                mTryAgainCounter = 0;
-                // If the clock is more than N seconds off or this is the first time it's been
-                // fetched since boot, set the current time.
-                if (Math.abs(ntp - currentTime) > mTimeErrorThresholdMs
-                        || mLastNtpFetchTime == NOT_SET) {
-                    // Set the system time
-                    if (DBG && mLastNtpFetchTime == NOT_SET
-                            && Math.abs(ntp - currentTime) <= mTimeErrorThresholdMs) {
-                        Log.d(TAG, "For initial setup, rtc = " + currentTime);
-                    }
-                    if (DBG) Log.d(TAG, "Ntp time to be set = " + ntp);
-                    // Make sure we don't overflow, since it's going to be converted to an int
-                    if (ntp / 1000 < Integer.MAX_VALUE) {
-                        SystemClock.setCurrentTimeMillis(ntp);
-                    }
-                } else {
-                    if (DBG) Log.d(TAG, "Ntp time is close enough = " + ntp);
-                }
-                mLastNtpFetchTime = SystemClock.elapsedRealtime();
+        } else {
+            // No fresh fix; schedule retry
+            mTryAgainCounter++;
+            if (mTryAgainTimesMax < 0 || mTryAgainCounter <= mTryAgainTimesMax) {
+                resetAlarm(mPollingIntervalShorterMs);
             } else {
-                // Try again shortly
-                mTryAgainCounter++;
-                if (mTryAgainTimesMax < 0 || mTryAgainCounter <= mTryAgainTimesMax) {
-                    resetAlarm(mPollingIntervalShorterMs);
-                } else {
-                    // Try much later
-                    mTryAgainCounter = 0;
-                    resetAlarm(mPollingIntervalMs);
-                }
+                // Try much later
+                mTryAgainCounter = 0;
+                resetAlarm(mPollingIntervalMs);
+            }
+        }
+    }
+
+    private long getNitzAge() {
+        if (mNitzTimeSetTime == NOT_SET) {
+            return Long.MAX_VALUE;
+        } else {
+            return SystemClock.elapsedRealtime() - mNitzTimeSetTime;
+        }
+    }
+
+    /**
+     * Consider updating system clock based on current NTP fix, if requested by
+     * user, significant enough delta, and we don't have a recent NITZ.
+     */
+    private void updateSystemClock(int event) {
+        final boolean forceUpdate = (event == EVENT_AUTO_TIME_CHANGED);
+        if (!forceUpdate) {
+            if (getNitzAge() < mPollingIntervalMs) {
+                if (DBG) Log.d(TAG, "Ignoring NTP update due to recent NITZ");
+                return;
+            }
+
+            final long skew = Math.abs(mTime.currentTimeMillis() - System.currentTimeMillis());
+            if (skew < mTimeErrorThresholdMs) {
+                if (DBG) Log.d(TAG, "Ignoring NTP update due to low skew");
                 return;
             }
         }
-        resetAlarm(mPollingIntervalMs);
+
+        SystemClock.setCurrentTimeMillis(mTime.currentTimeMillis());
     }
 
     /**
@@ -326,8 +322,8 @@ public class NetworkTimeUpdateService extends Binder {
         pw.print("TimeErrorThresholdMs: ");
         TimeUtils.formatDuration(mTimeErrorThresholdMs, pw);
         pw.println("\nTryAgainCounter: " + mTryAgainCounter);
-        pw.print("LastNtpFetchTime: ");
-        TimeUtils.formatDuration(mLastNtpFetchTime, pw);
+        pw.println("NTP cache age: " + mTime.getCacheAge());
+        pw.println("NTP cache certainty: " + mTime.getCacheCertainty());
         pw.println();
     }
 }
