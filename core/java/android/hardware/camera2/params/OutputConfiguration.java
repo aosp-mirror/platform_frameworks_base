@@ -82,11 +82,9 @@ import java.util.List;
  *
  * </ul>
  *
- * <p>Please note that surface sharing is currently only enabled for outputs that use the
- * {@link ImageFormat#PRIVATE} format. This includes surface sources like
- * {@link android.view.SurfaceView}, {@link android.media.MediaRecorder},
- * {@link android.graphics.SurfaceTexture} and {@link android.media.ImageReader}, configured using
- * the aforementioned format.</p>
+ * <p> As of {@link android.os.Build.VERSION_CODES#P Android P}, all formats can be used for
+ * sharing, subject to device support. On prior API levels, only {@link ImageFormat#PRIVATE}
+ * format may be used.</p>
  *
  * @see CameraDevice#createCaptureSessionByOutputConfigurations
  *
