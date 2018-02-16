@@ -86,8 +86,16 @@ class KeyguardController {
      *         display, false otherwise
      */
     boolean isKeyguardShowing(int displayId) {
-        return mKeyguardShowing && !mKeyguardGoingAway &&
-                (displayId == DEFAULT_DISPLAY ? !mOccluded : displayId == mSecondaryDisplayShowing);
+        return isKeyguardActive(displayId) && !mKeyguardGoingAway;
+    }
+
+    /**
+     * @return true if Keyguard is showing and not occluded. We ignore whether it is going away or
+     *         not here.
+     */
+    boolean isKeyguardActive(int displayId) {
+        return mKeyguardShowing && (displayId == DEFAULT_DISPLAY ? !mOccluded
+                : displayId == mSecondaryDisplayShowing);
     }
 
     /**
@@ -113,6 +121,9 @@ class KeyguardController {
                 setKeyguardGoingAway(false);
                 mDismissalRequested = false;
             }
+        }
+        if (!showing) {
+            mStackSupervisor.resumeFocusedStackTopActivityLocked();
         }
         mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
         updateKeyguardSleepToken();
