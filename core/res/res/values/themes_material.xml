@@ -384,7 +384,6 @@ please see themes_device_defaults.xml.
         <!-- DatePicker dialog theme -->
         <item name="datePickerDialogTheme">@style/ThemeOverlay.Material.Dialog.DatePicker</item>
 
-        <!-- TODO: This belongs in a FastScroll style -->
         <item name="fastScrollThumbDrawable">@drawable/fastscroll_thumb_material</item>
         <item name="fastScrollPreviewBackgroundLeft">@drawable/fastscroll_label_left_material</item>
         <item name="fastScrollPreviewBackgroundRight">@drawable/fastscroll_label_right_material</item>
