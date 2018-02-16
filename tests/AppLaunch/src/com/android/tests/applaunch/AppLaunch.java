@@ -302,7 +302,7 @@ public class AppLaunch extends InstrumentationTestCase {
                         atraceLogger.atraceStop();
                     }
                 }
-                closeApp(launch.getApp(), true);
+                closeApp(launch.getApp());
                 sleep(BETWEEN_LAUNCH_SLEEP_TIMEOUT);
             }
         } finally {
@@ -575,22 +575,23 @@ public class AppLaunch extends InstrumentationTestCase {
         }
     }
 
-    private void closeApp(String appName, boolean forceStopApp) {
+    private void startHomeIntent() {
         Intent homeIntent = new Intent(Intent.ACTION_MAIN);
         homeIntent.addCategory(Intent.CATEGORY_HOME);
         homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
         getInstrumentation().getContext().startActivity(homeIntent);
         sleep(POST_LAUNCH_IDLE_TIMEOUT);
-        if (forceStopApp) {
-            Intent startIntent = mNameToIntent.get(appName);
-            if (startIntent != null) {
-                String packageName = startIntent.getComponent().getPackageName();
-                try {
-                    mAm.forceStopPackage(packageName, UserHandle.USER_CURRENT);
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Error closing app", e);
-                }
+    }
+
+    private void closeApp(String appName) {
+        Intent startIntent = mNameToIntent.get(appName);
+        if (startIntent != null) {
+            String packageName = startIntent.getComponent().getPackageName();
+            try {
+                mAm.forceStopPackage(packageName, UserHandle.USER_CURRENT);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Error closing app", e);
             }
         }
     }
