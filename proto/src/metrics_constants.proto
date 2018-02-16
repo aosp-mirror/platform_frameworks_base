@@ -5257,6 +5257,23 @@ message MetricsEvent {
     // OS: P
     FIELD_END_BATTERY_PERCENT = 1308;
 
+    // ACTION: Settings > Display > Night Light
+    // SUBTYPE: com.android.server.display.ColorDisplayService.AutoMode value
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_NIGHT_DISPLAY_AUTO_MODE_CHANGED = 1309;
+
+    // ACTION: Settings > Display > Night Light
+    // CATEGORY: SETTINGS
+    // SUBTYPE: 0 is starting time, 1 is ending time
+    // OS: P
+    ACTION_NIGHT_DISPLAY_AUTO_MODE_CUSTOM_TIME_CHANGED = 1310;
+
+    // FIELD: Current mode corresponding to a QS tile
+    // CATEGORY: QUICK SETTINGS
+    // OS: P
+    FIELD_QS_MODE = 1311;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
