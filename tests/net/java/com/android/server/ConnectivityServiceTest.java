@@ -50,6 +50,7 @@ import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI_AWARE;
 
 import static com.android.internal.util.TestUtils.waitForIdleHandler;
+import static com.android.internal.util.TestUtils.waitForIdleLooper;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -85,6 +86,7 @@ import android.net.ConnectivityManager.NetworkCallback;
 import android.net.ConnectivityManager.PacketKeepalive;
 import android.net.ConnectivityManager.PacketKeepaliveCallback;
 import android.net.ConnectivityManager.TooManyRequestsException;
+import android.net.ConnectivityThread;
 import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
 import android.net.IpPrefix;
@@ -279,6 +281,7 @@ public class ConnectivityServiceTest {
         waitForIdle(mWiFiNetworkAgent, timeoutMs);
         waitForIdle(mEthernetNetworkAgent, timeoutMs);
         waitForIdleHandler(mService.mHandlerThread, timeoutMs);
+        waitForIdleLooper(ConnectivityThread.getInstanceLooper(), timeoutMs);
     }
 
     public void waitForIdle(MockNetworkAgent agent, long timeoutMs) {
@@ -1875,8 +1878,7 @@ public class ConnectivityServiceTest {
         callback.expectCallback(CallbackState.LOSING, mCellNetworkAgent);
 
         // Let linger run its course.
-        // TODO : the callback should be delayed by the linger delay. Fix this.
-        //        callback.assertNoCallback();
+        callback.assertNoCallback();
         final int lingerTimeoutMs = TEST_LINGER_DELAY_MS + TEST_LINGER_DELAY_MS / 4;
         callback.expectCapabilitiesWithout(NET_CAPABILITY_FOREGROUND, mCellNetworkAgent,
                 lingerTimeoutMs);
