@@ -2662,7 +2662,7 @@ public class ConnectivityManager {
      * A {@code NetworkCallback} is registered by calling
      * {@link #requestNetwork(NetworkRequest, NetworkCallback)},
      * {@link #registerNetworkCallback(NetworkRequest, NetworkCallback)},
-     * or {@link #registerDefaultNetworkCallback(NetworkCallback). A {@code NetworkCallback} is
+     * or {@link #registerDefaultNetworkCallback(NetworkCallback)}. A {@code NetworkCallback} is
      * unregistered by calling {@link #unregisterNetworkCallback(NetworkCallback)}.
      * A {@code NetworkCallback} should be registered at most once at any time.
      * A {@code NetworkCallback} that has been unregistered can be registered again.
