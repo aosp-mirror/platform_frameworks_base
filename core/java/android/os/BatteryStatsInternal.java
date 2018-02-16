@@ -18,7 +18,7 @@ package android.os;
 
 /**
  * Battery stats local system service interface. This is used to pass internal data out of
- * BatteryStatsImpl.
+ * BatteryStatsImpl, as well as make unchecked calls into BatteryStatsImpl.
  *
  * @hide Only for use within Android OS.
  */
@@ -32,4 +32,13 @@ public abstract class BatteryStatsInternal {
      * Returns the mobile data interfaces.
      */
     public abstract String[] getMobileIfaces();
+
+    /**
+     * Inform battery stats how many deferred jobs existed when the app got launched and how
+     * long ago was the last job execution for the app.
+     * @param uid the uid of the app.
+     * @param numDeferred number of deferred jobs.
+     * @param sinceLast how long in millis has it been since a job was run
+     */
+    public abstract void noteJobsDeferred(int uid, int numDeferred, long sinceLast);
 }

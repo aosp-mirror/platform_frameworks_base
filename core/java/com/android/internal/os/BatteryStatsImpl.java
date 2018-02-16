@@ -134,7 +134,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 174 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 175 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS;
@@ -1222,7 +1222,7 @@ public class BatteryStatsImpl extends BatteryStats {
          * @param out the Parcel to be written to.
          * @param counter a Counter, or null.
          */
-        public static void writeCounterToParcel(Parcel out, Counter counter) {
+        public static void writeCounterToParcel(Parcel out, @Nullable Counter counter) {
             if (counter == null) {
                 out.writeInt(0); // indicates null
                 return;
@@ -1230,6 +1230,19 @@ public class BatteryStatsImpl extends BatteryStats {
             out.writeInt(1); // indicates non-null
 
             counter.writeToParcel(out);
+        }
+
+        /**
+         * Reads a Counter that was written using {@link #writeCounterToParcel(Parcel, Counter)}.
+         * @param timeBase the timebase to assign to the Counter
+         * @param in the parcel to read from
+         * @return the Counter or null.
+         */
+        public static @Nullable Counter readCounterFromParcel(TimeBase timeBase, Parcel in) {
+            if (in.readInt() == 0) {
+                return null;
+            }
+            return new Counter(timeBase, in);
         }
 
         @Override
@@ -4071,6 +4084,11 @@ public class BatteryStatsImpl extends BatteryStats {
         addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_JOB_FINISH, name, uid);
     }
 
+    public void noteJobsDeferredLocked(int uid, int numDeferred, long sinceLast) {
+        uid = mapUid(uid);
+        getUidStatsLocked(uid).noteJobsDeferredLocked(numDeferred, sinceLast);
+    }
+
     public void noteAlarmStartLocked(String name, WorkSource workSource, int uid) {
         noteAlarmStartOrFinishLocked(HistoryItem.EVENT_ALARM_START, name, workSource, uid);
     }
@@ -6749,6 +6767,29 @@ public class BatteryStatsImpl extends BatteryStats {
         final ArrayMap<String, SparseIntArray> mJobCompletions = new ArrayMap<>();
 
         /**
+         * Count of app launch events that had associated deferred job counts or info about
+         * last time a job was run.
+         */
+        Counter mJobsDeferredEventCount;
+
+        /**
+         * Count of deferred jobs that were pending when the app was launched or brought to
+         * the foreground through a user interaction.
+         */
+        Counter mJobsDeferredCount;
+
+        /**
+         * Sum of time since the last time a job was run for this app before it was launched.
+         */
+        LongSamplingCounter mJobsFreshnessTimeMs;
+
+        /**
+         * Array of counts of instances where the time since the last job was run for the app
+         * fell within one of the thresholds in {@link #JOB_FRESHNESS_BUCKETS}.
+         */
+        final Counter[] mJobsFreshnessBuckets;
+
+        /**
          * The statistics we have collected for this uid's sensor activations.
          */
         final SparseArray<Sensor> mSensorStats = new SparseArray<>();
@@ -6822,6 +6863,10 @@ public class BatteryStatsImpl extends BatteryStats {
             mWifiMulticastTimer = new StopwatchTimer(mBsi.mClocks, this, WIFI_MULTICAST_ENABLED,
                     mBsi.mWifiMulticastTimers, mBsi.mOnBatteryTimeBase);
             mProcessStateTimer = new StopwatchTimer[NUM_PROCESS_STATE];
+            mJobsDeferredEventCount = new Counter(mBsi.mOnBatteryTimeBase);
+            mJobsDeferredCount = new Counter(mBsi.mOnBatteryTimeBase);
+            mJobsFreshnessTimeMs = new LongSamplingCounter(mBsi.mOnBatteryTimeBase);
+            mJobsFreshnessBuckets = new Counter[JOB_FRESHNESS_BUCKETS.length];
         }
 
         @VisibleForTesting
@@ -7799,6 +7844,55 @@ public class BatteryStatsImpl extends BatteryStats {
             return 0;
         }
 
+        @Override
+        public void getDeferredJobsCheckinLineLocked(StringBuilder sb, int which) {
+            sb.setLength(0);
+            final int deferredEventCount = mJobsDeferredEventCount.getCountLocked(which);
+            if (deferredEventCount == 0) {
+                return;
+            }
+            final int deferredCount = mJobsDeferredCount.getCountLocked(which);
+            final long averageLatency = deferredEventCount != 0
+                    ? mJobsFreshnessTimeMs.getCountLocked(which) / deferredEventCount
+                    : 0L;
+            sb.append(deferredEventCount); sb.append(',');
+            sb.append(deferredCount); sb.append(',');
+            sb.append(averageLatency);
+            for (int i = 0; i < JOB_FRESHNESS_BUCKETS.length; i++) {
+                if (mJobsFreshnessBuckets[i] == null) {
+                    sb.append(",0");
+                } else {
+                    sb.append(",");
+                    sb.append(mJobsFreshnessBuckets[i].getCountLocked(which));
+                }
+            }
+        }
+
+        @Override
+        public void getDeferredJobsLineLocked(StringBuilder sb, int which) {
+            sb.setLength(0);
+            final int deferredEventCount = mJobsDeferredEventCount.getCountLocked(which);
+            if (deferredEventCount == 0) {
+                return;
+            }
+            final int deferredCount = mJobsDeferredCount.getCountLocked(which);
+            final long averageLatency = deferredEventCount != 0
+                    ? mJobsFreshnessTimeMs.getCountLocked(which) / deferredEventCount
+                    : 0L;
+            sb.append("times="); sb.append(deferredEventCount); sb.append(", ");
+            sb.append("count="); sb.append(deferredCount); sb.append(", ");
+            sb.append("avgLatency="); sb.append(averageLatency); sb.append(", ");
+            for (int i = 0; i < JOB_FRESHNESS_BUCKETS.length; i++) {
+                sb.append("<"); sb.append(JOB_FRESHNESS_BUCKETS[i]); sb.append("ms=");
+                if (mJobsFreshnessBuckets[i] == null) {
+                    sb.append("0");
+                } else {
+                    sb.append(mJobsFreshnessBuckets[i].getCountLocked(which));
+                }
+                sb.append(" ");
+            }
+        }
+
         void initNetworkActivityLocked() {
             mNetworkByteActivityCounters = new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];
             mNetworkPacketActivityCounters = new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];
@@ -7982,6 +8076,16 @@ public class BatteryStatsImpl extends BatteryStats {
             }
             mJobStats.cleanup();
             mJobCompletions.clear();
+
+            mJobsDeferredEventCount.reset(false);
+            mJobsDeferredCount.reset(false);
+            mJobsFreshnessTimeMs.reset(false);
+            for (int ij = 0; ij < JOB_FRESHNESS_BUCKETS.length; ij++) {
+                if (mJobsFreshnessBuckets[ij] != null) {
+                    mJobsFreshnessBuckets[ij].reset(false);
+                }
+            }
+
             for (int ise=mSensorStats.size()-1; ise>=0; ise--) {
                 Sensor s = mSensorStats.valueAt(ise);
                 if (s.reset()) {
@@ -7990,6 +8094,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     active = true;
                 }
             }
+
             for (int ip=mProcessStats.size()-1; ip>=0; ip--) {
                 Proc proc = mProcessStats.valueAt(ip);
                 proc.detach();
@@ -8206,6 +8311,13 @@ public class BatteryStatsImpl extends BatteryStats {
             }
 
             writeJobCompletionsToParcelLocked(out);
+
+            mJobsDeferredEventCount.writeToParcel(out);
+            mJobsDeferredCount.writeToParcel(out);
+            mJobsFreshnessTimeMs.writeToParcel(out);
+            for (int i = 0; i < JOB_FRESHNESS_BUCKETS.length; i++) {
+                Counter.writeCounterToParcel(out, mJobsFreshnessBuckets[i]);
+            }
 
             int NSE = mSensorStats.size();
             out.writeInt(NSE);
@@ -8502,6 +8614,14 @@ public class BatteryStatsImpl extends BatteryStats {
 
             readJobCompletionsFromParcelLocked(in);
 
+            mJobsDeferredEventCount = new Counter(mBsi.mOnBatteryTimeBase, in);
+            mJobsDeferredCount = new Counter(mBsi.mOnBatteryTimeBase, in);
+            mJobsFreshnessTimeMs = new LongSamplingCounter(mBsi.mOnBatteryTimeBase, in);
+            for (int i = 0; i < JOB_FRESHNESS_BUCKETS.length; i++) {
+                mJobsFreshnessBuckets[i] = Counter.readCounterFromParcel(mBsi.mOnBatteryTimeBase,
+                        in);
+            }
+
             int numSensors = in.readInt();
             mSensorStats.clear();
             for (int k = 0; k < numSensors; k++) {
@@ -8767,6 +8887,26 @@ public class BatteryStatsImpl extends BatteryStats {
                 mWifiRadioApWakeupCount = new LongSamplingCounter(mBsi.mOnBatteryTimeBase, in);
             } else {
                 mWifiRadioApWakeupCount = null;
+            }
+        }
+
+        public void noteJobsDeferredLocked(int numDeferred, long sinceLast) {
+            mJobsDeferredEventCount.addAtomic(1);
+            mJobsDeferredCount.addAtomic(numDeferred);
+            if (sinceLast != 0) {
+                // Add the total time, which can be divided by the event count to get an average
+                mJobsFreshnessTimeMs.addCountLocked(sinceLast);
+                // Also keep track of how many times there were in these different buckets.
+                for (int i = 0; i < JOB_FRESHNESS_BUCKETS.length; i++) {
+                    if (sinceLast < JOB_FRESHNESS_BUCKETS[i]) {
+                        if (mJobsFreshnessBuckets[i] == null) {
+                            mJobsFreshnessBuckets[i] = new Counter(
+                                    mBsi.mOnBatteryTimeBase);
+                        }
+                        mJobsFreshnessBuckets[i].addAtomic(1);
+                        break;
+                    }
+                }
             }
         }
 
@@ -13921,6 +14061,16 @@ public class BatteryStatsImpl extends BatteryStats {
 
             u.readJobCompletionsFromParcelLocked(in);
 
+            u.mJobsDeferredEventCount.readSummaryFromParcelLocked(in);
+            u.mJobsDeferredCount.readSummaryFromParcelLocked(in);
+            u.mJobsFreshnessTimeMs.readSummaryFromParcelLocked(in);
+            for (int i = 0; i < JOB_FRESHNESS_BUCKETS.length; i++) {
+                if (in.readInt() != 0) {
+                    u.mJobsFreshnessBuckets[i] = new Counter(u.mBsi.mOnBatteryTimeBase);
+                    u.mJobsFreshnessBuckets[i].readSummaryFromParcelLocked(in);
+                }
+            }
+
             int NP = in.readInt();
             if (NP > 1000) {
                 throw new ParcelFormatException("File corrupt: too many sensors " + NP);
@@ -14418,6 +14568,17 @@ public class BatteryStatsImpl extends BatteryStats {
             }
 
             u.writeJobCompletionsToParcelLocked(out);
+
+            u.mJobsDeferredEventCount.writeSummaryFromParcelLocked(out);
+            u.mJobsDeferredCount.writeSummaryFromParcelLocked(out);
+            u.mJobsFreshnessTimeMs.writeSummaryFromParcelLocked(out);
+            for (int i = 0; i < JOB_FRESHNESS_BUCKETS.length; i++) {
+                if (u.mJobsFreshnessBuckets[i] != null) {
+                    u.mJobsFreshnessBuckets[i].writeSummaryFromParcelLocked(out);
+                } else {
+                    out.writeInt(0);
+                }
+            }
 
             int NSE = u.mSensorStats.size();
             out.writeInt(NSE);

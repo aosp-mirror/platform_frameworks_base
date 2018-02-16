@@ -49,6 +49,7 @@ import android.content.pm.ServiceInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.BatteryStats;
+import android.os.BatteryStatsInternal;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
@@ -62,6 +63,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
 import android.provider.Settings;
+import android.text.format.DateUtils;
 import android.util.KeyValueListParser;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -2282,14 +2284,20 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 return;
             }
 
-            final long sinceLast = sElapsedRealtimeClock.millis() -
-                    mUsageStats.getTimeSinceLastJobRun(packageName, userId);
+            long sinceLast = mUsageStats.getTimeSinceLastJobRun(packageName, userId);
+            if (sinceLast > 2 * DateUtils.DAY_IN_MILLIS) {
+                // Too long ago, not worth logging
+                sinceLast = 0L;
+            }
             final DeferredJobCounter counter = new DeferredJobCounter();
             synchronized (mLock) {
                 mJobs.forEachJobForSourceUid(uid, counter);
             }
-
-            mUsageStats.reportAppJobState(packageName, userId, counter.numDeferred(), sinceLast);
+            if (counter.numDeferred() > 0 || sinceLast > 0) {
+                BatteryStatsInternal mBatteryStatsInternal = LocalServices.getService
+                        (BatteryStatsInternal.class);
+                mBatteryStatsInternal.noteJobsDeferred(uid, counter.numDeferred(), sinceLast);
+            }
         }
     }
 
