@@ -19,6 +19,7 @@ package android.hardware.usb;
 
 import android.Manifest;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -27,6 +28,7 @@ import android.annotation.SystemService;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.hardware.usb.gadget.V1_0.GadgetFunction;
 import android.os.Bundle;
@@ -382,6 +384,7 @@ public class UsbManager {
      *
      * @return HashMap containing all connected USB devices.
      */
+    @RequiresFeature(PackageManager.FEATURE_USB_HOST)
     public HashMap<String,UsbDevice> getDeviceList() {
         HashMap<String,UsbDevice> result = new HashMap<String,UsbDevice>();
         if (mService == null) {
@@ -406,6 +409,7 @@ public class UsbManager {
      * @param device the device to open
      * @return a {@link UsbDeviceConnection}, or {@code null} if open failed
      */
+    @RequiresFeature(PackageManager.FEATURE_USB_HOST)
     public UsbDeviceConnection openDevice(UsbDevice device) {
         try {
             String deviceName = device.getDeviceName();
@@ -430,6 +434,7 @@ public class UsbManager {
      *
      * @return list of USB accessories, or null if none are attached.
      */
+    @RequiresFeature(PackageManager.FEATURE_USB_ACCESSORY)
     public UsbAccessory[] getAccessoryList() {
         if (mService == null) {
             return null;
@@ -452,6 +457,7 @@ public class UsbManager {
      * @param accessory the USB accessory to open
      * @return file descriptor, or null if the accessor could not be opened.
      */
+    @RequiresFeature(PackageManager.FEATURE_USB_ACCESSORY)
     public ParcelFileDescriptor openAccessory(UsbAccessory accessory) {
         try {
             return mService.openAccessory(accessory);
@@ -472,6 +478,7 @@ public class UsbManager {
      * @param device to check permissions for
      * @return true if caller has permission
      */
+    @RequiresFeature(PackageManager.FEATURE_USB_HOST)
     public boolean hasPermission(UsbDevice device) {
         if (mService == null) {
             return false;
@@ -492,6 +499,7 @@ public class UsbManager {
      * @param accessory to check permissions for
      * @return true if caller has permission
      */
+    @RequiresFeature(PackageManager.FEATURE_USB_ACCESSORY)
     public boolean hasPermission(UsbAccessory accessory) {
         if (mService == null) {
             return false;
@@ -525,6 +533,7 @@ public class UsbManager {
      * @param device to request permissions for
      * @param pi PendingIntent for returning result
      */
+    @RequiresFeature(PackageManager.FEATURE_USB_HOST)
     public void requestPermission(UsbDevice device, PendingIntent pi) {
         try {
             mService.requestDevicePermission(device, mContext.getPackageName(), pi);
@@ -551,6 +560,7 @@ public class UsbManager {
      * @param accessory to request permissions for
      * @param pi PendingIntent for returning result
      */
+    @RequiresFeature(PackageManager.FEATURE_USB_ACCESSORY)
     public void requestPermission(UsbAccessory accessory, PendingIntent pi) {
         try {
             mService.requestAccessoryPermission(accessory, mContext.getPackageName(), pi);
