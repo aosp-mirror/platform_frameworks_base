@@ -35,6 +35,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -178,39 +179,31 @@ public class TextClassificationManagerTest {
         if (isTextClassifierDisabled()) return;
         String text = "The number is +12122537077. See you tonight!";
         assertThat(mClassifier.generateLinks(text, mLinksOptions.setEntityConfig(
-                new TextClassifier.EntityConfig(TextClassifier.ENTITY_PRESET_ALL)
-                        .excludeEntities(TextClassifier.TYPE_PHONE))),
+                TextClassifier.EntityConfig.create(Collections.EMPTY_LIST,
+                        Collections.EMPTY_LIST, Arrays.asList(TextClassifier.TYPE_PHONE)))),
                 not(isTextLinksContaining(text, "+12122537077", TextClassifier.TYPE_PHONE)));
     }
 
     @Test
-    public void testGenerateLinks_none_config() {
+    public void testGenerateLinks_explicit_address() {
         if (isTextClassifierDisabled()) return;
+        String text = "The address is 1600 Amphitheater Parkway, Mountain View, CA. See you!";
+        assertThat(mClassifier.generateLinks(text, mLinksOptions.setEntityConfig(
+                TextClassifier.EntityConfig.createWithEntityList(
+                        Arrays.asList(TextClassifier.TYPE_ADDRESS)))),
+                isTextLinksContaining(text, "1600 Amphitheater Parkway, Mountain View, CA",
+                        TextClassifier.TYPE_ADDRESS));
+    }
 
+    @Test
+    public void testGenerateLinks_exclude_override() {
+        if (isTextClassifierDisabled()) return;
         String text = "The number is +12122537077. See you tonight!";
         assertThat(mClassifier.generateLinks(text, mLinksOptions.setEntityConfig(
-                new TextClassifier.EntityConfig(TextClassifier.ENTITY_PRESET_NONE))),
+                TextClassifier.EntityConfig.create(Collections.EMPTY_LIST,
+                        Arrays.asList(TextClassifier.TYPE_PHONE),
+                        Arrays.asList(TextClassifier.TYPE_PHONE)))),
                 not(isTextLinksContaining(text, "+12122537077", TextClassifier.TYPE_PHONE)));
-    }
-
-    @Test
-    public void testGenerateLinks_address() {
-        if (isTextClassifierDisabled()) return;
-        String text = "The address is 1600 Amphitheater Parkway, Mountain View, CA. See you!";
-        assertThat(mClassifier.generateLinks(text, null),
-                isTextLinksContaining(text, "1600 Amphitheater Parkway, Mountain View, CA",
-                        TextClassifier.TYPE_ADDRESS));
-    }
-
-    @Test
-    public void testGenerateLinks_include() {
-        if (isTextClassifierDisabled()) return;
-        String text = "The address is 1600 Amphitheater Parkway, Mountain View, CA. See you!";
-        assertThat(mClassifier.generateLinks(text, mLinksOptions.setEntityConfig(
-                new TextClassifier.EntityConfig(TextClassifier.ENTITY_PRESET_NONE)
-                        .includeEntities(TextClassifier.TYPE_ADDRESS))),
-                isTextLinksContaining(text, "1600 Amphitheater Parkway, Mountain View, CA",
-                        TextClassifier.TYPE_ADDRESS));
     }
 
     @Test

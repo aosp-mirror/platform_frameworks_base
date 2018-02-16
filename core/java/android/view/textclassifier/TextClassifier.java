@@ -16,7 +16,6 @@
 
 package android.view.textclassifier;
 
-import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -86,19 +85,15 @@ public interface TextClassifier {
     })
     @interface EntityType {}
 
-    /** Designates that the TextClassifier should identify all entity types it can. **/
-    int ENTITY_PRESET_ALL = 0;
-    /** Designates that the TextClassifier should identify no entities. **/
-    int ENTITY_PRESET_NONE = 1;
-    /** Designates that the TextClassifier should identify a base set of entities determined by the
-     * TextClassifier. **/
-    int ENTITY_PRESET_BASE = 2;
+    /** Designates that the text in question is editable. **/
+    String HINT_TEXT_IS_EDITABLE = "android.text_is_editable";
+    /** Designates that the text in question is not editable. **/
+    String HINT_TEXT_IS_NOT_EDITABLE = "android.text_is_not_editable";
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "ENTITY_CONFIG_" },
-            value = {ENTITY_PRESET_ALL, ENTITY_PRESET_NONE, ENTITY_PRESET_BASE})
-    @interface EntityPreset {}
+    @StringDef(prefix = { "HINT_" }, value = {HINT_TEXT_IS_EDITABLE, HINT_TEXT_IS_NOT_EDITABLE})
+    @interface Hints {}
 
     /**
      * No-op TextClassifier.
@@ -323,17 +318,6 @@ public interface TextClassifier {
     }
 
     /**
-     * Returns a {@link Collection} of the entity types in the specified preset.
-     *
-     * @see #ENTITY_PRESET_ALL
-     * @see #ENTITY_PRESET_NONE
-     * @see #ENTITY_PRESET_BASE
-     */
-    default Collection<String> getEntitiesForPreset(@EntityPreset int entityPreset) {
-        return Collections.EMPTY_LIST;
-    }
-
-    /**
      * Returns a helper for logging TextClassifier related events.
      *
      * @param config logger configuration
@@ -358,54 +342,92 @@ public interface TextClassifier {
      * Configs are initially based on a predefined preset, and can be modified from there.
      */
     final class EntityConfig implements Parcelable {
-        private final @TextClassifier.EntityPreset int mEntityPreset;
+        private final Collection<String> mHints;
         private final Collection<String> mExcludedEntityTypes;
         private final Collection<String> mIncludedEntityTypes;
+        private final boolean mUseHints;
 
-        public EntityConfig(@TextClassifier.EntityPreset int mEntityPreset) {
-            this.mEntityPreset = mEntityPreset;
-            mExcludedEntityTypes = new ArraySet<>();
-            mIncludedEntityTypes = new ArraySet<>();
+        private EntityConfig(boolean useHints, Collection<String> hints,
+                Collection<String> includedEntityTypes, Collection<String> excludedEntityTypes) {
+            mHints = hints == null
+                    ? Collections.EMPTY_LIST
+                    : Collections.unmodifiableCollection(new ArraySet<>(hints));
+            mExcludedEntityTypes = excludedEntityTypes == null
+                    ? Collections.EMPTY_LIST : new ArraySet<>(excludedEntityTypes);
+            mIncludedEntityTypes = includedEntityTypes == null
+                    ? Collections.EMPTY_LIST : new ArraySet<>(includedEntityTypes);
+            mUseHints = useHints;
         }
 
         /**
-         * Specifies an entity to include in addition to any specified by the enity preset.
+         * Creates an EntityConfig.
+         *
+         * @param hints Hints for the TextClassifier to determine what types of entities to find.
+         */
+        public static EntityConfig create(@Nullable Collection<String> hints) {
+            return new EntityConfig(/* useHints */ true, hints,
+                    /* includedEntityTypes */null, /* excludedEntityTypes */ null);
+        }
+
+        /**
+         * Creates an EntityConfig.
+         *
+         * @param hints Hints for the TextClassifier to determine what types of entities to find
+         * @param includedEntityTypes Entity types, e.g. {@link #TYPE_EMAIL}, to explicitly include
+         * @param excludedEntityTypes Entity types, e.g. {@link #TYPE_PHONE}, to explicitly exclude
+         *
          *
          * Note that if an entity has been excluded, the exclusion will take precedence.
          */
-        public EntityConfig includeEntities(String... entities) {
-            for (String entity : entities) {
-                mIncludedEntityTypes.add(entity);
-            }
-            return this;
+        public static EntityConfig create(@Nullable Collection<String> hints,
+                @Nullable Collection<String> includedEntityTypes,
+                @Nullable Collection<String> excludedEntityTypes) {
+            return new EntityConfig(/* useHints */ true, hints,
+                    includedEntityTypes, excludedEntityTypes);
         }
 
         /**
-         * Specifies an entity to be excluded.
+         * Creates an EntityConfig with an explicit entity list.
+         *
+         * @param entityTypes Complete set of entities, e.g. {@link #TYPE_URL} to find.
+         *
          */
-        public EntityConfig excludeEntities(String... entities) {
-            for (String entity : entities) {
-                mExcludedEntityTypes.add(entity);
-            }
-            return this;
+        public static EntityConfig createWithEntityList(@Nullable Collection<String> entityTypes) {
+            return new EntityConfig(/* useHints */ false, /* hints */ null,
+                    /* includedEntityTypes */ entityTypes, /* excludedEntityTypes */ null);
         }
 
         /**
-         * Returns an unmodifiable list of the final set of entities to find.
+         * Returns a list of the final set of entities to find.
+         *
+         * @param entities Entities we think should be found before factoring in includes/excludes
+         *
+         * This method is intended for use by TextClassifier implementations.
          */
-        public List<String> getEntities(TextClassifier textClassifier) {
-            ArrayList<String> entities = new ArrayList<>();
-            for (String entity : textClassifier.getEntitiesForPreset(mEntityPreset)) {
-                if (!mExcludedEntityTypes.contains(entity)) {
-                    entities.add(entity);
+        public List<String> resolveEntityListModifications(@NonNull Collection<String> entities) {
+            final ArrayList<String> finalList = new ArrayList<>();
+            if (mUseHints) {
+                for (String entity : entities) {
+                    if (!mExcludedEntityTypes.contains(entity)) {
+                        finalList.add(entity);
+                    }
                 }
             }
             for (String entity : mIncludedEntityTypes) {
-                if (!mExcludedEntityTypes.contains(entity) && !entities.contains(entity)) {
-                    entities.add(entity);
+                if (!mExcludedEntityTypes.contains(entity) && !finalList.contains(entity)) {
+                    finalList.add(entity);
                 }
             }
-            return Collections.unmodifiableList(entities);
+            return finalList;
+        }
+
+        /**
+         * Retrieves the list of hints.
+         *
+         * @return An unmodifiable collection of the hints.
+         */
+        public Collection<String> getHints() {
+            return mHints;
         }
 
         @Override
@@ -415,9 +437,10 @@ public interface TextClassifier {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(mEntityPreset);
+            dest.writeStringList(new ArrayList<>(mHints));
             dest.writeStringList(new ArrayList<>(mExcludedEntityTypes));
             dest.writeStringList(new ArrayList<>(mIncludedEntityTypes));
+            dest.writeInt(mUseHints ? 1 : 0);
         }
 
         public static final Parcelable.Creator<EntityConfig> CREATOR =
@@ -434,9 +457,10 @@ public interface TextClassifier {
                 };
 
         private EntityConfig(Parcel in) {
-            mEntityPreset = in.readInt();
+            mHints = new ArraySet<>(in.createStringArrayList());
             mExcludedEntityTypes = new ArraySet<>(in.createStringArrayList());
             mIncludedEntityTypes = new ArraySet<>(in.createStringArrayList());
+            mUseHints = in.readInt() == 1;
         }
     }
 
