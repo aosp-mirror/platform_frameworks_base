@@ -1041,6 +1041,13 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="android.view.menu.ContextMenuActivity" android:label="ContextMenu" android:theme="@android:style/Theme.Material">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
+
         <activity android:name="android.view.menu.MenuWith1Item" android:label="MenuWith1Item">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
