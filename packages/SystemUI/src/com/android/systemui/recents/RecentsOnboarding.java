@@ -29,6 +29,8 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
+import android.os.SystemProperties;
+import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
@@ -176,6 +178,9 @@ public class RecentsOnboarding {
     }
 
     public void show() {
+        if (!shouldShow()) {
+            return;
+        }
         CharSequence onboardingText = mOverviewProxyService.getOnboardingText();
         if (TextUtils.isEmpty(onboardingText)) {
             Log.w(TAG, "Unable to get onboarding text");
@@ -205,6 +210,14 @@ public class RecentsOnboarding {
         }
     }
 
+    /**
+     * @return True unless setprop has been set to false, or we're in demo mode.
+     */
+    private boolean shouldShow() {
+        return SystemProperties.getBoolean("persist.quickstep.onboarding.enabled",
+                !(mContext.getSystemService(UserManager.class)).isDemoUser());
+    }
+
     public void hide(boolean animate) {
         if (mLayoutAttachedToWindow) {
             if (animate) {
@@ -217,6 +230,7 @@ public class RecentsOnboarding {
                         .withEndAction(() -> mWindowManager.removeView(mLayout))
                         .start();
             } else {
+                mLayout.animate().cancel();
                 mWindowManager.removeView(mLayout);
             }
         }
