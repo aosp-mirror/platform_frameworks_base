@@ -309,6 +309,8 @@ def verify_class_names(clazz):
         warn(clazz, None, "S1", "Class names with acronyms should be Mtp not MTP")
     if re.match("[^A-Z]", clazz.name):
         error(clazz, None, "S1", "Class must start with uppercase char")
+    if clazz.name.endswith("Impl"):
+        error(clazz, None, None, "Don't expose your implementation details")
 
 
 def verify_method_names(clazz):
@@ -1291,6 +1293,44 @@ def verify_tense(clazz):
             warn(clazz, m, None, "Unexpected tense; probably meant 'enabled'")
 
 
+def verify_icu(clazz):
+    """Verifies that richer ICU replacements are used."""
+    better = {
+        "java.util.TimeZone": "android.icu.util.TimeZone",
+        "java.util.Calendar": "android.icu.util.Calendar",
+        "java.util.Locale": "android.icu.util.ULocale",
+        "java.util.ResourceBundle": "android.icu.util.UResourceBundle",
+        "java.util.SimpleTimeZone": "android.icu.util.SimpleTimeZone",
+        "java.util.StringTokenizer": "android.icu.util.StringTokenizer",
+        "java.util.GregorianCalendar": "android.icu.util.GregorianCalendar",
+        "java.lang.Character": "android.icu.lang.UCharacter",
+        "java.text.BreakIterator": "android.icu.text.BreakIterator",
+        "java.text.Collator": "android.icu.text.Collator",
+        "java.text.DecimalFormatSymbols": "android.icu.text.DecimalFormatSymbols",
+        "java.text.NumberFormat": "android.icu.text.NumberFormat",
+        "java.text.DateFormatSymbols": "android.icu.text.DateFormatSymbols",
+        "java.text.DateFormat": "android.icu.text.DateFormat",
+        "java.text.SimpleDateFormat": "android.icu.text.SimpleDateFormat",
+        "java.text.MessageFormat": "android.icu.text.MessageFormat",
+        "java.text.DecimalFormat": "android.icu.text.DecimalFormat",
+    }
+
+    for m in clazz.ctors + clazz.methods:
+        types = []
+        types.extend(m.typ)
+        types.extend(m.args)
+        for arg in types:
+            if arg in better:
+                warn(clazz, m, None, "Type %s should be replaced with richer ICU type %s" % (arg, better[arg]))
+
+
+def verify_clone(clazz):
+    """Verify that clone() isn't implemented; see EJ page 61."""
+    for m in clazz.methods:
+        if m.name == "clone":
+            error(clazz, m, None, "Provide an explicit copy constructor instead of implementing clone()")
+
+
 def examine_clazz(clazz):
     """Find all style issues in the given class."""
 
@@ -1352,6 +1392,8 @@ def examine_clazz(clazz):
     verify_params(clazz)
     verify_services(clazz)
     verify_tense(clazz)
+    verify_icu(clazz)
+    verify_clone(clazz)
 
 
 def examine_stream(stream):
