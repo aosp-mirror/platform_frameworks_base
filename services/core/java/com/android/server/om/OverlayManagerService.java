@@ -544,7 +544,28 @@ public final class OverlayManagerService extends SystemService {
             final long ident = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    return mImpl.setEnabledExclusive(packageName, userId);
+                    return mImpl.setEnabledExclusive(packageName, false /* withinCategory */,
+                            userId);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override
+        public boolean setEnabledExclusiveInCategory(@Nullable String packageName, int userId)
+                throws RemoteException {
+            enforceChangeOverlayPackagesPermission("setEnabled");
+            userId = handleIncomingUser(userId, "setEnabled");
+            if (packageName == null) {
+                return false;
+            }
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    return mImpl.setEnabledExclusive(packageName, true /* withinCategory */,
+                            userId);
                 }
             } finally {
                 Binder.restoreCallingIdentity(ident);
