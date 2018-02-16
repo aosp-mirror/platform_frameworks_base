@@ -426,32 +426,6 @@ package android.service.quicksettings {
 
 }
 
-package android.telecom {
-
-  public abstract class Connection extends android.telecom.Conferenceable {
-    method public void handleRttUpgradeResponse(android.telecom.Connection.RttTextStream);
-    method public void onStartRtt(android.telecom.Connection.RttTextStream);
-    method public void onStopRtt();
-    method public final void sendRemoteRttRequest();
-    method public final void sendRttInitiationFailure(int);
-    method public final void sendRttInitiationSuccess();
-    method public final void sendRttSessionRemotelyTerminated();
-    field public static final int PROPERTY_IS_RTT = 256; // 0x100
-  }
-
-  public static final class Connection.RttTextStream {
-    method public java.lang.String read() throws java.io.IOException;
-    method public java.lang.String readImmediately() throws java.io.IOException;
-    method public void write(java.lang.String) throws java.io.IOException;
-  }
-
-  public final class ConnectionRequest implements android.os.Parcelable {
-    method public android.telecom.Connection.RttTextStream getRttTextStream();
-    method public boolean isRequestingRtt();
-  }
-
-}
-
 package android.telephony {
 
   public class MbmsDownloadSession implements java.lang.AutoCloseable {
