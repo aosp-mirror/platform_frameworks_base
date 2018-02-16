@@ -543,7 +543,6 @@ public class AppOpsManager {
             OP_CAMERA,
             // Body sensors
             OP_BODY_SENSORS,
-            OP_REQUEST_DELETE_PACKAGES,
 
             // APPOP PERMISSIONS
             OP_ACCESS_NOTIFICATIONS,
