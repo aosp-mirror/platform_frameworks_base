@@ -128,7 +128,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 synchronized (sStatsdLock) {
                     sStatsd = fetchStatsdService();
                     if (sStatsd == null) {
-                        Slog.w(TAG, "Could not access statsd");
+                        Slog.w(TAG, "Could not access statsd for UserUpdateReceiver");
                         return;
                     }
                     try {
@@ -143,7 +143,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
         };
         mShutdownEventReceiver = new ShutdownEventReceiver();
-        Slog.w(TAG, "Registered receiver for ACTION_PACKAGE_REPLACE AND ADDED.");
+        if (DEBUG) Slog.d(TAG, "Registered receiver for ACTION_PACKAGE_REPLACED and ADDED.");
         PowerProfile powerProfile = new PowerProfile(context);
         final int numClusters = powerProfile.getNumCpuClusters();
         mKernelCpuSpeedReaders = new KernelCpuSpeedReader[numClusters];
@@ -216,7 +216,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         PackageManager pm = context.getPackageManager();
         final List<UserInfo> users = um.getUsers(true);
         if (DEBUG) {
-            Slog.w(TAG, "Iterating over " + users.size() + " profiles.");
+            Slog.d(TAG, "Iterating over " + users.size() + " profiles.");
         }
 
         List<Integer> uids = new ArrayList();
@@ -237,7 +237,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         sStatsd.informAllUidData(toIntArray(uids), toLongArray(versions), apps.toArray(new
                 String[apps.size()]));
         if (DEBUG) {
-            Slog.w(TAG, "Sent data for " + uids.size() + " apps");
+            Slog.d(TAG, "Sent data for " + uids.size() + " apps");
         }
     }
 
@@ -868,7 +868,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             sStatsd = fetchStatsdService();
             if (sStatsd == null) {
-                Slog.w(TAG, "Could not access statsd");
+                Slog.i(TAG, "Could not yet find statsd to tell it that StatsCompanion is alive.");
                 return;
             }
             if (DEBUG) Slog.d(TAG, "Saying hi to statsd");
@@ -908,6 +908,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 } finally {
                     restoreCallingIdentity(token);
                 }
+                Slog.i(TAG, "Told statsd that StatsCompanionService is alive.");
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to inform statsd that statscompanion is ready", e);
                 forgetEverything();
