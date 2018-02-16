@@ -5226,9 +5226,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         final int cutoutMode = attrs.layoutInDisplayCutoutMode;
+        final boolean attachedInParent = attached != null && !layoutInScreen;
         // Ensure that windows with a DEFAULT or NEVER display cutout mode are laid out in
         // the cutout safe zone.
-        if (cutoutMode != LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS) {
+        // Windows that are attached to a parent and laid out in said parent are already avoiding
+        // the cutout according to that parent and don't need to be further constrained.
+        if (cutoutMode != LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS && !attachedInParent) {
             final Rect displayCutoutSafeExceptMaybeTop = mTmpRect;
             displayCutoutSafeExceptMaybeTop.set(displayFrames.mDisplayCutoutSafe);
             if (layoutInScreen && layoutInsetDecor && !requestedFullscreen
