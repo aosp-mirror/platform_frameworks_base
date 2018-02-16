@@ -514,7 +514,7 @@ public final class AutofillManagerService extends SystemService {
      */
     @GuardedBy("mLock")
     private void updateCachedServiceLocked(int userId, boolean disabled) {
-        AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+        AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
         if (service != null) {
             service.destroySessionsLocked();
             service.updateLocked(disabled);
