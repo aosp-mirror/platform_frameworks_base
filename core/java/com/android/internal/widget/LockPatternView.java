@@ -125,6 +125,7 @@ public class LockPatternView extends View {
     private boolean mInStealthMode = false;
     private boolean mEnableHapticFeedback = true;
     private boolean mPatternInProgress = false;
+    private boolean mFadePattern = true;
 
     private float mHitFactor = 0.6f;
 
@@ -373,6 +374,14 @@ public class LockPatternView extends View {
      */
     public void setInStealthMode(boolean inStealthMode) {
         mInStealthMode = inStealthMode;
+    }
+
+    /**
+     * Set whether the pattern should fade as it's being drawn. If
+     * true, each segment of the pattern fades over time.
+     */
+    public void setFadePattern(boolean fadePattern) {
+        mFadePattern = fadePattern;
     }
 
     /**
@@ -1167,10 +1176,18 @@ public class LockPatternView extends View {
                     currentPath.moveTo(lastX, lastY);
                     if (state.lineEndX != Float.MIN_VALUE && state.lineEndY != Float.MIN_VALUE) {
                         currentPath.lineTo(state.lineEndX, state.lineEndY);
-                        mPathPaint.setAlpha((int) 255 - lineFadeVal );
+                        if (mFadePattern) {
+                            mPathPaint.setAlpha((int) 255 - lineFadeVal );
+                        } else {
+                            mPathPaint.setAlpha(255);
+                        }
                     } else {
                         currentPath.lineTo(centerX, centerY);
-                        mPathPaint.setAlpha((int) 255 - lineFadeVal );
+                        if (mFadePattern) {
+                            mPathPaint.setAlpha((int) 255 - lineFadeVal );
+                        } else {
+                            mPathPaint.setAlpha(255);
+                        }
                     }
                     canvas.drawPath(currentPath, mPathPaint);
                 }
