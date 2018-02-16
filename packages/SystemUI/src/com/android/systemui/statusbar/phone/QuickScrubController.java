@@ -224,6 +224,10 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
             case MotionEvent.ACTION_DOWN: {
                 int x = (int) event.getX();
                 int y = (int) event.getY();
+                // End any existing quickscrub animations before starting the new transition
+                if (mQuickScrubEndAnimator != null) {
+                    mQuickScrubEndAnimator.end();
+                }
                 mHomeButtonView = homeButton.getCurrentView();
                 if (mNavigationBarView.isQuickScrubEnabled()
                         && mNavigationBarView.getDownHitTarget() == HIT_TARGET_HOME) {
