@@ -17,6 +17,7 @@
 package android.hardware.usb;
 
 import android.annotation.Nullable;
+import android.os.Build;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
@@ -43,7 +44,7 @@ public class UsbRequest {
     private static final String TAG = "UsbRequest";
 
     // From drivers/usb/core/devio.c
-    private static final int MAX_USBFS_BUFFER_SIZE = 16384;
+    static final int MAX_USBFS_BUFFER_SIZE = 16384;
 
     // used by the JNI code
     private long mNativeContext;
@@ -175,7 +176,9 @@ public class UsbRequest {
      *               capacity will be ignored. Once the request
      *               {@link UsbDeviceConnection#requestWait() is processed} the position will be set
      *               to the number of bytes read/written.
-     * @param length number of bytes to read or write.
+     * @param length number of bytes to read or write. Before {@value Build.VERSION_CODES#P}, a
+     *               value larger than 16384 bytes would be truncated down to 16384. In API
+     *               {@value Build.VERSION_CODES#P} and after, any value of length is valid.
      *
      * @return true if the queueing operation succeeded
      *
@@ -185,6 +188,11 @@ public class UsbRequest {
     public boolean queue(ByteBuffer buffer, int length) {
         boolean out = (mEndpoint.getDirection() == UsbConstants.USB_DIR_OUT);
         boolean result;
+
+        if (mConnection.getContext().getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.P
+                && length > MAX_USBFS_BUFFER_SIZE) {
+            length = MAX_USBFS_BUFFER_SIZE;
+        }
 
         synchronized (mLock) {
             // save our buffer for when the request has completed
@@ -222,7 +230,10 @@ public class UsbRequest {
      *               of the buffer is undefined until the request is returned by
      *               {@link UsbDeviceConnection#requestWait}. If the request failed the buffer
      *               will be unchanged; if the request succeeded the position of the buffer is
-     *               incremented by the number of bytes sent/received.
+     *               incremented by the number of bytes sent/received. Before
+     *               {@value Build.VERSION_CODES#P}, a buffer of length larger than 16384 bytes
+     *               would throw IllegalArgumentException. In API {@value Build.VERSION_CODES#P}
+     *               and after, any size buffer is valid.
      *
      * @return true if the queueing operation succeeded
      */
@@ -244,9 +255,12 @@ public class UsbRequest {
                 mIsUsingNewQueue = true;
                 wasQueued = native_queue(null, 0, 0);
             } else {
-                // Can only send/receive MAX_USBFS_BUFFER_SIZE bytes at once
-                Preconditions.checkArgumentInRange(buffer.remaining(), 0, MAX_USBFS_BUFFER_SIZE,
-                        "number of remaining bytes");
+                if (mConnection.getContext().getApplicationInfo().targetSdkVersion
+                        < Build.VERSION_CODES.P) {
+                    // Can only send/receive MAX_USBFS_BUFFER_SIZE bytes at once
+                    Preconditions.checkArgumentInRange(buffer.remaining(), 0, MAX_USBFS_BUFFER_SIZE,
+                            "number of remaining bytes");
+                }
 
                 // Can not receive into read-only buffers.
                 Preconditions.checkArgument(!(buffer.isReadOnly() && !isSend), "buffer can not be "
