@@ -40,7 +40,7 @@
     <dimen name="battery_detail_graph_space_top">27dp</dimen>
     <dimen name="battery_detail_graph_space_bottom">27dp</dimen>
 
-    <dimen name="qs_tile_margin_top">32dp</dimen>
+    <dimen name="qs_tile_margin_top">16dp</dimen>
     <dimen name="qs_brightness_padding_top">6dp</dimen>
     <dimen name="qs_detail_margin_top">28dp</dimen>
 </resources>

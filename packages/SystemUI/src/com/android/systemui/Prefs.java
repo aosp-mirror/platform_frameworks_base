@@ -47,7 +47,6 @@ public final class Prefs {
         Key.QS_INVERT_COLORS_ADDED,
         Key.QS_WORK_ADDED,
         Key.QS_NIGHTDISPLAY_ADDED,
-        Key.QS_LONG_PRESS_TOOLTIP_SHOWN_COUNT,
         Key.SEEN_MULTI_USER,
         Key.NUM_APPS_LAUNCHED,
         Key.HAS_SEEN_RECENTS_ONBOARDING,
@@ -77,11 +76,6 @@ public final class Prefs {
         String QS_WORK_ADDED = "QsWorkAdded";
         @Deprecated
         String QS_NIGHTDISPLAY_ADDED = "QsNightDisplayAdded";
-        /**
-         * Used for tracking how many times the user has seen the long press tooltip in the Quick
-         * Settings panel.
-         */
-        String QS_LONG_PRESS_TOOLTIP_SHOWN_COUNT = "QsLongPressTooltipShownCount";
         String SEEN_MULTI_USER = "HasSeenMultiUser";
         String NUM_APPS_LAUNCHED = "NumAppsLaunched";
         String HAS_SEEN_RECENTS_ONBOARDING = "HasSeenRecentsOnboarding";

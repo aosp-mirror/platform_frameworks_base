@@ -99,11 +99,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
             record.tileView.measure(exactly(mCellWidth), exactly(mCellHeight));
             previousView = record.tileView.updateAccessibilityOrder(previousView);
         }
-
-        // Only include the top margin in our measurement if we have more than 1 row to show.
-        // Otherwise, don't add the extra margin buffer at top.
-        int height = (mCellHeight + mCellMargin) * rows +
-                rows != 0 ? (mCellMarginTop - mCellMargin) : 0;
+        int height = (mCellHeight + mCellMargin) * rows + (mCellMarginTop - mCellMargin);
         if (height < 0) height = 0;
         setMeasuredDimension(width, height);
     }

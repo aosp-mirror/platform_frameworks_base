@@ -42,7 +42,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
-import com.android.systemui.Prefs;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSIconView;
@@ -50,7 +49,6 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.PagedTileLayout.TilePage;
 import com.android.systemui.qs.QSHost;
-import com.android.systemui.qs.QSTooltipView;
 
 import java.util.ArrayList;
 
@@ -193,11 +191,6 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
     public void longClick() {
         mMetricsLogger.write(populate(new LogMaker(ACTION_QS_LONG_PRESS).setType(TYPE_ACTION)));
         mHandler.sendEmptyMessage(H.LONG_CLICK);
-
-        Prefs.putInt(
-                mContext,
-                Prefs.Key.QS_LONG_PRESS_TOOLTIP_SHOWN_COUNT,
-                QSTooltipView.MAX_TOOLTIP_SHOWN_COUNT);
     }
 
     public LogMaker populate(LogMaker logMaker) {

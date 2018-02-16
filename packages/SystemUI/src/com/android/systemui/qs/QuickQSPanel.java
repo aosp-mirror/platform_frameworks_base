@@ -124,8 +124,9 @@ public class QuickQSPanel extends QSPanel {
 
     @Override
     public void onTuningChanged(String key, String newValue) {
-        if (QS_SHOW_BRIGHTNESS.equals(key) || QS_SHOW_LONG_PRESS_TOOLTIP.equals(key)) {
-            // No Brightness or Tooltip for you!
+        // No tunings for you.
+        if (key.equals(QS_SHOW_BRIGHTNESS)) {
+            // No Brightness for you.
             super.onTuningChanged(key, "0");
         }
     }
