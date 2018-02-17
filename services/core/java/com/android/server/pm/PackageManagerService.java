@@ -22229,8 +22229,16 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 Slog.e(TAG, "Failed to create app data for " + packageName + ": " + e);
             }
         }
-        // Prepare the application profiles.
-        mArtManagerService.prepareAppProfiles(pkg, userId);
+        // Prepare the application profiles only for upgrades and first boot (so that we don't
+        // repeat the same operation at each boot).
+        // We only have to cover the upgrade and first boot here because for app installs we
+        // prepare the profiles before invoking dexopt (in installPackageLI).
+        //
+        // We also have to cover non system users because we do not call the usual install package
+        // methods for them.
+        if (mIsUpgrade || mFirstBoot || (userId != UserHandle.USER_SYSTEM)) {
+            mArtManagerService.prepareAppProfiles(pkg, userId);
+        }
 
         if ((flags & StorageManager.FLAG_STORAGE_CE) != 0 && ceDataInode != -1) {
             // TODO: mark this structure as dirty so we persist it!
