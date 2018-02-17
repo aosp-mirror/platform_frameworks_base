@@ -49,7 +49,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.platform.test.annotations.Presubmit;
 
-import com.android.server.backup.testing.ShadowContextImplForBackup;
 import com.android.server.backup.testing.TransportData;
 import com.android.server.backup.testing.TransportTestUtils.TransportMock;
 import com.android.server.backup.transport.OnTransportRegisteredListener;
@@ -61,7 +60,6 @@ import com.android.server.testing.SystemLoaderPackages;
 import com.android.server.testing.shadows.FrameworkShadowContextImpl;
 import com.android.server.testing.shadows.FrameworkShadowPackageManager;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -90,8 +88,8 @@ public class TransportManagerTest {
     private static final String PACKAGE_B = "some.package.b";
 
     /**
-     * GMSCore depends on this constant so we define it here on top of the definition in
-     * {@link TransportManager} to verify this extra is passed
+     * GMSCore depends on this constant so we define it here on top of the definition in {@link
+     * TransportManager} to verify this extra is passed
      */
     private static final String EXTRA_TRANSPORT_REGISTRATION = "transport_registration";
 
@@ -108,19 +106,13 @@ public class TransportManagerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        mContext = RuntimeEnvironment.application;
         mShadowPackageManager =
-                (FrameworkShadowPackageManager)
-                        extract(RuntimeEnvironment.application.getPackageManager());
-        mContext = RuntimeEnvironment.application.getApplicationContext();
+                (FrameworkShadowPackageManager) extract(mContext.getPackageManager());
 
         mTransportA1 = genericTransport(PACKAGE_A, "TransportFoo");
         mTransportA2 = genericTransport(PACKAGE_A, "TransportBar");
         mTransportB1 = genericTransport(PACKAGE_B, "TransportBaz");
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        ShadowContextImplForBackup.resetBackupShadowState();
     }
 
     @Test

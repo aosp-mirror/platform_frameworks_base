@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.server.backup.testing;
+package com.android.server.testing.shadows;
 
 import android.annotation.Nullable;
 import android.content.pm.PackageManager;

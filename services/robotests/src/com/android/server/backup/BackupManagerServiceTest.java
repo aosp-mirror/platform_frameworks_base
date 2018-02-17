@@ -16,6 +16,7 @@
 
 package com.android.server.backup;
 
+import static com.android.server.backup.testing.BackupManagerServiceTestUtils.startBackupThread;
 import static com.android.server.backup.testing.TransportData.backupTransport;
 import static com.android.server.backup.testing.TransportData.d2dTransport;
 import static com.android.server.backup.testing.TransportData.localTransport;
@@ -41,9 +42,9 @@ import android.content.Intent;
 import android.os.HandlerThread;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
-import com.android.server.backup.PackageManagerBackupAgent;
-import com.android.server.backup.testing.ShadowAppBackupUtils;
-import com.android.server.backup.testing.ShadowBackupPolicyEnforcer;
+
+import com.android.server.testing.shadows.ShadowAppBackupUtils;
+import com.android.server.testing.shadows.ShadowBackupPolicyEnforcer;
 import com.android.server.backup.testing.TransportData;
 import com.android.server.backup.testing.TransportTestUtils.TransportMock;
 import com.android.server.backup.transport.TransportNotRegisteredException;
@@ -97,10 +98,7 @@ public class BackupManagerServiceTest {
         mTransport = backupTransport();
         mTransportName = mTransport.transportName;
 
-        mBackupThread = new HandlerThread("backup-test");
-        mBackupThread.setUncaughtExceptionHandler(
-                (t, e) -> ShadowLog.e(TAG, "Uncaught exception in test thread " + t.getName(), e));
-        mBackupThread.start();
+        mBackupThread = startBackupThread(this::uncaughtException);
         mShadowBackupLooper = shadowOf(mBackupThread.getLooper());
 
         ContextWrapper context = RuntimeEnvironment.application;
@@ -119,6 +117,13 @@ public class BackupManagerServiceTest {
         mBackupThread.quit();
         ShadowAppBackupUtils.reset();
         ShadowBackupPolicyEnforcer.setMandatoryBackupTransport(null);
+    }
+
+    private void uncaughtException(Thread thread, Throwable e) {
+        // Unrelated exceptions are thrown in the backup thread. Until we mock everything properly
+        // we should not fail tests because of this. This is not flakiness, the exceptions thrown
+        // don't interfere with the tests.
+        ShadowLog.e(TAG, "Uncaught exception in test thread " + thread.getName(), e);
     }
 
     /* Tests for destination string */
