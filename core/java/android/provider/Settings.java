@@ -9098,6 +9098,16 @@ public final class Settings {
         @SystemApi
         public static final String CARRIER_APP_WHITELIST = "carrier_app_whitelist";
 
+        /**
+         * Map of package name to application names.  Package names must be lower cased as they are
+         * used as a key in the map.  The application names cannot and will not be localized.
+         *
+         * The value is "packageName1:appName1;packageName2:appName2;..."
+         * @hide
+         */
+        @SystemApi
+        public static final String CARRIER_APP_NAMES = "carrier_app_names";
+
        /**
         * USB Mass Storage Enabled
         */

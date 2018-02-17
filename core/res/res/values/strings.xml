@@ -3204,9 +3204,10 @@
     <string name="sim_restart_button">Restart</string>
     <!-- See Carrier_App_Dialog. This is the message of that dialog. -->
     <string name="install_carrier_app_notification_title">Activate mobile service</string>
-    <string name="install_carrier_app_notification_text">
-        Download the carrier app to activate your new SIM
-    </string>
+    <!-- Notification message that shows when the user inserts a SIM card that requires a carrier app download, but the app name is unknown -->
+    <string name="install_carrier_app_notification_text">Download the carrier app to activate your new SIM</string>
+    <!-- Notification message that shows when the user inserts a SIM card that requires a carrier app download.  App name is known -->
+    <string name="install_carrier_app_notification_text_app_name">Download the <xliff:g id="app_name">%1$s</xliff:g> app to activate your new SIM</string>
     <!-- See Carrier_App_Notification. This is the button of that dialog. -->
     <string name="install_carrier_app_notification_button">Download app</string>
     <!-- See carrier_app_notification. This is the headline. -->
