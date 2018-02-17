@@ -543,6 +543,10 @@ public abstract class ExpandableView extends FrameLayout {
         return false;
     }
 
+    public boolean hasExpandingChild() {
+        return false;
+    }
+
     /**
      * A listener notifying when {@link #getActualHeight} changes.
      */

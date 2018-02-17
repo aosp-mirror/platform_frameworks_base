@@ -220,8 +220,7 @@ public class AmbientState {
     }
 
     public int getInnerHeight() {
-        return Math.max(Math.min(mLayoutHeight, mMaxLayoutHeight) - mTopPadding
-                - mExpandAnimationTopChange, mLayoutMinHeight);
+        return Math.max(Math.min(mLayoutHeight, mMaxLayoutHeight) - mTopPadding, mLayoutMinHeight);
     }
 
     public boolean isShadeExpanded() {
