@@ -19,6 +19,7 @@ package android.net.wifi.rtt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.net.MacAddress;
 import android.net.wifi.aware.PeerHandle;
 import android.os.Handler;
@@ -27,6 +28,7 @@ import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -40,6 +42,7 @@ import java.util.Objects;
  */
 public final class RangingResult implements Parcelable {
     private static final String TAG = "RangingResult";
+    private static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
     /** @hide */
     @IntDef({STATUS_SUCCESS, STATUS_FAIL, STATUS_RESPONDER_DOES_NOT_SUPPORT_IEEE80211MC})
@@ -76,37 +79,35 @@ public final class RangingResult implements Parcelable {
     private final int mDistanceMm;
     private final int mDistanceStdDevMm;
     private final int mRssi;
-    private final LocationConfigurationInformation mLci;
-    private final LocationCivic mLcr;
+    private final byte[] mLci;
+    private final byte[] mLcr;
     private final long mTimestamp;
 
     /** @hide */
     public RangingResult(@RangeResultStatus int status, @NonNull MacAddress mac, int distanceMm,
-            int distanceStdDevMm, int rssi, LocationConfigurationInformation lci, LocationCivic lcr,
-            long timestamp) {
+            int distanceStdDevMm, int rssi, byte[] lci, byte[] lcr, long timestamp) {
         mStatus = status;
         mMac = mac;
         mPeerHandle = null;
         mDistanceMm = distanceMm;
         mDistanceStdDevMm = distanceStdDevMm;
         mRssi = rssi;
-        mLci = lci;
-        mLcr = lcr;
+        mLci = lci == null ? EMPTY_BYTE_ARRAY : lci;
+        mLcr = lcr == null ? EMPTY_BYTE_ARRAY : lcr;
         mTimestamp = timestamp;
     }
 
     /** @hide */
     public RangingResult(@RangeResultStatus int status, PeerHandle peerHandle, int distanceMm,
-            int distanceStdDevMm, int rssi, LocationConfigurationInformation lci, LocationCivic lcr,
-            long timestamp) {
+            int distanceStdDevMm, int rssi, byte[] lci, byte[] lcr, long timestamp) {
         mStatus = status;
         mMac = null;
         mPeerHandle = peerHandle;
         mDistanceMm = distanceMm;
         mDistanceStdDevMm = distanceStdDevMm;
         mRssi = rssi;
-        mLci = lci;
-        mLcr = lcr;
+        mLci = lci == null ? EMPTY_BYTE_ARRAY : lci;
+        mLcr = lcr == null ? EMPTY_BYTE_ARRAY : lcr;
         mTimestamp = timestamp;
     }
 
@@ -192,13 +193,15 @@ public final class RangingResult implements Parcelable {
      * <p>
      * Note: the information is NOT validated - use with caution. Consider validating it with
      * other sources of information before using it.
+     *
+     * @hide
      */
-    @Nullable
-    public LocationConfigurationInformation getReportedLocationConfigurationInformation() {
+    @SystemApi
+    @NonNull
+    public byte[] getLci() {
         if (mStatus != STATUS_SUCCESS) {
             throw new IllegalStateException(
-                    "getReportedLocationConfigurationInformation(): invoked on an invalid result: "
-                            + "getStatus()=" + mStatus);
+                    "getLci(): invoked on an invalid result: getStatus()=" + mStatus);
         }
         return mLci;
     }
@@ -208,9 +211,12 @@ public final class RangingResult implements Parcelable {
      * <p>
      * Note: the information is NOT validated - use with caution. Consider validating it with
      * other sources of information before using it.
+     *
+     * @hide
      */
-    @Nullable
-    public LocationCivic getReportedLocationCivic() {
+    @SystemApi
+    @NonNull
+    public byte[] getLcr() {
         if (mStatus != STATUS_SUCCESS) {
             throw new IllegalStateException(
                     "getReportedLocationCivic(): invoked on an invalid result: getStatus()="
@@ -256,18 +262,8 @@ public final class RangingResult implements Parcelable {
         dest.writeInt(mDistanceMm);
         dest.writeInt(mDistanceStdDevMm);
         dest.writeInt(mRssi);
-        if (mLci == null) {
-            dest.writeBoolean(false);
-        } else {
-            dest.writeBoolean(true);
-            mLci.writeToParcel(dest, flags);
-        }
-        if (mLcr == null) {
-            dest.writeBoolean(false);
-        } else {
-            dest.writeBoolean(true);
-            mLcr.writeToParcel(dest, flags);
-        }
+        dest.writeByteArray(mLci);
+        dest.writeByteArray(mLcr);
         dest.writeLong(mTimestamp);
     }
 
@@ -293,16 +289,8 @@ public final class RangingResult implements Parcelable {
             int distanceMm = in.readInt();
             int distanceStdDevMm = in.readInt();
             int rssi = in.readInt();
-            boolean lciPresent = in.readBoolean();
-            LocationConfigurationInformation lci = null;
-            if (lciPresent) {
-                lci = LocationConfigurationInformation.CREATOR.createFromParcel(in);
-            }
-            boolean lcrPresent = in.readBoolean();
-            LocationCivic lcr = null;
-            if (lcrPresent) {
-                lcr = LocationCivic.CREATOR.createFromParcel(in);
-            }
+            byte[] lci = in.createByteArray();
+            byte[] lcr = in.createByteArray();
             long timestamp = in.readLong();
             if (peerHandlePresent) {
                 return new RangingResult(status, peerHandle, distanceMm, distanceStdDevMm, rssi,
@@ -340,7 +328,7 @@ public final class RangingResult implements Parcelable {
         return mStatus == lhs.mStatus && Objects.equals(mMac, lhs.mMac) && Objects.equals(
                 mPeerHandle, lhs.mPeerHandle) && mDistanceMm == lhs.mDistanceMm
                 && mDistanceStdDevMm == lhs.mDistanceStdDevMm && mRssi == lhs.mRssi
-                && Objects.equals(mLci, lhs.mLci) && Objects.equals(mLcr, lhs.mLcr)
+                && Arrays.equals(mLci, lhs.mLci) && Arrays.equals(mLcr, lhs.mLcr)
                 && mTimestamp == lhs.mTimestamp;
     }
 
