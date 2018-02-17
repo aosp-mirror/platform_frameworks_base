@@ -611,6 +611,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     // as one line, but close enough for now.
     static final int RESERVED_BYTES_PER_LOGCAT_LINE = 100;
 
+    /** If a UID observer takes more than this long, send a WTF. */
+    private static final int SLOW_UID_OBSERVER_THRESHOLD_MS = 20;
+
     // Access modes for handleIncomingUser.
     static final int ALLOW_NON_FULL = 0;
     static final int ALLOW_NON_FULL_IN_PROFILE = 1;
@@ -782,6 +785,9 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @VisibleForTesting
     long mWaitForNetworkTimeoutMs;
+
+    /** Total # of UID change events dispatched, shown in dumpsys. */
+    int mUidChangeDispatchCount;
 
     /**
      * Helper class which strips out priority and proto arguments then calls the dump function with
@@ -1704,6 +1710,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         final String pkg;
         final int which;
         final int cutpoint;
+
+        /**
+         * Total # of callback calls that took more than {@link #SLOW_UID_OBSERVER_THRESHOLD_MS}.
+         * We show it in dumpsys.
+         */
+        int mSlowDispatchCount;
+
+        /** Max time it took for each dispatch. */
+        int mMaxDispatchTime;
 
         final SparseIntArray lastProcStates;
 
@@ -4724,6 +4739,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     "*** Delivering " + N + " uid changes");
         }
 
+        mUidChangeDispatchCount += N;
         int i = mUidObservers.beginBroadcast();
         while (i > 0) {
             i--;
@@ -4776,6 +4792,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // interested in all proc state changes.
                     continue;
                 }
+                final long start = SystemClock.uptimeMillis();
                 if ((change & UidRecord.CHANGE_IDLE) != 0) {
                     if ((reg.which & ActivityManager.UID_OBSERVER_IDLE) != 0) {
                         if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
@@ -4835,6 +4852,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     item.procStateSeq);
                         }
                     }
+                }
+                final int duration = (int) (SystemClock.uptimeMillis() - start);
+                if (reg.mMaxDispatchTime < duration) {
+                    reg.mMaxDispatchTime = duration;
+                }
+                if (duration >= SLOW_UID_OBSERVER_THRESHOLD_MS) {
+                    reg.mSlowDispatchCount++;
                 }
             }
         } catch (RemoteException e) {
@@ -16796,6 +16820,25 @@ public class ActivityManagerService extends IActivityManager.Stub
                         pw.print(" mLowRamSinceLastIdle=");
                         TimeUtils.formatDuration(getLowRamTimeSinceIdle(now), pw);
                         pw.println();
+                pw.println();
+                pw.print("  mUidChangeDispatchCount=");
+                pw.print(mUidChangeDispatchCount);
+                pw.println();
+
+                pw.println("  Slow UID dispatches:");
+                final int N = mUidObservers.beginBroadcast();
+                for (int i = 0; i < N; i++) {
+                    UidObserverRegistration r =
+                            (UidObserverRegistration) mUidObservers.getBroadcastCookie(i);
+                    pw.print("    ");
+                    pw.print(mUidObservers.getBroadcastItem(i).getClass().getTypeName());
+                    pw.print(": ");
+                    pw.print(r.mSlowDispatchCount);
+                    pw.print(" / Max ");
+                    pw.print(r.mMaxDispatchTime);
+                    pw.println("ms");
+                }
+                mUidObservers.finishBroadcast();
             }
         }
         pw.println("  mForceBackgroundCheck=" + mForceBackgroundCheck);
