@@ -78,9 +78,10 @@ class RippleBackground extends RippleComponent {
     }
 
     private void onStateChanged() {
-        float newOpacity = 0.0f;
-        if (mHovered) newOpacity += .25f;
-        if (mFocused) newOpacity += .75f;
+        // Hover             = .2 * alpha
+        // Focus             = .6 * alpha
+        // Focused + Hovered = .6 * alpha
+        float newOpacity = mFocused ? .6f : mHovered ? .2f : 0f;
         if (mAnimator != null) {
             mAnimator.cancel();
             mAnimator = null;
