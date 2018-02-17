@@ -221,8 +221,8 @@ class ZygoteConnection {
 
         pid = Zygote.forkAndSpecialize(parsedArgs.uid, parsedArgs.gid, parsedArgs.gids,
                 parsedArgs.runtimeFlags, rlimits, parsedArgs.mountExternal, parsedArgs.seInfo,
-                parsedArgs.niceName, fdsToClose, fdsToIgnore, parsedArgs.instructionSet,
-                parsedArgs.appDataDir);
+                parsedArgs.niceName, fdsToClose, fdsToIgnore, parsedArgs.startChildZygote,
+                parsedArgs.instructionSet, parsedArgs.appDataDir);
 
         try {
             if (pid == 0) {
@@ -233,7 +233,8 @@ class ZygoteConnection {
                 IoUtils.closeQuietly(serverPipeFd);
                 serverPipeFd = null;
 
-                return handleChildProc(parsedArgs, descriptors, childPipeFd);
+                return handleChildProc(parsedArgs, descriptors, childPipeFd,
+                        parsedArgs.startChildZygote);
             } else {
                 // In the parent. A pid < 0 indicates a failure and will be handled in
                 // handleParentProc.
@@ -415,6 +416,14 @@ class ZygoteConnection {
         boolean preloadDefault;
 
         /**
+         * Whether this is a request to start a zygote process as a child of this zygote.
+         * Set with --start-child-zygote. The remaining arguments must include the
+         * CHILD_ZYGOTE_SOCKET_NAME_ARG flag to indicate the abstract socket name that
+         * should be used for communication.
+         */
+        boolean startChildZygote;
+
+        /**
          * Constructs instance and parses args
          * @param args zygote command-line args
          * @throws IllegalArgumentException
@@ -565,6 +574,8 @@ class ZygoteConnection {
                     preloadPackageCacheKey = args[++curArg];
                 } else if (arg.equals("--preload-default")) {
                     preloadDefault = true;
+                } else if (arg.equals("--start-child-zygote")) {
+                    startChildZygote = true;
                 } else {
                     break;
                 }
@@ -586,6 +597,20 @@ class ZygoteConnection {
 
                 remainingArgs = new String[args.length - curArg];
                 System.arraycopy(args, curArg, remainingArgs, 0, remainingArgs.length);
+            }
+
+            if (startChildZygote) {
+                boolean seenChildSocketArg = false;
+                for (String arg : remainingArgs) {
+                    if (arg.startsWith(Zygote.CHILD_ZYGOTE_SOCKET_NAME_ARG)) {
+                        seenChildSocketArg = true;
+                        break;
+                    }
+                }
+                if (!seenChildSocketArg) {
+                    throw new IllegalArgumentException("--start-child-zygote specified " +
+                            "without " + Zygote.CHILD_ZYGOTE_SOCKET_NAME_ARG);
+                }
             }
         }
     }
@@ -739,9 +764,10 @@ class ZygoteConnection {
      * @param parsedArgs non-null; zygote args
      * @param descriptors null-ok; new file descriptors for stdio if available.
      * @param pipeFd null-ok; pipe for communication back to Zygote.
+     * @param isZygote whether this new child process is itself a new Zygote.
      */
     private Runnable handleChildProc(Arguments parsedArgs, FileDescriptor[] descriptors,
-            FileDescriptor pipeFd) {
+            FileDescriptor pipeFd, boolean isZygote) {
         /**
          * By the time we get here, the native code has closed the two actual Zygote
          * socket connections, and substituted /dev/null in their place.  The LocalSocket
@@ -778,8 +804,13 @@ class ZygoteConnection {
             // Should not get here.
             throw new IllegalStateException("WrapperInit.execApplication unexpectedly returned");
         } else {
-            return ZygoteInit.zygoteInit(parsedArgs.targetSdkVersion, parsedArgs.remainingArgs,
-                    null /* classLoader */);
+            if (!isZygote) {
+                return ZygoteInit.zygoteInit(parsedArgs.targetSdkVersion, parsedArgs.remainingArgs,
+                        null /* classLoader */);
+            } else {
+                return ZygoteInit.childZygoteInit(parsedArgs.targetSdkVersion,
+                        parsedArgs.remainingArgs, null /* classLoader */);
+            }
         }
     }
 
