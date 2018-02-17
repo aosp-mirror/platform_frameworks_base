@@ -53,16 +53,16 @@
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"ချိတ်ဆက်မှုပြတ်တောက်သည်"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"အဆက်အသွယ်ဖြတ်တောက်သည်"</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"ချိတ်ဆက်နေသည်"</string>
-    <string name="bluetooth_connected" msgid="6038755206916626419">"ချိတ်ဆက်ထားပြီး"</string>
+    <string name="bluetooth_connected" msgid="5427152882755735944">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> ချိတ်ဆက်ပြီးပြီ"</string>
     <string name="bluetooth_pairing" msgid="1426882272690346242">"တွဲချိတ်ပါ"</string>
-    <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"ချိတ်ဆက်ထားပြီး (ဖုန်းမရှိ)"</string>
-    <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"ချိတ်ဆက်ထားပြီး (မီဒီယာမရှိ)"</string>
-    <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"ချိတ်ဆက်မိသည် (သတင်းရယူမှုမရှိ)"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"ချိတ်ဆက်ပြီး (ဖုန်း သို့ မီဒီယာမဟုတ်ပါ)"</string>
-    <string name="bluetooth_connected_battery_level" msgid="7049181126136692368">"ချိတ်ဆက်ပြီးပါပြီ၊ ဘက်ထရီ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_battery_level" msgid="5504193961248406027">"ချိတ်ဆက်ပြီးပါပြီ (မည်သည့်ဖုန်းမျှ မရှိပါ)၊ ဘက်ထရီ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="4751724026365870779">"ချိတ်ဆက်ပြီးပါပြီ (မည်သည့် မီဒီယာမျှ မရှိပါ)၊ ဘက်ထရီ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1549265779323455261">"ချိတ်ဆက်ပြီးပါပြီ (မည်သည့် ဖုန်း သို့မဟုတ် မီဒီယာမျှ မရှိပါ)၊ ဘက်ထရီ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset" msgid="616068069034994802">"ချိတ်ဆက်ပြီးပြီ (ဖုန်းမရှိပါ)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp" msgid="3736431800395923868">"ချိတ်ဆက်ပြီးပြီ (မီဒီယာ မရှိပါ)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_map" msgid="3200033913678466453">"ချိတ်ဆက်ပြီးပြီ (မက်ဆေ့ဂျ် သုံး၍မရပါ)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2047403011284187056">"ချိတ်ပြီးပြီ (ဖုန်း (သို့) မီဒီယာ မရှိပါ)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_battery_level" msgid="5162924691231307748">"ချိတ်ဆက်ပြီးပြီ၊ ဘက်ထရီ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"ချိတ်ဆက်ပြီးပြီ (ဖုန်းမရှိပါ)၊ ဘက်ထရီ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"ချိတ်ဆက်ပြီးပြီ (မီဒီယာ မရှိပါ)၊ ဘက်ထရီ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"ချိတ်ဆက်ပြီးပြီ (ဖုန်း (သို့) မီဒီယာ မရှိပါ)၊ ဘက်ထရီ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"မီဒီယာ အသံ"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"ဖုန်းခေါ်ဆိုမှုများ"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"ဖိုင်လွဲပြောင်းခြင်း"</string>
@@ -75,6 +75,10 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM အသုံးပြုခြင်း"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD အသံ- <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD အသံ"</string>
+    <!-- no translation found for bluetooth_profile_hearing_aid (7999237886427812595) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_profile_summary_connected (7188282786730266159) -->
+    <skip />
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"မီဒီယာအသံအား ချိတ်ဆက်ရန်"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"ဖုန်းအသံအား ချိတ်ဆက်ရန်"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"ဖိုင်လွှဲပြောင်းမည့်ဆာဗာနှင့် ချိတ်ဆက်ထားပြီး"</string>
@@ -91,6 +95,8 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"ဖုန်းအသံအားအသုံးပြုရန်"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"ဖိုင်လွဲပြောင်းရန်အတွက်အသုံးပြုရန်"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"ထည့်သွင်းရန်အသုံးပြုသည်"</string>
+    <!-- no translation found for bluetooth_hearing_aid_profile_summary_use_for (908775281788309484) -->
+    <skip />
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"အတူတွဲပါ"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"ချိတ်တွဲရန်"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"မလုပ်တော့"</string>
@@ -327,9 +333,10 @@
     <item msgid="8280754435979370728">"မျက်လုံးမှတွေ့ရသည့် သဘာဝအရောင်"</item>
     <item msgid="5363960654009010371">"ဒီဂျစ်တယ်အကြောင်းအရာအတွက် ပြင်ဆင်ထားသည့် အရောင်များ"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="1317817863508274533">"အလုပ်မလုပ်သော အက်ပ်များ"</string>
+    <string name="inactive_apps_title" msgid="9042996804461901648">"အရန်သင့်ထားရှိသော အက်ပ်များ"</string>
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"ပွင့်မနေပါ။ ပြောင်းရန်တို့ပါ။"</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"ပွင့်နေသည်။ ပြောင်းရန်တို့ပါ။"</string>
+    <string name="standby_bucket_summary" msgid="6567835350910684727">"အက်ပ်ကို အရန်သင့်ထားရှိခြင်း အခြေအနေ-<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"အလုပ်လုပ်နေသောဝန်ဆောင်မှုများ"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"ယခုအလုပ်လုပ်နေသောဝန်ဆောင်မှုကို ကြည့်ခြင်းနှင့် ထိန်းသိမ်းခြင်းအား ပြုလုပ်မည်လား?"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView အကောင်အထည်ဖော်မှု"</string>
@@ -351,16 +358,24 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"အရောင်ပြင်ဆင်မှု"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"ဤဝန်ဆောင်မှုမှာ စမ်းသပ်အဆင့်သာဖြစ်၍ လုပ်ဆောင်မှုအားနည်းနိုင်သည်။"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> မှ ကျော်၍ လုပ်ထားသည်။"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"<xliff:g id="TIME">^1</xliff:g> ခန့်လိုပါသည်"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"သင့်အသုံးပြုမှုအရ <xliff:g id="TIME">^1</xliff:g> ခန့် ကျန်ပါသည်"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"အားပြည့်ရန် <xliff:g id="TIME">^1</xliff:g> လိုပါသည်"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">^1</xliff:g> ကျန်သည်"</string>
-    <string name="power_remaining_duration_only_short_enhanced" msgid="7450425624026394823">"သင့်အသုံးပြုမှုအရ <xliff:g id="TIME">^1</xliff:g> ကျန်ပါသည်"</string>
-    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">^1</xliff:g> − <xliff:g id="TIME">^2</xliff:g> ခန့်ကျန်သည်"</string>
-    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">^1</xliff:g> - သင့်အသုံးပြုမှုအရ <xliff:g id="TIME">^2</xliff:g> ခန့် ကျန်ပါသည်"</string>
-    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> ကျန်သည်"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"<xliff:g id="TIME">%1$s</xliff:g> ခန့်လိုပါသည်"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"သင့်အသုံးပြုမှုအရ <xliff:g id="TIME">%1$s</xliff:g> ခန့် ကျန်ပါသည်"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"အားပြည့်ရန် <xliff:g id="TIME">%1$s</xliff:g> လိုပါသည်"</string>
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> ကျန်သည်"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"<xliff:g id="THRESHOLD">%1$s</xliff:g> ခန့်သာ ကျန်တော့သည်"</string>
+    <string name="power_remaining_less_than_duration" msgid="7967078125657859046">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="THRESHOLD">%2$s</xliff:g> ခန့်သာ ကျန်တော့သည်"</string>
+    <string name="power_remaining_more_than_subtext" msgid="6846716609975752316">"<xliff:g id="LEVEL">%1$s</xliff:g><xliff:g id="TIME_REMAINING">%2$s</xliff:g> ကျော် ကျန်သေးသည်"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="8884488700395194194">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ကျော် ကျန်သေးသည်"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="8168317165722752881">"မကြာမီ ဖုန်းပိတ်သွားနိုင်သည်"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="5957064378548718872">"မကြာမီ တက်ဘလက်ပိတ်သွားနိုင်သည်"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="9055596817716471373">"မကြာမီ စက်ပိတ်သွားနိုင်သည်"</string>
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> − <xliff:g id="TIME">%2$s</xliff:g> ခန့်ကျန်သည်"</string>
+    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">%1$s</xliff:g> - သင့်အသုံးပြုမှုအရ <xliff:g id="TIME">%2$s</xliff:g> ခန့် ကျန်ပါသည်"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="7679005631124015335">"<xliff:g id="LEVEL">%1$s</xliff:g> - မကြာမီ ဖုန်းပိတ်သွားနိင်သည်"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="261050880878965621">"<xliff:g id="LEVEL">%1$s</xliff:g> - မကြာမီ တက်ဘလက်ပိတ်သွားနိင်သည်"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="2020049829798578618">"<xliff:g id="LEVEL">%1$s</xliff:g> - မကြာမီ စက်ပိတ်သွားနိင်သည်"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> − အားပြည့်ရန် <xliff:g id="TIME">^2</xliff:g> ကျန်သည်"</string>
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> − အားပြည့်ရန် <xliff:g id="TIME">%2$s</xliff:g> ကျန်သည်"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"အကြောင်းအရာ မသိရှိ"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"အားသွင်းနေပါသည်"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"အားသွင်းနေပါသည်"</string>
@@ -414,4 +429,8 @@
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"ဘယ်တော့မှ"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"ဦးစားပေးများသာ"</string>
     <string name="zen_mode_and_condition" msgid="4927230238450354412">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>။ <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
+    <string name="zen_alarm_warning_indef" msgid="3007988140196673193">"သင်၏ နောက်ထပ်နှိုးစက် <xliff:g id="WHEN">%1$s</xliff:g> မတိုင်မီ ၎င်းကိုမပိတ်လျှင် ကြားမည်မဟုတ်ပါ"</string>
+    <string name="zen_alarm_warning" msgid="6236690803924413088">"သင်၏ နောက်ထပ်နှိုးစက် <xliff:g id="WHEN">%1$s</xliff:g> ကို ကြားမည်မဟုတ်ပါ"</string>
+    <string name="alarm_template" msgid="4996153414057676512">"<xliff:g id="WHEN">%1$s</xliff:g> တွင်"</string>
+    <string name="alarm_template_far" msgid="3779172822607461675">"<xliff:g id="WHEN">%1$s</xliff:g> တွင်"</string>
 </resources>
