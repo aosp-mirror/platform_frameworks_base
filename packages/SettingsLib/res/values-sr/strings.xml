@@ -53,16 +53,16 @@
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Веза је прекинута"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Прекидање везе..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Повезивање…"</string>
-    <string name="bluetooth_connected" msgid="6038755206916626419">"Повезано"</string>
+    <string name="bluetooth_connected" msgid="5427152882755735944">"Повезано: <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_pairing" msgid="1426882272690346242">"Упаривање..."</string>
-    <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"Повезано (без телефона)"</string>
-    <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Повезано (без медија)"</string>
-    <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Повезано је (нема приступа порукама)"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Повезано (без телефона или медија)"</string>
-    <string name="bluetooth_connected_battery_level" msgid="7049181126136692368">"Повезано, ниво батерије је <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_battery_level" msgid="5504193961248406027">"Повезано (без телефона), ниво батерије је <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="4751724026365870779">"Повезано (без медија), ниво батерије је <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1549265779323455261">"Повезано (без телефона или медија), ниво батерије је <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset" msgid="616068069034994802">"Повезано (без телефона): <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp" msgid="3736431800395923868">"Повезано (без медија): <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_map" msgid="3200033913678466453">"Повезано је (без приступа порукама): <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2047403011284187056">"Повезано (без телефона или медија): <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_battery_level" msgid="5162924691231307748">"Повезано, ниво батерије је <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"Повезано (без телефона), ниво батерије је <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Повезано (без медија), ниво батерије је <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Повезано (без телефона или медија), ниво батерије је <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Звук медија"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Телефонски позиви"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Пренос датотеке"</string>
@@ -75,6 +75,10 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Приступ SIM картици"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD звук: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD звук"</string>
+    <!-- no translation found for bluetooth_profile_hearing_aid (7999237886427812595) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_profile_summary_connected (7188282786730266159) -->
+    <skip />
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Повезано са звуком медија"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Повезано са звуком телефона"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Повезано са сервером за пренос датотека"</string>
@@ -91,6 +95,8 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Коришћење за аудио телефона"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Коришћење за пренос датотека"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Користи за улаз"</string>
+    <!-- no translation found for bluetooth_hearing_aid_profile_summary_use_for (908775281788309484) -->
+    <skip />
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Упари"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"УПАРИ"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Откажи"</string>
@@ -275,7 +281,6 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Прикажи ажурирања хардверских слојева"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Хардверски слојеви трепере зелено када се ажурирају"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Отклони грешке GPU преклапања"</string>
-    <string name="debug_hw_renderer" msgid="7568529019431785816">"Подеси GPU приказивач"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Онемог. HW пост. елементе"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Увек користи GPU за компоновање екрана"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"Симулирај простор боје"</string>
@@ -328,9 +333,10 @@
     <item msgid="8280754435979370728">"Природне боје налик онима које региструје око"</item>
     <item msgid="5363960654009010371">"Боје оптимизоване за дигитални садржај"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="1317817863508274533">"Неактивне апликације"</string>
+    <string name="inactive_apps_title" msgid="9042996804461901648">"Апликације у стању приправности"</string>
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Неактивна. Додирните да бисте је активирали."</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Активна. Додирните да бисте је деактивирали."</string>
+    <string name="standby_bucket_summary" msgid="6567835350910684727">"Стање приправности апликације: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Покренуте услуге"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Приказ и контрола тренутно покренутих услуга"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Примена WebView-а"</string>
@@ -352,16 +358,24 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Корекција боја"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Ова функција је експериментална и може да утиче на квалитет рада."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Замењује га <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"Још око <xliff:g id="TIME">^1</xliff:g>"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"На основу потрошње имате још отприлике <xliff:g id="TIME">^1</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">^1</xliff:g> до потпуног пуњења"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Преостало време: <xliff:g id="TIME">^1</xliff:g>"</string>
-    <string name="power_remaining_duration_only_short_enhanced" msgid="7450425624026394823">"На основу потрошње имате још <xliff:g id="TIME">^1</xliff:g>"</string>
-    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">^1</xliff:g> – остало је око <xliff:g id="TIME">^2</xliff:g>"</string>
-    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">^1</xliff:g> – на основу потрошње имате још отприлике <xliff:g id="TIME">^2</xliff:g>"</string>
-    <string name="power_discharging_duration_short" msgid="4192244429001842403">"Преостало је <xliff:g id="LEVEL">^1</xliff:g> – <xliff:g id="TIME">^2</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"Још око <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"На основу потрошње имате још отприлике <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> до потпуног пуњења"</string>
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Преостало време: <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Преостало је мање од <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration" msgid="7967078125657859046">"<xliff:g id="LEVEL">%1$s</xliff:g> – преостало је мање од <xliff:g id="THRESHOLD">%2$s</xliff:g>"</string>
+    <string name="power_remaining_more_than_subtext" msgid="6846716609975752316">"<xliff:g id="LEVEL">%1$s</xliff:g> – преостало је више од <xliff:g id="TIME_REMAINING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="8884488700395194194">"преостало је више од <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="8168317165722752881">"телефон ће се ускоро искључити"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="5957064378548718872">"таблет ће се ускоро искључити"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="9055596817716471373">"уређај ће се ускоро искључити"</string>
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> – остало је око <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">%1$s</xliff:g> – на основу потрошње имате још отприлике <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="7679005631124015335">"<xliff:g id="LEVEL">%1$s</xliff:g> – телефон ће се ускоро искључити"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="261050880878965621">"<xliff:g id="LEVEL">%1$s</xliff:g> – таблет ће се ускоро искључити"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="2020049829798578618">"<xliff:g id="LEVEL">%1$s</xliff:g> – уређај ће се ускоро искључити"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> – <xliff:g id="TIME">^2</xliff:g> до потпуног пуњења"</string>
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> до потпуног пуњења"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Непознато"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Пуњење"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"пуни се"</string>
@@ -410,4 +424,14 @@
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Више времена."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Мање времена."</string>
+    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"Укључи"</string>
+    <string name="cancel" msgid="6859253417269739139">"Откажи"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"Укључите режим Не узнемиравај"</string>
+    <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"Никад"</string>
+    <string name="zen_interruption_level_priority" msgid="2078370238113347720">"Само приоритетни прекиди"</string>
+    <string name="zen_mode_and_condition" msgid="4927230238450354412">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
+    <string name="zen_alarm_warning_indef" msgid="3007988140196673193">"Нећете чути следећи аларм у <xliff:g id="WHEN">%1$s</xliff:g> ако не искључите ово пре тога"</string>
+    <string name="zen_alarm_warning" msgid="6236690803924413088">"Нећете чути следећи аларм у <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template" msgid="4996153414057676512">"у <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="3779172822607461675">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
 </resources>
