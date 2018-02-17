@@ -167,9 +167,9 @@
     <string name="development_settings_enable" msgid="542530994778109538">"विकासकर्ता विकल्प सक्रिया गर्नुहोस्"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"अनुप्रयोग विकासको लागि विकल्पहरू सेट गर्नुहोस्"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"विकासकर्ताका विकल्पहरू यस प्रयोगकर्ताका लागि उपलब्ध छैन"</string>
-    <string name="vpn_settings_not_available" msgid="956841430176985598">"VPN सेटिङ्हरू यो प्रयोगकर्ताको लागि उपलब्ध छैन"</string>
-    <string name="tethering_settings_not_available" msgid="6765770438438291012">"कार्यक्षेत्र सीमा सेटिङ्हरू यो प्रयोगकर्ताको लागि उपलब्ध छैन"</string>
-    <string name="apn_settings_not_available" msgid="7873729032165324000">"पहुँच बिन्दु नामको सेटिङ्हरू यो प्रयोगकर्ताको लागि उपलब्ध छैन"</string>
+    <string name="vpn_settings_not_available" msgid="956841430176985598">"VPN सेटिङहरू यो प्रयोगकर्ताको लागि उपलब्ध छैन"</string>
+    <string name="tethering_settings_not_available" msgid="6765770438438291012">"कार्यक्षेत्र सीमा सेटिङहरू यो प्रयोगकर्ताको लागि उपलब्ध छैन"</string>
+    <string name="apn_settings_not_available" msgid="7873729032165324000">"पहुँच बिन्दु नामको सेटिङहरू यो प्रयोगकर्ताको लागि उपलब्ध छैन"</string>
     <string name="enable_adb" msgid="7982306934419797485">"USB डिबग गर्दै"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"USB जडित हुँदा डिबग मोड"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"USB डिबग गर्ने प्राधिकरणहरू उल्टाउनुहोस्"</string>

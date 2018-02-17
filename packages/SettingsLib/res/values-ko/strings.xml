@@ -45,7 +45,7 @@
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s을(를) 통해 사용 가능"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"매우 느림"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"느림"</string>
-    <string name="speed_label_okay" msgid="2331665440671174858">"확인"</string>
+    <string name="speed_label_okay" msgid="2331665440671174858">"보통"</string>
     <string name="speed_label_medium" msgid="3175763313268941953">"보통"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"빠름"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"매우 빠름"</string>
