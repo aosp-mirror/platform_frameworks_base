@@ -577,7 +577,7 @@ public final class AutofillManagerService extends SystemService {
         }
     }
 
-    private static class AutofillCompatState {
+    private static final class AutofillCompatState {
         private final Object mLock = new Object();
 
         @GuardedBy("mLock")
@@ -1013,6 +1013,8 @@ public final class AutofillManagerService extends SystemService {
                         }
                     }
                     mUi.dump(pw);
+                    pw.print("Autofill Compat State: ");
+                    pw.println(mAutofillCompatState.mUserSpecs);
                 }
                 if (showHistory) {
                     pw.println(); pw.println("Requests history:"); pw.println();
