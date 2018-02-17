@@ -66,6 +66,7 @@ import android.provider.Settings;
 import android.system.Os;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
+import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.KeyValueListParser;
@@ -268,6 +269,7 @@ class AlarmManagerService extends SystemService {
         // Key names stored in the settings value.
         private static final String KEY_MIN_FUTURITY = "min_futurity";
         private static final String KEY_MIN_INTERVAL = "min_interval";
+        private static final String KEY_MAX_INTERVAL = "max_interval";
         private static final String KEY_ALLOW_WHILE_IDLE_SHORT_TIME = "allow_while_idle_short_time";
         private static final String KEY_ALLOW_WHILE_IDLE_LONG_TIME = "allow_while_idle_long_time";
         private static final String KEY_ALLOW_WHILE_IDLE_WHITELIST_DURATION
@@ -285,6 +287,7 @@ class AlarmManagerService extends SystemService {
 
         private static final long DEFAULT_MIN_FUTURITY = 5 * 1000;
         private static final long DEFAULT_MIN_INTERVAL = 60 * 1000;
+        private static final long DEFAULT_MAX_INTERVAL = 365 * DateUtils.DAY_IN_MILLIS;
         private static final long DEFAULT_ALLOW_WHILE_IDLE_SHORT_TIME = DEFAULT_MIN_FUTURITY;
         private static final long DEFAULT_ALLOW_WHILE_IDLE_LONG_TIME = 9*60*1000;
         private static final long DEFAULT_ALLOW_WHILE_IDLE_WHITELIST_DURATION = 10*1000;
@@ -302,6 +305,9 @@ class AlarmManagerService extends SystemService {
 
         // Minimum alarm recurrence interval
         public long MIN_INTERVAL = DEFAULT_MIN_INTERVAL;
+
+        // Maximum alarm recurrence interval
+        public long MAX_INTERVAL = DEFAULT_MAX_INTERVAL;
 
         // Minimum time between ALLOW_WHILE_IDLE alarms when system is not idle.
         public long ALLOW_WHILE_IDLE_SHORT_TIME = DEFAULT_ALLOW_WHILE_IDLE_SHORT_TIME;
@@ -361,6 +367,7 @@ class AlarmManagerService extends SystemService {
 
                 MIN_FUTURITY = mParser.getLong(KEY_MIN_FUTURITY, DEFAULT_MIN_FUTURITY);
                 MIN_INTERVAL = mParser.getLong(KEY_MIN_INTERVAL, DEFAULT_MIN_INTERVAL);
+                MAX_INTERVAL = mParser.getLong(KEY_MAX_INTERVAL, DEFAULT_MAX_INTERVAL);
                 ALLOW_WHILE_IDLE_SHORT_TIME = mParser.getLong(KEY_ALLOW_WHILE_IDLE_SHORT_TIME,
                         DEFAULT_ALLOW_WHILE_IDLE_SHORT_TIME);
                 ALLOW_WHILE_IDLE_LONG_TIME = mParser.getLong(KEY_ALLOW_WHILE_IDLE_LONG_TIME,
@@ -391,6 +398,10 @@ class AlarmManagerService extends SystemService {
             TimeUtils.formatDuration(MIN_INTERVAL, pw);
             pw.println();
 
+            pw.print("    "); pw.print(KEY_MAX_INTERVAL); pw.print("=");
+            TimeUtils.formatDuration(MAX_INTERVAL, pw);
+            pw.println();
+
             pw.print("    "); pw.print(KEY_LISTENER_TIMEOUT); pw.print("=");
             TimeUtils.formatDuration(LISTENER_TIMEOUT, pw);
             pw.println();
@@ -419,6 +430,7 @@ class AlarmManagerService extends SystemService {
 
             proto.write(ConstantsProto.MIN_FUTURITY_DURATION_MS, MIN_FUTURITY);
             proto.write(ConstantsProto.MIN_INTERVAL_DURATION_MS, MIN_INTERVAL);
+            proto.write(ConstantsProto.MAX_INTERVAL_DURATION_MS, MAX_INTERVAL);
             proto.write(ConstantsProto.LISTENER_TIMEOUT_DURATION_MS, LISTENER_TIMEOUT);
             proto.write(ConstantsProto.ALLOW_WHILE_IDLE_SHORT_DURATION_MS,
                     ALLOW_WHILE_IDLE_SHORT_TIME);
@@ -481,7 +493,7 @@ class AlarmManagerService extends SystemService {
 
         Batch(Alarm seed) {
             start = seed.whenElapsed;
-            end = seed.maxWhenElapsed;
+            end = clampPositive(seed.maxWhenElapsed);
             flags = seed.flags;
             alarms.add(seed);
             if (seed.operation == mTimeTickSender) {
@@ -737,7 +749,7 @@ class AlarmManagerService extends SystemService {
         if (futurity < MIN_FUZZABLE_INTERVAL) {
             futurity = 0;
         }
-        return triggerAtTime + (long)(.75 * futurity);
+        return clampPositive(triggerAtTime + (long)(.75 * futurity));
     }
 
     // returns true if the batch was added at the head
@@ -913,12 +925,16 @@ class AlarmManagerService extends SystemService {
             // the window based on the alarm's new futurity.  Note that this
             // reflects a policy of preferring timely to deferred delivery.
             maxElapsed = (a.windowLength > 0)
-                    ? (whenElapsed + a.windowLength)
+                    ? clampPositive(whenElapsed + a.windowLength)
                     : maxTriggerTime(nowElapsed, whenElapsed, a.repeatInterval);
         }
         a.whenElapsed = whenElapsed;
         a.maxWhenElapsed = maxElapsed;
         setImplLocked(a, true, doValidate);
+    }
+
+    static long clampPositive(long val) {
+        return (val >= 0) ? val : Long.MAX_VALUE;
     }
 
     /**
@@ -1421,13 +1437,18 @@ class AlarmManagerService extends SystemService {
         }
 
         // Sanity check the recurrence interval.  This will catch people who supply
-        // seconds when the API expects milliseconds.
+        // seconds when the API expects milliseconds, or apps trying shenanigans
+        // around intentional period overflow, etc.
         final long minInterval = mConstants.MIN_INTERVAL;
         if (interval > 0 && interval < minInterval) {
             Slog.w(TAG, "Suspiciously short interval " + interval
                     + " millis; expanding to " + (minInterval/1000)
                     + " seconds");
             interval = minInterval;
+        } else if (interval > mConstants.MAX_INTERVAL) {
+            Slog.w(TAG, "Suspiciously long interval " + interval
+                    + " millis; clamping");
+            interval = mConstants.MAX_INTERVAL;
         }
 
         if (type < RTC_WAKEUP || type > ELAPSED_REALTIME) {
@@ -3175,8 +3196,7 @@ class AlarmManagerService extends SystemService {
             whenElapsed = _whenElapsed;
             expectedWhenElapsed = _whenElapsed;
             windowLength = _windowLength;
-            maxWhenElapsed = _maxWhen;
-            expectedMaxWhenElapsed = _maxWhen;
+            maxWhenElapsed = expectedMaxWhenElapsed = clampPositive(_maxWhen);
             repeatInterval = _interval;
             operation = _op;
             listener = _rec;

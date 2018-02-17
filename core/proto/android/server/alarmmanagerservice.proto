@@ -220,6 +220,8 @@ message ConstantsProto {
   optional int64 allow_while_idle_long_duration_ms = 5;
   // BroadcastOptions.setTemporaryAppWhitelistDuration() to use for FLAG_ALLOW_WHILE_IDLE.
   optional int64 allow_while_idle_whitelist_duration_ms = 6;
+  // Maximum alarm recurrence interval.
+  optional int64 max_interval_duration_ms = 7;
 }
 
 // A com.android.server.AlarmManagerService.FilterStats object.
