@@ -51,6 +51,7 @@ static jmethodID method_setGnssYearOfHardware;
 static jmethodID method_setGnssHardwareModelName;
 static jmethodID method_xtraDownloadRequest;
 static jmethodID method_reportNiNotification;
+static jmethodID method_requestLocation;
 static jmethodID method_requestRefLocation;
 static jmethodID method_requestSetID;
 static jmethodID method_requestUtcTime;
@@ -346,6 +347,34 @@ static jobject translateLocation(JNIEnv* env, const GnssLocation& location) {
     return object.get();
 }
 
+static GnssLocation createGnssLocation(
+        jint gnssLocationFlags,
+        jdouble latitudeDegrees,
+        jdouble longitudeDegrees,
+        jdouble altitudeMeters,
+        jfloat speedMetersPerSec,
+        jfloat bearingDegrees,
+        jfloat horizontalAccuracyMeters,
+        jfloat verticalAccuracyMeters,
+        jfloat speedAccuracyMetersPerSecond,
+        jfloat bearingAccuracyDegrees,
+        jlong timestamp) {
+    GnssLocation location;
+    location.gnssLocationFlags = static_cast<uint16_t>(gnssLocationFlags);
+    location.latitudeDegrees = static_cast<double>(latitudeDegrees);
+    location.longitudeDegrees = static_cast<double>(longitudeDegrees);
+    location.altitudeMeters = static_cast<double>(altitudeMeters);
+    location.speedMetersPerSec = static_cast<float>(speedMetersPerSec);
+    location.bearingDegrees = static_cast<float>(bearingDegrees);
+    location.horizontalAccuracyMeters = static_cast<float>(horizontalAccuracyMeters);
+    location.verticalAccuracyMeters = static_cast<float>(verticalAccuracyMeters);
+    location.speedAccuracyMetersPerSecond = static_cast<float>(speedAccuracyMetersPerSecond);
+    location.bearingAccuracyDegrees = static_cast<float>(bearingAccuracyDegrees);
+    location.timestamp = static_cast<uint64_t>(timestamp);
+
+    return location;
+}
+
 /*
  * GnssCallback class implements the callback methods for IGnss interface.
  */
@@ -474,7 +503,9 @@ Return<void> GnssCallback::gnssRequestTimeCb() {
 }
 
 Return<void> GnssCallback::gnssRequestLocationCb(const bool independentFromGnss) {
-    // TODO(b/72405645): call into java implementation
+    JNIEnv* env = getJniEnv();
+    env->CallVoidMethod(mCallbacksObj, method_requestLocation, boolToJbool(independentFromGnss));
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return Void();
 }
 
@@ -1042,6 +1073,7 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
     method_xtraDownloadRequest = env->GetMethodID(clazz, "xtraDownloadRequest", "()V");
     method_reportNiNotification = env->GetMethodID(clazz, "reportNiNotification",
             "(IIIIILjava/lang/String;Ljava/lang/String;II)V");
+    method_requestLocation = env->GetMethodID(clazz, "requestLocation", "(Z)V");
     method_requestRefLocation = env->GetMethodID(clazz, "requestRefLocation", "()V");
     method_requestSetID = env->GetMethodID(clazz, "requestSetID", "(I)V");
     method_requestUtcTime = env->GetMethodID(clazz, "requestUtcTime", "()V");
@@ -1438,6 +1470,42 @@ static void android_location_GnssLocationProvider_inject_time(JNIEnv* /* env */,
         if (!result.isOk() || !result) {
             ALOGE("%s: Gnss injectTime() failed", __func__);
         }
+    }
+}
+
+static void android_location_GnssLocationProvider_inject_best_location(
+        JNIEnv*,
+        jobject,
+        jint gnssLocationFlags,
+        jdouble latitudeDegrees,
+        jdouble longitudeDegrees,
+        jdouble altitudeMeters,
+        jfloat speedMetersPerSec,
+        jfloat bearingDegrees,
+        jfloat horizontalAccuracyMeters,
+        jfloat verticalAccuracyMeters,
+        jfloat speedAccuracyMetersPerSecond,
+        jfloat bearingAccuracyDegrees,
+        jlong timestamp) {
+    if (gnssHal_V1_1 != nullptr) {
+        GnssLocation location = createGnssLocation(
+                gnssLocationFlags,
+                latitudeDegrees,
+                longitudeDegrees,
+                altitudeMeters,
+                speedMetersPerSec,
+                bearingDegrees,
+                horizontalAccuracyMeters,
+                verticalAccuracyMeters,
+                speedAccuracyMetersPerSecond,
+                bearingAccuracyDegrees,
+                timestamp);
+        auto result = gnssHal_V1_1->injectBestLocation(location);
+        if (!result.isOk() || !result) {
+            ALOGE("%s: Gnss injectBestLocation() failed.", __func__);
+        }
+    } else {
+        ALOGE("%s: injectBestLocation() is called but gnssHal_V1_1 is not available.", __func__);
     }
 }
 
@@ -1996,6 +2064,9 @@ static const JNINativeMethod sMethods[] = {
             android_location_GnssLocationProvider_read_nmea)},
     {"native_inject_time", "(JJI)V", reinterpret_cast<void *>(
             android_location_GnssLocationProvider_inject_time)},
+    {"native_inject_best_location",
+            "(IDDDFFFFFFJ)V",
+            reinterpret_cast<void *>(android_location_GnssLocationProvider_inject_best_location)},
     {"native_inject_location",
             "(DDF)V",
             reinterpret_cast<void *>(android_location_GnssLocationProvider_inject_location)},
