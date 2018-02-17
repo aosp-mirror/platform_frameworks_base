@@ -1028,22 +1028,33 @@ final class BinderProxy implements IBinder {
      * in use, then we return the same bp.
      *
      * @param nativeData C++ pointer to (possibly still empty) BinderProxyNativeData.
-     * Takes ownership of nativeData iff <result>.mNativeData == nativeData.  Caller will usually
-     * delete nativeData if that's not the case.
+     * Takes ownership of nativeData iff <result>.mNativeData == nativeData, or if
+     * we exit via an exception.  If neither applies, it's the callers responsibility to
+     * recycle nativeData.
      * @param iBinder C++ pointer to IBinder. Does not take ownership of referenced object.
      */
     private static BinderProxy getInstance(long nativeData, long iBinder) {
-        BinderProxy result = sProxyMap.get(iBinder);
-        if (result == null) {
+        BinderProxy result;
+        try {
+            result = sProxyMap.get(iBinder);
+            if (result != null) {
+                return result;
+            }
             result = new BinderProxy(nativeData);
-            sProxyMap.set(iBinder, result);
+        } catch (Throwable e) {
+            // We're throwing an exception (probably OOME); don't drop nativeData.
+            NativeAllocationRegistry.applyFreeFunction(NoImagePreloadHolder.sNativeFinalizer,
+                    nativeData);
+            throw e;
         }
+        NoImagePreloadHolder.sRegistry.registerNativeAllocation(result, nativeData);
+        // The registry now owns nativeData, even if registration threw an exception.
+        sProxyMap.set(iBinder, result);
         return result;
     }
 
     private BinderProxy(long nativeData) {
         mNativeData = nativeData;
-        NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, mNativeData);
     }
 
     /**
@@ -1057,8 +1068,9 @@ final class BinderProxy implements IBinder {
     // Use a Holder to allow static initialization of BinderProxy in the boot image, and
     // to avoid some initialization ordering issues.
     private static class NoImagePreloadHolder {
+        public static final long sNativeFinalizer = getNativeFinalizer();
         public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
-                BinderProxy.class.getClassLoader(), getNativeFinalizer(), NATIVE_ALLOCATION_SIZE);
+                BinderProxy.class.getClassLoader(), sNativeFinalizer, NATIVE_ALLOCATION_SIZE);
     }
 
     public native boolean pingBinder();
