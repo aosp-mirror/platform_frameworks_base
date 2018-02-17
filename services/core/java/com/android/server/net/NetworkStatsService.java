@@ -427,13 +427,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mUidRecorder.forcePersistLocked(currentTime);
         mUidTagRecorder.forcePersistLocked(currentTime);
 
-        mDevRecorder = null;
-        mXtRecorder = null;
-        mUidRecorder = null;
-        mUidTagRecorder = null;
-
-        mXtStatsCached = null;
-
         mSystemReady = false;
     }
 
