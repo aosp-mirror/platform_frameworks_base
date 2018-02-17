@@ -87,6 +87,7 @@ import java.util.Map;
  * <tr><td>{@link #KEY_AAC_DRC_ATTENUATION_FACTOR}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, specifies the DRC attenuation factor.</td></tr>
  * <tr><td>{@link #KEY_AAC_DRC_HEAVY_COMPRESSION}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, specifies whether to use heavy compression.</td></tr>
  * <tr><td>{@link #KEY_AAC_MAX_OUTPUT_CHANNEL_COUNT}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, specifies the maximum number of channels the decoder outputs.</td></tr>
+ * <tr><td>{@link #KEY_AAC_DRC_EFFECT_TYPE}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, specifies the DRC effect type to use.</td></tr>
  * <tr><td>{@link #KEY_CHANNEL_MASK}</td><td>Integer</td><td>optional, a mask of audio channel assignments</td></tr>
  * <tr><td>{@link #KEY_FLAC_COMPRESSION_LEVEL}</td><td>Integer</td><td><b>encoder-only</b>, optional, if content is FLAC audio, specifies the desired compression level.</td></tr>
  * </table>
@@ -510,6 +511,31 @@ public final class MediaFormat {
      * <p>This key is only used during decoding.
      */
     public static final String KEY_AAC_DRC_TARGET_REFERENCE_LEVEL = "aac-target-ref-level";
+
+    /**
+     * A key describing for selecting the DRC effect type for MPEG-D DRC.
+     * The supported values are defined in ISO/IEC 23003-4:2015 and are described as follows:
+     * <table>
+     * <tr><th>Value</th><th>Effect</th></tr>
+     * <tr><th>-1</th><th>Off</th></tr>
+     * <tr><th>0</th><th>None</th></tr>
+     * <tr><th>1</th><th>Late night</th></tr>
+     * <tr><th>2</th><th>Noisy environment</th></tr>
+     * <tr><th>3</th><th>Limited playback range</th></tr>
+     * <tr><th>4</th><th>Low playback level</th></tr>
+     * <tr><th>5</th><th>Dialog enhancement</th></tr>
+     * <tr><th>6</th><th>General compression</th></tr>
+     * </table>
+     * <p>The value -1 (Off) disables DRC processing, while loudness normalization may still be
+     * active and dependent on KEY_AAC_DRC_TARGET_REFERENCE_LEVEL.<br>
+     * The value 0 (None) automatically enables DRC processing if necessary to prevent signal
+     * clipping<br>
+     * The value 6 (General compression) can be used for enabling MPEG-D DRC without particular
+     * DRC effect type request.<br>
+     * The default is DRC effect type "None".
+     * <p>This key is only used during decoding.
+     */
+    public static final String KEY_AAC_DRC_EFFECT_TYPE = "aac-drc-effect-type";
 
     /**
      * A key describing the target reference level that was assumed at the encoder for
