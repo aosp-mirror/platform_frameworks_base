@@ -16,12 +16,15 @@
 
 package android.net;
 
+import android.annotation.Nullable;
 import android.content.Intent;
 import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.StrictMode;
 import android.util.Log;
+
+import libcore.net.UriCodec;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,8 +40,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.RandomAccess;
 import java.util.Set;
-
-import libcore.net.UriCodec;
 
 /**
  * Immutable URI reference. A URI reference includes a URI and a fragment, the
@@ -174,6 +175,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      *
      * @return the scheme or null if this is a relative URI
      */
+    @Nullable
     public abstract String getScheme();
 
     /**
@@ -208,6 +210,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      *
      * @return the authority for this URI or null if not present
      */
+    @Nullable
     public abstract String getAuthority();
 
     /**
@@ -219,6 +222,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      *
      * @return the authority for this URI or null if not present
      */
+    @Nullable
     public abstract String getEncodedAuthority();
 
     /**
@@ -228,6 +232,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      *
      * @return the user info for this URI or null if not present
      */
+    @Nullable
     public abstract String getUserInfo();
 
     /**
@@ -237,6 +242,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      *
      * @return the user info for this URI or null if not present
      */
+    @Nullable
     public abstract String getEncodedUserInfo();
 
     /**
@@ -246,6 +252,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      *
      * @return the host for this URI or null if not present
      */
+    @Nullable
     public abstract String getHost();
 
     /**
@@ -262,6 +269,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      * @return the decoded path, or null if this is not a hierarchical URI
      * (like "mailto:nobody@google.com") or the URI is invalid
      */
+    @Nullable
     public abstract String getPath();
 
     /**
@@ -270,6 +278,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      * @return the encoded path, or null if this is not a hierarchical URI
      * (like "mailto:nobody@google.com") or the URI is invalid
      */
+    @Nullable
     public abstract String getEncodedPath();
 
     /**
@@ -280,6 +289,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      *
      * @return the decoded query or null if there isn't one
      */
+    @Nullable
     public abstract String getQuery();
 
     /**
@@ -290,6 +300,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      *
      * @return the encoded query or null if there isn't one
      */
+    @Nullable
     public abstract String getEncodedQuery();
 
     /**
@@ -297,6 +308,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      *
      * @return the decoded fragment or null if there isn't one
      */
+    @Nullable
     public abstract String getFragment();
 
     /**
@@ -304,6 +316,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      *
      * @return the encoded fragment or null if there isn't one
      */
+    @Nullable
     public abstract String getEncodedFragment();
 
     /**
@@ -318,6 +331,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      *
      * @return the decoded last segment or null if the path is empty
      */
+    @Nullable
     public abstract String getLastPathSegment();
 
     /**
@@ -1674,6 +1688,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      * @throws NullPointerException if key is null
      * @return the decoded value or null if no parameter is found
      */
+    @Nullable
     public String getQueryParameter(String key) {
         if (isOpaque()) {
             throw new UnsupportedOperationException(NOT_HIERARCHICAL);
