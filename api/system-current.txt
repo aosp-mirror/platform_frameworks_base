@@ -3564,7 +3564,7 @@ package android.net.wifi.rtt {
 
   public class WifiRttManager {
     method public void cancelRanging(android.os.WorkSource);
-    method public void startRanging(android.os.WorkSource, android.net.wifi.rtt.RangingRequest, android.net.wifi.rtt.RangingResultCallback, android.os.Handler);
+    method public void startRanging(android.os.WorkSource, android.net.wifi.rtt.RangingRequest, java.util.concurrent.Executor, android.net.wifi.rtt.RangingResultCallback);
   }
 
 }

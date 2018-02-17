@@ -21,6 +21,7 @@ import static android.Manifest.permission.ACCESS_WIFI_STATE;
 import static android.Manifest.permission.CHANGE_WIFI_STATE;
 import static android.Manifest.permission.LOCATION_HARDWARE;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -29,13 +30,12 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.os.Binder;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.WorkSource;
 import android.util.Log;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * This class provides the primary API for measuring distance (range) to other devices using the
@@ -46,7 +46,7 @@ import java.util.List;
  * <li>Wi-Fi Aware peers
  * <p>
  * Ranging requests are triggered using
- * {@link #startRanging(RangingRequest, RangingResultCallback, Handler)}. Results (in case of
+ * {@link #startRanging(RangingRequest, Executor, RangingResultCallback)}. Results (in case of
  * successful operation) are returned in the {@link RangingResultCallback#onRangingResults(List)}
  * callback.
  * <p>
@@ -106,15 +106,13 @@ public class WifiRttManager {
      *
      * @param request  A request specifying a set of devices whose distance measurements are
      *                 requested.
+     * @param executor The Executor on which to run the callback.
      * @param callback A callback for the result of the ranging request.
-     * @param handler  The Handler on whose thread to execute the callbacks of the {@code
-     *                 callback} object. If a null is provided then the application's main thread
-     *                 will be used.
      */
     @RequiresPermission(allOf = {ACCESS_COARSE_LOCATION, CHANGE_WIFI_STATE, ACCESS_WIFI_STATE})
     public void startRanging(@NonNull RangingRequest request,
-            @NonNull RangingResultCallback callback, @Nullable Handler handler) {
-        startRanging(null, request, callback, handler);
+            @NonNull @CallbackExecutor Executor executor, @NonNull RangingResultCallback callback) {
+        startRanging(null, request, executor, callback);
     }
 
     /**
@@ -124,10 +122,8 @@ public class WifiRttManager {
      * @param workSource A mechanism to specify an alternative work-source for the request.
      * @param request  A request specifying a set of devices whose distance measurements are
      *                 requested.
+     * @param executor The Executor on which to run the callback.
      * @param callback A callback for the result of the ranging request.
-     * @param handler  The Handler on whose thread to execute the callbacks of the {@code
-     *                 callback} object. If a null is provided then the application's main thread
-     *                 will be used.
      *
      * @hide
      */
@@ -135,21 +131,36 @@ public class WifiRttManager {
     @RequiresPermission(allOf = {LOCATION_HARDWARE, ACCESS_COARSE_LOCATION, CHANGE_WIFI_STATE,
             ACCESS_WIFI_STATE})
     public void startRanging(@Nullable WorkSource workSource, @NonNull RangingRequest request,
-            @NonNull RangingResultCallback callback, @Nullable Handler handler) {
+            @NonNull @CallbackExecutor Executor executor, @NonNull RangingResultCallback callback) {
         if (VDBG) {
             Log.v(TAG, "startRanging: workSource=" + workSource + ", request=" + request
-                    + ", callback=" + callback + ", handler=" + handler);
+                    + ", callback=" + callback + ", executor=" + executor);
         }
 
+        if (executor == null) {
+            throw new IllegalArgumentException("Null executor provided");
+        }
         if (callback == null) {
             throw new IllegalArgumentException("Null callback provided");
         }
 
-        Looper looper = (handler == null) ? Looper.getMainLooper() : handler.getLooper();
         Binder binder = new Binder();
         try {
             mService.startRanging(binder, mContext.getOpPackageName(), workSource, request,
-                    new RttCallbackProxy(looper, callback));
+                    new IRttCallback.Stub() {
+                        @Override
+                        public void onRangingFailure(int status) throws RemoteException {
+                            clearCallingIdentity();
+                            executor.execute(() -> callback.onRangingFailure(status));
+                        }
+
+                        @Override
+                        public void onRangingResults(List<RangingResult> results)
+                                throws RemoteException {
+                            clearCallingIdentity();
+                            executor.execute(() -> callback.onRangingResults(results));
+                        }
+                    });
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -157,7 +168,7 @@ public class WifiRttManager {
 
     /**
      * Cancel all ranging requests for the specified work sources. The requests have been requested
-     * using {@link #startRanging(WorkSource, RangingRequest, RangingResultCallback, Handler)}.
+     * using {@link #startRanging(WorkSource, RangingRequest, Executor, RangingResultCallback)}.
      *
      * @param workSource The work-sources of the requesters.
      *
@@ -174,32 +185,6 @@ public class WifiRttManager {
             mService.cancelRanging(workSource);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
-        }
-    }
-
-    private static class RttCallbackProxy extends IRttCallback.Stub {
-        private final Handler mHandler;
-        private final RangingResultCallback mCallback;
-
-        RttCallbackProxy(Looper looper, RangingResultCallback callback) {
-            mHandler = new Handler(looper);
-            mCallback = callback;
-        }
-
-        @Override
-        public void onRangingFailure(int status) throws RemoteException {
-            if (VDBG) Log.v(TAG, "RttCallbackProxy: onRangingFailure: status=" + status);
-            mHandler.post(() -> {
-               mCallback.onRangingFailure(status);
-            });
-        }
-
-        @Override
-        public void onRangingResults(List<RangingResult> results) throws RemoteException {
-            if (VDBG) Log.v(TAG, "RttCallbackProxy: onRanginResults: results=" + results);
-            mHandler.post(() -> {
-               mCallback.onRangingResults(results);
-            });
         }
     }
 }

@@ -37,7 +37,7 @@ import java.util.StringJoiner;
  * Defines the ranging request to other devices. The ranging request is built using
  * {@link RangingRequest.Builder}.
  * A ranging request is executed using
- * {@link WifiRttManager#startRanging(RangingRequest, RangingResultCallback, Handler)}.
+ * {@link WifiRttManager#startRanging(RangingRequest, java.util.concurrent.Executor, RangingResultCallback)}.
  * <p>
  * The ranging request is a batch request - specifying a set of devices (specified using
  * {@link RangingRequest.Builder#addAccessPoint(ScanResult)} and

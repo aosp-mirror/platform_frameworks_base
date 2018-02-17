@@ -12,7 +12,6 @@ import android.net.wifi.rtt.RangingRequest;
 import android.net.wifi.rtt.RangingResult;
 import android.net.wifi.rtt.RangingResultCallback;
 import android.net.wifi.rtt.WifiRttManager;
-import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -933,7 +932,8 @@ public class RttManager {
      * Request to start an RTT ranging
      * <p>
      * This method is deprecated. Please use the
-     * {@link WifiRttManager#startRanging(RangingRequest, RangingResultCallback, Handler)} API.
+     * {@link WifiRttManager#startRanging(RangingRequest, java.util.concurrent.Executor, RangingResultCallback)}
+     * API.
      *
      * @param params  -- RTT request Parameters
      * @param listener -- Call back to inform RTT result
@@ -969,7 +969,9 @@ public class RttManager {
                     android.net.wifi.rtt.ResponderConfig.fromScanResult(reconstructed));
         }
         try {
-            mNewService.startRanging(builder.build(), new RangingResultCallback() {
+            mNewService.startRanging(builder.build(),
+                    mContext.getMainExecutor(),
+                    new RangingResultCallback() {
                 @Override
                 public void onRangingFailure(int code) {
                     int localCode = REASON_UNSPECIFIED;
@@ -1000,7 +1002,7 @@ public class RttManager {
                     }
                     listener.onSuccess(legacyResults);
                 }
-            }, null);
+            });
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "startRanging: invalid arguments - " + e);
             listener.onFailure(REASON_INVALID_REQUEST, e.getMessage());
@@ -1191,6 +1193,7 @@ public class RttManager {
     public static final int CMD_OP_REG_BINDER           = BASE + 9;
 
     private final WifiRttManager mNewService;
+    private final Context mContext;
     private RttCapabilities mRttCapabilities;
 
     /**
@@ -1204,6 +1207,7 @@ public class RttManager {
      */
     public RttManager(Context context, WifiRttManager service) {
         mNewService = service;
+        mContext = context;
 
         boolean rttSupported = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_WIFI_RTT);

@@ -28,7 +28,6 @@ import android.content.Context;
 import android.net.MacAddress;
 import android.net.wifi.ScanResult;
 import android.net.wifi.aware.PeerHandle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.test.TestLooper;
@@ -41,6 +40,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Unit test harness for WifiRttManager class.
@@ -48,7 +48,7 @@ import java.util.List;
 public class WifiRttManagerTest {
     private WifiRttManager mDut;
     private TestLooper mMockLooper;
-    private Handler mMockLooperHandler;
+    private Executor mMockLooperExecutor;
 
     private final String packageName = "some.package.name.for.rtt.app";
 
@@ -64,7 +64,7 @@ public class WifiRttManagerTest {
 
         mDut = new WifiRttManager(mockContext, mockRttService);
         mMockLooper = new TestLooper();
-        mMockLooperHandler = new Handler(mMockLooper.getLooper());
+        mMockLooperExecutor = mMockLooper.getNewExecutor();
 
         when(mockContext.getOpPackageName()).thenReturn(packageName);
     }
@@ -83,7 +83,7 @@ public class WifiRttManagerTest {
         ArgumentCaptor<IRttCallback> callbackCaptor = ArgumentCaptor.forClass(IRttCallback.class);
 
         // verify ranging request passed to service
-        mDut.startRanging(request, callbackMock, mMockLooperHandler);
+        mDut.startRanging(request, mMockLooperExecutor, callbackMock);
         verify(mockRttService).startRanging(any(IBinder.class), eq(packageName), eq(null),
                 eq(request), callbackCaptor.capture());
 
@@ -107,7 +107,7 @@ public class WifiRttManagerTest {
         ArgumentCaptor<IRttCallback> callbackCaptor = ArgumentCaptor.forClass(IRttCallback.class);
 
         // verify ranging request passed to service
-        mDut.startRanging(request, callbackMock, mMockLooperHandler);
+        mDut.startRanging(request, mMockLooperExecutor, callbackMock);
         verify(mockRttService).startRanging(any(IBinder.class), eq(packageName), eq(null),
                 eq(request), callbackCaptor.capture());
 
