@@ -449,8 +449,12 @@ public class UsbManager {
     /**
      * Opens a file descriptor for reading and writing data to the USB accessory.
      *
+     * <p>If data is read from the {@link java.io.InputStream} created from this file descriptor all
+     * data of a USB transfer should be read at once. If only a partial request is read the rest of
+     * the transfer is dropped.
+     *
      * @param accessory the USB accessory to open
-     * @return file descriptor, or null if the accessor could not be opened.
+     * @return file descriptor, or null if the accessory could not be opened.
      */
     public ParcelFileDescriptor openAccessory(UsbAccessory accessory) {
         try {
