@@ -313,10 +313,12 @@ bool FileDescriptorInfo::GetSocketName(const int fd, std::string* result) {
     return false;
   }
 
-  // This is a local socket with an abstract address, we do not accept it.
+  // This is a local socket with an abstract address. Remove the leading NUL byte and
+  // add a human-readable "ABSTRACT/" prefix.
   if (unix_addr->sun_path[0] == '\0') {
-    LOG(ERROR) << "Unsupported AF_UNIX socket (fd=" << fd << ") with abstract address.";
-    return false;
+    *result = "ABSTRACT/";
+    result->append(&unix_addr->sun_path[1], path_len - 1);
+    return true;
   }
 
   // If we're here, sun_path must refer to a null terminated filesystem

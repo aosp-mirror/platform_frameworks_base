@@ -129,7 +129,7 @@ class WebViewZygoteInit {
 
         final Runnable caller;
         try {
-            sServer.registerServerSocket("webview_zygote");
+            sServer.registerServerSocketFromEnv("webview_zygote");
             // The select loop returns early in the child process after a fork and
             // loops forever in the zygote.
             caller = sServer.runSelectLoop(TextUtils.join(",", Build.SUPPORTED_ABIS));
