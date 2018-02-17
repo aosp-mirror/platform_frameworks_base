@@ -514,6 +514,17 @@ std::vector<std::unique_ptr<xml::XmlResource>> ResourceFileFlattener::LinkAndVer
   return xml_compat_versioner.Process(context_, doc, api_range);
 }
 
+ResourceFile::Type XmlFileTypeForOutputFormat(OutputFormat format) {
+  switch (format) {
+    case OutputFormat::kApk:
+      return ResourceFile::Type::kBinaryXml;
+    case OutputFormat::kProto:
+      return ResourceFile::Type::kProtoXml;
+  }
+  LOG_ALWAYS_FATAL("unreachable");
+  return ResourceFile::Type::kUnknown;
+}
+
 bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archive_writer) {
   bool error = false;
   std::map<std::pair<ConfigDescription, StringPiece>, FileOperation> config_sorted_files;
@@ -587,6 +598,9 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
               }
             }
 
+            // Update the type that this file will be written as.
+            file_ref->type = XmlFileTypeForOutputFormat(options_.output_format);
+
             file_op.xml_to_flatten->file.config = config_value->config;
             file_op.xml_to_flatten->file.source = file_ref->GetSource();
             file_op.xml_to_flatten->file.name = ResourceName(pkg->name, type->type, entry->name);
@@ -625,12 +639,16 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
                                                  << config << "' -> '" << doc->file.config << "'");
               }
 
-              dst_path =
-                  ResourceUtils::BuildResourceFileName(doc->file, context_->GetNameMangler());
-              bool result =
-                  table->AddFileReferenceMangled(doc->file.name, doc->file.config, doc->file.source,
-                                                 dst_path, nullptr, context_->GetDiagnostics());
-              if (!result) {
+              const ResourceFile& file = doc->file;
+              dst_path = ResourceUtils::BuildResourceFileName(file, context_->GetNameMangler());
+
+              std::unique_ptr<FileReference> file_ref =
+                  util::make_unique<FileReference>(table->string_pool.MakeRef(dst_path));
+              file_ref->SetSource(doc->file.source);
+              // Update the output format of this XML file.
+              file_ref->type = XmlFileTypeForOutputFormat(options_.output_format);
+              if (!table->AddResourceMangled(file.name, file.config, {}, std::move(file_ref),
+                                             context_->GetDiagnostics())) {
                 return false;
               }
             }
