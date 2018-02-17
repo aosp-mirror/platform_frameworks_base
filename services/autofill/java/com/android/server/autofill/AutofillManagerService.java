@@ -327,11 +327,7 @@ public final class AutofillManagerService extends SystemService {
                     mUiLatencyHistory, mWtfHistory, resolvedUserId, mUi,
                     mDisabledUsers.get(resolvedUserId));
             mServicesCache.put(userId, service);
-            final ArrayMap<String, Pair<Long, String>> compatPackages =
-                    service.getCompatibilityPackagesLocked();
-            if (compatPackages != null) {
-                addCompatibilityModeRequests(compatPackages, userId);
-            }
+            addCompatibilityModeRequestsLocked(service, userId);
         }
         return service;
     }
@@ -521,24 +517,23 @@ public final class AutofillManagerService extends SystemService {
             if (!service.isEnabledLocked()) {
                 removeCachedServiceLocked(userId);
             } else {
-                final ArrayMap<String, Pair<Long, String>> compatPackages =
-                        service.getCompatibilityPackagesLocked();
-                if (compatPackages != null) {
-                    addCompatibilityModeRequests(compatPackages, userId);
-                }
+                addCompatibilityModeRequestsLocked(service, userId);
             }
         }
     }
 
-    private void addCompatibilityModeRequests(
-            @NonNull ArrayMap<String, Pair<Long, String>> compatPackages, int userId) {
-        final Set<String> whiteListedPackages = Build.IS_ENG ? null
-                : getWhitelistedCompatModePackages();
+    private void addCompatibilityModeRequestsLocked(@NonNull AutofillManagerServiceImpl service
+            , int userId) {
+        final ArrayMap<String, Pair<Long, String>> compatPackages =
+                service.getCompatibilityPackagesLocked();
+        if (compatPackages == null || compatPackages.isEmpty()) {
+            return;
+        }
+        final Set<String> whiteListedPackages = getWhitelistedCompatModePackages();
         final int compatPackageCount = compatPackages.size();
         for (int i = 0; i < compatPackageCount; i++) {
             final String packageName = compatPackages.keyAt(i);
-            if (!Build.IS_ENG && (whiteListedPackages == null
-                    || !whiteListedPackages.contains(packageName))) {
+            if (whiteListedPackages == null || !whiteListedPackages.contains(packageName)) {
                 Slog.w(TAG, "Ignoring not whitelisted compat package " + packageName);
                 continue;
             }
