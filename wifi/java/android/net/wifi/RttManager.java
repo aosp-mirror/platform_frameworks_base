@@ -991,7 +991,7 @@ public class RttManager {
                             legacyResults[i].distance = result.getDistanceMm() / 10;
                             legacyResults[i].distanceStandardDeviation =
                                     result.getDistanceStdDevMm() / 10;
-                            legacyResults[i].rssi = result.getRssi();
+                            legacyResults[i].rssi = result.getRssi() * -2;
                             legacyResults[i].ts = result.getRangingTimestampUs();
                         } else {
                             // just in case legacy API needed some relatively real timestamp

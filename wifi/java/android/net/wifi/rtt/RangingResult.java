@@ -175,7 +175,7 @@ public final class RangingResult implements Parcelable {
     }
 
     /**
-     * @return The average RSSI (in units of -0.5dB) observed during the RTT measurement.
+     * @return The average RSSI, in units of dBm, observed during the RTT measurement.
      * <p>
      * Only valid if {@link #getStatus()} returns {@link #STATUS_SUCCESS}, otherwise will throw an
      * exception.
