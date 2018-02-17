@@ -230,7 +230,7 @@ public class RuntimeInit {
      * @param argv Argument vector for main()
      * @param classLoader the classLoader to load {@className} with
      */
-    private static Runnable findStaticMain(String className, String[] argv,
+    protected static Runnable findStaticMain(String className, String[] argv,
             ClassLoader classLoader) {
         Class<?> cl;
 
