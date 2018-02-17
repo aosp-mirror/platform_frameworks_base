@@ -226,15 +226,18 @@ public final class RangingResult implements Parcelable {
     }
 
     /**
-     * @return The timestamp, in us since boot, at which the ranging operation was performed.
+     * @return The timestamp at which the ranging operation was performed. The timestamp is in
+     * milliseconds since boot, including time spent in sleep, corresponding to values provided by
+     * {@link android.os.SystemClock#elapsedRealtime()}.
      * <p>
      * Only valid if {@link #getStatus()} returns {@link #STATUS_SUCCESS}, otherwise will throw an
      * exception.
      */
-    public long getRangingTimestampUs() {
+    public long getRangingTimestampMillis() {
         if (mStatus != STATUS_SUCCESS) {
             throw new IllegalStateException(
-                    "getRangingTimestamp(): invoked on an invalid result: getStatus()=" + mStatus);
+                    "getRangingTimestampMillis(): invoked on an invalid result: getStatus()="
+                            + mStatus);
         }
         return mTimestamp;
     }
