@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -131,12 +132,13 @@ public class NotificationGutsManager implements Dumpable {
     }
 
     /**
-     * Sends an intent to open the notification settings for a particular package and optional
+     * Sends an intent to open the app settings for a particular package and optional
      * channel.
      */
     private void startAppNotificationSettingsActivity(String packageName, final int appUid,
             final NotificationChannel channel, ExpandableNotificationRow row) {
-        final Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+        final Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        intent.setData(Uri.fromParts("package", packageName, null));
         intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName);
         intent.putExtra(Settings.EXTRA_APP_UID, appUid);
         if (channel != null) {
