@@ -3985,6 +3985,8 @@ message MetricsEvent {
     // Package: Package of app that was autofilled
     // Tag FIELD_AUTOFILL_FILTERTEXT_LEN: The length of the filter text
     // Tag FIELD_AUTOFILL_NUM_DATASETS: The number of datasets shown
+    // NOTE: starting on OS P, it also added the following field:
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     AUTOFILL_FILL_UI = 910;
 
     // Tag of a field for the length of the filter text
@@ -4011,7 +4013,9 @@ message MetricsEvent {
     // Type TYPE_CLOSE: UI was destroyed without influence of the user
     // Type TYPE_ACTION: data was saved
     // Package: Package of app that was autofilled
-    // Tag FIELD_AUTOFILL_NUM_ID: The number of ids that are saved
+    // Tag FIELD_AUTOFILL_NUM_IDS: The number of ids that are saved
+    // NOTE: starting on OS P, it also added the following field:
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     AUTOFILL_SAVE_UI = 916;
 
     // Tag of a field for the number of saveable ids
@@ -5083,7 +5087,8 @@ message MetricsEvent {
 
     // An autofill service updated its user data
     // Package: Package of the autofill service that updated the user data
-    // Counter: number of fields added (or 0 if reset)
+    // Tag FIELD_AUTOFILL_NUM_VALUES: number of fields added (or 0 if reset)
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // OS: P
     AUTOFILL_USERDATA_UPDATED = 1272;
 
@@ -5171,7 +5176,6 @@ message MetricsEvent {
     // An autofill service was bound using an unofficial(but still supported) permission.
     // Package: Package of the autofill service
     // OS: P
-
     AUTOFILL_INVALID_PERMISSION = 1289;
 
     // OPEN: QS Alarm tile shown
