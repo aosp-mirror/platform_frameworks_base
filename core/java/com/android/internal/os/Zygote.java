@@ -69,6 +69,13 @@ public final class Zygote {
 
     private static final ZygoteHooks VM_HOOKS = new ZygoteHooks();
 
+    /**
+     * An extraArg passed when a zygote process is forking a child-zygote, specifying a name
+     * in the abstract socket namespace. This socket name is what the new child zygote
+     * should listen for connections on.
+     */
+    public static final String CHILD_ZYGOTE_SOCKET_NAME_ARG = "--zygote-socket=";
+
     private Zygote() {}
 
     /** Called for some security initialization before any fork. */
@@ -100,6 +107,8 @@ public final class Zygote {
      * @param fdsToIgnore null-ok an array of ints, either null or holding
      * one or more POSIX file descriptor numbers that are to be ignored
      * in the file descriptor table check.
+     * @param startChildZygote if true, the new child process will itself be a
+     * new zygote process.
      * @param instructionSet null-ok the instruction set to use.
      * @param appDataDir null-ok the data directory of the app.
      *
@@ -108,13 +117,13 @@ public final class Zygote {
      */
     public static int forkAndSpecialize(int uid, int gid, int[] gids, int runtimeFlags,
           int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
-          int[] fdsToIgnore, String instructionSet, String appDataDir) {
+          int[] fdsToIgnore, boolean startChildZygote, String instructionSet, String appDataDir) {
         VM_HOOKS.preFork();
         // Resets nice priority for zygote process.
         resetNicePriority();
         int pid = nativeForkAndSpecialize(
                   uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo, niceName, fdsToClose,
-                  fdsToIgnore, instructionSet, appDataDir);
+                  fdsToIgnore, startChildZygote, instructionSet, appDataDir);
         // Enable tracing as soon as possible for the child process.
         if (pid == 0) {
             Trace.setTracingEnabled(true, runtimeFlags);
@@ -128,7 +137,7 @@ public final class Zygote {
 
     native private static int nativeForkAndSpecialize(int uid, int gid, int[] gids,int runtimeFlags,
           int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
-          int[] fdsToIgnore, String instructionSet, String appDataDir);
+          int[] fdsToIgnore, boolean startChildZygote, String instructionSet, String appDataDir);
 
     /**
      * Called to do any initialization before starting an application.
@@ -188,8 +197,8 @@ public final class Zygote {
     native protected static void nativeUnmountStorageOnInit();
 
     private static void callPostForkChildHooks(int runtimeFlags, boolean isSystemServer,
-            String instructionSet) {
-        VM_HOOKS.postForkChild(runtimeFlags, isSystemServer, instructionSet);
+            boolean isZygote, String instructionSet) {
+        VM_HOOKS.postForkChild(runtimeFlags, isSystemServer, isZygote, instructionSet);
     }
 
     /**
