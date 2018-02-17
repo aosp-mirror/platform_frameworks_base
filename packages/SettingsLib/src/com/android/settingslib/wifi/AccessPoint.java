@@ -1048,14 +1048,19 @@ public class AccessPoint implements Comparable<AccessPoint> {
         if (newLevel > 0 && newLevel != oldLevel) {
             // Only update labels on visible rssi changes
             updateSpeed();
-            if (mAccessPointListener != null) {
-                ThreadUtils.postOnMainThread(() -> mAccessPointListener.onLevelChanged(this));
-            }
+            ThreadUtils.postOnMainThread(() -> {
+                if (mAccessPointListener != null) {
+                    mAccessPointListener.onLevelChanged(this);
+                }
+            });
+
         }
 
-        if (mAccessPointListener != null) {
-            ThreadUtils.postOnMainThread(() -> mAccessPointListener.onAccessPointChanged(this));
-        }
+        ThreadUtils.postOnMainThread(() -> {
+            if (mAccessPointListener != null) {
+                mAccessPointListener.onAccessPointChanged(this);
+            }
+        });
 
         if (!scanResults.isEmpty()) {
             ScanResult result = scanResults.iterator().next();
@@ -1102,10 +1107,18 @@ public class AccessPoint implements Comparable<AccessPoint> {
             mNetworkInfo = null;
         }
         if (updated && mAccessPointListener != null) {
-            ThreadUtils.postOnMainThread(() -> mAccessPointListener.onAccessPointChanged(this));
+            ThreadUtils.postOnMainThread(() -> {
+                if (mAccessPointListener != null) {
+                    mAccessPointListener.onAccessPointChanged(this);
+                }
+            });
 
             if (oldLevel != getLevel() /* current level */) {
-                ThreadUtils.postOnMainThread(() -> mAccessPointListener.onLevelChanged(this));
+                ThreadUtils.postOnMainThread(() -> {
+                    if (mAccessPointListener != null) {
+                        mAccessPointListener.onLevelChanged(this);
+                    }
+                });
             }
         }
 
@@ -1115,9 +1128,11 @@ public class AccessPoint implements Comparable<AccessPoint> {
     void update(@Nullable WifiConfiguration config) {
         mConfig = config;
         networkId = config != null ? config.networkId : WifiConfiguration.INVALID_NETWORK_ID;
-        if (mAccessPointListener != null) {
-            ThreadUtils.postOnMainThread(() -> mAccessPointListener.onAccessPointChanged(this));
-        }
+        ThreadUtils.postOnMainThread(() -> {
+            if (mAccessPointListener != null) {
+                mAccessPointListener.onAccessPointChanged(this);
+            }
+        });
     }
 
     @VisibleForTesting
