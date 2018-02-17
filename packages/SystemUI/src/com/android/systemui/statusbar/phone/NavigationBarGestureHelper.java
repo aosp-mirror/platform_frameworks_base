@@ -88,7 +88,7 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
         @Override
         public void onRecentsAnimationStarted() {
             mRecentsAnimationStarted = true;
-            mQuickScrubController.cancelQuickSwitch();
+            mQuickScrubController.setRecentsAnimationStarted(true /* started */);
         }
     };
 
@@ -159,6 +159,7 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
                 mNavigationBarView.transformMatrixToGlobal(mTransformGlobalMatrix);
                 mNavigationBarView.transformMatrixToLocal(mTransformLocalMatrix);
                 mRecentsAnimationStarted = false;
+                mQuickScrubController.setRecentsAnimationStarted(false /* started */);
                 break;
             }
         }
