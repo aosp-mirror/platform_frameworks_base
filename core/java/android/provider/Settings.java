@@ -7662,6 +7662,24 @@ public final class Settings {
          */
         public static final String BACKUP_MANAGER_CONSTANTS = "backup_manager_constants";
 
+
+        /**
+         * Local transport parameters so we can configure it for tests.
+         * This is encoded as a key=value list, separated by commas.
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         * fake_encryption_flag  (boolean)
+         * </pre>
+         *
+         * <p>
+         * Type: string
+         * @hide
+         */
+        public static final String BACKUP_LOCAL_TRANSPORT_PARAMETERS =
+                "backup_local_transport_parameters";
+
         /**
          * Flag to set if the system should predictively attempt to re-enable Bluetooth while
          * the user is driving.

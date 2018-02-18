@@ -26,8 +26,16 @@ public class LocalTransportService extends Service {
     @Override
     public void onCreate() {
         if (sTransport == null) {
-            sTransport = new LocalTransport(this);
+            LocalTransportParameters parameters =
+                    new LocalTransportParameters(getMainThreadHandler(), getContentResolver());
+            sTransport = new LocalTransport(this, parameters);
         }
+        sTransport.getParameters().start();
+    }
+
+    @Override
+    public void onDestroy() {
+        sTransport.getParameters().stop();
     }
 
     @Override

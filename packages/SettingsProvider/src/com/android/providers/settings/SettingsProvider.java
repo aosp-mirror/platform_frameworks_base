@@ -3028,7 +3028,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 154;
+            private static final int SETTINGS_VERSION = 155;
 
             private final int mUserId;
 
@@ -3653,6 +3653,24 @@ public class SettingsProvider extends ContentProvider {
                                 null, true, SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     currentVersion = 154;
+                }
+
+                if (currentVersion == 154) {
+                    // Version 155: Set the default value for BACKUP_LOCAL_TRANSPORT_PARAMETERS.
+                    final SettingsState systemSecureSettings = getSecureSettingsLocked(userId);
+                    final String oldValue = systemSecureSettings.getSettingLocked(
+                            Settings.Secure.BACKUP_LOCAL_TRANSPORT_PARAMETERS).getValue();
+                    if (TextUtils.equals(null, oldValue)) {
+                        final String defaultValue = getContext().getResources().getString(
+                                R.string.def_backup_local_transport_parameters);
+                        if (!TextUtils.isEmpty(defaultValue)) {
+                            systemSecureSettings.insertSettingLocked(
+                                    Settings.Secure.BACKUP_LOCAL_TRANSPORT_PARAMETERS, defaultValue,
+                                    null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+
+                    }
+                    currentVersion = 155;
                 }
 
                 // vXXX: Add new settings above this point.

@@ -565,6 +565,7 @@ public class SettingsBackupTest {
                  Settings.Secure.VOICE_RECOGNITION_SERVICE,
                  Settings.Secure.INSTANT_APPS_ENABLED,
                  Settings.Secure.BACKUP_MANAGER_CONSTANTS,
+                 Settings.Secure.BACKUP_LOCAL_TRANSPORT_PARAMETERS,
                  Settings.Secure.KEYGUARD_SLICE_URI,
                  Settings.Secure.PARENTAL_CONTROL_ENABLED,
                  Settings.Secure.PARENTAL_CONTROL_REDIRECT_URL,

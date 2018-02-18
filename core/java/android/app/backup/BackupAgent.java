@@ -163,6 +163,16 @@ public abstract class BackupAgent extends ContextWrapper {
      */
     public static final int FLAG_DEVICE_TO_DEVICE_TRANSFER = 2;
 
+    /**
+     * Flag for {@link BackupDataOutput#getTransportFlags()} and
+     * {@link FullBackupDataOutput#getTransportFlags()} only.
+     *
+     * <p>Used for internal testing only. Do not check this flag in production code.
+     *
+     * @hide
+     */
+    public static final int FLAG_FAKE_CLIENT_SIDE_ENCRYPTION_ENABLED = 1 << 31;
+
     Handler mHandler = null;
 
     Handler getHandler() {
