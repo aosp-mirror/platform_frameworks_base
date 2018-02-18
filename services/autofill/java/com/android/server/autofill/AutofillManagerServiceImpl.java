@@ -40,7 +40,6 @@ import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
 import android.os.AsyncTask;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
@@ -870,10 +869,10 @@ final class AutofillManagerServiceImpl {
             }
             mUserData = userData;
             // Log it
-            int numberFields = mUserData == null ? 0: mUserData.getRemoteIds().length;
+            int numberFields = mUserData == null ? 0: mUserData.getCategoryIds().length;
             mMetricsLogger.write(Helper.newLogMaker(MetricsEvent.AUTOFILL_USERDATA_UPDATED,
                     getServicePackageName(), null)
-                    .setCounterValue(numberFields));
+                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_VALUES, numberFields));
         }
     }
 
@@ -907,9 +906,12 @@ final class AutofillManagerServiceImpl {
         pw.print(prefix); pw.print("Disabled: "); pw.println(mDisabled);
         pw.print(prefix); pw.print("Field classification enabled: ");
             pw.println(isFieldClassificationEnabledLocked());
+        pw.print(prefix); pw.print("Compat pkgs: ");
         final ArrayMap<String, Pair<Long, String>> compatPkgs = getCompatibilityPackagesLocked();
-        if (compatPkgs != null) {
-            pw.print(prefix); pw.print("Compat pkgs: "); pw.println(compatPkgs.keySet());
+        if (compatPkgs == null) {
+            pw.println("N/A");
+        } else {
+            pw.println(compatPkgs);
         }
         pw.print(prefix); pw.print("Setup complete: "); pw.println(mSetupComplete);
         pw.print(prefix); pw.print("Last prune: "); pw.println(mLastPrune);

@@ -400,6 +400,7 @@ public class AudioPolicy {
                 new AudioAttributes.Builder()
                         .setInternalCapturePreset(MediaRecorder.AudioSource.REMOTE_SUBMIX)
                         .addTag(addressForTag(mix))
+                        .addTag(AudioRecord.SUBMIX_FIXED_VOLUME)
                         .build(),
                 mixFormat,
                 AudioRecord.getMinBufferSize(mix.getFormat().getSampleRate(),

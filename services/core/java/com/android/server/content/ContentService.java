@@ -300,7 +300,7 @@ public final class ContentService extends IContentService.Stub {
 
     void onBootPhase(int phase) {
         switch (phase) {
-            case SystemService.PHASE_SYSTEM_SERVICES_READY:
+            case SystemService.PHASE_ACTIVITY_MANAGER_READY:
                 getSyncManager();
                 break;
         }

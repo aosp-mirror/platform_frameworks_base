@@ -13,31 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#pragma once
 
 #ifndef SECTIONS_H
 #define SECTIONS_H
 
 #include "Reporter.h"
 
-#include <map>
 #include <stdarg.h>
+#include <map>
 
-#include <utils/String8.h>
 #include <utils/String16.h>
+#include <utils/String8.h>
 #include <utils/Vector.h>
 
 using namespace android;
 
-const int64_t REMOTE_CALL_TIMEOUT_MS = 10 * 1000; // 10 seconds
+const int64_t REMOTE_CALL_TIMEOUT_MS = 10 * 1000;  // 10 seconds
 
 /**
  * Base class for sections
  */
-class Section
-{
+class Section {
 public:
     const int id;
-    const int64_t timeoutMs; // each section must have a timeout
+    const int64_t timeoutMs;  // each section must have a timeout
     String8 name;
 
     Section(int id, const int64_t timeoutMs = REMOTE_CALL_TIMEOUT_MS);
@@ -49,8 +49,7 @@ public:
 /**
  * Section that generates incident headers.
  */
-class HeaderSection : public Section
-{
+class HeaderSection : public Section {
 public:
     HeaderSection();
     virtual ~HeaderSection();
@@ -59,10 +58,20 @@ public:
 };
 
 /**
+ * Section that generates incident metadata.
+ */
+class MetadataSection : public Section {
+public:
+    MetadataSection();
+    virtual ~MetadataSection();
+
+    virtual status_t Execute(ReportRequestSet* requests) const;
+};
+
+/**
  * Section that reads in a file.
  */
-class FileSection : public Section
-{
+class FileSection : public Section {
 public:
     FileSection(int id, const char* filename, const int64_t timeoutMs = 5000 /* 5 seconds */);
     virtual ~FileSection();
@@ -71,14 +80,13 @@ public:
 
 private:
     const char* mFilename;
-    bool mIsSysfs; // sysfs files are pollable but return POLLERR by default, handle it separately
+    bool mIsSysfs;  // sysfs files are pollable but return POLLERR by default, handle it separately
 };
 
 /**
  * Base class for sections that call a command that might need a timeout.
  */
-class WorkerThreadSection : public Section
-{
+class WorkerThreadSection : public Section {
 public:
     WorkerThreadSection(int id);
     virtual ~WorkerThreadSection();
@@ -91,8 +99,7 @@ public:
 /**
  * Section that forks and execs a command, and puts stdout as the section.
  */
-class CommandSection : public Section
-{
+class CommandSection : public Section {
 public:
     CommandSection(int id, const int64_t timeoutMs, const char* command, ...);
 
@@ -111,8 +118,7 @@ private:
 /**
  * Section that calls dumpsys on a system service.
  */
-class DumpsysSection : public WorkerThreadSection
-{
+class DumpsysSection : public WorkerThreadSection {
 public:
     DumpsysSection(int id, const char* service, ...);
     virtual ~DumpsysSection();
@@ -127,8 +133,7 @@ private:
 /**
  * Section that reads from logd.
  */
-class LogSection : public WorkerThreadSection
-{
+class LogSection : public WorkerThreadSection {
     // global last log retrieved timestamp for each log_id_t.
     static map<log_id_t, log_time> gLastLogsRetrieved;
 
@@ -143,5 +148,4 @@ private:
     bool mBinary;
 };
 
-#endif // SECTIONS_H
-
+#endif  // SECTIONS_H

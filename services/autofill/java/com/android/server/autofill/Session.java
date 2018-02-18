@@ -376,6 +376,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     /**
      * Updates values of the nodes in the context's structure so that:
+     *
      * - proper node is focused
      * - autofillValue is sent back to service when it was previously autofilled
      * - autofillValue is sent in the view used to force a request
@@ -395,7 +396,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             final ViewNode node = nodes[i];
             if (node == null) {
                 if (sVerbose) {
-                    Slog.v(TAG, "fillStructureWithAllowedValues(): no node for " + viewState.id);
+                    Slog.v(TAG,
+                            "fillContextWithAllowedValuesLocked(): no node for " + viewState.id);
                 }
                 continue;
             }
@@ -1174,12 +1176,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             @NonNull UserData userData, @NonNull Collection<ViewState> viewStates) {
 
         final String[] userValues = userData.getValues();
-        final String[] remoteIds = userData.getRemoteIds();
+        final String[] categoryIds = userData.getCategoryIds();
 
         // Sanity check
-        if (userValues == null || remoteIds == null || userValues.length != remoteIds.length) {
+        if (userValues == null || categoryIds == null || userValues.length != categoryIds.length) {
             final int valuesLength = userValues == null ? -1 : userValues.length;
-            final int idsLength = remoteIds == null ? -1 : remoteIds.length;
+            final int idsLength = categoryIds == null ? -1 : categoryIds.length;
             Slog.w(TAG, "setScores(): user data mismatch: values.length = "
                     + valuesLength + ", ids.length = " + idsLength);
             return;
@@ -1196,12 +1198,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final int viewsSize = viewStates.size();
 
         // First, we get all scores.
-        final AutofillId[] fieldIds = new AutofillId[viewsSize];
+        final AutofillId[] autofillIds = new AutofillId[viewsSize];
         final ArrayList<AutofillValue> currentValues = new ArrayList<>(viewsSize);
         int k = 0;
         for (ViewState viewState : viewStates) {
             currentValues.add(viewState.getCurrentValue());
-            fieldIds[k++] = viewState.id;
+            autofillIds[k++] = viewState.id;
         }
 
         // Then use the results, asynchronously
@@ -1221,32 +1223,53 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
             int i = 0, j = 0;
             try {
+                // Iteract over all autofill fields first
                 for (i = 0; i < viewsSize; i++) {
-                    final AutofillId fieldId = fieldIds[i];
+                    final AutofillId autofillId = autofillIds[i];
 
-                    ArrayList<Match> matches = null;
+                    // Search the best scores for each category (as some categories could have
+                    // multiple user values
+                    ArrayMap<String, Float> scoresByField = null;
                     for (j = 0; j < userValues.length; j++) {
-                        String remoteId = remoteIds[j];
+                        final String categoryId = categoryIds[j];
                         final float score = scores.scores[i][j];
                         if (score > 0) {
+                            if (scoresByField == null) {
+                                scoresByField = new ArrayMap<>(userValues.length);
+                            }
+                            final Float currentScore = scoresByField.get(categoryId);
+                            if (currentScore != null && currentScore > score) {
+                                if (sVerbose) {
+                                    Slog.v(TAG,  "skipping score " + score
+                                            + " because it's less than " + currentScore);
+                                }
+                                continue;
+                            }
                             if (sVerbose) {
                                 Slog.v(TAG, "adding score " + score + " at index " + j + " and id "
-                                        + fieldId);
+                                        + autofillId);
                             }
-                            if (matches == null) {
-                                matches = new ArrayList<>(userValues.length);
-                            }
-                            matches.add(new Match(remoteId, score));
+                            scoresByField.put(categoryId, score);
                         }
                         else if (sVerbose) {
-                            Slog.v(TAG, "skipping score 0 at index " + j + " and id " + fieldId);
+                            Slog.v(TAG, "skipping score 0 at index " + j + " and id " + autofillId);
                         }
                     }
-                    if (matches != null) {
-                        detectedFieldIds.add(fieldId);
-                        detectedFieldClassifications.add(new FieldClassification(matches));
+                    if (scoresByField == null) {
+                        if (sVerbose) Slog.v(TAG, "no score for autofillId=" + autofillId);
+                        continue;
                     }
-                }
+
+                    // Then create the matches for that autofill id
+                    final ArrayList<Match> matches = new ArrayList<>(scoresByField.size());
+                    for (j = 0; j < scoresByField.size(); j++) {
+                        final String fieldId = scoresByField.keyAt(j);
+                        final float score = scoresByField.valueAt(j);
+                        matches.add(new Match(fieldId, score));
+                    }
+                    detectedFieldIds.add(autofillId);
+                    detectedFieldClassifications.add(new FieldClassification(matches));
+                } // for i
             } catch (ArrayIndexOutOfBoundsException e) {
                 wtf(e, "Error accessing FC score at [%d, %d] (%s): %s", i, j, scores, e);
                 return;

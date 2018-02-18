@@ -1,72 +1,87 @@
-/*
- * Copyright (C) 2015 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.android.systemui.statusbar.car;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
+import android.content.Intent;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 
-import com.android.keyguard.AlphaOptimizedImageButton;
 import com.android.systemui.R;
 
+import java.net.URISyntaxException;
+
 /**
- * A wrapper view for a car navigation facet, which includes a button icon and a drop down icon.
+ * CarNavigationButton is an image button that allows for a bit more configuration at the
+ * xml file level. This allows for more control via overlays instead of having to update
+ * code.
  */
-public class CarNavigationButton extends RelativeLayout {
+public class CarNavigationButton extends com.android.keyguard.AlphaOptimizedImageButton {
+
     private static final float SELECTED_ALPHA = 1;
     private static final float UNSELECTED_ALPHA = 0.7f;
 
-    private AlphaOptimizedImageButton mIcon;
-    private AlphaOptimizedImageButton mMoreIcon;
+    private Context mContext;
+    private String mIntent = null;
+    private String mLongIntent = null;
+    private boolean mBroadcastIntent = false;
+    private boolean mSelected = false;
+
 
     public CarNavigationButton(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mContext = context;
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.CarNavigationButton);
+        mIntent = typedArray.getString(R.styleable.CarNavigationButton_intent);
+        mLongIntent = typedArray.getString(R.styleable.CarNavigationButton_longIntent);
+        mBroadcastIntent = typedArray.getBoolean(R.styleable.CarNavigationButton_broadcast, false);
     }
 
+
+    /**
+     * After the standard inflate this then adds the xml defined intents to click and long click
+     * actions if defined.
+     */
     @Override
     public void onFinishInflate() {
         super.onFinishInflate();
-        mIcon = findViewById(R.id.car_nav_button_icon);
-        mIcon.setScaleType(ImageView.ScaleType.CENTER);
-        mIcon.setClickable(false);
-        mIcon.setBackgroundColor(android.R.color.transparent);
-        mIcon.setAlpha(UNSELECTED_ALPHA);
-
-        mMoreIcon = findViewById(R.id.car_nav_button_more_icon);
-        mMoreIcon.setClickable(false);
-        mMoreIcon.setBackgroundColor(android.R.color.transparent);
-        mMoreIcon.setVisibility(INVISIBLE);
-        mMoreIcon.setImageDrawable(getContext().getDrawable(R.drawable.car_ic_arrow));
-        mMoreIcon.setAlpha(UNSELECTED_ALPHA);
-    }
-
-    public void setResources(Drawable icon) {
-        mIcon.setImageDrawable(icon);
-    }
-
-    public void setSelected(boolean selected, boolean showMoreIcon) {
-        if (selected) {
-            mMoreIcon.setVisibility(showMoreIcon ? VISIBLE : INVISIBLE);
-            mMoreIcon.setAlpha(SELECTED_ALPHA);
-            mIcon.setAlpha(SELECTED_ALPHA);
-        } else {
-            mMoreIcon.setVisibility(INVISIBLE);
-            mIcon.setAlpha(UNSELECTED_ALPHA);
+        setScaleType(ImageView.ScaleType.CENTER);
+        setAlpha(UNSELECTED_ALPHA);
+        try {
+            if (mIntent != null) {
+                final Intent intent = Intent.parseUri(mIntent, Intent.URI_INTENT_SCHEME);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                setOnClickListener(v -> {
+                    if (mBroadcastIntent) {
+                        mContext.sendBroadcast(intent);
+                        return;
+                    }
+                    mContext.startActivity(intent);
+                });
+            }
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("Failed to attach intent", e);
         }
+
+        try {
+            if (mLongIntent != null) {
+                final Intent intent = Intent.parseUri(mLongIntent, Intent.URI_INTENT_SCHEME);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                setOnLongClickListener(v -> {
+                    mContext.startActivity(intent);
+                    return true;
+                });
+            }
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("Failed to attach long press intent", e);
+        }
+    }
+
+    /**
+     * @param selected true if should indicate if this is a selected state, false otherwise
+     */
+    public void setSelected(boolean selected) {
+        super.setSelected(selected);
+        mSelected = selected;
+        setAlpha(mSelected ? SELECTED_ALPHA : UNSELECTED_ALPHA);
     }
 }

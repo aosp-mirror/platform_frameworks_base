@@ -604,6 +604,7 @@ static jint android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
     CameraInfo cameraInfo;
     status_t rc = Camera::getCameraInfo(cameraId, &cameraInfo);
     if (rc != NO_ERROR) {
+        ALOGE("%s: getCameraInfo error: %d", __FUNCTION__, rc);
         return rc;
     }
     int defaultOrientation = 0;

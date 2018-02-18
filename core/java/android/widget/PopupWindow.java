@@ -1583,7 +1583,7 @@ public class PopupWindow {
      *
      * @hide
      */
-    protected final boolean findDropDownPosition(View anchor, WindowManager.LayoutParams outParams,
+    protected boolean findDropDownPosition(View anchor, WindowManager.LayoutParams outParams,
             int xOffset, int yOffset, int width, int height, int gravity, boolean allowScroll) {
         final int anchorHeight = anchor.getHeight();
         final int anchorWidth = anchor.getWidth();

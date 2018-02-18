@@ -553,9 +553,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
     public static final String PLATFORM_PACKAGE_NAME = "android";
 
-    static final String DEFAULT_CONTAINER_PACKAGE = "com.android.defcontainer";
+    public static final String DEFAULT_CONTAINER_PACKAGE = "com.android.defcontainer";
 
-    static final ComponentName DEFAULT_CONTAINER_COMPONENT = new ComponentName(
+    public static final ComponentName DEFAULT_CONTAINER_COMPONENT = new ComponentName(
             DEFAULT_CONTAINER_PACKAGE,
             "com.android.defcontainer.DefaultContainerService");
 
@@ -598,6 +598,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     // Compilation reasons.
+    public static final int REASON_UNKNOWN = -1;
     public static final int REASON_FIRST_BOOT = 0;
     public static final int REASON_BOOT = 1;
     public static final int REASON_INSTALL = 2;
@@ -8836,7 +8837,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final long startTime = System.nanoTime();
         final int[] stats = performDexOptUpgrade(pkgs, mIsPreNUpgrade /* showDialog */,
-                    getCompilerFilterForReason(causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT),
+                    causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT,
                     false /* bootComplete */);
 
         final int elapsedTimeSeconds =
@@ -8863,7 +8864,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * and {@code numberOfPackagesFailed}.
      */
     private int[] performDexOptUpgrade(List<PackageParser.Package> pkgs, boolean showDialog,
-            final String compilerFilter, boolean bootComplete) {
+            final int compilationReason, boolean bootComplete) {
 
         int numberOfPackagesVisited = 0;
         int numberOfPackagesOptimized = 0;
@@ -8963,13 +8964,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            String pkgCompilerFilter = compilerFilter;
+            int pkgCompilationReason = compilationReason;
             if (useProfileForDexopt) {
                 // Use background dexopt mode to try and use the profile. Note that this does not
                 // guarantee usage of the profile.
-                pkgCompilerFilter =
-                        PackageManagerServiceCompilerMapping.getCompilerFilterForReason(
-                                PackageManagerService.REASON_BACKGROUND_DEXOPT);
+                pkgCompilationReason = PackageManagerService.REASON_BACKGROUND_DEXOPT;
             }
 
             // checkProfiles is false to avoid merging profiles during boot which
@@ -8980,7 +8979,7 @@ public class PackageManagerService extends IPackageManager.Stub
             int dexoptFlags = bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0;
             int primaryDexOptStaus = performDexOptTraced(new DexoptOptions(
                     pkg.packageName,
-                    pkgCompilerFilter,
+                    pkgCompilationReason,
                     dexoptFlags));
 
             switch (primaryDexOptStaus) {
@@ -9081,8 +9080,8 @@ public class PackageManagerService extends IPackageManager.Stub
         int flags = (checkProfiles ? DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES : 0) |
                 (force ? DexoptOptions.DEXOPT_FORCE : 0) |
                 (bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0);
-        return performDexOpt(new DexoptOptions(packageName, targetCompilerFilter,
-                splitName, flags));
+        return performDexOpt(new DexoptOptions(packageName, REASON_UNKNOWN,
+                targetCompilerFilter, splitName, flags));
     }
 
     /**
@@ -9191,7 +9190,8 @@ public class PackageManagerService extends IPackageManager.Stub
         final String[] instructionSets = getAppDexInstructionSets(p.applicationInfo);
         if (!deps.isEmpty()) {
             DexoptOptions libraryOptions = new DexoptOptions(options.getPackageName(),
-                    options.getCompilerFilter(), options.getSplitName(),
+                    options.getCompilationReason(), options.getCompilerFilter(),
+                    options.getSplitName(),
                     options.getFlags() | DexoptOptions.DEXOPT_AS_SHARED_LIBRARY);
             for (PackageParser.Package depPackage : deps) {
                 // TODO: Analyze and investigate if we (should) profile libraries.
@@ -20644,10 +20644,6 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
     @Override
     public String getInstallerPackageName(String packageName) {
         final int callingUid = Binder.getCallingUid();
-        if (getInstantAppPackageName(callingUid) != null) {
-            return null;
-        }
-        // reader
         synchronized (mPackages) {
             final PackageSetting ps = mSettings.mPackages.get(packageName);
             if (filterAppAccessLPr(ps, callingUid, UserHandle.getUserId(callingUid))) {
@@ -20952,7 +20948,6 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 pw.println("    check-permission <permission> <package> [<user>]: does pkg hold perm?");
                 pw.println("    dexopt: dump dexopt state");
                 pw.println("    compiler-stats: dump compiler statistics");
-                pw.println("    enabled-overlays: dump list of enabled overlay packages");
                 pw.println("    service-permissions: dump permissions required by services");
                 pw.println("    <package.name>: info about given package");
                 return;
@@ -22234,8 +22229,16 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 Slog.e(TAG, "Failed to create app data for " + packageName + ": " + e);
             }
         }
-        // Prepare the application profiles.
-        mArtManagerService.prepareAppProfiles(pkg, userId);
+        // Prepare the application profiles only for upgrades and first boot (so that we don't
+        // repeat the same operation at each boot).
+        // We only have to cover the upgrade and first boot here because for app installs we
+        // prepare the profiles before invoking dexopt (in installPackageLI).
+        //
+        // We also have to cover non system users because we do not call the usual install package
+        // methods for them.
+        if (mIsUpgrade || mFirstBoot || (userId != UserHandle.USER_SYSTEM)) {
+            mArtManagerService.prepareAppProfiles(pkg, userId);
+        }
 
         if ((flags & StorageManager.FLAG_STORAGE_CE) != 0 && ceDataInode != -1) {
             // TODO: mark this structure as dirty so we persist it!

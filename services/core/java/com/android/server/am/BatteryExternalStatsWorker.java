@@ -139,7 +139,8 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     }
 
     @Override
-    public Future<?> scheduleReadProcStateCpuTimes(boolean onBattery, boolean onBatteryScreenOff) {
+    public Future<?> scheduleReadProcStateCpuTimes(
+            boolean onBattery, boolean onBatteryScreenOff, long delayMillis) {
         synchronized (mStats) {
             if (!mStats.trackPerProcStateCpuTimes()) {
                 return null;
@@ -147,9 +148,10 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         }
         synchronized (BatteryExternalStatsWorker.this) {
             if (!mExecutorService.isShutdown()) {
-                return mExecutorService.submit(PooledLambda.obtainRunnable(
+                return mExecutorService.schedule(PooledLambda.obtainRunnable(
                         BatteryStatsImpl::updateProcStateCpuTimes,
-                        mStats, onBattery, onBatteryScreenOff).recycleOnUse());
+                        mStats, onBattery, onBatteryScreenOff).recycleOnUse(),
+                        delayMillis, TimeUnit.MILLISECONDS);
             }
         }
         return null;

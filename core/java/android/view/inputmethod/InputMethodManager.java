@@ -20,10 +20,12 @@ import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
@@ -213,6 +215,7 @@ import java.util.concurrent.TimeUnit;
  * </ul>
  */
 @SystemService(Context.INPUT_METHOD_SERVICE)
+@RequiresFeature(PackageManager.FEATURE_INPUT_METHODS)
 public final class InputMethodManager {
     static final boolean DEBUG = false;
     static final String TAG = "InputMethodManager";

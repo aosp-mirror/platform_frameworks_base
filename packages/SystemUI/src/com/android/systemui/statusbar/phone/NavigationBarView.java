@@ -67,6 +67,7 @@ import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.statusbar.phone.NavGesture;
 import com.android.systemui.plugins.statusbar.phone.NavGesture.GestureHelper;
 import com.android.systemui.recents.RecentsOnboarding;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.NavigationBarCompat;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.policy.DeadZone;
@@ -407,26 +408,14 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 || oldConfig.densityDpi != newConfig.densityDpi) {
             mDockedIcon = getDrawable(ctx,
                     R.drawable.ic_sysbar_docked, R.drawable.ic_sysbar_docked_dark);
+            mHomeDefaultIcon = getHomeDrawable(ctx);
         }
         if (oldConfig.densityDpi != newConfig.densityDpi
                 || oldConfig.getLayoutDirection() != newConfig.getLayoutDirection()) {
-            final boolean quickStepEnabled = isQuickStepSwipeUpEnabled() || isQuickScrubEnabled();
-            mBackIcon = quickStepEnabled
-                    ? getDrawable(ctx, R.drawable.ic_sysbar_back_quick_step,
-                            R.drawable.ic_sysbar_back_quick_step_dark)
-                    : getDrawable(ctx, R.drawable.ic_sysbar_back, R.drawable.ic_sysbar_back_dark);
+            mBackIcon = getBackDrawable(ctx);
             mBackLandIcon = mBackIcon;
-            mBackAltIcon = quickStepEnabled
-                    ? getDrawable(ctx, R.drawable.ic_sysbar_back_ime_quick_step,
-                            R.drawable.ic_sysbar_back_ime_quick_step_dark)
-                    : getDrawable(ctx, R.drawable.ic_sysbar_back_ime,
-                            R.drawable.ic_sysbar_back_ime_dark);
+            mBackAltIcon = getBackImeDrawable(ctx);
             mBackAltLandIcon = mBackAltIcon;
-
-            mHomeDefaultIcon = quickStepEnabled
-                    ? getDrawable(ctx, R.drawable.ic_sysbar_home_quick_step,
-                            R.drawable.ic_sysbar_home_quick_step_dark)
-                    : getDrawable(ctx, R.drawable.ic_sysbar_home, R.drawable.ic_sysbar_home_dark);
             mRecentIcon = getDrawable(ctx,
                     R.drawable.ic_sysbar_recent, R.drawable.ic_sysbar_recent_dark);
             mMenuIcon = getDrawable(ctx, R.drawable.ic_sysbar_menu, R.drawable.ic_sysbar_menu_dark);
@@ -449,6 +438,33 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 updateCarModeIcons(ctx);
             }
         }
+    }
+
+    public KeyButtonDrawable getBackDrawable(Context ctx) {
+        return chooseNavigationIconDrawable(ctx, R.drawable.ic_sysbar_back,
+                R.drawable.ic_sysbar_back_dark, R.drawable.ic_sysbar_back_quick_step,
+                R.drawable.ic_sysbar_back_quick_step_dark);
+    }
+
+    public KeyButtonDrawable getBackImeDrawable(Context ctx) {
+        return chooseNavigationIconDrawable(ctx, R.drawable.ic_sysbar_back_ime,
+                R.drawable.ic_sysbar_back_ime_dark, R.drawable.ic_sysbar_back_ime_quick_step,
+                R.drawable.ic_sysbar_back_ime_quick_step_dark);
+    }
+
+    public KeyButtonDrawable getHomeDrawable(Context ctx) {
+        return chooseNavigationIconDrawable(ctx, R.drawable.ic_sysbar_home,
+                R.drawable.ic_sysbar_home_dark, R.drawable.ic_sysbar_home_quick_step,
+                R.drawable.ic_sysbar_home_quick_step_dark);
+    }
+
+    private KeyButtonDrawable chooseNavigationIconDrawable(Context ctx, @DrawableRes int iconLight,
+            @DrawableRes int iconDark, @DrawableRes int quickStepIconLight,
+            @DrawableRes int quickStepIconDark) {
+        final boolean quickStepEnabled = isQuickStepSwipeUpEnabled() || isQuickScrubEnabled();
+        return quickStepEnabled
+                ? getDrawable(ctx, quickStepIconLight, quickStepIconDark)
+                : getDrawable(ctx, iconLight, iconDark);
     }
 
     private KeyButtonDrawable getDrawable(Context ctx, @DrawableRes int lightIcon,
@@ -559,7 +575,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         mDisabledFlags = disabledFlags;
 
-        final boolean disableHome = ((disabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0);
+        boolean disableHome = ((disabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0);
 
         // Always disable recents when alternate car mode UI is active.
         boolean disableRecent = mUseCarModeUi
@@ -568,20 +584,21 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         boolean disableBack = ((disabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0)
                 && ((mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) == 0);
 
-        if ((disableRecent || disableBack) && inScreenPinning()) {
-            // Don't hide back and recents buttons when in screen pinning mode, as they are used for
-            // exiting.
-            disableBack = false;
-            disableRecent = false;
-        }
-
+        // When screen pinning, don't hide back and home when connected service or back and
+        // recents buttons when disconnected from launcher service in screen pinning mode,
+        // as they are used for exiting.
         if (mOverviewProxyService.getProxy() != null) {
-            // When overview is connected to the launcher service, disable the recents button by
-            // default unless overwritten by interaction flags. Similar with the back button but
-            // shown by default.
+            // Use interaction flags to show/hide navigation buttons but will be shown if required
+            // to exit screen pinning.
             final int flags = mOverviewProxyService.getInteractionFlags();
             disableRecent |= (flags & FLAG_SHOW_OVERVIEW_BUTTON) == 0;
-            disableBack |= (flags & FLAG_HIDE_BACK_BUTTON) != 0;
+            if (inScreenPinning()) {
+                disableBack = disableHome = false;
+            } else {
+                disableBack |= (flags & FLAG_HIDE_BACK_BUTTON) != 0;
+            }
+        } else if (inScreenPinning()) {
+            disableBack = disableRecent = false;
         }
 
         ViewGroup navButtons = (ViewGroup) getCurrentView().findViewById(R.id.nav_buttons);
@@ -599,13 +616,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         getRecentsButton().setVisibility(disableRecent ? View.INVISIBLE : View.VISIBLE);
     }
 
-    private boolean inScreenPinning() {
-        try {
-            return ActivityManager.getService().getLockTaskModeState()
-                    == ActivityManager.LOCK_TASK_MODE_PINNED;
-        } catch (RemoteException e) {
-            return false;
-        }
+    public boolean inScreenPinning() {
+        return ActivityManagerWrapper.getInstance().isLockToAppActive();
     }
 
     public void setLayoutTransitionsEnabled(boolean enabled) {
@@ -909,6 +921,11 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             Log.d(TAG, "reorient(): rot=" + mCurrentRotation);
         }
 
+        // Resolve layout direction if not resolved since components changing layout direction such
+        // as changing languages will recreate this view and the direction will be resolved later
+        if (!isLayoutDirectionResolved()) {
+            resolveLayoutDirection();
+        }
         updateTaskSwitchHelper();
         setNavigationIconHints(mNavigationIconHints, true);
 

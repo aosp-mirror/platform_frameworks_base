@@ -108,21 +108,21 @@ public final class FieldClassification {
      */
     public static final class Match {
 
-        private final String mRemoteId;
+        private final String mCategoryId;
         private final float mScore;
 
         /** @hide */
-        public Match(String remoteId, float score) {
-            mRemoteId = Preconditions.checkNotNull(remoteId);
+        public Match(String categoryId, float score) {
+            mCategoryId = Preconditions.checkNotNull(categoryId);
             mScore = score;
         }
 
         /**
-         * Gets the remote id of the {@link UserData} entry.
+         * Gets the category id of the {@link UserData} entry.
          */
         @NonNull
-        public String getRemoteId() {
-            return mRemoteId;
+        public String getCategoryId() {
+            return mCategoryId;
         }
 
         /**
@@ -149,13 +149,13 @@ public final class FieldClassification {
         public String toString() {
             if (!sDebug) return super.toString();
 
-            final StringBuilder string = new StringBuilder("Match: remoteId=");
-            Helper.appendRedacted(string, mRemoteId);
+            final StringBuilder string = new StringBuilder("Match: categoryId=");
+            Helper.appendRedacted(string, mCategoryId);
             return string.append(", score=").append(mScore).toString();
         }
 
         private void writeToParcel(@NonNull Parcel parcel) {
-            parcel.writeString(mRemoteId);
+            parcel.writeString(mCategoryId);
             parcel.writeFloat(mScore);
         }
 

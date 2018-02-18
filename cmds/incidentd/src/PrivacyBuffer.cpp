@@ -13,29 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#define LOG_TAG "incidentd"
+#include "Log.h"
 
 #include "PrivacyBuffer.h"
-#include "io_util.h"
+#include "incidentd_util.h"
 
+#include <android-base/file.h>
 #include <android/util/protobuf.h>
 #include <cutils/log.h>
 
 using namespace android::util;
 
-const bool DEBUG = false;
-
 /**
  * Write the field to buf based on the wire type, iterator will point to next field.
  * If skip is set to true, no data will be written to buf. Return number of bytes written.
  */
-void
-PrivacyBuffer::writeFieldOrSkip(uint32_t fieldTag, bool skip)
-{
-    if (DEBUG) ALOGD("%s field %d (wiretype = %d)", skip ? "skip" : "write",
-        read_field_id(fieldTag), read_wire_type(fieldTag));
-
+void PrivacyBuffer::writeFieldOrSkip(uint32_t fieldTag, bool skip) {
     uint8_t wireType = read_wire_type(fieldTag);
     size_t bytesToWrite = 0;
     uint32_t varint = 0;
@@ -54,18 +47,17 @@ PrivacyBuffer::writeFieldOrSkip(uint32_t fieldTag, bool skip)
             break;
         case WIRE_TYPE_LENGTH_DELIMITED:
             bytesToWrite = mData.readRawVarint();
-            if(!skip) mProto.writeLengthDelimitedHeader(read_field_id(fieldTag), bytesToWrite);
+            if (!skip) mProto.writeLengthDelimitedHeader(read_field_id(fieldTag), bytesToWrite);
             break;
         case WIRE_TYPE_FIXED32:
             if (!skip) mProto.writeRawVarint(fieldTag);
             bytesToWrite = 4;
             break;
     }
-    if (DEBUG) ALOGD("%s %d bytes of data", skip ? "skip" : "write", (int)bytesToWrite);
     if (skip) {
         mData.rp()->move(bytesToWrite);
     } else {
-        for (size_t i=0; i<bytesToWrite; i++) {
+        for (size_t i = 0; i < bytesToWrite; i++) {
             mProto.writeRawByte(mData.next());
         }
     }
@@ -78,28 +70,29 @@ PrivacyBuffer::writeFieldOrSkip(uint32_t fieldTag, bool skip)
  * The iterator must point to the head of a protobuf formatted field for successful operation.
  * After exit with NO_ERROR, iterator points to the next protobuf field's head.
  */
-status_t
-PrivacyBuffer::stripField(const Privacy* parentPolicy, const PrivacySpec& spec)
-{
+status_t PrivacyBuffer::stripField(const Privacy* parentPolicy, const PrivacySpec& spec,
+                                   int depth /* use as a counter for this recusive method. */) {
     if (!mData.hasNext() || parentPolicy == NULL) return BAD_VALUE;
     uint32_t fieldTag = mData.readRawVarint();
-    const Privacy* policy = lookup(parentPolicy, read_field_id(fieldTag));
+    uint32_t fieldId = read_field_id(fieldTag);
+    const Privacy* policy = lookup(parentPolicy, fieldId);
 
+    VLOG("[Depth %2d]Try to strip id %d, wiretype %d", depth, fieldId, read_wire_type(fieldTag));
     if (policy == NULL || policy->children == NULL) {
-        if (DEBUG) ALOGD("Not a message field %d: dest(%d)", read_field_id(fieldTag),
-            policy != NULL ? policy->dest : parentPolicy->dest);
-
         bool skip = !spec.CheckPremission(policy, parentPolicy->dest);
         // iterator will point to head of next field
+        size_t currentAt = mData.rp()->pos();
         writeFieldOrSkip(fieldTag, skip);
+        VLOG("[Depth %2d]Field %d %ss %d bytes", depth, fieldId, skip ? "skip" : "write",
+             (int)(get_varint_size(fieldTag) + mData.rp()->pos() - currentAt));
         return NO_ERROR;
     }
     // current field is message type and its sub-fields have extra privacy policies
     uint32_t msgSize = mData.readRawVarint();
-    EncodedBuffer::Pointer start = mData.rp()->copy();
+    size_t start = mData.rp()->pos();
     long long token = mProto.start(encode_field_id(policy));
-    while (mData.rp()->pos() - start.pos() != msgSize) {
-        status_t err = stripField(policy, spec);
+    while (mData.rp()->pos() - start != msgSize) {
+        status_t err = stripField(policy, spec, depth + 1);
         if (err != NO_ERROR) return err;
     }
     mProto.end(token);
@@ -108,53 +101,39 @@ PrivacyBuffer::stripField(const Privacy* parentPolicy, const PrivacySpec& spec)
 
 // ================================================================================
 PrivacyBuffer::PrivacyBuffer(const Privacy* policy, EncodedBuffer::iterator& data)
-        :mPolicy(policy),
-         mData(data),
-         mProto(),
-         mSize(0)
-{
-}
+    : mPolicy(policy), mData(data), mProto(), mSize(0) {}
 
-PrivacyBuffer::~PrivacyBuffer()
-{
-}
+PrivacyBuffer::~PrivacyBuffer() {}
 
-status_t
-PrivacyBuffer::strip(const PrivacySpec& spec)
-{
-    if (DEBUG) ALOGD("Strip with spec %d", spec.dest);
+status_t PrivacyBuffer::strip(const PrivacySpec& spec) {
+    VLOG("Strip with spec %d", spec.dest);
     // optimization when no strip happens
     if (mPolicy == NULL || mPolicy->children == NULL || spec.RequireAll()) {
         if (spec.CheckPremission(mPolicy)) mSize = mData.size();
         return NO_ERROR;
     }
     while (mData.hasNext()) {
-        status_t err = stripField(mPolicy, spec);
+        status_t err = stripField(mPolicy, spec, 0);
         if (err != NO_ERROR) return err;
     }
     if (mData.bytesRead() != mData.size()) return BAD_VALUE;
     mSize = mProto.size();
-    mData.rp()->rewind(); // rewind the read pointer back to beginning after the strip.
+    mData.rp()->rewind();  // rewind the read pointer back to beginning after the strip.
     return NO_ERROR;
 }
 
-void
-PrivacyBuffer::clear()
-{
+void PrivacyBuffer::clear() {
     mSize = 0;
     mProto.clear();
 }
 
-size_t
-PrivacyBuffer::size() const { return mSize; }
+size_t PrivacyBuffer::size() const { return mSize; }
 
-status_t
-PrivacyBuffer::flush(int fd)
-{
+status_t PrivacyBuffer::flush(int fd) {
     status_t err = NO_ERROR;
     EncodedBuffer::iterator iter = size() == mData.size() ? mData : mProto.data();
     while (iter.readBuffer() != NULL) {
-        err = write_all(fd, iter.readBuffer(), iter.currentToRead());
+        err = WriteFully(fd, iter.readBuffer(), iter.currentToRead()) ? NO_ERROR : -errno;
         iter.rp()->move(iter.currentToRead());
         if (err != NO_ERROR) return err;
     }

@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#define LOG_TAG "incidentd"
+#include "Log.h"
 
 #include "IncidentService.h"
 
@@ -23,25 +22,22 @@
 #include <binder/IServiceManager.h>
 #include <binder/ProcessState.h>
 #include <binder/Status.h>
-#include <cutils/log.h>
 #include <utils/Looper.h>
 #include <utils/StrongPointer.h>
 
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 
 using namespace android;
 
 // ================================================================================
-int
-main(int /*argc*/, char** /*argv*/)
-{
+int main(int /*argc*/, char** /*argv*/) {
     // Set up the looper
     sp<Looper> looper(Looper::prepare(0 /* opts */));
 
     // Set up the binder
     sp<ProcessState> ps(ProcessState::self());
-    ps->setThreadPoolMaxThreadCount(1); // everything is oneway, let it queue and save ram
+    ps->setThreadPoolMaxThreadCount(1);  // everything is oneway, let it queue and save ram
     ps->startThreadPool();
     ps->giveThreadPoolName();
     IPCThreadState::self()->disableBackgroundScheduling(true);

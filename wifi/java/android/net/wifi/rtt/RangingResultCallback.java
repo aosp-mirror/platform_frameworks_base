@@ -18,7 +18,6 @@ package android.net.wifi.rtt;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.os.Handler;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -26,11 +25,11 @@ import java.util.List;
 
 /**
  * Base class for ranging result callbacks. Should be extended by applications and set when calling
- * {@link WifiRttManager#startRanging(RangingRequest, RangingResultCallback, Handler)}. If the
- * ranging operation fails in whole (not attempted) then {@link #onRangingFailure(int)} will be
- * called with a failure code. If the ranging operation is performed for each of the requested
- * peers then the {@link #onRangingResults(List)} will be called with the set of results (@link
- * {@link RangingResult}, each of which has its own success/failure code
+ * {@link WifiRttManager#startRanging(RangingRequest, java.util.concurrent.Executor, RangingResultCallback)}.
+ * If the ranging operation fails in whole (not attempted) then {@link #onRangingFailure(int)}
+ * will be called with a failure code. If the ranging operation is performed for each of the
+ * requested peers then the {@link #onRangingResults(List)} will be called with the set of
+ * results (@link {@link RangingResult}, each of which has its own success/failure code
  * {@link RangingResult#getStatus()}.
  */
 public abstract class RangingResultCallback {

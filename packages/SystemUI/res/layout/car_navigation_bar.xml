@@ -19,34 +19,80 @@
 
 <com.android.systemui.statusbar.car.CarNavigationBarView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:gravity="center"
     android:background="@drawable/system_bar_background">
 
-    <!-- phone.NavigationBarView has rot0 and rot90 but we expect the car head unit to have a fixed
-         rotation so skip this level of the heirarchy.
-    -->
     <LinearLayout
         android:layout_height="match_parent"
-        android:layout_width="@dimen/car_navigation_bar_width"
+        android:layout_width="wrap_content"
         android:orientation="horizontal"
-        android:clipChildren="false"
-        android:clipToPadding="false"
         android:id="@+id/nav_buttons"
+        android:gravity="left"
+        android:paddingLeft="30dp"
+        android:layout_weight="1"
         android:animateLayoutChanges="true">
 
-        <!-- Buttons get populated here from a car_arrays.xml. -->
+        <com.android.systemui.statusbar.car.CarNavigationButton
+            android:id="@+id/home"
+            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            systemui:intent="intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.HOME;end"
+            android:src="@drawable/car_ic_overview"
+            android:background="?android:attr/selectableItemBackground"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp"
+        />
+
+        <com.android.systemui.statusbar.car.CarNavigationButton
+            android:id="@+id/hvac"
+            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            systemui:intent="intent:#Intent;action=android.car.intent.action.SHOW_HVAC_CONTROLS;end"
+            systemui:broadcast="true"
+            android:src="@drawable/car_ic_hvac"
+            android:background="?android:attr/selectableItemBackground"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp"
+        />
     </LinearLayout>
 
-    <!-- lights out layout to match exactly -->
     <LinearLayout
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_width="match_parent"
-        android:orientation="horizontal"
-        android:id="@+id/lights_out"
-        android:visibility="gone">
-        <!-- Must match nav_buttons. -->
+        android:layout_weight="1"
+        android:gravity="right"
+        android:orientation="horizontal">
+
+        <com.android.keyguard.AlphaOptimizedImageButton
+            android:id="@+id/notifications"
+            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:src="@drawable/car_ic_notification"
+            android:background="?android:attr/selectableItemBackground"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:alpha="0.7"
+        />
+
+        <com.android.systemui.statusbar.policy.Clock
+            android:id="@+id/clock"
+            android:textAppearance="@style/TextAppearance.StatusBar.Clock"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:singleLine="true"
+            android:paddingStart="@dimen/status_bar_clock_starting_padding"
+            android:paddingEnd="@dimen/status_bar_clock_end_padding"
+            android:gravity="center_vertical"
+            android:paddingRight="20dp"
+        />
+
+        <Space
+            android:layout_width="10dp"
+            android:layout_height="match_parent"/>
+
     </LinearLayout>
 
 </com.android.systemui.statusbar.car.CarNavigationBarView>
+

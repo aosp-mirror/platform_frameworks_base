@@ -16,6 +16,13 @@
 
 package com.android.server;
 
+import static android.app.AlarmManager.ELAPSED_REALTIME;
+import static android.app.AlarmManager.ELAPSED_REALTIME_WAKEUP;
+import static android.app.AlarmManager.FLAG_ALLOW_WHILE_IDLE;
+import static android.app.AlarmManager.FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED;
+import static android.app.AlarmManager.RTC;
+import static android.app.AlarmManager.RTC_WAKEUP;
+
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -46,6 +53,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.ParcelableException;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
@@ -62,6 +70,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.KeyValueListParser;
 import android.util.Log;
+import android.util.NtpTrustedTime;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -70,10 +79,18 @@ import android.util.SparseLongArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.DumpUtils;
+import com.android.internal.util.LocalLog;
+import com.android.server.AppStateTracker.Listener;
+
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.time.DateTimeException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -87,21 +104,6 @@ import java.util.Random;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.function.Predicate;
-
-import static android.app.AlarmManager.FLAG_ALLOW_WHILE_IDLE;
-import static android.app.AlarmManager.FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED;
-import static android.app.AlarmManager.RTC_WAKEUP;
-import static android.app.AlarmManager.RTC;
-import static android.app.AlarmManager.ELAPSED_REALTIME_WAKEUP;
-import static android.app.AlarmManager.ELAPSED_REALTIME;
-
-import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.DumpUtils;
-import com.android.internal.util.LocalLog;
-import com.android.internal.util.Preconditions;
-import com.android.server.AppStateTracker.Listener;
 
 /**
  * Alarm manager implementaion.
@@ -1791,6 +1793,16 @@ class AlarmManagerService extends SystemService {
                     "getNextAlarmClock", null);
 
             return getNextAlarmClockImpl(userId);
+        }
+
+        @Override
+        public long currentNetworkTimeMillis() {
+            final NtpTrustedTime time = NtpTrustedTime.getInstance(getContext());
+            if (time.hasCache()) {
+                return time.currentTimeMillis();
+            } else {
+                throw new ParcelableException(new DateTimeException("Missing NTP fix"));
+            }
         }
 
         @Override

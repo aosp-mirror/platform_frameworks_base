@@ -382,7 +382,7 @@ public class TextViewActivityTest {
         TextClassifier textClassifier = textClassificationManager.getTextClassifier();
         Spannable content = new SpannableString("Call me at +19148277737");
         TextLinks links = textClassifier.generateLinks(content);
-        links.apply(content, TextLinks.APPLY_STRATEGY_REPLACE, null);
+        links.apply(content, TextLinks.APPLY_STRATEGY_REPLACE, null, false /* allowPrefix */);
 
         mActivityRule.runOnUiThread(() -> {
             textView.setText(content);

@@ -1346,6 +1346,15 @@ public final class JobStatus {
         }
         pw.print(prefix); pw.print("Standby bucket: ");
         pw.println(bucketName(standbyBucket));
+        if (standbyBucket > 0) {
+            pw.print(prefix); pw.print("Base heartbeat: ");
+            pw.println(baseHeartbeat);
+        }
+        if (whenStandbyDeferred != 0) {
+            pw.print(prefix); pw.print("  Deferred since: ");
+            TimeUtils.formatDuration(whenStandbyDeferred, elapsedRealtimeMillis, pw);
+            pw.println();
+        }
         pw.print(prefix); pw.print("Enqueue time: ");
         TimeUtils.formatDuration(enqueueTime, elapsedRealtimeMillis, pw);
         pw.println();

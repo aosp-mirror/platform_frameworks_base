@@ -917,7 +917,7 @@ public class LinearLayout extends ViewGroup {
         // measurement on any children, we need to measure them now.
         int remainingExcess = heightSize - mTotalLength
                 + (mAllowInconsistentMeasurement ? 0 : consumedExcessSpace);
-        if (skippedMeasure || remainingExcess != 0 && totalWeight > 0.0f) {
+        if (skippedMeasure || totalWeight > 0.0f) {
             float remainingWeightSum = mWeightSum > 0.0f ? mWeightSum : totalWeight;
 
             mTotalLength = 0;
@@ -1300,7 +1300,7 @@ public class LinearLayout extends ViewGroup {
         // measurement on any children, we need to measure them now.
         int remainingExcess = widthSize - mTotalLength
                 + (mAllowInconsistentMeasurement ? 0 : usedExcessSpace);
-        if (skippedMeasure || remainingExcess != 0 && totalWeight > 0.0f) {
+        if (skippedMeasure || totalWeight > 0.0f) {
             float remainingWeightSum = mWeightSum > 0.0f ? mWeightSum : totalWeight;
 
             maxAscent[0] = maxAscent[1] = maxAscent[2] = maxAscent[3] = -1;

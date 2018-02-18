@@ -182,6 +182,8 @@
     <string name="notification_channel_voice_mail">Voicemail messages</string>
     <!-- Telephony notification channel name for a channel containing wifi calling status notifications. -->
     <string name="notification_channel_wfc">Wi-Fi calling</string>
+    <!-- Telephony notification channel name for a channel containing SIM notifications -->
+    <string name="notification_channel_sim">SIM status</string>
 
     <!-- Displayed to tell the user that peer changed TTY mode -->
     <string name="peerTtyModeFull">Peer requested TTY Mode FULL</string>
@@ -2169,6 +2171,9 @@
     <!-- Text to show in the auto complete drop down list on a text view when the WebView can auto fill the entire form but the user has not configured an AutoFill profile [CHAR-LIMIT=19] -->
     <string name="setup_autofill">Set up Autofill</string>
 
+    <!-- Title of fullscreen autofill window [CHAR-LIMIT=80] -->
+    <string name="autofill_window_title">Autofill</string>
+
     <!-- String used to separate FirstName and LastName when writing out a local name
          e.g. John<separator>Smith [CHAR-LIMIT=NONE]-->
     <string name="autofill_address_name_separator">\u0020</string>
@@ -3194,10 +3199,12 @@
     <!-- See SIM_ADDED_DIALOG.  This is the button of that dialog. -->
     <string name="sim_restart_button">Restart</string>
     <!-- See Carrier_App_Dialog. This is the message of that dialog. -->
-    <string name="carrier_app_dialog_message">To get your new SIM working properly, you\'ll need to install and open an app from your carrier.</string>
-    <!-- See Carrier_App_Dialog. This is the button of that dialog. -->
-    <string name="carrier_app_dialog_button">GET THE APP</string>
-    <string name="carrier_app_dialog_not_now">NOT NOW</string>
+    <string name="install_carrier_app_notification_title">Activate mobile service</string>
+    <string name="install_carrier_app_notification_text">
+        Download the carrier app to activate your new SIM
+    </string>
+    <!-- See Carrier_App_Notification. This is the button of that dialog. -->
+    <string name="install_carrier_app_notification_button">Download app</string>
     <!-- See carrier_app_notification. This is the headline. -->
     <string name="carrier_app_notification_title">New SIM inserted</string>
     <string name="carrier_app_notification_text">Tap to set it up</string>

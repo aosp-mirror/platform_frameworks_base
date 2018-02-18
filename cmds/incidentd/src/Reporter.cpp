@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#define LOG_TAG "incidentd"
+#include "Log.h"
 
 #include "Reporter.h"
 
+#include "Privacy.h"
 #include "report_directory.h"
 #include "section_list.h"
 
@@ -25,11 +25,11 @@
 #include <private/android_filesystem_config.h>
 #include <utils/SystemClock.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <dirent.h>
-#include <fcntl.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 /**
  * The directory where the incident reports are stored.
@@ -38,72 +38,67 @@ static const char* INCIDENT_DIRECTORY = "/data/misc/incidents/";
 
 // ================================================================================
 ReportRequest::ReportRequest(const IncidentReportArgs& a,
-            const sp<IIncidentReportStatusListener> &l, int f)
-    :args(a),
-     listener(l),
-     fd(f),
-     err(NO_ERROR)
-{
-}
+                             const sp<IIncidentReportStatusListener>& l, int f)
+    : args(a), listener(l), fd(f), err(NO_ERROR) {}
 
-ReportRequest::~ReportRequest()
-{
+ReportRequest::~ReportRequest() {
     if (fd >= 0) {
         // clean up the opened file descriptor
         close(fd);
     }
 }
 
-bool
-ReportRequest::ok()
-{
-    return fd >= 0 && err == NO_ERROR;
-}
+bool ReportRequest::ok() { return fd >= 0 && err == NO_ERROR; }
 
 // ================================================================================
 ReportRequestSet::ReportRequestSet()
-    :mRequests(),
-     mSections(),
-     mMainFd(-1),
-     mMainDest(-1)
-{
-}
+    : mRequests(), mSections(), mMainFd(-1), mMainDest(-1), mMetadata(), mSectionStats() {}
 
-ReportRequestSet::~ReportRequestSet()
-{
-}
+ReportRequestSet::~ReportRequestSet() {}
 
 // TODO: dedup on exact same args and fd, report the status back to listener!
-void
-ReportRequestSet::add(const sp<ReportRequest>& request)
-{
+void ReportRequestSet::add(const sp<ReportRequest>& request) {
     mRequests.push_back(request);
     mSections.merge(request->args);
+    mMetadata.set_request_size(mMetadata.request_size() + 1);
 }
 
-void
-ReportRequestSet::setMainFd(int fd)
-{
+void ReportRequestSet::setMainFd(int fd) {
     mMainFd = fd;
+    mMetadata.set_use_dropbox(fd > 0);
 }
 
-void
-ReportRequestSet::setMainDest(int dest)
-{
+void ReportRequestSet::setMainDest(int dest) {
     mMainDest = dest;
+    PrivacySpec spec = PrivacySpec::new_spec(dest);
+    switch (spec.dest) {
+        case android::os::DEST_AUTOMATIC:
+            mMetadata.set_dest(IncidentMetadata_Destination_AUTOMATIC);
+            break;
+        case android::os::DEST_EXPLICIT:
+            mMetadata.set_dest(IncidentMetadata_Destination_EXPLICIT);
+            break;
+        case android::os::DEST_LOCAL:
+            mMetadata.set_dest(IncidentMetadata_Destination_LOCAL);
+            break;
+    }
 }
 
-bool
-ReportRequestSet::containsSection(int id) {
-    return mSections.containsSection(id);
+bool ReportRequestSet::containsSection(int id) { return mSections.containsSection(id); }
+
+IncidentMetadata::SectionStats* ReportRequestSet::sectionStats(int id) {
+    if (mSectionStats.find(id) == mSectionStats.end()) {
+        auto stats = mMetadata.add_sections();
+        stats->set_id(id);
+        mSectionStats[id] = stats;
+    }
+    return mSectionStats[id];
 }
 
 // ================================================================================
 Reporter::Reporter() : Reporter(INCIDENT_DIRECTORY) { isTest = false; };
 
-Reporter::Reporter(const char* directory)
-    :batch()
-{
+Reporter::Reporter(const char* directory) : batch() {
     char buf[100];
 
     // TODO: Make the max size smaller for user builds.
@@ -121,22 +116,18 @@ Reporter::Reporter(const char* directory)
     mFilename = mIncidentDirectory + buf;
 }
 
-Reporter::~Reporter()
-{
-}
+Reporter::~Reporter() {}
 
-Reporter::run_report_status_t
-Reporter::runReport()
-{
-
+Reporter::run_report_status_t Reporter::runReport() {
     status_t err = NO_ERROR;
     bool needMainFd = false;
     int mainFd = -1;
     int mainDest = -1;
     HeaderSection headers;
+    MetadataSection metadataSection;
 
     // See if we need the main file
-    for (ReportRequestSet::iterator it=batch.begin(); it!=batch.end(); it++) {
+    for (ReportRequestSet::iterator it = batch.begin(); it != batch.end(); it++) {
         if ((*it)->fd < 0 && mainFd < 0) {
             needMainFd = true;
             mainDest = (*it)->args.dest();
@@ -167,7 +158,7 @@ Reporter::runReport()
     }
 
     // Tell everyone that we're starting.
-    for (ReportRequestSet::iterator it=batch.begin(); it!=batch.end(); it++) {
+    for (ReportRequestSet::iterator it = batch.begin(); it != batch.end(); it++) {
         if ((*it)->listener != NULL) {
             (*it)->listener->onReportStarted();
         }
@@ -178,31 +169,36 @@ Reporter::runReport()
 
     // For each of the report fields, see if we need it, and if so, execute the command
     // and report to those that care that we're doing it.
-    for (const Section** section=SECTION_LIST; *section; section++) {
+    for (const Section** section = SECTION_LIST; *section; section++) {
         const int id = (*section)->id;
         if (this->batch.containsSection(id)) {
             ALOGD("Taking incident report section %d '%s'", id, (*section)->name.string());
-            // Notify listener of starting
-            for (ReportRequestSet::iterator it=batch.begin(); it!=batch.end(); it++) {
+            for (ReportRequestSet::iterator it = batch.begin(); it != batch.end(); it++) {
                 if ((*it)->listener != NULL && (*it)->args.containsSection(id)) {
-                    (*it)->listener->onReportSectionStatus(id,
-                            IIncidentReportStatusListener::STATUS_STARTING);
+                    (*it)->listener->onReportSectionStatus(
+                            id, IIncidentReportStatusListener::STATUS_STARTING);
                 }
             }
 
             // Execute - go get the data and write it into the file descriptors.
+            auto stats = batch.sectionStats(id);
+            int64_t startTime = uptimeMillis();
             err = (*section)->Execute(&batch);
+            int64_t endTime = uptimeMillis();
+
+            stats->set_success(err == NO_ERROR);
+            stats->set_exec_duration_ms(endTime - startTime);
             if (err != NO_ERROR) {
                 ALOGW("Incident section %s (%d) failed: %s. Stopping report.",
-                        (*section)->name.string(), id, strerror(-err));
+                      (*section)->name.string(), id, strerror(-err));
                 goto DONE;
             }
 
             // Notify listener of starting
-            for (ReportRequestSet::iterator it=batch.begin(); it!=batch.end(); it++) {
+            for (ReportRequestSet::iterator it = batch.begin(); it != batch.end(); it++) {
                 if ((*it)->listener != NULL && (*it)->args.containsSection(id)) {
-                    (*it)->listener->onReportSectionStatus(id,
-                            IIncidentReportStatusListener::STATUS_FINISHED);
+                    (*it)->listener->onReportSectionStatus(
+                            id, IIncidentReportStatusListener::STATUS_FINISHED);
                 }
             }
             ALOGD("Finish incident report section %d '%s'", id, (*section)->name.string());
@@ -210,13 +206,16 @@ Reporter::runReport()
     }
 
 DONE:
+    // Reports the metdadata when taking the incident report.
+    if (!isTest) metadataSection.Execute(&batch);
+
     // Close the file.
     if (mainFd >= 0) {
         close(mainFd);
     }
 
     // Tell everyone that we're done.
-    for (ReportRequestSet::iterator it=batch.begin(); it!=batch.end(); it++) {
+    for (ReportRequestSet::iterator it = batch.begin(); it != batch.end(); it++) {
         if ((*it)->listener != NULL) {
             if (err == NO_ERROR) {
                 (*it)->listener->onReportFinished();
@@ -238,7 +237,7 @@ DONE:
         // If the status was ok, delete the file. If not, leave it around until the next
         // boot or the next checkin. If the directory gets too big older files will
         // be rotated out.
-        if(!isTest) unlink(mFilename.c_str());
+        if (!isTest) unlink(mFilename.c_str());
     }
 
     return REPORT_FINISHED;
@@ -247,9 +246,7 @@ DONE:
 /**
  * Create our output file and set the access permissions to -rw-rw----
  */
-status_t
-Reporter::create_file(int* fd)
-{
+status_t Reporter::create_file(int* fd) {
     const char* filename = mFilename.c_str();
 
     *fd = open(filename, O_CREAT | O_TRUNC | O_RDWR | O_CLOEXEC, 0660);
@@ -271,9 +268,7 @@ Reporter::create_file(int* fd)
     return NO_ERROR;
 }
 
-Reporter::run_report_status_t
-Reporter::upload_backlog()
-{
+Reporter::run_report_status_t Reporter::upload_backlog() {
     DIR* dir;
     struct dirent* entry;
     struct stat st;
@@ -324,4 +319,3 @@ Reporter::upload_backlog()
 
     return REPORT_FINISHED;
 }
-

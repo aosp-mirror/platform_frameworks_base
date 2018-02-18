@@ -53,16 +53,16 @@
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"डिस्कनेक्ट केले"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"डिस्कनेक्ट करत आहे..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"कनेक्ट करत आहे..."</string>
-    <string name="bluetooth_connected" msgid="6038755206916626419">"कनेक्ट केले"</string>
+    <string name="bluetooth_connected" msgid="5427152882755735944">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>कनेक्ट केले"</string>
     <string name="bluetooth_pairing" msgid="1426882272690346242">"जोडत आहे…"</string>
-    <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"कनेक्ट केले (फोन नाही)"</string>
-    <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"कनेक्ट केले (मीडिया नाही)"</string>
-    <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"कनेक्ट केलेले आहे (कोणत्याही संदेशामध्ये प्रवेश नाही)"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"कनेक्ट केले (फोन किंवा मीडिया नाही)"</string>
-    <string name="bluetooth_connected_battery_level" msgid="7049181126136692368">"कनेक्ट केलेले आहे, बॅटरी <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_battery_level" msgid="5504193961248406027">"कनेक्ट केलेले आहे (कोणताही फोन नाही), बॅटरी <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="4751724026365870779">"कनेक्ट केलेले आहे (कोणताही मीडिया नाही), बॅटरी <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1549265779323455261">"कनेक्ट केलेले आहे (कोणताही फोन किंवा मीडिया नाही), बॅटरी <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset" msgid="616068069034994802">"कनेक्ट केले (फोन नाही)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp" msgid="3736431800395923868">"कनेक्ट केले (मीडिया नाही)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_map" msgid="3200033913678466453">"कनेक्ट केले (संदेश अ‍ॅक्सेस नाही)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2047403011284187056">"कनेक्ट केले (फोन किंवा मीडिया नाही)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_battery_level" msgid="5162924691231307748">"कनेक्ट केले, बॅटरी <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"कनेक्ट केले (फोन नाही), बॅटरी <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"कनेक्ट केले (मीडिया नाही), बॅटरी <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"कनेक्ट केले (फोन किंवा मीडिया नाही), बॅटरी <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"मीडिया ऑडिओ"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"फोन कॉल"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"फाइल स्थानांतरण"</string>
@@ -75,6 +75,10 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"सिम प्रवेश"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD ऑडिओ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD ऑडिओ"</string>
+    <!-- no translation found for bluetooth_profile_hearing_aid (7999237886427812595) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_profile_summary_connected (7188282786730266159) -->
+    <skip />
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"मीडिया ऑडिओवर कनेक्ट केले"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"फोन ऑडिओ वर कनेक्ट केले"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"फाईल स्थानांतर सर्व्हरवर कनेक्ट केले"</string>
@@ -91,6 +95,8 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"फोन ऑडिओसाठी वापरा"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"फाईल स्थानांतरणासाठी वापरा"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"इनपुट साठी वापरा"</string>
+    <!-- no translation found for bluetooth_hearing_aid_profile_summary_use_for (908775281788309484) -->
+    <skip />
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"पेअर करा"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"पेअर करा"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"रद्द करा"</string>
@@ -99,7 +105,7 @@
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"अयोग्य पिन किंवा पासकीमुळे <xliff:g id="DEVICE_NAME">%1$s</xliff:g> सह जोडू शकलो नाही."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> शी संवाद प्रस्थापित करू शकत नाही."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> द्वारे पेअरींग नाकारले."</string>
-    <string name="bluetooth_talkback_computer" msgid="4875089335641234463">"संगणक"</string>
+    <string name="bluetooth_talkback_computer" msgid="4875089335641234463">"कॉंप्युटर"</string>
     <string name="bluetooth_talkback_headset" msgid="5140152177885220949">"हेडसेट"</string>
     <string name="bluetooth_talkback_phone" msgid="4260255181240622896">"फोन"</string>
     <string name="bluetooth_talkback_imaging" msgid="551146170554589119">"इमेज"</string>
@@ -327,9 +333,10 @@
     <item msgid="8280754435979370728">"डोळ्यांनी पाहिले तसे नैसर्गिक रंग"</item>
     <item msgid="5363960654009010371">"डिजिटल सामग्रीसाठी ऑप्टिमाइझ केलेले रंग"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="1317817863508274533">"निष्क्रिय अ‍ॅप्स"</string>
+    <string name="inactive_apps_title" msgid="9042996804461901648">"स्टँडबाय अॅप्स"</string>
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"निष्क्रिय. टॉगल करण्यासाठी टॅप करा."</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"सक्रिय. टॉगल करण्यासाठी टॅप करा."</string>
+    <string name="standby_bucket_summary" msgid="6567835350910684727">"अॅप स्टँडबाय स्थिती: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"चालू सेवा"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"सध्या चालत असलेल्या सेवा पहा आणि नियंत्रित करा"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"वेबदृश्य अंमलबजावणी"</string>
@@ -351,16 +358,24 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"रंग सुधारणा"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"हे वैशिष्‍ट्य प्रायोगिक आहे आणि कदाचित कार्यप्रदर्शन प्रभावित करू शकते."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> द्वारे अधिलिखित"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"सुमारे <xliff:g id="TIME">^1</xliff:g> शिल्‍लक"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"तुमच्या वापरानुसार अंदाजे <xliff:g id="TIME">^1</xliff:g> पुरेल इतकी बॅटरी शिल्लक आहे"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"पूर्णपणे चार्ज होण्यास <xliff:g id="TIME">^1</xliff:g> शिल्‍लक"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">^1</xliff:g> शिल्लक"</string>
-    <string name="power_remaining_duration_only_short_enhanced" msgid="7450425624026394823">"तुमच्या वापरानुसार <xliff:g id="TIME">^1</xliff:g> पुरेल इतकी बॅटरी शिल्लक आहे"</string>
-    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">^1</xliff:g> - सुमारे <xliff:g id="TIME">^2</xliff:g> शिल्लक"</string>
-    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">^1</xliff:g> - तुमच्या वापरानुसार अंदाजे <xliff:g id="TIME">^2</xliff:g> पुरेल इतकी बॅटरी शिल्लक आहे"</string>
-    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> शिल्लक"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"सुमारे <xliff:g id="TIME">%1$s</xliff:g> शिल्‍लक"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"तुमच्या वापरानुसार अंदाजे <xliff:g id="TIME">%1$s</xliff:g> पुरेल इतकी बॅटरी शिल्लक आहे"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"पूर्णपणे चार्ज होण्यास <xliff:g id="TIME">%1$s</xliff:g> शिल्‍लक"</string>
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> शिल्लक"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"<xliff:g id="THRESHOLD">%1$s</xliff:g> पेक्षा कमी शिल्लक आहे"</string>
+    <string name="power_remaining_less_than_duration" msgid="7967078125657859046">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="THRESHOLD">%2$s</xliff:g> पेक्षा कमी शिल्लक आहे"</string>
+    <string name="power_remaining_more_than_subtext" msgid="6846716609975752316">"<xliff:g id="LEVEL">%1$s</xliff:g><xliff:g id="TIME_REMAINING">%2$s</xliff:g> पेक्षा जास्त शिल्लक आहे"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="8884488700395194194">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> पेक्षा जास्त शिल्लक आहे"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="8168317165722752881">"फोन लवकरच बंद होऊ शकतो"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="5957064378548718872">"टॅबलेट लवकरच बंद होऊ शकतो"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="9055596817716471373">"डिव्हाइस लवकरच बंद होऊ शकते"</string>
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - सुमारे <xliff:g id="TIME">%2$s</xliff:g> शिल्लक"</string>
+    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">%1$s</xliff:g> - तुमच्या वापरानुसार अंदाजे <xliff:g id="TIME">%2$s</xliff:g> पुरेल इतकी बॅटरी शिल्लक आहे"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="7679005631124015335">"<xliff:g id="LEVEL">%1$s</xliff:g> - फोन लवकरच बंद होऊ शकतो"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="261050880878965621">"<xliff:g id="LEVEL">%1$s</xliff:g> - टॅबलेट लवकरच बंद होऊ शकतो"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="2020049829798578618">"<xliff:g id="LEVEL">%1$s</xliff:g> - डिव्हाइस लवकरच बंद होऊ शकते"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> - पूर्णपणे चार्ज होण्यात <xliff:g id="TIME">^2</xliff:g>"</string>
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - पूर्णपणे चार्ज होण्यात <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"चार्ज होत आहे"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"चार्ज होत आहे"</string>
@@ -414,4 +429,8 @@
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"कधीही नाही"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"केवळ प्राधान्य"</string>
     <string name="zen_mode_and_condition" msgid="4927230238450354412">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
+    <string name="zen_alarm_warning_indef" msgid="3007988140196673193">"तुम्ही आधी हे बंद केल्याशिवाय पुढील <xliff:g id="WHEN">%1$s</xliff:g> वाजता होणारा अलार्म ऐकू शकणार नाही"</string>
+    <string name="zen_alarm_warning" msgid="6236690803924413088">"तुमचा पुढील <xliff:g id="WHEN">%1$s</xliff:g> वाजता होणारा अलार्म, तुम्ही ऐकू शकणार नाही"</string>
+    <string name="alarm_template" msgid="4996153414057676512">"<xliff:g id="WHEN">%1$s</xliff:g> वाजता"</string>
+    <string name="alarm_template_far" msgid="3779172822607461675">"<xliff:g id="WHEN">%1$s</xliff:g> रोजी"</string>
 </resources>

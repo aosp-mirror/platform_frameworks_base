@@ -22,4 +22,9 @@
          uri that will be launched into the docked window. -->
     <bool name="config_enablePersistentDockedActivity">false</bool>
     <string name="config_persistentDockedActivityIntentUri" translatable="false"></string>
+
+    <!-- configure which system ui bars should be displayed -->
+    <bool name="config_enableLeftNavigationBar">false</bool>
+    <bool name="config_enableRightNavigationBar">false</bool>
+    <bool name="config_enableBottomNavigationBar">true</bool>
 </resources>

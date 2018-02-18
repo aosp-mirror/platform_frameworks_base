@@ -17,6 +17,7 @@
 package android.content;
 
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.content.pm.ApplicationInfo;
@@ -1000,14 +1001,17 @@ public class ContextWrapper extends Context {
      */
     @Override
     public boolean isAutofillCompatibilityEnabled() {
-        return mBase.isAutofillCompatibilityEnabled();
+        return mBase != null && mBase.isAutofillCompatibilityEnabled();
     }
 
     /**
      * @hide
      */
+    @TestApi
     @Override
     public void setAutofillCompatibilityEnabled(boolean  autofillCompatEnabled) {
-        mBase.setAutofillCompatibilityEnabled(autofillCompatEnabled);
+        if (mBase != null) {
+            mBase.setAutofillCompatibilityEnabled(autofillCompatEnabled);
+        }
     }
 }

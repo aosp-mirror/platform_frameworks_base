@@ -12,9 +12,9 @@ import android.net.wifi.rtt.RangingRequest;
 import android.net.wifi.rtt.RangingResult;
 import android.net.wifi.rtt.RangingResultCallback;
 import android.net.wifi.rtt.WifiRttManager;
-import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -932,7 +932,8 @@ public class RttManager {
      * Request to start an RTT ranging
      * <p>
      * This method is deprecated. Please use the
-     * {@link WifiRttManager#startRanging(RangingRequest, RangingResultCallback, Handler)} API.
+     * {@link WifiRttManager#startRanging(RangingRequest, java.util.concurrent.Executor, RangingResultCallback)}
+     * API.
      *
      * @param params  -- RTT request Parameters
      * @param listener -- Call back to inform RTT result
@@ -968,7 +969,9 @@ public class RttManager {
                     android.net.wifi.rtt.ResponderConfig.fromScanResult(reconstructed));
         }
         try {
-            mNewService.startRanging(builder.build(), new RangingResultCallback() {
+            mNewService.startRanging(builder.build(),
+                    mContext.getMainExecutor(),
+                    new RangingResultCallback() {
                 @Override
                 public void onRangingFailure(int code) {
                     int localCode = REASON_UNSPECIFIED;
@@ -986,15 +989,20 @@ public class RttManager {
                         legacyResults[i] = new RttResult();
                         legacyResults[i].status = result.getStatus();
                         legacyResults[i].bssid = result.getMacAddress().toString();
-                        legacyResults[i].distance = result.getDistanceMm() / 10;
-                        legacyResults[i].distanceStandardDeviation =
-                                result.getDistanceStdDevMm() / 10;
-                        legacyResults[i].rssi = result.getRssi();
-                        legacyResults[i].ts = result.getRangingTimestampUs();
+                        if (result.getStatus() == RangingResult.STATUS_SUCCESS) {
+                            legacyResults[i].distance = result.getDistanceMm() / 10;
+                            legacyResults[i].distanceStandardDeviation =
+                                    result.getDistanceStdDevMm() / 10;
+                            legacyResults[i].rssi = result.getRssi() * -2;
+                            legacyResults[i].ts = result.getRangingTimestampMillis() * 1000;
+                        } else {
+                            // just in case legacy API needed some relatively real timestamp
+                            legacyResults[i].ts = SystemClock.elapsedRealtime() * 1000;
+                        }
                     }
                     listener.onSuccess(legacyResults);
                 }
-            }, null);
+            });
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "startRanging: invalid arguments - " + e);
             listener.onFailure(REASON_INVALID_REQUEST, e.getMessage());
@@ -1185,6 +1193,7 @@ public class RttManager {
     public static final int CMD_OP_REG_BINDER           = BASE + 9;
 
     private final WifiRttManager mNewService;
+    private final Context mContext;
     private RttCapabilities mRttCapabilities;
 
     /**
@@ -1198,6 +1207,7 @@ public class RttManager {
      */
     public RttManager(Context context, WifiRttManager service) {
         mNewService = service;
+        mContext = context;
 
         boolean rttSupported = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_WIFI_RTT);

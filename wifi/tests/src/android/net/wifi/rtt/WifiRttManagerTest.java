@@ -17,7 +17,6 @@
 package android.net.wifi.rtt;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -29,7 +28,6 @@ import android.content.Context;
 import android.net.MacAddress;
 import android.net.wifi.ScanResult;
 import android.net.wifi.aware.PeerHandle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.test.TestLooper;
@@ -42,6 +40,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Unit test harness for WifiRttManager class.
@@ -49,7 +48,7 @@ import java.util.List;
 public class WifiRttManagerTest {
     private WifiRttManager mDut;
     private TestLooper mMockLooper;
-    private Handler mMockLooperHandler;
+    private Executor mMockLooperExecutor;
 
     private final String packageName = "some.package.name.for.rtt.app";
 
@@ -65,7 +64,7 @@ public class WifiRttManagerTest {
 
         mDut = new WifiRttManager(mockContext, mockRttService);
         mMockLooper = new TestLooper();
-        mMockLooperHandler = new Handler(mMockLooper.getLooper());
+        mMockLooperExecutor = mMockLooper.getNewExecutor();
 
         when(mockContext.getOpPackageName()).thenReturn(packageName);
     }
@@ -84,7 +83,7 @@ public class WifiRttManagerTest {
         ArgumentCaptor<IRttCallback> callbackCaptor = ArgumentCaptor.forClass(IRttCallback.class);
 
         // verify ranging request passed to service
-        mDut.startRanging(request, callbackMock, mMockLooperHandler);
+        mDut.startRanging(request, mMockLooperExecutor, callbackMock);
         verify(mockRttService).startRanging(any(IBinder.class), eq(packageName), eq(null),
                 eq(request), callbackCaptor.capture());
 
@@ -108,7 +107,7 @@ public class WifiRttManagerTest {
         ArgumentCaptor<IRttCallback> callbackCaptor = ArgumentCaptor.forClass(IRttCallback.class);
 
         // verify ranging request passed to service
-        mDut.startRanging(request, callbackMock, mMockLooperHandler);
+        mDut.startRanging(request, mMockLooperExecutor, callbackMock);
         verify(mockRttService).startRanging(any(IBinder.class), eq(packageName), eq(null),
                 eq(request), callbackCaptor.capture());
 
@@ -227,7 +226,6 @@ public class WifiRttManagerTest {
      */
     @Test
     public void testRangingResultsParcel() {
-        // Note: not validating parcel code of ScanResult (assumed to work)
         int status = RangingResult.STATUS_SUCCESS;
         final MacAddress mac = MacAddress.fromString("00:01:02:03:04:05");
         PeerHandle peerHandle = new PeerHandle(10);
@@ -235,19 +233,8 @@ public class WifiRttManagerTest {
         int distanceStdDevCm = 10;
         int rssi = 5;
         long timestamp = System.currentTimeMillis();
-        double latitude = 5.5;
-        double latitudeUncertainty = 6.5;
-        double longitude = 7.5;
-        double longitudeUncertainty = 8.5;
-        int altitudeType = LocationConfigurationInformation.ALTITUDE_IN_METERS;
-        double altitude = 9.5;
-        double altitudeUncertainty = 55.5;
-        byte[] lcrData = { 0x1, 0x2, 0x3, 0xA, 0xB, 0xC };
-
-        LocationConfigurationInformation lci = new LocationConfigurationInformation(latitude,
-                latitudeUncertainty, longitude, longitudeUncertainty, altitudeType, altitude,
-                altitudeUncertainty);
-        LocationCivic lcr = new LocationCivic(lcrData);
+        byte[] lci = { 0x5, 0x6, 0x7 };
+        byte[] lcr = { 0x1, 0x2, 0x3, 0xA, 0xB, 0xC };
 
         // RangingResults constructed with a MAC address
         RangingResult result = new RangingResult(status, mac, distanceCm, distanceStdDevCm, rssi,
@@ -283,81 +270,25 @@ public class WifiRttManagerTest {
     }
 
     /**
-     * Validate that LocationConfigurationInformation parcel works (produces same object on
-     * write/read).
+     * Validate that RangingResults tests equal even if LCI/LCR is empty (length == 0) and null.
      */
     @Test
-    public void testLciParcel() {
-        double latitude = 1.5;
-        double latitudeUncertainty = 2.5;
-        double longitude = 3.5;
-        double longitudeUncertainty = 4.5;
-        int altitudeType = LocationConfigurationInformation.ALTITUDE_IN_FLOORS;
-        double altitude = 5.5;
-        double altitudeUncertainty = 6.5;
+    public void testRangingResultsEqualityLciLcr() {
+        int status = RangingResult.STATUS_SUCCESS;
+        final MacAddress mac = MacAddress.fromString("00:01:02:03:04:05");
+        PeerHandle peerHandle = new PeerHandle(10);
+        int distanceCm = 105;
+        int distanceStdDevCm = 10;
+        int rssi = 5;
+        long timestamp = System.currentTimeMillis();
+        byte[] lci = { };
+        byte[] lcr = { };
 
-        LocationConfigurationInformation lci = new LocationConfigurationInformation(latitude,
-                latitudeUncertainty, longitude, longitudeUncertainty, altitudeType, altitude,
-                altitudeUncertainty);
+        RangingResult rr1 = new RangingResult(status, mac, distanceCm, distanceStdDevCm, rssi, lci,
+                lcr, timestamp);
+        RangingResult rr2 = new RangingResult(status, mac, distanceCm, distanceStdDevCm, rssi, null,
+                null, timestamp);
 
-        Parcel parcelW = Parcel.obtain();
-        lci.writeToParcel(parcelW, 0);
-        byte[] bytes = parcelW.marshall();
-        parcelW.recycle();
-
-        Parcel parcelR = Parcel.obtain();
-        parcelR.unmarshall(bytes, 0, bytes.length);
-        parcelR.setDataPosition(0);
-        LocationConfigurationInformation rereadLci =
-                LocationConfigurationInformation.CREATOR.createFromParcel(parcelR);
-
-        assertEquals(lci, rereadLci);
-    }
-
-    /**
-     * Validate that the LCI throws an exception when accessing invalid fields an certain altitude
-     * types.
-     */
-    @Test
-    public void testLciInvalidAltitudeFieldAccess() {
-        boolean exceptionThrown;
-        LocationConfigurationInformation lci = new LocationConfigurationInformation(0, 0, 0, 0,
-                LocationConfigurationInformation.ALTITUDE_UNKNOWN, 0, 0);
-
-        // UNKNOWN - invalid altitude & altitude uncertainty
-        exceptionThrown = false;
-        try {
-            lci.getAltitude();
-        } catch (IllegalStateException e) {
-            exceptionThrown = true;
-        }
-        assertTrue("UNKNOWN / getAltitude()", exceptionThrown);
-
-        exceptionThrown = false;
-        try {
-            lci.getAltitudeUncertainty();
-        } catch (IllegalStateException e) {
-            exceptionThrown = true;
-        }
-        assertTrue("UNKNOWN / getAltitudeUncertainty()", exceptionThrown);
-
-        lci = new LocationConfigurationInformation(0, 0, 0, 0,
-                LocationConfigurationInformation.ALTITUDE_IN_FLOORS, 0, 0);
-
-        // FLOORS - invalid altitude uncertainty
-        exceptionThrown = false;
-        try {
-            lci.getAltitudeUncertainty();
-        } catch (IllegalStateException e) {
-            exceptionThrown = true;
-        }
-        assertTrue("FLOORS / getAltitudeUncertainty()", exceptionThrown);
-
-        // and good accesses just in case
-        lci.getAltitude();
-        lci = new LocationConfigurationInformation(0, 0, 0, 0,
-                LocationConfigurationInformation.ALTITUDE_IN_METERS, 0, 0);
-        lci.getAltitude();
-        lci.getAltitudeUncertainty();
+        assertEquals(rr1, rr2);
     }
 }

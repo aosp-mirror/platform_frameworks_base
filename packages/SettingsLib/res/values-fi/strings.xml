@@ -53,16 +53,16 @@
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Yhteys katkaistu"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Katkaistaan yhteyttä..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Yhdistetään…"</string>
-    <string name="bluetooth_connected" msgid="6038755206916626419">"Yhdistetty"</string>
+    <string name="bluetooth_connected" msgid="5427152882755735944">"Yhdistetty <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_pairing" msgid="1426882272690346242">"Laiteparia muodostetaan..."</string>
-    <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"Yhdistetty (ei puhelimen ääntä)"</string>
-    <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Yhdistetty (ei median ääntä)"</string>
-    <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Yhdistetty (ei MAP)"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Yhdistetty (ei puhelimen/median ääntä)"</string>
-    <string name="bluetooth_connected_battery_level" msgid="7049181126136692368">"Yhdistetty, akun varaus <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_battery_level" msgid="5504193961248406027">"Yhdistetty (ei puhelimen ääntä), akun varaus <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="4751724026365870779">"Yhdistetty (ei median ääntä), akun varaus <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1549265779323455261">"Yhdistetty (ei puhelimen tai median ääntä), akun varaustaso <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset" msgid="616068069034994802">"Yhdistetty (ei puhelimen ääntä) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp" msgid="3736431800395923868">"Yhdistetty (ei median ääntä) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_map" msgid="3200033913678466453">"Yhdistetty (ei pääsyä viesteihin) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2047403011284187056">"Yhdistetty (ei puhelinta tai mediaa) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_battery_level" msgid="5162924691231307748">"Yhdistetty, akun taso <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"Yhdistetty (ei puhelimen ääntä), akun varaus <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Yhdistetty (ei median ääntä), akun varaus <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Yhdistetty (ei puhelimen tai median ääntä), akun varaustaso <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Median ääni"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Puhelut"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Tiedostonsiirto"</string>
@@ -75,6 +75,10 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM-kortin käyttö"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD-ääni: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD-ääni"</string>
+    <!-- no translation found for bluetooth_profile_hearing_aid (7999237886427812595) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_profile_summary_connected (7188282786730266159) -->
+    <skip />
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Yhdistetty median ääneen"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Yhdistetty puhelimen ääneen"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Yhdistetty tiedostonsiirtopalvelimeen"</string>
@@ -91,6 +95,8 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Käytä puhelimen äänille"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Käytä tiedostojen siirtoon"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Käytä syöttöön"</string>
+    <!-- no translation found for bluetooth_hearing_aid_profile_summary_use_for (908775281788309484) -->
+    <skip />
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Muodosta laitepari"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"MUODOSTA LAITEPARI"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Peruuta"</string>
@@ -327,9 +333,10 @@
     <item msgid="8280754435979370728">"Ihmissilmän näkemät luonnolliset värit"</item>
     <item msgid="5363960654009010371">"Digitaaliselle sisällölle parhaiten sopivat värit"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="1317817863508274533">"Epäaktiiviset sovellukset"</string>
+    <string name="inactive_apps_title" msgid="9042996804461901648">"Valmiustilasovellukset"</string>
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Ei käytössä. Ota käyttöön koskettamalla."</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Käytössä. Poista käytöstä koskettamalla."</string>
+    <string name="standby_bucket_summary" msgid="6567835350910684727">"Sovelluksen valmiusluokka: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Käynnissä olevat palvelut"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Tarkastele ja hallitse käynnissä olevia palveluita"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView-käyttöönotto"</string>
@@ -351,16 +358,24 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Värikorjaus"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Tämä ominaisuus on kokeellinen ja voi vaikuttaa suorituskykyyn."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Tämän ohittaa <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"Noin <xliff:g id="TIME">^1</xliff:g> jäljellä"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Noin <xliff:g id="TIME">^1</xliff:g> jäljellä käytön perusteella"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">^1</xliff:g> kunnes täynnä"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">^1</xliff:g> jäljellä"</string>
-    <string name="power_remaining_duration_only_short_enhanced" msgid="7450425624026394823">"<xliff:g id="TIME">^1</xliff:g> jäljellä käytön perusteella"</string>
-    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">^1</xliff:g> – noin <xliff:g id="TIME">^2</xliff:g> jäljellä"</string>
-    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">^1</xliff:g> – noin <xliff:g id="TIME">^2</xliff:g> jäljellä käytön perusteella"</string>
-    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> – <xliff:g id="TIME">^2</xliff:g> jäljellä"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"Noin <xliff:g id="TIME">%1$s</xliff:g> jäljellä"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Noin <xliff:g id="TIME">%1$s</xliff:g> jäljellä käytön perusteella"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> kunnes täynnä"</string>
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> jäljellä"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Alle <xliff:g id="THRESHOLD">%1$s</xliff:g> jäljellä"</string>
+    <string name="power_remaining_less_than_duration" msgid="7967078125657859046">"<xliff:g id="LEVEL">%1$s</xliff:g> – Alle <xliff:g id="THRESHOLD">%2$s</xliff:g> jäljellä"</string>
+    <string name="power_remaining_more_than_subtext" msgid="6846716609975752316">"<xliff:g id="LEVEL">%1$s</xliff:g> yli <xliff:g id="TIME_REMAINING">%2$s</xliff:g> jäljellä"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="8884488700395194194">"yli <xliff:g id="TIME_REMAINING">%1$s</xliff:g> jäljellä"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="8168317165722752881">"puhelin voi pian sammua"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="5957064378548718872">"tabletti voi pian sammua"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="9055596817716471373">"laite voi pian sammua"</string>
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> – noin <xliff:g id="TIME">%2$s</xliff:g> jäljellä"</string>
+    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">%1$s</xliff:g> – noin <xliff:g id="TIME">%2$s</xliff:g> jäljellä käytön perusteella"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="7679005631124015335">"<xliff:g id="LEVEL">%1$s</xliff:g> – puhelin voi pian sammua"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="261050880878965621">"<xliff:g id="LEVEL">%1$s</xliff:g> – tabletti voi pian sammua"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="2020049829798578618">"<xliff:g id="LEVEL">%1$s</xliff:g> – laite voi pian sammua"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> – <xliff:g id="TIME">^2</xliff:g> täyteen lataukseen"</string>
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> täyteen lataukseen"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Tuntematon"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Ladataan"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"ladataan"</string>
@@ -414,4 +429,8 @@
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"Ei koskaan"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"Vain tärkeät"</string>
     <string name="zen_mode_and_condition" msgid="4927230238450354412">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
+    <string name="zen_alarm_warning_indef" msgid="3007988140196673193">"Et kuule seuraavaa hälytystäsi (<xliff:g id="WHEN">%1$s</xliff:g>), ellet poista tätä tilaa käytöstä ennen sitä."</string>
+    <string name="zen_alarm_warning" msgid="6236690803924413088">"Et kuule seuraavaa hälytystäsi (<xliff:g id="WHEN">%1$s</xliff:g>)."</string>
+    <string name="alarm_template" msgid="4996153414057676512">"kello <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="3779172822607461675">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
 </resources>

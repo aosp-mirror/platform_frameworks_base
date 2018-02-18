@@ -793,6 +793,8 @@ LOCAL_SRC_FILES := \
     $(call all-proto-files-under, core/proto) \
     $(call all-proto-files-under, libs/incident/proto) \
     $(call all-proto-files-under, cmds/statsd/src)
+# b/72714520
+LOCAL_ERROR_PRONE_FLAGS := -Xep:MissingOverride:OFF
 include $(BUILD_HOST_JAVA_LIBRARY)
 
 # ====  java proto device library (for test only)  ==============================

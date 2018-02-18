@@ -516,7 +516,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
                                      jint mount_external,
                                      jstring java_se_info, jstring java_se_name,
                                      bool is_system_server, jintArray fdsToClose,
-                                     jintArray fdsToIgnore,
+                                     jintArray fdsToIgnore, bool is_child_zygote,
                                      jstring instructionSet, jstring dataDir) {
   SetSignalHandlers();
 
@@ -699,7 +699,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
     UnsetChldSignalHandler();
 
     env->CallStaticVoidMethod(gZygoteClass, gCallPostForkChildHooks, runtime_flags,
-                              is_system_server, instructionSet);
+                              is_system_server, is_child_zygote, instructionSet);
     if (env->ExceptionCheck()) {
       RuntimeAbort(env, __LINE__, "Error calling post fork hooks.");
     }
@@ -748,8 +748,7 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         JNIEnv* env, jclass, jint uid, jint gid, jintArray gids,
         jint runtime_flags, jobjectArray rlimits,
         jint mount_external, jstring se_info, jstring se_name,
-        jintArray fdsToClose,
-        jintArray fdsToIgnore,
+        jintArray fdsToClose, jintArray fdsToIgnore, jboolean is_child_zygote,
         jstring instructionSet, jstring appDataDir) {
     jlong capabilities = 0;
 
@@ -786,13 +785,22 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
       capabilities |= (1LL << CAP_BLOCK_SUSPEND);
     }
 
+    // If forking a child zygote process, that zygote will need to be able to change
+    // the UID and GID of processes it forks, as well as drop those capabilities.
+    if (is_child_zygote) {
+      capabilities |= (1LL << CAP_SETUID);
+      capabilities |= (1LL << CAP_SETGID);
+      capabilities |= (1LL << CAP_SETPCAP);
+    }
+
     // Containers run without some capabilities, so drop any caps that are not
     // available.
     capabilities &= GetEffectiveCapabilityMask(env);
 
     return ForkAndSpecializeCommon(env, uid, gid, gids, runtime_flags,
             rlimits, capabilities, capabilities, mount_external, se_info,
-            se_name, false, fdsToClose, fdsToIgnore, instructionSet, appDataDir);
+            se_name, false, fdsToClose, fdsToIgnore, is_child_zygote == JNI_TRUE,
+            instructionSet, appDataDir);
 }
 
 static jint com_android_internal_os_Zygote_nativeForkSystemServer(
@@ -803,7 +811,7 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
                                       runtime_flags, rlimits,
                                       permittedCapabilities, effectiveCapabilities,
                                       MOUNT_EXTERNAL_DEFAULT, NULL, NULL, true, NULL,
-                                      NULL, NULL, NULL);
+                                      NULL, false, NULL, NULL);
   if (pid > 0) {
       // The zygote process checks whether the child process has died or not.
       ALOGI("System server process %d has been created", pid);
@@ -880,7 +888,7 @@ static const JNINativeMethod gMethods[] = {
     { "nativeSecurityInit", "()V",
       (void *) com_android_internal_os_Zygote_nativeSecurityInit },
     { "nativeForkAndSpecialize",
-      "(II[II[[IILjava/lang/String;Ljava/lang/String;[I[ILjava/lang/String;Ljava/lang/String;)I",
+      "(II[II[[IILjava/lang/String;Ljava/lang/String;[I[IZLjava/lang/String;Ljava/lang/String;)I",
       (void *) com_android_internal_os_Zygote_nativeForkAndSpecialize },
     { "nativeForkSystemServer", "(II[II[[IJJ)I",
       (void *) com_android_internal_os_Zygote_nativeForkSystemServer },
@@ -895,7 +903,7 @@ static const JNINativeMethod gMethods[] = {
 int register_com_android_internal_os_Zygote(JNIEnv* env) {
   gZygoteClass = MakeGlobalRefOrDie(env, FindClassOrDie(env, kZygoteClassName));
   gCallPostForkChildHooks = GetStaticMethodIDOrDie(env, gZygoteClass, "callPostForkChildHooks",
-                                                   "(IZLjava/lang/String;)V");
+                                                   "(IZZLjava/lang/String;)V");
 
   return RegisterMethodsOrDie(env, "com/android/internal/os/Zygote", gMethods, NELEM(gMethods));
 }

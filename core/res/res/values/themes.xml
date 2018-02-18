@@ -41,58 +41,44 @@ please see themes_device_defaults.xml.
          #Theme_Holo} or {@link #Theme_DeviceDefault}.</p>
     -->
     <style name="Theme">
-
         <item name="isLightTheme">false</item>
+
         <item name="colorForeground">@color/bright_foreground_dark</item>
         <item name="colorForegroundInverse">@color/bright_foreground_dark_inverse</item>
         <item name="colorBackground">@color/background_dark</item>
         <item name="colorBackgroundFloating">?attr/colorBackground</item>
         <item name="colorBackgroundCacheHint">?attr/colorBackground</item>
-
-        <item name="colorPressedHighlight">@color/legacy_pressed_highlight</item>
-        <item name="colorLongPressedHighlight">@color/legacy_long_pressed_highlight</item>
-        <item name="colorFocusedHighlight">@color/legacy_selected_highlight</item>
-        <item name="colorMultiSelectHighlight">@color/legacy_selected_highlight</item>
-        <item name="colorActivatedHighlight">@color/legacy_selected_highlight</item>
-
-        <item name="colorPrimaryDark">@color/legacy_primary_dark</item>
-        <item name="colorPrimary">@color/legacy_primary</item>
-        <item name="colorSecondary">?attr/colorPrimary</item>
-        <item name="colorControlActivated">@color/legacy_control_activated</item>
-        <item name="colorControlNormal">@color/legacy_control_normal</item>
-        <item name="colorControlHighlight">@color/legacy_button_pressed</item>
-        <item name="colorButtonNormal">@color/legacy_button_normal</item>
-        <item name="colorEdgeEffect">?attr/colorPrimary</item>
-        <item name="colorError">@color/red</item>
-
         <item name="disabledAlpha">0.5</item>
+        <item name="primaryContentAlpha">@dimen/primary_content_alpha_material_dark</item>
+        <item name="secondaryContentAlpha">@dimen/secondary_content_alpha_material_dark</item>
         <item name="backgroundDimAmount">0.6</item>
+        <item name="colorError">@color/red</item>
 
         <!-- Text styles -->
         <item name="textAppearance">@style/TextAppearance</item>
         <item name="textAppearanceInverse">@style/TextAppearance.Inverse</item>
 
         <item name="textColorPrimary">@color/primary_text_dark</item>
-        <item name="textColorSecondary">@color/secondary_text_dark</item>
-        <item name="textColorTertiary">@color/tertiary_text_dark</item>
         <item name="textColorPrimaryInverse">@color/primary_text_light</item>
-        <item name="textColorSecondaryInverse">@color/secondary_text_light</item>
-        <item name="textColorTertiaryInverse">@color/tertiary_text_light</item>
         <item name="textColorPrimaryActivated">@color/primary_text_dark</item>
-        <item name="textColorSecondaryActivated">@color/secondary_text_dark</item>
         <item name="textColorPrimaryDisableOnly">@color/primary_text_dark_disable_only</item>
         <item name="textColorPrimaryInverseDisableOnly">@color/primary_text_light_disable_only</item>
-        <item name="textColorPrimaryNoDisable">@color/primary_text_dark_nodisable</item>
-        <item name="textColorSecondaryNoDisable">@color/secondary_text_dark_nodisable</item>
         <item name="textColorPrimaryInverseNoDisable">@color/primary_text_light_nodisable</item>
+        <item name="textColorPrimaryNoDisable">@color/primary_text_dark_nodisable</item>
+        <item name="textColorSecondary">@color/secondary_text_dark</item>
+        <item name="textColorSecondaryInverse">@color/secondary_text_light</item>
+        <item name="textColorSecondaryActivated">@color/secondary_text_dark</item>
+        <item name="textColorSecondaryNoDisable">@color/secondary_text_dark_nodisable</item>
         <item name="textColorSecondaryInverseNoDisable">@color/secondary_text_light_nodisable</item>
+        <item name="textColorTertiary">@color/tertiary_text_dark</item>
+        <item name="textColorTertiaryInverse">@color/tertiary_text_light</item>
         <item name="textColorHint">@color/hint_foreground_dark</item>
         <item name="textColorHintInverse">@color/hint_foreground_light</item>
-        <item name="textColorSearchUrl">@color/search_url_text</item>
         <item name="textColorHighlight">@color/highlighted_text_dark</item>
         <item name="textColorHighlightInverse">@color/highlighted_text_light</item>
         <item name="textColorLink">@color/link_text_dark</item>
         <item name="textColorLinkInverse">@color/link_text_light</item>
+        <item name="textColorSearchUrl">@color/search_url_text</item>
         <item name="textColorAlertDialogListItem">@color/primary_text_light_disable_only</item>
 
         <item name="textAppearanceLarge">@style/TextAppearance.Large</item>
@@ -120,14 +106,19 @@ please see themes_device_defaults.xml.
 
         <item name="textAppearanceLargePopupMenu">@style/TextAppearance.Widget.PopupMenu.Large</item>
         <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.Widget.PopupMenu.Small</item>
+        <item name="textAppearancePopupMenuHeader">@null</item>
 
         <!-- Button styles -->
         <item name="buttonStyle">@style/Widget.Button</item>
+
         <item name="buttonStyleSmall">@style/Widget.Button.Small</item>
         <item name="buttonStyleInset">@style/Widget.Button.Inset</item>
+
         <item name="buttonStyleToggle">@style/Widget.Button.Toggle</item>
+        <item name="buttonCornerRadius">0dp</item>
 
         <item name="switchStyle">@style/Widget.CompoundButton.Switch</item>
+        <item name="mediaRouteButtonStyle">@style/Widget.DeviceDefault.MediaRouteButton</item>
 
         <item name="selectableItemBackground">@drawable/item_background</item>
         <item name="selectableItemBackgroundBorderless">?attr/selectableItemBackground</item>
@@ -156,7 +147,6 @@ please see themes_device_defaults.xml.
         <item name="listChoiceIndicatorMultiple">@drawable/btn_check</item>
 
         <item name="listChoiceBackgroundIndicator">@drawable/list_selector_background</item>
-
         <item name="activatedBackgroundIndicator">@drawable/activated_background</item>
 
         <item name="listDividerAlertDialog">@drawable/divider_horizontal_bright</item>
@@ -215,6 +205,7 @@ please see themes_device_defaults.xml.
         <item name="dialogCustomTitleDecorLayout">@layout/dialog_custom_title</item>
         <item name="dialogTitleDecorLayout">@layout/dialog_title</item>
         <item name="dialogPreferredPadding">@dimen/dialog_padding</item>
+        <item name="dialogCornerRadius">0dp</item>
 
         <!-- AlertDialog attributes -->
         <item name="alertDialogTheme">@style/Theme.Dialog.Alert</item>
@@ -239,6 +230,7 @@ please see themes_device_defaults.xml.
 
         <item name="panelMenuIsCompact">false</item>
         <item name="panelMenuListWidth">296dip</item>
+        <item name="panelMenuListTheme">@null</item>
 
         <!-- Scrollbar attributes -->
         <item name="scrollbarFadeDuration">250</item>
@@ -316,8 +308,9 @@ please see themes_device_defaults.xml.
         <item name="quickContactBadgeStyleSmallWindowLarge">@style/Widget.QuickContactBadgeSmall.WindowLarge</item>
         <item name="listPopupWindowStyle">@style/Widget.ListPopupWindow</item>
         <item name="popupMenuStyle">@style/Widget.PopupMenu</item>
+        <item name="popupTheme">@null</item>
+        <item name="stackViewStyle">@null</item>
         <item name="activityChooserViewStyle">@style/Widget.ActivityChooserView</item>
-        <item name="mediaRouteButtonStyle">@style/Widget.DeviceDefault.MediaRouteButton</item>
         <item name="fragmentBreadCrumbsStyle">@style/Widget.FragmentBreadCrumbs</item>
         <item name="contextPopupMenuStyle">?attr/popupMenuStyle</item>
 
@@ -432,6 +425,22 @@ please see themes_device_defaults.xml.
         <item name="fastScrollOverlayPosition">floating</item>
         <item name="fastScrollTextColor">@color/primary_text_dark</item>
 
+
+        <item name="colorPressedHighlight">@color/legacy_pressed_highlight</item>
+        <item name="colorLongPressedHighlight">@color/legacy_long_pressed_highlight</item>
+        <item name="colorFocusedHighlight">@color/legacy_selected_highlight</item>
+        <item name="colorMultiSelectHighlight">@color/legacy_selected_highlight</item>
+        <item name="colorActivatedHighlight">@color/legacy_selected_highlight</item>
+
+        <item name="colorPrimaryDark">@color/legacy_primary_dark</item>
+        <item name="colorPrimary">@color/legacy_primary</item>
+        <item name="colorSecondary">?attr/colorPrimary</item>
+        <item name="colorControlActivated">@color/legacy_control_activated</item>
+        <item name="colorControlNormal">@color/legacy_control_normal</item>
+        <item name="colorControlHighlight">@color/legacy_button_pressed</item>
+        <item name="colorButtonNormal">@color/legacy_button_normal</item>
+        <item name="colorEdgeEffect">?attr/colorPrimary</item>
+
         <!-- Accessibility focused drawable -->
         <item name="accessibilityFocusedDrawable">@drawable/view_accessibility_focused</item>
 
@@ -451,8 +460,8 @@ please see themes_device_defaults.xml.
         <item name="tooltipBackgroundColor">@color/tooltip_background_light</item>
 
         <!-- Autofill: max width/height of the dataset picker as a fraction of screen size -->
-        <item name="autofillDatasetPickerMaxWidth">@dimen/autofill_dataset_picker_max_size</item>
-        <item name="autofillDatasetPickerMaxHeight">@dimen/autofill_dataset_picker_max_size</item>
+        <item name="autofillDatasetPickerMaxWidth">@dimen/autofill_dataset_picker_max_width</item>
+        <item name="autofillDatasetPickerMaxHeight">@dimen/autofill_dataset_picker_max_height</item>
 
         <!-- Autofill: max height of custom save subtitle as a fraction of screen size -->
         <item name="autofillSaveCustomSubtitleMaxHeight">@dimen/autofill_save_custom_subtitle_max_height</item>

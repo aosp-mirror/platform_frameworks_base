@@ -663,7 +663,8 @@ jobject javaObjectForIBinder(JNIEnv* env, const sp<IBinder>& val)
     jobject object = env->CallStaticObjectMethod(gBinderProxyOffsets.mClass,
             gBinderProxyOffsets.mGetInstance, (jlong) nativeData, (jlong) val.get());
     if (env->ExceptionCheck()) {
-        gNativeDataCache = nativeData;
+        // In the exception case, getInstance still took ownership of nativeData.
+        gNativeDataCache = nullptr;
         return NULL;
     }
     BinderProxyNativeData* actualNativeData = getBPNativeData(env, object);

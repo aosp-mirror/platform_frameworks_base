@@ -17,28 +17,13 @@
 */
 -->
 
-<com.android.systemui.statusbar.car.CarNavigationButton
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_height="match_parent"
-        android:layout_width="wrap_content"
-        android:orientation="horizontal"
-        android:background="?android:attr/selectableItemBackground">
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
     <com.android.keyguard.AlphaOptimizedImageButton
-            android:id="@+id/car_nav_button_icon"
-            android:layout_height="match_parent"
-            android:layout_width="@dimen/car_navigation_button_width"
-            android:layout_centerInParent="true"
-            android:animateLayoutChanges="true"
-            android:scaleType="fitCenter">
+        android:id="@+id/car_nav_button_icon"
+        android:layout_height="wrap_content"
+        android:layout_width="@dimen/car_navigation_button_width"
+        android:layout_centerInParent="true"
+        android:animateLayoutChanges="true"
+        android:scaleType="fitCenter">
     </com.android.keyguard.AlphaOptimizedImageButton>
-
-    <com.android.keyguard.AlphaOptimizedImageButton
-            android:id="@+id/car_nav_button_more_icon"
-            android:layout_height="match_parent"
-            android:layout_width="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@+id/car_nav_button_icon"
-            android:animateLayoutChanges="true"
-            android:scaleType="fitCenter">
-    </com.android.keyguard.AlphaOptimizedImageButton>
-</com.android.systemui.statusbar.car.CarNavigationButton>
+</merge>

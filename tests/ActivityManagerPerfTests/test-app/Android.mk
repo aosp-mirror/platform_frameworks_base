@@ -23,6 +23,8 @@ LOCAL_SRC_FILES := \
 LOCAL_STATIC_JAVA_LIBRARIES := \
     ActivityManagerPerfTestsUtils
 
+LOCAL_MIN_SDK_VERSION := 25
+
 LOCAL_PACKAGE_NAME := ActivityManagerPerfTestsTestApp
 
 include $(BUILD_PACKAGE)

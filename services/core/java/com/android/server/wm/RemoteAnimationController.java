@@ -34,6 +34,7 @@ import android.view.SurfaceControl.Transaction;
 
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 /**
@@ -48,13 +49,7 @@ class RemoteAnimationController {
     private final ArrayList<RemoteAnimationAdapterWrapper> mPendingAnimations = new ArrayList<>();
     private final Rect mTmpRect = new Rect();
     private final Handler mHandler;
-
-    private final IRemoteAnimationFinishedCallback mFinishedCallback = new Stub() {
-        @Override
-        public void onAnimationFinished() throws RemoteException {
-            RemoteAnimationController.this.onAnimationFinished();
-        }
-    };
+    private FinishedCallback mFinishedCallback;
 
     private final Runnable mTimeoutRunnable = () -> {
         onAnimationFinished();
@@ -96,6 +91,7 @@ class RemoteAnimationController {
         // Scale the timeout with the animator scale the controlling app is using.
         mHandler.postDelayed(mTimeoutRunnable,
                 (long) (TIMEOUT_MS * mService.getCurrentAnimatorScale()));
+        mFinishedCallback = new FinishedCallback(this);
 
         final RemoteAnimationTarget[] animations = createAnimations();
         mService.mAnimator.addAfterPrepareSurfacesRunnable(() -> {
@@ -124,6 +120,7 @@ class RemoteAnimationController {
     private void onAnimationFinished() {
         mHandler.removeCallbacks(mTimeoutRunnable);
         synchronized (mService.mWindowMap) {
+            releaseFinishedCallback();
             mService.openSurfaceTransaction();
             try {
                 for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
@@ -143,6 +140,41 @@ class RemoteAnimationController {
             Slog.e(TAG, "Failed to notify cancel", e);
         }
     }
+
+    private void releaseFinishedCallback() {
+        if (mFinishedCallback != null) {
+            mFinishedCallback.release();
+            mFinishedCallback = null;
+        }
+    }
+
+    private static final class FinishedCallback extends IRemoteAnimationFinishedCallback.Stub {
+
+        RemoteAnimationController mOuter;
+
+        FinishedCallback(RemoteAnimationController outer) {
+            mOuter = outer;
+        }
+
+        @Override
+        public void onAnimationFinished() throws RemoteException {
+            if (mOuter != null) {
+                mOuter.onAnimationFinished();
+
+                // In case the client holds on to the finish callback, make sure we don't leak
+                // RemoteAnimationController which in turn would leak the runner on the client.
+                mOuter = null;
+            }
+        }
+
+        /**
+         * Marks this callback as not be used anymore by releasing the reference to the outer class
+         * to prevent memory leak.
+         */
+        void release() {
+            mOuter = null;
+        }
+    };
 
     private class RemoteAnimationAdapterWrapper implements AnimationAdapter {
 
@@ -212,6 +244,7 @@ class RemoteAnimationController {
             mPendingAnimations.remove(this);
             if (mPendingAnimations.isEmpty()) {
                 mHandler.removeCallbacks(mTimeoutRunnable);
+                releaseFinishedCallback();
                 invokeAnimationCancelled();
             }
         }

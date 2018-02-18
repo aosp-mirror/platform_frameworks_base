@@ -28,6 +28,8 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import com.android.internal.os.BinderInternal;
+import com.android.systemui.plugins.PluginManager;
+import com.android.systemui.plugins.PluginManagerImpl;
 
 public class SystemUIService extends Service {
 
@@ -69,6 +71,10 @@ public class SystemUIService extends Service {
             for (SystemUI ui: services) {
                 pw.println("dumping service: " + ui.getClass().getName());
                 ui.dump(fd, pw, args);
+            }
+            if (Build.IS_DEBUGGABLE) {
+                pw.println("dumping plugins:");
+                ((PluginManagerImpl) Dependency.get(PluginManager.class)).dump(fd, pw, args);
             }
         } else {
             String svc = args[0];

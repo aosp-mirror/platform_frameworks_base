@@ -3985,6 +3985,8 @@ message MetricsEvent {
     // Package: Package of app that was autofilled
     // Tag FIELD_AUTOFILL_FILTERTEXT_LEN: The length of the filter text
     // Tag FIELD_AUTOFILL_NUM_DATASETS: The number of datasets shown
+    // NOTE: starting on OS P, it also added the following field:
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     AUTOFILL_FILL_UI = 910;
 
     // Tag of a field for the length of the filter text
@@ -4011,7 +4013,9 @@ message MetricsEvent {
     // Type TYPE_CLOSE: UI was destroyed without influence of the user
     // Type TYPE_ACTION: data was saved
     // Package: Package of app that was autofilled
-    // Tag FIELD_AUTOFILL_NUM_ID: The number of ids that are saved
+    // Tag FIELD_AUTOFILL_NUM_IDS: The number of ids that are saved
+    // NOTE: starting on OS P, it also added the following field:
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     AUTOFILL_SAVE_UI = 916;
 
     // Tag of a field for the number of saveable ids
@@ -5083,7 +5087,8 @@ message MetricsEvent {
 
     // An autofill service updated its user data
     // Package: Package of the autofill service that updated the user data
-    // Counter: number of fields added (or 0 if reset)
+    // Tag FIELD_AUTOFILL_NUM_VALUES: number of fields added (or 0 if reset)
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // OS: P
     AUTOFILL_USERDATA_UPDATED = 1272;
 
@@ -5171,7 +5176,6 @@ message MetricsEvent {
     // An autofill service was bound using an unofficial(but still supported) permission.
     // Package: Package of the autofill service
     // OS: P
-
     AUTOFILL_INVALID_PERMISSION = 1289;
 
     // OPEN: QS Alarm tile shown
@@ -5228,6 +5232,51 @@ message MetricsEvent {
     // OPEN: TV Settings > Network > Proxy settings
     // OS: P
     DIALOG_TV_NETWORK_PROXY = 1301;
+
+    // Events for battery saver turning on/off and/or the interactive state changes.
+    // OS: P
+    BATTERY_SAVER = 1302;
+
+    // Device interactive state -- i.e. the screen ON (=1) or OFF (=1)
+    // OS: P
+    FIELD_INTERACTIVE = 1303;
+
+    // Time spent in milliseconds in the current mode.
+    // OS: P
+    FIELD_DURATION_MILLIS = 1304;
+
+    // Battery level in uA (0 - ~3,000,000 depending on device) when the current "mode" started.
+    // OS: P
+    FIELD_START_BATTERY_UA = 1305;
+
+    // Battery level in uA (0 - ~3,000,000 depending on device) when this event was created.
+    // OS: P
+    FIELD_END_BATTERY_UA = 1306;
+
+    // Battery level in % (0-100) when the current "mode" started.
+    // OS: P
+    FIELD_START_BATTERY_PERCENT = 1307;
+
+    // Battery level in % (0-100) when this event was created.
+    // OS: P
+    FIELD_END_BATTERY_PERCENT = 1308;
+
+    // ACTION: Settings > Display > Night Light
+    // SUBTYPE: com.android.server.display.ColorDisplayService.AutoMode value
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_NIGHT_DISPLAY_AUTO_MODE_CHANGED = 1309;
+
+    // ACTION: Settings > Display > Night Light
+    // CATEGORY: SETTINGS
+    // SUBTYPE: 0 is starting time, 1 is ending time
+    // OS: P
+    ACTION_NIGHT_DISPLAY_AUTO_MODE_CUSTOM_TIME_CHANGED = 1310;
+
+    // FIELD: Current mode corresponding to a QS tile
+    // CATEGORY: QUICK SETTINGS
+    // OS: P
+    FIELD_QS_MODE = 1311;
 
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.

@@ -300,34 +300,10 @@ public class KeyguardIndicationController {
                 } else if (mPowerPluggedIn) {
                     String indication = computePowerIndication();
                     if (animate) {
-                        int yTranslation = mContext.getResources().getInteger(
-                                R.integer.wired_charging_aod_text_animation_distance);
-                        int animateUpDuration = mContext.getResources().getInteger(
-                                R.integer.wired_charging_aod_text_animation_duration_up);
-                        int animateDownDuration = mContext.getResources().getInteger(
-                                R.integer.wired_charging_aod_text_animation_duration_down);
-                        mTextView.animate()
-                                .translationYBy(yTranslation)
-                                .setInterpolator(Interpolators.LINEAR)
-                                .setDuration(animateUpDuration)
-                                .setListener(new AnimatorListenerAdapter() {
-                                    @Override
-                                    public void onAnimationStart(Animator animation) {
-                                        mTextView.switchIndication(indication);
-                                    }
-                                    @Override
-                                    public void onAnimationEnd(Animator animation) {
-                                        mTextView.animate()
-                                                .setDuration(animateDownDuration)
-                                                .setInterpolator(Interpolators.BOUNCE)
-                                                .translationYBy(-1 * yTranslation)
-                                                .setListener(null);
-                                    }
-                                });
+                        animateText(mTextView, indication);
                     } else {
                         mTextView.switchIndication(indication);
                     }
-
                 } else {
                     String percentage = NumberFormat.getPercentInstance()
                             .format(mBatteryLevel / 100f);
@@ -355,8 +331,12 @@ public class KeyguardIndicationController {
                 if (DEBUG_CHARGING_SPEED) {
                     indication += ",  " + (mChargingWattage / 1000) + " mW";
                 }
-                mTextView.switchIndication(indication);
                 mTextView.setTextColor(mInitialTextColor);
+                if (animate) {
+                    animateText(mTextView, indication);
+                } else {
+                    mTextView.switchIndication(indication);
+                }
             } else if (!TextUtils.isEmpty(trustManagedIndication)
                     && updateMonitor.getUserTrustIsManaged(userId)
                     && !updateMonitor.getUserHasTrust(userId)) {
@@ -367,6 +347,34 @@ public class KeyguardIndicationController {
                 mTextView.setTextColor(mInitialTextColor);
             }
         }
+    }
+
+    // animates textView - textView moves up and bounces down
+    private void animateText(KeyguardIndicationTextView textView, String indication) {
+        int yTranslation = mContext.getResources().getInteger(
+                R.integer.wired_charging_keyguard_text_animation_distance);
+        int animateUpDuration = mContext.getResources().getInteger(
+                R.integer.wired_charging_keyguard_text_animation_duration_up);
+        int animateDownDuration = mContext.getResources().getInteger(
+                R.integer.wired_charging_keyguard_text_animation_duration_down);
+        textView.animate()
+                .translationYBy(yTranslation)
+                .setInterpolator(Interpolators.LINEAR)
+                .setDuration(animateUpDuration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                        textView.switchIndication(indication);
+                    }
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        textView.animate()
+                                .setDuration(animateDownDuration)
+                                .setInterpolator(Interpolators.BOUNCE)
+                                .translationYBy(-1 * yTranslation)
+                                .setListener(null);
+                    }
+                });
     }
 
     private String computePowerIndication() {

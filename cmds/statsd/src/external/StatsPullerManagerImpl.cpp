@@ -115,7 +115,10 @@ const std::map<int, PullAtomInfo> StatsPullerManagerImpl::kAllPullAtomInfo = {
          {{}, {}, 1, new ResourceHealthManagerPuller(android::util::REMAINING_BATTERY_CAPACITY)}},
         // full_battery_capacity
         {android::util::FULL_BATTERY_CAPACITY,
-         {{}, {}, 1, new ResourceHealthManagerPuller(android::util::FULL_BATTERY_CAPACITY)}}};
+         {{}, {}, 1, new ResourceHealthManagerPuller(android::util::FULL_BATTERY_CAPACITY)}},
+        // process_memory_state
+        {android::util::PROCESS_MEMORY_STATE,
+         {{4,5,6,7,8}, {2,3}, 0, new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_STATE)}}};
 
 StatsPullerManagerImpl::StatsPullerManagerImpl()
     : mCurrentPullingInterval(LONG_MAX) {

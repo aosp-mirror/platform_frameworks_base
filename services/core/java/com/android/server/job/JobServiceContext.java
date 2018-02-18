@@ -240,11 +240,6 @@ public final class JobServiceContext implements ServiceConnection {
                 }
             }
 
-            UsageStatsManagerInternal usageStats =
-                    LocalServices.getService(UsageStatsManagerInternal.class);
-            usageStats.setLastJobRunTime(job.getSourcePackageName(), job.getSourceUserId(),
-                    mExecutionStartTimeElapsed);
-
             // Once we'e begun executing a job, we by definition no longer care whether
             // it was inflated from disk with not-yet-coherent delay/deadline bounds.
             job.clearPersistedUtcTimes();
@@ -267,12 +262,16 @@ public final class JobServiceContext implements ServiceConnection {
                 removeOpTimeOutLocked();
                 return false;
             }
+            mJobPackageTracker.noteActive(job);
             try {
                 mBatteryStats.noteJobStart(job.getBatteryName(), job.getSourceUid());
             } catch (RemoteException e) {
                 // Whatever.
             }
-            mJobPackageTracker.noteActive(job);
+            UsageStatsManagerInternal usageStats =
+                    LocalServices.getService(UsageStatsManagerInternal.class);
+            usageStats.setLastJobRunTime(job.getSourcePackageName(), job.getSourceUserId(),
+                    mExecutionStartTimeElapsed);
             mAvailable = false;
             mStoppedReason = null;
             mStoppedTime = 0;

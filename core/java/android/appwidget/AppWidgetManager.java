@@ -19,6 +19,7 @@ package android.appwidget;
 import android.annotation.BroadcastBehavior;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
@@ -29,6 +30,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
 import android.os.Bundle;
@@ -55,6 +57,7 @@ import java.util.List;
  * </div>
  */
 @SystemService(Context.APPWIDGET_SERVICE)
+@RequiresFeature(PackageManager.FEATURE_APP_WIDGETS)
 public class AppWidgetManager {
 
     /**

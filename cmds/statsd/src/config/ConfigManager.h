@@ -21,6 +21,7 @@
 #include "config/ConfigListener.h"
 
 #include <map>
+#include <mutex>
 #include <set>
 #include <string>
 
@@ -109,10 +110,12 @@ public:
     void Dump(FILE* out);
 
 private:
+    mutable std::mutex mMutex;
+
     /**
      * Save the configs to disk.
      */
-    void update_saved_configs(const ConfigKey& key, const StatsdConfig& config);
+    void update_saved_configs_locked(const ConfigKey& key, const StatsdConfig& config);
 
     /**
      * Remove saved configs from disk.

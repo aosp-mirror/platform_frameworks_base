@@ -4919,7 +4919,7 @@ public abstract class Context {
     /**
      * @hide
      */
-    public void setAutofillClient(AutofillClient client) {
+    public void setAutofillClient(@SuppressWarnings("unused") AutofillClient client) {
     }
 
     /**
@@ -4932,7 +4932,9 @@ public abstract class Context {
     /**
      * @hide
      */
-    public void setAutofillCompatibilityEnabled(boolean autofillCompatEnabled) {
+    @TestApi
+    public void setAutofillCompatibilityEnabled(
+            @SuppressWarnings("unused") boolean autofillCompatEnabled) {
     }
 
     /**

@@ -17,6 +17,7 @@
 package android.app;
 
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
+
 import static java.lang.Character.MIN_VALUE;
 
 import android.annotation.CallSuper;
@@ -135,6 +136,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -1898,7 +1900,7 @@ public class Activity extends ContextThemeWrapper
 
         if (isFinishing()) {
             if (mAutoFillResetNeeded) {
-                getAutofillManager().onActivityFinished();
+                getAutofillManager().onActivityFinishing();
             } else if (mIntent != null
                     && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN)) {
                 // Activity was launched when user tapped a link in the Autofill Save UI - since
@@ -6341,6 +6343,8 @@ public class Activity extends ContextThemeWrapper
 
         final AutofillManager afm = getAutofillManager();
         if (afm != null) {
+            writer.print(prefix); writer.print("Autofill Compat Mode: ");
+            writer.println(isAutofillCompatibilityEnabled());
             afm.dump(prefix, writer);
         } else {
             writer.print(prefix); writer.println("No AutofillManager");
@@ -7162,8 +7166,8 @@ public class Activity extends ContextThemeWrapper
 
                 String appName = getApplicationInfo().loadLabel(getPackageManager())
                         .toString();
-                String warning = "Detected problems with API compatiblity\n"
-                                 + "(please consult log for detail)";
+                String warning = "Detected problems with API compatibility\n"
+                                 + "(visit g.co/dev/appcompat for more info)";
                 if (isAppDebuggable) {
                     new AlertDialog.Builder(this)
                         .setTitle(appName)
@@ -7688,6 +7692,9 @@ public class Activity extends ContextThemeWrapper
                     visible[i] = view.isVisibleToUserForAutofill(autofillId.getVirtualChildId());
                 }
             }
+        }
+        if (android.view.autofill.Helper.sVerbose) {
+            Log.v(TAG, "autofillClientGetViewVisibility(): " + Arrays.toString(visible));
         }
         return visible;
     }

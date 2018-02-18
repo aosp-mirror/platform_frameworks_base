@@ -99,35 +99,45 @@ public class WifiManager {
     // Supplicant error codes:
     /**
      * The error code if there was a problem authenticating.
+     * @deprecated This is no longer supported.
      */
+    @Deprecated
     public static final int ERROR_AUTHENTICATING = 1;
 
     /**
      * The reason code if there is no error during authentication.
      * It could also imply that there no authentication in progress,
      * this reason code also serves as a reset value.
+     * @deprecated This is no longer supported.
      * @hide
      */
+    @Deprecated
     public static final int ERROR_AUTH_FAILURE_NONE = 0;
 
     /**
      * The reason code if there was a timeout authenticating.
+     * @deprecated This is no longer supported.
      * @hide
      */
+    @Deprecated
     public static final int ERROR_AUTH_FAILURE_TIMEOUT = 1;
 
     /**
      * The reason code if there was a wrong password while
      * authenticating.
+     * @deprecated This is no longer supported.
      * @hide
      */
+    @Deprecated
     public static final int ERROR_AUTH_FAILURE_WRONG_PSWD = 2;
 
     /**
      * The reason code if there was EAP failure while
      * authenticating.
+     * @deprecated This is no longer supported.
      * @hide
      */
+    @Deprecated
     public static final int ERROR_AUTH_FAILURE_EAP_FAILURE = 3;
 
     /**
@@ -565,8 +575,10 @@ public class WifiManager {
      * to perform Wi-Fi operations) or the connection to the supplicant has been
      * lost. One extra provides the connection state as a boolean, where {@code true}
      * means CONNECTED.
+     * @deprecated This is no longer supported.
      * @see #EXTRA_SUPPLICANT_CONNECTED
      */
+    @Deprecated
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String SUPPLICANT_CONNECTION_CHANGE_ACTION =
         "android.net.wifi.supplicant.CONNECTION_CHANGE";
@@ -575,7 +587,9 @@ public class WifiManager {
      * the supplicant daemon has been gained or lost. {@code true} means
      * a connection now exists.
      * Retrieve it with {@link android.content.Intent#getBooleanExtra(String,boolean)}.
+     * @deprecated This is no longer supported.
      */
+    @Deprecated
     public static final String EXTRA_SUPPLICANT_CONNECTED = "connected";
     /**
      * Broadcast intent action indicating that the state of Wi-Fi connectivity
@@ -612,7 +626,9 @@ public class WifiManager {
      * the overall state of connectivity.
      * @see #EXTRA_NEW_STATE
      * @see #EXTRA_SUPPLICANT_ERROR
+     * @deprecated This is no longer supported.
      */
+    @Deprecated
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String SUPPLICANT_STATE_CHANGED_ACTION =
         "android.net.wifi.supplicant.STATE_CHANGE";
@@ -620,7 +636,9 @@ public class WifiManager {
      * The lookup key for a {@link SupplicantState} describing the new state
      * Retrieve with
      * {@link android.content.Intent#getParcelableExtra(String)}.
+     * @deprecated This is no longer supported.
      */
+    @Deprecated
     public static final String EXTRA_NEW_STATE = "newState";
 
     /**
@@ -629,7 +647,9 @@ public class WifiManager {
      * Retrieve with
      * {@link android.content.Intent#getIntExtra(String, int)}.
      * @see #ERROR_AUTHENTICATING
+     * @deprecated This is no longer supported.
      */
+    @Deprecated
     public static final String EXTRA_SUPPLICANT_ERROR = "supplicantError";
 
     /**
@@ -638,8 +658,10 @@ public class WifiManager {
      * Retrieve with
      * {@link android.content.Intent#getIntExtra(String, int)}.
      * @see #ERROR_AUTH_FAILURE_#REASON_CODE
+     * @deprecated This is no longer supported.
      * @hide
      */
+    @Deprecated
     public static final String EXTRA_SUPPLICANT_ERROR_REASON = "supplicantErrorReason";
 
     /**
@@ -3617,8 +3639,10 @@ public class WifiManager {
      * Restore state from the older version of back up data.
      * The old backup data was essentially a backup of wpa_supplicant.conf
      * and ipconfig.txt file.
+     * @deprecated this is no longer supported.
      * @hide
      */
+    @Deprecated
     public void restoreSupplicantBackupData(byte[] supplicantData, byte[] ipConfigData) {
         try {
             mService.restoreSupplicantBackupData(supplicantData, ipConfigData);

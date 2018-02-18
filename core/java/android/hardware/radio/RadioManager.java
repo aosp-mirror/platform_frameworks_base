@@ -21,10 +21,12 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -58,6 +60,7 @@ import java.util.stream.Collectors;
  */
 @SystemApi
 @SystemService(Context.RADIO_SERVICE)
+@RequiresFeature(PackageManager.FEATURE_BROADCAST_RADIO)
 public class RadioManager {
     private static final String TAG = "BroadcastRadio.manager";
 

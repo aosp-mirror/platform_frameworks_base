@@ -30,6 +30,8 @@ import com.android.internal.util.Preconditions;
 import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.net.CookieHandler;
+import java.net.CookieManager;
 import java.net.HttpCookie;
 
 import java.util.ArrayList;
@@ -433,10 +435,22 @@ public final class DataSourceDesc {
          * @param cookies the cookies to be sent together with the request
          * @return the same Builder instance.
          * @throws NullPointerException if context or uri is null.
+         * @throws IllegalArgumentException if the cookie handler is not of CookieManager type
+         *                                  when cookies are provided.
          */
         public Builder setDataSource(@NonNull Context context, @NonNull Uri uri,
                 @Nullable Map<String, String> headers, @Nullable List<HttpCookie> cookies) {
+            Preconditions.checkNotNull(context, "context cannot be null");
             Preconditions.checkNotNull(uri);
+            if (cookies != null) {
+                CookieHandler cookieHandler = CookieHandler.getDefault();
+                if (cookieHandler != null && !(cookieHandler instanceof CookieManager)) {
+                    throw new IllegalArgumentException(
+                            "The cookie handler has to be of CookieManager type "
+                            + "when cookies are provided.");
+                }
+            }
+
             resetDataSource();
             mType = TYPE_URI;
             mUri = uri;

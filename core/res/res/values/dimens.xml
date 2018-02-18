@@ -626,7 +626,8 @@
     <dimen name="messaging_avatar_size">@dimen/notification_right_icon_size</dimen>
 
     <!-- Max width/height of the autofill data set picker as a fraction of the screen width/height -->
-    <dimen name="autofill_dataset_picker_max_size">90%</dimen>
+    <dimen name="autofill_dataset_picker_max_width">90%</dimen>
+    <dimen name="autofill_dataset_picker_max_height">90%</dimen>
 
     <!-- Max height of the the autofill save custom subtitle as a fraction of the screen width/height -->
     <dimen name="autofill_save_custom_subtitle_max_height">20%</dimen>

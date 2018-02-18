@@ -27,6 +27,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 
 LOCAL_PACKAGE_NAME := ActivityManagerPerfTests
 
+LOCAL_MIN_SDK_VERSION := 25
+
 # For android.permission.FORCE_STOP_PACKAGES permission
 LOCAL_CERTIFICATE := platform
 

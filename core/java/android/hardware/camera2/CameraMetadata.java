@@ -829,19 +829,24 @@ public abstract class CameraMetadata<TKey> {
      * <li>{@link CameraCharacteristics#LENS_RADIAL_DISTORTION android.lens.radialDistortion}</li>
      * </ul>
      * </li>
+     * <li>The SENSOR_INFO_TIMESTAMP_SOURCE of the logical device and physical devices must be
+     *   the same.</li>
      * <li>The logical camera device must be LIMITED or higher device.</li>
      * </ul>
      * <p>Both the logical camera device and its underlying physical devices support the
      * mandatory stream combinations required for their device levels.</p>
      * <p>Additionally, for each guaranteed stream combination, the logical camera supports:</p>
      * <ul>
-     * <li>Replacing one logical {@link android.graphics.ImageFormat#YUV_420_888 YUV_420_888}
+     * <li>For each guaranteed stream combination, the logical camera supports replacing one
+     *   logical {@link android.graphics.ImageFormat#YUV_420_888 YUV_420_888}
      *   or raw stream with two physical streams of the same size and format, each from a
      *   separate physical camera, given that the size and format are supported by both
      *   physical cameras.</li>
-     * <li>Adding two raw streams, each from one physical camera, if the logical camera doesn't
-     *   advertise RAW capability, but the underlying physical cameras do. This is usually
-     *   the case when the physical cameras have different sensor sizes.</li>
+     * <li>If the logical camera doesn't advertise RAW capability, but the underlying physical
+     *   cameras do, the logical camera will support guaranteed stream combinations for RAW
+     *   capability, except that the RAW streams will be physical streams, each from a separate
+     *   physical camera. This is usually the case when the physical cameras have different
+     *   sensor sizes.</li>
      * </ul>
      * <p>Using physical streams in place of a logical stream of the same size and format will
      * not slow down the frame rate of the capture, as long as the minimum frame duration

@@ -887,10 +887,13 @@
     <dimen name="home_padding">16dp</dimen>
 
     <!-- Smart reply button -->
-    <dimen name="smart_reply_button_corner_radius">24dip</dimen>
     <dimen name="smart_reply_button_spacing">8dp</dimen>
-    <dimen name="smart_reply_button_padding_vertical">4dp</dimen>
+    <dimen name="smart_reply_button_padding_vertical">10dp</dimen>
+    <dimen name="smart_reply_button_padding_horizontal_single_line">12dp</dimen>
+    <dimen name="smart_reply_button_padding_horizontal_double_line">16dp</dimen>
+    <dimen name="smart_reply_button_min_height">40dp</dimen>
     <dimen name="smart_reply_button_font_size">14sp</dimen>
+    <dimen name="smart_reply_button_line_spacing_extra">6sp</dimen> <!-- Total line height 20sp. -->
 
     <dimen name="fingerprint_dialog_icon_size">44dp</dimen>
     <dimen name="fingerprint_dialog_fp_icon_size">60dp</dimen>
@@ -920,15 +923,16 @@
     <integer name="wireless_charging_fade_duration">200</integer>
 
     <!-- Wired charging on AOD, text animation duration -->
-    <integer name="wired_charging_aod_text_animation_duration_down">500</integer>
+    <integer name="wired_charging_keyguard_text_animation_duration_down">500</integer>
     <!-- Wired charging on AOD, text animation duration -->
-    <integer name="wired_charging_aod_text_animation_duration_up">300</integer>
+    <integer name="wired_charging_keyguard_text_animation_duration_up">300</integer>
     <!-- Wired charging on AOD, text animation distance -->
-    <integer name="wired_charging_aod_text_animation_distance">-30</integer>
+    <integer name="wired_charging_keyguard_text_animation_distance">-30</integer>
 
     <!-- Logout button -->
     <dimen name="logout_button_layout_height">32dp</dimen>
     <dimen name="logout_button_padding_horizontal">16dp</dimen>
     <dimen name="logout_button_margin_bottom">12dp</dimen>
     <dimen name="logout_button_corner_radius">2dp</dimen>
+
 </resources>

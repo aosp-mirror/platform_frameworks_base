@@ -574,6 +574,7 @@
   <java-symbol type="string" name="notification_channel_sms" />
   <java-symbol type="string" name="notification_channel_voice_mail" />
   <java-symbol type="string" name="notification_channel_wfc" />
+  <java-symbol type="string" name="notification_channel_sim" />
   <java-symbol type="string" name="SetupCallDefault" />
   <java-symbol type="string" name="accept" />
   <java-symbol type="string" name="activity_chooser_view_see_all" />
@@ -1383,6 +1384,7 @@
 
   <java-symbol type="drawable" name="ic_sim_card_multi_24px_clr" />
   <java-symbol type="drawable" name="ic_sim_card_multi_48px_clr" />
+  <java-symbol type="drawable" name="ic_signal_cellular_alt_24px" />
 
   <java-symbol type="drawable" name="stat_notify_mmcc_indication_icn" />
   <java-symbol type="drawable" name="autofilled_highlight"/>
@@ -2072,6 +2074,7 @@
   <java-symbol type="string" name="config_customAdbPublicKeyConfirmationSecondaryUserComponent" />
   <java-symbol type="string" name="config_customVpnConfirmDialogComponent" />
   <java-symbol type="string" name="config_customVpnAlwaysOnDisconnectedDialogComponent" />
+  <java-symbol type="string" name="config_carrierAppInstallDialogComponent" />
   <java-symbol type="string" name="config_defaultNetworkScorerPackageName" />
   <java-symbol type="string" name="config_persistentDataPackageName" />
 
@@ -2771,9 +2774,9 @@
   <java-symbol type="array" name="resolver_target_actions_pin" />
   <java-symbol type="array" name="resolver_target_actions_unpin" />
 
-  <java-symbol type="string" name="carrier_app_dialog_message" />
-  <java-symbol type="string" name="carrier_app_dialog_button" />
-  <java-symbol type="string" name="carrier_app_dialog_not_now" />
+  <java-symbol type="string" name="install_carrier_app_notification_title" />
+  <java-symbol type="string" name="install_carrier_app_notification_text" />
+  <java-symbol type="string" name="install_carrier_app_notification_button" />
   <java-symbol type="string" name="carrier_app_notification_title" />
   <java-symbol type="string" name="carrier_app_notification_text" />
   <java-symbol type="string" name="negative_duration" />
@@ -2987,6 +2990,8 @@
   <!-- com.android.server.autofill -->
   <java-symbol type="layout" name="autofill_save"/>
   <java-symbol type="layout" name="autofill_dataset_picker"/>
+  <java-symbol type="layout" name="autofill_dataset_picker_fullscreen"/>
+  <java-symbol type="id" name="autofill_dataset_container"/>
   <java-symbol type="id" name="autofill_dataset_list"/>
   <java-symbol type="id" name="autofill_dataset_picker"/>
   <java-symbol type="id" name="autofill" />
@@ -3015,7 +3020,8 @@
   <java-symbol type="drawable" name="autofill_dataset_picker_background" />
   <java-symbol type="style" name="AutofillDatasetPicker" />
   <java-symbol type="style" name="AutofillSaveAnimation" />
-  <java-symbol type="dimen" name="autofill_dataset_picker_max_size"/>
+  <java-symbol type="dimen" name="autofill_dataset_picker_max_width"/>
+  <java-symbol type="dimen" name="autofill_dataset_picker_max_height"/>
   <java-symbol type="dimen" name="autofill_save_custom_subtitle_max_height"/>
   <java-symbol type="dimen" name="autofill_save_icon_max_size"/>
 

@@ -192,6 +192,7 @@ import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.am.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
+import static com.android.server.am.MemoryStatUtil.readMemoryStatFromMemcg;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
@@ -248,6 +249,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.PictureInPictureParams;
+import android.app.ProcessMemoryState;
 import android.app.ProfilerInfo;
 import android.app.RemoteAction;
 import android.app.WaitResult;
@@ -436,6 +438,7 @@ import com.android.server.SystemServiceManager;
 import com.android.server.ThreadPriorityBooster;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;
+import com.android.server.am.MemoryStatUtil.MemoryStat;
 import com.android.server.am.proto.ActivityManagerServiceProto;
 import com.android.server.am.proto.BroadcastProto;
 import com.android.server.am.proto.GrantUriProto;
@@ -580,6 +583,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     // How long we wait until we timeout on key dispatching during instrumentation.
     static final int INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT = 60*1000;
 
+    // Disable hidden API checks for the newly started instrumentation.
+    // Must be kept in sync with Am.
+    private static final int INSTRUMENTATION_FLAG_DISABLE_HIDDEN_API_CHECKS = 1 << 0;
+
     // How long to wait in getAssistContextExtras for the activity and foreground services
     // to respond with the result.
     static final int PENDING_ASSIST_EXTRAS_TIMEOUT = 500;
@@ -603,6 +610,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     // Assumes logcat entries average around 100 bytes; that's not perfect stack traces count
     // as one line, but close enough for now.
     static final int RESERVED_BYTES_PER_LOGCAT_LINE = 100;
+
+    /** If a UID observer takes more than this long, send a WTF. */
+    private static final int SLOW_UID_OBSERVER_THRESHOLD_MS = 20;
 
     // Access modes for handleIncomingUser.
     static final int ALLOW_NON_FULL = 0;
@@ -775,6 +785,9 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @VisibleForTesting
     long mWaitForNetworkTimeoutMs;
+
+    /** Total # of UID change events dispatched, shown in dumpsys. */
+    int mUidChangeDispatchCount;
 
     /**
      * Helper class which strips out priority and proto arguments then calls the dump function with
@@ -1697,6 +1710,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         final String pkg;
         final int which;
         final int cutpoint;
+
+        /**
+         * Total # of callback calls that took more than {@link #SLOW_UID_OBSERVER_THRESHOLD_MS}.
+         * We show it in dumpsys.
+         */
+        int mSlowDispatchCount;
+
+        /** Max time it took for each dispatch. */
+        int mMaxDispatchTime;
 
         final SparseIntArray lastProcStates;
 
@@ -4003,12 +4025,19 @@ public class ActivityManagerService extends IActivityManager.Stub
         startProcessLocked(app, hostingType, hostingNameStr, null /* abiOverride */);
     }
 
+    @GuardedBy("this")
+    private final boolean startProcessLocked(ProcessRecord app,
+            String hostingType, String hostingNameStr, String abiOverride) {
+        return startProcessLocked(app, hostingType, hostingNameStr,
+                false /* disableHiddenApiChecks */, abiOverride);
+    }
+
     /**
      * @return {@code true} if process start is successful, false otherwise.
      */
     @GuardedBy("this")
     private final boolean startProcessLocked(ProcessRecord app, String hostingType,
-            String hostingNameStr, String abiOverride) {
+            String hostingNameStr, boolean disableHiddenApiChecks, String abiOverride) {
         if (app.pendingStart) {
             return true;
         }
@@ -4131,7 +4160,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 runtimeFlags |= Zygote.ONLY_USE_SYSTEM_OAT_FILES;
             }
 
-            if (!app.info.isAllowedToUseHiddenApi() && !mHiddenApiBlacklist.isDisabled()) {
+            if (!app.info.isAllowedToUseHiddenApi() &&
+                    !disableHiddenApiChecks &&
+                    !mHiddenApiBlacklist.isDisabled()) {
                 // This app is not allowed to use undocumented and private APIs, or blacklisting is
                 // enabled. Set up its runtime with the appropriate flag.
                 runtimeFlags |= Zygote.ENABLE_HIDDEN_API_CHECKS;
@@ -4708,6 +4739,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     "*** Delivering " + N + " uid changes");
         }
 
+        mUidChangeDispatchCount += N;
         int i = mUidObservers.beginBroadcast();
         while (i > 0) {
             i--;
@@ -4760,6 +4792,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // interested in all proc state changes.
                     continue;
                 }
+                final long start = SystemClock.uptimeMillis();
                 if ((change & UidRecord.CHANGE_IDLE) != 0) {
                     if ((reg.which & ActivityManager.UID_OBSERVER_IDLE) != 0) {
                         if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
@@ -4819,6 +4852,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     item.procStateSeq);
                         }
                     }
+                }
+                final int duration = (int) (SystemClock.uptimeMillis() - start);
+                if (reg.mMaxDispatchTime < duration) {
+                    reg.mMaxDispatchTime = duration;
+                }
+                if (duration >= SLOW_UID_OBSERVER_THRESHOLD_MS) {
+                    reg.mSlowDispatchCount++;
                 }
             }
         } catch (RemoteException e) {
@@ -12852,6 +12892,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("this")
     final ProcessRecord addAppLocked(ApplicationInfo info, String customProcess, boolean isolated,
             String abiOverride) {
+        return addAppLocked(info, customProcess, isolated, false /* disableHiddenApiChecks */,
+                abiOverride);
+    }
+
+    final ProcessRecord addAppLocked(ApplicationInfo info, String customProcess, boolean isolated,
+            boolean disableHiddenApiChecks, String abiOverride) {
         ProcessRecord app;
         if (!isolated) {
             app = getProcessRecordLocked(customProcess != null ? customProcess : info.processName,
@@ -12883,7 +12929,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (app.thread == null && mPersistentStartingProcesses.indexOf(app) < 0) {
             mPersistentStartingProcesses.add(app);
             startProcessLocked(app, "added application",
-                    customProcess != null ? customProcess : app.processName, abiOverride);
+                    customProcess != null ? customProcess : app.processName, disableHiddenApiChecks,
+                    abiOverride);
         }
 
         return app;
@@ -16773,6 +16820,25 @@ public class ActivityManagerService extends IActivityManager.Stub
                         pw.print(" mLowRamSinceLastIdle=");
                         TimeUtils.formatDuration(getLowRamTimeSinceIdle(now), pw);
                         pw.println();
+                pw.println();
+                pw.print("  mUidChangeDispatchCount=");
+                pw.print(mUidChangeDispatchCount);
+                pw.println();
+
+                pw.println("  Slow UID dispatches:");
+                final int N = mUidObservers.beginBroadcast();
+                for (int i = 0; i < N; i++) {
+                    UidObserverRegistration r =
+                            (UidObserverRegistration) mUidObservers.getBroadcastCookie(i);
+                    pw.print("    ");
+                    pw.print(mUidObservers.getBroadcastItem(i).getClass().getTypeName());
+                    pw.print(": ");
+                    pw.print(r.mSlowDispatchCount);
+                    pw.print(" / Max ");
+                    pw.print(r.mMaxDispatchTime);
+                    pw.println("ms");
+                }
+                mUidObservers.finishBroadcast();
             }
         }
         pw.println("  mForceBackgroundCheck=" + mForceBackgroundCheck);
@@ -21694,7 +21760,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mUsageStatsService.reportEvent(ii.targetPackage, userId,
                         UsageEvents.Event.SYSTEM_INTERACTION);
             }
-            ProcessRecord app = addAppLocked(ai, defProcess, false, abiOverride);
+            boolean disableHiddenApiChecks =
+                    (flags & INSTRUMENTATION_FLAG_DISABLE_HIDDEN_API_CHECKS) != 0;
+            ProcessRecord app = addAppLocked(ai, defProcess, false, disableHiddenApiChecks,
+                    abiOverride);
             app.instr = activeInstr;
             activeInstr.mFinished = false;
             activeInstr.mRunningProcesses.add(app);
@@ -26073,6 +26142,33 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final UidRecord uidRec = mActiveUids.get(uid);
                 return (uidRec != null) && !uidRec.idle;
             }
+        }
+
+        @Override
+        public List<ProcessMemoryState> getMemoryStateForProcesses() {
+            List<ProcessMemoryState> processMemoryStates = new ArrayList<>();
+            synchronized (mPidsSelfLocked) {
+                for (int i = 0, size = mPidsSelfLocked.size(); i < size; i++) {
+                    final ProcessRecord r = mPidsSelfLocked.valueAt(i);
+                    final int pid = r.pid;
+                    final int uid = r.uid;
+                    final MemoryStat memoryStat = readMemoryStatFromMemcg(uid, pid);
+                    if (memoryStat == null) {
+                        continue;
+                    }
+                    ProcessMemoryState processMemoryState =
+                            new ProcessMemoryState(uid,
+                                    r.processName,
+                                    r.maxAdj,
+                                    memoryStat.pgfault,
+                                    memoryStat.pgmajfault,
+                                    memoryStat.rssInBytes,
+                                    memoryStat.cacheInBytes,
+                                    memoryStat.swapInBytes);
+                    processMemoryStates.add(processMemoryState);
+                }
+            }
+            return processMemoryStates;
         }
     }
 

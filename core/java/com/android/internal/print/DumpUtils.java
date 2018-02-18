@@ -213,9 +213,8 @@ public class DumpUtils {
         PrintAttributes.MediaSize mediaSize = attributes.getMediaSize();
         if (mediaSize != null) {
             writeMediaSize(context, proto, "media_size", PrintAttributesProto.MEDIA_SIZE, mediaSize);
+            proto.write("is_portrait", PrintAttributesProto.IS_PORTRAIT, attributes.isPortrait());
         }
-
-        proto.write("is_portrait", PrintAttributesProto.IS_PORTRAIT, attributes.isPortrait());
 
         PrintAttributes.Resolution res = attributes.getResolution();
         if (res != null) {

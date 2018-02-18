@@ -5,3 +5,8 @@ per-file *Camera*,*camera* = etalvala@google.com
 per-file *Camera*,*camera* = shuzhenwang@google.com
 per-file *Camera*,*camera* = yinchiayeh@google.com
 per-file *Camera*,*camera* = zhijunhe@google.com
+
+# Connectivity
+per-file android_net_*=ek@google.com
+per-file android_net_*=lorenzo@google.com
+per-file android_net_*=satk@google.com

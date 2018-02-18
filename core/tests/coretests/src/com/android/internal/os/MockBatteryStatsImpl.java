@@ -160,8 +160,8 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         }
 
         @Override
-        public Future<?> scheduleReadProcStateCpuTimes(
-                boolean onBattery, boolean onBatteryScreenOff) {
+        public Future<?> scheduleReadProcStateCpuTimes(boolean onBattery,
+                boolean onBatteryScreenOff, long delayMillis) {
             return null;
         }
 

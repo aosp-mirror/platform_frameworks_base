@@ -31,12 +31,12 @@ import android.net.Uri;
  * <p>
  * {@link Uri} builder example:
  * <pre>
- * Uri wifiActionUri = AUTHORITY_URI
+ * Uri wifiActionUri = BASE_URI
  *         .buildUpon()
  *         .appendPath(PATH_SETTING_ACTION)
  *         .appendPath(KEY_WIFI)
  *         .build();
- * Uri bluetoothIntentUri = AUTHORITY_URI
+ * Uri bluetoothIntentUri = BASE_URI
  *         .buildUpon()
  *         .appendPath(PATH_SETTING_INTENT)
  *         .appendPath(KEY_BLUETOOTH)

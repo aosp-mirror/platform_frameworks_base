@@ -16,8 +16,10 @@
 package com.android.server.stats;
 
 import android.annotation.Nullable;
+import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.app.ProcessMemoryState;
 import android.app.StatsManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.BluetoothAdapter;
@@ -128,7 +130,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 synchronized (sStatsdLock) {
                     sStatsd = fetchStatsdService();
                     if (sStatsd == null) {
-                        Slog.w(TAG, "Could not access statsd");
+                        Slog.w(TAG, "Could not access statsd for UserUpdateReceiver");
                         return;
                     }
                     try {
@@ -143,7 +145,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
         };
         mShutdownEventReceiver = new ShutdownEventReceiver();
-        Slog.w(TAG, "Registered receiver for ACTION_PACKAGE_REPLACE AND ADDED.");
+        if (DEBUG) Slog.d(TAG, "Registered receiver for ACTION_PACKAGE_REPLACED and ADDED.");
         PowerProfile powerProfile = new PowerProfile(context);
         final int numClusters = powerProfile.getNumCpuClusters();
         mKernelCpuSpeedReaders = new KernelCpuSpeedReader[numClusters];
@@ -172,7 +174,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     public void sendSubscriberBroadcast(IBinder intentSenderBinder, long configUid, long configKey,
                                         long subscriptionId, long subscriptionRuleId,
                                         StatsDimensionsValue dimensionsValue) {
-        if (DEBUG) Slog.d(TAG, "Statsd requested to sendSubscriberBroadcast.");
         enforceCallingPermission();
         IntentSender intentSender = new IntentSender(intentSenderBinder);
         Intent intent = new Intent()
@@ -181,16 +182,16 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 .putExtra(StatsManager.EXTRA_STATS_SUBSCRIPTION_ID, subscriptionId)
                 .putExtra(StatsManager.EXTRA_STATS_SUBSCRIPTION_RULE_ID, subscriptionRuleId)
                 .putExtra(StatsManager.EXTRA_STATS_DIMENSIONS_VALUE, dimensionsValue);
+        if (DEBUG) {
+            Slog.d(TAG, String.format("Statsd sendSubscriberBroadcast with params {%d %d %d %d %s}",
+                    configUid, configKey, subscriptionId,
+                    subscriptionRuleId, dimensionsValue));
+        }
         try {
             intentSender.sendIntent(mContext, CODE_SUBSCRIBER_BROADCAST, intent, null, null);
         } catch (IntentSender.SendIntentException e) {
             Slog.w(TAG, "Unable to send using IntentSender from uid " + configUid
                     + "; presumably it had been cancelled.");
-            if (DEBUG) {
-                Slog.d(TAG, String.format("SubscriberBroadcast params {%d %d %d %d %s}",
-                        configUid, configKey, subscriptionId,
-                        subscriptionRuleId, dimensionsValue));
-            }
         }
     }
 
@@ -217,12 +218,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         PackageManager pm = context.getPackageManager();
         final List<UserInfo> users = um.getUsers(true);
         if (DEBUG) {
-            Slog.w(TAG, "Iterating over " + users.size() + " profiles.");
+            Slog.d(TAG, "Iterating over " + users.size() + " profiles.");
         }
 
-        List<Integer> uids = new ArrayList();
-        List<Long> versions = new ArrayList();
-        List<String> apps = new ArrayList();
+        List<Integer> uids = new ArrayList<>();
+        List<Long> versions = new ArrayList<>();
+        List<String> apps = new ArrayList<>();
 
         // Add in all the apps for every user/profile.
         for (UserInfo profile : users) {
@@ -238,7 +239,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         sStatsd.informAllUidData(toIntArray(uids), toLongArray(versions), apps.toArray(new
                 String[apps.size()]));
         if (DEBUG) {
-            Slog.w(TAG, "Sent data for " + uids.size() + " apps");
+            Slog.d(TAG, "Sent data for " + uids.size() + " apps");
         }
     }
 
@@ -713,6 +714,24 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         pulledData.add(e);
     }
 
+    private void pullProcessMemoryState(int tagId, List<StatsLogEventWrapper> pulledData) {
+        List<ProcessMemoryState> processMemoryStates =
+                LocalServices.getService(ActivityManagerInternal.class)
+                        .getMemoryStateForProcesses();
+        for (ProcessMemoryState processMemoryState : processMemoryStates) {
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, 8 /* fields */);
+            e.writeInt(processMemoryState.uid);
+            e.writeString(processMemoryState.processName);
+            e.writeInt(processMemoryState.oomScore);
+            e.writeLong(processMemoryState.pgfault);
+            e.writeLong(processMemoryState.pgmajfault);
+            e.writeLong(processMemoryState.rssInBytes);
+            e.writeLong(processMemoryState.cacheInBytes);
+            e.writeLong(processMemoryState.swapInBytes);
+            pulledData.add(e);
+        }
+    }
+
     /**
      * Pulls various data.
      */
@@ -721,7 +740,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         enforceCallingPermission();
         if (DEBUG)
             Slog.d(TAG, "Pulling " + tagId);
-        List<StatsLogEventWrapper> ret = new ArrayList();
+        List<StatsLogEventWrapper> ret = new ArrayList<>();
         switch (tagId) {
             case StatsLog.WIFI_BYTES_TRANSFER: {
                 pullWifiBytesTransfer(tagId, ret);
@@ -773,6 +792,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.DISK_SPACE: {
                 pullDiskSpace(tagId, ret);
+                break;
+            }
+            case StatsLog.PROCESS_MEMORY_STATE: {
+                pullProcessMemoryState(tagId, ret);
                 break;
             }
             default:
@@ -869,7 +892,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             sStatsd = fetchStatsdService();
             if (sStatsd == null) {
-                Slog.w(TAG, "Could not access statsd");
+                Slog.i(TAG, "Could not yet find statsd to tell it that StatsCompanion is alive.");
                 return;
             }
             if (DEBUG) Slog.d(TAG, "Saying hi to statsd");
@@ -909,6 +932,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 } finally {
                     restoreCallingIdentity(token);
                 }
+                Slog.i(TAG, "Told statsd that StatsCompanionService is alive.");
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to inform statsd that statscompanion is ready", e);
                 forgetEverything();

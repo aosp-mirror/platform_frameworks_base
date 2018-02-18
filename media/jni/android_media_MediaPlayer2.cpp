@@ -273,9 +273,9 @@ static void process_media_player_call(
 }
 
 static void
-android_media_MediaPlayer2_setDataSourceAndHeaders(
-        JNIEnv *env, jobject thiz, jlong srcId, jobject httpServiceObj, jstring path,
-        jobjectArray keys, jobjectArray values) {
+android_media_MediaPlayer2_handleDataSourceUrl(
+        JNIEnv *env, jobject thiz, jboolean isCurrent, jlong srcId,
+        jobject httpServiceObj, jstring path, jobjectArray keys, jobjectArray values) {
 
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
     if (mp == NULL) {
@@ -292,10 +292,10 @@ android_media_MediaPlayer2_setDataSourceAndHeaders(
     if (tmp == NULL) {  // Out of memory
         return;
     }
-    ALOGV("setDataSourceAndHeaders: path %s, srcId %lld", tmp, (long long)srcId);
+    ALOGV("handleDataSourceUrl: path %s, srcId %lld", tmp, (long long)srcId);
 
     if (strncmp(tmp, "content://", 10) == 0) {
-        ALOGE("setDataSourceAndHeaders: content scheme is not supported in native code");
+        ALOGE("handleDataSourceUrl: content scheme is not supported in native code");
         jniThrowException(env, "java/io/IOException",
                           "content scheme is not supported in native code");
         return;
@@ -321,14 +321,20 @@ android_media_MediaPlayer2_setDataSourceAndHeaders(
     }
     dsd->mHttpService = httpService;
 
-    process_media_player_call(
-            env, thiz, mp->setDataSource(dsd), "java/io/IOException",
-            "setDataSourceAndHeaders failed." );
+    status_t err;
+    if (isCurrent) {
+        err = mp->setDataSource(dsd);
+    } else {
+        err = mp->prepareNextDataSource(dsd);
+    }
+    process_media_player_call(env, thiz, err,
+            "java/io/IOException", "handleDataSourceUrl failed." );
 }
 
 static void
-android_media_MediaPlayer2_setDataSourceFD(
-    JNIEnv *env, jobject thiz, jlong srcId, jobject fileDescriptor, jlong offset, jlong length)
+android_media_MediaPlayer2_handleDataSourceFD(
+    JNIEnv *env, jobject thiz, jboolean isCurrent, jlong srcId,
+    jobject fileDescriptor, jlong offset, jlong length)
 {
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
     if (mp == NULL ) {
@@ -341,14 +347,14 @@ android_media_MediaPlayer2_setDataSourceFD(
         return;
     }
     int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
-    ALOGV("setDataSourceFD: srcId=%lld, fd=%d (%s), offset=%lld, length=%lld",
+    ALOGV("handleDataSourceFD: srcId=%lld, fd=%d (%s), offset=%lld, length=%lld",
           (long long)srcId, fd, nameForFd(fd).c_str(), (long long)offset, (long long)length);
 
     struct stat sb;
     int ret = fstat(fd, &sb);
     if (ret != 0) {
-        ALOGE("setDataSourceFD: fstat(%d) failed: %d, %s", fd, ret, strerror(errno));
-        jniThrowException(env, "java/io/IOException", "setDataSourceFD failed fstat");
+        ALOGE("handleDataSourceFD: fstat(%d) failed: %d, %s", fd, ret, strerror(errno));
+        jniThrowException(env, "java/io/IOException", "handleDataSourceFD failed fstat");
         return;
     }
 
@@ -359,14 +365,14 @@ android_media_MediaPlayer2_setDataSourceFD(
     ALOGV("st_size = %llu", static_cast<unsigned long long>(sb.st_size));
 
     if (offset >= sb.st_size) {
-        ALOGE("setDataSourceFD: offset is out of range");
+        ALOGE("handleDataSourceFD: offset is out of range");
         jniThrowException(env, "java/lang/IllegalArgumentException",
-                          "setDataSourceFD failed, offset is out of range.");
+                          "handleDataSourceFD failed, offset is out of range.");
         return;
     }
     if (offset + length > sb.st_size) {
         length = sb.st_size - offset;
-        ALOGV("setDataSourceFD: adjusted length = %lld", (long long)length);
+        ALOGV("handleDataSourceFD: adjusted length = %lld", (long long)length);
     }
 
     sp<DataSourceDesc> dsd = new DataSourceDesc();
@@ -375,13 +381,20 @@ android_media_MediaPlayer2_setDataSourceFD(
     dsd->mFD = fd;
     dsd->mFDOffset = offset;
     dsd->mFDLength = length;
-    process_media_player_call(env, thiz, mp->setDataSource(dsd),
-                              "java/io/IOException", "setDataSourceFD failed." );
+
+    status_t err;
+    if (isCurrent) {
+        err = mp->setDataSource(dsd);
+    } else {
+        err = mp->prepareNextDataSource(dsd);
+    }
+    process_media_player_call(env, thiz, err,
+            "java/io/IOException", "handleDataSourceFD failed." );
 }
 
 static void
-android_media_MediaPlayer2_setDataSourceCallback(
-    JNIEnv *env, jobject thiz, jlong srcId, jobject dataSource)
+android_media_MediaPlayer2_handleDataSourceCallback(
+    JNIEnv *env, jobject thiz, jboolean isCurrent, jlong srcId, jobject dataSource)
 {
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
     if (mp == NULL ) {
@@ -398,8 +411,15 @@ android_media_MediaPlayer2_setDataSourceCallback(
     dsd->mId = srcId;
     dsd->mType = DataSourceDesc::TYPE_CALLBACK;
     dsd->mCallbackSource = callbackDataSource;
-    process_media_player_call(env, thiz, mp->setDataSource(dsd),
-                              "java/lang/RuntimeException", "setDataSourceCallback failed." );
+
+    status_t err;
+    if (isCurrent) {
+        err = mp->setDataSource(dsd);
+    } else {
+        err = mp->prepareNextDataSource(dsd);
+    }
+    process_media_player_call(env, thiz, err,
+            "java/lang/RuntimeException", "handleDataSourceCallback failed." );
 }
 
 static sp<ANativeWindowWrapper>
@@ -503,20 +523,16 @@ android_media_MediaPlayer2_setBufferingParams(JNIEnv *env, jobject thiz, jobject
 }
 
 static void
-android_media_MediaPlayer2_prepare(JNIEnv *env, jobject thiz)
+android_media_MediaPlayer2_playNextDataSource(JNIEnv *env, jobject thiz, jlong srcId)
 {
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
-    if (mp == NULL ) {
+    if (mp == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
         return;
     }
 
-    // Handle the case where the display surface was set before the mp was
-    // initialized. We try again to make it stick.
-    sp<ANativeWindowWrapper> st = getVideoSurfaceTexture(env, thiz);
-    mp->setVideoSurfaceTexture(st);
-
-    process_media_player_call( env, thiz, mp->prepare(), "java/io/IOException", "Prepare failed." );
+    process_media_player_call(env, thiz, mp->playNextDataSource((int64_t)srcId),
+            "java/io/IOException", "playNextDataSource failed." );
 }
 
 static void
@@ -1449,18 +1465,25 @@ static void android_media_MediaPlayer2_native_on_stream_data_request(JNIEnv *env
 
 static const JNINativeMethod gMethods[] = {
     {
-        "nativeSetDataSource",
-        "(JLandroid/media/Media2HTTPService;Ljava/lang/String;[Ljava/lang/String;"
+        "nativeHandleDataSourceUrl",
+        "(ZJLandroid/media/Media2HTTPService;Ljava/lang/String;[Ljava/lang/String;"
         "[Ljava/lang/String;)V",
-        (void *)android_media_MediaPlayer2_setDataSourceAndHeaders
+        (void *)android_media_MediaPlayer2_handleDataSourceUrl
     },
-
-    {"_setDataSource",      "(JLjava/io/FileDescriptor;JJ)V",    (void *)android_media_MediaPlayer2_setDataSourceFD},
-    {"_setDataSource",      "(JLandroid/media/Media2DataSource;)V",(void *)android_media_MediaPlayer2_setDataSourceCallback },
+    {
+        "nativeHandleDataSourceFD",
+        "(ZJLjava/io/FileDescriptor;JJ)V",
+        (void *)android_media_MediaPlayer2_handleDataSourceFD
+    },
+    {
+        "nativeHandleDataSourceCallback",
+        "(ZJLandroid/media/Media2DataSource;)V",
+        (void *)android_media_MediaPlayer2_handleDataSourceCallback
+    },
+    {"nativePlayNextDataSource", "(J)V",                        (void *)android_media_MediaPlayer2_playNextDataSource},
     {"_setVideoSurface",    "(Landroid/view/Surface;)V",        (void *)android_media_MediaPlayer2_setVideoSurface},
     {"getBufferingParams", "()Landroid/media/BufferingParams;", (void *)android_media_MediaPlayer2_getBufferingParams},
     {"setBufferingParams", "(Landroid/media/BufferingParams;)V", (void *)android_media_MediaPlayer2_setBufferingParams},
-    {"_prepare",            "()V",                              (void *)android_media_MediaPlayer2_prepare},
     {"prepareAsync",        "()V",                              (void *)android_media_MediaPlayer2_prepareAsync},
     {"_start",              "()V",                              (void *)android_media_MediaPlayer2_start},
     {"_stop",               "()V",                              (void *)android_media_MediaPlayer2_stop},

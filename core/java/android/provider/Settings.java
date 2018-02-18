@@ -3692,18 +3692,15 @@ public final class Settings {
                 new SettingsValidators.InclusiveIntegerRangeValidator(0, 3);
 
         /**
-         * User-selected RTT mode
+         * User-selected RTT mode. When on, outgoing and incoming calls will be answered as RTT
+         * calls when supported by the device and carrier. Boolean value.
          * 0 = OFF
-         * 1 = FULL
-         * 2 = VCO
-         * 3 = HCO
-         * Uses the same constants as TTY (e.g. {@link android.telecom.TelecomManager#TTY_MODE_OFF})
-         * @hide
+         * 1 = ON
          */
         public static final String RTT_CALLING_MODE = "rtt_calling_mode";
 
         /** @hide */
-        public static final Validator RTT_CALLING_MODE_VALIDATOR = TTY_MODE_VALIDATOR;
+        public static final Validator RTT_CALLING_MODE_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Whether the sounds effects (key clicks, lid open ...) are enabled. The value is
@@ -5383,6 +5380,17 @@ public final class Settings {
         @TestApi
         public static final String AUTOFILL_USER_DATA_MAX_FIELD_CLASSIFICATION_IDS_SIZE =
                 "autofill_user_data_max_field_classification_size";
+
+        /**
+         * Defines value returned by
+         * {@link android.service.autofill.UserData#getMaxCategoryCount()}.
+         *
+         * @hide
+         */
+        @SystemApi
+        @TestApi
+        public static final String AUTOFILL_USER_DATA_MAX_CATEGORY_COUNT =
+                "autofill_user_data_max_category_count";
 
         /**
          * Defines value returned by {@link android.service.autofill.UserData#getMaxValueLength()}.
@@ -8752,6 +8760,7 @@ public final class Settings {
        /** {@hide} */
        public static final String NETSTATS_POLL_INTERVAL = "netstats_poll_interval";
        /** {@hide} */
+       @Deprecated
        public static final String NETSTATS_TIME_CACHE_MAX_AGE = "netstats_time_cache_max_age";
        /** {@hide} */
        public static final String NETSTATS_GLOBAL_ALERT_BYTES = "netstats_global_alert_bytes";
@@ -10449,6 +10458,9 @@ public final class Settings {
          * <pre>
          * smart_selection_dark_launch              (boolean)
          * smart_selection_enabled_for_edit_text    (boolean)
+         * suggest_selection_max_range_length       (int)
+         * classify_text_max_range_length           (int)
+         * generate_links_max_text_length           (int)
          * </pre>
          *
          * <p>
@@ -10467,6 +10479,7 @@ public final class Settings {
          * track_cpu_times_by_proc_state (boolean)
          * track_cpu_active_cluster_time (boolean)
          * read_binary_cpu_time          (boolean)
+         * proc_state_cpu_times_read_delay_ms (long)
          * </pre>
          *
          * <p>
@@ -11360,6 +11373,7 @@ public final class Settings {
          * @hide
          */
         @SystemApi
+        @TestApi
         public static final String AUTOFILL_COMPAT_ALLOWED_PACKAGES =
                 "autofill_compat_allowed_packages";
 
@@ -12068,6 +12082,28 @@ public final class Settings {
          */
         public static final String ENABLE_GNSS_RAW_MEAS_FULL_TRACKING =
                 "enable_gnss_raw_meas_full_tracking";
+
+        /**
+         * Whether the notification should be ongoing (persistent) when a carrier app install is
+         * required.
+         *
+         * The value is a boolean (1 or 0).
+         * @hide
+         */
+        @SystemApi
+        public static final String INSTALL_CARRIER_APP_NOTIFICATION_PERSISTENT =
+                "install_carrier_app_notification_persistent";
+
+        /**
+         * The amount of time (ms) to hide the install carrier app notification after the user has
+         * ignored it. After this time passes, the notification will be shown again
+         *
+         * The value is a long
+         * @hide
+         */
+        @SystemApi
+        public static final String INSTALL_CARRIER_APP_NOTIFICATION_SLEEP_MILLIS =
+                "install_carrier_app_notification_sleep_millis";
 
         /**
          * Whether we've enabled zram on this device. Takes effect on

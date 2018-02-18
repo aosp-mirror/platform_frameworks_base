@@ -53,16 +53,16 @@
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"தொடர்பு துண்டிக்கப்பட்டது"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"துண்டிக்கிறது..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"இணைக்கிறது..."</string>
-    <string name="bluetooth_connected" msgid="6038755206916626419">"இணைக்கப்பட்டது"</string>
+    <string name="bluetooth_connected" msgid="5427152882755735944">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> சாதனம் இணைக்கப்பட்டது"</string>
     <string name="bluetooth_pairing" msgid="1426882272690346242">"இணைக்கிறது..."</string>
-    <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"இணைக்கப்பட்டது (மொபைல் இல்லை)"</string>
-    <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"இணைக்கப்பட்டது (மீடியா இல்லை)"</string>
-    <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"இணைக்கப்பட்டது (செய்திக்கான அணுகல் இல்லை)"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"இணைக்கப்பட்டது (மொபைல் அல்லது மீடியாவுடன் அல்ல)"</string>
-    <string name="bluetooth_connected_battery_level" msgid="7049181126136692368">"இணைக்கப்பட்டது, பேட்டரி <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_battery_level" msgid="5504193961248406027">"இணைக்கப்பட்டது (மொபைல் ஆடியோ இணைக்கப்படவில்லை), பேட்டரி <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="4751724026365870779">"இணைக்கப்பட்டது (மீடியா ஆடியோ இணைக்கப்படவில்லை), பேட்டரி <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1549265779323455261">"இணைக்கப்பட்டது (மொபைல் அல்லது மீடியா ஆடியோ இணைக்கப்படவில்லை), பேட்டரி <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset" msgid="616068069034994802">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> இணைக்கப்பட்டது (மொபைல் இல்லை)"</string>
+    <string name="bluetooth_connected_no_a2dp" msgid="3736431800395923868">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> இணைக்கப்பட்டது (மீடியா இல்லை)"</string>
+    <string name="bluetooth_connected_no_map" msgid="3200033913678466453">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> இணைக்கப்பட்டது (செய்தி அணுகல் இல்லை)"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2047403011284187056">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> இணைக்கப்பட்டது (மொபைல்/மீடியா இல்லை)"</string>
+    <string name="bluetooth_connected_battery_level" msgid="5162924691231307748">"இணைக்கப்பட்டது, பேட்டரி <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"இணைக்கப்பட்டது (மொபைல் இல்லை), பேட்டரி <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"இணைக்கப்பட்டது (மீடியா இல்லை), பேட்டரி <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"இணைக்கப்பட்டது (மொபைல் அல்லது மீடியா இல்லை), பேட்டரி <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"மீடியா ஆடியோ"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"ஃபோன் அழைப்புகள்"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"கோப்பு இடமாற்றம்"</string>
@@ -75,6 +75,10 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"சிம் அணுகல்"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD ஆடியோ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD ஆடியோ"</string>
+    <!-- no translation found for bluetooth_profile_hearing_aid (7999237886427812595) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_profile_summary_connected (7188282786730266159) -->
+    <skip />
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"மீடியா ஆடியோவுடன் இணைக்கப்பட்டது"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"மொபைல் ஆடியோவுடன் இணைக்கப்பட்டது"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"கோப்பைப் பரிமாற்றும் சேவையகத்துடன் இணைக்கப்பட்டது"</string>
@@ -91,6 +95,8 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"மொபைல் ஆடியோவைப் பயன்படுத்து"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"கோப்பு பரிமாற்றத்திற்காகப் பயன்படுத்து"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"உள்ளீட்டுக்குப் பயன்படுத்து"</string>
+    <!-- no translation found for bluetooth_hearing_aid_profile_summary_use_for (908775281788309484) -->
+    <skip />
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"இணை"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"இணை"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"ரத்துசெய்"</string>
@@ -327,9 +333,10 @@
     <item msgid="8280754435979370728">"கண்களால் பார்ப்பதைப் போலவே இயற்கையான வண்ணங்கள்"</item>
     <item msgid="5363960654009010371">"டிஜிட்டல் உள்ளடக்கத்திற்கு ஏற்ப மேம்படுத்தப்பட்ட வண்ணங்கள்"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="1317817863508274533">"செயலில் இல்லாத பயன்பாடுகள்"</string>
+    <string name="inactive_apps_title" msgid="9042996804461901648">"காத்திருப்பில் உள்ள ஆப்ஸ்"</string>
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"செயலில் இல்லை. மாற்ற, தட்டவும்."</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"செயலில் உள்ளது. மாற்ற, தட்டவும்."</string>
+    <string name="standby_bucket_summary" msgid="6567835350910684727">"காத்திருப்பில் உள்ள பயன்பாட்டின் நிலை:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"இயங்கும் சேவைகள்"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"தற்போது இயக்கத்தில் இருக்கும் சேவைகளைப் பார்த்து கட்டுப்படுத்து"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView செயல்படுத்தல்"</string>
@@ -351,16 +358,24 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"வண்ணத்திருத்தம்"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"இது சோதனை முறையிலான அம்சம், இது செயல்திறனைப் பாதிக்கலாம்."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> மூலம் மேலெழுதப்பட்டது"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"கிட்டத்தட்ட <xliff:g id="TIME">^1</xliff:g> உள்ளது"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"உபயோகத்தின் அடிப்படையில் கிட்டத்தட்ட <xliff:g id="TIME">^1</xliff:g> மீதமுள்ளது"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"முழு சார்ஜாக <xliff:g id="TIME">^1</xliff:g> ஆகும்"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">^1</xliff:g> மீதமுள்ளது"</string>
-    <string name="power_remaining_duration_only_short_enhanced" msgid="7450425624026394823">"உபயோகத்தின் அடிப்படையில் <xliff:g id="TIME">^1</xliff:g> மீதமுள்ளது"</string>
-    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">^1</xliff:g> - கிட்டத்தட்ட <xliff:g id="TIME">^2</xliff:g> மீதமுள்ளது"</string>
-    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">^1</xliff:g> - உபயோகத்தின் அடிப்படையில் கிட்டத்தட்ட <xliff:g id="TIME">^2</xliff:g> மீதமுள்ளது"</string>
-    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> மீதமுள்ளது"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"கிட்டத்தட்ட <xliff:g id="TIME">%1$s</xliff:g> உள்ளது"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"உபயோகத்தின் அடிப்படையில் கிட்டத்தட்ட <xliff:g id="TIME">%1$s</xliff:g> மீதமுள்ளது"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"முழு சார்ஜாக <xliff:g id="TIME">%1$s</xliff:g> ஆகும்"</string>
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> மீதமுள்ளது"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"<xliff:g id="THRESHOLD">%1$s</xliff:g>க்கும் குறைவாகவே பயன்படுத்த முடியும்"</string>
+    <string name="power_remaining_less_than_duration" msgid="7967078125657859046">"<xliff:g id="LEVEL">%1$s</xliff:g> பேட்டரி மட்டுமே உள்ளது, <xliff:g id="THRESHOLD">%2$s</xliff:g>க்கும் குறைவாகவே பயன்படுத்தமுடியும்"</string>
+    <string name="power_remaining_more_than_subtext" msgid="6846716609975752316">"பேட்டரி <xliff:g id="LEVEL">%1$s</xliff:g> உள்ளது, <xliff:g id="TIME_REMAINING">%2$s</xliff:g>க்கு மேல் பயன்படுத்த முடியும்"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="8884488700395194194">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>க்கு மேல் பயன்படுத்த முடியும்"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="8168317165722752881">"மொபைல் விரைவில் ஆஃப் ஆகக்கூடும்"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="5957064378548718872">"டேப்லெட் விரைவில் ஆஃப் ஆகக்கூடும்"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="9055596817716471373">"சாதனம் விரைவில் ஆஃப் ஆகக்கூடும்"</string>
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - கிட்டத்தட்ட <xliff:g id="TIME">%2$s</xliff:g> மீதமுள்ளது"</string>
+    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">%1$s</xliff:g> - உபயோகத்தின் அடிப்படையில் கிட்டத்தட்ட <xliff:g id="TIME">%2$s</xliff:g> மீதமுள்ளது"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="7679005631124015335">"<xliff:g id="LEVEL">%1$s</xliff:g> - மொபைல் விரைவில் ஆஃப் ஆகக்கூடும்"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="261050880878965621">"<xliff:g id="LEVEL">%1$s</xliff:g> - டேப்லெட் விரைவில் ஆஃப் ஆகக்கூடும்"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="2020049829798578618">"<xliff:g id="LEVEL">%1$s</xliff:g> - சாதனம் விரைவில் ஆஃப் ஆகக்கூடும்"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> - முழு சார்ஜாக <xliff:g id="TIME">^2</xliff:g> ஆகும்"</string>
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - முழு சார்ஜாக <xliff:g id="TIME">%2$s</xliff:g> ஆகும்"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"அறியப்படாத"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"சார்ஜ் ஆகிறது"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"சார்ஜ் ஆகிறது"</string>
@@ -414,4 +429,8 @@
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"ஒருபோதும் வேண்டாம்"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"முக்கியமானவை மட்டும்"</string>
     <string name="zen_mode_and_condition" msgid="4927230238450354412">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
+    <string name="zen_alarm_warning_indef" msgid="3007988140196673193">"<xliff:g id="WHEN">%1$s</xliff:g>க்கு முன்பு இதை ஆஃப் செய்யாவிட்டால், அடுத்த அலாரத்திற்கு ஒலி இருக்காது"</string>
+    <string name="zen_alarm_warning" msgid="6236690803924413088">"<xliff:g id="WHEN">%1$s</xliff:g>க்கான அடுத்த அலாரத்திற்கு ஒலி இருக்காது"</string>
+    <string name="alarm_template" msgid="4996153414057676512">"அலாரம்: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="3779172822607461675">"அலாரம்: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
 </resources>

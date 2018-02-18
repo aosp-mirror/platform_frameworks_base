@@ -16,17 +16,19 @@
   ~ limitations under the License
   -->
 
+<!-- android:paddingHorizontal is set dynamically in SmartReplyView. -->
 <Button xmlns:android="http://schemas.android.com/apk/res/android"
         style="@android:style/Widget.Material.Button.Borderless.Small"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/smart_reply_button_spacing"
+        android:layout_height="match_parent"
+        android:minWidth="0dp"
+        android:minHeight="@dimen/smart_reply_button_min_height"
         android:paddingVertical="@dimen/smart_reply_button_padding_vertical"
-        android:paddingHorizontal="@dimen/smart_reply_button_corner_radius"
         android:background="@drawable/smart_reply_button_background"
         android:gravity="center"
         android:fontFamily="sans-serif"
         android:textSize="@dimen/smart_reply_button_font_size"
+        android:lineSpacingExtra="@dimen/smart_reply_button_line_spacing_extra"
         android:textColor="@color/smart_reply_button_text"
         android:textStyle="normal"
-        android:singleLine="true"/>
+        android:ellipsize="none"/>

@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#define LOG_TAG "incidentd"
+#include "Log.h"
 
 #include "FdBuffer.h"
 
@@ -26,30 +25,16 @@
 #include <unistd.h>
 #include <wait.h>
 
-const bool DEBUG = false;
-const ssize_t BUFFER_SIZE = 16 * 1024; // 16 KB
-const ssize_t MAX_BUFFER_COUNT = 256; // 4 MB max
+const ssize_t BUFFER_SIZE = 16 * 1024;  // 16 KB
+const ssize_t MAX_BUFFER_COUNT = 256;   // 4 MB max
 
 FdBuffer::FdBuffer()
-    :mBuffer(BUFFER_SIZE),
-     mStartTime(-1),
-     mFinishTime(-1),
-     mTimedOut(false),
-     mTruncated(false)
-{
-}
+    : mBuffer(BUFFER_SIZE), mStartTime(-1), mFinishTime(-1), mTimedOut(false), mTruncated(false) {}
 
-FdBuffer::~FdBuffer()
-{
-}
+FdBuffer::~FdBuffer() {}
 
-status_t
-FdBuffer::read(int fd, int64_t timeout)
-{
-    struct pollfd pfds = {
-        .fd = fd,
-        .events = POLLIN
-    };
+status_t FdBuffer::read(int fd, int64_t timeout) {
+    struct pollfd pfds = {.fd = fd, .events = POLLIN};
     mStartTime = uptimeMillis();
 
     fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
@@ -63,22 +48,22 @@ FdBuffer::read(int fd, int64_t timeout)
 
         int64_t remainingTime = (mStartTime + timeout) - uptimeMillis();
         if (remainingTime <= 0) {
-            if (DEBUG) ALOGD("timed out due to long read");
+            VLOG("timed out due to long read");
             mTimedOut = true;
             break;
         }
 
         int count = poll(&pfds, 1, remainingTime);
         if (count == 0) {
-            if (DEBUG) ALOGD("timed out due to block calling poll");
+            VLOG("timed out due to block calling poll");
             mTimedOut = true;
             break;
         } else if (count < 0) {
-            if (DEBUG) ALOGD("poll failed: %s", strerror(errno));
+            VLOG("poll failed: %s", strerror(errno));
             return -errno;
         } else {
             if ((pfds.revents & POLLERR) != 0) {
-                if (DEBUG) ALOGD("return event has error %s", strerror(errno));
+                VLOG("return event has error %s", strerror(errno));
                 return errno != 0 ? -errno : UNKNOWN_ERROR;
             } else {
                 ssize_t amt = ::read(fd, mBuffer.writeBuffer(), mBuffer.currentToWrite());
@@ -86,7 +71,7 @@ FdBuffer::read(int fd, int64_t timeout)
                     if (errno == EAGAIN || errno == EWOULDBLOCK) {
                         continue;
                     } else {
-                        if (DEBUG) ALOGD("Fail to read %d: %s", fd, strerror(errno));
+                        VLOG("Fail to read %d: %s", fd, strerror(errno));
                         return -errno;
                     }
                 } else if (amt == 0) {
@@ -100,13 +85,12 @@ FdBuffer::read(int fd, int64_t timeout)
     return NO_ERROR;
 }
 
-status_t
-FdBuffer::readProcessedDataInStream(int fd, int toFd, int fromFd, int64_t timeoutMs, const bool isSysfs)
-{
+status_t FdBuffer::readProcessedDataInStream(int fd, int toFd, int fromFd, int64_t timeoutMs,
+                                             const bool isSysfs) {
     struct pollfd pfds[] = {
-        { .fd = fd,     .events = POLLIN  },
-        { .fd = toFd,   .events = POLLOUT },
-        { .fd = fromFd, .events = POLLIN  },
+            {.fd = fd, .events = POLLIN},
+            {.fd = toFd, .events = POLLOUT},
+            {.fd = fromFd, .events = POLLIN},
     };
 
     mStartTime = uptimeMillis();
@@ -131,7 +115,7 @@ FdBuffer::readProcessedDataInStream(int fd, int toFd, int fromFd, int64_t timeou
 
         int64_t remainingTime = (mStartTime + timeoutMs) - uptimeMillis();
         if (remainingTime <= 0) {
-            if (DEBUG) ALOGD("timed out due to long read");
+            VLOG("timed out due to long read");
             mTimedOut = true;
             break;
         }
@@ -139,11 +123,11 @@ FdBuffer::readProcessedDataInStream(int fd, int toFd, int fromFd, int64_t timeou
         // wait for any pfds to be ready to perform IO
         int count = poll(pfds, 3, remainingTime);
         if (count == 0) {
-            if (DEBUG) ALOGD("timed out due to block calling poll");
+            VLOG("timed out due to block calling poll");
             mTimedOut = true;
             break;
         } else if (count < 0) {
-            if (DEBUG) ALOGD("Fail to poll: %s", strerror(errno));
+            VLOG("Fail to poll: %s", strerror(errno));
             return -errno;
         }
 
@@ -151,10 +135,10 @@ FdBuffer::readProcessedDataInStream(int fd, int toFd, int fromFd, int64_t timeou
         for (int i = 0; i < 3; ++i) {
             if ((pfds[i].revents & POLLERR) != 0) {
                 if (i == 0 && isSysfs) {
-                    if (DEBUG) ALOGD("fd %d is sysfs, ignore its POLLERR return value", fd);
+                    VLOG("fd %d is sysfs, ignore its POLLERR return value", fd);
                     continue;
                 }
-                if (DEBUG) ALOGD("fd[%d]=%d returns error events: %s", i, fd, strerror(errno));
+                VLOG("fd[%d]=%d returns error events: %s", i, fd, strerror(errno));
                 return errno != 0 ? -errno : UNKNOWN_ERROR;
             }
         }
@@ -169,9 +153,9 @@ FdBuffer::readProcessedDataInStream(int fd, int toFd, int fromFd, int64_t timeou
             }
             if (amt < 0) {
                 if (!(errno == EAGAIN || errno == EWOULDBLOCK)) {
-                    if (DEBUG) ALOGD("Fail to read fd %d: %s", fd, strerror(errno));
+                    VLOG("Fail to read fd %d: %s", fd, strerror(errno));
                     return -errno;
-                } // otherwise just continue
+                }                   // otherwise just continue
             } else if (amt == 0) {  // reach EOF so don't have to poll pfds[0].
                 ::close(pfds[0].fd);
                 pfds[0].fd = -1;
@@ -191,9 +175,9 @@ FdBuffer::readProcessedDataInStream(int fd, int toFd, int fromFd, int64_t timeou
             }
             if (amt < 0) {
                 if (!(errno == EAGAIN || errno == EWOULDBLOCK)) {
-                    if (DEBUG) ALOGD("Fail to write toFd %d: %s", toFd, strerror(errno));
+                    VLOG("Fail to write toFd %d: %s", toFd, strerror(errno));
                     return -errno;
-                } // otherwise just continue
+                }  // otherwise just continue
             } else {
                 wpos += amt;
                 cirSize -= amt;
@@ -218,9 +202,9 @@ FdBuffer::readProcessedDataInStream(int fd, int toFd, int fromFd, int64_t timeou
         ssize_t amt = ::read(fromFd, mBuffer.writeBuffer(), mBuffer.currentToWrite());
         if (amt < 0) {
             if (!(errno == EAGAIN || errno == EWOULDBLOCK)) {
-                if (DEBUG) ALOGD("Fail to read fromFd %d: %s", fromFd, strerror(errno));
+                VLOG("Fail to read fromFd %d: %s", fromFd, strerror(errno));
                 return -errno;
-            } // otherwise just continue
+            }  // otherwise just continue
         } else if (amt == 0) {
             break;
         } else {
@@ -232,14 +216,6 @@ FdBuffer::readProcessedDataInStream(int fd, int toFd, int fromFd, int64_t timeou
     return NO_ERROR;
 }
 
-size_t
-FdBuffer::size() const
-{
-    return mBuffer.size();
-}
+size_t FdBuffer::size() const { return mBuffer.size(); }
 
-EncodedBuffer::iterator
-FdBuffer::data() const
-{
-    return mBuffer.begin();
-}
+EncodedBuffer::iterator FdBuffer::data() const { return mBuffer.begin(); }

@@ -92,8 +92,10 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
         ALOGE("This config is too big! Reject!");
         mConfigValid = false;
     }
-
-    // TODO: add alert size.
+    if (mAllAnomalyTrackers.size() > StatsdStats::kMaxAlertCountPerConfig) {
+        ALOGE("This config has too many alerts! Reject!");
+        mConfigValid = false;
+    }
     // no matter whether this config is valid, log it in the stats.
     StatsdStats::getInstance().noteConfigReceived(key, mAllMetricProducers.size(),
                                                   mAllConditionTrackers.size(),
@@ -188,8 +190,9 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
         return;
     }
 
-    if (event.GetTagId() == android::util::APP_BREADCRUMB_REPORTED) { // Check that app hook fields are valid.
-        // TODO: Find a way to make these checks easier to maintain if the app hooks get changed.
+    if (event.GetTagId() == android::util::APP_BREADCRUMB_REPORTED) {
+        // Check that app breadcrumb reported fields are valid.
+        // TODO: Find a way to make these checks easier to maintain.
         status_t err = NO_ERROR;
 
         // Uid is 3rd from last field and must match the caller's uid,

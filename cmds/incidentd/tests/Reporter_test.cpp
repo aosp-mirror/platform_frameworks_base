@@ -11,8 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-#define LOG_TAG "incidentd"
+#include "Log.h"
 
 #include "Reporter.h"
 
@@ -26,7 +25,6 @@
 #include <gtest/gtest.h>
 #include <string.h>
 
-
 using namespace android;
 using namespace android::base;
 using namespace android::binder;
@@ -35,8 +33,7 @@ using namespace std;
 using ::testing::StrEq;
 using ::testing::Test;
 
-class TestListener : public IIncidentReportStatusListener
-{
+class TestListener : public IIncidentReportStatusListener {
 public:
     int startInvoked;
     int finishInvoked;
@@ -44,8 +41,8 @@ public:
     map<int, int> startSections;
     map<int, int> finishSections;
 
-    TestListener() : startInvoked(0), finishInvoked(0), failedInvoked(0) {};
-    virtual ~TestListener() {};
+    TestListener() : startInvoked(0), finishInvoked(0), failedInvoked(0){};
+    virtual ~TestListener(){};
 
     virtual Status onReportStarted() {
         startInvoked++;
@@ -53,16 +50,14 @@ public:
     };
     virtual Status onReportSectionStatus(int section, int status) {
         switch (status) {
-        case IIncidentReportStatusListener::STATUS_STARTING:
-            if (startSections.count(section) == 0)
-                startSections[section] = 0;
-            startSections[section] = startSections[section] + 1;
-            break;
-        case IIncidentReportStatusListener::STATUS_FINISHED:
-            if (finishSections.count(section) == 0)
-                finishSections[section] = 0;
-            finishSections[section] = finishSections[section] + 1;
-            break;
+            case IIncidentReportStatusListener::STATUS_STARTING:
+                if (startSections.count(section) == 0) startSections[section] = 0;
+                startSections[section] = startSections[section] + 1;
+                break;
+            case IIncidentReportStatusListener::STATUS_FINISHED:
+                if (finishSections.count(section) == 0) finishSections[section] = 0;
+                finishSections[section] = finishSections[section] + 1;
+                break;
         }
         return Status::ok();
     };
@@ -156,7 +151,8 @@ TEST_F(ReporterTest, RunReportWithHeaders) {
 
     string result;
     ReadFileToString(tf.path, &result);
-    EXPECT_THAT(result, StrEq("\n\x2" "\b\f"));
+    EXPECT_THAT(result, StrEq("\n\x2"
+                              "\b\f"));
 
     EXPECT_EQ(l->startInvoked, 2);
     EXPECT_EQ(l->finishInvoked, 2);
@@ -178,5 +174,24 @@ TEST_F(ReporterTest, RunReportToGivenDirectory) {
     ASSERT_EQ(Reporter::REPORT_FINISHED, reporter->runReport());
     vector<string> results = InspectFiles();
     ASSERT_EQ((int)results.size(), 1);
-    EXPECT_EQ(results[0], "\n\x2" "\b\f\n\x6" "\x12\x4" "abcd");
+    EXPECT_EQ(results[0],
+              "\n\x2"
+              "\b\f\n\x6"
+              "\x12\x4"
+              "abcd");
+}
+
+TEST_F(ReporterTest, ReportMetadata) {
+    IncidentReportArgs args;
+    args.addSection(1);
+    args.setDest(android::os::DEST_EXPLICIT);
+    sp<ReportRequest> r = new ReportRequest(args, l, -1);
+    reporter->batch.add(r);
+
+    ASSERT_EQ(Reporter::REPORT_FINISHED, reporter->runReport());
+    auto metadata = reporter->batch.metadata();
+    EXPECT_EQ(IncidentMetadata_Destination_EXPLICIT, metadata.dest());
+    EXPECT_EQ(1, metadata.request_size());
+    EXPECT_TRUE(metadata.use_dropbox());
+    EXPECT_EQ(0, metadata.sections_size());
 }

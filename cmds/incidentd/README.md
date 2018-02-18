@@ -21,3 +21,7 @@ Run the test via AndroidTest.xml
 ```
 root$ atest incidentd_test
 ```
+
+Use clang-format to style the file
+
+clang-format -style=file -i <file list>

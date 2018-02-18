@@ -22,6 +22,8 @@ import android.provider.Settings.Global;
 import android.util.KeyValueListParser;
 import android.util.Slog;
 
+import com.android.internal.os.BackgroundThread;
+
 import java.io.PrintWriter;
 
 public class SyncManagerConstants extends ContentObserver {
@@ -53,13 +55,14 @@ public class SyncManagerConstants extends ContentObserver {
     protected SyncManagerConstants(Context context) {
         super(null);
         mContext = context;
-        refresh();
     }
 
     public void start() {
-        mContext.getContentResolver().registerContentObserver(Settings.Global.getUriFor(
-                Settings.Global.SYNC_MANAGER_CONSTANTS), false, this);
-        refresh();
+        BackgroundThread.getHandler().post(() -> {
+            mContext.getContentResolver().registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.SYNC_MANAGER_CONSTANTS), false, this);
+            refresh();
+        });
     }
 
     @Override

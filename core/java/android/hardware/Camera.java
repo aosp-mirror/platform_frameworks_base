@@ -242,6 +242,9 @@ public class Camera {
 
     /**
      * Returns the number of physical cameras available on this device.
+     * The return value of this method might change dynamically if the device
+     * supports external cameras and an external camera is connected or
+     * disconnected.
      *
      * @return total number of accessible camera devices, or 0 if there are no
      *   cameras or an error was encountered enumerating them.
@@ -3542,8 +3545,8 @@ public class Camera {
         /**
          * Gets the horizontal angle of view in degrees.
          *
-         * @return horizontal angle of view. This method will always return a
-         *         valid value.
+         * @return horizontal angle of view. Returns -1.0 when the device
+         *         doesn't report view angle information.
          */
         public float getHorizontalViewAngle() {
             return Float.parseFloat(get(KEY_HORIZONTAL_VIEW_ANGLE));
@@ -3552,8 +3555,8 @@ public class Camera {
         /**
          * Gets the vertical angle of view in degrees.
          *
-         * @return vertical angle of view. This method will always return a
-         *         valid value.
+         * @return vertical angle of view. Returns -1.0 when the device
+         *         doesn't report view angle information.
          */
         public float getVerticalViewAngle() {
             return Float.parseFloat(get(KEY_VERTICAL_VIEW_ANGLE));
