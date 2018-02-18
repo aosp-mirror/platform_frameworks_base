@@ -28,7 +28,7 @@
     <uses-permission android:name="android.permission.ACCESS_VOICE_INTERACTION_SERVICE" />
     <uses-permission android:name="android.permission.DEVICE_POWER" />
 
-    <application>
+    <application android:debuggable="true">
         <uses-library android:name="android.test.runner" />
 
         <provider android:name=".DummyProvider"

@@ -83,6 +83,7 @@ public class TestableContext extends ContextWrapper implements TestRule {
                 .acquireContentProviderClient(Settings.AUTHORITY);
         mSettingsProvider = TestableSettingsProvider.getFakeSettingsProvider(settings);
         mTestableContentResolver.addProvider(Settings.AUTHORITY, mSettingsProvider);
+        mSettingsProvider.clearValuesAndCheck(TestableContext.this);
         mReceiver = check != null ? check.getTracker("receiver") : null;
         mService = check != null ? check.getTracker("service") : null;
         mComponent = check != null ? check.getTracker("component") : null;

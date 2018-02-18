@@ -36,7 +36,7 @@ import static org.junit.Assert.*;
 public class TestableSettingsProvider extends MockContentProvider {
 
     private static final String TAG = "TestableSettingsProvider";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final String MY_UNIQUE_KEY = "Key_" + TestableSettingsProvider.class.getName();
     private static TestableSettingsProvider sInstance;
 
@@ -54,6 +54,9 @@ public class TestableSettingsProvider extends MockContentProvider {
         mValues.put(key("secure", MY_UNIQUE_KEY, userId), MY_UNIQUE_KEY);
         mValues.put(key("system", MY_UNIQUE_KEY, userId), MY_UNIQUE_KEY);
 
+        Settings.Global.clearProviderForTest();
+        Settings.Secure.clearProviderForTest();
+        Settings.System.clearProviderForTest();
         // Verify that if any test is using TestableContext, they all have the correct settings
         // provider.
         assertEquals("Incorrect settings provider, test using incorrect Context?", MY_UNIQUE_KEY,
