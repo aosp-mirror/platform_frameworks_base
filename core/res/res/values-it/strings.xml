@@ -93,6 +93,7 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Messaggi vocali"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Chiamate Wi-Fi"</string>
+    <string name="notification_channel_sim" msgid="4052095493875188564">"Stato SIM"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Peer ha richiesto la modalità TTY FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Peer ha richiesto la modalità TTY HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Peer ha richiesto la modalità TTY VCO"</string>
@@ -238,7 +239,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"Impostazioni"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Assistenza"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Voice Assist"</string>
-    <string name="global_action_lockdown" msgid="2277328351790053477">"Inser. blocco"</string>
+    <string name="global_action_lockdown" msgid="1099326950891078929">"Blocco"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"Nuova notifica"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Tastiera virtuale"</string>
@@ -497,10 +498,8 @@
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Troppi tentativi. Riprova più tardi."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Troppi tentativi. Sensore di impronte digitali disattivato."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Riprova."</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (7654382120628334248) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_hw_not_present (5729436878065119329) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Nessuna impronta digitale registrata."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Questo dispositivo non è dotato di sensore di impronte digitali"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Dito <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -827,6 +826,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Suggerimento. Tocca due volte per aumentare e diminuire lo zoom."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Compilazione autom."</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Compilaz. autom."</string>
+    <string name="autofill_window_title" msgid="921006636895825007">"Compilazione automatica"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1197,9 +1197,9 @@
     <string name="sim_added_title" msgid="3719670512889674693">"Scheda SIM aggiunta"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Riavvia il dispositivo per accedere alla rete mobile."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Riavvia"</string>
-    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Per far funzionare correttamente la tua nuova SIM, dovrai installare e aprire un\'app del tuo operatore."</string>
-    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"SCARICA L\'APP"</string>
-    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"NON ORA"</string>
+    <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Attiva il servizio dati mobile"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Scarica l\'app dell\'operatore per attivare la nuova SIM"</string>
+    <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Scarica app"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Nuova SIM inserita"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Tocca per configurarla"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Imposta ora"</string>
@@ -1211,23 +1211,15 @@
     <string name="no_permissions" msgid="7283357728219338112">"Nessuna autorizzazione richiesta"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"potrebbe comportare dei costi"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <!-- no translation found for usb_charging_notification_title (1595122345358177163) -->
-    <skip />
-    <!-- no translation found for usb_supplying_notification_title (4631045789893086181) -->
-    <skip />
-    <!-- no translation found for usb_mtp_notification_title (4238227258391151029) -->
-    <skip />
-    <!-- no translation found for usb_ptp_notification_title (5425857879922006878) -->
-    <skip />
-    <!-- no translation found for usb_tether_notification_title (3716143122035802501) -->
-    <skip />
-    <!-- no translation found for usb_midi_notification_title (5356040379749154805) -->
-    <skip />
-    <!-- no translation found for usb_accessory_notification_title (1899977434994900306) -->
-    <skip />
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"Dispositivo in carica tramite USB"</string>
+    <string name="usb_supplying_notification_title" msgid="4631045789893086181">"Dispositivo collegato in carica tramite USB"</string>
+    <string name="usb_mtp_notification_title" msgid="4238227258391151029">"Trasferimento file tramite USB attivato"</string>
+    <string name="usb_ptp_notification_title" msgid="5425857879922006878">"Modalità PTP tramite USB attivata"</string>
+    <string name="usb_tether_notification_title" msgid="3716143122035802501">"Tethering USB attivato"</string>
+    <string name="usb_midi_notification_title" msgid="5356040379749154805">"Modalità MIDI tramite USB attivata"</string>
+    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"Modalità accessorio USB attivata"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Tocca per altre opzioni."</string>
-    <!-- no translation found for usb_power_notification_message (4647527153291917218) -->
-    <skip />
+    <string name="usb_power_notification_message" msgid="4647527153291917218">"Dispositivo collegato in carica. Tocca per altre opzioni."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Accessorio audio analogico rilevato"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Il dispositivo collegato non è compatibile con questo telefono. Tocca per avere ulteriori informazioni."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Debug USB collegato"</string>
@@ -1830,8 +1822,7 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Telefono non consentito per la voce"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Finestra popup"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <!-- no translation found for shortcut_restored_on_lower_version (4860853725206702336) -->
-    <skip />
+    <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"È stato eseguito il downgrade della versione dell\'app oppure la versione non è compatibile con questa scorciatoia"</string>
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Impossibile ripristinare la scorciatoia perché l\'app non supporta il backup e il ripristino"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Impossibile ripristinare la scorciatoia perché la firma dell\'app non corrisponde"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Impossibile ripristinare la scorciatoia"</string>
@@ -1841,4 +1832,7 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"App dannosa rilevata"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"L\'app <xliff:g id="APP_0">%1$s</xliff:g> vuole mostrare porzioni dell\'app <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"Modifica"</string>
+    <string name="notification_channel_system_changes" msgid="5072715579030948646">"Modifiche al sistema"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"L\'impostazione Non disturbare è cambiata"</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"Tocca per controllare le interruzioni nelle impostazioni relative al comportamento"</string>
 </resources>

@@ -93,6 +93,7 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"Μηνύματα SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Μηνύματα αυτόματου τηλεφωνητή"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Κλήση Wi-Fi"</string>
+    <string name="notification_channel_sim" msgid="4052095493875188564">"Κατάσταση SIM"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Αίτημα peer για TTY ΠΛΗΡΗΣ Λειτουργία"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Αίτημα peer για TTY Λειτουργία HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Αίτημα peer για TTY Λειτουργία VCO"</string>
@@ -238,7 +239,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"Ρυθμίσεις"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Βοήθεια"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Φων.υποβοηθ."</string>
-    <string name="global_action_lockdown" msgid="2277328351790053477">"Εισαγ. κλειδώμ."</string>
+    <string name="global_action_lockdown" msgid="1099326950891078929">"Κλείδωμα"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"Νέα ειδοποίηση"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Εικονικό πληκτρολόγιο"</string>
@@ -264,10 +265,8 @@
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Ασφαλής λειτουργία"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Σύστημα Android"</string>
-    <!-- no translation found for user_owner_label (8836124313744349203) -->
-    <skip />
-    <!-- no translation found for managed_profile_label (8947929265267690522) -->
-    <skip />
+    <string name="user_owner_label" msgid="8836124313744349203">"Εναλλαγή σε προσωπικό προφίλ"</string>
+    <string name="managed_profile_label" msgid="8947929265267690522">"Εναλλαγή σε προφίλ εργασίας"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Επαφές"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"πρόσβαση στις επαφές σας"</string>
     <string name="permgrouprequest_contacts" msgid="1601591667800538208">"Να επιτρέπεται στην εφαρμογή &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; να έχει πρόσβαση στις επαφές σας"</string>
@@ -419,10 +418,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Επιτρέπει στην εφαρμογή την πρόσβαση στις λειτουργίες τηλεφώνου της συσκευής. Αυτή η άδεια δίνει τη δυνατότητα στην εφαρμογή να καθορίζει τον αριθμό τηλεφώνου και τα αναγνωριστικά συσκευών, εάν μια κλήση είναι ενεργή, καθώς και τον απομακρυσμένο αριθμό που συνδέεται από μια κλήση."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"δρομολόγηση κλήσεων μέσω του συστήματος"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Επιτρέπει στην εφαρμογή να δρομολογεί τις κλήσεις της μέσω του συστήματος για να βελτιώσει την εμπειρία κλήσης."</string>
-    <!-- no translation found for permlab_acceptHandover (2661534649736022409) -->
-    <skip />
-    <!-- no translation found for permdesc_acceptHandovers (4570660484220539698) -->
-    <skip />
+    <string name="permlab_acceptHandover" msgid="2661534649736022409">"συνέχιση κλήσης από άλλη συσκευή"</string>
+    <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Επιτρέπει στην εφαρμογή να συνεχίσει μια κλήση η οποία ξεκίνησε σε άλλη εφαρμογή."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ανάγνωση αριθμών τηλεφώνου"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Επιτρέπει στην εφαρμογή να αποκτήσει πρόσβαση στους αριθμούς τηλεφώνου της συσκευής"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"αποτρέπει την μετάβαση του tablet σε κατάσταση αδράνειας"</string>
@@ -497,11 +494,12 @@
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Δεν είναι δυνατή η αποθήκευση μοναδικού χαρακτηριστικού. Καταργήστε το υπάρχον μοναδικό χαρακτηριστικό."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Λήξη χρονικού ορίου μοναδικού χαρακτηριστικού. Δοκιμάστε ξανά."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Η λειτουργία μοναδικού χαρακτηριστικού ακυρώθηκε."</string>
-    <!-- no translation found for fingerprint_error_user_canceled (7999639584615291494) -->
-    <skip />
+    <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Η λειτουργία δακτυλικού αποτυπώματος ακυρώθηκε από τον χρήστη."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Πάρα πολλές προσπάθειες. Δοκιμάστε ξανά αργότερα."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Πάρα πολλές προσπάθειες. Ο αισθητήρας δακτυλικών αποτυπωμάτων απενεργοποιήθηκε."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Δοκιμάστε ξανά."</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Δεν έχουν καταχωριστεί δακτυλικά αποτυπώματα."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Αυτή η συσκευή δεν διαθέτει αισθητήρα δακτυλικών αποτυπωμάτων"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Δάχτυλο <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -828,6 +826,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Συμβουλή: Πατήστε δύο φορές για μεγέθυνση και σμίκρυνση."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Αυτόματη συμπλήρωση"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Ρύθμ.αυτ.συμπλ."</string>
+    <string name="autofill_window_title" msgid="921006636895825007">"Αυτόματη συμπλήρωση"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1000,12 +999,9 @@
     <string name="browse" msgid="1245903488306147205">"Άνοιγμα"</string>
     <string name="sms" msgid="4560537514610063430">"Μήνυμα"</string>
     <string name="add_contact" msgid="7867066569670597203">"Προσθήκη"</string>
-    <!-- no translation found for view_calendar (979609872939597838) -->
-    <skip />
-    <!-- no translation found for add_calendar_event (1953664627192056206) -->
-    <skip />
-    <!-- no translation found for view_flight (7691640491425680214) -->
-    <skip />
+    <string name="view_calendar" msgid="979609872939597838">"Προβολή"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Χρονοδιάγραμμα"</string>
+    <string name="view_flight" msgid="7691640491425680214">"Κομμάτι"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Ο αποθηκευτικός χώρος εξαντλείται"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Ορισμένες λειτουργίες συστήματος ενδέχεται να μην λειτουργούν"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Δεν υπάρχει αρκετός αποθηκευτικός χώρος για το σύστημα. Βεβαιωθείτε ότι διαθέτετε 250 MB ελεύθερου χώρου και κάντε επανεκκίνηση."</string>
@@ -1131,8 +1127,7 @@
       <item quantity="one">Υπάρχει διαθέσιμο ανοικτό δίκτυο Wi-Fi</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Σύνδεση σε ανοιχτό δίκτυο Wi‑Fi"</string>
-    <!-- no translation found for wifi_available_carrier_network_title (4527932626916527897) -->
-    <skip />
+    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Σύνδεση με δίκτυο Wi‑Fi εταιρείας κινητής τηλεφωνίας"</string>
     <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Σύνδεση σε ανοιχτό δίκτυο Wi‑Fi"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Ολοκληρώθηκε η σύνδεση στο δίκτυο Wi-Fi"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Δεν ήταν δυνατή η σύνδεση σε δίκτυο Wi‑Fi"</string>
@@ -1202,9 +1197,9 @@
     <string name="sim_added_title" msgid="3719670512889674693">"Προστέθηκε κάρτα SIM"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Επανεκκινήστε τη συσκευή σας για να αποκτήσετε πρόσβαση στο δίκτυο κινητής τηλεφωνίας."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Επανεκκίνηση"</string>
-    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Για να λειτουργεί σωστά η νέα κάρτα SIM, θα πρέπει να εγκαταστήσετε και να ανοίξετε μια εφαρμογή από την εταιρεία κινητής τηλεφωνίας που χρησιμοποιείτε."</string>
-    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"ΛΗΨΗ ΤΗΣ ΕΦΑΡΜΟΓΗΣ"</string>
-    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"ΟΧΙ ΤΩΡΑ"</string>
+    <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Ενεργοποίηση υπηρεσίας κινητής τηλεφωνίας"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Κατεβάστε την εφαρμογή της εταιρείας κινητής τηλεφωνίας, για να ενεργοποιήσετε τη νέα SIM"</string>
+    <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Λήψη εφαρμογής"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Τοποθετήθηκε νέα SIM"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Πατήστε για ρύθμιση"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Ρύθμιση ώρας"</string>
@@ -1216,13 +1211,15 @@
     <string name="no_permissions" msgid="7283357728219338112">"Δεν απαιτούνται άδειες"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"ενδέχεται να χρεωθείτε"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ΟΚ"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"Αυτή η συσκευή φορτίζεται μέσω USB"</string>
-    <string name="usb_supplying_notification_title" msgid="5310642257296510271">"Η συνδεδεμένη συσκευή τροφοδοτείται μέσω USB"</string>
-    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB για μεταφορά αρχείων"</string>
-    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB για μεταφορά φωτογραφιών"</string>
-    <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB για MIDI"</string>
-    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Σύνδεση σε αξεσουάρ USB"</string>
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"Φόρτιση αυτής της συσκευής μέσω USB"</string>
+    <string name="usb_supplying_notification_title" msgid="4631045789893086181">"Φόρτιση συνδεδεμένης συσκευής μέσω USB"</string>
+    <string name="usb_mtp_notification_title" msgid="4238227258391151029">"Η μεταφορά αρχείων μέσω USB ενεργοποιήθηκε"</string>
+    <string name="usb_ptp_notification_title" msgid="5425857879922006878">"Η λειτουργία PTP μέσω USB ενεργοποιήθηκε"</string>
+    <string name="usb_tether_notification_title" msgid="3716143122035802501">"Η σύνδεση μέσω USB ενεργοποιήθηκε"</string>
+    <string name="usb_midi_notification_title" msgid="5356040379749154805">"Η λειτουργία MIDI μέσω USB ενεργοποιήθηκε"</string>
+    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"Η λειτουργία αξεσουάρ USB ενεργοποιήθηκε"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Πατήστε για περισσότερες επιλογές."</string>
+    <string name="usb_power_notification_message" msgid="4647527153291917218">"Φόρτιση συνδεδεμένης συσκευής. Πατήστε για περισσότερες επιλογές."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Εντοπίστηκε αναλογικό αξεσουάρ ήχου"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Η συνδεδεμένη συσκευή δεν είναι συμβατή με αυτό το τηλέφωνο. Πατήστε για να μάθετε περισσότερα."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Συνδέθηκε ο εντοπισμός σφαλμάτων USB"</string>
@@ -1661,9 +1658,6 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Εργασία <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"<xliff:g id="LABEL">%1$s</xliff:g> εργασίας 2"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"<xliff:g id="LABEL">%1$s</xliff:g> εργασίας 3"</string>
-    <string name="lock_to_app_toast" msgid="6820571533009838261">"Για να ξεκαρφιτσώσετε αυτήν την οθόνη, αγγίξτε παρατεταμένα τα κουμπιά \"Πίσω\" και \"Επισκόπηση\""</string>
-    <string name="lock_to_app_start" msgid="6643342070839862795">"Η οθόνη καρφιτσώθηκε"</string>
-    <string name="lock_to_app_exit" msgid="8598219838213787430">"Η οθόνη ξεκαρφιτσώθηκε"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Να γίνεται ερώτηση για το PIN, πριν από το ξεκαρφίτσωμα"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Να γίνεται ερώτηση για το μοτίβο ξεκλειδώματος, πριν από το ξεκαρφίτσωμα"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Να γίνεται ερώτηση για τον κωδικό πρόσβασης, πριν από το ξεκαρφίτσωμα"</string>
@@ -1757,15 +1751,11 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Όλες οι γλώσσες"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Όλες οι περιοχές"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Αναζήτηση"</string>
-    <!-- no translation found for work_mode_off_title (1118691887588435530) -->
-    <skip />
-    <!-- no translation found for work_mode_off_message (5130856710614337649) -->
-    <skip />
+    <string name="work_mode_off_title" msgid="1118691887588435530">"Ενεργοποίηση προφίλ εργασίας;"</string>
+    <string name="work_mode_off_message" msgid="5130856710614337649">"Οι εφαρμογές, οι ειδοποιήσεις και τα δεδομένα εργασίας σας, καθώς και άλλες λειτουργίες του προφίλ εργασίας, θα ενεργοποιηθούν"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Ενεργοποίηση"</string>
-    <!-- no translation found for deprecated_target_sdk_message (1449696506742572767) -->
-    <skip />
-    <!-- no translation found for deprecated_target_sdk_app_store (5032340500368495077) -->
-    <skip />
+    <string name="deprecated_target_sdk_message" msgid="1449696506742572767">"Αυτή η εφαρμογή δημιουργήθηκε για παλαιότερη έκδοση του Android και μπορεί να μην λειτουργεί σωστά. Δοκιμάστε να ελέγξετε εάν υπάρχουν ενημερώσεις ή επικοινωνήστε με τον προγραμματιστή."</string>
+    <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Έλεγχος για ενημέρωση"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Έχετε νέα μηνύματα"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Άνοιγμα της εφαρμογής SMS για προβολή"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Μερ. λειτ. ίσως είναι περιορ."</string>
@@ -1832,17 +1822,17 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Δεν επιτρέπεται η χρήση του τηλεφώνου για φωνητικές εντολές"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Αναδυόμενο παράθυρο"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"Αυτή η συντόμευση απαιτεί την πιο πρόσφατη έκδοση της εφαρμογής"</string>
+    <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"Η έκδοση εφαρμογής υποβαθμίστηκε ή δεν είναι συμβατή με αυτήν τη συντόμευση"</string>
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Δεν ήταν δυνατή η επαναφορά της συντόμευσης, επειδή η εφαρμογή δεν υποστηρίζει τη δημιουργία αντιγράφων ασφαλείας και την επαναφορά"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Δεν ήταν δυνατή η επαναφορά της συντόμευσης, λόγω αναντιστοιχίας της υπογραφής εφαρμογής"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Δεν ήταν δυνατή η επαναφορά της συντόμευσης"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"Η συντόμευση είναι απενεργοποιημένη"</string>
-    <!-- no translation found for harmful_app_warning_uninstall (4837672735619532931) -->
-    <skip />
-    <!-- no translation found for harmful_app_warning_open_anyway (596432803680914321) -->
-    <skip />
-    <!-- no translation found for harmful_app_warning_title (8982527462829423432) -->
-    <skip />
+    <string name="harmful_app_warning_uninstall" msgid="4837672735619532931">"ΑΠΕΓΚΑΤΑΣΤΑΣΗ"</string>
+    <string name="harmful_app_warning_open_anyway" msgid="596432803680914321">"ΑΝΟΙΓΜΑ"</string>
+    <string name="harmful_app_warning_title" msgid="8982527462829423432">"Εντοπίστηκε επιβλαβής εφαρμογή"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"Η εφαρμογή <xliff:g id="APP_0">%1$s</xliff:g> θέλει να εμφανίζει τμήματα της εφαρμογής <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"Επεξεργασία"</string>
+    <string name="notification_channel_system_changes" msgid="5072715579030948646">"Αλλαγές στο σύστημα"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Η λειτουργία \"Μην ενοχλείτε\" άλλαξε"</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"Πατήστε για να ελέγξετε τις ρυθμίσεις συμπεριφοράς για διακοπές"</string>
 </resources>

@@ -93,6 +93,7 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS မက်ဆေ့ဂျ်များ"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"အသံမေးလ် မက်ဆေ့ဂျ်များ"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi ခေါ်ဆိုမှု"</string>
+    <string name="notification_channel_sim" msgid="4052095493875188564">"ဆင်းမ် အခြေအနေ"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"အခြားစက်မှ TTY မုဒ် FULL ပြုရန် တောင်းဆို၏"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"အခြားစက်မှ TTY မုဒ် HCO ပြုရန် တောင်းဆို၏"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"TTY မုဒ် VCO ပြုရန် အခြားစက်မှ တောင်းဆို၏"</string>
@@ -238,7 +239,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"ဆက်တင်များ"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"အကူအညီ"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"အသံ အကူအညီ"</string>
-    <string name="global_action_lockdown" msgid="2277328351790053477">"ချိပ်ပိတ်ရန်"</string>
+    <string name="global_action_lockdown" msgid="1099326950891078929">"ချိတ်ပိတ်ရန်"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"၉၉၉+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"အကြောင်းကြားချက်အသစ်"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"ပကတိအသွင်ကီးဘုတ်"</string>
@@ -497,10 +498,8 @@
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"ကြိုးစာမှု အကြိမ်များနေ၏။ နောက်မှ ထပ်မံကြိုးစားပါ။"</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"အကြိမ်အရေအတွက် အလွန်များနေပါပြီ။ လက်ဗွေဖတ်စနစ်ကို ပိတ်ထားပါသည်။"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"ပြန်ကြိုးစားပါ"</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (7654382120628334248) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_hw_not_present (5729436878065119329) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"မည်သည့် လက်ဗွေကိုမျှ ထည့်သွင်းမထားပါ။"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"ဤစက်ပစ္စည်းတွင် လက်ဗွေအာရုံခံကိရိယာ မရှိပါ"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"လက်ချောင်း <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -827,6 +826,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"အကြံပေးချက်- ဇူးမ်ဆွဲရန်နှင့် ဖြုတ်ရန် နှစ်ကြိမ်ဆက်တိုက် တို့ပါ"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"အလိုအလျောက်ဖြည့်ပါ"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"အလိုအလျောက်ဖြည့်ရန် သတ်မှတ်သည်"</string>
+    <string name="autofill_window_title" msgid="921006636895825007">"အလိုအလျောက်ဖြည့်ရန်"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -997,7 +997,7 @@
     <string name="dial" msgid="1253998302767701559">"ခေါ်ဆိုရန်"</string>
     <string name="map" msgid="6521159124535543457">"တည်နေရာ"</string>
     <string name="browse" msgid="1245903488306147205">"ဖွင့်ရန်"</string>
-    <string name="sms" msgid="4560537514610063430">"စာပို့ရန်"</string>
+    <string name="sms" msgid="4560537514610063430">"SMS"</string>
     <string name="add_contact" msgid="7867066569670597203">"ထည့်ရန်"</string>
     <string name="view_calendar" msgid="979609872939597838">"ကြည့်ရန်"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"အချိန်ဇယား"</string>
@@ -1198,9 +1198,9 @@
     <string name="sim_added_title" msgid="3719670512889674693">"ဆင်းမ်ကဒ် ထည့်ပါသည်"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"မိုးဘိုင်းကွန်ရက်ကို ဆက်သွယ်ရန် စက်ကို ပြန် စ ပါ"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"အစက ပြန်စရန်"</string>
-    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"သင့် SIM အသစ်ပုံမှန် အလုပ်လုပ်ရန်၊ သင်အသုံးပြုသည့် မိုဘိုင်းဝန်ဆောင်မှုမှ အက်ပ်တစ်ခုထည့်သွင်း၍ ဖွင့်ရန်လိုအပ်ပါသည်။"</string>
-    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"အက်ပ်ကို ရယူပါ"</string>
-    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"ယခုမလုပ်ပါ"</string>
+    <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"မိုဘိုင်းဝန်ဆောင်မှု စတင်ဖွင့်လှစ်ရန်"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"သင့်ဆင်းမ် အသစ်ကို စတင်အသုံးပြုရန် ဝန်ဆောင်မှုပေးသူအက်ပ်ကို ဒေါင်းလုဒ်လုပ်ပါ"</string>
+    <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"အက်ပ် ဒေါင်းလုဒ်လုပ်ရန်"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"SIM အသစ်ထည့်သွင်းလိုက်ပါသည်"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"၎င်းကိုတပ်ဆင်ရန် တို့ပါ"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"အချိန်သတ်မှတ်ရန်"</string>
@@ -1212,23 +1212,15 @@
     <string name="no_permissions" msgid="7283357728219338112">"ခွင့်ပြုချက်မလိုအပ်ပါ"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"သင့်အတွက် ပိုက်ဆံကုန်ကျနိုင်ပါသည်"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"အိုကေ"</string>
-    <!-- no translation found for usb_charging_notification_title (1595122345358177163) -->
-    <skip />
-    <!-- no translation found for usb_supplying_notification_title (4631045789893086181) -->
-    <skip />
-    <!-- no translation found for usb_mtp_notification_title (4238227258391151029) -->
-    <skip />
-    <!-- no translation found for usb_ptp_notification_title (5425857879922006878) -->
-    <skip />
-    <!-- no translation found for usb_tether_notification_title (3716143122035802501) -->
-    <skip />
-    <!-- no translation found for usb_midi_notification_title (5356040379749154805) -->
-    <skip />
-    <!-- no translation found for usb_accessory_notification_title (1899977434994900306) -->
-    <skip />
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"ဤစက်ပစ္စည်းကို USB မှတစ်ဆင့် အားသွင်းနေသည်"</string>
+    <string name="usb_supplying_notification_title" msgid="4631045789893086181">"USB မှတစ်ဆင့် ချိတ်ဆက်ထားသည့် စက်ပစ္စည်းကို အားသွင်းနေသည်"</string>
+    <string name="usb_mtp_notification_title" msgid="4238227258391151029">"USB ဖြင့် ဖိုင်လွှဲပြောင်းခြင်းကို ဖွင့်ထားသည်"</string>
+    <string name="usb_ptp_notification_title" msgid="5425857879922006878">"USB မှတစ်ဆင့် PTP ကို အသုံးပြုရန် ဖွင့်ထားသည်"</string>
+    <string name="usb_tether_notification_title" msgid="3716143122035802501">"USB မှတစ်ဆင့် မိုဘိုင်းဖုန်းကို မိုဒမ်အဖြစ်သုံးရန် ဖွင့်ထားသည်"</string>
+    <string name="usb_midi_notification_title" msgid="5356040379749154805">"USB မှတစ်ဆင့် MIDI ကို အသုံးပြုရန် ဖွင့်ထားသည်"</string>
+    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"USB တွဲဖက်ပစ္စည်းမုဒ်ကို ဖွင့်ထားသည်"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"နောက်ထပ်ရွေးချယ်စရာများအတွက် တို့ပါ။"</string>
-    <!-- no translation found for usb_power_notification_message (4647527153291917218) -->
-    <skip />
+    <string name="usb_power_notification_message" msgid="4647527153291917218">"ချိတ်ဆက်ထားသည့် စက်ပစ္စည်းကို အားသွင်းနေသည်။ နောက်ထပ်ရွေးချယ်စရာများအတွက် တို့ပါ။"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"အန်နာလော့ အသံကိရိယာကို တွေ့ထားပါသည်"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"တပ်ဆင်ထားသော ကိရိယာကို ဤဖုန်းနှင့် တွဲသုံး၍မရပါ။ ပိုမိုလေ့လာရန် တို့ပါ။"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB အမှားရှာပြင်စနစ် ချိတ်ဆက်ထားသည်"</string>
@@ -1831,8 +1823,7 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"စကားသံအတွက် ဖုန်းကို ခွင့်မပြုပါ"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"ပေါ့ပ်အပ် ဝင်းဒိုး"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <!-- no translation found for shortcut_restored_on_lower_version (4860853725206702336) -->
-    <skip />
+    <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"အက်ပ်ဗားရှင်းကို အဆင့်နှိမ့်ထားသည် သို့မဟုတ် ဤဖြတ်လမ်းလင့်ခ်နှင့် သဟဇာတမဖြစ်ပါ"</string>
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"အက်ပ်သည် မိတ္တူကူးခြင်းနှင့် ပြန်ယူခြင်းကို ပံ့ပိုးခြင်းမရှိသည့်အတွက် ဖြတ်လမ်းလင့်ခ်ကို ပြန်ယူ၍မရပါ"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"အက်ပ်လက်မှတ် မတူညီသည့်အတွက် ဖြတ်လမ်းလင့်ခ်များကို ပြန်ယူ၍မရပါ"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"ဖြတ်လမ်းလင့်ခ်ကို ပြန်ယူ၍မရပါ"</string>
@@ -1842,4 +1833,7 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"အန္တရာယ်ရှိသော အက်ပ်ကို တွေ့ရှိထားသည်"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> သည် <xliff:g id="APP_2">%2$s</xliff:g> ၏အချပ်များကို ပြသလိုသည်"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"တည်းဖြတ်ရန်"</string>
+    <string name="notification_channel_system_changes" msgid="5072715579030948646">"စနစ် အပြောင်းအလဲများ"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\'မနှောင့်ယှက်ရ\' ပြောင်းလဲသွားပါပြီ"</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"ကြားဖြတ်ခြင်းများအတွက် သင်၏ အမူအကျင့်ဆက်တင်များကို စစ်ဆေးရန် တို့ပါ"</string>
 </resources>

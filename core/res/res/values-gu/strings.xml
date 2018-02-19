@@ -93,6 +93,8 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS સંદેશા"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"વૉઇસમેઇલ સંદેશા"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"વાઇ-ફાઇ કૉલિંગ"</string>
+    <!-- no translation found for notification_channel_sim (4052095493875188564) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"પીઅરે TTY મોડ પૂર્ણની વિનંતી કરી"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"પીઅરે TTY મોડ HCO ની વિનંતી કરી"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"પીઅરે TTY મોડ VCO ની વિનંતી કરી"</string>
@@ -238,7 +240,8 @@
     <string name="global_action_settings" msgid="1756531602592545966">"સેટિંગ્સ"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"સહાય"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"વૉઇસ સહાય"</string>
-    <string name="global_action_lockdown" msgid="2277328351790053477">"લોકડાઉન દાખલ કરો"</string>
+    <!-- no translation found for global_action_lockdown (1099326950891078929) -->
+    <skip />
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"નવું નોટિફિકેશન"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"વર્ચ્યુઅલ કીબોર્ડ"</string>
@@ -497,10 +500,8 @@
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"ઘણા બધા પ્રયત્નો. પછીથી ફરી પ્રયાસ કરો."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"ઘણા વધુ પ્રયત્નો. ફિંગરપ્રિન્ટ સેન્સર અક્ષમ કરવામાં આવ્યું છે."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"ફરી પ્રયાસ કરો."</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (7654382120628334248) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_hw_not_present (5729436878065119329) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"કોઈ ફિંગરપ્રિન્ટની નોંધણી કરવામાં આવી નથી."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"આ ઉપકરણમાં કોઈ ફિંગરપ્રિન્ટ સેન્સર નથી"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"આંગળી <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -827,6 +828,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"ટિપ: ઝૂમ વધારવા અને ઘટાડવા માટે બે વાર ટેપ કરો."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"સ્વતઃભરણ"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"સ્વતઃભરણ સેટ કરો"</string>
+    <!-- no translation found for autofill_window_title (921006636895825007) -->
+    <skip />
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1198,9 +1201,12 @@
     <string name="sim_added_title" msgid="3719670512889674693">"સિમ કાર્ડ ઉમેર્યો"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"મોબાઇલ નેટવર્કને ઍક્સેસ કરવા માટે તમારા ઉપકરણને પુનઃપ્રારંભ કરો."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"રિસ્ટાર્ટ કરો"</string>
-    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"તમારું નવું સિમ ઠીકથી કામ કરે તે માટે, તમને તમારા કેરીઅર પરથી ઍપ્લિકેશન ઇન્સ્ટૉલ કરીને ખોલવી પડશે."</string>
-    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"ઍપ્લિકેશન મેળવો"</string>
-    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"હમણાં નહીં"</string>
+    <!-- no translation found for install_carrier_app_notification_title (9056007111024059888) -->
+    <skip />
+    <!-- no translation found for install_carrier_app_notification_text (3346681446158696001) -->
+    <skip />
+    <!-- no translation found for install_carrier_app_notification_button (3094206295081900849) -->
+    <skip />
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"નવું સિમ દાખલ કર્યું"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"તેને સેટ કરવા માટે ટૅપ કરો"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"સમય સેટ કરો"</string>
@@ -1212,23 +1218,15 @@
     <string name="no_permissions" msgid="7283357728219338112">"કોઈ પરવાનગીઓ જરૂરી નથી"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"આનાથી તમારા પૈસા ખર્ચ થઈ શકે છે"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ઓકે"</string>
-    <!-- no translation found for usb_charging_notification_title (1595122345358177163) -->
-    <skip />
-    <!-- no translation found for usb_supplying_notification_title (4631045789893086181) -->
-    <skip />
-    <!-- no translation found for usb_mtp_notification_title (4238227258391151029) -->
-    <skip />
-    <!-- no translation found for usb_ptp_notification_title (5425857879922006878) -->
-    <skip />
-    <!-- no translation found for usb_tether_notification_title (3716143122035802501) -->
-    <skip />
-    <!-- no translation found for usb_midi_notification_title (5356040379749154805) -->
-    <skip />
-    <!-- no translation found for usb_accessory_notification_title (1899977434994900306) -->
-    <skip />
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"આ ઉપકરણને USB મારફતે ચાર્જ કરી રહ્યાં છીએ"</string>
+    <string name="usb_supplying_notification_title" msgid="4631045789893086181">"કનેક્ટેડ ઉપકરણને USB મારફતે ચાર્જ કરી રહ્યાં છીએ"</string>
+    <string name="usb_mtp_notification_title" msgid="4238227258391151029">"USB ફાઇલ ટ્રાન્સફર ચાલુ છે"</string>
+    <string name="usb_ptp_notification_title" msgid="5425857879922006878">"USB મારફતે PTP ચાલુ કર્યું"</string>
+    <string name="usb_tether_notification_title" msgid="3716143122035802501">"USBથી ઇન્ટરનેટ શેર કરવાની સુવિધા ચાલુ કરી"</string>
+    <string name="usb_midi_notification_title" msgid="5356040379749154805">"USB મારફતે MIDI ચાલુ કર્યું"</string>
+    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"USB ઍક્સેસરી મોડ ચાલુ કર્યો"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"વધુ વિકલ્પો માટે ટૅપ કરો."</string>
-    <!-- no translation found for usb_power_notification_message (4647527153291917218) -->
-    <skip />
+    <string name="usb_power_notification_message" msgid="4647527153291917218">"કનેક્ટ કરેલ ઉપકરણ ચાર્જ થઈ રહ્યું છે. વધુ વિકલ્પો માટે ટૅપ કરો."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"એનાલોગ ઑડિઓ ઍક્સેસરી મળી"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"જોડેલ ઉપકરણ આ ફોન સાથે સુસંગત નથી. વધુ જાણવા માટે ટૅપ કરો."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ડીબગિંગ કનેક્ટ થયું."</string>
@@ -1831,8 +1829,7 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"વૉઇસ માટે આ ફોનને મંજૂરી નથી"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"પૉપઅપ વિંડો"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <!-- no translation found for shortcut_restored_on_lower_version (4860853725206702336) -->
-    <skip />
+    <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"આ ઍપનું વર્ઝન ડાઉનગ્રેડ કરવામાં આવ્યું છે અથવા આ શૉર્ટકટ સાથે સુસંગત નથી"</string>
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"શૉર્ટકટ ફરી મેળવી શકાયો નથી કારણ કે ઍપ બૅકઅપ અને ફરી મેળવવાનું સમર્થન કરતી નથી"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"શૉર્ટકટ ફરી મેળવી શકાયો નથી કારણ કે ઍપમાં છે તે સહી મેળ ખાતી નથી"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"શૉર્ટકટ પાછો મેળવી શકાયો નથી"</string>
@@ -1842,4 +1839,7 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"નુકસાનકારક ઍપ મળી આવી છે"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g>એ <xliff:g id="APP_2">%2$s</xliff:g> સ્લાઇસ બતાવવા માગે છે"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"ફેરફાર કરો"</string>
+    <string name="notification_channel_system_changes" msgid="5072715579030948646">"સિસ્ટમના ફેરફારો"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"ખલેલ પાડશો નહીંમાં ફેરફાર થયો છે"</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"વિક્ષેપો સંબંધિત તમારી વર્તણૂક સેટિંગ તપાસવા માટે ટૅપ કરો"</string>
 </resources>

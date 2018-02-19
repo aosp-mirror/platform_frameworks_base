@@ -97,6 +97,7 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"‏الرسائل القصيرة SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"رسائل البريد الصوتي"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"‏الاتصال عبر Wi-Fi"</string>
+    <string name="notification_channel_sim" msgid="4052095493875188564">"‏حالة شريحة SIM"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"‏طلب النظير وضع TTY الكامل"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"‏طلب النظير وضع TTY على HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"‏طلب النظير وضع TTY على VCO"</string>
@@ -250,7 +251,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"الإعدادات"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"مساعدة"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"المساعد الصوتي"</string>
-    <string name="global_action_lockdown" msgid="2277328351790053477">"تفعيل الإغلاق"</string>
+    <string name="global_action_lockdown" msgid="1099326950891078929">"إغلاق"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"إشعار جديد"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"لوحة المفاتيح الافتراضية"</string>
@@ -276,10 +277,8 @@
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>، <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"الوضع الآمن"</string>
     <string name="android_system_label" msgid="6577375335728551336">"‏نظام Android"</string>
-    <!-- no translation found for user_owner_label (8836124313744349203) -->
-    <skip />
-    <!-- no translation found for managed_profile_label (8947929265267690522) -->
-    <skip />
+    <string name="user_owner_label" msgid="8836124313744349203">"التبديل إلى الملف الشخصي"</string>
+    <string name="managed_profile_label" msgid="8947929265267690522">"التبديل إلى الملف الشخصي للعمل"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"جهات الاتصال"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"الوصول إلى جهات اتصالك"</string>
     <string name="permgrouprequest_contacts" msgid="1601591667800538208">"‏السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالوصول إلى جهات الاتصال"</string>
@@ -431,10 +430,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"للسماح للتطبيق بالدخول إلى ميزات الهاتف في الجهاز. ويتيح هذا الإذن للتطبيق تحديد رقم الهاتف ومعرّفات الجهاز، وما إذا كانت هناك مكالمة نشطة والرقم البعيد الذي تم الاتصال به في المكالمة."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"توجيه المكالمات من خلال النظام"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"يسمح للتطبيق بتوجيه المكالمات من خلال النظام لتحسين تجربة الاتصال."</string>
-    <!-- no translation found for permlab_acceptHandover (2661534649736022409) -->
-    <skip />
-    <!-- no translation found for permdesc_acceptHandovers (4570660484220539698) -->
-    <skip />
+    <string name="permlab_acceptHandover" msgid="2661534649736022409">"مواصلة مكالمة من تطبيق آخر"</string>
+    <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"السماح للتطبيق بمواصلة مكالمة بدأت في تطبيق آخر."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"قراءة أرقام الهواتف"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"للسماح للتطبيق بالوصول إلى أرقام الهواتف على هذا الجهاز."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"منع الجهاز اللوحي من الدخول في وضع السكون"</string>
@@ -509,11 +506,12 @@
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"يتعذر تخزين بصمة الإصبع؛ يرجى إزالة إحدى البصمات المخزنة."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"تم بلوغ مهلة إدخال بصمة الإصبع. أعد المحاولة."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"تم إلغاء تشغيل بصمة الإصبع."</string>
-    <!-- no translation found for fingerprint_error_user_canceled (7999639584615291494) -->
-    <skip />
+    <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"تم إلغاء تشغيل بصمة الإصبع بواسطة المستخدم."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"تم إجراء عدد كبير من المحاولات. أعد المحاولة لاحقًا."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"تم إجراء عدد كبير جدًا من المحاولات. لذا تم تعطيل مستشعر بصمات الإصبع."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"أعد المحاولة."</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"ليست هناك بصمات إصبع مسجَّلة."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"لا يحتوي هذا الجهاز على مستشعر بصمات الأصابع."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"الإصبع <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -840,6 +838,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"نصيحة: اضغط مرتين للتكبير والتصغير."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"ملء تلقائي"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"إعداد الملء التلقائي"</string>
+    <string name="autofill_window_title" msgid="921006636895825007">"ملء تلقائي"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">"، "</string>
@@ -1080,12 +1079,9 @@
     <string name="browse" msgid="1245903488306147205">"فتح"</string>
     <string name="sms" msgid="4560537514610063430">"رسالة"</string>
     <string name="add_contact" msgid="7867066569670597203">"إضافة"</string>
-    <!-- no translation found for view_calendar (979609872939597838) -->
-    <skip />
-    <!-- no translation found for add_calendar_event (1953664627192056206) -->
-    <skip />
-    <!-- no translation found for view_flight (7691640491425680214) -->
-    <skip />
+    <string name="view_calendar" msgid="979609872939597838">"عرض"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"تحديد موعد حدث"</string>
+    <string name="view_flight" msgid="7691640491425680214">"تتبّع"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"مساحة التخزين منخفضة"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"قد لا تعمل بعض وظائف النظام"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"ليست هناك سعة تخزينية كافية للنظام. تأكد من أنه لديك مساحة خالية تبلغ ٢٥٠ ميغابايت وأعد التشغيل."</string>
@@ -1195,9 +1191,9 @@
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"مستوى صوت المكالمة"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"مستوى صوت الوسائط"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"مستوى صوت الإشعار"</string>
-    <string name="ringtone_default" msgid="3789758980357696936">"نغمة الرنين الافتراضية"</string>
+    <string name="ringtone_default" msgid="3789758980357696936">"نغمة الرنين التلقائية"</string>
     <string name="ringtone_default_with_actual" msgid="1767304850491060581">"الافتراضية (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="7937634392408977062">"لا شيء"</string>
+    <string name="ringtone_silent" msgid="7937634392408977062">"بلا نغمة رنين"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"نغمات الرنين"</string>
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"أصوات التنبيه"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"أصوات الإشعار"</string>
@@ -1219,8 +1215,7 @@
       <item quantity="one">‏تتوفر شبكة Wi-Fi واحدة مفتوحة</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"‏الاتصال بشبكة Wi-Fi المفتوحة"</string>
-    <!-- no translation found for wifi_available_carrier_network_title (4527932626916527897) -->
-    <skip />
+    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"‏الاتصال بشبكة Wi‑Fi لمشغِّل شبكة الجوّال"</string>
     <string name="wifi_available_title_connecting" msgid="1557292688310330032">"‏جارٍ الاتصال بشبكة Wi-Fi المفتوحة"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"‏تم الاتصال بشبكة Wi-Fi"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"‏تعذَّر الاتصال بشبكة Wi‑Fi"</string>
@@ -1290,9 +1285,9 @@
     <string name="sim_added_title" msgid="3719670512889674693">"‏تمت إضافة شريحة SIM"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"أعد تشغيل جهازك للدخول إلى شبكة الجوال."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"إعادة التشغيل"</string>
-    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"‏لتشغيل شريحة SIM الجديدة بشكل سليم، يجب تثبيت تطبيق من مشغّل شبكة الجوّال وفتحه."</string>
-    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"الحصول على التطبيق"</string>
-    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"ليس الآن"</string>
+    <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"تفعيل خدمة الجوّال"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"‏تنزيل تطبيق مشغل شبكة الجوّال لتفعيل شريحة SIM الجديدة"</string>
+    <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"تنزيل التطبيق"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"‏تم إدخال شريحة SIM جديدة."</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"انقر لإعداده."</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"تعيين الوقت"</string>
@@ -1304,13 +1299,15 @@
     <string name="no_permissions" msgid="7283357728219338112">"لا أذونات مطلوبة"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"قد يكلفك هذا مالاً."</string>
     <string name="dlg_ok" msgid="7376953167039865701">"حسنًا"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"‏يتم استخدام الاتصال عبر USB لشحن هذا الجهاز"</string>
-    <string name="usb_supplying_notification_title" msgid="5310642257296510271">"‏يتم استخدام الاتصال عبر USB لإمداد الجهاز المتصل بالطاقة"</string>
-    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"‏USB لنقل الملفات"</string>
-    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"‏USB لنقل الصور"</string>
-    <string name="usb_midi_notification_title" msgid="4850904915889144654">"‏USB لـ MIDI"</string>
-    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"‏الاتصال بجهاز USB ملحق"</string>
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"‏جارٍ شحن هذا الجهاز عبر منفذ USB"</string>
+    <string name="usb_supplying_notification_title" msgid="4631045789893086181">"‏جارٍ شحن الجهاز المتصل عبر USB"</string>
+    <string name="usb_mtp_notification_title" msgid="4238227258391151029">"‏تمّ تفعيل نقل الملفات عبر USB"</string>
+    <string name="usb_ptp_notification_title" msgid="5425857879922006878">"‏تمّ تفعيل PTP عبر USB"</string>
+    <string name="usb_tether_notification_title" msgid="3716143122035802501">"‏تمّ تفعيل التوصيل عبر USB"</string>
+    <string name="usb_midi_notification_title" msgid="5356040379749154805">"‏تمّ تفعيل MIDI عبر USB"</string>
+    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"‏تمّ تفعيل وضع ملحق USB"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"انقر للحصول على المزيد من الخيارات."</string>
+    <string name="usb_power_notification_message" msgid="4647527153291917218">"جارٍ شحن الجهاز المتصل. انقر لعرض خيارات أكثر."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"تم اكتشاف ملحق صوتي تناظري"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"الجهاز الذي تم توصيله بالهاتف غير متوافق معه. انقر للحصول على المزيد من المعلومات."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"‏تم توصيل تصحيح أخطاء USB"</string>
@@ -1761,9 +1758,6 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> المخصص للعمل"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"العمل الثاني <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"العمل الثالث <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="6820571533009838261">"لإزالة تثبيت هذه الشاشة، يمكنك لمس زرّي \"رجوع\" و\"نظرة عامة\" مع الاستمرار"</string>
-    <string name="lock_to_app_start" msgid="6643342070839862795">"تم تثبيت الشاشة"</string>
-    <string name="lock_to_app_exit" msgid="8598219838213787430">"تم إلغاء تثبيت الشاشة"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"المطالبة برقم التعريف الشخصي قبل إزالة التثبيت"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"المطالبة بنقش إلغاء القفل قبل إزالة التثبيت"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"المطالبة بكلمة المرور قبل إزالة التثبيت"</string>
@@ -1893,15 +1887,11 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"جميع اللغات"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"كل المناطق"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"البحث"</string>
-    <!-- no translation found for work_mode_off_title (1118691887588435530) -->
-    <skip />
-    <!-- no translation found for work_mode_off_message (5130856710614337649) -->
-    <skip />
+    <string name="work_mode_off_title" msgid="1118691887588435530">"تفعيل الملف الشخصي للعمل؟"</string>
+    <string name="work_mode_off_message" msgid="5130856710614337649">"سيتم تفعيل تطبيقات العمل التي تستخدمها والإشعارات والبيانات وغيرها من ميزات الملف الشخصي للعمل"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"تشغيل"</string>
-    <!-- no translation found for deprecated_target_sdk_message (1449696506742572767) -->
-    <skip />
-    <!-- no translation found for deprecated_target_sdk_app_store (5032340500368495077) -->
-    <skip />
+    <string name="deprecated_target_sdk_message" msgid="1449696506742572767">"‏تمّ إنشاء هذا التطبيق لإصدار قديم من Android وقد لا يعمل بشكل صحيح. جرِّب البحث عن تحديثات أو الاتصال بمطوّر البرامج."</string>
+    <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"البحث عن تحديث"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"لديك رسائل جديدة"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"‏فتح تطبيق الرسائل القصيرة SMS للعرض"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"ربما تكون بعض الوظائف مُقيّدة."</string>
@@ -1972,17 +1962,17 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"غير مسموح باستخدام الهاتف للصوت"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"نافذة منبثقة"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"يتطلب هذا الاختصار أحدث تطبيق"</string>
+    <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"إصدار التطبيق أقدم من إصداره على الجهاز الآخر أو أنه ليس متوافقًا مع هذا الاختصار."</string>
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"تعذّرت استعادة الاختصار لأن التطبيق لا يوفِّر إمكانية النسخ الاحتياطي والاستعادة"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"تعذّرت استعادة الاختصار بسبب عدم تطابق توقيع التطبيق"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"تعذّرت استعادة الاختصار"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"تم إيقاف الاختصار"</string>
-    <!-- no translation found for harmful_app_warning_uninstall (4837672735619532931) -->
-    <skip />
-    <!-- no translation found for harmful_app_warning_open_anyway (596432803680914321) -->
-    <skip />
-    <!-- no translation found for harmful_app_warning_title (8982527462829423432) -->
-    <skip />
+    <string name="harmful_app_warning_uninstall" msgid="4837672735619532931">"إلغاء التثبيت"</string>
+    <string name="harmful_app_warning_open_anyway" msgid="596432803680914321">"الفتح على أي حال"</string>
+    <string name="harmful_app_warning_title" msgid="8982527462829423432">"تم العثور على تطبيق ضار"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"يريد تطبيق <xliff:g id="APP_0">%1$s</xliff:g> عرض شرائح تطبيق <xliff:g id="APP_2">%2$s</xliff:g>."</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"تعديل"</string>
+    <string name="notification_channel_system_changes" msgid="5072715579030948646">"تغييرات النظام"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"تم تغيير وضع \"الرجاء عدم الإزعاج\"."</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"انقر للتأكد من عدم وجود انقطاع في إعدادات السلوك."</string>
 </resources>

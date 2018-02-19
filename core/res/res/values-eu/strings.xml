@@ -93,6 +93,7 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS mezuak"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Erantzungailuko mezuak"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi bidezko deiak"</string>
+    <string name="notification_channel_sim" msgid="4052095493875188564">"SIMaren egoera"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Beste gailuak TTY osagarria FULL moduan erabiltzea eskatu du"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Beste gailuak TTY osagarria HCO moduan erabiltzea eskatu du"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Beste gailuak TTY osagarria VCO moduan erabiltzea eskatu du"</string>
@@ -238,7 +239,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"Ezarpenak"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Lagundu"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Ahots-laguntza"</string>
-    <string name="global_action_lockdown" msgid="2277328351790053477">"Sartu blokeo moduan"</string>
+    <string name="global_action_lockdown" msgid="1099326950891078929">"Blokeoa"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"Jakinarazpen berria"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Teklatu birtuala"</string>
@@ -355,8 +356,6 @@
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Beren zati batzuk memoria modu iraunkorrean ezartzeko baimena ematen die aplikazioei. Horrela, beste aplikazioek erabilgarri duten memoria murritz daiteke eta tableta motel daiteke."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Beren zati batzuk memorian modu iraunkorrean aktibo uztea baimentzen die aplikazioei. Horrela, beste aplikazioek memoria gutxiago izan lezakete erabilgarri eta telebistak motelago funtziona lezake."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Beren zati batzuk memoria modu iraunkorrean ezartzeko baimena ematen die aplikazioei. Horrela, beste aplikazioek erabilgarri duten memoria murritz daiteke eta telefonoa motel daiteke."</string>
-    <string name="permlab_foregroundService" msgid="3310786367649133115">"Exekutatu zerbitzuak aurreko planoan"</string>
-    <string name="permdesc_foregroundService" msgid="6471634326171344622">"Aurreko planoko zerbitzuak erabiltzea baimentzen dio aplikazioari."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"neurtu aplikazioen biltegiratze-tokia"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Bere kodea, datuak eta cache-tamainak eskuratzea baimentzen die aplikazioei."</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"aldatu sistemaren ezarpenak"</string>
@@ -827,6 +826,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Aholkua: sakatu birritan handitzeko edo txikitzeko."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Betetze automatikoa"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Konfiguratu betetze automatikoa"</string>
+    <string name="autofill_window_title" msgid="921006636895825007">"Betetze automatikoa"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1198,9 +1198,9 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM txartela gehitu da"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Berrabiarazi gailua sare mugikorra atzitzeko."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Berrabiarazi"</string>
-    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"SIM berriak behar bezala funtziona dezan, operadorearen aplikazio bat instalatu eta ireki behar duzu."</string>
-    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"ESKURATU APLIKAZIOA"</string>
-    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"ORAIN EZ"</string>
+    <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Aktibatu zerbitzu mugikorra"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Deskargatu operadorearen aplikazioa SIM berria aktibatzeko"</string>
+    <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Deskargatu aplikazioa"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"SIM berria sartu da"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Sakatu konfiguratzeko"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Ezarri ordua"</string>
@@ -1833,4 +1833,7 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"Aplikazio kaltegarri bat hauteman da"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> aplikazioak <xliff:g id="APP_2">%2$s</xliff:g> aplikazioaren zatiak erakutsi nahi ditu"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"Editatu"</string>
+    <string name="notification_channel_system_changes" msgid="5072715579030948646">"Sistema-aldaketak"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\"Ez molestatu\" modua aldatu da"</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"Sakatu etenaldietarako ezarri den jokabidea ikusteko"</string>
 </resources>
