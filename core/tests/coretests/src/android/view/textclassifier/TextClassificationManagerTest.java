@@ -148,6 +148,20 @@ public class TextClassificationManagerTest {
     }
 
     @Test
+    public void testTextClassifyText_address() {
+        if (isTextClassifierDisabled()) return;
+
+        String text = "Brandschenkestrasse 110, Zürich, Switzerland";
+        TextClassification classification = mClassifier.classifyText(
+                text, 0, text.length(), mClassificationOptions);
+        assertThat(classification,
+                isTextClassification(
+                        text,
+                        TextClassifier.TYPE_ADDRESS,
+                        "geo:0,0?q=Brandschenkestrasse+110%2C+Z%C3%BCrich%2C+Switzerland"));
+    }
+
+    @Test
     public void testTextClassifyText_url_inCaps() {
         if (isTextClassifierDisabled()) return;
 
@@ -314,6 +328,10 @@ public class TextClassificationManagerTest {
                             scheme = result.getIntent().getData().getScheme();
                             typeRequirementSatisfied = "http".equals(scheme)
                                     || "https".equals(scheme);
+                            break;
+                        case TextClassifier.TYPE_ADDRESS:
+                            scheme = result.getIntent().getData().getScheme();
+                            typeRequirementSatisfied = "geo".equals(scheme);
                             break;
                         default:
                             typeRequirementSatisfied = true;
