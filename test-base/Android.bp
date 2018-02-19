@@ -24,6 +24,10 @@ java_library {
 
     srcs: ["src/**/*.java"],
 
+    errorprone: {
+      javacflags: ["-Xep:DepAnn:ERROR"],
+    },
+
     // Needs to be consistent with the repackaged version of this make target.
     java_version: "1.8",
 
