@@ -139,7 +139,7 @@ public abstract class UsageStatsManagerInternal {
 
         /** Callback to inform listeners that the idle state has changed to a new bucket. */
         public abstract void onAppIdleStateChanged(String packageName, @UserIdInt int userId,
-                boolean idle, int bucket);
+                boolean idle, int bucket, int reason);
 
         /**
          * Callback to inform listeners that the parole state has changed. This means apps are

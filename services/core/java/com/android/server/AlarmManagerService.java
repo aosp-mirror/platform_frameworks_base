@@ -3860,7 +3860,7 @@ class AlarmManagerService extends SystemService {
     final class AppStandbyTracker extends UsageStatsManagerInternal.AppIdleStateChangeListener {
         @Override
         public void onAppIdleStateChanged(final String packageName, final @UserIdInt int userId,
-                boolean idle, int bucket) {
+                boolean idle, int bucket, int reason) {
             if (DEBUG_STANDBY) {
                 Slog.d(TAG, "Package " + packageName + " for user " + userId + " now in bucket " +
                         bucket);

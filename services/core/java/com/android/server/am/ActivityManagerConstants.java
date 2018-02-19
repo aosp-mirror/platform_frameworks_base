@@ -85,7 +85,7 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final int DEFAULT_POWER_CHECK_MAX_CPU_3 = 10;
     private static final int DEFAULT_POWER_CHECK_MAX_CPU_4 = 2;
     private static final long DEFAULT_SERVICE_USAGE_INTERACTION_TIME = 30*60*1000;
-    private static final long DEFAULT_USAGE_STATS_INTERACTION_INTERVAL = 24*60*60*1000L;
+    private static final long DEFAULT_USAGE_STATS_INTERACTION_INTERVAL = 2*60*60*1000L;
     private static final long DEFAULT_SERVICE_RESTART_DURATION = 1*1000;
     private static final long DEFAULT_SERVICE_RESET_RUN_DURATION = 60*1000;
     private static final int DEFAULT_SERVICE_RESTART_DURATION_FACTOR = 4;

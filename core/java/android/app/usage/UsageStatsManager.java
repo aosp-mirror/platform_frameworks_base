@@ -132,24 +132,37 @@ public final class UsageStatsManager {
     @SystemApi
     public static final int STANDBY_BUCKET_NEVER = 50;
 
-    /** {@hide} Reason for bucketing -- default initial state */
-    public static final String REASON_DEFAULT = "default";
+    /** @hide */
+    public static final int REASON_MAIN_MASK = 0xFF00;
+    /** @hide */
+    public static final int REASON_MAIN_DEFAULT =   0x0100;
+    /** @hide */
+    public static final int REASON_MAIN_TIMEOUT =   0x0200;
+    /** @hide */
+    public static final int REASON_MAIN_USAGE =     0x0300;
+    /** @hide */
+    public static final int REASON_MAIN_FORCED =    0x0400;
+    /** @hide */
+    public static final int REASON_MAIN_PREDICTED = 0x0500;
 
-    /** {@hide} Reason for bucketing -- timeout */
-    public static final String REASON_TIMEOUT = "timeout";
-
-    /** {@hide} Reason for bucketing -- usage */
-    public static final String REASON_USAGE = "usage";
-
-    /** {@hide} Reason for bucketing -- forced by user / shell command */
-    public static final String REASON_FORCED = "forced";
-
-    /**
-     * {@hide}
-     * Reason for bucketing -- predicted. This is a prefix and the UID of the bucketeer will
-     * be appended.
-     */
-    public static final String REASON_PREDICTED = "predicted";
+    /** @hide */
+    public static final int REASON_SUB_MASK = 0x00FF;
+    /** @hide */
+    public static final int REASON_SUB_USAGE_SYSTEM_INTERACTION = 0x0001;
+    /** @hide */
+    public static final int REASON_SUB_USAGE_NOTIFICATION_SEEN  = 0x0002;
+    /** @hide */
+    public static final int REASON_SUB_USAGE_USER_INTERACTION   = 0x0003;
+    /** @hide */
+    public static final int REASON_SUB_USAGE_MOVE_TO_FOREGROUND = 0x0004;
+    /** @hide */
+    public static final int REASON_SUB_USAGE_MOVE_TO_BACKGROUND = 0x0005;
+    /** @hide */
+    public static final int REASON_SUB_USAGE_SYSTEM_UPDATE      = 0x0006;
+    /** @hide */
+    public static final int REASON_SUB_USAGE_ACTIVE_TIMEOUT     = 0x0007;
+    /** @hide */
+    public static final int REASON_SUB_USAGE_SYNC_ADAPTER       = 0x0008;
 
     /** @hide */
     @IntDef(flag = false, prefix = { "STANDBY_BUCKET_" }, value = {
@@ -425,6 +438,55 @@ public final class UsageStatsManager {
             mService.setAppStandbyBuckets(slice, mContext.getUserId());
         } catch (RemoteException e) {
         }
+    }
+
+    /** @hide */
+    public static String reasonToString(int standbyReason) {
+        StringBuilder sb = new StringBuilder();
+        switch (standbyReason & REASON_MAIN_MASK) {
+            case REASON_MAIN_DEFAULT:
+                sb.append("d");
+                break;
+            case REASON_MAIN_FORCED:
+                sb.append("f");
+                break;
+            case REASON_MAIN_PREDICTED:
+                sb.append("p");
+                break;
+            case REASON_MAIN_TIMEOUT:
+                sb.append("t");
+                break;
+            case REASON_MAIN_USAGE:
+                sb.append("u-");
+                switch (standbyReason & REASON_SUB_MASK) {
+                    case REASON_SUB_USAGE_SYSTEM_INTERACTION:
+                        sb.append("si");
+                        break;
+                    case REASON_SUB_USAGE_NOTIFICATION_SEEN:
+                        sb.append("ns");
+                        break;
+                    case REASON_SUB_USAGE_USER_INTERACTION:
+                        sb.append("ui");
+                        break;
+                    case REASON_SUB_USAGE_MOVE_TO_FOREGROUND:
+                        sb.append("mf");
+                        break;
+                    case REASON_SUB_USAGE_MOVE_TO_BACKGROUND:
+                        sb.append("mb");
+                        break;
+                    case REASON_SUB_USAGE_SYSTEM_UPDATE:
+                        sb.append("su");
+                        break;
+                    case REASON_SUB_USAGE_ACTIVE_TIMEOUT:
+                        sb.append("at");
+                        break;
+                    case REASON_SUB_USAGE_SYNC_ADAPTER:
+                        sb.append("sa");
+                        break;
+                }
+                break;
+        }
+        return sb.toString();
     }
 
     /**
