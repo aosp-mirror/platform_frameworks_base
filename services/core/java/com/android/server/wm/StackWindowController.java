@@ -23,6 +23,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -253,12 +254,13 @@ public class StackWindowController
             final TaskStack stack = mContainer;
             final DisplayContent displayContent = stack.getDisplayContent();
             final DisplayInfo di = displayContent.getDisplayInfo();
+            final DisplayCutout displayCutout = di.displayCutout;
 
             // Get the insets and display bounds
             mService.mPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
-                    mTmpStableInsets);
+                    displayCutout, mTmpStableInsets);
             mService.mPolicy.getNonDecorInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
-                    mTmpNonDecorInsets);
+                    displayCutout, mTmpNonDecorInsets);
             mTmpDisplayBounds.set(0, 0, di.logicalWidth, di.logicalHeight);
 
             int width;

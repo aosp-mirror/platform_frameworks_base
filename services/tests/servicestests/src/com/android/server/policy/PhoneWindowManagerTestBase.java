@@ -72,7 +72,6 @@ public class PhoneWindowManagerTestBase {
     FakeWindowState mNavigationBar;
     private boolean mHasDisplayCutout;
     private int mRotation = ROTATION_0;
-    private final Matrix mTmpMatrix = new Matrix();
 
     @Before
     public void setUpBase() throws Exception {
@@ -97,24 +96,7 @@ public class PhoneWindowManagerTestBase {
     }
 
     private void updateDisplayFrames() {
-        DisplayInfo info = new DisplayInfo();
-
-        final boolean flippedDimensions = mRotation == ROTATION_90 || mRotation == ROTATION_270;
-        info.logicalWidth = flippedDimensions ? DISPLAY_HEIGHT : DISPLAY_WIDTH;
-        info.logicalHeight = flippedDimensions ? DISPLAY_WIDTH : DISPLAY_HEIGHT;
-        info.rotation = mRotation;
-        if (mHasDisplayCutout) {
-            Path p = new Path();
-            p.addRect(DISPLAY_WIDTH / 4, 0, DISPLAY_WIDTH * 3 / 4, DISPLAY_CUTOUT_HEIGHT,
-                    Path.Direction.CCW);
-            transformPhysicalToLogicalCoordinates(
-                    mRotation, DISPLAY_WIDTH, DISPLAY_HEIGHT, mTmpMatrix);
-            p.transform(mTmpMatrix);
-            info.displayCutout = DisplayCutout.fromBounds(p);
-        } else {
-            info.displayCutout = null;
-        }
-
+        DisplayInfo info = displayInfoForRotation(mRotation, mHasDisplayCutout);
         mFrames = new DisplayFrames(Display.DEFAULT_DISPLAY, info);
     }
 
@@ -159,6 +141,34 @@ public class PhoneWindowManagerTestBase {
      */
     public void assertInsetByTopBottom(Rect actual, int expectedInsetTop, int expectedInsetBottom) {
         assertInsetBy(actual, 0, expectedInsetTop, 0, expectedInsetBottom);
+    }
+
+    public static DisplayInfo displayInfoForRotation(int rotation, boolean withDisplayCutout) {
+        DisplayInfo info = new DisplayInfo();
+
+        final boolean flippedDimensions = rotation == ROTATION_90 || rotation == ROTATION_270;
+        info.logicalWidth = flippedDimensions ? DISPLAY_HEIGHT : DISPLAY_WIDTH;
+        info.logicalHeight = flippedDimensions ? DISPLAY_WIDTH : DISPLAY_HEIGHT;
+        info.rotation = rotation;
+        if (withDisplayCutout) {
+            info.displayCutout = displayCutoutForRotation(rotation)
+                    .computeSafeInsets(info.logicalWidth, info.logicalHeight);
+        } else {
+            info.displayCutout = null;
+        }
+        return info;
+    }
+
+    private static DisplayCutout displayCutoutForRotation(int rotation) {
+        Path p = new Path();
+        p.addRect(DISPLAY_WIDTH / 4, 0, DISPLAY_WIDTH * 3 / 4, DISPLAY_CUTOUT_HEIGHT,
+                Path.Direction.CCW);
+
+        Matrix m = new Matrix();
+        transformPhysicalToLogicalCoordinates(rotation, DISPLAY_WIDTH, DISPLAY_HEIGHT, m);
+        p.transform(m);
+
+        return DisplayCutout.fromBounds(p);
     }
 
     static class TestContextWrapper extends ContextWrapper {
