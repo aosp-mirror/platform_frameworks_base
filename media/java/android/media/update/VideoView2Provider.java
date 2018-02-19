@@ -27,6 +27,8 @@ import android.util.AttributeSet;
 import android.widget.MediaControlView2;
 import android.widget.VideoView2;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -70,12 +72,10 @@ public interface VideoView2Provider extends ViewGroupProvider {
     int getViewType_impl();
     void setCustomActions_impl(List<PlaybackState.CustomAction> actionList,
             Executor executor, VideoView2.OnCustomActionListener listener);
-    void setOnPreparedListener_impl(Executor executor, VideoView2.OnPreparedListener l);
-    void setOnCompletionListener_impl(Executor executor, VideoView2.OnCompletionListener l);
-    void setOnErrorListener_impl(Executor executor, VideoView2.OnErrorListener l);
-    void setOnInfoListener_impl(Executor executor, VideoView2.OnInfoListener l);
-    void setOnViewTypeChangedListener_impl(
-            Executor executor, VideoView2.OnViewTypeChangedListener l);
-    void setFullScreenRequestListener_impl(
-            Executor executor, VideoView2.OnFullScreenRequestListener l);
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    void setOnViewTypeChangedListener_impl(VideoView2.OnViewTypeChangedListener l);
+    void setFullScreenRequestListener_impl(VideoView2.OnFullScreenRequestListener l);
 }
