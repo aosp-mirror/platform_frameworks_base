@@ -325,7 +325,7 @@
     <string name="recents_empty_message" msgid="808480104164008572">"Hakuna vipengee vya hivi karibuni"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Umeondoa vipengee vyote"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Maelezo ya Programu"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"kudumisha programu moja"</string>
+    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"kubandika kwenye skirini"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"tafuta"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Haikuweza kuanzisha <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> imezimwa katika hali salama."</string>

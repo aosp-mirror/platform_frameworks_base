@@ -475,7 +475,7 @@
     <string name="show_demo_mode" msgid="2018336697782464029">"Pokaż tryb demonstracyjny"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"Alarm"</string>
-    <string name="status_bar_work" msgid="6022553324802866373">"Profil do pracy"</string>
+    <string name="status_bar_work" msgid="6022553324802866373">"Profil służbowy"</string>
     <string name="status_bar_airplane" msgid="7057575501472249002">"Tryb samolotowy"</string>
     <string name="add_tile" msgid="2995389510240786221">"Dodaj nazwę"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Rozgłaszana nazwa"</string>
@@ -485,7 +485,7 @@
     <string name="alarm_template_far" msgid="4242179982586714810">"w: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Szybkie ustawienia, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
-    <string name="accessibility_managed_profile" msgid="6613641363112584120">"Profil do pracy"</string>
+    <string name="accessibility_managed_profile" msgid="6613641363112584120">"Profil służbowy"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Dobra zabawa, ale nie dla każdego"</string>
     <string name="tuner_warning" msgid="8730648121973575701">"Kalibrator System UI udostępnia dodatkowe sposoby dostrajania i dostosowywania interfejsu Androida. Te eksperymentalne funkcje mogą się zmienić, popsuć lub zniknąć w przyszłych wersjach. Zachowaj ostrożność."</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"Te eksperymentalne funkcje mogą się zmienić, popsuć lub zniknąć w przyszłych wersjach. Zachowaj ostrożność."</string>
