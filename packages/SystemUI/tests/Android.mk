@@ -56,11 +56,18 @@ LOCAL_STATIC_ANDROID_LIBRARIES := \
 LOCAL_STATIC_JAVA_LIBRARIES := \
     metrics-helper-lib \
     android-support-test \
-    mockito-target-minus-junit4 \
+    mockito-target-inline-minus-junit4 \
     SystemUI-proto \
     SystemUI-tags \
     testables \
     truth-prebuilt \
+
+LOCAL_MULTILIB := both
+
+LOCAL_JNI_SHARED_LIBRARIES := \
+    libdexmakerjvmtiagent \
+    libmultiplejvmtiagentsinterferenceagent
+
 
 LOCAL_JAVA_LIBRARIES := \
     android.test.runner \

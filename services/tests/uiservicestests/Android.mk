@@ -14,7 +14,6 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src) \
 	$(call all-java-files-under, ../../core/java/com/android/server/slice) \
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
-    frameworks-base-testutils \
     services.accessibility \
     services.core \
     services.devicepolicy \
@@ -22,7 +21,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     services.usage \
     guava \
     android-support-test \
-    mockito-target-minus-junit4 \
+    mockito-target-inline-minus-junit4 \
     platform-test-annotations \
     testables
 
@@ -36,8 +35,12 @@ LOCAL_COMPATIBILITY_SUITE := device-tests
 
 LOCAL_CERTIFICATE := platform
 
+LOCAL_MULTILIB := both
+
 # These are not normally accessible from apps so they must be explicitly included.
 LOCAL_JNI_SHARED_LIBRARIES := \
+    libdexmakerjvmtiagent \
+    libmultiplejvmtiagentsinterferenceagent \
     libbacktrace \
     libbase \
     libbinder \
