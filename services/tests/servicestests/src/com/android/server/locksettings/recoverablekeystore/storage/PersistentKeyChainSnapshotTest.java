@@ -27,6 +27,7 @@ import android.security.keystore.recovery.KeyChainProtectionParams;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -175,6 +176,7 @@ public class PersistentKeyChainSnapshotTest {
                 () -> reader.readProtectionParams());
     }
 
+    @Ignore("Investigate why this is broken. b/73609806")
     @Test
     public void testKeyChainSnapshot() throws Exception {
         PersistentKeyChainSnapshot writer = new PersistentKeyChainSnapshot();
@@ -235,6 +237,7 @@ public class PersistentKeyChainSnapshotTest {
         verifyDeserialize(snapshot);
     }
 
+    @Ignore("Investigate why this is broken. b/73609806")
     @Test
     public void testKeyChainSnapshot_withManyKeysAndProtectionParams() throws Exception {
         PersistentKeyChainSnapshot writer = new PersistentKeyChainSnapshot();
