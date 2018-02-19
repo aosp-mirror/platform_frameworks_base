@@ -54,10 +54,14 @@ import java.nio.charset.StandardCharsets;
 class TransferOwnershipMetadataManager {
     final static String ADMIN_TYPE_DEVICE_OWNER = "device-owner";
     final static String ADMIN_TYPE_PROFILE_OWNER = "profile-owner";
-    private final static String TAG_USER_ID = "user-id";
-    private final static String TAG_SOURCE_COMPONENT = "source-component";
-    private final static String TAG_TARGET_COMPONENT = "target-component";
-    private final static String TAG_ADMIN_TYPE = "admin-type";
+    @VisibleForTesting
+    final static String TAG_USER_ID = "user-id";
+    @VisibleForTesting
+    final static String TAG_SOURCE_COMPONENT = "source-component";
+    @VisibleForTesting
+    final static String TAG_TARGET_COMPONENT = "target-component";
+    @VisibleForTesting
+    final static String TAG_ADMIN_TYPE = "admin-type";
     private final static String TAG = TransferOwnershipMetadataManager.class.getName();
     public static final String OWNER_TRANSFER_METADATA_XML = "owner-transfer-metadata.xml";
 
@@ -177,10 +181,10 @@ class TransferOwnershipMetadataManager {
         final ComponentName targetComponent;
         final String adminType;
 
-        Metadata(@NonNull String sourceComponent, @NonNull String targetComponent,
+        Metadata(@NonNull ComponentName sourceComponent, @NonNull ComponentName targetComponent,
                 @NonNull int userId, @NonNull String adminType) {
-            this.sourceComponent = ComponentName.unflattenFromString(sourceComponent);
-            this.targetComponent = ComponentName.unflattenFromString(targetComponent);
+            this.sourceComponent = sourceComponent;
+            this.targetComponent = targetComponent;
             Preconditions.checkNotNull(sourceComponent);
             Preconditions.checkNotNull(targetComponent);
             Preconditions.checkStringNotEmpty(adminType);
@@ -188,10 +192,15 @@ class TransferOwnershipMetadataManager {
             this.adminType = adminType;
         }
 
-        Metadata(@NonNull ComponentName sourceComponent, @NonNull ComponentName targetComponent,
+        Metadata(@NonNull String flatSourceComponent, @NonNull String flatTargetComponent,
                 @NonNull int userId, @NonNull String adminType) {
-            this(sourceComponent.flattenToString(), targetComponent.flattenToString(),
-                    userId, adminType);
+            this(unflattenComponentUnchecked(flatSourceComponent),
+                    unflattenComponentUnchecked(flatTargetComponent), userId, adminType);
+        }
+
+        private static ComponentName unflattenComponentUnchecked(String flatComponent) {
+            Preconditions.checkNotNull(flatComponent);
+            return ComponentName.unflattenFromString(flatComponent);
         }
 
         @Override
