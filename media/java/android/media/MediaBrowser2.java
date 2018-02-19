@@ -156,12 +156,14 @@ public class MediaBrowser2 extends MediaController2 {
     /**
      * Unsubscribe for changes to the children of the parent, which was previously subscribed with
      * {@link #subscribe(String, Bundle)}.
+     * <p>
+     * This unsubscribes all previous subscription with the parent id, regardless of the extra
+     * that was previously sent to the library service.
      *
      * @param parentId parent id
-     * @param extras extra bundle
      */
-    public void unsubscribe(String parentId, @Nullable Bundle extras) {
-        mProvider.unsubscribe_impl(parentId, extras);
+    public void unsubscribe(String parentId) {
+        mProvider.unsubscribe_impl(parentId);
     }
 
     /**

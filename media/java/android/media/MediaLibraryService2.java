@@ -176,25 +176,27 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
         }
 
         /**
-         * Called when a controller subscribes to the parent.
+         * Called when a controller subscribed to the parent.
+         * <p>
+         * It's your responsibility to keep subscriptions by your own and call
+         * {@link MediaLibrarySession#notifyChildrenChanged(ControllerInfo, String, Bundle)} when
+         * the parent is changed.
          *
          * @param controller controller
          * @param parentId parent id
          * @param extras extra bundle
          */
-        public void onSubscribed(@NonNull ControllerInfo controller, String parentId,
+        public void onSubscribed(@NonNull ControllerInfo controller, @NonNull String parentId,
                 @Nullable Bundle extras) {
         }
 
         /**
-         * Called when a controller unsubscribes to the parent.
+         * Called when a controller unsubscribed to the parent.
          *
          * @param controller controller
          * @param parentId parent id
-         * @param extras extra bundle
          */
-        public void onUnsubscribed(@NonNull ControllerInfo controller, String parentId,
-                @Nullable Bundle extras) {
+        public void onUnsubscribed(@NonNull ControllerInfo controller, @NonNull String parentId) {
         }
 
         /**
@@ -206,7 +208,6 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          */
         public void onSearch(@NonNull ControllerInfo controllerInfo, @NonNull String query,
                 @Nullable Bundle extras) {
-
         }
 
         /**

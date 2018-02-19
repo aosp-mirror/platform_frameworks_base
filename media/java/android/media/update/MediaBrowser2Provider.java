@@ -25,7 +25,7 @@ public interface MediaBrowser2Provider extends MediaController2Provider {
     void getLibraryRoot_impl(Bundle rootHints);
 
     void subscribe_impl(String parentId, Bundle extras);
-    void unsubscribe_impl(String parentId, Bundle extras);
+    void unsubscribe_impl(String parentId);
 
     void getItem_impl(String mediaId);
     void getChildren_impl(String parentId, int page, int pageSize, Bundle extras);
