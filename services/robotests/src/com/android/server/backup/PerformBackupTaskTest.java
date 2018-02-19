@@ -112,11 +112,8 @@ import java.util.stream.Stream;
         ShadowQueuedWork.class
     }
 )
-@SystemLoaderPackages({"com.android.server.backup"})
+@SystemLoaderPackages({"com.android.server.backup", "android.app.backup"})
 @SystemLoaderClasses({
-    BackupDataOutput.class,
-    FullBackupDataOutput.class,
-    BackupAgent.class,
     IBackupTransport.class,
     IBackupAgent.class,
     PackageInfo.class

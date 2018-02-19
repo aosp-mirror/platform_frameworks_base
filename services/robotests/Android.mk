@@ -58,14 +58,14 @@ INTERNAL_BACKUP := ../../core/java/com/android/internal/backup
 LOCAL_SRC_FILES := \
     $(call all-java-files-under, src) \
     $(call all-Iaidl-files-under, $(INTERNAL_BACKUP)) \
+    $(call all-java-files-under, ../../core/java/android/app/backup) \
+    $(call all-Iaidl-files-under, ../../core/java/android/app/backup) \
     ../../core/java/android/content/pm/PackageInfo.java \
-    ../../core/java/android/app/backup/BackupAgent.java \
-    ../../core/java/android/app/backup/BackupDataOutput.java \
-    ../../core/java/android/app/backup/FullBackupDataOutput.java \
     ../../core/java/android/app/IBackupAgent.aidl
 
 LOCAL_AIDL_INCLUDES := \
     $(call all-Iaidl-files-under, $(INTERNAL_BACKUP)) \
+    $(call all-Iaidl-files-under, ../../core/java/android/app/backup) \
     ../../core/java/android/app/IBackupAgent.aidl
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
