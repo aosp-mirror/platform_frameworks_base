@@ -78,26 +78,36 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
         }
 
         /**
-         * Notify subscribed controller about change in a parent's children.
+         * Notify the controller of the change in a parent's children.
+         * <p>
+         * If the controller hasn't subscribed to the parent, the API will do nothing.
+         * <p>
+         * Controllers will use {@link MediaBrowser2#getChildren(String, int, int, Bundle)} to get
+         * the list of children.
          *
          * @param controller controller to notify
-         * @param parentId
-         * @param extras
+         * @param parentId parent id with changes in its children
+         * @param childCount number of children.
+         * @param extras extra information from session to controller
          */
         public void notifyChildrenChanged(@NonNull ControllerInfo controller,
-                @NonNull String parentId, @NonNull Bundle extras) {
-            mProvider.notifyChildrenChanged_impl(controller, parentId, extras);
+                @NonNull String parentId, int childCount, @Nullable Bundle extras) {
+            mProvider.notifyChildrenChanged_impl(controller, parentId, childCount, extras);
         }
 
         /**
-         * Notify subscribed controller about change in a parent's children.
+         * Notify all controllers that subscribed to the parent about change in the parent's
+         * children, regardless of the extra bundle supplied by
+         * {@link MediaBrowser2#subscribe(String, Bundle)}.
          *
          * @param parentId parent id
-         * @param extras extra bundle
+         * @param childCount number of children
+         * @param extras extra information from session to controller
          */
         // This is for the backward compatibility.
-        public void notifyChildrenChanged(@NonNull String parentId, @Nullable Bundle extras) {
-            mProvider.notifyChildrenChanged_impl(parentId, extras);
+        public void notifyChildrenChanged(@NonNull String parentId, int childCount,
+                @Nullable Bundle extras) {
+            mProvider.notifyChildrenChanged_impl(parentId, childCount, extras);
         }
 
         /**

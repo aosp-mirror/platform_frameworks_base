@@ -20,6 +20,8 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.media.MediaLibraryService2.MediaLibrarySession;
+import android.media.MediaSession2.ControllerInfo;
 import android.media.update.ApiLoader;
 import android.media.update.MediaBrowser2Provider;
 import android.os.Bundle;
@@ -54,11 +56,18 @@ public class MediaBrowser2 extends MediaController2 {
 
         /**
          * Called when there's change in the parent's children.
+         * <p>
+         * This API is called when the library service called
+         * {@link MediaLibrarySession#notifyChildrenChanged(ControllerInfo, String, int, Bundle)} or
+         * {@link MediaLibrarySession#notifyChildrenChanged(String, int, Bundle)} for the parent.
          *
          * @param parentId parent id that you've specified with {@link #subscribe(String, Bundle)}
-         * @param extras extra bundle from the library service
+         * @param childCount number of children
+         * @param extras extra bundle from the library service. Can be differ from extras that
+         *               you've specified with {@link #subscribe(String, Bundle)}.
          */
-        public void onChildrenChanged(@NonNull String parentId, @Nullable Bundle extras) { }
+        public void onChildrenChanged(@NonNull String parentId, int childCount,
+                @Nullable Bundle extras) { }
 
         /**
          * Called when the list of items has been returned by the library service for the previous
@@ -142,7 +151,7 @@ public class MediaBrowser2 extends MediaController2 {
 
     /**
      * Subscribe to a parent id for the change in its children. When there's a change,
-     * {@link BrowserCallback#onChildrenChanged(String, Bundle)} will be called with the bundle
+     * {@link BrowserCallback#onChildrenChanged(String, int, Bundle)} will be called with the bundle
      * that you've specified. You should call {@link #getChildren(String, int, int, Bundle)} to get
      * the actual contents for the parent.
      *
