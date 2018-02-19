@@ -138,13 +138,12 @@ cc_defaults {
 
     product_variables: {
         arc: {
-            // TODO: remove the suffix "_bp" after finishing migration to Android.bp.
             shared_libs: [
                 "libarcbridge",
                 "libarcbridgeservice",
                 "libarcvideobridge",
                 "libchrome",
-                "libmojo_bp",
+                "libmojo",
             ],
         }
     }
