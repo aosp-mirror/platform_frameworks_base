@@ -154,6 +154,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.view.IInputMethodClient;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.wm.utils.RotationCache;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -215,7 +216,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     int mInitialDisplayDensity = 0;
 
     DisplayCutout mInitialDisplayCutout;
-    DisplayCutout mDisplayCutoutOverride;
+    private final RotationCache<DisplayCutout, DisplayCutout> mDisplayCutoutCache
+            = new RotationCache<>(this::calculateDisplayCutoutForRotationUncached);
 
     /**
      * Overridden display size. Initialized with {@link #mInitialDisplayWidth}
@@ -1198,7 +1200,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     DisplayCutout calculateDisplayCutoutForRotation(int rotation) {
-        final DisplayCutout cutout = mInitialDisplayCutout;
+        return mDisplayCutoutCache.getOrCompute(mInitialDisplayCutout, rotation);
+    }
+
+    private DisplayCutout calculateDisplayCutoutForRotationUncached(
+            DisplayCutout cutout, int rotation) {
         if (cutout == null || cutout == DisplayCutout.NO_CUTOUT) {
             return cutout;
         }
