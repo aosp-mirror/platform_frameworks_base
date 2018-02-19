@@ -285,7 +285,6 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         int delta = add ? +1 : -1;
         switch (request.type) {
             case REQUEST:
-            case TRACK_DEFAULT:
                 mNumRequestNetworkRequests += delta;
                 break;
 
@@ -294,6 +293,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
                 mNumBackgroundNetworkRequests += delta;
                 break;
 
+            case TRACK_DEFAULT:
             case LISTEN:
                 break;
 
