@@ -21,6 +21,7 @@ cc_library_host_shared {
     name: "libstats_proto_host",
     srcs: [
         "src/atoms.proto",
+        "src/atom_field_options.proto",
     ],
 
     shared_libs: [
@@ -30,6 +31,9 @@ cc_library_host_shared {
     proto: {
         type: "full",
         export_proto_headers: true,
+        include_dirs: [
+            "external/protobuf/src",
+        ],
     },
 
     export_shared_lib_headers: [

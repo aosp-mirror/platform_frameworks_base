@@ -16,7 +16,7 @@
 #pragma once
 
 #include "config/ConfigKey.h"
-#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
+#include "frameworks/base/cmds/statsd/src/stats_log_common.pb.h"
 #include "statslog.h"
 
 #include <gtest/gtest_prod.h>

@@ -21,7 +21,6 @@
 
 #include "config/ConfigKey.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"  // subscription
-#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"  // DimensionsValue
 #include "android/os/StatsDimensionsValue.h"
 #include "HashableDimensionKey.h"
 

@@ -21,6 +21,7 @@ package android.os.statsd;
 option java_package = "com.android.os";
 option java_outer_classname = "AtomsProto";
 
+import "frameworks/base/cmds/statsd/src/atom_field_options.proto";
 import "frameworks/base/core/proto/android/app/enums.proto";
 import "frameworks/base/core/proto/android/os/enums.proto";
 import "frameworks/base/core/proto/android/server/enums.proto";
@@ -179,7 +180,7 @@ message AttributionNode {
  */
 message ScreenStateChanged {
     // New screen state, from frameworks/base/core/proto/android/view/enums.proto.
-    optional android.view.DisplayStateEnum state = 1;
+    optional android.view.DisplayStateEnum state = 1 [(stateFieldOption).option = EXCLUSIVE];
 }
 
 /**
@@ -189,10 +190,10 @@ message ScreenStateChanged {
  *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
  */
 message UidProcessStateChanged {
-    optional int32 uid = 1; // TODO: should be a string tagged w/ uid annotation
+    optional int32 uid = 1 [(stateFieldOption).option = PRIMARY];
 
     // The state, from frameworks/base/core/proto/android/app/enums.proto.
-    optional android.app.ProcessStateEnum state = 2;
+    optional android.app.ProcessStateEnum state = 2 [(stateFieldOption).option = EXCLUSIVE];
 }
 
 /**
@@ -1523,4 +1524,3 @@ message RemainingBatteryCapacity {
 message FullBatteryCapacity {
     optional int32 capacity_uAh = 1;
 }
-

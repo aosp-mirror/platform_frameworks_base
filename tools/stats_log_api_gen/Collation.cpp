@@ -41,12 +41,12 @@ AtomDecl::AtomDecl()
 }
 
 AtomDecl::AtomDecl(const AtomDecl& that)
-    :code(that.code),
-     name(that.name),
-     message(that.message),
-     fields(that.fields)
-{
-}
+    : code(that.code),
+      name(that.name),
+      message(that.message),
+      fields(that.fields),
+      primaryFields(that.primaryFields),
+      exclusiveField(that.exclusiveField) {}
 
 AtomDecl::AtomDecl(int c, const string& n, const string& m)
     :code(c),
@@ -237,6 +237,31 @@ int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
       signature->push_back(javaType);
     }
     atomDecl->fields.push_back(atField);
+
+    if (field->options().GetExtension(os::statsd::stateFieldOption).option() ==
+        os::statsd::StateField::PRIMARY) {
+        if (javaType == JAVA_TYPE_UNKNOWN ||
+            javaType == JAVA_TYPE_ATTRIBUTION_CHAIN ||
+            javaType == JAVA_TYPE_OBJECT || javaType == JAVA_TYPE_BYTE_ARRAY) {
+            errorCount++;
+        }
+        atomDecl->primaryFields.push_back(it->first);
+    }
+
+    if (field->options().GetExtension(os::statsd::stateFieldOption).option() ==
+        os::statsd::StateField::EXCLUSIVE) {
+        if (javaType == JAVA_TYPE_UNKNOWN ||
+            javaType == JAVA_TYPE_ATTRIBUTION_CHAIN ||
+            javaType == JAVA_TYPE_OBJECT || javaType == JAVA_TYPE_BYTE_ARRAY) {
+            errorCount++;
+        }
+
+        if (atomDecl->exclusiveField == 0) {
+            atomDecl->exclusiveField = it->first;
+        } else {
+            errorCount++;
+        }
+    }
   }
 
   return errorCount;
@@ -318,6 +343,9 @@ int collate_atoms(const Descriptor *descriptor, Atoms *atoms) {
     AtomDecl atomDecl(atomField->number(), atomField->name(), atom->name());
     vector<java_type_t> signature;
     errorCount += collate_atom(atom, &atomDecl, &signature);
+    if (atomDecl.primaryFields.size() != 0 && atomDecl.exclusiveField == 0) {
+        errorCount++;
+    }
     atoms->signatures.insert(signature);
     atoms->decls.insert(atomDecl);
 

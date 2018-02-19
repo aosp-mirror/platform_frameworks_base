@@ -25,14 +25,14 @@ namespace statsd {
 TEST(LogEventTest, TestLogParsing) {
     LogEvent event1(1, 2000);
 
-    std::vector<AttributionNode> nodes;
+    std::vector<AttributionNodeInternal> nodes;
 
-    AttributionNode node1;
+    AttributionNodeInternal node1;
     node1.set_uid(1000);
     node1.set_tag("tag1");
     nodes.push_back(node1);
 
-    AttributionNode node2;
+    AttributionNodeInternal node2;
     node2.set_uid(2000);
     node2.set_tag("tag2");
     nodes.push_back(node2);
@@ -92,17 +92,17 @@ TEST(LogEventTest, TestLogParsing) {
 TEST(LogEventTest, TestLogParsing2) {
     LogEvent event1(1, 2000);
 
-    std::vector<AttributionNode> nodes;
+    std::vector<AttributionNodeInternal> nodes;
 
     event1.write("hello");
 
     // repeated msg can be in the middle
-    AttributionNode node1;
+    AttributionNodeInternal node1;
     node1.set_uid(1000);
     node1.set_tag("tag1");
     nodes.push_back(node1);
 
-    AttributionNode node2;
+    AttributionNodeInternal node2;
     node2.set_uid(2000);
     node2.set_tag("tag2");
     nodes.push_back(node2);

@@ -17,6 +17,7 @@
 syntax = "proto2";
 
 import "frameworks/base/cmds/statsd/src/atoms.proto";
+import "frameworks/base/cmds/statsd/src/atom_field_options.proto";
 
 package android.stats_log_api_gen;
 
@@ -108,3 +109,68 @@ message BadAttributionNodePosition {
   oneof event { BadAttributionNodePositionAtom bad = 1; }
 }
 
+message BadStateAtoms {
+    oneof event {
+        BadStateAtom1 bad1 = 1;
+        BadStateAtom2 bad2 = 2;
+        BadStateAtom3 bad3 = 3;
+    }
+}
+
+message GoodStateAtoms {
+    oneof event {
+        GoodStateAtom1 good1 = 1;
+        GoodStateAtom2 good2 = 2;
+    }
+}
+
+// The atom has only primary field but no exclusive state field.
+message BadStateAtom1 {
+    optional int32 uid = 1
+            [(android.os.statsd.stateFieldOption).option = PRIMARY];
+}
+
+// Only primative types can be annotated.
+message BadStateAtom2 {
+    repeated android.os.statsd.AttributionNode attribution = 1
+            [(android.os.statsd.stateFieldOption).option = PRIMARY];
+    optional int32 state = 2
+            [(android.os.statsd.stateFieldOption).option = EXCLUSIVE];
+}
+
+// Having 2 exclusive state field in the atom means the atom is badly designed.
+// E.g., putting bluetooth state and wifi state in the same atom.
+message BadStateAtom3 {
+    optional int32 uid = 1
+            [(android.os.statsd.stateFieldOption).option = PRIMARY];
+    optional int32 state = 2
+            [(android.os.statsd.stateFieldOption).option = EXCLUSIVE];
+    optional int32 state2 = 3
+            [(android.os.statsd.stateFieldOption).option = EXCLUSIVE];
+}
+
+message GoodStateAtom1 {
+    optional int32 uid = 1
+            [(android.os.statsd.stateFieldOption).option = PRIMARY];
+    optional int32 state = 2
+            [(android.os.statsd.stateFieldOption).option = EXCLUSIVE];
+}
+
+// Atoms can have exclusive state field, but no primary field. That means
+// the state is globally exclusive (e.g., DisplayState).
+message GoodStateAtom2 {
+    optional int32 uid = 1;
+    optional int32 state = 2
+            [(android.os.statsd.stateFieldOption).option = EXCLUSIVE];
+}
+
+// We can have more than one primary fields. That means their combination is a
+// primary key.
+message GoodStateAtom3 {
+    optional int32 uid = 1
+            [(android.os.statsd.stateFieldOption).option = PRIMARY];
+    optional int32 tid = 2
+            [(android.os.statsd.stateFieldOption).option = PRIMARY];
+    optional int32 state = 3
+            [(android.os.statsd.stateFieldOption).option = EXCLUSIVE];
+}

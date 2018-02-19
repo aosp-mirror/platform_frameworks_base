@@ -17,9 +17,8 @@ LOCAL_PATH:= $(call my-dir)
 statsd_common_src := \
     ../../core/java/android/os/IStatsCompanionService.aidl \
     ../../core/java/android/os/IStatsManager.aidl \
-    src/stats_log.proto \
+    src/stats_log_common.proto \
     src/statsd_config.proto \
-    src/atoms.proto \
     src/FieldValue.cpp \
     src/stats_log_util.cpp \
     src/anomaly/AnomalyMonitor.cpp \
@@ -168,6 +167,9 @@ LOCAL_CFLAGS += \
 
 LOCAL_SRC_FILES := \
     $(statsd_common_src) \
+    src/atom_field_options.proto \
+    src/atoms.proto \
+    src/stats_log.proto \
     tests/AnomalyMonitor_test.cpp \
     tests/anomaly/AnomalyTracker_test.cpp \
     tests/ConfigManager_test.cpp \
@@ -202,9 +204,13 @@ LOCAL_STATIC_LIBRARIES := \
     $(statsd_common_static_libraries) \
     libgmock
 
-LOCAL_SHARED_LIBRARIES := $(statsd_common_shared_libraries)
+LOCAL_PROTOC_OPTIMIZE_TYPE := full
 
-LOCAL_PROTOC_OPTIMIZE_TYPE := lite
+LOCAL_PROTOC_FLAGS := \
+    -Iexternal/protobuf/src
+
+LOCAL_SHARED_LIBRARIES := $(statsd_common_shared_libraries) \
+                        libprotobuf-cpp-full
 
 include $(BUILD_NATIVE_TEST)
 
@@ -217,6 +223,7 @@ LOCAL_MODULE := statsdprotolite
 
 LOCAL_SRC_FILES := \
     src/stats_log.proto \
+    src/stats_log_common.proto \
     src/statsd_config.proto \
     src/perfetto/perfetto_config.proto \
     src/atoms.proto
@@ -225,6 +232,9 @@ LOCAL_PROTOC_OPTIMIZE_TYPE := lite
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     platformprotoslite
+
+LOCAL_PROTOC_FLAGS := \
+    -Iexternal/protobuf/src
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
@@ -260,8 +270,6 @@ LOCAL_STATIC_LIBRARIES := \
 LOCAL_SHARED_LIBRARIES := $(statsd_common_shared_libraries) \
     libgtest_prod \
     libstatslog
-
-LOCAL_PROTOC_OPTIMIZE_TYPE := lite
 
 LOCAL_MODULE_TAGS := eng tests
 

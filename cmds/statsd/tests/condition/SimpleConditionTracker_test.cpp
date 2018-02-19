@@ -58,9 +58,9 @@ SimplePredicate getWakeLockHeldCondition(bool countNesting, bool defaultFalse,
 }
 
 void writeAttributionNodesToEvent(LogEvent* event, const std::vector<int> &uids) {
-    std::vector<AttributionNode> nodes;
+    std::vector<AttributionNodeInternal> nodes;
     for (size_t i = 0; i < uids.size(); ++i) {
-        AttributionNode node;
+        AttributionNodeInternal node;
         node.set_uid(uids[i]);
         nodes.push_back(node);
     }

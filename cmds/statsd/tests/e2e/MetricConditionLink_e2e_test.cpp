@@ -134,8 +134,8 @@ TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks1) {
         CreateScreenStateChangedEvent(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
                                       bucketStartTimeNs + 2 * bucketSizeNs - 100);
 
-    std::vector<AttributionNode> attributions =
-        {CreateAttribution(appUid, "App1"), CreateAttribution(appUid + 1, "GMSCoreModule1")};
+    std::vector<AttributionNodeInternal> attributions = {
+            CreateAttribution(appUid, "App1"), CreateAttribution(appUid + 1, "GMSCoreModule1")};
     auto syncOnEvent1 =
         CreateSyncStartEvent(attributions, "ReadEmail", bucketStartTimeNs + 50);
     auto syncOffEvent1 =
@@ -249,8 +249,8 @@ TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks2) {
             CreateScreenStateChangedEvent(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
                                           bucketStartTimeNs + 2 * bucketSizeNs - 100);
 
-    std::vector<AttributionNode> attributions = {CreateAttribution(appUid, "App1"),
-                                                 CreateAttribution(appUid + 1, "GMSCoreModule1")};
+    std::vector<AttributionNodeInternal> attributions = {
+            CreateAttribution(appUid, "App1"), CreateAttribution(appUid + 1, "GMSCoreModule1")};
     auto syncOnEvent1 = CreateSyncStartEvent(attributions, "ReadEmail", bucketStartTimeNs + 50);
     auto syncOffEvent1 =
             CreateSyncEndEvent(attributions, "ReadEmail", bucketStartTimeNs + bucketSizeNs + 300);

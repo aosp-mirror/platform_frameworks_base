@@ -291,8 +291,8 @@ std::unique_ptr<LogEvent> CreateScreenBrightnessChangedEvent(
 }
 
 std::unique_ptr<LogEvent> CreateWakelockStateChangedEvent(
-    const std::vector<AttributionNode>& attributions, const string& wakelockName,
-    const WakelockStateChanged::State state, uint64_t timestampNs) {
+        const std::vector<AttributionNodeInternal>& attributions, const string& wakelockName,
+        const WakelockStateChanged::State state, uint64_t timestampNs) {
     auto event = std::make_unique<LogEvent>(android::util::WAKELOCK_STATE_CHANGED, timestampNs);
     event->write(attributions);
     event->write(android::os::WakeLockLevelEnum::PARTIAL_WAKE_LOCK);
@@ -303,15 +303,15 @@ std::unique_ptr<LogEvent> CreateWakelockStateChangedEvent(
 }
 
 std::unique_ptr<LogEvent> CreateAcquireWakelockEvent(
-    const std::vector<AttributionNode>& attributions,
-    const string& wakelockName, uint64_t timestampNs) {
+        const std::vector<AttributionNodeInternal>& attributions, const string& wakelockName,
+        uint64_t timestampNs) {
     return CreateWakelockStateChangedEvent(
         attributions, wakelockName, WakelockStateChanged::ACQUIRE, timestampNs);
 }
 
 std::unique_ptr<LogEvent> CreateReleaseWakelockEvent(
-    const std::vector<AttributionNode>& attributions,
-    const string& wakelockName, uint64_t timestampNs) {
+        const std::vector<AttributionNodeInternal>& attributions, const string& wakelockName,
+        uint64_t timestampNs) {
     return CreateWakelockStateChangedEvent(
         attributions, wakelockName, WakelockStateChanged::RELEASE, timestampNs);
 }
@@ -339,8 +339,8 @@ std::unique_ptr<LogEvent> CreateMoveToForegroundEvent(const int uid, uint64_t ti
 }
 
 std::unique_ptr<LogEvent> CreateSyncStateChangedEvent(
-    const std::vector<AttributionNode>& attributions,
-    const string& name, const SyncStateChanged::State state, uint64_t timestampNs) {
+        const std::vector<AttributionNodeInternal>& attributions, const string& name,
+        const SyncStateChanged::State state, uint64_t timestampNs) {
     auto event = std::make_unique<LogEvent>(android::util::SYNC_STATE_CHANGED, timestampNs);
     event->write(attributions);
     event->write(name);
@@ -350,12 +350,14 @@ std::unique_ptr<LogEvent> CreateSyncStateChangedEvent(
 }
 
 std::unique_ptr<LogEvent> CreateSyncStartEvent(
-    const std::vector<AttributionNode>& attributions, const string& name, uint64_t timestampNs){
+        const std::vector<AttributionNodeInternal>& attributions, const string& name,
+        uint64_t timestampNs) {
     return CreateSyncStateChangedEvent(attributions, name, SyncStateChanged::ON, timestampNs);
 }
 
 std::unique_ptr<LogEvent> CreateSyncEndEvent(
-    const std::vector<AttributionNode>& attributions, const string& name, uint64_t timestampNs) {
+        const std::vector<AttributionNodeInternal>& attributions, const string& name,
+        uint64_t timestampNs) {
     return CreateSyncStateChangedEvent(attributions, name, SyncStateChanged::OFF, timestampNs);
 }
 
@@ -396,8 +398,8 @@ sp<StatsLogProcessor> CreateStatsLogProcessor(const long timeBaseSec, const Stat
     return processor;
 }
 
-AttributionNode CreateAttribution(const int& uid, const string& tag) {
-    AttributionNode attribution;
+AttributionNodeInternal CreateAttribution(const int& uid, const string& tag) {
+    AttributionNodeInternal attribution;
     attribution.set_uid(uid);
     attribution.set_tag(tag);
     return attribution;
