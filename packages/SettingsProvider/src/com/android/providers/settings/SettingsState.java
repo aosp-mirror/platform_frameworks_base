@@ -51,7 +51,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 
 import libcore.io.IoUtils;
-import libcore.util.Objects;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -66,6 +65,7 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -996,7 +996,7 @@ final class SettingsState {
             String defaultValue = this.defaultValue;
             boolean defaultFromSystem = this.defaultFromSystem;
             if (setDefault) {
-                if (!Objects.equal(value, this.defaultValue)
+                if (!Objects.equals(value, this.defaultValue)
                         && (!defaultFromSystem || callerSystem)) {
                     defaultValue = value;
                     // Default null means no default, so the tag is irrelevant
@@ -1015,10 +1015,10 @@ final class SettingsState {
             }
 
             // Is something gonna change?
-            if (Objects.equal(value, this.value)
-                    && Objects.equal(defaultValue, this.defaultValue)
-                    && Objects.equal(packageName, this.packageName)
-                    && Objects.equal(tag, this.tag)
+            if (Objects.equals(value, this.value)
+                    && Objects.equals(defaultValue, this.defaultValue)
+                    && Objects.equals(packageName, this.packageName)
+                    && Objects.equals(tag, this.tag)
                     && defaultFromSystem == this.defaultFromSystem) {
                 return false;
             }

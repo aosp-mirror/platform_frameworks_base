@@ -52,9 +52,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import libcore.io.IoUtils;
-import libcore.util.Objects;
 
 /**
  * Manages persistent state recorded by the display manager service as an XML file.
@@ -180,7 +180,7 @@ final class PersistentDataStore {
             if (index >= 0) {
                 alias = mRememberedWifiDisplays.get(index).getDeviceAlias();
             }
-            if (!Objects.equal(display.getDeviceAlias(), alias)) {
+            if (!Objects.equals(display.getDeviceAlias(), alias)) {
                 return new WifiDisplay(display.getDeviceAddress(), display.getDeviceName(),
                         alias, display.isAvailable(), display.canConnect(), display.isRemembered());
             }

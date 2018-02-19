@@ -42,11 +42,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import dalvik.system.VMRuntime;
 import libcore.io.IoUtils;
-import libcore.util.Objects;
 
 /**
  * Stat file which store usage information about dex files.
@@ -830,7 +830,7 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
                 // We detected an unsupported context.
                 mClassLoaderContext = UNSUPPORTED_CLASS_LOADER_CONTEXT;
             } else if (!UNSUPPORTED_CLASS_LOADER_CONTEXT.equals(mClassLoaderContext) &&
-                    !Objects.equal(mClassLoaderContext, dexUseInfo.mClassLoaderContext)) {
+                    !Objects.equals(mClassLoaderContext, dexUseInfo.mClassLoaderContext)) {
                 // We detected a context change.
                 mClassLoaderContext = VARIABLE_CLASS_LOADER_CONTEXT;
             }
@@ -838,7 +838,7 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
             return updateIsas ||
                     (oldIsUsedByOtherApps != mIsUsedByOtherApps) ||
                     updateLoadingPackages
-                    || !Objects.equal(oldClassLoaderContext, mClassLoaderContext);
+                    || !Objects.equals(oldClassLoaderContext, mClassLoaderContext);
         }
 
         public boolean isUsedByOtherApps() {
