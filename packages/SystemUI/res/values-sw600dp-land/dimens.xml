@@ -16,9 +16,6 @@
 */
 -->
 <resources>
-    <fraction name="keyguard_clock_y_fraction_max">37%</fraction>
-    <fraction name="keyguard_clock_y_fraction_min">20%</fraction>
-
     <dimen name="keyguard_clock_notifications_margin">36dp</dimen>
 
     <dimen name="keyguard_indication_margin_bottom">80dp</dimen>
