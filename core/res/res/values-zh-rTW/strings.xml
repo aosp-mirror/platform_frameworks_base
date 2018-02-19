@@ -838,7 +838,7 @@
     <string name="preposition_for_year" msgid="5040395640711867177">"於 <xliff:g id="YEAR">%s</xliff:g> 年"</string>
     <string name="day" msgid="8144195776058119424">"天"</string>
     <string name="days" msgid="4774547661021344602">"天"</string>
-    <string name="hour" msgid="2126771916426189481">"小時"</string>
+    <string name="hour" msgid="2126771916426189481">"點"</string>
     <string name="hours" msgid="894424005266852993">"小時"</string>
     <string name="minute" msgid="9148878657703769868">"分鐘"</string>
     <string name="minutes" msgid="5646001005827034509">"分鐘"</string>

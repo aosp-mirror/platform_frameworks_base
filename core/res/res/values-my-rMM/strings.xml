@@ -1113,7 +1113,7 @@
     <string name="sms_control_title" msgid="7296612781128917719">"စာတိုပို့စနစ်(SMS)ဖြင့် စာများ ပို့သည်"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; မှ စာ အမြောက်အများ ပို့နေပါသည်။ ဒီအပလီကေးရှင်းကို ဆက်လက်ပြီး လုပ်ဆောင်ရန် ခွင့်ပြုပါမလား"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"ခွင့်ပြုရန်"</string>
-    <string name="sms_control_no" msgid="625438561395534982">"ငြင်းပယ်ခြင်း"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"ငြင်းပယ်ရန်"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; မှ &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; ကို စာတို ပို့ချင်ပါသည်"</string>
     <string name="sms_short_code_details" msgid="5873295990846059400"><b>"ဒါက သင့် မိုဘိုင်း အကောင့် အတွက် "</b>" ကုန်ကျမှု ရှိလာနိုင်သည်။"</string>
     <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"ဒါက သင့် မိုဘိုင်း အကောင့် အတွက် ကုန်ကျမှု ရှိလာနိုင်သည်။"</b></string>

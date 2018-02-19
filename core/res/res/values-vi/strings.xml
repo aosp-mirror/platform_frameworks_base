@@ -318,7 +318,7 @@
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Cho phép ứng dụng làm cho các phần của ứng dụng trở nên ổn định trong bộ nhớ. Việc này có thể hạn chế bộ nhớ đối với các ứng dụng khác đang làm chậm TV."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Cho phép ứng dụng tạo sự đồng nhất cho các phần của mình trong bộ nhớ. Việc này có thể hạn chế bộ nhớ đối với các ứng dụng khác đang làm chậm điện thoại."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"đo dung lượng lưu trữ ứng dụng"</string>
-    <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Cho phép ứng dụng truy xuất mã, dữ liệu và kích thước bộ nhớ cache của chính ứng dụng"</string>
+    <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Cho phép ứng dụng truy xuất mã, dữ liệu và kích thước bộ nhớ đệm của chính ứng dụng"</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"sửa đổi cài đặt hệ thống"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Cho phép ứng dụng sửa đổi dữ liệu cài đặt của hệ thống. Ứng dụng độc hại có thể làm hỏng cấu hình hệ thống của bạn."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"chạy khi khởi động"</string>
