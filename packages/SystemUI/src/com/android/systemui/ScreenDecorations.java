@@ -387,11 +387,10 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         }
 
         private boolean hasCutout() {
-            if (mInfo.displayCutout == null) {
+            final DisplayCutout displayCutout = mInfo.displayCutout;
+            if (displayCutout == null) {
                 return false;
             }
-            DisplayCutout displayCutout = mInfo.displayCutout.calculateRelativeTo(
-                    new Rect(0, 0, mInfo.logicalWidth, mInfo.logicalHeight));
             if (mStart) {
                 return displayCutout.getSafeInsetLeft() > 0
                         || displayCutout.getSafeInsetTop() > 0;

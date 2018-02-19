@@ -138,6 +138,7 @@ import android.os.Trace;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.MutableBoolean;
+import android.util.Size;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
@@ -1197,14 +1198,20 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     DisplayCutout calculateDisplayCutoutForCurrentRotation() {
         final DisplayCutout cutout = mInitialDisplayCutout;
-        if (cutout == null || cutout == DisplayCutout.NO_CUTOUT || mRotation == ROTATION_0) {
+        if (cutout == null || cutout == DisplayCutout.NO_CUTOUT) {
             return cutout;
         }
+        if (mRotation == ROTATION_0) {
+            return cutout.computeSafeInsets(mInitialDisplayWidth, mInitialDisplayHeight);
+        }
+        final boolean rotated = (mRotation == ROTATION_90 || mRotation == ROTATION_270);
         final Path bounds = cutout.getBounds().getBoundaryPath();
         transformPhysicalToLogicalCoordinates(mRotation, mInitialDisplayWidth,
                 mInitialDisplayHeight, mTmpMatrix);
         bounds.transform(mTmpMatrix);
-        return DisplayCutout.fromBounds(bounds);
+        return DisplayCutout.fromBounds(bounds).computeSafeInsets(
+                rotated ? mInitialDisplayHeight : mInitialDisplayWidth,
+                rotated ? mInitialDisplayWidth : mInitialDisplayHeight);
     }
 
     /**

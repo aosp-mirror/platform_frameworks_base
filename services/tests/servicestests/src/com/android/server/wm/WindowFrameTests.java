@@ -22,7 +22,6 @@ import org.junit.runner.RunWith;
 
 import android.app.ActivityManager.TaskDescription;
 import android.content.res.Configuration;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
@@ -33,12 +32,11 @@ import android.view.Gravity;
 import android.view.IWindow;
 import android.view.WindowManager;
 
+import static android.view.DisplayCutout.fromBoundingRect;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.FILL_PARENT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
-import java.util.Arrays;
 
 /**
  * Tests for the {@link WindowState#computeFrameLw} method and other window frame machinery.
@@ -430,7 +428,8 @@ public class WindowFrameTests extends WindowTestsBase {
 
         final Rect pf = new Rect(0, 0, 1000, 1000);
         // Create a display cutout of size 50x50, aligned top-center
-        final DisplayCutout cutout = createDisplayCutoutFromRect(500, 0, 550, 50);
+        final DisplayCutout cutout = fromBoundingRect(500, 0, 550, 50)
+                .computeSafeInsets(pf.width(), pf.height());
 
         w.computeFrameLw(pf, pf, pf, pf, pf, pf, pf, pf, cutout);
 
@@ -448,12 +447,4 @@ public class WindowFrameTests extends WindowTestsBase {
         return new WindowStateWithTask(attrs, task);
     }
 
-    private DisplayCutout createDisplayCutoutFromRect(int left, int top, int right, int bottom) {
-        return DisplayCutout.fromBoundingPolygon(Arrays.asList(
-                new Point(left, top),
-                new Point(left, bottom),
-                new Point(right, bottom),
-                new Point(right, top)
-        ));
-    }
 }
