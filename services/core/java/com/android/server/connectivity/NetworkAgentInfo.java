@@ -384,12 +384,15 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
 
     /**
      * Returns whether the network is a background network. A network is a background network if it
-     * is satisfying no foreground requests and at least one background request. (If it did not have
-     * a background request, it would be a speculative network that is only being kept up because
-     * it might satisfy a request if it validated).
+     * does not have the NET_CAPABILITY_FOREGROUND capability, which implies it is satisfying no
+     * foreground request, is not lingering (i.e. kept for a while after being outscored), and is
+     * not a speculative network (i.e. kept pending validation when validation would have it
+     * outscore another foreground network). That implies it is being kept up by some background
+     * request (otherwise it would be torn down), maybe the mobile always-on request.
      */
     public boolean isBackgroundNetwork() {
-        return !isVPN() && numForegroundNetworkRequests() == 0 && mNumBackgroundNetworkRequests > 0;
+        return !isVPN() && numForegroundNetworkRequests() == 0 && mNumBackgroundNetworkRequests > 0
+                && !isLingering();
     }
 
     /**
