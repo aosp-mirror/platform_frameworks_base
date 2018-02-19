@@ -23,6 +23,10 @@ java_library {
     java_version: "1.8",
     srcs: ["src/**/*.java"],
 
+    errorprone: {
+      javacflags: ["-Xep:DepAnn:ERROR"],
+    },
+
     no_framework_libs: true,
     libs: [
         "framework",
