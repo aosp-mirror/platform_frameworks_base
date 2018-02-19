@@ -305,6 +305,8 @@ public final class TextLinks implements Parcelable {
         private @ApplyStrategy int mApplyStrategy;
         private Function<TextLink, TextLinkSpan> mSpanFactory;
 
+        private String mCallingPackageName;
+
         /**
          * Returns a new options object based on the specified link mask.
          */
@@ -377,6 +379,15 @@ public final class TextLinks implements Parcelable {
         }
 
         /**
+         * Sets the name of the package that requested the links to get generated.
+         * @hide
+         */
+        public Options setCallingPackageName(@Nullable String callingPackageName) {
+            mCallingPackageName = callingPackageName;
+            return this;
+        }
+
+        /**
          * @return ordered list of locale preferences that can be used to disambiguate
          *      the provided text
          */
@@ -417,6 +428,16 @@ public final class TextLinks implements Parcelable {
             return mSpanFactory;
         }
 
+        /**
+         * @return the name of the package that requested the links to get generated.
+         * TODO: make available as system API
+         * @hide
+         */
+        @Nullable
+        public String getCallingPackageName() {
+            return mCallingPackageName;
+        }
+
         @Override
         public int describeContents() {
             return 0;
@@ -433,6 +454,7 @@ public final class TextLinks implements Parcelable {
                 mEntityConfig.writeToParcel(dest, flags);
             }
             dest.writeInt(mApplyStrategy);
+            dest.writeString(mCallingPackageName);
         }
 
         public static final Parcelable.Creator<Options> CREATOR =
@@ -456,6 +478,7 @@ public final class TextLinks implements Parcelable {
                 mEntityConfig = TextClassifier.EntityConfig.CREATOR.createFromParcel(in);
             }
             mApplyStrategy = in.readInt();
+            mCallingPackageName = in.readString();
         }
     }
 

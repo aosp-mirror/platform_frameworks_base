@@ -5283,6 +5283,40 @@ message MetricsEvent {
     // OS: P
     USB_DEFAULT = 1312;
 
+    // CATEGORY: The category for all actions related to TextClassifier generateLinks.
+    // OS: P
+    TEXT_CLASSIFIER_GENERATE_LINKS = 1313;
+
+    // FIELD: milliseconds spent generating links.
+    // CATEGORY: TEXT_CLASSIFIER_GENERATE_LINKS
+    // OS: P
+    FIELD_LINKIFY_LATENCY = 1314;
+
+    // FIELD: length of the input text in characters.
+    // CATEGORY: TEXT_CLASSIFIER_GENERATE_LINKS
+    // OS: P
+    FIELD_LINKIFY_TEXT_LENGTH = 1315;
+
+    // FIELD: number of links detected.
+    // CATEGORY: TEXT_CLASSIFIER_GENERATE_LINKS
+    // OS: P
+    FIELD_LINKIFY_NUM_LINKS = 1316;
+
+    // FIELD: length of all links in characters.
+    // CATEGORY: TEXT_CLASSIFIER_GENERATE_LINKS
+    // OS: P
+    FIELD_LINKIFY_LINK_LENGTH = 1317;
+
+    // FIELD: the type of entity the stats are for.
+    // CATEGORY: TEXT_CLASSIFIER_GENERATE_LINKS
+    // OS: P
+    FIELD_LINKIFY_ENTITY_TYPE = 1318;
+
+    // FIELD: a random uid for a single call to generateLinks
+    // CATEGORY: TEXT_CLASSIFIER_GENERATE_LINKS
+    // OS: P
+    FIELD_LINKIFY_CALL_ID = 1319;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

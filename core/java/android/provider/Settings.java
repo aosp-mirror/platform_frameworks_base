@@ -10479,6 +10479,7 @@ public final class Settings {
          * suggest_selection_max_range_length       (int)
          * classify_text_max_range_length           (int)
          * generate_links_max_text_length           (int)
+         * generate_links_log_sample_rate           (int)
          * </pre>
          *
          * <p>

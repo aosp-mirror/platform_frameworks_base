@@ -38,10 +38,10 @@ import android.provider.Settings;
 import android.text.util.Linkify;
 import android.util.Patterns;
 import android.view.textclassifier.logging.DefaultLogger;
+import android.view.textclassifier.logging.GenerateLinksLogger;
 import android.view.textclassifier.logging.Logger;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.Preconditions;
 
 import java.io.File;
@@ -100,7 +100,7 @@ public final class TextClassifierImpl implements TextClassifier {
     private final Context mContext;
     private final TextClassifier mFallback;
 
-    private final MetricsLogger mMetricsLogger = new MetricsLogger();
+    private final GenerateLinksLogger mGenerateLinksLogger;
 
     private final Object mLock = new Object();
     @GuardedBy("mLock") // Do not access outside this lock.
@@ -121,6 +121,8 @@ public final class TextClassifierImpl implements TextClassifier {
     public TextClassifierImpl(Context context) {
         mContext = Preconditions.checkNotNull(context);
         mFallback = TextClassifier.NO_OP;
+        mGenerateLinksLogger = new GenerateLinksLogger(
+                getSettings().getGenerateLinksLogSampleRate());
     }
 
     /** @inheritDoc */
@@ -221,6 +223,7 @@ public final class TextClassifierImpl implements TextClassifier {
         }
 
         try {
+            final long startTimeMs = System.currentTimeMillis();
             final LocaleList defaultLocales = options != null ? options.getDefaultLocales() : null;
             final Collection<String> entitiesToIdentify =
                     options != null && options.getEntityConfig() != null
@@ -238,7 +241,15 @@ public final class TextClassifierImpl implements TextClassifier {
                 }
                 builder.addLink(span.getStartIndex(), span.getEndIndex(), entityScores);
             }
-            return builder.build();
+            final TextLinks links = builder.build();
+            final long endTimeMs = System.currentTimeMillis();
+            final String callingPackageName =
+                    options == null || options.getCallingPackageName() == null
+                            ? mContext.getPackageName()  // local (in process) TC.
+                            : options.getCallingPackageName();
+            mGenerateLinksLogger.logGenerateLinks(
+                    text, links, callingPackageName, endTimeMs - startTimeMs);
+            return links;
         } catch (Throwable t) {
             // Avoid throwing from this method. Log the error.
             Log.e(LOG_TAG, "Error getting links info.", t);
