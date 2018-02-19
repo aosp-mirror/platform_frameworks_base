@@ -10471,7 +10471,8 @@ public final class Settings {
 
         /**
          * TextClassifier specific settings.
-         * This is encoded as a key=value list, separated by commas. Ex:
+         * This is encoded as a key=value list, separated by commas. String[] types like
+         * entity_list_default use ":" as delimiter for values. Ex:
          *
          * <pre>
          * smart_selection_dark_launch              (boolean)
@@ -10480,6 +10481,9 @@ public final class Settings {
          * classify_text_max_range_length           (int)
          * generate_links_max_text_length           (int)
          * generate_links_log_sample_rate           (int)
+         * entity_list_default                      (String[])
+         * entity_list_not_editable                 (String[])
+         * entity_list_editable                     (String[])
          * </pre>
          *
          * <p>
