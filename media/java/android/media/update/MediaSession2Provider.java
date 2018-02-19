@@ -20,7 +20,7 @@ import android.app.PendingIntent;
 import android.media.MediaItem2;
 import android.media.MediaMetadata2;
 import android.media.MediaPlayerInterface;
-import android.media.MediaPlayerInterface.PlaybackListener;
+import android.media.MediaPlayerInterface.EventCallback;
 import android.media.MediaSession2;
 import android.media.MediaSession2.Command;
 import android.media.MediaSession2.CommandButton;
@@ -61,8 +61,8 @@ public interface MediaSession2Provider extends TransportControlProvider {
     void setPlaylistParams_impl(PlaylistParams params);
     PlaylistParams getPlaylistParams_impl();
 
-    void addPlaybackListener_impl(Executor executor, PlaybackListener listener);
-    void removePlaybackListener_impl(PlaybackListener listener);
+    void registerPlayerEventCallback_impl(Executor executor, EventCallback callback);
+    void unregisterPlayerEventCallback_impl(EventCallback callback);
 
     interface CommandProvider {
         int getCommandCode_impl();
