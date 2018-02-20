@@ -565,6 +565,7 @@ Landroid/content/res/ColorStateList$ColorStateListFactory;-><init>(Landroid/cont
 Landroid/content/res/ColorStateList;->mColors:[I
 Landroid/content/res/ColorStateList;->mDefaultColor:I
 Landroid/content/res/ColorStateList;->mFactory:Landroid/content/res/ColorStateList$ColorStateListFactory;
+Landroid/content/res/CompatibilityInfo;->applicationScale:F
 Landroid/content/res/CompatibilityInfo;->DEFAULT_COMPATIBILITY_INFO:Landroid/content/res/CompatibilityInfo;
 Landroid/content/res/DrawableCache;->getInstance(JLandroid/content/res/Resources;Landroid/content/res/Resources$Theme;)Landroid/graphics/drawable/Drawable;
 Landroid/content/res/ObbInfo;->salt:[B
