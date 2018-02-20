@@ -104,7 +104,8 @@ PageTypeInfoParser::Parse(const int in, const int out) const
 
                 for (size_t i=0; i<blockHeader.size(); i++) {
                     if (!table.insertField(&proto, blockHeader[i], blockCounts[i+1])) {
-                        return BAD_VALUE;
+                        fprintf(stderr, "Header %s has bad data %s\n", blockHeader[i].c_str(),
+                            blockCounts[i+1].c_str());
                     }
                 }
             } else return BAD_VALUE;
