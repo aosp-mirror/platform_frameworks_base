@@ -365,11 +365,14 @@ write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attributio
     fprintf(out, "};\n");
     fprintf(out, "\n");
 
-    std::set<string> kFuzzingAtomNames = { "mobile_radio_power_state_changed" };
+    std::set<string> kTruncatingAtomNames =
+        { "mobile_radio_power_state_changed", "audio_state_changed", "call_state_changed",
+          "phone_signal_strength_changed", "mobile_bytes_transfer_by_fg_bg",
+          "mobile_bytes_transfer"};
     fprintf(out, "const static std::set<int> kNotTruncatingTimestampAtomWhiteList = {\n");
     for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
         atom != atoms.decls.end(); atom++) {
-        if (kFuzzingAtomNames.find(atom->name) == kFuzzingAtomNames.end()) {
+        if (kTruncatingAtomNames.find(atom->name) == kTruncatingAtomNames.end()) {
             string constant = make_constant_name(atom->name);
             fprintf(out, " %s,\n", constant.c_str());
         }
