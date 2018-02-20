@@ -365,9 +365,8 @@ public final class PublishConfig implements Parcelable {
          * {@link SubscribeConfig.Builder#setMaxDistanceMm(int)} to specify a minimum and/or
          * maximum distance at which discovery will be triggered.
          * <p>
-         * Optional. Disabled by default - i.e. any peer which attempts to measure distance to this
-         * device will be refused. If the peer has ranging enabled (using the
-         * {@link SubscribeConfig} APIs listed above, it will never discover this device.
+         * Optional. Disabled by default - i.e. any peer attempt to measure distance to this device
+         * will be refused and discovery will proceed without ranging constraints.
          * <p>
          * The device must support Wi-Fi RTT for this feature to be used. Feature support is checked
          * as described in {@link android.net.wifi.rtt}.
