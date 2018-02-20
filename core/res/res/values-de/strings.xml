@@ -1138,7 +1138,7 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Datum festlegen"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Speichern"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Fertig"</string>
-    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"Neu: "</font></string>
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"NEU: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Zur Verfügung gestellt von <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="no_permissions" msgid="7283357728219338112">"Keine Berechtigungen erforderlich"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"Hierfür können Gebühren anfallen."</string>

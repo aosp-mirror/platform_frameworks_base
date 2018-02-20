@@ -980,7 +980,7 @@
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Nema dovoljno memorijskog prostora za sistem. Uverite se da imate 250 MB slobodnog prostora i ponovo pokrenite."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> je pokrenuta"</string>
     <string name="app_running_notification_text" msgid="1197581823314971177">"Dodirnite za više informacija ili zaustavljanje aplikacije."</string>
-    <string name="ok" msgid="5970060430562524910">"Potvrdi"</string>
+    <string name="ok" msgid="5970060430562524910">"U redu"</string>
     <string name="cancel" msgid="6442560571259935130">"Otkaži"</string>
     <string name="yes" msgid="5362982303337969312">"Potvrdi"</string>
     <string name="no" msgid="5141531044935541497">"Otkaži"</string>
