@@ -2954,20 +2954,20 @@
     <string name="heavy_weight_notification"><xliff:g id="app">%1$s</xliff:g> running</string>
 
     <!-- Notification details to tell the user that a heavy-weight application is running. -->
-    <string name="heavy_weight_notification_detail">Tap to switch to app</string>
+    <string name="heavy_weight_notification_detail">Tap to return to game</string>
 
     <!-- Title of dialog prompting whether user wants to switch between heavy-weight apps. -->
-    <string name="heavy_weight_switcher_title">Switch apps?</string>
+    <string name="heavy_weight_switcher_title">Choose game</string>
 
     <!-- Descriptive text for switching to a new heavy-weight application. -->
-    <string name="heavy_weight_switcher_text">Another app is already running
-    that must be stopped before you can start a new one.</string>
+    <string name="heavy_weight_switcher_text">For better performance, only one of these
+        games can be open at a time.</string>
 
-    <string name="old_app_action">Return to <xliff:g id="old_app">%1$s</xliff:g></string>
-    <string name="old_app_description">Don\'t start the new app.</string>
+    <string name="old_app_action">Go back to <xliff:g id="old_app">%1$s</xliff:g></string>
 
-    <string name="new_app_action">Start <xliff:g id="old_app">%1$s</xliff:g></string>
-    <string name="new_app_description">Stop the old app without saving.</string>
+    <string name="new_app_action">Open <xliff:g id="new_app">%1$s</xliff:g></string>
+    <string name="new_app_description"><xliff:g id="old_app">%1$s</xliff:g> will close
+        without saving</string>
 
     <!-- Notification text to tell the user that a process has exceeded its memory limit. -->
     <string name="dump_heap_notification"><xliff:g id="proc">%1$s</xliff:g> exceeded memory

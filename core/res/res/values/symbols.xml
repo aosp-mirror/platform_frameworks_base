@@ -109,7 +109,6 @@
   <java-symbol type="id" name="no_permissions" />
   <java-symbol type="id" name="numberpicker_input" />
   <java-symbol type="id" name="old_app_action" />
-  <java-symbol type="id" name="old_app_description" />
   <java-symbol type="id" name="old_app_icon" />
   <java-symbol type="id" name="overlay_display_window_texture" />
   <java-symbol type="id" name="overlay_display_window_title" />
