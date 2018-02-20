@@ -32,7 +32,7 @@ package com.android.server.wm.proto;
 
 option java_multiple_files = true;
 
-message WindowManagerServiceProto {
+message WindowManagerServiceDumpProto {
   option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
   optional WindowManagerPolicyProto policy = 1;

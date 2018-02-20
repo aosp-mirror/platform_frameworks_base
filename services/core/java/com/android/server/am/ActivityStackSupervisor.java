@@ -3777,7 +3777,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         mService.mLockTaskController.dump(pw, prefix);
     }
 
-    public void writeToProto(ProtoOutputStream proto) {
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
         super.writeToProto(proto, CONFIGURATION_CONTAINER, false /* trim */);
         for (int displayNdx = 0; displayNdx < mActivityDisplays.size(); ++displayNdx) {
             ActivityDisplay activityDisplay = mActivityDisplays.valueAt(displayNdx);
@@ -3795,6 +3796,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
         proto.write(IS_HOME_RECENTS_COMPONENT,
                 mRecentTasks.isRecentsComponentHomeActivity(mCurrentUser));
+        proto.end(token);
     }
 
     /**
