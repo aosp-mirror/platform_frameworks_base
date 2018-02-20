@@ -19,20 +19,18 @@ package com.android.server.pm.dex;
 import android.Manifest;
 import android.annotation.UserIdInt;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.ArtManager.ProfileType;
-import android.content.pm.dex.ArtManagerInternal;
 import android.content.pm.dex.DexMetadataHelper;
-import android.content.pm.dex.PackageOptimizationInfo;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.content.pm.IPackageManager;
 import android.content.pm.dex.ISnapshotRuntimeProfileCallback;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -44,13 +42,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
-import com.android.server.LocalServices;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
-
-import dalvik.system.DexFile;
-
-import dalvik.system.VMRuntime;
 import java.io.File;
 import java.io.FileNotFoundException;
 import libcore.io.IoUtils;
@@ -93,8 +86,6 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         mInstaller = installer;
         mInstallLock = installLock;
         mHandler = new Handler(BackgroundThread.getHandler().getLooper());
-
-        LocalServices.addService(ArtManagerInternal.class, new ArtManagerInternalImpl());
     }
 
     @Override
@@ -405,31 +396,5 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
             }
         }
         return result;
-    }
-
-    private class ArtManagerInternalImpl extends ArtManagerInternal {
-        @Override
-        public PackageOptimizationInfo getPackageOptimizationInfo(
-                ApplicationInfo info, String abi) {
-            String compilationReason;
-            String compilationFilter;
-            try {
-                String isa = VMRuntime.getInstructionSet(abi);
-                String[] stats = DexFile.getDexFileOptimizationStatus(info.getBaseCodePath(), isa);
-                compilationFilter = stats[0];
-                compilationReason = stats[1];
-            } catch (FileNotFoundException e) {
-                Slog.e(TAG, "Could not get optimizations status for " + info.getBaseCodePath(), e);
-                compilationFilter = "error";
-                compilationReason = "error";
-            } catch (IllegalArgumentException e) {
-                Slog.wtf(TAG, "Requested optimization status for " + info.getBaseCodePath()
-                        + " due to an invalid abi " + abi, e);
-                compilationFilter = "error";
-                compilationReason = "error";
-            }
-
-            return new PackageOptimizationInfo(compilationFilter, compilationReason);
-        }
     }
 }
