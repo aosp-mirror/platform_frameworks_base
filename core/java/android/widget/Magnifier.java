@@ -172,7 +172,7 @@ public final class Magnifier {
             if (mWindow == null) {
                 mWindow = new InternalPopupWindow(mView.getContext(), mView.getDisplay(),
                         getValidViewSurface(), mWindowWidth, mWindowHeight, mWindowElevation,
-                        Handler.getMain() /* draw the magnifier on the UI thread */);
+                        Handler.getMain() /* draw the magnifier on the UI thread */, mCallback);
             }
             performPixelCopy(startX, startY, true /* update window position */);
             mPrevPosInView.x = xPosInView;
@@ -331,6 +331,8 @@ public final class Magnifier {
         private final Runnable mMagnifierUpdater;
         // The handler where the magnifier updater jobs will be post'd.
         private final Handler mHandler;
+        // The callback to be run after the next draw. Only used for testing.
+        private Callback mCallback;
 
         // Members below describe the state of the magnifier. Reads/writes to them
         // have to be synchronized between the UI thread and the thread that handles
@@ -351,8 +353,9 @@ public final class Magnifier {
         InternalPopupWindow(final Context context, final Display display,
                 final Surface parentSurface,
                 final int width, final int height, final float elevation,
-                final Handler handler) {
+                final Handler handler, final Callback callback) {
             mDisplay = display;
+            mCallback = callback;
 
             mContentWidth = width;
             mContentHeight = height;
@@ -535,6 +538,31 @@ public final class Magnifier {
             }
 
             mRenderer.draw(callback);
+            if (mCallback != null) {
+                mCallback.onOperationComplete();
+            }
+        }
+    }
+
+    // The rest of the file consists of test APIs.
+
+    /**
+     * See {@link #setOnOperationCompleteCallback(Callback)}.
+     */
+    @TestApi
+    private Callback mCallback;
+
+    /**
+     * Sets a callback which will be invoked at the end of the next
+     * {@link #show(float, float)} or {@link #update()} operation.
+     *
+     * @hide
+     */
+    @TestApi
+    public void setOnOperationCompleteCallback(final Callback callback) {
+        mCallback = callback;
+        if (mWindow != null) {
+            mWindow.mCallback = callback;
         }
     }
 
@@ -583,5 +611,16 @@ public final class Magnifier {
         size.x = resources.getDimension(com.android.internal.R.dimen.magnifier_width) / density;
         size.y = resources.getDimension(com.android.internal.R.dimen.magnifier_height) / density;
         return size;
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public interface Callback {
+        /**
+         * Callback called after the drawing for a magnifier update has happened.
+         */
+        void onOperationComplete();
     }
 }
