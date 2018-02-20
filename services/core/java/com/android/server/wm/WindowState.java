@@ -600,12 +600,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     boolean mResizedWhileGone = false;
 
-    /** @see #isResizedWhileNotDragResizing(). */
-    private boolean mResizedWhileNotDragResizing;
-
-    /** @see #isResizedWhileNotDragResizingReported(). */
-    private boolean mResizedWhileNotDragResizingReported;
-
     /**
      * During seamless rotation we have two phases, first the old window contents
      * are rotated to look as if they didn't move in the new coordinate system. Then we
@@ -1280,7 +1274,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 || mDisplayCutoutChanged
                 || configChanged
                 || dragResizingChanged
-                || !isResizedWhileNotDragResizingReported()
                 || mReportOrientationChanged) {
             if (DEBUG_RESIZE || DEBUG_ORIENTATION) {
                 Slog.v(TAG_WM, "Resize reasons for w=" + this + ": "
@@ -1295,8 +1288,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         + " surfaceResized=" + winAnimator.mSurfaceResized
                         + " configChanged=" + configChanged
                         + " dragResizingChanged=" + dragResizingChanged
-                        + " resizedWhileNotDragResizingReported="
-                        + isResizedWhileNotDragResizingReported()
                         + " reportOrientationChanged=" + mReportOrientationChanged
                         + " displayCutoutChanged=" + mDisplayCutoutChanged);
             }
@@ -1315,8 +1306,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // then we need to hold off on unfreezing the display until this window has been
             // redrawn; to do that, we need to go through the process of getting informed by the
             // application when it has finished drawing.
-            if (getOrientationChanging() || dragResizingChanged
-                    || isResizedWhileNotDragResizing()) {
+            if (getOrientationChanging() || dragResizingChanged) {
                 if (DEBUG_ANIM || DEBUG_ORIENTATION || DEBUG_RESIZE) {
                     Slog.v(TAG_WM, "Orientation or resize start waiting for draw"
                             + ", mDrawState=DRAW_PENDING in " + this
@@ -1744,22 +1734,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mHasSurface && !resizingWindows.contains(this)) {
             if (DEBUG_RESIZE) Slog.d(TAG, "onResize: Resizing " + this);
             resizingWindows.add(this);
-
-            // If we are not drag resizing, force recreating of a new surface so updating
-            // the content and positioning that surface will be in sync.
-            //
-            // As we use this flag as a hint to freeze surface boundary updates, we'd like to only
-            // apply this to TYPE_BASE_APPLICATION, windows of TYPE_APPLICATION like dialogs, could
-            // appear to not be drag resizing while they resize, but we'd still like to manipulate
-            // their frame to update crop, etc...
-            //
-            // Anyway we don't need to synchronize position and content updates for these
-            // windows since they aren't at the base layer and could be moved around anyway.
-            if (!computeDragResizing() && mAttrs.type == TYPE_BASE_APPLICATION
-                    && !mWinAnimator.isForceScaled() && !isGoneForLayoutLw()
-                    && !getTask().inPinnedWindowingMode()) {
-                setResizedWhileNotDragResizing(true);
-            }
         }
         if (isGoneForLayoutLw()) {
             mResizedWhileGone = true;
@@ -2944,7 +2918,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mOutsetsChanged = false;
             mFrameSizeChanged = false;
             mDisplayCutoutChanged = false;
-            mResizedWhileNotDragResizingReported = true;
             mWinAnimator.mSurfaceResized = false;
             mReportOrientationChanged = false;
         } catch (RemoteException e) {
@@ -2989,8 +2962,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             MergedConfiguration mergedConfiguration, boolean reportOrientation, int displayId,
             DisplayCutout displayCutout)
             throws RemoteException {
-        final boolean forceRelayout = isDragResizeChanged() || mResizedWhileNotDragResizing
-                || reportOrientation;
+        final boolean forceRelayout = isDragResizeChanged() || reportOrientation;
 
         mClient.resized(frame, overscanInsets, contentInsets, visibleInsets, stableInsets, outsets,
                 reportDraw, mergedConfiguration, getBackdropFrame(frame), forceRelayout,
@@ -3090,32 +3062,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void resetDragResizingChangeReported() {
         mDragResizingChangeReported = false;
         super.resetDragResizingChangeReported();
-    }
-
-    /**
-     * Set whether we got resized but drag resizing flag was false.
-     * @see #isResizedWhileNotDragResizing().
-     */
-    private void setResizedWhileNotDragResizing(boolean resizedWhileNotDragResizing) {
-        mResizedWhileNotDragResizing = resizedWhileNotDragResizing;
-        mResizedWhileNotDragResizingReported = !resizedWhileNotDragResizing;
-    }
-
-    /**
-     * Indicates whether we got resized but drag resizing flag was false. In this case, we also
-     * need to recreate the surface and defer surface bound updates in order to make sure the
-     * buffer contents and the positioning/size stay in sync.
-     */
-    boolean isResizedWhileNotDragResizing() {
-        return mResizedWhileNotDragResizing;
-    }
-
-    /**
-     * @return Whether we reported "resize while not drag resizing" to the application.
-     * @see #isResizedWhileNotDragResizing()
-     */
-    private boolean isResizedWhileNotDragResizingReported() {
-        return mResizedWhileNotDragResizingReported;
     }
 
     int getResizeMode() {
@@ -4357,12 +4303,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // stack since it can lead to issues if a new surface is created while calculating the
         // scale for the animation using the source hint rect
         // (see WindowStateAnimator#setSurfaceBoundariesLocked()).
-        if (isDragResizeChanged() || isResizedWhileNotDragResizing()
+        if (isDragResizeChanged()
                 || (surfaceInsetsChanging() && !inPinnedWindowingMode())) {
             mLastSurfaceInsets.set(mAttrs.surfaceInsets);
 
             setDragResizing();
-            setResizedWhileNotDragResizing(false);
             // We can only change top level windows to the full-screen surface when
             // resizing (as we only have one full-screen surface). So there is no need
             // to preserve and destroy windows which are attached to another, they
