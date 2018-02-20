@@ -262,7 +262,8 @@ public class Editor {
     boolean mDiscardNextActionUp;
     boolean mIgnoreActionUpEvent;
 
-    long mShowCursor;
+    private long mShowCursor;
+    private boolean mRenderCursorRegardlessTiming;
     private Blink mBlink;
 
     boolean mCursorVisible = true;
@@ -681,9 +682,20 @@ public class Editor {
         }
     }
 
-    boolean isCursorVisible() {
+    private boolean isCursorVisible() {
         // The default value is true, even when there is no associated Editor
         return mCursorVisible && mTextView.isTextEditable();
+    }
+
+    boolean shouldRenderCursor() {
+        if (!isCursorVisible()) {
+            return false;
+        }
+        if (mRenderCursorRegardlessTiming) {
+            return true;
+        }
+        final long showCursorDelta = SystemClock.uptimeMillis() - mShowCursor;
+        return showCursorDelta % (2 * BLINK) < BLINK;
     }
 
     void prepareCursorControllers() {
@@ -4666,13 +4678,18 @@ public class Editor {
                     + mTextView.getLayout().getLineBottom(lineNumber)) / 2.0f
                     + mTextView.getTotalPaddingTop() - mTextView.getScrollY();
 
+            // Make the cursor visible and stop blinking.
+            mRenderCursorRegardlessTiming = true;
+            mTextView.invalidateCursorPath();
             suspendBlink();
+
             mMagnifier.show(xPosInView, yPosInView);
         }
 
         protected final void dismissMagnifier() {
             if (mMagnifier != null) {
                 mMagnifier.dismiss();
+                mRenderCursorRegardlessTiming = false;
                 resumeBlink();
             }
         }

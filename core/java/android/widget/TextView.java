@@ -6965,9 +6965,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final int selEnd = getSelectionEnd();
         if (mMovement != null && (isFocused() || isPressed()) && selStart >= 0) {
             if (selStart == selEnd) {
-                if (mEditor != null && mEditor.isCursorVisible()
-                        && (SystemClock.uptimeMillis() - mEditor.mShowCursor)
-                        % (2 * Editor.BLINK) < Editor.BLINK) {
+                if (mEditor != null && mEditor.shouldRenderCursor()) {
                     if (mHighlightPathBogus) {
                         if (mHighlightPath == null) mHighlightPath = new Path();
                         mHighlightPath.reset();
