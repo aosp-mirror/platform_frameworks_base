@@ -195,7 +195,7 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Kuongeza kasi kwa kutumia maunzi ili kusambaza mtandao"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Onyesha vifaa vya Bluetooth visivyo na majina"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Zima sauti kamili"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Washa kipengele cha mlio wa simu katika kituo hicho hicho"</string>
+    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Washa uchezaji wa mlio unaotumika kwenye simu"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Toleo la Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Chagua Toleo la Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Kodeki ya Sauti ya Bluetooth"</string>
@@ -235,7 +235,7 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Kagua programu zilizosakinishwa kupitia ADB/ADT kwa tabia ya kudhuru."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Itaonyesha vifaa vya Bluetooth bila majina (anwani za MAC pekee)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Huzima kipengele cha Bluetooth cha sauti kamili kunapotokea matatizo ya sauti katika vifaa vya mbali kama vile sauti ya juu mno au inaposhindikana kuidhibiti."</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Ruhusu milio ya simu kwenye simu ichezwe kwenye Vifaa vya sauti vya Bluetooth"</string>
+    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Ruhusu bluetooth icheze milio iliyo kwenye simu"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Kituo cha karibu"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Washa programu ya mwisho inayotoa ufikiaji mkuu wa karibu"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Inakagua HDCP"</string>
