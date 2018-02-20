@@ -93,6 +93,7 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"Mensagens SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Mensagens de correio de voz"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Chamadas Wi-Fi"</string>
+    <string name="notification_channel_sim" msgid="4052095493875188564">"Estado do SIM"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"O par solicitou o modo COMPLETO de teletipo"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"O par solicitou o modo HCO de teletipo"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"O par solicitou o modo VCO de teletipo"</string>
@@ -238,7 +239,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"Definições"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Assistência"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Assist. de voz"</string>
-    <string name="global_action_lockdown" msgid="2277328351790053477">"Ativar bloqueio"</string>
+    <string name="global_action_lockdown" msgid="1099326950891078929">"Bloqueio"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"Nova notificação"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Teclado virtual"</string>
@@ -497,10 +498,8 @@
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Demasiadas tentativas. Tente novamente mais tarde."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Demasiadas tentativas. Sensor de impressões digitais desativado."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Tente novamente."</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (7654382120628334248) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_hw_not_present (5729436878065119329) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Nenhuma impressão digital registada."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Este dispositivo não tem sensor de impressões digitais."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Dedo <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -753,12 +752,12 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Consulte o Manual de utilizador ou contacte a Assistência a Clientes."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"O cartão SIM está bloqueado."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"A desbloquear cartão SIM..."</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Desenhou a sua sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. \n\nTente novamente dentro de <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Desenhou a sua padrão de desbloqueio incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. \n\nTente novamente dentro de <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Escreveu a sua palavra-passe incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. \n\n Tente novamente dentro de <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Escreveu o seu número PIN incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. \n\n Tente novamente dentro de <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Desenhou a sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. Após outras <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativas sem sucesso, ser-lhe-á pedido para desbloquear o tablet com as suas credenciais de início de sessão do Google.\n\n Tente novamente dentro de <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"O utilizador desenhou incorretamente a sua sequência de desbloqueio <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. Após mais <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativas sem êxito, é-lhe pedido que desbloqueie a sua TV através do seu início de sessão Google.\n\n Tente novamente dentro de <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Desenhou a sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. Após outras <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativas sem sucesso, ser-lhe-á pedido para desbloquear o telemóvel com as suas credenciais de início de sessão do Google.\n\n Tente novamente dentro de <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Desenhou o padrão de desbloqueio incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. Após outras <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativas sem sucesso, ser-lhe-á pedido para desbloquear o tablet com as suas credenciais de início de sessão do Google.\n\n Tente novamente dentro de <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"O utilizador desenhou incorretamente a sua padrão de desbloqueio <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. Após mais <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativas sem êxito, é-lhe pedido que desbloqueie a sua TV através do seu início de sessão Google.\n\n Tente novamente dentro de <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Desenhou o padrão de desbloqueio incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. Após outras <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativas sem sucesso, ser-lhe-á pedido para desbloquear o telemóvel com as suas credenciais de início de sessão do Google.\n\n Tente novamente dentro de <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Tentou desbloquear o tablet <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes de forma incorreta. Após mais <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativa(s) sem êxito, as definições de origem do tablet serão repostas e todos os dados de utilizador serão perdidos."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"O utilizador tentou desbloquear incorretamente a TV <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. Após mais <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativas sem êxito, a TV é reposta para as predefinições de fábrica e todos os dados do utilizador são perdidos."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Tentou desbloquear o telemóvel <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes de forma incorreta. Após mais <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativa(s) sem êxito, as definições de origem do telemóvel serão repostas e todos os dados de utilizador serão perdidos."</string>
@@ -827,6 +826,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Sugestão: toque duas vezes para aumentar ou diminuir o zoom."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Preenchimento Automático"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Configurar Preenchimento Automático"</string>
+    <string name="autofill_window_title" msgid="921006636895825007">"Preenchimento automático"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1197,9 +1197,9 @@
     <string name="sim_added_title" msgid="3719670512889674693">"Cartão SIM adicionado"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Reinicie o aparelho para aceder à rede de telemóvel."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Reiniciar"</string>
-    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Para que o novo SIM funcione corretamente, tem de instalar e abrir uma aplicação do seu operador."</string>
-    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"OBTER A APLICAÇÃO"</string>
-    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"AGORA NÃO"</string>
+    <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Ativar o serviço móvel"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Transfira a aplicação do operador para ativar o seu novo SIM."</string>
+    <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Transferir aplicação"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Novo SIM inserido"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Toque para configurar"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Definir hora"</string>
@@ -1211,23 +1211,15 @@
     <string name="no_permissions" msgid="7283357728219338112">"Não são necessárias permissões"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"isto poderá estar sujeito a custos"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <!-- no translation found for usb_charging_notification_title (1595122345358177163) -->
-    <skip />
-    <!-- no translation found for usb_supplying_notification_title (4631045789893086181) -->
-    <skip />
-    <!-- no translation found for usb_mtp_notification_title (4238227258391151029) -->
-    <skip />
-    <!-- no translation found for usb_ptp_notification_title (5425857879922006878) -->
-    <skip />
-    <!-- no translation found for usb_tether_notification_title (3716143122035802501) -->
-    <skip />
-    <!-- no translation found for usb_midi_notification_title (5356040379749154805) -->
-    <skip />
-    <!-- no translation found for usb_accessory_notification_title (1899977434994900306) -->
-    <skip />
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"O dispositivo está a carregar por USB"</string>
+    <string name="usb_supplying_notification_title" msgid="4631045789893086181">"A carregar o dispositivo ligado por USB"</string>
+    <string name="usb_mtp_notification_title" msgid="4238227258391151029">"A transferência de ficheiros por USB está ativada"</string>
+    <string name="usb_ptp_notification_title" msgid="5425857879922006878">"O PTP por USB está ativado"</string>
+    <string name="usb_tether_notification_title" msgid="3716143122035802501">"A ligação USB via telemóvel está ativada"</string>
+    <string name="usb_midi_notification_title" msgid="5356040379749154805">"O MIDI através de USB está ativado"</string>
+    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"O modo de acessório USB está ativado"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Toque para obter mais opções."</string>
-    <!-- no translation found for usb_power_notification_message (4647527153291917218) -->
-    <skip />
+    <string name="usb_power_notification_message" msgid="4647527153291917218">"A carregar o dispositivo ligado. Toque para obter mais opções."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Acessório de áudio analógico detetado"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"O dispositivo ligado não é compatível com este telemóvel. Toque para saber mais."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuração USB ligada"</string>
@@ -1517,16 +1509,16 @@
     <string name="kg_login_checking_password" msgid="1052685197710252395">"A verificar a conta…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Escreveu o PIN incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. \n\nTente novamente dentro de <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Escreveu a palavra-passe incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. \n\nTente novamente dentro de <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Desenhou a sua sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. \n\nTente novamente dentro de <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Desenhou a sua padrão de desbloqueio incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. \n\nTente novamente dentro de <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Tentou desbloquear o tablet <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes de forma incorreta. Depois de mais <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativas sem êxito, as definições de origem do telemóvel serão repostas e todos os dados do utilizador serão perdidos."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"O utilizador tentou desbloquear incorretamente a TV <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. Após mais <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativas sem êxito, a TV é reposta para as predefinições de fábrica e todos os dados do utilizador são perdidos."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Tentou desbloquear o telemóvel <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes de forma incorreta. Depois de mais <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativas sem êxito, as definições de origem do telemóvel serão repostas e todos os dados do utilizador serão perdidos."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Tentou desbloquear o tablet <xliff:g id="NUMBER">%d</xliff:g> vezes de forma incorreta, pelo que será reposta a predefinição de fábrica."</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"O utilizador tentou desbloquear incorretamente a TV <xliff:g id="NUMBER">%d</xliff:g> vezes. A TV será agora reposta para as predefinições de fábrica."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Tentou desbloquear o telemóvel <xliff:g id="NUMBER">%d</xliff:g> vezes de forma incorreta, pelo que será reposta a predefinição de fábrica."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Desenhou a sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. Depois de mais <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativas sem sucesso, ser-lhe-á pedido para desbloquear o tablet através de uma conta de email.\n\n Tente novamente dentro de <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"O utilizador desenhou incorretamente a sua sequência de desbloqueio <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. Após mais <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativas sem êxito, é-lhe pedido que desbloqueie a sua TV através de uma conta de email.\n\n Tente novamente dentro de <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Desenhou a sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. Depois de mais <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativas sem sucesso, ser-lhe-á pedido para desbloquear o telemóvel através de uma conta de email.\n\n Tente novamente dentro de <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Desenhou o padrão de desbloqueio incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. Depois de mais <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativas sem sucesso, ser-lhe-á pedido para desbloquear o tablet através de uma conta de email.\n\n Tente novamente dentro de <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"O utilizador desenhou incorretamente a sua padrão de desbloqueio <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. Após mais <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativas sem êxito, é-lhe pedido que desbloqueie a sua TV através de uma conta de email.\n\n Tente novamente dentro de <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Desenhou o padrão de desbloqueio incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. Depois de mais <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativas sem sucesso, ser-lhe-á pedido para desbloquear o telemóvel através de uma conta de email.\n\n Tente novamente dentro de <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" - "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Remover"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Aumentar o volume acima do nível recomendado?\n\nOuvir com um volume elevado durante longos períodos poderá ser prejudicial para a sua audição."</string>
@@ -1667,7 +1659,7 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2.º <xliff:g id="LABEL">%1$s</xliff:g> de trabalho"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3.º <xliff:g id="LABEL">%1$s</xliff:g> de trabalho"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pedir PIN antes de soltar"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pedir sequência de desbloqueio antes de soltar"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pedir padrão de desbloqueio antes de soltar"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pedir palavra-passe antes de soltar"</string>
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instalado pelo seu gestor"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Atualizado pelo seu gestor"</string>
@@ -1830,8 +1822,7 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Telemóvel não permitido para voz"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Janela pop-up"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <!-- no translation found for shortcut_restored_on_lower_version (4860853725206702336) -->
-    <skip />
+    <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"A aplicação foi alterada para a versão anterior ou não é compatível com este atalho."</string>
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Não foi possível restaurar o atalho porque a aplicação não é compatível com a funcionalidade de cópia de segurança e restauro."</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Não foi possível restaurar o atalho devido a uma falha de correspondência entre as assinaturas das aplicações."</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Não foi possível restaurar o atalho."</string>
@@ -1841,4 +1832,7 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"Aplicação prejudicial detetada"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"A aplicação <xliff:g id="APP_0">%1$s</xliff:g> pretende mostrar partes da aplicação <xliff:g id="APP_2">%2$s</xliff:g>."</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"Editar"</string>
+    <string name="notification_channel_system_changes" msgid="5072715579030948646">"Alterações ao sistema"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"O modo Não incomodar foi alterado"</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"Toque para verificar se existem interrupções nas suas definições de comportamento."</string>
 </resources>

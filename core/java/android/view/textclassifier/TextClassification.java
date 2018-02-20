@@ -17,11 +17,14 @@
 package android.view.textclassifier;
 
 import android.annotation.FloatRange;
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -36,6 +39,8 @@ import android.view.textclassifier.TextClassifier.EntityType;
 
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -81,7 +86,7 @@ import java.util.Map;
  *           // Add the "secondary" actions.
  *           for (int i = 0; i < classification.getSecondaryActionsCount(); i++) {
  *               if (thisAppHasPermissionToInvokeIntent(classification.getSecondaryIntent(i))) {
- *                   menu.add(Menu.NONE, i + 1, 20, classification.getSecondaryLabel(i))
+ *                  menu.add(Menu.NONE, i + 1, 20, classification.getSecondaryLabel(i))
  *                      .setIcon(classification.getSecondaryIcon(i))
  *                      .setIntent(classification.getSecondaryIntent(i));
  *               }
@@ -108,6 +113,14 @@ public final class TextClassification implements Parcelable {
     // TODO(toki): investigate a way to derive this based on device properties.
     private static final int MAX_PRIMARY_ICON_SIZE = 192;
     private static final int MAX_SECONDARY_ICON_SIZE = 144;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {IntentType.UNSUPPORTED, IntentType.ACTIVITY, IntentType.SERVICE})
+    private @interface IntentType {
+        int UNSUPPORTED = -1;
+        int ACTIVITY = 0;
+        int SERVICE = 1;
+    }
 
     @NonNull private final String mText;
     @Nullable private final Drawable mPrimaryIcon;
@@ -312,17 +325,58 @@ public final class TextClassification implements Parcelable {
     }
 
     /**
-     * Creates an OnClickListener that starts an activity with the specified intent.
+     * Creates an OnClickListener that triggers the specified intent.
+     * Returns null if the intent is not supported for the specified context.
      *
      * @throws IllegalArgumentException if context or intent is null
      * @hide
      */
-    @NonNull
-    public static OnClickListener createStartActivityOnClickListener(
+    @Nullable
+    public static OnClickListener createIntentOnClickListener(
             @NonNull final Context context, @NonNull final Intent intent) {
+        switch (getIntentType(intent, context)) {
+            case IntentType.ACTIVITY:
+                return v -> context.startActivity(intent);
+            case IntentType.SERVICE:
+                return v -> context.startService(intent);
+            default:
+                return null;
+        }
+    }
+
+    @IntentType
+    private static int getIntentType(@NonNull Intent intent, @NonNull Context context) {
         Preconditions.checkArgument(context != null);
         Preconditions.checkArgument(intent != null);
-        return v -> context.startActivity(intent);
+
+        final ResolveInfo activityRI = context.getPackageManager().resolveActivity(intent, 0);
+        if (activityRI != null) {
+            if (context.getPackageName().equals(activityRI.activityInfo.packageName)) {
+                return IntentType.ACTIVITY;
+            }
+            final boolean exported = activityRI.activityInfo.exported;
+            if (exported && hasPermission(context, activityRI.activityInfo.permission)) {
+                return IntentType.ACTIVITY;
+            }
+        }
+
+        final ResolveInfo serviceRI = context.getPackageManager().resolveService(intent, 0);
+        if (serviceRI != null) {
+            if (context.getPackageName().equals(serviceRI.serviceInfo.packageName)) {
+                return IntentType.SERVICE;
+            }
+            final boolean exported = serviceRI.serviceInfo.exported;
+            if (exported && hasPermission(context, serviceRI.serviceInfo.permission)) {
+                return IntentType.SERVICE;
+            }
+        }
+
+        return IntentType.UNSUPPORTED;
+    }
+
+    private static boolean hasPermission(@NonNull Context context, @NonNull String permission) {
+        return permission == null
+                || context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED;
     }
 
     /**

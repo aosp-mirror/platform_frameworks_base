@@ -47,7 +47,9 @@ import com.android.internal.util.Preconditions;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -633,8 +635,15 @@ public final class TextClassifierImpl implements TextClassifier {
 
         @NonNull
         private static List<Intent> createForAddress(String text) {
-            return Arrays.asList(new Intent(Intent.ACTION_VIEW)
-                    .setData(Uri.parse(String.format("geo:0,0?q=%s", text))));
+            final List<Intent> intents = new ArrayList<>();
+            try {
+                final String encText = URLEncoder.encode(text, "UTF-8");
+                intents.add(new Intent(Intent.ACTION_VIEW)
+                        .setData(Uri.parse(String.format("geo:0,0?q=%s", encText))));
+            } catch (UnsupportedEncodingException e) {
+                Log.e(LOG_TAG, "Could not encode address", e);
+            }
+            return intents;
         }
 
         @NonNull

@@ -93,6 +93,7 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"Tekstiviestit"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Vastaajaviestit"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi-puhelut"</string>
+    <string name="notification_channel_sim" msgid="4052095493875188564">"SIM-kortin tila"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Toinen käyttäjä vaihtoi TTY-tilaksi TÄYSI"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Toinen käyttäjä vaihtoi TTY-tilaksi HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Toinen käyttäjä vaihtoi TTY-tilaksi VCO"</string>
@@ -238,7 +239,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"Asetukset"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Auta"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Ääniapuri"</string>
-    <string name="global_action_lockdown" msgid="2277328351790053477">"Lukitse"</string>
+    <string name="global_action_lockdown" msgid="1099326950891078929">"Lukitse"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"Uusi ilmoitus"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Virtuaalinen näppäimistö"</string>
@@ -497,10 +498,8 @@
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Liian monta yritystä. Yritä myöhemmin uudelleen."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Liian monta yritystä. Sormenjälkitunnistin poistettu käytöstä."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Yritä uudelleen."</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (7654382120628334248) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_hw_not_present (5729436878065119329) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Sormenjälkiä ei ole otettu käyttöön."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Laitteessa ei ole sormenjälkitunnistinta."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Sormi <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -827,6 +826,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Vinkki: lähennä ja loitonna kaksoisnapauttamalla."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Aut. täyttö"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Määritä autom. täyttö"</string>
+    <string name="autofill_window_title" msgid="921006636895825007">"Automaattinen täyttö"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -889,7 +889,7 @@
     <string name="preposition_for_year" msgid="5040395640711867177">"vuonna <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"päivä"</string>
     <string name="days" msgid="4774547661021344602">"päivää"</string>
-    <string name="hour" msgid="2126771916426189481">"tunti"</string>
+    <string name="hour" msgid="2126771916426189481">"tunnit"</string>
     <string name="hours" msgid="894424005266852993">"tuntia"</string>
     <string name="minute" msgid="9148878657703769868">"min"</string>
     <string name="minutes" msgid="5646001005827034509">"min"</string>
@@ -1197,9 +1197,9 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM-kortti lisätty"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Muodosta mobiiliverkkoyhteys käynnistämällä laite uudelleen."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Käynnistä uudelleen"</string>
-    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Jotta saat uuden SIM-kortin toimimaan oikein, sinun on asennettava ja avattava operaattorisi sovellus."</string>
-    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"LATAA SOVELLUS"</string>
-    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"EI NYT"</string>
+    <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Aktivoi mobiilipalvelu"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Lataa operaattorin sovellus, niin voit aktivoida SIM-korttisi."</string>
+    <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Lataa sovellus"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Uusi SIM-kortti asetettu"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Määritä se napauttamalla"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Aseta aika"</string>
@@ -1211,23 +1211,15 @@
     <string name="no_permissions" msgid="7283357728219338112">"Lupia ei tarvita"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"tämä voi maksaa"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <!-- no translation found for usb_charging_notification_title (1595122345358177163) -->
-    <skip />
-    <!-- no translation found for usb_supplying_notification_title (4631045789893086181) -->
-    <skip />
-    <!-- no translation found for usb_mtp_notification_title (4238227258391151029) -->
-    <skip />
-    <!-- no translation found for usb_ptp_notification_title (5425857879922006878) -->
-    <skip />
-    <!-- no translation found for usb_tether_notification_title (3716143122035802501) -->
-    <skip />
-    <!-- no translation found for usb_midi_notification_title (5356040379749154805) -->
-    <skip />
-    <!-- no translation found for usb_accessory_notification_title (1899977434994900306) -->
-    <skip />
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"Laitetta ladataan USB-yhteyden kautta"</string>
+    <string name="usb_supplying_notification_title" msgid="4631045789893086181">"Ladataan yhdistettyä laitetta USB:n kautta"</string>
+    <string name="usb_mtp_notification_title" msgid="4238227258391151029">"USB-tiedostonsiirto on käytössä"</string>
+    <string name="usb_ptp_notification_title" msgid="5425857879922006878">"PTP USB:n kautta on käytössä"</string>
+    <string name="usb_tether_notification_title" msgid="3716143122035802501">"Internetin jakaminen USB:n kautta on käytössä"</string>
+    <string name="usb_midi_notification_title" msgid="5356040379749154805">"MIDI USB:n kautta on käytössä"</string>
+    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"USB-lisävarustetila on käytössä"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Näet lisää vaihtoehtoja napauttamalla."</string>
-    <!-- no translation found for usb_power_notification_message (4647527153291917218) -->
-    <skip />
+    <string name="usb_power_notification_message" msgid="4647527153291917218">"Ladataan yhdistettyä laitetta. Napauta nähdäksesi lisää vaihtoehtoja."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Analoginen äänilaite havaittu"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Liitetty laite ei ole yhteensopiva puhelimen kanssa. Napauta, niin näet lisätietoja."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-vianetsintä yhdistetty"</string>
@@ -1792,7 +1784,7 @@
     <string name="app_category_productivity" msgid="3742083261781538852">"Tuottavuus"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"Laitteen tallennustila"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB-vianetsintä"</string>
-    <string name="time_picker_hour_label" msgid="2979075098868106450">"tunti"</string>
+    <string name="time_picker_hour_label" msgid="2979075098868106450">"tunnit"</string>
     <string name="time_picker_minute_label" msgid="5168864173796598399">"minuutit"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"Aseta aika"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"Anna kelvollinen aika."</string>
@@ -1830,8 +1822,7 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Äänipalvelujen käyttö ei sallittua puhelimella"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Ponnahdusikkuna"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <!-- no translation found for shortcut_restored_on_lower_version (4860853725206702336) -->
-    <skip />
+    <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"Sovellusversio on päivitetty vanhempaan versioon tai ei ole yhteensopiva tämän pikakuvakkeen kanssa."</string>
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Pikakuvakkeen palautus epäonnistui, koska sovellus ei tue varmuuskopiointia eikä palauttamista."</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Pikakuvakkeen palautus epäonnistui sovelluksen allekirjoituksen yhteensopimattomuuden vuoksi."</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Pikakuvakkeen palautus epäonnistui."</string>
@@ -1841,4 +1832,7 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"Haitallinen sovellus havaittu"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> haluaa näyttää osia sovelluksesta <xliff:g id="APP_2">%2$s</xliff:g>."</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"Muokkaa"</string>
+    <string name="notification_channel_system_changes" msgid="5072715579030948646">"Järjestelmän muutokset"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Älä häiritse ‑tila muuttui"</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"Tarkasta keskeytyksiä koskevat toiminta-asetukset napauttamalla."</string>
 </resources>

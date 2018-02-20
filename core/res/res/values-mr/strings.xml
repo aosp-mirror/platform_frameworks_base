@@ -93,6 +93,8 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS संदेश"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"व्हॉइसमेल संदेश"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"वाय-फाय कॉलिंग"</string>
+    <!-- no translation found for notification_channel_sim (4052095493875188564) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"समवयस्क व्यक्तीने TTY मोड पूर्ण ची विनंती केली"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"समवयस्क व्यक्तीने TTY मोड HCO ची विनंती केली"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"समवयस्क व्यक्तीने TTY मोड VCO ची विनंती केली"</string>
@@ -238,7 +240,8 @@
     <string name="global_action_settings" msgid="1756531602592545966">"सेटिंग्ज"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"सहाय्यता"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"व्हॉइस सहाय्य"</string>
-    <string name="global_action_lockdown" msgid="2277328351790053477">"लॉकडाउन टाका"</string>
+    <!-- no translation found for global_action_lockdown (1099326950891078929) -->
+    <skip />
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"नवीन सूचना"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"व्हर्च्युअल कीबोर्ड"</string>
@@ -414,7 +417,7 @@
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS कॉल सेवा अॅक्सेस करा"</string>
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"आपल्‍या हस्तक्षेपाशिवाय अ‍ॅपला कॉल करण्‍यासाठी IMS सेवा वापरण्याची अनुमती देते."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"फोन स्थिती आणि ओळख वाचा"</string>
-    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"डिव्हाइस च्या फोन वैशिष्ट्यांवर अॅक्सेस करण्यास अॅपला अनुमती देते. ही परवानगी कॉल अॅक्टिव्हेट असला किंवा नसला तरीही, फोन नंबर आणि डिव्हाइस आयडी आणि कॉलद्वारे कनेक्ट केलेला रीमोट नंबर निर्धारित करण्यासाठी अॅपला अनुमती देते."</string>
+    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"डिव्हाइस च्या फोन वैशिष्ट्यांवर अॅक्सेस करण्यास अॅपला अनुमती देते. ही परवानगी कॉल अॅक्टिव्हेट असला किंवा नसला तरीही, फोन नंबर आणि डिव्हाइस आयडी आणि कॉलद्वारे कनेक्ट केलेला रिमोट नंबर निर्धारित करण्यासाठी अॅपला अनुमती देते."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"प्रणालीच्या माध्यमातून कॉल रूट करा"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"कॉल करण्याचा अनुभव सुधारण्यासाठी अॅपला त्याचे कॉल प्रणालीच्या माध्यमातून रूट करू देते."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"दुसऱ्या अॅपवरून कॉल करणे सुरू ठेवा"</string>
@@ -497,10 +500,8 @@
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"खूप प्रयत्न केले. नंतर पुन्हा प्रयत्न करा."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"खूप प्रयत्न करून झाले. फिंगरप्रिंट सेंसर बंद आहे."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"पुन्हा प्रयत्न करा."</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (7654382120628334248) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_hw_not_present (5729436878065119329) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"कोणत्याही फिंगरप्रिंटची नोंद झाली नाही"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"या डिव्हाइसवर फिंगरप्रिंट सेन्सर नाही"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"<xliff:g id="FINGERID">%d</xliff:g> बोट"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -827,6 +828,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"टीप: झूम कमी करण्यासाठी आणि वाढवण्यासाठी दोनदा-टॅप करा."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"स्वयं-भरण"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"स्वयं-भरण सेट करा"</string>
+    <!-- no translation found for autofill_window_title (921006636895825007) -->
+    <skip />
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1198,9 +1201,12 @@
     <string name="sim_added_title" msgid="3719670512889674693">"सिम कार्ड जोडले"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"मोबाईल नेटवर्कवर अॅक्सेस करण्यासाठी तुमचे डिव्हाइस रीस्टार्ट करा."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"रीस्टार्ट"</string>
-    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"आपल्या नवीन सिमने योग्यरित्या कार्य करण्यासाठी, आपल्याला अॅप इंस्टॉल करण्याची आणि तो आपल्या वाहकामधून उघडण्याची आवश्यकता असेल."</string>
-    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"अ‍ॅप मिळवा"</string>
-    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"आता नाही"</string>
+    <!-- no translation found for install_carrier_app_notification_title (9056007111024059888) -->
+    <skip />
+    <!-- no translation found for install_carrier_app_notification_text (3346681446158696001) -->
+    <skip />
+    <!-- no translation found for install_carrier_app_notification_button (3094206295081900849) -->
+    <skip />
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"नवीन सिम घाला"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"ते सेट करण्यासाठी टॅप करा"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"वेळ सेट करा"</string>
@@ -1212,23 +1218,15 @@
     <string name="no_permissions" msgid="7283357728219338112">"परवानग्या आवश्यक नाहीत"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"यासाठी आपले पैसे खर्च होऊ शकतात"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ठीक"</string>
-    <!-- no translation found for usb_charging_notification_title (1595122345358177163) -->
-    <skip />
-    <!-- no translation found for usb_supplying_notification_title (4631045789893086181) -->
-    <skip />
-    <!-- no translation found for usb_mtp_notification_title (4238227258391151029) -->
-    <skip />
-    <!-- no translation found for usb_ptp_notification_title (5425857879922006878) -->
-    <skip />
-    <!-- no translation found for usb_tether_notification_title (3716143122035802501) -->
-    <skip />
-    <!-- no translation found for usb_midi_notification_title (5356040379749154805) -->
-    <skip />
-    <!-- no translation found for usb_accessory_notification_title (1899977434994900306) -->
-    <skip />
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"हे डिव्हाइस USB ने चार्ज करत आहे"</string>
+    <string name="usb_supplying_notification_title" msgid="4631045789893086181">"USB ने चार्ज करायला ठेवलेले डिव्हाइस"</string>
+    <string name="usb_mtp_notification_title" msgid="4238227258391151029">"USB फाइल ट्रांसफर चालू केले"</string>
+    <string name="usb_ptp_notification_title" msgid="5425857879922006878">"USB मार्फत PTP चालू केले"</string>
+    <string name="usb_tether_notification_title" msgid="3716143122035802501">"USB टेदरिंग चालू केले"</string>
+    <string name="usb_midi_notification_title" msgid="5356040379749154805">"USB मार्फत MIDI चालू केले"</string>
+    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"USB अ‍ॅक्सेसरी मोड चालू आहे"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"अधिक पर्यायांसाठी टॅप करा."</string>
-    <!-- no translation found for usb_power_notification_message (4647527153291917218) -->
-    <skip />
+    <string name="usb_power_notification_message" msgid="4647527153291917218">"चार्जर लावलेले डिव्हाइस. आणखी पर्यायांसाठी टॅप करा"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"अॅनालॉग ऑडिओ अॅक्‍सेसरी आढळली"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"या फोनसह संलग्‍न केलेले डीव्‍हाइस सुसंगत नाही. अधिक जाणून घेण्‍यासाठी टॅप करा."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डीबग करणे कनेक्‍ट केले"</string>
@@ -1818,7 +1816,7 @@
     <string name="autofill_save_type_address" msgid="4936707762193009542">"पत्ता"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"क्रेडिट कार्ड"</string>
     <string name="autofill_save_type_username" msgid="239040540379769562">"वापरकर्तानाव"</string>
-    <string name="autofill_save_type_email_address" msgid="5752949432129262174">"ईमेल पत्ता"</string>
+    <string name="autofill_save_type_email_address" msgid="5752949432129262174">"ईमेल अॅड्रेस"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"शांत रहा आणि जवळपास निवारा शोधा."</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"किनारपट्टीचे प्रदेश आणि नदीकाठची क्षेत्रे त्वरित रिकामी करून उंच मैदानासारख्या अधिक सुरक्षित ठिकाणी जा."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"शांत रहा आणि जवळपास निवारा शोधा."</string>
@@ -1831,8 +1829,7 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"व्‍हॉइसची फोनला अनुमती नाही"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"पॉपअप विंडो"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <!-- no translation found for shortcut_restored_on_lower_version (4860853725206702336) -->
-    <skip />
+    <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"अ‍ॅपची आवृत्ती डाउनग्रेड केली, किंवा ती या शॉर्टकटशी कंपॅटिबल नाही"</string>
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"अॅप बॅकअप आणि रिस्‍टोअर करण्यास सपोर्ट देत नसल्यामुळे शॉर्टकट रिस्‍टोअर करू शकलो नाही"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"अॅप स्वाक्षरी न जुळल्यामुळे शॉर्टकट रिस्‍टोअर करू शकलो नाही"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"शॉर्टकट रिस्‍टोअर करू शकलो नाही"</string>
@@ -1842,4 +1839,7 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"हानिकारक अॅप आढळला"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> ला <xliff:g id="APP_2">%2$s</xliff:g> चे तुकडे दाखवायचे आहेत"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"संपादित करा"</string>
+    <string name="notification_channel_system_changes" msgid="5072715579030948646">"सिस्टम बदल"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"व्यत्यय आणू नका बदलले आहे"</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"व्यत्ययांसाठीच्या तुमच्या वर्तन सेटिंग्ज तपासण्यासाठी टॅप करा"</string>
 </resources>

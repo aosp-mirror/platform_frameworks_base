@@ -21,6 +21,7 @@
 #include "Source.h"
 #include "java/AnnotationProcessor.h"
 #include "java/ClassDefinition.h"
+#include "java/JavaClassGenerator.h"
 #include "text/Unicode.h"
 #include "util/Maybe.h"
 #include "xml/XmlDom.h"
@@ -36,6 +37,11 @@ static Maybe<StringPiece> ExtractJavaIdentifier(IDiagnostics* diag, const Source
   size_t pos = value.rfind('.');
   if (pos != std::string::npos) {
     result = result.substr(pos + 1);
+  }
+
+  // Normalize only the java identifier, leave the original value unchanged.
+  if (result.contains("-")) {
+    result = JavaClassGenerator::TransformToFieldName(result);
   }
 
   if (result.empty()) {

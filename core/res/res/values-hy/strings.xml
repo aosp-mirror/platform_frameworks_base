@@ -93,6 +93,7 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS հաղորդագրություններ"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Ձայնային փոստի հաղորդագրություններ"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Զանգեր Wi-Fi-ի միջոցով"</string>
+    <string name="notification_channel_sim" msgid="4052095493875188564">"SIM քարտի կարգավիճակը"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Բաժանորդի սարքում ընտրված է հեռատիպի ԲՈԼՈՐԸ ռեժիմը"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Բաժանորդի սարքում ընտրված է հեռատիպի HCO ռեժիմը"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Բաժանորդի սարքում ընտրված է հեռատիպի VCO ռեժիմը"</string>
@@ -238,7 +239,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"Կարգավորումներ"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Օգնական"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Ձայնային օգնութ"</string>
-    <string name="global_action_lockdown" msgid="2277328351790053477">"Արգելափակել"</string>
+    <string name="global_action_lockdown" msgid="1099326950891078929">"Արգելափակում"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"Նոր ծանուցում"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Վիրտուալ ստեղնաշար"</string>
@@ -355,8 +356,6 @@
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Թույլ է տալիս հավելվածին մնայուն դարձնել իր մասերը հիշողության մեջ: Սա կարող է սահմանափակել այլ հավելվածներին հասանելի հիշողությունը` դանդաղեցնելով պլանշետի աշխատանքը:"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Թույլ է տալիս հավելվածին պահել իր տարրերը հիշողության մեջ: Սա կարող է սահմանափակել այլ հավելվածների համար հատկացված հիշողությունը և դանդաղեցնել հեռուստացույցի աշխատանքը:"</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Թույլ է տալիս հավելվածին մնայուն դարձնել իր մասերը հիշողության մեջ: Սա կարող է սահմանափակել այլ հավելվածներին հասանելի հիշողությունը` դանդաղեցնելով հեռախոսի աշխատանքը:"</string>
-    <string name="permlab_foregroundService" msgid="3310786367649133115">"աշխատեցնել ակտիվ ծառայությունները"</string>
-    <string name="permdesc_foregroundService" msgid="6471634326171344622">"Թույլ է տալիս հավելվածին օգտագործել ակտիվ ծառայությունները:"</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"չափել հավելվածի պահոցի տարածքը"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Թույլ է տալիս հավելվածին առբերել իր կոդը, տվյալները և քեշի չափերը"</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"փոփոխել համակարգի կարգավորումները"</string>
@@ -827,6 +826,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Հուշակ` կրկնակի հպեք` մեծացնելու և փոքրացնելու համար:"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Ինքնալրացում"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Դնել ինքնալրացում"</string>
+    <string name="autofill_window_title" msgid="921006636895825007">"Ինքնալրացում"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1197,9 +1197,9 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM քարտը ավելացվել է"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Վերագործարկեք ձեր սարքը` բջջային ցանց մուտք ունենալու համար:"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Վերագործարկել"</string>
-    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Նոր SIM քարտի պատշաճ աշխատանքն ապահովելու համար ձեզ անհրաժեշտ է տեղադրել և գործարկել ձեր օպերատորից ստացած հավելվածը:"</string>
-    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"ՏԵՂԱԴՐԵԼ ՀԱՎԵԼՎԱԾԸ"</string>
-    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"ՈՉ ՀԻՄԱ"</string>
+    <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Ակտիվացրեք բջջային ծառայությունը"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Նոր SIM քարտն ակտիվացնելու համար ներբեռնեք օպերատորի հավելվածը"</string>
+    <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Ներբեռնել հավելվածը"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Տեղադրվել է նոր SIM քարտ"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Հպեք՝ կարգավորելու համար"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Սահմանել ժամը"</string>
@@ -1832,4 +1832,7 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"Հայտնաբերվել է վնասաբեր հավելված"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> հավելվածն ուզում է ցուցադրել հատվածներ <xliff:g id="APP_2">%2$s</xliff:g> հավելվածից"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"Փոփոխել"</string>
+    <string name="notification_channel_system_changes" msgid="5072715579030948646">"Համակարգի փոփոխություններ"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"«Չանհանգստացնել» ռեժիմի կարգավորումները փոխվել են"</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"Հպեք՝ ծանուցման կարգավորումները ստուգելու համար"</string>
 </resources>

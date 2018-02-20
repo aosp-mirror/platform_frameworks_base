@@ -4020,10 +4020,11 @@ public class Editor {
             if (textClassification == null) {
                 return;
             }
-            if (isValidAssistMenuItem(
+            final OnClickListener onClick = getSupportedOnClickListener(
                     textClassification.getIcon(),
                     textClassification.getLabel(),
-                    textClassification.getIntent())) {
+                    textClassification.getIntent());
+            if (onClick != null) {
                 final MenuItem item = menu.add(
                         TextView.ID_ASSIST, TextView.ID_ASSIST, MENU_ITEM_ORDER_ASSIST,
                         textClassification.getLabel())
@@ -4031,15 +4032,16 @@ public class Editor {
                         .setIntent(textClassification.getIntent());
                 item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
                 mAssistClickHandlers.put(
-                        item, TextClassification.createStartActivityOnClickListener(
+                        item, TextClassification.createIntentOnClickListener(
                                 mTextView.getContext(), textClassification.getIntent()));
             }
             final int count = textClassification.getSecondaryActionsCount();
             for (int i = 0; i < count; i++) {
-                if (!isValidAssistMenuItem(
+                final OnClickListener onClick1 = getSupportedOnClickListener(
                         textClassification.getSecondaryIcon(i),
                         textClassification.getSecondaryLabel(i),
-                        textClassification.getSecondaryIntent(i))) {
+                        textClassification.getSecondaryIntent(i));
+                if (onClick1 == null) {
                     continue;
                 }
                 final int order = MENU_ITEM_ORDER_SECONDARY_ASSIST_ACTIONS_START + i;
@@ -4050,7 +4052,7 @@ public class Editor {
                         .setIntent(textClassification.getSecondaryIntent(i));
                 item.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
                 mAssistClickHandlers.put(item,
-                        TextClassification.createStartActivityOnClickListener(
+                        TextClassification.createIntentOnClickListener(
                                 mTextView.getContext(), textClassification.getSecondaryIntent(i)));
             }
         }
@@ -4067,30 +4069,15 @@ public class Editor {
             }
         }
 
-        private boolean isValidAssistMenuItem(Drawable icon, CharSequence label, Intent intent) {
+        @Nullable
+        private OnClickListener getSupportedOnClickListener(
+                Drawable icon, CharSequence label, Intent intent) {
             final boolean hasUi = icon != null || !TextUtils.isEmpty(label);
-            final boolean hasAction = isSupportedIntent(intent);
-            return hasUi && hasAction;
-        }
-
-        private boolean isSupportedIntent(Intent intent) {
-            if (intent == null) {
-                return false;
+            if (hasUi) {
+                return TextClassification.createIntentOnClickListener(
+                        mTextView.getContext(), intent);
             }
-            final Context context = mTextView.getContext();
-            final ResolveInfo info = context.getPackageManager().resolveActivity(intent, 0);
-            final boolean samePackage = context.getPackageName().equals(
-                    info.activityInfo.packageName);
-            if (samePackage) {
-                return true;
-            }
-
-            final boolean exported =  info.activityInfo.exported;
-            final boolean requiresPermission = info.activityInfo.permission != null;
-            final boolean hasPermission = !requiresPermission
-                    || context.checkSelfPermission(info.activityInfo.permission)
-                            == PackageManager.PERMISSION_GRANTED;
-            return exported && hasPermission;
+            return null;
         }
 
         private boolean onAssistMenuItemClicked(MenuItem assistMenuItem) {
@@ -4107,7 +4094,7 @@ public class Editor {
             if (onClickListener == null) {
                 final Intent intent = assistMenuItem.getIntent();
                 if (intent != null) {
-                    onClickListener = TextClassification.createStartActivityOnClickListener(
+                    onClickListener = TextClassification.createIntentOnClickListener(
                             mTextView.getContext(), intent);
                 }
             }

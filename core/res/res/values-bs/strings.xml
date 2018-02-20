@@ -94,6 +94,7 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS poruke"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Poruke govorne pošte"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi pozivanje"</string>
+    <string name="notification_channel_sim" msgid="4052095493875188564">"Status SIM-a"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Ravnopravni uređaj zatražio TTY PUNI način rada"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Ravnopravni uređaj zatražio TTY HCO način rada"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Ravnopravni uređaj zatražio TTY VCO način rada"</string>
@@ -241,7 +242,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"Postavke"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Pomoć"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Glasovna pomoć"</string>
-    <string name="global_action_lockdown" msgid="2277328351790053477">"Unesite blokadu"</string>
+    <string name="global_action_lockdown" msgid="1099326950891078929">"Zaključavanje"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"Novo obavještenje"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Virtuelna tastatura"</string>
@@ -500,10 +501,8 @@
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Previše pokušaja. Pokušajte ponovo kasnije."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Previše pokušaja. Senzor za otisak prsta je onemogućen."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Pokušajte ponovo."</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (7654382120628334248) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_hw_not_present (5729436878065119329) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Nije prijavljen nijedan otisak prsta."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Ovaj uređaj nema senzor za otisak prsta"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Prst <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -830,6 +829,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Savjet: Dodirnite ekran dva puta za uvećanje ili smanjenje prikaza."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Autofill"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Podesite Autofill"</string>
+    <string name="autofill_window_title" msgid="921006636895825007">"Automatsko popunjavanje"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1221,9 +1221,9 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM kartica dodana"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Za pristup mobilnoj mreži ponovo pokrenite uređaj."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Ponovo pokreni"</string>
-    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Da bi nova SIM kartica ispravno radila, morate instalirati i otvoriti aplikaciju svog operatera."</string>
-    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"PREUZMI APLIKACIJU"</string>
-    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"NE SADA"</string>
+    <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Aktivirajte uslugu mobilne mreže"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Preuzmite aplikaciju operatera da aktivirate novi SIM"</string>
+    <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Preuzmite aplikaciju"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Nova SIM kartica je umetnuta"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Dodirnite da biste postavili"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Postavljanje vremena"</string>
@@ -1235,23 +1235,15 @@
     <string name="no_permissions" msgid="7283357728219338112">"Nisu potrebna odobrenja"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"ovo se možda dodatno plaća"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Uredu"</string>
-    <!-- no translation found for usb_charging_notification_title (1595122345358177163) -->
-    <skip />
-    <!-- no translation found for usb_supplying_notification_title (4631045789893086181) -->
-    <skip />
-    <!-- no translation found for usb_mtp_notification_title (4238227258391151029) -->
-    <skip />
-    <!-- no translation found for usb_ptp_notification_title (5425857879922006878) -->
-    <skip />
-    <!-- no translation found for usb_tether_notification_title (3716143122035802501) -->
-    <skip />
-    <!-- no translation found for usb_midi_notification_title (5356040379749154805) -->
-    <skip />
-    <!-- no translation found for usb_accessory_notification_title (1899977434994900306) -->
-    <skip />
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"Punjenje uređaja putem USB-a"</string>
+    <string name="usb_supplying_notification_title" msgid="4631045789893086181">"Punjenje povezanog uređaja putem USB-a"</string>
+    <string name="usb_mtp_notification_title" msgid="4238227258391151029">"Uključen je način rada Prijenos fajlova putem USB-a"</string>
+    <string name="usb_ptp_notification_title" msgid="5425857879922006878">"Uključen je način rada PTP putem USB-a"</string>
+    <string name="usb_tether_notification_title" msgid="3716143122035802501">"Uključen je način rada Povezivanje mobitela putem USB-a"</string>
+    <string name="usb_midi_notification_title" msgid="5356040379749154805">"Uključen je način rada MIDI putem USB-a"</string>
+    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"Uključen je način rada USB periferni uređaj"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Dodirnite za više opcija."</string>
-    <!-- no translation found for usb_power_notification_message (4647527153291917218) -->
-    <skip />
+    <string name="usb_power_notification_message" msgid="4647527153291917218">"Punjenje povezanog uređaja. Dodirnite za više opcija."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Otkriven je analogni periferni uređaj"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Priključeni uređaj nije kompatibilan s ovim telefonom. Dodirnite da saznate više."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Otklanjanje grešaka putem uređaja spojenog na USB je uspostavljeno"</string>
@@ -1867,8 +1859,7 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Telefon nije dozvoljen za govor"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Iskočni prozor"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <!-- no translation found for shortcut_restored_on_lower_version (4860853725206702336) -->
-    <skip />
+    <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"Instalirana je starija verzija aplikacije ili aplikacija nije kompatibilna s ovom prečicom"</string>
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Prečica nije uspješno vraćena jer aplikacija ne podržava izradu sigurnosne kopije i vraćanje"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Prečica nije uspješno vraćena zbog nepodudaranja potpisa aplikacije"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Prečica nije uspješno vraćena"</string>
@@ -1878,4 +1869,7 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"Otkrivena je štetna aplikacija"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"Aplikacija <xliff:g id="APP_0">%1$s</xliff:g> želi prikazati isječke aplikacije <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"Uredi"</string>
+    <string name="notification_channel_system_changes" msgid="5072715579030948646">"Sistemske promjene"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Način rada Ne ometaj je promijenjen"</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"Dodirnite da provjerite ima li ometanja u postavkama ponašanja"</string>
 </resources>

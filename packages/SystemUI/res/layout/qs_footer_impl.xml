@@ -28,12 +28,6 @@
     android:clipToPadding="false">
 
     <View
-        android:id="@+id/qs_footer_background"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/qs_background_primary" />
-
-    <View
         android:id="@+id/qs_footer_divider"
         android:layout_width="match_parent"
         android:layout_height="1dp"

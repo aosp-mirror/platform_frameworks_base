@@ -93,6 +93,8 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS mesajları"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Sesli mesajlar"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Kablosuz çağrı"</string>
+    <!-- no translation found for notification_channel_sim (4052095493875188564) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Karşı taraf TTY Modunu TAM yaptı"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Karşı taraf TTY Modunu HCO yaptı"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Karşı taraf TTY Modunu VCO yaptı"</string>
@@ -238,7 +240,8 @@
     <string name="global_action_settings" msgid="1756531602592545966">"Ayarlar"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Asist"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Sesli Yardım"</string>
-    <string name="global_action_lockdown" msgid="2277328351790053477">"Tam kilitlemeye geç"</string>
+    <!-- no translation found for global_action_lockdown (1099326950891078929) -->
+    <skip />
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"Yeni bildirim"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Sanal klavye"</string>
@@ -497,10 +500,8 @@
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Çok fazla deneme yapıldı. Daha sonra tekrar deneyin."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Çok fazla deneme yapıldı. Parmak izi sensörü devre dışı bıraıldı."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Tekrar deneyin."</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (7654382120628334248) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_hw_not_present (5729436878065119329) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Parmak izi kaydedilmedi."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Bu cihazda parmak izi sensörü yok"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"<xliff:g id="FINGERID">%d</xliff:g>. parmak"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -827,6 +828,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"İpucu: Yakınlaştırmak ve uzaklaştırmak için iki kez dokunun."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Otomatik Doldur"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Otomatik doldurma ayarla"</string>
+    <!-- no translation found for autofill_window_title (921006636895825007) -->
+    <skip />
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1197,9 +1200,12 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM kart eklendi"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Mobil ağa erişmek için cihazınızı yeniden başlatın."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Yeniden başlat"</string>
-    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Yeni SIM kartınızın doğru çalışmasını sağlamak için operatörünüzden bir uygulama yüklemeniz ve bu uygulamayı açmanız gerekecektir."</string>
-    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"UYGULAMAYI AL"</string>
-    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"ŞİMDİ DEĞİL"</string>
+    <!-- no translation found for install_carrier_app_notification_title (9056007111024059888) -->
+    <skip />
+    <!-- no translation found for install_carrier_app_notification_text (3346681446158696001) -->
+    <skip />
+    <!-- no translation found for install_carrier_app_notification_button (3094206295081900849) -->
+    <skip />
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Yeni SIM kart takıldı"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Kurmak için dokunun"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Saati ayarlayın"</string>
@@ -1211,23 +1217,15 @@
     <string name="no_permissions" msgid="7283357728219338112">"İzin gerektirmez"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"bunun için sizden ücret alınabilir"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Tamam"</string>
-    <!-- no translation found for usb_charging_notification_title (1595122345358177163) -->
-    <skip />
-    <!-- no translation found for usb_supplying_notification_title (4631045789893086181) -->
-    <skip />
-    <!-- no translation found for usb_mtp_notification_title (4238227258391151029) -->
-    <skip />
-    <!-- no translation found for usb_ptp_notification_title (5425857879922006878) -->
-    <skip />
-    <!-- no translation found for usb_tether_notification_title (3716143122035802501) -->
-    <skip />
-    <!-- no translation found for usb_midi_notification_title (5356040379749154805) -->
-    <skip />
-    <!-- no translation found for usb_accessory_notification_title (1899977434994900306) -->
-    <skip />
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"Bu cihaz USB\'den şarj oluyor"</string>
+    <string name="usb_supplying_notification_title" msgid="4631045789893086181">"Bağlı cihaz USB\'den şarj oluyor"</string>
+    <string name="usb_mtp_notification_title" msgid="4238227258391151029">"USB dosya aktarımı açık"</string>
+    <string name="usb_ptp_notification_title" msgid="5425857879922006878">"USB üzerinden PTP açık"</string>
+    <string name="usb_tether_notification_title" msgid="3716143122035802501">"USB tethering açık"</string>
+    <string name="usb_midi_notification_title" msgid="5356040379749154805">"USB üzerinden MIDI açık"</string>
+    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"USB aksesuarı modu açık"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Diğer seçenekler için dokunun."</string>
-    <!-- no translation found for usb_power_notification_message (4647527153291917218) -->
-    <skip />
+    <string name="usb_power_notification_message" msgid="4647527153291917218">"Bağlı cihaz şarj ediliyor. Diğer seçenekler için dokunun."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Analog ses aksesuarı algılandı"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Takılan cihaz bu telefonla uyumlu değil. Daha fazla bilgi edinmek için dokunun."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB hata ayıklaması bağlandı"</string>
@@ -1796,7 +1794,7 @@
     <string name="time_picker_minute_label" msgid="5168864173796598399">"dakika"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"Saati ayarlayın"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"Geçerli bir saat girin"</string>
-    <string name="time_picker_prompt_label" msgid="7588093983899966783">"Zamanı yazın"</string>
+    <string name="time_picker_prompt_label" msgid="7588093983899966783">"Saati yazın"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Zaman girişi için metin girişi moduna geçin."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Zaman girişi için saat moduna geçin."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Otomatik doldurma seçenekleri"</string>
@@ -1830,8 +1828,7 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Ses için telefona izin verilmiyor"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Pop-up Pencere"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <!-- no translation found for shortcut_restored_on_lower_version (4860853725206702336) -->
-    <skip />
+    <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"Uygulama eski sürümüne geçirildi veya bu kısayol ile uyumlu değil"</string>
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Uygulama, yedekleme ve geri yüklemeyi desteklemediğinden kısayol geri yüklenemedi"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Uygulama imzası eşleşmediğinden kısayol geri yüklenemedi"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Kısayol geri yüklenemedi"</string>
@@ -1841,4 +1838,7 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"Zararlı uygulama tespit edildi"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> uygulaması, <xliff:g id="APP_2">%2$s</xliff:g> dilimlerini göstermek istiyor"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"Düzenle"</string>
+    <string name="notification_channel_system_changes" msgid="5072715579030948646">"Sistem değişiklikleri"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Rahatsız Etmeyin modu değişti"</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"Kesintilerle ilgili davranış ayarlarınızı kontrol etmek için dokunun"</string>
 </resources>

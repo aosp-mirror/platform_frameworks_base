@@ -93,6 +93,7 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS පණිවිඩ"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"හඬ තැපැල් පණිවිඩ"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi ඇමතීම"</string>
+    <string name="notification_channel_sim" msgid="4052095493875188564">"SIM තත්ත්වය"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"සම ඉල්ලීම් කළ TTY ප්‍රකාරය පූර්ණයි"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"සම ඉල්ලීම් කළ TTY ප්‍රකාරය HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"සම ඉල්ලීම් කළ TTY ප්‍රකාරය VCO"</string>
@@ -238,7 +239,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"සැකසීම්"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"සහාය දීම"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"හඬ සහායක"</string>
-    <string name="global_action_lockdown" msgid="2277328351790053477">"අගුලු දැමීමට යන්න"</string>
+    <string name="global_action_lockdown" msgid="1099326950891078929">"අගුලු දැමීම"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"නව දැනුම්දීම"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"අතථ්‍ය යතුරු පුවරුව"</string>
@@ -497,10 +498,8 @@
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"උත්සාහයන් ඉතා වැඩි ගණනකි. කරුණාකර පසුව නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"උත්සාහයන් ඉතා වැඩි ගණනකි. ඇඟිලි සලකුණු සංවේදකය අබල කරන ලදී."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"නැවත උත්සාහ කරන්න."</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (7654382120628334248) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_hw_not_present (5729436878065119329) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"ඇඟිලි සලකුණු ඇතුළත් කර නොමැත."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"මෙම උපාංගයේ ඇඟිලි සලකුණු සංවේදකයක් නොමැත"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"ඇඟිලි <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -829,6 +828,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"උපදෙස: විශාලනය කිරීමට සහ කුඩා කිරීමට දෙවරක් තට්ටු කරන්න."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"ස්වයංක්‍රිය පිරවුම"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"ස්වයංක්‍රිය පිරවුම සකසන්න"</string>
+    <string name="autofill_window_title" msgid="921006636895825007">"ස්වයං පිරවුම"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1199,9 +1199,9 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM පතක් එකතු කරන ලදි"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"ජංගම ජාලයට ප්‍රවේශ වීමට ඔබගේ උපාංගය නැවත අරඹන්න."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"යළි අරඹන්න"</string>
-    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"ඔබේ නව SIM නිසි ලෙස වැඩ කිරීමට, ඔබ ඔබේ වාහකය වෙතින් යෙදුමක් ස්ථාපනය කර විවෘත කිරීම අවශ්‍යය."</string>
-    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"යෙදුම ලබා ගන්න"</string>
-    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"දැන්ම නොවේ"</string>
+    <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"ජංගම සේවාව සක්‍රිය කරන්න"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"ඔබගේ නව SIM කාඩ්පත සක්‍රිය කිරීමට වාහක යෙදුම බාගන්න"</string>
+    <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"යෙදුම බාගන්න"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"නව SIM ඇතුළු කරන්න"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"එය පිහිටුවීමට තට්ටු කරන්න"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"වේලාව සකසන්න"</string>
@@ -1213,23 +1213,15 @@
     <string name="no_permissions" msgid="7283357728219338112">"අවසර අවශ්‍ය නොමැත"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"මෙමඟින් ඔබට මුදල් වැය විය හැක"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"හරි"</string>
-    <!-- no translation found for usb_charging_notification_title (1595122345358177163) -->
-    <skip />
-    <!-- no translation found for usb_supplying_notification_title (4631045789893086181) -->
-    <skip />
-    <!-- no translation found for usb_mtp_notification_title (4238227258391151029) -->
-    <skip />
-    <!-- no translation found for usb_ptp_notification_title (5425857879922006878) -->
-    <skip />
-    <!-- no translation found for usb_tether_notification_title (3716143122035802501) -->
-    <skip />
-    <!-- no translation found for usb_midi_notification_title (5356040379749154805) -->
-    <skip />
-    <!-- no translation found for usb_accessory_notification_title (1899977434994900306) -->
-    <skip />
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"මෙම උපාංගය USB හරහා ආරෝපණය කරමින්"</string>
+    <string name="usb_supplying_notification_title" msgid="4631045789893086181">"සම්බන්ධිත උපාංගය USB හරහා ආරෝපණය කරමින්"</string>
+    <string name="usb_mtp_notification_title" msgid="4238227258391151029">"USB ගොනු මාරු කිරීම ක්‍රියාත්මකයි"</string>
+    <string name="usb_ptp_notification_title" msgid="5425857879922006878">"USB හරහා PTP ක්‍රියාත්මකයි"</string>
+    <string name="usb_tether_notification_title" msgid="3716143122035802501">"USB ටෙදරින් ක්‍රියාත්මකයි"</string>
+    <string name="usb_midi_notification_title" msgid="5356040379749154805">"USB හරහා MIDI ක්‍රියාත්මකයි"</string>
+    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"USB උපාංග ප්‍රකාරය ක්‍රියාත්මකයි"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"තවත් විකල්ප සඳහා තට්ටු කරන්න."</string>
-    <!-- no translation found for usb_power_notification_message (4647527153291917218) -->
-    <skip />
+    <string name="usb_power_notification_message" msgid="4647527153291917218">"සම්බන්ධිත උපාංගය ආරෝපණය කරමින්. තවත් විකල්ප සඳහා තට්ටු කරන්න."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"ප්‍රතිසම ශ්‍රව්‍ය උපාංගය අනාවරණය කර ගන්නා ලදී"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"මෙම දුරකථනය සමඟ සම්බන්ධිත උපාංගය නොගැළපෙයි. තව දැන ගැනීමට තට්ටු කරන්න."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB නිදොස්කරණය සම්බන්ධිතයි"</string>
@@ -1832,8 +1824,7 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"දුරකථනය හඬ සඳහා ඉඩ නොදේ"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"උත්පතන කවුළුව"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <!-- no translation found for shortcut_restored_on_lower_version (4860853725206702336) -->
-    <skip />
+    <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"යෙදුම් අනුවාදය අවශ්‍රේණි කර ඇත, නැතහොත් මෙම කෙටි මග සමඟ අනුකූල නොවේ"</string>
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"යෙදුම උපස්ථ සහ ප්‍රතිසාධනය සඳහා සහාය නොදක්වන බැවින් කෙටි මග ප්‍රතිසාධනය කළ නොහැකි විය"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"යෙදුම් අත්සන නොගැළපෙන බැවින් කෙටි මග ප්‍රතිසාධනය කළ නොහැකි විය"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"කෙටි මග ප්‍රතිසාධනය කළ නොහැකි විය"</string>
@@ -1843,4 +1834,7 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"හානිකර යෙදුමක් අනාවරණය කර ගන්නා ලදී"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> හට කොටස් <xliff:g id="APP_2">%2$s</xliff:g>ක් පෙන්වීමට අවශ්‍යයි"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"සංස්කරණය"</string>
+    <string name="notification_channel_system_changes" msgid="5072715579030948646">"පද්ධති වෙනස් කිරීම්"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"බාධා නොකරන්න වෙනස් කර ඇත"</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"බාධා කිරීම් සඳහා ඔබේ හැසිරීම් සැකසීම් පරීක්ෂා කිරීමට තට්ටු කරන්න"</string>
 </resources>

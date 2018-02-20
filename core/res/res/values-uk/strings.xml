@@ -95,6 +95,7 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS-повідомлення"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Повідомлення голосової пошти"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Дзвінки через Wi-Fi"</string>
+    <string name="notification_channel_sim" msgid="4052095493875188564">"Статус SIM-карти"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Пристрій змінив режим TTY на FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Пристрій змінив режим TTY на HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Пристрій змінив режим TTY на VCO"</string>
@@ -244,7 +245,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"Налаштування"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Підказки"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Голос. підказки"</string>
-    <string name="global_action_lockdown" msgid="2277328351790053477">"Введіть код блокування"</string>
+    <string name="global_action_lockdown" msgid="1099326950891078929">"Блокування"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"Нове сповіщення"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Віртуальна клавіатура"</string>
@@ -503,10 +504,8 @@
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Забагато спроб. Спробуйте пізніше."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Забагато спроб. Сканер відбитків пальців вимкнено."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Повторіть спробу."</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (7654382120628334248) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_hw_not_present (5729436878065119329) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Відбитки пальців не зареєстровано."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"На цьому пристрої немає сканера відбитків пальців"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Відбиток пальця <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -833,6 +832,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Порада: двічі торкніться для збільшення чи зменшення."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Автозап."</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Налашт.автозап."</string>
+    <string name="autofill_window_title" msgid="921006636895825007">"Автозаповнення"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1098,7 +1098,7 @@
     <string name="anr_application_process" msgid="6417199034861140083">"Додаток <xliff:g id="APPLICATION">%1$s</xliff:g> не відповідає"</string>
     <string name="anr_process" msgid="6156880875555921105">"Процес \"<xliff:g id="PROCESS">%1$s</xliff:g>\" не відповідає"</string>
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
-    <string name="report" msgid="4060218260984795706">"Відгук"</string>
+    <string name="report" msgid="4060218260984795706">"Звіт"</string>
     <string name="wait" msgid="7147118217226317732">"Чекати"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"Сторінка не відповідає.\n\nЗакрити її?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Програму переадресовано"</string>
@@ -1241,9 +1241,9 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM-карту додано"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Перезапустіть пристрій, щоб отримати доступ до мобільної мережі."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Перезапуск"</string>
-    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Щоб ваша нова SIM-карта працювала правильно, установіть і відкрийте додаток від оператора."</string>
-    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"ЗАВАНТАЖИТИ ДОДАТОК"</string>
-    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"НЕ ЗАРАЗ"</string>
+    <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Активувати мобільну службу"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Завантажити додаток оператора, щоб активувати нову SIM-карту"</string>
+    <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Завантажити додаток"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Вставлено нову SIM-карту"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Торкніться, щоб налаштувати"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Установити час"</string>
@@ -1255,23 +1255,15 @@
     <string name="no_permissions" msgid="7283357728219338112">"Дозвіл не потрібний"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"це платна послуга"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <!-- no translation found for usb_charging_notification_title (1595122345358177163) -->
-    <skip />
-    <!-- no translation found for usb_supplying_notification_title (4631045789893086181) -->
-    <skip />
-    <!-- no translation found for usb_mtp_notification_title (4238227258391151029) -->
-    <skip />
-    <!-- no translation found for usb_ptp_notification_title (5425857879922006878) -->
-    <skip />
-    <!-- no translation found for usb_tether_notification_title (3716143122035802501) -->
-    <skip />
-    <!-- no translation found for usb_midi_notification_title (5356040379749154805) -->
-    <skip />
-    <!-- no translation found for usb_accessory_notification_title (1899977434994900306) -->
-    <skip />
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"Пристрій заряджається через USB"</string>
+    <string name="usb_supplying_notification_title" msgid="4631045789893086181">"Під’єднаний пристрій заряджається через USB"</string>
+    <string name="usb_mtp_notification_title" msgid="4238227258391151029">"Передавання файлів через USB ввімкнено"</string>
+    <string name="usb_ptp_notification_title" msgid="5425857879922006878">"Режим PTP через USB ввімкнено"</string>
+    <string name="usb_tether_notification_title" msgid="3716143122035802501">"Режим USB-модема ввімкнено"</string>
+    <string name="usb_midi_notification_title" msgid="5356040379749154805">"Режим MIDI через USB ввімкнено"</string>
+    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"Режим USB-аксесуара ввімкнено"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Торкніться, щоб переглянути більше опцій."</string>
-    <!-- no translation found for usb_power_notification_message (4647527153291917218) -->
-    <skip />
+    <string name="usb_power_notification_message" msgid="4647527153291917218">"Під’єднаний пристрій заряджається. Торкніться, щоб побачити більше опцій."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Виявлено аналоговий аксесуар для аудіо"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Під’єднаний пристрій несумісний із цим телефоном. Торкніться, щоб дізнатися більше."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Налагодження USB завершено"</string>
@@ -1900,8 +1892,7 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Голосові дзвінки з телефона заборонено"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Спливаюче вікно"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <!-- no translation found for shortcut_restored_on_lower_version (4860853725206702336) -->
-    <skip />
+    <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"Версія додатка застаріла або несумісна з цим ярликом"</string>
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Не вдалося відновити ярлик, оскільки додаток не підтримує резервне копіювання та відновлення"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Не вдалося відновити ярлик, оскільки підписи додатків не збігаються"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Не вдалося відновити ярлик"</string>
@@ -1911,4 +1902,7 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"Виявлено шкідливий додаток"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> хоче показати фрагменти додатка <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"Редагувати"</string>
+    <string name="notification_channel_system_changes" msgid="5072715579030948646">"Системні зміни"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Налаштування режиму \"Не турбувати\" змінено"</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"Торкніться, щоб перевірити налаштування сповіщень"</string>
 </resources>

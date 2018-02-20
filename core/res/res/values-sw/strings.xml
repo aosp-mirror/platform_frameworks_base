@@ -93,6 +93,7 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"Ujumbe wa SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Ujumbe wa sauti"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Kupiga simu kupitia Wi-Fi"</string>
+    <string name="notification_channel_sim" msgid="4052095493875188564">"Hali ya SIM"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Hali ya TTY iliyoombwa na mtandao mwenza KAMILI"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Hali ya TTY iliyoombwa na mtandao mwenza HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Hali ya TTY iliyoombwa na mtandao mwenza VCO"</string>
@@ -236,7 +237,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"Mipangilio"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Mapendekezo"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Usaidizi wa Sauti"</string>
-    <string name="global_action_lockdown" msgid="2277328351790053477">"Weka kipengele cha kufunga"</string>
+    <string name="global_action_lockdown" msgid="1099326950891078929">"Funga"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"Arifa mpya"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Kibodi pepe"</string>
@@ -495,10 +496,8 @@
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Majaribio mengi mno. Jaribu tena baadaye."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Majaribio mengi mno. Kitambua alama ya kidole kimezimwa."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Jaribu tena."</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (7654382120628334248) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_hw_not_present (5729436878065119329) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Hakuna alama za vidole zilizojumuishwa."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Kifaa hiki hakina kitambua alama ya kidole"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Kitambulisho <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -825,6 +824,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Kidokezo: Gusa mara mbili ili kukuza ndani na nje."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Kujaza kiotomatiki"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Weka uwezo wa kujaza kiotomatiki"</string>
+    <string name="autofill_window_title" msgid="921006636895825007">"Kujaza Kiotomatiki"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1195,9 +1195,9 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM kadi imeongezwa"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Anzisha upya kifaa chako ili kufikia mtandao wa simu."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Anza upya"</string>
-    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Ili SIM yako mpya ifanye kazi vizuri, utahitaji kusakinisha na kufungua programu kutoka kwa mtoa huduma wako."</string>
-    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"PATA PROGRAMU"</string>
-    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"SIYO SASA"</string>
+    <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Washa huduma ya simu za mkononi"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Pakua programu ya mtoa huduma ili uwashe SIM yako mpya"</string>
+    <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Pakua programu"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"SIM mpya imewekwa"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Gusa ili uiweke"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Weka saa"</string>
@@ -1209,23 +1209,15 @@
     <string name="no_permissions" msgid="7283357728219338112">"Hakuna vibali vinavyohitajika"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"huenda hii ikakugharimu pesa"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Sawa"</string>
-    <!-- no translation found for usb_charging_notification_title (1595122345358177163) -->
-    <skip />
-    <!-- no translation found for usb_supplying_notification_title (4631045789893086181) -->
-    <skip />
-    <!-- no translation found for usb_mtp_notification_title (4238227258391151029) -->
-    <skip />
-    <!-- no translation found for usb_ptp_notification_title (5425857879922006878) -->
-    <skip />
-    <!-- no translation found for usb_tether_notification_title (3716143122035802501) -->
-    <skip />
-    <!-- no translation found for usb_midi_notification_title (5356040379749154805) -->
-    <skip />
-    <!-- no translation found for usb_accessory_notification_title (1899977434994900306) -->
-    <skip />
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"Unachaji kifaa hiki kupitia USB"</string>
+    <string name="usb_supplying_notification_title" msgid="4631045789893086181">"Inachaji kifaa kilichounganishwa kupitia USB"</string>
+    <string name="usb_mtp_notification_title" msgid="4238227258391151029">"Umewasha hali ya uhamishaji wa faili kupitia USB"</string>
+    <string name="usb_ptp_notification_title" msgid="5425857879922006878">"Umewasha hali ya PTP kupitia USB"</string>
+    <string name="usb_tether_notification_title" msgid="3716143122035802501">"Umewasha hali ya kusambaza mtandao ukitumia USB"</string>
+    <string name="usb_midi_notification_title" msgid="5356040379749154805">"Umewasha hali ya MIDI kupitia USB"</string>
+    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"Umewasha hali ya vifaa vya USB"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Gusa ili upate chaguo zaidi."</string>
-    <!-- no translation found for usb_power_notification_message (4647527153291917218) -->
-    <skip />
+    <string name="usb_power_notification_message" msgid="4647527153291917218">"Inachaji kifaa kilichounganishwa. Gusa ili upate chaguo zaidi."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Imetambua kifaa cha sauti ya analogi"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Kifaa ulichoambatisha hakitumiki kwenye simu hii. Gusa ili upate maelezo zaidi."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Utatuaji wa USB umeunganishwa"</string>
@@ -1828,8 +1820,7 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Simu hairuhusiwi katika huduma ya sauti"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Dirisha Ibukizi"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <!-- no translation found for shortcut_restored_on_lower_version (4860853725206702336) -->
-    <skip />
+    <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"Toleo la programu limeshushwa kiwango au halioani na njia hii ya mkato"</string>
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Imeshindwa kurejesha njia ya mkato kwa sababu programu haitumii kipengele cha hifadhi rudufu na kurejesha upya"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Imeshindwa kurejesha njia ya mkato kwa sababu ufunguo wako wa kuambatisha cheti kwenye programu haulingani"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Imeshindwa kurejesha njia ya mkato"</string>
@@ -1839,4 +1830,7 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"Imetambua programu hatari"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> inataka kuonyesha vipengee <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"Badilisha"</string>
+    <string name="notification_channel_system_changes" msgid="5072715579030948646">"Mabadiliko kwenye mfumo"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Kipengele cha Usinisumbue kimebadilishwa"</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"Gusa ili uangilie mipangilio ya hali ya ukatizaji"</string>
 </resources>

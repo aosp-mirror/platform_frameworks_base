@@ -44,6 +44,7 @@ import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.Vibrator;
 import android.os.VibrationEffect;
@@ -288,13 +289,12 @@ public class VibratorService extends IVibratorService.Stub
                 com.android.internal.R.array.config_virtualKeyVibePattern);
         VibrationEffect clickEffect = createEffect(clickEffectTimings);
         VibrationEffect doubleClickEffect = VibrationEffect.createWaveform(
-               DOUBLE_CLICK_EFFECT_FALLBACK_TIMINGS, -1 /*repeatIndex*/);
+                DOUBLE_CLICK_EFFECT_FALLBACK_TIMINGS, -1 /*repeatIndex*/);
         long[] tickEffectTimings = getLongIntArray(context.getResources(),
                 com.android.internal.R.array.config_clockTickVibePattern);
         VibrationEffect tickEffect = createEffect(tickEffectTimings);
 
         mFallbackEffects = new VibrationEffect[] { clickEffect, doubleClickEffect, tickEffect };
-
     }
 
     private static VibrationEffect createEffect(long[] timings) {
@@ -308,44 +308,49 @@ public class VibratorService extends IVibratorService.Stub
     }
 
     public void systemReady() {
-        mIm = mContext.getSystemService(InputManager.class);
-        mVibrator = mContext.getSystemService(Vibrator.class);
-        mSettingObserver = new SettingsObserver(mH);
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "VibratorService#systemReady");
+        try {
+            mIm = mContext.getSystemService(InputManager.class);
+            mVibrator = mContext.getSystemService(Vibrator.class);
+            mSettingObserver = new SettingsObserver(mH);
 
-        mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
-        mPowerManagerInternal.registerLowPowerModeObserver(
-                new PowerManagerInternal.LowPowerModeListener() {
-                    @Override
-                    public int getServiceType() {
-                        return ServiceType.VIBRATION;
-                    }
+            mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
+            mPowerManagerInternal.registerLowPowerModeObserver(
+                    new PowerManagerInternal.LowPowerModeListener() {
+                        @Override
+                        public int getServiceType() {
+                            return ServiceType.VIBRATION;
+                        }
 
-                    @Override
-                    public void onLowPowerModeChanged(PowerSaveState result) {
-                        updateVibrators();
-                    }
-        });
+                        @Override
+                        public void onLowPowerModeChanged(PowerSaveState result) {
+                            updateVibrators();
+                        }
+            });
 
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(Settings.System.VIBRATE_INPUT_DEVICES),
-                true, mSettingObserver, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.VIBRATE_INPUT_DEVICES),
+                    true, mSettingObserver, UserHandle.USER_ALL);
 
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(Settings.System.HAPTIC_FEEDBACK_INTENSITY),
-                true, mSettingObserver, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.HAPTIC_FEEDBACK_INTENSITY),
+                    true, mSettingObserver, UserHandle.USER_ALL);
 
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(Settings.System.NOTIFICATION_VIBRATION_INTENSITY),
-                true, mSettingObserver, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.NOTIFICATION_VIBRATION_INTENSITY),
+                    true, mSettingObserver, UserHandle.USER_ALL);
 
-        mContext.registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                updateVibrators();
-            }
-        }, new IntentFilter(Intent.ACTION_USER_SWITCHED), null, mH);
+            mContext.registerReceiver(new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    updateVibrators();
+                }
+            }, new IntentFilter(Intent.ACTION_USER_SWITCHED), null, mH);
 
-        updateVibrators();
+            updateVibrators();
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+        }
     }
 
     private final class SettingsObserver extends ContentObserver {
@@ -422,60 +427,66 @@ public class VibratorService extends IVibratorService.Stub
     @Override // Binder call
     public void vibrate(int uid, String opPkg, VibrationEffect effect, int usageHint,
             IBinder token) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.VIBRATE)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires VIBRATE permission");
-        }
-        if (token == null) {
-            Slog.e(TAG, "token must not be null");
-            return;
-        }
-        verifyIncomingUid(uid);
-        if (!verifyVibrationEffect(effect)) {
-            return;
-        }
-
-        // If our current vibration is longer than the new vibration and is the same amplitude,
-        // then just let the current one finish.
-        synchronized (mLock) {
-            if (effect instanceof VibrationEffect.OneShot
-                    && mCurrentVibration != null
-                    && mCurrentVibration.effect instanceof VibrationEffect.OneShot) {
-                VibrationEffect.OneShot newOneShot = (VibrationEffect.OneShot) effect;
-                VibrationEffect.OneShot currentOneShot =
-                        (VibrationEffect.OneShot) mCurrentVibration.effect;
-                if (mCurrentVibration.hasTimeoutLongerThan(newOneShot.getDuration())
-                        && newOneShot.getAmplitude() == currentOneShot.getAmplitude()) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "Ignoring incoming vibration in favor of current vibration");
-                    }
-                    return;
-                }
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "vibrate");
+        try {
+            if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.VIBRATE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Requires VIBRATE permission");
             }
-
-            // If the current vibration is repeating and the incoming one is non-repeating, then
-            // ignore the non-repeating vibration. This is so that we don't cancel vibrations that
-            // are meant to grab the attention of the user, like ringtones and alarms, in favor of
-            // one-shot vibrations that are likely quite short.
-            if (!isRepeatingVibration(effect)
-                    && mCurrentVibration != null
-                    && isRepeatingVibration(mCurrentVibration.effect)) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Ignoring incoming vibration in favor of alarm vibration");
-                }
+            if (token == null) {
+                Slog.e(TAG, "token must not be null");
+                return;
+            }
+            verifyIncomingUid(uid);
+            if (!verifyVibrationEffect(effect)) {
                 return;
             }
 
-            Vibration vib = new Vibration(token, effect, usageHint, uid, opPkg);
-            linkVibration(vib);
-            long ident = Binder.clearCallingIdentity();
-            try {
-                doCancelVibrateLocked();
-                startVibrationLocked(vib);
-                addToPreviousVibrationsLocked(vib);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
+            // If our current vibration is longer than the new vibration and is the same amplitude,
+            // then just let the current one finish.
+            synchronized (mLock) {
+                if (effect instanceof VibrationEffect.OneShot
+                        && mCurrentVibration != null
+                        && mCurrentVibration.effect instanceof VibrationEffect.OneShot) {
+                    VibrationEffect.OneShot newOneShot = (VibrationEffect.OneShot) effect;
+                    VibrationEffect.OneShot currentOneShot =
+                            (VibrationEffect.OneShot) mCurrentVibration.effect;
+                    if (mCurrentVibration.hasTimeoutLongerThan(newOneShot.getDuration())
+                            && newOneShot.getAmplitude() == currentOneShot.getAmplitude()) {
+                        if (DEBUG) {
+                            Slog.d(TAG,
+                                    "Ignoring incoming vibration in favor of current vibration");
+                        }
+                        return;
+                    }
+                }
+
+                // If the current vibration is repeating and the incoming one is non-repeating,
+                // then ignore the non-repeating vibration. This is so that we don't cancel
+                // vibrations that are meant to grab the attention of the user, like ringtones and
+                // alarms, in favor of one-shot vibrations that are likely quite short.
+                if (!isRepeatingVibration(effect)
+                        && mCurrentVibration != null
+                        && isRepeatingVibration(mCurrentVibration.effect)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Ignoring incoming vibration in favor of alarm vibration");
+                    }
+                    return;
+                }
+
+                Vibration vib = new Vibration(token, effect, usageHint, uid, opPkg);
+                linkVibration(vib);
+                long ident = Binder.clearCallingIdentity();
+                try {
+                    doCancelVibrateLocked();
+                    startVibrationLocked(vib);
+                    addToPreviousVibrationsLocked(vib);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
             }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
     }
 
@@ -520,13 +531,19 @@ public class VibratorService extends IVibratorService.Stub
 
     @GuardedBy("mLock")
     private void doCancelVibrateLocked() {
-        mH.removeCallbacks(mVibrationEndRunnable);
-        if (mThread != null) {
-            mThread.cancel();
-            mThread = null;
+        Trace.asyncTraceEnd(Trace.TRACE_TAG_VIBRATOR, "vibration", 0);
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "doCancelVibrateLocked");
+        try {
+            mH.removeCallbacks(mVibrationEndRunnable);
+            if (mThread != null) {
+                mThread.cancel();
+                mThread = null;
+            }
+            doVibratorOff();
+            reportFinishVibrationLocked();
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
-        doVibratorOff();
-        reportFinishVibrationLocked();
     }
 
     // Callback for whenever the current vibration has finished played out
@@ -543,55 +560,68 @@ public class VibratorService extends IVibratorService.Stub
 
     @GuardedBy("mLock")
     private void startVibrationLocked(final Vibration vib) {
-        if (!isAllowedToVibrateLocked(vib)) {
-            return;
-        }
-
-        final int intensity = getCurrentIntensityLocked(vib);
-        if (intensity == Vibrator.VIBRATION_INTENSITY_OFF) {
-            return;
-        }
-
-        if (vib.isRingtone() && !shouldVibrateForRingtone()) {
-            if (DEBUG) {
-                Slog.e(TAG, "Vibrate ignored, not vibrating for ringtones");
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "startVibrationLocked");
+        try {
+            if (!isAllowedToVibrateLocked(vib)) {
+                return;
             }
-            return;
-        }
 
-        final int mode = getAppOpMode(vib);
-        if (mode != AppOpsManager.MODE_ALLOWED) {
-            if (mode == AppOpsManager.MODE_ERRORED) {
-                // We might be getting calls from within system_server, so we don't actually want
-                // to throw a SecurityException here.
-                Slog.w(TAG, "Would be an error: vibrate from uid " + vib.uid);
+            final int intensity = getCurrentIntensityLocked(vib);
+            if (intensity == Vibrator.VIBRATION_INTENSITY_OFF) {
+                return;
             }
-            return;
+
+            if (vib.isRingtone() && !shouldVibrateForRingtone()) {
+                if (DEBUG) {
+                    Slog.e(TAG, "Vibrate ignored, not vibrating for ringtones");
+                }
+                return;
+            }
+
+            final int mode = getAppOpMode(vib);
+            if (mode != AppOpsManager.MODE_ALLOWED) {
+                if (mode == AppOpsManager.MODE_ERRORED) {
+                    // We might be getting calls from within system_server, so we don't actually
+                    // want to throw a SecurityException here.
+                    Slog.w(TAG, "Would be an error: vibrate from uid " + vib.uid);
+                }
+                return;
+            }
+            applyVibrationIntensityScalingLocked(vib, intensity);
+            startVibrationInnerLocked(vib);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
-        applyVibrationIntensityScalingLocked(vib, intensity);
-        startVibrationInnerLocked(vib);
     }
 
     @GuardedBy("mLock")
     private void startVibrationInnerLocked(Vibration vib) {
-        mCurrentVibration = vib;
-        if (vib.effect instanceof VibrationEffect.OneShot) {
-            VibrationEffect.OneShot oneShot = (VibrationEffect.OneShot) vib.effect;
-            doVibratorOn(oneShot.getDuration(), oneShot.getAmplitude(), vib.uid, vib.usageHint);
-            mH.postDelayed(mVibrationEndRunnable, oneShot.getDuration());
-        } else if (vib.effect instanceof VibrationEffect.Waveform) {
-            // mThread better be null here. doCancelVibrate should always be
-            // called before startNextVibrationLocked or startVibrationLocked.
-            VibrationEffect.Waveform waveform = (VibrationEffect.Waveform) vib.effect;
-            mThread = new VibrateThread(waveform, vib.uid, vib.usageHint);
-            mThread.start();
-        } else if (vib.effect instanceof VibrationEffect.Prebaked) {
-            long timeout = doVibratorPrebakedEffectLocked(vib);
-            if (timeout > 0) {
-                mH.postDelayed(mVibrationEndRunnable, timeout);
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "startVibrationInnerLocked");
+        try {
+            mCurrentVibration = vib;
+            if (vib.effect instanceof VibrationEffect.OneShot) {
+                Trace.asyncTraceBegin(Trace.TRACE_TAG_VIBRATOR, "vibration", 0);
+                VibrationEffect.OneShot oneShot = (VibrationEffect.OneShot) vib.effect;
+                doVibratorOn(oneShot.getDuration(), oneShot.getAmplitude(), vib.uid, vib.usageHint);
+                mH.postDelayed(mVibrationEndRunnable, oneShot.getDuration());
+            } else if (vib.effect instanceof VibrationEffect.Waveform) {
+                // mThread better be null here. doCancelVibrate should always be
+                // called before startNextVibrationLocked or startVibrationLocked.
+                Trace.asyncTraceBegin(Trace.TRACE_TAG_VIBRATOR, "vibration", 0);
+                VibrationEffect.Waveform waveform = (VibrationEffect.Waveform) vib.effect;
+                mThread = new VibrateThread(waveform, vib.uid, vib.usageHint);
+                mThread.start();
+            } else if (vib.effect instanceof VibrationEffect.Prebaked) {
+                Trace.asyncTraceBegin(Trace.TRACE_TAG_VIBRATOR, "vibration", 0);
+                long timeout = doVibratorPrebakedEffectLocked(vib);
+                if (timeout > 0) {
+                    mH.postDelayed(mVibrationEndRunnable, timeout);
+                }
+            } else {
+                Slog.e(TAG, "Unknown vibration type, ignoring");
             }
-        } else {
-            Slog.e(TAG, "Unknown vibration type, ignoring");
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
     }
 
@@ -708,14 +738,19 @@ public class VibratorService extends IVibratorService.Stub
 
     @GuardedBy("mLock")
     private void reportFinishVibrationLocked() {
-        if (mCurrentVibration != null) {
-            try {
-                mAppOpsService.finishOperation(AppOpsManager.getToken(mAppOpsService),
-                        AppOpsManager.OP_VIBRATE, mCurrentVibration.uid,
-                        mCurrentVibration.opPkg);
-            } catch (RemoteException e) { }
-            unlinkVibration(mCurrentVibration);
-            mCurrentVibration = null;
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "reportFinishVibrationLocked");
+        try {
+            if (mCurrentVibration != null) {
+                try {
+                    mAppOpsService.finishOperation(AppOpsManager.getToken(mAppOpsService),
+                            AppOpsManager.OP_VIBRATE, mCurrentVibration.uid,
+                            mCurrentVibration.opPkg);
+                } catch (RemoteException e) { }
+                unlinkVibration(mCurrentVibration);
+                mCurrentVibration = null;
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
     }
 
@@ -838,28 +873,34 @@ public class VibratorService extends IVibratorService.Stub
     }
 
     private void doVibratorOn(long millis, int amplitude, int uid, int usageHint) {
-        synchronized (mInputDeviceVibrators) {
-            if (amplitude == VibrationEffect.DEFAULT_AMPLITUDE) {
-                amplitude = mDefaultVibrationAmplitude;
-            }
-            if (DEBUG) {
-                Slog.d(TAG, "Turning vibrator on for " + millis + " ms" +
-                        " with amplitude " + amplitude + ".");
-            }
-            noteVibratorOnLocked(uid, millis);
-            final int vibratorCount = mInputDeviceVibrators.size();
-            if (vibratorCount != 0) {
-                final AudioAttributes attributes =
-                        new AudioAttributes.Builder().setUsage(usageHint).build();
-                for (int i = 0; i < vibratorCount; i++) {
-                    mInputDeviceVibrators.get(i).vibrate(millis, attributes);
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "doVibratorOn");
+        try {
+            synchronized (mInputDeviceVibrators) {
+                if (amplitude == VibrationEffect.DEFAULT_AMPLITUDE) {
+                    amplitude = mDefaultVibrationAmplitude;
                 }
-            } else {
-                // Note: ordering is important here! Many haptic drivers will reset their amplitude
-                // when enabled, so we always have to enable frst, then set the amplitude.
-                vibratorOn(millis);
-                doVibratorSetAmplitude(amplitude);
+                if (DEBUG) {
+                    Slog.d(TAG, "Turning vibrator on for " + millis + " ms" +
+                            " with amplitude " + amplitude + ".");
+                }
+                noteVibratorOnLocked(uid, millis);
+                final int vibratorCount = mInputDeviceVibrators.size();
+                if (vibratorCount != 0) {
+                    final AudioAttributes attributes =
+                            new AudioAttributes.Builder().setUsage(usageHint).build();
+                    for (int i = 0; i < vibratorCount; i++) {
+                        mInputDeviceVibrators.get(i).vibrate(millis, attributes);
+                    }
+                } else {
+                    // Note: ordering is important here! Many haptic drivers will reset their
+                    // amplitude when enabled, so we always have to enable frst, then set the
+                    // amplitude.
+                    vibratorOn(millis);
+                    doVibratorSetAmplitude(amplitude);
+                }
             }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
     }
 
@@ -870,52 +911,63 @@ public class VibratorService extends IVibratorService.Stub
     }
 
     private void doVibratorOff() {
-        synchronized (mInputDeviceVibrators) {
-            if (DEBUG) {
-                Slog.d(TAG, "Turning vibrator off.");
-            }
-            noteVibratorOffLocked();
-            final int vibratorCount = mInputDeviceVibrators.size();
-            if (vibratorCount != 0) {
-                for (int i = 0; i < vibratorCount; i++) {
-                    mInputDeviceVibrators.get(i).cancel();
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "doVibratorOff");
+        try {
+            synchronized (mInputDeviceVibrators) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Turning vibrator off.");
                 }
-            } else {
-                vibratorOff();
+                noteVibratorOffLocked();
+                final int vibratorCount = mInputDeviceVibrators.size();
+                if (vibratorCount != 0) {
+                    for (int i = 0; i < vibratorCount; i++) {
+                        mInputDeviceVibrators.get(i).cancel();
+                    }
+                } else {
+                    vibratorOff();
+                }
             }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
     }
 
     @GuardedBy("mLock")
     private long doVibratorPrebakedEffectLocked(Vibration vib) {
-        final VibrationEffect.Prebaked prebaked = (VibrationEffect.Prebaked) vib.effect;
-        final boolean usingInputDeviceVibrators;
-        synchronized (mInputDeviceVibrators) {
-            usingInputDeviceVibrators = !mInputDeviceVibrators.isEmpty();
-        }
-        // Input devices don't support prebaked effect, so skip trying it with them.
-        if (!usingInputDeviceVibrators) {
-            long timeout = vibratorPerformEffect(prebaked.getId(), prebaked.getEffectStrength());
-            if (timeout > 0) {
-                noteVibratorOnLocked(vib.uid, timeout);
-                return timeout;
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "doVibratorPrebakedEffectLocked");
+        try {
+            final VibrationEffect.Prebaked prebaked = (VibrationEffect.Prebaked) vib.effect;
+            final boolean usingInputDeviceVibrators;
+            synchronized (mInputDeviceVibrators) {
+                usingInputDeviceVibrators = !mInputDeviceVibrators.isEmpty();
             }
-        }
-        if (!prebaked.shouldFallback()) {
+            // Input devices don't support prebaked effect, so skip trying it with them.
+            if (!usingInputDeviceVibrators) {
+                long timeout = vibratorPerformEffect(prebaked.getId(),
+                        prebaked.getEffectStrength());
+                if (timeout > 0) {
+                    noteVibratorOnLocked(vib.uid, timeout);
+                    return timeout;
+                }
+            }
+            if (!prebaked.shouldFallback()) {
+                return 0;
+            }
+            VibrationEffect effect = getFallbackEffect(prebaked.getId());
+            if (effect == null) {
+                Slog.w(TAG, "Failed to play prebaked effect, no fallback");
+                return 0;
+            }
+            Vibration fallbackVib =
+                    new Vibration(vib.token, effect, vib.usageHint, vib.uid, vib.opPkg);
+            final int intensity = getCurrentIntensityLocked(fallbackVib);
+            linkVibration(fallbackVib);
+            applyVibrationIntensityScalingLocked(fallbackVib, intensity);
+            startVibrationInnerLocked(fallbackVib);
             return 0;
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
-        VibrationEffect effect = getFallbackEffect(prebaked.getId());
-        if (effect == null) {
-            Slog.w(TAG, "Failed to play prebaked effect, no fallback");
-            return 0;
-        }
-        Vibration fallbackVib =
-                new Vibration(vib.token, effect, vib.usageHint, vib.uid, vib.opPkg);
-        final int intensity = getCurrentIntensityLocked(fallbackVib);
-        linkVibration(fallbackVib);
-        applyVibrationIntensityScalingLocked(fallbackVib, intensity);
-        startVibrationInnerLocked(fallbackVib);
-        return 0;
     }
 
     private VibrationEffect getFallbackEffect(int effectId) {
@@ -977,22 +1029,27 @@ public class VibratorService extends IVibratorService.Stub
         }
 
         private long delayLocked(long duration) {
-            long durationRemaining = duration;
-            if (duration > 0) {
-                final long bedtime = duration + SystemClock.uptimeMillis();
-                do {
-                    try {
-                        this.wait(durationRemaining);
-                    }
-                    catch (InterruptedException e) { }
-                    if (mForceStop) {
-                        break;
-                    }
-                    durationRemaining = bedtime - SystemClock.uptimeMillis();
-                } while (durationRemaining > 0);
-                return duration - durationRemaining;
+            Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "delayLocked");
+            try {
+                long durationRemaining = duration;
+                if (duration > 0) {
+                    final long bedtime = duration + SystemClock.uptimeMillis();
+                    do {
+                        try {
+                            this.wait(durationRemaining);
+                        }
+                        catch (InterruptedException e) { }
+                        if (mForceStop) {
+                            break;
+                        }
+                        durationRemaining = bedtime - SystemClock.uptimeMillis();
+                    } while (durationRemaining > 0);
+                    return duration - durationRemaining;
+                }
+                return 0;
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
             }
-            return 0;
         }
 
         public void run() {
@@ -1014,48 +1071,53 @@ public class VibratorService extends IVibratorService.Stub
          * @return true if it finished naturally, false otherwise (e.g. it was canceled).
          */
         public boolean playWaveform() {
-            synchronized (this) {
-                final long[] timings = mWaveform.getTimings();
-                final int[] amplitudes = mWaveform.getAmplitudes();
-                final int len = timings.length;
-                final int repeat = mWaveform.getRepeatIndex();
+            Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "playWaveform");
+            try {
+                synchronized (this) {
+                    final long[] timings = mWaveform.getTimings();
+                    final int[] amplitudes = mWaveform.getAmplitudes();
+                    final int len = timings.length;
+                    final int repeat = mWaveform.getRepeatIndex();
 
-                int index = 0;
-                long onDuration = 0;
-                while (!mForceStop) {
-                    if (index < len) {
-                        final int amplitude = amplitudes[index];
-                        final long duration = timings[index++];
-                        if (duration <= 0) {
-                            continue;
-                        }
-                        if (amplitude != 0) {
-                            if (onDuration <= 0) {
-                                // Telling the vibrator to start multiple times usually causes
-                                // effects to feel "choppy" because the motor resets at every on
-                                // command.  Instead we figure out how long our next "on" period is
-                                // going to be, tell the motor to stay on for the full duration,
-                                // and then wake up to change the amplitude at the appropriate
-                                // intervals.
-                                onDuration =
-                                        getTotalOnDuration(timings, amplitudes, index - 1, repeat);
-                                doVibratorOn(onDuration, amplitude, mUid, mUsageHint);
-                            } else {
-                                doVibratorSetAmplitude(amplitude);
+                    int index = 0;
+                    long onDuration = 0;
+                    while (!mForceStop) {
+                        if (index < len) {
+                            final int amplitude = amplitudes[index];
+                            final long duration = timings[index++];
+                            if (duration <= 0) {
+                                continue;
                             }
-                        }
+                            if (amplitude != 0) {
+                                if (onDuration <= 0) {
+                                    // Telling the vibrator to start multiple times usually causes
+                                    // effects to feel "choppy" because the motor resets at every on
+                                    // command.  Instead we figure out how long our next "on" period
+                                    // is going to be, tell the motor to stay on for the full
+                                    // duration, and then wake up to change the amplitude at the
+                                    // appropriate intervals.
+                                    onDuration = getTotalOnDuration(timings, amplitudes, index - 1,
+                                            repeat);
+                                    doVibratorOn(onDuration, amplitude, mUid, mUsageHint);
+                                } else {
+                                    doVibratorSetAmplitude(amplitude);
+                                }
+                            }
 
-                        long waitTime = delayLocked(duration);
-                        if (amplitude != 0) {
-                            onDuration -= waitTime;
+                            long waitTime = delayLocked(duration);
+                            if (amplitude != 0) {
+                                onDuration -= waitTime;
+                            }
+                        } else if (repeat < 0) {
+                            break;
+                        } else {
+                            index = repeat;
                         }
-                    } else if (repeat < 0) {
-                        break;
-                    } else {
-                        index = repeat;
                     }
+                    return !mForceStop;
                 }
-                return !mForceStop;
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
             }
         }
 
@@ -1161,35 +1223,40 @@ public class VibratorService extends IVibratorService.Stub
         }
 
         private int runVibrate() {
+            Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "runVibrate");
             try {
-                final int zenMode = Settings.Global.getInt(mContext.getContentResolver(),
-                        Settings.Global.ZEN_MODE);
-                if (zenMode != Settings.Global.ZEN_MODE_OFF) {
-                    try (PrintWriter pw = getOutPrintWriter();) {
-                        pw.print("Ignoring because device is on DND mode ");
-                        pw.println(DebugUtils.flagsToString(Settings.Global.class, "ZEN_MODE_",
-                                zenMode));
-                        return 0;
+                try {
+                    final int zenMode = Settings.Global.getInt(mContext.getContentResolver(),
+                            Settings.Global.ZEN_MODE);
+                    if (zenMode != Settings.Global.ZEN_MODE_OFF) {
+                        try (PrintWriter pw = getOutPrintWriter();) {
+                            pw.print("Ignoring because device is on DND mode ");
+                            pw.println(DebugUtils.flagsToString(Settings.Global.class, "ZEN_MODE_",
+                                    zenMode));
+                            return 0;
+                        }
                     }
+                } catch (SettingNotFoundException e) {
+                    // ignore
                 }
-            } catch (SettingNotFoundException e) {
-                // ignore
-            }
 
-            final long duration = Long.parseLong(getNextArgRequired());
-            if (duration > MAX_VIBRATION_MS) {
-                throw new IllegalArgumentException("maximum duration is " + MAX_VIBRATION_MS);
-            }
-            String description = getNextArg();
-            if (description == null) {
-                description = "Shell command";
-            }
+                final long duration = Long.parseLong(getNextArgRequired());
+                if (duration > MAX_VIBRATION_MS) {
+                    throw new IllegalArgumentException("maximum duration is " + MAX_VIBRATION_MS);
+                }
+                String description = getNextArg();
+                if (description == null) {
+                    description = "Shell command";
+                }
 
-            VibrationEffect effect =
-                    VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE);
-            vibrate(Binder.getCallingUid(), description, effect, AudioAttributes.USAGE_UNKNOWN,
-                    mToken);
-            return 0;
+                VibrationEffect effect =
+                        VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE);
+                vibrate(Binder.getCallingUid(), description, effect, AudioAttributes.USAGE_UNKNOWN,
+                        mToken);
+                return 0;
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+            }
         }
 
         @Override

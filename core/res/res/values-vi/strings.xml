@@ -93,6 +93,8 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"Tin nhắn SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Thư thoại"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Gọi qua Wi-Fi"</string>
+    <!-- no translation found for notification_channel_sim (4052095493875188564) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"TTY theo yêu cầu của thiết bị ngang hàng ở chế độ ĐẦY ĐỦ"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"TTY theo yêu cầu của thiết bị ngang hàng ở chế độ HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"TTY theo yêu cầu của thiết bị ngang hàng ở chế độ VCO"</string>
@@ -238,7 +240,8 @@
     <string name="global_action_settings" msgid="1756531602592545966">"Cài đặt"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Hỗ trợ"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Trợ lý thoại"</string>
-    <string name="global_action_lockdown" msgid="2277328351790053477">"Nhập khóa"</string>
+    <!-- no translation found for global_action_lockdown (1099326950891078929) -->
+    <skip />
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"Thông báo mới"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Bàn phím ảo"</string>
@@ -264,10 +267,8 @@
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Chế độ an toàn"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Hệ thống Android"</string>
-    <!-- no translation found for user_owner_label (8836124313744349203) -->
-    <skip />
-    <!-- no translation found for managed_profile_label (8947929265267690522) -->
-    <skip />
+    <string name="user_owner_label" msgid="8836124313744349203">"Chuyển sang hồ sơ cá nhân"</string>
+    <string name="managed_profile_label" msgid="8947929265267690522">"Chuyển sang hồ sơ công việc"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Danh bạ"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"truy cập vào danh bạ của bạn"</string>
     <string name="permgrouprequest_contacts" msgid="1601591667800538208">"Cho phép &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; truy cập vào danh bạ của bạn"</string>
@@ -358,7 +359,7 @@
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Cho phép ứng dụng làm cho các phần của ứng dụng trở nên ổn định trong bộ nhớ. Việc này có thể hạn chế bộ nhớ đối với các ứng dụng khác đang làm chậm TV."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Cho phép ứng dụng tạo sự đồng nhất cho các phần của mình trong bộ nhớ. Việc này có thể hạn chế bộ nhớ đối với các ứng dụng khác đang làm chậm điện thoại."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"đo dung lượng lưu trữ ứng dụng"</string>
-    <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Cho phép ứng dụng truy xuất mã, dữ liệu và kích thước bộ nhớ cache của chính ứng dụng"</string>
+    <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Cho phép ứng dụng truy xuất mã, dữ liệu và kích thước bộ nhớ đệm của chính ứng dụng"</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"sửa đổi cài đặt hệ thống"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Cho phép ứng dụng sửa đổi dữ liệu cài đặt của hệ thống. Ứng dụng độc hại có thể làm hỏng cấu hình hệ thống của bạn."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"chạy khi khởi động"</string>
@@ -419,10 +420,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Cho phép ứng dụng truy cập vào các tính năng điện thoại của thiết bị. Quyền này cho phép ứng dụng xác định số điện thoại và ID thiết bị, cho dù cuộc gọi có hiện hoạt hay không và số từ xa có được kết nối bằng một cuộc gọi hay không."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"định tuyến cuộc gọi thông qua hệ thống"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Cho phép ứng dụng định tuyến cuộc gọi thông qua hệ thống nhằm cải thiện trải nghiệm gọi điện."</string>
-    <!-- no translation found for permlab_acceptHandover (2661534649736022409) -->
-    <skip />
-    <!-- no translation found for permdesc_acceptHandovers (4570660484220539698) -->
-    <skip />
+    <string name="permlab_acceptHandover" msgid="2661534649736022409">"tiếp tục cuộc gọi từ một ứng dụng khác"</string>
+    <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Cho phép ứng dụng tiếp tục cuộc gọi được bắt đầu trong một ứng dụng khác."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"đọc số điện thoại"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Cho phép ứng dụng truy cập số điện thoại của thiết bị."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ngăn máy tính bảng chuyển sang chế độ ngủ"</string>
@@ -497,11 +496,12 @@
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Không thể lưu vân tay. Vui lòng xóa vân tay hiện có."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Đã hết thời gian chờ vân tay. Hãy thử lại."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Thao tác dùng dấu vân tay bị hủy."</string>
-    <!-- no translation found for fingerprint_error_user_canceled (7999639584615291494) -->
-    <skip />
+    <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Người dùng đã hủy thao tác dùng dấu vân tay."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Quá nhiều lần thử. Hãy thử lại sau."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Quá nhiều lần thử. Cảm biến vân tay đã bị tắt."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Thử lại."</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Chưa đăng ký vân tay."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Thiết bị này không có cảm biến vân tay"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Ngón tay <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -828,6 +828,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Mẹo: Nhấn đúp để phóng to và thu nhỏ."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Tự động điền"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Thiết lập Tự động điền"</string>
+    <!-- no translation found for autofill_window_title (921006636895825007) -->
+    <skip />
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1000,12 +1002,9 @@
     <string name="browse" msgid="1245903488306147205">"Mở"</string>
     <string name="sms" msgid="4560537514610063430">"Gửi tin nhắn"</string>
     <string name="add_contact" msgid="7867066569670597203">"Thêm"</string>
-    <!-- no translation found for view_calendar (979609872939597838) -->
-    <skip />
-    <!-- no translation found for add_calendar_event (1953664627192056206) -->
-    <skip />
-    <!-- no translation found for view_flight (7691640491425680214) -->
-    <skip />
+    <string name="view_calendar" msgid="979609872939597838">"Xem"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Lịch biểu"</string>
+    <string name="view_flight" msgid="7691640491425680214">"Theo dõi"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Sắp hết dung lượng lưu trữ"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Một số chức năng hệ thống có thể không hoạt động"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Không đủ bộ nhớ cho hệ thống. Đảm bảo bạn có 250 MB dung lượng trống và khởi động lại."</string>
@@ -1131,8 +1130,7 @@
       <item quantity="one">Mở mạng Wi-Fi khả dụng</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Kết nối với mạng Wi-Fi đang mở"</string>
-    <!-- no translation found for wifi_available_carrier_network_title (4527932626916527897) -->
-    <skip />
+    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Kết nối với mạng Wi‑Fi của nhà mạng"</string>
     <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Đang kết nối với mạng Wi‑Fi đang mở"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Đã kết nối với mạng Wi-Fi"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Không thể kết nối với mạng Wi‑Fi"</string>
@@ -1202,9 +1200,12 @@
     <string name="sim_added_title" msgid="3719670512889674693">"Đã thêm thẻ SIM"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Khởi động lại thiết bị của bạn để truy cập mạng di động."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Khởi động lại"</string>
-    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Để SIM mới của bạn hoạt động bình thường, bạn cần phải cài đặt và mở một ứng dụng của nhà cung cấp dịch vụ."</string>
-    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"TẢI ỨNG DỤNG"</string>
-    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"KHÔNG PHẢI BÂY GIỜ"</string>
+    <!-- no translation found for install_carrier_app_notification_title (9056007111024059888) -->
+    <skip />
+    <!-- no translation found for install_carrier_app_notification_text (3346681446158696001) -->
+    <skip />
+    <!-- no translation found for install_carrier_app_notification_button (3094206295081900849) -->
+    <skip />
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Đã lắp SIM mới"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Nhấn để thiết lập"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Đặt giờ"</string>
@@ -1216,13 +1217,15 @@
     <string name="no_permissions" msgid="7283357728219338112">"Không yêu cầu quyền"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"bạn có thể mất tiền vì điều này"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"Sạc qua USB thiết bị này"</string>
-    <string name="usb_supplying_notification_title" msgid="5310642257296510271">"Nguồn cấp điện qua USB cho thiết bị được kết nối"</string>
-    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB để truyền tệp"</string>
-    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB để truyền ảnh"</string>
-    <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB cho MIDI"</string>
-    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Đã kết nối với phụ kiện USB"</string>
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"Đang sạc thiết bị này qua USB"</string>
+    <string name="usb_supplying_notification_title" msgid="4631045789893086181">"Đang sạc thiết bị được kết nối qua USB"</string>
+    <string name="usb_mtp_notification_title" msgid="4238227258391151029">"Đã bật truyền tệp qua USB"</string>
+    <string name="usb_ptp_notification_title" msgid="5425857879922006878">"Đã bật chế độ PTP qua USB"</string>
+    <string name="usb_tether_notification_title" msgid="3716143122035802501">"Đã bật chia sẻ kết nối qua USB"</string>
+    <string name="usb_midi_notification_title" msgid="5356040379749154805">"Đã bật chế độ MIDI qua USB"</string>
+    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"Đã bật chế độ phụ kiện USB"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Nhấn để biết thêm tùy chọn."</string>
+    <string name="usb_power_notification_message" msgid="4647527153291917218">"Đang sạc thiết bị được kết nối. Hãy nhấn để biết thêm các tùy chọn."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Đã phát hiện phụ kiện âm thanh analog"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Thiết bị được kết nối không tương thích với điện thoại này. Nhấn để tìm hiểu thêm."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Đã kết nối gỡ lỗi USB"</string>
@@ -1661,9 +1664,6 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> làm việc"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"Công việc thứ 2 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"Công việc thứ 2 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="6820571533009838261">"Để bỏ ghim màn hình này, chạm và giữ nút Quay lại và Tổng quan"</string>
-    <string name="lock_to_app_start" msgid="6643342070839862795">"Đã ghim màn hình"</string>
-    <string name="lock_to_app_exit" msgid="8598219838213787430">"Đã bỏ ghim màn hình"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Hỏi mã PIN trước khi bỏ ghim"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Hỏi hình mở khóa trước khi bỏ ghim"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Hỏi mật khẩu trước khi bỏ ghim"</string>
@@ -1757,15 +1757,11 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Tất cả ngôn ngữ"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Tất cả khu vực"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Tìm kiếm"</string>
-    <!-- no translation found for work_mode_off_title (1118691887588435530) -->
-    <skip />
-    <!-- no translation found for work_mode_off_message (5130856710614337649) -->
-    <skip />
+    <string name="work_mode_off_title" msgid="1118691887588435530">"Bạn muốn bật hồ sơ công việc?"</string>
+    <string name="work_mode_off_message" msgid="5130856710614337649">"Ứng dụng công việc, thông báo, dữ liệu và các tính năng khác của hồ sơ công việc sẽ được bật"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Bật"</string>
-    <!-- no translation found for deprecated_target_sdk_message (1449696506742572767) -->
-    <skip />
-    <!-- no translation found for deprecated_target_sdk_app_store (5032340500368495077) -->
-    <skip />
+    <string name="deprecated_target_sdk_message" msgid="1449696506742572767">"Ứng dụng này được xây dựng cho một phiên bản Android cũ hơn và có thể hoạt động không bình thường. Hãy thử kiểm tra các bản cập nhật hoặc liên hệ với nhà phát triển."</string>
+    <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Kiểm tra bản cập nhật"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Bạn có tin nhắn mới"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Mở ứng dụng SMS để xem"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Một số chức năng có thể bị hạn chế"</string>
@@ -1832,17 +1828,20 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Điện thoại không được phép sử dụng tính năng thoại"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Cửa sổ bật lên"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"Lối tắt này yêu cầu ứng dụng mới nhất"</string>
+    <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"Phiên bản của ứng dụng đã bị hạ cấp hoặc không tương thích với lối tắt này"</string>
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Không thể khôi phục lối tắt do ứng dụng không hỗ trợ sao lưu và khôi phục"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Không thể khôi phục lối tắt do không khớp chữ ký ứng dụng"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Không thể khôi phục lối tắt"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"Đã vô hiệu hóa lối tắt"</string>
-    <!-- no translation found for harmful_app_warning_uninstall (4837672735619532931) -->
-    <skip />
-    <!-- no translation found for harmful_app_warning_open_anyway (596432803680914321) -->
-    <skip />
-    <!-- no translation found for harmful_app_warning_title (8982527462829423432) -->
-    <skip />
+    <string name="harmful_app_warning_uninstall" msgid="4837672735619532931">"GỠ CÀI ĐẶT"</string>
+    <string name="harmful_app_warning_open_anyway" msgid="596432803680914321">"VẪN MỞ"</string>
+    <string name="harmful_app_warning_title" msgid="8982527462829423432">"Đã phát hiện ứng dụng độc hại"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> muốn hiển thị các lát của <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"Chỉnh sửa"</string>
+    <!-- no translation found for notification_channel_system_changes (5072715579030948646) -->
+    <skip />
+    <!-- no translation found for zen_upgrade_notification_title (3799603322910377294) -->
+    <skip />
+    <!-- no translation found for zen_upgrade_notification_content (6603123479476554768) -->
+    <skip />
 </resources>

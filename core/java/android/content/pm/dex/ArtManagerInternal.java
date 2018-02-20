@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2008 The Android Open Source Project
+/**
+ * Copyright 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-package android.test;
+package android.content.pm.dex;
 
-import junit.framework.TestSuite;
+import android.content.pm.ApplicationInfo;
 
 /**
- * Implementors will know how to get a test suite.
+ * Art manager local system service interface.
  *
- * @deprecated Use
- * <a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">
- * AndroidJUnitRunner</a> instead. New tests should be written using the
- * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
+ * @hide Only for use within the system server.
  */
-@Deprecated
-public interface TestSuiteProvider {
+public abstract class ArtManagerInternal {
 
-    TestSuite getTestSuite();
+    /**
+     * Return optimization information about the application {@code info} when
+     * in executes using the specified {@code abi}.
+     */
+    public abstract PackageOptimizationInfo getPackageOptimizationInfo(
+            ApplicationInfo info, String abi);
 }

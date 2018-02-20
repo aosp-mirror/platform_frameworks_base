@@ -939,6 +939,11 @@ message AppStartChanged {
     // Empty if not set.
     optional string launch_token = 13;
 
+    // The compiler filter used when when the package was optimized.
+    optional string package_optimization_compilation_filter = 14;
+
+    // The reason why the package was optimized.
+    optional string package_optimization_compilation_reason = 15;
 }
 
 message AppStartCancelChanged {
