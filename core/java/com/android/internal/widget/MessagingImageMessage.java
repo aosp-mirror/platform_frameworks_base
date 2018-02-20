@@ -97,7 +97,7 @@ public class MessagingImageMessage extends ImageView implements MessagingMessage
         Drawable drawable;
         try {
             drawable = LocalImageResolver.resolveImage(message.getDataUri(), getContext());
-        } catch (IOException e) {
+        } catch (IOException | SecurityException e) {
             e.printStackTrace();
             return false;
         }
