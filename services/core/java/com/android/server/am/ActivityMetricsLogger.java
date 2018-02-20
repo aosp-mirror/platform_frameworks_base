@@ -23,6 +23,8 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TR
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_WINDOWS_DRAWN_DELAY_MS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_CLASS_NAME;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_INSTANT_APP_LAUNCH_TOKEN;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.PACKAGE_OPTIMIZATION_COMPILATION_REASON;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.PACKAGE_OPTIMIZATION_COMPILATION_FILTER;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_TRANSITION_COLD_LAUNCH;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_TRANSITION_HOT_LAUNCH;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_TRANSITION_REPORTED_DRAWN_NO_BUNDLE;
@@ -35,6 +37,9 @@ import static com.android.server.am.MemoryStatUtil.MemoryStat;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromMemcg;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.dex.ArtManagerInternal;
+import android.content.pm.dex.PackageOptimizationInfo;
 import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.Looper;
@@ -47,6 +52,7 @@ import android.util.StatsLog;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.SomeArgs;
+import com.android.server.LocalServices;
 
 import java.util.ArrayList;
 
@@ -68,7 +74,8 @@ class ActivityMetricsLogger {
     private static final long INVALID_START_TIME = -1;
 
     private static final int MSG_CHECK_VISIBILITY = 0;
-    private static final int MSG_LOG_APP_START_MEMORY_STATE_CAPTURE = 1;
+    private static final int MSG_LOG_APP_TRANSITION = 1;
+    private static final int MSG_LOG_APP_START_MEMORY_STATE_CAPTURE = 2;
 
     // Preallocated strings we are sending to tron, so we don't have to allocate a new one every
     // time we log.
@@ -93,6 +100,9 @@ class ActivityMetricsLogger {
     private final SparseArray<WindowingModeTransitionInfo> mLastWindowingModeTransitionInfo =
             new SparseArray<>();
     private final H mHandler;
+
+    private ArtManagerInternal mArtManagerInternal;
+
     private final class H extends Handler {
 
         public H(Looper looper) {
@@ -106,12 +116,16 @@ class ActivityMetricsLogger {
                     final SomeArgs args = (SomeArgs) msg.obj;
                     checkVisibility((TaskRecord) args.arg1, (ActivityRecord) args.arg2);
                     break;
+                case MSG_LOG_APP_TRANSITION:
+                    logAppTransition(msg.arg1, msg.arg2,
+                            (WindowingModeTransitionInfoSnapshot) msg.obj);
+                    break;
                 case MSG_LOG_APP_START_MEMORY_STATE_CAPTURE:
                     logAppStartMemoryStateCapture((WindowingModeTransitionInfo) msg.obj);
                     break;
             }
         }
-    };
+    }
 
     private final class WindowingModeTransitionInfo {
         private ActivityRecord launchedActivity;
@@ -123,6 +137,36 @@ class ActivityMetricsLogger {
         private int reason = APP_TRANSITION_TIMEOUT;
         private boolean loggedWindowsDrawn;
         private boolean loggedStartingWindowDrawn;
+    }
+
+    private final class WindowingModeTransitionInfoSnapshot {
+        final private ApplicationInfo applicationInfo;
+        final private String packageName;
+        final private String launchedActivityName;
+        final private String launchedActivityLaunchedFromPackage;
+        final private String launchedActivityLaunchToken;
+        final private String launchedActivityAppRecordRequiredAbi;
+        final private int reason;
+        final private int startingWindowDelayMs;
+        final private int bindApplicationDelayMs;
+        final private int windowsDrawnDelayMs;
+        final private int type;
+
+        private WindowingModeTransitionInfoSnapshot(WindowingModeTransitionInfo info) {
+            applicationInfo = info.launchedActivity.appInfo;
+            packageName = info.launchedActivity.packageName;
+            launchedActivityName = info.launchedActivity.info.name;
+            launchedActivityLaunchedFromPackage = info.launchedActivity.launchedFromPackage;
+            launchedActivityLaunchToken = info.launchedActivity.info.launchToken;
+            launchedActivityAppRecordRequiredAbi = info.launchedActivity.app == null
+                    ? null
+                    : info.launchedActivity.app.requiredAbi;
+            reason = info.reason;
+            startingWindowDelayMs = info.startingWindowDelayMs;
+            bindApplicationDelayMs = info.bindApplicationDelayMs;
+            windowsDrawnDelayMs = info.windowsDrawnDelayMs;
+            type = getTransitionType(info);
+        }
     }
 
     ActivityMetricsLogger(ActivityStackSupervisor supervisor, Context context, Looper looper) {
@@ -456,52 +500,78 @@ class ActivityMetricsLogger {
             if (type == -1) {
                 return;
             }
-            final LogMaker builder = new LogMaker(APP_TRANSITION);
-            builder.setPackageName(info.launchedActivity.packageName);
-            builder.setType(type);
-            builder.addTaggedData(FIELD_CLASS_NAME, info.launchedActivity.info.name);
-            final boolean isInstantApp = info.launchedActivity.info.applicationInfo.isInstantApp();
-            if (info.launchedActivity.launchedFromPackage != null) {
-                builder.addTaggedData(APP_TRANSITION_CALLING_PACKAGE_NAME,
-                        info.launchedActivity.launchedFromPackage);
-            }
-            String launchToken = info.launchedActivity.info.launchToken;
-            if (launchToken != null) {
-                builder.addTaggedData(FIELD_INSTANT_APP_LAUNCH_TOKEN, launchToken);
-                info.launchedActivity.info.launchToken = null;
-            }
-            builder.addTaggedData(APP_TRANSITION_IS_EPHEMERAL, isInstantApp ? 1 : 0);
-            builder.addTaggedData(APP_TRANSITION_DEVICE_UPTIME_SECONDS,
-                    mCurrentTransitionDeviceUptime);
-            builder.addTaggedData(APP_TRANSITION_DELAY_MS, mCurrentTransitionDelayMs);
-            builder.setSubtype(info.reason);
-            if (info.startingWindowDelayMs != -1) {
-                builder.addTaggedData(APP_TRANSITION_STARTING_WINDOW_DELAY_MS,
-                        info.startingWindowDelayMs);
-            }
-            if (info.bindApplicationDelayMs != -1) {
-                builder.addTaggedData(APP_TRANSITION_BIND_APPLICATION_DELAY_MS,
-                        info.bindApplicationDelayMs);
-            }
-            builder.addTaggedData(APP_TRANSITION_WINDOWS_DRAWN_DELAY_MS, info.windowsDrawnDelayMs);
-            mMetricsLogger.write(builder);
-            StatsLog.write(
-                    StatsLog.APP_START_CHANGED,
-                    info.launchedActivity.appInfo.uid,
-                    info.launchedActivity.packageName,
-                    convertAppStartTransitionType(type),
-                    info.launchedActivity.info.name,
-                    info.launchedActivity.launchedFromPackage,
-                    isInstantApp,
-                    mCurrentTransitionDeviceUptime * 1000,
-                    info.reason,
-                    mCurrentTransitionDelayMs,
-                    info.startingWindowDelayMs,
-                    info.bindApplicationDelayMs,
-                    info.windowsDrawnDelayMs,
-                    launchToken);
+
+            // Take a snapshot of the transition info before sending it to the handler for logging.
+            // This will avoid any races with other operations that modify the ActivityRecord.
+            final WindowingModeTransitionInfoSnapshot infoSnapshot =
+                    new WindowingModeTransitionInfoSnapshot(info);
+            mHandler.obtainMessage(MSG_LOG_APP_TRANSITION, mCurrentTransitionDeviceUptime,
+                    mCurrentTransitionDelayMs, infoSnapshot).sendToTarget();
+
+            info.launchedActivity.info.launchToken = null;
             mHandler.obtainMessage(MSG_LOG_APP_START_MEMORY_STATE_CAPTURE, info).sendToTarget();
         }
+    }
+
+    // This gets called on the handler without holding the activity manager lock.
+    private void logAppTransition(int currentTransitionDeviceUptime, int currentTransitionDelayMs,
+            WindowingModeTransitionInfoSnapshot info) {
+        final LogMaker builder = new LogMaker(APP_TRANSITION);
+        builder.setPackageName(info.packageName);
+        builder.setType(info.type);
+        builder.addTaggedData(FIELD_CLASS_NAME, info.launchedActivityName);
+        final boolean isInstantApp = info.applicationInfo.isInstantApp();
+        if (info.launchedActivityLaunchedFromPackage != null) {
+            builder.addTaggedData(APP_TRANSITION_CALLING_PACKAGE_NAME,
+                    info.launchedActivityLaunchedFromPackage);
+        }
+        String launchToken = info.launchedActivityLaunchToken;
+        if (launchToken != null) {
+            builder.addTaggedData(FIELD_INSTANT_APP_LAUNCH_TOKEN, launchToken);
+        }
+        builder.addTaggedData(APP_TRANSITION_IS_EPHEMERAL, isInstantApp ? 1 : 0);
+        builder.addTaggedData(APP_TRANSITION_DEVICE_UPTIME_SECONDS,
+                currentTransitionDeviceUptime);
+        builder.addTaggedData(APP_TRANSITION_DELAY_MS, currentTransitionDelayMs);
+        builder.setSubtype(info.reason);
+        if (info.startingWindowDelayMs != -1) {
+            builder.addTaggedData(APP_TRANSITION_STARTING_WINDOW_DELAY_MS,
+                    info.startingWindowDelayMs);
+        }
+        if (info.bindApplicationDelayMs != -1) {
+            builder.addTaggedData(APP_TRANSITION_BIND_APPLICATION_DELAY_MS,
+                    info.bindApplicationDelayMs);
+        }
+        builder.addTaggedData(APP_TRANSITION_WINDOWS_DRAWN_DELAY_MS, info.windowsDrawnDelayMs);
+        final ArtManagerInternal artManagerInternal = getArtManagerInternal();
+        final PackageOptimizationInfo packageOptimizationInfo =
+                (artManagerInternal == null) || (info.launchedActivityAppRecordRequiredAbi == null)
+                ? PackageOptimizationInfo.createWithNoInfo()
+                : artManagerInternal.getPackageOptimizationInfo(
+                        info.applicationInfo,
+                        info.launchedActivityAppRecordRequiredAbi);
+        builder.addTaggedData(PACKAGE_OPTIMIZATION_COMPILATION_REASON,
+                packageOptimizationInfo.getCompilationReason());
+        builder.addTaggedData(PACKAGE_OPTIMIZATION_COMPILATION_FILTER,
+                packageOptimizationInfo.getCompilationFilter());
+        mMetricsLogger.write(builder);
+        StatsLog.write(
+                StatsLog.APP_START_CHANGED,
+                info.applicationInfo.uid,
+                info.packageName,
+                convertAppStartTransitionType(info.type),
+                info.launchedActivityName,
+                info.launchedActivityLaunchedFromPackage,
+                isInstantApp,
+                currentTransitionDeviceUptime * 1000,
+                info.reason,
+                currentTransitionDelayMs,
+                info.startingWindowDelayMs,
+                info.bindApplicationDelayMs,
+                info.windowsDrawnDelayMs,
+                launchToken,
+                packageOptimizationInfo.getCompilationReason(),
+                packageOptimizationInfo.getCompilationFilter());
     }
 
     private int convertAppStartTransitionType(int tronType) {
@@ -591,5 +661,15 @@ class ActivityMetricsLogger {
                 ? mSupervisor.mService.mProcessNames.get(launchedActivity.processName,
                         launchedActivity.appInfo.uid)
                 : null;
+    }
+
+    private ArtManagerInternal getArtManagerInternal() {
+        if (mArtManagerInternal == null) {
+            // Note that this may be null.
+            // ArtManagerInternal is registered during PackageManagerService
+            // initialization which happens after ActivityManagerService.
+            mArtManagerInternal = LocalServices.getService(ArtManagerInternal.class);
+        }
+        return mArtManagerInternal;
     }
 }
