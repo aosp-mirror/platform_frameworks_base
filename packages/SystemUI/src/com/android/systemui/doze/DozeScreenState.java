@@ -17,6 +17,7 @@
 package com.android.systemui.doze;
 
 import android.os.Handler;
+import android.util.Log;
 import android.view.Display;
 
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -25,6 +26,10 @@ import com.android.systemui.statusbar.phone.DozeParameters;
  * Controls the screen when dozing.
  */
 public class DozeScreenState implements DozeMachine.Part {
+
+    private static final boolean DEBUG = DozeService.DEBUG;
+    private static final String TAG = "DozeScreenState";
+
     private final DozeMachine.Service mDozeService;
     private final Handler mHandler;
     private final Runnable mApplyPendingScreenState = this::applyPendingScreenState;
@@ -79,6 +84,7 @@ public class DozeScreenState implements DozeMachine.Part {
 
     private void applyScreenState(int screenState) {
         if (screenState != Display.STATE_UNKNOWN) {
+            if (DEBUG) Log.d(TAG, "setDozeScreenState(" + screenState + ")");
             mDozeService.setDozeScreenState(screenState);
             mPendingScreenState = Display.STATE_UNKNOWN;
         }
