@@ -980,6 +980,40 @@ public final class DefaultPermissionGrantPolicy {
         }
     }
 
+    public void grantDefaultPermissionsToEnabledTelephonyDataServices(
+            String[] packageNames, int userId) {
+        Log.i(TAG, "Granting permissions to enabled data services for user:" + userId);
+        if (packageNames == null) {
+            return;
+        }
+        for (String packageName : packageNames) {
+            PackageParser.Package dataServicePackage = getSystemPackage(packageName);
+            if (dataServicePackage != null
+                    && doesPackageSupportRuntimePermissions(dataServicePackage)) {
+                // Grant these permissions as system-fixed, so that nobody can accidentally
+                // break cellular data.
+                grantRuntimePermissions(dataServicePackage, PHONE_PERMISSIONS, true, userId);
+                grantRuntimePermissions(dataServicePackage, LOCATION_PERMISSIONS, true, userId);
+            }
+        }
+    }
+
+    public void revokeDefaultPermissionsFromDisabledTelephonyDataServices(
+            String[] packageNames, int userId) {
+        Log.i(TAG, "Revoking permissions from disabled data services for user:" + userId);
+        if (packageNames == null) {
+            return;
+        }
+        for (String packageName : packageNames) {
+            PackageParser.Package dataServicePackage = getSystemPackage(packageName);
+            if (dataServicePackage != null
+                    && doesPackageSupportRuntimePermissions(dataServicePackage)) {
+                revokeRuntimePermissions(dataServicePackage, PHONE_PERMISSIONS, true, userId);
+                revokeRuntimePermissions(dataServicePackage, LOCATION_PERMISSIONS, true, userId);
+            }
+        }
+    }
+
     public void grantDefaultPermissionsToDefaultBrowser(String packageName, int userId) {
         Log.i(TAG, "Granting permissions to default browser for user:" + userId);
         if (packageName == null) {
