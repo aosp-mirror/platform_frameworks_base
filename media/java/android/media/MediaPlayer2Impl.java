@@ -1889,7 +1889,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * @return the current position in milliseconds
      */
     @Override
-    public native int getCurrentPosition();
+    public native long getCurrentPosition();
 
     /**
      * Gets the duration of the file.
@@ -1898,7 +1898,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      *         (for example, if streaming live content), -1 is returned.
      */
     @Override
-    public native int getDuration();
+    public native long getDuration();
 
     /**
      * Gets the media metadata.
@@ -1986,28 +1986,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     }
 
     /**
-     * Set the MediaPlayer2 to start when this MediaPlayer2 finishes playback
-     * (i.e. reaches the end of the stream).
-     * The media framework will attempt to transition from this player to
-     * the next as seamlessly as possible. The next player can be set at
-     * any time before completion, but shall be after setDataSource has been
-     * called successfully. The next player must be prepared by the
-     * app, and the application should not call play() on it.
-     * The next MediaPlayer2 must be different from 'this'. An exception
-     * will be thrown if next == this.
-     * The application may call setNextMediaPlayer(null) to indicate no
-     * next player should be started at the end of playback.
-     * If the current player is looping, it will keep looping and the next
-     * player will not be started.
-     *
-     * @param next the player to start after this one completes playback.
-     *
-     * @hide
-     */
-    @Override
-    public native void setNextMediaPlayer(MediaPlayer2 next);
-
-    /**
      * Resets the MediaPlayer2 to its uninitialized state. After calling
      * this method, you will have to initialize it again by setting the
      * data source and calling prepareAsync().
@@ -2078,9 +2056,10 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * @param key key indicates the parameter to be set.
      * @param value value of the parameter to be set.
      * @return true if the parameter is set successfully, false otherwise
-     * {@hide}
      */
     private native boolean setParameter(int key, Parcel value);
+
+    private native Parcel getParameter(int key);
 
     /**
      * Sets the audio attributes for this MediaPlayer2.
@@ -2103,6 +2082,14 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         attributes.writeToParcel(pattributes, AudioAttributes.FLATTEN_TAGS);
         setParameter(KEY_PARAMETER_AUDIO_ATTRIBUTES, pattributes);
         pattributes.recycle();
+    }
+
+    @Override
+    public AudioAttributes getAudioAttributes() {
+        Parcel pattributes = getParameter(KEY_PARAMETER_AUDIO_ATTRIBUTES);
+        AudioAttributes attributes = AudioAttributes.CREATOR.createFromParcel(pattributes);
+        pattributes.recycle();
+        return attributes;
     }
 
     /**
@@ -3211,11 +3198,12 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                     }
 
                     // notifying the client outside the lock
+                    // TODO: get srcId
                     if (drmInfo != null) {
                         synchronized (mEventCbLock) {
                             for (Pair<Executor, DrmEventCallback> cb : mDrmEventCallbackRecords) {
                                 cb.first.execute(() -> cb.second.onDrmInfo(
-                                        mMediaPlayer, drmInfo));
+                                        mMediaPlayer, 0, drmInfo));
                             }
                         }
                     }
@@ -3747,8 +3735,9 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
 
         // call the callback outside the lock
+        // TODO: get srcId
         if (mOnDrmConfigHelper != null)  {
-            mOnDrmConfigHelper.onDrmConfig(this);
+            mOnDrmConfigHelper.onDrmConfig(this, 0);
         }
 
         synchronized (mDrmLock) {
@@ -3818,11 +3807,12 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
 
         // if finished successfully without provisioning, call the callback outside the lock
+        // TODO: get srcId
         if (allDoneWithoutProvisioning) {
             synchronized (mDrmEventCbLock) {
                 for (Pair<Executor, DrmEventCallback> cb : mDrmEventCallbackRecords) {
                     cb.first.execute(() -> cb.second.onDrmPrepared(
-                            this, PREPARE_DRM_STATUS_SUCCESS));
+                            this, 0, PREPARE_DRM_STATUS_SUCCESS));
                 }
             }
         }
@@ -4488,9 +4478,10 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 } // synchronized
 
                 // calling the callback outside the lock
+                // TODO: get srcId
                 synchronized (mDrmEventCbLock) {
                     for (Pair<Executor, DrmEventCallback> cb : mDrmEventCallbackRecords) {
-                        cb.first.execute(() -> cb.second.onDrmPrepared(mediaPlayer, status));
+                        cb.first.execute(() -> cb.second.onDrmPrepared(mediaPlayer, 0, status));
                     }
                 }
             } else {   // blocking mode already has the lock
