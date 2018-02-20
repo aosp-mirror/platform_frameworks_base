@@ -2914,7 +2914,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 161;
+            private static final int SETTINGS_VERSION = 162;
 
             private final int mUserId;
 
@@ -3671,6 +3671,21 @@ public class SettingsProvider extends ContentProvider {
                                 null, true, SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     currentVersion = 161;
+                }
+
+                if (currentVersion == 161) {
+                    // Version 161: Add a gesture for silencing phones
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    final Setting currentSetting = secureSettings.getSettingLocked(
+                            Secure.VOLUME_HUSH_GESTURE);
+                    if (currentSetting.isNull()) {
+                        secureSettings.insertSettingLocked(
+                                Secure.VOLUME_HUSH_GESTURE,
+                                Integer.toString(Secure.VOLUME_HUSH_VIBRATE),
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+
+                    currentVersion = 162;
                 }
 
                 // vXXX: Add new settings above this point.

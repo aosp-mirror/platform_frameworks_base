@@ -7762,6 +7762,21 @@ public final class Settings {
         public static final String BLUETOOTH_ON_WHILE_DRIVING = "bluetooth_on_while_driving";
 
         /**
+         * What behavior should be invoked when the volume hush gesture is triggered
+         * One of VOLUME_HUSH_OFF, VOLUME_HUSH_VIBRATE, VOLUME_HUSH_MUTE.
+         *
+         * @hide
+         */
+        public static final String VOLUME_HUSH_GESTURE = "volume_hush_gesture";
+
+        /** @hide */ public static final int VOLUME_HUSH_OFF = 0;
+        /** @hide */ public static final int VOLUME_HUSH_VIBRATE = 1;
+        /** @hide */ public static final int VOLUME_HUSH_MUTE = 2;
+
+        private static final Validator VOLUME_HUSH_GESTURE_VALIDATOR =
+                NON_NEGATIVE_INTEGER_VALIDATOR;
+
+        /**
          * The number of times (integer) the user has manually enabled battery saver.
          * @hide
          */
@@ -7875,6 +7890,7 @@ public final class Settings {
             SCREENSAVER_ACTIVATE_ON_SLEEP,
             LOCKDOWN_IN_POWER_MENU,
             SHOW_FIRST_CRASH_DIALOG_DEV_OPTION,
+            VOLUME_HUSH_GESTURE
         };
 
         /**
@@ -8011,6 +8027,7 @@ public final class Settings {
             VALIDATORS.put(LOCKDOWN_IN_POWER_MENU, LOCKDOWN_IN_POWER_MENU_VALIDATOR);
             VALIDATORS.put(SHOW_FIRST_CRASH_DIALOG_DEV_OPTION,
                     SHOW_FIRST_CRASH_DIALOG_DEV_OPTION_VALIDATOR);
+            VALIDATORS.put(VOLUME_HUSH_GESTURE, VOLUME_HUSH_GESTURE_VALIDATOR);
             VALIDATORS.put(ENABLED_NOTIFICATION_LISTENERS,
                     ENABLED_NOTIFICATION_LISTENERS_VALIDATOR); //legacy restore setting
             VALIDATORS.put(ENABLED_NOTIFICATION_ASSISTANT,
