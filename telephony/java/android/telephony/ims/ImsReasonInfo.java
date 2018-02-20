@@ -393,6 +393,12 @@ public final class ImsReasonInfo implements Parcelable {
      */
     public static final int CODE_SIP_ALTERNATE_EMERGENCY_CALL = 1514;
 
+    /**
+     * Call failed because of unobtainable number
+     * @hide
+     */
+    public static final int CODE_UNOBTAINABLE_NUMBER = 1515;
+
     /* OEM specific error codes. To be used by OEMs when they don't want to
    reveal error code which would be replaced by ERROR_UNSPECIFIED */
     public static final int CODE_OEM_CAUSE_1 = 0xf001;
