@@ -57,8 +57,7 @@ public class QuickQSPanel extends QSPanel {
             for (int i = 0; i < mRecords.size(); i++) {
                 mTileLayout.removeTile(mRecords.get(i));
             }
-            View tileLayoutView = (View) mTileLayout;
-            ((ViewGroup) tileLayoutView.getParent()).removeView(tileLayoutView);
+            removeView((View) mTileLayout);
         }
         mTileLayout = new HeaderTileLayout(context);
         mTileLayout.setListening(mListening);
