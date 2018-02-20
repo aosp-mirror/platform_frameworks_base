@@ -149,6 +149,10 @@ void AnomalyTracker::addBucketToSum(const shared_ptr<DimToValMap>& bucket) {
 
 int64_t AnomalyTracker::getPastBucketValue(const MetricDimensionKey& key,
                                            const int64_t& bucketNum) const {
+    if (mNumOfPastBuckets == 0) {
+        return 0;
+    }
+
     const auto& bucket = mPastBuckets[index(bucketNum)];
     if (bucket == nullptr) {
         return 0;
