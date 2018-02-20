@@ -4298,10 +4298,9 @@ package android.security.keystore.recovery {
     method public void recoverySecretAvailable(android.security.keystore.recovery.KeyChainProtectionParams) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public void removeKey(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public void setRecoverySecretTypes(int[]) throws android.security.keystore.recovery.InternalRecoveryServiceException;
-    method public void setRecoveryStatus(java.lang.String, java.lang.String, int) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.content.pm.PackageManager.NameNotFoundException;
+    method public void setRecoveryStatus(java.lang.String, int) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public void setServerParams(byte[]) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public void setSnapshotCreatedPendingIntent(android.app.PendingIntent) throws android.security.keystore.recovery.InternalRecoveryServiceException;
-    field public static final int RECOVERY_STATUS_MISSING_ACCOUNT = 2; // 0x2
     field public static final int RECOVERY_STATUS_PERMANENT_FAILURE = 3; // 0x3
     field public static final int RECOVERY_STATUS_SYNCED = 0; // 0x0
     field public static final int RECOVERY_STATUS_SYNC_IN_PROGRESS = 1; // 0x1

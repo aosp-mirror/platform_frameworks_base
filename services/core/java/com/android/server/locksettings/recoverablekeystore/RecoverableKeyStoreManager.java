@@ -277,29 +277,11 @@ public class RecoverableKeyStoreManager {
     }
 
     /**
-     * Updates recovery status for the application given its {@code packageName}.
-     *
-     * @param packageName which recoverable key statuses will be returned
-     * @param aliases - KeyStore aliases or {@code null} for all aliases of the app
-     * @param status - new status
+     * Sets the recovery status of key with {@code alias} to {@code status}.
      */
-    public void setRecoveryStatus(
-            @NonNull String packageName, @Nullable String[] aliases, int status)
-            throws RemoteException {
+    public void setRecoveryStatus(String alias, int status) throws RemoteException {
         checkRecoverKeyStorePermission();
-        int uid = Binder.getCallingUid();
-        if (packageName != null) {
-            // TODO: get uid for package name, when many apps are supported.
-        }
-        if (aliases == null) {
-            // Get all keys for the app.
-            Map<String, Integer> allKeys = mDatabase.getStatusForAllKeys(uid);
-            aliases = new String[allKeys.size()];
-            allKeys.keySet().toArray(aliases);
-        }
-        for (String alias: aliases) {
-            mDatabase.setRecoveryStatus(uid, alias, status);
-        }
+        mDatabase.setRecoveryStatus(Binder.getCallingUid(), alias, status);
     }
 
     /**

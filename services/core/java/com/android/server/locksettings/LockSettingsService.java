@@ -2001,9 +2001,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public void setRecoveryStatus(@NonNull String packageName, @Nullable String[] aliases,
-            int status) throws RemoteException {
-        mRecoverableKeyStoreManager.setRecoveryStatus(packageName, aliases, status);
+    public void setRecoveryStatus(String alias, int status) throws RemoteException {
+        mRecoverableKeyStoreManager.setRecoveryStatus(alias, status);
     }
 
     public Map getRecoveryStatus(@Nullable String packageName) throws RemoteException {

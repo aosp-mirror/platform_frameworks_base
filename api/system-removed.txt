@@ -91,6 +91,14 @@ package android.os {
 
 }
 
+package android.security.keystore.recovery {
+
+  public class RecoveryController {
+    method public deprecated void setRecoveryStatus(java.lang.String, java.lang.String, int) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.content.pm.PackageManager.NameNotFoundException;
+  }
+
+}
+
 package android.service.notification {
 
   public abstract class NotificationListenerService extends android.app.Service {
