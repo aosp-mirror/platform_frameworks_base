@@ -78,8 +78,10 @@ Landroid/app/ActivityThread;->getProcessName()Ljava/lang/String;
 Landroid/app/ActivityThread;->getSystemContext()Landroid/app/ContextImpl;
 Landroid/app/ActivityThread$H;->BIND_SERVICE:I
 Landroid/app/ActivityThread$H;->CREATE_SERVICE:I
+Landroid/app/ActivityThread$H;->DUMP_PROVIDER:I
 Landroid/app/ActivityThread$H;->EXIT_APPLICATION:I
 Landroid/app/ActivityThread$H;->GC_WHEN_IDLE:I
+Landroid/app/ActivityThread$H;->INSTALL_PROVIDER:I
 Landroid/app/ActivityThread$H;->RECEIVER:I
 Landroid/app/ActivityThread$H;->REMOVE_PROVIDER:I
 Landroid/app/ActivityThread$H;->SERVICE_ARGS:I
@@ -278,8 +280,10 @@ Landroid/app/IUiModeManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/app/IWallpaperManager;->getWallpaper(Ljava/lang/String;Landroid/app/IWallpaperManagerCallback;ILandroid/os/Bundle;I)Landroid/os/ParcelFileDescriptor;
 Landroid/app/job/IJobScheduler$Stub;->asInterface(Landroid/os/IBinder;)Landroid/app/job/IJobScheduler;
 Landroid/app/job/IJobScheduler$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
+Landroid/app/LoadedApk;->getAssets()Landroid/content/res/AssetManager;
 Landroid/app/LoadedApk;->getClassLoader()Ljava/lang/ClassLoader;
 Landroid/app/LoadedApk;->getDataDirFile()Ljava/io/File;
+Landroid/app/LoadedApk;->getResources()Landroid/content/res/Resources;
 Landroid/app/LoadedApk;->mActivityThread:Landroid/app/ActivityThread;
 Landroid/app/LoadedApk;->makeApplication(ZLandroid/app/Instrumentation;)Landroid/app/Application;
 Landroid/app/LoadedApk;->mAppDir:Ljava/lang/String;
@@ -295,6 +299,7 @@ Landroid/app/LoadedApk;->mReceivers:Landroid/util/ArrayMap;
 Landroid/app/LoadedApk;->mResDir:Ljava/lang/String;
 Landroid/app/LoadedApk;->mResources:Landroid/content/res/Resources;
 Landroid/app/LoadedApk;->mSplitResDirs:[Ljava/lang/String;
+Landroid/app/LoadedApk;->rewriteRValues(Ljava/lang/ClassLoader;Ljava/lang/String;I)V
 Landroid/app/LocalActivityManager;->mActivities:Ljava/util/Map;
 Landroid/app/LocalActivityManager;->mActivityArray:Ljava/util/ArrayList;
 Landroid/app/NativeActivity;->hideIme(I)V
