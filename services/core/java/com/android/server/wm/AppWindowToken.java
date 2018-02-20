@@ -469,7 +469,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             // never gets updated.
             // If we're becoming invisible, update the client visibility if we are not running an
             // animation. Otherwise, we'll update client visibility in onAnimationFinished.
-            if (visible || !delayed) {
+            if (visible || !isReallyAnimating()) {
                 setClientHidden(!visible);
             }
 
@@ -1793,7 +1793,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 "AppWindowToken");
 
         clearThumbnail();
-        setClientHidden(isHidden());
+        setClientHidden(hiddenRequested);
 
         if (mService.mInputMethodTarget != null && mService.mInputMethodTarget.mAppToken == this) {
             getDisplayContent().computeImeTarget(true /* updateImeTarget */);
