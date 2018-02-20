@@ -60,7 +60,7 @@ public class TextLine {
     private char[] mChars;
     private boolean mCharsValid;
     private Spanned mSpanned;
-    private MeasuredText mMeasured;
+    private PrecomputedText mComputed;
 
     // Additional width of whitespace for justification. This value is per whitespace, thus
     // the line width will increase by mAddedWidth x (number of stretchable whitespaces).
@@ -119,7 +119,7 @@ public class TextLine {
         tl.mSpanned = null;
         tl.mTabs = null;
         tl.mChars = null;
-        tl.mMeasured = null;
+        tl.mComputed = null;
 
         tl.mMetricAffectingSpanSpanSet.recycle();
         tl.mCharacterStyleSpanSet.recycle();
@@ -170,12 +170,9 @@ public class TextLine {
             hasReplacement = mReplacementSpanSpanSet.numberOfSpans > 0;
         }
 
-        mMeasured = null;
-        if (text instanceof MeasuredText) {
-            MeasuredText mt = (MeasuredText) text;
-            if (mt.canUseMeasuredResult(paint)) {
-                mMeasured = mt;
-            }
+        mComputed = null;
+        if (text instanceof PrecomputedText) {
+            mComputed = (PrecomputedText) text;
         }
 
         mCharsValid = hasReplacement || hasTabs || directions != Layout.DIRS_ALL_LEFT_TO_RIGHT;
@@ -746,12 +743,12 @@ public class TextLine {
             return wp.getRunAdvance(mChars, start, end, contextStart, contextEnd, runIsRtl, offset);
         } else {
             final int delta = mStart;
-            if (mMeasured == null) {
+            if (mComputed == null) {
                 // TODO: Enable measured getRunAdvance for ReplacementSpan and RTL text.
                 return wp.getRunAdvance(mText, delta + start, delta + end,
                         delta + contextStart, delta + contextEnd, runIsRtl, delta + offset);
             } else {
-                return mMeasured.getWidth(start + delta, end + delta);
+                return mComputed.getWidth(start + delta, end + delta);
             }
         }
     }

@@ -651,42 +651,25 @@ public class StaticLayout extends Layout {
                 b.mJustificationMode != Layout.JUSTIFICATION_MODE_NONE,
                 indents, mLeftPaddings, mRightPaddings);
 
-        MeasuredText measured = null;
+        PrecomputedText measured = null;
         final Spanned spanned;
-        final boolean canUseMeasuredText;
-        if (source instanceof MeasuredText) {
-            measured = (MeasuredText) source;
-
-            if (bufStart != measured.getStart() || bufEnd != measured.getEnd()) {
-                // The buffer position has changed. Re-measure here.
-                canUseMeasuredText = false;
-            } else if (b.mBreakStrategy != measured.getBreakStrategy()
-                    || b.mHyphenationFrequency != measured.getHyphenationFrequency()) {
-                // The computed hyphenation pieces may not be able to used. Re-measure it.
-                canUseMeasuredText = false;
-            } else {
-                // We can use measured information.
-                canUseMeasuredText = true;
+        if (source instanceof PrecomputedText) {
+            measured = (PrecomputedText) source;
+            if (!measured.canUseMeasuredResult(bufStart, bufEnd, textDir, paint, b.mBreakStrategy,
+                      b.mHyphenationFrequency)) {
+                // Some parameters are different from the ones when measured text is created.
+                measured = null;
             }
-        } else {
-            canUseMeasuredText = false;
         }
 
-        if (!canUseMeasuredText) {
-            measured = new MeasuredText.Builder(source, paint)
-                    .setRange(bufStart, bufEnd)
-                    .setTextDirection(textDir)
-                    .setBreakStrategy(b.mBreakStrategy)
-                    .setHyphenationFrequency(b.mHyphenationFrequency)
-                    .build(false /* full layout is not necessary for line breaking */);
+        if (measured == null) {
+            final PrecomputedText.Params param = new PrecomputedText.Params(paint, textDir,
+                    b.mBreakStrategy, b.mHyphenationFrequency);
+            measured = PrecomputedText.createWidthOnly(source, param, bufStart, bufEnd);
             spanned = (source instanceof Spanned) ? (Spanned) source : null;
         } else {
             final CharSequence original = measured.getText();
             spanned = (original instanceof Spanned) ? (Spanned) original : null;
-            // Overwrite with the one when measured.
-            // TODO: Give an option for developer not to overwrite and measure again here?
-            textDir = measured.getTextDir();
-            paint = measured.getPaint();
         }
 
         try {
