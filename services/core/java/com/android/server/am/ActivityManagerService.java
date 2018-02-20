@@ -2711,6 +2711,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             throw new RuntimeException(
                     "Unable to find android system package", e);
         }
+
+        // Start watching app ops after we and the package manager are up and running.
+        mAppOpsService.startWatchingMode(AppOpsManager.OP_RUN_IN_BACKGROUND, null,
+                new IAppOpsCallback.Stub() {
+                    @Override public void opChanged(int op, int uid, String packageName) {
+                        if (op == AppOpsManager.OP_RUN_IN_BACKGROUND && packageName != null) {
+                            if (mAppOpsService.checkOperation(op, uid, packageName)
+                                    != AppOpsManager.MODE_ALLOWED) {
+                                runInBackgroundDisabled(uid);
+                            }
+                        }
+                    }
+                });
     }
 
     public void setWindowManager(WindowManagerService wm) {
@@ -2987,17 +3000,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mProcessStats = new ProcessStatsService(this, new File(systemDir, "procstats"));
 
         mAppOpsService = mInjector.getAppOpsService(new File(systemDir, "appops.xml"), mHandler);
-        mAppOpsService.startWatchingMode(AppOpsManager.OP_RUN_IN_BACKGROUND, null,
-                new IAppOpsCallback.Stub() {
-                    @Override public void opChanged(int op, int uid, String packageName) {
-                        if (op == AppOpsManager.OP_RUN_IN_BACKGROUND && packageName != null) {
-                            if (mAppOpsService.checkOperation(op, uid, packageName)
-                                    != AppOpsManager.MODE_ALLOWED) {
-                                runInBackgroundDisabled(uid);
-                            }
-                        }
-                    }
-                });
 
         mGrantFile = new AtomicFile(new File(systemDir, "urigrants.xml"), "uri-grants");
 

@@ -19,6 +19,7 @@ package com.android.internal.app;
 import android.app.AppOpsManager;
 import android.os.Bundle;
 import com.android.internal.app.IAppOpsCallback;
+import com.android.internal.app.IAppOpsActiveCallback;
 
 interface IAppOpsService {
     // These first methods are also called by native code, so must
@@ -49,5 +50,7 @@ interface IAppOpsService {
     void setUserRestriction(int code, boolean restricted, IBinder token, int userHandle, in String[] exceptionPackages);
     void removeUser(int userHandle);
 
+    void startWatchingActive(in int[] ops, IAppOpsActiveCallback callback);
+    void stopWatchingActive(IAppOpsActiveCallback callback);
     boolean isOperationActive(int code, int uid, String packageName);
 }

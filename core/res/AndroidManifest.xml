@@ -3839,6 +3839,11 @@
     <permission android:name="android.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Allows an application to watch changes and/or active state of app ops.
+         @hide <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.WATCH_APPOPS"
+        android:protectionLevel="signature" />
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"
