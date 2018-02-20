@@ -93,6 +93,8 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS хабарлары"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Дауыстық пошта хабарлары"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi қоңыраулары"</string>
+    <!-- no translation found for notification_channel_sim (4052095493875188564) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Пир TTY режимі ТОЛЫҚ сұрады"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Пир TTY режимінің HCO сұрады"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Пир TTY режимінің VCO сұрады"</string>
@@ -238,7 +240,8 @@
     <string name="global_action_settings" msgid="1756531602592545966">"Параметрлер"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Көмек"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Дауыс көмекшісі"</string>
-    <string name="global_action_lockdown" msgid="2277328351790053477">"Құлыптауды енгізу"</string>
+    <!-- no translation found for global_action_lockdown (1099326950891078929) -->
+    <skip />
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"Жаңа хабарландыру"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Виртуалды пернетақта"</string>
@@ -417,10 +420,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Қолданбаға құрылғыдағы телефон функцияларына кіру мүмкіндігін береді. Бұл рұқсат қолданбаға телефон нөмірі, құрылғы жеке анықтағышы, қоңырау белсенділігі және сол қоңырауға байланысты қашықтағы нөмірді анықтау мүмкіндігін береді."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"қоңырауларды жүйе арқылы бағыттау"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Қоңырау шалу тәжірибесін жақсарту үшін қолданба қоңырауларды жүйе арқылы бағыттай алады."</string>
-    <!-- no translation found for permlab_acceptHandover (2661534649736022409) -->
-    <skip />
-    <!-- no translation found for permdesc_acceptHandovers (4570660484220539698) -->
-    <skip />
+    <string name="permlab_acceptHandover" msgid="2661534649736022409">"басқа қолданбадағы қоңырауды жалғастыру"</string>
+    <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Қолданбаға басқа қолданбадағы қоңырауды жалғастыруға рұқсат береді."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"телефон нөмірлерін оқу"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Қолданбаға құрылғының телефон нөмірлерін алуға мүмкіндік береді."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"планшетті ұйқыдан бөгеу"</string>
@@ -499,6 +500,8 @@
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Талпыныстар тым көп. Кейінірек қайталап көріңіз."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Тым көп әрекет жасалды. Саусақ ізін оқу сканері өшірілді."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Әрекетті қайталаңыз."</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Саусақ іздері тіркелмеген."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Бұл құрылғыда саусақ ізін оқу сканері жоқ"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"<xliff:g id="FINGERID">%d</xliff:g> саусағы"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -825,6 +828,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Кеңес: Ұлғайту немесе кішірейту үшін екі рет түртіңіз."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Aвто толтыру"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Автотолтыруды орнату"</string>
+    <!-- no translation found for autofill_window_title (921006636895825007) -->
+    <skip />
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -997,12 +1002,9 @@
     <string name="browse" msgid="1245903488306147205">"Ашу"</string>
     <string name="sms" msgid="4560537514610063430">"Хабар"</string>
     <string name="add_contact" msgid="7867066569670597203">"Енгізу"</string>
-    <!-- no translation found for view_calendar (979609872939597838) -->
-    <skip />
-    <!-- no translation found for add_calendar_event (1953664627192056206) -->
-    <skip />
-    <!-- no translation found for view_flight (7691640491425680214) -->
-    <skip />
+    <string name="view_calendar" msgid="979609872939597838">"Көру"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Кесте"</string>
+    <string name="view_flight" msgid="7691640491425680214">"Бақылау"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Жадта орын азайып барады"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Жүйенің кейбір функциялары жұмыс істемеуі мүмкін"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Жүйе үшін жад жеткіліксіз. 250 МБ бос орын бар екенін тексеріп, қайта іске қосыңыз."</string>
@@ -1128,8 +1130,7 @@
       <item quantity="one">Ашық Wi-Fi желісі қол жетімді</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Ашық Wi‑Fi желісіне қосылу"</string>
-    <!-- no translation found for wifi_available_carrier_network_title (4527932626916527897) -->
-    <skip />
+    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Оператордың Wi‑Fi желісіне қосылу"</string>
     <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Ашық Wi‑Fi желісіне қосылуда"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Wi‑Fi желісіне қосылды"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Wi‑Fi желісіне қосылмады"</string>
@@ -1200,9 +1201,12 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM картасы қосылды"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Ұялы желіге кіру үшін құрылғыны қайта бастаңыз."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Қайта бастау"</string>
-    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Жаңа SIM картаңыз дұрыс жұмыс істеуі үшін оператордың қолданбасын орнату және ашу керек."</string>
-    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"ҚОЛДАНБАНЫ АЛУ"</string>
-    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"ҚАЗІР ЕМЕС"</string>
+    <!-- no translation found for install_carrier_app_notification_title (9056007111024059888) -->
+    <skip />
+    <!-- no translation found for install_carrier_app_notification_text (3346681446158696001) -->
+    <skip />
+    <!-- no translation found for install_carrier_app_notification_button (3094206295081900849) -->
+    <skip />
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Жаңа SIM салынды"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Оны орнату үшін түртіңіз"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Уақытты реттеу"</string>
@@ -1214,13 +1218,15 @@
     <string name="no_permissions" msgid="7283357728219338112">"Рұқсат қажет емес"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"бұған төлем қажет болуы мүмкін"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Жарайды"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"USB арқылы зарядтау"</string>
-    <string name="usb_supplying_notification_title" msgid="5310642257296510271">"USB жалғанған құрылғыға қуат беруде"</string>
-    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"Файлды тасымалдауға арналған USB"</string>
-    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"Фотосуретті тасымалдауға арналған USB"</string>
-    <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI режиміне арналған USB"</string>
-    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB жабдығына қосылған"</string>
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"Құрылғы USB арқылы зарядталып тұр"</string>
+    <string name="usb_supplying_notification_title" msgid="4631045789893086181">"Жалғанған құрылғы USB арқылы зарядталуда"</string>
+    <string name="usb_mtp_notification_title" msgid="4238227258391151029">"USB арқылы файл жіберу мүмкіндігі қосылды"</string>
+    <string name="usb_ptp_notification_title" msgid="5425857879922006878">"PTP режимі USB арқылы қосылды"</string>
+    <string name="usb_tether_notification_title" msgid="3716143122035802501">"USB тетеринг режимі қосылды"</string>
+    <string name="usb_midi_notification_title" msgid="5356040379749154805">"MIDI режимі USB арқылы қосылды"</string>
+    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"USB жабдығы режимі қосылды"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Қосымша опциялар үшін түртіңіз."</string>
+    <string name="usb_power_notification_message" msgid="4647527153291917218">"Жалғанған құрылғы зарядталуда. Қосымша параметрлер үшін түртіңіз."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Аналогтық аудиожабдық анықталды"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Жалғанған құрылғы бұл телефонмен үйлесімсіз. Қосымша ақпарат алу үшін түртіңіз."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB түзетуі қосылған"</string>
@@ -1659,9 +1665,6 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Жұмыс <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2-ші жұмыс профилі (<xliff:g id="LABEL">%1$s</xliff:g>)"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3-ші жұмыс профилі (<xliff:g id="LABEL">%1$s</xliff:g>)"</string>
-    <string name="lock_to_app_toast" msgid="6820571533009838261">"Бұл экранды босату үшін \"Артқа\" және \"Шолу\" түймелерін түртіп, ұстап тұрыңыз"</string>
-    <string name="lock_to_app_start" msgid="6643342070839862795">"Экран түйрелді"</string>
-    <string name="lock_to_app_exit" msgid="8598219838213787430">"Экран босатылды"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Босату алдында PIN кодын сұрау"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Босату алдында бекітпесін ашу өрнегін сұрау"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Босату алдында құпия сөзді сұрау"</string>
@@ -1758,10 +1761,8 @@
     <string name="work_mode_off_title" msgid="1118691887588435530">"Жұмыс профилі қосылсын ба?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Жұмыс қолданбалары, хабарландырулар, деректер және басқа да жұмыс профильдерінің мүмкіндіктері қосылады"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Қосу"</string>
-    <!-- no translation found for deprecated_target_sdk_message (1449696506742572767) -->
-    <skip />
-    <!-- no translation found for deprecated_target_sdk_app_store (5032340500368495077) -->
-    <skip />
+    <string name="deprecated_target_sdk_message" msgid="1449696506742572767">"Қолданба Android жүйесінің ескі нұсқасына арналған және дұрыс жұмыс істемеуі мүмкін. Жаңартылған нұсқаны тексеріңіз немесе әзірлеушіге хабарласыңыз."</string>
+    <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Жаңартылған нұсқаны тексеру"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Сізде жаңа хабарлар бар"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Көру үшін SMS қолданбасын ашыңыз"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Кейбір функциялар істемеуі мүмкін"</string>
@@ -1828,17 +1829,17 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Телефонды дауысқа пайдалануға тыйым салынған"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Қалқымалы терезе"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"Бұл таңбаша ең соңғы қолданбаны қажет етеді"</string>
+    <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"Қолданбаның нұсқасы ескі немесе бұл таңбашамен үйлеспейді"</string>
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Қолданба сақтық көшірме жасау мен қалпына келтіруді қолдамайтындықтан, таңбаша қалпына келтірілмеді"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Қолтаңба сәйкес келмейтіндіктен, таңбаша қалпына келтірілмеді"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Таңбаша қалпына келтірілмеді"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"Таңбаша өшірілген"</string>
-    <!-- no translation found for harmful_app_warning_uninstall (4837672735619532931) -->
-    <skip />
-    <!-- no translation found for harmful_app_warning_open_anyway (596432803680914321) -->
-    <skip />
-    <!-- no translation found for harmful_app_warning_title (8982527462829423432) -->
-    <skip />
+    <string name="harmful_app_warning_uninstall" msgid="4837672735619532931">"ЖОЮ"</string>
+    <string name="harmful_app_warning_open_anyway" msgid="596432803680914321">"БӘРІБІР АШУ"</string>
+    <string name="harmful_app_warning_title" msgid="8982527462829423432">"Зиянды қолданба анықталды"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> қолданбасы <xliff:g id="APP_2">%2$s</xliff:g> қолданбасының үзінділерін көрсеткісі келеді"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"Өзгерту"</string>
+    <string name="notification_channel_system_changes" msgid="5072715579030948646">"Жүйе өзгерістері"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\"Мазаламау\" режимі өзгерді"</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"Түймені түртіп, кедергі жасалған кезде орындалатын әрекет параметрлерін тексеріңіз"</string>
 </resources>

@@ -93,6 +93,8 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS സന്ദേശങ്ങൾ"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"വോയ്‌സ്‌മെയിൽ സന്ദേശങ്ങൾ"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"വൈഫൈ കോളിംഗ്"</string>
+    <!-- no translation found for notification_channel_sim (4052095493875188564) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് \'ഫുൾ\'"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് VCO"</string>
@@ -238,7 +240,8 @@
     <string name="global_action_settings" msgid="1756531602592545966">"ക്രമീകരണം"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"അസിസ്റ്റ്"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"വോയ്‌സ് സഹായം"</string>
-    <string name="global_action_lockdown" msgid="2277328351790053477">"ലോക്ക്‌ഡൗൺ നൽകൂ"</string>
+    <!-- no translation found for global_action_lockdown (1099326950891078929) -->
+    <skip />
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"പുതിയ അറിയിപ്പ്"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"വെർച്വൽ കീബോർഡ്"</string>
@@ -497,10 +500,8 @@
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"നിരവധി തവണ ശ്രമിച്ചു. പിന്നീട് വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"നിരവധി തവണ ശ്രമിച്ചതിനാൽ, വിരലടയാള സെൻസർ പ്രവർത്തനരഹിതമായി."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"വീണ്ടും ശ്രമിക്കൂ."</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (7654382120628334248) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_hw_not_present (5729436878065119329) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"വിരലടയാളങ്ങൾ എൻറോൾ ചെയ്തിട്ടില്ല."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"ഈ ഉപകരണത്തിൽ വിരലടയാള സെൻസർ ഇല്ല"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"കൈവിരൽ <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -827,6 +828,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"നുറുങ്ങ്: സൂം ഇൻ ചെയ്യാനും സൂം ഔട്ട് ചെയ്യാനും ഇരട്ട-ടാപ്പുചെയ്യുക."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"ഓട്ടോഫിൽ"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"ഓട്ടോഫിൽ സജ്ജീകരിക്കുക"</string>
+    <!-- no translation found for autofill_window_title (921006636895825007) -->
+    <skip />
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1198,9 +1201,12 @@
     <string name="sim_added_title" msgid="3719670512889674693">"സിം കാർഡ് ചേർത്തു"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"മൊബൈൽ നെറ്റ്‌വർക്ക് ആക്‌സസ്സുചെയ്യാൻ നിങ്ങളുടെ ഉപകരണം പുനരാരംഭിക്കുക."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"പുനരാരംഭിക്കുക"</string>
-    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"നിങ്ങളുടെ സിം ശരിയായി പ്രവർത്തിക്കുന്നതിന്, നിങ്ങളുടെ കാരിയറിൽ നിന്നുള്ള ആപ്പ് നിങ്ങൾ ഇൻസ്റ്റാൾ ചെയ്യുകയും തുറക്കുകയും ചെയ്യേണ്ടതുണ്ട്."</string>
-    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"ആപ്പ് സ്വന്തമാക്കുക"</string>
-    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"ഇപ്പോഴല്ല"</string>
+    <!-- no translation found for install_carrier_app_notification_title (9056007111024059888) -->
+    <skip />
+    <!-- no translation found for install_carrier_app_notification_text (3346681446158696001) -->
+    <skip />
+    <!-- no translation found for install_carrier_app_notification_button (3094206295081900849) -->
+    <skip />
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"പുതിയ സിം ഇട്ടു"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"ഇത് സജ്ജമാക്കുന്നതിന് ടാപ്പുചെയ്യുക"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"സമയം സജ്ജീകരിക്കുക"</string>
@@ -1212,23 +1218,15 @@
     <string name="no_permissions" msgid="7283357728219338112">"അനുമതികളൊന്നും ആവശ്യമില്ല"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"ഇത് നിങ്ങൾക്ക് പണച്ചെലവിനിടയാക്കാം"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ശരി"</string>
-    <!-- no translation found for usb_charging_notification_title (1595122345358177163) -->
-    <skip />
-    <!-- no translation found for usb_supplying_notification_title (4631045789893086181) -->
-    <skip />
-    <!-- no translation found for usb_mtp_notification_title (4238227258391151029) -->
-    <skip />
-    <!-- no translation found for usb_ptp_notification_title (5425857879922006878) -->
-    <skip />
-    <!-- no translation found for usb_tether_notification_title (3716143122035802501) -->
-    <skip />
-    <!-- no translation found for usb_midi_notification_title (5356040379749154805) -->
-    <skip />
-    <!-- no translation found for usb_accessory_notification_title (1899977434994900306) -->
-    <skip />
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"USB വഴി ഈ ഉപകരണം ചാർജ് ചെയ്യുന്നു"</string>
+    <string name="usb_supplying_notification_title" msgid="4631045789893086181">"USB വഴി കണക്‌റ്റ് ചെയ്‌ത ഉപകരണം ചാർജ് ചെയ്യുന്നു"</string>
+    <string name="usb_mtp_notification_title" msgid="4238227258391151029">"USB ഫയൽ കൈമാറ്റം ഓണാക്കി"</string>
+    <string name="usb_ptp_notification_title" msgid="5425857879922006878">"USB വഴിയുള്ള PTP ഓണാക്കി"</string>
+    <string name="usb_tether_notification_title" msgid="3716143122035802501">"USB ടെതറിംഗ് ഓണാക്കി"</string>
+    <string name="usb_midi_notification_title" msgid="5356040379749154805">"USB വഴിയുള്ള MIDI ഓണാക്കി"</string>
+    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"USB ആക്‌സസറി മോഡ് ഓണാക്കി"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"കൂടുതൽ ഓപ്ഷനുകൾക്ക് ടാപ്പുചെയ്യുക."</string>
-    <!-- no translation found for usb_power_notification_message (4647527153291917218) -->
-    <skip />
+    <string name="usb_power_notification_message" msgid="4647527153291917218">"കണക്‌റ്റ് ചെയ്‌ത ഉപകരണം ചാർജ് ചെയ്യുന്നു. കൂടുതൽ ഓപ്ഷനുകൾക്ക് ടാപ്പ് ചെയ്യുക."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"അനലോഗ് ഓഡിയോ ആക്‌സസറി കണ്ടെത്തി"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"അറ്റാച്ചുചെയ്‌ത ഉപകരണം ഈ ഫോണിന് അനുയോജ്യമല്ല. കൂടുതലറിയാൻ ടാപ്പുചെയ്യുക."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ഡീബഗ്ഗിംഗ് കണക്റ്റ് ചെയ്തു"</string>
@@ -1831,8 +1829,7 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"ഫോൺ വോയ്‌സിന് അനുവദനീയമല്ല"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"പോപ്പ് അപ്പ് വിൻഡോ"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <!-- no translation found for shortcut_restored_on_lower_version (4860853725206702336) -->
-    <skip />
+    <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"ആപ്പ് പതിപ്പ് തരംതാഴ്ത്തി, അല്ലെങ്കിൽ ഈ കുറുക്കുവഴിക്ക് അനുയോജ്യമല്ല"</string>
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"ആപ്പ് \'ബാക്കപ്പും പുനഃസ്ഥാപിക്കലും\' പിന്തുണയ്ക്കാത്തതിനാൽ കുറുക്കുവഴി പുനഃസ്ഥാപിക്കാനായില്ല"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"ആപ്പ് സിഗ്നേച്ചർ പൊരുത്തപ്പെടാത്തതിനാൽ കുറുക്കുവഴി പുനഃസ്ഥാപിക്കാനായില്ല"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"കുറുക്കുവഴി പുനഃസ്ഥാപിക്കാനായില്ല"</string>
@@ -1842,4 +1839,7 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"ദോഷകരമായ ആപ്പ് കണ്ടെത്തി"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_2">%2$s</xliff:g> സ്ലൈസുകൾ കാണിക്കാൻ <xliff:g id="APP_0">%1$s</xliff:g> താൽപ്പര്യപ്പെടുന്നു"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"എഡിറ്റ് ചെയ്യുക"</string>
+    <string name="notification_channel_system_changes" msgid="5072715579030948646">"സിസ്‌റ്റത്തിലെ മാറ്റങ്ങൾ"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\'ശല്യപ്പെടുത്തരുത്\' മാറ്റി"</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"തടസ്സങ്ങൾക്കായുള്ള പ്രവർത്തന ക്രമീകരണം പരിശോധിക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
 </resources>

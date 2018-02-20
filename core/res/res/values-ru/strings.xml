@@ -95,6 +95,7 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Голосовые сообщения"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Звонки по Wi-Fi"</string>
+    <string name="notification_channel_sim" msgid="4052095493875188564">"Статус SIM-карты"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"На устройстве абонента выбран режим телетайпа \"ВСЕ\""</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"На устройстве абонента выбран режим телетайпа HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"На устройстве абонента выбран режим телетайпа VCO"</string>
@@ -244,7 +245,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"Настройки"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Помощник"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Аудиоподсказки"</string>
-    <string name="global_action_lockdown" msgid="2277328351790053477">"Заблокировать"</string>
+    <string name="global_action_lockdown" msgid="1099326950891078929">"Блокировка"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"&gt;999"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"Новое уведомление"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Виртуальная клавиатура"</string>
@@ -503,10 +504,8 @@
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Слишком много попыток. Повторите позже."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Слишком много попыток. Сканер отпечатков пальцев отключен."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Повторите попытку."</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (7654382120628334248) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_hw_not_present (5729436878065119329) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Нет отсканированных отпечатков пальцев"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"На этом устройстве нет сканера отпечатков пальцев"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Отпечаток <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -833,6 +832,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Совет: нажмите дважды, чтобы увеличить и уменьшить масштаб."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Автозаполнение"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Настроить автозаполнение"</string>
+    <string name="autofill_window_title" msgid="921006636895825007">"Автозаполнение"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1241,9 +1241,9 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM-карта добавлена"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Перезагрузите устройство для доступа к мобильной сети."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Перезапустить"</string>
-    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Чтобы SIM-карта работала корректно, установите и запустите приложение оператора."</string>
-    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"СКАЧАТЬ"</string>
-    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"НЕ СЕЙЧАС"</string>
+    <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Включить мобильную связь"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Скачайте приложение оператора, чтобы активировать новую SIM-карту"</string>
+    <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Скачать приложение"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Установлена новая SIM-карта"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Нажмите, чтобы настроить."</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Настройка времени"</string>
@@ -1255,23 +1255,15 @@
     <string name="no_permissions" msgid="7283357728219338112">"Не требуется разрешений"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"это может стоить вам денег!"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ОК"</string>
-    <!-- no translation found for usb_charging_notification_title (1595122345358177163) -->
-    <skip />
-    <!-- no translation found for usb_supplying_notification_title (4631045789893086181) -->
-    <skip />
-    <!-- no translation found for usb_mtp_notification_title (4238227258391151029) -->
-    <skip />
-    <!-- no translation found for usb_ptp_notification_title (5425857879922006878) -->
-    <skip />
-    <!-- no translation found for usb_tether_notification_title (3716143122035802501) -->
-    <skip />
-    <!-- no translation found for usb_midi_notification_title (5356040379749154805) -->
-    <skip />
-    <!-- no translation found for usb_accessory_notification_title (1899977434994900306) -->
-    <skip />
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"Зарядка устройства через USB…"</string>
+    <string name="usb_supplying_notification_title" msgid="4631045789893086181">"Зарядка устройства через USB…"</string>
+    <string name="usb_mtp_notification_title" msgid="4238227258391151029">"Передача файлов через USB включена"</string>
+    <string name="usb_ptp_notification_title" msgid="5425857879922006878">"Режим PTP включен"</string>
+    <string name="usb_tether_notification_title" msgid="3716143122035802501">"Режим USB-модема включен"</string>
+    <string name="usb_midi_notification_title" msgid="5356040379749154805">"Режим MIDI включен"</string>
+    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"USB-устройство подключено"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Нажмите, чтобы показать дополнительные параметры."</string>
-    <!-- no translation found for usb_power_notification_message (4647527153291917218) -->
-    <skip />
+    <string name="usb_power_notification_message" msgid="4647527153291917218">"Подключенное устройство заряжается. Нажмите, чтобы увидеть другие настройки."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Обнаружено аналоговое аудиоустройство"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Подсоединенное устройство несовместимо с этим телефоном. Нажмите, чтобы узнать подробности."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Отладка по USB разрешена"</string>
@@ -1900,8 +1892,7 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Для телефона недоступны голосовые вызовы"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Всплывающее окно"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <!-- no translation found for shortcut_restored_on_lower_version (4860853725206702336) -->
-    <skip />
+    <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"Версия приложения устарела или несовместима с ярлыком"</string>
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Не удалось восстановить ярлык: приложение не поддерживает резервное копирование"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Не удалось восстановить ярлык: некорректная подпись приложения"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Не удалось восстановить ярлык"</string>
@@ -1911,4 +1902,7 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"Обнаружено вредоносное приложение"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"Приложение \"<xliff:g id="APP_0">%1$s</xliff:g>\" запрашивает разрешение на показ фрагментов приложения \"<xliff:g id="APP_2">%2$s</xliff:g>\"."</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"Изменить"</string>
+    <string name="notification_channel_system_changes" msgid="5072715579030948646">"Системные изменения"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Настройки режима \"Не беспокоить\" изменены"</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"Нажмите, чтобы проверить их."</string>
 </resources>

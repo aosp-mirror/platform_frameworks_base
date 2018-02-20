@@ -93,6 +93,8 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS メッセージ"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"ボイスメール メッセージ"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi 通話"</string>
+    <!-- no translation found for notification_channel_sim (4052095493875188564) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"ピアから、TTY モードを FULL にするようリクエストされました"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"ピアから、TTYモードをHCOにするようリクエストされました"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"ピアから、TTYモードをVCOにするようリクエストされました"</string>
@@ -181,6 +183,7 @@
     <string name="network_logging_notification_text" msgid="7930089249949354026">"この端末は組織によって管理され、ネットワーク トラフィックが監視される場合があります。詳しくはタップしてください。"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"端末のデータが消去されます"</string>
     <string name="factory_reset_message" msgid="7972496262232832457">"管理アプリを使用できません。端末のデータはこれから消去されます。\n\nご不明な点がある場合は、組織の管理者にお問い合わせください。"</string>
+    <string name="printing_disabled_by" msgid="8936832919072486965">"「<xliff:g id="OWNER_APP">%s</xliff:g>」により印刷は無効にされています。"</string>
     <string name="me" msgid="6545696007631404292">"自分"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"タブレットオプション"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"テレビのオプション"</string>
@@ -237,7 +240,8 @@
     <string name="global_action_settings" msgid="1756531602592545966">"設定"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"サポート"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"音声アシスト"</string>
-    <string name="global_action_lockdown" msgid="2277328351790053477">"ロックダウンを入力"</string>
+    <!-- no translation found for global_action_lockdown (1099326950891078929) -->
+    <skip />
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"新しい通知"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"仮想キーボード"</string>
@@ -263,8 +267,8 @@
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>、<xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"セーフモード"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Androidシステム"</string>
-    <string name="user_owner_label" msgid="1119010402169916617">"個人用に切り替える"</string>
-    <string name="managed_profile_label" msgid="5289992269827577857">"仕事用に切り替える"</string>
+    <string name="user_owner_label" msgid="8836124313744349203">"個人用プロファイルに切り替える"</string>
+    <string name="managed_profile_label" msgid="8947929265267690522">"仕事用プロファイルに切り替える"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"連絡先"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"連絡先へのアクセス"</string>
     <string name="permgrouprequest_contacts" msgid="1601591667800538208">"連絡先へのアクセスを &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可してください"</string>
@@ -416,6 +420,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"端末の電話機能へのアクセスをアプリに許可します。これにより、電話番号、端末ID、通話中かどうか、通話相手の電話番号をアプリから特定できるようになります。"</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"システム経由での通話転送"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"通話環境の改善のために、システム経由での通話転送をアプリに許可します。"</string>
+    <string name="permlab_acceptHandover" msgid="2661534649736022409">"別のアプリでの通話の続行"</string>
+    <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"別のアプリで通話を続行することをこのアプリに許可します。"</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"電話番号の読み取り"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"端末の電話番号へのアクセスをアプリに許可します。"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"タブレットのスリープを無効化"</string>
@@ -485,13 +491,17 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"指の動きが遅すぎました。もう一度お試しください。"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
+    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"認識されませんでした"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"指紋ハードウェアは使用できません。"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"指紋を保存できません。既存の指紋を削除してください。"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"指紋の読み取りがタイムアウトになりました。もう一度お試しください。"</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"指紋の操作をキャンセルしました。"</string>
+    <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"指紋の操作がユーザーによりキャンセルされました。"</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"所定の回数以上間違えました。しばらくしてからもう一度お試しください。"</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"試行回数が上限を超えました。指紋認証センサーを無効にしました。"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"もう一度お試しください。"</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"指紋が登録されていません。"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"この端末には指紋認証センサーがありません"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"指紋<xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -818,6 +828,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"ヒント: ダブルタップで拡大/縮小できます。"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"自動入力"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"自動入力を設定"</string>
+    <!-- no translation found for autofill_window_title (921006636895825007) -->
+    <skip />
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$3$2$1"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">"、 "</string>
@@ -990,6 +1002,9 @@
     <string name="browse" msgid="1245903488306147205">"開く"</string>
     <string name="sms" msgid="4560537514610063430">"メッセージ"</string>
     <string name="add_contact" msgid="7867066569670597203">"追加"</string>
+    <string name="view_calendar" msgid="979609872939597838">"表示"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"スケジュール"</string>
+    <string name="view_flight" msgid="7691640491425680214">"トラック"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"空き容量わずか"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"一部のシステム機能が動作しない可能性があります"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"システムに十分な容量がありません。250MBの空き容量を確保して再起動してください。"</string>
@@ -1115,6 +1130,7 @@
       <item quantity="one">Wi-Fiオープンネットワークが利用できます</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Wi-Fi オープン ネットワークに接続"</string>
+    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"携帯通信会社の Wi‑Fi ネットワークに接続"</string>
     <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Wi-Fi オープン ネットワークに接続しています"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Wi-Fi ネットワークに接続しました"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Wi‑Fi ネットワークに接続できませんでした"</string>
@@ -1184,9 +1200,12 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIMカードが追加されました"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"モバイルネットワークにアクセスするには端末を再起動してください。"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"再起動"</string>
-    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"新しい SIM を正常に動作させるには、携帯通信会社からアプリをダウンロードして起動する必要があります。"</string>
-    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"アプリをダウンロード"</string>
-    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"後で行う"</string>
+    <!-- no translation found for install_carrier_app_notification_title (9056007111024059888) -->
+    <skip />
+    <!-- no translation found for install_carrier_app_notification_text (3346681446158696001) -->
+    <skip />
+    <!-- no translation found for install_carrier_app_notification_button (3094206295081900849) -->
+    <skip />
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"新しい SIM が挿入されました"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"タップして設定"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"時刻設定"</string>
@@ -1198,13 +1217,15 @@
     <string name="no_permissions" msgid="7283357728219338112">"権限の許可は必要ありません"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"料金が発生する場合があります"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"この端末を USB で充電"</string>
-    <string name="usb_supplying_notification_title" msgid="5310642257296510271">"接続した端末に USB で給電"</string>
-    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USBをファイル転送に使用"</string>
-    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USBを写真転送に使用"</string>
-    <string name="usb_midi_notification_title" msgid="4850904915889144654">"USBをMIDIに使用"</string>
-    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USBアクセサリを接続しました"</string>
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"この端末を USB で充電中"</string>
+    <string name="usb_supplying_notification_title" msgid="4631045789893086181">"USB で接続された端末を充電しています"</string>
+    <string name="usb_mtp_notification_title" msgid="4238227258391151029">"USB ファイル転送モード ON"</string>
+    <string name="usb_ptp_notification_title" msgid="5425857879922006878">"USB PTP モード ON"</string>
+    <string name="usb_tether_notification_title" msgid="3716143122035802501">"USB テザリング ON"</string>
+    <string name="usb_midi_notification_title" msgid="5356040379749154805">"USB MIDI モード ON"</string>
+    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"USB アクセサリ モード ON"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"タップしてその他のオプションを表示します。"</string>
+    <string name="usb_power_notification_message" msgid="4647527153291917218">"接続されている端末を充電しています。タップすると、他の項目が表示されます。"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"アナログのオーディオ アクセサリを検出"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"接続したデバイスはこのスマートフォンと互換性がありません。タップすると、詳細を確認できます。"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USBデバッグが接続されました"</string>
@@ -1412,6 +1433,8 @@
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"指定した上限を<xliff:g id="SIZE">%s</xliff:g>超えました。"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"バックグラウンドデータに上限あり"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"タップして制限を解除します。"</string>
+    <string name="data_usage_rapid_title" msgid="4579994056245665351">"データ使用量の増加"</string>
+    <string name="data_usage_rapid_body" msgid="4899922842674185567">"ここ数日間のデータ使用量が通常より増えています。タップして使用状況と設定を確認してください。"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"セキュリティ証明書"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"証明書は有効です。"</string>
     <string name="issued_to" msgid="454239480274921032">"発行先:"</string>
@@ -1641,9 +1664,6 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"仕事の<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2 番目の仕事用<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3 番目の仕事用<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="6820571533009838261">"この画面の固定を解除するには [戻る] ボタンと [最近] ボタンを押し続けます"</string>
-    <string name="lock_to_app_start" msgid="6643342070839862795">"画面を固定しました"</string>
-    <string name="lock_to_app_exit" msgid="8598219838213787430">"画面固定を解除しました"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"オフライン再生を解除する前にPINの入力を求める"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"画面固定を解除する前にロック解除パターンの入力を求める"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"オフライン再生を解除する前にパスワードの入力を求める"</string>
@@ -1688,7 +1708,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>まで"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>（次のアラーム）まで"</string>
-    <string name="zen_mode_forever" msgid="1916263162129197274">"マナーモードを OFF にするまで"</string>
+    <string name="zen_mode_forever" msgid="931849471004038757">"ユーザーが OFF にするまで"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"マナーモードを OFF にするまで"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"折りたたむ"</string>
@@ -1737,9 +1757,11 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"すべての言語"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"すべての地域"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"検索"</string>
-    <string name="work_mode_off_title" msgid="2615362773958585967">"Work モード ON"</string>
-    <string name="work_mode_off_message" msgid="2961559609199223594">"これで、アプリ、バックグラウンド同期、関連機能など、仕事用プロファイルが有効になります。"</string>
+    <string name="work_mode_off_title" msgid="1118691887588435530">"仕事用プロファイルの有効化"</string>
+    <string name="work_mode_off_message" msgid="5130856710614337649">"仕事用のアプリ、通知、データなど、仕事用プロファイルの機能が ON になります"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ON にする"</string>
+    <string name="deprecated_target_sdk_message" msgid="1449696506742572767">"このアプリは以前のバージョンの Android 用に作成されており、正常に動作しない可能性があります。アップデートを確認するか、デベロッパーにお問い合わせください。"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"アップデートを確認"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"新着メッセージがあります"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"表示するには SMS アプリを開きます"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"一部機能が制限されている可能性"</string>
@@ -1806,12 +1828,17 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"音声を使用できないスマートフォンです"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"ポップアップ ウィンドウ"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"他 <xliff:g id="NUMBER">%1$d</xliff:g> 件"</string>
-    <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"このショートカットを使用するには、最新のアプリが必要です"</string>
+    <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"アプリのバージョンがダウングレードされているか、このショートカットに対応していません"</string>
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"このアプリはバックアップと復元に対応していないため、ショートカットを復元できませんでした"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"アプリの署名が一致しないため、ショートカットを復元できませんでした"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"ショートカットを復元できませんでした"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"ショートカットは無効になっています"</string>
-    <string name="harmful_app_warning_uninstall" msgid="3846265696369136266">"アンインストール"</string>
-    <string name="harmful_app_warning_launch_anyway" msgid="5784428382367400530">"このまま起動"</string>
-    <string name="harmful_app_warning_title" msgid="2229996292333310435">"有害なアプリをアンインストールしますか？"</string>
+    <string name="harmful_app_warning_uninstall" msgid="4837672735619532931">"アンインストール"</string>
+    <string name="harmful_app_warning_open_anyway" msgid="596432803680914321">"開く"</string>
+    <string name="harmful_app_warning_title" msgid="8982527462829423432">"有害なアプリが検出されました"</string>
+    <string name="slices_permission_request" msgid="8484943441501672932">"「<xliff:g id="APP_0">%1$s</xliff:g>」が「<xliff:g id="APP_2">%2$s</xliff:g>」のスライスの表示をリクエストしています"</string>
+    <string name="screenshot_edit" msgid="7867478911006447565">"編集"</string>
+    <string name="notification_channel_system_changes" msgid="5072715579030948646">"システムの変更"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"マナーモードが変わりました"</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"タップして割り込みの動作設定をご確認ください"</string>
 </resources>
