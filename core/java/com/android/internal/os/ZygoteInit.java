@@ -656,6 +656,7 @@ public class ZygoteInit {
             "--capabilities=" + capabilities + "," + capabilities,
             "--nice-name=system_server",
             "--runtime-args",
+            "--target-sdk-version=" + VMRuntime.SDK_VERSION_CUR_DEVELOPMENT,
             "com.android.server.SystemServer",
         };
         ZygoteConnection.Arguments parsedArgs = null;
