@@ -172,7 +172,7 @@ public class KeepaliveTracker {
         }
 
         private int checkInterval() {
-            return mInterval >= 10 ? SUCCESS : ERROR_INVALID_INTERVAL;
+            return mInterval >= MIN_INTERVAL ? SUCCESS : ERROR_INVALID_INTERVAL;
         }
 
         private int isValid() {

@@ -16,8 +16,8 @@
 
 package android.net;
 
-import android.system.OsConstants;
-import android.net.ConnectivityManager;
+import static android.net.ConnectivityManager.PacketKeepalive.*;
+
 import android.net.util.IpUtils;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -25,12 +25,9 @@ import android.system.OsConstants;
 import android.util.Log;
 
 import java.net.Inet4Address;
-import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-
-import static android.net.ConnectivityManager.PacketKeepalive.*;
 
 /**
  * Represents the actual packets that are sent by the
@@ -97,13 +94,6 @@ public class KeepalivePacketData implements Parcelable {
     public static KeepalivePacketData nattKeepalivePacket(
             InetAddress srcAddress, int srcPort, InetAddress dstAddress, int dstPort)
             throws InvalidPacketException {
-
-        // FIXME: remove this and actually support IPv6 keepalives
-        if (srcAddress instanceof Inet6Address && dstAddress instanceof Inet6Address) {
-            // Optimistically returning an IPv6 Keepalive Packet with no data,
-            // which currently only works on cellular
-            return new KeepalivePacketData(srcAddress, srcPort, dstAddress, dstPort, new byte[0]);
-        }
 
         if (!(srcAddress instanceof Inet4Address) || !(dstAddress instanceof Inet4Address)) {
             throw new InvalidPacketException(ERROR_INVALID_IP_ADDRESS);
