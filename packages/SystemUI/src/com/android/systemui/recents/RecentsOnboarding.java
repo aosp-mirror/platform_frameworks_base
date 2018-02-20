@@ -211,11 +211,13 @@ public class RecentsOnboarding {
     }
 
     /**
-     * @return True unless setprop has been set to false, or we're in demo mode.
+     * @return True unless setprop has been set to false, we're in demo mode, or running tests in
+     * automation.
      */
     private boolean shouldShow() {
         return SystemProperties.getBoolean("persist.quickstep.onboarding.enabled",
-                !(mContext.getSystemService(UserManager.class)).isDemoUser());
+                !(mContext.getSystemService(UserManager.class)).isDemoUser() &&
+                !ActivityManager.isRunningInTestHarness());
     }
 
     public void hide(boolean animate) {
