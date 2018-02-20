@@ -35,8 +35,8 @@
     <string name="battery_low_title" msgid="6456385927409742437">"Queda poca bateria"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g>."</string>
     <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g>. L\'estalvi de bateria està activat."</string>
-    <string name="invalid_charger" msgid="4549105996740522523">"Pujada d\'USB no admesa.\nUtilitza només el carregador proporcionat."</string>
-    <string name="invalid_charger_title" msgid="3515740382572798460">"La pujada per USB no és compatible."</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"Càrrega per USB no admesa.\nUtilitza només el carregador proporcionat."</string>
+    <string name="invalid_charger_title" msgid="3515740382572798460">"La càrrega per USB no és compatible."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Fes servir només el carregador proporcionat amb el dispositiu."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Configuració"</string>
     <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Vols activar l\'estalvi de bateria?"</string>
@@ -339,7 +339,7 @@
   </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Carregada"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"S\'està carregant"</string>
-    <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> per completar la pujada"</string>
+    <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> per completar la càrrega"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"No s\'està carregant"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"És possible que la xarxa\nestigui controlada"</string>
     <string name="description_target_search" msgid="3091587249776033139">"Cerca"</string>
@@ -363,9 +363,9 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Silenci\ntotal"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Només\ninterr. prior."</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Només\nalarmes"</string>
-    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Carregant (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> per completar la pujada)"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Pujada ràpida (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> per completar-se)"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Pujada lenta (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> per completar-se)"</string>
+    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Carregant (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> per completar la càrrega)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Càrrega ràpida (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> per completar-se)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Càrrega lenta (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> per completar-se)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Canvia d\'usuari"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Canvia d\'usuari. Usuari actual: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Usuari actual: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -524,7 +524,7 @@
     <string name="notification_done" msgid="5279426047273930175">"Fet"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Controls de notificació de l\'aplicació <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Consum de la bateria"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"La funció Estalvi de bateria no està disponible durant la pujada"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"La funció Estalvi de bateria no està disponible durant la càrrega"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Estalvi de bateria"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Redueix el rendiment i les dades en segon pla"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Botó <xliff:g id="NAME">%1$s</xliff:g>"</string>
