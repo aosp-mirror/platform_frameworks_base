@@ -373,9 +373,9 @@ final class ApkSigningBlockUtils {
     static final int SIGNATURE_ECDSA_WITH_SHA256 = 0x0201;
     static final int SIGNATURE_ECDSA_WITH_SHA512 = 0x0202;
     static final int SIGNATURE_DSA_WITH_SHA256 = 0x0301;
-    static final int SIGNATURE_VERITY_RSA_PKCS1_V1_5_WITH_SHA256 = 0x0401;
-    static final int SIGNATURE_VERITY_ECDSA_WITH_SHA256 = 0x0403;
-    static final int SIGNATURE_VERITY_DSA_WITH_SHA256 = 0x0405;
+    static final int SIGNATURE_VERITY_RSA_PKCS1_V1_5_WITH_SHA256 = 0x0411;
+    static final int SIGNATURE_VERITY_ECDSA_WITH_SHA256 = 0x0413;
+    static final int SIGNATURE_VERITY_DSA_WITH_SHA256 = 0x0415;
 
     static final int CONTENT_DIGEST_CHUNKED_SHA256 = 1;
     static final int CONTENT_DIGEST_CHUNKED_SHA512 = 2;
@@ -754,9 +754,6 @@ final class ApkSigningBlockUtils {
                 md.update(buffer);
             }
         }
-
-        @Override
-        public void finish() {}
     }
 
 }
