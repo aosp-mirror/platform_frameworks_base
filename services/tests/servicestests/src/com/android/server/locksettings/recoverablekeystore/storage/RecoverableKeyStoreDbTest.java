@@ -317,6 +317,7 @@ public class RecoverableKeyStoreDbTest {
         assertThat(statuses).hasSize(0);
     }
 
+    @Test
     public void testInvalidateKeysWithOldGenerationId_withSingleKey() {
         int userId = 12;
         int uid = 1009;
@@ -372,6 +373,7 @@ public class RecoverableKeyStoreDbTest {
                 pubkey);
     }
 
+    @Test
     public void setRecoveryServiceCertPath_replaceOldValue() throws Exception {
         int userId = 12;
         int uid = 10009;
@@ -453,6 +455,7 @@ public class RecoverableKeyStoreDbTest {
         assertThat(agents).contains(uid2);
     }
 
+    @Test
     public void setRecoverySecretTypes_emptyDefaultValue() throws Exception {
         int userId = 12;
         int uid = 10009;

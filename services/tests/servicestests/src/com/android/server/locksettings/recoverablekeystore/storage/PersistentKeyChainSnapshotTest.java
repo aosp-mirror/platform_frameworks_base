@@ -27,6 +27,7 @@ import android.security.keystore.recovery.KeyChainProtectionParams;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -148,6 +149,7 @@ public class PersistentKeyChainSnapshotTest {
                 () -> reader.readKeyEntry());
     }
 
+    @Test
     public void testWriteProtectionParams() throws Exception {
         PersistentKeyChainSnapshot writer = new PersistentKeyChainSnapshot();
         writer.initWriter();
@@ -174,6 +176,8 @@ public class PersistentKeyChainSnapshotTest {
                 () -> reader.readProtectionParams());
     }
 
+    @Ignore("Investigate why this is broken. b/73609806")
+    @Test
     public void testKeyChainSnapshot() throws Exception {
         PersistentKeyChainSnapshot writer = new PersistentKeyChainSnapshot();
         writer.initWriter();
@@ -233,6 +237,8 @@ public class PersistentKeyChainSnapshotTest {
         verifyDeserialize(snapshot);
     }
 
+    @Ignore("Investigate why this is broken. b/73609806")
+    @Test
     public void testKeyChainSnapshot_withManyKeysAndProtectionParams() throws Exception {
         PersistentKeyChainSnapshot writer = new PersistentKeyChainSnapshot();
         writer.initWriter();
@@ -316,7 +322,7 @@ public class PersistentKeyChainSnapshotTest {
                 .isEqualTo(snapshot.getTrustedHardwarePublicKey());
     }
 
-
+    @Test
     public void testDeserialize_failsForNewerVersion() throws Exception {
         byte[] newVersion = new byte[]{(byte) 2, (byte) 0, (byte) 0, (byte) 0};
         assertThrows(
@@ -324,6 +330,7 @@ public class PersistentKeyChainSnapshotTest {
                 () -> PersistentKeyChainSnapshot.deserialize(newVersion));
     }
 
+    @Test
     public void testDeserialize_failsForEmptyData() throws Exception {
         byte[] empty = new byte[]{};
         assertThrows(
