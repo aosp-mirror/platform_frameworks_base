@@ -52,11 +52,16 @@ public class Instrument {
     public boolean rawMode = false;
     public boolean proto = false;
     public boolean noWindowAnimation = false;
+    public boolean disableHiddenApiChecks = false;
     public String abi = null;
     public int userId = UserHandle.USER_CURRENT;
     public Bundle args = new Bundle();
     // Required
     public String componentNameArg;
+
+    // Disable hidden API checks for the newly started instrumentation.
+    // Must be kept in sync with ActivityManagerService.
+    private static final int INSTRUMENTATION_FLAG_DISABLE_HIDDEN_API_CHECKS = 1 << 0;
 
     /**
      * Construct the instrument command runner.
@@ -416,7 +421,8 @@ public class Instrument {
             }
 
             // Start the instrumentation
-            if (!mAm.startInstrumentation(cn, profileFile, 0, args, watcher, connection, userId,
+            int flags = disableHiddenApiChecks ? INSTRUMENTATION_FLAG_DISABLE_HIDDEN_API_CHECKS : 0;
+            if (!mAm.startInstrumentation(cn, profileFile, flags, args, watcher, connection, userId,
                         abi)) {
                 throw new AndroidException("INSTRUMENTATION_FAILED: " + cn.flattenToString());
             }
