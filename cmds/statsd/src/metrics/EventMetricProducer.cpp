@@ -129,12 +129,23 @@ void EventMetricProducer::onMatchedLogEventInternalLocked(
 
     long long wrapperToken =
             mProto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DATA);
-    mProto->write(FIELD_TYPE_INT64 | FIELD_ID_ELAPSED_TIMESTAMP_NANOS,
-        (long long)event.GetElapsedTimestampNs());
+
     long long eventToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_ATOMS);
+    const bool truncateTimestamp =
+        android::util::kNotTruncatingTimestampAtomWhiteList.find(event.GetTagId()) ==
+        android::util::kNotTruncatingTimestampAtomWhiteList.end();
+    if (truncateTimestamp) {
+        mProto->write(FIELD_TYPE_INT64 | FIELD_ID_ELAPSED_TIMESTAMP_NANOS,
+            (long long)truncateTimestampNsToFiveMinutes(event.GetElapsedTimestampNs()));
+        mProto->write(FIELD_TYPE_INT64 | FIELD_ID_WALL_CLOCK_TIMESTAMP_NANOS,
+            (long long)truncateTimestampNsToFiveMinutes(getWallClockNs()));
+    } else {
+        mProto->write(FIELD_TYPE_INT64 | FIELD_ID_ELAPSED_TIMESTAMP_NANOS,
+            (long long)event.GetElapsedTimestampNs());
+        mProto->write(FIELD_TYPE_INT64 | FIELD_ID_WALL_CLOCK_TIMESTAMP_NANOS,
+            (long long)getWallClockNs());
+    }
     event.ToProto(*mProto);
-    mProto->write(FIELD_TYPE_INT64 | FIELD_ID_WALL_CLOCK_TIMESTAMP_NANOS,
-        (long long)getWallClockNs());
     mProto->end(eventToken);
     mProto->end(wrapperToken);
 }
