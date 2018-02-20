@@ -570,12 +570,6 @@ public class RecoverableKeyStoreManager {
             throws RemoteException, ServiceSpecificException {
         byte[] locallyEncryptedKey;
         try {
-            // TODO: Remove the extraneous logging here
-            Log.d(TAG, constructLoggingMessage("sessionEntry.getKeyClaimant()",
-                    sessionEntry.getKeyClaimant()));
-            Log.d(TAG, constructLoggingMessage("sessionEntry.getVaultParams()",
-                    sessionEntry.getVaultParams()));
-            Log.d(TAG, constructLoggingMessage("encryptedClaimResponse", encryptedClaimResponse));
             locallyEncryptedKey = KeySyncUtils.decryptRecoveryClaimResponse(
                     sessionEntry.getKeyClaimant(),
                     sessionEntry.getVaultParams(),
@@ -594,10 +588,6 @@ public class RecoverableKeyStoreManager {
         }
 
         try {
-            // TODO: Remove the extraneous logging here
-            Log.d(TAG, constructLoggingMessage("sessionEntry.getLskfHash()",
-                    sessionEntry.getLskfHash()));
-            Log.d(TAG, constructLoggingMessage("locallyEncryptedKey", locallyEncryptedKey));
             return KeySyncUtils.decryptRecoveryKey(sessionEntry.getLskfHash(), locallyEncryptedKey);
         } catch (InvalidKeyException e) {
             Log.e(TAG, "Got InvalidKeyException during decrypting recovery key", e);
@@ -636,9 +626,6 @@ public class RecoverableKeyStoreManager {
             byte[] encryptedKeyMaterial = applicationKey.getEncryptedKeyMaterial();
 
             try {
-                // TODO: Remove the extraneous logging here
-                Log.d(TAG, constructLoggingMessage("recoveryKey", recoveryKey));
-                Log.d(TAG, constructLoggingMessage("encryptedKeyMaterial", encryptedKeyMaterial));
                 byte[] keyMaterial =
                         KeySyncUtils.decryptApplicationKey(recoveryKey, encryptedKeyMaterial);
                 keyMaterialByAlias.put(alias, keyMaterial);
