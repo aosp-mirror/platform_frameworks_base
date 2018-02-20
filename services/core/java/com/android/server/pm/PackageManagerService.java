@@ -9851,6 +9851,10 @@ public class PackageManagerService extends IPackageManager.Stub
             // behave differently than "pm.dexopt.bg-dexopt=speed-profile" but that's a
             // trade-off worth doing to save boot time work.
             int dexoptFlags = bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0;
+            if (compilationReason == REASON_FIRST_BOOT) {
+                // TODO: This doesn't cover the upgrade case, we should check for this too.
+                dexoptFlags |= DexoptOptions.DEXOPT_INSTALL_WITH_DEX_METADATA_FILE;
+            }
             int primaryDexOptStaus = performDexOptTraced(new DexoptOptions(
                     pkg.packageName,
                     pkgCompilationReason,
