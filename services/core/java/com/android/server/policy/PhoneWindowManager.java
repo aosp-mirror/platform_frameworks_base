@@ -2655,6 +2655,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
                 attrs.flags &= ~WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
                 break;
+            case TYPE_DREAM:
+                // Dreams don't have an app window token and can thus not be letterboxed.
+                // Hence always let them extend under the cutout.
+                attrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+                break;
             case TYPE_STATUS_BAR:
 
                 // If the Keyguard is in a hidden state (occluded by another window), we force to
