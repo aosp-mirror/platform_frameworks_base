@@ -24,17 +24,23 @@ package android.os;
 // and how many bytes a section takes, etc.
 message IncidentMetadata {
 
+    // The id of the incident report.
+    optional int64 report_id = 1;
+
+    // The sequence number of the report.
+    optional int32 sequence_number = 2;
+
     // privacy level of the incident report.
     enum Destination {
         AUTOMATIC = 0;
         EXPLICIT = 1;
         LOCAL = 2;
     }
-    optional Destination dest = 1;
+    optional Destination dest = 3;
 
-    optional int32 request_size = 2;
+    optional int32 request_size = 4;
 
-    optional bool use_dropbox = 3;
+    optional bool use_dropbox = 5;
 
     // stats of each section taken in this incident report.
     message SectionStats {
@@ -58,6 +64,8 @@ message IncidentMetadata {
 
         // Next Tag: 9
     }
-    repeated SectionStats sections = 4;
+    repeated SectionStats sections = 6;
+
+    // Next Tag: 7
 }
 
