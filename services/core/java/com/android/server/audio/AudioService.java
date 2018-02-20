@@ -3706,6 +3706,9 @@ public class AudioService extends IAudioService.Stub
         int min = MIN_STREAM_VOLUME[AudioSystem.STREAM_MUSIC];
         int max = MAX_STREAM_VOLUME[AudioSystem.STREAM_MUSIC];
 
+        mSafeUsbMediaVolumeDbfs = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_safe_media_volume_usb_mB) / 100.0f;
+
         while (Math.abs(max-min) > 1) {
             int index = (max + min) / 2;
             float gainDB = AudioSystem.getStreamVolumeDB(
@@ -3713,10 +3716,10 @@ public class AudioService extends IAudioService.Stub
             if (Float.isNaN(gainDB)) {
                 //keep last min in case of read error
                 break;
-            } else if (gainDB == SAFE_VOLUME_GAIN_DBFS) {
+            } else if (gainDB == mSafeUsbMediaVolumeDbfs) {
                 min = index;
                 break;
-            } else if (gainDB < SAFE_VOLUME_GAIN_DBFS) {
+            } else if (gainDB < mSafeUsbMediaVolumeDbfs) {
                 min = index;
             } else {
                 max = index;
@@ -6310,14 +6313,17 @@ public class AudioService extends IAudioService.Stub
     private int mMcc = 0;
     // mSafeMediaVolumeIndex is the cached value of config_safe_media_volume_index property
     private int mSafeMediaVolumeIndex;
+    // mSafeUsbMediaVolumeDbfs is the cached value of the config_safe_media_volume_usb_mB
+    // property, divided by 100.0.
+    private float mSafeUsbMediaVolumeDbfs;
     // mSafeUsbMediaVolumeIndex is used for USB Headsets and is the music volume UI index
-    // corresponding to a gain of -30 dBFS in audio flinger mixer.
+    // corresponding to a gain of mSafeUsbMediaVolumeDbfs (defaulting to -37dB) in audio
+    // flinger mixer.
     // We remove -22 dBs from the theoretical -15dB to account for the EQ + bass boost
     // amplification when both effects are on with all band gains at maximum.
     // This level corresponds to a loudness of 85 dB SPL for the warning to be displayed when
     // the headset is compliant to EN 60950 with a max loudness of 100dB SPL.
     private int mSafeUsbMediaVolumeIndex;
-    private static final float SAFE_VOLUME_GAIN_DBFS = -37.0f;
     // mSafeMediaVolumeDevices lists the devices for which safe media volume is enforced,
     private final int mSafeMediaVolumeDevices = AudioSystem.DEVICE_OUT_WIRED_HEADSET |
                                                 AudioSystem.DEVICE_OUT_WIRED_HEADPHONE |
@@ -6647,6 +6653,7 @@ public class AudioService extends IAudioService.Stub
         pw.println(safeMediaVolumeStateToString(mSafeMediaVolumeState));
         pw.print("  mSafeMediaVolumeIndex="); pw.println(mSafeMediaVolumeIndex);
         pw.print("  mSafeUsbMediaVolumeIndex="); pw.println(mSafeUsbMediaVolumeIndex);
+        pw.print("  mSafeUsbMediaVolumeDbfs="); pw.println(mSafeUsbMediaVolumeDbfs);
         pw.print("  sIndependentA11yVolume="); pw.println(sIndependentA11yVolume);
         pw.print("  mPendingVolumeCommand="); pw.println(mPendingVolumeCommand);
         pw.print("  mMusicActiveMs="); pw.println(mMusicActiveMs);
