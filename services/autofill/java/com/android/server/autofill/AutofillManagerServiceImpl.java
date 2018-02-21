@@ -41,6 +41,7 @@ import android.metrics.LogMaker;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteCallbackList;
@@ -76,7 +77,6 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.os.HandlerCaller;
 import com.android.server.LocalServices;
 import com.android.server.autofill.ui.AutoFillUI;
 
@@ -98,8 +98,6 @@ final class AutofillManagerServiceImpl {
 
     /** Minimum interval to prune abandoned sessions */
     private static final int MAX_ABANDONED_SESSION_MILLIS = 30000;
-
-    static final int MSG_SERVICE_SAVE = 1;
 
     private final int mUserId;
     private final Context mContext;
@@ -151,18 +149,7 @@ final class AutofillManagerServiceImpl {
     @GuardedBy("mLock")
     private boolean mSetupComplete;
 
-    private final HandlerCaller.Callback mHandlerCallback = (msg) -> {
-        switch (msg.what) {
-            case MSG_SERVICE_SAVE:
-                handleSessionSave(msg.arg1);
-                break;
-            default:
-                Slog.w(TAG, "invalid msg on handler: " + msg);
-        }
-    };
-
-    private final HandlerCaller mHandlerCaller = new HandlerCaller(null, Looper.getMainLooper(),
-            mHandlerCallback, true);
+    private final Handler mHandler = new Handler(Looper.getMainLooper(), null, true);
 
     /**
      * Cache of pending {@link Session}s, keyed by sessionId.
@@ -508,7 +495,7 @@ final class AutofillManagerServiceImpl {
 
         assertCallerLocked(componentName);
 
-        final Session newSession = new Session(this, mUi, mContext, mHandlerCaller, mUserId, mLock,
+        final Session newSession = new Session(this, mUi, mContext, mHandler, mUserId, mLock,
                 sessionId, uid, activityToken, appCallbackToken, hasCallback, mUiLatencyHistory,
                 mWtfHistory, mInfo.getServiceInfo().getComponentName(), componentName, compatMode,
                 flags);
@@ -597,11 +584,10 @@ final class AutofillManagerServiceImpl {
         mSessions.remove(sessionId);
     }
 
-    private void handleSessionSave(int sessionId) {
+    void handleSessionSave(Session session) {
         synchronized (mLock) {
-            final Session session = mSessions.get(sessionId);
-            if (session == null) {
-                Slog.w(TAG, "handleSessionSave(): already gone: " + sessionId);
+            if (mSessions.get(session.id) == null) {
+                Slog.w(TAG, "handleSessionSave(): already gone: " + session.id);
 
                 return;
             }

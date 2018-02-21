@@ -26,6 +26,7 @@ import static android.view.autofill.AutofillManager.ACTION_VALUE_CHANGED;
 import static android.view.autofill.AutofillManager.ACTION_VIEW_ENTERED;
 import static android.view.autofill.AutofillManager.ACTION_VIEW_EXITED;
 
+import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sPartitionMaxCount;
 import static com.android.server.autofill.Helper.sVerbose;
@@ -49,6 +50,7 @@ import android.graphics.Rect;
 import android.metrics.LogMaker;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.os.RemoteCallback;
@@ -117,7 +119,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private static final String EXTRA_REQUEST_ID = "android.service.autofill.extra.REQUEST_ID";
 
     private final AutofillManagerServiceImpl mService;
-    private final HandlerCaller mHandlerCaller;
+    private final Handler mHandler;
     private final Object mLock;
     private final AutoFillUI mUi;
 
@@ -485,7 +487,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     Session(@NonNull AutofillManagerServiceImpl service, @NonNull AutoFillUI ui,
-            @NonNull Context context, @NonNull HandlerCaller handlerCaller, int userId,
+            @NonNull Context context, @NonNull Handler handler, int userId,
             @NonNull Object lock, int sessionId, int uid, @NonNull IBinder activityToken,
             @NonNull IBinder client, boolean hasCallback, @NonNull LocalLog uiLatencyHistory,
             @NonNull LocalLog wtfHistory,
@@ -498,7 +500,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mService = service;
         mLock = lock;
         mUi = ui;
-        mHandlerCaller = handlerCaller;
+        mHandler = handler;
         mRemoteFillService = new RemoteFillService(context, serviceComponentName, userId, this);
         mActivityToken = activityToken;
         mHasCallback = hasCallback;
@@ -726,8 +728,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mService.setAuthenticationSelected(id, mClientState);
 
         final int authenticationId = AutofillManager.makeAuthenticationId(requestId, datasetIndex);
-        mHandlerCaller.getHandler().post(() -> startAuthentication(authenticationId,
-                intent, fillInIntent));
+        mHandler.sendMessage(obtainMessage(
+                Session::startAuthentication,
+                this, authenticationId, intent, fillInIntent));
     }
 
     // FillServiceCallbacks
@@ -746,7 +749,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 return;
             }
         }
-        mHandlerCaller.getHandler().post(() -> autoFill(requestId, datasetIndex, dataset, true));
+        mHandler.sendMessage(obtainMessage(
+                Session::autoFill,
+                this, requestId, datasetIndex, dataset, true));
     }
 
     // AutoFillUiCallback
@@ -759,9 +764,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 return;
             }
         }
-        mHandlerCaller.getHandler()
-                .obtainMessage(AutofillManagerServiceImpl.MSG_SERVICE_SAVE, id, 0)
-                .sendToTarget();
+        mHandler.sendMessage(obtainMessage(
+                AutofillManagerServiceImpl::handleSessionSave,
+                mService, this));
     }
 
     // AutoFillUiCallback
@@ -776,7 +781,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 return;
             }
         }
-        mHandlerCaller.getHandler().post(() -> removeSelf());
+        mHandler.sendMessage(obtainMessage(
+                Session::removeSelf, this));
     }
 
     // AutoFillUiCallback
@@ -831,15 +837,19 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
             removeSelfLocked();
         }
-        mHandlerCaller.getHandler().post(() -> {
-            try {
-                synchronized (mLock) {
-                    mClient.startIntentSender(intentSender, null);
-                }
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Error launching auth intent", e);
+        mHandler.sendMessage(obtainMessage(
+                Session::doStartIntentSender,
+                this, intentSender));
+    }
+
+    private void doStartIntentSender(IntentSender intentSender) {
+        try {
+            synchronized (mLock) {
+                mClient.startIntentSender(intentSender, null);
             }
-        });
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Error launching auth intent", e);
+        }
     }
 
     @GuardedBy("mLock")
@@ -960,11 +970,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * when necessary.
      */
     public void logContextCommitted() {
-        mHandlerCaller.getHandler().post(() -> {
-            synchronized (mLock) {
-                logContextCommittedLocked();
-            }
-        });
+        mHandler.sendMessage(obtainMessage(
+                Session::doLogContextCommitted, this));
+    }
+
+    private void doLogContextCommitted() {
+        synchronized (mLock) {
+            logContextCommittedLocked();
+        }
     }
 
     @GuardedBy("mLock")
@@ -1486,7 +1499,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
 
                 // Use handler so logContextCommitted() is logged first
-                mHandlerCaller.getHandler().post(() -> mService.logSaveShown(id, mClientState));
+                mHandler.sendMessage(obtainMessage(
+                        Session::logSaveShown, this));
 
                 final IAutoFillManagerClient client = getClient();
                 mPendingSaveUi = new PendingUi(mActivityToken, id, client);
@@ -1512,6 +1526,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + ", atLeastOneChanged=" + atLeastOneChanged);
         }
         return true;
+    }
+
+    private void logSaveShown() {
+        mService.logSaveShown(id, mClientState);
     }
 
     @Nullable
