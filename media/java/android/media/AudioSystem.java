@@ -401,6 +401,7 @@ public class AudioSystem
     public static final int DEVICE_OUT_BUS = 0x1000000;
     public static final int DEVICE_OUT_PROXY = 0x2000000;
     public static final int DEVICE_OUT_USB_HEADSET = 0x4000000;
+    public static final int DEVICE_OUT_HEARING_AID = 0x8000000;
 
     public static final int DEVICE_OUT_DEFAULT = DEVICE_BIT_DEFAULT;
 
@@ -431,6 +432,7 @@ public class AudioSystem
                                               DEVICE_OUT_BUS |
                                               DEVICE_OUT_PROXY |
                                               DEVICE_OUT_USB_HEADSET |
+                                              DEVICE_OUT_HEARING_AID |
                                               DEVICE_OUT_DEFAULT);
     public static final int DEVICE_OUT_ALL_A2DP = (DEVICE_OUT_BLUETOOTH_A2DP |
                                                    DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
@@ -546,6 +548,7 @@ public class AudioSystem
     public static final String DEVICE_OUT_BUS_NAME = "bus";
     public static final String DEVICE_OUT_PROXY_NAME = "proxy";
     public static final String DEVICE_OUT_USB_HEADSET_NAME = "usb_headset";
+    public static final String DEVICE_OUT_HEARING_AID_NAME = "hearing_aid_out";
 
     public static final String DEVICE_IN_COMMUNICATION_NAME = "communication";
     public static final String DEVICE_IN_AMBIENT_NAME = "ambient";
@@ -628,6 +631,8 @@ public class AudioSystem
             return DEVICE_OUT_PROXY_NAME;
         case DEVICE_OUT_USB_HEADSET:
             return DEVICE_OUT_USB_HEADSET_NAME;
+        case DEVICE_OUT_HEARING_AID:
+            return DEVICE_OUT_HEARING_AID_NAME;
         case DEVICE_OUT_DEFAULT:
         default:
             return Integer.toString(device);
