@@ -18055,19 +18055,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * currently attached to.
      */
     public WindowId getWindowId() {
-        if (mAttachInfo == null) {
+        AttachInfo ai = mAttachInfo;
+        if (ai == null) {
             return null;
         }
-        if (mAttachInfo.mWindowId == null) {
+        if (ai.mWindowId == null) {
             try {
-                mAttachInfo.mIWindowId = mAttachInfo.mSession.getWindowId(
-                        mAttachInfo.mWindowToken);
-                mAttachInfo.mWindowId = new WindowId(
-                        mAttachInfo.mIWindowId);
+                ai.mIWindowId = ai.mSession.getWindowId(ai.mWindowToken);
+                if (ai.mIWindowId != null) {
+                    ai.mWindowId = new WindowId(ai.mIWindowId);
+                }
             } catch (RemoteException e) {
             }
         }
-        return mAttachInfo.mWindowId;
+        return ai.mWindowId;
     }
 
     /**
