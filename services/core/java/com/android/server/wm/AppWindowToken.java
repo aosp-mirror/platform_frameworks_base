@@ -1668,6 +1668,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             }
             if (adapter != null) {
                 startAnimation(getPendingTransaction(), adapter, !isVisible());
+                if (adapter.getShowWallpaper()) {
+                    mDisplayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
+                }
             }
         } else {
             cancelAnimation();

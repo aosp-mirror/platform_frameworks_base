@@ -6328,6 +6328,9 @@
         <!-- Special option for window animations: if this window is on top
              of a wallpaper, don't animate the wallpaper with it. -->
         <attr name="detachWallpaper" format="boolean" />
+        <!-- Special option for window animations: show the wallpaper behind when running this
+             animation. -->
+        <attr name="showWallpaper" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="AnimationSet">

@@ -39,6 +39,12 @@ interface AnimationAdapter {
     boolean getDetachWallpaper();
 
     /**
+     * @return Whether we should show the wallpaper during the animation.
+     * @see Animation#getShowWallpaper()
+     */
+    boolean getShowWallpaper();
+
+    /**
      * @return The background color behind the animation.
      */
     @ColorInt int getBackgroundColor();
