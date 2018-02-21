@@ -109,7 +109,6 @@
   <java-symbol type="id" name="no_permissions" />
   <java-symbol type="id" name="numberpicker_input" />
   <java-symbol type="id" name="old_app_action" />
-  <java-symbol type="id" name="old_app_description" />
   <java-symbol type="id" name="old_app_icon" />
   <java-symbol type="id" name="overlay_display_window_texture" />
   <java-symbol type="id" name="overlay_display_window_title" />
@@ -453,6 +452,7 @@
   <java-symbol type="integer" name="config_multiuserMaximumUsers" />
   <java-symbol type="integer" name="config_multiuserMaxRunningUsers" />
   <java-symbol type="integer" name="config_safe_media_volume_index" />
+  <java-symbol type="integer" name="config_safe_media_volume_usb_mB" />
   <java-symbol type="integer" name="config_mobile_mtu" />
   <java-symbol type="array"   name="config_mobile_tcp_buffers" />
   <java-symbol type="integer" name="config_volte_replacement_rat"/>

@@ -1625,6 +1625,20 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             // The activity may be waiting for stop, but that is no longer appropriate for it.
             mStackSupervisor.mStoppingActivities.remove(this);
             mStackSupervisor.mGoingToSleepActivities.remove(this);
+
+            // If the activity is stopped or stopping, cycle to the paused state.
+            if (state == STOPPED || state == STOPPING) {
+                // Capture reason before state change
+                final String reason = getLifecycleDescription("makeVisibleIfNeeded");
+
+                // An activity must be in the {@link PAUSING} state for the system to validate
+                // the move to {@link PAUSED}.
+                state = PAUSING;
+                service.mLifecycleManager.scheduleTransaction(app.thread, appToken,
+                        PauseActivityItem.obtain(finishing, false /* userLeaving */,
+                                configChangeFlags, false /* dontReport */)
+                                .setDescription(reason));
+            }
         } catch (Exception e) {
             // Just skip on any failure; we'll make it visible when it next restarts.
             Slog.w(TAG, "Exception thrown making visibile: " + intent.getComponent(), e);

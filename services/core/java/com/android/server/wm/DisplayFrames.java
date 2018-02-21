@@ -22,17 +22,12 @@ import static android.view.Surface.ROTATION_90;
 import static com.android.server.wm.proto.DisplayFramesProto.STABLE_BOUNDS;
 
 import android.annotation.NonNull;
-import android.content.res.Resources;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 import java.io.PrintWriter;
-import java.util.Arrays;
 
 /**
  * Container class for all the display frames that affect how we do window layout on a display.
@@ -173,7 +168,7 @@ public class DisplayFrames {
         mStableFullscreen.set(mUnrestricted);
         mCurrent.set(mUnrestricted);
 
-        mDisplayCutout = mDisplayInfoCutout.calculateRelativeTo(mOverscan);
+        mDisplayCutout = mDisplayInfoCutout;
         mDisplayCutoutSafe.set(Integer.MIN_VALUE, Integer.MIN_VALUE,
                 Integer.MAX_VALUE, Integer.MAX_VALUE);
         if (!mDisplayCutout.isEmpty()) {

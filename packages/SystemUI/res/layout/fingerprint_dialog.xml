@@ -35,131 +35,105 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:elevation="2dp"
-        android:background="@drawable/fingerprint_dialog_bg">
+        android:background="@color/fingerprint_dialog_bg_color">
 
-        <RelativeLayout
+        <TextView
+            android:id="@+id/title"
+            android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:elevation="2dp">
+            android:layout_marginEnd="24dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="24dp"
+            android:gravity="center"
+            android:textSize="20sp"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:textColor="@color/fingerprint_dialog_text_dark_color"/>
 
-            <ImageView
-                android:id="@+id/icon"
-                android:layout_width="@dimen/fingerprint_dialog_icon_size"
-                android:layout_height="@dimen/fingerprint_dialog_icon_size"
-                android:layout_marginTop="16dp"
-                android:layout_marginStart="16dp"
-                android:scaleType="centerInside" />
-
-            <TextView
-                android:id="@+id/title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf="@+id/icon"
-                android:layout_marginEnd="16dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:textSize="20sp"
-                android:maxLines="1"
-                android:singleLine="true"
-                android:ellipsize="marquee"
-                android:marqueeRepeatLimit="marquee_forever"
-                android:textColor="@color/fingerprint_dialog_text_color"/>
-
-            <TextView
-                android:id="@+id/subtitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf="@+id/icon"
-                android:layout_below="@+id/title"
-                android:layout_marginEnd="16dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="4dp"
-                android:textSize="12sp"
-                android:maxLines="2"
-                android:textColor="@color/fingerprint_dialog_text_color"/>
-
-        </RelativeLayout>
+        <TextView
+            android:id="@+id/subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"
+            android:gravity="center_horizontal"
+            android:textSize="14sp"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:textColor="@color/fingerprint_dialog_text_light_color"/>
 
         <TextView
             android:id="@+id/description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp"
-            android:paddingTop="16dp"
-            android:paddingBottom="20dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginStart="24dp"
+            android:paddingTop="24dp"
             android:textSize="16sp"
             android:maxLines="4"
-            android:textColor="@color/fingerprint_dialog_text_color"/>
+            android:textColor="@color/fingerprint_dialog_text_dark_color"/>
 
         <ImageView
             android:id="@+id/fingerprint_icon"
             android:layout_width="@dimen/fingerprint_dialog_fp_icon_size"
             android:layout_height="@dimen/fingerprint_dialog_fp_icon_size"
             android:layout_gravity="center_horizontal"
-            android:scaleType="centerInside"
-            android:contentDescription="@string/accessibility_fingerprint_dialog_fingerprint_icon"
-            android:src="@drawable/fingerprint_icon"/>
+            android:layout_marginTop="32dp"
+            android:scaleType="fitXY"
+            android:contentDescription="@string/accessibility_fingerprint_dialog_fingerprint_icon" />
 
         <TextView
             android:id="@+id/error"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd = "16dp"
-            android:layout_marginStart="16dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginStart="24dp"
             android:paddingTop="16dp"
-            android:paddingBottom="60dp"
+            android:paddingBottom="24dp"
             android:textSize="12sp"
-            android:visibility="invisible"
             android:gravity="center_horizontal"
             android:accessibilityLiveRegion="polite"
+            android:text="@string/fingerprint_dialog_touch_sensor"
             android:contentDescription="@string/accessibility_fingerprint_dialog_help_area"
-            android:textColor="@color/fingerprint_error_message_color"/>
+            android:textColor="@color/fingerprint_dialog_text_light_color"/>
 
-        <LinearLayout android:id="@+id/buttonPanel"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="54dip"
-            android:orientation="vertical" >
-            <LinearLayout
-                style="?android:attr/buttonBarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingTop="4dip"
-                android:paddingStart="2dip"
-                android:paddingEnd="2dip"
-                android:measureWithLargestChild="true">
-                <LinearLayout android:id="@+id/leftSpacer"
-                    android:layout_weight="0.25"
-                    android:layout_width="0dip"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:visibility="gone" />
-                <!-- Positive Button -->
-                <Button android:id="@+id/button1"
-                    android:layout_width="0dip"
-                    android:layout_gravity="start"
-                    android:layout_weight="1"
-                    style="?android:attr/buttonBarButtonStyle"
-                    android:maxLines="2"
-                    android:layout_height="wrap_content"/>
-                <!-- Negative Button -->
-                <Button android:id="@+id/button2"
-                    android:layout_width="0dip"
-                    android:layout_gravity="end"
-                    android:layout_weight="1"
-                    style="?android:attr/buttonBarButtonStyle"
-                    android:maxLines="2"
-                    android:layout_height="wrap_content" />
-                <LinearLayout android:id="@+id/rightSpacer"
-                    android:layout_width="0dip"
-                    android:layout_weight="0.25"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:visibility="gone" />
-            </LinearLayout>
+            android:layout_height="72dip"
+            android:paddingTop="16dp"
+            android:layout_gravity="center_vertical"
+            style="?android:attr/buttonBarStyle"
+            android:orientation="horizontal"
+            android:measureWithLargestChild="true">
+            <Space android:id="@+id/leftSpacer"
+                android:layout_width="24dp"
+                android:layout_height="match_parent"
+                android:visibility="visible" />
+            <!-- Negative Button -->
+            <Button android:id="@+id/button2"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
+                android:layout_marginStart="-12dp"
+                android:gravity="start|center_vertical"
+                android:maxLines="2" />
+            <!-- Positive Button -->
+            <Button android:id="@+id/button1"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
+                android:layout_marginEnd="12dp"
+                android:maxLines="2" />
+            <Space android:id="@+id/rightSpacer"
+                android:layout_width="24dip"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>
 

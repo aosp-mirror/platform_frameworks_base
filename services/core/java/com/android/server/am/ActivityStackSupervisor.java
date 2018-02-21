@@ -2599,9 +2599,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // resize when we remove task from it below and it is detached from the
                 // display because it no longer contains any tasks.
                 mAllowDockedStackResize = false;
-            } else if (inPinnedWindowingMode && onTop) {
-                // Log if we are expanding the PiP to fullscreen
-                MetricsLoggerWrapper.logPictureInPictureFullScreen(mService.mContext);
             }
 
             // If we are moving from the pinned stack, then the animation takes care of updating
@@ -2624,6 +2621,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                                 isTopTask /* animate */, DEFER_RESUME,
                                 schedulePictureInPictureModeChange,
                                 "moveTasksToFullscreenStack - onTop");
+                        MetricsLoggerWrapper.logPictureInPictureFullScreen(mService.mContext,
+                                task.effectiveUid, task.realActivity.flattenToString());
                     } else {
                         // Position the tasks in the fullscreen stack in order at the bottom of the
                         // stack. Also defer resume until all the tasks have been moved to the
@@ -3342,11 +3341,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     stack.goToSleepIfPossible(false /* shuttingDown */);
                 } else {
                     stack.awakeFromSleepingLocked();
-                    if (isFocusedStack(stack)
-                            && !mKeyguardController.isKeyguardActive(display.mDisplayId)) {
-                        // If there is no keyguard on this display - resume immediately. Otherwise
-                        // we'll wait for keyguard visibility callback and resume while ensuring
-                        // activities visibility
+                    if (isFocusedStack(stack)) {
                         resumeFocusedStackTopActivityLocked();
                     }
                 }

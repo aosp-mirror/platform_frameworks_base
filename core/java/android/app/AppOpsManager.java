@@ -17,6 +17,7 @@
 package android.app;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -34,8 +35,10 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.ArrayMap;
 
+import com.android.internal.app.IAppOpsActiveCallback;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
+import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,8 +77,9 @@ public class AppOpsManager {
 
     final Context mContext;
     final IAppOpsService mService;
-    final ArrayMap<OnOpChangedListener, IAppOpsCallback> mModeWatchers
-            = new ArrayMap<OnOpChangedListener, IAppOpsCallback>();
+    final ArrayMap<OnOpChangedListener, IAppOpsCallback> mModeWatchers = new ArrayMap<>();
+    final ArrayMap<OnOpActiveChangedListener, IAppOpsActiveCallback> mActiveWatchers =
+            new ArrayMap<>();
 
     static IBinder sToken;
 
@@ -1532,6 +1536,23 @@ public class AppOpsManager {
     }
 
     /**
+     * Callback for notification of changes to operation active state.
+     *
+     * @hide
+     */
+    public interface OnOpActiveChangedListener {
+        /**
+         * Called when the active state of an app op changes.
+         *
+         * @param code The op code.
+         * @param uid The UID performing the operation.
+         * @param packageName The package performing the operation.
+         * @param active Whether the operation became active or inactive.
+         */
+        void onOpActiveChanged(int code, int uid, String packageName, boolean active);
+    }
+
+    /**
      * Callback for notification of changes to operation state.
      * This allows you to see the raw op codes instead of strings.
      * @hide
@@ -1695,6 +1716,8 @@ public class AppOpsManager {
 
     /**
      * Monitor for changes to the operating mode for the given op in the given app package.
+     * You can watch op changes only for your UID.
+     *
      * @param op The operation to monitor, one of OPSTR_*.
      * @param packageName The name of the application to monitor.
      * @param callback Where to report changes.
@@ -1706,11 +1729,17 @@ public class AppOpsManager {
 
     /**
      * Monitor for changes to the operating mode for the given op in the given app package.
+     *
+     * <p> If you don't hold the {@link android.Manifest.permission#WATCH_APPOPS} permission
+     * to watch changes only for your UID.
+     *
      * @param op The operation to monitor, one of OP_*.
      * @param packageName The name of the application to monitor.
      * @param callback Where to report changes.
      * @hide
      */
+    // TODO: Uncomment below annotation once b/73559440 is fixed
+    // @RequiresPermission(value=Manifest.permission.WATCH_APPOPS, conditional=true)
     public void startWatchingMode(int op, String packageName, final OnOpChangedListener callback) {
         synchronized (mModeWatchers) {
             IAppOpsCallback cb = mModeWatchers.get(callback);
@@ -1745,6 +1774,74 @@ public class AppOpsManager {
             if (cb != null) {
                 try {
                     mService.stopWatchingMode(cb);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+        }
+    }
+
+    /**
+     * Start watching for changes to the active state of app ops. An app op may be
+     * long running and it has a clear start and stop delimiters. If an op is being
+     * started or stopped by any package you will get a callback. To change the
+     * watched ops for a registered callback you need to unregister and register it
+     * again.
+     *
+     * @param ops The ops to watch.
+     * @param callback Where to report changes.
+     *
+     * @see #isOperationActive(int, int, String)
+     * @see #stopWatchingActive(OnOpActiveChangedListener)
+     * @see #startOp(int, int, String)
+     * @see #finishOp(int, int, String)
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WATCH_APPOPS)
+    public void startWatchingActive(@NonNull int[] ops,
+            @NonNull OnOpActiveChangedListener callback) {
+        Preconditions.checkNotNull(ops, "ops cannot be null");
+        Preconditions.checkNotNull(callback, "callback cannot be null");
+        IAppOpsActiveCallback cb;
+        synchronized (mActiveWatchers) {
+            cb = mActiveWatchers.get(callback);
+            if (cb != null) {
+                return;
+            }
+            cb = new IAppOpsActiveCallback.Stub() {
+                @Override
+                public void opActiveChanged(int op, int uid, String packageName, boolean active) {
+                    callback.onOpActiveChanged(op, uid, packageName, active);
+                }
+            };
+            mActiveWatchers.put(callback, cb);
+        }
+        try {
+            mService.startWatchingActive(ops, cb);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Stop watching for changes to the active state of an app op. An app op may be
+     * long running and it has a clear start and stop delimiters. Unregistering a
+     * non-registered callback has no effect.
+     *
+     * @see #isOperationActive#(int, int, String)
+     * @see #startWatchingActive(int[], OnOpActiveChangedListener)
+     * @see #startOp(int, int, String)
+     * @see #finishOp(int, int, String)
+     *
+     * @hide
+     */
+    public void stopWatchingActive(@NonNull OnOpActiveChangedListener callback) {
+        synchronized (mActiveWatchers) {
+            final IAppOpsActiveCallback cb = mActiveWatchers.get(callback);
+            if (cb != null) {
+                try {
+                    mService.stopWatchingActive(cb);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }
@@ -2145,6 +2242,7 @@ public class AppOpsManager {
     }
 
     /** @hide */
+    @RequiresPermission(Manifest.permission.WATCH_APPOPS)
     public boolean isOperationActive(int code, int uid, String packageName) {
         try {
             return mService.isOperationActive(code, uid, packageName);

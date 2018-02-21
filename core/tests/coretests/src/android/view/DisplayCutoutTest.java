@@ -17,25 +17,24 @@
 package android.view;
 
 import static android.view.DisplayCutout.NO_CUTOUT;
+import static android.view.DisplayCutout.fromBoundingRect;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.Size;
 import android.view.DisplayCutout.ParcelableWrapper;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.Arrays;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -45,7 +44,7 @@ public class DisplayCutoutTest {
     /** This is not a consistent cutout. Useful for verifying insets in one go though. */
     final DisplayCutout mCutoutNumbers = new DisplayCutout(
             new Rect(1, 2, 3, 4),
-            new Region(5, 6, 7, 8));
+            new Region(5, 6, 7, 8), new Size(9, 10));
 
     final DisplayCutout mCutoutTop = createCutoutTop();
 
@@ -155,50 +154,94 @@ public class DisplayCutoutTest {
     }
 
     @Test
-    public void calculateRelativeTo_top() throws Exception {
-        DisplayCutout cutout = mCutoutTop.calculateRelativeTo(new Rect(0, 0, 200, 400));
+    public void computeSafeInsets_top() throws Exception {
+        DisplayCutout cutout = fromBoundingRect(0, 0, 100, 20)
+                .computeSafeInsets(200, 400);
 
-        assertEquals(new Rect(0, 100, 0, 0), cutout.getSafeInsets());
+        assertEquals(new Rect(0, 20, 0, 0), cutout.getSafeInsets());
+    }
+
+    @Test
+    public void computeSafeInsets_left() throws Exception {
+        DisplayCutout cutout = fromBoundingRect(0, 0, 20, 100)
+                .computeSafeInsets(400, 200);
+
+        assertEquals(new Rect(20, 0, 0, 0), cutout.getSafeInsets());
+    }
+
+    @Test
+    public void computeSafeInsets_bottom() throws Exception {
+        DisplayCutout cutout = fromBoundingRect(0, 180, 100, 200)
+                .computeSafeInsets(100, 200);
+
+        assertEquals(new Rect(0, 0, 0, 20), cutout.getSafeInsets());
+    }
+
+    @Test
+    public void computeSafeInsets_right() throws Exception {
+        DisplayCutout cutout = fromBoundingRect(180, 0, 200, 100)
+                .computeSafeInsets(200, 100);
+
+        assertEquals(new Rect(0, 0, 20, 0), cutout.getSafeInsets());
+    }
+
+    @Test
+    public void computeSafeInsets_bounds() throws Exception {
+        DisplayCutout cutout = mCutoutTop.computeSafeInsets(1000, 2000);
+
+        assertEquals(mCutoutTop.getBoundingRect(), cutout.getBounds().getBounds());
+    }
+
+    @Test
+    public void calculateRelativeTo_top() throws Exception {
+        DisplayCutout cutout = fromBoundingRect(0, 0, 100, 20)
+                .computeSafeInsets(200, 400)
+                .calculateRelativeTo(new Rect(5, 5, 95, 195));
+
+        assertEquals(new Rect(0, 15, 0, 0), cutout.getSafeInsets());
     }
 
     @Test
     public void calculateRelativeTo_left() throws Exception {
-        DisplayCutout cutout = mCutoutTop.calculateRelativeTo(new Rect(0, 0, 400, 200));
+        DisplayCutout cutout = fromBoundingRect(0, 0, 20, 100)
+                .computeSafeInsets(400, 200)
+                .calculateRelativeTo(new Rect(5, 5, 195, 95));
 
-        assertEquals(new Rect(75, 0, 0, 0), cutout.getSafeInsets());
+        assertEquals(new Rect(15, 0, 0, 0), cutout.getSafeInsets());
     }
 
     @Test
     public void calculateRelativeTo_bottom() throws Exception {
-        DisplayCutout cutout = mCutoutTop.calculateRelativeTo(new Rect(0, -300, 200, 100));
+        DisplayCutout cutout = fromBoundingRect(0, 180, 100, 200)
+                .computeSafeInsets(100, 200)
+                .calculateRelativeTo(new Rect(5, 5, 95, 195));
 
-        assertEquals(new Rect(0, 0, 0, 100), cutout.getSafeInsets());
+        assertEquals(new Rect(0, 0, 0, 15), cutout.getSafeInsets());
     }
 
     @Test
     public void calculateRelativeTo_right() throws Exception {
-        DisplayCutout cutout = mCutoutTop.calculateRelativeTo(new Rect(-400, -200, 100, 100));
+        DisplayCutout cutout = fromBoundingRect(180, 0, 200, 100)
+                .computeSafeInsets(200, 100)
+                .calculateRelativeTo(new Rect(5, 5, 195, 95));
 
-        assertEquals(new Rect(0, 0, 50, 0), cutout.getSafeInsets());
+        assertEquals(new Rect(0, 0, 15, 0), cutout.getSafeInsets());
     }
 
     @Test
     public void calculateRelativeTo_bounds() throws Exception {
-        DisplayCutout cutout = mCutoutTop.calculateRelativeTo(new Rect(-1000, -2000, 100, 200));
+        DisplayCutout cutout = fromBoundingRect(0, 0, 100, 20)
+                .computeSafeInsets(200, 400)
+                .calculateRelativeTo(new Rect(5, 10, 95, 180));
 
-        assertEquals(new Rect(1050, 2000, 1075, 2100), cutout.getBoundingRect());
+        assertEquals(new Rect(-5, -10, 95, 10), cutout.getBounds().getBounds());
     }
 
     @Test
     public void fromBoundingPolygon() throws Exception {
         assertEquals(
                 new Rect(50, 0, 75, 100),
-                DisplayCutout.fromBoundingPolygon(
-                        Arrays.asList(
-                                new Point(75, 0),
-                                new Point(50, 0),
-                                new Point(75, 100),
-                                new Point(50, 100))).getBounds().getBounds());
+                DisplayCutout.fromBoundingRect(50, 0, 75, 100).getBounds().getBounds());
     }
 
     @Test
@@ -211,6 +254,19 @@ public class DisplayCutoutTest {
         p.setDataPosition(0);
 
         assertEquals(mCutoutTop, ParcelableWrapper.CREATOR.createFromParcel(p).get());
+        assertEquals(posAfterWrite, p.dataPosition());
+    }
+
+    @Test
+    public void parcel_unparcel_withFrame() {
+        Parcel p = Parcel.obtain();
+
+        new ParcelableWrapper(mCutoutNumbers).writeToParcel(p, 0);
+        int posAfterWrite = p.dataPosition();
+
+        p.setDataPosition(0);
+
+        assertEquals(mCutoutNumbers, ParcelableWrapper.CREATOR.createFromParcel(p).get());
         assertEquals(posAfterWrite, p.dataPosition());
     }
 
@@ -264,6 +320,7 @@ public class DisplayCutoutTest {
     private static DisplayCutout createCutoutWithInsets(int left, int top, int right, int bottom) {
         return new DisplayCutout(
                 new Rect(left, top, right, bottom),
-                new Region(50, 0, 75, 100));
+                new Region(50, 0, 75, 100),
+                null);
     }
 }

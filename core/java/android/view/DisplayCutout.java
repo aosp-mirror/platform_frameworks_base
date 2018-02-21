@@ -26,7 +26,6 @@ import static android.view.Surface.ROTATION_90;
 import android.content.res.Resources;
 import android.graphics.Matrix;
 import android.graphics.Path;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
@@ -35,12 +34,13 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.PathParser;
+import android.util.Size;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents a part of the display that is not functional for displaying content.
@@ -70,10 +70,12 @@ public final class DisplayCutout {
      *
      * @hide
      */
-    public static final DisplayCutout NO_CUTOUT = new DisplayCutout(ZERO_RECT, EMPTY_REGION);
+    public static final DisplayCutout NO_CUTOUT = new DisplayCutout(ZERO_RECT, EMPTY_REGION,
+            new Size(0, 0));
 
     private final Rect mSafeInsets;
     private final Region mBounds;
+    private final Size mFrameSize;
 
     /**
      * Creates a DisplayCutout instance.
@@ -83,9 +85,10 @@ public final class DisplayCutout {
      * @hide
      */
     @VisibleForTesting
-    public DisplayCutout(Rect safeInsets, Region bounds) {
+    public DisplayCutout(Rect safeInsets, Region bounds, Size frameSize) {
         mSafeInsets = safeInsets != null ? safeInsets : ZERO_RECT;
         mBounds = bounds != null ? bounds : Region.obtain();
+        mFrameSize = frameSize;
     }
 
     /**
@@ -164,7 +167,8 @@ public final class DisplayCutout {
         if (o instanceof DisplayCutout) {
             DisplayCutout c = (DisplayCutout) o;
             return mSafeInsets.equals(c.mSafeInsets)
-                    && mBounds.equals(c.mBounds);
+                    && mBounds.equals(c.mBounds)
+                    && Objects.equals(mFrameSize, c.mFrameSize);
         }
         return false;
     }
@@ -217,70 +221,84 @@ public final class DisplayCutout {
         }
 
         bounds.translate(-insetLeft, -insetTop);
+        Size frame = mFrameSize == null ? null : new Size(
+                mFrameSize.getWidth() - insetLeft - insetRight,
+                mFrameSize.getHeight() - insetTop - insetBottom);
 
-        return new DisplayCutout(safeInsets, bounds);
+        return new DisplayCutout(safeInsets, bounds, frame);
     }
 
     /**
-     * Calculates the safe insets relative to the given reference frame.
+     * Recalculates the cutout relative to the given reference frame.
+     *
+     * The safe insets must already have been computed, e.g. with {@link #computeSafeInsets}.
+     *
+     * @return a copy of this instance with the safe insets recalculated
+     * @hide
+     */
+    public DisplayCutout calculateRelativeTo(Rect frame) {
+        return inset(frame.left, frame.top,
+                mFrameSize.getWidth() - frame.right, mFrameSize.getHeight() - frame.bottom);
+    }
+
+    /**
+     * Calculates the safe insets relative to the given display size.
      *
      * @return a copy of this instance with the safe insets calculated
      * @hide
      */
-    public DisplayCutout calculateRelativeTo(Rect frame) {
-        if (mBounds.isEmpty() || !Rect.intersects(frame, mBounds.getBounds())) {
+    public DisplayCutout computeSafeInsets(int width, int height) {
+        if (this == NO_CUTOUT || mBounds.isEmpty()) {
             return NO_CUTOUT;
         }
 
-        return DisplayCutout.calculateRelativeTo(frame, Region.obtain(mBounds));
+        return computeSafeInsets(new Size(width, height), mBounds);
     }
 
-    private static DisplayCutout calculateRelativeTo(Rect frame, Region bounds) {
+    private static DisplayCutout computeSafeInsets(Size displaySize, Region bounds) {
         Rect boundingRect = bounds.getBounds();
         Rect safeRect = new Rect();
 
         int bestArea = 0;
         int bestVariant = 0;
         for (int variant = ROTATION_0; variant <= ROTATION_270; variant++) {
-            int area = calculateInsetVariantArea(frame, boundingRect, variant, safeRect);
+            int area = calculateInsetVariantArea(displaySize, boundingRect, variant, safeRect);
             if (bestArea < area) {
                 bestArea = area;
                 bestVariant = variant;
             }
         }
-        calculateInsetVariantArea(frame, boundingRect, bestVariant, safeRect);
+        calculateInsetVariantArea(displaySize, boundingRect, bestVariant, safeRect);
         if (safeRect.isEmpty()) {
-            // The entire frame overlaps with the cutout.
-            safeRect.set(0, frame.height(), 0, 0);
+            // The entire displaySize overlaps with the cutout.
+            safeRect.set(0, displaySize.getHeight(), 0, 0);
         } else {
-            // Convert safeRect to insets relative to frame. We're reusing the rect here to avoid
-            // an allocation.
+            // Convert safeRect to insets relative to displaySize. We're reusing the rect here to
+            // avoid an allocation.
             safeRect.set(
-                    Math.max(0, safeRect.left - frame.left),
-                    Math.max(0, safeRect.top - frame.top),
-                    Math.max(0, frame.right - safeRect.right),
-                    Math.max(0, frame.bottom - safeRect.bottom));
+                    Math.max(0, safeRect.left),
+                    Math.max(0, safeRect.top),
+                    Math.max(0, displaySize.getWidth() - safeRect.right),
+                    Math.max(0, displaySize.getHeight() - safeRect.bottom));
         }
 
-        bounds.translate(-frame.left, -frame.top);
-
-        return new DisplayCutout(safeRect, bounds);
+        return new DisplayCutout(safeRect, bounds, displaySize);
     }
 
-    private static int calculateInsetVariantArea(Rect frame, Rect boundingRect, int variant,
+    private static int calculateInsetVariantArea(Size display, Rect boundingRect, int variant,
             Rect outSafeRect) {
         switch (variant) {
             case ROTATION_0:
-                outSafeRect.set(frame.left, frame.top, frame.right, boundingRect.top);
+                outSafeRect.set(0, 0, display.getWidth(), boundingRect.top);
                 break;
             case ROTATION_90:
-                outSafeRect.set(frame.left, frame.top, boundingRect.left, frame.bottom);
+                outSafeRect.set(0, 0, boundingRect.left, display.getHeight());
                 break;
             case ROTATION_180:
-                outSafeRect.set(frame.left, boundingRect.bottom, frame.right, frame.bottom);
+                outSafeRect.set(0, boundingRect.bottom, display.getWidth(), display.getHeight());
                 break;
             case ROTATION_270:
-                outSafeRect.set(boundingRect.right, frame.top, frame.right, frame.bottom);
+                outSafeRect.set(boundingRect.right, 0, display.getWidth(), display.getHeight());
                 break;
         }
 
@@ -293,21 +311,17 @@ public final class DisplayCutout {
 
 
     /**
-     * Creates an instance from a bounding polygon.
+     * Creates an instance from a bounding rect.
      *
      * @hide
      */
-    public static DisplayCutout fromBoundingPolygon(List<Point> points) {
+    public static DisplayCutout fromBoundingRect(int left, int top, int right, int bottom) {
         Path path = new Path();
         path.reset();
-        for (int i = 0; i < points.size(); i++) {
-            Point point = points.get(i);
-            if (i == 0) {
-                path.moveTo(point.x, point.y);
-            } else {
-                path.lineTo(point.x, point.y);
-            }
-        }
+        path.moveTo(left, top);
+        path.lineTo(left, bottom);
+        path.lineTo(right, bottom);
+        path.lineTo(right, top);
         path.close();
         return fromBounds(path);
     }
@@ -327,7 +341,7 @@ public final class DisplayCutout {
         Region bounds = new Region();
         bounds.setPath(path, clipRegion);
         clipRegion.recycle();
-        return new DisplayCutout(ZERO_RECT, bounds);
+        return new DisplayCutout(ZERO_RECT, bounds, null /* frameSize */);
     }
 
     /**
@@ -407,6 +421,12 @@ public final class DisplayCutout {
                 out.writeInt(1);
                 out.writeTypedObject(cutout.mSafeInsets, flags);
                 out.writeTypedObject(cutout.mBounds, flags);
+                if (cutout.mFrameSize != null) {
+                    out.writeInt(cutout.mFrameSize.getWidth());
+                    out.writeInt(cutout.mFrameSize.getHeight());
+                } else {
+                    out.writeInt(-1);
+                }
             }
         }
 
@@ -449,7 +469,10 @@ public final class DisplayCutout {
             Rect safeInsets = in.readTypedObject(Rect.CREATOR);
             Region bounds = in.readTypedObject(Region.CREATOR);
 
-            return new DisplayCutout(safeInsets, bounds);
+            int width = in.readInt();
+            Size frameSize = width >= 0 ? new Size(width, in.readInt()) : null;
+
+            return new DisplayCutout(safeInsets, bounds, frameSize);
         }
 
         public DisplayCutout get() {

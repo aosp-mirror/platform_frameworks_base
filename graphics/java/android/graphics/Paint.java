@@ -2835,6 +2835,16 @@ public class Paint {
         return result;
     }
 
+    /**
+     * Returns true of the passed {@link Paint} will have the same effect on text measurement
+     *
+     * @param other A {@link Paint} object.
+     * @return true if the other {@link Paint} has the same effect on text measurement.
+     */
+    public boolean equalsForTextMeasurement(@NonNull Paint other) {
+        return nEqualsForTextMeasurement(mNativePaint, other.mNativePaint);
+    }
+
     // regular JNI
     private static native long nGetNativeFinalizer();
     private static native long nInit();
@@ -3002,4 +3012,6 @@ public class Paint {
     private static native float nGetStrikeThruThickness(long paintPtr);
     @CriticalNative
     private static native void nSetTextSize(long paintPtr, float textSize);
+    @CriticalNative
+    private static native boolean nEqualsForTextMeasurement(long leftPaintPtr, long rightPaintPtr);
 }

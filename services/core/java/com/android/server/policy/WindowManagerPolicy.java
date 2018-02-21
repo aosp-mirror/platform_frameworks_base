@@ -922,7 +922,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * button bar.
      */
     public int getNonDecorDisplayWidth(int fullWidth, int fullHeight, int rotation,
-            int uiMode, int displayId);
+            int uiMode, int displayId, DisplayCutout displayCutout);
 
     /**
      * Return the display height available after excluding any screen
@@ -930,25 +930,25 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * button bar.
      */
     public int getNonDecorDisplayHeight(int fullWidth, int fullHeight, int rotation,
-            int uiMode, int displayId);
+            int uiMode, int displayId, DisplayCutout displayCutout);
 
     /**
      * Return the available screen width that we should report for the
      * configuration.  This must be no larger than
-     * {@link #getNonDecorDisplayWidth(int, int, int, int int, int)}; it may be smaller than
-     * that to account for more transient decoration like a status bar.
+     * {@link #getNonDecorDisplayWidth(int, int, int, int, int, DisplayCutout)}; it may be smaller
+     * than that to account for more transient decoration like a status bar.
      */
     public int getConfigDisplayWidth(int fullWidth, int fullHeight, int rotation,
-            int uiMode, int displayId);
+            int uiMode, int displayId, DisplayCutout displayCutout);
 
     /**
      * Return the available screen height that we should report for the
      * configuration.  This must be no larger than
-     * {@link #getNonDecorDisplayHeight(int, int, int, int, int)}; it may be smaller than
-     * that to account for more transient decoration like a status bar.
+     * {@link #getNonDecorDisplayHeight(int, int, int, int, int, DisplayCutout)}; it may be smaller
+     * than that to account for more transient decoration like a status bar.
      */
     public int getConfigDisplayHeight(int fullWidth, int fullHeight, int rotation,
-            int uiMode, int displayId);
+            int uiMode, int displayId, DisplayCutout displayCutout);
 
     /**
      * Return whether the given window can become the Keyguard window. Typically returns true for
@@ -1639,10 +1639,11 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * @param displayRotation the current display rotation
      * @param displayWidth the current display width
      * @param displayHeight the current display height
+     * @param displayCutout the current display cutout
      * @param outInsets the insets to return
      */
     public void getStableInsetsLw(int displayRotation, int displayWidth, int displayHeight,
-            Rect outInsets);
+            DisplayCutout displayCutout, Rect outInsets);
 
 
     /**
@@ -1666,10 +1667,11 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * @param displayRotation the current display rotation
      * @param displayWidth the current display width
      * @param displayHeight the current display height
+     * @param displayCutout the current display cutout
      * @param outInsets the insets to return
      */
     public void getNonDecorInsetsLw(int displayRotation, int displayWidth, int displayHeight,
-            Rect outInsets);
+            DisplayCutout displayCutout, Rect outInsets);
 
     /**
      * @return True if a specified {@param dockSide} is allowed on the current device, or false

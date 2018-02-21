@@ -552,13 +552,14 @@ public class TaskStack extends WindowContainer<Task> implements
         final int dockSide = getDockSide(outBounds);
         final int dividerPosition = DockedDividerUtils.calculatePositionForBounds(outBounds,
                 dockSide, dividerSize);
-        final int displayWidth = mDisplayContent.getDisplayInfo().logicalWidth;
-        final int displayHeight = mDisplayContent.getDisplayInfo().logicalHeight;
+        final int displayWidth = displayInfo.logicalWidth;
+        final int displayHeight = displayInfo.logicalHeight;
 
         // Snap the position to a target.
         final int rotation = displayInfo.rotation;
         final int orientation = mDisplayContent.getConfiguration().orientation;
-        mService.mPolicy.getStableInsetsLw(rotation, displayWidth, displayHeight, outBounds);
+        mService.mPolicy.getStableInsetsLw(rotation, displayWidth, displayHeight,
+                displayInfo.displayCutout, outBounds);
         final DividerSnapAlgorithm algorithm = new DividerSnapAlgorithm(
                 mService.mContext.getResources(), displayWidth, displayHeight,
                 dividerSize, orientation == Configuration.ORIENTATION_PORTRAIT, outBounds,
@@ -929,7 +930,7 @@ public class TaskStack extends WindowContainer<Task> implements
             // adjusted to occupy whatever screen space the docked stack isn't occupying.
             final DisplayInfo di = mDisplayContent.getDisplayInfo();
             mService.mPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
-                    mTmpRect2);
+                    di.displayCutout, mTmpRect2);
             final int position = new DividerSnapAlgorithm(mService.mContext.getResources(),
                     di.logicalWidth,
                     di.logicalHeight,

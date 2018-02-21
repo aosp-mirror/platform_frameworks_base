@@ -60,6 +60,9 @@ public:
     void dumpStates(FILE* out, bool verbose) const override;
 
 private:
+    // Returns true if at least one of the mInfos is started.
+    bool anyStarted();
+
     std::unordered_map<HashableDimensionKey, DurationInfo> mInfos;
 
     void noteConditionChanged(const HashableDimensionKey& key, bool conditionMet,
@@ -72,6 +75,8 @@ private:
     FRIEND_TEST(MaxDurationTrackerTest, TestCrossBucketBoundary);
     FRIEND_TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition);
     FRIEND_TEST(MaxDurationTrackerTest, TestStopAll);
+    FRIEND_TEST(MaxDurationTrackerTest, TestAnomalyDetection);
+    FRIEND_TEST(MaxDurationTrackerTest, TestAnomalyPredictedTimestamp);
 };
 
 }  // namespace statsd

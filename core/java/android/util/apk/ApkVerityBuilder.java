@@ -207,14 +207,10 @@ abstract class ApkVerityBuilder {
             }
         }
 
-        /** Finish the current digestion if any. */
-        @Override
-        public void finish() throws DigestException {
-            if (mBytesDigestedSinceReset == 0) {
-                return;
+        public void assertEmptyBuffer() throws DigestException {
+            if (mBytesDigestedSinceReset != 0) {
+                throw new IllegalStateException("Buffer is not empty: " + mBytesDigestedSinceReset);
             }
-            mMd.digest(mDigestBuffer, 0, mDigestBuffer.length);
-            mOutput.put(mDigestBuffer);
         }
 
         private void fillUpLastOutputChunk() {
@@ -279,9 +275,15 @@ abstract class ApkVerityBuilder {
                 new MemoryMappedFileDataSource(apk.getFD(), offsetAfterEocdCdOffsetField,
                     apk.length() - offsetAfterEocdCdOffsetField),
                 MMAP_REGION_SIZE_BYTES);
-        digester.finish();
 
-        // 5. Fill up the rest of buffer with 0s.
+        // 5. Pad 0s up to the nearest 4096-byte block before hashing.
+        int lastIncompleteChunkSize = (int) (apk.length() % CHUNK_SIZE_BYTES);
+        if (lastIncompleteChunkSize != 0) {
+            digester.consume(ByteBuffer.allocate(CHUNK_SIZE_BYTES - lastIncompleteChunkSize));
+        }
+        digester.assertEmptyBuffer();
+
+        // 6. Fill up the rest of buffer with 0s.
         digester.fillUpLastOutputChunk();
     }
 
@@ -300,8 +302,7 @@ abstract class ApkVerityBuilder {
             DataSource source = new ByteBufferDataSource(inputBuffer);
             BufferedDigester digester = new BufferedDigester(salt, outputBuffer);
             consumeByChunk(digester, source, CHUNK_SIZE_BYTES);
-            digester.finish();
-
+            digester.assertEmptyBuffer();
             digester.fillUpLastOutputChunk();
         }
 
@@ -309,7 +310,7 @@ abstract class ApkVerityBuilder {
         byte[] rootHash = new byte[DIGEST_SIZE_BYTES];
         BufferedDigester digester = new BufferedDigester(salt, ByteBuffer.wrap(rootHash));
         digester.consume(slice(output, 0, CHUNK_SIZE_BYTES));
-        digester.finish();
+        digester.assertEmptyBuffer();
         return rootHash;
     }
 

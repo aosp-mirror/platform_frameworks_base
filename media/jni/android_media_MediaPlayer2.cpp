@@ -1088,7 +1088,7 @@ static void
 android_media_MediaPlayer2_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
 {
     ALOGV("native_setup");
-    sp<MediaPlayer2> mp = new MediaPlayer2();
+    sp<MediaPlayer2> mp = MediaPlayer2::Create();
     if (mp == NULL) {
         jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
         return;

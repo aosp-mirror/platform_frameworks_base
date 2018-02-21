@@ -16,9 +16,9 @@
 
 package com.android.systemui.pip.phone;
 
-import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_NONE;
 import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_CLOSE;
 import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_FULL;
+import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_NONE;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -42,7 +42,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+
 import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.policy.PipSnapAlgorithm;
 import com.android.systemui.R;
@@ -158,8 +158,9 @@ public class PipTouchHandler {
 
         @Override
         public void onPipDismiss() {
+            MetricsLoggerWrapper.logPictureInPictureDismissByTap(mContext,
+                    PipUtils.getTopPinnedActivity(mContext, mActivityManager));
             mMotionHelper.dismissPip();
-            MetricsLoggerWrapper.logPictureInPictureDismissByTap(mContext);
         }
 
         @Override
@@ -458,7 +459,8 @@ public class PipTouchHandler {
             return;
         }
         if (mIsMinimized != isMinimized) {
-            MetricsLoggerWrapper.logPictureInPictureMinimize(mContext, isMinimized);
+            MetricsLoggerWrapper.logPictureInPictureMinimize(mContext,
+                    isMinimized, PipUtils.getTopPinnedActivity(mContext, mActivityManager));
         }
         mIsMinimized = isMinimized;
         mSnapAlgorithm.setMinimized(isMinimized);
@@ -661,9 +663,10 @@ public class PipTouchHandler {
             if (ENABLE_DISMISS_DRAG_TO_EDGE) {
                 // Check if the user dragged or flung the PiP offscreen to dismiss it
                 if (mMotionHelper.shouldDismissPip() || isFlingToBot) {
+                    MetricsLoggerWrapper.logPictureInPictureDismissByDrag(mContext,
+                            PipUtils.getTopPinnedActivity(mContext, mActivityManager));
                     mMotionHelper.animateDismiss(mMotionHelper.getBounds(), vel.x,
                         vel.y, mUpdateScrimListener);
-                    MetricsLoggerWrapper.logPictureInPictureDismissByDrag(mContext);
                     return true;
                 }
             }

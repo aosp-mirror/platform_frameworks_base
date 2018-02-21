@@ -62,7 +62,7 @@
     <string name="bluetooth_connected_battery_level" msgid="5162924691231307748">"Conectado a <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>, batería ao <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"Conectado a <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (sen teléfono), batería ao <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Conectado a <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (sen audio multimedia), batería ao <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Conectado <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (sen teléfono nin audio multimedia), batería ao <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Conectado a <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (sen teléfono nin audio multimedia), batería ao <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Audio multimedia"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Chamadas telefónicas"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Transferencia de ficheiros"</string>

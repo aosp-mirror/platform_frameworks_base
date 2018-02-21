@@ -2818,16 +2818,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public int getNonDecorDisplayWidth(int fullWidth, int fullHeight, int rotation, int uiMode,
-            int displayId) {
+            int displayId, DisplayCutout displayCutout) {
+        int width = fullWidth;
         // TODO(multi-display): Support navigation bar on secondary displays.
         if (displayId == DEFAULT_DISPLAY && mHasNavigationBar) {
             // For a basic navigation bar, when we are in landscape mode we place
             // the navigation bar to the side.
             if (mNavigationBarCanMove && fullWidth > fullHeight) {
-                return fullWidth - getNavigationBarWidth(rotation, uiMode);
+                width -= getNavigationBarWidth(rotation, uiMode);
             }
         }
-        return fullWidth;
+        if (displayCutout != null) {
+            width -= displayCutout.getSafeInsetLeft() + displayCutout.getSafeInsetRight();
+        }
+        return width;
     }
 
     private int getNavigationBarHeight(int rotation, int uiMode) {
@@ -2840,35 +2844,46 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public int getNonDecorDisplayHeight(int fullWidth, int fullHeight, int rotation, int uiMode,
-            int displayId) {
+            int displayId, DisplayCutout displayCutout) {
+        int height = fullHeight;
         // TODO(multi-display): Support navigation bar on secondary displays.
         if (displayId == DEFAULT_DISPLAY && mHasNavigationBar) {
             // For a basic navigation bar, when we are in portrait mode we place
             // the navigation bar to the bottom.
             if (!mNavigationBarCanMove || fullWidth < fullHeight) {
-                return fullHeight - getNavigationBarHeight(rotation, uiMode);
+                height -= getNavigationBarHeight(rotation, uiMode);
             }
         }
-        return fullHeight;
+        if (displayCutout != null) {
+            height -= displayCutout.getSafeInsetTop() + displayCutout.getSafeInsetBottom();
+        }
+        return height;
     }
 
     @Override
     public int getConfigDisplayWidth(int fullWidth, int fullHeight, int rotation, int uiMode,
-            int displayId) {
-        return getNonDecorDisplayWidth(fullWidth, fullHeight, rotation, uiMode, displayId);
+            int displayId, DisplayCutout displayCutout) {
+        return getNonDecorDisplayWidth(fullWidth, fullHeight, rotation, uiMode, displayId,
+                displayCutout);
     }
 
     @Override
     public int getConfigDisplayHeight(int fullWidth, int fullHeight, int rotation, int uiMode,
-            int displayId) {
+            int displayId, DisplayCutout displayCutout) {
         // There is a separate status bar at the top of the display.  We don't count that as part
         // of the fixed decor, since it can hide; however, for purposes of configurations,
         // we do want to exclude it since applications can't generally use that part
         // of the screen.
         // TODO(multi-display): Support status bars on secondary displays.
         if (displayId == DEFAULT_DISPLAY) {
-            return getNonDecorDisplayHeight(fullWidth, fullHeight, rotation, uiMode, displayId)
-                    - mStatusBarHeight;
+            int statusBarHeight = mStatusBarHeight;
+            if (displayCutout != null) {
+                // If there is a cutout, it may already have accounted for some part of the status
+                // bar height.
+                statusBarHeight = Math.max(0, mStatusBarHeight - displayCutout.getSafeInsetTop());
+            }
+            return getNonDecorDisplayHeight(fullWidth, fullHeight, rotation, uiMode, displayId,
+                    displayCutout) - statusBarHeight;
         }
         return fullHeight;
     }
@@ -6905,17 +6920,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public void getStableInsetsLw(int displayRotation, int displayWidth, int displayHeight,
-            Rect outInsets) {
+            DisplayCutout displayCutout, Rect outInsets) {
         outInsets.setEmpty();
 
         // Navigation bar and status bar.
-        getNonDecorInsetsLw(displayRotation, displayWidth, displayHeight, outInsets);
-        outInsets.top = mStatusBarHeight;
+        getNonDecorInsetsLw(displayRotation, displayWidth, displayHeight, displayCutout, outInsets);
+        outInsets.top = Math.max(outInsets.top, mStatusBarHeight);
     }
 
     @Override
     public void getNonDecorInsetsLw(int displayRotation, int displayWidth, int displayHeight,
-            Rect outInsets) {
+            DisplayCutout displayCutout, Rect outInsets) {
         outInsets.setEmpty();
 
         // Only navigation bar
@@ -6928,6 +6943,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             } else if (position == NAV_BAR_LEFT) {
                 outInsets.left = getNavigationBarWidth(displayRotation, mUiMode);
             }
+        }
+
+        if (displayCutout != null) {
+            outInsets.left += displayCutout.getSafeInsetLeft();
+            outInsets.top += displayCutout.getSafeInsetTop();
+            outInsets.right += displayCutout.getSafeInsetRight();
+            outInsets.bottom += displayCutout.getSafeInsetBottom();
         }
     }
 

@@ -204,8 +204,53 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary_nested) {
 }
 
 TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition) {
+    const std::vector<HashableDimensionKey> conditionKey = {key1};
+
+    vector<Matcher> dimensionInCondition;
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+
+    ConditionKey conditionKey1;
+    MetricDimensionKey eventKey = getMockedMetricDimensionKey(TagId, 1, "1");
+    conditionKey1[StringToId("APP_BACKGROUND")] = conditionKey;
+
+    /**
+    Start in first bucket, stop in second bucket. Condition turns on and off in the first bucket
+    and again turns on and off in the second bucket.
+    */
+    uint64_t bucketStartTimeNs = 10000000000;
+    uint64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
+    uint64_t eventStartTimeNs = bucketStartTimeNs + 1 * NS_PER_SEC;
+    uint64_t conditionStarts1 = bucketStartTimeNs + 11 * NS_PER_SEC;
+    uint64_t conditionStops1 = bucketStartTimeNs + 14 * NS_PER_SEC;
+    uint64_t conditionStarts2 = bucketStartTimeNs + bucketSizeNs + 5 * NS_PER_SEC;
+    uint64_t conditionStops2 = conditionStarts2 + 10 * NS_PER_SEC;
+    uint64_t eventStopTimeNs = conditionStops2 + 8 * NS_PER_SEC;
+
+    int64_t metricId = 1;
+    MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, dimensionInCondition,
+                               false, bucketStartTimeNs, 0, bucketStartTimeNs, bucketSizeNs, true,
+                               {});
+    EXPECT_TRUE(tracker.mAnomalyTrackers.empty());
+
+    tracker.noteStart(key1, false, eventStartTimeNs, conditionKey1);
+    tracker.noteConditionChanged(key1, true, conditionStarts1);
+    tracker.noteConditionChanged(key1, false, conditionStops1);
+    unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
+    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1, &buckets);
+    EXPECT_EQ(0U, buckets.size());
+
+    tracker.noteConditionChanged(key1, true, conditionStarts2);
+    tracker.noteConditionChanged(key1, false, conditionStops2);
+    tracker.noteStop(key1, eventStopTimeNs, false);
+    tracker.flushIfNeeded(bucketStartTimeNs + 2 * bucketSizeNs + 1, &buckets);
+    EXPECT_EQ(1U, buckets.size());
+    vector<DurationBucket> item = buckets.begin()->second;
+    EXPECT_EQ(1UL, item.size());
+    EXPECT_EQ(13ULL * NS_PER_SEC, item[0].mDuration);
+}
+
+TEST(MaxDurationTrackerTest, TestAnomalyDetection) {
     const std::vector<HashableDimensionKey> conditionKey = {getMockedDimensionKey(TagId, 4, "1")};
-    const HashableDimensionKey key1 = getMockedDimensionKey(TagId, 1, "1");
 
     vector<Matcher> dimensionInCondition;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
@@ -214,34 +259,149 @@ TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition) {
     MetricDimensionKey eventKey = getMockedMetricDimensionKey(TagId, 2, "maps");
     conditionKey1[StringToId("APP_BACKGROUND")] = conditionKey;
 
-    EXPECT_CALL(*wizard, query(_, conditionKey1, _, _))  // #4
-            .WillOnce(Return(ConditionState::kFalse));
-
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
 
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
     uint64_t bucketNum = 0;
-    uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
+    uint64_t eventStartTimeNs = 13000000000;
     int64_t durationTimeNs = 2 * 1000;
 
     int64_t metricId = 1;
+    Alert alert;
+    alert.set_id(101);
+    alert.set_metric_id(1);
+    alert.set_trigger_if_sum_gt(40 * NS_PER_SEC);
+    alert.set_num_buckets(2);
+    const int32_t refPeriodSec = 45;
+    alert.set_refractory_period_secs(refPeriodSec);
+    sp<DurationAnomalyTracker> anomalyTracker = new DurationAnomalyTracker(alert, kConfigKey);
     MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, dimensionInCondition,
                                false, bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
-                               true, {});
-    EXPECT_TRUE(tracker.mAnomalyTrackers.empty());
+                               true, {anomalyTracker});
 
     tracker.noteStart(key1, true, eventStartTimeNs, conditionKey1);
+    sp<const AnomalyAlarm> alarm = anomalyTracker->mAlarms.begin()->second;
+    EXPECT_EQ((long long)(53ULL * NS_PER_SEC), (long long)(alarm->timestampSec * NS_PER_SEC));
 
-    tracker.onSlicedConditionMayChange(eventStartTimeNs + 5);
+    // Remove the anomaly alarm when the duration is no longer fully met.
+    tracker.noteConditionChanged(key1, false, eventStartTimeNs + 15 * NS_PER_SEC);
+    EXPECT_EQ(0U, anomalyTracker->mAlarms.size());
 
-    tracker.noteStop(key1, eventStartTimeNs + durationTimeNs, false);
+    // Since the condition was off for 10 seconds, the anomaly should trigger 10 sec later.
+    tracker.noteConditionChanged(key1, true, eventStartTimeNs + 25 * NS_PER_SEC);
+    EXPECT_EQ(1U, anomalyTracker->mAlarms.size());
+    alarm = anomalyTracker->mAlarms.begin()->second;
+    EXPECT_EQ((long long)(63ULL * NS_PER_SEC), (long long)(alarm->timestampSec * NS_PER_SEC));
+}
 
-    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1, &buckets);
-    EXPECT_TRUE(buckets.find(eventKey) != buckets.end());
-    EXPECT_EQ(1u, buckets[eventKey].size());
-    EXPECT_EQ(5ULL, buckets[eventKey][0].mDuration);
+// This tests that we correctly compute the predicted time of an anomaly assuming that the current
+// state continues forward as-is.
+TEST(MaxDurationTrackerTest, TestAnomalyPredictedTimestamp) {
+    const std::vector<HashableDimensionKey> conditionKey = {getMockedDimensionKey(TagId, 4, "1")};
+
+    vector<Matcher> dimensionInCondition;
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+
+    ConditionKey conditionKey1;
+    MetricDimensionKey eventKey = getMockedMetricDimensionKey(TagId, 2, "maps");
+    conditionKey1[StringToId("APP_BACKGROUND")] = conditionKey;
+    ConditionKey conditionKey2;
+    conditionKey2[StringToId("APP_BACKGROUND")] = {getMockedDimensionKey(TagId, 4, "2")};
+
+    unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
+
+    /**
+     * Suppose we have two sub-dimensions that we're taking the MAX over. In the first of these
+     * nested dimensions, we enter the pause state after 3 seconds. When we resume, the second
+     * dimension has already been running for 4 seconds. Thus, we have 40-4=36 seconds remaining
+     * before we trigger the anomaly.
+     */
+    uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
+    uint64_t bucketStartTimeNs = 10000000000;
+    uint64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
+    uint64_t bucketNum = 0;
+    uint64_t eventStartTimeNs = bucketStartTimeNs + 5 * NS_PER_SEC;  // Condition is off at start.
+    uint64_t conditionStarts1 = bucketStartTimeNs + 11 * NS_PER_SEC;
+    uint64_t conditionStops1 = bucketStartTimeNs + 14 * NS_PER_SEC;
+    uint64_t conditionStarts2 = bucketStartTimeNs + 20 * NS_PER_SEC;
+    uint64_t eventStartTimeNs2 = conditionStarts2 - 4 * NS_PER_SEC;
+
+    int64_t metricId = 1;
+    Alert alert;
+    alert.set_id(101);
+    alert.set_metric_id(1);
+    alert.set_trigger_if_sum_gt(40 * NS_PER_SEC);
+    alert.set_num_buckets(2);
+    const int32_t refPeriodSec = 45;
+    alert.set_refractory_period_secs(refPeriodSec);
+    sp<DurationAnomalyTracker> anomalyTracker = new DurationAnomalyTracker(alert, kConfigKey);
+    MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, dimensionInCondition,
+                               false, bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
+                               true, {anomalyTracker});
+
+    tracker.noteStart(key1, false, eventStartTimeNs, conditionKey1);
+    tracker.noteConditionChanged(key1, true, conditionStarts1);
+    tracker.noteConditionChanged(key1, false, conditionStops1);
+    tracker.noteStart(key2, true, eventStartTimeNs2, conditionKey2);  // Condition is on already.
+    tracker.noteConditionChanged(key1, true, conditionStarts2);
+    EXPECT_EQ(1U, anomalyTracker->mAlarms.size());
+    auto alarm = anomalyTracker->mAlarms.begin()->second;
+    EXPECT_EQ(conditionStarts2 + 36 * NS_PER_SEC,
+              (unsigned long long)(alarm->timestampSec * NS_PER_SEC));
+}
+
+// Suppose that within one tracker there are two dimensions A and B.
+// Suppose A starts, then B starts, and then A stops. We still need to set an anomaly based on the
+// elapsed duration of B.
+TEST(MaxDurationTrackerTest, TestAnomalyPredictedTimestamp_UpdatedOnStop) {
+    const std::vector<HashableDimensionKey> conditionKey = {getMockedDimensionKey(TagId, 4, "1")};
+
+    vector<Matcher> dimensionInCondition;
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+
+    ConditionKey conditionKey1;
+    MetricDimensionKey eventKey = getMockedMetricDimensionKey(TagId, 2, "maps");
+    conditionKey1[StringToId("APP_BACKGROUND")] = conditionKey;
+    ConditionKey conditionKey2;
+    conditionKey2[StringToId("APP_BACKGROUND")] = {getMockedDimensionKey(TagId, 4, "2")};
+
+    unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
+
+    /**
+     * Suppose we have two sub-dimensions that we're taking the MAX over. In the first of these
+     * nested dimensions, are started for 8 seconds. When we stop, the other nested dimension has
+     * been started for 5 seconds. So we can only allow 35 more seconds from now.
+     */
+    uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
+    uint64_t bucketStartTimeNs = 10000000000;
+    uint64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
+    uint64_t bucketNum = 0;
+    uint64_t eventStartTimeNs1 = bucketStartTimeNs + 5 * NS_PER_SEC;  // Condition is off at start.
+    uint64_t eventStopTimeNs1 = bucketStartTimeNs + 13 * NS_PER_SEC;
+    uint64_t eventStartTimeNs2 = bucketStartTimeNs + 8 * NS_PER_SEC;
+
+    int64_t metricId = 1;
+    Alert alert;
+    alert.set_id(101);
+    alert.set_metric_id(1);
+    alert.set_trigger_if_sum_gt(40 * NS_PER_SEC);
+    alert.set_num_buckets(2);
+    const int32_t refPeriodSec = 45;
+    alert.set_refractory_period_secs(refPeriodSec);
+    sp<DurationAnomalyTracker> anomalyTracker = new DurationAnomalyTracker(alert, kConfigKey);
+    MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, dimensionInCondition,
+                               false, bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
+                               true, {anomalyTracker});
+
+    tracker.noteStart(key1, true, eventStartTimeNs1, conditionKey1);
+    tracker.noteStart(key2, true, eventStartTimeNs2, conditionKey2);
+    tracker.noteStop(key1, eventStopTimeNs1, false);
+    EXPECT_EQ(1U, anomalyTracker->mAlarms.size());
+    auto alarm = anomalyTracker->mAlarms.begin()->second;
+    EXPECT_EQ(eventStopTimeNs1 + 35 * NS_PER_SEC,
+              (unsigned long long)(alarm->timestampSec * NS_PER_SEC));
 }
 
 }  // namespace statsd

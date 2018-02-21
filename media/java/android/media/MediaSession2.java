@@ -452,13 +452,15 @@ public class MediaSession2 implements AutoCloseable {
         }
 
         /**
-         * Called when a controller set rating on the currently playing contents by
-         * {@link MediaController2#setRating(Rating2)}.
+         * Called when a controller set rating of a media item through
+         * {@link MediaController2#setRating(String, Rating2)}.
          *
          * @param controller controller information
+         * @param mediaId media id from the controller
          * @param rating new rating from the controller
          */
-        public void onSetRating(@NonNull ControllerInfo controller, @NonNull Rating2 rating) { }
+        public void onSetRating(@NonNull ControllerInfo controller, @NonNull String mediaId,
+                @NonNull Rating2 rating) { }
 
         /**
          * Called when a controller sent a custom command through

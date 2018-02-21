@@ -27,6 +27,7 @@ import android.security.keystore.recovery.KeyChainProtectionParams;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -148,6 +149,7 @@ public class PersistentKeyChainSnapshotTest {
                 () -> reader.readKeyEntry());
     }
 
+    @Test
     public void testWriteProtectionParams() throws Exception {
         PersistentKeyChainSnapshot writer = new PersistentKeyChainSnapshot();
         writer.initWriter();
@@ -174,6 +176,7 @@ public class PersistentKeyChainSnapshotTest {
                 () -> reader.readProtectionParams());
     }
 
+    @Test
     public void testKeyChainSnapshot() throws Exception {
         PersistentKeyChainSnapshot writer = new PersistentKeyChainSnapshot();
         writer.initWriter();
@@ -197,7 +200,7 @@ public class PersistentKeyChainSnapshotTest {
         KeyChainSnapshot snapshot =  new KeyChainSnapshot.Builder()
                 .setSnapshotVersion(SNAPSHOT_VERSION)
                 .setKeyChainProtectionParams(protectionParamsList)
-                .setEncryptedRecoveryKeyBlob(KEY_MATERIAL)
+                .setEncryptedRecoveryKeyBlob(RECOVERY_KEY_MATERIAL)
                 .setWrappedApplicationKeys(appKeysList)
                 .setMaxAttempts(MAX_ATTEMPTS)
                 .setCounterId(COUNTER_ID)
@@ -214,13 +217,11 @@ public class PersistentKeyChainSnapshotTest {
 
         KeyChainSnapshot copy = reader.readKeyChainSnapshot();
         assertThat(copy.getSnapshotVersion()).isEqualTo(SNAPSHOT_VERSION);
-        assertThat(copy.getKeyChainProtectionParams()).hasSize(2);
+        assertThat(copy.getKeyChainProtectionParams()).hasSize(1);
         assertThat(copy.getKeyChainProtectionParams().get(0).getUserSecretType()).isEqualTo(1);
-        assertThat(copy.getKeyChainProtectionParams().get(1).getUserSecretType()).isEqualTo(2);
         assertThat(copy.getEncryptedRecoveryKeyBlob()).isEqualTo(RECOVERY_KEY_MATERIAL);
-        assertThat(copy.getWrappedApplicationKeys()).hasSize(2);
+        assertThat(copy.getWrappedApplicationKeys()).hasSize(1);
         assertThat(copy.getWrappedApplicationKeys().get(0).getAlias()).isEqualTo(ALIAS);
-        assertThat(copy.getWrappedApplicationKeys().get(1).getAlias()).isEqualTo(ALIAS2);
         assertThat(copy.getMaxAttempts()).isEqualTo(MAX_ATTEMPTS);
         assertThat(copy.getCounterId()).isEqualTo(COUNTER_ID);
         assertThat(copy.getServerParams()).isEqualTo(SERVER_PARAMS);
@@ -233,6 +234,7 @@ public class PersistentKeyChainSnapshotTest {
         verifyDeserialize(snapshot);
     }
 
+    @Test
     public void testKeyChainSnapshot_withManyKeysAndProtectionParams() throws Exception {
         PersistentKeyChainSnapshot writer = new PersistentKeyChainSnapshot();
         writer.initWriter();
@@ -266,7 +268,7 @@ public class PersistentKeyChainSnapshotTest {
         KeyChainSnapshot snapshot =  new KeyChainSnapshot.Builder()
                 .setSnapshotVersion(SNAPSHOT_VERSION)
                 .setKeyChainProtectionParams(protectionParamsList)
-                .setEncryptedRecoveryKeyBlob(KEY_MATERIAL)
+                .setEncryptedRecoveryKeyBlob(RECOVERY_KEY_MATERIAL)
                 .setWrappedApplicationKeys(appKeysList)
                 .setMaxAttempts(MAX_ATTEMPTS)
                 .setCounterId(COUNTER_ID)
@@ -316,7 +318,7 @@ public class PersistentKeyChainSnapshotTest {
                 .isEqualTo(snapshot.getTrustedHardwarePublicKey());
     }
 
-
+    @Test
     public void testDeserialize_failsForNewerVersion() throws Exception {
         byte[] newVersion = new byte[]{(byte) 2, (byte) 0, (byte) 0, (byte) 0};
         assertThrows(
@@ -324,6 +326,7 @@ public class PersistentKeyChainSnapshotTest {
                 () -> PersistentKeyChainSnapshot.deserialize(newVersion));
     }
 
+    @Test
     public void testDeserialize_failsForEmptyData() throws Exception {
         byte[] empty = new byte[]{};
         assertThrows(

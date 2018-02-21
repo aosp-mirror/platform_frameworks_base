@@ -714,8 +714,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
      * used in conjunction with {@link #moveHomeStackBehindStack}.
      */
     void moveHomeStackBehindBottomMostVisibleStack() {
-        if (mHomeStack == null) {
-            // Skip if there is no home stack
+        if (mHomeStack == null || mHomeStack.shouldBeVisible(null)) {
+            // Skip if there is no home stack, or if it is already visible
             return;
         }
 
@@ -746,7 +746,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
      * conjunction with {@link #moveHomeStackBehindBottomMostVisibleStack}.
      */
     void moveHomeStackBehindStack(ActivityStack behindStack) {
-        if (behindStack == null) {
+        if (behindStack == null || behindStack == mHomeStack) {
             return;
         }
 

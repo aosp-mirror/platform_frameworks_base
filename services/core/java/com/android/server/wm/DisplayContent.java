@@ -1159,10 +1159,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         // Update application display metrics.
+        final DisplayCutout displayCutout = calculateDisplayCutoutForRotation(
+                mRotation);
         final int appWidth = mService.mPolicy.getNonDecorDisplayWidth(dw, dh, mRotation, uiMode,
-                mDisplayId);
+                mDisplayId, displayCutout);
         final int appHeight = mService.mPolicy.getNonDecorDisplayHeight(dw, dh, mRotation, uiMode,
-                mDisplayId);
+                mDisplayId, displayCutout);
         mDisplayInfo.rotation = mRotation;
         mDisplayInfo.logicalWidth = dw;
         mDisplayInfo.logicalHeight = dh;
@@ -1173,7 +1175,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mDisplayInfo.getLogicalMetrics(mRealDisplayMetrics,
                     CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
         }
-        mDisplayInfo.displayCutout = calculateDisplayCutoutForCurrentRotation();
+        mDisplayInfo.displayCutout = displayCutout;
         mDisplayInfo.getAppMetrics(mDisplayMetrics);
         if (mDisplayScalingDisabled) {
             mDisplayInfo.flags |= Display.FLAG_SCALING_DISABLED;
@@ -1195,16 +1197,22 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mDisplayInfo;
     }
 
-    DisplayCutout calculateDisplayCutoutForCurrentRotation() {
+    DisplayCutout calculateDisplayCutoutForRotation(int rotation) {
         final DisplayCutout cutout = mInitialDisplayCutout;
-        if (cutout == null || cutout == DisplayCutout.NO_CUTOUT || mRotation == ROTATION_0) {
+        if (cutout == null || cutout == DisplayCutout.NO_CUTOUT) {
             return cutout;
         }
+        if (rotation == ROTATION_0) {
+            return cutout.computeSafeInsets(mInitialDisplayWidth, mInitialDisplayHeight);
+        }
+        final boolean rotated = (rotation == ROTATION_90 || mRotation == ROTATION_270);
         final Path bounds = cutout.getBounds().getBoundaryPath();
-        transformPhysicalToLogicalCoordinates(mRotation, mInitialDisplayWidth,
-                mInitialDisplayHeight, mTmpMatrix);
+        transformPhysicalToLogicalCoordinates(rotation, mInitialDisplayWidth, mInitialDisplayHeight,
+                mTmpMatrix);
         bounds.transform(mTmpMatrix);
-        return DisplayCutout.fromBounds(bounds);
+        return DisplayCutout.fromBounds(bounds).computeSafeInsets(
+                rotated ? mInitialDisplayHeight : mInitialDisplayWidth,
+                rotated ? mInitialDisplayWidth : mInitialDisplayHeight);
     }
 
     /**
@@ -1221,14 +1229,16 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // so the display can be configured for things like fullscreen.
         config.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
 
+        final float density = mDisplayMetrics.density;
         config.screenWidthDp =
                 (int)(mService.mPolicy.getConfigDisplayWidth(dw, dh, displayInfo.rotation,
-                        config.uiMode, mDisplayId) / mDisplayMetrics.density);
+                        config.uiMode, mDisplayId, displayInfo.displayCutout) / density);
         config.screenHeightDp =
                 (int)(mService.mPolicy.getConfigDisplayHeight(dw, dh, displayInfo.rotation,
-                        config.uiMode, mDisplayId) / mDisplayMetrics.density);
+                        config.uiMode, mDisplayId, displayInfo.displayCutout) / density);
 
-        mService.mPolicy.getNonDecorInsetsLw(displayInfo.rotation, dw, dh, mTmpRect);
+        mService.mPolicy.getNonDecorInsetsLw(displayInfo.rotation, dw, dh,
+                displayInfo.displayCutout, mTmpRect);
         final int leftInset = mTmpRect.left;
         final int topInset = mTmpRect.top;
         // appBounds at the root level should mirror the app screen size.
@@ -1239,7 +1249,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 || displayInfo.rotation == Surface.ROTATION_270);
 
         computeSizeRangesAndScreenLayout(displayInfo, mDisplayId, rotated, config.uiMode, dw, dh,
-                mDisplayMetrics.density, config);
+                density, config);
 
         config.screenLayout = (config.screenLayout & ~Configuration.SCREENLAYOUT_ROUND_MASK)
                 | ((displayInfo.flags & Display.FLAG_ROUND) != 0
@@ -1351,9 +1361,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private int reduceCompatConfigWidthSize(int curSize, int rotation, int uiMode,
             DisplayMetrics dm, int dw, int dh, int displayId) {
         dm.noncompatWidthPixels = mService.mPolicy.getNonDecorDisplayWidth(dw, dh, rotation, uiMode,
-                displayId);
+                displayId, mDisplayInfo.displayCutout);
         dm.noncompatHeightPixels = mService.mPolicy.getNonDecorDisplayHeight(dw, dh, rotation,
-                uiMode, displayId);
+                uiMode, displayId, mDisplayInfo.displayCutout);
         float scale = CompatibilityInfo.computeCompatibleScaling(dm, null);
         int size = (int)(((dm.noncompatWidthPixels / scale) / dm.density) + .5f);
         if (curSize == 0 || size < curSize) {
@@ -1405,8 +1415,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private int reduceConfigLayout(int curLayout, int rotation, float density, int dw, int dh,
             int uiMode, int displayId) {
         // Get the app screen size at this rotation.
-        int w = mService.mPolicy.getNonDecorDisplayWidth(dw, dh, rotation, uiMode, displayId);
-        int h = mService.mPolicy.getNonDecorDisplayHeight(dw, dh, rotation, uiMode, displayId);
+        int w = mService.mPolicy.getNonDecorDisplayWidth(dw, dh, rotation, uiMode, displayId,
+                mDisplayInfo.displayCutout);
+        int h = mService.mPolicy.getNonDecorDisplayHeight(dw, dh, rotation, uiMode, displayId,
+                mDisplayInfo.displayCutout);
 
         // Compute the screen layout size class for this rotation.
         int longSize = w;
@@ -1423,8 +1435,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     private void adjustDisplaySizeRanges(DisplayInfo displayInfo, int displayId, int rotation,
             int uiMode, int dw, int dh) {
+        final DisplayCutout displayCutout = calculateDisplayCutoutForRotation(rotation);
         final int width = mService.mPolicy.getConfigDisplayWidth(dw, dh, rotation, uiMode,
-                displayId);
+                displayId, displayCutout);
         if (width < displayInfo.smallestNominalAppWidth) {
             displayInfo.smallestNominalAppWidth = width;
         }
@@ -1432,7 +1445,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             displayInfo.largestNominalAppWidth = width;
         }
         final int height = mService.mPolicy.getConfigDisplayHeight(dw, dh, rotation, uiMode,
-                displayId);
+                displayId, displayCutout);
         if (height < displayInfo.smallestNominalAppHeight) {
             displayInfo.smallestNominalAppHeight = height;
         }

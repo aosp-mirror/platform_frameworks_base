@@ -76,22 +76,11 @@ public class QSContainerImpl extends FrameLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        getDisplay().getRealSize(mSizePoint);
-
         // Since we control our own bottom, be whatever size we want.
         // Otherwise the QSPanel ends up with 0 height when the window is only the
         // size of the status bar.
-        Configuration config = getResources().getConfiguration();
-        boolean navBelow = config.smallestScreenWidthDp >= 600
-                || config.orientation != Configuration.ORIENTATION_LANDSCAPE;
-        MarginLayoutParams params = (MarginLayoutParams) mQSPanel.getLayoutParams();
-        int maxQs = mSizePoint.y - params.topMargin - params.bottomMargin - getPaddingBottom()
-                - getResources().getDimensionPixelSize(R.dimen.qs_notif_collapsed_space);
-        if (navBelow) {
-            maxQs -= getResources().getDimensionPixelSize(R.dimen.navigation_bar_height);
-        }
-        mQSPanel.measure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(maxQs, MeasureSpec.AT_MOST));
-
+        mQSPanel.measure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(
+                MeasureSpec.getSize(heightMeasureSpec), MeasureSpec.UNSPECIFIED));
         int width = mQSPanel.getMeasuredWidth();
         LayoutParams layoutParams = (LayoutParams) mQSPanel.getLayoutParams();
         int height = layoutParams.topMargin + layoutParams.bottomMargin
@@ -101,6 +90,7 @@ public class QSContainerImpl extends FrameLayout {
 
         // QSCustomizer will always be the height of the screen, but do this after
         // other measuring to avoid changing the height of the QS.
+        getDisplay().getRealSize(mSizePoint);
         mQSCustomizer.measure(widthMeasureSpec,
                 MeasureSpec.makeMeasureSpec(mSizePoint.y, MeasureSpec.EXACTLY));
     }

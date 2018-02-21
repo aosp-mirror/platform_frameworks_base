@@ -362,8 +362,8 @@
     <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Пайдалану негізінде шамамен <xliff:g id="TIME">%1$s</xliff:g> қалды"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"Толық зарядқа <xliff:g id="TIME">%1$s</xliff:g> қалды"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> қалды"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"<xliff:g id="THRESHOLD">%1$s</xliff:g> мәнінен аз қалды"</string>
-    <string name="power_remaining_less_than_duration" msgid="7967078125657859046">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="THRESHOLD">%2$s</xliff:g> мәнінен аз қалды"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"<xliff:g id="THRESHOLD">%1$s</xliff:g> шамасынан аз қалды"</string>
+    <string name="power_remaining_less_than_duration" msgid="7967078125657859046">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="THRESHOLD">%2$s</xliff:g> шамасынан аз қалды"</string>
     <string name="power_remaining_more_than_subtext" msgid="6846716609975752316">"<xliff:g id="LEVEL">%1$s</xliff:g><xliff:g id="TIME_REMAINING">%2$s</xliff:g> үстінде қалды"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="8884488700395194194">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> үстінде қалды"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="8168317165722752881">"телефон көп ұзамай өшуі мүмкін"</string>
@@ -432,5 +432,5 @@
     <string name="zen_alarm_warning_indef" msgid="3007988140196673193">"Мұны ертерек өшіріп қоймасаңыз, келесі дабыл (уақыты: <xliff:g id="WHEN">%1$s</xliff:g>) естілмейді"</string>
     <string name="zen_alarm_warning" msgid="6236690803924413088">"Келесі дабылыңыз (уақыты: <xliff:g id="WHEN">%1$s</xliff:g>) естілмейді"</string>
     <string name="alarm_template" msgid="4996153414057676512">"Уақыты: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="alarm_template_far" msgid="3779172822607461675">"Күні: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="3779172822607461675">"Уақыты: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
 </resources>

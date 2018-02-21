@@ -435,6 +435,14 @@ class UserController implements Handler.Callback {
         }
         mInjector.getUserManagerInternal().setUserState(userId, uss.state);
         uss.mUnlockProgress.finish();
+
+        // Get unaware persistent apps running and start any unaware providers
+        // in already-running apps that are partially aware
+        if (userId == UserHandle.USER_SYSTEM) {
+            mInjector.startPersistentApps(PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
+        }
+        mInjector.installEncryptionUnawareProviders(userId);
+
         // Dispatch unlocked to external apps
         final Intent unlockedIntent = new Intent(Intent.ACTION_USER_UNLOCKED);
         unlockedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
@@ -1951,10 +1959,6 @@ class UserController implements Handler.Callback {
                 FgThread.getHandler().post(() -> {
                     mInjector.loadUserRecents(userId);
                 });
-                if (userId == UserHandle.USER_SYSTEM) {
-                    mInjector.startPersistentApps(PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
-                }
-                mInjector.installEncryptionUnawareProviders(userId);
                 finishUserUnlocked((UserState) msg.obj);
                 break;
             case SYSTEM_USER_CURRENT_MSG:
