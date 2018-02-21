@@ -75,6 +75,7 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
     private boolean mDraggingActive;
     private boolean mQuickScrubActive;
     private boolean mAllowQuickSwitch;
+    private boolean mRecentsAnimationStarted;
     private float mDownOffset;
     private float mTranslation;
     private int mTouchDownX;
@@ -279,7 +280,7 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
                     }
 
                     // Control the button movement
-                    if (!mDraggingActive && exceededTouchSlop) {
+                    if (!mDraggingActive && exceededTouchSlop && !mRecentsAnimationStarted) {
                         boolean allowDrag = !mDragPositive
                                 ? offset < 0 && pos < touchDown : offset >= 0 && pos > touchDown;
                         if (allowDrag) {
@@ -415,6 +416,13 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
             }
         }
         mDraggingActive = false;
+    }
+
+    public void setRecentsAnimationStarted(boolean started) {
+        mRecentsAnimationStarted = started;
+        if (started) {
+            cancelQuickSwitch();
+        }
     }
 
     public void cancelQuickSwitch() {
