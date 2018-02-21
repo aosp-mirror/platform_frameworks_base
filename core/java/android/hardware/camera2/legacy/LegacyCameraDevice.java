@@ -730,7 +730,7 @@ public class LegacyCameraDevice implements AutoCloseable {
         LegacyExceptionUtils.throwOnError(nativeSetSurfaceDimens(surface, width, height));
     }
 
-    static long getSurfaceId(Surface surface) throws BufferQueueAbandonedException {
+    public static long getSurfaceId(Surface surface) throws BufferQueueAbandonedException {
         checkNotNull(surface);
         try {
             return nativeGetSurfaceId(surface);
