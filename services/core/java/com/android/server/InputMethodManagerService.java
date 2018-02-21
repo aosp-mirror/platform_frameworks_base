@@ -4702,6 +4702,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         @ShellCommandResult
         @Override
         public int onCommand(@Nullable String cmd) {
+            if ("refresh_debug_properties".equals(cmd)) {
+                return refreshDebugProperties();
+            }
+
             // For existing "adb shell ime <command>".
             if ("ime".equals(cmd)) {
                 final String imeCommand = getNextArg();
@@ -4720,8 +4724,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         return mService.handleShellCommandSetInputMethod(this);
                     case "reset":
                         return mService.handleShellCommandResetInputMethod(this);
-                    case "refresh_debug_properties":
-                        return refreshDebugProperties();
                     default:
                         getOutPrintWriter().println("Unknown command: " + imeCommand);
                         return ShellCommandResult.FAILURE;
