@@ -5278,6 +5278,11 @@ message MetricsEvent {
     // OS: P
     FIELD_QS_MODE = 1311;
 
+    // OPEN: Settings->Developer Options->Default USB
+    // CATEGORY: SETTINGS
+    // OS: P
+    USB_DEFAULT = 1312;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
