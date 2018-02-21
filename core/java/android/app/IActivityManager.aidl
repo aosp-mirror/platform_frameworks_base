@@ -630,7 +630,6 @@ interface IActivityManager {
     void setHasTopUi(boolean hasTopUi);
 
     // Start of O transactions
-    void requestActivityRelaunch(in IBinder token);
     /**
      * Updates override configuration applied to specific display.
      * @param values Update values for display configuration. If null is passed it will request the
