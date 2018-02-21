@@ -25,6 +25,7 @@ import android.app.IStopUserCallback;
 import android.app.IUidObserver;
 import android.app.ProfilerInfo;
 import android.app.WaitResult;
+import android.app.usage.AppStandbyInfo;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.IUsageStatsManager;
 import android.app.usage.UsageStatsManager;
@@ -1945,15 +1946,16 @@ final class ActivityManagerShellCommand extends ShellCommand {
         if (!multiple) {
             usm.setAppStandbyBucket(packageName, bucketNameToBucketValue(value), userId);
         } else {
-            HashMap<String, Integer> buckets = new HashMap<>();
-            buckets.put(packageName, bucket);
+            ArrayList<AppStandbyInfo> bucketInfoList = new ArrayList<>();
+            bucketInfoList.add(new AppStandbyInfo(packageName, bucket));
             while ((packageName = getNextArg()) != null) {
                 value = getNextArgRequired();
                 bucket = bucketNameToBucketValue(value);
                 if (bucket < 0) continue;
-                buckets.put(packageName, bucket);
+                bucketInfoList.add(new AppStandbyInfo(packageName, bucket));
             }
-            usm.setAppStandbyBuckets(buckets, userId);
+            ParceledListSlice<AppStandbyInfo> slice = new ParceledListSlice<>(bucketInfoList);
+            usm.setAppStandbyBuckets(slice, userId);
         }
         return 0;
     }
@@ -1978,11 +1980,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
             int bucket = usm.getAppStandbyBucket(packageName, null, userId);
             pw.println(bucket);
         } else {
-            Map<String, Integer> buckets = (Map<String, Integer>) usm.getAppStandbyBuckets(
+            ParceledListSlice<AppStandbyInfo> buckets = usm.getAppStandbyBuckets(
                     SHELL_PACKAGE_NAME, userId);
-            for (Map.Entry<String, Integer> entry: buckets.entrySet()) {
-                pw.print(entry.getKey()); pw.print(": ");
-                pw.println(entry.getValue());
+            for (AppStandbyInfo bucketInfo : buckets.getList()) {
+                pw.print(bucketInfo.mPackageName); pw.print(": ");
+                pw.println(bucketInfo.mStandbyBucket);
             }
         }
         return 0;

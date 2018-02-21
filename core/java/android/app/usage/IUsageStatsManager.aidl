@@ -40,6 +40,6 @@ interface IUsageStatsManager {
             in String[] annotations, String action);
     int getAppStandbyBucket(String packageName, String callingPackage, int userId);
     void setAppStandbyBucket(String packageName, int bucket, int userId);
-    Map getAppStandbyBuckets(String callingPackage, int userId);
-    void setAppStandbyBuckets(in Map appBuckets, int userId);
+    ParceledListSlice getAppStandbyBuckets(String callingPackage, int userId);
+    void setAppStandbyBuckets(in ParceledListSlice appBuckets, int userId);
 }

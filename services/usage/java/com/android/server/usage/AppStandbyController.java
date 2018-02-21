@@ -33,6 +33,7 @@ import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
+import android.app.usage.AppStandbyInfo;
 import android.app.usage.UsageStatsManager.StandbyBuckets;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal.AppIdleStateChangeListener;
@@ -954,9 +955,9 @@ public class AppStandbyController {
         }
     }
 
-    public Map<String, Integer> getAppStandbyBuckets(int userId, long elapsedRealtime) {
+    public List<AppStandbyInfo> getAppStandbyBuckets(int userId) {
         synchronized (mAppIdleLock) {
-            return mAppIdleHistory.getAppStandbyBuckets(userId, elapsedRealtime, mAppIdleEnabled);
+            return mAppIdleHistory.getAppStandbyBuckets(userId, mAppIdleEnabled);
         }
     }
 
