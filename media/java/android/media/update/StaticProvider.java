@@ -40,7 +40,6 @@ import android.media.MediaSessionService2;
 import android.media.MediaSessionService2.MediaNotification;
 import android.media.PlaybackState2;
 import android.media.Rating2;
-import android.media.SessionPlayer2;
 import android.media.SessionToken2;
 import android.media.VolumeProvider2;
 import android.media.update.MediaLibraryService2Provider.LibraryRootProvider;
@@ -112,8 +111,6 @@ public interface StaticProvider {
     SessionToken2Provider createSessionToken2(Context context, SessionToken2 instance,
             String packageName, String serviceName, int uid);
     SessionToken2 SessionToken2_fromBundle(Context context, Bundle bundle);
-
-    SessionPlayer2Provider createSessionPlayer2(Context context, SessionPlayer2 instance);
 
     MediaItem2Provider createMediaItem2(Context context, MediaItem2 mediaItem2,
             String mediaId, DataSourceDesc dsd, MediaMetadata2 metadata, int flags);
