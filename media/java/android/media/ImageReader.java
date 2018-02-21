@@ -876,6 +876,12 @@ public class ImageReader implements AutoCloseable {
         }
 
         @Override
+        public HardwareBuffer getHardwareBuffer() {
+            throwISEIfImageIsInvalid();
+            return nativeGetHardwareBuffer();
+        }
+
+        @Override
         public void setTimestamp(long timestampNs) {
             throwISEIfImageIsInvalid();
             mTimestamp = timestampNs;
@@ -1017,6 +1023,7 @@ public class ImageReader implements AutoCloseable {
         private synchronized native int nativeGetWidth();
         private synchronized native int nativeGetHeight();
         private synchronized native int nativeGetFormat(int readerFormat);
+        private synchronized native HardwareBuffer nativeGetHardwareBuffer();
     }
 
     private synchronized native void nativeInit(Object weakSelf, int w, int h,
