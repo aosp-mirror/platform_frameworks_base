@@ -117,7 +117,6 @@ public interface MediaSession2Provider extends TransportControlProvider {
 
     interface BuilderBaseProvider<T extends MediaSession2, C extends SessionCallback> {
         void setVolumeProvider_impl(VolumeProvider2 volumeProvider);
-        void setRatingType_impl(int type);
         void setSessionActivity_impl(PendingIntent pi);
         void setId_impl(String id);
         void setSessionCallback_impl(Executor executor, C callback);

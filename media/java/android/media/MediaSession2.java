@@ -87,8 +87,7 @@ public class MediaSession2 implements AutoCloseable {
     // TODO(jaewan): Should we define IntDef? Currently we don't have to allow subclass to add more.
     // TODO(jaewan): Shouldn't we pull out?
     // TODO(jaewan): Should we also protect getters not related with metadata?
-    //               Getters are getRatingType(), getPlaybackState(), getSessionActivity(),
-    //               getPlaylistParams())
+    //               Getters are getPlaybackState(), getSessionActivity(), getPlaylistParams()
     // Next ID: 23
     /**
      * Command code for the custom command which can be defined by string action in the
@@ -454,6 +453,11 @@ public class MediaSession2 implements AutoCloseable {
         /**
          * Called when a controller set rating of a media item through
          * {@link MediaController2#setRating(String, Rating2)}.
+         * <p>
+         * To allow setting user rating for a {@link MediaItem2}, the media item's metadata
+         * should have {@link Rating2} with the key {@link MediaMetadata#METADATA_KEY_USER_RATING},
+         * in order to provide possible rating style for controller. Controller will follow the
+         * rating style.
          *
          * @param controller controller information
          * @param mediaId media id from the controller
@@ -621,24 +625,6 @@ public class MediaSession2 implements AutoCloseable {
         }
 
         /**
-         * Set the style of rating used by this session. Apps trying to set the
-         * rating should use this style. Must be one of the following:
-         * <ul>
-         * <li>{@link Rating2#RATING_NONE}</li>
-         * <li>{@link Rating2#RATING_3_STARS}</li>
-         * <li>{@link Rating2#RATING_4_STARS}</li>
-         * <li>{@link Rating2#RATING_5_STARS}</li>
-         * <li>{@link Rating2#RATING_HEART}</li>
-         * <li>{@link Rating2#RATING_PERCENTAGE}</li>
-         * <li>{@link Rating2#RATING_THUMB_UP_DOWN}</li>
-         * </ul>
-         */
-        U setRatingType(@Rating2.Style int type) {
-            mProvider.setRatingType_impl(type);
-            return (U) this;
-        }
-
-        /**
          * Set an intent for launching UI for this Session. This can be used as a
          * quick link to an ongoing media screen. The intent should be for an
          * activity that may be started using {@link Context#startActivity(Intent)}.
@@ -707,11 +693,6 @@ public class MediaSession2 implements AutoCloseable {
         @Override
         public Builder setVolumeProvider(@Nullable VolumeProvider2 volumeProvider) {
             return super.setVolumeProvider(volumeProvider);
-        }
-
-        @Override
-        public Builder setRatingType(@Rating2.Style int type) {
-            return super.setRatingType(type);
         }
 
         @Override

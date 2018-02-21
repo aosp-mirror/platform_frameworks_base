@@ -252,11 +252,6 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
         }
 
         @Override
-        public MediaLibrarySessionBuilder setRatingType(int type) {
-            return super.setRatingType(type);
-        }
-
-        @Override
         public MediaLibrarySessionBuilder setSessionActivity(@Nullable PendingIntent pi) {
             return super.setSessionActivity(pi);
         }
