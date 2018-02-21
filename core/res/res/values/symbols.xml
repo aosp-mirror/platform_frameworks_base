@@ -316,6 +316,7 @@
   <java-symbol type="bool" name="config_wifi_softap_acs_supported" />
   <java-symbol type="bool" name="config_wifi_softap_ieee80211ac_supported" />
   <java-symbol type="bool" name="config_enableMultiUserUI"/>
+  <java-symbol type="bool" name="config_enableNewAutoSelectNetworkUI"/>
   <java-symbol type="bool" name="config_disableUsbPermissionDialogs"/>
   <java-symbol type="bool" name="config_hasRecents" />
   <java-symbol type="string" name="config_recentsComponentName" />
