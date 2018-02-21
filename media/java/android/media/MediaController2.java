@@ -570,14 +570,14 @@ public class MediaController2 implements AutoCloseable {
     }
 
     /**
-     * Rate the current content. This will cause the rating to be set for
-     * the current user. The Rating type must match the type returned by
-     * {@link #getRatingType()}.
+     * Rate the media. This will cause the rating to be set for the current user.
+     * The Rating type must match the type returned by {@link #getRatingType()}.
      *
-     * @param rating The rating to set for the current content
+     * @param mediaId The id of the media
+     * @param rating The rating to set
      */
-    public void setRating(Rating2 rating) {
-        mProvider.setRating_impl(rating);
+    public void setRating(String mediaId, Rating2 rating) {
+        mProvider.setRating_impl(mediaId, rating);
     }
 
     /**
