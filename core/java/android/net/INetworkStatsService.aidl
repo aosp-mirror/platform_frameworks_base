@@ -39,9 +39,6 @@ interface INetworkStatsService {
      */
     INetworkStatsSession openSessionForUsageStats(int flags, String callingPackage);
 
-    /** Return network layer usage total for traffic that matches template. */
-    long getNetworkTotalBytes(in NetworkTemplate template, long start, long end);
-
     /** Return data layer snapshot of UID network usage. */
     NetworkStats getDataLayerSnapshotForUid(int uid);
     /** Return set of any ifaces associated with mobile networks since boot. */
@@ -50,16 +47,10 @@ interface INetworkStatsService {
     /** Increment data layer count of operations performed for UID and tag. */
     void incrementOperationCount(int uid, int tag, int operationCount);
 
-    /** Mark given UID as being in foreground for stats purposes. */
-    void setUidForeground(int uid, boolean uidForeground);
-
     /** Force update of ifaces. */
     void forceUpdateIfaces(in Network[] defaultNetworks);
     /** Force update of statistics. */
     void forceUpdate();
-
-    /** Advise persistance threshold; may be overridden internally. */
-    void advisePersistThreshold(long thresholdBytes);
 
     /** Registers a callback on data usage. */
     DataUsageRequest registerUsageCallback(String callingPackage,

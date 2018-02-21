@@ -26,6 +26,9 @@ import static android.net.NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
 import static android.net.NetworkPolicyManager.uidPoliciesToString;
+import static android.net.NetworkStats.IFACE_ALL;
+import static android.net.NetworkStats.SET_ALL;
+import static android.net.NetworkStats.TAG_ALL;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.telephony.CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED;
@@ -41,8 +44,6 @@ import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT_SNOOZED;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_RAPID;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_WARNING;
-
-import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -86,7 +87,6 @@ import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkPolicyListener;
-import android.net.INetworkStatsService;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -105,6 +105,7 @@ import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.RemoteException;
 import android.os.SimpleClock;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
@@ -125,6 +126,7 @@ import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.BroadcastInterceptingContext.FutureIntent;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.net.NetworkPolicyManagerService;
+import com.android.server.net.NetworkStatsManagerInternal;
 
 import libcore.io.IoUtils;
 import libcore.io.Streams;
@@ -214,7 +216,6 @@ public class NetworkPolicyManagerServiceTest {
     private String mNetpolicyXml;
 
     private @Mock IActivityManager mActivityManager;
-    private @Mock INetworkStatsService mStatsService;
     private @Mock INetworkManagementService mNetworkManager;
     private @Mock IConnectivityManager mConnManager;
     private @Mock NotificationManager mNotifManager;
@@ -224,7 +225,8 @@ public class NetworkPolicyManagerServiceTest {
     private @Mock CarrierConfigManager mCarrierConfigManager;
     private @Mock TelephonyManager mTelephonyManager;
 
-    private static ActivityManagerInternal mActivityManagerInternal;
+    private ActivityManagerInternal mActivityManagerInternal;
+    private NetworkStatsManagerInternal mStatsService;
 
     private IUidObserver mUidObserver;
     private INetworkManagementEventObserver mNetworkObserver;
@@ -264,6 +266,8 @@ public class NetworkPolicyManagerServiceTest {
     private static final int UID_F = UserHandle.getUid(USER_ID, APP_ID_F);
 
     private static final String PKG_NAME_A = "name.is.A,pkg.A";
+    private static final String PKG_NAME_B = "name.is.B,pkg.B";
+    private static final String PKG_NAME_C = "name.is.C,pkg.C";
 
     public final @Rule NetPolicyMethodRule mNetPolicyXmlRule = new NetPolicyMethodRule();
 
@@ -287,6 +291,8 @@ public class NetworkPolicyManagerServiceTest {
                 .setBatterySaverEnabled(false).build();
         final PowerManagerInternal pmInternal = addLocalServiceMock(PowerManagerInternal.class);
         when(pmInternal.getLowPowerState(anyInt())).thenReturn(state);
+
+        mStatsService = addLocalServiceMock(NetworkStatsManagerInternal.class);
     }
 
     @Before
@@ -347,7 +353,7 @@ public class NetworkPolicyManagerServiceTest {
                 eq(ActivityManager.PROCESS_STATE_UNKNOWN), isNull(String.class));
 
         mFutureIntent = newRestrictBackgroundChangedFuture();
-        mService = new NetworkPolicyManagerService(mServiceContext, mActivityManager, mStatsService,
+        mService = new NetworkPolicyManagerService(mServiceContext, mActivityManager,
                 mNetworkManager, mIpm, mClock, mPolicyDir, true);
         mService.bindConnectivityManager(mConnManager);
         mPolicyListener = new NetworkPolicyListenerAnswer(mService);
@@ -375,6 +381,14 @@ public class NetworkPolicyManagerServiceTest {
         when(mPackageManager.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
                 .thenReturn(new ApplicationInfo());
         when(mPackageManager.getPackagesForUid(UID_A)).thenReturn(new String[] {PKG_NAME_A});
+        when(mPackageManager.getPackagesForUid(UID_B)).thenReturn(new String[] {PKG_NAME_B});
+        when(mPackageManager.getPackagesForUid(UID_C)).thenReturn(new String[] {PKG_NAME_C});
+        when(mPackageManager.getApplicationInfo(eq(PKG_NAME_A), anyInt()))
+                .thenReturn(buildApplicationInfo(PKG_NAME_A));
+        when(mPackageManager.getApplicationInfo(eq(PKG_NAME_B), anyInt()))
+                .thenReturn(buildApplicationInfo(PKG_NAME_B));
+        when(mPackageManager.getApplicationInfo(eq(PKG_NAME_C), anyInt()))
+                .thenReturn(buildApplicationInfo(PKG_NAME_C));
         when(mNetworkManager.isBandwidthControlEnabled()).thenReturn(true);
         when(mNetworkManager.setDataSaverModeEnabled(anyBoolean())).thenReturn(true);
 
@@ -409,6 +423,7 @@ public class NetworkPolicyManagerServiceTest {
         LocalServices.removeServiceForTest(PowerManagerInternal.class);
         LocalServices.removeServiceForTest(DeviceIdleController.LocalService.class);
         LocalServices.removeServiceForTest(UsageStatsManagerInternal.class);
+        LocalServices.removeServiceForTest(NetworkStatsManagerInternal.class);
     }
 
     @After
@@ -515,7 +530,7 @@ public class NetworkPolicyManagerServiceTest {
         mService.updateRestrictBackgroundByLowPowerModeUL(stateOn);
 
         // RestrictBackground should be on even though battery saver want to turn it off
-        assertThat(mService.getRestrictBackground()).isTrue();
+        assertTrue(mService.getRestrictBackground());
 
         PowerSaveState stateOff = new PowerSaveState.Builder()
                 .setGlobalBatterySaverEnabled(false)
@@ -524,7 +539,7 @@ public class NetworkPolicyManagerServiceTest {
         mService.updateRestrictBackgroundByLowPowerModeUL(stateOff);
 
         // RestrictBackground should be on, following its previous state
-        assertThat(mService.getRestrictBackground()).isTrue();
+        assertTrue(mService.getRestrictBackground());
     }
 
     @Test
@@ -539,7 +554,7 @@ public class NetworkPolicyManagerServiceTest {
         mService.updateRestrictBackgroundByLowPowerModeUL(stateOn);
 
         // RestrictBackground should be turned on because of battery saver
-        assertThat(mService.getRestrictBackground()).isTrue();
+        assertTrue(mService.getRestrictBackground());
 
         PowerSaveState stateOff = new PowerSaveState.Builder()
                 .setGlobalBatterySaverEnabled(false)
@@ -548,7 +563,7 @@ public class NetworkPolicyManagerServiceTest {
         mService.updateRestrictBackgroundByLowPowerModeUL(stateOff);
 
         // RestrictBackground should be off, following its previous state
-        assertThat(mService.getRestrictBackground()).isFalse();
+        assertFalse(mService.getRestrictBackground());
     }
 
     @Test
@@ -562,7 +577,7 @@ public class NetworkPolicyManagerServiceTest {
         mService.updateRestrictBackgroundByLowPowerModeUL(stateOn);
 
         // RestrictBackground should still be on
-        assertThat(mService.getRestrictBackground()).isTrue();
+        assertTrue(mService.getRestrictBackground());
 
         // User turns off RestrictBackground manually
         setRestrictBackground(false);
@@ -571,7 +586,7 @@ public class NetworkPolicyManagerServiceTest {
         mService.updateRestrictBackgroundByLowPowerModeUL(stateOff);
 
         // RestrictBackground should be off because user changes it manually
-        assertThat(mService.getRestrictBackground()).isFalse();
+        assertFalse(mService.getRestrictBackground());
     }
 
     private void removeRestrictBackgroundWhitelist(boolean expectIntent) throws Exception {
@@ -974,6 +989,7 @@ public class NetworkPolicyManagerServiceTest {
     public void testNotificationWarningLimitSnooze() throws Exception {
         // Create a place to store fake usage
         final NetworkStatsHistory history = new NetworkStatsHistory(TimeUnit.HOURS.toMillis(1));
+        final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 0);
         when(mStatsService.getNetworkTotalBytes(any(), anyLong(), anyLong()))
                 .thenAnswer(new Answer<Long>() {
                     @Override
@@ -981,6 +997,13 @@ public class NetworkPolicyManagerServiceTest {
                         final NetworkStatsHistory.Entry entry = history.getValues(
                                 invocation.getArgument(1), invocation.getArgument(2), null);
                         return entry.rxBytes + entry.txBytes;
+                    }
+                });
+        when(mStatsService.getNetworkUidBytes(any(), anyLong(), anyLong()))
+                .thenAnswer(new Answer<NetworkStats>() {
+                    @Override
+                    public NetworkStats answer(InvocationOnMock invocation) throws Throwable {
+                        return stats;
                     }
                 });
 
@@ -1003,7 +1026,7 @@ public class NetworkPolicyManagerServiceTest {
 
         // Normal usage means no notification
         {
-            history.removeBucketsBefore(Long.MAX_VALUE);
+            history.clear();
             history.recordData(start, end,
                     new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(360), 0L, 0L, 0L, 0));
 
@@ -1020,7 +1043,7 @@ public class NetworkPolicyManagerServiceTest {
 
         // Push over warning
         {
-            history.removeBucketsBefore(Long.MAX_VALUE);
+            history.clear();
             history.recordData(start, end,
                     new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1799), 0L, 0L, 0L, 0));
 
@@ -1038,7 +1061,7 @@ public class NetworkPolicyManagerServiceTest {
 
         // Push over limit
         {
-            history.removeBucketsBefore(Long.MAX_VALUE);
+            history.clear();
             history.recordData(start, end,
                     new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1810), 0L, 0L, 0L, 0));
 
@@ -1073,6 +1096,7 @@ public class NetworkPolicyManagerServiceTest {
     public void testNotificationRapid() throws Exception {
         // Create a place to store fake usage
         final NetworkStatsHistory history = new NetworkStatsHistory(TimeUnit.HOURS.toMillis(1));
+        final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 0);
         when(mStatsService.getNetworkTotalBytes(any(), anyLong(), anyLong()))
                 .thenAnswer(new Answer<Long>() {
                     @Override
@@ -1080,6 +1104,13 @@ public class NetworkPolicyManagerServiceTest {
                         final NetworkStatsHistory.Entry entry = history.getValues(
                                 invocation.getArgument(1), invocation.getArgument(2), null);
                         return entry.rxBytes + entry.txBytes;
+                    }
+                });
+        when(mStatsService.getNetworkUidBytes(any(), anyLong(), anyLong()))
+                .thenAnswer(new Answer<NetworkStats>() {
+                    @Override
+                    public NetworkStats answer(InvocationOnMock invocation) throws Throwable {
+                        return stats;
                     }
                 });
 
@@ -1102,7 +1133,7 @@ public class NetworkPolicyManagerServiceTest {
 
         // Using 20% data in 20% time is normal
         {
-            history.removeBucketsBefore(Long.MAX_VALUE);
+            history.clear();
             history.recordData(start, end,
                     new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(360), 0L, 0L, 0L, 0));
 
@@ -1111,16 +1142,58 @@ public class NetworkPolicyManagerServiceTest {
             verify(mNotifManager, never()).notifyAsUser(any(), anyInt(), any(), any());
         }
 
-        // Using 80% data in 20% time is alarming
+        // Using 80% data in 20% time is alarming; but spread equally among
+        // three UIDs means we get generic alert
         {
-            history.removeBucketsBefore(Long.MAX_VALUE);
+            history.clear();
             history.recordData(start, end,
                     new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1440), 0L, 0L, 0L, 0));
+            stats.clear();
+            stats.addValues(IFACE_ALL, UID_A, SET_ALL, TAG_ALL,
+                    DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
+            stats.addValues(IFACE_ALL, UID_B, SET_ALL, TAG_ALL,
+                    DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
+            stats.addValues(IFACE_ALL, UID_C, SET_ALL, TAG_ALL,
+                    DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
 
             reset(mNotifManager);
             mService.updateNetworks();
+
+            final ArgumentCaptor<Notification> notif = ArgumentCaptor.forClass(Notification.class);
             verify(mNotifManager, atLeastOnce()).notifyAsUser(any(), eq(TYPE_RAPID),
-                    isA(Notification.class), eq(UserHandle.ALL));
+                    notif.capture(), eq(UserHandle.ALL));
+
+            final String text = notif.getValue().extras.getCharSequence(Notification.EXTRA_TEXT)
+                    .toString();
+            assertFalse(text.contains(PKG_NAME_A));
+            assertFalse(text.contains(PKG_NAME_B));
+            assertFalse(text.contains(PKG_NAME_C));
+        }
+
+        // Using 80% data in 20% time is alarming; but mostly done by one UID
+        // means we get specific alert
+        {
+            history.clear();
+            history.recordData(start, end,
+                    new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1440), 0L, 0L, 0L, 0));
+            stats.clear();
+            stats.addValues(IFACE_ALL, UID_A, SET_ALL, TAG_ALL,
+                    DataUnit.MEGABYTES.toBytes(960), 0, 0, 0, 0);
+            stats.addValues(IFACE_ALL, UID_B, SET_ALL, TAG_ALL,
+                    DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
+
+            reset(mNotifManager);
+            mService.updateNetworks();
+
+            final ArgumentCaptor<Notification> notif = ArgumentCaptor.forClass(Notification.class);
+            verify(mNotifManager, atLeastOnce()).notifyAsUser(any(), eq(TYPE_RAPID),
+                    notif.capture(), eq(UserHandle.ALL));
+
+            final String text = notif.getValue().extras.getCharSequence(Notification.EXTRA_TEXT)
+                    .toString();
+            assertTrue(text.contains(PKG_NAME_A));
+            assertFalse(text.contains(PKG_NAME_B));
+            assertFalse(text.contains(PKG_NAME_C));
         }
     }
 
@@ -1409,6 +1482,12 @@ public class NetworkPolicyManagerServiceTest {
 
         assertNetworkPolicyEquals(31, mDefaultWarningBytes, mDefaultLimitBytes,
                 true);
+    }
+
+    private ApplicationInfo buildApplicationInfo(String label) {
+        final ApplicationInfo ai = new ApplicationInfo();
+        ai.nonLocalizedLabel = label;
+        return ai;
     }
 
     private NetworkInfo buildNetworkInfo() {
