@@ -6022,4 +6022,14 @@ public abstract class PackageManager {
         throw new UnsupportedOperationException(
                 "hasSigningCertificate not implemented in subclass");
     }
+
+    /**
+     * @return the system defined text classifier package name, or null if there's none.
+     *
+     * @hide
+     */
+    public String getSystemTextClassifierPackageName() {
+        throw new UnsupportedOperationException(
+                "getSystemTextClassifierPackageName not implemented in subclass");
+    }
 }

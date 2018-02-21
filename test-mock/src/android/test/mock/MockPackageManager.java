@@ -1209,4 +1209,11 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * @hide
+     */
+    @Override
+    public String getSystemTextClassifierPackageName() {
+        throw new UnsupportedOperationException();
+    }
 }

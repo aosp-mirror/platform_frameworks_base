@@ -3158,14 +3158,14 @@
     -->
     <string name="config_defaultAutofillService" translatable="false"></string>
 
-    <!-- The component name, flattened to a string, for the default system textclassifier service.
+    <!-- The package name for the default system textclassifier service.
          This service must be trusted, as it can be activated without explicit consent of the user.
          (e.g. com.android.textclassifier/.TextClassifierServiceImpl).
          If no textclassifier service with the specified name exists on the device (or if this is
          set to empty string), a default textclassifier will be loaded in the calling app's process.
          See android.view.textclassifier.TextClassificationManager.
     -->
-    <string name="config_defaultTextClassifierService" translatable="false"></string>
+    <string name="config_defaultTextClassifierPackage" translatable="false"></string>
 
     <!-- Whether the device uses the default focus highlight when focus state isn't specified. -->
     <bool name="config_useDefaultFocusHighlight">true</bool>
