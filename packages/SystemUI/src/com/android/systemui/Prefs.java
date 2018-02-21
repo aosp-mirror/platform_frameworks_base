@@ -30,27 +30,28 @@ public final class Prefs {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-        Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME,
-        Key.DEBUG_MODE_ENABLED,
-        Key.HOTSPOT_TILE_LAST_USED,
-        Key.COLOR_INVERSION_TILE_LAST_USED,
-        Key.DND_TILE_VISIBLE,
-        Key.DND_TILE_COMBINED_ICON,
-        Key.DND_CONFIRMED_PRIORITY_INTRODUCTION,
-        Key.DND_CONFIRMED_SILENCE_INTRODUCTION,
-        Key.DND_FAVORITE_BUCKET_INDEX,
-        Key.DND_NONE_SELECTED,
-        Key.DND_FAVORITE_ZEN,
-        Key.QS_HOTSPOT_ADDED,
-        Key.QS_DATA_SAVER_ADDED,
-        Key.QS_DATA_SAVER_DIALOG_SHOWN,
-        Key.QS_INVERT_COLORS_ADDED,
-        Key.QS_WORK_ADDED,
-        Key.QS_NIGHTDISPLAY_ADDED,
-        Key.QS_LONG_PRESS_TOOLTIP_SHOWN_COUNT,
-        Key.SEEN_MULTI_USER,
-        Key.NUM_APPS_LAUNCHED,
-        Key.HAS_SEEN_RECENTS_ONBOARDING,
+            Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME,
+            Key.DEBUG_MODE_ENABLED,
+            Key.HOTSPOT_TILE_LAST_USED,
+            Key.COLOR_INVERSION_TILE_LAST_USED,
+            Key.DND_TILE_VISIBLE,
+            Key.DND_TILE_COMBINED_ICON,
+            Key.DND_CONFIRMED_PRIORITY_INTRODUCTION,
+            Key.DND_CONFIRMED_SILENCE_INTRODUCTION,
+            Key.DND_FAVORITE_BUCKET_INDEX,
+            Key.DND_NONE_SELECTED,
+            Key.DND_FAVORITE_ZEN,
+            Key.QS_HOTSPOT_ADDED,
+            Key.QS_DATA_SAVER_ADDED,
+            Key.QS_DATA_SAVER_DIALOG_SHOWN,
+            Key.QS_INVERT_COLORS_ADDED,
+            Key.QS_WORK_ADDED,
+            Key.QS_NIGHTDISPLAY_ADDED,
+            Key.QS_LONG_PRESS_TOOLTIP_SHOWN_COUNT,
+            Key.SEEN_MULTI_USER,
+            Key.NUM_APPS_LAUNCHED,
+            Key.HAS_SEEN_RECENTS_ONBOARDING,
+            Key.SEEN_RINGER_GUIDANCE_COUNT
     })
     public @interface Key {
         @Deprecated
@@ -85,6 +86,7 @@ public final class Prefs {
         String SEEN_MULTI_USER = "HasSeenMultiUser";
         String NUM_APPS_LAUNCHED = "NumAppsLaunched";
         String HAS_SEEN_RECENTS_ONBOARDING = "HasSeenRecentsOnboarding";
+        String SEEN_RINGER_GUIDANCE_COUNT = "RingerGuidanceCount";
     }
 
     public static boolean getBoolean(Context context, @Key String key, boolean defaultValue) {

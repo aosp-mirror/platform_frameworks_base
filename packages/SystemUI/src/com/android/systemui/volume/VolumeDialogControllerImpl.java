@@ -110,11 +110,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private boolean mShowA11yStream;
     private boolean mShowVolumeDialog;
     private boolean mShowSafetyWarning;
-    private DeviceCallback mDeviceCallback = new DeviceCallback();
     private final NotificationManager mNotificationManager;
-    @GuardedBy("mLock")
-    private List<AudioDeviceInfo> mConnectedDevices = new ArrayList<>();
-    private Object mLock = new Object();
 
     private boolean mDestroyed;
     private VolumePolicy mVolumePolicy;
@@ -192,7 +188,6 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         } catch (SecurityException e) {
             Log.w(TAG, "No access to media sessions", e);
         }
-        mAudio.registerAudioDeviceCallback(mDeviceCallback, mWorker);
     }
 
     public void setVolumePolicy(VolumePolicy policy) {
@@ -218,7 +213,6 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         mMediaSessions.destroy();
         mObserver.destroy();
         mReceiver.destroy();
-        mAudio.unregisterAudioDeviceCallback(mDeviceCallback);
         mWorkerThread.quitSafely();
     }
 
@@ -842,18 +836,6 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                 });
             }
         }
-
-        @Override
-        public void onConnectedDeviceChanged(String deviceName) {
-            for (final Map.Entry<Callbacks, Handler> entry : mCallbackMap.entrySet()) {
-                entry.getValue().post(new Runnable() {
-                    @Override
-                    public void run() {
-                        entry.getKey().onConnectedDeviceChanged(deviceName);
-                    }
-                });
-            }
-        }
     }
 
 
@@ -1056,33 +1038,6 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                 if (D.BUG) Log.d(TAG, triggeringMethod + ": added stream " +  mNextStream
                         + " from token + "+ token.toString());
                 mNextStream++;
-            }
-        }
-    }
-
-    protected final class DeviceCallback extends AudioDeviceCallback {
-        public void onAudioDevicesAdded(AudioDeviceInfo[] addedDevices) {
-            synchronized (mLock) {
-                for (AudioDeviceInfo info : addedDevices) {
-                    if (info.isSink()
-                            && (info.getType() == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP
-                            || info.getType() == AudioDeviceInfo.TYPE_BLUETOOTH_SCO)) {
-                        mConnectedDevices.add(info);
-                        mCallbacks.onConnectedDeviceChanged(info.getProductName().toString());
-                    }
-                }
-            }
-        }
-
-        public void onAudioDevicesRemoved(AudioDeviceInfo[] removedDevices) {
-            synchronized (mLock) {
-                for (AudioDeviceInfo info : removedDevices) {
-                    mConnectedDevices.remove(info);
-                }
-
-                if (mConnectedDevices.size() == 0) {
-                    mCallbacks.onConnectedDeviceChanged(null);
-                }
             }
         }
     }
