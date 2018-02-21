@@ -240,8 +240,11 @@ public abstract class BatteryStats implements Parcelable {
      * New in version 30:
      *   - Uid.PROCESS_STATE_FOREGROUND_SERVICE only tracks
      *   ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE.
+     * New in version 31:
+     *   - New cellular network types.
+     *   - Deferred job metrics.
      */
-    static final int CHECKIN_VERSION = 30;
+    static final int CHECKIN_VERSION = 31;
 
     /**
      * Old version, we hit 9 and ran out of room, need to remove.

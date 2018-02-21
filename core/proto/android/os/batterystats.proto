@@ -226,7 +226,11 @@ message SystemProto {
       LTE = 13;
       EHRPD = 14;
       HSPAP = 15;
-      OTHER = 16;
+      GSM = 16;
+      TD_SCDMA = 17;
+      IWLAN = 18;
+      LTE_CA = 19;
+      OTHER = 20;
     };
     optional Name name = 1;
     optional TimerProto total = 2;
