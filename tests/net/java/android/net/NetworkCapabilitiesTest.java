@@ -223,7 +223,9 @@ public class NetworkCapabilitiesTest {
         assertFalse(netCap.appliesToUidRange(new UidRange(60, 3400)));
 
         NetworkCapabilities netCap2 = new NetworkCapabilities();
-        assertFalse(netCap2.satisfiedByUids(netCap));
+        // A new netcap object has null UIDs, so anything will satisfy it.
+        assertTrue(netCap2.satisfiedByUids(netCap));
+        // Still not equal though.
         assertFalse(netCap2.equalsUids(netCap));
         netCap2.setUids(uids);
         assertTrue(netCap2.satisfiedByUids(netCap));
@@ -240,7 +242,7 @@ public class NetworkCapabilitiesTest {
         assertTrue(netCap.appliesToUid(650));
         assertFalse(netCap.appliesToUid(500));
 
-        assertFalse(new NetworkCapabilities().satisfiedByUids(netCap));
+        assertTrue(new NetworkCapabilities().satisfiedByUids(netCap));
         netCap.combineCapabilities(new NetworkCapabilities());
         assertTrue(netCap.appliesToUid(500));
         assertTrue(netCap.appliesToUidRange(new UidRange(1, 100000)));

@@ -890,7 +890,16 @@ public final class NetworkCapabilities implements Parcelable {
     /**
      * List of UIDs this network applies to. No restriction if null.
      * <p>
-     * This is typically (and at this time, only) used by VPN. This network is only available to
+     * For networks, mUids represent the list of network this applies to, and null means this
+     * network applies to all UIDs.
+     * For requests, mUids is the list of UIDs this network MUST apply to to match ; ALL UIDs
+     * must be included in a network so that they match. As an exception to the general rule,
+     * a null mUids field for requests mean "no requirements" rather than what the general rule
+     * would suggest ("must apply to all UIDs") : this is because this has shown to be what users
+     * of this API expect in practice. A network that must match all UIDs can still be
+     * expressed with a set ranging the entire set of possible UIDs.
+     * <p>
+     * mUids is typically (and at this time, only) used by VPN. This network is only available to
      * the UIDs in this list, and it is their default network. Apps in this list that wish to
      * bypass the VPN can do so iff the VPN app allows them to or if they are privileged. If this
      * member is null, then the network is not restricted by app UID. If it's an empty list, then
@@ -1012,8 +1021,7 @@ public final class NetworkCapabilities implements Parcelable {
      * @hide
      */
     public boolean satisfiedByUids(NetworkCapabilities nc) {
-        if (null == nc.mUids) return true; // The network satisfies everything.
-        if (null == mUids) return false; // Not everything allowed but requires everything
+        if (null == nc.mUids || null == mUids) return true; // The network satisfies everything.
         for (UidRange requiredRange : mUids) {
             if (requiredRange.contains(nc.mEstablishingVpnAppUid)) return true;
             if (!nc.appliesToUidRange(requiredRange)) {

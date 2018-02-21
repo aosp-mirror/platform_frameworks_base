@@ -17,6 +17,7 @@
 package com.android.server;
 
 import static android.Manifest.permission.RECEIVE_DATA_ACTIVITY_CHANGE;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.NETID_UNSET;
 import static android.net.ConnectivityManager.TYPE_ETHERNET;
@@ -1329,9 +1330,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (nai != null) {
             synchronized (nai) {
                 if (nai.networkCapabilities != null) {
-                    // TODO : don't remove the UIDs when communicating with processes
-                    // that have the NETWORK_SETTINGS permission.
-                    return networkCapabilitiesWithoutUids(nai.networkCapabilities);
+                    return networkCapabilitiesWithoutUidsUnlessAllowed(nai.networkCapabilities,
+                            Binder.getCallingPid(), Binder.getCallingUid());
                 }
             }
         }
@@ -1344,8 +1344,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return getNetworkCapabilitiesInternal(getNetworkAgentInfoForNetwork(network));
     }
 
-    private NetworkCapabilities networkCapabilitiesWithoutUids(NetworkCapabilities nc) {
+    private NetworkCapabilities networkCapabilitiesWithoutUidsUnlessAllowed(
+            NetworkCapabilities nc, int callerPid, int callerUid) {
+        if (checkSettingsPermission(callerPid, callerUid)) return new NetworkCapabilities(nc);
         return new NetworkCapabilities(nc).setUids(null);
+    }
+
+    private void restrictRequestUidsForCaller(NetworkCapabilities nc) {
+        if (!checkSettingsPermission()) {
+            nc.setSingleUid(Binder.getCallingUid());
+        }
     }
 
     @Override
@@ -1544,6 +1552,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.NETWORK_SETTINGS,
                 "ConnectivityService");
+    }
+
+    private boolean checkSettingsPermission() {
+        return PERMISSION_GRANTED == mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.NETWORK_SETTINGS);
+    }
+
+    private boolean checkSettingsPermission(int pid, int uid) {
+        return PERMISSION_GRANTED == mContext.checkPermission(
+                android.Manifest.permission.NETWORK_SETTINGS, pid, uid);
     }
 
     private void enforceTetherAccessPermission() {
@@ -4213,13 +4231,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
             enforceMeteredApnPolicy(networkCapabilities);
         }
         ensureRequestableCapabilities(networkCapabilities);
-        // Set the UID range for this request to the single UID of the requester.
+        // Set the UID range for this request to the single UID of the requester, or to an empty
+        // set of UIDs if the caller has the appropriate permission and UIDs have not been set.
         // This will overwrite any allowed UIDs in the requested capabilities. Though there
         // are no visible methods to set the UIDs, an app could use reflection to try and get
         // networks for other apps so it's essential that the UIDs are overwritten.
-        // TODO : don't forcefully set the UID when communicating with processes
-        // that have the NETWORK_SETTINGS permission.
-        networkCapabilities.setSingleUid(Binder.getCallingUid());
+        restrictRequestUidsForCaller(networkCapabilities);
 
         if (timeoutMs < 0) {
             throw new IllegalArgumentException("Bad timeout specified");
@@ -4293,9 +4310,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         enforceMeteredApnPolicy(networkCapabilities);
         ensureRequestableCapabilities(networkCapabilities);
         ensureValidNetworkSpecifier(networkCapabilities);
-        // TODO : don't forcefully set the UID when communicating with processes
-        // that have the NETWORK_SETTINGS permission.
-        networkCapabilities.setSingleUid(Binder.getCallingUid());
+        restrictRequestUidsForCaller(networkCapabilities);
 
         NetworkRequest networkRequest = new NetworkRequest(networkCapabilities, TYPE_NONE,
                 nextNetworkRequestId(), NetworkRequest.Type.REQUEST);
@@ -4349,9 +4364,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         NetworkCapabilities nc = new NetworkCapabilities(networkCapabilities);
-        // TODO : don't forcefully set the UIDs when communicating with processes
-        // that have the NETWORK_SETTINGS permission.
-        nc.setSingleUid(Binder.getCallingUid());
+        restrictRequestUidsForCaller(nc);
         if (!ConnectivityManager.checkChangePermission(mContext)) {
             // Apps without the CHANGE_NETWORK_STATE permission can't use background networks, so
             // make all their listens include NET_CAPABILITY_FOREGROUND. That way, they will get
@@ -4381,9 +4394,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         ensureValidNetworkSpecifier(networkCapabilities);
 
         final NetworkCapabilities nc = new NetworkCapabilities(networkCapabilities);
-        // TODO : don't forcefully set the UIDs when communicating with processes
-        // that have the NETWORK_SETTINGS permission.
-        nc.setSingleUid(Binder.getCallingUid());
+        restrictRequestUidsForCaller(nc);
 
         NetworkRequest networkRequest = new NetworkRequest(nc, TYPE_NONE, nextNetworkRequestId(),
                 NetworkRequest.Type.LISTEN);
@@ -4947,8 +4958,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             case ConnectivityManager.CALLBACK_CAP_CHANGED: {
                 // networkAgent can't be null as it has been accessed a few lines above.
-                final NetworkCapabilities nc =
-                        networkCapabilitiesWithoutUids(networkAgent.networkCapabilities);
+                final NetworkCapabilities nc = networkCapabilitiesWithoutUidsUnlessAllowed(
+                        networkAgent.networkCapabilities, nri.mPid, nri.mUid);
                 putParcelable(bundle, nc);
                 break;
             }
