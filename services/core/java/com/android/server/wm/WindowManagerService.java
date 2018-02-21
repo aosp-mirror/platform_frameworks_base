@@ -1131,7 +1131,18 @@ public class WindowManagerService extends IWindowManager.Stub
                 throw new IllegalStateException("Display has not been initialialized");
             }
 
-            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+
+            // Adding a window is an exception where the WindowManagerService can create the
+            // display instead of waiting for the ActivityManagerService to drive creation.
+            if (displayContent == null) {
+                final Display display = mDisplayManager.getDisplay(displayId);
+
+                if (display != null) {
+                    displayContent = mRoot.createDisplayContent(display, null /* controller */);
+                }
+            }
+
             if (displayContent == null) {
                 Slog.w(TAG_WM, "Attempted to add window to a display that does not exist: "
                         + displayId + ".  Aborting.");
