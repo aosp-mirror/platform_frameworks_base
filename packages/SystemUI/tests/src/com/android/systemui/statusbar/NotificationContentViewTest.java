@@ -16,14 +16,23 @@
 
 package com.android.systemui.statusbar;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import android.app.AppOpsManager;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.ArraySet;
+import android.view.NotificationHeaderView;
 import android.view.View;
 
 import com.android.systemui.SysuiTestCase;
@@ -74,5 +83,36 @@ public class NotificationContentViewTest extends SysuiTestCase {
         mView.setDark(false, true, 0);
         mView.setHeadsUpAnimatingAway(true);
         Assert.assertFalse(mView.isAnimatingVisibleType());
+    }
+
+    @Test
+    @UiThreadTest
+    public void testShowAppOpsIcons() {
+        NotificationHeaderView mockContracted = mock(NotificationHeaderView.class);
+        when(mockContracted.findViewById(com.android.internal.R.id.notification_header))
+                .thenReturn(mockContracted);
+        NotificationHeaderView mockExpanded = mock(NotificationHeaderView.class);
+        when(mockExpanded.findViewById(com.android.internal.R.id.notification_header))
+                .thenReturn(mockExpanded);
+        NotificationHeaderView mockHeadsUp = mock(NotificationHeaderView.class);
+        when(mockHeadsUp.findViewById(com.android.internal.R.id.notification_header))
+                .thenReturn(mockHeadsUp);
+        NotificationHeaderView mockAmbient = mock(NotificationHeaderView.class);
+        when(mockAmbient.findViewById(com.android.internal.R.id.notification_header))
+                .thenReturn(mockAmbient);
+
+        mView.setContractedChild(mockContracted);
+        mView.setExpandedChild(mockExpanded);
+        mView.setHeadsUpChild(mockHeadsUp);
+        mView.setAmbientChild(mockAmbient);
+
+        ArraySet<Integer> ops = new ArraySet<>();
+        ops.add(AppOpsManager.OP_ANSWER_PHONE_CALLS);
+        mView.showAppOpsIcons(ops);
+
+        verify(mockContracted, times(1)).showAppOpsIcons(ops);
+        verify(mockExpanded, times(1)).showAppOpsIcons(ops);
+        verify(mockAmbient, never()).showAppOpsIcons(ops);
+        verify(mockHeadsUp, times(1)).showAppOpsIcons(any());
     }
 }

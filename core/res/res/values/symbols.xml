@@ -218,6 +218,10 @@
   <java-symbol type="id" name="selection_end_handle" />
   <java-symbol type="id" name="insertion_handle" />
   <java-symbol type="id" name="accessibilityActionClickOnClickableSpan" />
+  <java-symbol type="id" name="camera" />
+  <java-symbol type="id" name="mic" />
+  <java-symbol type="id" name="overlay" />
+  <java-symbol type="id" name="app_ops" />
 
   <java-symbol type="attr" name="actionModeShareDrawable" />
   <java-symbol type="attr" name="alertDialogCenterButtons" />
@@ -1389,6 +1393,9 @@
 
   <java-symbol type="drawable" name="stat_notify_mmcc_indication_icn" />
   <java-symbol type="drawable" name="autofilled_highlight"/>
+  <java-symbol type="drawable" name="ic_camera" />
+  <java-symbol type="drawable" name="ic_mic" />
+  <java-symbol type="drawable" name="ic_alert_window_layer" />
 
   <java-symbol type="drawable" name="ic_account_circle" />
   <java-symbol type="color" name="user_icon_1" />

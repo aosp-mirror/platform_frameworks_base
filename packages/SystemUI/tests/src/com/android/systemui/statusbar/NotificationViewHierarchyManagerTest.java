@@ -19,6 +19,9 @@ package com.android.systemui.statusbar;
 import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -168,6 +171,19 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         assertTrue(Lists.newArrayList(entry0.row, entry1.row).equals(mListContainer.mRows));
         assertEquals(View.GONE, entry0.row.getVisibility());
         assertEquals(View.VISIBLE, entry1.row.getVisibility());
+    }
+
+    @Test
+    public void testUpdateNotificationViews_appOps() throws Exception {
+        NotificationData.Entry entry0 = createEntry();
+        entry0.row = spy(entry0.row);
+        when(mNotificationData.getActiveNotifications()).thenReturn(
+                Lists.newArrayList(entry0));
+        mListContainer.addContainerView(entry0.row);
+
+        mViewHierarchyManager.updateNotificationViews();
+
+        verify(entry0.row, times(1)).showAppOpsIcons(any());
     }
 
     private class FakeListContainer implements NotificationListContainer {

@@ -342,6 +342,8 @@ public class NotificationViewHierarchyManager {
 
             row.showBlockingHelper(entry.userSentiment ==
                     NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE);
+
+            row.showAppOpsIcons(entry.mActiveAppOps);
         }
 
         mPresenter.onUpdateRowStates();

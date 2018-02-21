@@ -44,6 +44,7 @@ import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.EnhancedEstimatesImpl;
 import com.android.systemui.power.PowerNotificationWarnings;
 import com.android.systemui.power.PowerUI;
+import com.android.systemui.statusbar.AppOpsListener;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.phone.DarkIconDispatcherImpl;
 import com.android.systemui.statusbar.phone.LightBarController;
@@ -313,6 +314,8 @@ public class Dependency extends SystemUI {
         mProviders.put(OverviewProxyService.class, () -> new OverviewProxyService(mContext));
 
         mProviders.put(EnhancedEstimates.class, () -> new EnhancedEstimatesImpl());
+
+        mProviders.put(AppOpsListener.class, () -> new AppOpsListener(mContext));
 
         // Put all dependencies above here so the factory can override them if it wants.
         SystemUIFactory.getInstance().injectDependencies(mProviders, mContext);

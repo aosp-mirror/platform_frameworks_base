@@ -36,6 +36,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
+import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.MathUtils;
@@ -1354,6 +1355,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mHelperButton.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
+    public void showAppOpsIcons(ArraySet<Integer> activeOps) {
+        if (mIsSummaryWithChildren && mChildrenContainer.getHeaderView() != null) {
+            mChildrenContainer.getHeaderView().showAppOpsIcons(activeOps);
+        }
+        mPrivateLayout.showAppOpsIcons(activeOps);
+        mPublicLayout.showAppOpsIcons(activeOps);
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
@@ -2627,6 +2636,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     @VisibleForTesting
     protected void setChildrenContainer(NotificationChildrenContainer childrenContainer) {
         mChildrenContainer = childrenContainer;
+    }
+
+    @VisibleForTesting
+    protected void setPrivateLayout(NotificationContentView privateLayout) {
+        mPrivateLayout = privateLayout;
+    }
+
+    @VisibleForTesting
+    protected void setPublicLayout(NotificationContentView publicLayout) {
+        mPublicLayout = publicLayout;
     }
 
     /**

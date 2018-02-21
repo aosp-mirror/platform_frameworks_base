@@ -14,7 +14,9 @@
 
 package com.android.systemui;
 
+import android.annotation.Nullable;
 import android.service.notification.StatusBarNotification;
+import android.util.ArraySet;
 
 public interface ForegroundServiceController {
     /**
@@ -46,4 +48,32 @@ public interface ForegroundServiceController {
      * @return true if sbn is the system-provided "dungeon" (list of running foreground services).
      */
     boolean isDungeonNotification(StatusBarNotification sbn);
+
+    /**
+     * @return true if sbn is one of the window manager "drawing over other apps" notifications
+     */
+    boolean isSystemAlertNotification(StatusBarNotification sbn);
+
+    /**
+     * Returns the key of the foreground service from this package using the standard template,
+     * if one exists.
+     */
+    @Nullable String getStandardLayoutKey(int userId, String pkg);
+
+    /**
+     * @return true if this user/pkg has a missing or custom layout notification and therefore needs
+     * a disclosure notification for system alert windows.
+     */
+    boolean isSystemAlertWarningNeeded(int userId, String pkg);
+
+    /**
+     * Records active app ops. App Ops are stored in FSC in addition to NotificationData in
+     * case they change before we have a notification to tag.
+     */
+    void onAppOpChanged(int code, int uid, String packageName, boolean active);
+
+    /**
+     * Gets active app ops for this user and package.
+     */
+    @Nullable ArraySet<Integer> getAppOps(int userId, String packageName);
 }

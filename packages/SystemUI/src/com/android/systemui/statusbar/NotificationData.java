@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar;
 
 import android.app.AppGlobals;
+import android.app.AppOpsManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -34,6 +35,7 @@ import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
@@ -65,6 +67,8 @@ public class NotificationData {
     private final Environment mEnvironment;
     private HeadsUpManager mHeadsUpManager;
 
+    final ForegroundServiceController mFsc = Dependency.get(ForegroundServiceController.class);
+
     public static final class Entry {
         private static final long LAUNCH_COOLDOWN = 2000;
         private static final long REMOTE_INPUT_COOLDOWN = 500;
@@ -95,6 +99,7 @@ public class NotificationData {
         private Throwable mDebugThrowable;
         public CharSequence remoteInputTextWhenReset;
         public long lastRemoteInputSent = NOT_LAUNCHED_YET;
+        public ArraySet<Integer> mActiveAppOps = new ArraySet<>(3);
 
         public Entry(StatusBarNotification n) {
             this.key = n.getKey();
@@ -194,7 +199,7 @@ public class NotificationData {
         /**
          * Update the notification icons.
          * @param context the context to create the icons with.
-         * @param n the notification to read the icon from.
+         * @param sbn the notification to read the icon from.
          * @throws InflationException
          */
         public void updateIcons(Context context, StatusBarNotification sbn)
@@ -375,6 +380,8 @@ public class NotificationData {
         }
         mGroupManager.onEntryAdded(entry);
 
+        updateAppOps(entry);
+
         updateRankingAndSort(mRankingMap);
     }
 
@@ -391,6 +398,35 @@ public class NotificationData {
 
     public void updateRanking(RankingMap ranking) {
         updateRankingAndSort(ranking);
+    }
+
+    private void updateAppOps(Entry entry) {
+        final int uid = entry.notification.getUid();
+        final String pkg = entry.notification.getPackageName();
+        ArraySet<Integer> activeOps = mFsc.getAppOps(entry.notification.getUserId(), pkg);
+        if (activeOps != null) {
+            int N = activeOps.size();
+            for (int i = 0; i < N; i++) {
+                updateAppOp(activeOps.valueAt(i), uid, pkg, true);
+            }
+        }
+    }
+
+    public void updateAppOp(int appOp, int uid, String pkg, boolean showIcon) {
+        synchronized (mEntries) {
+            final int N = mEntries.size();
+            for (int i = 0; i < N; i++) {
+                Entry entry = mEntries.valueAt(i);
+                if (uid == entry.notification.getUid()
+                    && pkg.equals(entry.notification.getPackageName())) {
+                    if (showIcon) {
+                        entry.mActiveAppOps.add(appOp);
+                    } else {
+                        entry.mActiveAppOps.remove(appOp);
+                    }
+                }
+            }
+        }
     }
 
     public boolean isAmbient(String key) {
@@ -545,9 +581,12 @@ public class NotificationData {
             return true;
         }
 
-        final ForegroundServiceController fsc = Dependency.get(ForegroundServiceController.class);
-        if (fsc.isDungeonNotification(sbn) && !fsc.isDungeonNeededForUser(sbn.getUserId())) {
+        if (mFsc.isDungeonNotification(sbn) && !mFsc.isDungeonNeededForUser(sbn.getUserId())) {
             // this is a foreground-service disclosure for a user that does not need to show one
+            return true;
+        }
+        if (mFsc.isSystemAlertNotification(sbn) && !mFsc.isSystemAlertWarningNeeded(
+                sbn.getUserId(), sbn.getPackageName())) {
             return true;
         }
 
