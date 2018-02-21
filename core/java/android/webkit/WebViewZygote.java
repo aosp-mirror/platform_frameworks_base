@@ -20,28 +20,21 @@ import android.app.LoadedApk;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.os.Build;
-import android.os.SystemService;
+import android.os.ChildZygoteProcess;
+import android.os.Process;
 import android.os.ZygoteProcess;
 import android.text.TextUtils;
-import android.util.AndroidRuntimeException;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeoutException;
 
 /** @hide */
 public class WebViewZygote {
     private static final String LOGTAG = "WebViewZygote";
-
-    private static final String WEBVIEW_ZYGOTE_SERVICE_32 = "webview_zygote32";
-    private static final String WEBVIEW_ZYGOTE_SERVICE_64 = "webview_zygote64";
-    private static final String WEBVIEW_ZYGOTE_SOCKET = "webview_zygote";
 
     /**
      * Lock object that protects all other static members.
@@ -53,14 +46,7 @@ public class WebViewZygote {
      * is not running or is not connected.
      */
     @GuardedBy("sLock")
-    private static ZygoteProcess sZygote;
-
-    /**
-     * Variable that allows us to determine whether the WebView zygote Service has already been
-     * started.
-     */
-    @GuardedBy("sLock")
-    private static boolean sStartedService = false;
+    private static ChildZygoteProcess sZygote;
 
     /**
      * Information about the selected WebView package. This is set from #onWebViewProviderChanged().
@@ -86,7 +72,7 @@ public class WebViewZygote {
         synchronized (sLock) {
             if (sZygote != null) return sZygote;
 
-            waitForServiceStartAndConnect();
+            connectToZygoteIfNeededLocked();
             return sZygote;
         }
     }
@@ -108,21 +94,13 @@ public class WebViewZygote {
             sMultiprocessEnabled = enabled;
 
             // When toggling between multi-process being on/off, start or stop the
-            // service. If it is enabled and the zygote is not yet started, bring up the service.
-            // Otherwise, bring down the service. The name may be null if the package
-            // information has not yet been resolved.
-            final String serviceName = getServiceNameLocked();
-            if (serviceName == null) return;
-
+            // zygote. If it is enabled and the zygote is not yet started, launch it.
+            // Otherwise, kill it. The name may be null if the package information has
+            // not yet been resolved.
             if (enabled) {
-                if (!sStartedService) {
-                    SystemService.start(serviceName);
-                    sStartedService = true;
-                }
+                connectToZygoteIfNeededLocked();
             } else {
-                SystemService.stop(serviceName);
-                sStartedService = false;
-                sZygote = null;
+                stopZygoteLocked();
             }
         }
     }
@@ -138,53 +116,21 @@ public class WebViewZygote {
                 return;
             }
 
-            final String serviceName = getServiceNameLocked();
-            sZygote = null;
-
-            // The service may enter the RUNNING state before it opens the socket,
-            // so connectToZygoteIfNeededLocked() may still fail.
-            if (SystemService.isStopped(serviceName)) {
-                SystemService.start(serviceName);
-            } else {
-                SystemService.restart(serviceName);
-            }
-            sStartedService = true;
-        }
-    }
-
-    private static void waitForServiceStartAndConnect() {
-        if (!sStartedService) {
-            throw new AndroidRuntimeException("Tried waiting for the WebView Zygote Service to " +
-                    "start running without first starting the service.");
-        }
-
-        String serviceName;
-        synchronized (sLock) {
-            serviceName = getServiceNameLocked();
-        }
-        try {
-            SystemService.waitForState(serviceName, SystemService.State.RUNNING, 5000);
-        } catch (TimeoutException e) {
-            Log.e(LOGTAG, "Timed out waiting for " + serviceName);
-            return;
-        }
-
-        synchronized (sLock) {
-            connectToZygoteIfNeededLocked();
+            stopZygoteLocked();
         }
     }
 
     @GuardedBy("sLock")
-    private static String getServiceNameLocked() {
-        if (sPackage == null)
-            return null;
-
-        if (Arrays.asList(Build.SUPPORTED_64_BIT_ABIS).contains(
-                    sPackage.applicationInfo.primaryCpuAbi)) {
-            return WEBVIEW_ZYGOTE_SERVICE_64;
+    private static void stopZygoteLocked() {
+        if (sZygote != null) {
+            // Close the connection and kill the zygote process. This will not cause
+            // child processes to be killed by itself. But if this is called in response to
+            // setMultiprocessEnabled() or onWebViewProviderChanged(), the WebViewUpdater
+            // will kill all processes that depend on the WebView package.
+            sZygote.close();
+            Process.killProcess(sZygote.getPid());
+            sZygote = null;
         }
-
-        return WEBVIEW_ZYGOTE_SERVICE_32;
     }
 
     @GuardedBy("sLock")
@@ -198,14 +144,17 @@ public class WebViewZygote {
             return;
         }
 
-        final String serviceName = getServiceNameLocked();
-        if (!SystemService.isRunning(serviceName)) {
-            Log.e(LOGTAG, serviceName + " is not running");
-            return;
-        }
-
         try {
-            sZygote = new ZygoteProcess(WEBVIEW_ZYGOTE_SOCKET, null);
+            sZygote = Process.zygoteProcess.startChildZygote(
+                    "com.android.internal.os.WebViewZygoteInit",
+                    "webview_zygote",
+                    Process.WEBVIEW_ZYGOTE_UID,
+                    Process.WEBVIEW_ZYGOTE_UID,
+                    null,  // gids
+                    0,  // runtimeFlags
+                    "webview_zygote",  // seInfo
+                    sPackage.applicationInfo.primaryCpuAbi,  // abi
+                    null);  // instructionSet
 
             // All the work below is usually done by LoadedApk, but the zygote can't talk to
             // PackageManager or construct a LoadedApk since it's single-threaded pre-fork, so
@@ -227,14 +176,14 @@ public class WebViewZygote {
             final String cacheKey = (zipPaths.size() == 1) ? zipPaths.get(0) :
                     TextUtils.join(File.pathSeparator, zipPaths);
 
-            ZygoteProcess.waitForConnectionToZygote(WEBVIEW_ZYGOTE_SOCKET);
+            ZygoteProcess.waitForConnectionToZygote(sZygote.getPrimarySocketAddress());
 
             Log.d(LOGTAG, "Preloading package " + zip + " " + librarySearchPath);
             sZygote.preloadPackageForAbi(zip, librarySearchPath, cacheKey,
                                          Build.SUPPORTED_ABIS[0]);
         } catch (Exception e) {
-            Log.e(LOGTAG, "Error connecting to " + serviceName, e);
-            sZygote = null;
+            Log.e(LOGTAG, "Error connecting to webview zygote", e);
+            stopZygoteLocked();
         }
     }
 }
