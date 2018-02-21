@@ -99,14 +99,16 @@ using android::hardware::gnss::V1_0::IGnssConfiguration;
 using android::hardware::gnss::V1_0::IGnssDebug;
 using android::hardware::gnss::V1_0::IGnssGeofenceCallback;
 using android::hardware::gnss::V1_0::IGnssGeofencing;
-using android::hardware::gnss::V1_0::IGnssMeasurementCallback;
+using IGnssMeasurementCallback_V1_0 = android::hardware::gnss::V1_0::IGnssMeasurementCallback;
 using android::hardware::gnss::V1_0::IGnssNavigationMessage;
 using android::hardware::gnss::V1_0::IGnssNavigationMessageCallback;
 using android::hardware::gnss::V1_0::IGnssNi;
 using android::hardware::gnss::V1_0::IGnssNiCallback;
 using android::hardware::gnss::V1_0::IGnssXtra;
 using android::hardware::gnss::V1_0::IGnssXtraCallback;
+
 using android::hardware::gnss::V1_1::IGnssCallback;
+using android::hardware::gnss::V1_1::IGnssMeasurementCallback;
 
 struct GnssDeathRecipient : virtual public hidl_death_recipient
 {
@@ -699,21 +701,24 @@ Return<void> GnssNavigationMessageCallback::gnssNavigationMessageCb(
  * GnssMeasurement interface.
  */
 struct GnssMeasurementCallback : public IGnssMeasurementCallback {
-    Return<void> GnssMeasurementCb(const IGnssMeasurementCallback::GnssData& data);
+    Return<void> gnssMeasurementCb(const IGnssMeasurementCallback::GnssData& data) override;
+    Return<void> GnssMeasurementCb(const IGnssMeasurementCallback_V1_0::GnssData& data) override;
  private:
-    jobject translateGnssMeasurement(
-            JNIEnv* env, const IGnssMeasurementCallback::GnssMeasurement* measurement);
-    jobject translateGnssClock(
-            JNIEnv* env, const IGnssMeasurementCallback::GnssClock* clock);
+    void translateGnssMeasurement_V1_0(
+            JNIEnv* env, const IGnssMeasurementCallback_V1_0::GnssMeasurement* measurement,
+            JavaObject object);
     jobjectArray translateGnssMeasurements(
             JNIEnv* env,
             const IGnssMeasurementCallback::GnssMeasurement* measurements,
+            const IGnssMeasurementCallback_V1_0::GnssMeasurement* measurements_v1_0,
             size_t count);
+    jobject translateGnssClock(
+            JNIEnv* env, const IGnssMeasurementCallback::GnssClock* clock);
     void setMeasurementData(JNIEnv* env, jobject clock, jobjectArray measurementArray);
 };
 
 
-Return<void> GnssMeasurementCallback::GnssMeasurementCb(
+Return<void> GnssMeasurementCallback::gnssMeasurementCb(
         const IGnssMeasurementCallback::GnssData& data) {
     JNIEnv* env = getJniEnv();
 
@@ -722,7 +727,7 @@ Return<void> GnssMeasurementCallback::GnssMeasurementCb(
 
     clock = translateGnssClock(env, &data.clock);
     measurementArray = translateGnssMeasurements(
-        env, data.measurements.data(), data.measurementCount);
+        env, data.measurements.data(), NULL, data.measurements.size());
     setMeasurementData(env, clock, measurementArray);
 
     env->DeleteLocalRef(clock);
@@ -730,10 +735,27 @@ Return<void> GnssMeasurementCallback::GnssMeasurementCb(
     return Void();
 }
 
-jobject GnssMeasurementCallback::translateGnssMeasurement(
-        JNIEnv* env, const IGnssMeasurementCallback::GnssMeasurement* measurement) {
-    JavaObject object(env, "android/location/GnssMeasurement");
+Return<void> GnssMeasurementCallback::GnssMeasurementCb(
+        const IGnssMeasurementCallback_V1_0::GnssData& data) {
+    JNIEnv* env = getJniEnv();
 
+    jobject clock;
+    jobjectArray measurementArray;
+
+    clock = translateGnssClock(env, &data.clock);
+    measurementArray = translateGnssMeasurements(
+        env, NULL, data.measurements.data(), data.measurementCount);
+    setMeasurementData(env, clock, measurementArray);
+
+    env->DeleteLocalRef(clock);
+    env->DeleteLocalRef(measurementArray);
+    return Void();
+}
+
+// preallocate object as: JavaObject object(env, "android/location/GnssMeasurement");
+void GnssMeasurementCallback::translateGnssMeasurement_V1_0(
+        JNIEnv* env, const IGnssMeasurementCallback_V1_0::GnssMeasurement* measurement,
+        JavaObject object) {
     uint32_t flags = static_cast<uint32_t>(measurement->flags);
 
     SET(Svid, static_cast<int32_t>(measurement->svid));
@@ -757,13 +779,8 @@ jobject GnssMeasurementCallback::translateGnssMeasurement(
         SET(CarrierFrequencyHz, measurement->carrierFrequencyHz);
     }
 
-    if (flags & static_cast<uint32_t>(GnssMeasurementFlags::HAS_CARRIER_PHASE)) {
-        SET(CarrierPhase, measurement->carrierPhase);
-    }
-
-    if (flags & static_cast<uint32_t>(GnssMeasurementFlags::HAS_CARRIER_PHASE_UNCERTAINTY)) {
-        SET(CarrierPhaseUncertainty, measurement->carrierPhaseUncertainty);
-    }
+    // Intentionally not copying deprecated fields of carrierCycles,
+    // carrierPhase, carrierPhaseUncertainty
 
     SET(MultipathIndicator, static_cast<int32_t>(measurement->multipathIndicator));
 
@@ -774,8 +791,6 @@ jobject GnssMeasurementCallback::translateGnssMeasurement(
     if (flags & static_cast<uint32_t>(GnssMeasurementFlags::HAS_AUTOMATIC_GAIN_CONTROL)) {
         SET(AutomaticGainControlLevelInDb, measurement->agcLevelDb);
     }
-
-    return object.get();
 }
 
 jobject GnssMeasurementCallback::translateGnssClock(
@@ -818,8 +833,9 @@ jobject GnssMeasurementCallback::translateGnssClock(
 }
 
 jobjectArray GnssMeasurementCallback::translateGnssMeasurements(JNIEnv* env,
-                                       const IGnssMeasurementCallback::GnssMeasurement*
-                                       measurements, size_t count) {
+         const IGnssMeasurementCallback::GnssMeasurement* measurements,
+         const IGnssMeasurementCallback_V1_0::GnssMeasurement* measurements_v1_0,
+         size_t count) {
     if (count == 0) {
         return NULL;
     }
@@ -831,11 +847,18 @@ jobjectArray GnssMeasurementCallback::translateGnssMeasurements(JNIEnv* env,
             NULL /* initialElement */);
 
     for (uint16_t i = 0; i < count; ++i) {
-        jobject gnssMeasurement = translateGnssMeasurement(
-            env,
-            &measurements[i]);
-        env->SetObjectArrayElement(gnssMeasurementArray, i, gnssMeasurement);
-        env->DeleteLocalRef(gnssMeasurement);
+        JavaObject object(env, "android/location/GnssMeasurement");
+        if (measurements != NULL) {
+            translateGnssMeasurement_V1_0(env, &(measurements[i].v1_0), object);
+
+            // Set the V1_1 flag
+            SET(AccumulatedDeltaRangeState,
+                    static_cast<int32_t>(measurements[i].accumulatedDeltaRangeState));
+        } else {
+            translateGnssMeasurement_V1_0(env, &(measurements_v1_0[i]), object);
+        }
+
+        env->SetObjectArrayElement(gnssMeasurementArray, i, object.get());
     }
 
     env->DeleteLocalRef(gnssMeasurementClass);
