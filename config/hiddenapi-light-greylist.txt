@@ -1822,7 +1822,7 @@ Landroid/view/textclassifier/logging/SmartSelectionEventTracker$SelectionEvent;-
 Landroid/view/textclassifier/logging/SmartSelectionEventTracker$SelectionEvent;->selectionModified(IILandroid/view/textclassifier/TextSelection;)Landroid/view/textclassifier/logging/SmartSelectionEventTracker$SelectionEvent;
 Landroid/view/textclassifier/logging/SmartSelectionEventTracker$SelectionEvent;->selectionStarted(I)Landroid/view/textclassifier/logging/SmartSelectionEventTracker$SelectionEvent;
 Landroid/view/textservice/TextServicesManager;->isSpellCheckerEnabled()Z
-Landroid/view/TextureView;->mLayer:Landroid/view/HardwareLayer;
+Landroid/view/TextureView;->mLayer:Landroid/view/TextureLayer;
 Landroid/view/TextureView;->mNativeWindow:J
 Landroid/view/TextureView;->mSurface:Landroid/graphics/SurfaceTexture;
 Landroid/view/TextureView;->mUpdateListener:Landroid/graphics/SurfaceTexture$OnFrameAvailableListener;

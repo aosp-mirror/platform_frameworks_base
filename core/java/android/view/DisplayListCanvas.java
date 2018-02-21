@@ -198,8 +198,8 @@ public final class DisplayListCanvas extends RecordingCanvas {
      *
      * @param layer The layer to composite on this canvas
      */
-    void drawHardwareLayer(HardwareLayer layer) {
-        nDrawLayer(mNativeCanvasWrapper, layer.getLayerHandle());
+    void drawTextureLayer(TextureLayer layer) {
+        nDrawTextureLayer(mNativeCanvasWrapper, layer.getLayerHandle());
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -257,7 +257,7 @@ public final class DisplayListCanvas extends RecordingCanvas {
     @CriticalNative
     private static native void nDrawRenderNode(long renderer, long renderNode);
     @CriticalNative
-    private static native void nDrawLayer(long renderer, long layer);
+    private static native void nDrawTextureLayer(long renderer, long layer);
     @CriticalNative
     private static native void nDrawCircle(long renderer, long propCx,
             long propCy, long propRadius, long propPaint);

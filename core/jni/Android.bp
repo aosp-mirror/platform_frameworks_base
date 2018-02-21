@@ -64,7 +64,7 @@ cc_library_shared {
         "android_graphics_drawable_VectorDrawable.cpp",
         "android_view_DisplayEventReceiver.cpp",
         "android_view_DisplayListCanvas.cpp",
-        "android_view_HardwareLayer.cpp",
+        "android_view_TextureLayer.cpp",
         "android_view_InputChannel.cpp",
         "android_view_InputDevice.cpp",
         "android_view_InputEventReceiver.cpp",

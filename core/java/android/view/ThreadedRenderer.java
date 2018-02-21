@@ -833,9 +833,9 @@ public final class ThreadedRenderer {
      *
      * @return A hardware layer
      */
-    HardwareLayer createTextureLayer() {
+    TextureLayer createTextureLayer() {
         long layer = nCreateTextureLayer(mNativeProxy);
-        return HardwareLayer.adoptTextureLayer(this, layer);
+        return TextureLayer.adoptTextureLayer(this, layer);
     }
 
 
@@ -844,7 +844,7 @@ public final class ThreadedRenderer {
     }
 
 
-    boolean copyLayerInto(final HardwareLayer layer, final Bitmap bitmap) {
+    boolean copyLayerInto(final TextureLayer layer, final Bitmap bitmap) {
         return nCopyLayerInto(mNativeProxy,
                 layer.getDeferredLayerUpdater(), bitmap);
     }
@@ -855,7 +855,7 @@ public final class ThreadedRenderer {
      *
      * @param layer The hardware layer that needs an update
      */
-    void pushLayerUpdate(HardwareLayer layer) {
+    void pushLayerUpdate(TextureLayer layer) {
         nPushLayerUpdate(mNativeProxy, layer.getDeferredLayerUpdater());
     }
 
@@ -863,7 +863,7 @@ public final class ThreadedRenderer {
      * Tells the HardwareRenderer that the layer is destroyed. The renderer
      * should remove the layer from any update queues.
      */
-    void onLayerDestroyed(HardwareLayer layer) {
+    void onLayerDestroyed(TextureLayer layer) {
         nCancelLayerUpdate(mNativeProxy, layer.getDeferredLayerUpdater());
     }
 
