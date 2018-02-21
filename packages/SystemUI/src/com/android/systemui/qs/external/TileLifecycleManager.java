@@ -39,8 +39,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import com.android.systemui.qs.external.PackageManagerAdapter;
 
-import libcore.util.Objects;
-
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -307,7 +306,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         if (!Intent.ACTION_USER_UNLOCKED.equals(intent.getAction())) {
             Uri data = intent.getData();
             String pkgName = data.getEncodedSchemeSpecificPart();
-            if (!Objects.equal(pkgName, mIntent.getComponent().getPackageName())) {
+            if (!Objects.equals(pkgName, mIntent.getComponent().getPackageName())) {
                 return;
             }
         }

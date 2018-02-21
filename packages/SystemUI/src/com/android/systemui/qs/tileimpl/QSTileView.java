@@ -32,7 +32,7 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
 
-import libcore.util.Objects;
+import java.util.Objects;
 
 /** View that represents a standard quick settings tile. **/
 public class QSTileView extends QSTileBaseView {
@@ -98,7 +98,7 @@ public class QSTileView extends QSTileBaseView {
     @Override
     protected void handleStateChanged(QSTile.State state) {
         super.handleStateChanged(state);
-        if (!Objects.equal(mLabel.getText(), state.label) || mState != state.state) {
+        if (!Objects.equals(mLabel.getText(), state.label) || mState != state.state) {
             if (state.state == Tile.STATE_UNAVAILABLE) {
                 int color = QSTileImpl.getColorForState(getContext(), state.state);
                 state.label = new SpannableStringBuilder().append(state.label,
@@ -108,7 +108,7 @@ public class QSTileView extends QSTileBaseView {
             mState = state.state;
             mLabel.setText(state.label);
         }
-        if (!Objects.equal(mSecondLine.getText(), state.secondaryLabel)) {
+        if (!Objects.equals(mSecondLine.getText(), state.secondaryLabel)) {
             mSecondLine.setText(state.secondaryLabel);
             mSecondLine.setVisibility(TextUtils.isEmpty(state.secondaryLabel) ? View.GONE
                     : View.VISIBLE);

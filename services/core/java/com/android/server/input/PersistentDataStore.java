@@ -49,10 +49,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import libcore.io.IoUtils;
-import libcore.util.Objects;
 
 /**
  * Manages persistent state recorded by the input manager service as an XML file.
@@ -377,7 +377,7 @@ final class PersistentDataStore {
         }
 
         public boolean setCurrentKeyboardLayout(String keyboardLayout) {
-            if (Objects.equal(mCurrentKeyboardLayout, keyboardLayout)) {
+            if (Objects.equals(mCurrentKeyboardLayout, keyboardLayout)) {
                 return false;
             }
             addKeyboardLayout(keyboardLayout);
@@ -432,7 +432,7 @@ final class PersistentDataStore {
 
         private void updateCurrentKeyboardLayoutIfRemoved(
                 String removedKeyboardLayout, int removedIndex) {
-            if (Objects.equal(mCurrentKeyboardLayout, removedKeyboardLayout)) {
+            if (Objects.equals(mCurrentKeyboardLayout, removedKeyboardLayout)) {
                 if (!mUnassociatedKeyboardLayouts.isEmpty()) {
                     int index = removedIndex;
                     if (index == mUnassociatedKeyboardLayouts.size()) {

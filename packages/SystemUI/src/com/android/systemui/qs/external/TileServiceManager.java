@@ -37,8 +37,7 @@ import com.android.systemui.qs.customize.TileQueryHelper.TileStateListener;
 import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;
 
 import java.util.List;
-
-import libcore.util.Objects;
+import java.util.Objects;
 
 /**
  * Manages the priority which lets {@link TileServices} make decisions about which tiles
@@ -248,7 +247,7 @@ public class TileServiceManager {
             Uri data = intent.getData();
             String pkgName = data.getEncodedSchemeSpecificPart();
             final ComponentName component = mStateManager.getComponent();
-            if (!Objects.equal(pkgName, component.getPackageName())) {
+            if (!Objects.equals(pkgName, component.getPackageName())) {
                 return;
             }
 
@@ -260,8 +259,8 @@ public class TileServiceManager {
                 List<ResolveInfo> services = pm.queryIntentServicesAsUser(
                         queryIntent, 0, ActivityManager.getCurrentUser());
                 for (ResolveInfo info : services) {
-                    if (Objects.equal(info.serviceInfo.packageName, component.getPackageName())
-                            && Objects.equal(info.serviceInfo.name, component.getClassName())) {
+                    if (Objects.equals(info.serviceInfo.packageName, component.getPackageName())
+                            && Objects.equals(info.serviceInfo.name, component.getClassName())) {
                         return;
                     }
                 }
