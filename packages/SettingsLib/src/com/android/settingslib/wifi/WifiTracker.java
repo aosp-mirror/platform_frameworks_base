@@ -681,7 +681,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
         synchronized (mLock) {
             if (!mInternalAccessPoints.isEmpty()) {
                 mInternalAccessPoints.clear();
-                mListener.onAccessPointsChanged();
+                conditionallyNotifyListeners();
             }
         }
     }
@@ -916,7 +916,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     }
 
     /**
-     * Invokes {@link WifiListenerExecutor#onAccessPointsChanged()} if {@link #mStaleScanResults}
+     * Invokes {@link WifiListenerExecutor#onAccessPointsChanged()} iif {@link #mStaleScanResults}
      * is false.
      */
     private void conditionallyNotifyListeners() {
@@ -924,6 +924,6 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
             return;
         }
 
-        ThreadUtils.postOnMainThread(() -> mListener.onAccessPointsChanged());
+        mListener.onAccessPointsChanged();
     }
 }
