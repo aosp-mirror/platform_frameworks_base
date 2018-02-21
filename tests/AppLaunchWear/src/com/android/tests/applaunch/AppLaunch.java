@@ -103,6 +103,7 @@ public class AppLaunch extends InstrumentationTestCase {
     private static final String DROP_CACHE_SCRIPT = "/data/local/tmp/dropCache.sh";
     private static final String APP_LAUNCH_CMD = "am start -W -n";
     private static final String SUCCESS_MESSAGE = "Status: ok";
+    private static final String WARNING_MESSAGE = "Warning: Activity not started";
     private static final String COMPILE_SUCCESS = "Success";
     private static final String THIS_TIME = "ThisTime:";
     private static final String LAUNCH_ITERATION = "LAUNCH_ITERATION - %d";
@@ -790,6 +791,17 @@ public class AppLaunch extends InstrumentationTestCase {
                 TotalTime: 357
                 WaitTime: 377
                 Complete*/
+                /* WHEN NOT KILLING HOME :
+                Starting: Intent { cmp=com.google.android.wearable.app/
+                    com.google.android.clockwork.home.calendar.AgendaActivity }
+                Warning: Activity not started, its current task has been brought to the front
+                Status: ok
+                Activity: com.google.android.wearable.app/
+                    com.google.android.clockwork.home.calendar.AgendaActivity
+                ThisTime: 209
+                TotalTime: 209
+                WaitTime: 285
+                Complete*/
                 /* WITH SIMPLEPERF :
                 Performance counter statistics,
                 6595722690,cpu-cycles,4.511040,GHz,(100%),
@@ -799,28 +811,32 @@ public class AppLaunch extends InstrumentationTestCase {
                         inputStream));
                 String line = null;
                 int lineCount = 1;
+                int addLineForWarning = 0;
                 mBufferedWriter.newLine();
                 mBufferedWriter.write(headerInfo);
                 mBufferedWriter.newLine();
                 while ((line = bufferedReader.readLine()) != null) {
-                    if (lineCount == 2 && line.contains(SUCCESS_MESSAGE)) {
+                    if (lineCount == 2 && line.contains(WARNING_MESSAGE)) {
+                        addLineForWarning = 1;
+                    }
+                    if (lineCount == (2 + addLineForWarning) && line.contains(SUCCESS_MESSAGE)) {
                         launchSuccess = true;
                     }
                     // Parse TotalTime which is the launch time
-                    if (launchSuccess && lineCount == 5) {
+                    if (launchSuccess && lineCount == (5 + addLineForWarning)) {
                         String launchSplit[] = line.split(":");
                         launchTime = launchSplit[1].trim();
                     }
 
                     if (mSimplePerfAppOnly) {
                         // Parse simpleperf output.
-                        if (lineCount == 9) {
+                        if (lineCount == (9 + addLineForWarning)) {
                             if (!line.contains("cpu-cycles")) {
                                 Log.e(TAG, "Error in simpleperf output");
                             } else {
                                 cpuCycles = line.split(",")[0].trim();
                             }
-                        } else if (lineCount == 10) {
+                        } else if (lineCount == (10 + addLineForWarning)) {
                             if (!line.contains("major-faults")) {
                                 Log.e(TAG, "Error in simpleperf output");
                             } else {
