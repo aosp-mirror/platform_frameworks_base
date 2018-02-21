@@ -89,7 +89,7 @@ public interface WebViewFactoryProvider {
         * {@link android.webkit.WebView#setSafeBrowsingWhitelist(List<String>,
         * ValueCallback<Boolean>)}
         */
-        void setSafeBrowsingWhitelist(List<String> urls, ValueCallback<Boolean> callback);
+        void setSafeBrowsingWhitelist(List<String> hosts, ValueCallback<Boolean> callback);
 
         /**
          * Implement the API method
