@@ -211,7 +211,7 @@ public class FingerprintDialogImpl extends SystemUI implements CommandQueue.Call
     }
 
     private void handleClearMessage() {
-        mDialogView.clearMessage();
+        mDialogView.resetMessage();
     }
 
     private void handleUserCanceled() {

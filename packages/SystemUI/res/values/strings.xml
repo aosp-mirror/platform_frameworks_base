@@ -259,6 +259,8 @@
     <!-- Button name for "Cancel". [CHAR LIMIT=NONE] -->
     <string name="cancel">Cancel</string>
 
+    <!-- Message shown when the system-provided fingerprint dialog is shown, asking for authentication -->
+    <string name="fingerprint_dialog_touch_sensor">Touch the fingerprint sensor</string>
     <!-- Content description of the fingerprint icon when the system-provided fingerprint dialog is showing, for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_fingerprint_dialog_fingerprint_icon">Fingerprint icon</string>
     <!-- Content description of the application icon when the system-provided fingerprint dialog is showing, for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
