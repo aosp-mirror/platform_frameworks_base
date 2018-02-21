@@ -56,7 +56,7 @@ public class MediaBrowser2 extends MediaController2 {
          * Called when there's change in the parent's children.
          *
          * @param parentId parent id that you've specified with {@link #subscribe(String, Bundle)}
-         * @param extras extra bundle that you've specified with {@link #subscribe(String, Bundle)}
+         * @param extras extra bundle from the library service
          */
         public void onChildrenChanged(@NonNull String parentId, @Nullable Bundle extras) { }
 
@@ -69,12 +69,11 @@ public class MediaBrowser2 extends MediaController2 {
          *             {@link #getChildren(String, int, int, Bundle)}
          * @param pageSize page size that you've specified with
          *                 {@link #getChildren(String, int, int, Bundle)}
-         * @param extras extra bundle that you've specified with
-         *                {@link #getChildren(String, int, int, Bundle)}
          * @param result result. Can be {@code null}
+         * @param extras extra bundle from the library service
          */
         public void onChildrenLoaded(@NonNull String parentId, int page, int pageSize,
-                @Nullable Bundle extras, @Nullable List<MediaItem2> result) { }
+                @Nullable List<MediaItem2> result, @Nullable Bundle extras) { }
 
         /**
          * Called when the item has been returned by the library service for the previous
@@ -92,11 +91,11 @@ public class MediaBrowser2 extends MediaController2 {
          * {@link MediaBrowser2#search(String, Bundle)}.
          *
          * @param query search query that you've specified with {@link #search(String, Bundle)}
-         * @param extras extra bundle
          * @param itemCount The item count for the search result
+         * @param extras extra bundle from the library service
          */
-        public void onSearchResultChanged(@NonNull String query, @Nullable Bundle extras,
-                int itemCount) { }
+        public void onSearchResultChanged(@NonNull String query, int itemCount,
+                @Nullable Bundle extras) { }
 
         /**
          * Called when the search result has been returned by the library service for the previous
@@ -110,12 +109,11 @@ public class MediaBrowser2 extends MediaController2 {
          *             {@link #getSearchResult(String, int, int, Bundle)}
          * @param pageSize page size that you've specified with
          *                 {@link #getSearchResult(String, int, int, Bundle)}
-         * @param extras extra bundle that you've specified with
-         *                {@link #getSearchResult(String, int, int, Bundle)}
          * @param result result. Can be {@code null}.
+         * @param extras extra bundle from the library service
          */
         public void onSearchResultLoaded(@NonNull String query, int page, int pageSize,
-                @Nullable Bundle extras, @Nullable List<MediaItem2> result) { }
+                @Nullable List<MediaItem2> result, @Nullable Bundle extras) { }
     }
 
     public MediaBrowser2(@NonNull Context context, @NonNull SessionToken2 token,
@@ -168,7 +166,7 @@ public class MediaBrowser2 extends MediaController2 {
 
     /**
      * Get list of children under the parent. Result would be sent back asynchronously with the
-     * {@link BrowserCallback#onChildrenLoaded(String, int, int, Bundle, List)}.
+     * {@link BrowserCallback#onChildrenLoaded(String, int, int, List, Bundle)}.
      *
      * @param parentId parent id for getting the children.
      * @param page page number to get the result. Starts from {@code 1}
@@ -191,7 +189,7 @@ public class MediaBrowser2 extends MediaController2 {
 
     /**
      * Send a search request to the library service. When the search result is changed,
-     * {@link BrowserCallback#onSearchResultChanged(String, Bundle, int)} will be called. You should
+     * {@link BrowserCallback#onSearchResultChanged(String, int, Bundle)} will be called. You should
      * call {@link #getSearchResult(String, int, int, Bundle)} to get the actual search result.
      *
      * @param query search query. Should not be an empty string.
@@ -203,7 +201,7 @@ public class MediaBrowser2 extends MediaController2 {
 
     /**
      * Get the search result from lhe library service. Result would be sent back asynchronously with
-     * the {@link BrowserCallback#onSearchResultLoaded(String, int, int, Bundle, List)}.
+     * the {@link BrowserCallback#onSearchResultLoaded(String, int, int, List, Bundle)}.
      *
      * @param query search query that you've specified with {@link #search(String, Bundle)}
      * @param page page number to get search result. Starts from {@code 1}
