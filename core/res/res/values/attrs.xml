@@ -5905,6 +5905,9 @@
         <!-- Identifier of the image file. This attribute is mandatory.
              It must be an image file with multiple frames, e.g. gif or webp -->
         <attr name="src" />
+        <!-- Indicates if the drawable needs to be mirrored when its layout direction is
+             RTL (right-to-left). -->
+        <attr name="autoMirrored" />
     </declare-styleable>
 
     <!-- Drawable used to draw bitmaps. -->
