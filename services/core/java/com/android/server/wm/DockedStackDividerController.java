@@ -242,7 +242,7 @@ public class DockedStackDividerController {
             final int appWidth = mService.mPolicy.getNonDecorDisplayWidth(dw, dh, rotation,
                 baseConfig.uiMode, displayId, displayCutout);
             final int appHeight = mService.mPolicy.getNonDecorDisplayHeight(dw, dh, rotation,
-                baseConfig.uiMode, displayId, mDisplayContent.getDisplayInfo().displayCutout);
+                baseConfig.uiMode, displayId, displayCutout);
             mService.mPolicy.getNonDecorInsetsLw(rotation, dw, dh, displayCutout, mTmpRect);
             final int leftInset = mTmpRect.left;
             final int topInset = mTmpRect.top;
