@@ -25,6 +25,7 @@ import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.StringDef;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -58,6 +59,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.ContactsContract.Directory;
+import android.provider.Settings;
 import android.security.AttestedKeyPair;
 import android.security.Credentials;
 import android.security.KeyChain;
@@ -7281,6 +7283,15 @@ public class DevicePolicyManager {
         }
     }
 
+    /** @hide */
+    @StringDef({
+            Settings.System.SCREEN_BRIGHTNESS_MODE,
+            Settings.System.SCREEN_BRIGHTNESS,
+            Settings.System.SCREEN_OFF_TIMEOUT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SystemSettingsWhitelist {}
+
     /**
      * Called by device owner to update {@link android.provider.Settings.System} settings.
      * Validation that the value of the setting is in the correct form for the setting type should
@@ -7300,8 +7311,8 @@ public class DevicePolicyManager {
      * @param value The value to update the setting to.
      * @throws SecurityException if {@code admin} is not a device owner.
      */
-    public void setSystemSetting(@NonNull ComponentName admin, @NonNull String setting,
-            String value) {
+    public void setSystemSetting(@NonNull ComponentName admin,
+            @NonNull @SystemSettingsWhitelist String setting, String value) {
         throwIfParentInstance("setSystemSetting");
         if (mService != null) {
             try {
