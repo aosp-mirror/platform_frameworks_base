@@ -1419,6 +1419,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             return false;
         }
 
+        if (prev == resuming) {
+            Slog.wtf(TAG, "Trying to pause activity that is in process of being resumed");
+            return false;
+        }
+
         if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to PAUSING: " + prev);
         else if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Start pausing: " + prev);
         mResumedActivity = null;

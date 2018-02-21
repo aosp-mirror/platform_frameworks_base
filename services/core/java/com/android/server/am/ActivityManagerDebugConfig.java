@@ -65,7 +65,7 @@ class ActivityManagerDebugConfig {
     static final boolean DEBUG_NETWORK = DEBUG_ALL || false;
     static final boolean DEBUG_OOM_ADJ = DEBUG_ALL || false;
     static final boolean DEBUG_OOM_ADJ_REASON = DEBUG_ALL || false;
-    static final boolean DEBUG_PAUSE = DEBUG_ALL || true;
+    static final boolean DEBUG_PAUSE = DEBUG_ALL || false;
     static final boolean DEBUG_POWER = DEBUG_ALL || false;
     static final boolean DEBUG_POWER_QUICK = DEBUG_POWER || false;
     static final boolean DEBUG_PROCESS_OBSERVERS = DEBUG_ALL || false;
