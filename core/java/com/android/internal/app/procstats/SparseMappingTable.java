@@ -18,6 +18,7 @@ package com.android.internal.app.procstats;
 
 import android.os.Build;
 import android.os.Parcel;
+import android.util.EventLog;
 import android.util.Slog;
 import libcore.util.EmptyArray;
 
@@ -528,6 +529,12 @@ public class SparseMappingTable {
             final long[] array = new long[size];
             readCompactedLongArray(in, array, size);
             mLongs.add(array);
+        }
+        // Verify that last array's length is consistent with writeToParcel
+        if (N > 0 && mLongs.get(N - 1).length != mNextIndex) {
+            EventLog.writeEvent(0x534e4554, "73252178", -1, "");
+            throw new IllegalStateException("Expected array of length " + mNextIndex + " but was "
+                    + mLongs.get(N - 1).length);
         }
     }
 
