@@ -23556,6 +23556,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
 
         @Override
+        public ComponentName getDefaultHomeActivity(int userId) {
+            return PackageManagerService.this.getDefaultHomeActivity(userId);
+        }
+
+        @Override
         public void setDeviceAndProfileOwnerPackages(
                 int deviceOwnerUserId, String deviceOwnerPackage,
                 SparseArray<String> profileOwnerPackages) {

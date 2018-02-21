@@ -365,6 +365,11 @@ public abstract class ActivityManagerInternal {
     public abstract boolean isCallerRecents(int callingUid);
 
     /**
+     * Returns whether the recents component is the home activity for the given user.
+     */
+    public abstract boolean isRecentsComponentHomeActivity(int userId);
+
+    /**
      * Whether an UID is active or idle.
      */
     public abstract boolean isUidActive(int uid);

@@ -26155,6 +26155,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             return getRecentTasks().isCallerRecents(callingUid);
         }
 
+        public boolean isRecentsComponentHomeActivity(int userId) {
+            return getRecentTasks().isRecentsComponentHomeActivity(userId);
+        }
+
         @Override
         public boolean isUidActive(int uid) {
             synchronized (ActivityManagerService.this) {

@@ -444,17 +444,6 @@ public class SystemServicesProxy {
         }
     }
 
-    public void endProlongedAnimations() {
-        if (mWm == null) {
-            return;
-        }
-        try {
-            mIwm.endProlongedAnimations();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public void registerDockedStackListener(IDockedStackListener listener) {
         if (mWm == null) return;
 

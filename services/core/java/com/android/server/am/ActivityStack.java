@@ -603,6 +603,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 // the one where the home stack is visible since recents isn't visible yet, but the
                 // divider will be off. I think we should just make the initial bounds that of home
                 // so that the divider matches and remove this logic.
+                // TODO: This is currently only called when entering split-screen while in another
+                // task, and from the tests
                 final ActivityStack recentStack = display.getOrCreateStack(
                         WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_RECENTS,
                         true /* onTop */);

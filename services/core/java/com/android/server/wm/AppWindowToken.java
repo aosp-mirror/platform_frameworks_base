@@ -1709,6 +1709,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 frame.set(win.mFrame);
             } else if (win.isLetterboxedAppWindow()) {
                 frame.set(getTask().getBounds());
+            } else if (win.isDockedResizing()) {
+                // If we are animating while docked resizing, then use the stack bounds as the
+                // animation target (which will be different than the task bounds)
+                frame.set(getTask().getParent().getBounds());
             } else {
                 frame.set(win.mContainingFrame);
             }

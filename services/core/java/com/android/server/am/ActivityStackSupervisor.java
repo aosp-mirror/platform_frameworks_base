@@ -93,6 +93,7 @@ import static com.android.server.am.TaskRecord.REPARENT_MOVE_STACK_TO_FRONT;
 import static com.android.server.am.proto.ActivityStackSupervisorProto.CONFIGURATION_CONTAINER;
 import static com.android.server.am.proto.ActivityStackSupervisorProto.DISPLAYS;
 import static com.android.server.am.proto.ActivityStackSupervisorProto.FOCUSED_STACK_ID;
+import static com.android.server.am.proto.ActivityStackSupervisorProto.IS_HOME_RECENTS_COMPONENT;
 import static com.android.server.am.proto.ActivityStackSupervisorProto.KEYGUARD_CONTROLLER;
 import static com.android.server.am.proto.ActivityStackSupervisorProto.RESUMED_ACTIVITY;
 import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
@@ -164,7 +165,6 @@ import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
-import android.view.RemoteAnimationAdapter;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -2540,11 +2540,21 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
     }
 
+    void deferUpdateRecentsHomeStackBounds() {
+        deferUpdateBounds(ACTIVITY_TYPE_RECENTS);
+        deferUpdateBounds(ACTIVITY_TYPE_HOME);
+    }
+
     void deferUpdateBounds(int activityType) {
         final ActivityStack stack = getStack(WINDOWING_MODE_UNDEFINED, activityType);
         if (stack != null) {
             stack.deferUpdateBounds();
         }
+    }
+
+    void continueUpdateRecentsHomeStackBounds() {
+        continueUpdateBounds(ACTIVITY_TYPE_RECENTS);
+        continueUpdateBounds(ACTIVITY_TYPE_HOME);
     }
 
     void continueUpdateBounds(int activityType) {
@@ -2555,7 +2565,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     void notifyAppTransitionDone() {
-        continueUpdateBounds(ACTIVITY_TYPE_RECENTS);
+        continueUpdateRecentsHomeStackBounds();
         for (int i = mResizingTasksDuringAnimation.size() - 1; i >= 0; i--) {
             final int taskId = mResizingTasksDuringAnimation.valueAt(i);
             final TaskRecord task = anyTaskForIdLocked(taskId, MATCH_TASK_IN_STACKS_ONLY);
@@ -3760,6 +3770,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 pw.print(prefix); pw.print(prefix); mWaitingForActivityVisible.get(i).dump(pw, prefix);
             }
         }
+        pw.print(prefix); pw.print("isHomeRecentsComponent=");
+        pw.print(mRecentTasks.isRecentsComponentHomeActivity(mCurrentUser));
 
         mKeyguardController.dump(pw, prefix);
         mService.mLockTaskController.dump(pw, prefix);
@@ -3781,6 +3793,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         } else {
             proto.write(FOCUSED_STACK_ID, INVALID_STACK_ID);
         }
+        proto.write(IS_HOME_RECENTS_COMPONENT,
+                mRecentTasks.isRecentsComponentHomeActivity(mCurrentUser));
     }
 
     /**
@@ -4546,14 +4560,14 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // Defer updating the stack in which recents is until the app transition is done, to
                 // not run into issues where we still need to draw the task in recents but the
                 // docked stack is already created.
-                deferUpdateBounds(ACTIVITY_TYPE_RECENTS);
+                deferUpdateRecentsHomeStackBounds();
                 mWindowManager.prepareAppTransition(TRANSIT_DOCK_TASK_FROM_RECENTS, false);
             }
 
             task = anyTaskForIdLocked(taskId, MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE,
                     activityOptions, ON_TOP);
             if (task == null) {
-                continueUpdateBounds(ACTIVITY_TYPE_RECENTS);
+                continueUpdateRecentsHomeStackBounds();
                 mWindowManager.executeAppTransition();
                 throw new IllegalArgumentException(
                         "startActivityFromRecents: Task " + taskId + " not found.");
@@ -4611,6 +4625,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     // window manager can correctly calculate the focus window that can receive
                     // input keys.
                     moveHomeStackToFront("startActivityFromRecents: homeVisibleInSplitScreen");
+
+                    // Immediately update the minimized docked stack mode, the upcoming animation
+                    // for the docked activity (WMS.overridePendingAppTransitionMultiThumbFuture)
+                    // will do the animation to the target bounds
+                    mWindowManager.checkSplitScreenMinimizedChanged(false /* animate */);
                 }
             }
             mWindowManager.continueSurfaceLayout();

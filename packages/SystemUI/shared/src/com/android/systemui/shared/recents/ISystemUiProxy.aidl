@@ -28,25 +28,30 @@ interface ISystemUiProxy {
      * Proxies SurfaceControl.screenshotToBuffer().
      */
     GraphicBufferCompat screenshot(in Rect sourceCrop, int width, int height, int minLayer,
-            int maxLayer, boolean useIdentityTransform, int rotation);
+            int maxLayer, boolean useIdentityTransform, int rotation) = 0;
 
     /**
      * Begins screen pinning on the provided {@param taskId}.
      */
-    void startScreenPinning(int taskId);
+    void startScreenPinning(int taskId) = 1;
 
     /**
      * Called when the overview service has started the recents animation.
      */
-    void onRecentsAnimationStarted();
+    void onRecentsAnimationStarted() = 2;
 
     /**
      * Specifies the text to be shown for onboarding the new swipe-up gesture to access recents.
      */
-    void setRecentsOnboardingText(CharSequence text);
+    void setRecentsOnboardingText(CharSequence text) = 3;
 
     /**
      * Enables/disables launcher/overview interaction features {@link InteractionType}.
      */
-    void setInteractionState(int flags);
+    void setInteractionState(int flags) = 4;
+
+    /**
+    * Notifies SystemUI that split screen has been invoked.
+    */
+    void onSplitScreenInvoked() = 5;
 }
