@@ -11102,8 +11102,23 @@ public class PackageManagerService extends IPackageManager.Stub
                                 mSettings.getPackageLPr(pkg.packageName),
                                 "previous package state not present");
 
+                        // previousPkg.pkg may be null: the package will be not be scanned if the
+                        // package manager knows there is a newer version on /data.
+                        // TODO[b/79435695]: Find a better way to keep track of the "static"
+                        // property for RROs instead of having to parse packages on /system
+                        PackageParser.Package ppkg = previousPkg.pkg;
+                        if (ppkg == null) {
+                            try {
+                                final PackageParser pp = new PackageParser();
+                                ppkg = pp.parsePackage(previousPkg.codePath,
+                                        parseFlags | PackageParser.PARSE_IS_SYSTEM_DIR);
+                            } catch (PackageParserException e) {
+                                Slog.w(TAG, "failed to parse " + previousPkg.codePath, e);
+                            }
+                        }
+
                         // Static overlays cannot be updated.
-                        if (previousPkg.pkg.mOverlayIsStatic) {
+                        if (ppkg != null && ppkg.mOverlayIsStatic) {
                             throw new PackageManagerException("Overlay " + pkg.packageName +
                                     " is static and cannot be upgraded.");
                         // Non-static overlays cannot be converted to static overlays.
