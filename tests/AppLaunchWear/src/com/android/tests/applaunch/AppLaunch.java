@@ -231,7 +231,7 @@ public class AppLaunch extends InstrumentationTestCase {
                 dropCache();
                 String appPkgName = mNameToIntent.get(launch.getApp())
                         .getComponent().getPackageName();
-
+                Log.v(TAG, String.format("Adding app package name: %s", appPkgName));
                 // App launch times for trial launch will not be used for final
                 // launch time calculations.
                 if (launch.getLaunchReason().equals(TRIAL_LAUNCH)) {
@@ -276,8 +276,10 @@ public class AppLaunch extends InstrumentationTestCase {
                     // In the "applaunch.txt" file app launches are referenced using
                     // "LAUNCH_ITERATION - ITERATION NUM"
                     if (appPkgName.contains(WEARABLE_HOME_PACKAGE)) {
+                        Log.v(TAG, "Home package detected. Not killing app");
                         launchResults = startApp(launch.getApp(), false, launch.getLaunchReason());
                     } else {
+                        Log.v(TAG, "Will kill app before launch");
                         launchResults = startApp(launch.getApp(), true, launch.getLaunchReason());
                     }
                     if (launchResults.mLaunchTime < 0) {
@@ -707,7 +709,12 @@ public class AppLaunch extends InstrumentationTestCase {
                 String packageName = mLaunchIntent.getComponent().getPackageName();
                 String componentName = mLaunchIntent.getComponent().flattenToShortString();
                 if (mForceStopBeforeLaunch) {
+                    Log.v(TAG, "Stopping app before launch");
                     mAm.forceStopPackage(packageName, UserHandle.USER_CURRENT);
+                } else {
+                    Log.v(TAG, "Not killing app. Going to Home Screen.");
+                    ParcelFileDescriptor goHome = getInstrumentation().getUiAutomation()
+                        .executeShellCommand("input keyevent 3");
                 }
                 String launchCmd = String.format("%s %s", APP_LAUNCH_CMD, componentName);
                 if (mSimplePerfAppOnly) {
