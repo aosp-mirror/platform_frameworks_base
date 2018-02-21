@@ -161,7 +161,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         updateStates();
     }
 
-    private void hideBouncer(boolean destroyView) {
+    public void hideBouncer(boolean destroyView) {
         mBouncer.hide(destroyView);
         cancelPendingWakeupAction();
     }
