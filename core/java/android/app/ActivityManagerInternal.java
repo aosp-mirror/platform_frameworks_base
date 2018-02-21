@@ -154,8 +154,8 @@ public abstract class ActivityManagerInternal {
      * Callback for window manager to let activity manager know that we are finally starting the
      * app transition;
      *
-     * @param reasons A map from stack id to a reason integer why the transition was started,, which
-     *                must be one of the APP_TRANSITION_* values.
+     * @param reasons A map from windowing mode to a reason integer why the transition was started,
+     *                which must be one of the APP_TRANSITION_* values.
      * @param timestamp The time at which the app transition started in
      *                  {@link SystemClock#uptimeMillis()} timebase.
      */

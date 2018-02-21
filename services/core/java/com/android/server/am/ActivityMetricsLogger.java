@@ -2,7 +2,6 @@ package com.android.server.am;
 
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManagerInternal.APP_TRANSITION_TIMEOUT;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
@@ -89,8 +88,10 @@ class ActivityMetricsLogger {
     private int mCurrentTransitionDelayMs;
     private boolean mLoggedTransitionStarting;
 
-    private final SparseArray<StackTransitionInfo> mStackTransitionInfo = new SparseArray<>();
-    private final SparseArray<StackTransitionInfo> mLastStackTransitionInfo = new SparseArray<>();
+    private final SparseArray<WindowingModeTransitionInfo> mWindowingModeTransitionInfo =
+            new SparseArray<>();
+    private final SparseArray<WindowingModeTransitionInfo> mLastWindowingModeTransitionInfo =
+            new SparseArray<>();
     private final H mHandler;
     private final class H extends Handler {
 
@@ -106,13 +107,13 @@ class ActivityMetricsLogger {
                     checkVisibility((TaskRecord) args.arg1, (ActivityRecord) args.arg2);
                     break;
                 case MSG_LOG_APP_START_MEMORY_STATE_CAPTURE:
-                    logAppStartMemoryStateCapture((StackTransitionInfo) msg.obj);
+                    logAppStartMemoryStateCapture((WindowingModeTransitionInfo) msg.obj);
                     break;
             }
         }
     };
 
-    private final class StackTransitionInfo {
+    private final class WindowingModeTransitionInfo {
         private ActivityRecord launchedActivity;
         private int startResult;
         private boolean currentTransitionProcessRunning;
@@ -242,56 +243,57 @@ class ActivityMetricsLogger {
 
         // If we are already in an existing transition, only update the activity name, but not the
         // other attributes.
-        final int stackId = launchedActivity != null && launchedActivity.getStack() != null
-                ? launchedActivity.getStack().mStackId
-                : INVALID_STACK_ID;
+        final int windowingMode = launchedActivity != null
+                ? launchedActivity.getWindowingMode()
+                : WINDOWING_MODE_UNDEFINED;
 
         if (mCurrentTransitionStartTime == INVALID_START_TIME) {
             return;
         }
 
-        final StackTransitionInfo info = mStackTransitionInfo.get(stackId);
+        final WindowingModeTransitionInfo info = mWindowingModeTransitionInfo.get(windowingMode);
         if (launchedActivity != null && info != null) {
             info.launchedActivity = launchedActivity;
             return;
         }
 
-        final boolean otherStacksLaunching = mStackTransitionInfo.size() > 0 && info == null;
+        final boolean otherWindowModesLaunching =
+                mWindowingModeTransitionInfo.size() > 0 && info == null;
         if ((resultCode < 0 || launchedActivity == null || !processSwitch
-                || stackId == INVALID_STACK_ID) && !otherStacksLaunching) {
+                || windowingMode == WINDOWING_MODE_UNDEFINED) && !otherWindowModesLaunching) {
 
             // Failed to launch or it was not a process switch, so we don't care about the timing.
             reset(true /* abort */);
             return;
-        } else if (otherStacksLaunching) {
-            // Don't log this stack but continue with the other stacks.
+        } else if (otherWindowModesLaunching) {
+            // Don't log this windowing mode but continue with the other windowing modes.
             return;
         }
 
         if (DEBUG_METRICS) Slog.i(TAG, "notifyActivityLaunched successful");
 
-        final StackTransitionInfo newInfo = new StackTransitionInfo();
+        final WindowingModeTransitionInfo newInfo = new WindowingModeTransitionInfo();
         newInfo.launchedActivity = launchedActivity;
         newInfo.currentTransitionProcessRunning = processRunning;
         newInfo.startResult = resultCode;
-        mStackTransitionInfo.put(stackId, newInfo);
-        mLastStackTransitionInfo.put(stackId, newInfo);
+        mWindowingModeTransitionInfo.put(windowingMode, newInfo);
+        mLastWindowingModeTransitionInfo.put(windowingMode, newInfo);
         mCurrentTransitionDeviceUptime = (int) (SystemClock.uptimeMillis() / 1000);
     }
 
     /**
      * Notifies the tracker that all windows of the app have been drawn.
      */
-    void notifyWindowsDrawn(int stackId, long timestamp) {
-        if (DEBUG_METRICS) Slog.i(TAG, "notifyWindowsDrawn stackId=" + stackId);
+    void notifyWindowsDrawn(int windowingMode, long timestamp) {
+        if (DEBUG_METRICS) Slog.i(TAG, "notifyWindowsDrawn windowingMode=" + windowingMode);
 
-        final StackTransitionInfo info = mStackTransitionInfo.get(stackId);
+        final WindowingModeTransitionInfo info = mWindowingModeTransitionInfo.get(windowingMode);
         if (info == null || info.loggedWindowsDrawn) {
             return;
         }
         info.windowsDrawnDelayMs = calculateDelay(timestamp);
         info.loggedWindowsDrawn = true;
-        if (allStacksWindowsDrawn() && mLoggedTransitionStarting) {
+        if (allWindowsDrawn() && mLoggedTransitionStarting) {
             reset(false /* abort */);
         }
     }
@@ -299,8 +301,8 @@ class ActivityMetricsLogger {
     /**
      * Notifies the tracker that the starting window was drawn.
      */
-    void notifyStartingWindowDrawn(int stackId, long timestamp) {
-        final StackTransitionInfo info = mStackTransitionInfo.get(stackId);
+    void notifyStartingWindowDrawn(int windowingMode, long timestamp) {
+        final WindowingModeTransitionInfo info = mWindowingModeTransitionInfo.get(windowingMode);
         if (info == null || info.loggedStartingWindowDrawn) {
             return;
         }
@@ -311,25 +313,26 @@ class ActivityMetricsLogger {
     /**
      * Notifies the tracker that the app transition is starting.
      *
-     * @param stackIdReasons A map from stack id to a reason integer, which must be on of
-     *                       ActivityManagerInternal.APP_TRANSITION_* reasons.
+     * @param windowingModeToReason A map from windowing mode to a reason integer, which must be on
+     *                              of ActivityManagerInternal.APP_TRANSITION_* reasons.
      */
-    void notifyTransitionStarting(SparseIntArray stackIdReasons, long timestamp) {
+    void notifyTransitionStarting(SparseIntArray windowingModeToReason, long timestamp) {
         if (!isAnyTransitionActive() || mLoggedTransitionStarting) {
             return;
         }
         if (DEBUG_METRICS) Slog.i(TAG, "notifyTransitionStarting");
         mCurrentTransitionDelayMs = calculateDelay(timestamp);
         mLoggedTransitionStarting = true;
-        for (int index = stackIdReasons.size() - 1; index >= 0; index--) {
-            final int stackId = stackIdReasons.keyAt(index);
-            final StackTransitionInfo info = mStackTransitionInfo.get(stackId);
+        for (int index = windowingModeToReason.size() - 1; index >= 0; index--) {
+            final int windowingMode = windowingModeToReason.keyAt(index);
+            final WindowingModeTransitionInfo info = mWindowingModeTransitionInfo.get(
+                    windowingMode);
             if (info == null) {
                 continue;
             }
-            info.reason = stackIdReasons.valueAt(index);
+            info.reason = windowingModeToReason.valueAt(index);
         }
-        if (allStacksWindowsDrawn()) {
+        if (allWindowsDrawn()) {
             reset(false /* abort */);
         }
     }
@@ -340,7 +343,8 @@ class ActivityMetricsLogger {
      * @param activityRecord the app that is changing its visibility
      */
     void notifyVisibilityChanged(ActivityRecord activityRecord) {
-        final StackTransitionInfo info = mStackTransitionInfo.get(activityRecord.getStackId());
+        final WindowingModeTransitionInfo info = mWindowingModeTransitionInfo.get(
+                activityRecord.getWindowingMode());
         if (info == null) {
             return;
         }
@@ -357,7 +361,8 @@ class ActivityMetricsLogger {
     private void checkVisibility(TaskRecord t, ActivityRecord r) {
         synchronized (mSupervisor.mService) {
 
-            final StackTransitionInfo info = mStackTransitionInfo.get(r.getStackId());
+            final WindowingModeTransitionInfo info = mWindowingModeTransitionInfo.get(
+                    r.getWindowingMode());
 
             // If we have an active transition that's waiting on a certain activity that will be
             // invisible now, we'll never get onWindowsDrawn, so abort the transition if necessary.
@@ -365,8 +370,8 @@ class ActivityMetricsLogger {
                 if (DEBUG_METRICS) Slog.i(TAG, "notifyVisibilityChanged to invisible"
                         + " activity=" + r);
                 logAppTransitionCancel(info);
-                mStackTransitionInfo.remove(r.getStackId());
-                if (mStackTransitionInfo.size() == 0) {
+                mWindowingModeTransitionInfo.remove(r.getWindowingMode());
+                if (mWindowingModeTransitionInfo.size() == 0) {
                     reset(true /* abort */);
                 }
             }
@@ -379,8 +384,8 @@ class ActivityMetricsLogger {
      * @param app The client into which we'll call bindApplication.
      */
     void notifyBindApplication(ProcessRecord app) {
-        for (int i = mStackTransitionInfo.size() - 1; i >= 0; i--) {
-            final StackTransitionInfo info = mStackTransitionInfo.valueAt(i);
+        for (int i = mWindowingModeTransitionInfo.size() - 1; i >= 0; i--) {
+            final WindowingModeTransitionInfo info = mWindowingModeTransitionInfo.valueAt(i);
 
             // App isn't attached to record yet, so match with info.
             if (info.launchedActivity.appInfo == app.info) {
@@ -389,9 +394,9 @@ class ActivityMetricsLogger {
         }
     }
 
-    private boolean allStacksWindowsDrawn() {
-        for (int index = mStackTransitionInfo.size() - 1; index >= 0; index--) {
-            if (!mStackTransitionInfo.valueAt(index).loggedWindowsDrawn) {
+    private boolean allWindowsDrawn() {
+        for (int index = mWindowingModeTransitionInfo.size() - 1; index >= 0; index--) {
+            if (!mWindowingModeTransitionInfo.valueAt(index).loggedWindowsDrawn) {
                 return false;
             }
         }
@@ -400,7 +405,7 @@ class ActivityMetricsLogger {
 
     private boolean isAnyTransitionActive() {
         return mCurrentTransitionStartTime != INVALID_START_TIME
-                && mStackTransitionInfo.size() > 0;
+                && mWindowingModeTransitionInfo.size() > 0;
     }
 
     private void reset(boolean abort) {
@@ -411,7 +416,7 @@ class ActivityMetricsLogger {
         mCurrentTransitionStartTime = INVALID_START_TIME;
         mCurrentTransitionDelayMs = -1;
         mLoggedTransitionStarting = false;
-        mStackTransitionInfo.clear();
+        mWindowingModeTransitionInfo.clear();
     }
 
     private int calculateCurrentDelay() {
@@ -425,7 +430,7 @@ class ActivityMetricsLogger {
         return (int) (timestamp - mCurrentTransitionStartTime);
     }
 
-    private void logAppTransitionCancel(StackTransitionInfo info) {
+    private void logAppTransitionCancel(WindowingModeTransitionInfo info) {
         final int type = getTransitionType(info);
         if (type == -1) {
             return;
@@ -445,8 +450,8 @@ class ActivityMetricsLogger {
 
     private void logAppTransitionMultiEvents() {
         if (DEBUG_METRICS) Slog.i(TAG, "logging transition events");
-        for (int index = mStackTransitionInfo.size() - 1; index >= 0; index--) {
-            final StackTransitionInfo info = mStackTransitionInfo.valueAt(index);
+        for (int index = mWindowingModeTransitionInfo.size() - 1; index >= 0; index--) {
+            final WindowingModeTransitionInfo info = mWindowingModeTransitionInfo.valueAt(index);
             final int type = getTransitionType(info);
             if (type == -1) {
                 return;
@@ -513,7 +518,8 @@ class ActivityMetricsLogger {
      }
 
     void logAppTransitionReportedDrawn(ActivityRecord r, boolean restoredFromBundle) {
-        final StackTransitionInfo info = mLastStackTransitionInfo.get(r.getStackId());
+        final WindowingModeTransitionInfo info = mLastWindowingModeTransitionInfo.get(
+                r.getWindowingMode());
         if (info == null) {
             return;
         }
@@ -540,7 +546,7 @@ class ActivityMetricsLogger {
                 startupTimeMs);
     }
 
-    private int getTransitionType(StackTransitionInfo info) {
+    private int getTransitionType(WindowingModeTransitionInfo info) {
         if (info.currentTransitionProcessRunning) {
             if (info.startResult == START_SUCCESS) {
                 return TYPE_TRANSITION_WARM_LAUNCH;
@@ -553,7 +559,7 @@ class ActivityMetricsLogger {
         return -1;
     }
 
-    private void logAppStartMemoryStateCapture(StackTransitionInfo info) {
+    private void logAppStartMemoryStateCapture(WindowingModeTransitionInfo info) {
         final ProcessRecord processRecord = findProcessForActivity(info.launchedActivity);
         if (processRecord == null) {
             if (DEBUG_METRICS) Slog.i(TAG, "logAppStartMemoryStateCapture processRecord null");
