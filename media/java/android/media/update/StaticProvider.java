@@ -133,7 +133,6 @@ public interface StaticProvider {
     Rating2 newPercentageRating_Rating2(Context context, float percent);
 
     PlaybackState2Provider createPlaybackState2(Context context, PlaybackState2 instance, int state,
-            long position, long updateTime, float speed, long bufferedPosition, long activeItemId,
-            CharSequence error);
+            long position, long updateTime, float speed, long bufferedPosition, long activeItemId);
     PlaybackState2 fromBundle_PlaybackState2(Context context, Bundle bundle);
 }

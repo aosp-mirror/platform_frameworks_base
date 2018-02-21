@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.media.MediaSession2.PlaylistParams;
@@ -29,13 +30,56 @@ import java.util.concurrent.Executor;
  */
 public interface MediaPlayerInterface {
     /**
-     * Listens change in {@link PlaybackState2}.
+     * Unspecified media player error.
      */
-    interface PlaybackListener {
+    int MEDIA_ERROR_UNKNOWN = MediaPlayer2.MEDIA_ERROR_UNKNOWN;
+
+    /**
+     * The video is streamed and its container is not valid for progressive
+     * playback i.e the video's index (e.g moov atom) is not at the start of the
+     * file.
+     */
+    int MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK =
+            MediaPlayer2.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK;
+
+    /**
+     * File or network related operation errors.
+     */
+    int MEDIA_ERROR_IO = MediaPlayer2.MEDIA_ERROR_IO;
+
+    /**
+     * Bitstream is not conforming to the related coding standard or file spec.
+     */
+    int MEDIA_ERROR_MALFORMED = MediaPlayer2.MEDIA_ERROR_MALFORMED;
+
+    /**
+     * Bitstream is conforming to the related coding standard or file spec, but
+     * the media framework does not support the feature.
+     */
+    int MEDIA_ERROR_UNSUPPORTED = MediaPlayer2.MEDIA_ERROR_UNSUPPORTED;
+
+    /**
+     * Some operation takes too long to complete, usually more than 3-5 seconds.
+     */
+    int MEDIA_ERROR_TIMED_OUT = MediaPlayer2.MEDIA_ERROR_TIMED_OUT;
+
+    /**
+     * Callbacks to listens to the changes in {@link PlaybackState2} and error.
+     */
+    interface EventCallback {
         /**
          * Called when {@link PlaybackState2} for this player is changed.
          */
-        void onPlaybackChanged(PlaybackState2 state);
+        default void onPlaybackStateChanged(PlaybackState2 state) { }
+
+        /**
+         * Called to indicate an error.
+         *
+         * @param mediaId optional mediaId to indicate error
+         * @param what what
+         * @param extra
+         */
+        default void onError(@Nullable String mediaId, int what, int extra) { }
     }
 
     // Transport controls that session will send command directly to this player.
@@ -75,17 +119,18 @@ public interface MediaPlayerInterface {
     PlaylistParams getPlaylistParams();
 
     /**
-     * Add a {@link PlaybackListener} to be invoked when the playback state is changed.
+     * Register a {@link EventCallback}.
      *
-     * @param executor the Handler that will receive the listener
-     * @param listener the listener that will be run
+     * @param executor a callback executor
+     * @param callback a EventCallback
      */
-    void addPlaybackListener(Executor executor, PlaybackListener listener);
+    void registerEventCallback(@NonNull @CallbackExecutor Executor executor,
+            @NonNull EventCallback callback);
 
     /**
-     * Remove previously added {@link PlaybackListener}.
+     * Unregister previously registered {@link EventCallback}.
      *
-     * @param listener the listener to be removed
+     * @param callback a EventCallback
      */
-    void removePlaybackListener(PlaybackListener listener);
+    void unregisterEventCallback(@NonNull EventCallback callback);
 }

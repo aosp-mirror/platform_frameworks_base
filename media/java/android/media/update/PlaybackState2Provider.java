@@ -33,8 +33,6 @@ public interface PlaybackState2Provider {
 
     float getPlaybackSpeed_impl();
 
-    CharSequence getErrorMessage_impl();
-
     long getLastPositionUpdateTime_impl();
 
     long getCurrentPlaylistItemIndex_impl();

@@ -521,24 +521,6 @@ public class MediaController2 implements AutoCloseable {
     }
 
     /**
-     * Get the rating type supported by the session. One of:
-     * <ul>
-     * <li>{@link Rating2#RATING_NONE}</li>
-     * <li>{@link Rating2#RATING_HEART}</li>
-     * <li>{@link Rating2#RATING_THUMB_UP_DOWN}</li>
-     * <li>{@link Rating2#RATING_3_STARS}</li>
-     * <li>{@link Rating2#RATING_4_STARS}</li>
-     * <li>{@link Rating2#RATING_5_STARS}</li>
-     * <li>{@link Rating2#RATING_PERCENTAGE}</li>
-     * </ul>
-     *
-     * @return The supported rating type
-     */
-    public int getRatingType() {
-        return mProvider.getRatingType_impl();
-    }
-
-    /**
      * Get an intent for launching UI associated with this session if one exists.
      *
      * @return A {@link PendingIntent} to launch UI or null.
@@ -571,7 +553,12 @@ public class MediaController2 implements AutoCloseable {
 
     /**
      * Rate the media. This will cause the rating to be set for the current user.
-     * The Rating type must match the type returned by {@link #getRatingType()}.
+     * The rating style must follow the user rating style from the session.
+     * You can get the rating style from the session through the
+     * {@link MediaMetadata#getRating(String)} with the key
+     * {@link MediaMetadata#METADATA_KEY_USER_RATING}.
+     * <p>
+     * If the user rating was {@code null}, the media item does not accept setting user rating.
      *
      * @param mediaId The id of the media
      * @param rating The rating to set
