@@ -1384,6 +1384,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         classLoaderName = orig.classLoaderName;
         splitClassLoaderNames = orig.splitClassLoaderNames;
         appComponentFactory = orig.appComponentFactory;
+        compileSdkVersion = orig.compileSdkVersion;
+        compileSdkVersionCodename = orig.compileSdkVersionCodename;
     }
 
     public String toString() {
