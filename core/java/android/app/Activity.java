@@ -751,6 +751,14 @@ public class Activity extends ContextThemeWrapper
 
     private static final String KEYBOARD_SHORTCUTS_RECEIVER_PKG_NAME = "com.android.systemui";
 
+    private static final int LOG_AM_ON_CREATE_CALLED = 30057;
+    private static final int LOG_AM_ON_START_CALLED = 30059;
+    private static final int LOG_AM_ON_RESUME_CALLED = 30022;
+    private static final int LOG_AM_ON_PAUSE_CALLED = 30021;
+    private static final int LOG_AM_ON_STOP_CALLED = 30049;
+    private static final int LOG_AM_ON_RESTART_CALLED = 30058;
+    private static final int LOG_AM_ON_DESTROY_CALLED = 30060;
+
     private static class ManagedDialog {
         Dialog mDialog;
         Bundle mArgs;
@@ -7103,6 +7111,7 @@ public class Activity extends ContextThemeWrapper
         } else {
             onCreate(icicle);
         }
+        writeEventLog(LOG_AM_ON_CREATE_CALLED, "performCreate");
         mActivityTransitionState.readState(icicle);
 
         mVisibleFromClient = !mWindow.getWindowStyle().getBoolean(
@@ -7116,12 +7125,14 @@ public class Activity extends ContextThemeWrapper
         onNewIntent(intent);
     }
 
-    final void performStart() {
+    final void performStart(String reason) {
         mActivityTransitionState.setEnterActivityOptions(this, getActivityOptions());
         mFragments.noteStateNotSaved();
         mCalled = false;
         mFragments.execPendingActions();
         mInstrumentation.callActivityOnStart(this);
+        writeEventLog(LOG_AM_ON_START_CALLED, reason);
+
         if (!mCalled) {
             throw new SuperNotCalledException(
                 "Activity " + mComponent.toShortString() +
@@ -7190,7 +7201,7 @@ public class Activity extends ContextThemeWrapper
      *              The option to not start immediately is needed in case a transaction with
      *              multiple lifecycle transitions is in progress.
      */
-    final void performRestart(boolean start) {
+    final void performRestart(boolean start, String reason) {
         mCanEnterPictureInPicture = true;
         mFragments.noteStateNotSaved();
 
@@ -7223,19 +7234,20 @@ public class Activity extends ContextThemeWrapper
 
             mCalled = false;
             mInstrumentation.callActivityOnRestart(this);
+            writeEventLog(LOG_AM_ON_RESTART_CALLED, reason);
             if (!mCalled) {
                 throw new SuperNotCalledException(
                     "Activity " + mComponent.toShortString() +
                     " did not call through to super.onRestart()");
             }
             if (start) {
-                performStart();
+                performStart(reason);
             }
         }
     }
 
-    final void performResume(boolean followedByPause) {
-        performRestart(true /* start */);
+    final void performResume(boolean followedByPause, String reason) {
+        performRestart(true /* start */, reason);
 
         mFragments.execPendingActions();
 
@@ -7254,6 +7266,7 @@ public class Activity extends ContextThemeWrapper
         mCalled = false;
         // mResumed is set by the instrumentation
         mInstrumentation.callActivityOnResume(this);
+        writeEventLog(LOG_AM_ON_RESUME_CALLED, reason);
         if (!mCalled) {
             throw new SuperNotCalledException(
                 "Activity " + mComponent.toShortString() +
@@ -7290,6 +7303,7 @@ public class Activity extends ContextThemeWrapper
         mFragments.dispatchPause();
         mCalled = false;
         onPause();
+        writeEventLog(LOG_AM_ON_PAUSE_CALLED, "performPause");
         mResumed = false;
         if (!mCalled && getApplicationInfo().targetSdkVersion
                 >= android.os.Build.VERSION_CODES.GINGERBREAD) {
@@ -7297,7 +7311,6 @@ public class Activity extends ContextThemeWrapper
                     "Activity " + mComponent.toShortString() +
                     " did not call through to super.onPause()");
         }
-        mResumed = false;
     }
 
     final void performUserLeaving() {
@@ -7305,7 +7318,7 @@ public class Activity extends ContextThemeWrapper
         onUserLeaveHint();
     }
 
-    final void performStop(boolean preserveWindow) {
+    final void performStop(boolean preserveWindow, String reason) {
         mDoReportFullyDrawn = false;
         mFragments.doLoaderStop(mChangingConfigurations /*retain*/);
 
@@ -7328,6 +7341,7 @@ public class Activity extends ContextThemeWrapper
 
             mCalled = false;
             mInstrumentation.callActivityOnStop(this);
+            writeEventLog(LOG_AM_ON_STOP_CALLED, reason);
             if (!mCalled) {
                 throw new SuperNotCalledException(
                     "Activity " + mComponent.toShortString() +
@@ -7355,6 +7369,7 @@ public class Activity extends ContextThemeWrapper
         mWindow.destroy();
         mFragments.dispatchDestroy();
         onDestroy();
+        writeEventLog(LOG_AM_ON_DESTROY_CALLED, "performDestroy");
         mFragments.doLoaderDestroy();
         if (mVoiceInteractor != null) {
             mVoiceInteractor.detachActivity();
@@ -7827,6 +7842,12 @@ public class Activity extends ContextThemeWrapper
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to call registerRemoteAnimations", e);
         }
+    }
+
+    /** Log a lifecycle event for current user id and component class. */
+    private void writeEventLog(int event, String reason) {
+        EventLog.writeEvent(event, UserHandle.myUserId(), getComponentName().getClassName(),
+                reason);
     }
 
     class HostCallbacks extends FragmentHostCallback<Activity> {

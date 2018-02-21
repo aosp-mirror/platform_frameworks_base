@@ -208,9 +208,6 @@ public final class ActivityThread extends ClientTransactionHandler {
     public static final boolean DEBUG_ORDER = false;
     private static final long MIN_TIME_BETWEEN_GCS = 5*1000;
     private static final int SQLITE_MEM_RELEASED_EVENT_LOG_TAG = 75003;
-    private static final int LOG_AM_ON_PAUSE_CALLED = 30021;
-    private static final int LOG_AM_ON_RESUME_CALLED = 30022;
-    private static final int LOG_AM_ON_STOP_CALLED = 30049;
 
     /** Type for IActivityManager.serviceDoneExecuting: anonymous operation */
     public static final int SERVICE_DONE_EXECUTING_ANON = 0;
@@ -2924,7 +2921,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         // Start
-        activity.performStart();
+        activity.performStart("handleStartActivity");
         r.setState(ON_START);
 
         if (pendingActions == null) {
@@ -3113,7 +3110,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         checkAndBlockForNetworkAccess();
         deliverNewIntents(r, intents);
         if (resumed) {
-            r.activity.performResume(false);
+            r.activity.performResume(false, "performNewIntents");
             r.activity.mTemporaryPause = false;
         }
 
@@ -3735,10 +3732,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                     deliverResults(r, r.pendingResults);
                     r.pendingResults = null;
                 }
-                r.activity.performResume(r.startsNotResumed);
-
-                EventLog.writeEvent(LOG_AM_ON_RESUME_CALLED, UserHandle.myUserId(),
-                        r.activity.getComponentName().getClassName(), reason);
+                r.activity.performResume(r.startsNotResumed, reason);
 
                 r.state = null;
                 r.persistentState = null;
@@ -3906,7 +3900,8 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     @Override
     public void handlePauseActivity(IBinder token, boolean finished, boolean userLeaving,
-            int configChanges, boolean dontReport, PendingTransactionActions pendingActions) {
+            int configChanges, boolean dontReport, PendingTransactionActions pendingActions,
+            String reason) {
         ActivityClientRecord r = mActivities.get(token);
         if (r != null) {
             if (userLeaving) {
@@ -3914,7 +3909,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
 
             r.activity.mConfigChangeFlags |= configChanges;
-            performPauseActivity(r, finished, "handlePauseActivity", pendingActions);
+            performPauseActivity(r, finished, reason, pendingActions);
 
             // Make sure any pending writes are now committed.
             if (r.isPreHoneycomb()) {
@@ -4007,8 +4002,6 @@ public final class ActivityThread extends ClientTransactionHandler {
         try {
             r.activity.mCalled = false;
             mInstrumentation.callActivityOnPause(r.activity);
-            EventLog.writeEvent(LOG_AM_ON_PAUSE_CALLED, UserHandle.myUserId(),
-                    r.activity.getComponentName().getClassName(), reason);
             if (!r.activity.mCalled) {
                 throw new SuperNotCalledException("Activity " + safeToComponentShortString(r.intent)
                         + " did not call through to super.onPause()");
@@ -4119,7 +4112,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         try {
-            r.activity.performStop(false /*preserveWindow*/);
+            r.activity.performStop(false /*preserveWindow*/, reason);
         } catch (SuperNotCalledException e) {
             throw e;
         } catch (Exception e) {
@@ -4131,8 +4124,6 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
         }
         r.setState(ON_STOP);
-        EventLog.writeEvent(LOG_AM_ON_STOP_CALLED, UserHandle.myUserId(),
-                r.activity.getComponentName().getClassName(), reason);
 
         if (shouldSaveState && !isPreP) {
             callActivityOnSaveInstanceState(r);
@@ -4169,12 +4160,12 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     @Override
     public void handleStopActivity(IBinder token, boolean show, int configChanges,
-            PendingTransactionActions pendingActions) {
+            PendingTransactionActions pendingActions, String reason) {
         final ActivityClientRecord r = mActivities.get(token);
         r.activity.mConfigChangeFlags |= configChanges;
 
         final StopInfo stopInfo = new StopInfo();
-        performStopActivityInner(r, stopInfo, show, true, "handleStopActivity");
+        performStopActivityInner(r, stopInfo, show, true, reason);
 
         if (localLOGV) Slog.v(
             TAG, "Finishing stop of " + r + ": show=" + show
@@ -4209,7 +4200,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     public void performRestartActivity(IBinder token, boolean start) {
         ActivityClientRecord r = mActivities.get(token);
         if (r.stopped) {
-            r.activity.performRestart(start);
+            r.activity.performRestart(start, "performRestartActivity");
             if (start) {
                 r.setState(ON_START);
             }
@@ -4232,7 +4223,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             // we are back active so skip it.
             unscheduleGcIdler();
 
-            r.activity.performRestart(true /* start */);
+            r.activity.performRestart(true /* start */, "handleWindowVisibility");
             r.setState(ON_START);
         }
         if (r.activity.mDecor != null) {
@@ -4272,7 +4263,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
         } else {
             if (r.stopped && r.activity.mVisibleFromServer) {
-                r.activity.performRestart(true /* start */);
+                r.activity.performRestart(true /* start */, "handleSleeping");
                 r.setState(ON_START);
             }
         }
@@ -4384,7 +4375,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             checkAndBlockForNetworkAccess();
             deliverResults(r, results);
             if (resumed) {
-                r.activity.performResume(false);
+                r.activity.performResume(false, "handleSendResult");
                 r.activity.mTemporaryPause = false;
             }
         }
