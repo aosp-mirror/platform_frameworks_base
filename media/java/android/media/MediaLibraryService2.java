@@ -105,12 +105,12 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          *
          * @param controller controller to notify
          * @param query previously sent search query from the controller.
-         * @param extras extra bundle
          * @param itemCount the number of items that have been found in the search.
+         * @param extras extra bundle
          */
         public void notifySearchResultChanged(@NonNull ControllerInfo controller,
-                @NonNull String query, @NonNull Bundle extras, int itemCount) {
-            mProvider.notifySearchResultChanged_impl(controller, query, extras, itemCount);
+                @NonNull String query, int itemCount, @NonNull Bundle extras) {
+            mProvider.notifySearchResultChanged_impl(controller, query, itemCount, extras);
         }
     }
 
