@@ -44,4 +44,9 @@ public class NotificationAdjustmentExtractor implements NotificationSignalExtrac
     public void setConfig(RankingConfig config) {
         // config is not used
     }
+
+    @Override
+    public void setZenHelper(ZenModeHelper helper) {
+
+    }
 }

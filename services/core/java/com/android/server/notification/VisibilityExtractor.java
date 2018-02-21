@@ -52,4 +52,9 @@ public class VisibilityExtractor implements NotificationSignalExtractor {
     public void setConfig(RankingConfig config) {
         mConfig = config;
     }
+
+    @Override
+    public void setZenHelper(ZenModeHelper helper) {
+
+    }
 }
