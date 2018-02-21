@@ -463,7 +463,7 @@ public final class WebViewFactory {
      */
     public static int onWebViewProviderChanged(PackageInfo packageInfo) {
         String[] nativeLibs = null;
-        String originalSourceDir = packageInfo.applicationInfo.sourceDir;
+        ApplicationInfo originalAppInfo = new ApplicationInfo(packageInfo.applicationInfo);
         try {
             fixupStubApplicationInfo(packageInfo.applicationInfo,
                                      AppGlobals.getInitialApplication().getPackageManager());
@@ -474,7 +474,7 @@ public final class WebViewFactory {
             Log.e(LOGTAG, "error preparing webview native library", t);
         }
 
-        WebViewZygote.onWebViewProviderChanged(packageInfo, originalSourceDir);
+        WebViewZygote.onWebViewProviderChanged(packageInfo, originalAppInfo);
 
         return prepareWebViewInSystemServer(nativeLibs);
     }
