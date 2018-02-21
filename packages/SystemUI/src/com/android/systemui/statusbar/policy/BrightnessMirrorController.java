@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.policy;
 
 import android.annotation.NonNull;
+import android.content.res.Resources;
 import android.util.ArraySet;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
@@ -111,10 +112,10 @@ public class BrightnessMirrorController
     public void updateResources() {
         FrameLayout.LayoutParams lp =
                 (FrameLayout.LayoutParams) mBrightnessMirror.getLayoutParams();
-        lp.width = mBrightnessMirror.getResources().getDimensionPixelSize(
-                R.dimen.qs_panel_width);
-        lp.gravity = mBrightnessMirror.getResources().getInteger(
-                R.integer.notification_panel_layout_gravity);
+        Resources r = mBrightnessMirror.getResources();
+        lp.width = r.getDimensionPixelSize(R.dimen.qs_panel_width);
+        lp.height = r.getDimensionPixelSize(R.dimen.brightness_mirror_height);
+        lp.gravity = r.getInteger(R.integer.notification_panel_layout_gravity);
         mBrightnessMirror.setLayoutParams(lp);
     }
 

@@ -254,8 +254,10 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     public void updateResources() {
         final Resources res = mContext.getResources();
-        setPadding(0, res.getDimensionPixelSize(R.dimen.qs_brightness_padding_top),
-                0, res.getDimensionPixelSize(R.dimen.qs_panel_padding_bottom));
+        setPadding(0, 0, 0, res.getDimensionPixelSize(R.dimen.qs_panel_padding_bottom));
+        mTooltipView.getLayoutParams().height =
+                res.getDimensionPixelSize(R.dimen.qs_header_tooltip_height);
+        mTooltipView.setLayoutParams(mTooltipView.getLayoutParams());
         for (TileRecord r : mRecords) {
             r.tile.clearState();
         }
