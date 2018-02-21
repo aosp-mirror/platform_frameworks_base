@@ -90,12 +90,6 @@ public final class TextClassifierImpl implements TextClassifier {
                     TextClassifier.TYPE_DATE,
                     TextClassifier.TYPE_DATE_TIME,
                     TextClassifier.TYPE_FLIGHT_NUMBER));
-    private static final List<String> ENTITY_TYPES_BASE =
-            Collections.unmodifiableList(Arrays.asList(
-                    TextClassifier.TYPE_ADDRESS,
-                    TextClassifier.TYPE_EMAIL,
-                    TextClassifier.TYPE_PHONE,
-                    TextClassifier.TYPE_URL));
 
     private final Context mContext;
     private final TextClassifier mFallback;
@@ -224,7 +218,9 @@ public final class TextClassifierImpl implements TextClassifier {
             final LocaleList defaultLocales = options != null ? options.getDefaultLocales() : null;
             final Collection<String> entitiesToIdentify =
                     options != null && options.getEntityConfig() != null
-                            ? options.getEntityConfig().getEntities(this) : ENTITY_TYPES_ALL;
+                            ? options.getEntityConfig().resolveEntityListModifications(
+                                    getEntitiesForHints(options.getEntityConfig().getHints()))
+                            : ENTITY_TYPES_ALL;
             final SmartSelection smartSelection = getSmartSelection(defaultLocales);
             final SmartSelection.AnnotatedSpan[] annotations = smartSelection.annotate(textString);
             for (SmartSelection.AnnotatedSpan span : annotations) {
@@ -252,18 +248,8 @@ public final class TextClassifierImpl implements TextClassifier {
         return getSettings().getGenerateLinksMaxTextLength();
     }
 
-    @Override
-    public Collection<String> getEntitiesForPreset(@TextClassifier.EntityPreset int entityPreset) {
-        switch (entityPreset) {
-            case TextClassifier.ENTITY_PRESET_NONE:
-                return Collections.emptyList();
-            case TextClassifier.ENTITY_PRESET_BASE:
-                return ENTITY_TYPES_BASE;
-            case TextClassifier.ENTITY_PRESET_ALL:
-                // fall through
-            default:
-                return ENTITY_TYPES_ALL;
-        }
+    private Collection<String> getEntitiesForHints(Collection<String> hints) {
+        return ENTITY_TYPES_ALL;
     }
 
     @Override

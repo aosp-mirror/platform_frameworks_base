@@ -309,23 +309,23 @@ public final class TextLinks implements Parcelable {
          * Returns a new options object based on the specified link mask.
          */
         public static Options fromLinkMask(@LinkifyMask int mask) {
-            final TextClassifier.EntityConfig entityConfig =
-                    new TextClassifier.EntityConfig(TextClassifier.ENTITY_PRESET_NONE);
+            final List<String> entitiesToFind = new ArrayList<>();
 
             if ((mask & Linkify.WEB_URLS) != 0) {
-                entityConfig.includeEntities(TextClassifier.TYPE_URL);
+                entitiesToFind.add(TextClassifier.TYPE_URL);
             }
             if ((mask & Linkify.EMAIL_ADDRESSES) != 0) {
-                entityConfig.includeEntities(TextClassifier.TYPE_EMAIL);
+                entitiesToFind.add(TextClassifier.TYPE_EMAIL);
             }
             if ((mask & Linkify.PHONE_NUMBERS) != 0) {
-                entityConfig.includeEntities(TextClassifier.TYPE_PHONE);
+                entitiesToFind.add(TextClassifier.TYPE_PHONE);
             }
             if ((mask & Linkify.MAP_ADDRESSES) != 0) {
-                entityConfig.includeEntities(TextClassifier.TYPE_ADDRESS);
+                entitiesToFind.add(TextClassifier.TYPE_ADDRESS);
             }
 
-            return new Options().setEntityConfig(entityConfig);
+            return new Options().setEntityConfig(
+                    TextClassifier.EntityConfig.createWithEntityList(entitiesToFind));
         }
 
         public Options() {}

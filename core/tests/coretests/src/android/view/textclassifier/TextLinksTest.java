@@ -31,6 +31,7 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -98,10 +99,10 @@ public class TextLinksTest {
 
     @Test
     public void testParcelOptions() {
-        TextClassifier.EntityConfig entityConfig = new TextClassifier.EntityConfig(
-                TextClassifier.ENTITY_PRESET_NONE);
-        entityConfig.includeEntities("a", "b", "c");
-        entityConfig.excludeEntities("b");
+        TextClassifier.EntityConfig entityConfig = TextClassifier.EntityConfig.create(
+                Arrays.asList(TextClassifier.HINT_TEXT_IS_EDITABLE),
+                Arrays.asList("a", "b", "c"),
+                Arrays.asList("b"));
         TextLinks.Options reference = new TextLinks.Options();
         reference.setDefaultLocales(new LocaleList(Locale.US, Locale.GERMANY));
         reference.setEntityConfig(entityConfig);
@@ -113,6 +114,9 @@ public class TextLinksTest {
         TextLinks.Options result = TextLinks.Options.CREATOR.createFromParcel(parcel);
 
         assertEquals("en-US,de-DE", result.getDefaultLocales().toLanguageTags());
-        assertEquals(Arrays.asList("a", "c"), result.getEntityConfig().getEntities(mClassifier));
+        assertEquals(new String[]{TextClassifier.HINT_TEXT_IS_EDITABLE},
+                result.getEntityConfig().getHints().toArray());
+        assertEquals(Arrays.asList("a", "c"),
+                result.getEntityConfig().resolveEntityListModifications(Collections.emptyList()));
     }
 }
