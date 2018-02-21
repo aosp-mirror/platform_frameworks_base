@@ -30,8 +30,10 @@ public interface MediaLibraryService2Provider extends MediaSessionService2Provid
     // Nothing new for now
 
     interface MediaLibrarySessionProvider extends MediaSession2Provider {
-        void notifyChildrenChanged_impl(ControllerInfo controller, String parentId, Bundle options);
-        void notifyChildrenChanged_impl(String parentId, Bundle options);
+        void notifyChildrenChanged_impl(ControllerInfo controller, String parentId, Bundle extras);
+        void notifyChildrenChanged_impl(String parentId, Bundle extras);
+        void notifySearchResultChanged_impl(ControllerInfo controller, String query, Bundle extras,
+                int itemCount);
     }
 
     interface LibraryRootProvider {

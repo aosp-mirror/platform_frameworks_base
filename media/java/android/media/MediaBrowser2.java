@@ -88,14 +88,15 @@ public class MediaBrowser2 extends MediaController2 {
         public void onItemLoaded(@NonNull String mediaId, @Nullable MediaItem2 result) { }
 
         /**
-         * Called when there's change in the search result.
+         * Called when there's change in the search result requested by the previous
+         * {@link MediaBrowser2#search(String, Bundle)}.
          *
          * @param query search query that you've specified with {@link #search(String, Bundle)}
-         * @param extras extra bundle that you've specified with {@link #search(String, Bundle)}
-         * @param totalItemCount The total item count for the search result
+         * @param extras extra bundle
+         * @param itemCount The item count for the search result
          */
         public void onSearchResultChanged(@NonNull String query, @Nullable Bundle extras,
-                int totalItemCount) { }
+                int itemCount) { }
 
         /**
          * Called when the search result has been returned by the library service for the previous
@@ -189,10 +190,9 @@ public class MediaBrowser2 extends MediaController2 {
     }
 
     /**
-     * Send a search request to the library service. When there's a change,
-     * {@link BrowserCallback#onSearchResultChanged(String, Bundle, int)} will be called with the
-     * bundle that you've specified. You should call
-     * {@link #getSearchResult(String, int, int, Bundle)} to get the actual search result.
+     * Send a search request to the library service. When the search result is changed,
+     * {@link BrowserCallback#onSearchResultChanged(String, Bundle, int)} will be called. You should
+     * call {@link #getSearchResult(String, int, int, Bundle)} to get the actual search result.
      *
      * @param query search query. Should not be an empty string.
      * @param extras extra bundle
