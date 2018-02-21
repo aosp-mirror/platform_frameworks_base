@@ -659,6 +659,7 @@ Status StatsService::informOnePackageRemoved(const String16& app, int32_t uid) {
                                          "Only system uid can call informOnePackageRemoved");
     }
     mUidMap->removeApp(app, uid);
+    mConfigManager->RemoveConfigs(uid);
     return Status::ok();
 }
 
