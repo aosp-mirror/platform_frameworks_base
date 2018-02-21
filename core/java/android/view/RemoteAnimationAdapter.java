@@ -52,6 +52,9 @@ public class RemoteAnimationAdapter implements Parcelable {
     private final long mDuration;
     private final long mStatusBarTransitionDelay;
 
+    /** @see #getCallingPid */
+    private int mCallingPid;
+
     /**
      * @param runner The interface that gets notified when we actually need to start the animation.
      * @param duration The duration of the animation.
@@ -81,6 +84,20 @@ public class RemoteAnimationAdapter implements Parcelable {
 
     public long getStatusBarTransitionDelay() {
         return mStatusBarTransitionDelay;
+    }
+
+    /**
+     * To be called by system_server to keep track which pid is running this animation.
+     */
+    public void setCallingPid(int pid) {
+        mCallingPid = pid;
+    }
+
+    /**
+     * @return The pid of the process running the animation.
+     */
+    public int getCallingPid() {
+        return mCallingPid;
     }
 
     @Override

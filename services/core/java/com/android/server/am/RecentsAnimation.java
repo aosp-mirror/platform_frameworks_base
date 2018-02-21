@@ -50,6 +50,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
     private final WindowManagerService mWindowManager;
     private final UserController mUserController;
     private final Handler mHandler;
+    private final int mCallingPid;
 
     private final Runnable mCancelAnimationRunnable;
 
@@ -58,13 +59,14 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
 
     RecentsAnimation(ActivityManagerService am, ActivityStackSupervisor stackSupervisor,
             ActivityStartController activityStartController, WindowManagerService wm,
-            UserController userController) {
+            UserController userController, int callingPid) {
         mService = am;
         mStackSupervisor = stackSupervisor;
         mActivityStartController = activityStartController;
         mHandler = new Handler(mStackSupervisor.mLooper);
         mWindowManager = wm;
         mUserController = userController;
+        mCallingPid = callingPid;
 
         mCancelAnimationRunnable = () -> {
             // The caller has not finished the animation in a predefined amount of time, so
@@ -94,9 +96,10 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
             }
         }
 
+        mService.setRunningRemoteAnimation(mCallingPid, true);
+
         mWindowManager.deferSurfaceLayout();
         try {
-
             final ActivityDisplay display;
             if (hasExistingHomeActivity) {
                 // Move the home activity into place for the animation if it is not already top most
@@ -151,6 +154,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
         mHandler.removeCallbacks(mCancelAnimationRunnable);
         synchronized (mService) {
             if (mWindowManager.getRecentsAnimationController() == null) return;
+
+            mService.setRunningRemoteAnimation(mCallingPid, false);
 
             mWindowManager.inSurfaceTransaction(() -> {
                 Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER,
