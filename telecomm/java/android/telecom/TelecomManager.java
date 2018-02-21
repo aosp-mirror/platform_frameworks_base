@@ -111,12 +111,6 @@ public class TelecomManager {
             "android.telecom.action.SHOW_RESPOND_VIA_SMS_SETTINGS";
 
     /**
-     * The {@link android.content.Intent} action used to show the assisted dialing settings.
-     */
-    public static final String ACTION_SHOW_ASSISTED_DIALING_SETTINGS =
-            "android.telecom.action.SHOW_ASSISTED_DIALING_SETTINGS";
-
-    /**
      * The {@link android.content.Intent} action used to show the settings page used to configure
      * {@link PhoneAccount} preferences.
      */
