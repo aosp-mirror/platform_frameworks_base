@@ -231,12 +231,14 @@ public class AppLaunch extends InstrumentationTestCase {
                 dropCache();
                 String appPkgName = mNameToIntent.get(launch.getApp())
                         .getComponent().getPackageName();
+                Log.v(TAG, String.format("\nApp name: %s", launch.getApp()));
                 Log.v(TAG, String.format("Adding app package name: %s", appPkgName));
                 // App launch times for trial launch will not be used for final
                 // launch time calculations.
                 if (launch.getLaunchReason().equals(TRIAL_LAUNCH)) {
                     // In the "applaunch.txt" file, trail launches is referenced using
                     // "TRIAL_LAUNCH"
+                    Log.v(TAG, "Trial Launch");
                     if (SPEED_PROFILE_FILTER.equals(launch.getCompilerFilter())) {
                         assertTrue(String.format("Not able to compile the app : %s", appPkgName),
                               compileApp(VERIFY_FILTER, appPkgName));
@@ -246,8 +248,14 @@ public class AppLaunch extends InstrumentationTestCase {
                     }
                     // We only need to run a trial for the speed-profile filter, but we always
                     // run one for "applaunch.txt" consistency.
-                    AppLaunchResult launchResult =
-                        startApp(launch.getApp(), true, launch.getLaunchReason());
+                    AppLaunchResult launchResult = null;
+                    if (appPkgName.contains(WEARABLE_HOME_PACKAGE)) {
+                        Log.v(TAG, "Home package detected. Not killing app");
+                        launchResult = startApp(launch.getApp(), false, launch.getLaunchReason());
+                    } else {
+                        Log.v(TAG, "Will kill app before launch");
+                        launchResult = startApp(launch.getApp(), true, launch.getLaunchReason());
+                    }
                     if (launchResult.mLaunchTime < 0) {
                         addLaunchResult(launch, new AppLaunchResult());
                         // simply pass the app if launch isn't successful
@@ -268,6 +276,7 @@ public class AppLaunch extends InstrumentationTestCase {
 
                 // App launch times used for final calculation
                 else if (launch.getLaunchReason().contains(LAUNCH_ITERATION_PREFIX)) {
+                    Log.v(TAG, "Launch iteration prefix.");
                     AppLaunchResult launchResults = null;
                     if (hasFailureOnFirstLaunch(launch)) {
                         // skip if the app has failures while launched first
@@ -295,6 +304,7 @@ public class AppLaunch extends InstrumentationTestCase {
                 // App launch times for trace launch will not be used for final
                 // launch time calculations.
                 else if (launch.getLaunchReason().contains(TRACE_ITERATION_PREFIX)) {
+                    Log.v(TAG, "Trace iteration prefix");
                     AtraceLogger atraceLogger = AtraceLogger
                             .getAtraceLoggerInstance(getInstrumentation());
                     // Start the trace
@@ -302,7 +312,13 @@ public class AppLaunch extends InstrumentationTestCase {
                         atraceLogger.atraceStart(traceCategoriesSet, traceBufferSize,
                                 traceDumpInterval, rootTraceSubDir,
                                 String.format("%s-%s", launch.getApp(), launch.getLaunchReason()));
-                        startApp(launch.getApp(), true, launch.getLaunchReason());
+                        if (appPkgName.contains(WEARABLE_HOME_PACKAGE)) {
+                            Log.v(TAG, "Home package detected. Not killing app");
+                            startApp(launch.getApp(), false, launch.getLaunchReason());
+                        } else {
+                            Log.v(TAG, "Will kill app before launch");
+                            startApp(launch.getApp(), true, launch.getLaunchReason());
+                        }
                         sleep(POST_LAUNCH_IDLE_TIMEOUT);
                     } finally {
                         // Stop the trace
