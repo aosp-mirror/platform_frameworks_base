@@ -22,7 +22,4 @@ import java.security.DigestException;
 interface DataDigester {
     /** Consumes the {@link ByteBuffer}. */
     void consume(ByteBuffer buffer) throws DigestException;
-
-    /** Finishes the digestion. Must be called after the last {@link #consume(ByteBuffer)}. */
-    void finish() throws DigestException;
 }
