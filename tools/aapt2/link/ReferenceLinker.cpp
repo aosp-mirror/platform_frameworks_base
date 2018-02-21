@@ -30,6 +30,7 @@
 #include "util/Util.h"
 #include "xml/XmlUtil.h"
 
+using ::aapt::ResourceUtils::StringBuilder;
 using ::android::StringPiece;
 
 namespace aapt {
@@ -133,10 +134,11 @@ class ReferenceLinkerVisitor : public DescendingValueVisitor {
 
       // If we could not parse as any specific type, try a basic STRING.
       if (!transformed && (attr->type_mask & android::ResTable_map::TYPE_STRING)) {
-        util::StringBuilder string_builder;
-        string_builder.Append(*raw_string->value);
+        StringBuilder string_builder;
+        string_builder.AppendText(*raw_string->value);
         if (string_builder) {
-          transformed = util::make_unique<String>(string_pool_->MakeRef(string_builder.ToString()));
+          transformed =
+              util::make_unique<String>(string_pool_->MakeRef(string_builder.to_string()));
         }
       }
 

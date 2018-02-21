@@ -379,7 +379,7 @@
     <!-- Text message in the factory reset warning dialog. This says that the the device admin app
          is missing or corrupted. As a result the device will be erased. [CHAR LIMIT=NONE]-->
     <string name="factory_reset_message">The admin app can\'t be used. Your device will now be
-        erased.\n\nIf you have questions, contact your organization's admin.</string>
+        erased.\n\nIf you have questions, contact your organization\'s admin.</string>
 
     <!-- A toast message displayed when printing is attempted but disabled by policy. -->
     <string name="printing_disabled_by">Printing disabled by <xliff:g id="owner_app">%s</xliff:g>.</string>
@@ -764,7 +764,7 @@
     <string name="capability_title_canCaptureFingerprintGestures">Fingerprint gestures</string>
     <!-- Description for the capability of an accessibility service to perform gestures. -->
     <string name="capability_desc_canCaptureFingerprintGestures">Can capture gestures performed on
-        the device's fingerprint sensor.</string>
+        the device\'s fingerprint sensor.</string>
 
     <!--  Permissions -->
 
@@ -3774,7 +3774,7 @@
     <!-- Notification title when data usage has exceeded warning threshold. [CHAR LIMIT=50] -->
     <string name="data_usage_warning_title">Data warning</string>
     <!-- Notification body when data usage has exceeded warning threshold. [CHAR LIMIT=32] -->
-    <string name="data_usage_warning_body">You've used <xliff:g id="app" example="3.8GB">%s</xliff:g> of data</string>
+    <string name="data_usage_warning_body">You\'ve used <xliff:g id="app" example="3.8GB">%s</xliff:g> of data</string>
 
     <!-- Notification title when mobile data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=50] -->
     <string name="data_usage_mobile_limit_title">Mobile data limit reached</string>
@@ -3788,7 +3788,7 @@
     <!-- Notification title when Wi-Fi data usage has exceeded limit threshold. [CHAR LIMIT=32] -->
     <string name="data_usage_wifi_limit_snoozed_title">Over your Wi-Fi data limit</string>
     <!-- Notification body when data usage has exceeded limit threshold. -->
-    <string name="data_usage_limit_snoozed_body">You've gone <xliff:g id="size" example="3.8GB">%s</xliff:g> over your set limit</string>
+    <string name="data_usage_limit_snoozed_body">You\'ve gone <xliff:g id="size" example="3.8GB">%s</xliff:g> over your set limit</string>
 
     <!-- Notification title when background data usage is limited. [CHAR LIMIT=32] -->
     <string name="data_usage_restricted_title">Background data restricted</string>

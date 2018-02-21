@@ -25,6 +25,7 @@
 #include "androidfw/ResourceTypes.h"
 #include "utils/misc.h"
 
+#include "ResourceUtils.h"
 #include "SdkConstants.h"
 #include "ValueVisitor.h"
 #include "format/binary/ChunkWriter.h"
@@ -32,6 +33,8 @@
 #include "xml/XmlDom.h"
 
 using namespace android;
+
+using ::aapt::ResourceUtils::StringBuilder;
 
 namespace aapt {
 
@@ -89,9 +92,9 @@ class XmlFlattenerVisitor : public xml::ConstVisitor {
     ResXMLTree_cdataExt* flat_text = writer.NextBlock<ResXMLTree_cdataExt>();
 
     // Process plain strings to make sure they get properly escaped.
-    util::StringBuilder builder;
-    builder.Append(node->text);
-    AddString(builder.ToString(), kLowPriority, &flat_text->data);
+    StringBuilder builder;
+    builder.AppendText(node->text);
+    AddString(builder.to_string(), kLowPriority, &flat_text->data);
 
     writer.Finish();
   }
@@ -272,7 +275,7 @@ class XmlFlattenerVisitor : public xml::ConstVisitor {
         // There is no compiled value, so treat the raw string as compiled, once it is processed to
         // make sure escape sequences are properly interpreted.
         processed_str =
-            util::StringBuilder(true /*preserve_spaces*/).Append(xml_attr->value).ToString();
+            StringBuilder(true /*preserve_spaces*/).AppendText(xml_attr->value).to_string();
         compiled_text = StringPiece(processed_str);
       }
 

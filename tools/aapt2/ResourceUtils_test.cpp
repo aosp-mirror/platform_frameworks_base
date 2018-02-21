@@ -212,4 +212,48 @@ TEST(ResourceUtilsTest, ItemsWithWhitespaceAreParsedCorrectly) {
               Pointee(ValueEq(BinaryPrimitive(Res_value::TYPE_FLOAT, expected_float_flattened))));
 }
 
+TEST(ResourceUtilsTest, StringBuilderWhitespaceRemoval) {
+  EXPECT_THAT(ResourceUtils::StringBuilder()
+                  .AppendText("    hey guys ")
+                  .AppendText(" this is so cool ")
+                  .to_string(),
+              Eq(" hey guys this is so cool "));
+  EXPECT_THAT(ResourceUtils::StringBuilder()
+                  .AppendText(" \" wow,  so many \t ")
+                  .AppendText("spaces. \"what? ")
+                  .to_string(),
+              Eq("  wow,  so many \t spaces. what? "));
+  EXPECT_THAT(ResourceUtils::StringBuilder()
+                  .AppendText("  where \t ")
+                  .AppendText(" \nis the pie?")
+                  .to_string(),
+              Eq(" where is the pie?"));
+}
+
+TEST(ResourceUtilsTest, StringBuilderEscaping) {
+  EXPECT_THAT(ResourceUtils::StringBuilder()
+                  .AppendText("hey guys\\n ")
+                  .AppendText(" this \\t is so\\\\ cool")
+                  .to_string(),
+              Eq("hey guys\n this \t is so\\ cool"));
+  EXPECT_THAT(ResourceUtils::StringBuilder().AppendText("\\@\\?\\#\\\\\\'").to_string(),
+              Eq("@?#\\\'"));
+}
+
+TEST(ResourceUtilsTest, StringBuilderMisplacedQuote) {
+  ResourceUtils::StringBuilder builder;
+  EXPECT_FALSE(builder.AppendText("they're coming!"));
+}
+
+TEST(ResourceUtilsTest, StringBuilderUnicodeCodes) {
+  EXPECT_THAT(ResourceUtils::StringBuilder().AppendText("\\u00AF\\u0AF0 woah").to_string(),
+              Eq("\u00AF\u0AF0 woah"));
+  EXPECT_FALSE(ResourceUtils::StringBuilder().AppendText("\\u00 yo"));
+}
+
+TEST(ResourceUtilsTest, StringBuilderPreserveSpaces) {
+  EXPECT_THAT(ResourceUtils::StringBuilder(true /*preserve_spaces*/).AppendText("\"").to_string(),
+              Eq("\""));
+}
+
 }  // namespace aapt

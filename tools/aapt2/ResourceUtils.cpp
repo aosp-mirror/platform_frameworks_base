@@ -18,17 +18,23 @@
 
 #include <sstream>
 
+#include "android-base/stringprintf.h"
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/ResourceUtils.h"
 
 #include "NameMangler.h"
 #include "SdkConstants.h"
 #include "format/binary/ResourceTypeExtensions.h"
+#include "text/Unicode.h"
+#include "text/Utf8Iterator.h"
 #include "util/Files.h"
 #include "util/Util.h"
 
+using ::aapt::text::IsWhitespace;
+using ::aapt::text::Utf8Iterator;
 using ::android::StringPiece;
 using ::android::StringPiece16;
+using ::android::base::StringPrintf;
 
 namespace aapt {
 namespace ResourceUtils {
@@ -748,6 +754,196 @@ std::unique_ptr<Item> ParseBinaryResValue(const ResourceType& type, const Config
 
   // Treat this as a raw binary primitive.
   return util::make_unique<BinaryPrimitive>(res_value);
+}
+
+// Converts the codepoint to UTF-8 and appends it to the string.
+static bool AppendCodepointToUtf8String(char32_t codepoint, std::string* output) {
+  ssize_t len = utf32_to_utf8_length(&codepoint, 1);
+  if (len < 0) {
+    return false;
+  }
+
+  const size_t start_append_pos = output->size();
+
+  // Make room for the next character.
+  output->resize(output->size() + len);
+
+  char* dst = &*(output->begin() + start_append_pos);
+  utf32_to_utf8(&codepoint, 1, dst, len + 1);
+  return true;
+}
+
+// Reads up to 4 UTF-8 characters that represent a Unicode escape sequence, and appends the
+// Unicode codepoint represented by the escape sequence to the string.
+static bool AppendUnicodeEscapeSequence(Utf8Iterator* iter, std::string* output) {
+  char32_t code = 0;
+  for (size_t i = 0; i < 4 && iter->HasNext(); i++) {
+    char32_t codepoint = iter->Next();
+    char32_t a;
+    if (codepoint >= U'0' && codepoint <= U'9') {
+      a = codepoint - U'0';
+    } else if (codepoint >= U'a' && codepoint <= U'f') {
+      a = codepoint - U'a' + 10;
+    } else if (codepoint >= U'A' && codepoint <= U'F') {
+      a = codepoint - U'A' + 10;
+    } else {
+      return {};
+    }
+    code = (code << 4) | a;
+  }
+  return AppendCodepointToUtf8String(code, output);
+}
+
+StringBuilder::StringBuilder(bool preserve_spaces)
+    : preserve_spaces_(preserve_spaces), quote_(preserve_spaces) {
+}
+
+StringBuilder& StringBuilder::AppendText(const std::string& text) {
+  if (!error_.empty()) {
+    return *this;
+  }
+
+  const size_t previous_len = xml_string_.text.size();
+  Utf8Iterator iter(text);
+  while (iter.HasNext()) {
+    char32_t codepoint = iter.Next();
+    if (!quote_ && text::IsWhitespace(codepoint)) {
+      if (!last_codepoint_was_space_) {
+        // Emit a space if it's the first.
+        xml_string_.text += ' ';
+        last_codepoint_was_space_ = true;
+      }
+
+      // Keep eating spaces.
+      continue;
+    }
+
+    // This is not a space.
+    last_codepoint_was_space_ = false;
+
+    if (codepoint == U'\\') {
+      if (iter.HasNext()) {
+        codepoint = iter.Next();
+        switch (codepoint) {
+          case U't':
+            xml_string_.text += '\t';
+            break;
+
+          case U'n':
+            xml_string_.text += '\n';
+            break;
+
+          case U'#':
+          case U'@':
+          case U'?':
+          case U'"':
+          case U'\'':
+          case U'\\':
+            xml_string_.text += static_cast<char>(codepoint);
+            break;
+
+          case U'u':
+            if (!AppendUnicodeEscapeSequence(&iter, &xml_string_.text)) {
+              error_ =
+                  StringPrintf("invalid unicode escape sequence in string\n\"%s\"", text.c_str());
+              return *this;
+            }
+            break;
+
+          default:
+            // Ignore the escape character and just include the codepoint.
+            AppendCodepointToUtf8String(codepoint, &xml_string_.text);
+            break;
+        }
+      }
+    } else if (!preserve_spaces_ && codepoint == U'"') {
+      // Only toggle the quote state when we are not preserving spaces.
+      quote_ = !quote_;
+
+    } else if (!quote_ && codepoint == U'\'') {
+      // This should be escaped.
+      error_ = StringPrintf("unescaped apostrophe in string\n\"%s\"", text.c_str());
+      return *this;
+
+    } else {
+      AppendCodepointToUtf8String(codepoint, &xml_string_.text);
+    }
+  }
+
+  // Accumulate the added string's UTF-16 length.
+  const uint8_t* utf8_data = reinterpret_cast<const uint8_t*>(xml_string_.text.c_str());
+  const size_t utf8_length = xml_string_.text.size();
+  ssize_t len = utf8_to_utf16_length(utf8_data + previous_len, utf8_length - previous_len);
+  if (len < 0) {
+    error_ = StringPrintf("invalid unicode code point in string\n\"%s\"", utf8_data + previous_len);
+    return *this;
+  }
+
+  utf16_len_ += static_cast<uint32_t>(len);
+  return *this;
+}
+
+StringBuilder::SpanHandle StringBuilder::StartSpan(const std::string& name) {
+  if (!error_.empty()) {
+    return 0u;
+  }
+
+  // When we start a span, all state associated with whitespace truncation and quotation is ended.
+  ResetTextState();
+  Span span;
+  span.name = name;
+  span.first_char = span.last_char = utf16_len_;
+  xml_string_.spans.push_back(std::move(span));
+  return xml_string_.spans.size() - 1;
+}
+
+void StringBuilder::EndSpan(SpanHandle handle) {
+  if (!error_.empty()) {
+    return;
+  }
+
+  // When we end a span, all state associated with whitespace truncation and quotation is ended.
+  ResetTextState();
+  xml_string_.spans[handle].last_char = utf16_len_ - 1u;
+}
+
+StringBuilder::UntranslatableHandle StringBuilder::StartUntranslatable() {
+  if (!error_.empty()) {
+    return 0u;
+  }
+
+  UntranslatableSection section;
+  section.start = section.end = xml_string_.text.size();
+  xml_string_.untranslatable_sections.push_back(section);
+  return xml_string_.untranslatable_sections.size() - 1;
+}
+
+void StringBuilder::EndUntranslatable(UntranslatableHandle handle) {
+  if (!error_.empty()) {
+    return;
+  }
+  xml_string_.untranslatable_sections[handle].end = xml_string_.text.size();
+}
+
+FlattenedXmlString StringBuilder::GetFlattenedString() const {
+  return xml_string_;
+}
+
+std::string StringBuilder::to_string() const {
+  return xml_string_.text;
+}
+
+StringBuilder::operator bool() const {
+  return error_.empty();
+}
+
+std::string StringBuilder::GetError() const {
+  return error_;
+}
+
+void StringBuilder::ResetTextState() {
+  quote_ = preserve_spaces_;
+  last_codepoint_was_space_ = false;
 }
 
 }  // namespace ResourceUtils
