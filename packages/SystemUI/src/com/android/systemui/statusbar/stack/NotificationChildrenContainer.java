@@ -120,6 +120,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         super(context, attrs, defStyleAttr, defStyleRes);
         initDimens();
         mHybridGroupManager = new HybridGroupManager(getContext(), this);
+        setClipChildren(false);
     }
 
     private void initDimens() {
@@ -134,7 +135,7 @@ public class NotificationChildrenContainer extends ViewGroup {
                 R.dimen.notification_children_container_top_padding);
         mHeaderHeight = mNotificationHeaderMargin + mNotificatonTopPadding;
         mCollapsedBottompadding = res.getDimensionPixelSize(
-                com.android.internal.R.dimen.notification_content_margin_bottom);
+                com.android.internal.R.dimen.notification_content_margin);
         mEnableShadowOnChildNotifications =
                 res.getBoolean(R.bool.config_enableShadowOnChildNotifications);
         mShowDividersWhenExpanded =
@@ -533,11 +534,12 @@ public class NotificationChildrenContainer extends ViewGroup {
 
     /**
      * Update the state of all its children based on a linear layout algorithm.
-     *
-     * @param resultState the state to update
+     *  @param resultState the state to update
      * @param parentState the state of the parent
+     * @param ambientState
      */
-    public void getState(StackScrollState resultState, ExpandableViewState parentState) {
+    public void getState(StackScrollState resultState, ExpandableViewState parentState,
+            AmbientState ambientState) {
         int childCount = mChildren.size();
         int yPosition = mNotificationHeaderMargin;
         boolean firstChild = true;
@@ -553,6 +555,7 @@ public class NotificationChildrenContainer extends ViewGroup {
 
         boolean childrenExpandedAndNotAnimating = mChildrenExpanded
                 && !mContainingNotification.isGroupExpansionChanging();
+        int launchTransitionCompensation = 0;
         for (int i = 0; i < childCount; i++) {
             ExpandableNotificationRow child = mChildren.get(i);
             if (!firstChild) {
@@ -577,13 +580,13 @@ public class NotificationChildrenContainer extends ViewGroup {
             ExpandableViewState childState = resultState.getViewStateForView(child);
             int intrinsicHeight = child.getIntrinsicHeight();
             childState.height = intrinsicHeight;
-            childState.yTranslation = yPosition;
+            childState.yTranslation = yPosition + launchTransitionCompensation;
             childState.hidden = false;
             // When the group is expanded, the children cast the shadows rather than the parent
             // so use the parent's elevation here.
             childState.zTranslation =
                     (childrenExpandedAndNotAnimating && mEnableShadowOnChildNotifications)
-                    ? mContainingNotification.getTranslationZ()
+                    ? parentState.zTranslation
                     : 0;
             childState.dimmed = parentState.dimmed;
             childState.dark = parentState.dark;
@@ -600,6 +603,9 @@ public class NotificationChildrenContainer extends ViewGroup {
             childState.location = parentState.location;
             childState.inShelf = parentState.inShelf;
             yPosition += intrinsicHeight;
+            if (child.isExpandAnimationRunning()) {
+                launchTransitionCompensation = -ambientState.getExpandAnimationTopChange();
+            }
 
         }
         if (mOverflowNumber != null) {
@@ -637,7 +643,7 @@ public class NotificationChildrenContainer extends ViewGroup {
             }
             mHeaderViewState.initFrom(mNotificationHeader);
             mHeaderViewState.zTranslation = childrenExpandedAndNotAnimating
-                    ? mContainingNotification.getTranslationZ()
+                    ? parentState.zTranslation
                     : 0;
         }
     }
@@ -727,6 +733,9 @@ public class NotificationChildrenContainer extends ViewGroup {
     }
 
     private void updateChildrenClipping() {
+        if (mContainingNotification.hasExpandingChild()) {
+            return;
+        }
         int childCount = mChildren.size();
         int layoutEnd = mContainingNotification.getActualHeight() - mClipBottomAmount;
         for (int i = 0; i < childCount; i++) {

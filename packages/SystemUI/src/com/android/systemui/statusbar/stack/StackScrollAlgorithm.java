@@ -91,17 +91,18 @@ public class StackScrollAlgorithm {
         updateClipping(resultState, algorithmState, ambientState);
         updateSpeedBumpState(resultState, algorithmState, ambientState);
         updateShelfState(resultState, ambientState);
-        getNotificationChildrenStates(resultState, algorithmState);
+        getNotificationChildrenStates(resultState, algorithmState, ambientState);
     }
 
     private void getNotificationChildrenStates(StackScrollState resultState,
-            StackScrollAlgorithmState algorithmState) {
+            StackScrollAlgorithmState algorithmState,
+            AmbientState ambientState) {
         int childCount = algorithmState.visibleChildren.size();
         for (int i = 0; i < childCount; i++) {
             ExpandableView v = algorithmState.visibleChildren.get(i);
             if (v instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) v;
-                row.getChildrenStates(resultState);
+                row.getChildrenStates(resultState, ambientState);
             }
         }
     }
@@ -323,7 +324,9 @@ public class StackScrollAlgorithm {
         }
         ExpandableNotificationRow expandingNotification = ambientState.getExpandingNotification();
         state.indexOfExpandingNotification = expandingNotification != null
-                ? state.visibleChildren.indexOf(expandingNotification)
+                ? expandingNotification.isChildInGroup()
+                    ? state.visibleChildren.indexOf(expandingNotification.getNotificationParent())
+                    : state.visibleChildren.indexOf(expandingNotification)
                 : -1;
     }
 
@@ -386,7 +389,7 @@ public class StackScrollAlgorithm {
 
         childViewState.location = ExpandableViewState.LOCATION_MAIN_AREA;
         float inset = ambientState.getTopPadding() + ambientState.getStackTranslation();
-        if (i < algorithmState.getIndexOfExpandingNotification()) {
+        if (i <= algorithmState.getIndexOfExpandingNotification()) {
             inset += ambientState.getExpandAnimationTopChange();
         }
         if (child.mustStayOnScreen() && childViewState.yTranslation >= 0) {
@@ -515,7 +518,7 @@ public class StackScrollAlgorithm {
                 - ambientState.getShelf().getIntrinsicHeight();
         childViewState.yTranslation = Math.min(childViewState.yTranslation, shelfStart);
         if (childViewState.yTranslation >= shelfStart) {
-            childViewState.hidden = !child.isExpandAnimationRunning();
+            childViewState.hidden = !child.isExpandAnimationRunning() && !child.hasExpandingChild();
             childViewState.inShelf = true;
             childViewState.headsUpIsVisible = false;
         }

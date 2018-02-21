@@ -42,8 +42,6 @@ import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
 
-import java.util.function.Consumer;
-
 /**
  * A class that allows activities to be launched in a seamless way where the notification
  * transforms nicely into the starting window.
@@ -134,8 +132,24 @@ public class ActivityLaunchAnimator {
                         ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
                         mParams.startPosition = mSourceNotification.getLocationOnScreen();
                         mParams.startTranslationZ = mSourceNotification.getTranslationZ();
+                        mParams.startClipTopAmount = mSourceNotification.getClipTopAmount();
+                        if (mSourceNotification.isChildInGroup()) {
+                            int parentClip = mSourceNotification
+                                    .getNotificationParent().getClipTopAmount();
+                            mParams.parentStartClipTopAmount = parentClip;
+                            // We need to calculate how much the child is clipped by the parent
+                            // because children always have 0 clipTopAmount
+                            if (parentClip != 0) {
+                                float childClip = parentClip
+                                        - mSourceNotification.getTranslationY();
+                                if (childClip > 0.0f) {
+                                    mParams.startClipTopAmount = (int) Math.ceil(childClip);
+                                }
+                            }
+                        }
                         int targetWidth = app.sourceContainerBounds.width();
-                        int notificationHeight = mSourceNotification.getActualHeight();
+                        int notificationHeight = mSourceNotification.getActualHeight()
+                                - mSourceNotification.getClipBottomAmount();
                         int notificationWidth = mSourceNotification.getWidth();
                         anim.setDuration(ANIMATION_DURATION);
                         anim.setInterpolator(Interpolators.LINEAR);
@@ -241,6 +255,8 @@ public class ActivityLaunchAnimator {
         int top;
         int right;
         int bottom;
+        int startClipTopAmount;
+        int parentStartClipTopAmount;
 
         public ExpandAnimationParameters() {
         }
@@ -258,13 +274,30 @@ public class ActivityLaunchAnimator {
         }
 
         public int getTopChange() {
-            return Math.min(top - startPosition[1], 0);
+            // We need this compensation to ensure that the QS moves in sync.
+            int clipTopAmountCompensation = 0;
+            if (startClipTopAmount != 0.0f) {
+                clipTopAmountCompensation = (int) MathUtils.lerp(0, startClipTopAmount,
+                        Interpolators.FAST_OUT_SLOW_IN.getInterpolation(linearProgress));
+            }
+            return Math.min(top - startPosition[1] - clipTopAmountCompensation, 0);
         }
 
+        public float getProgress() {
+            return linearProgress;
+        }
 
         public float getProgress(long delay, long duration) {
             return MathUtils.constrain((linearProgress * ANIMATION_DURATION - delay)
                     / duration, 0.0f, 1.0f);
+        }
+
+        public int getStartClipTopAmount() {
+            return startClipTopAmount;
+        }
+
+        public int getParentStartClipTopAmount() {
+            return parentStartClipTopAmount;
         }
 
         public float getStartTranslationZ() {
