@@ -1270,7 +1270,8 @@ public final class SystemServer {
 
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_USB_HOST)
                 || mPackageManager.hasSystemFeature(
-                PackageManager.FEATURE_USB_ACCESSORY)) {
+                PackageManager.FEATURE_USB_ACCESSORY)
+                || isEmulator) {
                 // Manage USB host and device support
                 traceBeginAndSlog("StartUsbService");
                 mSystemServiceManager.startService(USB_SERVICE_CLASS);
