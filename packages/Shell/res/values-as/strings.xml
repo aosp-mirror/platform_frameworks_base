@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="3701846017049540910">"শ্বেল"</string>
+    <!-- no translation found for bugreport_notification_channel (2574150205913861141) -->
+    <skip />
+    <!-- no translation found for bugreport_in_progress_title (4311705936714972757) -->
+    <skip />
+    <!-- no translation found for bugreport_finished_title (4429132808670114081) -->
+    <skip />
+    <!-- no translation found for bugreport_updating_title (4423539949559634214) -->
+    <skip />
+    <!-- no translation found for bugreport_updating_wait (3322151947853929470) -->
+    <skip />
+    <!-- no translation found for bugreport_finished_text (1223616207145252689) -->
+    <skip />
+    <!-- no translation found for bugreport_finished_text (5758325479058638893) -->
+    <skip />
+    <!-- no translation found for bugreport_finished_text (8353769438382138847) -->
+    <skip />
+    <!-- no translation found for bugreport_finished_pending_screenshot_text (2343263822812016950) -->
+    <skip />
+    <!-- no translation found for bugreport_finished_pending_screenshot_text (1474435374470177193) -->
+    <skip />
+    <!-- no translation found for bugreport_finished_pending_screenshot_text (1474435374470177193) -->
+    <skip />
+    <!-- no translation found for bugreport_confirm (5917407234515812495) -->
+    <skip />
+    <!-- no translation found for bugreport_confirm_dont_repeat (6179945398364357318) -->
+    <skip />
+    <!-- no translation found for bugreport_storage_title (5332488144740527109) -->
+    <skip />
+    <!-- no translation found for bugreport_unreadable_text (586517851044535486) -->
+    <skip />
+    <!-- no translation found for bugreport_add_details_to_zip_failed (1302931926486712371) -->
+    <skip />
+    <!-- no translation found for bugreport_unnamed (2800582406842092709) -->
+    <skip />
+    <!-- no translation found for bugreport_info_action (2158204228510576227) -->
+    <skip />
+    <!-- no translation found for bugreport_screenshot_action (8677781721940614995) -->
+    <skip />
+    <!-- no translation found for bugreport_screenshot_taken (5684211273096253120) -->
+    <skip />
+    <!-- no translation found for bugreport_screenshot_failed (5853049140806834601) -->
+    <skip />
+    <!-- no translation found for bugreport_info_dialog_title (1355948594292983332) -->
+    <skip />
+    <!-- no translation found for bugreport_info_name (4414036021935139527) -->
+    <skip />
+    <!-- no translation found for bugreport_info_title (2306030793918239804) -->
+    <skip />
+    <!-- no translation found for bugreport_info_description (5072835127481627722) -->
+    <skip />
+    <!-- no translation found for save (4781509040564835759) -->
+    <skip />
+    <!-- no translation found for bugreport_intent_chooser_title (7605709494790894076) -->
+    <skip />
+</resources>
