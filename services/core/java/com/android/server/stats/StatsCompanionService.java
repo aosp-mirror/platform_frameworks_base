@@ -418,10 +418,11 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void addNetworkStats(
             int tag, List<StatsLogEventWrapper> ret, NetworkStats stats, boolean withFGBG) {
         int size = stats.size();
+        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
         NetworkStats.Entry entry = new NetworkStats.Entry(); // For recycling
         for (int j = 0; j < size; j++) {
             stats.getValues(j, entry);
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tag, withFGBG ? 6 : 5);
+            StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tag, withFGBG ? 6 : 5);
             e.writeInt(entry.uid);
             if (withFGBG) {
                 e.writeInt(entry.set);
@@ -500,10 +501,11 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void pullKernelWakelock(int tagId, List<StatsLogEventWrapper> pulledData) {
         final KernelWakelockStats wakelockStats =
                 mKernelWakelockReader.readKernelWakelockStats(mTmpWakelockStats);
+        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
         for (Map.Entry<String, KernelWakelockStats.Entry> ent : wakelockStats.entrySet()) {
             String name = ent.getKey();
             KernelWakelockStats.Entry kws = ent.getValue();
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, 4);
+            StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 4);
             e.writeString(name);
             e.writeInt(kws.mCount);
             e.writeInt(kws.mVersion);
@@ -576,8 +578,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     private void pullBluetoothBytesTransfer(int tagId, List<StatsLogEventWrapper> pulledData) {
         BluetoothActivityEnergyInfo info = pullBluetoothData();
+        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
         for (UidTraffic traffic : info.getUidTraffic()) {
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, 3);
+            StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 3);
             e.writeInt(traffic.getUid());
             e.writeLong(traffic.getRxBytes());
             e.writeLong(traffic.getTxBytes());
@@ -605,11 +608,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     }
 
     private void pullCpuTimePerFreq(int tagId, List<StatsLogEventWrapper> pulledData) {
+        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
         for (int cluster = 0; cluster < mKernelCpuSpeedReaders.length; cluster++) {
             long[] clusterTimeMs = mKernelCpuSpeedReaders[cluster].readAbsolute();
             if (clusterTimeMs != null) {
                 for (int speed = clusterTimeMs.length - 1; speed >= 0; --speed) {
-                    StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, 3);
+                    StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 3);
                     e.writeInt(cluster);
                     e.writeInt(speed);
                     e.writeLong(clusterTimeMs[speed]);
@@ -630,7 +634,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 SynchronousResultReceiver wifiReceiver = new SynchronousResultReceiver("wifi");
                 mWifiManager.requestActivityInfo(wifiReceiver);
                 final WifiActivityEnergyInfo wifiInfo = awaitControllerInfo(wifiReceiver);
-                StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, 6);
+                StatsLogEventWrapper e = new StatsLogEventWrapper(SystemClock.elapsedRealtimeNanos(), tagId, 6);
                 e.writeLong(wifiInfo.getTimeStamp());
                 e.writeInt(wifiInfo.getStackState());
                 e.writeLong(wifiInfo.getControllerTxTimeMillis());
@@ -655,7 +659,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             SynchronousResultReceiver modemReceiver = new SynchronousResultReceiver("telephony");
             mTelephony.requestModemActivityInfo(modemReceiver);
             final ModemActivityInfo modemInfo = awaitControllerInfo(modemReceiver);
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, 6);
+            StatsLogEventWrapper e = new StatsLogEventWrapper(SystemClock.elapsedRealtimeNanos(), tagId, 6);
             e.writeLong(modemInfo.getTimestamp());
             e.writeLong(modemInfo.getSleepTimeMillis());
             e.writeLong(modemInfo.getIdleTimeMillis());
@@ -672,7 +676,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     private void pullBluetoothActivityInfo(int tagId, List<StatsLogEventWrapper> pulledData) {
         BluetoothActivityEnergyInfo info = pullBluetoothData();
-        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, 6);
+        StatsLogEventWrapper e = new StatsLogEventWrapper(SystemClock.elapsedRealtimeNanos(), tagId, 6);
         e.writeLong(info.getTimeStamp());
         e.writeInt(info.getBluetoothStackState());
         e.writeLong(info.getControllerTxTimeMillis());
@@ -695,13 +699,13 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     }
 
     private void pullSystemElapsedRealtime(int tagId, List<StatsLogEventWrapper> pulledData) {
-        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, 1);
+        StatsLogEventWrapper e = new StatsLogEventWrapper(SystemClock.elapsedRealtimeNanos(), tagId, 1);
         e.writeLong(SystemClock.elapsedRealtime());
         pulledData.add(e);
     }
 
     private void pullDiskSpace(int tagId, List<StatsLogEventWrapper> pulledData) {
-        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, 3);
+        StatsLogEventWrapper e = new StatsLogEventWrapper(SystemClock.elapsedRealtimeNanos(), tagId, 3);
         e.writeLong(mStatFsData.getAvailableBytes());
         e.writeLong(mStatFsSystem.getAvailableBytes());
         e.writeLong(mStatFsTemp.getAvailableBytes());
@@ -709,7 +713,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     }
 
     private void pullSystemUpTime(int tagId, List<StatsLogEventWrapper> pulledData) {
-        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, 1);
+        StatsLogEventWrapper e = new StatsLogEventWrapper(SystemClock.elapsedRealtimeNanos(), tagId, 1);
         e.writeLong(SystemClock.uptimeMillis());
         pulledData.add(e);
     }
@@ -718,8 +722,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         List<ProcessMemoryState> processMemoryStates =
                 LocalServices.getService(ActivityManagerInternal.class)
                         .getMemoryStateForProcesses();
+        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
         for (ProcessMemoryState processMemoryState : processMemoryStates) {
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, 8 /* fields */);
+            StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 8 /* fields */);
             e.writeInt(processMemoryState.uid);
             e.writeString(processMemoryState.processName);
             e.writeInt(processMemoryState.oomScore);
