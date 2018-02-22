@@ -16,20 +16,22 @@
 
 package android.telephony.mbms;
 
-import android.os.Handler;
+import android.os.Binder;
 import android.os.RemoteException;
+
+import java.util.concurrent.Executor;
 
 /**
  * @hide
  */
 public class InternalDownloadStateCallback extends IDownloadStateCallback.Stub {
-    private final Handler mHandler;
+    private final Executor mExecutor;
     private final DownloadStateCallback mAppCallback;
     private volatile boolean mIsStopped = false;
 
-    public InternalDownloadStateCallback(DownloadStateCallback appCallback, Handler handler) {
+    public InternalDownloadStateCallback(DownloadStateCallback appCallback, Executor executor) {
         mAppCallback = appCallback;
-        mHandler = handler;
+        mExecutor = executor;
     }
 
     @Override
@@ -40,11 +42,16 @@ public class InternalDownloadStateCallback extends IDownloadStateCallback.Stub {
             return;
         }
 
-        mHandler.post(new Runnable() {
+        mExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                mAppCallback.onProgressUpdated(request, fileInfo, currentDownloadSize,
-                        fullDownloadSize, currentDecodedSize, fullDecodedSize);
+                long token = Binder.clearCallingIdentity();
+                try {
+                    mAppCallback.onProgressUpdated(request, fileInfo, currentDownloadSize,
+                            fullDownloadSize, currentDecodedSize, fullDecodedSize);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
             }
         });
     }
@@ -56,10 +63,15 @@ public class InternalDownloadStateCallback extends IDownloadStateCallback.Stub {
             return;
         }
 
-        mHandler.post(new Runnable() {
+        mExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                mAppCallback.onStateUpdated(request, fileInfo, state);
+                long token = Binder.clearCallingIdentity();
+                try {
+                    mAppCallback.onStateUpdated(request, fileInfo, state);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
             }
         });
     }

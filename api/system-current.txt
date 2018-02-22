@@ -5287,12 +5287,7 @@ package android.telephony.ims.stub {
 
 package android.telephony.mbms {
 
-  public final class DownloadRequest implements android.os.Parcelable {
-    method public byte[] getOpaqueData();
-  }
-
   public static class DownloadRequest.Builder {
-    method public android.telephony.mbms.DownloadRequest.Builder setOpaqueData(byte[]);
     method public android.telephony.mbms.DownloadRequest.Builder setServiceId(java.lang.String);
   }
 
