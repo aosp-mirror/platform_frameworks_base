@@ -46,6 +46,7 @@ import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.AnimatedVectorDrawable;
+import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
 import android.os.Binder;
 import android.os.Bundle;
@@ -77,8 +78,8 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.LatencyTracker;
 import com.android.systemui.Dependency;
-import com.android.systemui.OverviewProxyService;
 import com.android.systemui.Interpolators;
+import com.android.systemui.OverviewProxyService;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.assist.AssistManager;
@@ -110,6 +111,9 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     public static final String TAG = "NavigationBar";
     private static final boolean DEBUG = false;
     private static final String EXTRA_DISABLE_STATE = "disabled_state";
+
+    private final static int BUTTON_FADE_IN_OUT_DURATION_MS = 100;
+    private final static int ROTATE_BUTTON_LOOP_DURATION_MS = 2000;
 
     /** Allow some time inbetween the long press for back and recents. */
     private static final int LOCK_TO_APP_GESTURE_TOLERENCE = 200;
@@ -150,8 +154,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     private RotationLockController mRotationLockController;
     private TaskStackListenerImpl mTaskStackListener;
 
-    private final Runnable mRemoveRotationProposal = () -> safeSetRotationButtonState(false);
-    private Animator mRotateShowAnimator;
+    private final Runnable mRemoveRotationProposal = () -> setRotateSuggestionButtonState(false);
     private Animator mRotateHideAnimator;
 
     private final OverviewProxyListener mOverviewProxyListener = new OverviewProxyListener() {
@@ -364,29 +367,130 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         // rotate button if shown.
 
         if (!isValid) {
-            safeSetRotationButtonState(false);
+            setRotateSuggestionButtonState(false);
             return;
         }
 
-        if (rotation == mWindowManager.getDefaultDisplay().getRotation()) {
+        final int winRotation = mWindowManager.getDefaultDisplay().getRotation();
+        if (rotation == winRotation) {
             // Use this as a signal to remove any current suggestions
             getView().getHandler().removeCallbacks(mRemoveRotationProposal);
-            safeSetRotationButtonState(false);
+            setRotateSuggestionButtonState(false);
         } else {
             mLastRotationSuggestion = rotation; // Remember rotation for click
-            safeSetRotationButtonState(true);
+
+            // Update the icon style to change animation parameters
+            if (mNavigationBarView != null) {
+                final boolean rotationCCW = isRotationAnimationCCW(winRotation, rotation);
+                int style;
+                if (winRotation == Surface.ROTATION_0 || winRotation == Surface.ROTATION_180) {
+                    style = rotationCCW ? R.style.RotateButtonCCWStart90 :
+                            R.style.RotateButtonCWStart90;
+                } else { // 90 or 270
+                    style = rotationCCW ? R.style.RotateButtonCCWStart0 :
+                            R.style.RotateButtonCWStart0;
+                }
+                mNavigationBarView.updateRotateSuggestionButtonStyle(style, true);
+            }
+
+            setRotateSuggestionButtonState(true);
             rescheduleRotationTimeout(false);
             mMetricsLogger.visible(MetricsEvent.ROTATION_SUGGESTION_SHOWN);
         }
     }
 
-    private void safeSetRotationButtonState(boolean vis) {
-        if (mNavigationBarView != null) mNavigationBarView.setRotateSuggestionButtonState(vis);
+    private boolean isRotationAnimationCCW(int from, int to) {
+        // All 180deg WM rotation animations are CCW, match that
+        if (from == Surface.ROTATION_0 && to == Surface.ROTATION_90) return false;
+        if (from == Surface.ROTATION_0 && to == Surface.ROTATION_180) return true; //180d so CCW
+        if (from == Surface.ROTATION_0 && to == Surface.ROTATION_270) return true;
+        if (from == Surface.ROTATION_90 && to == Surface.ROTATION_0) return true;
+        if (from == Surface.ROTATION_90 && to == Surface.ROTATION_180) return false;
+        if (from == Surface.ROTATION_90 && to == Surface.ROTATION_270) return true; //180d so CCW
+        if (from == Surface.ROTATION_180 && to == Surface.ROTATION_0) return true; //180d so CCW
+        if (from == Surface.ROTATION_180 && to == Surface.ROTATION_90) return true;
+        if (from == Surface.ROTATION_180 && to == Surface.ROTATION_270) return false;
+        if (from == Surface.ROTATION_270 && to == Surface.ROTATION_0) return false;
+        if (from == Surface.ROTATION_270 && to == Surface.ROTATION_90) return true; //180d so CCW
+        if (from == Surface.ROTATION_270 && to == Surface.ROTATION_180) return true;
+        return false; // Default
     }
 
-    private void safeSetRotationButtonState(boolean vis, boolean force) {
-        if (mNavigationBarView != null) {
-            mNavigationBarView.setRotateSuggestionButtonState(vis, force);
+    public void setRotateSuggestionButtonState(final boolean visible) {
+        setRotateSuggestionButtonState(visible, false);
+    }
+
+    public void setRotateSuggestionButtonState(final boolean visible, final boolean force) {
+        if (mNavigationBarView == null) return;
+
+        // At any point the the button can become invisible because an a11y service became active.
+        // Similarly, a call to make the button visible may be rejected because an a11y service is
+        // active. Must account for this.
+
+        ButtonDispatcher rotBtn = mNavigationBarView.getRotateSuggestionButton();
+        final boolean currentlyVisible = mNavigationBarView.isRotateButtonVisible();
+
+        // Rerun a show animation to indicate change but don't rerun a hide animation
+        if (!visible && !currentlyVisible) return;
+
+        View view = rotBtn.getCurrentView();
+        if (view == null) return;
+
+        KeyButtonDrawable kbd = rotBtn.getImageDrawable();
+        if (kbd == null) return;
+
+        // The KBD and AVD is recreated every new valid suggestion because of style changes.
+        AnimatedVectorDrawable animIcon = null;
+        if (kbd.getDrawable(0) instanceof AnimatedVectorDrawable) {
+            animIcon = (AnimatedVectorDrawable) kbd.getDrawable(0);
+        }
+
+        if (visible) { // Appear and change (cannot force)
+            // Stop any currently running hide animations
+            if (mRotateHideAnimator != null && mRotateHideAnimator.isRunning()) {
+                mRotateHideAnimator.pause();
+            }
+
+            // Reset the alpha if any has changed due to hide animation
+            view.setAlpha(1f);
+
+            // Run the rotate icon's animation if it has one
+            if (animIcon != null) {
+                animIcon.reset();
+                animIcon.start();
+            }
+
+            // Set visibility, may fail if a11y service is active.
+            // If invisible, call will stop animation.
+            mNavigationBarView.setRotateButtonVisibility(true);
+
+        } else { // Hide
+
+            if (force) {
+                // If a hide animator is running stop it and make invisible
+                if (mRotateHideAnimator != null && mRotateHideAnimator.isRunning()) {
+                    mRotateHideAnimator.pause();
+                }
+                mNavigationBarView.setRotateButtonVisibility(false);
+                return;
+            }
+
+            // Don't start any new hide animations if one is running
+            if (mRotateHideAnimator != null && mRotateHideAnimator.isRunning()) return;
+
+            ObjectAnimator fadeOut = ObjectAnimator.ofFloat(view, "alpha",
+                    0f);
+            fadeOut.setDuration(BUTTON_FADE_IN_OUT_DURATION_MS);
+            fadeOut.setInterpolator(Interpolators.LINEAR);
+            fadeOut.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mNavigationBarView.setRotateButtonVisibility(false);
+                }
+            });
+
+            mRotateHideAnimator = fadeOut;
+            fadeOut.start();
         }
     }
 
@@ -394,13 +498,9 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         // May be called due to a new rotation proposal or a change in hover state
         if (reasonHover) {
             // Don't reschedule if a hide animator is running
-            if (mRotateHideAnimator != null && mRotateHideAnimator.isRunning()) {
-                return;
-            }
+            if (mRotateHideAnimator != null && mRotateHideAnimator.isRunning()) return;
             // Don't reschedule if not visible
-            if (mNavigationBarView.getRotateSuggestionButton().getVisibility() != View.VISIBLE) {
-                return;
-            }
+            if (!mNavigationBarView.isRotateButtonVisible()) return;
         }
 
         Handler h = getView().getHandler();
@@ -827,7 +927,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
                     if (shouldOverrideUserLockPrefs(rotation)) {
                         mRotationLockController.setRotationLockedAtAngle(true, rotation);
                     }
-                    safeSetRotationButtonState(false, true);
+                    setRotateSuggestionButtonState(false, true);
                 }
 
                 if (mNavigationBarView != null
@@ -863,22 +963,22 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
         @Override
         public void onTaskStackChanged() {
-            safeSetRotationButtonState(false);
+            setRotateSuggestionButtonState(false);
         }
 
         @Override
         public void onTaskRemoved(int taskId) {
-            safeSetRotationButtonState(false);
+            setRotateSuggestionButtonState(false);
         }
 
         @Override
         public void onTaskMovedToFront(int taskId) {
-            safeSetRotationButtonState(false);
+            setRotateSuggestionButtonState(false);
         }
 
         @Override
         public void onActivityRequestedOrientationChanged(int taskId, int requestedOrientation) {
-            safeSetRotationButtonState(false);
+            setRotateSuggestionButtonState(false);
         }
     }
 
