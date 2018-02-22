@@ -18,9 +18,11 @@ package com.android.settingslib.wifi;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -50,6 +52,7 @@ import android.text.format.DateUtils;
 import android.text.style.TtsSpan;
 
 import com.android.settingslib.R;
+import com.android.settingslib.utils.ThreadUtils;
 import com.android.settingslib.wifi.AccessPoint.Speed;
 
 import org.junit.Before;
@@ -61,6 +64,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.concurrent.CountDownLatch;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -79,6 +83,8 @@ public class AccessPointTest {
     private Context mContext;
     @Mock private RssiCurve mockBadgeCurve;
     @Mock private WifiNetworkScoreCache mockWifiNetworkScoreCache;
+    public static final int NETWORK_ID = 123;
+    public static final int DEFAULT_RSSI = -55;
 
     private static ScanResult createScanResult(String ssid, String bssid, int rssi) {
         ScanResult scanResult = new ScanResult();
@@ -753,16 +759,15 @@ public class AccessPointTest {
         assertThat(ap.update(config, wifiInfo, newInfo)).isFalse();
     }
     @Test
-    public void testUpdateWithConfigChangeOnly_returnsFalseButInvokesListener() {
-        int networkId = 123;
-        int rssi = -55;
+    public void testUpdateWithConfigChangeOnly_returnsFalseButInvokesListener()
+            throws InterruptedException {
         WifiConfiguration config = new WifiConfiguration();
-        config.networkId = networkId;
+        config.networkId = NETWORK_ID;
         config.numNoInternetAccessReports = 1;
 
         WifiInfo wifiInfo = new WifiInfo();
-        wifiInfo.setNetworkId(networkId);
-        wifiInfo.setRssi(rssi);
+        wifiInfo.setNetworkId(NETWORK_ID);
+        wifiInfo.setRssi(DEFAULT_RSSI);
 
         NetworkInfo networkInfo =
                 new NetworkInfo(ConnectivityManager.TYPE_WIFI, 0 /* subtype */, "WIFI", "");
@@ -770,8 +775,8 @@ public class AccessPointTest {
 
         AccessPoint ap = new TestAccessPointBuilder(mContext)
                 .setNetworkInfo(networkInfo)
-                .setNetworkId(networkId)
-                .setRssi(rssi)
+                .setNetworkId(NETWORK_ID)
+                .setRssi(DEFAULT_RSSI)
                 .setWifiInfo(wifiInfo)
                 .build();
 
@@ -781,18 +786,131 @@ public class AccessPointTest {
         config.validatedInternetAccess = true;
 
         assertThat(ap.update(newConfig, wifiInfo, networkInfo)).isFalse();
+
+        // Wait for MainHandler to process callback
+        CountDownLatch latch = new CountDownLatch(1);
+        ThreadUtils.postOnMainThread(latch::countDown);
+
+        latch.await();
         verify(mockListener).onAccessPointChanged(ap);
     }
 
     @Test
-    public void testUpdateWithNullWifiConfiguration_doesNotThrowNPE() {
-        int networkId = 123;
-        int rssi = -55;
+    public void testConnectionInfo_doesNotThrowNPE_ifListenerIsNulledWhileAwaitingExecution()
+            throws InterruptedException {
         WifiConfiguration config = new WifiConfiguration();
-        config.networkId = networkId;
+        config.networkId = NETWORK_ID;
+        config.numNoInternetAccessReports = 1;
+
         WifiInfo wifiInfo = new WifiInfo();
-        wifiInfo.setNetworkId(networkId);
-        wifiInfo.setRssi(rssi);
+        wifiInfo.setNetworkId(NETWORK_ID);
+        wifiInfo.setRssi(DEFAULT_RSSI);
+
+        NetworkInfo networkInfo =
+                new NetworkInfo(ConnectivityManager.TYPE_WIFI, 0 /* subtype */, "WIFI", "");
+        networkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTED, "", "");
+
+        AccessPoint ap = new TestAccessPointBuilder(mContext)
+                .setNetworkInfo(networkInfo)
+                .setNetworkId(NETWORK_ID)
+                .setRssi(DEFAULT_RSSI)
+                .setWifiInfo(wifiInfo)
+                .build();
+
+        WifiConfiguration newConfig = new WifiConfiguration(config);
+        config.validatedInternetAccess = true;
+
+        performGivenUpdateAndThenNullListenerBeforeResumingMainHandlerExecution(
+                ap, () -> assertThat(ap.update(newConfig, wifiInfo, networkInfo)).isFalse());
+
+    }
+
+    private void performGivenUpdateAndThenNullListenerBeforeResumingMainHandlerExecution(
+            AccessPoint ap, Runnable r) {
+        AccessPoint.AccessPointListener mockListener = mock(AccessPoint.AccessPointListener.class);
+        ap.setListener(mockListener);
+
+        // Put a latch on the MainHandler to prevent the callback from being invoked instantly
+        CountDownLatch latch1 = new CountDownLatch(1);
+        ThreadUtils.postOnMainThread(() -> {
+            try{
+                latch1.await();
+            } catch (InterruptedException e) {
+                fail("Interruped Exception thrown while awaiting latch countdown");
+            }
+        });
+
+        r.run();
+
+        ap.setListener(null);
+        latch1.countDown();
+
+        // The second latch ensures the previously posted listener invocation has processed on the
+        // main thread.
+        CountDownLatch latch2 = new CountDownLatch(1);
+        ThreadUtils.postOnMainThread(latch2::countDown);
+
+        try{
+            latch2.await();
+        } catch (InterruptedException e) {
+            fail("Interruped Exception thrown while awaiting latch countdown");
+        }
+    }
+
+    @Test
+    public void testUpdateScanResults_doesNotThrowNPE_ifListenerIsNulledWhileAwaitingExecution()
+            throws InterruptedException {
+        String ssid = "ssid";
+        int newRssi = -80;
+        AccessPoint ap = new TestAccessPointBuilder(mContext).setSsid(ssid).build();
+
+        ScanResult scanResult = new ScanResult();
+        scanResult.SSID = ssid;
+        scanResult.level = newRssi;
+        scanResult.BSSID = "bssid";
+        scanResult.timestamp = SystemClock.elapsedRealtime() * 1000;
+        scanResult.capabilities = "";
+
+        performGivenUpdateAndThenNullListenerBeforeResumingMainHandlerExecution(
+                ap, () -> ap.setScanResults(Collections.singletonList(scanResult)));
+    }
+
+    @Test
+    public void testUpdateConfig_doesNotThrowNPE_ifListenerIsNulledWhileAwaitingExecution()
+            throws InterruptedException {
+        WifiConfiguration config = new WifiConfiguration();
+        config.networkId = NETWORK_ID;
+        config.numNoInternetAccessReports = 1;
+
+        WifiInfo wifiInfo = new WifiInfo();
+        wifiInfo.setNetworkId(NETWORK_ID);
+        wifiInfo.setRssi(DEFAULT_RSSI);
+
+        NetworkInfo networkInfo =
+                new NetworkInfo(ConnectivityManager.TYPE_WIFI, 0 /* subtype */, "WIFI", "");
+        networkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTED, "", "");
+
+        AccessPoint ap = new TestAccessPointBuilder(mContext)
+                .setNetworkInfo(networkInfo)
+                .setNetworkId(NETWORK_ID)
+                .setRssi(DEFAULT_RSSI)
+                .setWifiInfo(wifiInfo)
+                .build();
+
+        WifiConfiguration newConfig = new WifiConfiguration(config);
+        config.validatedInternetAccess = true;
+
+        performGivenUpdateAndThenNullListenerBeforeResumingMainHandlerExecution(
+                ap, () -> ap.update(newConfig));
+    }
+
+    @Test
+    public void testUpdateWithNullWifiConfiguration_doesNotThrowNPE() {
+        WifiConfiguration config = new WifiConfiguration();
+        config.networkId = NETWORK_ID;
+        WifiInfo wifiInfo = new WifiInfo();
+        wifiInfo.setNetworkId(NETWORK_ID);
+        wifiInfo.setRssi(DEFAULT_RSSI);
 
         NetworkInfo networkInfo =
                 new NetworkInfo(ConnectivityManager.TYPE_WIFI, 0 /* subtype */, "WIFI", "");
@@ -800,8 +918,8 @@ public class AccessPointTest {
 
         AccessPoint ap = new TestAccessPointBuilder(mContext)
                 .setNetworkInfo(networkInfo)
-                .setNetworkId(networkId)
-                .setRssi(rssi)
+                .setNetworkId(NETWORK_ID)
+                .setRssi(DEFAULT_RSSI)
                 .setWifiInfo(wifiInfo)
                 .build();
 
@@ -847,34 +965,34 @@ public class AccessPointTest {
                 .thenReturn(buildScoredNetworkWithGivenBadgeCurve(badgeCurve2));
 
         ap.update(
-        mockWifiNetworkScoreCache, true /* scoringUiEnabled */, MAX_SCORE_CACHE_AGE_MILLIS);
+            mockWifiNetworkScoreCache, true /* scoringUiEnabled */, MAX_SCORE_CACHE_AGE_MILLIS);
 
         assertThat(ap.getSpeed()).isEqualTo(speed1);
     }
 
     @Test
     public void testSpeedLabelFallbackScoreIgnoresNullCurves() {
-        int rssi = -55;
         String bssid = "00:00:00:00:00:00";
-        int networkId = 123;
 
         WifiInfo info = new WifiInfo();
-        info.setRssi(rssi);
+        info.setRssi(DEFAULT_RSSI);
         info.setSSID(WifiSsid.createFromAsciiEncoded(TEST_SSID));
         info.setBSSID(bssid);
-        info.setNetworkId(networkId);
+        info.setNetworkId(NETWORK_ID);
 
         ArrayList<ScanResult> scanResults = new ArrayList<>();
-        ScanResult scanResultUnconnected = createScanResult(TEST_SSID, "11:11:11:11:11:11", rssi);
+        ScanResult scanResultUnconnected =
+                createScanResult(TEST_SSID, "11:11:11:11:11:11", DEFAULT_RSSI);
         scanResults.add(scanResultUnconnected);
 
-        ScanResult scanResultConnected = createScanResult(TEST_SSID, bssid, rssi);
+        ScanResult scanResultConnected =
+                createScanResult(TEST_SSID, bssid, DEFAULT_RSSI);
         scanResults.add(scanResultConnected);
 
         AccessPoint ap =
                 new TestAccessPointBuilder(mContext)
                         .setActive(true)
-                        .setNetworkId(networkId)
+                        .setNetworkId(NETWORK_ID)
                         .setSsid(TEST_SSID)
                         .setScanResults(scanResults)
                         .setWifiInfo(info)
