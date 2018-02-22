@@ -5451,24 +5451,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    @Override
-    public final void requestActivityRelaunch(IBinder token) {
-        synchronized(this) {
-            ActivityRecord r = ActivityRecord.isInStackLocked(token);
-            if (r == null) {
-                return;
-            }
-            final long origId = Binder.clearCallingIdentity();
-            try {
-                r.forceNewConfig = true;
-                r.ensureActivityConfigurationLocked(0 /* globalChanges */,
-                        true /* preserveWindow */);
-            } finally {
-                Binder.restoreCallingIdentity(origId);
-            }
-        }
-    }
-
     /**
      * This is the internal entry point for handling Activity.finish().
      *
