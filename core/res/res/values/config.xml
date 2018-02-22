@@ -3163,7 +3163,7 @@
 
     <!-- The package name for the default system textclassifier service.
          This service must be trusted, as it can be activated without explicit consent of the user.
-         (e.g. com.android.textclassifier/.TextClassifierServiceImpl).
+         Example: "com.android.textclassifier"
          If no textclassifier service with the specified name exists on the device (or if this is
          set to empty string), a default textclassifier will be loaded in the calling app's process.
          See android.view.textclassifier.TextClassificationManager.
