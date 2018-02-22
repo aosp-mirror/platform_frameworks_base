@@ -22,6 +22,8 @@
 namespace android {
 namespace os {
 namespace statsd {
+
+using std::string;
 using std::vector;
 
 android::hash_t hashDimension(const HashableDimensionKey& value) {

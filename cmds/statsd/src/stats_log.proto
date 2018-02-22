@@ -15,7 +15,6 @@
  */
 
 syntax = "proto2";
-option optimize_for = LITE_RUNTIME;
 
 package android.os.statsd;
 
@@ -23,6 +22,7 @@ option java_package = "com.android.os";
 option java_outer_classname = "StatsLog";
 
 import "frameworks/base/cmds/statsd/src/atoms.proto";
+import "frameworks/base/cmds/statsd/src/stats_log_common.proto";
 
 message DimensionsValue {
   optional int32 field = 1;
@@ -115,33 +115,6 @@ message GaugeMetricData {
   repeated GaugeBucketInfo bucket_info = 3;
 }
 
-message UidMapping {
-  message PackageInfoSnapshot {
-    message PackageInfo {
-      optional string name = 1;
-
-      optional int64 version = 2;
-
-      optional int32 uid = 3;
-    }
-    optional int64 elapsed_timestamp_nanos = 1;
-
-    repeated PackageInfo package_info = 2;
-  }
-  repeated PackageInfoSnapshot snapshots = 1;
-
-  message Change {
-    optional bool deletion = 1;
-
-    optional int64 elapsed_timestamp_nanos = 2;
-    optional string app = 3;
-    optional int32 uid = 4;
-
-    optional int64 version = 5;
-  }
-  repeated Change changes = 2;
-}
-
 message StatsLogReport {
   optional int64 metric_id = 1;
 
@@ -191,87 +164,4 @@ message ConfigMetricsReportList {
   optional ConfigKey config_key = 1;
 
   repeated ConfigMetricsReport reports = 2;
-}
-
-message StatsdStatsReport {
-  optional int32 stats_begin_time_sec = 1;
-
-  optional int32 stats_end_time_sec = 2;
-
-  message MatcherStats {
-    optional int64 id = 1;
-    optional int32 matched_times = 2;
-  }
-
-  message ConditionStats {
-    optional int64 id = 1;
-    optional int32 max_tuple_counts = 2;
-  }
-
-  message MetricStats {
-    optional int64 id = 1;
-    optional int32 max_tuple_counts = 2;
-  }
-
-  message AlertStats {
-    optional int64 id = 1;
-    optional int32 alerted_times = 2;
-  }
-
-  message ConfigStats {
-    optional int32 uid = 1;
-    optional int64 id = 2;
-    optional int32 creation_time_sec = 3;
-    optional int32 deletion_time_sec = 4;
-    optional int32 metric_count = 5;
-    optional int32 condition_count = 6;
-    optional int32 matcher_count = 7;
-    optional int32 alert_count = 8;
-    optional bool is_valid = 9;
-
-    repeated int32 broadcast_sent_time_sec = 10;
-    repeated int32 data_drop_time_sec = 11;
-    repeated int32 dump_report_time_sec = 12;
-    repeated MatcherStats matcher_stats = 13;
-    repeated ConditionStats condition_stats = 14;
-    repeated MetricStats metric_stats = 15;
-    repeated AlertStats alert_stats = 16;
-  }
-
-  repeated ConfigStats config_stats = 3;
-
-  message AtomStats {
-    optional int32 tag = 1;
-    optional int32 count = 2;
-  }
-
-  repeated AtomStats atom_stats = 7;
-
-  message UidMapStats {
-    optional int32 snapshots = 1;
-    optional int32 changes = 2;
-    optional int32 bytes_used = 3;
-    optional int32 dropped_snapshots = 4;
-    optional int32 dropped_changes = 5;
-  }
-  optional UidMapStats uidmap_stats = 8;
-
-  message AnomalyAlarmStats {
-    optional int32 alarms_registered = 1;
-  }
-  optional AnomalyAlarmStats anomaly_alarm_stats = 9;
-
-  message PulledAtomStats {
-    optional int32 atom_id = 1;
-    optional int64 total_pull = 2;
-    optional int64 total_pull_from_cache = 3;
-    optional int64 min_pull_interval_sec = 4;
-  }
-  repeated PulledAtomStats pulled_atom_stats = 10;
-
-  message LoggerErrorStats {
-    optional int32 logger_disconnection_sec = 1;
-    optional int32 error_code = 2;
-  }
-  repeated LoggerErrorStats logger_error_stats = 11;
 }

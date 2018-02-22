@@ -19,7 +19,7 @@
 #include <android/util/ProtoOutputStream.h>
 #include "FieldValue.h"
 #include "HashableDimensionKey.h"
-#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
+#include "frameworks/base/cmds/statsd/src/stats_log_common.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "guardrail/StatsdStats.h"
 

@@ -78,13 +78,13 @@ TEST(DimensionInConditionE2eTest, TestCountMetricNoLink) {
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
 
-    std::vector<AttributionNode> attributions1 = {CreateAttribution(111, "App1"),
-                                                  CreateAttribution(222, "GMSCoreModule1"),
-                                                  CreateAttribution(222, "GMSCoreModule2")};
+    std::vector<AttributionNodeInternal> attributions1 = {CreateAttribution(111, "App1"),
+                                                          CreateAttribution(222, "GMSCoreModule1"),
+                                                          CreateAttribution(222, "GMSCoreModule2")};
 
-    std::vector<AttributionNode> attributions2 = {CreateAttribution(333, "App2"),
-                                                  CreateAttribution(222, "GMSCoreModule1"),
-                                                  CreateAttribution(555, "GMSCoreModule2")};
+    std::vector<AttributionNodeInternal> attributions2 = {CreateAttribution(333, "App2"),
+                                                          CreateAttribution(222, "GMSCoreModule1"),
+                                                          CreateAttribution(555, "GMSCoreModule2")};
 
     std::vector<std::unique_ptr<LogEvent>> events;
     events.push_back(
@@ -284,13 +284,13 @@ TEST(DimensionInConditionE2eTest, TestCountMetricWithLink) {
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
-    std::vector<AttributionNode> attributions1 = {CreateAttribution(111, "App1"),
-                                                  CreateAttribution(222, "GMSCoreModule1"),
-                                                  CreateAttribution(222, "GMSCoreModule2")};
+    std::vector<AttributionNodeInternal> attributions1 = {CreateAttribution(111, "App1"),
+                                                          CreateAttribution(222, "GMSCoreModule1"),
+                                                          CreateAttribution(222, "GMSCoreModule2")};
 
-    std::vector<AttributionNode> attributions2 = {CreateAttribution(333, "App2"),
-                                                  CreateAttribution(222, "GMSCoreModule1"),
-                                                  CreateAttribution(555, "GMSCoreModule2")};
+    std::vector<AttributionNodeInternal> attributions2 = {CreateAttribution(333, "App2"),
+                                                          CreateAttribution(222, "GMSCoreModule1"),
+                                                          CreateAttribution(555, "GMSCoreModule2")};
 
     std::vector<std::unique_ptr<LogEvent>> events;
 
@@ -464,13 +464,13 @@ TEST(DimensionInConditionE2eTest, TestDurationMetricNoLink) {
         EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
         EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
 
-        std::vector<AttributionNode> attributions1 = {CreateAttribution(111, "App1"),
-                                                      CreateAttribution(222, "GMSCoreModule1"),
-                                                      CreateAttribution(222, "GMSCoreModule2")};
+        std::vector<AttributionNodeInternal> attributions1 = {
+                CreateAttribution(111, "App1"), CreateAttribution(222, "GMSCoreModule1"),
+                CreateAttribution(222, "GMSCoreModule2")};
 
-        std::vector<AttributionNode> attributions2 = {CreateAttribution(333, "App2"),
-                                                      CreateAttribution(222, "GMSCoreModule1"),
-                                                      CreateAttribution(555, "GMSCoreModule2")};
+        std::vector<AttributionNodeInternal> attributions2 = {
+                CreateAttribution(333, "App2"), CreateAttribution(222, "GMSCoreModule1"),
+                CreateAttribution(555, "GMSCoreModule2")};
 
         std::vector<std::unique_ptr<LogEvent>> events;
 
@@ -629,13 +629,13 @@ TEST(DimensionInConditionE2eTest, TestDurationMetricWithLink) {
         EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
         EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
 
-        std::vector<AttributionNode> attributions1 = {CreateAttribution(111, "App1"),
-                                                      CreateAttribution(222, "GMSCoreModule1"),
-                                                      CreateAttribution(222, "GMSCoreModule2")};
+        std::vector<AttributionNodeInternal> attributions1 = {
+                CreateAttribution(111, "App1"), CreateAttribution(222, "GMSCoreModule1"),
+                CreateAttribution(222, "GMSCoreModule2")};
 
-        std::vector<AttributionNode> attributions2 = {CreateAttribution(333, "App2"),
-                                                      CreateAttribution(222, "GMSCoreModule1"),
-                                                      CreateAttribution(555, "GMSCoreModule2")};
+        std::vector<AttributionNodeInternal> attributions2 = {
+                CreateAttribution(333, "App2"), CreateAttribution(222, "GMSCoreModule1"),
+                CreateAttribution(555, "GMSCoreModule2")};
 
         std::vector<std::unique_ptr<LogEvent>> events;
 

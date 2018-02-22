@@ -24,10 +24,10 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
+#include "frameworks/base/cmds/statsd/src/stats_log_common.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
-#include "stats_util.h"
 #include "packages/UidMap.h"
+#include "stats_util.h"
 
 namespace android {
 namespace os {

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 #include <gtest/gtest.h>
-#include "src/logd/LogEvent.h"
+#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "matchers/matcher_util.h"
+#include "src/logd/LogEvent.h"
 #include "stats_log_util.h"
 #include "stats_util.h"
 #include "subscriber/SubscriberReporter.h"
@@ -64,19 +65,19 @@ TEST(AtomMatcherTest, TestFilter) {
     vector<Matcher> matchers;
     translateFieldMatcher(matcher1, &matchers);
 
-    AttributionNode attribution_node1;
+    AttributionNodeInternal attribution_node1;
     attribution_node1.set_uid(1111);
     attribution_node1.set_tag("location1");
 
-    AttributionNode attribution_node2;
+    AttributionNodeInternal attribution_node2;
     attribution_node2.set_uid(2222);
     attribution_node2.set_tag("location2");
 
-    AttributionNode attribution_node3;
+    AttributionNodeInternal attribution_node3;
     attribution_node3.set_uid(3333);
     attribution_node3.set_tag("location3");
-    std::vector<AttributionNode> attribution_nodes = {attribution_node1, attribution_node2,
-                                                      attribution_node3};
+    std::vector<AttributionNodeInternal> attribution_nodes = {attribution_node1, attribution_node2,
+                                                              attribution_node3};
 
     // Set up the event
     LogEvent event(10, 12345);
@@ -154,19 +155,19 @@ TEST(AtomMatcherTest, TestSubDimension) {
 }
 
 TEST(AtomMatcherTest, TestMetric2ConditionLink) {
-    AttributionNode attribution_node1;
+    AttributionNodeInternal attribution_node1;
     attribution_node1.set_uid(1111);
     attribution_node1.set_tag("location1");
 
-    AttributionNode attribution_node2;
+    AttributionNodeInternal attribution_node2;
     attribution_node2.set_uid(2222);
     attribution_node2.set_tag("location2");
 
-    AttributionNode attribution_node3;
+    AttributionNodeInternal attribution_node3;
     attribution_node3.set_uid(3333);
     attribution_node3.set_tag("location3");
-    std::vector<AttributionNode> attribution_nodes = {attribution_node1, attribution_node2,
-                                                      attribution_node3};
+    std::vector<AttributionNodeInternal> attribution_nodes = {attribution_node1, attribution_node2,
+                                                              attribution_node3};
 
     // Set up the event
     LogEvent event(10, 12345);
@@ -298,15 +299,15 @@ TEST(AtomMatcherTest, TestWriteDimensionToProto) {
 }
 
 TEST(AtomMatcherTest, TestWriteAtomToProto) {
-    AttributionNode attribution_node1;
+    AttributionNodeInternal attribution_node1;
     attribution_node1.set_uid(1111);
     attribution_node1.set_tag("location1");
 
-    AttributionNode attribution_node2;
+    AttributionNodeInternal attribution_node2;
     attribution_node2.set_uid(2222);
     attribution_node2.set_tag("location2");
 
-    std::vector<AttributionNode> attribution_nodes = {attribution_node1, attribution_node2};
+    std::vector<AttributionNodeInternal> attribution_nodes = {attribution_node1, attribution_node2};
 
     // Set up the event
     LogEvent event(4, 12345);

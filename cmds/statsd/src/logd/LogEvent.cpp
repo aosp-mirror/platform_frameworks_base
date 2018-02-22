@@ -26,9 +26,10 @@ namespace os {
 namespace statsd {
 
 using namespace android::util;
+using android::util::ProtoOutputStream;
 using std::ostringstream;
 using std::string;
-using android::util::ProtoOutputStream;
+using std::vector;
 
 LogEvent::LogEvent(log_msg& msg) {
     mContext =
@@ -130,7 +131,7 @@ bool LogEvent::write(float value) {
     return false;
 }
 
-bool LogEvent::write(const std::vector<AttributionNode>& nodes) {
+bool LogEvent::write(const std::vector<AttributionNodeInternal>& nodes) {
     if (mContext) {
          if (android_log_write_list_begin(mContext) < 0) {
             return false;
@@ -148,7 +149,7 @@ bool LogEvent::write(const std::vector<AttributionNode>& nodes) {
     return false;
 }
 
-bool LogEvent::write(const AttributionNode& node) {
+bool LogEvent::write(const AttributionNodeInternal& node) {
     if (mContext) {
          if (android_log_write_list_begin(mContext) < 0) {
             return false;

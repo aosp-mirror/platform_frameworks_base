@@ -199,5 +199,18 @@ TEST(CollationTest, FailBadAttributionNodePosition) {
   EXPECT_EQ(1, errorCount);
 }
 
+TEST(CollationTest, FailOnBadStateAtomOptions) {
+    Atoms atoms;
+    int errorCount = collate_atoms(BadStateAtoms::descriptor(), &atoms);
+
+    EXPECT_EQ(3, errorCount);
+}
+
+TEST(CollationTest, PassOnGoodStateAtomOptions) {
+    Atoms atoms;
+    int errorCount = collate_atoms(GoodStateAtoms::descriptor(), &atoms);
+    EXPECT_EQ(0, errorCount);
+}
+
 }  // namespace stats_log_api_gen
 }  // namespace android

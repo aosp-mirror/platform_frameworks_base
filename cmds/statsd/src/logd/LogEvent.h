@@ -17,7 +17,6 @@
 #pragma once
 
 #include "FieldValue.h"
-#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 
 #include <android/util/ProtoOutputStream.h>
 #include <log/log_event_list.h>
@@ -32,8 +31,26 @@ namespace android {
 namespace os {
 namespace statsd {
 
-using std::string;
-using std::vector;
+struct AttributionNodeInternal {
+    void set_uid(int32_t id) {
+        mUid = id;
+    }
+
+    void set_tag(const std::string& value) {
+        mTag = value;
+    }
+
+    int32_t uid() const {
+        return mUid;
+    }
+
+    const std::string& tag() const {
+        return mTag;
+    }
+
+    int32_t mUid;
+    std::string mTag;
+};
 /**
  * Wrapper for the log_msg structure.
  */
@@ -89,15 +106,15 @@ public:
     bool write(int32_t value);
     bool write(uint64_t value);
     bool write(int64_t value);
-    bool write(const string& value);
+    bool write(const std::string& value);
     bool write(float value);
-    bool write(const std::vector<AttributionNode>& nodes);
-    bool write(const AttributionNode& node);
+    bool write(const std::vector<AttributionNodeInternal>& nodes);
+    bool write(const AttributionNodeInternal& node);
 
     /**
      * Return a string representation of this event.
      */
-    string ToString() const;
+    std::string ToString() const;
 
     /**
      * Write this object to a ProtoOutputStream.
