@@ -366,7 +366,38 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
     }
 
-    public void testPublishWithNoActivity() {
+    public void testUnlimitedCalls() {
+        setCaller(CALLING_PACKAGE_1, USER_0);
+
+        final ShortcutInfo si1 = makeShortcut("shortcut1");
+
+        assertEquals(3, mManager.getRemainingCallCount());
+
+        assertTrue(mManager.setDynamicShortcuts(list(si1)));
+        assertEquals(2, mManager.getRemainingCallCount());
+
+        assertTrue(mManager.addDynamicShortcuts(list(si1)));
+        assertEquals(1, mManager.getRemainingCallCount());
+
+        assertTrue(mManager.updateShortcuts(list(si1)));
+        assertEquals(0, mManager.getRemainingCallCount());
+
+        // Unlimited now.
+        mInjectHasUnlimitedShortcutsApiCallsPermission = true;
+
+        assertEquals(3, mManager.getRemainingCallCount());
+
+        assertTrue(mManager.setDynamicShortcuts(list(si1)));
+        assertEquals(3, mManager.getRemainingCallCount());
+
+        assertTrue(mManager.addDynamicShortcuts(list(si1)));
+        assertEquals(3, mManager.getRemainingCallCount());
+
+        assertTrue(mManager.updateShortcuts(list(si1)));
+        assertEquals(3, mManager.getRemainingCallCount());
+    }
+
+   public void testPublishWithNoActivity() {
         // If activity is not explicitly set, use the default one.
 
         mRunningUsers.put(USER_10, true);

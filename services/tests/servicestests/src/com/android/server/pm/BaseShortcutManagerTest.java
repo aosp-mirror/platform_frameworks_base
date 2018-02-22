@@ -289,6 +289,12 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
+        int injectBinderCallingPid() {
+            // Note it's not used in tests, so just return a "random" value.
+            return mInjectedCallingUid * 123;
+        }
+
+        @Override
         int injectGetPackageUid(String packageName, int userId) {
             return getInjectedPackageInfo(packageName, userId, false).applicationInfo.uid;
         }
@@ -322,6 +328,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         boolean hasShortcutHostPermission(@NonNull String callingPackage, int userId,
                 int callingPid, int callingUid) {
             return mDefaultLauncherChecker.test(callingPackage, userId);
+        }
+
+        @Override
+        boolean injectHasUnlimitedShortcutsApiCallsPermission(int callingPid, int callingUid) {
+            return mInjectHasUnlimitedShortcutsApiCallsPermission;
         }
 
         @Override
@@ -519,6 +530,12 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
+        int injectBinderCallingPid() {
+            // Note it's not used in tests, so just return a "random" value.
+            return mInjectedCallingUid * 123;
+        }
+
+        @Override
         long injectClearCallingIdentity() {
             final int prevCallingUid = mInjectedCallingUid;
             mInjectedCallingUid = Process.SYSTEM_UID;
@@ -704,6 +721,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected String mInjectedBuildFingerprint = "build1";
 
     protected boolean mInjectCheckAccessShortcutsPermission = false;
+
+    protected boolean mInjectHasUnlimitedShortcutsApiCallsPermission = false;
 
     static {
         QUERY_ALL.setQueryFlags(
@@ -1207,7 +1226,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     }
 
     /**
-     * This controls {@link ShortcutService#hasShortcutHostPermission(String, int)}, but
+     * This controls {@link ShortcutService#hasShortcutHostPermission}, but
      * not {@link ShortcutService#getDefaultLauncher(int)}.  To control the later, use
      * {@link #setDefaultLauncher(int, ComponentName)}.
      */

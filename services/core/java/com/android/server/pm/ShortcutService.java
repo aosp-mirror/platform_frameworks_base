@@ -15,6 +15,7 @@
  */
 package com.android.server.pm;
 
+import android.Manifest.permission;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1726,6 +1727,9 @@ public class ShortcutService extends IShortcutService.Stub {
         final List<ShortcutInfo> newShortcuts = (List<ShortcutInfo>) shortcutInfoList.getList();
         final int size = newShortcuts.size();
 
+        final boolean unlimited = injectHasUnlimitedShortcutsApiCallsPermission(
+                injectBinderCallingPid(), injectBinderCallingUid());
+
         synchronized (mLock) {
             throwIfUserLockedL(userId);
 
@@ -1738,7 +1742,7 @@ public class ShortcutService extends IShortcutService.Stub {
             ps.enforceShortcutCountsBeforeOperation(newShortcuts, OPERATION_SET);
 
             // Throttling.
-            if (!ps.tryApiCall()) {
+            if (!ps.tryApiCall(unlimited)) {
                 return false;
             }
 
@@ -1777,6 +1781,9 @@ public class ShortcutService extends IShortcutService.Stub {
         final List<ShortcutInfo> newShortcuts = (List<ShortcutInfo>) shortcutInfoList.getList();
         final int size = newShortcuts.size();
 
+        final boolean unlimited = injectHasUnlimitedShortcutsApiCallsPermission(
+                injectBinderCallingPid(), injectBinderCallingUid());
+
         synchronized (mLock) {
             throwIfUserLockedL(userId);
 
@@ -1790,7 +1797,7 @@ public class ShortcutService extends IShortcutService.Stub {
             ps.enforceShortcutCountsBeforeOperation(newShortcuts, OPERATION_UPDATE);
 
             // Throttling.
-            if (!ps.tryApiCall()) {
+            if (!ps.tryApiCall(unlimited)) {
                 return false;
             }
 
@@ -1859,6 +1866,9 @@ public class ShortcutService extends IShortcutService.Stub {
         final List<ShortcutInfo> newShortcuts = (List<ShortcutInfo>) shortcutInfoList.getList();
         final int size = newShortcuts.size();
 
+        final boolean unlimited = injectHasUnlimitedShortcutsApiCallsPermission(
+                injectBinderCallingPid(), injectBinderCallingUid());
+
         synchronized (mLock) {
             throwIfUserLockedL(userId);
 
@@ -1875,7 +1885,7 @@ public class ShortcutService extends IShortcutService.Stub {
             assignImplicitRanks(newShortcuts);
 
             // Throttling.
-            if (!ps.tryApiCall()) {
+            if (!ps.tryApiCall(unlimited)) {
                 return false;
             }
             for (int i = 0; i < size; i++) {
@@ -2144,11 +2154,14 @@ public class ShortcutService extends IShortcutService.Stub {
     public int getRemainingCallCount(String packageName, @UserIdInt int userId) {
         verifyCaller(packageName, userId);
 
+        final boolean unlimited = injectHasUnlimitedShortcutsApiCallsPermission(
+                injectBinderCallingPid(), injectBinderCallingUid());
+
         synchronized (mLock) {
             throwIfUserLockedL(userId);
 
             final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
-            return mMaxUpdatesPerInterval - ps.getApiCallCount();
+            return mMaxUpdatesPerInterval - ps.getApiCallCount(unlimited);
         }
     }
 
@@ -2295,6 +2308,15 @@ public class ShortcutService extends IShortcutService.Stub {
     @VisibleForTesting
     boolean injectHasAccessShortcutsPermission(int callingPid, int callingUid) {
         return mContext.checkPermission(android.Manifest.permission.ACCESS_SHORTCUTS,
+                callingPid, callingUid) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /**
+     * Returns true if the caller has the "UNLIMITED_SHORTCUTS_API_CALLS" permission.
+     */
+    @VisibleForTesting
+    boolean injectHasUnlimitedShortcutsApiCallsPermission(int callingPid, int callingUid) {
+        return mContext.checkPermission(permission.UNLIMITED_SHORTCUTS_API_CALLS,
                 callingPid, callingUid) == PackageManager.PERMISSION_GRANTED;
     }
 
@@ -4195,6 +4217,11 @@ public class ShortcutService extends IShortcutService.Stub {
     @VisibleForTesting
     int injectBinderCallingUid() {
         return getCallingUid();
+    }
+
+    @VisibleForTesting
+    int injectBinderCallingPid() {
+        return getCallingPid();
     }
 
     private int getCallingUserId() {
