@@ -1691,10 +1691,12 @@ Landroid/view/accessibility/IAccessibilityManager$Stub;->asInterface(Landroid/os
 Landroid/view/accessibility/IAccessibilityManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/view/ActionMode;->isUiFocusable()Z
 Landroid/view/animation/Animation;->mListener:Landroid/view/animation/Animation$AnimationListener;
+Landroid/view/Choreographer$CallbackQueue;->addCallbackLocked(JLjava/lang/Object;Ljava/lang/Object;)V
 Landroid/view/Choreographer;->doFrame(JI)V
 Landroid/view/Choreographer;->getFrameTime()J
 Landroid/view/Choreographer;->mCallbackQueues:[Landroid/view/Choreographer$CallbackQueue;
 Landroid/view/Choreographer;->mLastFrameTimeNanos:J
+Landroid/view/Choreographer;->mLock:Ljava/lang/Object;
 Landroid/view/Choreographer;->postCallback(ILjava/lang/Runnable;Ljava/lang/Object;)V
 Landroid/view/Choreographer;->removeCallbacks(ILjava/lang/Runnable;Ljava/lang/Object;)V
 Landroid/view/Choreographer;->scheduleVsyncLocked()V
