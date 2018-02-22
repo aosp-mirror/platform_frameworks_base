@@ -143,6 +143,7 @@ public abstract class ConnectionService extends Service {
     private static final String SESSION_HANDOVER_COMPLETE = "CS.hC";
     private static final String SESSION_EXTRAS_CHANGED = "CS.oEC";
     private static final String SESSION_START_RTT = "CS.+RTT";
+    private static final String SESSION_UPDATE_RTT_PIPES = "CS.uRTT";
     private static final String SESSION_STOP_RTT = "CS.-RTT";
     private static final String SESSION_RTT_UPGRADE_RESPONSE = "CS.rTRUR";
     private static final String SESSION_HANDOVER_FAILED = "CS.haF";
@@ -1864,7 +1865,6 @@ public abstract class ConnectionService extends Service {
         Log.d(this, "stopRtt(%s)", callId);
         if (mConnectionById.containsKey(callId)) {
             findConnectionForAction(callId, "stopRtt").onStopRtt();
-            findConnectionForAction(callId, "stopRtt").unsetRttProperty();
         } else if (mConferenceById.containsKey(callId)) {
             Log.w(this, "stopRtt called on a conference.");
         }

@@ -3665,18 +3665,15 @@ public final class Settings {
         public static final Validator TTY_MODE_VALIDATOR = new InclusiveIntegerRangeValidator(0, 3);
 
         /**
-         * User-selected RTT mode
+         * User-selected RTT mode. When on, outgoing and incoming calls will be answered as RTT
+         * calls when supported by the device and carrier. Boolean value.
          * 0 = OFF
-         * 1 = FULL
-         * 2 = VCO
-         * 3 = HCO
-         * Uses the same constants as TTY (e.g. {@link android.telecom.TelecomManager#TTY_MODE_OFF})
-         * @hide
+         * 1 = ON
          */
         public static final String RTT_CALLING_MODE = "rtt_calling_mode";
 
         /** @hide */
-        public static final Validator RTT_CALLING_MODE_VALIDATOR = TTY_MODE_VALIDATOR;
+        public static final Validator RTT_CALLING_MODE_VALIDATOR = sBooleanValidator;
 
         /**
          * Whether the sounds effects (key clicks, lid open ...) are enabled. The value is
