@@ -395,10 +395,7 @@ struct GnssCallback : public IGnssCallback {
     // New in 1.1
     Return<void> gnssNameCb(const android::hardware::hidl_string& name) override;
 
-    static GnssSvInfo sGnssSvList[static_cast<uint32_t>(
-            android::hardware::gnss::V1_0::GnssMax::SVS_COUNT)];
-    static size_t sGnssSvListSize;
-
+    // TODO(b/73306084): Reconsider allocation cost vs threadsafety on these statics
     static const char* sNmeaString;
     static size_t sNmeaStringLength;
 };
@@ -414,11 +411,8 @@ Return<void> GnssCallback::gnssNameCb(const android::hardware::hidl_string& name
     return Void();
 }
 
-IGnssCallback::GnssSvInfo GnssCallback::sGnssSvList[static_cast<uint32_t>(
-        android::hardware::gnss::V1_0::GnssMax::SVS_COUNT)];
 const char* GnssCallback::sNmeaString = nullptr;
 size_t GnssCallback::sNmeaStringLength = 0;
-size_t GnssCallback::sGnssSvListSize = 0;
 
 Return<void> GnssCallback::gnssLocationCb(const GnssLocation& location) {
     JNIEnv* env = getJniEnv();
@@ -432,6 +426,7 @@ Return<void> GnssCallback::gnssLocationCb(const GnssLocation& location) {
                         boolToJbool(hasLatLong),
                         jLocation);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    env->DeleteLocalRef(jLocation);
     return Void();
 }
 
@@ -445,20 +440,55 @@ Return<void> GnssCallback::gnssStatusCb(const IGnssCallback::GnssStatusValue sta
 Return<void> GnssCallback::gnssSvStatusCb(const IGnssCallback::GnssSvStatus& svStatus) {
     JNIEnv* env = getJniEnv();
 
-    sGnssSvListSize = svStatus.numSvs;
-    if (sGnssSvListSize > static_cast<uint32_t>(
+    uint32_t listSize = svStatus.numSvs;
+    if (listSize > static_cast<uint32_t>(
             android::hardware::gnss::V1_0::GnssMax::SVS_COUNT)) {
-        ALOGD("Too many satellites %zd. Clamps to %u.", sGnssSvListSize,
+        ALOGD("Too many satellites %u. Clamps to %u.", listSize,
               static_cast<uint32_t>(android::hardware::gnss::V1_0::GnssMax::SVS_COUNT));
-        sGnssSvListSize = static_cast<uint32_t>(android::hardware::gnss::V1_0::GnssMax::SVS_COUNT);
+        listSize = static_cast<uint32_t>(android::hardware::gnss::V1_0::GnssMax::SVS_COUNT);
     }
 
-    // Copy GNSS SV info into sGnssSvList, if any.
-    if (svStatus.numSvs > 0) {
-        memcpy(sGnssSvList, svStatus.gnssSvList.data(), sizeof(GnssSvInfo) * sGnssSvListSize);
+    jintArray svidWithFlagArray = env->NewIntArray(listSize);
+    jfloatArray cn0Array = env->NewFloatArray(listSize);
+    jfloatArray elevArray = env->NewFloatArray(listSize);
+    jfloatArray azimArray = env->NewFloatArray(listSize);
+    jfloatArray carrierFreqArray = env->NewFloatArray(listSize);
+
+    jint* svidWithFlags = env->GetIntArrayElements(svidWithFlagArray, 0);
+    jfloat* cn0s = env->GetFloatArrayElements(cn0Array, 0);
+    jfloat* elev = env->GetFloatArrayElements(elevArray, 0);
+    jfloat* azim = env->GetFloatArrayElements(azimArray, 0);
+    jfloat* carrierFreq = env->GetFloatArrayElements(carrierFreqArray, 0);
+
+    /*
+     * Read GNSS SV info.
+     */
+    for (size_t i = 0; i < listSize; ++i) {
+        enum ShiftWidth: uint8_t {
+            SVID_SHIFT_WIDTH = 8,
+            CONSTELLATION_TYPE_SHIFT_WIDTH = 4
+        };
+
+        const IGnssCallback::GnssSvInfo& info = svStatus.gnssSvList.data()[i];
+        svidWithFlags[i] = (info.svid << SVID_SHIFT_WIDTH) |
+            (static_cast<uint32_t>(info.constellation) << CONSTELLATION_TYPE_SHIFT_WIDTH) |
+            static_cast<uint32_t>(info.svFlag);
+        cn0s[i] = info.cN0Dbhz;
+        elev[i] = info.elevationDegrees;
+        azim[i] = info.azimuthDegrees;
+        carrierFreq[i] = info.carrierFrequencyHz;
     }
 
-    env->CallVoidMethod(mCallbacksObj, method_reportSvStatus);
+    env->ReleaseIntArrayElements(svidWithFlagArray, svidWithFlags, 0);
+    env->ReleaseFloatArrayElements(cn0Array, cn0s, 0);
+    env->ReleaseFloatArrayElements(elevArray, elev, 0);
+    env->ReleaseFloatArrayElements(azimArray, azim, 0);
+    env->ReleaseFloatArrayElements(carrierFreqArray, carrierFreq, 0);
+
+    env->CallVoidMethod(mCallbacksObj, method_reportSvStatus,
+            static_cast<jint>(listSize), svidWithFlagArray, cn0Array, elevArray, azimArray,
+            carrierFreqArray);
+
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return Void();
 }
@@ -577,6 +607,7 @@ Return<void> GnssGeofenceCallback::gnssGeofenceTransitionCb(
                         timestamp);
 
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    env->DeleteLocalRef(jLocation);
     return Void();
 }
 
@@ -592,6 +623,7 @@ Return<void> GnssGeofenceCallback::gnssGeofenceStatusCb(
                         status,
                         jLocation);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    env->DeleteLocalRef(jLocation);
     return Void();
 }
 
@@ -1086,7 +1118,7 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
     method_reportLocation = env->GetMethodID(clazz, "reportLocation",
             "(ZLandroid/location/Location;)V");
     method_reportStatus = env->GetMethodID(clazz, "reportStatus", "(I)V");
-    method_reportSvStatus = env->GetMethodID(clazz, "reportSvStatus", "()V");
+    method_reportSvStatus = env->GetMethodID(clazz, "reportSvStatus", "(I[I[F[F[F[F)V");
     method_reportAGpsStatus = env->GetMethodID(clazz, "reportAGpsStatus", "(II[B)V");
     method_reportNmea = env->GetMethodID(clazz, "reportNmea", "(J)V");
     method_setEngineCapabilities = env->GetMethodID(clazz, "setEngineCapabilities", "(I)V");
@@ -1390,49 +1422,6 @@ static void android_location_GnssLocationProvider_delete_aiding_data(JNIEnv* /* 
             ALOGE("Error in deleting aiding data");
         }
     }
-}
-
-/*
- * This enum is used by the read_sv_status method to combine the svid,
- * constellation and svFlag fields.
- */
-enum ShiftWidth: uint8_t {
-    SVID_SHIFT_WIDTH = 8,
-    CONSTELLATION_TYPE_SHIFT_WIDTH = 4
-};
-
-static jint android_location_GnssLocationProvider_read_sv_status(JNIEnv* env, jobject /* obj */,
-        jintArray svidWithFlagArray, jfloatArray cn0Array, jfloatArray elevArray,
-        jfloatArray azumArray, jfloatArray carrierFreqArray) {
-    /*
-     * This method should only be called from within a call to reportSvStatus.
-     */
-    jint* svidWithFlags = env->GetIntArrayElements(svidWithFlagArray, 0);
-    jfloat* cn0s = env->GetFloatArrayElements(cn0Array, 0);
-    jfloat* elev = env->GetFloatArrayElements(elevArray, 0);
-    jfloat* azim = env->GetFloatArrayElements(azumArray, 0);
-    jfloat* carrierFreq = env->GetFloatArrayElements(carrierFreqArray, 0);
-
-    /*
-     * Read GNSS SV info.
-     */
-    for (size_t i = 0; i < GnssCallback::sGnssSvListSize; ++i) {
-        const IGnssCallback::GnssSvInfo& info = GnssCallback::sGnssSvList[i];
-        svidWithFlags[i] = (info.svid << SVID_SHIFT_WIDTH) |
-            (static_cast<uint32_t>(info.constellation) << CONSTELLATION_TYPE_SHIFT_WIDTH) |
-            static_cast<uint32_t>(info.svFlag);
-        cn0s[i] = info.cN0Dbhz;
-        elev[i] = info.elevationDegrees;
-        azim[i] = info.azimuthDegrees;
-        carrierFreq[i] = info.carrierFrequencyHz;
-    }
-
-    env->ReleaseIntArrayElements(svidWithFlagArray, svidWithFlags, 0);
-    env->ReleaseFloatArrayElements(cn0Array, cn0s, 0);
-    env->ReleaseFloatArrayElements(elevArray, elev, 0);
-    env->ReleaseFloatArrayElements(azumArray, azim, 0);
-    env->ReleaseFloatArrayElements(carrierFreqArray, carrierFreq, 0);
-    return static_cast<jint>(GnssCallback::sGnssSvListSize);
 }
 
 static void android_location_GnssLocationProvider_agps_set_reference_location_cellid(
@@ -2080,9 +2069,6 @@ static const JNINativeMethod sMethods[] = {
     {"native_delete_aiding_data",
             "(I)V",
             reinterpret_cast<void*>(android_location_GnssLocationProvider_delete_aiding_data)},
-    {"native_read_sv_status",
-            "([I[F[F[F[F)I",
-            reinterpret_cast<void *>(android_location_GnssLocationProvider_read_sv_status)},
     {"native_read_nmea", "([BI)I", reinterpret_cast<void *>(
             android_location_GnssLocationProvider_read_nmea)},
     {"native_inject_time", "(JJI)V", reinterpret_cast<void *>(

@@ -215,6 +215,8 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private static final int REQUEST_SUPL_CONNECTION = 14;
     private static final int RELEASE_SUPL_CONNECTION = 15;
     private static final int REQUEST_LOCATION = 16;
+    private static final int REPORT_LOCATION = 17; // HAL reports location
+    private static final int REPORT_SV_STATUS = 18; // HAL reports SV status
 
     // Request setid
     private static final int AGPS_RIL_REQUEST_SETID_IMSI = 1;
@@ -266,7 +268,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
         }
     }
 
-    // Simple class to hold stats reported in the Extras Bundle
+    // Threadsafe class to hold stats reported in the Extras Bundle
     private static class LocationExtras {
         private int mSvCount;
         private int mMeanCn0;
@@ -278,9 +280,11 @@ public class GnssLocationProvider implements LocationProviderInterface {
         }
 
         public void set(int svCount, int meanCn0, int maxCn0) {
-            mSvCount = svCount;
-            mMeanCn0 = meanCn0;
-            mMaxCn0 = maxCn0;
+            synchronized(this) {
+                mSvCount = svCount;
+                mMeanCn0 = meanCn0;
+                mMaxCn0 = maxCn0;
+            }
             setBundle(mBundle);
         }
 
@@ -291,14 +295,18 @@ public class GnssLocationProvider implements LocationProviderInterface {
         // Also used by outside methods to add to other bundles
         public void setBundle(Bundle extras) {
             if (extras != null) {
-                extras.putInt("satellites", mSvCount);
-                extras.putInt("meanCn0", mMeanCn0);
-                extras.putInt("maxCn0", mMaxCn0);
+                synchronized (this) {
+                    extras.putInt("satellites", mSvCount);
+                    extras.putInt("meanCn0", mMeanCn0);
+                    extras.putInt("maxCn0", mMaxCn0);
+                }
             }
         }
 
         public Bundle getBundle() {
-            return mBundle;
+            synchronized (this) {
+                return new Bundle(mBundle);
+            }
         }
     }
 
@@ -411,7 +419,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private final Context mContext;
     private final NtpTrustedTime mNtpTime;
     private final ILocationManager mILocationManager;
-    private Location mLocation = new Location(LocationManager.GPS_PROVIDER);
     private final LocationExtras mLocationExtras = new LocationExtras();
     private final GnssStatusListenerHelper mListenerHelper;
     private final GnssMeasurementsProvider mGnssMeasurementsProvider;
@@ -757,8 +764,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
         mContext = context;
         mNtpTime = NtpTrustedTime.getInstance(context);
         mILocationManager = ilocationManager;
-
-        mLocation.setExtras(mLocationExtras.getBundle());
 
         // Create a wake lock
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
@@ -1726,6 +1731,10 @@ public class GnssLocationProvider implements LocationProviderInterface {
      * called from native code to update our position.
      */
     private void reportLocation(boolean hasLatLong, Location location) {
+        sendMessage(REPORT_LOCATION, hasLatLong ? 1 : 0, location);
+    }
+
+    private void handleReportLocation(boolean hasLatLong, Location location) {
         if (location.hasSpeed()) {
             mItarSpeedLimitExceeded = location.getSpeed() > ITAR_SPEED_LIMIT_METERS_PER_SECOND;
         }
@@ -1739,18 +1748,15 @@ public class GnssLocationProvider implements LocationProviderInterface {
 
         if (VERBOSE) Log.v(TAG, "reportLocation " + location.toString());
 
-        synchronized (mLocation) {
-            mLocation = location;
-            // It would be nice to push the elapsed real-time timestamp
-            // further down the stack, but this is still useful
-            mLocation.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
-            mLocation.setExtras(mLocationExtras.getBundle());
+        // It would be nice to push the elapsed real-time timestamp
+        // further down the stack, but this is still useful
+        location.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
+        location.setExtras(mLocationExtras.getBundle());
 
-            try {
-                mILocationManager.reportLocation(mLocation, false);
-            } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException calling reportLocation");
-            }
+        try {
+            mILocationManager.reportLocation(location, false);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException calling reportLocation");
         }
 
         mGnssMetrics.logReceivedLocationStatus(hasLatLong);
@@ -1835,54 +1841,73 @@ public class GnssLocationProvider implements LocationProviderInterface {
         }
     }
 
+    // Helper class to carry data to handler for reportSvStatus
+    private static class SvStatusInfo {
+        public int mSvCount;
+        public int[] mSvidWithFlags;
+        public float[] mCn0s;
+        public float[] mSvElevations;
+        public float[] mSvAzimuths;
+        public float[] mSvCarrierFreqs;
+    }
+
     /**
      * called from native code to update SV info
      */
-    private void reportSvStatus() {
-        int svCount = native_read_sv_status(mSvidWithFlags,
-                mCn0s,
-                mSvElevations,
-                mSvAzimuths,
-                mSvCarrierFreqs);
+    private void reportSvStatus(int svCount, int[] svidWithFlags, float[] cn0s,
+            float[] svElevations, float[] svAzimuths, float[] svCarrierFreqs) {
+        SvStatusInfo svStatusInfo = new SvStatusInfo();
+        svStatusInfo.mSvCount = svCount;
+        svStatusInfo.mSvidWithFlags = svidWithFlags;
+        svStatusInfo.mCn0s = cn0s;
+        svStatusInfo.mSvElevations = svElevations;
+        svStatusInfo.mSvAzimuths = svAzimuths;
+        svStatusInfo.mSvCarrierFreqs = svCarrierFreqs;
+
+        sendMessage(REPORT_SV_STATUS, 0, svStatusInfo);
+    }
+
+    private void handleReportSvStatus(SvStatusInfo info) {
         mListenerHelper.onSvStatusChanged(
-                svCount,
-                mSvidWithFlags,
-                mCn0s,
-                mSvElevations,
-                mSvAzimuths,
-                mSvCarrierFreqs);
+                info.mSvCount,
+                info.mSvidWithFlags,
+                info.mCn0s,
+                info.mSvElevations,
+                info.mSvAzimuths,
+                info.mSvCarrierFreqs);
 
         // Log CN0 as part of GNSS metrics
-        mGnssMetrics.logCn0(mCn0s, svCount);
+        mGnssMetrics.logCn0(info.mCn0s, info.mSvCount);
 
         if (VERBOSE) {
-            Log.v(TAG, "SV count: " + svCount);
+            Log.v(TAG, "SV count: " + info.mSvCount);
         }
         // Calculate number of satellites used in fix.
         int usedInFixCount = 0;
         int maxCn0 = 0;
         int meanCn0 = 0;
-        for (int i = 0; i < svCount; i++) {
-            if ((mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_USED_IN_FIX) != 0) {
+        for (int i = 0; i < info.mSvCount; i++) {
+            if ((info.mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_USED_IN_FIX) != 0) {
                 ++usedInFixCount;
-                if (mCn0s[i] > maxCn0) {
-                    maxCn0 = (int) mCn0s[i];
+                if (info.mCn0s[i] > maxCn0) {
+                    maxCn0 = (int) info.mCn0s[i];
                 }
-                meanCn0 += mCn0s[i];
+                meanCn0 += info.mCn0s[i];
             }
             if (VERBOSE) {
-                Log.v(TAG, "svid: " + (mSvidWithFlags[i] >> GnssStatus.SVID_SHIFT_WIDTH) +
-                        " cn0: " + mCn0s[i] +
-                        " elev: " + mSvElevations[i] +
-                        " azimuth: " + mSvAzimuths[i] +
-                        " carrier frequency: " + mSvCarrierFreqs[i] +
-                        ((mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_EPHEMERIS_DATA) == 0
+                Log.v(TAG, "svid: " + (info.mSvidWithFlags[i] >> GnssStatus.SVID_SHIFT_WIDTH) +
+                        " cn0: " + info.mCn0s[i] +
+                        " elev: " + info.mSvElevations[i] +
+                        " azimuth: " + info.mSvAzimuths[i] +
+                        " carrier frequency: " + info.mSvCarrierFreqs[i] +
+                        ((info.mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_EPHEMERIS_DATA) == 0
                                 ? "  " : " E") +
-                        ((mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_ALMANAC_DATA) == 0
+                        ((info.mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_ALMANAC_DATA) == 0
                                 ? "  " : " A") +
-                        ((mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_USED_IN_FIX) == 0
+                        ((info.mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_USED_IN_FIX) == 0
                                 ? "" : "U") +
-                        ((mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_CARRIER_FREQUENCY) == 0
+                        ((info.mSvidWithFlags[i] &
+                                GnssStatus.GNSS_SV_FLAGS_HAS_CARRIER_FREQUENCY) == 0
                                 ? "" : "F"));
             }
         }
@@ -2479,6 +2504,12 @@ public class GnssLocationProvider implements LocationProviderInterface {
                 case INITIALIZE_HANDLER:
                     handleInitialize();
                     break;
+                case REPORT_LOCATION:
+                    handleReportLocation(msg.arg1 == 1, (Location) msg.obj);
+                    break;
+                case REPORT_SV_STATUS:
+                    handleReportSvStatus((SvStatusInfo) msg.obj);
+                    break;
             }
             if (msg.arg2 == 1) {
                 // wakelock was taken for this message, release it
@@ -2798,6 +2829,10 @@ public class GnssLocationProvider implements LocationProviderInterface {
                 return "SUBSCRIPTION_OR_SIM_CHANGED";
             case INITIALIZE_HANDLER:
                 return "INITIALIZE_HANDLER";
+            case REPORT_LOCATION:
+                return "REPORT_LOCATION";
+            case REPORT_SV_STATUS:
+                return "REPORT_SV_STATUS";
             default:
                 return "<Unknown>";
         }
@@ -2862,15 +2897,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
         }
     }
 
-    // for GPS SV statistics
-    private static final int MAX_SVS = 64;
-
-    // preallocated arrays, to avoid memory allocation in reportStatus()
-    private int mSvidWithFlags[] = new int[MAX_SVS];
-    private float mCn0s[] = new float[MAX_SVS];
-    private float mSvElevations[] = new float[MAX_SVS];
-    private float mSvAzimuths[] = new float[MAX_SVS];
-    private float mSvCarrierFreqs[] = new float[MAX_SVS];
     // preallocated to avoid memory allocation in reportNmea()
     private byte[] mNmeaBuffer = new byte[120];
 
@@ -2898,11 +2924,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private native boolean native_stop();
 
     private native void native_delete_aiding_data(int flags);
-
-    // returns number of SVs
-    // mask[0] is ephemeris mask and mask[1] is almanac mask
-    private native int native_read_sv_status(int[] prnWithFlags, float[] cn0s, float[] elevations,
-            float[] azimuths, float[] carrierFrequencies);
 
     private native int native_read_nmea(byte[] buffer, int bufferSize);
 
