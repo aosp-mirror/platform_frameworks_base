@@ -38,7 +38,8 @@ public class StopActivityItem extends ActivityLifecycleItem {
     public void execute(ClientTransactionHandler client, IBinder token,
             PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityStop");
-        client.handleStopActivity(token, mShowWindow, mConfigChanges, pendingActions);
+        client.handleStopActivity(token, mShowWindow, mConfigChanges, pendingActions,
+                "STOP_ACTIVITY_ITEM");
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
