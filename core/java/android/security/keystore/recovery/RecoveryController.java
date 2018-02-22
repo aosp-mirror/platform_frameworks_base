@@ -545,6 +545,15 @@ public class RecoveryController {
         }
     }
 
+    /**
+     * Returns a new {@link RecoverySession}.
+     *
+     * <p>A recovery session is required to restore keys from a remote store.
+     */
+    public RecoverySession createRecoverySession() {
+        return RecoverySession.newInstance(this);
+    }
+
     InternalRecoveryServiceException wrapUnexpectedServiceSpecificException(
             ServiceSpecificException e) {
         if (e.errorCode == ERROR_SERVICE_INTERNAL_ERROR) {
