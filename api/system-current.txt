@@ -5733,6 +5733,9 @@ package android.provider {
     field public static final String[] NON_INDEXABLES_KEYS_COLUMNS;
     field public static final String NON_INDEXABLES_KEYS_PATH = "settings/non_indexables_key";
     field public static final String PROVIDER_INTERFACE = "android.content.action.SEARCH_INDEXABLES_PROVIDER";
+    field public static final String SLICE_URI_PAIRS = "slice_uri_pairs";
+    field public static final String[] SLICE_URI_PAIRS_COLUMNS;
+    field public static final String SLICE_URI_PAIRS_PATH = "settings/slice_uri_pairs";
   }
 
   public static class SearchIndexablesContract.BaseColumns {
@@ -5761,6 +5764,11 @@ package android.provider {
     field public static final String MIME_TYPE = "vnd.android.cursor.dir/indexables_raw";
   }
 
+  public static final class SearchIndexablesContract.SliceUriPairColumns {
+    field public static final String KEY = "key";
+    field public static final String SLICE_URI = "slice_uri";
+  }
+
   public static final class SearchIndexablesContract.XmlResource extends android.provider.SearchIndexablesContract.BaseColumns {
     field public static final String COLUMN_XML_RESID = "xmlResId";
     field public static final String MIME_TYPE = "vnd.android.cursor.dir/indexables_xml_res";
@@ -5774,6 +5782,7 @@ package android.provider {
     method public android.database.Cursor query(android.net.Uri, String[], String, String[], String);
     method public abstract android.database.Cursor queryNonIndexableKeys(String[]);
     method public abstract android.database.Cursor queryRawData(String[]);
+    method public android.database.Cursor querySliceUriPairs();
     method public abstract android.database.Cursor queryXmlResources(String[]);
     method public final int update(android.net.Uri, android.content.ContentValues, String, String[]);
   }
