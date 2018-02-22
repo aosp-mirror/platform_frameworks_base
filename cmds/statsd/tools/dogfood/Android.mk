@@ -24,7 +24,6 @@ LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 LOCAL_STATIC_JAVA_LIBRARIES := platformprotoslite \
                                statsdprotolite
 
-LOCAL_PROTOC_OPTIMIZE_TYPE := lite
 LOCAL_PRIVILEGED_MODULE := true
 LOCAL_DEX_PREOPT := false
 LOCAL_CERTIFICATE := platform

@@ -15,6 +15,8 @@
  */
 package android.service.autofill;
 
+import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
+
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -22,6 +24,7 @@ import android.annotation.SdkConstant;
 import android.app.Service;
 import android.content.Intent;
 import android.os.CancellationSignal;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.Looper;
@@ -33,9 +36,6 @@ import android.view.ViewStructure;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
-
-import com.android.internal.os.HandlerCaller;
-import com.android.internal.os.SomeArgs;
 
 /**
  * An {@code AutofillService} is a service used to automatically fill the contents of the screen
@@ -554,20 +554,12 @@ public abstract class AutofillService extends Service {
      */
     public static final String SERVICE_META_DATA = "android.autofill";
 
-    // Handler messages.
-    private static final int MSG_CONNECT = 1;
-    private static final int MSG_DISCONNECT = 2;
-    private static final int MSG_ON_FILL_REQUEST = 3;
-    private static final int MSG_ON_SAVE_REQUEST = 4;
-
     private final IAutoFillService mInterface = new IAutoFillService.Stub() {
         @Override
         public void onConnectedStateChanged(boolean connected) {
-            if (connected) {
-                mHandlerCaller.obtainMessage(MSG_CONNECT).sendToTarget();
-            } else {
-                mHandlerCaller.obtainMessage(MSG_DISCONNECT).sendToTarget();
-            }
+            mHandler.sendMessage(obtainMessage(
+                    connected ? AutofillService::onConnected : AutofillService::onDisconnected,
+                    AutofillService.this));
         }
 
         @Override
@@ -578,56 +570,27 @@ public abstract class AutofillService extends Service {
             } catch (RemoteException e) {
                 e.rethrowFromSystemServer();
             }
-            mHandlerCaller.obtainMessageOOO(MSG_ON_FILL_REQUEST, request,
-                    CancellationSignal.fromTransport(transport), callback)
-                    .sendToTarget();
+            mHandler.sendMessage(obtainMessage(
+                    AutofillService::onFillRequest,
+                    AutofillService.this, request, CancellationSignal.fromTransport(transport),
+                    new FillCallback(callback, request.getId())));
         }
 
         @Override
         public void onSaveRequest(SaveRequest request, ISaveCallback callback) {
-            mHandlerCaller.obtainMessageOO(MSG_ON_SAVE_REQUEST, request,
-                    callback).sendToTarget();
+            mHandler.sendMessage(obtainMessage(
+                    AutofillService::onSaveRequest,
+                    AutofillService.this, request, new SaveCallback(callback)));
         }
     };
 
-    private final HandlerCaller.Callback mHandlerCallback = (msg) -> {
-        switch (msg.what) {
-            case MSG_CONNECT: {
-                onConnected();
-                break;
-            } case MSG_ON_FILL_REQUEST: {
-                final SomeArgs args = (SomeArgs) msg.obj;
-                final FillRequest request = (FillRequest) args.arg1;
-                final CancellationSignal cancellation = (CancellationSignal) args.arg2;
-                final IFillCallback callback = (IFillCallback) args.arg3;
-                final FillCallback fillCallback = new FillCallback(callback, request.getId());
-                args.recycle();
-                onFillRequest(request, cancellation, fillCallback);
-                break;
-            } case MSG_ON_SAVE_REQUEST: {
-                final SomeArgs args = (SomeArgs) msg.obj;
-                final SaveRequest request = (SaveRequest) args.arg1;
-                final ISaveCallback callback = (ISaveCallback) args.arg2;
-                final SaveCallback saveCallback = new SaveCallback(callback);
-                args.recycle();
-                onSaveRequest(request, saveCallback);
-                break;
-            } case MSG_DISCONNECT: {
-                onDisconnected();
-                break;
-            } default: {
-                Log.w(TAG, "MyCallbacks received invalid message type: " + msg);
-            }
-        }
-    };
-
-    private HandlerCaller mHandlerCaller;
+    private Handler mHandler;
 
     @CallSuper
     @Override
     public void onCreate() {
         super.onCreate();
-        mHandlerCaller = new HandlerCaller(null, Looper.getMainLooper(), mHandlerCallback, true);
+        mHandler = new Handler(Looper.getMainLooper(), null, true);
     }
 
     @Override

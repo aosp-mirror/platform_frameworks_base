@@ -43,7 +43,6 @@ public interface MediaController2Provider extends TransportControlProvider {
     boolean isConnected_impl();
 
     PendingIntent getSessionActivity_impl();
-    int getRatingType_impl();
 
     void setVolumeTo_impl(int value, int flags);
     void adjustVolume_impl(int direction, int flags);

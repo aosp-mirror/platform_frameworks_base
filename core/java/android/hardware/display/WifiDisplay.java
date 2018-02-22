@@ -19,7 +19,7 @@ package android.hardware.display;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import libcore.util.Objects;
+import java.util.Objects;
 
 /**
  * Describes the properties of a Wifi display.
@@ -140,7 +140,7 @@ public final class WifiDisplay implements Parcelable {
         return other != null
                 && mDeviceAddress.equals(other.mDeviceAddress)
                 && mDeviceName.equals(other.mDeviceName)
-                && Objects.equal(mDeviceAlias, other.mDeviceAlias);
+                && Objects.equals(mDeviceAlias, other.mDeviceAlias);
     }
 
     /**

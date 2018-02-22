@@ -320,6 +320,7 @@ write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attributio
     fprintf(out, "\n");
     fprintf(out, "#include <stdint.h>\n");
     fprintf(out, "#include <vector>\n");
+    fprintf(out, "#include <map>\n");
     fprintf(out, "#include <set>\n");
     fprintf(out, "\n");
 
@@ -411,6 +412,43 @@ write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attributio
     fprintf(out, "\n");
 
     fprintf(out, "const static int kMaxPushedAtomId = %d;\n\n", maxPushedAtomId);
+
+    fprintf(out, "struct StateAtomFieldOptions {\n");
+    fprintf(out, "  std::vector<int> primaryFields;\n");
+    fprintf(out, "  int exclusiveField;\n");
+    fprintf(out, "\n");
+    fprintf(out,
+            "  static std::map<int, StateAtomFieldOptions> "
+            "getStateAtomFieldOptions() {\n");
+    fprintf(out, "    std::map<int, StateAtomFieldOptions> options;\n");
+    fprintf(out, "    StateAtomFieldOptions opt;\n");
+    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
+         atom != atoms.decls.end(); atom++) {
+        if (atom->primaryFields.size() == 0 && atom->exclusiveField == 0) {
+            continue;
+        }
+        fprintf(out,
+                "\n    // Adding primary and exclusive fields for atom "
+                "(%d)%s\n",
+                atom->code, atom->name.c_str());
+        fprintf(out, "    opt.primaryFields.clear();\n");
+        for (const auto& field : atom->primaryFields) {
+            fprintf(out, "    opt.primaryFields.push_back(%d);\n", field);
+        }
+
+        fprintf(out, "    opt.exclusiveField = %d;\n", atom->exclusiveField);
+        fprintf(out, "    options[static_cast<int>(%s)] = opt;\n",
+                make_constant_name(atom->name).c_str());
+    }
+
+    fprintf(out, "    return options;\n");
+    fprintf(out, "  }\n");
+    fprintf(out, "};\n");
+
+    fprintf(out,
+            "const static std::map<int, StateAtomFieldOptions> "
+            "kStateAtomsFieldOptions = "
+            "StateAtomFieldOptions::getStateAtomFieldOptions();\n");
 
     // Print write methods
     fprintf(out, "//\n");

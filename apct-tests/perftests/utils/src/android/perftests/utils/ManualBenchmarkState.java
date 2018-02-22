@@ -150,6 +150,8 @@ public final class ManualBenchmarkState {
         final Bundle status = new Bundle();
         status.putLong(key + "_median", mStats.getMedian());
         status.putLong(key + "_mean", (long) mStats.getMean());
+        status.putLong(key + "_percentile90", mStats.getPercentile90());
+        status.putLong(key + "_percentile95", mStats.getPercentile95());
         status.putLong(key + "_stddev", (long) mStats.getStandardDeviation());
         instrumentation.sendStatus(Activity.RESULT_OK, status);
     }

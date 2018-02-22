@@ -78,26 +78,36 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
         }
 
         /**
-         * Notify subscribed controller about change in a parent's children.
+         * Notify the controller of the change in a parent's children.
+         * <p>
+         * If the controller hasn't subscribed to the parent, the API will do nothing.
+         * <p>
+         * Controllers will use {@link MediaBrowser2#getChildren(String, int, int, Bundle)} to get
+         * the list of children.
          *
          * @param controller controller to notify
-         * @param parentId
-         * @param extras
+         * @param parentId parent id with changes in its children
+         * @param childCount number of children.
+         * @param extras extra information from session to controller
          */
         public void notifyChildrenChanged(@NonNull ControllerInfo controller,
-                @NonNull String parentId, @NonNull Bundle extras) {
-            mProvider.notifyChildrenChanged_impl(controller, parentId, extras);
+                @NonNull String parentId, int childCount, @Nullable Bundle extras) {
+            mProvider.notifyChildrenChanged_impl(controller, parentId, childCount, extras);
         }
 
         /**
-         * Notify subscribed controller about change in a parent's children.
+         * Notify all controllers that subscribed to the parent about change in the parent's
+         * children, regardless of the extra bundle supplied by
+         * {@link MediaBrowser2#subscribe(String, Bundle)}.
          *
          * @param parentId parent id
-         * @param extras extra bundle
+         * @param childCount number of children
+         * @param extras extra information from session to controller
          */
         // This is for the backward compatibility.
-        public void notifyChildrenChanged(@NonNull String parentId, @Nullable Bundle extras) {
-            mProvider.notifyChildrenChanged_impl(parentId, extras);
+        public void notifyChildrenChanged(@NonNull String parentId, int childCount,
+                @Nullable Bundle extras) {
+            mProvider.notifyChildrenChanged_impl(parentId, childCount, extras);
         }
 
         /**
@@ -105,12 +115,12 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          *
          * @param controller controller to notify
          * @param query previously sent search query from the controller.
-         * @param extras extra bundle
          * @param itemCount the number of items that have been found in the search.
+         * @param extras extra bundle
          */
         public void notifySearchResultChanged(@NonNull ControllerInfo controller,
-                @NonNull String query, @NonNull Bundle extras, int itemCount) {
-            mProvider.notifySearchResultChanged_impl(controller, query, extras, itemCount);
+                @NonNull String query, int itemCount, @NonNull Bundle extras) {
+            mProvider.notifySearchResultChanged_impl(controller, query, itemCount, extras);
         }
     }
 
@@ -176,25 +186,27 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
         }
 
         /**
-         * Called when a controller subscribes to the parent.
+         * Called when a controller subscribed to the parent.
+         * <p>
+         * It's your responsibility to keep subscriptions by your own and call
+         * {@link MediaLibrarySession#notifyChildrenChanged(ControllerInfo, String, Bundle)} when
+         * the parent is changed.
          *
          * @param controller controller
          * @param parentId parent id
          * @param extras extra bundle
          */
-        public void onSubscribed(@NonNull ControllerInfo controller, String parentId,
+        public void onSubscribed(@NonNull ControllerInfo controller, @NonNull String parentId,
                 @Nullable Bundle extras) {
         }
 
         /**
-         * Called when a controller unsubscribes to the parent.
+         * Called when a controller unsubscribed to the parent.
          *
          * @param controller controller
          * @param parentId parent id
-         * @param extras extra bundle
          */
-        public void onUnsubscribed(@NonNull ControllerInfo controller, String parentId,
-                @Nullable Bundle extras) {
+        public void onUnsubscribed(@NonNull ControllerInfo controller, @NonNull String parentId) {
         }
 
         /**
@@ -206,7 +218,6 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          */
         public void onSearch(@NonNull ControllerInfo controllerInfo, @NonNull String query,
                 @Nullable Bundle extras) {
-
         }
 
         /**
@@ -249,11 +260,6 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
         public MediaLibrarySessionBuilder setVolumeProvider(
                 @Nullable VolumeProvider2 volumeProvider) {
             return super.setVolumeProvider(volumeProvider);
-        }
-
-        @Override
-        public MediaLibrarySessionBuilder setRatingType(int type) {
-            return super.setRatingType(type);
         }
 
         @Override

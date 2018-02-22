@@ -17,64 +17,191 @@
 package com.android.internal.os;
 
 import android.annotation.Nullable;
-import android.os.StrictMode;
 import android.os.SystemClock;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.TimeUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 
 /**
- * Reads /proc/uid_concurrent_policy_time which has the format:
- * policy0: X policy4: Y (there are X cores on policy0, Y cores on policy4)
- * [uid0]: [time-0-0] [time-0-1] ... [time-1-0] [time-1-1] ...
- * [uid1]: [time-0-0] [time-0-1] ... [time-1-0] [time-1-1] ...
- * ...
- * Time-X-Y means the time a UID spent on clusterX running concurrently with Y other processes.
+ * Reads binary proc file /proc/uid_cpupower/concurrent_policy_time and reports CPU cluster times
+ * to BatteryStats to compute cluster power. See
+ * {@link PowerProfile#getAveragePowerForCpuCluster(int)}.
+ *
+ * concurrent_policy_time is an array of u32's in the following format:
+ * [n, x0, ..., xn, uid0, time0a, time0b, ..., time0n,
+ * uid1, time1a, time1b, ..., time1n,
+ * uid2, time2a, time2b, ..., time2n, etc.]
+ * where n is the number of policies
+ * xi is the number cpus on a particular policy
+ * Each uidX is followed by x0 time entries corresponding to the time UID X spent on cluster0
+ * running concurrently with 0, 1, 2, ..., x0 - 1 other processes, then followed by x1, ..., xn
+ * time entries.
+ *
  * The file contains a monotonically increasing count of time for a single boot. This class
- * maintains the previous results of a call to {@link #readDelta} in order to provide a proper
- * delta.
+ * maintains the previous results of a call to {@link #readDelta} in order to provide a
+ * proper delta.
+ *
+ * This class uses a throttler to reject any {@link #readDelta} call within
+ * {@link #mThrottleInterval}. This is different from the throttler in {@link KernelCpuProcReader},
+ * which has a shorter throttle interval and returns cached result from last read when the request
+ * is throttled.
+ *
+ * This class is NOT thread-safe and NOT designed to be accessed by more than one caller (due to
+ * the nature of {@link #readDelta(Callback)}).
  */
 public class KernelUidCpuClusterTimeReader {
-
-    private static final boolean DEBUG = false;
     private static final String TAG = "KernelUidCpuClusterTimeReader";
-    private static final String UID_TIMES_PROC_FILE = "/proc/uid_concurrent_policy_time";
+    // Throttle interval in milliseconds
+    private static final long DEFAULT_THROTTLE_INTERVAL = 10_000L;
 
-    // mCoreOnCluster[i] is the # of cores on cluster i
-    private int[] mCoreOnCluster;
-    private int mCores;
-    private long mLastTimeReadMs;
-    private long mNowTimeMs;
-    private SparseArray<long[]> mLastUidPolicyTimeMs = new SparseArray<>();
+    private final KernelCpuProcReader mProcReader;
+    private long mLastTimeReadMs = Long.MIN_VALUE;
+    private long mThrottleInterval = DEFAULT_THROTTLE_INTERVAL;
+    private SparseArray<double[]> mLastUidPolicyTimeMs = new SparseArray<>();
+
+    private int mNumClusters = -1;
+    private int mNumCores;
+    private int[] mNumCoresOnCluster;
+
+    private double[] mCurTime; // Reuse to avoid GC.
+    private long[] mDeltaTime; // Reuse to avoid GC.
 
     public interface Callback {
         /**
-         * @param uid
-         * @param cpuActiveTimeMs the first dimension is cluster, the second dimension is the # of
-         *                        processes running concurrently with this uid.
+         * Notifies when new data is available.
+         *
+         * @param uid              uid int
+         * @param cpuClusterTimeMs an array of times spent by this uid on corresponding clusters.
+         *                         The array index is the cluster index.
          */
-        void onUidCpuPolicyTime(int uid, long[] cpuActiveTimeMs);
+        void onUidCpuPolicyTime(int uid, long[] cpuClusterTimeMs);
+    }
+
+    public KernelUidCpuClusterTimeReader() {
+        mProcReader = KernelCpuProcReader.getClusterTimeReaderInstance();
+    }
+
+    @VisibleForTesting
+    public KernelUidCpuClusterTimeReader(KernelCpuProcReader procReader) {
+        mProcReader = procReader;
+    }
+
+    public void setThrottleInterval(long throttleInterval) {
+        if (throttleInterval >= 0) {
+            mThrottleInterval = throttleInterval;
+        }
     }
 
     public void readDelta(@Nullable Callback cb) {
-        final int oldMask = StrictMode.allowThreadDiskReadsMask();
-        try (BufferedReader reader = new BufferedReader(new FileReader(UID_TIMES_PROC_FILE))) {
-            mNowTimeMs = SystemClock.elapsedRealtime();
-            readDeltaInternal(reader, cb);
-            mLastTimeReadMs = mNowTimeMs;
-        } catch (IOException e) {
-            Slog.e(TAG, "Failed to read " + UID_TIMES_PROC_FILE + ": " + e);
-        } finally {
-            StrictMode.setThreadPolicyMask(oldMask);
+        if (SystemClock.elapsedRealtime() < mLastTimeReadMs + mThrottleInterval) {
+            Slog.w(TAG, "Throttle");
+            return;
         }
+        synchronized (mProcReader) {
+            ByteBuffer bytes = mProcReader.readBytes();
+            if (bytes == null || bytes.remaining() <= 4) {
+                // Error already logged in mProcReader.
+                return;
+            }
+            if ((bytes.remaining() & 3) != 0) {
+                Slog.wtf(TAG,
+                        "Cannot parse cluster time proc bytes to int: " + bytes.remaining());
+                return;
+            }
+            IntBuffer buf = bytes.asIntBuffer();
+            final int numClusters = buf.get();
+            if (numClusters <= 0) {
+                Slog.wtf(TAG, "Cluster time format error: " + numClusters);
+                return;
+            }
+            if (mNumClusters == -1) {
+                mNumClusters = numClusters;
+            }
+            if (buf.remaining() < numClusters) {
+                Slog.wtf(TAG, "Too few data left in the buffer: " + buf.remaining());
+                return;
+            }
+            if (mNumCores <= 0) {
+                if (!readCoreInfo(buf, numClusters)) {
+                    return;
+                }
+            } else {
+                buf.position(buf.position() + numClusters);
+            }
+
+            if (buf.remaining() % (mNumCores + 1) != 0) {
+                Slog.wtf(TAG,
+                        "Cluster time format error: " + buf.remaining() + " / " + (mNumCores
+                                + 1));
+                return;
+            }
+            int numUids = buf.remaining() / (mNumCores + 1);
+
+            for (int i = 0; i < numUids; i++) {
+                processUidLocked(buf, cb);
+            }
+            // Slog.i(TAG, "Read uids: " + numUids);
+        }
+        mLastTimeReadMs = SystemClock.elapsedRealtime();
+    }
+
+    private void processUidLocked(IntBuffer buf, @Nullable Callback cb) {
+        int uid = buf.get();
+        double[] lastTimes = mLastUidPolicyTimeMs.get(uid);
+        if (lastTimes == null) {
+            lastTimes = new double[mNumClusters];
+            mLastUidPolicyTimeMs.put(uid, lastTimes);
+        }
+
+        boolean notify = false;
+        boolean corrupted = false;
+
+        for (int j = 0; j < mNumClusters; j++) {
+            mCurTime[j] = 0;
+            for (int k = 1; k <= mNumCoresOnCluster[j]; k++) {
+                int time = buf.get();
+                if (time < 0) {
+                    Slog.e(TAG, "Corrupted data from cluster time proc uid: " + uid);
+                    corrupted = true;
+                }
+                mCurTime[j] += (double) time * 10 / k; // Unit is 10ms.
+            }
+            mDeltaTime[j] = (long) (mCurTime[j] - lastTimes[j]);
+            if (mDeltaTime[j] < 0) {
+                Slog.e(TAG, "Unexpected delta from cluster time proc uid: " + uid);
+                corrupted = true;
+            }
+            notify |= mDeltaTime[j] > 0;
+        }
+        if (notify && !corrupted) {
+            System.arraycopy(mCurTime, 0, lastTimes, 0, mNumClusters);
+            if (cb != null) {
+                cb.onUidCpuPolicyTime(uid, mDeltaTime);
+            }
+        }
+    }
+
+    // Returns if it has read valid info.
+    private boolean readCoreInfo(IntBuffer buf, int numClusters) {
+        int numCores = 0;
+        int[] numCoresOnCluster = new int[numClusters];
+        for (int i = 0; i < numClusters; i++) {
+            numCoresOnCluster[i] = buf.get();
+            numCores += numCoresOnCluster[i];
+        }
+        if (numCores <= 0) {
+            Slog.e(TAG, "Invalid # cores from cluster time proc file: " + numCores);
+            return false;
+        }
+        mNumCores = numCores;
+        mNumCoresOnCluster = numCoresOnCluster;
+        mCurTime = new double[numClusters];
+        mDeltaTime = new long[numClusters];
+        return true;
     }
 
     public void removeUid(int uid) {
@@ -91,88 +218,5 @@ public class KernelUidCpuClusterTimeReader {
         final int firstIndex = mLastUidPolicyTimeMs.indexOfKey(startUid);
         final int lastIndex = mLastUidPolicyTimeMs.indexOfKey(endUid);
         mLastUidPolicyTimeMs.removeAtRange(firstIndex, lastIndex - firstIndex + 1);
-    }
-
-    @VisibleForTesting
-    public void readDeltaInternal(BufferedReader reader, @Nullable Callback cb) throws IOException {
-        String line = reader.readLine();
-        if (line == null || !line.startsWith("policy")) {
-            Slog.e(TAG, String.format("Malformed proc file: %s ", UID_TIMES_PROC_FILE));
-            return;
-        }
-        if (mCoreOnCluster == null) {
-            List<Integer> list = new ArrayList<>();
-            String[] policies = line.split(" ");
-
-            if (policies.length == 0 || policies.length % 2 != 0) {
-                Slog.e(TAG, String.format("Malformed proc file: %s ", UID_TIMES_PROC_FILE));
-                return;
-            }
-
-            for (int i = 0; i < policies.length; i+=2) {
-                list.add(Integer.parseInt(policies[i+1]));
-            }
-
-            mCoreOnCluster = new int[list.size()];
-            for(int i=0;i<list.size();i++){
-                mCoreOnCluster[i] = list.get(i);
-                mCores += mCoreOnCluster[i];
-            }
-        }
-        while ((line = reader.readLine()) != null) {
-            final int index = line.indexOf(' ');
-            final int uid = Integer.parseInt(line.substring(0, index - 1), 10);
-            readTimesForUid(uid, line.substring(index + 1), cb);
-        }
-    }
-
-    private void readTimesForUid(int uid, String line, @Nullable Callback cb) {
-        long[] lastPolicyTime = mLastUidPolicyTimeMs.get(uid);
-        if (lastPolicyTime == null) {
-            lastPolicyTime = new long[mCores];
-            mLastUidPolicyTimeMs.put(uid, lastPolicyTime);
-        }
-        final String[] timeStr = line.split(" ");
-        if (timeStr.length != mCores) {
-            Slog.e(TAG, String.format("# readings don't match # cores, readings: %d, # CPU cores: %d",
-                    timeStr.length, mCores));
-            return;
-        }
-        final long[] deltaPolicyTime = new long[mCores];
-        final long[] currPolicyTime = new long[mCores];
-        boolean notify = false;
-        for (int i = 0; i < mCores; i++) {
-            // Times read will be in units of 10ms
-            currPolicyTime[i] = Long.parseLong(timeStr[i], 10) * 10;
-            deltaPolicyTime[i] = currPolicyTime[i] - lastPolicyTime[i];
-            if (deltaPolicyTime[i] < 0 || currPolicyTime[i] < 0) {
-                if (DEBUG) {
-                    final StringBuilder sb = new StringBuilder();
-                    sb.append(String.format("Malformed cpu policy time for UID=%d\n", uid));
-                    sb.append(String.format("data=(%d,%d)\n", lastPolicyTime[i], currPolicyTime[i]));
-                    sb.append("times=(");
-                    TimeUtils.formatDuration(mLastTimeReadMs, sb);
-                    sb.append(",");
-                    TimeUtils.formatDuration(mNowTimeMs, sb);
-                    sb.append(")");
-                    Slog.e(TAG, sb.toString());
-                }
-                return;
-            }
-            notify |= deltaPolicyTime[i] > 0;
-        }
-        if (notify) {
-            System.arraycopy(currPolicyTime, 0, lastPolicyTime, 0, mCores);
-            if (cb != null) {
-                final long[] times = new long[mCoreOnCluster.length];
-                int core = 0;
-                for (int i = 0; i < mCoreOnCluster.length; i++) {
-                    for (int j = 0; j < mCoreOnCluster[i]; j++) {
-                        times[i] += deltaPolicyTime[core++] / (j+1);
-                    }
-                }
-                cb.onUidCpuPolicyTime(uid, times);
-            }
-        }
     }
 }

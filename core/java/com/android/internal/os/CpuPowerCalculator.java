@@ -50,13 +50,14 @@ public class CpuPowerCalculator extends PowerCalculator {
                 cpuPowerMaUs += cpuSpeedStepPower;
             }
         }
-        cpuPowerMaUs += u.getCpuActiveTime() * mProfile.getAveragePower(
+        cpuPowerMaUs += u.getCpuActiveTime() * 1000 * mProfile.getAveragePower(
                 PowerProfile.POWER_CPU_ACTIVE);
         long[] cpuClusterTimes = u.getCpuClusterTimes();
         if (cpuClusterTimes != null) {
             if (cpuClusterTimes.length == numClusters) {
                 for (int i = 0; i < numClusters; i++) {
-                    double power = cpuClusterTimes[i] * mProfile.getAveragePowerForCpuCluster(i);
+                    double power =
+                            cpuClusterTimes[i] * 1000 * mProfile.getAveragePowerForCpuCluster(i);
                     cpuPowerMaUs += power;
                     if (DEBUG) {
                         Log.d(TAG, "UID " + u.getUid() + ": CPU cluster #" + i + " clusterTimeUs="

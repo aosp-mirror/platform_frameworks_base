@@ -29,6 +29,7 @@ import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.annotation.DrawableRes;
+import android.annotation.StyleRes;
 import android.app.ActivityManager;
 import android.app.StatusBarManager;
 import android.content.Context;
@@ -37,6 +38,7 @@ import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.AnimatedVectorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
@@ -86,8 +88,6 @@ import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_SHOW_O
 public class NavigationBarView extends FrameLayout implements PluginListener<NavGesture> {
     final static boolean DEBUG = false;
     final static String TAG = "StatusBar/NavBarView";
-
-    final static int BUTTON_FADE_IN_OUT_DURATION_MS = 100;
 
     // slippery nav bar when everything is disabled, e.g. during setup
     final static boolean SLIPPERY_WHEN_DISABLED = true;
@@ -152,7 +152,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private RecentsOnboarding mRecentsOnboarding;
     private NotificationPanelView mPanelView;
 
-    private Animator mRotateHideAnimator;
+    private int mRotateBtnStyle = R.style.RotateButtonCCWStart90;
 
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
@@ -429,10 +429,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             mImeIcon = getDrawable(darkContext, lightContext,
                     R.drawable.ic_ime_switcher_default, R.drawable.ic_ime_switcher_default);
 
-            int lightColor = Utils.getColorAttr(lightContext, R.attr.singleToneColor);
-            int darkColor = Utils.getColorAttr(darkContext, R.attr.singleToneColor);
-            mRotateSuggestionIcon = getDrawable(ctx, R.drawable.ic_sysbar_rotate_button,
-                    lightColor, darkColor);
+            updateRotateSuggestionButtonStyle(mRotateBtnStyle, false);
 
             if (ALTERNATE_CAR_MODE_UI) {
                 updateCarModeIcons(ctx);
@@ -726,92 +723,60 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             // Accessibility button overrides Menu, IME switcher and rotate buttons.
             setMenuVisibility(false, true);
             getImeSwitchButton().setVisibility(View.INVISIBLE);
-            setRotateSuggestionButtonState(false, true);
+            setRotateButtonVisibility(false);
         }
 
         getAccessibilityButton().setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
         getAccessibilityButton().setLongClickable(longClickable);
     }
 
-    public void setRotateSuggestionButtonState(final boolean visible) {
-        setRotateSuggestionButtonState(visible, false);
+    public void updateRotateSuggestionButtonStyle(@StyleRes int style, boolean setIcon) {
+        mRotateBtnStyle = style;
+        final Context ctx = getContext();
+
+        // Extract the dark and light tints
+        final int dualToneDarkTheme = Utils.getThemeAttr(ctx, R.attr.darkIconTheme);
+        final int dualToneLightTheme = Utils.getThemeAttr(ctx, R.attr.lightIconTheme);
+        Context darkContext = new ContextThemeWrapper(ctx, dualToneDarkTheme);
+        Context lightContext = new ContextThemeWrapper(ctx, dualToneLightTheme);
+        final int lightColor = Utils.getColorAttr(lightContext, R.attr.singleToneColor);
+        final int darkColor = Utils.getColorAttr(darkContext, R.attr.singleToneColor);
+
+        // Use the supplied style to set the icon's rotation parameters
+        Context rotateContext = new ContextThemeWrapper(ctx, style);
+
+        // Recreate the icon and set it if needed
+        mRotateSuggestionIcon = getDrawable(rotateContext, R.drawable.ic_sysbar_rotate_button,
+                lightColor, darkColor);
+        if (setIcon) getRotateSuggestionButton().setImageDrawable(mRotateSuggestionIcon);
     }
 
-    public void setRotateSuggestionButtonState(final boolean visible, final boolean force) {
-        ButtonDispatcher rotBtn = getRotateSuggestionButton();
-        final boolean currentlyVisible = mShowRotateButton;
-
-        // Rerun a show animation to indicate change but don't rerun a hide animation
-        if (!visible && !currentlyVisible) return;
-
-        View currentView = rotBtn.getCurrentView();
-        if (currentView == null) return;
-
-        KeyButtonDrawable kbd = rotBtn.getImageDrawable();
-        if (kbd == null) return;
-
-        AnimatedVectorDrawable animIcon = null;
-        if (kbd.getDrawable(0) instanceof AnimatedVectorDrawable) {
-            animIcon = (AnimatedVectorDrawable) kbd.getDrawable(0);
-        }
-
-        if (visible) { // Appear and change, cannot force
-            setRotateButtonVisibility(true);
-
-            // Stop any currently running hide animations
-            if (mRotateHideAnimator != null && mRotateHideAnimator.isRunning()) {
-                mRotateHideAnimator.pause();
-            }
-
-            // Reset the alpha if any has changed due to hide animation
-            currentView.setAlpha(1f);
-
-            // Run the rotate icon's animation if it has one
-            if (animIcon != null) {
-                animIcon.reset();
-                animIcon.start();
-            }
-
-        } else { // Hide
-            if (force) {
-                // If a hide animator is running stop it and instantly make invisible
-                if (mRotateHideAnimator != null && mRotateHideAnimator.isRunning()) {
-                    mRotateHideAnimator.pause();
-                }
-                setRotateButtonVisibility(false);
-                return;
-            }
-
-            // Don't start any new hide animations if one is running
-            if (mRotateHideAnimator != null && mRotateHideAnimator.isRunning()) return;
-
-            ObjectAnimator fadeOut = ObjectAnimator.ofFloat(currentView, "alpha",
-                    0f);
-            fadeOut.setDuration(BUTTON_FADE_IN_OUT_DURATION_MS);
-            fadeOut.setInterpolator(Interpolators.LINEAR);
-            fadeOut.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    setRotateButtonVisibility(false);
-                }
-            });
-
-            mRotateHideAnimator = fadeOut;
-            fadeOut.start();
-        }
-    }
-
-    private void setRotateButtonVisibility(final boolean visible) {
+    public void setRotateButtonVisibility(final boolean visible) {
         // Never show if a11y is visible
         final boolean adjVisible = visible && !mShowAccessibilityButton;
         final int vis = adjVisible ? View.VISIBLE : View.INVISIBLE;
 
+        // No need to do anything if the request matches the current state
+        if (vis == getRotateSuggestionButton().getVisibility()) return;
+
         getRotateSuggestionButton().setVisibility(vis);
         mShowRotateButton = visible;
+
+        // Stop any active animations if hidden
+        if (!visible) {
+            Drawable d = mRotateSuggestionIcon.getDrawable(0);
+            if (d instanceof AnimatedVectorDrawable) {
+                AnimatedVectorDrawable avd = (AnimatedVectorDrawable) d;
+                avd.clearAnimationCallbacks();
+                avd.reset();
+            }
+        }
 
         // Hide/restore other button visibility, if necessary
         setNavigationIconHints(mNavigationIconHints, true);
     }
+
+    public boolean isRotateButtonVisible() { return mShowRotateButton; }
 
     @Override
     public void onFinishInflate() {

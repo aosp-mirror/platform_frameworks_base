@@ -144,6 +144,11 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         // ignore: config has no relevant information yet.
     }
 
+    @Override
+    public void setZenHelper(ZenModeHelper helper) {
+
+    }
+
     /**
      * @param extras extras of the notification with EXTRA_PEOPLE populated
      * @param timeoutMs timeout in milliseconds to wait for contacts response
@@ -444,7 +449,8 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         private float mContactAffinity = NONE;
         private NotificationRecord mRecord;
 
-        private PeopleRankingReconsideration(Context context, String key, LinkedList<String> pendingLookups) {
+        private PeopleRankingReconsideration(Context context, String key,
+                LinkedList<String> pendingLookups) {
             super(key);
             mContext = context;
             mPendingLookups = pendingLookups;
@@ -478,7 +484,9 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
                         final String cacheKey = getCacheKey(mContext.getUserId(), handle);
                         mPeopleCache.put(cacheKey, lookupResult);
                     }
-                    if (DEBUG) Slog.d(TAG, "lookup contactAffinity is " + lookupResult.getAffinity());
+                    if (DEBUG) {
+                        Slog.d(TAG, "lookup contactAffinity is " + lookupResult.getAffinity());
+                    }
                     mContactAffinity = Math.max(mContactAffinity, lookupResult.getAffinity());
                 } else {
                     if (DEBUG) Slog.d(TAG, "lookupResult is null");

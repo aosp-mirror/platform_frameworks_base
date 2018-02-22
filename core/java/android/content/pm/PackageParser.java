@@ -3185,7 +3185,7 @@ public class PackageParser {
 
         perm.info.protectionLevel = PermissionInfo.fixProtectionLevel(perm.info.protectionLevel);
 
-        if ((perm.info.protectionLevel&PermissionInfo.PROTECTION_MASK_FLAGS) != 0) {
+        if (perm.info.getProtectionFlags() != 0) {
             if ( (perm.info.protectionLevel&PermissionInfo.PROTECTION_FLAG_INSTANT) == 0
                     && (perm.info.protectionLevel&PermissionInfo.PROTECTION_FLAG_RUNTIME_ONLY) == 0
                     && (perm.info.protectionLevel&PermissionInfo.PROTECTION_MASK_BASE) !=

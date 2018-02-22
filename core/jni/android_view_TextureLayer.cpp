@@ -40,7 +40,7 @@ namespace android {
 
 using namespace uirenderer;
 
-static jboolean android_view_HardwareLayer_prepare(JNIEnv* env, jobject clazz,
+static jboolean TextureLayer_prepare(JNIEnv* env, jobject clazz,
         jlong layerUpdaterPtr, jint width, jint height, jboolean isOpaque) {
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
     bool changed = false;
@@ -49,7 +49,7 @@ static jboolean android_view_HardwareLayer_prepare(JNIEnv* env, jobject clazz,
     return changed;
 }
 
-static void android_view_HardwareLayer_setLayerPaint(JNIEnv* env, jobject clazz,
+static void TextureLayer_setLayerPaint(JNIEnv* env, jobject clazz,
         jlong layerUpdaterPtr, jlong paintPtr) {
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
     if (layer) {
@@ -58,21 +58,21 @@ static void android_view_HardwareLayer_setLayerPaint(JNIEnv* env, jobject clazz,
     }
 }
 
-static void android_view_HardwareLayer_setTransform(JNIEnv* env, jobject clazz,
+static void TextureLayer_setTransform(JNIEnv* env, jobject clazz,
         jlong layerUpdaterPtr, jlong matrixPtr) {
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
     SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixPtr);
     layer->setTransform(matrix);
 }
 
-static void android_view_HardwareLayer_setSurfaceTexture(JNIEnv* env, jobject clazz,
+static void TextureLayer_setSurfaceTexture(JNIEnv* env, jobject clazz,
         jlong layerUpdaterPtr, jobject surface) {
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
     sp<GLConsumer> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, surface));
     layer->setSurfaceTexture(surfaceTexture);
 }
 
-static void android_view_HardwareLayer_updateSurfaceTexture(JNIEnv* env, jobject clazz,
+static void TextureLayer_updateSurfaceTexture(JNIEnv* env, jobject clazz,
         jlong layerUpdaterPtr) {
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
     layer->updateTexImage();
@@ -82,18 +82,18 @@ static void android_view_HardwareLayer_updateSurfaceTexture(JNIEnv* env, jobject
 // JNI Glue
 // ----------------------------------------------------------------------------
 
-const char* const kClassPathName = "android/view/HardwareLayer";
+const char* const kClassPathName = "android/view/TextureLayer";
 
 static const JNINativeMethod gMethods[] = {
-    { "nPrepare",                "(JIIZ)Z",    (void*) android_view_HardwareLayer_prepare },
-    { "nSetLayerPaint",          "(JJ)V",      (void*) android_view_HardwareLayer_setLayerPaint },
-    { "nSetTransform",           "(JJ)V",      (void*) android_view_HardwareLayer_setTransform },
+    { "nPrepare",                "(JIIZ)Z",    (void*) TextureLayer_prepare },
+    { "nSetLayerPaint",          "(JJ)V",      (void*) TextureLayer_setLayerPaint },
+    { "nSetTransform",           "(JJ)V",      (void*) TextureLayer_setTransform },
     { "nSetSurfaceTexture",      "(JLandroid/graphics/SurfaceTexture;)V",
-            (void*) android_view_HardwareLayer_setSurfaceTexture },
-    { "nUpdateSurfaceTexture",   "(J)V",       (void*) android_view_HardwareLayer_updateSurfaceTexture },
+            (void*) TextureLayer_setSurfaceTexture },
+    { "nUpdateSurfaceTexture",   "(J)V",       (void*) TextureLayer_updateSurfaceTexture },
 };
 
-int register_android_view_HardwareLayer(JNIEnv* env) {
+int register_android_view_TextureLayer(JNIEnv* env) {
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 

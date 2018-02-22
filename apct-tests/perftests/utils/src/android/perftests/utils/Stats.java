@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class Stats {
-    private long mMedian, mMin, mMax;
+    private long mMedian, mMin, mMax, mPercentile90, mPercentile95;
     private double mMean, mStandardDeviation;
 
     /* Calculate stats in constructor. */
@@ -35,11 +35,13 @@ public class Stats {
 
         Collections.sort(values);
 
-        mMedian = size % 2 == 0 ? (values.get(size / 2) + values.get(size / 2 - 1)) / 2 :
-                values.get(size / 2);
-
         mMin = values.get(0);
         mMax = values.get(values.size() - 1);
+
+        mMedian = size % 2 == 0 ? (values.get(size / 2) + values.get(size / 2 - 1)) / 2 :
+                values.get(size / 2);
+        mPercentile90 = getPercentile(values, 90);
+        mPercentile95 = getPercentile(values, 95);
 
         for (int i = 0; i < size; ++i) {
             long result = values.get(i);
@@ -72,5 +74,22 @@ public class Stats {
 
     public double getStandardDeviation() {
         return mStandardDeviation;
+    }
+
+    public long getPercentile90() {
+        return mPercentile90;
+    }
+
+    public long getPercentile95() {
+        return mPercentile95;
+    }
+
+    private static long getPercentile(List<Long> values, int percentile) {
+        if (percentile < 0 || percentile > 100) {
+            throw new IllegalArgumentException(
+                    "invalid percentile " + percentile + ", should be 0-100");
+        }
+        int idx = (values.size() - 1) * percentile / 100;
+        return values.get(idx);
     }
 }

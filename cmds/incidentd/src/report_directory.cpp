@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define DEBUG false
 #include "Log.h"
 
 #include "report_directory.h"

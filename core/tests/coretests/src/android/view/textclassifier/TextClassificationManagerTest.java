@@ -35,12 +35,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class TextClassificationManagerTest {
 
-    private static final LocaleList LOCALES = LocaleList.forLanguageTags("en");
+    private static final LocaleList LOCALES = LocaleList.forLanguageTags("en-US");
     private static final String NO_TYPE = null;
 
     private TextClassificationManager mTcm;
@@ -180,6 +181,42 @@ public class TextClassificationManagerTest {
     }
 
     @Test
+    public void testTextClassifyText_date() {
+        if (isTextClassifierDisabled()) return;
+
+        String text = "Let's meet on January 9, 2018.";
+        String classifiedText = "January 9, 2018";
+        int startIndex = text.indexOf(classifiedText);
+        int endIndex = startIndex + classifiedText.length();
+
+        TextClassification classification = mClassifier.classifyText(
+                text, startIndex, endIndex, mClassificationOptions);
+        assertThat(classification,
+                isTextClassification(
+                        classifiedText,
+                        TextClassifier.TYPE_DATE,
+                        null));
+    }
+
+    @Test
+    public void testTextClassifyText_datetime() {
+        if (isTextClassifierDisabled()) return;
+
+        String text = "Let's meet 2018/01/01 10:30:20.";
+        String classifiedText = "2018/01/01 10:30:20";
+        int startIndex = text.indexOf(classifiedText);
+        int endIndex = startIndex + classifiedText.length();
+
+        TextClassification classification = mClassifier.classifyText(
+                text, startIndex, endIndex, mClassificationOptions);
+        assertThat(classification,
+                isTextClassification(
+                        classifiedText,
+                        TextClassifier.TYPE_DATE_TIME,
+                        null));
+    }
+
+    @Test
     public void testGenerateLinks_phone() {
         if (isTextClassifierDisabled()) return;
         String text = "The number is +12122537077. See you tonight!";
@@ -192,39 +229,31 @@ public class TextClassificationManagerTest {
         if (isTextClassifierDisabled()) return;
         String text = "The number is +12122537077. See you tonight!";
         assertThat(mClassifier.generateLinks(text, mLinksOptions.setEntityConfig(
-                new TextClassifier.EntityConfig(TextClassifier.ENTITY_PRESET_ALL)
-                        .excludeEntities(TextClassifier.TYPE_PHONE))),
+                TextClassifier.EntityConfig.create(Collections.EMPTY_LIST,
+                        Collections.EMPTY_LIST, Arrays.asList(TextClassifier.TYPE_PHONE)))),
                 not(isTextLinksContaining(text, "+12122537077", TextClassifier.TYPE_PHONE)));
     }
 
     @Test
-    public void testGenerateLinks_none_config() {
+    public void testGenerateLinks_explicit_address() {
         if (isTextClassifierDisabled()) return;
+        String text = "The address is 1600 Amphitheater Parkway, Mountain View, CA. See you!";
+        assertThat(mClassifier.generateLinks(text, mLinksOptions.setEntityConfig(
+                TextClassifier.EntityConfig.createWithEntityList(
+                        Arrays.asList(TextClassifier.TYPE_ADDRESS)))),
+                isTextLinksContaining(text, "1600 Amphitheater Parkway, Mountain View, CA",
+                        TextClassifier.TYPE_ADDRESS));
+    }
 
+    @Test
+    public void testGenerateLinks_exclude_override() {
+        if (isTextClassifierDisabled()) return;
         String text = "The number is +12122537077. See you tonight!";
         assertThat(mClassifier.generateLinks(text, mLinksOptions.setEntityConfig(
-                new TextClassifier.EntityConfig(TextClassifier.ENTITY_PRESET_NONE))),
+                TextClassifier.EntityConfig.create(Collections.EMPTY_LIST,
+                        Arrays.asList(TextClassifier.TYPE_PHONE),
+                        Arrays.asList(TextClassifier.TYPE_PHONE)))),
                 not(isTextLinksContaining(text, "+12122537077", TextClassifier.TYPE_PHONE)));
-    }
-
-    @Test
-    public void testGenerateLinks_address() {
-        if (isTextClassifierDisabled()) return;
-        String text = "The address is 1600 Amphitheater Parkway, Mountain View, CA. See you!";
-        assertThat(mClassifier.generateLinks(text, null),
-                isTextLinksContaining(text, "1600 Amphitheater Parkway, Mountain View, CA",
-                        TextClassifier.TYPE_ADDRESS));
-    }
-
-    @Test
-    public void testGenerateLinks_include() {
-        if (isTextClassifierDisabled()) return;
-        String text = "The address is 1600 Amphitheater Parkway, Mountain View, CA. See you!";
-        assertThat(mClassifier.generateLinks(text, mLinksOptions.setEntityConfig(
-                new TextClassifier.EntityConfig(TextClassifier.ENTITY_PRESET_NONE)
-                        .includeEntities(TextClassifier.TYPE_ADDRESS))),
-                isTextLinksContaining(text, "1600 Amphitheater Parkway, Mountain View, CA",
-                        TextClassifier.TYPE_ADDRESS));
     }
 
     @Test
@@ -341,7 +370,8 @@ public class TextClassificationManagerTest {
                             && text.equals(result.getText())
                             && result.getEntityCount() > 0
                             && type.equals(result.getEntity(0))
-                            && intentUri.equals(result.getIntent().getDataString());
+                            && (intentUri == null
+                                || intentUri.equals(result.getIntent().getDataString()));
                     // TODO: Include other properties.
                 }
                 return false;

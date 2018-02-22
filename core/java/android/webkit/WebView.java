@@ -1689,8 +1689,8 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Sets the list of domains that are exempt from SafeBrowsing checks. The list is
-     * global for all the WebViews.
+     * Sets the list of hosts (domain names/IP addresses) that are exempt from SafeBrowsing checks.
+     * The list is global for all the WebViews.
      * <p>
      * Each rule should take one of these:
      * <table>
@@ -1702,15 +1702,18 @@ public class WebView extends AbsoluteLayout
      * </table>
      * <p>
      * All other rules, including wildcards, are invalid.
+     * <p>
+     * The correct syntax for hosts is defined by <a
+     * href="https://tools.ietf.org/html/rfc3986#section-3.2.2">RFC 3986</a>.
      *
-     * @param urls the list of URLs
-     * @param callback will be called with {@code true} if URLs are successfully added to the
-     * whitelist. It will be called with {@code false} if any URLs are malformed. The callback will
-     * be run on the UI thread
+     * @param hosts the list of hosts
+     * @param callback will be called with {@code true} if hosts are successfully added to the
+     * whitelist. It will be called with {@code false} if any hosts are malformed. The callback
+     * will be run on the UI thread
      */
-    public static void setSafeBrowsingWhitelist(@NonNull List<String> urls,
+    public static void setSafeBrowsingWhitelist(@NonNull List<String> hosts,
             @Nullable ValueCallback<Boolean> callback) {
-        getFactory().getStatics().setSafeBrowsingWhitelist(urls, callback);
+        getFactory().getStatics().setSafeBrowsingWhitelist(hosts, callback);
     }
 
     /**

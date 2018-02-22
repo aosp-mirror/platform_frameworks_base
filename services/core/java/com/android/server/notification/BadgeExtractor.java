@@ -61,4 +61,9 @@ public class BadgeExtractor implements NotificationSignalExtractor {
     public void setConfig(RankingConfig config) {
         mConfig = config;
     }
+
+    @Override
+    public void setZenHelper(ZenModeHelper helper) {
+
+    }
 }

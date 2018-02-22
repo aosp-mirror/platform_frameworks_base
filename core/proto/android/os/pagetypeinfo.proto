@@ -58,7 +58,7 @@ message PageTypeInfoProto {
     }
     repeated MigrateType migrate_types = 3;
 
-    // Next tag: 9
+    // Next tag: 10
     message Block {
         option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -77,6 +77,8 @@ message PageTypeInfoProto {
         optional int32 reserve = 7;
 
         optional int32 isolate = 8;
+
+        optional int32 highatomic = 9;
     }
     repeated Block blocks = 4;
 }

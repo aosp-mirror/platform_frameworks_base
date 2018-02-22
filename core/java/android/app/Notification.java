@@ -4587,7 +4587,8 @@ public class Notification implements Parcelable
             big.setViewVisibility(R.id.notification_material_reply_text_3, View.GONE);
             big.setTextViewText(R.id.notification_material_reply_text_3, null);
 
-            big.setViewLayoutMarginBottomDimen(R.id.notification_action_list_margin_target, 0);
+            big.setViewLayoutMarginBottomDimen(R.id.notification_action_list_margin_target,
+                    R.dimen.notification_content_margin);
         }
 
         private RemoteViews applyStandardTemplateWithActions(int layoutId) {
@@ -4608,16 +4609,7 @@ public class Notification implements Parcelable
             if (N > 0) {
                 big.setViewVisibility(R.id.actions_container, View.VISIBLE);
                 big.setViewVisibility(R.id.actions, View.VISIBLE);
-                if (p.ambient) {
-                    big.setInt(R.id.actions, "setBackgroundColor", Color.TRANSPARENT);
-                } else if (isColorized()) {
-                    big.setInt(R.id.actions, "setBackgroundColor", getActionBarColor());
-                } else {
-                    big.setInt(R.id.actions, "setBackgroundColor", mContext.getColor(
-                            R.color.notification_action_list));
-                }
-                big.setViewLayoutMarginBottomDimen(R.id.notification_action_list_margin_target,
-                        R.dimen.notification_action_list_height);
+                big.setViewLayoutMarginBottomDimen(R.id.notification_action_list_margin_target, 0);
                 if (N>MAX_ACTION_BUTTONS) N=MAX_ACTION_BUTTONS;
                 for (int i=0; i<N; i++) {
                     Action action = mActions.get(i);
@@ -5226,6 +5218,7 @@ public class Notification implements Parcelable
             if (mStyle != null) {
                 mStyle.reduceImageSizes(mContext);
                 mStyle.purgeResources();
+                mStyle.validate(mContext);
                 mStyle.buildStyled(mN);
             }
             mN.reduceImageSizes(mContext);
@@ -5795,6 +5788,13 @@ public class Notification implements Parcelable
          */
         public void reduceImageSizes(Context context) {
         }
+
+        /**
+         * Validate that this style was properly composed. This is called at build time.
+         * @hide
+         */
+        public void validate(Context context) {
+        }
     }
 
     /**
@@ -6185,12 +6185,23 @@ public class Notification implements Parcelable
          * @param user Required - The person displayed for any messages that are sent by the
          * user. Any messages added with {@link #addMessage(Notification.MessagingStyle.Message)}
          * who don't have a Person associated with it will be displayed as if they were sent
-         * by this user. The user also needs to have a valid name associated with it.
+         * by this user. The user also needs to have a valid name associated with it, which will
+         * be enforced starting in Android P.
          */
         public MessagingStyle(@NonNull Person user) {
             mUser = user;
-            if (user == null || user.getName() == null) {
-                throw new RuntimeException("user must be valid and have a name");
+        }
+
+        /**
+         * Validate that this style was properly composed. This is called at build time.
+         * @hide
+         */
+        @Override
+        public void validate(Context context) {
+            super.validate(context);
+            if (context.getApplicationInfo().targetSdkVersion
+                    >= Build.VERSION_CODES.P && (mUser == null || mUser.getName() == null)) {
+                throw new RuntimeException("User must be valid and have a name.");
             }
         }
 

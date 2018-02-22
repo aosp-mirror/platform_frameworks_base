@@ -485,4 +485,25 @@
         <item name="android:colorBackground">?android:attr/colorSecondary</item>
     </style>
 
+    <!-- Used to style rotate suggestion button AVD animations -->
+    <style name="RotateButtonCCWStart0">
+        <item name="rotateButtonStartAngle">0</item>
+        <item name="rotateButtonEndAngle">-90</item>
+    </style>
+
+    <style name="RotateButtonCCWStart90">
+        <item name="rotateButtonStartAngle">90</item>
+        <item name="rotateButtonEndAngle">0</item>
+    </style>
+
+    <style name="RotateButtonCWStart0">
+        <item name="rotateButtonStartAngle">0</item>
+        <item name="rotateButtonEndAngle">90</item>
+    </style>
+
+    <style name="RotateButtonCWStart90">
+        <item name="rotateButtonStartAngle">90</item>
+        <item name="rotateButtonEndAngle">180</item>
+    </style>
+
 </resources>

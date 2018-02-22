@@ -35,13 +35,12 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 
-import libcore.util.Objects;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -106,7 +105,7 @@ final class OverlayManagerServiceImpl {
             final PackageInfo overlayPackage = overlayPackages.get(i);
             final OverlayInfo oi = storedOverlayInfos.get(overlayPackage.packageName);
             if (oi == null || !oi.targetPackageName.equals(overlayPackage.overlayTarget)
-                    || !Objects.equal(oi.category, overlayPackage.overlayCategory)) {
+                    || !Objects.equals(oi.category, overlayPackage.overlayCategory)) {
                 // Update the overlay if it didn't exist or had the wrong target package.
                 mSettings.init(overlayPackage.packageName, newUserId,
                         overlayPackage.overlayTarget,
@@ -434,7 +433,7 @@ final class OverlayManagerServiceImpl {
                     // Don't touch static overlays.
                     continue;
                 }
-                if (withinCategory && !Objects.equal(disabledOverlayPackageInfo.overlayCategory,
+                if (withinCategory && !Objects.equals(disabledOverlayPackageInfo.overlayCategory,
                         oi.category)) {
                     // Don't touch overlays from other categories.
                     continue;

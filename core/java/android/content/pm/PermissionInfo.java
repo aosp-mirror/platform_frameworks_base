@@ -16,11 +16,15 @@
 
 package android.content.pm;
 
+import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Information you can retrieve about a particular security permission
@@ -55,6 +59,16 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      */
     @Deprecated
     public static final int PROTECTION_SIGNATURE_OR_SYSTEM = 3;
+
+    /** @hide */
+    @IntDef(flag = false, prefix = { "PROTECTION_" }, value = {
+            PROTECTION_NORMAL,
+            PROTECTION_DANGEROUS,
+            PROTECTION_SIGNATURE,
+            PROTECTION_SIGNATURE_OR_SYSTEM,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Protection {}
 
     /**
      * Additional flag for {@link #protectionLevel}, corresponding
@@ -155,30 +169,71 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     public static final int PROTECTION_FLAG_VENDOR_PRIVILEGED = 0x8000;
 
     /**
-     * Mask for {@link #protectionLevel}: the basic protection type.
+     * Additional flag for {@link #protectionLevel}, corresponding
+     * to the <code>text_classifier</code> value of
+     * {@link android.R.attr#protectionLevel}.
+     *
+     * @hide
      */
+    @SystemApi
+    @TestApi
+    public static final int PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER = 0x10000;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "PROTECTION_FLAG_" }, value = {
+            PROTECTION_FLAG_PRIVILEGED,
+            PROTECTION_FLAG_SYSTEM,
+            PROTECTION_FLAG_DEVELOPMENT,
+            PROTECTION_FLAG_APPOP,
+            PROTECTION_FLAG_PRE23,
+            PROTECTION_FLAG_INSTALLER,
+            PROTECTION_FLAG_VERIFIER,
+            PROTECTION_FLAG_PREINSTALLED,
+            PROTECTION_FLAG_SETUP,
+            PROTECTION_FLAG_INSTANT,
+            PROTECTION_FLAG_RUNTIME_ONLY,
+            PROTECTION_FLAG_OEM,
+            PROTECTION_FLAG_VENDOR_PRIVILEGED,
+            PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ProtectionFlags {}
+
+    /**
+     * Mask for {@link #protectionLevel}: the basic protection type.
+     *
+     * @deprecated Use #getProtection() instead.
+     */
+    @Deprecated
     public static final int PROTECTION_MASK_BASE = 0xf;
 
     /**
      * Mask for {@link #protectionLevel}: additional flag bits.
+     *
+     * @deprecated Use #getProtectionFlags() instead.
      */
+    @Deprecated
     public static final int PROTECTION_MASK_FLAGS = 0xfff0;
 
     /**
      * The level of access this permission is protecting, as per
      * {@link android.R.attr#protectionLevel}. Consists of
-     * a base permission type and zero or more flags:
+     * a base permission type and zero or more flags. Use the following functions
+     * to extract them.
      *
      * <pre>
-     * int basePermissionType = protectionLevel & {@link #PROTECTION_MASK_BASE};
-     * int permissionFlags = protectionLevel & {@link #PROTECTION_MASK_FLAGS};
+     * int basePermissionType = permissionInfo.getProtection();
+     * int permissionFlags = permissionInfo.getProtectionFlags();
      * </pre>
      *
      * <p></p>Base permission types are {@link #PROTECTION_NORMAL},
      * {@link #PROTECTION_DANGEROUS}, {@link #PROTECTION_SIGNATURE}
      * and the deprecated {@link #PROTECTION_SIGNATURE_OR_SYSTEM}.
      * Flags are listed under {@link android.R.attr#protectionLevel}.
+     *
+     * @deprecated Use #getProtection() and #getProtectionFlags() instead.
      */
+    @Deprecated
     public int protectionLevel;
 
     /**
@@ -304,6 +359,9 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         if ((level & PermissionInfo.PROTECTION_FLAG_VENDOR_PRIVILEGED) != 0) {
             protLevel += "|vendorPrivileged";
         }
+        if ((level & PermissionInfo.PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER) != 0) {
+            protLevel += "|textClassifier";
+        }
         return protLevel;
     }
 
@@ -342,6 +400,22 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
             }
         }
         return null;
+    }
+
+    /**
+     * Return the base permission type.
+     */
+    @Protection
+    public int getProtection() {
+        return protectionLevel & PROTECTION_MASK_BASE;
+    }
+
+    /**
+     * Return the additional flags in {@link #protectionLevel}.
+     */
+    @ProtectionFlags
+    public int getProtectionFlags() {
+        return protectionLevel & ~PROTECTION_MASK_BASE;
     }
 
     @Override

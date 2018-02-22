@@ -26,10 +26,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := \
     $(call all-java-files-under, src)
 
-LOCAL_JAVA_LIBRARIES := \
-    core-oj \
-    core-libart \
-    framework \
+LOCAL_SDK_VERSION := current
 
 LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 LOCAL_DROIDDOC_SOURCE_PATH := $(LOCAL_PATH)/src

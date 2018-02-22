@@ -436,6 +436,9 @@ public final class MediaMetadata2 {
     /**
      * Return a {@link Rating2} for the given key or null if no rating exists for
      * the given key.
+     * <p>
+     * For the {@link #METADATA_KEY_USER_RATING}, A {@code null} return value means that user rating
+     * cannot be set by {@link MediaController2}.
      *
      * @param key The key the value is stored under
      * @return A {@link Rating2} or {@code null}

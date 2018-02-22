@@ -477,7 +477,7 @@ public class AppLaunch extends InstrumentationTestCase {
 
         if (mSimplePerfCmd != null && mSimplePerfAppOnly) {
             Log.w(TAG, String.format("Passing both %s and %s is not supported, ignoring %s",
-                KEY_SIMPLEPERF_CMD, KEY_SIMPLEPERF_APP));
+                KEY_SIMPLEPERF_CMD, KEY_SIMPLEPERF_APP, KEY_SIMPLEPERF_CMD));
         }
     }
 

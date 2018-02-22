@@ -60,13 +60,13 @@ StatsdConfig CreateStatsdConfig(DurationMetric::AggregationType aggregationType)
     return config;
 }
 
-std::vector<AttributionNode> attributions1 = {CreateAttribution(111, "App1"),
-                                              CreateAttribution(222, "GMSCoreModule1"),
-                                              CreateAttribution(222, "GMSCoreModule2")};
+std::vector<AttributionNodeInternal> attributions1 = {CreateAttribution(111, "App1"),
+                                                      CreateAttribution(222, "GMSCoreModule1"),
+                                                      CreateAttribution(222, "GMSCoreModule2")};
 
-std::vector<AttributionNode> attributions2 = {CreateAttribution(111, "App2"),
-                                              CreateAttribution(222, "GMSCoreModule1"),
-                                              CreateAttribution(222, "GMSCoreModule2")};
+std::vector<AttributionNodeInternal> attributions2 = {CreateAttribution(111, "App2"),
+                                                      CreateAttribution(222, "GMSCoreModule1"),
+                                                      CreateAttribution(222, "GMSCoreModule2")};
 
 /*
 Events:

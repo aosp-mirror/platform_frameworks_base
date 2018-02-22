@@ -668,6 +668,8 @@
     <!-- Textual description of Ethernet connections -->
     <string name="ethernet_label">Ethernet</string>
 
+    <!-- QuickSettings: Onboarding text that introduces users to long press on an option in order to view the option's menu in Settings [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_header_onboarding_text">Press &amp; hold on the icons for more options</string>
     <!-- QuickSettings: Do not disturb [CHAR LIMIT=NONE] -->
     <string name="quick_settings_dnd_label">Do not disturb</string>
     <!-- QuickSettings: Do not disturb - Priority only [CHAR LIMIT=NONE] -->

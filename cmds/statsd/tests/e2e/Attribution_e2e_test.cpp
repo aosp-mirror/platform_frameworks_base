@@ -75,41 +75,40 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSlice) {
         android::String16("APP3"), 333 /* uid */, 2 /* version code*/);
 
     // GMS core node is in the middle.
-    std::vector<AttributionNode> attributions1 =
-        {CreateAttribution(111, "App1"), CreateAttribution(222, "GMSCoreModule1"),
-         CreateAttribution(333, "App3")};
+    std::vector<AttributionNodeInternal> attributions1 = {CreateAttribution(111, "App1"),
+                                                          CreateAttribution(222, "GMSCoreModule1"),
+                                                          CreateAttribution(333, "App3")};
 
     // GMS core node is the last one.
-    std::vector<AttributionNode> attributions2 =
-        {CreateAttribution(111, "App1"), CreateAttribution(333, "App3"),
-         CreateAttribution(222, "GMSCoreModule1")};
+    std::vector<AttributionNodeInternal> attributions2 = {CreateAttribution(111, "App1"),
+                                                          CreateAttribution(333, "App3"),
+                                                          CreateAttribution(222, "GMSCoreModule1")};
 
     // GMS core node is the first one.
-    std::vector<AttributionNode> attributions3 =
-        {CreateAttribution(222, "GMSCoreModule1"), CreateAttribution(333, "App3")};
+    std::vector<AttributionNodeInternal> attributions3 = {CreateAttribution(222, "GMSCoreModule1"),
+                                                          CreateAttribution(333, "App3")};
 
     // Single GMS core node.
-    std::vector<AttributionNode> attributions4 =
-        {CreateAttribution(222, "GMSCoreModule1")};
+    std::vector<AttributionNodeInternal> attributions4 = {CreateAttribution(222, "GMSCoreModule1")};
 
     // GMS core has another uid.
-    std::vector<AttributionNode> attributions5 =
-        {CreateAttribution(111, "App1"), CreateAttribution(444, "GMSCoreModule2"),
-         CreateAttribution(333, "App3")};
+    std::vector<AttributionNodeInternal> attributions5 = {CreateAttribution(111, "App1"),
+                                                          CreateAttribution(444, "GMSCoreModule2"),
+                                                          CreateAttribution(333, "App3")};
 
     // Multiple GMS core nodes.
-    std::vector<AttributionNode> attributions6 =
-        {CreateAttribution(444, "GMSCoreModule2"), CreateAttribution(222, "GMSCoreModule1")};
+    std::vector<AttributionNodeInternal> attributions6 = {CreateAttribution(444, "GMSCoreModule2"),
+                                                          CreateAttribution(222, "GMSCoreModule1")};
 
     // No GMS core nodes.
-    std::vector<AttributionNode> attributions7 =
-        {CreateAttribution(111, "App1"), CreateAttribution(333, "App3")};
-    std::vector<AttributionNode> attributions8 = {CreateAttribution(111, "App1")};
+    std::vector<AttributionNodeInternal> attributions7 = {CreateAttribution(111, "App1"),
+                                                          CreateAttribution(333, "App3")};
+    std::vector<AttributionNodeInternal> attributions8 = {CreateAttribution(111, "App1")};
 
     // GMS core node with isolated uid.
     const int isolatedUid = 666;
-    std::vector<AttributionNode> attributions9 =
-        {CreateAttribution(isolatedUid, "GMSCoreModule3")};
+    std::vector<AttributionNodeInternal> attributions9 = {
+            CreateAttribution(isolatedUid, "GMSCoreModule3")};
 
     std::vector<std::unique_ptr<LogEvent>> events;
     // Events 1~4 are in the 1st bucket.

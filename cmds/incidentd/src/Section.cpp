@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define DEBUG false
 #include "Log.h"
 
 #include "Section.h"
@@ -244,7 +245,8 @@ status_t MetadataSection::Execute(ReportRequestSet* requests) const {
     }
     if (requests->mainFd() >= 0 && !metadataBuf.empty()) {
         write_section_header(requests->mainFd(), id, metadataBuf.size());
-        if (!WriteFully(requests->mainFd(), (uint8_t const*)metadataBuf.data(), metadataBuf.size())) {
+        if (!WriteFully(requests->mainFd(), (uint8_t const*)metadataBuf.data(),
+                        metadataBuf.size())) {
             ALOGW("Failed to write metadata to dropbox fd %d", requests->mainFd());
             return -1;
         }

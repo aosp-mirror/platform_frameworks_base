@@ -28,7 +28,8 @@
             android:layout_width="match_parent"
             android:layout_height="1dip"
             android:id="@+id/action_divider"
-            android:layout_marginBottom="15dp"
+            android:layout_marginTop="@dimen/notification_content_margin"
+            android:layout_marginBottom="@dimen/notification_content_margin"
             android:background="@drawable/notification_template_divider" />
 
     <TextView
@@ -53,7 +54,6 @@
             android:id="@+id/notification_material_reply_text_1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="15dp"
             android:layout_marginEnd="@dimen/notification_content_margin_end"
             android:textAppearance="@style/TextAppearance.Material.Notification.Reply"
             android:singleLine="true" />

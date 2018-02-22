@@ -116,10 +116,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import libcore.io.IoUtils;
 import libcore.io.Streams;
-import libcore.util.Objects;
 
 /*
  * Wraps the C++ InputManager and provides its callbacks.
@@ -1462,7 +1462,7 @@ public class InputManagerService extends IInputManager.Stub
                     oldLayout = mDataStore.getCurrentKeyboardLayout(identifier.getDescriptor());
                 }
                 if (mDataStore.addKeyboardLayout(key, keyboardLayoutDescriptor)
-                        && !Objects.equal(oldLayout, mDataStore.getCurrentKeyboardLayout(key))) {
+                        && !Objects.equals(oldLayout, mDataStore.getCurrentKeyboardLayout(key))) {
                     mHandler.sendEmptyMessage(MSG_RELOAD_KEYBOARD_LAYOUTS);
                 }
             } finally {
@@ -1495,7 +1495,7 @@ public class InputManagerService extends IInputManager.Stub
                     removed |= mDataStore.removeKeyboardLayout(identifier.getDescriptor(),
                             keyboardLayoutDescriptor);
                 }
-                if (removed && !Objects.equal(oldLayout,
+                if (removed && !Objects.equals(oldLayout,
                                 mDataStore.getCurrentKeyboardLayout(key))) {
                     mHandler.sendEmptyMessage(MSG_RELOAD_KEYBOARD_LAYOUTS);
                 }

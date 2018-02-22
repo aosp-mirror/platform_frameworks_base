@@ -19,6 +19,7 @@
     android:id="@+id/status_bar_latest_event_content"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:clipChildren="false"
     android:tag="bigText"
     >
     <include layout="@layout/notification_template_header" />
@@ -43,6 +44,7 @@
             android:clipToPadding="false"
             android:minHeight="@dimen/notification_min_content_height"
             android:orientation="vertical"
+            android:layout_weight="1"
             >
             <include layout="@layout/notification_template_part_line1" />
             <include layout="@layout/notification_template_progress"
@@ -54,7 +56,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/notification_text_margin_top"
-                android:paddingBottom="@dimen/notification_content_margin_bottom"
                 android:textAppearance="@style/TextAppearance.Material.Notification"
                 android:singleLine="false"
                 android:gravity="top"
@@ -68,12 +69,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
         <include layout="@layout/notification_template_smart_reply_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/notification_content_margin_start"
-            android:layout_marginEnd="@dimen/notification_content_margin_end"
-            android:layout_marginBottom="@dimen/notification_content_margin_bottom" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/notification_content_margin_start"
+                android:layout_marginEnd="@dimen/notification_content_margin_end"
+                android:layout_marginTop="@dimen/notification_content_margin" />
+        <include layout="@layout/notification_material_action_list" />
     </LinearLayout>
-    <include layout="@layout/notification_material_action_list" />
     <include layout="@layout/notification_template_right_icon" />
 </FrameLayout>

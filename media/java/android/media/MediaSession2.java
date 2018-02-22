@@ -24,7 +24,7 @@ import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.media.MediaPlayerInterface.PlaybackListener;
+import android.media.MediaPlayerInterface.EventCallback;
 import android.media.session.MediaSession;
 import android.media.session.MediaSession.Callback;
 import android.media.session.PlaybackState;
@@ -41,7 +41,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IInterface;
 import android.os.ResultReceiver;
-import android.text.TextUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -87,8 +86,7 @@ public class MediaSession2 implements AutoCloseable {
     // TODO(jaewan): Should we define IntDef? Currently we don't have to allow subclass to add more.
     // TODO(jaewan): Shouldn't we pull out?
     // TODO(jaewan): Should we also protect getters not related with metadata?
-    //               Getters are getRatingType(), getPlaybackState(), getSessionActivity(),
-    //               getPlaylistParams())
+    //               Getters are getPlaybackState(), getSessionActivity(), getPlaylistParams()
     // Next ID: 23
     /**
      * Command code for the custom command which can be defined by string action in the
@@ -454,6 +452,11 @@ public class MediaSession2 implements AutoCloseable {
         /**
          * Called when a controller set rating of a media item through
          * {@link MediaController2#setRating(String, Rating2)}.
+         * <p>
+         * To allow setting user rating for a {@link MediaItem2}, the media item's metadata
+         * should have {@link Rating2} with the key {@link MediaMetadata#METADATA_KEY_USER_RATING},
+         * in order to provide possible rating style for controller. Controller will follow the
+         * rating style.
          *
          * @param controller controller information
          * @param mediaId media id from the controller
@@ -621,24 +624,6 @@ public class MediaSession2 implements AutoCloseable {
         }
 
         /**
-         * Set the style of rating used by this session. Apps trying to set the
-         * rating should use this style. Must be one of the following:
-         * <ul>
-         * <li>{@link Rating2#RATING_NONE}</li>
-         * <li>{@link Rating2#RATING_3_STARS}</li>
-         * <li>{@link Rating2#RATING_4_STARS}</li>
-         * <li>{@link Rating2#RATING_5_STARS}</li>
-         * <li>{@link Rating2#RATING_HEART}</li>
-         * <li>{@link Rating2#RATING_PERCENTAGE}</li>
-         * <li>{@link Rating2#RATING_THUMB_UP_DOWN}</li>
-         * </ul>
-         */
-        U setRatingType(@Rating2.Style int type) {
-            mProvider.setRatingType_impl(type);
-            return (U) this;
-        }
-
-        /**
          * Set an intent for launching UI for this Session. This can be used as a
          * quick link to an ongoing media screen. The intent should be for an
          * activity that may be started using {@link Context#startActivity(Intent)}.
@@ -707,11 +692,6 @@ public class MediaSession2 implements AutoCloseable {
         @Override
         public Builder setVolumeProvider(@Nullable VolumeProvider2 volumeProvider) {
             return super.setVolumeProvider(volumeProvider);
-        }
-
-        @Override
-        public Builder setRatingType(@Rating2.Style int type) {
-            return super.setRatingType(type);
         }
 
         @Override
@@ -1077,8 +1057,9 @@ public class MediaSession2 implements AutoCloseable {
      * to. Events from the {@link MediaController2} will be sent directly to the underlying
      * player on the {@link Handler} where the session is created on.
      * <p>
-     * If the new player is successfully set, {@link PlaybackListener}
-     * will be called to tell the current playback state of the new player.
+     * If the new player is successfully set,
+     * {@link EventCallback#onPlaybackStateChanged(PlaybackState2)} will be called to tell the
+     * current playback state of the new player.
      * <p>
      * For the remote playback case which you want to handle volume by yourself, use
      * {@link #setPlayer(MediaPlayerInterface, VolumeProvider2)}.
@@ -1344,28 +1325,28 @@ public class MediaSession2 implements AutoCloseable {
     }
 
     /*
-     * Add a {@link PlaybackListener} to listen changes in the underlying
-     * {@link MediaPlayerInterface}. Listener will be called immediately to tell the current value.
+     * Register {@link EventCallback} to listen changes in the underlying
+     * {@link MediaPlayerInterface}, regardless of the change in the underlying player.
      * <p>
-     * Added listeners will be also called when the underlying player is changed.
+     * Registered callbacks will be also called when the underlying player is changed.
      *
-     * @param executor the call listener
-     * @param listener the listener that will be run
-     * @throws IllegalArgumentException when either the listener or handler is {@code null}.
+     * @param executor a callback Executor
+     * @param callback a EventCallback
+     * @throws IllegalArgumentException if executor or callback is {@code null}.
      */
-    public void addPlaybackListener(@NonNull @CallbackExecutor Executor executor,
-            @NonNull PlaybackListener listener) {
-        mProvider.addPlaybackListener_impl(executor, listener);
+    public void registerPlayerEventCallback(@NonNull @CallbackExecutor Executor executor,
+            @NonNull EventCallback callback) {
+        mProvider.registerPlayerEventCallback_impl(executor, callback);
     }
 
     /**
-     * Remove previously added {@link PlaybackListener}.
+     * Unregister the previously registered {@link EventCallback}.
      *
-     * @param listener the listener to be removed
-     * @throws IllegalArgumentException if the listener is {@code null}.
+     * @param callback the callback to be removed
+     * @throws IllegalArgumentException if the callback is {@code null}.
      */
-    public void removePlaybackListener(@NonNull PlaybackListener listener) {
-        mProvider.removePlaybackListener_impl(listener);
+    public void unregisterPlayerEventCallback(@NonNull EventCallback callback) {
+        mProvider.unregisterPlayerEventCallback_impl(callback);
     }
 
     /**

@@ -173,10 +173,10 @@
          values listed below. If no protectionLevel is defined for a custom
          permission, the system assigns the default ("normal").
          <p>Each protection level consists of a base permission type and zero or
-         more flags:
+         more flags. Use the following functions to extract those.
          <pre>
-         int basePermissionType = protectionLevel & {@link android.content.pm.PermissionInfo#PROTECTION_MASK_BASE};
-         int permissionFlags = protectionLevel & {@link android.content.pm.PermissionInfo#PROTECTION_MASK_FLAGS};
+         int basePermissionType = permissionInfo.getProtection();
+         int permissionFlags = permissionInfo.getProtectionFlags();
          </pre>
          -->
     <attr name="protectionLevel">
@@ -265,6 +265,9 @@
         <!-- Additional flag from base permission type: this permission can be granted to
              privileged apps in vendor partition. -->
         <flag name="vendorPrivileged" value="0x8000" />
+        <!-- Additional flag from base permission type: this permission can be automatically
+            granted to the system default text classifier -->
+        <flag name="textClassifier" value="0x10000" />
     </attr>
 
     <!-- Flags indicating more context for a permission group. -->

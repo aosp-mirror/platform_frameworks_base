@@ -25,8 +25,7 @@ import android.view.Surface;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
-
-import libcore.util.Objects;
+import java.util.Objects;
 
 /**
  * Describes how a logical display is configured.
@@ -225,7 +224,7 @@ final class LogicalDisplay {
         // logical display that they are sharing.  (eg. Adjust size for pixel-perfect
         // mirroring over HDMI.)
         DisplayDeviceInfo deviceInfo = mPrimaryDisplayDevice.getDisplayDeviceInfoLocked();
-        if (!Objects.equal(mPrimaryDisplayDeviceInfo, deviceInfo)) {
+        if (!Objects.equals(mPrimaryDisplayDeviceInfo, deviceInfo)) {
             mBaseDisplayInfo.layerStack = mLayerStack;
             mBaseDisplayInfo.flags = 0;
             if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_SUPPORTS_PROTECTED_BUFFERS) != 0) {

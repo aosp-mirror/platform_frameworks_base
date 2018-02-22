@@ -1148,6 +1148,13 @@ public class PermissionManagerService {
                 // this app is a setup wizard, then it gets the permission.
                 allowed = true;
             }
+            if (!allowed && bp.isSystemTextClassifier()
+                    && pkg.packageName.equals(mPackageManagerInt.getKnownPackageName(
+                            PackageManagerInternal.PACKAGE_SYSTEM_TEXT_CLASSIFIER,
+                            UserHandle.USER_SYSTEM))) {
+                // Special permissions for the system default text classifier.
+                allowed = true;
+            }
         }
         return allowed;
     }

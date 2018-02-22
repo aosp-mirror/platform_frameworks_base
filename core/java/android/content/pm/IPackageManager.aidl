@@ -660,4 +660,6 @@ interface IPackageManager {
     boolean hasSigningCertificate(String packageName, in byte[] signingCertificate, int flags);
 
     boolean hasUidSigningCertificate(int uid, in byte[] signingCertificate, int flags);
+
+    String getSystemTextClassifierPackageName();
 }

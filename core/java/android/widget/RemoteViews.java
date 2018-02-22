@@ -69,8 +69,6 @@ import com.android.internal.R;
 import com.android.internal.util.NotificationColorUtil;
 import com.android.internal.util.Preconditions;
 
-import libcore.util.Objects;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -82,6 +80,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Stack;
 import java.util.concurrent.Executor;
 
@@ -291,9 +290,9 @@ public class RemoteViews implements Parcelable, Filter {
                 return false;
             }
             MethodKey p = (MethodKey) o;
-            return Objects.equal(p.targetClass, targetClass)
-                    && Objects.equal(p.paramClass, paramClass)
-                    && Objects.equal(p.methodName, methodName);
+            return Objects.equals(p.targetClass, targetClass)
+                    && Objects.equals(p.paramClass, paramClass)
+                    && Objects.equals(p.methodName, methodName);
         }
 
         @Override

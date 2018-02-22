@@ -5,13 +5,7 @@ Performance tests for various ActivityManager components, e.g. Services, Broadca
 * Self-contained perf tests should go in frameworks/base/apct-tests/perftests
 
 Command to run tests
-* atest .../frameworks/base/tests/ActivityManagerPerfTests/tests/
-  * Command currently not working: b/71859981
-* m ActivityManagerPerfTests ActivityManagerPerfTestsTestApp && \
-  adb install "$OUT"/data/app/ActivityManagerPerfTests/ActivityManagerPerfTests.apk && \
-  adb install "$OUT"/data/app/ActivityManagerPerfTestsTestApp/ActivityManagerPerfTestsTestApp.apk && \
-  adb shell am instrument -w \
-  com.android.frameworks.perftests.amtests/android.support.test.runner.AndroidJUnitRunner
+* atest -v ActivityManagerPerfTests
 
 Overview
 * The numbers we are trying to measure are end-to-end numbers

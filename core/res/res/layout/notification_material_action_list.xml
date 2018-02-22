@@ -24,11 +24,9 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/notification_action_list_height"
             android:paddingEnd="12dp"
-            android:paddingStart="8dp"
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:visibility="gone"
-            android:background="@color/notification_action_list"
             >
         <!-- actions will be added here -->
     </com.android.internal.widget.NotificationActionListLayout>

@@ -36,6 +36,7 @@ import org.junit.runners.Suite;
         BatteryStatsTimerTest.class,
         BatteryStatsUidTest.class,
         BatteryStatsUserLifecycleTests.class,
+        KernelCpuProcReaderTest.class,
         KernelMemoryBandwidthStatsTest.class,
         KernelSingleUidTimeReaderTest.class,
         KernelUidCpuFreqTimeReaderTest.class,

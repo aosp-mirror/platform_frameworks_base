@@ -103,6 +103,7 @@ public class AppLaunch extends InstrumentationTestCase {
     private static final String DROP_CACHE_SCRIPT = "/data/local/tmp/dropCache.sh";
     private static final String APP_LAUNCH_CMD = "am start -W -n";
     private static final String SUCCESS_MESSAGE = "Status: ok";
+    private static final String WARNING_MESSAGE = "Warning: Activity not started";
     private static final String COMPILE_SUCCESS = "Success";
     private static final String THIS_TIME = "ThisTime:";
     private static final String LAUNCH_ITERATION = "LAUNCH_ITERATION - %d";
@@ -231,12 +232,14 @@ public class AppLaunch extends InstrumentationTestCase {
                 dropCache();
                 String appPkgName = mNameToIntent.get(launch.getApp())
                         .getComponent().getPackageName();
-
+                Log.v(TAG, String.format("\nApp name: %s", launch.getApp()));
+                Log.v(TAG, String.format("Adding app package name: %s", appPkgName));
                 // App launch times for trial launch will not be used for final
                 // launch time calculations.
                 if (launch.getLaunchReason().equals(TRIAL_LAUNCH)) {
                     // In the "applaunch.txt" file, trail launches is referenced using
                     // "TRIAL_LAUNCH"
+                    Log.v(TAG, "Trial Launch");
                     if (SPEED_PROFILE_FILTER.equals(launch.getCompilerFilter())) {
                         assertTrue(String.format("Not able to compile the app : %s", appPkgName),
                               compileApp(VERIFY_FILTER, appPkgName));
@@ -246,8 +249,14 @@ public class AppLaunch extends InstrumentationTestCase {
                     }
                     // We only need to run a trial for the speed-profile filter, but we always
                     // run one for "applaunch.txt" consistency.
-                    AppLaunchResult launchResult =
-                        startApp(launch.getApp(), true, launch.getLaunchReason());
+                    AppLaunchResult launchResult = null;
+                    if (appPkgName.contains(WEARABLE_HOME_PACKAGE)) {
+                        Log.v(TAG, "Home package detected. Not killing app");
+                        launchResult = startApp(launch.getApp(), false, launch.getLaunchReason());
+                    } else {
+                        Log.v(TAG, "Will kill app before launch");
+                        launchResult = startApp(launch.getApp(), true, launch.getLaunchReason());
+                    }
                     if (launchResult.mLaunchTime < 0) {
                         addLaunchResult(launch, new AppLaunchResult());
                         // simply pass the app if launch isn't successful
@@ -268,6 +277,7 @@ public class AppLaunch extends InstrumentationTestCase {
 
                 // App launch times used for final calculation
                 else if (launch.getLaunchReason().contains(LAUNCH_ITERATION_PREFIX)) {
+                    Log.v(TAG, "Launch iteration prefix.");
                     AppLaunchResult launchResults = null;
                     if (hasFailureOnFirstLaunch(launch)) {
                         // skip if the app has failures while launched first
@@ -276,8 +286,10 @@ public class AppLaunch extends InstrumentationTestCase {
                     // In the "applaunch.txt" file app launches are referenced using
                     // "LAUNCH_ITERATION - ITERATION NUM"
                     if (appPkgName.contains(WEARABLE_HOME_PACKAGE)) {
+                        Log.v(TAG, "Home package detected. Not killing app");
                         launchResults = startApp(launch.getApp(), false, launch.getLaunchReason());
                     } else {
+                        Log.v(TAG, "Will kill app before launch");
                         launchResults = startApp(launch.getApp(), true, launch.getLaunchReason());
                     }
                     if (launchResults.mLaunchTime < 0) {
@@ -293,6 +305,7 @@ public class AppLaunch extends InstrumentationTestCase {
                 // App launch times for trace launch will not be used for final
                 // launch time calculations.
                 else if (launch.getLaunchReason().contains(TRACE_ITERATION_PREFIX)) {
+                    Log.v(TAG, "Trace iteration prefix");
                     AtraceLogger atraceLogger = AtraceLogger
                             .getAtraceLoggerInstance(getInstrumentation());
                     // Start the trace
@@ -300,7 +313,13 @@ public class AppLaunch extends InstrumentationTestCase {
                         atraceLogger.atraceStart(traceCategoriesSet, traceBufferSize,
                                 traceDumpInterval, rootTraceSubDir,
                                 String.format("%s-%s", launch.getApp(), launch.getLaunchReason()));
-                        startApp(launch.getApp(), true, launch.getLaunchReason());
+                        if (appPkgName.contains(WEARABLE_HOME_PACKAGE)) {
+                            Log.v(TAG, "Home package detected. Not killing app");
+                            startApp(launch.getApp(), false, launch.getLaunchReason());
+                        } else {
+                            Log.v(TAG, "Will kill app before launch");
+                            startApp(launch.getApp(), true, launch.getLaunchReason());
+                        }
                         sleep(POST_LAUNCH_IDLE_TIMEOUT);
                     } finally {
                         // Stop the trace
@@ -707,7 +726,12 @@ public class AppLaunch extends InstrumentationTestCase {
                 String packageName = mLaunchIntent.getComponent().getPackageName();
                 String componentName = mLaunchIntent.getComponent().flattenToShortString();
                 if (mForceStopBeforeLaunch) {
+                    Log.v(TAG, "Stopping app before launch");
                     mAm.forceStopPackage(packageName, UserHandle.USER_CURRENT);
+                } else {
+                    Log.v(TAG, "Not killing app. Going to Home Screen.");
+                    ParcelFileDescriptor goHome = getInstrumentation().getUiAutomation()
+                        .executeShellCommand("input keyevent 3");
                 }
                 String launchCmd = String.format("%s %s", APP_LAUNCH_CMD, componentName);
                 if (mSimplePerfAppOnly) {
@@ -767,6 +791,17 @@ public class AppLaunch extends InstrumentationTestCase {
                 TotalTime: 357
                 WaitTime: 377
                 Complete*/
+                /* WHEN NOT KILLING HOME :
+                Starting: Intent { cmp=com.google.android.wearable.app/
+                    com.google.android.clockwork.home.calendar.AgendaActivity }
+                Warning: Activity not started, its current task has been brought to the front
+                Status: ok
+                Activity: com.google.android.wearable.app/
+                    com.google.android.clockwork.home.calendar.AgendaActivity
+                ThisTime: 209
+                TotalTime: 209
+                WaitTime: 285
+                Complete*/
                 /* WITH SIMPLEPERF :
                 Performance counter statistics,
                 6595722690,cpu-cycles,4.511040,GHz,(100%),
@@ -776,28 +811,32 @@ public class AppLaunch extends InstrumentationTestCase {
                         inputStream));
                 String line = null;
                 int lineCount = 1;
+                int addLineForWarning = 0;
                 mBufferedWriter.newLine();
                 mBufferedWriter.write(headerInfo);
                 mBufferedWriter.newLine();
                 while ((line = bufferedReader.readLine()) != null) {
-                    if (lineCount == 2 && line.contains(SUCCESS_MESSAGE)) {
+                    if (lineCount == 2 && line.contains(WARNING_MESSAGE)) {
+                        addLineForWarning = 1;
+                    }
+                    if (lineCount == (2 + addLineForWarning) && line.contains(SUCCESS_MESSAGE)) {
                         launchSuccess = true;
                     }
                     // Parse TotalTime which is the launch time
-                    if (launchSuccess && lineCount == 5) {
+                    if (launchSuccess && lineCount == (5 + addLineForWarning)) {
                         String launchSplit[] = line.split(":");
                         launchTime = launchSplit[1].trim();
                     }
 
                     if (mSimplePerfAppOnly) {
                         // Parse simpleperf output.
-                        if (lineCount == 9) {
+                        if (lineCount == (9 + addLineForWarning)) {
                             if (!line.contains("cpu-cycles")) {
                                 Log.e(TAG, "Error in simpleperf output");
                             } else {
                                 cpuCycles = line.split(",")[0].trim();
                             }
-                        } else if (lineCount == 10) {
+                        } else if (lineCount == (10 + addLineForWarning)) {
                             if (!line.contains("major-faults")) {
                                 Log.e(TAG, "Error in simpleperf output");
                             } else {

@@ -16,11 +16,8 @@
 package com.android.statsd.loadtest;
 
 import android.content.Context;
-import android.util.Log;
-import com.android.os.StatsLog.StatsdStatsReport;
+import com.android.os.StatsLogCommon.StatsdStatsReport;
 import com.android.internal.os.StatsdConfigProto.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class StatsdStatsRecorder extends PerfDataRecorder {
     private static final String TAG = "loadtest.StatsdStatsRecorder";

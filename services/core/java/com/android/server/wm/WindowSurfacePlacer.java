@@ -566,14 +566,14 @@ class WindowSurfacePlacer {
                 if (!allDrawn && !wtoken.startingDisplayed && !wtoken.startingMoved) {
                     return false;
                 }
-                final TaskStack stack = wtoken.getStack();
-                final int stackId = stack != null ? stack.mStackId : INVALID_STACK_ID;
+                final int windowingMode = wtoken.getWindowingMode();
                 if (allDrawn) {
-                    outReasons.put(stackId,  APP_TRANSITION_WINDOWS_DRAWN);
+                    outReasons.put(windowingMode,  APP_TRANSITION_WINDOWS_DRAWN);
                 } else {
-                    outReasons.put(stackId, wtoken.startingData instanceof SplashScreenStartingData
-                            ? APP_TRANSITION_SPLASH_SCREEN
-                            : APP_TRANSITION_SNAPSHOT);
+                    outReasons.put(windowingMode,
+                            wtoken.startingData instanceof SplashScreenStartingData
+                                    ? APP_TRANSITION_SPLASH_SCREEN
+                                    : APP_TRANSITION_SNAPSHOT);
                 }
             }
 

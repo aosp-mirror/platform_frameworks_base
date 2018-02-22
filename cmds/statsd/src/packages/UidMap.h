@@ -18,7 +18,7 @@
 
 #include "config/ConfigKey.h"
 #include "config/ConfigListener.h"
-#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
+#include "frameworks/base/cmds/statsd/src/stats_log_common.pb.h"
 #include "packages/PackageInfoListener.h"
 
 #include <binder/IResultReceiver.h>

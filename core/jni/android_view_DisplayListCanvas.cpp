@@ -159,7 +159,7 @@ static void android_view_DisplayListCanvas_drawRenderNode(jlong canvasPtr, jlong
     canvas->drawRenderNode(renderNode);
 }
 
-static void android_view_DisplayListCanvas_drawLayer(jlong canvasPtr, jlong layerPtr) {
+static void android_view_DisplayListCanvas_drawTextureLayer(jlong canvasPtr, jlong layerPtr) {
     Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerPtr);
     canvas->drawLayer(layer);
@@ -210,7 +210,7 @@ static JNINativeMethod gMethods[] = {
     { "nInsertReorderBarrier",    "(JZ)V",      (void*) android_view_DisplayListCanvas_insertReorderBarrier },
     { "nFinishRecording",         "(J)J",       (void*) android_view_DisplayListCanvas_finishRecording },
     { "nDrawRenderNode",          "(JJ)V",      (void*) android_view_DisplayListCanvas_drawRenderNode },
-    { "nDrawLayer",               "(JJ)V",      (void*) android_view_DisplayListCanvas_drawLayer },
+    { "nDrawTextureLayer",        "(JJ)V",      (void*) android_view_DisplayListCanvas_drawTextureLayer },
     { "nDrawCircle",              "(JJJJJ)V",   (void*) android_view_DisplayListCanvas_drawCircleProps },
     { "nDrawRoundRect",           "(JJJJJJJJ)V",(void*) android_view_DisplayListCanvas_drawRoundRectProps },
 };

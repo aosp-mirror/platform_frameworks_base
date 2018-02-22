@@ -37,6 +37,7 @@ import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.server.SystemConfig;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -1384,6 +1385,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         classLoaderName = orig.classLoaderName;
         splitClassLoaderNames = orig.splitClassLoaderNames;
         appComponentFactory = orig.appComponentFactory;
+        compileSdkVersion = orig.compileSdkVersion;
+        compileSdkVersionCodename = orig.compileSdkVersionCodename;
     }
 
     public String toString() {
@@ -1601,7 +1604,10 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * @hide
      */
     public boolean isAllowedToUseHiddenApi() {
-        return isSystemApp() || isUpdatedSystemApp();
+        boolean whitelisted =
+                SystemConfig.getInstance().getHiddenApiWhitelistedApps().contains(packageName);
+        return isSystemApp() || // TODO get rid of this once the whitelist has been populated
+                (whitelisted && (isSystemApp() || isUpdatedSystemApp()));
     }
 
     /**

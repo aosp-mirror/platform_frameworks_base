@@ -152,7 +152,8 @@ import java.util.List;
  */
 public class NetworkStatsService extends INetworkStatsService.Stub {
     static final String TAG = "NetworkStats";
-    static final boolean LOGV = false;
+    static final boolean LOGD = Log.isLoggable(TAG, Log.DEBUG);
+    static final boolean LOGV = Log.isLoggable(TAG, Log.VERBOSE);
 
     private static final int MSG_PERFORM_POLL = 1;
     private static final int MSG_UPDATE_IFACES = 2;
@@ -641,14 +642,14 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         if ((flags & NetworkStatsManager.FLAG_AUGMENT_WITH_SUBSCRIPTION_PLAN) != 0
                 && (template.getMatchRule() == NetworkTemplate.MATCH_MOBILE_ALL)
                 && mSettings.getAugmentEnabled()) {
-            Slog.d(TAG, "Resolving plan for " + template);
+            if (LOGD) Slog.d(TAG, "Resolving plan for " + template);
             final long token = Binder.clearCallingIdentity();
             try {
                 final SubscriptionManager sm = mContext.getSystemService(SubscriptionManager.class);
                 final TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
                 for (int subId : sm.getActiveSubscriptionIdList()) {
                     if (template.matchesSubscriberId(tm.getSubscriberId(subId))) {
-                        Slog.d(TAG, "Found active matching subId " + subId);
+                        if (LOGD) Slog.d(TAG, "Found active matching subId " + subId);
                         final List<SubscriptionPlan> plans = sm.getSubscriptionPlans(subId);
                         if (!plans.isEmpty()) {
                             plan = plans.get(0);
@@ -658,7 +659,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
-            Slog.d(TAG, "Resolved to plan " + plan);
+            if (LOGD) Slog.d(TAG, "Resolved to plan " + plan);
         }
         return plan;
     }

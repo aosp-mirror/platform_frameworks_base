@@ -174,7 +174,7 @@ public class DockedStackDividerController {
             final int position = DockedDividerUtils.calculatePositionForBounds(mTmpRect, dockSide,
                     getContentWidth());
 
-            DisplayCutout displayCutout = mDisplayContent.calculateDisplayCutoutForRotation(
+            final DisplayCutout displayCutout = mDisplayContent.calculateDisplayCutoutForRotation(
                     rotation);
 
             // Since we only care about feasible states, snap to the closest snap target, like it

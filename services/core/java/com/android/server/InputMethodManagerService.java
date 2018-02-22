@@ -1706,6 +1706,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (cs != null) {
                 clearClientSessionLocked(cs);
                 if (mCurClient == cs) {
+                    if (mBoundToMethod) {
+                        mBoundToMethod = false;
+                        if (mCurMethod != null) {
+                            executeOrSendMessage(mCurMethod, mCaller.obtainMessageO(
+                                    MSG_UNBIND_INPUT, mCurMethod));
+                        }
+                    }
                     mCurClient = null;
                 }
                 if (mCurFocusedWindowClient == cs) {

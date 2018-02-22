@@ -26,6 +26,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.CancellationSignal;
 import android.os.IBinder;
@@ -36,8 +37,6 @@ import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassifier;
 import android.view.textclassifier.TextLinks;
 import android.view.textclassifier.TextSelection;
-
-import com.android.internal.R;
 
 /**
  * Abstract base class for the TextClassifier service.
@@ -263,28 +262,33 @@ public abstract class TextClassifierService extends Service {
      */
     @Nullable
     public static ComponentName getServiceComponentName(Context context) {
-        final String str = context.getString(R.string.config_defaultTextClassifierService);
-        if (!TextUtils.isEmpty(str)) {
-            try {
-                final ComponentName componentName = ComponentName.unflattenFromString(str);
-                final Intent intent = new Intent(SERVICE_INTERFACE).setComponent(componentName);
-                final ServiceInfo si = context.getPackageManager()
-                        .getServiceInfo(intent.getComponent(), 0);
-                final String permission = si == null ? null : si.permission;
-                if (Manifest.permission.BIND_TEXTCLASSIFIER_SERVICE.equals(permission)) {
-                    return componentName;
-                }
-                Slog.w(LOG_TAG, String.format(
-                        "Service %s should require %s permission. Found %s permission",
-                        intent.getComponent().flattenToString(),
-                        Manifest.permission.BIND_TEXTCLASSIFIER_SERVICE,
-                        si.permission));
-            } catch (PackageManager.NameNotFoundException e) {
-                Slog.w(LOG_TAG, String.format("Service %s not found", str));
-            }
-        } else {
+        final String packageName = context.getPackageManager().getSystemTextClassifierPackageName();
+        if (TextUtils.isEmpty(packageName)) {
             Slog.d(LOG_TAG, "No configured system TextClassifierService");
+            return null;
         }
+
+        final Intent intent = new Intent(SERVICE_INTERFACE).setPackage(packageName);
+
+        final ResolveInfo ri = context.getPackageManager().resolveService(intent,
+                PackageManager.MATCH_SYSTEM_ONLY);
+
+        if ((ri == null) || (ri.serviceInfo == null)) {
+            Slog.w(LOG_TAG, String.format("Package or service not found in package %s",
+                    packageName));
+            return null;
+        }
+        final ServiceInfo si = ri.serviceInfo;
+
+        final String permission = si.permission;
+        if (Manifest.permission.BIND_TEXTCLASSIFIER_SERVICE.equals(permission)) {
+            return si.getComponentName();
+        }
+        Slog.w(LOG_TAG, String.format(
+                "Service %s should require %s permission. Found %s permission",
+                si.getComponentName(),
+                Manifest.permission.BIND_TEXTCLASSIFIER_SERVICE,
+                si.permission));
         return null;
     }
 }

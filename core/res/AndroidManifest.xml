@@ -3810,9 +3810,15 @@
     <permission android:name="android.permission.INSTANT_APP_FOREGROUND_SERVICE"
         android:protectionLevel="signature|development|instant|appop" />
 
-    <!-- @hide Allows system components to access all app shortcuts. -->
+    <!-- @SystemApi Allows to access all app shortcuts.
+         @hide -->
     <permission android:name="android.permission.ACCESS_SHORTCUTS"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|textClassifier" />
+
+    <!-- @SystemApi Allows unlimited calls to shortcut mutation APIs.
+         @hide -->
+    <permission android:name="android.permission.UNLIMITED_SHORTCUTS_API_CALLS"
+        android:protectionLevel="signature|textClassifier" />
 
     <!-- @SystemApi Allows an application to read the runtime profiles of other apps.
          @hide <p>Not for use by third-party applications. -->

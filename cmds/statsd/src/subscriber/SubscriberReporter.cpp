@@ -27,6 +27,8 @@ namespace android {
 namespace os {
 namespace statsd {
 
+using std::vector;
+
 void SubscriberReporter::setBroadcastSubscriber(const ConfigKey& configKey,
                                                 int64_t subscriberId,
                                                 const sp<IBinder>& intentSender) {

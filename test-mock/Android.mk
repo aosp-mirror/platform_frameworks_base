@@ -21,7 +21,7 @@ LOCAL_PATH:= $(call my-dir)
 # otherwise hidden methods could be visible.
 android_test_mock_source_files := \
     $(call all-java-files-under, src/android/test/mock) \
-    $(call all-java-files-under, ../core/java) \
+    $(call all-java-files-under, ../core/java/android)
 
 # For unbundled build we'll use the prebuilt jar from prebuilts/sdk.
 ifeq (,$(TARGET_BUILD_APPS)$(filter true,$(TARGET_BUILD_PDK)))
@@ -30,7 +30,6 @@ ifeq (,$(TARGET_BUILD_APPS)$(filter true,$(TARGET_BUILD_PDK)))
 # ==========================================================
 include $(CLEAR_VARS)
 LOCAL_SRC_FILES := $(android_test_mock_source_files)
-
 LOCAL_JAVA_LIBRARIES := core-oj core-libart framework conscrypt okhttp bouncycastle
 LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 LOCAL_DROIDDOC_SOURCE_PATH := $(LOCAL_PATH)/src/android/test/mock
@@ -42,6 +41,7 @@ ANDROID_TEST_MOCK_API_FILE := $(LOCAL_PATH)/api/android-test-mock-current.txt
 ANDROID_TEST_MOCK_REMOVED_API_FILE := $(LOCAL_PATH)/api/android-test-mock-removed.txt
 
 LOCAL_DROIDDOC_OPTIONS:= \
+    -hide 111 -hide 113 -hide 125 -hide 126 -hide 127 -hide 128 \
     -stubpackages android.test.mock \
     -stubs $(TARGET_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/android.test.mock.stubs_intermediates/src \
     -nodocs \

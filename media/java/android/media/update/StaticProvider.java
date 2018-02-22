@@ -40,7 +40,6 @@ import android.media.MediaSessionService2;
 import android.media.MediaSessionService2.MediaNotification;
 import android.media.PlaybackState2;
 import android.media.Rating2;
-import android.media.SessionPlayer2;
 import android.media.SessionToken2;
 import android.media.VolumeProvider2;
 import android.media.update.MediaLibraryService2Provider.LibraryRootProvider;
@@ -113,8 +112,6 @@ public interface StaticProvider {
             String packageName, String serviceName, int uid);
     SessionToken2 SessionToken2_fromBundle(Context context, Bundle bundle);
 
-    SessionPlayer2Provider createSessionPlayer2(Context context, SessionPlayer2 instance);
-
     MediaItem2Provider createMediaItem2(Context context, MediaItem2 mediaItem2,
             String mediaId, DataSourceDesc dsd, MediaMetadata2 metadata, int flags);
     MediaItem2 fromBundle_MediaItem2(Context context, Bundle bundle);
@@ -136,7 +133,6 @@ public interface StaticProvider {
     Rating2 newPercentageRating_Rating2(Context context, float percent);
 
     PlaybackState2Provider createPlaybackState2(Context context, PlaybackState2 instance, int state,
-            long position, long updateTime, float speed, long bufferedPosition, long activeItemId,
-            CharSequence error);
+            long position, long updateTime, float speed, long bufferedPosition, long activeItemId);
     PlaybackState2 fromBundle_PlaybackState2(Context context, Bundle bundle);
 }

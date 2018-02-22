@@ -101,7 +101,6 @@ import com.android.server.am.UserState;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 
 import libcore.io.IoUtils;
-import libcore.util.Objects;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -122,6 +121,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Service for {@link UserManager}.
@@ -604,7 +604,7 @@ public class UserManagerService extends IUserManager.Stub {
                     return;
                 }
                 String currentAccount = userData.account;
-                if (!Objects.equal(currentAccount, accountName)) {
+                if (!Objects.equals(currentAccount, accountName)) {
                     userData.account = accountName;
                     userToUpdate = userData;
                 }

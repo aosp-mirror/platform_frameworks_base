@@ -2802,4 +2802,13 @@ public class ApplicationPackageManager extends PackageManager {
             return mArtManager;
         }
     }
+
+    @Override
+    public String getSystemTextClassifierPackageName() {
+        try {
+            return mPM.getSystemTextClassifierPackageName();
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
 }
