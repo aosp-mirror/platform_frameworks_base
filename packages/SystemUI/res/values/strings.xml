@@ -804,10 +804,7 @@
     the top of their phone's screen. This is a label for a toggle to turn the work profile on and
     off. "Work profile" means a separate profile on a user's phone that's specifically for their
     work apps and managed by their company. "Work" is used as an adjective. [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_work_mode_on_label">Work profile</string>
-    <!-- QuickSettings: This is a label for a toggle to turn the work profile on and off and this is
-         shown when work profile is off. [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_work_mode_off_label">Notifications &amp; apps are off</string>
+    <string name="quick_settings_work_mode_label">Work profile</string>
     <!-- QuickSettings: Label for the toggle to activate Night display (renamed "Night Light" with title caps). [CHAR LIMIT=20] -->
     <string name="quick_settings_night_display_label">Night Light</string>
     <!-- QuickSettings: Secondary text for when the Night Light will be enabled at sunset. [CHAR LIMIT=20] -->
