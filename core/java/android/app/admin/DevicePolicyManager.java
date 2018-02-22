@@ -2858,8 +2858,8 @@ public class DevicePolicyManager {
      * When called by a profile owner of a managed profile returns true if the profile uses unified
      * challenge with its parent user.
      *
-     * <strong>Note: This method is not concerned with password quality and will return false if
-     * the profile has empty password as a separate challenge.
+     * <strong>Note</strong>: This method is not concerned with password quality and will return
+     * false if the profile has empty password as a separate challenge.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @throws SecurityException if {@code admin} is not a profile owner of a managed profile.
