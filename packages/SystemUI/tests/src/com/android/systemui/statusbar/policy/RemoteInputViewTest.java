@@ -24,6 +24,7 @@ import android.content.pm.ShortcutManager;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
@@ -87,5 +88,11 @@ public class RemoteInputViewTest extends SysuiTestCase {
                 RemoteInput.getResultsFromIntent(resultIntent).get(TEST_RESULT_KEY));
         assertEquals(RemoteInput.SOURCE_FREE_FORM_INPUT,
                 RemoteInput.getResultsSource(resultIntent));
+    }
+
+    @Test
+    public void testNoCrashWithoutVisibilityListener() {
+        mView.setOnVisibilityChangedListener(null);
+        mView.onVisibilityChanged(mView, View.VISIBLE);
     }
 }
