@@ -51,7 +51,7 @@ public class MediaBrowser2 extends MediaController2 {
          * @param rootMediaId media id of the library root. Can be {@code null}
          * @param rootExtra extra of the library root. Can be {@code null}
          */
-        public void onGetRootResult(Bundle rootHints, @Nullable String rootMediaId,
+        public void onGetLibraryRootDone(Bundle rootHints, @Nullable String rootMediaId,
                 @Nullable Bundle rootExtra) { }
 
         /**
@@ -62,11 +62,11 @@ public class MediaBrowser2 extends MediaController2 {
          * {@link MediaLibrarySession#notifyChildrenChanged(String, int, Bundle)} for the parent.
          *
          * @param parentId parent id that you've specified with {@link #subscribe(String, Bundle)}
-         * @param childCount number of children
+         * @param itemCount number of children
          * @param extras extra bundle from the library service. Can be differ from extras that
          *               you've specified with {@link #subscribe(String, Bundle)}.
          */
-        public void onChildrenChanged(@NonNull String parentId, int childCount,
+        public void onChildrenChanged(@NonNull String parentId, int itemCount,
                 @Nullable Bundle extras) { }
 
         /**
@@ -81,7 +81,7 @@ public class MediaBrowser2 extends MediaController2 {
          * @param result result. Can be {@code null}
          * @param extras extra bundle from the library service
          */
-        public void onChildrenLoaded(@NonNull String parentId, int page, int pageSize,
+        public void onGetChildrenDone(@NonNull String parentId, int page, int pageSize,
                 @Nullable List<MediaItem2> result, @Nullable Bundle extras) { }
 
         /**
@@ -93,7 +93,7 @@ public class MediaBrowser2 extends MediaController2 {
          * @param mediaId media id
          * @param result result. Can be {@code null}
          */
-        public void onItemLoaded(@NonNull String mediaId, @Nullable MediaItem2 result) { }
+        public void onGetItemDone(@NonNull String mediaId, @Nullable MediaItem2 result) { }
 
         /**
          * Called when there's change in the search result requested by the previous
@@ -121,7 +121,7 @@ public class MediaBrowser2 extends MediaController2 {
          * @param result result. Can be {@code null}.
          * @param extras extra bundle from the library service
          */
-        public void onSearchResultLoaded(@NonNull String query, int page, int pageSize,
+        public void onGetSearchResultDone(@NonNull String query, int page, int pageSize,
                 @Nullable List<MediaItem2> result, @Nullable Bundle extras) { }
     }
 
@@ -140,10 +140,10 @@ public class MediaBrowser2 extends MediaController2 {
 
     /**
      * Get the library root. Result would be sent back asynchronously with the
-     * {@link BrowserCallback#onGetRootResult(Bundle, String, Bundle)}.
+     * {@link BrowserCallback#onGetLibraryRootDone(Bundle, String, Bundle)}.
      *
      * @param rootHints hint for the root
-     * @see BrowserCallback#onGetRootResult(Bundle, String, Bundle)
+     * @see BrowserCallback#onGetLibraryRootDone(Bundle, String, Bundle)
      */
     public void getLibraryRoot(Bundle rootHints) {
         mProvider.getLibraryRoot_impl(rootHints);
@@ -177,7 +177,7 @@ public class MediaBrowser2 extends MediaController2 {
 
     /**
      * Get list of children under the parent. Result would be sent back asynchronously with the
-     * {@link BrowserCallback#onChildrenLoaded(String, int, int, List, Bundle)}.
+     * {@link BrowserCallback#onGetChildrenDone(String, int, int, List, Bundle)}.
      *
      * @param parentId parent id for getting the children.
      * @param page page number to get the result. Starts from {@code 1}
@@ -190,7 +190,7 @@ public class MediaBrowser2 extends MediaController2 {
 
     /**
      * Get the media item with the given media id. Result would be sent back asynchronously with the
-     * {@link BrowserCallback#onItemLoaded(String, MediaItem2)}.
+     * {@link BrowserCallback#onGetItemDone(String, MediaItem2)}.
      *
      * @param mediaId media id for specifying the item
      */
@@ -212,7 +212,7 @@ public class MediaBrowser2 extends MediaController2 {
 
     /**
      * Get the search result from lhe library service. Result would be sent back asynchronously with
-     * the {@link BrowserCallback#onSearchResultLoaded(String, int, int, List, Bundle)}.
+     * the {@link BrowserCallback#onGetSearchResultDone(String, int, int, List, Bundle)}.
      *
      * @param query search query that you've specified with {@link #search(String, Bundle)}
      * @param page page number to get search result. Starts from {@code 1}
