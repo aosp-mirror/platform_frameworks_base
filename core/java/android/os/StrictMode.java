@@ -636,13 +636,19 @@ public final class StrictMode {
              * executor every violation.
              */
             public Builder penaltyListener(
-                    @NonNull OnThreadViolationListener listener, @NonNull Executor executor) {
+                    @NonNull Executor executor, @NonNull OnThreadViolationListener listener) {
                 if (executor == null) {
                     throw new NullPointerException("executor must not be null");
                 }
                 mListener = listener;
                 mExecutor = executor;
                 return this;
+            }
+
+            /** @removed */
+            public Builder penaltyListener(
+                    @NonNull OnThreadViolationListener listener, @NonNull Executor executor) {
+                return penaltyListener(executor, listener);
             }
 
             private Builder enable(int bit) {
@@ -971,13 +977,19 @@ public final class StrictMode {
              * Call #{@link OnVmViolationListener#onVmViolation(Violation)} on every violation.
              */
             public Builder penaltyListener(
-                    @NonNull OnVmViolationListener listener, @NonNull Executor executor) {
+                    @NonNull Executor executor, @NonNull OnVmViolationListener listener) {
                 if (executor == null) {
                     throw new NullPointerException("executor must not be null");
                 }
                 mListener = listener;
                 mExecutor = executor;
                 return this;
+            }
+
+            /** @removed */
+            public Builder penaltyListener(
+                    @NonNull OnVmViolationListener listener, @NonNull Executor executor) {
+                return penaltyListener(executor, listener);
             }
 
             private Builder enable(int bit) {

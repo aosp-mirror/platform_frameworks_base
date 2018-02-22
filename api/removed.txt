@@ -257,6 +257,14 @@ package android.os {
     ctor public RecoverySystem();
   }
 
+  public static final class StrictMode.ThreadPolicy.Builder {
+    method public android.os.StrictMode.ThreadPolicy.Builder penaltyListener(android.os.StrictMode.OnThreadViolationListener, java.util.concurrent.Executor);
+  }
+
+  public static final class StrictMode.VmPolicy.Builder {
+    method public android.os.StrictMode.VmPolicy.Builder penaltyListener(android.os.StrictMode.OnVmViolationListener, java.util.concurrent.Executor);
+  }
+
   public final class SystemClock {
     method public static java.time.Clock elapsedRealtimeClock();
     method public static java.time.Clock uptimeClock();
