@@ -143,6 +143,8 @@ public final class ConnectionRequest implements Parcelable {
     private final boolean mShouldShowIncomingCallUi;
     private final ParcelFileDescriptor mRttPipeToInCall;
     private final ParcelFileDescriptor mRttPipeFromInCall;
+    // Cached return value of getRttTextStream -- we don't want to wrap it more than once.
+    private Connection.RttTextStream mRttTextStream;
 
     /**
      * @param accountHandle The accountHandle which should be used to place the call.
@@ -312,7 +314,10 @@ public final class ConnectionRequest implements Parcelable {
      */
     public Connection.RttTextStream getRttTextStream() {
         if (isRequestingRtt()) {
-            return new Connection.RttTextStream(mRttPipeToInCall, mRttPipeFromInCall);
+            if (mRttTextStream == null) {
+                mRttTextStream = new Connection.RttTextStream(mRttPipeToInCall, mRttPipeFromInCall);
+            }
+            return mRttTextStream;
         } else {
             return null;
         }
