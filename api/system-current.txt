@@ -4504,6 +4504,7 @@ package android.telephony.euicc {
     field public static final int RESET_OPTION_DELETE_FIELD_LOADED_TEST_PROFILES = 2; // 0x2
     field public static final int RESET_OPTION_DELETE_OPERATIONAL_PROFILES = 1; // 0x1
     field public static final int RESET_OPTION_RESET_DEFAULT_SMDP_ADDRESS = 4; // 0x4
+    field public static final int RESULT_EUICC_NOT_FOUND = -2; // 0xfffffffe
     field public static final int RESULT_OK = 0; // 0x0
     field public static final int RESULT_UNKNOWN_ERROR = -1; // 0xffffffff
   }
