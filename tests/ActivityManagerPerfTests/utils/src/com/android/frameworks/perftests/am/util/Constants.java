@@ -29,4 +29,5 @@ public class Constants {
             "com.android.frameworks.perftests.ACTION_BROADCAST_REGISTERED_RECEIVE";
 
     public static final String EXTRA_RECEIVER_CALLBACK = "receiver_callback_binder";
+    public static final String EXTRA_LOOPER_IDLE_CALLBACK = "looper_idle_callback_binder";
 }

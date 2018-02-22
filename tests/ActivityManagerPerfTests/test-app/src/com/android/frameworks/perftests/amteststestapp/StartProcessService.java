@@ -16,19 +16,26 @@
 
 package com.android.frameworks.perftests.amteststestapp;
 
-import android.app.Activity;
+import android.app.Service;
+import android.content.Intent;
+import android.os.Binder;
+import android.os.IBinder;
 import android.os.Looper;
+import android.util.Log;
 
-import com.android.frameworks.perftests.am.util.Constants;
 import com.android.frameworks.perftests.am.util.Utils;
 
-public class TestActivity extends Activity {
+/**
+ * Service used to start up the target package and make sure it's running.
+ * Should be bound to, then wait for it to call the ILooperIdleCallback.
+ */
+public class StartProcessService extends Service {
     @Override
-    protected void onResume() {
-        super.onResume();
-        Looper.myQueue().addIdleHandler(() -> {
-            Utils.sendTime(getIntent(), Constants.TYPE_TARGET_PACKAGE_START);
+    public IBinder onBind(Intent intent) {
+        Looper.getMainLooper().getQueue().addIdleHandler(() -> {
+            Utils.sendLooperIdle(intent);
             return false;
         });
+        return new Binder();
     }
 }

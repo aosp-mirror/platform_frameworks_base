@@ -18,6 +18,7 @@ package com.android.frameworks.perftests.am.util;
 
 import android.content.Intent;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
@@ -55,5 +56,13 @@ public class Utils {
         } catch (RemoteException e) {
             Log.e(TAG, e.getMessage());
         }
+    }
+
+    /**
+     * Notify the listener that the main Looper queue is idle.
+     */
+    public static void sendLooperIdle(Intent intent) {
+        ResultReceiver resultReceiver = intent.getParcelableExtra(Intent.EXTRA_RESULT_RECEIVER);
+        resultReceiver.send(0, null);
     }
 }

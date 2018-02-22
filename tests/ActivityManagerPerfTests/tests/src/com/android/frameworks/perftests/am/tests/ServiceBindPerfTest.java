@@ -25,6 +25,7 @@ import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.perftests.am.util.Constants;
+import com.android.frameworks.perftests.am.util.TargetPackageUtils;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -75,7 +76,7 @@ public class ServiceBindPerfTest extends BasePerfTest {
                 final long endTimeNs = getReceivedTimeNs(Constants.TYPE_SERVICE_CONNECTED);
                 return endTimeNs - startTimeNs;
             } finally {
-                unbindFromService(serviceConnection);
+                TargetPackageUtils.unbindFromService(mContext, serviceConnection);
             }
         });
     }
@@ -97,7 +98,7 @@ public class ServiceBindPerfTest extends BasePerfTest {
                 final long endTimeNs = getReceivedTimeNs(Constants.TYPE_SERVICE_CONNECTED);
                 return endTimeNs - startTimeNs;
             } finally {
-                unbindFromService(serviceConnection);
+                TargetPackageUtils.unbindFromService(mContext, serviceConnection);
             }
         });
     }
@@ -112,7 +113,8 @@ public class ServiceBindPerfTest extends BasePerfTest {
             startTargetPackage();
 
             final Intent intent = createServiceIntent();
-            final ServiceConnection alreadyBoundServiceConnection = bindAndWaitForConnectedService();
+            final ServiceConnection alreadyBoundServiceConnection =
+                    TargetPackageUtils.bindAndWaitForConnectedService(mContext, intent);
 
             try {
                 final ServiceConnection serviceConnection = createServiceConnectionReportTime();
@@ -123,10 +125,10 @@ public class ServiceBindPerfTest extends BasePerfTest {
                     final long endTimeNs = getReceivedTimeNs(Constants.TYPE_SERVICE_CONNECTED);
                     return endTimeNs - startTimeNs;
                 } finally {
-                    unbindFromService(serviceConnection);
+                    TargetPackageUtils.unbindFromService(mContext, serviceConnection);
                 }
             } finally {
-                unbindFromService(alreadyBoundServiceConnection);
+                TargetPackageUtils.unbindFromService(mContext, alreadyBoundServiceConnection);
             }
         });
     }
@@ -139,8 +141,9 @@ public class ServiceBindPerfTest extends BasePerfTest {
     public void bindServiceAllowOomManagement() {
         runPerfFunction(() -> {
             final Intent intentNoOom = createServiceIntent();
-            final ServiceConnection serviceConnectionOom = bindAndWaitForConnectedService(
-                    Context.BIND_ALLOW_OOM_MANAGEMENT);
+            final ServiceConnection serviceConnectionOom =
+                    TargetPackageUtils.bindAndWaitForConnectedService(mContext, intentNoOom,
+                            Context.BIND_ALLOW_OOM_MANAGEMENT);
 
             try {
                 final ServiceConnection serviceConnectionNoOom =
@@ -152,10 +155,10 @@ public class ServiceBindPerfTest extends BasePerfTest {
 
                     return endTimeNs - startTimeNs;
                 } finally {
-                    unbindFromService(serviceConnectionNoOom);
+                    TargetPackageUtils.unbindFromService(mContext, serviceConnectionNoOom);
                 }
             } finally {
-                unbindFromService(serviceConnectionOom);
+                TargetPackageUtils.unbindFromService(mContext, serviceConnectionOom);
             }
         });
     }
