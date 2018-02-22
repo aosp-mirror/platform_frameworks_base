@@ -22,11 +22,12 @@ import android.os.Handler;
 import android.telephony.MbmsStreamingSession;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * A callback class that is used to receive information from the middleware on MBMS streaming
  * services. An instance of this object should be passed into
- * {@link MbmsStreamingSession#create(Context, MbmsStreamingSessionCallback, int, Handler)}.
+ * {@link MbmsStreamingSession#create(Context, Executor, int, MbmsStreamingSessionCallback)}.
  */
 public class MbmsStreamingSessionCallback {
     /**

@@ -16,22 +16,23 @@
 
 package android.telephony.mbms;
 
-import android.os.Handler;
+import android.os.Binder;
 import android.os.RemoteException;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /** @hide */
 public class InternalDownloadSessionCallback extends IMbmsDownloadSessionCallback.Stub {
 
-    private final Handler mHandler;
+    private final Executor mExecutor;
     private final MbmsDownloadSessionCallback mAppCallback;
     private volatile boolean mIsStopped = false;
 
     public InternalDownloadSessionCallback(MbmsDownloadSessionCallback appCallback,
-            Handler handler) {
+            Executor executor) {
         mAppCallback = appCallback;
-        mHandler = handler;
+        mExecutor = executor;
     }
 
     @Override
@@ -40,10 +41,15 @@ public class InternalDownloadSessionCallback extends IMbmsDownloadSessionCallbac
             return;
         }
 
-        mHandler.post(new Runnable() {
+        mExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                mAppCallback.onError(errorCode, message);
+                long token = Binder.clearCallingIdentity();
+                try {
+                    mAppCallback.onError(errorCode, message);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
             }
         });
     }
@@ -54,10 +60,15 @@ public class InternalDownloadSessionCallback extends IMbmsDownloadSessionCallbac
             return;
         }
 
-        mHandler.post(new Runnable() {
+        mExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                mAppCallback.onFileServicesUpdated(services);
+                long token = Binder.clearCallingIdentity();
+                try {
+                    mAppCallback.onFileServicesUpdated(services);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
             }
         });
     }
@@ -68,16 +79,17 @@ public class InternalDownloadSessionCallback extends IMbmsDownloadSessionCallbac
             return;
         }
 
-        mHandler.post(new Runnable() {
+        mExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                mAppCallback.onMiddlewareReady();
+                long token = Binder.clearCallingIdentity();
+                try {
+                    mAppCallback.onMiddlewareReady();
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
             }
         });
-    }
-
-    public Handler getHandler() {
-        return mHandler;
     }
 
     public void stop() {

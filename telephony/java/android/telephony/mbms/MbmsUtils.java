@@ -50,7 +50,7 @@ public class MbmsUtils {
         return new ComponentName(ci.packageName, ci.name);
     }
 
-    private static ComponentName getOverrideServiceName(Context context, String serviceAction) {
+    public static ComponentName getOverrideServiceName(Context context, String serviceAction) {
         String metaDataKey = null;
         switch (serviceAction) {
             case MbmsDownloadSession.MBMS_DOWNLOAD_SERVICE_ACTION:
