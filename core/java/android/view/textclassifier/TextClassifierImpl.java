@@ -79,15 +79,6 @@ public final class TextClassifierImpl implements TextClassifier {
     private static final String MODEL_FILE_REGEX = "textclassifier\\.(.*)\\.model";
     private static final String UPDATED_MODEL_FILE_PATH =
             "/data/misc/textclassifier/textclassifier.model";
-    private static final List<String> ENTITY_TYPES_ALL =
-            Collections.unmodifiableList(Arrays.asList(
-                    TextClassifier.TYPE_ADDRESS,
-                    TextClassifier.TYPE_EMAIL,
-                    TextClassifier.TYPE_PHONE,
-                    TextClassifier.TYPE_URL,
-                    TextClassifier.TYPE_DATE,
-                    TextClassifier.TYPE_DATE_TIME,
-                    TextClassifier.TYPE_FLIGHT_NUMBER));
 
     private final Context mContext;
     private final TextClassifier mFallback;
@@ -235,7 +226,7 @@ public final class TextClassifierImpl implements TextClassifier {
                     options != null && options.getEntityConfig() != null
                             ? options.getEntityConfig().resolveEntityListModifications(
                                     getEntitiesForHints(options.getEntityConfig().getHints()))
-                            : ENTITY_TYPES_ALL;
+                            : getSettings().getEntityListDefault();
             final TextClassifierImplNative nativeImpl =
                     getNative(defaultLocales);
             final TextClassifierImplNative.AnnotatedSpan[] annotations =
@@ -281,7 +272,18 @@ public final class TextClassifierImpl implements TextClassifier {
     }
 
     private Collection<String> getEntitiesForHints(Collection<String> hints) {
-        return ENTITY_TYPES_ALL;
+        final boolean editable = hints.contains(HINT_TEXT_IS_EDITABLE);
+        final boolean notEditable = hints.contains(HINT_TEXT_IS_NOT_EDITABLE);
+
+        // Use the default if there is no hint, or conflicting ones.
+        final boolean useDefault = editable == notEditable;
+        if (useDefault) {
+            return getSettings().getEntityListDefault();
+        } else if (editable) {
+            return getSettings().getEntityListEditable();
+        } else {  // notEditable
+            return getSettings().getEntityListNotEditable();
+        }
     }
 
     @Override
