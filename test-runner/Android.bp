@@ -24,7 +24,7 @@ java_library {
     srcs: ["src/**/*.java"],
 
     errorprone: {
-      javacflags: ["-Xep:DepAnn:ERROR"],
+        javacflags: ["-Xep:DepAnn:ERROR"],
     },
 
     sdk_version: "current",
@@ -56,8 +56,21 @@ java_library {
 java_library_static {
     name: "repackaged.android.test.runner",
 
+    srcs: ["src/**/*.java"],
+    exclude_srcs: [
+        "src/android/test/ActivityUnitTestCase.java",
+        "src/android/test/ApplicationTestCase.java",
+        "src/android/test/IsolatedContext.java",
+        "src/android/test/ProviderTestCase.java",
+        "src/android/test/ProviderTestCase2.java",
+        "src/android/test/RenamingDelegatingContext.java",
+        "src/android/test/ServiceTestCase.java",
+    ],
+
     sdk_version: "current",
-    static_libs: ["android.test.runner"],
+    libs: [
+        "android.test.base",
+    ],
 
     jarjar_rules: "jarjar-rules.txt",
     // Pin java_version until jarjar is certified to support later versions. http://b/72703434
