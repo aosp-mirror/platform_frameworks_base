@@ -442,12 +442,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     options.setTaskOverlay(true, true /* canResume */);
                 }
             }
-            android.util.Log.d("bfranz", "I was here: " + mIsLockTask);
             if (mIsLockTask) {
                 if (options == null) {
                     options = ActivityOptions.makeBasic();
                 }
-                options.setLockTaskMode(true);
+                options.setLockTaskEnabled(true);
             }
             if (mWaitOption) {
                 result = mInterface.startActivityAndWait(null, null, intent, mimeType,

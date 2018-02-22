@@ -94,7 +94,6 @@ import com.android.server.pm.UserRestrictionsUtils;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -3765,19 +3764,22 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // The DO can still set lock task packages
         final String[] doPackages = {"doPackage1", "doPackage2"};
         final int flags = DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS
-                | DevicePolicyManager.LOCK_TASK_FEATURE_RECENTS;
+                | DevicePolicyManager.LOCK_TASK_FEATURE_HOME
+                | DevicePolicyManager.LOCK_TASK_FEATURE_OVERVIEW;
         verifyCanSetLockTask(DpmMockContext.CALLER_SYSTEM_USER_UID, UserHandle.USER_SYSTEM, admin1, doPackages, flags);
 
         final String[] secondaryPoPackages = {"secondaryPoPackage1", "secondaryPoPackage2"};
         final int secondaryPoFlags = DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS
-                | DevicePolicyManager.LOCK_TASK_FEATURE_RECENTS;
+                | DevicePolicyManager.LOCK_TASK_FEATURE_HOME
+                | DevicePolicyManager.LOCK_TASK_FEATURE_OVERVIEW;
         verifyCanNotSetLockTask(DpmMockContext.CALLER_UID, admin3, secondaryPoPackages, secondaryPoFlags);
 
         // Managed profile is unaffiliated - shouldn't be able to setLockTaskPackages.
         mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
         final String[] poPackages = {"poPackage1", "poPackage2"};
         final int poFlags = DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS
-                | DevicePolicyManager.LOCK_TASK_FEATURE_RECENTS;
+                | DevicePolicyManager.LOCK_TASK_FEATURE_HOME
+                | DevicePolicyManager.LOCK_TASK_FEATURE_OVERVIEW;
         verifyCanNotSetLockTask(MANAGED_PROFILE_ADMIN_UID, adminDifferentPackage, poPackages, poFlags);
 
         // Setting same affiliation ids
@@ -3820,7 +3822,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         final String[] poPackages = {"poPackage1", "poPackage2"};
         final int poFlags = DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS
-                | DevicePolicyManager.LOCK_TASK_FEATURE_RECENTS;
+                | DevicePolicyManager.LOCK_TASK_FEATURE_HOME
+                | DevicePolicyManager.LOCK_TASK_FEATURE_OVERVIEW;
         verifyCanSetLockTask(DpmMockContext.CALLER_UID, DpmMockContext.CALLER_USER_HANDLE, admin1,
                 poPackages, poFlags);
 
@@ -3836,8 +3839,23 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
         final String[] mpoPackages = {"poPackage1", "poPackage2"};
         final int mpoFlags = DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS
-                | DevicePolicyManager.LOCK_TASK_FEATURE_RECENTS;
+                | DevicePolicyManager.LOCK_TASK_FEATURE_HOME
+                | DevicePolicyManager.LOCK_TASK_FEATURE_OVERVIEW;
         verifyCanNotSetLockTask(MANAGED_PROFILE_ADMIN_UID, adminDifferentPackage, mpoPackages, mpoFlags);
+    }
+
+    public void testLockTaskFeatures_IllegalArgumentException() throws Exception {
+        // Setup a device owner.
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        // Lock task policy is updated when loading user data.
+        verifyLockTaskState(UserHandle.USER_SYSTEM);
+
+        final int flags = DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS
+                | DevicePolicyManager.LOCK_TASK_FEATURE_OVERVIEW;
+        assertExpectException(IllegalArgumentException.class,
+                "Cannot use LOCK_TASK_FEATURE_OVERVIEW without LOCK_TASK_FEATURE_HOME",
+                () -> dpm.setLockTaskFeatures(admin1, flags));
     }
 
     public void testIsDeviceManaged() throws Exception {
