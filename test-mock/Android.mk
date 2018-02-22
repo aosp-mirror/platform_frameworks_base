@@ -16,14 +16,19 @@
 
 LOCAL_PATH:= $(call my-dir)
 
-android_test_mock_source_files := $(call all-java-files-under, src/android/test/mock)
+# Includes the main framework source to ensure that doclava has access to the
+# visibility information for the base classes of the mock classes. Without it
+# otherwise hidden methods could be visible.
+android_test_mock_source_files := \
+    $(call all-java-files-under, src/android/test/mock) \
+    $(call all-java-files-under, ../core/java/android)
 
 # Generate the stub source files for android.test.mock.stubs
 # ==========================================================
 include $(CLEAR_VARS)
 LOCAL_SRC_FILES := $(android_test_mock_source_files)
 
-LOCAL_JAVA_LIBRARIES := core-oj core-libart framework
+LOCAL_JAVA_LIBRARIES := core-oj core-libart framework conscrypt okhttp bouncycastle
 LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 LOCAL_DROIDDOC_SOURCE_PATH := $(LOCAL_PATH)/src/android/test/mock
 
@@ -34,6 +39,7 @@ ANDROID_TEST_MOCK_API_FILE := $(LOCAL_PATH)/api/android-test-mock-current.txt
 ANDROID_TEST_MOCK_REMOVED_API_FILE := $(LOCAL_PATH)/api/android-test-mock-removed.txt
 
 LOCAL_DROIDDOC_OPTIONS:= \
+    -hide 111 -hide 113 -hide 125 -hide 126 -hide 127 -hide 128 \
     -stubpackages android.test.mock \
     -stubs $(TARGET_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/android.test.mock.stubs_intermediates/src \
     -nodocs \
@@ -62,6 +68,9 @@ LOCAL_SOURCE_FILES_ALL_GENERATED := true
 
 # Make sure to run droiddoc first to generate the stub source files.
 LOCAL_ADDITIONAL_DEPENDENCIES := $(android_test_mock_gen_stamp)
+android_test_mock_gen_stamp :=
+
+LOCAL_SDK_VERSION := current
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
