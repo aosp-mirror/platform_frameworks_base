@@ -421,7 +421,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                 byteToken[i] = token.get(i);
             }
             // Send to Keystore
-            KeyStore.getInstance().addAuthToken(byteToken, mCurrentUserId);
+            KeyStore.getInstance().addAuthToken(byteToken);
         }
         if (client != null && client.onAuthenticated(fingerId, groupId)) {
             removeClient(client);
