@@ -89,6 +89,9 @@ public final class Magnifier {
             NONEXISTENT_PREVIOUS_CONFIG_VALUE, NONEXISTENT_PREVIOUS_CONFIG_VALUE);
     // Rectangle defining the view surface area we pixel copy content from.
     private final Rect mPixelCopyRequestRect = new Rect();
+    // Lock to synchronize between the UI thread and the thread that handles pixel copy results.
+    // Only sync mWindow writes from UI thread with mWindow reads from sPixelCopyHandlerThread.
+    private final Object mLock = new Object();
 
     /**
      * Initializes a magnifier.
@@ -170,9 +173,12 @@ public final class Magnifier {
 
         if (xPosInView != mPrevPosInView.x || yPosInView != mPrevPosInView.y) {
             if (mWindow == null) {
-                mWindow = new InternalPopupWindow(mView.getContext(), mView.getDisplay(),
-                        getValidViewSurface(), mWindowWidth, mWindowHeight, mWindowElevation,
-                        Handler.getMain() /* draw the magnifier on the UI thread */, mCallback);
+                synchronized (mLock) {
+                    mWindow = new InternalPopupWindow(mView.getContext(), mView.getDisplay(),
+                            getValidViewSurface(), mWindowWidth, mWindowHeight, mWindowElevation,
+                            Handler.getMain() /* draw the magnifier on the UI thread */, mLock,
+                            mCallback);
+                }
             }
             performPixelCopy(startX, startY, true /* update window position */);
             mPrevPosInView.x = xPosInView;
@@ -200,8 +206,10 @@ public final class Magnifier {
      */
     public void dismiss() {
         if (mWindow != null) {
-            mWindow.destroy();
-            mWindow = null;
+            synchronized (mLock) {
+                mWindow.destroy();
+                mWindow = null;
+            }
         }
     }
 
@@ -281,19 +289,22 @@ public final class Magnifier {
                 clampedStartYInSurface + mBitmapHeight);
         final int windowCoordsX = mWindowCoords.x;
         final int windowCoordsY = mWindowCoords.y;
+        final InternalPopupWindow currentWindowInstance = mWindow;
 
         final Bitmap bitmap =
                 Bitmap.createBitmap(mBitmapWidth, mBitmapHeight, Bitmap.Config.ARGB_8888);
         PixelCopy.request(surface, mPixelCopyRequestRect, bitmap,
                 result -> {
-                    synchronized (mWindow.mLock) {
-                        if (mWindow != null) {
-                            if (updateWindowPosition) {
-                                // TODO: pull the position update outside #performPixelCopy
-                                mWindow.setContentPositionForNextDraw(windowCoordsX, windowCoordsY);
-                            }
-                            mWindow.updateContent(bitmap);
+                    synchronized (mLock) {
+                        if (mWindow != currentWindowInstance) {
+                            // The magnifier was dismissed (and maybe shown again) in the meantime.
+                            return;
                         }
+                        if (updateWindowPosition) {
+                            // TODO: pull the position update outside #performPixelCopy
+                            mWindow.setContentPositionForNextDraw(windowCoordsX, windowCoordsY);
+                        }
+                        mWindow.updateContent(bitmap);
                     }
                 },
                 sPixelCopyHandlerThread.getThreadHandler());
@@ -337,7 +348,7 @@ public final class Magnifier {
         // Members below describe the state of the magnifier. Reads/writes to them
         // have to be synchronized between the UI thread and the thread that handles
         // the pixel copy results. This is the purpose of mLock.
-        private final Object mLock = new Object();
+        private final Object mLock;
         // Whether a magnifier frame draw is currently pending in the UI thread queue.
         private boolean mFrameDrawScheduled;
         // The content bitmap.
@@ -353,8 +364,9 @@ public final class Magnifier {
         InternalPopupWindow(final Context context, final Display display,
                 final Surface parentSurface,
                 final int width, final int height, final float elevation,
-                final Handler handler, final Callback callback) {
+                final Handler handler, final Object lock, final Callback callback) {
             mDisplay = display;
+            mLock = lock;
             mCallback = callback;
 
             mContentWidth = width;
