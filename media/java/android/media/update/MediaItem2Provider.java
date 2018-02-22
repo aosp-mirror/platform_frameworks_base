@@ -23,7 +23,6 @@ import android.os.Bundle;
 /**
  * @hide
  */
-// TODO(jaewan): SystemApi
 public interface MediaItem2Provider {
     Bundle toBundle_impl();
     String toString_impl();

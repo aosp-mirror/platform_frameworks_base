@@ -90,7 +90,7 @@ import android.os.IBinder;
  * rejected, the controller will unbind. If it's accepted, the controller will be available to use
  * and keep binding.
  * <p>
- * When playback is started for this session service, {@link #onUpdateNotification(PlaybackState2)}
+ * When playback is started for this session service, {@link #onUpdateNotification()}
  * is called and service would become a foreground service. It's needed to keep playback after the
  * controller is destroyed. The session service becomes background service when the playback is
  * stopped.
@@ -100,7 +100,6 @@ import android.os.IBinder;
  * Any app can bind to the session service with controller, but the controller can be used only if
  * the session service accepted the connection request through
  * {@link MediaSession2.SessionCallback#onConnect(ControllerInfo)}.
- * @hide
  */
 public abstract class MediaSessionService2 extends Service {
     private final MediaSessionService2Provider mProvider;
@@ -158,17 +157,16 @@ public abstract class MediaSessionService2 extends Service {
     public @NonNull abstract MediaSession2 onCreateSession(String sessionId);
 
     /**
-     * Called when the playback state of this session is changed, and notification needs update.
-     * Override this method to show your own notification UI.
+     * Called when the playback state of this session is changed so notification needs update.
+     * Override this method to show or cancel your own notification UI.
      * <p>
      * With the notification returned here, the service become foreground service when the playback
      * is started. It becomes background service after the playback is stopped.
      *
-     * @param state playback state
      * @return a {@link MediaNotification}. If it's {@code null}, notification wouldn't be shown.
      */
-    public MediaNotification onUpdateNotification(PlaybackState2 state) {
-        return mProvider.onUpdateNotification_impl(state);
+    public MediaNotification onUpdateNotification() {
+        return mProvider.onUpdateNotification_impl();
     }
 
     /**
@@ -201,9 +199,9 @@ public abstract class MediaSessionService2 extends Service {
     }
 
     /**
-     * Returned by {@link #onUpdateNotification(PlaybackState2)} for making session service
-     * foreground service to keep playback running in the background. It's highly recommended to
-     * show media style notification here.
+     * Returned by {@link #onUpdateNotification()} for making session service forground service
+     * to keep playback running in the background. It's highly recommended to show media style
+     * notification here.
      */
     public static class MediaNotification {
         private final MediaNotificationProvider mProvider;

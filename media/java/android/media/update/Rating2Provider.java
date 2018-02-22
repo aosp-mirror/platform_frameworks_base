@@ -22,7 +22,6 @@ import android.os.Bundle;
 /**
  * @hide
  */
-// TODO(jaewan): @SystemApi
 public interface Rating2Provider {
     String toString_impl();
     boolean equals_impl(Object obj);

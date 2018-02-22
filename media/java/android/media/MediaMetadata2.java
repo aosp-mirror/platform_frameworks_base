@@ -19,7 +19,6 @@ package android.media;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
-import android.annotation.SystemApi;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.media.update.ApiLoader;
@@ -33,15 +32,13 @@ import java.util.Set;
 
 /**
  * Contains metadata about an item, such as the title, artist, etc.
- *
- * @hide
  */
+// New version of MediaMetadata with following changes
+//   - Don't implement Parcelable for updatable support.
+//   - Also support MediaDescription features. MediaDescription is deprecated instead because
+//     it was insufficient for controller to display media contents.
+// TODO(jaewan): Add @see for APIs from MediaDescription
 public final class MediaMetadata2 {
-    // New version of MediaMetadata that no longer implements Parcelable but added from/toBundle()
-    // for updatable.
-    // MediaDescription is deprecated because it was insufficient for controller to display media
-    // contents. Added getExtra() here to support all the features from the MediaDescription.
-
     /**
      * The title of the media.
      */
@@ -389,7 +386,6 @@ public final class MediaMetadata2 {
     /**
      * @hide
      */
-    @SystemApi
     public MediaMetadata2(MediaMetadata2Provider provider) {
         mProvider = provider;
     }
@@ -568,7 +564,6 @@ public final class MediaMetadata2 {
         /**
          * @hide
          */
-        @SystemApi
         public Builder(@NonNull MediaMetadata2Provider.BuilderProvider provider) {
             mProvider = provider;
         }

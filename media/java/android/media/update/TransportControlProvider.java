@@ -16,6 +16,7 @@
 
 package android.media.update;
 
+import android.media.MediaItem2;
 import android.media.PlaybackState2;
 
 /**
@@ -32,7 +33,7 @@ public interface TransportControlProvider {
     void fastForward_impl();
     void rewind_impl();
     void seekTo_impl(long pos);
-    void setCurrentPlaylistItem_impl(int index);
+    void skipToPlaylistItem_impl(MediaItem2 item);
 
     PlaybackState2 getPlaybackState_impl();
 }

@@ -31,7 +31,6 @@ import java.util.concurrent.Executor;
 
 /**
  * Browses media content offered by a {@link MediaLibraryService2}.
- * @hide
  */
 public class MediaBrowser2 extends MediaController2 {
     // Equals to the ((MediaBrowser2Provider) getProvider())
