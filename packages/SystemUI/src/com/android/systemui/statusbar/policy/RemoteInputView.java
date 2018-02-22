@@ -461,7 +461,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     @Override
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
-        if (changedView == this) {
+        if (changedView == this && mOnVisibilityChangedListener != null) {
             mOnVisibilityChangedListener.accept(visibility == VISIBLE);
         }
     }
