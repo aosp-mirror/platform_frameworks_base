@@ -4104,6 +4104,11 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    @Override
+    public void setHearingAidDeviceConnectionState(BluetoothDevice device, int state)
+    {
+    }
+
     public int setBluetoothA2dpDeviceConnectionState(BluetoothDevice device, int state, int profile)
     {
         return setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
