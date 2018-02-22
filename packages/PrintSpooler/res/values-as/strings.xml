@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="4469836075319831821">"স্পুলাৰ প্ৰিণ্ট কৰক"</string>
+    <string name="more_options_button" msgid="2243228396432556771">"অধিক বিকল্প"</string>
+    <string name="label_destination" msgid="9132510997381599275">"লক্ষ্যস্থান"</string>
+    <string name="label_copies" msgid="3634531042822968308">"প্ৰতিলিপিসমূহ"</string>
+    <string name="label_copies_summary" msgid="3861966063536529540">"প্ৰতিলিপসমূহ:"</string>
+    <string name="label_paper_size" msgid="908654383827777759">"কাগজৰ আকাৰ"</string>
+    <string name="label_paper_size_summary" msgid="5668204981332138168">"কাগজৰ আকাৰ:"</string>
+    <string name="label_color" msgid="1108690305218188969">"ৰং"</string>
+    <!-- no translation found for label_duplex (5370037254347072243) -->
+    <skip />
+    <string name="label_orientation" msgid="2853142581990496477">"দিশ"</string>
+    <string name="label_pages" msgid="7768589729282182230">"পৃষ্ঠাসমূহ"</string>
+    <!-- no translation found for destination_default_text (5422708056807065710) -->
+    <skip />
+    <string name="template_all_pages" msgid="3322235982020148762">"সকলো <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
+    <string name="template_page_range" msgid="428638530038286328">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g>ৰ পৰিসৰ"</string>
+    <string name="pages_range_example" msgid="8558694453556945172">"যেনে: ১—৫, ৮, ১১—১৩"</string>
+    <string name="print_preview" msgid="8010217796057763343">"প্ৰিণ্টৰ পূৰ্বদৰ্শন"</string>
+    <string name="install_for_print_preview" msgid="6366303997385509332">"পূৰ্বদৰ্শনৰ বাবে PDF ভিউৱাৰ ইনষ্টল কৰক"</string>
+    <string name="printing_app_crashed" msgid="854477616686566398">"প্ৰিণ্টিং এপ্ ক্ৰেশ্ব হৈছে"</string>
+    <string name="generating_print_job" msgid="3119608742651698916">"প্ৰিণ্টিং প্ৰস্তুত কৰি আছে"</string>
+    <string name="save_as_pdf" msgid="5718454119847596853">"PDF ৰূপে ছেভ কৰক"</string>
+    <string name="all_printers" msgid="5018829726861876202">"সকলো প্ৰিণ্টাৰ…"</string>
+    <string name="print_dialog" msgid="32628687461331979">"প্ৰিণ্ট সংবাদ"</string>
+    <!-- no translation found for current_page_template (5145005201131935302) -->
+    <skip />
+    <string name="page_description_template" msgid="6831239682256197161">"পৃষ্ঠা <xliff:g id="PAGE_COUNT">%2$d</xliff:g>ৰ <xliff:g id="CURRENT_PAGE">%1$d</xliff:g>"</string>
+    <string name="summary_template" msgid="8899734908625669193">"সাৰাংশ, প্ৰতিলিপিসমূহ <xliff:g id="COPIES">%1$s</xliff:g>, কাগজৰ আকাৰ <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
+    <string name="expand_handle" msgid="7282974448109280522">"হেণ্ডেল বিস্তাৰ কৰক"</string>
+    <string name="collapse_handle" msgid="6886637989442507451">"হেণ্ডেল সংকুচিত কৰক"</string>
+    <string name="print_button" msgid="645164566271246268">"প্ৰিণ্ট কৰক"</string>
+    <string name="savetopdf_button" msgid="2976186791686924743">"PDFৰ জৰিয়তে ছেভ কৰক"</string>
+    <string name="print_options_expanded" msgid="6944679157471691859">"প্ৰিণ্ট বিকল্পসমূহ বিস্তাৰ কৰা হ\'ল"</string>
+    <string name="print_options_collapsed" msgid="7455930445670414332">"প্ৰিণ্ট বিকল্পসমূহ সংকুচিত কৰা হ\'ল"</string>
+    <string name="search" msgid="5421724265322228497">"সন্ধান কৰক"</string>
+    <string name="all_printers_label" msgid="3178848870161526399">"সকলো প্ৰিণ্টাৰ"</string>
+    <string name="add_print_service_label" msgid="5356702546188981940">"সেৱা যোগ কৰক"</string>
+    <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"সন্ধান বাকচটো দেখুওৱা হ\'ল"</string>
+    <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"সন্ধান বাকচটো ঢাক খাই আছে"</string>
+    <string name="print_add_printer" msgid="1088656468360653455">"প্ৰিণ্টাৰ যোগ কৰক"</string>
+    <string name="print_select_printer" msgid="7388760939873368698">"প্ৰিণ্টাৰ বাছনি কৰক"</string>
+    <string name="print_forget_printer" msgid="5035287497291910766">"প্ৰিণ্টাৰ পাহৰি যাওক"</string>
+    <!-- no translation found for print_search_result_count_utterance (6997663738361080868) -->
+    <!-- no translation found for printer_extended_description_template (1366699227703381874) -->
+    <skip />
+    <!-- no translation found for printer_info_desc (7181988788991581654) -->
+    <skip />
+    <!-- no translation found for notification_channel_progress (872788690775721436) -->
+    <skip />
+    <!-- no translation found for notification_channel_failure (9042250774797916414) -->
+    <skip />
+    <!-- no translation found for could_not_create_file (3425025039427448443) -->
+    <skip />
+    <!-- no translation found for print_services_disabled_toast (9089060734685174685) -->
+    <skip />
+    <string name="print_searching_for_printers" msgid="6550424555079932867">"প্ৰিণ্টাৰৰ সন্ধান কৰি আছে"</string>
+    <!-- no translation found for print_no_print_services (8561247706423327966) -->
+    <skip />
+    <string name="print_no_printers" msgid="4869403323900054866">"প্ৰিণ্টাৰ পোৱা নগ\'ল"</string>
+    <!-- no translation found for cannot_add_printer (7840348733668023106) -->
+    <skip />
+    <!-- no translation found for select_to_add_printers (3800709038689830974) -->
+    <skip />
+    <!-- no translation found for enable_print_service (3482815747043533842) -->
+    <skip />
+    <!-- no translation found for enabled_services_title (7036986099096582296) -->
+    <skip />
+    <!-- no translation found for recommended_services_title (3799434882937956924) -->
+    <skip />
+    <!-- no translation found for disabled_services_title (7313253167968363211) -->
+    <skip />
+    <!-- no translation found for all_services_title (5578662754874906455) -->
+    <skip />
+    <!-- no translation found for print_services_recommendation_subtitle (5678487708807185138) -->
+    <string name="printing_notification_title_template" msgid="295903957762447362">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> প্ৰিণ্ট কৰি থকা হৈছে"</string>
+    <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> বাতিল কৰি থকা হৈছে"</string>
+    <string name="failed_notification_title_template" msgid="2256217208186530973">"প্ৰিণ্টাৰৰ আসোঁৱাহ <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
+    <string name="blocked_notification_title_template" msgid="1175435827331588646">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> প্ৰিণ্টাৰে অৱৰোধ কৰিছে"</string>
+    <string name="cancel" msgid="4373674107267141885">"বাতিল কৰক"</string>
+    <string name="restart" msgid="2472034227037808749">"ৰিষ্টাৰ্ট কৰক"</string>
+    <string name="no_connection_to_printer" msgid="2159246915977282728">"প্ৰিণ্টাৰ সংযোগ হৈ থকা নাই"</string>
+    <string name="reason_unknown" msgid="5507940196503246139">"অজ্ঞাত"</string>
+    <!-- no translation found for print_service_security_warning_title (2160752291246775320) -->
+    <skip />
+    <!-- no translation found for print_service_security_warning_summary (1427434625361692006) -->
+    <skip />
+  <string-array name="color_mode_labels">
+    <item msgid="7602948745415174937">"ক\'লা আৰু বগা"</item>
+    <item msgid="2762241247228983754">"ৰং"</item>
+  </string-array>
+  <string-array name="duplex_mode_labels">
+    <item msgid="3882302912790928315">"একো নাই"</item>
+    <item msgid="7296563835355641719">"দীঘল প্ৰান্ত"</item>
+    <item msgid="79513688117503758">"চুটি প্ৰান্ত"</item>
+  </string-array>
+  <string-array name="orientation_labels">
+    <item msgid="4061931020926489228">"প\'ৰ্ট্ৰেইট"</item>
+    <item msgid="3199660090246166812">"লেণ্ডস্কেইপ"</item>
+  </string-array>
+    <string name="print_write_error_message" msgid="5787642615179572543">"ফাইলত লিখিব পৰা নহ\'ল"</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"দুঃখিত, প্ৰিণ্টিঙৰ কাম নহ\'ল। পুনৰ চেষ্টা কৰক।"</string>
+    <string name="print_error_retry" msgid="1426421728784259538">"পুনৰ চেষ্টা কৰক"</string>
+    <string name="print_error_printer_unavailable" msgid="8985614415253203381">"এই প্ৰিণ্টাৰটো বৰ্তমান উপলব্ধ নহয়।"</string>
+    <!-- no translation found for print_cannot_load_page (6179560924492912009) -->
+    <skip />
+    <string name="print_preparing_preview" msgid="3939930735671364712">"পূৰ্বদৰ্শন প্ৰস্তুত কৰি আছে…"</string>
+</resources>
