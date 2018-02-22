@@ -56,7 +56,7 @@ LOCAL_CERTIFICATE := platform
 LOCAL_AAPT_FLAGS := --custom-package $(my_package_prefix)_v1
 LOCAL_AAPT_FLAGS += --version-code 1 --version-name v1
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/app/v1/res
-LOCAL_MANIFEST_FILE := app/AndroidManifest.xml
+LOCAL_MANIFEST_FILE := app/v1/AndroidManifest.xml
 include $(BUILD_PACKAGE)
 
 include $(CLEAR_VARS)
@@ -67,7 +67,7 @@ LOCAL_CERTIFICATE := platform
 LOCAL_AAPT_FLAGS := --custom-package $(my_package_prefix)_v2
 LOCAL_AAPT_FLAGS += --version-code 2 --version-name v2
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/app/v2/res
-LOCAL_MANIFEST_FILE := app/AndroidManifest.xml
+LOCAL_MANIFEST_FILE := app/v2/AndroidManifest.xml
 include $(BUILD_PACKAGE)
 
 my_package_prefix :=

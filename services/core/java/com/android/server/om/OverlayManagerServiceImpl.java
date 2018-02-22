@@ -60,13 +60,13 @@ final class OverlayManagerServiceImpl {
     private final PackageManagerHelper mPackageManager;
     private final IdmapManager mIdmapManager;
     private final OverlayManagerSettings mSettings;
-    private final Set<String> mDefaultOverlays;
+    private final String[] mDefaultOverlays;
     private final OverlayChangeListener mListener;
 
     OverlayManagerServiceImpl(@NonNull final PackageManagerHelper packageManager,
             @NonNull final IdmapManager idmapManager,
             @NonNull final OverlayManagerSettings settings,
-            @NonNull final Set<String> defaultOverlays,
+            @NonNull final String[] defaultOverlays,
             @NonNull final OverlayChangeListener listener) {
         mPackageManager = packageManager;
         mIdmapManager = idmapManager;
@@ -104,30 +104,26 @@ final class OverlayManagerServiceImpl {
         for (int i = 0; i < overlayPackagesSize; i++) {
             final PackageInfo overlayPackage = overlayPackages.get(i);
             final OverlayInfo oi = storedOverlayInfos.get(overlayPackage.packageName);
-            if (oi == null || !oi.targetPackageName.equals(overlayPackage.overlayTarget)
-                    || !Objects.equals(oi.category, overlayPackage.overlayCategory)) {
-                // Update the overlay if it didn't exist or had the wrong target package.
+            if (oi == null || !oi.targetPackageName.equals(overlayPackage.overlayTarget)) {
+                // Reset the overlay if it didn't exist or had the wrong target package.
                 mSettings.init(overlayPackage.packageName, newUserId,
                         overlayPackage.overlayTarget,
                         overlayPackage.applicationInfo.getBaseCodePath(),
-                        overlayPackage.isStaticOverlayPackage(), overlayPackage.overlayPriority,
+                        overlayPackage.isStaticOverlayPackage(),
+                        overlayPackage.overlayPriority,
                         overlayPackage.overlayCategory);
 
-                if (oi == null) {
-                    // This overlay does not exist in our settings.
-                    if (overlayPackage.isStaticOverlayPackage() ||
-                            mDefaultOverlays.contains(overlayPackage.packageName)) {
-                        // Enable this overlay by default.
-                        if (DEBUG) {
-                            Slog.d(TAG, "Enabling overlay " + overlayPackage.packageName
-                                    + " for user " + newUserId + " by default");
-                        }
-                        mSettings.setEnabled(overlayPackage.packageName, newUserId, true);
-                    }
-                } else {
+                if (oi != null) {
                     // The targetPackageName we have stored doesn't match the overlay's target.
                     // Queue the old target for an update as well.
                     packagesToUpdateAssets.add(oi.targetPackageName);
+                }
+            } else {
+                // Update all other components of an overlay that don't require a hard reset.
+                if (!Objects.equals(oi.category, overlayPackage.overlayCategory)) {
+                    // When changing categories, it is ok just to update our internal state.
+                    mSettings.setCategory(overlayPackage.packageName, newUserId,
+                            overlayPackage.overlayCategory);
                 }
             }
 
@@ -160,6 +156,42 @@ final class OverlayManagerServiceImpl {
                 iter.remove();
             }
         }
+
+        // Collect all of the categories in which we have at least one overlay enabled.
+        final ArraySet<String> enabledCategories = new ArraySet<>();
+        final ArrayMap<String, List<OverlayInfo>> userOverlays =
+                mSettings.getOverlaysForUser(newUserId);
+        final int userOverlayTargetCount = userOverlays.size();
+        for (int i = 0; i < userOverlayTargetCount; i++) {
+            final List<OverlayInfo> overlayList = userOverlays.valueAt(i);
+            final int overlayCount = overlayList != null ? overlayList.size() : 0;
+            for (int j = 0; j < overlayCount; j++) {
+                final OverlayInfo oi = overlayList.get(j);
+                if (oi.isEnabled()) {
+                    enabledCategories.add(oi.category);
+                }
+            }
+        }
+
+        // Enable the default overlay if its category does not have a single overlay enabled.
+        for (final String defaultOverlay : mDefaultOverlays) {
+            try {
+                final OverlayInfo oi = mSettings.getOverlayInfo(defaultOverlay, newUserId);
+                if (!enabledCategories.contains(oi.category)) {
+                    Slog.w(TAG, "Enabling default overlay '" + defaultOverlay + "' for target '"
+                            + oi.targetPackageName + "' in category '" + oi.category + "' for user "
+                            + newUserId);
+                    mSettings.setEnabled(oi.packageName, newUserId, true);
+                    if (updateState(oi.targetPackageName, oi.packageName, newUserId, 0)) {
+                        packagesToUpdateAssets.add(oi.targetPackageName);
+                    }
+                }
+            } catch (OverlayManagerSettings.BadKeyException e) {
+                Slog.e(TAG, "Failed to set default overlay '" + defaultOverlay + "' for user "
+                        + newUserId, e);
+            }
+        }
+
         return new ArrayList<>(packagesToUpdateAssets);
     }
 
@@ -325,6 +357,11 @@ final class OverlayManagerServiceImpl {
                 mSettings.init(packageName, userId, pkg.overlayTarget,
                         pkg.applicationInfo.getBaseCodePath(), pkg.isStaticOverlayPackage(),
                         pkg.overlayPriority, pkg.overlayCategory);
+            } else {
+                if (!Objects.equals(oldOi.category, pkg.overlayCategory)) {
+                    // Update the category in-place.
+                    mSettings.setCategory(packageName, userId, pkg.overlayCategory);
+                }
             }
 
             if (updateState(pkg.overlayTarget, packageName, userId, 0)) {
