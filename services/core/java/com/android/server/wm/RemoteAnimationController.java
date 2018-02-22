@@ -221,6 +221,11 @@ class RemoteAnimationController {
         }
 
         @Override
+        public boolean getShowWallpaper() {
+            return false;
+        }
+
+        @Override
         public int getBackgroundColor() {
             return 0;
         }

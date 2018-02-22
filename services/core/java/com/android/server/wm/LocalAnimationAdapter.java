@@ -43,6 +43,11 @@ class LocalAnimationAdapter implements AnimationAdapter {
     }
 
     @Override
+    public boolean getShowWallpaper() {
+        return mSpec.getShowWallpaper();
+    }
+
+    @Override
     public int getBackgroundColor() {
         return mSpec.getBackgroundColor();
     }
@@ -78,6 +83,13 @@ class LocalAnimationAdapter implements AnimationAdapter {
          * @see AnimationAdapter#getDetachWallpaper
          */
         default boolean getDetachWallpaper() {
+            return false;
+        }
+
+        /**
+         * @see AnimationAdapter#getShowWallpaper
+         */
+        default boolean getShowWallpaper() {
             return false;
         }
 

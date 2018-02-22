@@ -151,7 +151,10 @@ class WallpaperController {
 
         final RecentsAnimationController recentsAnimationController =
                 mService.getRecentsAnimationController();
-        final boolean hasWallpaper = (w.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0;
+        final boolean animationWallpaper = w.mAppToken != null && w.mAppToken.getAnimation() != null
+                && w.mAppToken.getAnimation().getShowWallpaper();
+        final boolean hasWallpaper = (w.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0
+                || animationWallpaper;
         final boolean isRecentsTransitionTarget = (recentsAnimationController != null
                 && recentsAnimationController.isWallpaperVisible(w));
         if (isRecentsTransitionTarget) {
