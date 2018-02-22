@@ -92,6 +92,9 @@ public final class RulesManagerService extends IRulesManager.Stub {
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     static final String REQUIRED_UPDATER_PERMISSION =
             android.Manifest.permission.UPDATE_TIME_ZONE_RULES;
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    static final String REQUIRED_QUERY_PERMISSION =
+            android.Manifest.permission.QUERY_TIME_ZONE_RULES;
     private static final File SYSTEM_TZ_DATA_FILE = new File("/system/usr/share/zoneinfo/tzdata");
     private static final File TZ_DATA_DIR = new File("/data/misc/zoneinfo");
 
@@ -131,7 +134,7 @@ public final class RulesManagerService extends IRulesManager.Stub {
 
     @Override // Binder call
     public RulesState getRulesState() {
-        mPermissionHelper.enforceCallerHasPermission(REQUIRED_UPDATER_PERMISSION);
+        mPermissionHelper.enforceCallerHasPermission(REQUIRED_QUERY_PERMISSION);
 
         return getRulesStateInternal();
     }
