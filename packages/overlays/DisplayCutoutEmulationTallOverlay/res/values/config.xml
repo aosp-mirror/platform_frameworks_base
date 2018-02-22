@@ -46,7 +46,8 @@
     <bool name="config_fillMainBuiltInDisplayCutout">true</bool>
 
     <!-- Height of the status bar -->
-    <dimen name="status_bar_height">48dp</dimen>
+    <dimen name="status_bar_height_portrait">48dp</dimen>
+    <dimen name="status_bar_height_landscape">28dp</dimen>
     <!-- Height of area above QQS where battery/time go (equal to status bar height if > 48dp) -->
     <dimen name="quick_qs_offset_height">48dp</dimen>
     <!-- Total height of QQS (quick_qs_offset_height + 128) -->

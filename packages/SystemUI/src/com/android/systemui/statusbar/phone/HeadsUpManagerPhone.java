@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.support.v4.util.ArraySet;
 import android.util.Log;
@@ -32,6 +33,7 @@ import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
@@ -45,12 +47,12 @@ import java.util.Stack;
  */
 public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
        ViewTreeObserver.OnComputeInternalInsetsListener, VisualStabilityManager.Callback,
-       OnHeadsUpChangedListener {
+       OnHeadsUpChangedListener, ConfigurationController.ConfigurationListener {
     private static final String TAG = "HeadsUpManagerPhone";
     private static final boolean DEBUG = false;
 
     private final View mStatusBarWindowView;
-    private final int mStatusBarHeight;
+    private int mStatusBarHeight;
     private final NotificationGroupManager mGroupManager;
     private final StatusBar mBar;
     private final VisualStabilityManager mVisualStabilityManager;
@@ -289,6 +291,13 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
             info.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
             info.touchableRegion.set(0, 0, mStatusBarWindowView.getWidth(), mStatusBarHeight);
         }
+    }
+
+    @Override
+    public void onConfigChanged(Configuration newConfig) {
+        Resources resources = mContext.getResources();
+        mStatusBarHeight = resources.getDimensionPixelSize(
+                com.android.internal.R.dimen.status_bar_height);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////

@@ -210,7 +210,6 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.AboveShelfObserver;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.UnlockMethodCache.OnUnlockMethodChangedListener;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
@@ -240,7 +239,6 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -815,6 +813,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mHeadsUpManager = new HeadsUpManagerPhone(context, mStatusBarWindow, mGroupManager, this,
                 mVisualStabilityManager);
+        Dependency.get(ConfigurationController.class).addCallback(mHeadsUpManager);
         mHeadsUpManager.addListener(this);
         mHeadsUpManager.addListener(mNotificationPanel);
         mHeadsUpManager.addListener(mGroupManager);
@@ -1071,7 +1070,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         // end old BaseStatusBar.onDensityOrFontScaleChanged().
         mScrimController.onDensityOrFontScaleChanged();
         // TODO: Remove this.
-        if (mStatusBarView != null) mStatusBarView.onDensityOrFontScaleChanged();
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.onDensityOrFontScaleChanged();
         }
@@ -3080,6 +3078,9 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         loadDimens();
 
+        if (mStatusBarView != null) {
+            mStatusBarView.updateResources();
+        }
         if (mNotificationPanel != null) {
             mNotificationPanel.updateResources();
         }
