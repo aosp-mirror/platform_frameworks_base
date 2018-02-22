@@ -123,6 +123,10 @@ public final class AudioDeviceInfo {
      * A device type describing a USB audio headset.
      */
     public static final int TYPE_USB_HEADSET       = 22;
+    /**
+     * A device type describing a Hearing Aid.
+     */
+    public static final int TYPE_HEARING_AID   = 23;
 
     /** @hide */
     @IntDef(flag = false, prefix = "TYPE", value = {
@@ -144,7 +148,8 @@ public final class AudioDeviceInfo {
             TYPE_FM,
             TYPE_AUX_LINE,
             TYPE_IP,
-            TYPE_BUS }
+            TYPE_BUS,
+            TYPE_HEARING_AID }
     )
     @Retention(RetentionPolicy.SOURCE)
     public @interface AudioDeviceTypeOut {}
@@ -171,6 +176,7 @@ public final class AudioDeviceInfo {
             case TYPE_AUX_LINE:
             case TYPE_IP:
             case TYPE_BUS:
+            case TYPE_HEARING_AID:
                 return true;
             default:
                 return false;
@@ -367,6 +373,7 @@ public final class AudioDeviceInfo {
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_AUX_LINE, TYPE_AUX_LINE);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_IP, TYPE_IP);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_BUS, TYPE_BUS);
+        INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_HEARING_AID, TYPE_HEARING_AID);
 
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_BUILTIN_MIC, TYPE_BUILTIN_MIC);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_BLUETOOTH_SCO_HEADSET, TYPE_BLUETOOTH_SCO);
@@ -415,6 +422,7 @@ public final class AudioDeviceInfo {
         EXT_TO_INT_DEVICE_MAPPING.put(TYPE_AUX_LINE, AudioSystem.DEVICE_OUT_AUX_LINE);
         EXT_TO_INT_DEVICE_MAPPING.put(TYPE_IP, AudioSystem.DEVICE_OUT_IP);
         EXT_TO_INT_DEVICE_MAPPING.put(TYPE_BUS, AudioSystem.DEVICE_OUT_BUS);
+        EXT_TO_INT_DEVICE_MAPPING.put(TYPE_HEARING_AID, AudioSystem.DEVICE_OUT_HEARING_AID);
     }
 }
 
