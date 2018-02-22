@@ -1165,13 +1165,18 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"بدء التطبيقات."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"جارٍ إعادة التشغيل."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> يعمل"</string>
-    <string name="heavy_weight_notification_detail" msgid="867643381388543170">"انقر للتبديل إلى التطبيق"</string>
-    <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"تبديل التطبيقات؟"</string>
-    <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"يوجد تطبيق آخر قيد التشغيل فعلاً ويجب إيقافه حتى تتمكن من بدء تطبيق جديد."</string>
-    <string name="old_app_action" msgid="493129172238566282">"عودة إلى <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
-    <string name="old_app_description" msgid="2082094275580358049">"عدم بدء التطبيق الجديد."</string>
-    <string name="new_app_action" msgid="5472756926945440706">"بدء <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
-    <string name="new_app_description" msgid="1932143598371537340">"إيقاف التطبيق القديم بدون الحفظ."</string>
+    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
+    <skip />
+    <!-- no translation found for old_app_action (3044685170829526403) -->
+    <skip />
+    <!-- no translation found for new_app_action (6694851182870774403) -->
+    <skip />
+    <!-- no translation found for new_app_description (5894852887817332322) -->
+    <skip />
     <string name="dump_heap_notification" msgid="2618183274836056542">"لقد تجاوزت <xliff:g id="PROC">%1$s</xliff:g> حد الذاكرة."</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"تم نسخ الذاكرة، انقر للمشاركة."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"هل تريد مشاركة نَسْخ الذاكرة؟"</string>

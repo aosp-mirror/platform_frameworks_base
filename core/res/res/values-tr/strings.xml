@@ -93,8 +93,7 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS mesajları"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Sesli mesajlar"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Kablosuz çağrı"</string>
-    <!-- no translation found for notification_channel_sim (4052095493875188564) -->
-    <skip />
+    <string name="notification_channel_sim" msgid="4052095493875188564">"SIM durumu"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Karşı taraf TTY Modunu TAM yaptı"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Karşı taraf TTY Modunu HCO yaptı"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Karşı taraf TTY Modunu VCO yaptı"</string>
@@ -240,8 +239,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"Ayarlar"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Asist"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Sesli Yardım"</string>
-    <!-- no translation found for global_action_lockdown (1099326950891078929) -->
-    <skip />
+    <string name="global_action_lockdown" msgid="1099326950891078929">"Tam gizlilik"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"Yeni bildirim"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Sanal klavye"</string>
@@ -828,8 +826,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"İpucu: Yakınlaştırmak ve uzaklaştırmak için iki kez dokunun."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Otomatik Doldur"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Otomatik doldurma ayarla"</string>
-    <!-- no translation found for autofill_window_title (921006636895825007) -->
-    <skip />
+    <string name="autofill_window_title" msgid="921006636895825007">"Otomatik doldur"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1072,7 +1069,7 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Bunu Sistem ayarları &gt; Uygulamalar &gt; İndirilenler bölümünden yeniden etkinleştirin."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> geçerli Ekran boyutu ayarını desteklemiyor ve beklenmedik bir şekilde davranabilir."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Her zaman göster"</string>
-    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"<xliff:g id="APP_NAME">%1$s</xliff:g> uygulaması Android OS\'un uyumlu olmayan önceki bir sürümü için geliştirilmiştir ve beklenmedik şekilde davranabilir. Uygulamanın güncellenmiş bir sürümü mevcut olabilir."</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"<xliff:g id="APP_NAME">%1$s</xliff:g> uygulaması Android OS\'in uyumlu olmayan önceki bir sürümü için geliştirilmiştir ve beklenmedik şekilde davranabilir. Uygulamanın güncellenmiş bir sürümü mevcut olabilir."</string>
     <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Her zaman göster"</string>
     <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Güncellemeleri denetle"</string>
     <string name="smv_application" msgid="3307209192155442829">"<xliff:g id="APPLICATION">%1$s</xliff:g> uygulaması (<xliff:g id="PROCESS">%2$s</xliff:g> işlemi) kendiliğinden uyguladığı StrictMode politikasını ihlal etti."</string>
@@ -1088,13 +1085,18 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Uygulamalar başlatılıyor"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Açılış tamamlanıyor."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> çalışıyor"</string>
-    <string name="heavy_weight_notification_detail" msgid="867643381388543170">"Uygulamaya geçmek için dokunun"</string>
-    <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"Uygulama değiştirilsin mi?"</string>
-    <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"Başka bir uygulama zaten çalışıyor. Yeni bir uygulama başlatmadan bu uygulama durdurulmalıdır."</string>
-    <string name="old_app_action" msgid="493129172238566282">"<xliff:g id="OLD_APP">%1$s</xliff:g> öğesine geri dön"</string>
-    <string name="old_app_description" msgid="2082094275580358049">"Yeni uygulamayı başlatmayın."</string>
-    <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> uygulamasını başlat"</string>
-    <string name="new_app_description" msgid="1932143598371537340">"Kaydetmeden eski uygulamayı durdurun."</string>
+    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
+    <skip />
+    <!-- no translation found for old_app_action (3044685170829526403) -->
+    <skip />
+    <!-- no translation found for new_app_action (6694851182870774403) -->
+    <skip />
+    <!-- no translation found for new_app_description (5894852887817332322) -->
+    <skip />
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> bellek sınırını aştı"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Yığın dökümü toplandı. Paylaşmak için dokunun"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Yığın dökümü paylaşılsın mı?"</string>
@@ -1200,12 +1202,9 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM kart eklendi"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Mobil ağa erişmek için cihazınızı yeniden başlatın."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Yeniden başlat"</string>
-    <!-- no translation found for install_carrier_app_notification_title (9056007111024059888) -->
-    <skip />
-    <!-- no translation found for install_carrier_app_notification_text (3346681446158696001) -->
-    <skip />
-    <!-- no translation found for install_carrier_app_notification_button (3094206295081900849) -->
-    <skip />
+    <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Mobil hizmeti etkinleştirin"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Yeni SIM\'inizi etkinleştirmek için operatörün uygulamasını indirin"</string>
+    <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Uygulama indir"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Yeni SIM kart takıldı"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Kurmak için dokunun"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Saati ayarlayın"</string>

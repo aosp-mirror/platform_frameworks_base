@@ -93,8 +93,7 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"এসএমএস মেসেজ"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"ভয়েসমেল মেসেজ"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"ওয়াই-ফাই কলিং"</string>
-    <!-- no translation found for notification_channel_sim (4052095493875188564) -->
-    <skip />
+    <string name="notification_channel_sim" msgid="4052095493875188564">"সিম কার্ডের স্টাটাস"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"পির TTY মোড FULL অনুরোধ করেছে"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"পির TTY মোড HCO অনুরোধ করেছে"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"পির TTY মোড VCO অনুরোধ করেছে"</string>
@@ -240,8 +239,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"সেটিংস"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"সহযোগিতা"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"ভয়েস সহায়তা"</string>
-    <!-- no translation found for global_action_lockdown (1099326950891078929) -->
-    <skip />
+    <string name="global_action_lockdown" msgid="1099326950891078929">"লকডাউন"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"৯৯৯+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"নতুন বিজ্ঞপ্তি"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"ভার্চুয়াল কীবোর্ড"</string>
@@ -828,8 +826,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"টিপ: জুম বাড়ানো ও কমানোর জন্য দুইবার আলতো চাপুন৷"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"স্বতঃপূর্ণ"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"স্বতঃপূর্ণ সেট করুন"</string>
-    <!-- no translation found for autofill_window_title (921006636895825007) -->
-    <skip />
+    <string name="autofill_window_title" msgid="921006636895825007">"আপনাআপনি পূরণ করুন"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$১$২$৩"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1088,13 +1085,18 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"অ্যাপ্লিকেশানগুলি শুরু করা হচ্ছে৷"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"চালু করা সম্পূর্ণ হচ্ছে৷"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> চলছে"</string>
-    <string name="heavy_weight_notification_detail" msgid="867643381388543170">"অ্যাপ্লিকেশান পাল্টাতে আলতো চাপুন"</string>
-    <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"একটি থেকে অন্য অ্যাপ্লিকেশানগুলিতে পরিবর্তন করবেন?"</string>
-    <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"অন্য একটি অ্যাপ্লিকেশান ইতিমধ্যেই চলছে, নতুন একটি চালু করতে আপনাকে অবশ্যই সেটি বন্ধ করতে হবে৷"</string>
-    <string name="old_app_action" msgid="493129172238566282">"<xliff:g id="OLD_APP">%1$s</xliff:g> এ ফিরুন"</string>
-    <string name="old_app_description" msgid="2082094275580358049">"নতুন অ্যাপ্লিকেশান চালু করবেন না৷"</string>
-    <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> শুরু করুন"</string>
-    <string name="new_app_description" msgid="1932143598371537340">"সংরক্ষণ না করেই পুরোনো অ্যাপ্লিকেশানটি বন্ধ করুন৷"</string>
+    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
+    <skip />
+    <!-- no translation found for old_app_action (3044685170829526403) -->
+    <skip />
+    <!-- no translation found for new_app_action (6694851182870774403) -->
+    <skip />
+    <!-- no translation found for new_app_description (5894852887817332322) -->
+    <skip />
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> মেমরি সীমা অতিক্রম করেছে"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"অনেক ডেটা সংগ্রহ করা হয়েছে; শেয়ার করার জন্য ট্যাপ করুন"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"হিপ ডাম্প শেয়ার করবেন?"</string>
@@ -1201,12 +1203,9 @@
     <string name="sim_added_title" msgid="3719670512889674693">"সিম কার্ড যোগ করা হয়েছে"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"মোবাইল নেটওয়ার্ক অ্যাক্সেস করতে আপনার ডিভাইসটি পুনর্সূচনা করুন৷"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"রিস্টার্ট করুন"</string>
-    <!-- no translation found for install_carrier_app_notification_title (9056007111024059888) -->
-    <skip />
-    <!-- no translation found for install_carrier_app_notification_text (3346681446158696001) -->
-    <skip />
-    <!-- no translation found for install_carrier_app_notification_button (3094206295081900849) -->
-    <skip />
+    <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"মোবাইল পরিষেবা চালু করুন"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"আপনার নতুন সিম কার্ড চালু করতে পরিষেবা প্রদানকারীর অ্যাপটি ডাউনলোড করুন"</string>
+    <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"অ্যাপ ডাউনলোড করুন"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"নতুন সিম ঢোকানো হয়েছে"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"এটিকে সেট আপ করতে আলতো চাপুন"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"সময় সেট করুন"</string>
@@ -1839,10 +1838,7 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"ক্ষতিকর অ্যাপ শনাক্ত করা হয়েছে"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> অ্যাপটি <xliff:g id="APP_2">%2$s</xliff:g> এর অংশ দেখাতে চায়"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"এডিট করুন"</string>
-    <!-- no translation found for notification_channel_system_changes (5072715579030948646) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_title (3799603322910377294) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_content (6603123479476554768) -->
-    <skip />
+    <string name="notification_channel_system_changes" msgid="5072715579030948646">"সিস্টেমে হয়ে থাকা পরিবর্তন"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\'বিরক্ত করবেন না\' মোডের সেটিং বদলে গেছে"</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"বিজ্ঞপ্তির উপর ট্যাপ করে জানুন আপনি বাধার জন্য কোন সেটিংস সেট করেছেন"</string>
 </resources>
