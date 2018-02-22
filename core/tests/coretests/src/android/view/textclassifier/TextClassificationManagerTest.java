@@ -41,7 +41,7 @@ import java.util.Collections;
 @RunWith(AndroidJUnit4.class)
 public class TextClassificationManagerTest {
 
-    private static final LocaleList LOCALES = LocaleList.forLanguageTags("en");
+    private static final LocaleList LOCALES = LocaleList.forLanguageTags("en-US");
     private static final String NO_TYPE = null;
 
     private TextClassificationManager mTcm;
@@ -178,6 +178,42 @@ public class TextClassificationManagerTest {
                         classifiedText,
                         TextClassifier.TYPE_URL,
                         "http://ANDROID.COM"));
+    }
+
+    @Test
+    public void testTextClassifyText_date() {
+        if (isTextClassifierDisabled()) return;
+
+        String text = "Let's meet on January 9, 2018.";
+        String classifiedText = "January 9, 2018";
+        int startIndex = text.indexOf(classifiedText);
+        int endIndex = startIndex + classifiedText.length();
+
+        TextClassification classification = mClassifier.classifyText(
+                text, startIndex, endIndex, mClassificationOptions);
+        assertThat(classification,
+                isTextClassification(
+                        classifiedText,
+                        TextClassifier.TYPE_DATE,
+                        null));
+    }
+
+    @Test
+    public void testTextClassifyText_datetime() {
+        if (isTextClassifierDisabled()) return;
+
+        String text = "Let's meet 2018/01/01 10:30:20.";
+        String classifiedText = "2018/01/01 10:30:20";
+        int startIndex = text.indexOf(classifiedText);
+        int endIndex = startIndex + classifiedText.length();
+
+        TextClassification classification = mClassifier.classifyText(
+                text, startIndex, endIndex, mClassificationOptions);
+        assertThat(classification,
+                isTextClassification(
+                        classifiedText,
+                        TextClassifier.TYPE_DATE_TIME,
+                        null));
     }
 
     @Test
@@ -334,7 +370,8 @@ public class TextClassificationManagerTest {
                             && text.equals(result.getText())
                             && result.getEntityCount() > 0
                             && type.equals(result.getEntity(0))
-                            && intentUri.equals(result.getIntent().getDataString());
+                            && (intentUri == null
+                                || intentUri.equals(result.getIntent().getDataString()));
                     // TODO: Include other properties.
                 }
                 return false;
