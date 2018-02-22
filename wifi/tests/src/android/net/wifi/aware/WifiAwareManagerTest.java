@@ -19,14 +19,20 @@ package android.net.wifi.aware;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.net.wifi.RttManager;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -79,11 +85,31 @@ public class WifiAwareManagerTest {
     @Mock
     public RttManager.RttListener mockRttListener;
 
+    @Mock
+    public PackageManager mockPackageManager;
+
+    @Mock
+    public ApplicationInfo mockApplicationInfo;
+
     private static final int AWARE_STATUS_ERROR = -1;
+
+    private static final byte[] PMK_VALID = "01234567890123456789012345678901".getBytes();
+    private static final byte[] PMK_INVALID = "012".getBytes();
+
+    private static final String PASSPHRASE_VALID = "SomeLongEnoughPassphrase";
+    private static final String PASSPHRASE_TOO_SHORT = "012";
+    private static final String PASSPHRASE_TOO_LONG =
+            "0123456789012345678901234567890123456789012345678901234567890123456789";
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+
+        mockApplicationInfo.targetSdkVersion = Build.VERSION_CODES.P;
+        when(mockPackageManager.getApplicationInfo(anyString(), anyInt())).thenReturn(
+                mockApplicationInfo);
+        when(mockContext.getOpPackageName()).thenReturn("XXX");
+        when(mockContext.getPackageManager()).thenReturn(mockPackageManager);
 
         mDut = new WifiAwareManager(mockContext, mockAwareService);
         mMockLooper = new TestLooper();
@@ -884,8 +910,8 @@ public class WifiAwareManagerTest {
         final int sessionId = 123;
         final PeerHandle peerHandle = new PeerHandle(123412);
         final int role = WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER;
-        final byte[] pmk = "01234567890123456789012345678901".getBytes();
-        final String passphrase = "A really bad password";
+        final byte[] pmk = PMK_VALID;
+        final String passphrase = PASSPHRASE_VALID;
         final ConfigRequest configRequest = new ConfigRequest.Builder().build();
         final PublishConfig publishConfig = new PublishConfig.Builder().build();
 
@@ -965,8 +991,8 @@ public class WifiAwareManagerTest {
         final ConfigRequest configRequest = new ConfigRequest.Builder().build();
         final byte[] someMac = HexEncoding.decode("000102030405".toCharArray(), false);
         final int role = WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_INITIATOR;
-        final byte[] pmk = "01234567890123456789012345678901".getBytes();
-        final String passphrase = "A really bad password";
+        final byte[] pmk = PMK_VALID;
+        final String passphrase = PASSPHRASE_VALID;
 
         ArgumentCaptor<WifiAwareSession> sessionCaptor = ArgumentCaptor.forClass(
                 WifiAwareSession.class);
@@ -1030,7 +1056,7 @@ public class WifiAwareManagerTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testNetworkSpecifierWithClientIncorrectLengthPmk() throws Exception {
-        executeNetworkSpecifierWithClient(new PeerHandle(123412), true, "012".getBytes(), null);
+        executeNetworkSpecifierWithClient(new PeerHandle(123412), true, PMK_INVALID, null);
     }
 
     /**
@@ -1045,17 +1071,17 @@ public class WifiAwareManagerTest {
      * Validate that a too short Passphrase triggers an exception.
      */
     @Test(expected = IllegalArgumentException.class)
-    public void testNetworkSpecifierWithClientShortPassphrase() throws Exception {
-        executeNetworkSpecifierWithClient(new PeerHandle(123412), false, null, "012");
+    public void testNetworkSpecifierWithClientTooShortPassphrase() throws Exception {
+        executeNetworkSpecifierWithClient(new PeerHandle(123412), false, null,
+                PASSPHRASE_TOO_SHORT);
     }
 
     /**
      * Validate that a too long Passphrase triggers an exception.
      */
     @Test(expected = IllegalArgumentException.class)
-    public void testNetworkSpecifierWithClientLongPassphrase() throws Exception {
-        executeNetworkSpecifierWithClient(new PeerHandle(123412), false, null,
-                "0123456789012345678901234567890123456789012345678901234567890123456789");
+    public void testNetworkSpecifierWithClientTooLongPassphrase() throws Exception {
+        executeNetworkSpecifierWithClient(new PeerHandle(123412), false, null, PASSPHRASE_TOO_LONG);
     }
 
     /**
@@ -1063,8 +1089,16 @@ public class WifiAwareManagerTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testNetworkSpecifierWithClientNullPeer() throws Exception {
-        executeNetworkSpecifierWithClient(null, false, null,
-                "0123456789012345678901234567890123456789012345678901234567890123456789");
+        executeNetworkSpecifierWithClient(null, false, null, PASSPHRASE_VALID);
+    }
+
+    /**
+     * Validate that a null PeerHandle does not trigger an exception for legacy API.
+     */
+    @Test
+    public void testNetworkSpecifierWithClientNullPeerLegacyApi() throws Exception {
+        mockApplicationInfo.targetSdkVersion = Build.VERSION_CODES.O;
+        executeNetworkSpecifierWithClient(null, false, null, PASSPHRASE_VALID);
     }
 
     private void executeNetworkSpecifierWithClient(PeerHandle peerHandle, boolean doPmk, byte[] pmk,
@@ -1117,7 +1151,7 @@ public class WifiAwareManagerTest {
     @Test(expected = IllegalArgumentException.class)
     public void testNetworkSpecifierDirectNullPmk() throws Exception {
         executeNetworkSpecifierDirect(HexEncoding.decode("000102030405".toCharArray(), false), true,
-                null, null);
+                null, null, true);
     }
 
     /**
@@ -1126,7 +1160,7 @@ public class WifiAwareManagerTest {
     @Test(expected = IllegalArgumentException.class)
     public void testNetworkSpecifierDirectIncorrectLengthPmk() throws Exception {
         executeNetworkSpecifierDirect(HexEncoding.decode("000102030405".toCharArray(), false), true,
-                "012".getBytes(), null);
+                PMK_INVALID, null, true);
     }
 
     /**
@@ -1135,40 +1169,57 @@ public class WifiAwareManagerTest {
     @Test(expected = IllegalArgumentException.class)
     public void testNetworkSpecifierDirectNullPassphrase() throws Exception {
         executeNetworkSpecifierDirect(HexEncoding.decode("000102030405".toCharArray(), false),
-                false, null, null);
+                false, null, null, true);
     }
 
     /**
      * Validate that a too short Passphrase triggers an exception.
      */
     @Test(expected = IllegalArgumentException.class)
-    public void testNetworkSpecifierDirectShortPassphrase() throws Exception {
+    public void testNetworkSpecifierDirectTooShortPassphrase() throws Exception {
         executeNetworkSpecifierDirect(HexEncoding.decode("000102030405".toCharArray(), false),
-                false, null, "012");
+                false, null, PASSPHRASE_TOO_SHORT, true);
     }
 
     /**
      * Validate that a too long Passphrase triggers an exception.
      */
     @Test(expected = IllegalArgumentException.class)
-    public void testNetworkSpecifierDirectLongPassphrase() throws Exception {
+    public void testNetworkSpecifierDirectTooLongPassphrase() throws Exception {
         executeNetworkSpecifierDirect(HexEncoding.decode("000102030405".toCharArray(), false),
-                false, null,
-                "0123456789012345678901234567890123456789012345678901234567890123456789");
+                false, null, PASSPHRASE_TOO_LONG, true);
     }
 
     /**
-     * Validate that a null peer MAC triggers an exception.
+     * Validate that a null peer MAC triggers an exception for an Initiator.
      */
     @Test(expected = IllegalArgumentException.class)
-    public void testNetworkSpecifierDirectNullPeer() throws Exception {
-        executeNetworkSpecifierDirect(null, false, null, null);
+    public void testNetworkSpecifierDirectNullPeerInitiator() throws Exception {
+        executeNetworkSpecifierDirect(null, false, null, PASSPHRASE_VALID, true);
+    }
+
+    /**
+     * Validate that a null peer MAC triggers an exception for a Resonder.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testNetworkSpecifierDirectNullPeerResponder() throws Exception {
+        executeNetworkSpecifierDirect(null, false, null, PASSPHRASE_VALID, false);
+    }
+
+    /**
+     * Validate that a null peer MAC does not trigger an exception for a Resonder on legacy API.
+     */
+    @Test
+    public void testNetworkSpecifierDirectNullPeerResponderLegacyApi() throws Exception {
+        mockApplicationInfo.targetSdkVersion = Build.VERSION_CODES.O;
+        executeNetworkSpecifierDirect(null, false, null, PASSPHRASE_VALID, false);
     }
 
     private void executeNetworkSpecifierDirect(byte[] someMac, boolean doPmk, byte[] pmk,
-            String passphrase) throws Exception {
+            String passphrase, boolean doInitiator) throws Exception {
         final int clientId = 134;
-        final int role = WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_INITIATOR;
+        final int role = doInitiator ? WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_INITIATOR
+                : WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER;
         final ConfigRequest configRequest = new ConfigRequest.Builder().build();
 
         ArgumentCaptor<WifiAwareSession> sessionCaptor = ArgumentCaptor.forClass(
