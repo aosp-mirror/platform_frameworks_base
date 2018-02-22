@@ -24,6 +24,7 @@ import android.hardware.camera2.impl.SyntheticKey;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.utils.HashCodeHelpers;
 import android.hardware.camera2.utils.TypeReference;
+import android.hardware.camera2.utils.SurfaceUtils;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
@@ -643,6 +644,30 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
                         break;
                     }
                 }
+
+                if (!streamFound) {
+                    // Check if we can match s by native object ID
+                    long reqSurfaceId = SurfaceUtils.getSurfaceId(s);
+                    for (int j = 0; j < configuredOutputs.size(); ++j) {
+                        int streamId = configuredOutputs.keyAt(j);
+                        OutputConfiguration outConfig = configuredOutputs.valueAt(j);
+                        int surfaceId = 0;
+                        for (Surface outSurface : outConfig.getSurfaces()) {
+                            if (reqSurfaceId == SurfaceUtils.getSurfaceId(outSurface)) {
+                                streamFound = true;
+                                mStreamIdxArray[i] = streamId;
+                                mSurfaceIdxArray[i] = surfaceId;
+                                i++;
+                                break;
+                            }
+                            surfaceId++;
+                        }
+                        if (streamFound) {
+                            break;
+                        }
+                    }
+                }
+
                 if (!streamFound) {
                     mStreamIdxArray = null;
                     mSurfaceIdxArray = null;
