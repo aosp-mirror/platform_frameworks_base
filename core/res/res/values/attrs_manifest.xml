@@ -2345,6 +2345,16 @@
         <attr name="logo" />
         <attr name="priority" />
         <attr name="autoVerify" />
+        <!-- Within an application, multiple intent filters may match a particular
+             intent. This allows the app author to specify the order filters should
+             be considered. We don't want to use priority because that is global
+             across applications.
+             <p>Only use if you really need to forcibly set the order in which
+             filters are evaluated. It is preferred to target an activity with a
+             directed intent instead.
+             <p>The value is a single integer, with higher numbers considered to
+             be better. If not specified, the default order is 0. -->
+        <attr name="order" />
     </declare-styleable>
 
     <!-- Attributes that can be supplied in an AndroidManifest.xml
