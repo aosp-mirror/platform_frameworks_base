@@ -19,15 +19,15 @@ package com.android.internal.os;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.SparseArray;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,6 +37,8 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.io.BufferedReader;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 
 /**
@@ -50,9 +52,9 @@ import java.util.Arrays;
  *
  * Build: m FrameworksCoreTests
  * Install: adb install -r \
- *     ${ANDROID_PRODUCT_OUT}/data/app/FrameworksCoreTests/FrameworksCoreTests.apk
+ * ${ANDROID_PRODUCT_OUT}/data/app/FrameworksCoreTests/FrameworksCoreTests.apk
  * Run: adb shell am instrument -e class com.android.internal.os.KernelUidCpuFreqTimeReaderTest -w \
- *     com.android.frameworks.coretests/android.support.test.runner.AndroidJUnitRunner
+ * com.android.frameworks.coretests/android.support.test.runner.AndroidJUnitRunner
  *
  * or
  *
@@ -61,16 +63,22 @@ import java.util.Arrays;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class KernelUidCpuFreqTimeReaderTest {
-    @Mock private BufferedReader mBufferedReader;
-    @Mock private KernelUidCpuFreqTimeReader.Callback mCallback;
-    @Mock private PowerProfile mPowerProfile;
+    @Mock
+    private BufferedReader mBufferedReader;
+    @Mock
+    private KernelUidCpuFreqTimeReader.Callback mCallback;
+    @Mock
+    private PowerProfile mPowerProfile;
+    @Mock
+    private KernelCpuProcReader mProcReader;
 
     private KernelUidCpuFreqTimeReader mKernelUidCpuFreqTimeReader;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mKernelUidCpuFreqTimeReader = new KernelUidCpuFreqTimeReader();
+        mKernelUidCpuFreqTimeReader = new KernelUidCpuFreqTimeReader(mProcReader);
+        mKernelUidCpuFreqTimeReader.setThrottleInterval(0);
     }
 
     @Test
@@ -154,7 +162,7 @@ public class KernelUidCpuFreqTimeReaderTest {
                 .thenReturn(getFreqsLine(freqs), getUidTimesLines(uids, times));
         mKernelUidCpuFreqTimeReader.readDelta(mBufferedReader, mCallback);
         for (int i = 0; i < uids.length; ++i) {
-            verify(mCallback).onUidCpuFreqTime(uids[i], times[i]);
+            Mockito.verify(mCallback).onUidCpuFreqTime(uids[i], times[i]);
         }
         verifyNoMoreInteractions(mCallback);
 
@@ -170,7 +178,7 @@ public class KernelUidCpuFreqTimeReaderTest {
                 .thenReturn(getFreqsLine(freqs), getUidTimesLines(uids, newTimes1));
         mKernelUidCpuFreqTimeReader.readDelta(mBufferedReader, mCallback);
         for (int i = 0; i < uids.length; ++i) {
-            verify(mCallback).onUidCpuFreqTime(uids[i], subtract(newTimes1[i], times[i]));
+            Mockito.verify(mCallback).onUidCpuFreqTime(uids[i], subtract(newTimes1[i], times[i]));
         }
         verifyNoMoreInteractions(mCallback);
 
@@ -206,9 +214,86 @@ public class KernelUidCpuFreqTimeReaderTest {
                 .thenReturn(getFreqsLine(freqs), getUidTimesLines(uids, newTimes3));
         mKernelUidCpuFreqTimeReader.readDelta(mBufferedReader, mCallback);
         for (int i = 0; i < uids.length; ++i) {
-            verify(mCallback).onUidCpuFreqTime(uids[i], subtract(newTimes3[i], newTimes2[i]));
+            Mockito.verify(mCallback).onUidCpuFreqTime(uids[i],
+                    subtract(newTimes3[i], newTimes2[i]));
         }
         verifyNoMoreInteractions(mCallback);
+    }
+
+    @Test
+    public void testReadDelta_Binary() throws Exception {
+        VerifiableCallback cb = new VerifiableCallback();
+        final long[] freqs = {110, 123, 145, 167, 289, 997};
+        final int[] uids = {1, 22, 333, 444, 555};
+        final long[][] times = new long[uids.length][freqs.length];
+        for (int i = 0; i < uids.length; ++i) {
+            for (int j = 0; j < freqs.length; ++j) {
+                times[i][j] = uids[i] * freqs[j] * 10;
+            }
+        }
+        when(mBufferedReader.readLine()).thenReturn(getFreqsLine(freqs));
+        long[] actualFreqs = mKernelUidCpuFreqTimeReader.readFreqs(mBufferedReader, mPowerProfile);
+
+        assertArrayEquals(freqs, actualFreqs);
+        when(mProcReader.readBytes()).thenReturn(getUidTimesBytes(uids, times));
+        mKernelUidCpuFreqTimeReader.readDeltaBinary(cb);
+        for (int i = 0; i < uids.length; ++i) {
+            cb.verify(uids[i], times[i]);
+        }
+        cb.verifyNoMoreInteractions();
+
+        // Verify that a second call will only return deltas.
+        cb.clear();
+        Mockito.reset(mProcReader);
+        final long[][] newTimes1 = new long[uids.length][freqs.length];
+        for (int i = 0; i < uids.length; ++i) {
+            for (int j = 0; j < freqs.length; ++j) {
+                newTimes1[i][j] = times[i][j] + (uids[i] + freqs[j]) * 50;
+            }
+        }
+        when(mProcReader.readBytes()).thenReturn(getUidTimesBytes(uids, newTimes1));
+        mKernelUidCpuFreqTimeReader.readDeltaBinary(cb);
+        for (int i = 0; i < uids.length; ++i) {
+            cb.verify(uids[i], subtract(newTimes1[i], times[i]));
+        }
+        cb.verifyNoMoreInteractions();
+
+        // Verify that there won't be a callback if the proc file values didn't change.
+        cb.clear();
+        Mockito.reset(mProcReader);
+        when(mProcReader.readBytes()).thenReturn(getUidTimesBytes(uids, newTimes1));
+        mKernelUidCpuFreqTimeReader.readDeltaBinary(cb);
+        cb.verifyNoMoreInteractions();
+
+        // Verify that calling with a null callback doesn't result in any crashes
+        cb.clear();
+        Mockito.reset(mProcReader);
+        final long[][] newTimes2 = new long[uids.length][freqs.length];
+        for (int i = 0; i < uids.length; ++i) {
+            for (int j = 0; j < freqs.length; ++j) {
+                newTimes2[i][j] = newTimes1[i][j] + (uids[i] * freqs[j]) * 30;
+            }
+        }
+        when(mProcReader.readBytes()).thenReturn(getUidTimesBytes(uids, newTimes2));
+        mKernelUidCpuFreqTimeReader.readDeltaBinary(null);
+        cb.verifyNoMoreInteractions();
+
+        // Verify that the readDelta call will only return deltas when
+        // the previous call had null callback.
+        cb.clear();
+        Mockito.reset(mProcReader);
+        final long[][] newTimes3 = new long[uids.length][freqs.length];
+        for (int i = 0; i < uids.length; ++i) {
+            for (int j = 0; j < freqs.length; ++j) {
+                newTimes3[i][j] = newTimes2[i][j] + (uids[i] + freqs[j]) * 40;
+            }
+        }
+        when(mProcReader.readBytes()).thenReturn(getUidTimesBytes(uids, newTimes3));
+        mKernelUidCpuFreqTimeReader.readDeltaBinary(cb);
+        for (int i = 0; i < uids.length; ++i) {
+            cb.verify(uids[i], subtract(newTimes3[i], newTimes2[i]));
+        }
+        cb.verifyNoMoreInteractions();
     }
 
     @Test
@@ -229,7 +314,7 @@ public class KernelUidCpuFreqTimeReaderTest {
                 .thenReturn(getFreqsLine(freqs), getUidTimesLines(uids, times));
         mKernelUidCpuFreqTimeReader.readDelta(mBufferedReader, mCallback);
         for (int i = 0; i < uids.length; ++i) {
-            verify(mCallback).onUidCpuFreqTime(uids[i], times[i]);
+            Mockito.verify(mCallback).onUidCpuFreqTime(uids[i], times[i]);
         }
         verifyNoMoreInteractions(mCallback);
 
@@ -249,7 +334,7 @@ public class KernelUidCpuFreqTimeReaderTest {
             if (i == uids.length - 1) {
                 continue;
             }
-            verify(mCallback).onUidCpuFreqTime(uids[i], subtract(newTimes1[i], times[i]));
+            Mockito.verify(mCallback).onUidCpuFreqTime(uids[i], subtract(newTimes1[i], times[i]));
         }
         verifyNoMoreInteractions(mCallback);
 
@@ -280,7 +365,8 @@ public class KernelUidCpuFreqTimeReaderTest {
             if (i == uids.length - 1) {
                 continue;
             }
-            verify(mCallback).onUidCpuFreqTime(uids[i], subtract(newTimes2[i], newTimes1[i]));
+            Mockito.verify(mCallback).onUidCpuFreqTime(uids[i],
+                    subtract(newTimes2[i], newTimes1[i]));
         }
         verifyNoMoreInteractions(mCallback);
 
@@ -327,11 +413,55 @@ public class KernelUidCpuFreqTimeReaderTest {
         return lines;
     }
 
+    private ByteBuffer getUidTimesBytes(int[] uids, long[][] times) {
+        int size = (1 + uids.length + uids.length * times[0].length) * 4;
+        ByteBuffer buf = ByteBuffer.allocate(size);
+        buf.order(ByteOrder.nativeOrder());
+        buf.putInt(times[0].length);
+        for (int i = 0; i < uids.length; i++) {
+            buf.putInt(uids[i]);
+            for (int j = 0; j < times[i].length; j++) {
+                buf.putInt((int) (times[i][j] / 10));
+            }
+        }
+        buf.flip();
+        return buf.asReadOnlyBuffer().order(ByteOrder.nativeOrder());
+    }
+
     private void setCpuClusterFreqs(int numClusters, int... clusterFreqs) {
         assertEquals(numClusters, clusterFreqs.length);
         when(mPowerProfile.getNumCpuClusters()).thenReturn(numClusters);
         for (int i = 0; i < numClusters; ++i) {
             when(mPowerProfile.getNumSpeedStepsInCpuCluster(i)).thenReturn(clusterFreqs[i]);
+        }
+    }
+
+    private class VerifiableCallback implements KernelUidCpuFreqTimeReader.Callback {
+
+        SparseArray<long[]> mData = new SparseArray<>();
+        int count = 0;
+
+        public void verify(int uid, long[] cpuFreqTimeMs) {
+            long[] array = mData.get(uid);
+            assertNotNull(array);
+            assertArrayEquals(cpuFreqTimeMs, array);
+            count++;
+        }
+
+        public void clear() {
+            mData.clear();
+            count = 0;
+        }
+
+        @Override
+        public void onUidCpuFreqTime(int uid, long[] cpuFreqTimeMs) {
+            long[] array = new long[cpuFreqTimeMs.length];
+            System.arraycopy(cpuFreqTimeMs, 0, array, 0, array.length);
+            mData.put(uid, array);
+        }
+
+        public void verifyNoMoreInteractions() {
+            assertEquals(mData.size(), count);
         }
     }
 }

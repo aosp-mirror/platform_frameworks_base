@@ -110,7 +110,10 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -12334,7 +12337,7 @@ public class BatteryStatsImpl extends BatteryStats {
     @VisibleForTesting
     public void readKernelUidCpuActiveTimesLocked(boolean onBattery) {
         final long startTimeMs = mClocks.uptimeMillis();
-        mKernelUidCpuActiveTimeReader.readDelta((uid, cpuActiveTimesUs) -> {
+        mKernelUidCpuActiveTimeReader.readDelta((uid, cpuActiveTimesMs) -> {
             uid = mapUid(uid);
             if (Process.isIsolated(uid)) {
                 mKernelUidCpuActiveTimeReader.removeUid(uid);
@@ -12347,7 +12350,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 return;
             }
             final Uid u = getUidStatsLocked(uid);
-            u.mCpuActiveTimeMs.addCountLocked(cpuActiveTimesUs, onBattery);
+            u.mCpuActiveTimeMs.addCountLocked(cpuActiveTimesMs, onBattery);
         });
 
         final long elapsedTimeMs = mClocks.uptimeMillis() - startTimeMs;
@@ -12363,7 +12366,7 @@ public class BatteryStatsImpl extends BatteryStats {
     @VisibleForTesting
     public void readKernelUidCpuClusterTimesLocked(boolean onBattery) {
         final long startTimeMs = mClocks.uptimeMillis();
-        mKernelUidCpuClusterTimeReader.readDelta((uid, cpuClusterTimesUs) -> {
+        mKernelUidCpuClusterTimeReader.readDelta((uid, cpuClusterTimesMs) -> {
             uid = mapUid(uid);
             if (Process.isIsolated(uid)) {
                 mKernelUidCpuClusterTimeReader.removeUid(uid);
@@ -12376,7 +12379,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 return;
             }
             final Uid u = getUidStatsLocked(uid);
-            u.mCpuClusterTimesMs.addCountLocked(cpuClusterTimesUs, onBattery);
+            u.mCpuClusterTimesMs.addCountLocked(cpuClusterTimesMs, onBattery);
         });
 
         final long elapsedTimeMs = mClocks.uptimeMillis() - startTimeMs;
@@ -13326,17 +13329,20 @@ public class BatteryStatsImpl extends BatteryStats {
                 = "read_binary_cpu_time";
         public static final String KEY_PROC_STATE_CPU_TIMES_READ_DELAY_MS
                 = "proc_state_cpu_times_read_delay_ms";
+        public static final String KEY_KERNEL_UID_READERS_THROTTLE_TIME
+                = "kernel_uid_readers_throttle_time";
 
         private static final boolean DEFAULT_TRACK_CPU_TIMES_BY_PROC_STATE = true;
         private static final boolean DEFAULT_TRACK_CPU_ACTIVE_CLUSTER_TIME = true;
         private static final boolean DEFAULT_READ_BINARY_CPU_TIME = false;
         private static final long DEFAULT_PROC_STATE_CPU_TIMES_READ_DELAY_MS = 5_000;
+        private static final long DEFAULT_KERNEL_UID_READERS_THROTTLE_TIME = 10_000;
 
         public boolean TRACK_CPU_TIMES_BY_PROC_STATE = DEFAULT_TRACK_CPU_TIMES_BY_PROC_STATE;
         public boolean TRACK_CPU_ACTIVE_CLUSTER_TIME = DEFAULT_TRACK_CPU_ACTIVE_CLUSTER_TIME;
-        // Not used right now.
         public boolean READ_BINARY_CPU_TIME = DEFAULT_READ_BINARY_CPU_TIME;
         public long PROC_STATE_CPU_TIMES_READ_DELAY_MS = DEFAULT_PROC_STATE_CPU_TIMES_READ_DELAY_MS;
+        public long KERNEL_UID_READERS_THROTTLE_TIME = DEFAULT_KERNEL_UID_READERS_THROTTLE_TIME;
 
         private ContentResolver mResolver;
         private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -13374,11 +13380,14 @@ public class BatteryStatsImpl extends BatteryStats {
                                 DEFAULT_TRACK_CPU_TIMES_BY_PROC_STATE));
                 TRACK_CPU_ACTIVE_CLUSTER_TIME = mParser.getBoolean(
                         KEY_TRACK_CPU_ACTIVE_CLUSTER_TIME, DEFAULT_TRACK_CPU_ACTIVE_CLUSTER_TIME);
-                READ_BINARY_CPU_TIME = mParser.getBoolean(
-                        KEY_READ_BINARY_CPU_TIME, DEFAULT_READ_BINARY_CPU_TIME);
+                updateReadBinaryCpuTime(READ_BINARY_CPU_TIME,
+                        mParser.getBoolean(KEY_READ_BINARY_CPU_TIME, DEFAULT_READ_BINARY_CPU_TIME));
                 updateProcStateCpuTimesReadDelayMs(PROC_STATE_CPU_TIMES_READ_DELAY_MS,
                         mParser.getLong(KEY_PROC_STATE_CPU_TIMES_READ_DELAY_MS,
-                        DEFAULT_PROC_STATE_CPU_TIMES_READ_DELAY_MS));
+                                DEFAULT_PROC_STATE_CPU_TIMES_READ_DELAY_MS));
+                updateKernelUidReadersThrottleTime(KERNEL_UID_READERS_THROTTLE_TIME,
+                        mParser.getLong(KEY_KERNEL_UID_READERS_THROTTLE_TIME,
+                                DEFAULT_KERNEL_UID_READERS_THROTTLE_TIME));
             }
         }
 
@@ -13394,12 +13403,29 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
+        private void updateReadBinaryCpuTime(boolean oldEnabled, boolean isEnabled) {
+            READ_BINARY_CPU_TIME = isEnabled;
+            if (oldEnabled != isEnabled) {
+                mKernelUidCpuFreqTimeReader.setReadBinary(isEnabled);
+            }
+        }
+
         private void updateProcStateCpuTimesReadDelayMs(long oldDelayMillis, long newDelayMillis) {
             PROC_STATE_CPU_TIMES_READ_DELAY_MS = newDelayMillis;
             if (oldDelayMillis != newDelayMillis) {
                 mNumCpuTimeReads = 0;
                 mNumBatchedCpuTimeReads = 0;
                 mCpuTimeReadsTrackingStartTime = mClocks.uptimeMillis();
+            }
+        }
+
+        private void updateKernelUidReadersThrottleTime(long oldTimeMs, long newTimeMs) {
+            KERNEL_UID_READERS_THROTTLE_TIME = newTimeMs;
+            if (oldTimeMs != newTimeMs) {
+                mKernelUidCpuFreqTimeReader.setThrottleInterval(KERNEL_UID_READERS_THROTTLE_TIME);
+                mKernelUidCpuActiveTimeReader.setThrottleInterval(KERNEL_UID_READERS_THROTTLE_TIME);
+                mKernelUidCpuClusterTimeReader
+                        .setThrottleInterval(KERNEL_UID_READERS_THROTTLE_TIME);
             }
         }
 
@@ -13412,6 +13438,8 @@ public class BatteryStatsImpl extends BatteryStats {
             pw.println(READ_BINARY_CPU_TIME);
             pw.print(KEY_PROC_STATE_CPU_TIMES_READ_DELAY_MS); pw.print("=");
             pw.println(PROC_STATE_CPU_TIMES_READ_DELAY_MS);
+            pw.print(KEY_KERNEL_UID_READERS_THROTTLE_TIME); pw.print("=");
+            pw.println(KERNEL_UID_READERS_THROTTLE_TIME);
         }
     }
 
