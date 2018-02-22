@@ -25731,7 +25731,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         public void notifyAppTransitionFinished() {
             synchronized (ActivityManagerService.this) {
                 mStackSupervisor.notifyAppTransitionDone();
-                mKeyguardController.notifyAppTransitionDone();
             }
         }
 
