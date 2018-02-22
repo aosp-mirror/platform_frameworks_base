@@ -52,6 +52,7 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.DebugUtils;
@@ -1621,6 +1622,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
     }
 
     int runSwitchUser(PrintWriter pw) throws RemoteException {
+        UserManager userManager = mInternal.mContext.getSystemService(UserManager.class);
+        if (!userManager.canSwitchUsers()) {
+            getErrPrintWriter().println("Error: disallowed switching user");
+            return -1;
+        }
         String user = getNextArgRequired();
         mInterface.switchUser(Integer.parseInt(user));
         return 0;
