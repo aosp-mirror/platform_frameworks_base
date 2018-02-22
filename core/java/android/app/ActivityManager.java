@@ -3335,6 +3335,28 @@ public class ActivityManager {
     }
 
     /**
+     * Query whether the user has enabled background restrictions for this app.
+     *
+     * <p> The user may chose to do this, if they see that an app is consuming an unreasonable
+     * amount of battery while in the background. </p>
+     *
+     * <p> If true, any work that the app tries to do will be aggressively restricted while it is in
+     * the background. At a minimum, jobs and alarms will not execute and foreground services
+     * cannot be started unless an app activity is in the foreground. </p>
+     *
+     * <p><b> Note that these restrictions stay in effect even when the device is charging.</b></p>
+     *
+     * @return true if user has enforced background restrictions for this app, false otherwise.
+     */
+    public boolean isBackgroundRestricted() {
+        try {
+            return getService().isBackgroundRestricted(mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Sets the memory trim mode for a process and schedules a memory trim operation.
      *
      * <p><b>Note: this method is only intended for testing framework.</b></p>

@@ -12856,6 +12856,25 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
+    public boolean isBackgroundRestricted(String packageName) {
+        final int callingUid = Binder.getCallingUid();
+        final IPackageManager pm = AppGlobals.getPackageManager();
+        try {
+            final int packageUid = pm.getPackageUid(packageName, MATCH_DEBUG_TRIAGED_MISSING,
+                    UserHandle.getUserId(callingUid));
+            if (packageUid != callingUid) {
+                throw new IllegalArgumentException("Uid " + callingUid
+                        + " cannot query restriction state for package " + packageName);
+            }
+        } catch (RemoteException exc) {
+            // Ignore.
+        }
+        final int mode = mAppOpsService.checkOperation(AppOpsManager.OP_RUN_ANY_IN_BACKGROUND,
+                callingUid, packageName);
+        return (mode != AppOpsManager.MODE_ALLOWED);
+    }
+
+    @Override
     public void backgroundWhitelistUid(final int uid) {
         if (Binder.getCallingUid() != Process.SYSTEM_UID) {
             throw new SecurityException("Only the OS may call backgroundWhitelistUid()");
