@@ -53,6 +53,8 @@
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"შემდეგი მაღვიძარა დაყენებულია <xliff:g id="ALARM">%1$s</xliff:g>-ზე"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"წაშლა"</string>
     <string name="disable_carrier_button_text" msgid="6914341927421916114">"eSIM-ის გათიშვა"</string>
+    <string name="error_disable_esim_title" msgid="4852978431156228006">"eSIM-ის გათიშვა ვერ ხერხდება"</string>
+    <string name="error_disable_esim_msg" msgid="676694908770135639">"eSIM-ის გათიშვა ვერ ხერხდება წარმოქმნილი შეცდომის გამო."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"შეყვანა"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"დაგავიწყდათ ნიმუში"</string>
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"ნიმუში არასწორია"</string>
@@ -65,7 +67,7 @@
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"დახატეთ თქვენი ნიმუში"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"შეიყვანეთ SIM ბარათის PIN-კოდი."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"შეიყვანეთ SIM ბარათის PIN-კოდი „<xliff:g id="CARRIER">%1$s</xliff:g>“-ისთვის."</string>
-    <string name="kg_sim_lock_instructions_esim" msgid="4957650659201013804">"გათიშეთ eSIM, მოწყობილობის მობილური სერვისების გარეშე გამოსაყენებლად."</string>
+    <string name="kg_sim_lock_esim_instructions" msgid="4416732549172148542">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> გათიშეთ eSIM, მოწყობილობის მობილური სერვისების გარეშე გამოსაყენებლად."</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"შეიყვანეთ PIN-კოდი"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"შეიყვანეთ პაროლი"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"SIM ბარათი ახლა დეაქტივირებულია. გასაგრძელებლად შეიყვანეთ PUK-კოდი. დეტალური ინფორმაციისთვის დაუკავშირდით თქვენს ოპერატორს."</string>

@@ -103,6 +103,8 @@
     <string name="camera_label" msgid="7261107956054836961">"कैमरा खोलें"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"नया कार्य लेआउट चुनें"</string>
     <string name="cancel" msgid="6442560571259935130">"रद्द करें"</string>
+    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
+    <skip />
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"फ़िंगरप्रिंट आइकॉन"</string>
     <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"ऐप्लिकेशन आइकॉन"</string>
     <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"सहायता का मैसेज दिखाने की जगह"</string>
@@ -272,6 +274,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"मिठाई का डिब्बा"</string>
     <string name="start_dreams" msgid="5640361424498338327">"स्क्रीन सेवर"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ईथरनेट"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"परेशान ना करें"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"सिर्फ़ प्राथमिकता"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"सिर्फ़ अलार्म"</string>
@@ -308,8 +312,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"वाई-फ़ाई  बंद"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"वाई-फ़ाई चालू है"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"कोई भी वाई-फ़ाई नेटवर्क उपलब्‍ध नहीं है"</string>
-    <!-- no translation found for quick_settings_alarm_title (2416759007342260676) -->
-    <skip />
+    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"अलार्म"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"कास्ट करें"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"कास्टिंग"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"अनाम डिवाइस"</string>
@@ -359,7 +362,6 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> को सुरक्षित-मोड में बंद किया गया."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Clear all"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"स्क्रीन के दो हिस्से में बंट जाने, स्पिल्ट स्क्रीन, का इस्तेमाल करने के लिए यहां खींचें और छोडें"</string>
-    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"ऐप्लिकेशन बदलने के लिए ऊपर स्वाइप करें"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"क्षैतिज रूप से विभाजित करें"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"लम्बवत रूप से विभाजित करें"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"अपने मुताबिक बांटें"</string>
@@ -500,25 +502,18 @@
     <string name="volume_zen_end_now" msgid="6930243045593601084">"अभी बंद करें"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"विस्तार करें"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"छोटा करें"</string>
-    <!-- no translation found for accessibility_output_chooser (8185317493017988680) -->
-    <skip />
+    <string name="accessibility_output_chooser" msgid="8185317493017988680">"आउटपुट डिवाइस बदलें"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"स्‍क्रीन पिन कर दी गई है"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"इससे वह तब तक दिखता रहता है जब तक कि आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए, \'वापस जाएं\' और \'खास जानकारी\' को दबाकर रखें."</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible (8281145542163727971) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"इससे वह तब तक दिखाई देती है जब तक आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए, होम और वापस जाएं वाले बटन को दबाकर रखें."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"इससे वह तब तक दिखता रहता है जब तक कि आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए, \'खास जानकारी\' को दबाकर रखें."</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible_accessible (6134833683151189507) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (2266705122951934150) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (8252402309499161281) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"इससे वह तब तक दिखाई देती है जब तक आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए, होम बटन को दबाकर रखें."</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"इस स्क्रीन को अनपिन करने के लिए, खास जानकारी और वापस जाएं वाले बटन को दबाकर रखें"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"इस स्क्रीन को अनपिन करने के लिए, होम और वापस जाएं वाले बटन को दबाकर रखें"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"ठीक है"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"नहीं, रहने दें"</string>
-    <!-- no translation found for screen_pinning_start (1022122128489278317) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (5187339744262325372) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="1022122128489278317">"स्‍क्रीन पिन की गई"</string>
+    <string name="screen_pinning_exit" msgid="5187339744262325372">"स्‍क्रीन अनपिन की गई"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> को छिपाएं?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"जब आप उसे अगली बार सेटिंग में चालू करेंगे तो वह फिर से दिखाई देगी."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"छिपाएं"</string>
@@ -541,8 +536,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. म्यूट करने के लिए टैप करें. सुलभता सेवाएं म्यूट हो सकती हैं."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. कंपन (वाइब्रेशन) पर सेट करने के लिए छूएं."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. म्यूट करने के लिए टैप करें."</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s वॉल्यूम नियंत्रण दिखाए गए हैं. खारिज करने के लिए स्वाइप करें."</string>
-    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"वॉल्यूम नियंत्रण छिपे हुए हैं"</string>
+    <string name="volume_dialog_title" msgid="7272969888820035876">"%s की आवाज़ कम या ज़्यादा करने की सुविधा"</string>
     <string name="output_title" msgid="5355078100792942802">"मीडिया आउटपुट"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"फ़ोन कॉल का आउटपुट"</string>
     <string name="output_none_found" msgid="5544982839808921091">"कोई डिवाइस नहीं मि‍ला"</string>
@@ -692,9 +686,8 @@
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"क्लिपबोर्ड"</item>
     <item msgid="5742013440802239414">"कुंजी कोड"</item>
-    <item msgid="8802889973626281575">"कीबोर्ड स्विचर"</item>
-    <item msgid="7095517796293767867">"घुमाने के सुझाव"</item>
-    <item msgid="8494159969042135235">"कोई नहीं"</item>
+    <item msgid="1951959982985094069">"घुमाए जाने की पुष्टि करें, कीबोर्ड की भाषा बदलने की सुविधा"</item>
+    <item msgid="8175437057325747277">"कोई नहीं"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"सामान्य"</item>

@@ -103,12 +103,11 @@
     <string name="camera_label" msgid="7261107956054836961">"abrir cámara"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Selecciona el nuevo diseño de la tarea."</string>
     <string name="cancel" msgid="6442560571259935130">"Cancelar"</string>
-    <!-- no translation found for accessibility_fingerprint_dialog_fingerprint_icon (3125122495414253226) -->
+    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
     <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_app_icon (3228052542929174609) -->
-    <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_help_area (5730471601819225159) -->
-    <skip />
+    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Ícono de huella digital"</string>
+    <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"Ícono de la aplicación"</string>
+    <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Área de mensajes de ayuda"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Botón de zoom de compatibilidad"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom de pantalla más pequeña a más grande"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth conectado"</string>
@@ -277,6 +276,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"Caja para postres"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Protector pantalla"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"No molestar"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Solo prioridad"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Solo alarmas"</string>
@@ -313,6 +314,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi desactivada"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi activado"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"No hay redes Wi-Fi disponibles"</string>
+    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"Alarma"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Transmitir"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Transmitiendo"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Dispositivo sin nombre"</string>
@@ -329,9 +331,11 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"Conectando…"</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Anclaje a red"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Zona"</string>
-    <!-- no translation found for quick_settings_hotspot_secondary_label_transient (7161046712706277215) -->
-    <skip />
-    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (2324635800672199428) -->
+    <string name="quick_settings_hotspot_secondary_label_transient" msgid="7161046712706277215">"Activando…"</string>
+    <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
+      <item quantity="other">%d dispositivos</item>
+      <item quantity="one">%d dispositivo</item>
+    </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Notificaciones"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Linterna"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Datos móviles"</string>
@@ -341,10 +345,8 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"Utilizados: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Límite de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Advertencia de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <!-- no translation found for quick_settings_work_mode_on_label (3421274215098764735) -->
-    <skip />
-    <!-- no translation found for quick_settings_work_mode_off_label (8856918707867192186) -->
-    <skip />
+    <string name="quick_settings_work_mode_on_label" msgid="3421274215098764735">"Perfil de trabajo"</string>
+    <string name="quick_settings_work_mode_off_label" msgid="8856918707867192186">"Las notificaciones y las apps están desactivadas"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Luz nocturna"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Al atardecer"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Hasta el amanecer"</string>
@@ -362,8 +364,6 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> está inhabilitada en modo seguro."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Borrar todo"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Arrastra hasta aquí para usar la pantalla dividida"</string>
-    <!-- no translation found for recents_swipe_up_onboarding (3824607135920170001) -->
-    <skip />
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"División horizontal"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"División vertical"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"División personalizada"</string>
@@ -504,11 +504,18 @@
     <string name="volume_zen_end_now" msgid="6930243045593601084">"Desactivar ahora"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Expandir"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Contraer"</string>
+    <string name="accessibility_output_chooser" msgid="8185317493017988680">"Cambiar dispositivo de salida"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Pantalla fija"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Esta función mantiene la pantalla visible hasta que dejes de fijarla. Para ello, mantén presionados los botones Atrás y Recientes."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Esta función mantiene la pantalla visible hasta que dejes de fijarla. Para ello, mantén presionados los botones de inicio y Atrás."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Esta función mantiene la pantalla visible hasta que dejes de fijarla. Para ello, mantén presionado el botón Recientes."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Esta función mantiene la pantalla visible hasta que dejes de fijarla. Para ello, mantén presionado el botón de inicio."</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"Para dejar de fijar esta pantalla, mantén presionados los botones Atrás y Recientes"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Para dejar de fijar esta pantalla, mantén presionados los botones de inicio y Atrás"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Entendido"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"No, gracias"</string>
+    <string name="screen_pinning_start" msgid="1022122128489278317">"Pantalla fija"</string>
+    <string name="screen_pinning_exit" msgid="5187339744262325372">"Pantalla no fija"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"¿Ocultar <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Volverá a aparecer la próxima vez que se active en la configuración."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Ocultar"</string>
@@ -531,8 +538,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Presiona para silenciar. Es posible que los servicios de accesibilidad estén silenciados."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Presiona para establecer el modo vibración."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Presiona para silenciar."</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Se muestran los controles de volumen de %s. Desliza el dedo para descartar."</string>
-    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Controles de volumen ocultos"</string>
+    <string name="volume_dialog_title" msgid="7272969888820035876">"Controles de volumen %s"</string>
     <string name="output_title" msgid="5355078100792942802">"Salida multimedia"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Salida de llamada telefónica"</string>
     <string name="output_none_found" msgid="5544982839808921091">"No se encontraron dispositivos"</string>
@@ -588,8 +594,7 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Con los controles de activación de notificaciones, puedes establecer un nivel de importancia para las notificaciones de una app. \n\n"<b>"Nivel 5"</b>" \n- Mostrar en la parte superior de la lista de notificaciones. \n- Permitir interrupción en la pantalla completa. \n- Mostrar siempre. \n\n"<b>"Nivel 4"</b>" \n- No permitir interrupción en la pantalla completa. \n- Mostrar siempre. \n\n"<b>"Nivel 3"</b>" \n- No permitir interrupción en la pantalla completa. \n- No mostrar. \n\n"<b>"Nivel 2"</b>" \n- No permitir interrupción en la pantalla completa. \n- No mostrar. \n- No sonar ni vibrar. \n\n"<b>"Nivel 1"</b>" \n- No permitir interrupción en la pantalla completa. \n- No mostrar. \n- No sonar ni vibrar. \n- Ocultar de la pantalla bloqueada y la barra de estado. \n- Mostrar al final de la lista de notificaciones. \n\n"<b>"Nivel 0"</b>" \n- Bloquear todas las notificaciones de la app."</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Notificaciones"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Ya no verás estas notificaciones"</string>
-    <!-- no translation found for inline_blocking_helper (3055064577771478591) -->
-    <skip />
+    <string name="inline_blocking_helper" msgid="3055064577771478591">"Sueles descartar estas notificaciones. \n¿Quieres seguir recibiéndolas?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"¿Quieres seguir viendo estas notificaciones?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Detener notificaciones"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Seguir viendo"</string>
@@ -683,9 +688,8 @@
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Portapapeles"</item>
     <item msgid="5742013440802239414">"Clave de código"</item>
-    <item msgid="8802889973626281575">"Cambio de teclado"</item>
-    <item msgid="7095517796293767867">"Sugerencia de rotación"</item>
-    <item msgid="8494159969042135235">"Ninguno"</item>
+    <item msgid="1951959982985094069">"Confirmar rotación, cambiar de teclado"</item>
+    <item msgid="8175437057325747277">"Ninguno"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"Normal"</item>

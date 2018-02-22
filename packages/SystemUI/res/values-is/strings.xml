@@ -103,12 +103,11 @@
     <string name="camera_label" msgid="7261107956054836961">"opna myndavél"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Velja nýtt útlit verkefna"</string>
     <string name="cancel" msgid="6442560571259935130">"Hætta við"</string>
-    <!-- no translation found for accessibility_fingerprint_dialog_fingerprint_icon (3125122495414253226) -->
+    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
     <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_app_icon (3228052542929174609) -->
-    <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_help_area (5730471601819225159) -->
-    <skip />
+    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Fingrafaratákn"</string>
+    <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"Forritstákn"</string>
+    <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Svæði hjálparskilaboða"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Hnappur fyrir samhæfisaðdrátt."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Aðlaga forrit fyrir lítinn skjá að stærri skjá."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth tengt."</string>
@@ -275,6 +274,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"Eftirréttaborð"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Skjávari"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Ónáðið ekki"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Aðeins forgangur"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Aðeins vekjarar"</string>
@@ -311,6 +312,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Slökkt á Wi-Fi"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Kveikt á Wi-Fi"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Engin Wi-Fi net í boði"</string>
+    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"Vekjari"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Útsending"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Sendir út"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Ónefnt tæki"</string>
@@ -327,9 +329,11 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"Tengist..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Tjóðrun"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Heitur reitur"</string>
-    <!-- no translation found for quick_settings_hotspot_secondary_label_transient (7161046712706277215) -->
-    <skip />
-    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (2324635800672199428) -->
+    <string name="quick_settings_hotspot_secondary_label_transient" msgid="7161046712706277215">"Kveikir..."</string>
+    <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
+      <item quantity="one">%d tæki</item>
+      <item quantity="other">%d tæki</item>
+    </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Tilkynningar"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Vasaljós"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Farsímagögn"</string>
@@ -339,10 +343,8 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> notuð"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> hámark"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> viðvörun"</string>
-    <!-- no translation found for quick_settings_work_mode_on_label (3421274215098764735) -->
-    <skip />
-    <!-- no translation found for quick_settings_work_mode_off_label (8856918707867192186) -->
-    <skip />
+    <string name="quick_settings_work_mode_on_label" msgid="3421274215098764735">"Vinnusnið"</string>
+    <string name="quick_settings_work_mode_off_label" msgid="8856918707867192186">"Slökkt er á tilkynningum og forritum"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Næturljós"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Kveikt við sólsetur"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Til sólarupprásar"</string>
@@ -360,8 +362,6 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Slökkt er á <xliff:g id="APP">%s</xliff:g> í öruggri stillingu."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Hreinsa allt"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Dragðu hingað til að skipta skjánum"</string>
-    <!-- no translation found for recents_swipe_up_onboarding (3824607135920170001) -->
-    <skip />
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Lárétt skipting"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Lóðrétt skipting"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Sérsniðin skipting"</string>
@@ -502,11 +502,18 @@
     <string name="volume_zen_end_now" msgid="6930243045593601084">"Slökkva núna"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Stækka"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Minnka"</string>
+    <string name="accessibility_output_chooser" msgid="8185317493017988680">"Skipta um úttakstæki"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Skjárinn er festur"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Þetta heldur þessu opnu þangað til þú losar það. Haltu fingri á „Til baka“ og „Yfirlit“ til að losa."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Þetta heldur þessu opnu þangað til það er losað. Haltu inni bakkhnappinum og heimahnappinum til að losa."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Þetta heldur þessu opnu þangað til þú losar það. Haltu fingri á „Yfirlit“ til að losa."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Þetta heldur þessu opnu þangað til það er losað. Haltu heimahnappinum inni til að losa."</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"Til að losa þessa skjámynd skaltu halda inni bakkhnappinum og yfirlitshnappinum"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Til að losa þessa skjámynd skaltu halda inni bakkhnappinum og heimahnappinum"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Ég skil"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Nei, takk"</string>
+    <string name="screen_pinning_start" msgid="1022122128489278317">"Skjámynd fest"</string>
+    <string name="screen_pinning_exit" msgid="5187339744262325372">"Skjámynd losuð"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Fela <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Þetta birtist aftur næst þegar þú kveikir á því í stillingunum."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Fela"</string>
@@ -529,8 +536,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Ýttu til að þagga. Hugsanlega verður slökkt á hljóði aðgengisþjónustu."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Ýttu til að stilla á titring."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Ýttu til að þagga."</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s stýringar fyrir hljóðstyrk sýnilegar. Strjúktu upp til að hunsa."</string>
-    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Stýringar fyrir hljóðstyrk faldar"</string>
+    <string name="volume_dialog_title" msgid="7272969888820035876">"%s stýringar á hljóstyrk"</string>
     <string name="output_title" msgid="5355078100792942802">"Margmiðlunarúttak"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Úttak símtals"</string>
     <string name="output_none_found" msgid="5544982839808921091">"Engin tæki fundust"</string>
@@ -586,8 +592,7 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Með orkutilkynningastýringum geturðu stillt mikilvægi frá 0 upp í 5 fyrir tilkynningar forrita. \n\n"<b>"Stig 5"</b>" \n- Sýna efst á tilkynningalista \n- Leyfa truflun þegar birt er á öllum skjánum \n- Kíkja alltaf \n\n"<b>"Stig 4"</b>" \n- Hindra truflun við birtingu á öllum skjánum \n- Kíkja alltaf \n\n"<b>"Stig 3"</b>" \n- Hindra truflun við birtingu á öllum skjánum \n- Kíkja aldrei \n\n"<b>"Stig 2"</b>" \n- Hindra truflun við birtingu á öllum skjánum \n- Kíkja aldrei \n- Slökkva á hljóði og titringi \n\n"<b>"Stig 1"</b>" \n- Hindra truflun við birtingu á öllum skjánum \n- Kíkja aldrei \n- Slökkva á hljóði og titringi \n- Fela á lásskjá og stöðustiku \n- Sýna neðst á tilkynningalista \n\n"<b>"Stig 0"</b>" \n- Setja allar tilkynningar frá forriti á bannlista"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Tilkynningar"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Þú munt ekki sjá þessar tilkynningar aftur"</string>
-    <!-- no translation found for inline_blocking_helper (3055064577771478591) -->
-    <skip />
+    <string name="inline_blocking_helper" msgid="3055064577771478591">"Þú hunsar yfirleitt þessar tilkynningar. \nViltu halda áfram að fá þær?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Sýna áfram þessar tilkynningar?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Stöðva tilkynningar"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Sýna áfram"</string>
@@ -681,9 +686,8 @@
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Klippiborð"</item>
     <item msgid="5742013440802239414">"Lykilkóði"</item>
-    <item msgid="8802889973626281575">"Lyklaborðsval"</item>
-    <item msgid="7095517796293767867">"Tillaga um snúning"</item>
-    <item msgid="8494159969042135235">"Ekkert"</item>
+    <item msgid="1951959982985094069">"Snúa til að staðfesta, lyklaborðsval"</item>
+    <item msgid="8175437057325747277">"Ekkert"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"Venjulegt"</item>

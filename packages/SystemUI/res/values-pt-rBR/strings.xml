@@ -103,6 +103,8 @@
     <string name="camera_label" msgid="7261107956054836961">"abrir câmera"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Selecionar novo layout da tarefa"</string>
     <string name="cancel" msgid="6442560571259935130">"Cancelar"</string>
+    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
+    <skip />
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Ícone de impressão digital"</string>
     <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"Ícone do app"</string>
     <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Área da mensagem de ajuda"</string>
@@ -274,6 +276,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"Mostruário de sobremesas"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Protetor de tela"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Não perturbe"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Somente prioridade"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Somente alarmes"</string>
@@ -310,8 +314,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi desligado"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi ativado"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Nenhuma rede Wi-Fi disponível"</string>
-    <!-- no translation found for quick_settings_alarm_title (2416759007342260676) -->
-    <skip />
+    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"Alarme"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Transmitir"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Transmitindo"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Dispositivo sem nome"</string>
@@ -361,7 +364,6 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"O app <xliff:g id="APP">%s</xliff:g> está desativado no modo de segurança."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Limpar tudo"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Arraste aqui para usar a tela dividida"</string>
-    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Deslize para cima para alternar entre os apps"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Divisão horizontal"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Divisão vertical"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Divisão personalizada"</string>
@@ -505,21 +507,15 @@
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Alterar dispositivo de saída"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"A tela está fixada"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Ela é mantida à vista até que seja liberada. Toque em Voltar e em Visão geral e mantenha essas opções pressionadas para liberar."</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible (8281145542163727971) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Ela é mantida à vista até que seja liberada. Toque em Voltar e em Início e mantenha essas opções pressionadas para liberar."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Ela é mantida à vista até que seja liberada. Toque em Visão geral e mantenha essa opção pressionada para liberar."</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible_accessible (6134833683151189507) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (2266705122951934150) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (8252402309499161281) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Ela é mantida à vista até que seja liberada. Toque em Início e mantenha essa opção pressionada para liberar."</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"Para liberar esta tela, mantenha os botões Voltar e Visão geral pressionados"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Para liberar essa tela, toque nos botões Voltar e Início e mantenha-os pressionados"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Entendi"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Não, obrigado"</string>
-    <!-- no translation found for screen_pinning_start (1022122128489278317) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (5187339744262325372) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="1022122128489278317">"Tela fixada"</string>
+    <string name="screen_pinning_exit" msgid="5187339744262325372">"Tela liberada"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Esconder <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Ela reaparecerá na próxima vez que você ativá-la nas configurações."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Ocultar"</string>
@@ -542,8 +538,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Toque para silenciar. É possível que os serviços de acessibilidade sejam silenciados."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Toque para configurar para vibrar."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Toque para silenciar."</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s controles de volume exibidos. Deslize para cima para dispensar."</string>
-    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Controles de volume ocultos"</string>
+    <string name="volume_dialog_title" msgid="7272969888820035876">"Controles de volume %s"</string>
     <string name="output_title" msgid="5355078100792942802">"Saída de mídia"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Saída de chamada telefônica"</string>
     <string name="output_none_found" msgid="5544982839808921091">"Nenhum dispositivo foi encontrado"</string>
@@ -693,9 +688,8 @@
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Área de transferência"</item>
     <item msgid="5742013440802239414">"Código de tecla"</item>
-    <item msgid="8802889973626281575">"Alternador de teclado"</item>
-    <item msgid="7095517796293767867">"Sugestão de rotação"</item>
-    <item msgid="8494159969042135235">"Nenhum"</item>
+    <item msgid="1951959982985094069">"Gire para confirmar a troca do teclado"</item>
+    <item msgid="8175437057325747277">"Nenhum"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"Normal"</item>

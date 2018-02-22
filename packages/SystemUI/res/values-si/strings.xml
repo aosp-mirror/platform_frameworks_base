@@ -103,6 +103,8 @@
     <string name="camera_label" msgid="7261107956054836961">"කැමරාව විවෘත කරන්න"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"නව කාර්යය සැකැස්ම තෝරන්න"</string>
     <string name="cancel" msgid="6442560571259935130">"අවලංගු කරන්න"</string>
+    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
+    <skip />
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"ඇඟිලි සලකුණු නිරූපකය"</string>
     <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"යෙදුම් නිරූපකය"</string>
     <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"උදවු පණිවිඩ ප්‍රදේශය"</string>
@@ -272,6 +274,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"අතුරුපස අවස්තාව"</string>
     <string name="start_dreams" msgid="5640361424498338327">"තිර සුරැකුම"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ඊතර නෙට්"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"බාධා නොකරන්න"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"ප්‍රමුඛතාව පමණයි"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"එලාම පමණි"</string>
@@ -308,8 +312,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi අක්‍රියයි"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi ක්‍රියාත්මකයි"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Wi-Fi ජාල ලබා ගත නොහැකිය"</string>
-    <!-- no translation found for quick_settings_alarm_title (2416759007342260676) -->
-    <skip />
+    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"එලාමය"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"කාස්ට් කිරීම"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"නම් නොකළ උපාංගය"</string>
@@ -359,7 +362,6 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> ආරක්ෂිත ප්‍රකාරය තුළ අබලයි."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"සියල්ල හිස් කරන්න"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"බෙදුම් තිරය භාවිත කිරීමට මෙතැනට අදින්න"</string>
-    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"යෙදුම් මාරු කිරීමට ස්වයිප් කරන්න"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"තිරස්ව වෙන් කරන්න"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"සිරස්ව වෙන් කරන්න"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"අභිමත ලෙස වෙන් කරන්න"</string>
@@ -503,21 +505,15 @@
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"ප්‍රතිදාන උපාංගය මාරු කරන්න"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"තීරය අමුණන ලදි"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට දළ විශ්ලේෂණය ස්පර්ශ කර ආපසු අල්ලාගෙන සිටින්න."</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible (8281145542163727971) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට මුල් පිටුව ස්පර්ශ කර අල්ලාගෙන සිටින්න."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට දළ විශ්ලේෂණය ස්පර්ශ කර අල්ලාගෙන සිටින්න."</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible_accessible (6134833683151189507) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (2266705122951934150) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (8252402309499161281) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට මුල් පිටුව ස්පර්ශ කර අල්ලාගෙන සිටින්න."</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"මෙම තිර ඇමුණුම ගැලවීමට, දළ විශ්ලේෂණය බොත්තම් ස්පර්ශ කර අල්ලා ගෙන සිටින්න"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"මෙම තිරය ඇමුණුම ගැලවීමට, මුල් පිටුව බොත්තම් ස්පර්ශ කර අල්ලා ගෙන සිටින්න"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"හරි, තේරුණා"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"එපා ස්තූතියි"</string>
-    <!-- no translation found for screen_pinning_start (1022122128489278317) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (5187339744262325372) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="1022122128489278317">"තිරය අමුණා ඇත"</string>
+    <string name="screen_pinning_exit" msgid="5187339744262325372">"තිරයේ ගලවා ඇත"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> සඟවන්නද?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"ඊළඟ අවස්ථාවේ සැකසීම් තුළ ඔබ එය සක්‍රිය කළ විට එය නැවත දිසිවේ."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"සඟවන්න"</string>
@@ -540,8 +536,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. නිහඬ කිරීමට තට්ටු කරන්න. ප්‍රවේශ්‍යතා සේවා නිහඬ කළ හැකිය."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. කම්පනය කිරීමට සකස් කිරීමට තට්ටු කරන්න."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. නිහඬ කිරීමට තට්ටු කරන්න."</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s හඬ පරිමා පාලන පෙන්වයි. ඉවත දැමීමට ස්වයිප් කරන්න."</string>
-    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"හඩ පරිමා පාලන සඟවා ඇත"</string>
+    <string name="volume_dialog_title" msgid="7272969888820035876">"හඬ පරිමා පාලන %s"</string>
     <string name="output_title" msgid="5355078100792942802">"මාධ්‍ය ප්‍රතිදානය"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"දුරකථන ඇමතුම් ප්‍රතිදානය"</string>
     <string name="output_none_found" msgid="5544982839808921091">"උපාංග හමු නොවිණි"</string>
@@ -691,9 +686,8 @@
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"පසුරු පුවරුව"</item>
     <item msgid="5742013440802239414">"යතුරු කේතය"</item>
-    <item msgid="8802889973626281575">"යතුරු පුවරු මාරුව"</item>
-    <item msgid="7095517796293767867">"කැරකීමේ යෝජනාව"</item>
-    <item msgid="8494159969042135235">"කිසිවක් නැත"</item>
+    <item msgid="1951959982985094069">"තහවුරු කිරීම කරකවන්න, යතුරු පුවරු මාරුව"</item>
+    <item msgid="8175437057325747277">"කිසිවක් නැත"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"සාමාන්‍ය"</item>

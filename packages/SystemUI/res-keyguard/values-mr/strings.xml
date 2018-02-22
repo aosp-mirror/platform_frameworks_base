@@ -53,10 +53,8 @@
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"पुढील अलार्म <xliff:g id="ALARM">%1$s</xliff:g> साठी सेट केला"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"हटवा"</string>
     <string name="disable_carrier_button_text" msgid="6914341927421916114">"eSIM बंद करा"</string>
-    <!-- no translation found for error_disable_esim_title (4852978431156228006) -->
-    <skip />
-    <!-- no translation found for error_disable_esim_msg (676694908770135639) -->
-    <skip />
+    <string name="error_disable_esim_title" msgid="4852978431156228006">"eSIM बंद करू नका"</string>
+    <string name="error_disable_esim_msg" msgid="676694908770135639">"एका एररमुळे eSIM बंद होऊ शकत नाही."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"एंटर करा"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"पॅटर्न विसरलात"</string>
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"चुकीचा पॅटर्न"</string>
@@ -69,8 +67,7 @@
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"तुमचा पॅटर्न काढा"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"सिम पिन एंटर करा"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" साठी सिम पिन एंटर करा"</string>
-    <!-- no translation found for kg_sim_lock_esim_instructions (4416732549172148542) -->
-    <skip />
+    <string name="kg_sim_lock_esim_instructions" msgid="4416732549172148542">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> मोबाइल सेवेशिवाय डिव्हाइस वापरण्यासाठी eSIM बंद करा."</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"पिन एंटर करा"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"पासवर्ड एंटर करा"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"सिम आता अक्षम केले आहे. सुरू ठेवण्यासाठी PUK कोड एंटर करा. तपशीलांसाठी वाहकाशी संपर्क साधा."</string>

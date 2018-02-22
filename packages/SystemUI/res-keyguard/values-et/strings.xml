@@ -53,6 +53,8 @@
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Järgmine alarm on määratud ajaks <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"Kustuta"</string>
     <string name="disable_carrier_button_text" msgid="6914341927421916114">"Keela eSIM-kaart"</string>
+    <string name="error_disable_esim_title" msgid="4852978431156228006">"eSIM-kaarti ei saa keelata"</string>
+    <string name="error_disable_esim_msg" msgid="676694908770135639">"Vea tõttu ei saa eSIM-kaarte keelata."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Sisesta"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Unustasin mustri"</string>
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"Vale muster"</string>
@@ -65,7 +67,7 @@
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"Joonistage oma muster"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"Sisestage SIM-kaardi PIN-kood."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"Sisestage operaatori „<xliff:g id="CARRIER">%1$s</xliff:g>” SIM-kaardi PIN-kood."</string>
-    <string name="kg_sim_lock_instructions_esim" msgid="4957650659201013804">"Keelake eSIM-kaart, et seadet ilma mobiilsideteenuseta kasutada."</string>
+    <string name="kg_sim_lock_esim_instructions" msgid="4416732549172148542">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Keelake eSIM-kaart, et seadet ilma mobiilsideteenuseta kasutada."</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"Sisestage PIN-kood"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"Sisestage parool"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"SIM-kaart on nüüd keelatud. Jätkamiseks sisestage PUK-kood. Lisateabe saamiseks võtke ühendust operaatoriga."</string>

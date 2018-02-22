@@ -103,6 +103,8 @@
     <string name="camera_label" msgid="7261107956054836961">"ເປີດ​ກ້ອງ"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"ເລືອກ​ແຜນ​ຜັງ​ໜ້າ​ວຽກ​ໃໝ່"</string>
     <string name="cancel" msgid="6442560571259935130">"ຍົກເລີກ"</string>
+    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
+    <skip />
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"ໄອຄອນລາຍນິ້ວມື"</string>
     <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"ໄອຄອນແອັບພລິເຄຊັນ"</string>
     <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"ຊ່ວຍພື້ນທີ່ຂໍ້ຄວາມ"</string>
@@ -272,6 +274,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"ກ່ອງຂອງຫວານ"</string>
     <string name="start_dreams" msgid="5640361424498338327">"ພາບພັກໜ້າຈໍ"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"ຫ້າມ​ລົບ​ກວນ"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"ບຸ​ລິ​ມະ​ສິດເທົ່າ​ນັ້ນ"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"ໂມງ​ປຸກ​ເທົ່າ​ນັ້ນ"</string>
@@ -308,8 +312,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi​-Fi ປິດ"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi ເປີດ"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"ບໍ່​ມີ​ເຄືອ​ຂ່າຍ Wi-Fi ຢູ່"</string>
-    <!-- no translation found for quick_settings_alarm_title (2416759007342260676) -->
-    <skip />
+    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"ໂມງປຸກ"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"ການສົ່ງສັນຍານ"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"​ກຳ​ລັງ​ສົ່ງ​ສັນ​ຍານ"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"​ອຸ​ປະ​ກອນບໍ່​ມີ​ຊື່"</string>
@@ -359,7 +362,6 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> ຖືກປິດໃຊ້ໃນໂໝດຄວາມມປອດໄພ."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"ລຶບລ້າງທັງໝົດ"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"ລາກມາບ່ອນນີ້ເພື່ອໃຊ້ການແບ່ງໜ້າຈໍ"</string>
-    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"ປັດຂື້ນເພື່ອສະຫຼັບແອັບ"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"ການ​ແຍກ​ລວງ​ຂວາງ"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ການ​ແຍກ​ລວງ​ຕັ້ງ"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"ການ​ແຍກ​ກຳ​ນົດ​ເອງ"</string>
@@ -500,25 +502,18 @@
     <string name="volume_zen_end_now" msgid="6930243045593601084">"ປິດດຽວນີ້"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"ຂະຫຍາຍ"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ຫຍໍ້ລົງ"</string>
-    <!-- no translation found for accessibility_output_chooser (8185317493017988680) -->
-    <skip />
+    <string name="accessibility_output_chooser" msgid="8185317493017988680">"ສະຫຼັບອຸປະກອນສົ່ງສຽງອອກ"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"ປັກ​ໝຸດໜ້າ​ຈໍ​ແລ້ວ"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"ນີ້ຈະສະແດງມັນໃນໜ້າຈໍຈົນກວ່າທ່ານຈະເຊົາປັກມຸດ. ໃຫ້ແຕະປຸ່ມກັບຄືນ ແລະ ປຸ່ມພາບຮວມຄ້າງໄວ້ເພື່ອຍົກເລີກການປັກມຸດ."</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible (8281145542163727971) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"ນີ້ຈະສະແດງມັນໃນໜ້າຈໍຈົນກວ່າທ່ານຈະເຊົາປັກໝຸດ. ໃຫ້ແຕະປຸ່ມກັບຄືນ ແລະ ປຸ່ມພາບຮວມຄ້າງໄວ້ເພື່ອຍົກເລີກການປັກໝຸດ."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"ນີ້ຈະສະແດງມັນໃນໜ້າຈໍຈົນກວ່າທ່ານຈະເຊົາປັກມຸດ. ໃຫ້ແຕະປຸ່ມພາບຮວມຄ້າງໄວ້ເພື່ອຍົກເລີກການປັກມຸດ."</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible_accessible (6134833683151189507) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (2266705122951934150) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (8252402309499161281) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"ນີ້ຈະສະແດງມັນໃນໜ້າຈໍຈົນກວ່າທ່ານຈະເຊົາປັກໝຸດ. ໃຫ້ແຕະປຸ່ມພາບຮວມຄ້າງໄວ້ເພື່ອຍົກເລີກການປັກໝຸດ."</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"ເພື່ອຍົກເລີກການປັກໝຸດໜ້າຈໍນີ້, ໃຫ້ແຕະປຸ່ມກັບຄືນ ແລະ ປຸ່ມພາບຮວມຄ້າງໄວ້"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"ເພື່ອຍົກເລີກການປັກໝຸດໜ້າຈໍນີ້, ໃຫ້ແຕະປຸ່ມກັບຄືນ ແລະ ປຸ່ມພາບຮວມຄ້າງໄວ້"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"ເຂົ້າໃຈແລ້ວ"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"ບໍ່, ຂອບໃຈ"</string>
-    <!-- no translation found for screen_pinning_start (1022122128489278317) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (5187339744262325372) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="1022122128489278317">"ປັກໝຸດໜ້າຈໍແລ້ວ"</string>
+    <string name="screen_pinning_exit" msgid="5187339744262325372">"ຍົກເລີກການປັກໝຸດໜ້າຈໍແລ້ວ"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"ເຊື່ອງ <xliff:g id="TILE_LABEL">%1$s</xliff:g> ຫຼື​ບໍ່?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"​ມັນ​ຈະ​ສະ​ແດງ​ຄືນ​ໃໝ່​ເມື່ອ​ທ່ານ​ເປີດ​ນຳ​ໃຊ້​ມັນ​ໃນ​ການ​ຕັ້ງ​ຄ່າ​ຄັ້ງ​ຕໍ່​ໄປ."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"ເຊື່ອງ"</string>
@@ -541,8 +536,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. ແຕະເພື່ອປິດສຽງ. ບໍລິການຊ່ວຍເຂົ້າເຖິງອາດຖືກປິດສຽງໄວ້."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. ແຕະເພື່ອຕັ້ງເປັນສັ່ນເຕືອນ."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. ແຕະເພື່ອປິດສຽງ."</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"ສະແດງສ່ວນຄວບຄຸມສຽງ %s ແລ້ວ. ປັດອອກຂ້າງເພື່ອປິດໄວ້."</string>
-    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"ເຊື່ອງສ່ວນຄວບຄຸມສຽງແລ້ວ"</string>
+    <string name="volume_dialog_title" msgid="7272969888820035876">"ການຄວບຄຸມສຽງ %s"</string>
     <string name="output_title" msgid="5355078100792942802">"ມີເດຍເອົ້າພຸດ"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"ເອົ້າພຸດສາຍໂທອອກ"</string>
     <string name="output_none_found" msgid="5544982839808921091">"ບໍ່ພົບອຸປະກອນ"</string>
@@ -692,9 +686,8 @@
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"ຄລິບບອດ"</item>
     <item msgid="5742013440802239414">"ລະຫັດກະແຈ"</item>
-    <item msgid="8802889973626281575">"ຕົວສະຫຼັບແປ້ນພິມ"</item>
-    <item msgid="7095517796293767867">"ການແນະນຳການໝຸນ"</item>
-    <item msgid="8494159969042135235">"ບໍ່ມີ"</item>
+    <item msgid="1951959982985094069">"ຢືນຢັນມຸນ, ຕົວສະຫຼັບແປ້ນພິມ"</item>
+    <item msgid="8175437057325747277">"ບໍ່ໃຊ້"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"ປົກກະຕິ"</item>
