@@ -25,19 +25,17 @@ import android.graphics.SurfaceTexture;
 import com.android.internal.util.VirtualRefBasePtr;
 
 /**
- * A hardware layer can be used to render graphics operations into a hardware
- * friendly buffer. For instance, with an OpenGL backend a hardware layer
- * would use a Frame Buffer Object (FBO.) The hardware layer can be used as
- * a drawing cache when a complex set of graphics operations needs to be
- * drawn several times.
+ * TextureLayer represents a SurfaceTexture that will be composited by RenderThread into the
+ * frame when drawn in a HW accelerated Canvas. This is backed by a DeferredLayerUpdater on
+ * the native side.
  *
  * @hide
  */
-final class HardwareLayer {
+final class TextureLayer {
     private ThreadedRenderer mRenderer;
     private VirtualRefBasePtr mFinalizer;
 
-    private HardwareLayer(ThreadedRenderer renderer, long deferredUpdater) {
+    private TextureLayer(ThreadedRenderer renderer, long deferredUpdater) {
         if (renderer == null || deferredUpdater == 0) {
             throw new IllegalArgumentException("Either hardware renderer: " + renderer
                     + " or deferredUpdater: " + deferredUpdater + " is invalid");
@@ -141,11 +139,12 @@ final class HardwareLayer {
         mRenderer.pushLayerUpdate(this);
     }
 
-    static HardwareLayer adoptTextureLayer(ThreadedRenderer renderer, long layer) {
-        return new HardwareLayer(renderer, layer);
+    static TextureLayer adoptTextureLayer(ThreadedRenderer renderer, long layer) {
+        return new TextureLayer(renderer, layer);
     }
 
-    private static native boolean nPrepare(long layerUpdater, int width, int height, boolean isOpaque);
+    private static native boolean nPrepare(long layerUpdater, int width, int height,
+            boolean isOpaque);
     private static native void nSetLayerPaint(long layerUpdater, long paint);
     private static native void nSetTransform(long layerUpdater, long matrix);
     private static native void nSetSurfaceTexture(long layerUpdater, SurfaceTexture surface);
