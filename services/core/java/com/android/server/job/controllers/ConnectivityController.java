@@ -41,12 +41,13 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobServiceContext;
 import com.android.server.job.StateChangedListener;
 import com.android.server.job.StateControllerProto;
 
-import java.io.PrintWriter;
+import java.util.function.Predicate;
 
 /**
  * Handles changes in connectivity.
@@ -331,18 +332,15 @@ public final class ConnectivityController extends StateController implements
 
     @GuardedBy("mLock")
     @Override
-    public void dumpControllerStateLocked(PrintWriter pw, int filterUid) {
-        pw.print("Connectivity: connected=");
-        pw.println(mConnected);
-
-        pw.print("Tracking ");
-        pw.print(mTrackedJobs.size());
-        pw.println(" jobs");
+    public void dumpControllerStateLocked(IndentingPrintWriter pw,
+            Predicate<JobStatus> predicate) {
+        pw.println("System connected: " + mConnected);
+        pw.println();
 
         for (int i = 0; i < mTrackedJobs.size(); i++) {
             final JobStatus js = mTrackedJobs.valueAt(i);
-            if (js.shouldDump(filterUid)) {
-                pw.print("  #");
+            if (predicate.test(js)) {
+                pw.print("#");
                 js.printUniqueId(pw);
                 pw.print(" from ");
                 UserHandle.formatUid(pw, js.getSourceUid());
@@ -355,7 +353,8 @@ public final class ConnectivityController extends StateController implements
 
     @GuardedBy("mLock")
     @Override
-    public void dumpControllerStateLocked(ProtoOutputStream proto, long fieldId, int filterUid) {
+    public void dumpControllerStateLocked(ProtoOutputStream proto, long fieldId,
+            Predicate<JobStatus> predicate) {
         final long token = proto.start(fieldId);
         final long mToken = proto.start(StateControllerProto.CONNECTIVITY);
 
@@ -363,7 +362,7 @@ public final class ConnectivityController extends StateController implements
 
         for (int i = 0; i < mTrackedJobs.size(); i++) {
             final JobStatus js = mTrackedJobs.valueAt(i);
-            if (!js.shouldDump(filterUid)) {
+            if (!predicate.test(js)) {
                 continue;
             }
             final long jsToken = proto.start(StateControllerProto.ConnectivityController.TRACKED_JOBS);

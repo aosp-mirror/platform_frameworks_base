@@ -79,6 +79,7 @@ import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.AppStateTracker;
 import com.android.server.DeviceIdleController;
@@ -86,7 +87,6 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerServiceDumpProto.ActiveJob;
 import com.android.server.job.JobSchedulerServiceDumpProto.PendingJob;
-import com.android.server.job.JobStore.JobStatusFunctor;
 import com.android.server.job.controllers.AppIdleController;
 import com.android.server.job.controllers.BackgroundJobsController;
 import com.android.server.job.controllers.BatteryController;
@@ -110,6 +110,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -1227,13 +1228,10 @@ public final class JobSchedulerService extends com.android.server.SystemService
                                     getContext().getMainLooper()));
                 }
                 // Attach jobs to their controllers.
-                mJobs.forEachJob(new JobStatusFunctor() {
-                    @Override
-                    public void process(JobStatus job) {
-                        for (int controller = 0; controller < mControllers.size(); controller++) {
-                            final StateController sc = mControllers.get(controller);
-                            sc.maybeStartTrackingJobLocked(job, null);
-                        }
+                mJobs.forEachJob((job) -> {
+                    for (int controller = 0; controller < mControllers.size(); controller++) {
+                        final StateController sc = mControllers.get(controller);
+                        sc.maybeStartTrackingJobLocked(job, null);
                     }
                 });
                 // GO GO GO!
@@ -1602,11 +1600,11 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
-    final class ReadyJobQueueFunctor implements JobStatusFunctor {
+    final class ReadyJobQueueFunctor implements Consumer<JobStatus> {
         ArrayList<JobStatus> newReadyJobs;
 
         @Override
-        public void process(JobStatus job) {
+        public void accept(JobStatus job) {
             if (isReadyToBeExecutedLocked(job)) {
                 if (DEBUG) {
                     Slog.d(TAG, "    queued " + job.toShortString());
@@ -1640,7 +1638,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
      * If more than 4 jobs total are ready we send them all off.
      * TODO: It would be nice to consolidate these sort of high-level policies somewhere.
      */
-    final class MaybeReadyJobQueueFunctor implements JobStatusFunctor {
+    final class MaybeReadyJobQueueFunctor implements Consumer<JobStatus> {
         int chargingCount;
         int batteryNotLowCount;
         int storageNotLowCount;
@@ -1656,7 +1654,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
         // Functor method invoked for each job via JobStore.forEachJob()
         @Override
-        public void process(JobStatus job) {
+        public void accept(JobStatus job) {
             if (isReadyToBeExecutedLocked(job)) {
                 try {
                     if (ActivityManager.getService().isAppStartModeDisabled(job.getUid(),
@@ -2173,12 +2171,9 @@ public final class JobSchedulerService extends com.android.server.SystemService
         public List<JobInfo> getSystemScheduledPendingJobs() {
             synchronized (mLock) {
                 final List<JobInfo> pendingJobs = new ArrayList<JobInfo>();
-                mJobs.forEachJob(Process.SYSTEM_UID, new JobStatusFunctor() {
-                    @Override
-                    public void process(JobStatus job) {
-                        if (job.getJob().isPeriodic() || !isCurrentlyActiveLocked(job)) {
-                            pendingJobs.add(job.getJob());
-                        }
+                mJobs.forEachJob(Process.SYSTEM_UID, (job) -> {
+                    if (job.getJob().isPeriodic() || !isCurrentlyActiveLocked(job)) {
+                        pendingJobs.add(job.getJob());
                     }
                 });
                 return pendingJobs;
@@ -2307,7 +2302,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
-    static class DeferredJobCounter implements JobStatusFunctor {
+    static class DeferredJobCounter implements Consumer<JobStatus> {
         private int mDeferred = 0;
 
         public int numDeferred() {
@@ -2315,7 +2310,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
 
         @Override
-        public void process(JobStatus job) {
+        public void accept(JobStatus job) {
             if (job.getWhenStandbyDeferred() > 0) {
                 mDeferred++;
             }
@@ -2596,12 +2591,13 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 }
             }
 
-            long identityToken = Binder.clearCallingIdentity();
+            final long identityToken = Binder.clearCallingIdentity();
             try {
                 if (proto) {
                     JobSchedulerService.this.dumpInternalProto(fd, filterUid);
                 } else {
-                    JobSchedulerService.this.dumpInternal(pw, filterUid);
+                    JobSchedulerService.this.dumpInternal(new IndentingPrintWriter(pw, "  "),
+                            filterUid);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identityToken);
@@ -2900,10 +2896,14 @@ public final class JobSchedulerService extends com.android.server.SystemService
         });
     }
 
-    void dumpInternal(final PrintWriter pw, int filterUid) {
+    void dumpInternal(final IndentingPrintWriter pw, int filterUid) {
         final int filterUidFinal = UserHandle.getAppId(filterUid);
         final long nowElapsed = sElapsedRealtimeClock.millis();
         final long nowUptime = sUptimeMillisClock.millis();
+        final Predicate<JobStatus> predicate = (js) -> {
+            return filterUidFinal == -1 || UserHandle.getAppId(js.getUid()) == filterUidFinal
+                    || UserHandle.getAppId(js.getSourceUid()) == filterUidFinal;
+        };
         synchronized (mLock) {
             mConstants.dump(pw);
             pw.println();
@@ -2919,7 +2919,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     pw.println(job.toShortStringExceptUniqueId());
 
                     // Skip printing details if the caller requested a filter
-                    if (!job.shouldDump(filterUidFinal)) {
+                    if (!predicate.test(job)) {
                         continue;
                     }
 
@@ -2953,7 +2953,10 @@ public final class JobSchedulerService extends com.android.server.SystemService
             }
             for (int i=0; i<mControllers.size(); i++) {
                 pw.println();
-                mControllers.get(i).dumpControllerStateLocked(pw, filterUidFinal);
+                pw.println(mControllers.get(i).getClass().getSimpleName() + ":");
+                pw.increaseIndent();
+                mControllers.get(i).dumpControllerStateLocked(pw, predicate);
+                pw.decreaseIndent();
             }
             pw.println();
             pw.println("Uid priority overrides:");
@@ -3056,6 +3059,10 @@ public final class JobSchedulerService extends com.android.server.SystemService
         final int filterUidFinal = UserHandle.getAppId(filterUid);
         final long nowElapsed = sElapsedRealtimeClock.millis();
         final long nowUptime = sUptimeMillisClock.millis();
+        final Predicate<JobStatus> predicate = (js) -> {
+            return filterUidFinal == -1 || UserHandle.getAppId(js.getUid()) == filterUidFinal
+                    || UserHandle.getAppId(js.getSourceUid()) == filterUidFinal;
+        };
 
         synchronized (mLock) {
             mConstants.dump(proto, JobSchedulerServiceDumpProto.SETTINGS);
@@ -3070,7 +3077,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     job.writeToShortProto(proto, JobSchedulerServiceDumpProto.RegisteredJob.INFO);
 
                     // Skip printing details if the caller requested a filter
-                    if (!job.shouldDump(filterUidFinal)) {
+                    if (!predicate.test(job)) {
                         continue;
                     }
 
@@ -3103,7 +3110,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
             }
             for (StateController controller : mControllers) {
                 controller.dumpControllerStateLocked(
-                        proto, JobSchedulerServiceDumpProto.CONTROLLERS, filterUidFinal);
+                        proto, JobSchedulerServiceDumpProto.CONTROLLERS, predicate);
             }
             for (int i=0; i< mUidPriorityOverride.size(); i++) {
                 int uid = mUidPriorityOverride.keyAt(i);

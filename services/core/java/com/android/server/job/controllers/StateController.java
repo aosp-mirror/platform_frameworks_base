@@ -19,10 +19,10 @@ package com.android.server.job.controllers;
 import android.content.Context;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.server.job.JobSchedulerService;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.job.StateChangedListener;
 
-import java.io.PrintWriter;
+import java.util.function.Predicate;
 
 /**
  * Incorporates shared controller logic between the various controllers of the JobManager.
@@ -64,7 +64,8 @@ public abstract class StateController {
     public void rescheduleForFailureLocked(JobStatus newJob, JobStatus failureToReschedule) {
     }
 
-    public abstract void dumpControllerStateLocked(PrintWriter pw, int filterUid);
+    public abstract void dumpControllerStateLocked(IndentingPrintWriter pw,
+            Predicate<JobStatus> predicate);
     public abstract void dumpControllerStateLocked(ProtoOutputStream proto, long fieldId,
-            int filterUid);
+            Predicate<JobStatus> predicate);
 }

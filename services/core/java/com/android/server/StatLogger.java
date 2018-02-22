@@ -21,6 +21,7 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.StatLoggerProto.Event;
 
 import java.io.PrintWriter;
@@ -78,19 +79,23 @@ public class StatLogger {
         }
     }
 
+    @Deprecated
     public void dump(PrintWriter pw, String prefix) {
+        dump(new IndentingPrintWriter(pw, "  ").setIndent(prefix));
+    }
+
+    public void dump(IndentingPrintWriter pw) {
         synchronized (mLock) {
-            pw.print(prefix);
             pw.println("Stats:");
+            pw.increaseIndent();
             for (int i = 0; i < SIZE; i++) {
-                pw.print(prefix);
-                pw.print("  ");
                 final int count = mCountStats[i];
                 final double durationMs = mDurationStats[i] / 1000.0;
                 pw.println(String.format("%s: count=%d, total=%.1fms, avg=%.3fms",
                         mLabels[i], count, durationMs,
                         (count == 0 ? 0 : ((double) durationMs) / count)));
             }
+            pw.decreaseIndent();
         }
     }
 

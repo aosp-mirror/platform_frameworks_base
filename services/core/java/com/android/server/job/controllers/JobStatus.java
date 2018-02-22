@@ -882,11 +882,6 @@ public final class JobStatus {
         return mLastFailedRunTime;
     }
 
-    public boolean shouldDump(int filterUid) {
-        return filterUid == -1 || UserHandle.getAppId(getUid()) == filterUid
-                || UserHandle.getAppId(getSourceUid()) == filterUid;
-    }
-
     /**
      * @return Whether or not this job is ready to run, based on its requirements. This is true if
      * the constraints are satisfied <strong>or</strong> the deadline on the job has expired.

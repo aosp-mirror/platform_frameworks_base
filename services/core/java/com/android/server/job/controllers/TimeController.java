@@ -30,15 +30,16 @@ import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateChangedListener;
 import com.android.server.job.StateControllerProto;
 
-import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.function.Predicate;
 
 /**
  * This class sets an alarm for the next expiring job, and determines whether a job's minimum
@@ -348,25 +349,24 @@ public final class TimeController extends StateController {
     };
 
     @Override
-    public void dumpControllerStateLocked(PrintWriter pw, int filterUid) {
+    public void dumpControllerStateLocked(IndentingPrintWriter pw,
+            Predicate<JobStatus> predicate) {
         final long nowElapsed = sElapsedRealtimeClock.millis();
-        pw.print("Alarms: now=");
-        pw.print(nowElapsed);
-        pw.println();
+        pw.println("Elapsed clock: " + nowElapsed);
+
         pw.print("Next delay alarm in ");
         TimeUtils.formatDuration(mNextDelayExpiredElapsedMillis, nowElapsed, pw);
         pw.println();
         pw.print("Next deadline alarm in ");
         TimeUtils.formatDuration(mNextJobExpiredElapsedMillis, nowElapsed, pw);
         pw.println();
-        pw.print("Tracking ");
-        pw.print(mTrackedJobs.size());
-        pw.println(":");
+        pw.println();
+
         for (JobStatus ts : mTrackedJobs) {
-            if (!ts.shouldDump(filterUid)) {
+            if (!predicate.test(ts)) {
                 continue;
             }
-            pw.print("  #");
+            pw.print("#");
             ts.printUniqueId(pw);
             pw.print(" from ");
             UserHandle.formatUid(pw, ts.getSourceUid());
@@ -387,7 +387,8 @@ public final class TimeController extends StateController {
     }
 
     @Override
-    public void dumpControllerStateLocked(ProtoOutputStream proto, long fieldId, int filterUid) {
+    public void dumpControllerStateLocked(ProtoOutputStream proto, long fieldId,
+            Predicate<JobStatus> predicate) {
         final long token = proto.start(fieldId);
         final long mToken = proto.start(StateControllerProto.TIME);
 
@@ -399,7 +400,7 @@ public final class TimeController extends StateController {
                 mNextJobExpiredElapsedMillis - nowElapsed);
 
         for (JobStatus ts : mTrackedJobs) {
-            if (!ts.shouldDump(filterUid)) {
+            if (!predicate.test(ts)) {
                 continue;
             }
             final long tsToken = proto.start(StateControllerProto.TimeController.TRACKED_JOBS);
