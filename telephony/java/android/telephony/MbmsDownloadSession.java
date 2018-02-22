@@ -30,7 +30,6 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.telephony.mbms.DownloadStateCallback;
 import android.telephony.mbms.FileInfo;
@@ -53,6 +52,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -107,11 +107,8 @@ public class MbmsDownloadSession implements AutoCloseable {
     /**
      * {@link Uri} extra that Android will attach to the intent supplied via
      * {@link android.telephony.mbms.DownloadRequest.Builder#setAppIntent(Intent)}
-     * Indicates the location of the successfully downloaded file within the temp file root set
-     * via {@link #setTempFileRootDirectory(File)}.
-     * While you may use this file in-place, it is highly encouraged that you move
-     * this file to a different location after receiving the download completion intent, as this
-     * file resides within the temp file directory.
+     * Indicates the location of the successfully downloaded file within the directory that the
+     * app provided via the builder.
      *
      * Will always be set to a non-null value if
      * {@link #EXTRA_MBMS_DOWNLOAD_RESULT} is set to {@link #RESULT_SUCCESSFUL}.
@@ -220,6 +217,8 @@ public class MbmsDownloadSession implements AutoCloseable {
      */
     public static final int STATUS_PENDING_DOWNLOAD_WINDOW = 4;
 
+    private static final String DESTINATION_SANITY_CHECK_FILE_NAME = "destinationSanityCheckFile";
+
     private static AtomicBoolean sIsInitialized = new AtomicBoolean(false);
 
     private final Context mContext;
@@ -236,23 +235,20 @@ public class MbmsDownloadSession implements AutoCloseable {
     private final Map<DownloadStateCallback, InternalDownloadStateCallback>
             mInternalDownloadCallbacks = new HashMap<>();
 
-    private MbmsDownloadSession(Context context, MbmsDownloadSessionCallback callback,
-            int subscriptionId, Handler handler) {
+    private MbmsDownloadSession(Context context, Executor executor, int subscriptionId,
+            MbmsDownloadSessionCallback callback) {
         mContext = context;
         mSubscriptionId = subscriptionId;
-        if (handler == null) {
-            handler = new Handler(Looper.getMainLooper());
-        }
-        mInternalCallback = new InternalDownloadSessionCallback(callback, handler);
+        mInternalCallback = new InternalDownloadSessionCallback(callback, executor);
     }
 
     /**
      * Create a new {@link MbmsDownloadSession} using the system default data subscription ID.
-     * See {@link #create(Context, MbmsDownloadSessionCallback, int, Handler)}
+     * See {@link #create(Context, Executor, int, MbmsDownloadSessionCallback)}
      */
     public static MbmsDownloadSession create(@NonNull Context context,
-            @NonNull MbmsDownloadSessionCallback callback, @NonNull Handler handler) {
-        return create(context, callback, SubscriptionManager.getDefaultSubscriptionId(), handler);
+            @NonNull Executor executor, @NonNull MbmsDownloadSessionCallback callback) {
+        return create(context, executor, SubscriptionManager.getDefaultSubscriptionId(), callback);
     }
 
     /**
@@ -279,24 +275,24 @@ public class MbmsDownloadSession implements AutoCloseable {
      * {@link MbmsDownloadSession} that you received before calling this method again.
      *
      * @param context The instance of {@link Context} to use
-     * @param callback A callback to get asynchronous error messages and file service updates.
+     * @param executor The executor on which you wish to execute callbacks.
      * @param subscriptionId The data subscription ID to use
-     * @param handler The {@link Handler} on which callbacks should be enqueued.
+     * @param callback A callback to get asynchronous error messages and file service updates.
      * @return A new instance of {@link MbmsDownloadSession}, or null if an error occurred during
      * setup.
      */
     public static @Nullable MbmsDownloadSession create(@NonNull Context context,
-            final @NonNull MbmsDownloadSessionCallback callback,
-            int subscriptionId, @NonNull Handler handler) {
+            @NonNull Executor executor, int subscriptionId,
+            final @NonNull MbmsDownloadSessionCallback callback) {
         if (!sIsInitialized.compareAndSet(false, true)) {
             throw new IllegalStateException("Cannot have two active instances");
         }
         MbmsDownloadSession session =
-                new MbmsDownloadSession(context, callback, subscriptionId, handler);
+                new MbmsDownloadSession(context, executor, subscriptionId, callback);
         final int result = session.bindAndInitialize();
         if (result != MbmsErrors.SUCCESS) {
             sIsInitialized.set(false);
-            handler.post(new Runnable() {
+            executor.execute(new Runnable() {
                 @Override
                 public void run() {
                     callback.onError(result, null);
@@ -500,6 +496,10 @@ public class MbmsDownloadSession implements AutoCloseable {
      * {@link MbmsDownloadSession#DEFAULT_TOP_LEVEL_TEMP_DIRECTORY} and store that as the temp
      * file root directory.
      *
+     * If the {@link DownloadRequest} has a destination that is not on the same filesystem as the
+     * temp file directory provided via {@link #getTempFileRootDirectory()}, an
+     * {@link IllegalArgumentException} will be thrown.
+     *
      * Asynchronous errors through the callback may include any error not specific to the
      * streaming use-case.
      * @param request The request that specifies what should be downloaded.
@@ -521,6 +521,8 @@ public class MbmsDownloadSession implements AutoCloseable {
             tempRootDirectory.mkdirs();
             setTempFileRootDirectory(tempRootDirectory);
         }
+
+        checkDownloadRequestDestination(request);
 
         try {
             int result = downloadService.download(request);
@@ -568,21 +570,21 @@ public class MbmsDownloadSession implements AutoCloseable {
      * this method will throw an {@link IllegalArgumentException}.
      *
      * @param request The {@link DownloadRequest} that you want updates on.
+     * @param executor The {@link Executor} on which calls to {@code callback} should be executed.
      * @param callback The callback that should be called when the middleware has information to
      *                 share on the download.
-     * @param handler The {@link Handler} on which calls to {@code callback} should be enqueued on.
      * @return {@link MbmsErrors#SUCCESS} if the operation did not encounter a synchronous error,
      * and some other error code otherwise.
      */
     public int registerStateCallback(@NonNull DownloadRequest request,
-            @NonNull DownloadStateCallback callback, @NonNull Handler handler) {
+            @NonNull Executor executor, @NonNull DownloadStateCallback callback) {
         IMbmsDownloadService downloadService = mService.get();
         if (downloadService == null) {
             throw new IllegalStateException("Middleware not yet bound");
         }
 
         InternalDownloadStateCallback internalCallback =
-                new InternalDownloadStateCallback(callback, handler);
+                new InternalDownloadStateCallback(callback, executor);
 
         try {
             int result = downloadService.registerStateCallback(request, internalCallback,
@@ -604,7 +606,7 @@ public class MbmsDownloadSession implements AutoCloseable {
 
     /**
      * Un-register a callback previously registered via
-     * {@link #registerStateCallback(DownloadRequest, DownloadStateCallback, Handler)}. After
+     * {@link #registerStateCallback(DownloadRequest, Executor, DownloadStateCallback)}. After
      * this method is called, no further callbacks will be enqueued on the {@link Handler}
      * provided upon registration, even if this method throws an exception.
      *
@@ -692,7 +694,7 @@ public class MbmsDownloadSession implements AutoCloseable {
      * The state will be delivered as a callback via
      * {@link DownloadStateCallback#onStateUpdated(DownloadRequest, FileInfo, int)}. If no such
      * callback has been registered via
-     * {@link #registerStateCallback(DownloadRequest, DownloadStateCallback, Handler)}, this
+     * {@link #registerStateCallback(DownloadRequest, Executor, DownloadStateCallback)}, this
      * method will be a no-op.
      *
      * If the middleware has no record of the
@@ -775,7 +777,7 @@ public class MbmsDownloadSession implements AutoCloseable {
      * instance of {@link MbmsDownloadSessionCallback}, but callbacks that have already been
      * enqueued will still be delivered.
      *
-     * It is safe to call {@link #create(Context, MbmsDownloadSessionCallback, int, Handler)} to
+     * It is safe to call {@link #create(Context, Executor, int, MbmsDownloadSessionCallback)} to
      * obtain another instance of {@link MbmsDownloadSession} immediately after this method
      * returns.
      *
@@ -828,6 +830,36 @@ public class MbmsDownloadSession implements AutoCloseable {
         }
         if (!token.delete()) {
             Log.w(LOG_TAG, "Couldn't delete download token at " + token);
+        }
+    }
+
+    private void checkDownloadRequestDestination(DownloadRequest request) {
+        File downloadRequestDestination = new File(request.getDestinationUri().getPath());
+        if (!downloadRequestDestination.isDirectory()) {
+            throw new IllegalArgumentException("The destination path must be a directory");
+        }
+        // Check if the request destination is okay to use by attempting to rename an empty
+        // file to there.
+        File testFile = new File(MbmsTempFileProvider.getEmbmsTempFileDir(mContext),
+                DESTINATION_SANITY_CHECK_FILE_NAME);
+        File testFileDestination = new File(downloadRequestDestination,
+                DESTINATION_SANITY_CHECK_FILE_NAME);
+
+        try {
+            if (!testFile.exists()) {
+                testFile.createNewFile();
+            }
+            if (!testFile.renameTo(testFileDestination)) {
+                throw new IllegalArgumentException("Destination provided in the download request " +
+                        "is invalid -- files in the temp file directory cannot be directly moved " +
+                        "there.");
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Got IOException while testing out the destination: "
+                    + e);
+        } finally {
+            testFile.delete();
+            testFileDestination.delete();
         }
     }
 
