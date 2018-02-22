@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.UserHandle;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
@@ -37,7 +38,9 @@ import com.android.server.job.StateControllerProto;
 import java.io.PrintWriter;
 
 public final class IdleController extends StateController {
-    private static final String TAG = "IdleController";
+    private static final String TAG = "JobScheduler.Idle";
+    private static final boolean DEBUG = JobSchedulerService.DEBUG
+            || Log.isLoggable(TAG, Log.DEBUG);
 
     // Policy: we decide that we're "idle" if the device has been unused /
     // screen off or dreaming for at least this long

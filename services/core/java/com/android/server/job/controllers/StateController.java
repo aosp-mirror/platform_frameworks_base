@@ -30,7 +30,6 @@ import java.io.PrintWriter;
  * are ready to run, or whether they must be stopped.
  */
 public abstract class StateController {
-    protected static final boolean DEBUG = JobSchedulerService.DEBUG;
     protected final Context mContext;
     protected final Object mLock;
     protected final StateChangedListener mStateChangedListener;

@@ -27,6 +27,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.UserHandle;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.proto.ProtoOutputStream;
@@ -47,9 +48,10 @@ import java.util.Arrays;
  * When device is not dozing, set constraint for all jobs as satisfied.
  */
 public final class DeviceIdleJobsController extends StateController {
+    private static final String TAG = "JobScheduler.DeviceIdle";
+    private static final boolean DEBUG = JobSchedulerService.DEBUG
+            || Log.isLoggable(TAG, Log.DEBUG);
 
-    private static final String LOG_TAG = "DeviceIdleJobsController";
-    private static final boolean LOG_DEBUG = false;
     private static final long BACKGROUND_JOBS_DELAY = 3000;
 
     static final int PROCESS_BACKGROUND_JOBS = 1;
@@ -104,8 +106,8 @@ public final class DeviceIdleJobsController extends StateController {
                     synchronized (mLock) {
                         mDeviceIdleWhitelistAppIds =
                                 mLocalDeviceIdleController.getPowerSaveWhitelistUserAppIds();
-                        if (LOG_DEBUG) {
-                            Slog.d(LOG_TAG, "Got whitelist "
+                        if (DEBUG) {
+                            Slog.d(TAG, "Got whitelist "
                                     + Arrays.toString(mDeviceIdleWhitelistAppIds));
                         }
                     }
@@ -114,8 +116,8 @@ public final class DeviceIdleJobsController extends StateController {
                     synchronized (mLock) {
                         mPowerSaveTempWhitelistAppIds =
                                 mLocalDeviceIdleController.getPowerSaveTempWhitelistAppIds();
-                        if (LOG_DEBUG) {
-                            Slog.d(LOG_TAG, "Got temp whitelist "
+                        if (DEBUG) {
+                            Slog.d(TAG, "Got temp whitelist "
                                     + Arrays.toString(mPowerSaveTempWhitelistAppIds));
                         }
                         boolean changed = false;
@@ -163,7 +165,7 @@ public final class DeviceIdleJobsController extends StateController {
                 changed = true;
             }
             mDeviceIdleMode = enabled;
-            if (LOG_DEBUG) Slog.d(LOG_TAG, "mDeviceIdleMode=" + mDeviceIdleMode);
+            if (DEBUG) Slog.d(TAG, "mDeviceIdleMode=" + mDeviceIdleMode);
             if (enabled) {
                 mHandler.removeMessages(PROCESS_BACKGROUND_JOBS);
                 mJobSchedulerService.getJobStore().forEachJob(mDeviceIdleUpdateFunctor);
@@ -193,8 +195,8 @@ public final class DeviceIdleJobsController extends StateController {
         if (!changed) {
             return;
         }
-        if (LOG_DEBUG) {
-            Slog.d(LOG_TAG, "uid " + uid + " going " + (active ? "active" : "inactive"));
+        if (DEBUG) {
+            Slog.d(TAG, "uid " + uid + " going " + (active ? "active" : "inactive"));
         }
         mForegroundUids.put(uid, active);
         mDeviceIdleUpdateFunctor.mChanged = false;

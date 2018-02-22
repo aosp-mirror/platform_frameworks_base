@@ -19,6 +19,7 @@ package com.android.server.job.controllers;
 import android.content.Context;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.util.Log;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
@@ -34,9 +35,9 @@ import com.android.server.job.StateControllerProto.BackgroundJobsController.Trac
 import java.io.PrintWriter;
 
 public final class BackgroundJobsController extends StateController {
-
-    private static final String LOG_TAG = "BackgroundJobsController";
-    private static final boolean DEBUG = JobSchedulerService.DEBUG;
+    private static final String TAG = "JobScheduler.Background";
+    private static final boolean DEBUG = JobSchedulerService.DEBUG
+            || Log.isLoggable(TAG, Log.DEBUG);
 
     // Singleton factory
     private static final Object sCreationLock = new Object();
@@ -179,7 +180,7 @@ public final class BackgroundJobsController extends StateController {
 
         final long time = DEBUG ? (SystemClock.elapsedRealtimeNanos() - start) : 0;
         if (DEBUG) {
-            Slog.d(LOG_TAG, String.format(
+            Slog.d(TAG, String.format(
                     "Job status updated: %d/%d checked/total jobs, %d us",
                     updateTrackedJobs.mCheckedCount,
                     updateTrackedJobs.mTotalCount,

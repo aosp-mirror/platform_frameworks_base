@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.UserHandle;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
@@ -39,7 +40,9 @@ import java.io.PrintWriter;
  * Simple controller that tracks the status of the device's storage.
  */
 public final class StorageController extends StateController {
-    private static final String TAG = "JobScheduler.Stor";
+    private static final String TAG = "JobScheduler.Storage";
+    private static final boolean DEBUG = JobSchedulerService.DEBUG
+            || Log.isLoggable(TAG, Log.DEBUG);
 
     private static final Object sCreationLock = new Object();
     private static volatile StorageController sController;
