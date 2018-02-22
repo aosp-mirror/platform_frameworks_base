@@ -103,6 +103,8 @@
     <string name="camera_label" msgid="7261107956054836961">"apri fotocamera"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Seleziona un nuovo layout per le attività"</string>
     <string name="cancel" msgid="6442560571259935130">"Annulla"</string>
+    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
+    <skip />
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Icona dell\'impronta digitale"</string>
     <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"Icona dell\'applicazione"</string>
     <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Area dei messaggi di assistenza"</string>
@@ -274,6 +276,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"Vetrina di dolci"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Screensaver"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Non disturbare"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Solo con priorità"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Solo sveglie"</string>
@@ -310,8 +314,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi disattivato"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi attivo"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Nessuna rete Wi-Fi disponibile"</string>
-    <!-- no translation found for quick_settings_alarm_title (2416759007342260676) -->
-    <skip />
+    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"Sveglia"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Trasmetti"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"In trasmissione"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Dispositivo senza nome"</string>
@@ -361,7 +364,6 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"L\'app <xliff:g id="APP">%s</xliff:g> è stata disattivata in modalità provvisoria."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Cancella tutto"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Trascina qui per utilizzare la modalità Schermo diviso"</string>
-    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Scorri verso l\'alto per passare ad altre app"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Divisione in orizzontale"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Divisione in verticale"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Divisione personalizzata"</string>
@@ -505,21 +507,15 @@
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Cambia dispositivo di uscita"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"La schermata è fissata"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"La schermata rimane visibile finché non viene sganciata. Per sganciarla, tieni premuto Indietro e Panoramica."</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible (8281145542163727971) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"La schermata rimane visibile finché non viene disattivato il blocco su schermo. Per disattivarlo, tocca e tieni premuto Indietro e Home."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"La schermata rimane visibile finché non viene sganciata. Per sganciarla, tieni premuto Panoramica."</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible_accessible (6134833683151189507) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (2266705122951934150) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (8252402309499161281) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"La schermata rimane visibile finché non viene disattivato il blocco su schermo. Per disattivarlo, tocca e tieni premuto Home."</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"Per disattivare il blocco su schermo, tocca e tieni premuti i pulsanti Indietro e Panoramica"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Per disattivare il blocco su schermo, tocca e tieni premuti i pulsanti Indietro e Home"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"OK"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"No, grazie"</string>
-    <!-- no translation found for screen_pinning_start (1022122128489278317) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (5187339744262325372) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="1022122128489278317">"Blocco su schermo attivato"</string>
+    <string name="screen_pinning_exit" msgid="5187339744262325372">"Blocco su schermo disattivato"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Nascondere <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Verranno visualizzate di nuovo quando le riattiverai nelle impostazioni."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Nascondi"</string>
@@ -542,8 +538,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Tocca per disattivare l\'audio. L\'audio dei servizi di accessibilità può essere disattivato."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Tocca per attivare la vibrazione."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Tocca per disattivare l\'audio."</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s comandi del volume mostrati. Fai scorrere verso l\'alto per ignorare."</string>
-    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Comandi del volume nascosti"</string>
+    <string name="volume_dialog_title" msgid="7272969888820035876">"Controlli del volume %s"</string>
     <string name="output_title" msgid="5355078100792942802">"Uscita contenuti multimediali"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Uscita telefonate"</string>
     <string name="output_none_found" msgid="5544982839808921091">"Nessun dispositivo trovato"</string>
@@ -693,9 +688,8 @@
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Appunti"</item>
     <item msgid="5742013440802239414">"Keycode"</item>
-    <item msgid="8802889973626281575">"Selettore tastiera"</item>
-    <item msgid="7095517796293767867">"Suggerimento per la rotazione"</item>
-    <item msgid="8494159969042135235">"Nessuno"</item>
+    <item msgid="1951959982985094069">"Conferma rotazione, selettore tastiera"</item>
+    <item msgid="8175437057325747277">"Nessuno"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"Normale"</item>

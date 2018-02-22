@@ -103,12 +103,11 @@
     <string name="camera_label" msgid="7261107956054836961">"buksan ang camera"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Pumili ng bagong layout ng gawain"</string>
     <string name="cancel" msgid="6442560571259935130">"Kanselahin"</string>
-    <!-- no translation found for accessibility_fingerprint_dialog_fingerprint_icon (3125122495414253226) -->
+    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
     <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_app_icon (3228052542929174609) -->
-    <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_help_area (5730471601819225159) -->
-    <skip />
+    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Icon ng fingerprint"</string>
+    <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"Icon ng application"</string>
+    <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Lugar ng mensahe ng tulong"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Button ng zoom ng pagiging tugma."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Mag-zoom nang mas maliit sa mas malaking screen."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Nakakonekta ang Bluetooth."</string>
@@ -275,6 +274,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"Dessert Case"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Screen saver"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Huwag istorbohin"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Priyoridad lang"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Mga alarm lang"</string>
@@ -311,6 +312,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Naka-off ang Wi-Fi"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Naka-on Ang Wi-Fi"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Walang available na mga Wi-Fi network"</string>
+    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"Alarm"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"I-cast"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Nagka-cast"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Walang pangalang device"</string>
@@ -327,9 +329,11 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"Kumokonekta..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Nagte-tether"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
-    <!-- no translation found for quick_settings_hotspot_secondary_label_transient (7161046712706277215) -->
-    <skip />
-    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (2324635800672199428) -->
+    <string name="quick_settings_hotspot_secondary_label_transient" msgid="7161046712706277215">"Ino-on..."</string>
+    <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
+      <item quantity="one">%d device</item>
+      <item quantity="other">%d na device</item>
+    </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Mga Notification"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Flashlight"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Mobile data"</string>
@@ -339,10 +343,8 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> ang nagamit"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ang limitasyon"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Babala sa <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <!-- no translation found for quick_settings_work_mode_on_label (3421274215098764735) -->
-    <skip />
-    <!-- no translation found for quick_settings_work_mode_off_label (8856918707867192186) -->
-    <skip />
+    <string name="quick_settings_work_mode_on_label" msgid="3421274215098764735">"Profile sa trabaho"</string>
+    <string name="quick_settings_work_mode_off_label" msgid="8856918707867192186">"Naka-off ang mga notification at app"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Night Light"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Mao-on sa sunset"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Hanggang mag-umaga"</string>
@@ -360,8 +362,6 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Naka-disable ang <xliff:g id="APP">%s</xliff:g> sa safe-mode."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"I-clear lahat"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"I-drag dito upang magamit ang split screen"</string>
-    <!-- no translation found for recents_swipe_up_onboarding (3824607135920170001) -->
-    <skip />
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Split Horizontal"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Split Vertical"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Split Custom"</string>
@@ -502,11 +502,18 @@
     <string name="volume_zen_end_now" msgid="6930243045593601084">"I-off na ngayon"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Palawakin"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"I-collapse"</string>
+    <string name="accessibility_output_chooser" msgid="8185317493017988680">"Lumipat ng output device"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Naka-pin ang screen"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Pinapanatili nitong nakikita ito hanggang sa mag-unpin ka. Pindutin nang matagal ang Bumalik at Overview upang mag-unpin."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Pinapanatili nitong nakikita ito hanggang sa mag-unpin ka. Pindutin nang matagal ang Bumalik at Home upang mag-unpin."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Pinapanatili nitong nakikita ito hanggang sa mag-unpin ka. Pindutin nang matagal ang Overview upang mag-unpin."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Pinapanatili nitong nakikita ito hanggang sa mag-unpin ka. Pindutin nang matagal ang Home upang mag-unpin."</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"Upang i-unpin ang screen na ito, pindutin nang matagal ang mga button na Bumalik at Overview"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Upang i-unpin ang screen na ito, pindutin nang matagal ang mga button na Bumalik at Home"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Nakuha ko"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Hindi, salamat na lang"</string>
+    <string name="screen_pinning_start" msgid="1022122128489278317">"Na-pin ang screen"</string>
+    <string name="screen_pinning_exit" msgid="5187339744262325372">"Na-unpin ang screen"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Itago ang <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Lalabas itong muli sa susunod na pagkakataon na i-on mo ito sa mga setting."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Itago"</string>
@@ -529,8 +536,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. I-tap upang i-mute. Maaaring i-mute ang mga serbisyo sa Accessibility."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. I-tap upang itakda na mag-vibrate."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. I-tap upang i-mute."</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Ipinapakita ang mga kontrol ng volume ng %s. Mag-swipe pataas upang i-dismiss."</string>
-    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Nakatago ang mga kontrol ng volume"</string>
+    <string name="volume_dialog_title" msgid="7272969888820035876">"Mga kontrol ng volume ng %s"</string>
     <string name="output_title" msgid="5355078100792942802">"Output ng media"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Output ng tawag sa telepono"</string>
     <string name="output_none_found" msgid="5544982839808921091">"Walang nakitang device"</string>
@@ -586,8 +592,7 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Sa pamamagitan ng mga kontrol sa notification ng power, magagawa mong itakda ang antas ng kahalagahan ng mga notification ng isang app mula 0 hanggang 5. \n\n"<b>"Antas 5"</b>" \n- Ipakita sa itaas ng listahan ng notification \n- Payagan ang pag-istorbo kapag full screen \n- Palaging sumilip \n\n"<b>"Antas 4"</b>" \n- Pigilan ang pag-istorbo kapag full screen \n- Palaging sumilip \n\n"<b>"Antas 3"</b>" \n- Pigilan ang pag-istorbo kapag full screen \n- Huwag kailanman sumilip \n\n"<b>"Antas 2"</b>" \n- Pigilan ang pag-istorbo kapag full screen \n- Huwag kailanman sumilip \n- Huwag kailanman tumunog o mag-vibrate \n\n"<b>"Antas 1"</b>" \n- Pigilan ang pag-istorbo kapag full screen \n- Huwag kailanman sumilip \n- Huwag kailanman tumunog o mag-vibrate \n- Itago sa lock screen at status bar \n- Ipakita sa ibaba ng listahan ng notification \n\n"<b>"Antas 0"</b>" \n- I-block ang lahat ng notification mula sa app"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Mga Notification"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Hindi mo na makikita ang mga notification na ito"</string>
-    <!-- no translation found for inline_blocking_helper (3055064577771478591) -->
-    <skip />
+    <string name="inline_blocking_helper" msgid="3055064577771478591">"Karaniwan mong dini-dismiss ang mga ganitong notification. \nPatuloy na ipakita ang mga ito?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Patuloy na ipakita ang mga notification na ito?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Ihinto ang mga notification"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Patuloy na ipakita"</string>
@@ -681,9 +686,8 @@
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Clipboard"</item>
     <item msgid="5742013440802239414">"Keycode"</item>
-    <item msgid="8802889973626281575">"Keyboard switcher"</item>
-    <item msgid="7095517796293767867">"Suhestyon sa pag-rotate"</item>
-    <item msgid="8494159969042135235">"Wala"</item>
+    <item msgid="1951959982985094069">"Pagkumpirma ng pag-rotate, keyboard switcher"</item>
+    <item msgid="8175437057325747277">"Wala"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"Karaniwan"</item>

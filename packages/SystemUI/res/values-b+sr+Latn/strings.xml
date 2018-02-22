@@ -104,12 +104,11 @@
     <string name="camera_label" msgid="7261107956054836961">"otvori kameru"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Izaberi novi raspored zadataka"</string>
     <string name="cancel" msgid="6442560571259935130">"Otkaži"</string>
-    <!-- no translation found for accessibility_fingerprint_dialog_fingerprint_icon (3125122495414253226) -->
+    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
     <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_app_icon (3228052542929174609) -->
-    <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_help_area (5730471601819225159) -->
-    <skip />
+    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Ikona otiska prsta"</string>
+    <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"Ikona aplikacije"</string>
+    <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Oblast poruke za pomoć"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Dugme Zum kompatibilnosti."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zumiranje sa manjeg na veći ekran."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth je priključen."</string>
@@ -277,6 +276,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"Vitrina sa poslasticama"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Čuvar ekrana"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Eternet"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Ne uznemiravaj"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Samo prioritetni prekidi"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Samo alarmi"</string>
@@ -313,6 +314,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi je isključen"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi je uključen"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Nije dostupna nijedna Wi-Fi mreža"</string>
+    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"Alarm"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Prebacivanje"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Prebacivanje"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Neimenovani uređaj"</string>
@@ -329,9 +331,12 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"Povezuje se..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Povezivanje"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
-    <!-- no translation found for quick_settings_hotspot_secondary_label_transient (7161046712706277215) -->
-    <skip />
-    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (2324635800672199428) -->
+    <string name="quick_settings_hotspot_secondary_label_transient" msgid="7161046712706277215">"Uključuje se..."</string>
+    <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
+      <item quantity="one">%d uređaj</item>
+      <item quantity="few">%d uređaja</item>
+      <item quantity="other">%d uređaja</item>
+    </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Obaveštenja"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Lampa"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Mobilni podaci"</string>
@@ -341,10 +346,8 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"Iskoristili ste <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Ograničenje od <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Upozorenje za <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <!-- no translation found for quick_settings_work_mode_on_label (3421274215098764735) -->
-    <skip />
-    <!-- no translation found for quick_settings_work_mode_off_label (8856918707867192186) -->
-    <skip />
+    <string name="quick_settings_work_mode_on_label" msgid="3421274215098764735">"Profil za Work"</string>
+    <string name="quick_settings_work_mode_off_label" msgid="8856918707867192186">"Obaveštenja i aplikacije su isključeni"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Noćno svetlo"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Uključuje se po zalasku sunca"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Do izlaska sunca"</string>
@@ -362,8 +365,6 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Aplikacija <xliff:g id="APP">%s</xliff:g> je onemogućena u bezbednom režimu."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Obriši sve"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Prevucite ovde da biste koristili razdeljeni ekran"</string>
-    <!-- no translation found for recents_swipe_up_onboarding (3824607135920170001) -->
-    <skip />
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Podeli horizontalno"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Podeli vertikalno"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Prilagođeno deljenje"</string>
@@ -504,11 +505,18 @@
     <string name="volume_zen_end_now" msgid="6930243045593601084">"Isključi odmah"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Proširi"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Skupi"</string>
+    <string name="accessibility_output_chooser" msgid="8185317493017988680">"Promenite izlazni uređaj"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekran je zakačen"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Na ovaj način se ovo stalno prikazuje dok ga ne otkačite. Dodirnite i zadržite Nazad i Pregled da biste ga otkačili."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Na ovaj način se ovo stalno prikazuje dok ga ne otkačite. Dodirnite i zadržite Nazad i Početna da biste ga otkačili."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Na ovaj način se ovo stalno prikazuje dok ga ne otkačite. Dodirnite i zadržite Pregled da biste ga otkačili."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Na ovaj način se ovo stalno prikazuje dok ga ne otkačite. Dodirnite i zadržite Početna da biste ga otkačili."</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"Da biste otkačili ovaj ekran, dodirnite i zadržite dugmad Nazad i Pregled"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Da biste otkačili ovaj ekran, dodirnite i zadržite dugmad Nazad i Početna"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Važi"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Ne, hvala"</string>
+    <string name="screen_pinning_start" msgid="1022122128489278317">"Ekran je zakačen"</string>
+    <string name="screen_pinning_exit" msgid="5187339744262325372">"Ekran je otkačen"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Želite li da sakrijete <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Ovo će se ponovo pojaviti kada ga sledeći put budete uključili u podešavanjima."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Sakrij"</string>
@@ -531,8 +539,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Dodirnite da biste isključili zvuk. Zvuk usluga pristupačnosti će možda biti isključen."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Dodirnite da biste podesili na vibraciju."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Dodirnite da biste isključili zvuk."</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Kontrole za jačinu zvuka (%s) su prikazane. Prevucite nagore da biste ih odbacili."</string>
-    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Kontrole za jačinu zvuka su sakrivene"</string>
+    <string name="volume_dialog_title" msgid="7272969888820035876">"Kontrole za jačinu zvuka za %s"</string>
     <string name="output_title" msgid="5355078100792942802">"Izlaz medija"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Izlaz za telefonski poziv"</string>
     <string name="output_none_found" msgid="5544982839808921091">"Nije pronađen nijedan uređaj"</string>
@@ -588,8 +595,7 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Pomoću naprednih kontrola za obaveštenja možete da podesite nivo važnosti od 0. do 5. za obaveštenja aplikacije. \n\n"<b>"5. nivo"</b>" \n– Prikazuju se u vrhu liste obaveštenja \n- Dozvoli prekid režima celog ekrana \n– Uvek zaviruj \n\n"<b>"4. nivo"</b>" \n– Spreči prekid režima celog ekrana \n– Uvek zaviruj \n\n"<b>"3. nivo"</b>" \n– Spreči prekid režima celog ekrana \n– Nikada ne zaviruj \n\n"<b>"2. nivo"</b>" \n– Spreči prekid režima celog ekrana \n– Nikada ne zaviruj \n– Nikada ne proizvodi zvuk ili vibraciju \n\n"<b>"1. nivo"</b>" \n– Spreči prekid režima celog ekrana \n– Nikada ne zaviruj \n– Nikada ne proizvodi zvuk ili vibraciju \n– Sakrij na zaključanom ekranu i statusnoj traci \n– Prikazuju se u dnu liste obaveštenja \n\n"<b>"0. nivo"</b>" \n– Blokiraj sva obaveštenja iz aplikacije"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Obaveštenja"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Više nećete videti ova obaveštenja"</string>
-    <!-- no translation found for inline_blocking_helper (3055064577771478591) -->
-    <skip />
+    <string name="inline_blocking_helper" msgid="3055064577771478591">"Obično odbacujete ova obaveštenja. \nŽelite li da se i dalje prikazuju?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Želite li da se ova obaveštenja i dalje prikazuju?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Prestani da prikazuješ obaveštenja"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Nastavi da prikazuješ"</string>
@@ -685,9 +691,8 @@
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Memorija"</item>
     <item msgid="5742013440802239414">"Kôd tastera"</item>
-    <item msgid="8802889973626281575">"Prebacivač za tastaturu"</item>
-    <item msgid="7095517796293767867">"Predlog za rotaciju"</item>
-    <item msgid="8494159969042135235">"Ništa"</item>
+    <item msgid="1951959982985094069">"Potvrda rotiranja, prebacivač za tastaturu"</item>
+    <item msgid="8175437057325747277">"Ništa"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"Normalni"</item>

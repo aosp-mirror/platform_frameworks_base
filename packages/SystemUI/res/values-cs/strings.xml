@@ -105,6 +105,8 @@
     <string name="camera_label" msgid="7261107956054836961">"spustit fotoaparát"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Vybrat nové rozvržení úkolů"</string>
     <string name="cancel" msgid="6442560571259935130">"Zrušit"</string>
+    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
+    <skip />
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Ikona otisku prstu"</string>
     <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"Ikona aplikace"</string>
     <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Oblast pro zprávu nápovědy"</string>
@@ -278,6 +280,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"Pult se sladkostmi"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Spořič obrazovky"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Nerušit"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Pouze prioritní"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Pouze budíky"</string>
@@ -314,8 +318,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi vypnuta"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi je zapnutá"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Žádné sítě Wi-Fi nejsou k dispozici"</string>
-    <!-- no translation found for quick_settings_alarm_title (2416759007342260676) -->
-    <skip />
+    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"Budík"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Odeslat"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Odesílání"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Nepojmenované zařízení"</string>
@@ -367,7 +370,6 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Aplikace <xliff:g id="APP">%s</xliff:g> je v nouzovém režimu zakázána."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Vymazat vše"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Rozdělenou obrazovku můžete použít přetažením zde"</string>
-    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Přejetím nahoru přepnete aplikace"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Vodorovné rozdělení"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Vertikální rozdělení"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Vlastní rozdělení"</string>
@@ -511,21 +513,15 @@
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Přepnout zařízení pro výstup"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Obrazovka je připnuta"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Obsah bude připnut v zobrazení, dokud jej neuvolníte. Uvolníte jej stisknutím a podržením tlačítek Zpět a Přehled."</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible (8281145542163727971) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Obsah bude připnut v zobrazení, dokud ho neuvolníte. Uvolníte ho podržením tlačítek Zpět a Plocha."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Obsah bude připnut v zobrazení, dokud jej neuvolníte. Uvolníte jej stisknutím a podržením tlačítka Přehled."</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible_accessible (6134833683151189507) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (2266705122951934150) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (8252402309499161281) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Obsah bude připnut v zobrazení, dokud ho neuvolníte. Uvolníte ho podržením tlačítka Plocha."</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"Chcete-li tuto obrazovku uvolnit, podržte tlačítka Zpět a Přehled"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Chcete-li tuto obrazovku uvolnit, podržte tlačítka Zpět a Plocha"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Rozumím"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Ne, děkuji"</string>
-    <!-- no translation found for screen_pinning_start (1022122128489278317) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (5187339744262325372) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="1022122128489278317">"Obrazovka připnuta"</string>
+    <string name="screen_pinning_exit" msgid="5187339744262325372">"Obrazovka uvolněna"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Skrýt <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Tato položka se znovu zobrazí, až ji v nastavení znovu zapnete."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Skrýt"</string>
@@ -548,8 +544,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Klepnutím vypnete zvuk. Služby přístupnosti mohou být ztlumeny."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Klepnutím nastavíte vibrace."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Klepnutím vypnete zvuk."</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Ovládací prvky hlasitosti aplikace %s jsou zobrazeny. Zavřete je přejetím prstem."</string>
-    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Ovládací prvky hlasitosti jsou skryty"</string>
+    <string name="volume_dialog_title" msgid="7272969888820035876">"Ovládací prvky hlasitosti %s"</string>
     <string name="output_title" msgid="5355078100792942802">"Výstup médií"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Výstup telefonního hovoru"</string>
     <string name="output_none_found" msgid="5544982839808921091">"Nebyla nalezena žádná zařízení"</string>
@@ -703,9 +698,8 @@
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Schránka"</item>
     <item msgid="5742013440802239414">"Klávesa"</item>
-    <item msgid="8802889973626281575">"Přepínač klávesnice"</item>
-    <item msgid="7095517796293767867">"Doporučené otočení"</item>
-    <item msgid="8494159969042135235">"Žádné"</item>
+    <item msgid="1951959982985094069">"Potvrzení otočení, přepínač na klávesnici"</item>
+    <item msgid="8175437057325747277">"Žádné"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"Normální"</item>

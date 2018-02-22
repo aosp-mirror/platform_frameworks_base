@@ -103,6 +103,8 @@
     <string name="camera_label" msgid="7261107956054836961">"ക്യാമറ തുറക്കുക"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"പുതിയ ടാസ്‌ക് ലേഔട്ട് തിരഞ്ഞെടുക്കുക"</string>
     <string name="cancel" msgid="6442560571259935130">"റദ്ദാക്കുക"</string>
+    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
+    <skip />
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"വിരലടയാള ഐക്കൺ"</string>
     <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"ആപ്പ് ഐക്കൺ"</string>
     <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"സഹായ സന്ദേശ ഏരിയ"</string>
@@ -272,6 +274,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"ഡെസേർട്ട് കെയ്സ്"</string>
     <string name="start_dreams" msgid="5640361424498338327">"സ്ക്രീൻ സേവർ"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ഇതർനെറ്റ്"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"ശല്ല്യപ്പെടുത്തരുത്"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"മുൻഗണന മാത്രം"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"അലാറങ്ങൾ മാത്രം"</string>
@@ -308,8 +312,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"വൈഫൈ ഓഫുചെയ്യുക"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"വൈഫൈ ഓണാണ്"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"വൈഫൈ നെറ്റ്‌വർക്കുകളൊന്നും ലഭ്യമല്ല"</string>
-    <!-- no translation found for quick_settings_alarm_title (2416759007342260676) -->
-    <skip />
+    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"അലാറം"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"കാസ്‌റ്റുചെയ്യുക"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"കാസ്റ്റുചെയ്യുന്നു"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"പേരിടാത്ത ഉപകരണം"</string>
@@ -359,7 +362,6 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"സുരക്ഷിത മോഡിൽ <xliff:g id="APP">%s</xliff:g> പ്രവർത്തനരഹിതമാക്കിയിരിക്കുന്നു."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"എല്ലാം മായ്‌ക്കുക"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"സ്പ്ലിറ്റ് സ്ക്രീൻ ഉപയോഗിക്കുന്നതിന് ഇവിടെ വലിച്ചിടുക"</string>
-    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"ആപ്പുകൾ മാറാൻ മുകളിലേക്ക് സ്വൈപ്പ് ചെയ്യുക"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"തിരശ്ചീനമായി വേർതിരിക്കുക"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ലംബമായി വേർതിരിക്കുക"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"ഇഷ്‌ടാനുസൃതമായി വേർതിരിക്കുക"</string>
@@ -500,25 +502,18 @@
     <string name="volume_zen_end_now" msgid="6930243045593601084">"ഇപ്പോൾ ഓഫ് ചെയ്യുക"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"വികസിപ്പിക്കുക"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ചുരുക്കുക"</string>
-    <!-- no translation found for accessibility_output_chooser (8185317493017988680) -->
-    <skip />
+    <string name="accessibility_output_chooser" msgid="8185317493017988680">"ഔട്ട്‌പുട്ട് ഉപകരണം മാറുക"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"സ്‌ക്രീൻ പിൻ ചെയ്‌തു"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"നിങ്ങൾ അൺപിൻ ചെയ്യുന്നതുവരെ ഇത് കാണുന്ന വിധത്തിൽ നിലനിർത്തും. അൺപിൻ ചെയ്യാൻ \'തിരികെ\', \'ചുരുക്കവിവരണം\' എന്നിവ സ്‌പർശിച്ച് പിടിക്കുക."</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible (8281145542163727971) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"നിങ്ങൾ അൺപിൻ ചെയ്യുന്നതുവരെ ഇത് കാണുന്ന വിധത്തിൽ നിലനിർത്തും. അൺപിൻ ചെയ്യാൻ \'തിരികെ പോവുക\', \'ഹോം\' ബട്ടണുകൾ സ്‌പർശിച്ച് പിടിക്കുക."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"നിങ്ങൾ അൺപിൻ ചെയ്യുന്നതുവരെ ഇത് കാണുന്ന വിധത്തിൽ നിലനിർത്തും. അൺപിൻ ചെയ്യാൻ \'ചുരുക്കവിവരണം\' സ്‌പർശിച്ച് പിടിക്കുക."</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible_accessible (6134833683151189507) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (2266705122951934150) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (8252402309499161281) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"നിങ്ങൾ അൺപിൻ ചെയ്യുന്നതുവരെ ഇത് കാണുന്ന വിധത്തിൽ നിലനിർത്തും. അൺപിൻ ചെയ്യാൻ \'ഹോം\' ബട്ടൺ സ്‌പർശിച്ച് പിടിക്കുക."</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"ഈ സ്‌ക്രീൻ അൺപിൻ ചെയ്യാൻ, \'തിരികെ പോവുക\', \'അവലോകനം\' ബട്ടണുകൾ സ്‌പർശിച്ച് പിടിക്കുക"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"ഈ സ്‌ക്രീൻ അൺപിൻ ചെയ്യാൻ, \'തിരികെ പോവുക\', \'ഹോം\' ബട്ടണുകൾ സ്‌പർശിച്ച് പിടിക്കുക"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"മനസ്സിലായി"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"വേണ്ട, നന്ദി"</string>
-    <!-- no translation found for screen_pinning_start (1022122128489278317) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (5187339744262325372) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="1022122128489278317">"സ്‌ക്രീൻ പിൻ ചെയ്തു"</string>
+    <string name="screen_pinning_exit" msgid="5187339744262325372">"സ്‌ക്രീൻ അൺപിൻ ചെയ്തു"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> എന്നത് മറയ്‌ക്കണോ?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"അടുത്ത തവണ നിങ്ങൾ അത് ക്രമീകരണങ്ങളിൽ ഓണാക്കുമ്പോൾ അത് വീണ്ടും ദൃശ്യമാകും."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"മറയ്‌ക്കുക"</string>
@@ -541,8 +536,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. മ്യൂട്ടുചെയ്യുന്നതിന് ടാപ്പുചെയ്യുക. ഉപയോഗസഹായി സേവനങ്ങൾ മ്യൂട്ടുചെയ്യപ്പെട്ടേക്കാം."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s വൈബ്രേറ്റിലേക്ക് സജ്ജമാക്കുന്നതിന് ടാപ്പുചെയ്യുക."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s മ്യൂട്ടുചെയ്യുന്നതിന് ടാപ്പുചെയ്യുക."</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s വോളിയം നിയന്ത്രണങ്ങൾ കാണിച്ചിരിക്കുന്നു. ഡിസ്മിസ് ചെയ്യുന്നതിന് മുകളിലേക്ക് സ്വൈപ്പുചെയ്യുക."</string>
-    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"വോളിയം നിയന്ത്രണങ്ങൾ മറച്ചിരിക്കുന്നു"</string>
+    <string name="volume_dialog_title" msgid="7272969888820035876">"%s ശബ്‌ദ നിയന്ത്രണങ്ങൾ"</string>
     <string name="output_title" msgid="5355078100792942802">"മീഡിയ ഔട്ട്പുട്ട്"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"ഫോൺ കോൾ ഔട്ട്പുട്ട്"</string>
     <string name="output_none_found" msgid="5544982839808921091">"ഉപകരണങ്ങളൊന്നും കണ്ടെത്തിയില്ല"</string>
@@ -692,9 +686,8 @@
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"ക്ലിപ്പ്ബോർഡ്"</item>
     <item msgid="5742013440802239414">"കീകോഡ്"</item>
-    <item msgid="8802889973626281575">"കീബോർഡ് സ്വിച്ചർ"</item>
-    <item msgid="7095517796293767867">"തിരിക്കൽ നിർദ്ദേശം"</item>
-    <item msgid="8494159969042135235">"ഒന്നുമില്ല"</item>
+    <item msgid="1951959982985094069">"റൊട്ടേറ്റ് ചെയ്യൽ സ്ഥിരീകരിക്കുക, കീബോഡ് മാറൽ"</item>
+    <item msgid="8175437057325747277">"ഒന്നുമില്ല"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"സാധാരണ വേഗത്തിൽ"</item>

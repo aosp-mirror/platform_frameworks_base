@@ -87,7 +87,7 @@
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Установить как камеру (PTP)"</string>
     <string name="installer_cd_button_title" msgid="2312667578562201583">"Установить приложение"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Назад"</string>
-    <string name="accessibility_home" msgid="8217216074895377641">"Домой"</string>
+    <string name="accessibility_home" msgid="8217216074895377641">"Главный экран"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Меню"</string>
     <string name="accessibility_accessibility_button" msgid="7601252764577607915">"Специальные возможности"</string>
     <string name="accessibility_rotate_button" msgid="7402949513740253006">"Поворот экрана"</string>
@@ -105,6 +105,8 @@
     <string name="camera_label" msgid="7261107956054836961">"Открыть камеру."</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Выберите другой макет"</string>
     <string name="cancel" msgid="6442560571259935130">"Отмена"</string>
+    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
+    <skip />
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Значок отпечатка пальца"</string>
     <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"Значок приложения"</string>
     <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Справочное сообщение"</string>
@@ -278,6 +280,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"Коробка со сладостями"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Заставка"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Не беспокоить"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Только важные"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Только будильник"</string>
@@ -314,8 +318,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi выкл."</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi включен"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Не удалось найти доступные сети Wi-Fi"</string>
-    <!-- no translation found for quick_settings_alarm_title (2416759007342260676) -->
-    <skip />
+    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"Будильник"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Трансляция"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Передача изображения"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Безымянное устройство"</string>
@@ -367,7 +370,6 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Приложение \"<xliff:g id="APP">%s</xliff:g>\" отключено в безопасном режиме."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Очистить все"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Перетащите сюда, чтобы разделить экран"</string>
-    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Чтобы переключиться между приложениями, проведите по экрану вверх."</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Разделить по горизонтали"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Разделить по вертикали"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Разделить по-другому"</string>
@@ -511,21 +513,15 @@
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Сменить устройство аудиовыхода"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Блокировка в приложении включена"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Приложение останется активным, пока вы не отмените блокировку, нажав и удерживая кнопки \"Назад\" и \"Обзор\"."</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible (8281145542163727971) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Приложение останется активным, пока вы не отмените блокировку, нажав и удерживая кнопки \"Назад\" и \"Главный экран\"."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Приложение останется активным, пока вы не отмените блокировку, нажав и удерживая кнопку \"Обзор\"."</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible_accessible (6134833683151189507) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (2266705122951934150) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (8252402309499161281) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Приложение останется активным, пока вы не отмените блокировку, нажав и удерживая кнопку \"Главный экран\"."</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"Чтобы отменить блокировку, нажмите и удерживайте кнопки \"Назад\" и \"Обзор\""</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Чтобы отменить блокировку, нажмите и удерживайте кнопки \"Назад\" и \"Главный экран\""</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"ОК"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Нет, спасибо"</string>
-    <!-- no translation found for screen_pinning_start (1022122128489278317) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (5187339744262325372) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="1022122128489278317">"Блокировка включена"</string>
+    <string name="screen_pinning_exit" msgid="5187339744262325372">"Блокировка выключена"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Скрыть параметр \"<xliff:g id="TILE_LABEL">%1$s</xliff:g>\"?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Этот параметр появится в следующий раз, когда вы включите его."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Скрыть"</string>
@@ -548,8 +544,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Нажмите, чтобы выключить звук. Специальные возможности могут прекратить работу."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Нажмите, чтобы включить вибрацию."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Нажмите, чтобы выключить звук."</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Показаны регуляторы громкости: %s. Проведите вверх, чтобы скрыть."</string>
-    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Регуляторы громкости скрыты"</string>
+    <string name="volume_dialog_title" msgid="7272969888820035876">"%s: регулировка громкости"</string>
     <string name="output_title" msgid="5355078100792942802">"Выход мультимедиа"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Выход телефонных вызовов"</string>
     <string name="output_none_found" msgid="5544982839808921091">"Устройств не найдено"</string>
@@ -703,9 +698,8 @@
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Буфер обмена"</item>
     <item msgid="5742013440802239414">"Код клавиши"</item>
-    <item msgid="8802889973626281575">"Переключение раскладки"</item>
-    <item msgid="7095517796293767867">"Поворот"</item>
-    <item msgid="8494159969042135235">"Нет"</item>
+    <item msgid="1951959982985094069">"Подтвердить поворот, переключить раскладку"</item>
+    <item msgid="8175437057325747277">"Нет"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"Обычная"</item>

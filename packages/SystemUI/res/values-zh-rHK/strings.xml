@@ -103,12 +103,11 @@
     <string name="camera_label" msgid="7261107956054836961">"開啟相機"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"選取新的工作版面配置"</string>
     <string name="cancel" msgid="6442560571259935130">"取消"</string>
-    <!-- no translation found for accessibility_fingerprint_dialog_fingerprint_icon (3125122495414253226) -->
+    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
     <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_app_icon (3228052542929174609) -->
-    <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_help_area (5730471601819225159) -->
-    <skip />
+    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"指紋圖示"</string>
+    <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"應用程式圖示"</string>
+    <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"說明訊息區域"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"相容性縮放按鈕。"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"將較小螢幕的畫面放大在較大螢幕上顯示。"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"藍牙連線已建立。"</string>
@@ -277,6 +276,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"Dessert Case"</string>
     <string name="start_dreams" msgid="5640361424498338327">"螢幕保護程式"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"以太網"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"請勿騷擾"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"只限優先"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"只限鬧鐘"</string>
@@ -313,6 +314,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi 關閉"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi 已開啟"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"沒有可用的 Wi-Fi 網絡"</string>
+    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"鬧鐘"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"投放"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"正在放送"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"未命名的裝置"</string>
@@ -329,9 +331,11 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"正在連線…"</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"網絡共享"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"熱點"</string>
-    <!-- no translation found for quick_settings_hotspot_secondary_label_transient (7161046712706277215) -->
-    <skip />
-    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (2324635800672199428) -->
+    <string name="quick_settings_hotspot_secondary_label_transient" msgid="7161046712706277215">"正在開啟…"</string>
+    <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
+      <item quantity="other">%d 部裝置</item>
+      <item quantity="one">%d 部裝置</item>
+    </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"通知"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"閃光燈"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"流動數據"</string>
@@ -341,10 +345,8 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"已使用 <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"上限為 <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> 警告"</string>
-    <!-- no translation found for quick_settings_work_mode_on_label (3421274215098764735) -->
-    <skip />
-    <!-- no translation found for quick_settings_work_mode_off_label (8856918707867192186) -->
-    <skip />
+    <string name="quick_settings_work_mode_on_label" msgid="3421274215098764735">"工作設定檔"</string>
+    <string name="quick_settings_work_mode_off_label" msgid="8856918707867192186">"通知和應用程式已關閉"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"夜燈模式"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"在日落時開啟"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"在日出時關閉"</string>
@@ -362,8 +364,6 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"「<xliff:g id="APP">%s</xliff:g>」已在安全模式中停用。"</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"全部清除"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"在這裡拖曳即可分割螢幕"</string>
-    <!-- no translation found for recents_swipe_up_onboarding (3824607135920170001) -->
-    <skip />
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"水平分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"垂直分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"自訂分割"</string>
@@ -504,11 +504,18 @@
     <string name="volume_zen_end_now" msgid="6930243045593601084">"立即關閉"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"展開"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"收合"</string>
+    <string name="accessibility_output_chooser" msgid="8185317493017988680">"切換輸出裝置"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"螢幕已固定"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"畫面將會繼續顯示，直至您取消固定。按住 [返回] 和 [概覽] 即可取消固定。"</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"畫面將會繼續顯示，直至您取消固定為止。按住 [返回] 按鈕和主按鈕即可取消固定。"</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"畫面將會繼續顯示，直至您取消固定。按住 [概覽] 即可取消固定。"</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"畫面將會繼續顯示，直至您取消固定為止。按住主按鈕即可取消固定。"</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"如要取消固定此畫面，請按住 [返回] 按鈕和 [概覽] 按鈕"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"如要取消固定此畫面，請按住 [返回] 按鈕和主按鈕"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"知道了"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"不用了，謝謝"</string>
+    <string name="screen_pinning_start" msgid="1022122128489278317">"已固定畫面"</string>
+    <string name="screen_pinning_exit" msgid="5187339744262325372">"已取消固定畫面"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"隱藏 <xliff:g id="TILE_LABEL">%1$s</xliff:g>？"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"下一次您在設定開啟它時，它將再次出現。"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"隱藏"</string>
@@ -531,8 +538,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s。輕按即可設為靜音。無障礙功能服務可能已經設為靜音。"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s。輕按即可設為震動。"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s。輕按即可設為靜音。"</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"已顯示 %s 音量控制項。向上快速滑動即可關閉。"</string>
-    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"已隱藏音量控制"</string>
+    <string name="volume_dialog_title" msgid="7272969888820035876">"%s音量控制項"</string>
     <string name="output_title" msgid="5355078100792942802">"媒體輸出"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"通話輸出"</string>
     <string name="output_none_found" msgid="5544982839808921091">"找不到裝置"</string>
@@ -588,8 +594,7 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"通知控制項讓您設定應用程式通知的重要性 (0 至 5 級)。\n\n"<b>"第 5 級"</b>" \n- 在通知清單頂部顯示 \n- 允許全螢幕騷擾 \n- 一律顯示通知 \n\n"<b>"第 4 級"</b>" \n- 阻止全螢幕騷擾 \n- 一律顯示通知 \n\n"<b>"第 3 級"</b>" \n- 阻止全螢幕騷擾 \n- 永不顯示通知 \n\n"<b>"第 2 級"</b>" \n- 阻止全螢幕騷擾 \n- 永不顯示通知 \n- 永不發出聲響和震動 \n\n"<b>"第 1 級"</b>" \n- 阻止全螢幕騷擾 \n- 永不顯示通知 \n- 永不發出聲響和震動 \n- 從上鎖畫面和狀態列中隱藏 \n- 在通知清單底部顯示 \n\n"<b>"第 0 級"</b>" \n- 封鎖所有應用程式通知"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"通知"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"您不會再看到這些通知"</string>
-    <!-- no translation found for inline_blocking_helper (3055064577771478591) -->
-    <skip />
+    <string name="inline_blocking_helper" msgid="3055064577771478591">"您通常會關閉這些通知。\n要繼續顯示通知嗎？"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"要繼續顯示這些通知嗎？"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"停止通知"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"繼續顯示"</string>
@@ -683,9 +688,8 @@
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"剪貼簿"</item>
     <item msgid="5742013440802239414">"按鍵碼"</item>
-    <item msgid="8802889973626281575">"鍵盤切換工具"</item>
-    <item msgid="7095517796293767867">"旋轉建議"</item>
-    <item msgid="8494159969042135235">"無"</item>
+    <item msgid="1951959982985094069">"確認旋轉、鍵盤切換工具"</item>
+    <item msgid="8175437057325747277">"無"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"一般"</item>

@@ -53,10 +53,8 @@
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Naredni alarm je podešen za <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"Izbriši"</string>
     <string name="disable_carrier_button_text" msgid="6914341927421916114">"Onemogući eSIM karticu"</string>
-    <!-- no translation found for error_disable_esim_title (4852978431156228006) -->
-    <skip />
-    <!-- no translation found for error_disable_esim_msg (676694908770135639) -->
-    <skip />
+    <string name="error_disable_esim_title" msgid="4852978431156228006">"Nije moguće onemogućiti eSIM"</string>
+    <string name="error_disable_esim_msg" msgid="676694908770135639">"eSIM nije moguće onemogućiti zbog greške."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Zaboravili ste uzorak?"</string>
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"Pogrešan uzorak"</string>
@@ -70,8 +68,7 @@
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"Nacrtajte uzorak"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"Unesite PIN SIM kartice."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"Unesite PIN SIM kartice operatera \"<xliff:g id="CARRIER">%1$s</xliff:g>\""</string>
-    <!-- no translation found for kg_sim_lock_esim_instructions (4416732549172148542) -->
-    <skip />
+    <string name="kg_sim_lock_esim_instructions" msgid="4416732549172148542">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Onemogućite eSIM za korištenje uređaja bez mobilne usluge."</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"Unesite PIN"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"Unesite lozinku"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"SIM kartica je sada onemogućena. Unesite PUK kôd da nastavite. Za više informacija obratite se operateru."</string>

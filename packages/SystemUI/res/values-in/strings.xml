@@ -103,12 +103,11 @@
     <string name="camera_label" msgid="7261107956054836961">"buka kamera"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Pilih tata letak tugas baru"</string>
     <string name="cancel" msgid="6442560571259935130">"Batal"</string>
-    <!-- no translation found for accessibility_fingerprint_dialog_fingerprint_icon (3125122495414253226) -->
+    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
     <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_app_icon (3228052542929174609) -->
-    <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_help_area (5730471601819225159) -->
-    <skip />
+    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Ikon sidik jari"</string>
+    <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"Ikon aplikasi"</string>
+    <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Area pesan bantuan"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Tombol perbesar/perkecil kompatibilitas."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Perbesar dari layar kecil ke besar."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth tersambung."</string>
@@ -275,6 +274,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"Etalase Hidangan Penutup"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Screen saver"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Jangan ganggu"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Hanya untuk prioritas"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Hanya alarm"</string>
@@ -311,6 +312,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi Mati"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi Aktif"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Tidak ada jaringan Wi-Fi yang tersedia"</string>
+    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"Alarm"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Melakukan transmisi"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Perangkat tanpa nama"</string>
@@ -327,9 +329,11 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"Menyambung..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Menambatkan"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
-    <!-- no translation found for quick_settings_hotspot_secondary_label_transient (7161046712706277215) -->
-    <skip />
-    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (2324635800672199428) -->
+    <string name="quick_settings_hotspot_secondary_label_transient" msgid="7161046712706277215">"Mengaktifkan..."</string>
+    <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
+      <item quantity="other">%d perangkat</item>
+      <item quantity="one">%d perangkat</item>
+    </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Notifikasi"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Lampu senter"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Data seluler"</string>
@@ -358,7 +362,6 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> dinonaktifkan dalam mode aman."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Hapus semua"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Tarik ke sini untuk menggunakan layar terpisah"</string>
-    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Geser ke atas untuk beralih aplikasi"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Pisahkan Horizontal"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Pisahkan Vertikal"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Pisahkan Khusus"</string>
@@ -499,11 +502,18 @@
     <string name="volume_zen_end_now" msgid="6930243045593601084">"Nonaktifkan sekarang"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Luaskan"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Ciutkan"</string>
+    <string name="accessibility_output_chooser" msgid="8185317493017988680">"Ganti perangkat keluaran"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Layar dipasangi pin"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh &amp; tahan tombol Kembali dan Ringkasan untuk melepas pin."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh &amp; tahan tombol Kembali dan Beranda untuk melepas pin."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh dan tahan tombol Ringkasan untuk melepas pin."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh dan tahan tombol Beranda untuk melepas pin."</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"Untuk melepas pin layar ini, sentuh &amp; tahan tombol Kembali dan Ringkasan"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Untuk melepas pin layar ini, sentuh &amp; tahan tombol Kembali dan Beranda"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Mengerti"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Lain kali"</string>
+    <string name="screen_pinning_start" msgid="1022122128489278317">"Layar dipasangi pin"</string>
+    <string name="screen_pinning_exit" msgid="5187339744262325372">"Layar dilepas pinnya"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Sembunyikan <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Ini akan muncul kembali saat Anda mengaktifkannya dalam setelan."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Sembunyikan"</string>
@@ -526,8 +536,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Ketuk untuk membisukan. Layanan aksesibilitas mungkin dibisukan."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Tap untuk menyetel agar bergetar."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Tap untuk menonaktifkan."</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Kontrol volume %s ditampilkan. Geser ke atas untuk menutup."</string>
-    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Kontrol volume disembunyikan"</string>
+    <string name="volume_dialog_title" msgid="7272969888820035876">"%s kontrol volume"</string>
     <string name="output_title" msgid="5355078100792942802">"Keluaran media"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Keluaran panggilan telepon"</string>
     <string name="output_none_found" msgid="5544982839808921091">"Perangkat tidak ditemukan"</string>
@@ -583,8 +592,7 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Dengan kontrol notifikasi daya, Anda dapt menyetel level kepentingan notifikasi aplikasi dari 0 sampai 5. \n\n"<b>"Level 5"</b>" \n- Muncul di atas daftar notifikasi \n- Izinkan interupsi layar penuh \n- Selalu intip pesan \n\n"<b>"Level 4"</b>" \n- Jangan interupsi layar penuh \n- Selalu intip pesan \n\n"<b>"Level 3"</b>" \n- Jangan interupsi layar penuh \n- Tak pernah intip pesan \n\n"<b>"Level 2"</b>" \n- Jangan interupsi layar penuh \n- Tak pernah intip pesan \n- Tanpa suara dan getaran \n\n"<b>"Level 1"</b>" \n- Jangan interupsi layar penuh \n- Tak pernah intip pesan \n- Tanpa suara atau getaran \n- Sembunyikan dari layar kunci dan bilah status \n- Muncul di bawah daftar notifikasi \n\n"<b>"Level 0"</b>" \n- Blokir semua notifikasi dari aplikasi"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Notifikasi"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Anda tidak akan melihat notifikasi ini lagi"</string>
-    <!-- no translation found for inline_blocking_helper (3055064577771478591) -->
-    <skip />
+    <string name="inline_blocking_helper" msgid="3055064577771478591">"Anda biasanya menutup notifikasi ini. \nTerus tampilkan?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Terus tampilkan notifikasi ini?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Hentikan notifikasi"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Terus tampilkan"</string>
@@ -678,9 +686,8 @@
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Papan klip"</item>
     <item msgid="5742013440802239414">"Kode tombol"</item>
-    <item msgid="8802889973626281575">"Pengalih keyboard"</item>
-    <item msgid="7095517796293767867">"Saran rotasi"</item>
-    <item msgid="8494159969042135235">"Tak Ada"</item>
+    <item msgid="1951959982985094069">"Pengalih keyboard, konfirmasi putar"</item>
+    <item msgid="8175437057325747277">"Tidak ada"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"Biasa"</item>

@@ -53,10 +53,8 @@
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"<xliff:g id="ALARM">%1$s</xliff:g> માટે આગલું એલાર્મ સેટ કર્યું"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"કાઢી નાખો"</string>
     <string name="disable_carrier_button_text" msgid="6914341927421916114">"eSIMને અક્ષમ કરો"</string>
-    <!-- no translation found for error_disable_esim_title (4852978431156228006) -->
-    <skip />
-    <!-- no translation found for error_disable_esim_msg (676694908770135639) -->
-    <skip />
+    <string name="error_disable_esim_title" msgid="4852978431156228006">"ઇ-સિમ બંધ કરી શકાતું નથી"</string>
+    <string name="error_disable_esim_msg" msgid="676694908770135639">"એક ભૂલને લીધે ઇ-સિમ બંધ કરી શકાતું નથી."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"દાખલ કરો"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"પૅટર્ન ભૂલી ગયાં"</string>
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"ખોટી પૅટર્ન"</string>
@@ -69,8 +67,7 @@
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"તમારી પૅટર્ન દોરો"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"સિમ પિન દાખલ કરો"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" માટે સિમ પિન દાખલ કરો."</string>
-    <!-- no translation found for kg_sim_lock_esim_instructions (4416732549172148542) -->
-    <skip />
+    <string name="kg_sim_lock_esim_instructions" msgid="4416732549172148542">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> મોબાઇલ સેવા વગર ઉપકરણનો ઉપયોગ કરવા માટે ઇ-સિમને બંધ કરો."</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"પિન દાખલ કરો"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"પાસવર્ડ દાખલ કરો"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"સિમ હમણાં અક્ષમ કરેલ છે. ચાલુ રાખવા માટે PUK કોડ દાખલ કરો. વિગતો માટે કૅરિઅરનો સંપર્ક કરો."</string>

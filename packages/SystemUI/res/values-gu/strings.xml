@@ -103,6 +103,8 @@
     <string name="camera_label" msgid="7261107956054836961">"કૅમેરો ખોલો"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"નવું કાર્ય લેઆઉટ પસંદ કરો"</string>
     <string name="cancel" msgid="6442560571259935130">"રદ કરો"</string>
+    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
+    <skip />
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"ફિંગરપ્રિન્ટનું આઇકન"</string>
     <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"ઍપ્લિકેશનનું આઇકન"</string>
     <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"સહાય સંદેશનું ક્ષેત્ર"</string>
@@ -272,6 +274,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"ડેઝર્ટ કેસ"</string>
     <string name="start_dreams" msgid="5640361424498338327">"સ્ક્રીન સેવર"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ઇથરનેટ"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"ખલેલ પાડશો નહીં"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"ફક્ત પ્રાધાન્યતા"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"ફક્ત એલાર્મ્સ"</string>
@@ -308,8 +312,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"વાઇ-ફાઇ બંધ"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"વાઇ-ફાઇ ચાલુ"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"કોઈ વાઇ-ફાઇ નેટવર્ક્સ ઉપલબ્ધ નથી"</string>
-    <!-- no translation found for quick_settings_alarm_title (2416759007342260676) -->
-    <skip />
+    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"અલાર્મ"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"કાસ્ટ કરો"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"કાસ્ટ કરી રહ્યાં છે"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"અનામાંકિત ઉપકરણ"</string>
@@ -359,7 +362,6 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"સુરક્ષિત મોડમાં <xliff:g id="APP">%s</xliff:g> અક્ષમ કરેલ છે."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"બધું સાફ કરો"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"વિભાજિત સ્ક્રીનનો ઉપયોગ કરવા માટે અહીં ખેંચો"</string>
-    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"ઍપ સ્વિચ કરવા માટે ઉપરની તરફ સ્વાઇપ કરો"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"આડું વિભક્ત કરો"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ઊભું વિભક્ત કરો"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"કસ્ટમ વિભક્ત કરો"</string>
@@ -500,25 +502,18 @@
     <string name="volume_zen_end_now" msgid="6930243045593601084">"હમણાં બંધ કરો"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"વિસ્તૃત કરો"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"સંકુચિત કરો"</string>
-    <!-- no translation found for accessibility_output_chooser (8185317493017988680) -->
-    <skip />
+    <string name="accessibility_output_chooser" msgid="8185317493017988680">"આઉટપુટ ઉપકરણ સ્વિચ કરો"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"સ્ક્રીન પિન કરેલ છે"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"તમે જ્યાં સુધી અનપિન કરશો નહીં ત્યાં સુધી આ તેને દૃશ્યક્ષમ રાખે છે. અનપિન કરવા માટે પાછળ અને ઝલકને સ્પર્શ કરી રાખો."</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible (8281145542163727971) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"તમે જ્યાં સુધી અનપિન કરશો નહીં ત્યાં સુધી આ તેને દૃશ્યક્ષમ રાખે છે. અનપિન કરવા માટે પાછળ અને હોમને સ્પર્શ કરી રાખો."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"તમે જ્યાં સુધી અનપિન કરશો નહીં ત્યાં સુધી આ તેને દૃશ્યક્ષમ રાખે છે. અનપિન કરવા માટે ઝલકને સ્પર્શ કરી રાખો."</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible_accessible (6134833683151189507) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (2266705122951934150) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (8252402309499161281) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"તમે જ્યાં સુધી અનપિન કરશો નહીં ત્યાં સુધી આ તેને દૃશ્યક્ષમ રાખે છે. અનપિન કરવા માટે હોમને સ્પર્શ કરી રાખો."</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"આ સ્ક્રીનને અનપિન કરવા માટે, પાછળ અને ઝલક બટનને સ્પર્શ કરી રાખો"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"આ સ્ક્રીનને અનપિન કરવા માટે, પાછળ અને હોમ બટનને સ્પર્શ કરી રાખો"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"સમજાઈ ગયું"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"ના, આભાર"</string>
-    <!-- no translation found for screen_pinning_start (1022122128489278317) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (5187339744262325372) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="1022122128489278317">"સ્ક્રીન પિન કરી"</string>
+    <string name="screen_pinning_exit" msgid="5187339744262325372">"સ્ક્રીન અનપિન કરી"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ને છુપાવીએ?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"તે સેટિંગ્સમાં તમે તેને ચાલુ કરશો ત્યારે આગલી વખતે ફરીથી દેખાશે."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"છુપાવો"</string>
@@ -541,8 +536,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. મ્યૂટ કરવા માટે ટૅપ કરો. ઍક્સેસિબિલિટી સેવાઓ મ્યૂટ કરવામાં આવી શકે છે."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. કંપન પર સેટ કરવા માટે ટૅપ કરો."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. મ્યૂટ કરવા માટે ટૅપ કરો."</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s વૉલ્યૂમ નિયંત્રણ બતાવ્યાં. છોડી દેવા માટે સ્વાઇપ કરો."</string>
-    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"વૉલ્યૂમ નિયંત્રણ છુપાવ્યાં"</string>
+    <string name="volume_dialog_title" msgid="7272969888820035876">"%s વૉલ્યૂમ નિયંત્રણો"</string>
     <string name="output_title" msgid="5355078100792942802">"મીડિયાનું આઉટપુટ"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"ફોન કૉલનો આઉટપુટ"</string>
     <string name="output_none_found" msgid="5544982839808921091">"કોઈ ઉપકરણો મળ્યા નથી"</string>
@@ -692,9 +686,8 @@
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"ક્લિપબોર્ડ"</item>
     <item msgid="5742013440802239414">"કીકોડ"</item>
-    <item msgid="8802889973626281575">"કીબોર્ડ સ્વિચર"</item>
-    <item msgid="7095517796293767867">"રોટેશન માટે સૂચન"</item>
-    <item msgid="8494159969042135235">"કોઈ નહીં"</item>
+    <item msgid="1951959982985094069">"ફેરવવાની પુષ્ટિ, કીબોર્ડ સ્વિચર"</item>
+    <item msgid="8175437057325747277">"કોઈ નહીં"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"સામાન્ય"</item>
