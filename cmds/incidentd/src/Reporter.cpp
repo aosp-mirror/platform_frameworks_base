@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define DEBUG false
 #include "Log.h"
 
 #include "Reporter.h"
@@ -118,7 +119,7 @@ Reporter::Reporter(const char* directory) : batch() {
 
 Reporter::~Reporter() {}
 
-Reporter::run_report_status_t Reporter::runReport() {
+Reporter::run_report_status_t Reporter::runReport(size_t* reportByteSize) {
     status_t err = NO_ERROR;
     bool needMainFd = false;
     int mainFd = -1;
@@ -185,7 +186,6 @@ Reporter::run_report_status_t Reporter::runReport() {
             int64_t startTime = uptimeMillis();
             err = (*section)->Execute(&batch);
             int64_t endTime = uptimeMillis();
-
             stats->set_success(err == NO_ERROR);
             stats->set_exec_duration_ms(endTime - startTime);
             if (err != NO_ERROR) {
@@ -193,6 +193,7 @@ Reporter::run_report_status_t Reporter::runReport() {
                       (*section)->name.string(), id, strerror(-err));
                 goto DONE;
             }
+            (*reportByteSize) += stats->report_size_bytes();
 
             // Notify listener of starting
             for (ReportRequestSet::iterator it = batch.begin(); it != batch.end(); it++) {

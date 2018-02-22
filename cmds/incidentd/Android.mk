@@ -25,16 +25,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := incidentd
 
-LOCAL_SRC_FILES := \
-        src/PrivacyBuffer.cpp \
-        src/FdBuffer.cpp \
-        src/IncidentService.cpp \
-        src/Privacy.cpp \
-        src/Reporter.cpp \
-        src/Section.cpp \
-        src/incidentd_util.cpp \
-        src/main.cpp \
-        src/report_directory.cpp
+LOCAL_SRC_FILES := $(call all-cpp-files-under, src) \
 
 LOCAL_CFLAGS += \
         -Wall -Werror -Wno-missing-field-initializers -Wno-unused-variable -Wunused-parameter
@@ -110,19 +101,15 @@ LOCAL_CFLAGS := -Werror -Wall -Wno-unused-variable -Wunused-parameter
 
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/src
 
-LOCAL_SRC_FILES := \
+LOCAL_SRC_FILES := $(call all-cpp-files-under, tests) \
     src/PrivacyBuffer.cpp \
     src/FdBuffer.cpp \
     src/Privacy.cpp \
     src/Reporter.cpp \
     src/Section.cpp \
+    src/Throttler.cpp \
     src/incidentd_util.cpp \
     src/report_directory.cpp \
-    tests/section_list.cpp \
-    tests/PrivacyBuffer_test.cpp \
-    tests/FdBuffer_test.cpp \
-    tests/Reporter_test.cpp \
-    tests/Section_test.cpp \
 
 LOCAL_STATIC_LIBRARIES := \
     libgmock \

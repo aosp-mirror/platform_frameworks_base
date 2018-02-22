@@ -26,6 +26,8 @@
 #include <deque>
 #include <mutex>
 
+#include "Throttler.h"
+
 using namespace android;
 using namespace android::base;
 using namespace android::binder;
@@ -49,7 +51,8 @@ private:
 // ================================================================================
 class ReportHandler : public MessageHandler {
 public:
-    ReportHandler(const sp<Looper>& handlerLooper, const sp<ReportRequestQueue>& queue);
+    ReportHandler(const sp<Looper>& handlerLooper, const sp<ReportRequestQueue>& queue,
+                  const sp<Throttler>& throttler);
     virtual ~ReportHandler();
 
     virtual void handleMessage(const Message& message);
@@ -70,6 +73,7 @@ private:
     nsecs_t mBacklogDelay;
     sp<Looper> mHandlerLooper;
     sp<ReportRequestQueue> mQueue;
+    sp<Throttler> mThrottler;
 
     /**
      * Runs all of the reports that have been queued.
@@ -109,6 +113,7 @@ public:
 private:
     sp<ReportRequestQueue> mQueue;
     sp<ReportHandler> mHandler;
+    sp<Throttler> mThrottler;
 
     /**
      * Commands print out help.

@@ -18,8 +18,6 @@
 #ifndef REPORTER_H
 #define REPORTER_H
 
-#include "frameworks/base/libs/incident/proto/android/os/metadata.pb.h"
-
 #include <android/os/IIncidentReportStatusListener.h>
 #include <android/os/IncidentReportArgs.h>
 
@@ -28,6 +26,9 @@
 #include <vector>
 
 #include <time.h>
+
+#include "Throttler.h"
+#include "frameworks/base/libs/incident/proto/android/os/metadata.pb.h"
 
 using namespace android;
 using namespace android::os;
@@ -91,7 +92,7 @@ public:
     virtual ~Reporter();
 
     // Run the report as described in the batch and args parameters.
-    run_report_status_t runReport();
+    run_report_status_t runReport(size_t* reportByteSize);
 
     static run_report_status_t upload_backlog();
 
