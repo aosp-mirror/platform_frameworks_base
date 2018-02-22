@@ -18,10 +18,14 @@ package android.view;
 
 import static android.view.DisplayCutout.NO_CUTOUT;
 import static android.view.DisplayCutout.fromBoundingRect;
+import static android.view.DisplayCutout.fromSpec;
 
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import android.graphics.Rect;
@@ -268,6 +272,30 @@ public class DisplayCutoutTest {
 
         assertEquals(mCutoutNumbers, ParcelableWrapper.CREATOR.createFromParcel(p).get());
         assertEquals(posAfterWrite, p.dataPosition());
+    }
+
+    @Test
+    public void fromSpec_caches() {
+        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 200, 1f);
+        assertThat(fromSpec("L1,0 L1,1 L0,1 z", 200, 1f), sameInstance(cached));
+    }
+
+    @Test
+    public void fromSpec_wontCacheIfSpecChanges() {
+        DisplayCutout cached = fromSpec("L1,0 L1000,1000 L0,1 z", 200, 1f);
+        assertThat(fromSpec("L1,0 L1,1 L0,1 z", 200, 1f), not(sameInstance(cached)));
+    }
+
+    @Test
+    public void fromSpec_wontCacheIfScreenWidthChanges() {
+        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 2000, 1f);
+        assertThat(fromSpec("L1,0 L1,1 L0,1 z", 200, 1f), not(sameInstance(cached)));
+    }
+
+    @Test
+    public void fromSpec_wontCacheIfDensityChanges() {
+        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 200, 2f);
+        assertThat(fromSpec("L1,0 L1,1 L0,1 z", 200, 1f), not(sameInstance(cached)));
     }
 
     @Test
