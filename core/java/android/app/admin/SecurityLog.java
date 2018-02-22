@@ -295,7 +295,7 @@ public class SecurityLog {
      * <li> [1] admin user ID ({@code Integer})
      * <li> [2] target user ID ({@code Integer})
      * <li> [3] new maximum number of failed password attempts ({@code Integer})
-     * @see DevicePolicyManager#setMaximumTimeToLock(ComponentName, long)
+     * @see DevicePolicyManager#setMaximumFailedPasswordsForWipe(ComponentName, int)
      */
     public static final int TAG_MAX_PASSWORD_ATTEMPTS_SET =
             SecurityLogTags.SECURITY_MAX_PASSWORD_ATTEMPTS_SET;
@@ -370,7 +370,7 @@ public class SecurityLog {
             SecurityLogTags.SECURITY_CERT_AUTHORITY_INSTALLED;
 
     /**
-     * Indicates that a new oot certificate has been removed from system's trusted credential
+     * Indicates that a new root certificate has been removed from system's trusted credential
      * storage. The log entry contains the following information about the event, encapsulated in an
      * {@link Object} array and accessible via {@link SecurityEvent#getData()}:
      * <li> [0] result ({@code Integer}, 0 if operation failed, 1 if succeeded)
