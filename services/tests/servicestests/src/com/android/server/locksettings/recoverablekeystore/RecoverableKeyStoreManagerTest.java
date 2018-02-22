@@ -639,7 +639,7 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
-    public void setRecoveryStatus_forOneAlias() throws Exception {
+    public void setRecoveryStatus() throws Exception {
         int userId = UserHandle.getCallingUserId();
         int uid = Binder.getCallingUid();
         int status = 100;
@@ -652,53 +652,10 @@ public class RecoverableKeyStoreManagerTest {
         assertThat(statuses).hasSize(1);
         assertThat(statuses).containsEntry(alias, status);
 
-        mRecoverableKeyStoreManager.setRecoveryStatus(
-                /*packageName=*/ null, new String[] {alias}, status2);
+        mRecoverableKeyStoreManager.setRecoveryStatus(alias, status2);
         statuses = mRecoverableKeyStoreManager.getRecoveryStatus(/*packageName=*/ null);
         assertThat(statuses).hasSize(1);
         assertThat(statuses).containsEntry(alias, status2); // updated
-    }
-
-    @Test
-    public void setRecoveryStatus_for2Aliases() throws Exception {
-        int userId = UserHandle.getCallingUserId();
-        int uid = Binder.getCallingUid();
-        int status = 100;
-        int status2 = 200;
-        int status3 = 300;
-        String alias = "key1";
-        String alias2 = "key2";
-        WrappedKey wrappedKey = new WrappedKey(NONCE, KEY_MATERIAL, GENERATION_ID, status);
-        mRecoverableKeyStoreDb.insertKey(userId, uid, alias, wrappedKey);
-        mRecoverableKeyStoreDb.insertKey(userId, uid, alias2, wrappedKey);
-        Map<String, Integer> statuses =
-                mRecoverableKeyStoreManager.getRecoveryStatus(/*packageName=*/ null);
-        assertThat(statuses).hasSize(2);
-        assertThat(statuses).containsEntry(alias, status);
-        assertThat(statuses).containsEntry(alias2, status);
-
-        mRecoverableKeyStoreManager.setRecoveryStatus(
-                /*packageName=*/ null, /*aliases=*/ null, status2);
-        statuses = mRecoverableKeyStoreManager.getRecoveryStatus(/*packageName=*/ null);
-        assertThat(statuses).hasSize(2);
-        assertThat(statuses).containsEntry(alias, status2); // updated
-        assertThat(statuses).containsEntry(alias2, status2); // updated
-
-        mRecoverableKeyStoreManager.setRecoveryStatus(
-                /*packageName=*/ null, new String[] {alias2}, status3);
-
-        statuses = mRecoverableKeyStoreManager.getRecoveryStatus(/*packageName=*/ null);
-        assertThat(statuses).hasSize(2);
-        assertThat(statuses).containsEntry(alias, status2);
-        assertThat(statuses).containsEntry(alias2, status3); // updated
-
-        mRecoverableKeyStoreManager.setRecoveryStatus(
-                /*packageName=*/ null, new String[] {alias, alias2}, status);
-
-        statuses = mRecoverableKeyStoreManager.getRecoveryStatus(/*packageName=*/ null);
-        assertThat(statuses).hasSize(2);
-        assertThat(statuses).containsEntry(alias, status); // updated
-        assertThat(statuses).containsEntry(alias2, status); // updated
     }
 
     private static byte[] encryptedApplicationKey(
