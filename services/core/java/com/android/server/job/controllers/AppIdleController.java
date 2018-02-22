@@ -19,6 +19,7 @@ package com.android.server.job.controllers;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.Context;
 import android.os.UserHandle;
+import android.util.Log;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
@@ -36,9 +37,9 @@ import java.io.PrintWriter;
  * out of idle state, it will be allowed to run scheduled jobs.
  */
 public final class AppIdleController extends StateController {
-
-    private static final String LOG_TAG = "AppIdleController";
-    private static final boolean DEBUG = false;
+    private static final String TAG = "JobScheduler.AppIdle";
+    private static final boolean DEBUG = JobSchedulerService.DEBUG
+            || Log.isLoggable(TAG, Log.DEBUG);
 
     // Singleton factory
     private static Object sCreationLock = new Object();
@@ -56,7 +57,7 @@ public final class AppIdleController extends StateController {
             final boolean appIdle = !mAppIdleParoleOn && mUsageStatsInternal.isAppIdle(packageName,
                     jobStatus.getSourceUid(), jobStatus.getSourceUserId());
             if (DEBUG) {
-                Slog.d(LOG_TAG, "Setting idle state of " + packageName + " to " + appIdle);
+                Slog.d(TAG, "Setting idle state of " + packageName + " to " + appIdle);
             }
             if (jobStatus.setAppNotIdleConstraintSatisfied(!appIdle)) {
                 mChanged = true;
@@ -81,7 +82,7 @@ public final class AppIdleController extends StateController {
                     && jobStatus.getSourceUserId() == mUserId) {
                 if (jobStatus.setAppNotIdleConstraintSatisfied(!mIdle)) {
                     if (DEBUG) {
-                        Slog.d(LOG_TAG, "App Idle state changed, setting idle state of "
+                        Slog.d(TAG, "App Idle state changed, setting idle state of "
                                 + mPackage + " to " + mIdle);
                     }
                     mChanged = true;
@@ -118,7 +119,7 @@ public final class AppIdleController extends StateController {
         final boolean appIdle = !mAppIdleParoleOn && mUsageStatsInternal.isAppIdle(packageName,
                 jobStatus.getSourceUid(), jobStatus.getSourceUserId());
         if (DEBUG) {
-            Slog.d(LOG_TAG, "Start tracking, setting idle state of "
+            Slog.d(TAG, "Start tracking, setting idle state of "
                     + packageName + " to " + appIdle);
         }
         jobStatus.setAppNotIdleConstraintSatisfied(!appIdle);
@@ -229,7 +230,7 @@ public final class AppIdleController extends StateController {
         @Override
         public void onParoleStateChanged(boolean isParoleOn) {
             if (DEBUG) {
-                Slog.d(LOG_TAG, "Parole on: " + isParoleOn);
+                Slog.d(TAG, "Parole on: " + isParoleOn);
             }
             setAppIdleParoleOn(isParoleOn);
         }

@@ -43,8 +43,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ServiceInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
@@ -65,6 +65,7 @@ import android.os.UserManagerInternal;
 import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.util.KeyValueListParser;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -79,9 +80,9 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
+import com.android.server.AppStateTracker;
 import com.android.server.DeviceIdleController;
 import com.android.server.FgThread;
-import com.android.server.AppStateTracker;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerServiceDumpProto.ActiveJob;
 import com.android.server.job.JobSchedulerServiceDumpProto.PendingJob;
@@ -125,8 +126,8 @@ import java.util.function.Predicate;
  */
 public final class JobSchedulerService extends com.android.server.SystemService
         implements StateChangedListener, JobCompletedListener {
-    static final String TAG = "JobSchedulerService";
-    public static final boolean DEBUG = false;
+    public static final String TAG = "JobScheduler";
+    public static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     public static final boolean DEBUG_STANDBY = DEBUG || false;
 
     /** The maximum number of concurrent jobs we run at one time. */

@@ -25,6 +25,7 @@ import android.content.Context;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.util.Log;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -45,6 +46,8 @@ import java.util.ListIterator;
  */
 public final class TimeController extends StateController {
     private static final String TAG = "JobScheduler.Time";
+    private static final boolean DEBUG = JobSchedulerService.DEBUG
+            || Log.isLoggable(TAG, Log.DEBUG);
 
     /** Deadline alarm tag for logging purposes */
     private final String DEADLINE_TAG = "*job.deadline*";

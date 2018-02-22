@@ -23,11 +23,12 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.util.ArrayMap;
+import android.util.ArraySet;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
-import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -43,8 +44,9 @@ import java.util.ArrayList;
  * Controller for monitoring changes to content URIs through a ContentObserver.
  */
 public final class ContentObserverController extends StateController {
-    private static final String TAG = "JobScheduler.Content";
-    private static final boolean DEBUG = false;
+    private static final String TAG = "JobScheduler.ContentObserver";
+    private static final boolean DEBUG = JobSchedulerService.DEBUG
+            || Log.isLoggable(TAG, Log.DEBUG);
 
     /**
      * Maximum number of changing URIs we will batch together to report.

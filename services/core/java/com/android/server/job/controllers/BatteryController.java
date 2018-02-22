@@ -26,6 +26,7 @@ import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
 import android.os.UserHandle;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
@@ -43,7 +44,9 @@ import java.io.PrintWriter;
  * ACTION_BATTERY_OK.
  */
 public final class BatteryController extends StateController {
-    private static final String TAG = "JobScheduler.Batt";
+    private static final String TAG = "JobScheduler.Battery";
+    private static final boolean DEBUG = JobSchedulerService.DEBUG
+            || Log.isLoggable(TAG, Log.DEBUG);
 
     private static final Object sCreationLock = new Object();
     private static volatile BatteryController sController;

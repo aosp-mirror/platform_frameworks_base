@@ -35,6 +35,7 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.text.format.DateUtils;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
@@ -56,8 +57,9 @@ import java.io.PrintWriter;
  */
 public final class ConnectivityController extends StateController implements
         ConnectivityManager.OnNetworkActiveListener {
-    private static final String TAG = "JobScheduler.Conn";
-    private static final boolean DEBUG = false;
+    private static final String TAG = "JobScheduler.Connectivity";
+    private static final boolean DEBUG = JobSchedulerService.DEBUG
+            || Log.isLoggable(TAG, Log.DEBUG);
 
     private final ConnectivityManager mConnManager;
     private final NetworkPolicyManager mNetPolicyManager;
