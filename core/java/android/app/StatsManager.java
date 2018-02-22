@@ -16,6 +16,7 @@
 package android.app;
 
 import android.Manifest;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.os.IBinder;
@@ -72,14 +73,6 @@ public final class StatsManager {
      * @hide
      */
     public StatsManager() {
-    }
-
-    /**
-     * Temporary. Will be deleted.
-     */
-    @RequiresPermission(Manifest.permission.DUMP)
-    public boolean addConfiguration(long configKey, byte[] config, String a, String b) {
-        return addConfiguration(configKey, config);
     }
 
     /**
@@ -226,10 +219,11 @@ public final class StatsManager {
      * the retrieved metrics from statsd memory.
      *
      * @param configKey Configuration key to retrieve data from.
-     * @return Serialized ConfigMetricsReportList proto. Returns null on failure.
+     * @return Serialized ConfigMetricsReportList proto. Returns null on failure (eg, if statsd
+     * crashed).
      */
     @RequiresPermission(Manifest.permission.DUMP)
-    public byte[] getData(long configKey) {
+    public @Nullable byte[] getData(long configKey) {
         synchronized (this) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
@@ -239,7 +233,7 @@ public final class StatsManager {
                 }
                 return service.getData(configKey);
             } catch (RemoteException e) {
-                if (DEBUG) Slog.d(TAG, "Failed to connecto statsd when getting data");
+                if (DEBUG) Slog.d(TAG, "Failed to connect to statsd when getting data");
                 return null;
             }
         }
@@ -250,10 +244,10 @@ public final class StatsManager {
      * the actual metrics themselves (metrics must be collected via {@link #getData(String)}.
      * This getter is not destructive and will not reset any metrics/counters.
      *
-     * @return Serialized StatsdStatsReport proto. Returns null on failure.
+     * @return Serialized StatsdStatsReport proto. Returns null on failure (eg, if statsd crashed).
      */
     @RequiresPermission(Manifest.permission.DUMP)
-    public byte[] getMetadata() {
+    public @Nullable byte[] getMetadata() {
         synchronized (this) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
