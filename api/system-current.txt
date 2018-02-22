@@ -469,7 +469,11 @@ package android.app.backup {
     method public android.app.backup.RestoreSession beginRestoreSession();
     method public void cancelBackups();
     method public long getAvailableRestoreToken(java.lang.String);
+    method public android.content.Intent getConfigurationIntent(java.lang.String);
     method public java.lang.String getCurrentTransport();
+    method public android.content.Intent getDataManagementIntent(java.lang.String);
+    method public java.lang.String getDataManagementLabel(java.lang.String);
+    method public java.lang.String getDestinationString(java.lang.String);
     method public boolean isAppEligibleForBackup(java.lang.String);
     method public boolean isBackupEnabled();
     method public boolean isBackupServiceActive(android.os.UserHandle);

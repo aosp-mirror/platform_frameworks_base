@@ -19,6 +19,7 @@ package android.app.backup;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -713,6 +714,92 @@ public class BackupManager {
                 Log.e(TAG, "cancelBackups() couldn't connect.");
             }
         }
+    }
+
+    /**
+     * Returns an {@link Intent} for the specified transport's configuration UI.
+     * This value is set by {@link #updateTransportAttributes(ComponentName, String, Intent, String,
+     * Intent, String)}.
+     * @param transportName The name of the registered transport.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
+    public Intent getConfigurationIntent(String transportName) {
+        if (sService != null) {
+            try {
+                return sService.getConfigurationIntent(transportName);
+            } catch (RemoteException e) {
+                Log.e(TAG, "getConfigurationIntent() couldn't connect");
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns a {@link String} describing where the specified transport is sending data.
+     * This value is set by {@link #updateTransportAttributes(ComponentName, String, Intent, String,
+     * Intent, String)}.
+     * @param transportName The name of the registered transport.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
+    public String getDestinationString(String transportName) {
+        if (sService != null) {
+            try {
+                return sService.getDestinationString(transportName);
+            } catch (RemoteException e) {
+                Log.e(TAG, "getDestinationString() couldn't connect");
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns an {@link Intent} for the specified transport's data management UI.
+     * This value is set by {@link #updateTransportAttributes(ComponentName, String, Intent, String,
+     * Intent, String)}.
+     * @param transportName The name of the registered transport.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
+    public Intent getDataManagementIntent(String transportName) {
+        if (sService != null) {
+            try {
+                return sService.getDataManagementIntent(transportName);
+            } catch (RemoteException e) {
+                Log.e(TAG, "getDataManagementIntent() couldn't connect");
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns a {@link String} describing what the specified transport's data management intent is
+     * used for.
+     * This value is set by {@link #updateTransportAttributes(ComponentName, String, Intent, String,
+     * Intent, String)}.
+     *
+     * @param transportName The name of the registered transport.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
+    public String getDataManagementLabel(String transportName) {
+        if (sService != null) {
+            try {
+                return sService.getDataManagementLabel(transportName);
+            } catch (RemoteException e) {
+                Log.e(TAG, "getDataManagementLabel() couldn't connect");
+            }
+        }
+        return null;
     }
 
     /*
