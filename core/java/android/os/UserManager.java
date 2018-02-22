@@ -913,6 +913,9 @@ public class UserManager {
      * Specifies if user switching is blocked on the current user.
      *
      * <p> This restriction can only be set by the device owner, it will be applied to all users.
+     * Device owner can still switch user via
+     * {@link DevicePolicyManager#switchUser(ComponentName, UserHandle)} when this restriction is
+     * set.
      *
      * <p>The default value is <code>false</code>.
      *
