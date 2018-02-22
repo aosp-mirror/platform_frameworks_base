@@ -263,12 +263,22 @@
     <dimen name="qs_panel_width">@dimen/notification_panel_width</dimen>
 
     <!-- the amount the volume panel should be offset at the end from the view next to it (or
-    the scren edge, in portrait-->
-    <dimen name="volume_dialog_base_margin">12dp</dimen>
+    the screen edge, in portrait-->
+    <dimen name="volume_dialog_base_margin">8dp</dimen>
 
-    <dimen name="volume_dialog_panel_width">100dp</dimen>
+    <dimen name="volume_dialog_panel_width">64dp</dimen>
 
-    <dimen name="output_chooser_panel_width">320dp</dimen>
+    <dimen name="volume_dialog_slider_height">101dp</dimen>
+
+    <dimen name="volume_dialog_row_height">252dp</dimen>
+
+    <dimen name="volume_dialog_ringer_size">64dp</dimen>
+
+    <dimen name="volume_dialog_tap_target_size">48dp</dimen>
+
+    <dimen name="volume_dialog_spacer">4dp</dimen>
+
+    <dimen name="volume_dialog_slider_margin_top">13dp</dimen>
 
     <!-- Gravity for the notification panel -->
     <integer name="notification_panel_layout_gravity">0x31</integer><!-- center_horizontal|top -->
