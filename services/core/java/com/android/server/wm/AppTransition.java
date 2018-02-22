@@ -29,6 +29,7 @@ import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
+import static android.view.WindowManager.TRANSIT_TASK_IN_PLACE;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_TASK_TO_BACK;
@@ -2138,6 +2139,10 @@ public class AppTransition implements Dump {
                     && isTransitionEqual(TRANSIT_ACTIVITY_CLOSE)) {
                 // Opening a new activity always supersedes a close for the anim.
                 setAppTransition(transit, flags);
+            } else if (isTaskTransit(transit) && isActivityTransit(mNextAppTransition)) {
+                // Task animations always supersede activity animations, because if we have both, it
+                // usually means that activity transition were just trampoline activities.
+                setAppTransition(transit, flags);
             }
         }
         boolean prepared = prepare();
@@ -2160,6 +2165,21 @@ public class AppTransition implements Dump {
     private static boolean isKeyguardTransit(int transit) {
         return isKeyguardGoingAwayTransit(transit) || transit == TRANSIT_KEYGUARD_OCCLUDE
                 || transit == TRANSIT_KEYGUARD_UNOCCLUDE;
+    }
+
+    private static boolean isTaskTransit(int transit) {
+        return transit == TRANSIT_TASK_OPEN
+                || transit == TRANSIT_TASK_CLOSE
+                || transit == TRANSIT_TASK_OPEN_BEHIND
+                || transit == TRANSIT_TASK_TO_BACK
+                || transit == TRANSIT_TASK_TO_FRONT
+                || transit == TRANSIT_TASK_IN_PLACE;
+    }
+
+    private static boolean isActivityTransit(int transit) {
+        return transit == TRANSIT_ACTIVITY_OPEN
+                || transit == TRANSIT_ACTIVITY_CLOSE
+                || transit == TRANSIT_ACTIVITY_RELAUNCH;
     }
 
     /**
