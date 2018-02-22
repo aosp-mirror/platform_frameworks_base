@@ -9554,12 +9554,19 @@ public class DevicePolicyManager {
     /**
      * Returns the data passed from the current administrator to the new administrator during an
      * ownership transfer. This is the same {@code bundle} passed in
-     * {@link #transferOwnership(ComponentName, ComponentName, PersistableBundle)}.
+     * {@link #transferOwnership(ComponentName, ComponentName, PersistableBundle)}. The bundle is
+     * persisted until the profile owner or device owner is removed.
+     *
+     * <p>This is the same <code>bundle</code> received in the
+     * {@link DeviceAdminReceiver#onTransferOwnershipComplete(Context, PersistableBundle)}.
+     * Use this method to retrieve it after the transfer as long as the new administrator is the
+     * active device or profile owner.
      *
      * <p>Returns <code>null</code> if no ownership transfer was started for the calling user.
      *
      * @see #transferOwnership
      * @see DeviceAdminReceiver#onTransferOwnershipComplete(Context, PersistableBundle)
+     * @throws SecurityException if the caller is not a device or profile owner.
      */
     @Nullable
     public PersistableBundle getTransferOwnershipBundle() {
