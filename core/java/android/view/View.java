@@ -14927,10 +14927,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * ImageView with only the foreground image. The default implementation returns true; subclasses
      * should override if they have cases which can be optimized.</p>
      *
-     * <p>The current implementation of the saveLayer and saveLayerAlpha methods in {@link Canvas}
-     * necessitates that a View return true if it uses the methods internally without passing the
-     * {@link Canvas#CLIP_TO_LAYER_SAVE_FLAG}.</p>
-     *
      * <p><strong>Note:</strong> The return value of this method is ignored if {@link
      * #forceHasOverlappingRendering(boolean)} has been called on this view.</p>
      *
