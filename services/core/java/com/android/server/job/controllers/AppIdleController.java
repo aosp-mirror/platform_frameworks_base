@@ -17,7 +17,6 @@
 package com.android.server.job.controllers;
 
 import android.app.usage.UsageStatsManagerInternal;
-import android.content.Context;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
@@ -42,10 +41,6 @@ public final class AppIdleController extends StateController {
     private static final boolean DEBUG = JobSchedulerService.DEBUG
             || Log.isLoggable(TAG, Log.DEBUG);
 
-    // Singleton factory
-    private static Object sCreationLock = new Object();
-    private static volatile AppIdleController sController;
-    private final JobSchedulerService mJobSchedulerService;
     private final UsageStatsManagerInternal mUsageStatsInternal;
     private boolean mInitializedParoleOn;
     boolean mAppIdleParoleOn;
@@ -94,19 +89,8 @@ public final class AppIdleController extends StateController {
         }
     }
 
-    public static AppIdleController get(JobSchedulerService service) {
-        synchronized (sCreationLock) {
-            if (sController == null) {
-                sController = new AppIdleController(service, service.getContext(),
-                        service.getLock());
-            }
-            return sController;
-        }
-    }
-
-    private AppIdleController(JobSchedulerService service, Context context, Object lock) {
-        super(service, context, lock);
-        mJobSchedulerService = service;
+    public AppIdleController(JobSchedulerService service) {
+        super(service);
         mUsageStatsInternal = LocalServices.getService(UsageStatsManagerInternal.class);
         mAppIdleParoleOn = true;
         mUsageStatsInternal.addAppIdleStateChangeListener(new AppIdleStateChangeListener());
@@ -139,7 +123,7 @@ public final class AppIdleController extends StateController {
         pw.println("Parole on: " + mAppIdleParoleOn);
         pw.println();
 
-        mJobSchedulerService.getJobStore().forEachJob(predicate, (jobStatus) -> {
+        mService.getJobStore().forEachJob(predicate, (jobStatus) -> {
             pw.print("#");
             jobStatus.printUniqueId(pw);
             pw.print(" from ");
@@ -162,7 +146,7 @@ public final class AppIdleController extends StateController {
 
         proto.write(StateControllerProto.AppIdleController.IS_PAROLE_ON, mAppIdleParoleOn);
 
-        mJobSchedulerService.getJobStore().forEachJob(predicate, (js) -> {
+        mService.getJobStore().forEachJob(predicate, (js) -> {
             final long jsToken =
                     proto.start(StateControllerProto.AppIdleController.TRACKED_JOBS);
             js.writeToShortProto(proto, StateControllerProto.AppIdleController.TrackedJob.INFO);
@@ -189,7 +173,7 @@ public final class AppIdleController extends StateController {
             }
             mAppIdleParoleOn = isAppIdleParoleOn;
             GlobalUpdateFunc update = new GlobalUpdateFunc();
-            mJobSchedulerService.getJobStore().forEachJob(update);
+            mService.getJobStore().forEachJob(update);
             if (update.mChanged) {
                 changed = true;
             }
@@ -210,7 +194,7 @@ public final class AppIdleController extends StateController {
                 }
 
                 PackageUpdateFunc update = new PackageUpdateFunc(userId, packageName, idle);
-                mJobSchedulerService.getJobStore().forEachJob(update);
+                mService.getJobStore().forEachJob(update);
                 if (update.mChanged) {
                     changed = true;
                 }

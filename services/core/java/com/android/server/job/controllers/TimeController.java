@@ -32,7 +32,6 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.job.JobSchedulerService;
-import com.android.server.job.StateChangedListener;
 import com.android.server.job.StateControllerProto;
 
 import java.util.Iterator;
@@ -63,23 +62,13 @@ public final class TimeController extends StateController {
     private AlarmManager mAlarmService = null;
     /** List of tracked jobs, sorted asc. by deadline */
     private final List<JobStatus> mTrackedJobs = new LinkedList<>();
-    /** Singleton. */
-    private static TimeController mSingleton;
 
-    public static synchronized TimeController get(JobSchedulerService jms) {
-        if (mSingleton == null) {
-            mSingleton = new TimeController(jms, jms.getContext(), jms.getLock());
-        }
-        return mSingleton;
-    }
-
-    private TimeController(StateChangedListener stateChangedListener, Context context,
-                Object lock) {
-        super(stateChangedListener, context, lock);
+    public TimeController(JobSchedulerService service) {
+        super(service);
 
         mNextJobExpiredElapsedMillis = Long.MAX_VALUE;
         mNextDelayExpiredElapsedMillis = Long.MAX_VALUE;
-        mChainedAttributionEnabled = WorkSource.isChainedBatteryAttributionEnabled(context);
+        mChainedAttributionEnabled = WorkSource.isChainedBatteryAttributionEnabled(mContext);
     }
 
     /**

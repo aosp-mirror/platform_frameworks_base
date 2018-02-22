@@ -57,10 +57,6 @@ public final class DeviceIdleJobsController extends StateController {
 
     static final int PROCESS_BACKGROUND_JOBS = 1;
 
-    // Singleton factory
-    private static Object sCreationLock = new Object();
-    private static DeviceIdleJobsController sController;
-
     /**
      * These are jobs added with a special flag to indicate that they should be exempted from doze
      * when the app is temp whitelisted or in the foreground.
@@ -69,7 +65,6 @@ public final class DeviceIdleJobsController extends StateController {
     private final SparseBooleanArray mForegroundUids;
     private final DeviceIdleUpdateFunctor mDeviceIdleUpdateFunctor;
     private final DeviceIdleJobsDelayHandler mHandler;
-    private final JobSchedulerService mJobSchedulerService;
     private final PowerManager mPowerManager;
     private final DeviceIdleController.LocalService mLocalDeviceIdleController;
 
@@ -79,19 +74,6 @@ public final class DeviceIdleJobsController extends StateController {
     private boolean mDeviceIdleMode;
     private int[] mDeviceIdleWhitelistAppIds;
     private int[] mPowerSaveTempWhitelistAppIds;
-
-    /**
-     * Returns a singleton for the DeviceIdleJobsController
-     */
-    public static DeviceIdleJobsController get(JobSchedulerService service) {
-        synchronized (sCreationLock) {
-            if (sController == null) {
-                sController = new DeviceIdleJobsController(service, service.getContext(),
-                        service.getLock());
-            }
-            return sController;
-        }
-    }
 
     // onReceive
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -134,12 +116,10 @@ public final class DeviceIdleJobsController extends StateController {
         }
     };
 
-    private DeviceIdleJobsController(JobSchedulerService jobSchedulerService, Context context,
-            Object lock) {
-        super(jobSchedulerService, context, lock);
+    public DeviceIdleJobsController(JobSchedulerService service) {
+        super(service);
 
-        mJobSchedulerService = jobSchedulerService;
-        mHandler = new DeviceIdleJobsDelayHandler(context.getMainLooper());
+        mHandler = new DeviceIdleJobsDelayHandler(mContext.getMainLooper());
         // Register for device idle mode changes
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mLocalDeviceIdleController =
@@ -169,13 +149,13 @@ public final class DeviceIdleJobsController extends StateController {
             if (DEBUG) Slog.d(TAG, "mDeviceIdleMode=" + mDeviceIdleMode);
             if (enabled) {
                 mHandler.removeMessages(PROCESS_BACKGROUND_JOBS);
-                mJobSchedulerService.getJobStore().forEachJob(mDeviceIdleUpdateFunctor);
+                mService.getJobStore().forEachJob(mDeviceIdleUpdateFunctor);
             } else {
                 // When coming out of doze, process all foreground uids immediately, while others
                 // will be processed after a delay of 3 seconds.
                 for (int i = 0; i < mForegroundUids.size(); i++) {
                     if (mForegroundUids.valueAt(i)) {
-                        mJobSchedulerService.getJobStore().forEachJobForSourceUid(
+                        mService.getJobStore().forEachJobForSourceUid(
                                 mForegroundUids.keyAt(i), mDeviceIdleUpdateFunctor);
                     }
                 }
@@ -201,7 +181,7 @@ public final class DeviceIdleJobsController extends StateController {
         }
         mForegroundUids.put(uid, active);
         mDeviceIdleUpdateFunctor.mChanged = false;
-        mJobSchedulerService.getJobStore().forEachJobForSourceUid(uid, mDeviceIdleUpdateFunctor);
+        mService.getJobStore().forEachJobForSourceUid(uid, mDeviceIdleUpdateFunctor);
         if (mDeviceIdleUpdateFunctor.mChanged) {
             mStateChangedListener.onControllerStateChanged();
         }
@@ -253,7 +233,7 @@ public final class DeviceIdleJobsController extends StateController {
         pw.println("Idle mode: " + mDeviceIdleMode);
         pw.println();
 
-        mJobSchedulerService.getJobStore().forEachJob(predicate, (jobStatus) -> {
+        mService.getJobStore().forEachJob(predicate, (jobStatus) -> {
             pw.print("#");
             jobStatus.printUniqueId(pw);
             pw.print(" from ");
@@ -281,7 +261,7 @@ public final class DeviceIdleJobsController extends StateController {
 
         proto.write(StateControllerProto.DeviceIdleJobsController.IS_DEVICE_IDLE_MODE,
                 mDeviceIdleMode);
-        mJobSchedulerService.getJobStore().forEachJob(predicate, (jobStatus) -> {
+        mService.getJobStore().forEachJob(predicate, (jobStatus) -> {
             final long jsToken =
                     proto.start(StateControllerProto.DeviceIdleJobsController.TRACKED_JOBS);
 
@@ -322,7 +302,7 @@ public final class DeviceIdleJobsController extends StateController {
                     // Just process all the jobs, the ones in foreground should already be running.
                     synchronized (mLock) {
                         mDeviceIdleUpdateFunctor.mChanged = false;
-                        mJobSchedulerService.getJobStore().forEachJob(mDeviceIdleUpdateFunctor);
+                        mService.getJobStore().forEachJob(mDeviceIdleUpdateFunctor);
                         if (mDeviceIdleUpdateFunctor.mChanged) {
                             mStateChangedListener.onControllerStateChanged();
                         }

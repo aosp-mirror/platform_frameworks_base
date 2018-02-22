@@ -164,15 +164,16 @@ public final class JobSchedulerService extends com.android.server.SystemService
      * {@link JobStatus#getServiceToken()}
      */
     final List<JobServiceContext> mActiveServices = new ArrayList<>();
+
     /** List of controllers that will notify this service of updates to jobs. */
-    List<StateController> mControllers;
+    private final List<StateController> mControllers;
     /** Need direct access to this for testing. */
-    BatteryController mBatteryController;
+    private final BatteryController mBatteryController;
     /** Need direct access to this for testing. */
-    StorageController mStorageController;
+    private final StorageController mStorageController;
     /** Need directly for sending uid state changes */
-    private BackgroundJobsController mBackgroundJobsController;
-    private DeviceIdleJobsController mDeviceIdleJobsController;
+    private final DeviceIdleJobsController mDeviceIdleJobsController;
+
     /**
      * Queue of pending jobs. The JobServiceContext class will receive jobs from this list
      * when ready to execute them.
@@ -254,12 +255,48 @@ public final class JobSchedulerService extends com.android.server.SystemService
      */
     int[] mTmpAssignPreferredUidForContext = new int[MAX_JOB_CONTEXTS_COUNT];
 
+    private class ConstantsObserver extends ContentObserver {
+        private ContentResolver mResolver;
+
+        public ConstantsObserver(Handler handler) {
+            super(handler);
+        }
+
+        public void start(ContentResolver resolver) {
+            mResolver = resolver;
+            mResolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.JOB_SCHEDULER_CONSTANTS), false, this);
+            updateConstants();
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            updateConstants();
+        }
+
+        private void updateConstants() {
+            synchronized (mLock) {
+                try {
+                    mConstants.updateConstantsLocked(Settings.Global.getString(mResolver,
+                            Settings.Global.JOB_SCHEDULER_CONSTANTS));
+                } catch (IllegalArgumentException e) {
+                    // Failed to parse the settings string, log this and move on
+                    // with defaults.
+                    Slog.e(TAG, "Bad jobscheduler settings", e);
+                }
+            }
+
+            // Reset the heartbeat alarm based on the new heartbeat duration
+            setNextHeartbeatAlarm();
+        }
+    }
+
     /**
      * All times are in milliseconds. These constants are kept synchronized with the system
      * global Settings. Any access to this class or its fields should be done while
      * holding the JobSchedulerService.mLock lock.
      */
-    private final class Constants extends ContentObserver {
+    public static class Constants {
         // Key names stored in the settings value.
         private static final String KEY_MIN_IDLE_COUNT = "min_idle_count";
         private static final String KEY_MIN_CHARGING_COUNT = "min_charging_count";
@@ -284,6 +321,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
         private static final String KEY_STANDBY_WORKING_BEATS = "standby_working_beats";
         private static final String KEY_STANDBY_FREQUENT_BEATS = "standby_frequent_beats";
         private static final String KEY_STANDBY_RARE_BEATS = "standby_rare_beats";
+        private static final String KEY_CONN_CONGESTION_DELAY_FRAC = "conn_congestion_delay_frac";
+        private static final String KEY_CONN_PREFETCH_RELAX_FRAC = "conn_prefetch_relax_frac";
 
         private static final int DEFAULT_MIN_IDLE_COUNT = 1;
         private static final int DEFAULT_MIN_CHARGING_COUNT = 1;
@@ -307,6 +346,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
         private static final int DEFAULT_STANDBY_WORKING_BEATS = 11;  // ~ 2 hours, with 11min beats
         private static final int DEFAULT_STANDBY_FREQUENT_BEATS = 43; // ~ 8 hours
         private static final int DEFAULT_STANDBY_RARE_BEATS = 130; // ~ 24 hours
+        private static final float DEFAULT_CONN_CONGESTION_DELAY_FRAC = 0.5f;
+        private static final float DEFAULT_CONN_PREFETCH_RELAX_FRAC = 0.5f;
 
         /**
          * Minimum # of idle jobs that must be ready in order to force the JMS to schedule things
@@ -401,7 +442,6 @@ public final class JobSchedulerService extends com.android.server.SystemService
          * hour or day, so that the heartbeat drifts relative to wall-clock milestones.
          */
         long STANDBY_HEARTBEAT_TIME = DEFAULT_STANDBY_HEARTBEAT_TIME;
-
         /**
          * Mapping: standby bucket -> number of heartbeats between each sweep of that
          * bucket's jobs.
@@ -416,171 +456,126 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 DEFAULT_STANDBY_FREQUENT_BEATS,
                 DEFAULT_STANDBY_RARE_BEATS
         };
+        /**
+         * The fraction of a job's running window that must pass before we
+         * consider running it when the network is congested.
+         */
+        public float CONN_CONGESTION_DELAY_FRAC = DEFAULT_CONN_CONGESTION_DELAY_FRAC;
+        /**
+         * The fraction of a prefetch job's running window that must pass before
+         * we consider matching it against a metered network.
+         */
+        public float CONN_PREFETCH_RELAX_FRAC = DEFAULT_CONN_PREFETCH_RELAX_FRAC;
 
-        private ContentResolver mResolver;
         private final KeyValueListParser mParser = new KeyValueListParser(',');
 
-        public Constants(Handler handler) {
-            super(handler);
-        }
-
-        public void start(ContentResolver resolver) {
-            mResolver = resolver;
-            mResolver.registerContentObserver(Settings.Global.getUriFor(
-                    Settings.Global.JOB_SCHEDULER_CONSTANTS), false, this);
-            updateConstants();
-        }
-
-        @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            updateConstants();
-        }
-
-        private void updateConstants() {
-            synchronized (mLock) {
-                try {
-                    mParser.setString(Settings.Global.getString(mResolver,
-                            Settings.Global.JOB_SCHEDULER_CONSTANTS));
-                } catch (IllegalArgumentException e) {
-                    // Failed to parse the settings string, log this and move on
-                    // with defaults.
-                    Slog.e(TAG, "Bad jobscheduler settings", e);
-                }
-
-                MIN_IDLE_COUNT = mParser.getInt(KEY_MIN_IDLE_COUNT,
-                        DEFAULT_MIN_IDLE_COUNT);
-                MIN_CHARGING_COUNT = mParser.getInt(KEY_MIN_CHARGING_COUNT,
-                        DEFAULT_MIN_CHARGING_COUNT);
-                MIN_BATTERY_NOT_LOW_COUNT = mParser.getInt(KEY_MIN_BATTERY_NOT_LOW_COUNT,
-                        DEFAULT_MIN_BATTERY_NOT_LOW_COUNT);
-                MIN_STORAGE_NOT_LOW_COUNT = mParser.getInt(KEY_MIN_STORAGE_NOT_LOW_COUNT,
-                        DEFAULT_MIN_STORAGE_NOT_LOW_COUNT);
-                MIN_CONNECTIVITY_COUNT = mParser.getInt(KEY_MIN_CONNECTIVITY_COUNT,
-                        DEFAULT_MIN_CONNECTIVITY_COUNT);
-                MIN_CONTENT_COUNT = mParser.getInt(KEY_MIN_CONTENT_COUNT,
-                        DEFAULT_MIN_CONTENT_COUNT);
-                MIN_READY_JOBS_COUNT = mParser.getInt(KEY_MIN_READY_JOBS_COUNT,
-                        DEFAULT_MIN_READY_JOBS_COUNT);
-                HEAVY_USE_FACTOR = mParser.getFloat(KEY_HEAVY_USE_FACTOR,
-                        DEFAULT_HEAVY_USE_FACTOR);
-                MODERATE_USE_FACTOR = mParser.getFloat(KEY_MODERATE_USE_FACTOR,
-                        DEFAULT_MODERATE_USE_FACTOR);
-                FG_JOB_COUNT = mParser.getInt(KEY_FG_JOB_COUNT,
-                        DEFAULT_FG_JOB_COUNT);
-                BG_NORMAL_JOB_COUNT = mParser.getInt(KEY_BG_NORMAL_JOB_COUNT,
-                        DEFAULT_BG_NORMAL_JOB_COUNT);
-                if ((FG_JOB_COUNT+BG_NORMAL_JOB_COUNT) > MAX_JOB_CONTEXTS_COUNT) {
-                    BG_NORMAL_JOB_COUNT = MAX_JOB_CONTEXTS_COUNT - FG_JOB_COUNT;
-                }
-                BG_MODERATE_JOB_COUNT = mParser.getInt(KEY_BG_MODERATE_JOB_COUNT,
-                        DEFAULT_BG_MODERATE_JOB_COUNT);
-                if ((FG_JOB_COUNT+BG_MODERATE_JOB_COUNT) > MAX_JOB_CONTEXTS_COUNT) {
-                    BG_MODERATE_JOB_COUNT = MAX_JOB_CONTEXTS_COUNT - FG_JOB_COUNT;
-                }
-                BG_LOW_JOB_COUNT = mParser.getInt(KEY_BG_LOW_JOB_COUNT,
-                        DEFAULT_BG_LOW_JOB_COUNT);
-                if ((FG_JOB_COUNT+BG_LOW_JOB_COUNT) > MAX_JOB_CONTEXTS_COUNT) {
-                    BG_LOW_JOB_COUNT = MAX_JOB_CONTEXTS_COUNT - FG_JOB_COUNT;
-                }
-                BG_CRITICAL_JOB_COUNT = mParser.getInt(KEY_BG_CRITICAL_JOB_COUNT,
-                        DEFAULT_BG_CRITICAL_JOB_COUNT);
-                if ((FG_JOB_COUNT+BG_CRITICAL_JOB_COUNT) > MAX_JOB_CONTEXTS_COUNT) {
-                    BG_CRITICAL_JOB_COUNT = MAX_JOB_CONTEXTS_COUNT - FG_JOB_COUNT;
-                }
-                MAX_STANDARD_RESCHEDULE_COUNT = mParser.getInt(KEY_MAX_STANDARD_RESCHEDULE_COUNT,
-                        DEFAULT_MAX_STANDARD_RESCHEDULE_COUNT);
-                MAX_WORK_RESCHEDULE_COUNT = mParser.getInt(KEY_MAX_WORK_RESCHEDULE_COUNT,
-                        DEFAULT_MAX_WORK_RESCHEDULE_COUNT);
-                MIN_LINEAR_BACKOFF_TIME = mParser.getDurationMillis(KEY_MIN_LINEAR_BACKOFF_TIME,
-                        DEFAULT_MIN_LINEAR_BACKOFF_TIME);
-                MIN_EXP_BACKOFF_TIME = mParser.getDurationMillis(KEY_MIN_EXP_BACKOFF_TIME,
-                        DEFAULT_MIN_EXP_BACKOFF_TIME);
-                STANDBY_HEARTBEAT_TIME = mParser.getDurationMillis(KEY_STANDBY_HEARTBEAT_TIME,
-                        DEFAULT_STANDBY_HEARTBEAT_TIME);
-                STANDBY_BEATS[1] = mParser.getInt(KEY_STANDBY_WORKING_BEATS,
-                        DEFAULT_STANDBY_WORKING_BEATS);
-                STANDBY_BEATS[2] = mParser.getInt(KEY_STANDBY_FREQUENT_BEATS,
-                        DEFAULT_STANDBY_FREQUENT_BEATS);
-                STANDBY_BEATS[3] = mParser.getInt(KEY_STANDBY_RARE_BEATS,
-                        DEFAULT_STANDBY_RARE_BEATS);
+        void updateConstantsLocked(String value) {
+            try {
+                mParser.setString(value);
+            } catch (Exception e) {
+                // Failed to parse the settings string, log this and move on
+                // with defaults.
+                Slog.e(TAG, "Bad jobscheduler settings", e);
             }
 
-            // Reset the heartbeat alarm based on the new heartbeat duration
-            setNextHeartbeatAlarm();
+            MIN_IDLE_COUNT = mParser.getInt(KEY_MIN_IDLE_COUNT,
+                    DEFAULT_MIN_IDLE_COUNT);
+            MIN_CHARGING_COUNT = mParser.getInt(KEY_MIN_CHARGING_COUNT,
+                    DEFAULT_MIN_CHARGING_COUNT);
+            MIN_BATTERY_NOT_LOW_COUNT = mParser.getInt(KEY_MIN_BATTERY_NOT_LOW_COUNT,
+                    DEFAULT_MIN_BATTERY_NOT_LOW_COUNT);
+            MIN_STORAGE_NOT_LOW_COUNT = mParser.getInt(KEY_MIN_STORAGE_NOT_LOW_COUNT,
+                    DEFAULT_MIN_STORAGE_NOT_LOW_COUNT);
+            MIN_CONNECTIVITY_COUNT = mParser.getInt(KEY_MIN_CONNECTIVITY_COUNT,
+                    DEFAULT_MIN_CONNECTIVITY_COUNT);
+            MIN_CONTENT_COUNT = mParser.getInt(KEY_MIN_CONTENT_COUNT,
+                    DEFAULT_MIN_CONTENT_COUNT);
+            MIN_READY_JOBS_COUNT = mParser.getInt(KEY_MIN_READY_JOBS_COUNT,
+                    DEFAULT_MIN_READY_JOBS_COUNT);
+            HEAVY_USE_FACTOR = mParser.getFloat(KEY_HEAVY_USE_FACTOR,
+                    DEFAULT_HEAVY_USE_FACTOR);
+            MODERATE_USE_FACTOR = mParser.getFloat(KEY_MODERATE_USE_FACTOR,
+                    DEFAULT_MODERATE_USE_FACTOR);
+            FG_JOB_COUNT = mParser.getInt(KEY_FG_JOB_COUNT,
+                    DEFAULT_FG_JOB_COUNT);
+            BG_NORMAL_JOB_COUNT = mParser.getInt(KEY_BG_NORMAL_JOB_COUNT,
+                    DEFAULT_BG_NORMAL_JOB_COUNT);
+            if ((FG_JOB_COUNT+BG_NORMAL_JOB_COUNT) > MAX_JOB_CONTEXTS_COUNT) {
+                BG_NORMAL_JOB_COUNT = MAX_JOB_CONTEXTS_COUNT - FG_JOB_COUNT;
+            }
+            BG_MODERATE_JOB_COUNT = mParser.getInt(KEY_BG_MODERATE_JOB_COUNT,
+                    DEFAULT_BG_MODERATE_JOB_COUNT);
+            if ((FG_JOB_COUNT+BG_MODERATE_JOB_COUNT) > MAX_JOB_CONTEXTS_COUNT) {
+                BG_MODERATE_JOB_COUNT = MAX_JOB_CONTEXTS_COUNT - FG_JOB_COUNT;
+            }
+            BG_LOW_JOB_COUNT = mParser.getInt(KEY_BG_LOW_JOB_COUNT,
+                    DEFAULT_BG_LOW_JOB_COUNT);
+            if ((FG_JOB_COUNT+BG_LOW_JOB_COUNT) > MAX_JOB_CONTEXTS_COUNT) {
+                BG_LOW_JOB_COUNT = MAX_JOB_CONTEXTS_COUNT - FG_JOB_COUNT;
+            }
+            BG_CRITICAL_JOB_COUNT = mParser.getInt(KEY_BG_CRITICAL_JOB_COUNT,
+                    DEFAULT_BG_CRITICAL_JOB_COUNT);
+            if ((FG_JOB_COUNT+BG_CRITICAL_JOB_COUNT) > MAX_JOB_CONTEXTS_COUNT) {
+                BG_CRITICAL_JOB_COUNT = MAX_JOB_CONTEXTS_COUNT - FG_JOB_COUNT;
+            }
+            MAX_STANDARD_RESCHEDULE_COUNT = mParser.getInt(KEY_MAX_STANDARD_RESCHEDULE_COUNT,
+                    DEFAULT_MAX_STANDARD_RESCHEDULE_COUNT);
+            MAX_WORK_RESCHEDULE_COUNT = mParser.getInt(KEY_MAX_WORK_RESCHEDULE_COUNT,
+                    DEFAULT_MAX_WORK_RESCHEDULE_COUNT);
+            MIN_LINEAR_BACKOFF_TIME = mParser.getDurationMillis(KEY_MIN_LINEAR_BACKOFF_TIME,
+                    DEFAULT_MIN_LINEAR_BACKOFF_TIME);
+            MIN_EXP_BACKOFF_TIME = mParser.getDurationMillis(KEY_MIN_EXP_BACKOFF_TIME,
+                    DEFAULT_MIN_EXP_BACKOFF_TIME);
+            STANDBY_HEARTBEAT_TIME = mParser.getDurationMillis(KEY_STANDBY_HEARTBEAT_TIME,
+                    DEFAULT_STANDBY_HEARTBEAT_TIME);
+            STANDBY_BEATS[1] = mParser.getInt(KEY_STANDBY_WORKING_BEATS,
+                    DEFAULT_STANDBY_WORKING_BEATS);
+            STANDBY_BEATS[2] = mParser.getInt(KEY_STANDBY_FREQUENT_BEATS,
+                    DEFAULT_STANDBY_FREQUENT_BEATS);
+            STANDBY_BEATS[3] = mParser.getInt(KEY_STANDBY_RARE_BEATS,
+                    DEFAULT_STANDBY_RARE_BEATS);
+            CONN_CONGESTION_DELAY_FRAC = mParser.getFloat(KEY_CONN_CONGESTION_DELAY_FRAC,
+                    DEFAULT_CONN_CONGESTION_DELAY_FRAC);
+            CONN_PREFETCH_RELAX_FRAC = mParser.getFloat(KEY_CONN_PREFETCH_RELAX_FRAC,
+                    DEFAULT_CONN_PREFETCH_RELAX_FRAC);
         }
 
-        void dump(PrintWriter pw) {
-            pw.println("  Settings:");
-
-            pw.print("    "); pw.print(KEY_MIN_IDLE_COUNT); pw.print("=");
-            pw.print(MIN_IDLE_COUNT); pw.println();
-
-            pw.print("    "); pw.print(KEY_MIN_CHARGING_COUNT); pw.print("=");
-            pw.print(MIN_CHARGING_COUNT); pw.println();
-
-            pw.print("    "); pw.print(KEY_MIN_BATTERY_NOT_LOW_COUNT); pw.print("=");
-            pw.print(MIN_BATTERY_NOT_LOW_COUNT); pw.println();
-
-            pw.print("    "); pw.print(KEY_MIN_STORAGE_NOT_LOW_COUNT); pw.print("=");
-            pw.print(MIN_STORAGE_NOT_LOW_COUNT); pw.println();
-
-            pw.print("    "); pw.print(KEY_MIN_CONNECTIVITY_COUNT); pw.print("=");
-            pw.print(MIN_CONNECTIVITY_COUNT); pw.println();
-
-            pw.print("    "); pw.print(KEY_MIN_CONTENT_COUNT); pw.print("=");
-            pw.print(MIN_CONTENT_COUNT); pw.println();
-
-            pw.print("    "); pw.print(KEY_MIN_READY_JOBS_COUNT); pw.print("=");
-            pw.print(MIN_READY_JOBS_COUNT); pw.println();
-
-            pw.print("    "); pw.print(KEY_HEAVY_USE_FACTOR); pw.print("=");
-            pw.print(HEAVY_USE_FACTOR); pw.println();
-
-            pw.print("    "); pw.print(KEY_MODERATE_USE_FACTOR); pw.print("=");
-            pw.print(MODERATE_USE_FACTOR); pw.println();
-
-            pw.print("    "); pw.print(KEY_FG_JOB_COUNT); pw.print("=");
-            pw.print(FG_JOB_COUNT); pw.println();
-
-            pw.print("    "); pw.print(KEY_BG_NORMAL_JOB_COUNT); pw.print("=");
-            pw.print(BG_NORMAL_JOB_COUNT); pw.println();
-
-            pw.print("    "); pw.print(KEY_BG_MODERATE_JOB_COUNT); pw.print("=");
-            pw.print(BG_MODERATE_JOB_COUNT); pw.println();
-
-            pw.print("    "); pw.print(KEY_BG_LOW_JOB_COUNT); pw.print("=");
-            pw.print(BG_LOW_JOB_COUNT); pw.println();
-
-            pw.print("    "); pw.print(KEY_BG_CRITICAL_JOB_COUNT); pw.print("=");
-            pw.print(BG_CRITICAL_JOB_COUNT); pw.println();
-
-            pw.print("    "); pw.print(KEY_MAX_STANDARD_RESCHEDULE_COUNT); pw.print("=");
-            pw.print(MAX_STANDARD_RESCHEDULE_COUNT); pw.println();
-
-            pw.print("    "); pw.print(KEY_MAX_WORK_RESCHEDULE_COUNT); pw.print("=");
-            pw.print(MAX_WORK_RESCHEDULE_COUNT); pw.println();
-
-            pw.print("    "); pw.print(KEY_MIN_LINEAR_BACKOFF_TIME); pw.print("=");
-            pw.print(MIN_LINEAR_BACKOFF_TIME); pw.println();
-
-            pw.print("    "); pw.print(KEY_MIN_EXP_BACKOFF_TIME); pw.print("=");
-            pw.print(MIN_EXP_BACKOFF_TIME); pw.println();
-
-            pw.print("    "); pw.print(KEY_STANDBY_HEARTBEAT_TIME); pw.print("=");
-            pw.print(STANDBY_HEARTBEAT_TIME); pw.println();
-
-            pw.print("    standby_beats={");
+        void dump(IndentingPrintWriter pw) {
+            pw.println("Settings:");
+            pw.increaseIndent();
+            pw.printPair(KEY_MIN_IDLE_COUNT, MIN_IDLE_COUNT).println();
+            pw.printPair(KEY_MIN_CHARGING_COUNT, MIN_CHARGING_COUNT).println();
+            pw.printPair(KEY_MIN_BATTERY_NOT_LOW_COUNT, MIN_BATTERY_NOT_LOW_COUNT).println();
+            pw.printPair(KEY_MIN_STORAGE_NOT_LOW_COUNT, MIN_STORAGE_NOT_LOW_COUNT).println();
+            pw.printPair(KEY_MIN_CONNECTIVITY_COUNT, MIN_CONNECTIVITY_COUNT).println();
+            pw.printPair(KEY_MIN_CONTENT_COUNT, MIN_CONTENT_COUNT).println();
+            pw.printPair(KEY_MIN_READY_JOBS_COUNT, MIN_READY_JOBS_COUNT).println();
+            pw.printPair(KEY_HEAVY_USE_FACTOR, HEAVY_USE_FACTOR).println();
+            pw.printPair(KEY_MODERATE_USE_FACTOR, MODERATE_USE_FACTOR).println();
+            pw.printPair(KEY_FG_JOB_COUNT, FG_JOB_COUNT).println();
+            pw.printPair(KEY_BG_NORMAL_JOB_COUNT, BG_NORMAL_JOB_COUNT).println();
+            pw.printPair(KEY_BG_MODERATE_JOB_COUNT, BG_MODERATE_JOB_COUNT).println();
+            pw.printPair(KEY_BG_LOW_JOB_COUNT, BG_LOW_JOB_COUNT).println();
+            pw.printPair(KEY_BG_CRITICAL_JOB_COUNT, BG_CRITICAL_JOB_COUNT).println();
+            pw.printPair(KEY_MAX_STANDARD_RESCHEDULE_COUNT, MAX_STANDARD_RESCHEDULE_COUNT).println();
+            pw.printPair(KEY_MAX_WORK_RESCHEDULE_COUNT, MAX_WORK_RESCHEDULE_COUNT).println();
+            pw.printPair(KEY_MIN_LINEAR_BACKOFF_TIME, MIN_LINEAR_BACKOFF_TIME).println();
+            pw.printPair(KEY_MIN_EXP_BACKOFF_TIME, MIN_EXP_BACKOFF_TIME).println();
+            pw.printPair(KEY_STANDBY_HEARTBEAT_TIME, STANDBY_HEARTBEAT_TIME).println();
+            pw.print("standby_beats={");
             pw.print(STANDBY_BEATS[0]);
             for (int i = 1; i < STANDBY_BEATS.length; i++) {
                 pw.print(", ");
                 pw.print(STANDBY_BEATS[i]);
             }
             pw.println('}');
+            pw.printPair(KEY_CONN_CONGESTION_DELAY_FRAC, CONN_CONGESTION_DELAY_FRAC).println();
+            pw.printPair(KEY_CONN_PREFETCH_RELAX_FRAC, CONN_PREFETCH_RELAX_FRAC).println();
+            pw.decreaseIndent();
         }
 
         void dump(ProtoOutputStream proto, long fieldId) {
             final long token = proto.start(fieldId);
-
             proto.write(ConstantsProto.MIN_IDLE_COUNT, MIN_IDLE_COUNT);
             proto.write(ConstantsProto.MIN_CHARGING_COUNT, MIN_CHARGING_COUNT);
             proto.write(ConstantsProto.MIN_BATTERY_NOT_LOW_COUNT, MIN_BATTERY_NOT_LOW_COUNT);
@@ -600,16 +595,17 @@ public final class JobSchedulerService extends com.android.server.SystemService
             proto.write(ConstantsProto.MIN_LINEAR_BACKOFF_TIME_MS, MIN_LINEAR_BACKOFF_TIME);
             proto.write(ConstantsProto.MIN_EXP_BACKOFF_TIME_MS, MIN_EXP_BACKOFF_TIME);
             proto.write(ConstantsProto.STANDBY_HEARTBEAT_TIME_MS, STANDBY_HEARTBEAT_TIME);
-
             for (int period : STANDBY_BEATS) {
                 proto.write(ConstantsProto.STANDBY_BEATS, period);
             }
-
+            proto.write(ConstantsProto.CONN_CONGESTION_DELAY_FRAC, CONN_CONGESTION_DELAY_FRAC);
+            proto.write(ConstantsProto.CONN_PREFETCH_RELAX_FRAC, CONN_PREFETCH_RELAX_FRAC);
             proto.end(token);
         }
     }
 
     final Constants mConstants;
+    final ConstantsObserver mConstantsObserver;
 
     static final Comparator<JobStatus> mEnqueueTimeComparator = (o1, o2) -> {
         if (o1.enqueueTime < o2.enqueueTime) {
@@ -777,6 +773,10 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
     public JobStore getJobStore() {
         return mJobs;
+    }
+
+    public Constants getConstants() {
+        return mConstants;
     }
 
     @Override
@@ -1098,7 +1098,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 LocalServices.getService(ActivityManagerInternal.class));
 
         mHandler = new JobHandler(context.getMainLooper());
-        mConstants = new Constants(mHandler);
+        mConstants = new Constants();
+        mConstantsObserver = new ConstantsObserver(mHandler);
         mJobSchedulerStub = new JobSchedulerStub();
 
         // Set up the app standby bucketing tracker
@@ -1114,17 +1115,17 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
         // Create the controllers.
         mControllers = new ArrayList<StateController>();
-        mControllers.add(ConnectivityController.get(this));
-        mControllers.add(TimeController.get(this));
-        mControllers.add(IdleController.get(this));
-        mBatteryController = BatteryController.get(this);
+        mControllers.add(new ConnectivityController(this));
+        mControllers.add(new TimeController(this));
+        mControllers.add(new IdleController(this));
+        mBatteryController = new BatteryController(this);
         mControllers.add(mBatteryController);
-        mStorageController = StorageController.get(this);
+        mStorageController = new StorageController(this);
         mControllers.add(mStorageController);
-        mControllers.add(BackgroundJobsController.get(this));
-        mControllers.add(AppIdleController.get(this));
-        mControllers.add(ContentObserverController.get(this));
-        mDeviceIdleJobsController = DeviceIdleJobsController.get(this);
+        mControllers.add(new BackgroundJobsController(this));
+        mControllers.add(new AppIdleController(this));
+        mControllers.add(new ContentObserverController(this));
+        mDeviceIdleJobsController = new DeviceIdleJobsController(this);
         mControllers.add(mDeviceIdleJobsController);
 
         // If the job store determined that it can't yet reschedule persisted jobs,
@@ -1185,7 +1186,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
     @Override
     public void onBootPhase(int phase) {
         if (PHASE_SYSTEM_SERVICES_READY == phase) {
-            mConstants.start(getContext().getContentResolver());
+            mConstantsObserver.start(getContext().getContentResolver());
 
             mAppStateTracker = Preconditions.checkNotNull(
                     LocalServices.getService(AppStateTracker.class));

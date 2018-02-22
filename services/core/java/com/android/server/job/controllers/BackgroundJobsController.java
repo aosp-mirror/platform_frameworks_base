@@ -16,7 +16,6 @@
 
 package com.android.server.job.controllers;
 
-import android.content.Context;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Log;
@@ -40,27 +39,10 @@ public final class BackgroundJobsController extends StateController {
     private static final boolean DEBUG = JobSchedulerService.DEBUG
             || Log.isLoggable(TAG, Log.DEBUG);
 
-    // Singleton factory
-    private static final Object sCreationLock = new Object();
-    private static volatile BackgroundJobsController sController;
-
-    private final JobSchedulerService mJobSchedulerService;
-
     private final AppStateTracker mAppStateTracker;
 
-    public static BackgroundJobsController get(JobSchedulerService service) {
-        synchronized (sCreationLock) {
-            if (sController == null) {
-                sController = new BackgroundJobsController(service, service.getContext(),
-                        service.getLock());
-            }
-            return sController;
-        }
-    }
-
-    private BackgroundJobsController(JobSchedulerService service, Context context, Object lock) {
-        super(service, context, lock);
-        mJobSchedulerService = service;
+    public BackgroundJobsController(JobSchedulerService service) {
+        super(service);
 
         mAppStateTracker = Preconditions.checkNotNull(
                 LocalServices.getService(AppStateTracker.class));
@@ -83,7 +65,7 @@ public final class BackgroundJobsController extends StateController {
         mAppStateTracker.dump(pw);
         pw.println();
 
-        mJobSchedulerService.getJobStore().forEachJob(predicate, (jobStatus) -> {
+        mService.getJobStore().forEachJob(predicate, (jobStatus) -> {
             final int uid = jobStatus.getSourceUid();
             final String sourcePkg = jobStatus.getSourcePackageName();
             pw.print("#");
@@ -120,7 +102,7 @@ public final class BackgroundJobsController extends StateController {
         mAppStateTracker.dumpProto(proto,
                 StateControllerProto.BackgroundJobsController.FORCE_APP_STANDBY_TRACKER);
 
-        mJobSchedulerService.getJobStore().forEachJob(predicate, (jobStatus) -> {
+        mService.getJobStore().forEachJob(predicate, (jobStatus) -> {
             final long jsToken =
                     proto.start(StateControllerProto.BackgroundJobsController.TRACKED_JOBS);
 
@@ -171,7 +153,7 @@ public final class BackgroundJobsController extends StateController {
 
         final long start = DEBUG ? SystemClock.elapsedRealtimeNanos() : 0;
 
-        mJobSchedulerService.getJobStore().forEachJob(updateTrackedJobs);
+        mService.getJobStore().forEachJob(updateTrackedJobs);
 
         final long time = DEBUG ? (SystemClock.elapsedRealtimeNanos() - start) : 0;
         if (DEBUG) {

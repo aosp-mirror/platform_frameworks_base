@@ -34,7 +34,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
-import com.android.server.job.StateChangedListener;
 import com.android.server.job.StateControllerProto;
 
 import java.util.function.Predicate;
@@ -49,36 +48,16 @@ public final class BatteryController extends StateController {
     private static final boolean DEBUG = JobSchedulerService.DEBUG
             || Log.isLoggable(TAG, Log.DEBUG);
 
-    private static final Object sCreationLock = new Object();
-    private static volatile BatteryController sController;
-
     private final ArraySet<JobStatus> mTrackedTasks = new ArraySet<>();
     private ChargingTracker mChargeTracker;
-
-    public static BatteryController get(JobSchedulerService taskManagerService) {
-        synchronized (sCreationLock) {
-            if (sController == null) {
-                sController = new BatteryController(taskManagerService,
-                        taskManagerService.getContext(), taskManagerService.getLock());
-            }
-        }
-        return sController;
-    }
 
     @VisibleForTesting
     public ChargingTracker getTracker() {
         return mChargeTracker;
     }
 
-    @VisibleForTesting
-    public static BatteryController getForTesting(StateChangedListener stateChangedListener,
-                                           Context context) {
-        return new BatteryController(stateChangedListener, context, new Object());
-    }
-
-    private BatteryController(StateChangedListener stateChangedListener, Context context,
-            Object lock) {
-        super(stateChangedListener, context, lock);
+    public BatteryController(JobSchedulerService service) {
+        super(service);
         mChargeTracker = new ChargingTracker();
         mChargeTracker.startTracking();
     }

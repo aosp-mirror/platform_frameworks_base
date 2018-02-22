@@ -18,7 +18,6 @@ package com.android.server.job.controllers;
 
 import android.annotation.UserIdInt;
 import android.app.job.JobInfo;
-import android.content.Context;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
@@ -31,10 +30,8 @@ import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.job.JobSchedulerService;
-import com.android.server.job.StateChangedListener;
 import com.android.server.job.StateControllerProto;
 import com.android.server.job.StateControllerProto.ContentObserverController.Observer.TriggerContentData;
 
@@ -61,9 +58,6 @@ public final class ContentObserverController extends StateController {
      */
     private static final int URIS_URGENT_THRESHOLD = 40;
 
-    private static final Object sCreationLock = new Object();
-    private static volatile ContentObserverController sController;
-
     final private ArraySet<JobStatus> mTrackedTasks = new ArraySet<>();
     /**
      * Per-userid {@link JobInfo.TriggerContentUri} keyed ContentObserver cache.
@@ -72,26 +66,9 @@ public final class ContentObserverController extends StateController {
             new SparseArray<>();
     final Handler mHandler;
 
-    public static ContentObserverController get(JobSchedulerService taskManagerService) {
-        synchronized (sCreationLock) {
-            if (sController == null) {
-                sController = new ContentObserverController(taskManagerService,
-                        taskManagerService.getContext(), taskManagerService.getLock());
-            }
-        }
-        return sController;
-    }
-
-    @VisibleForTesting
-    public static ContentObserverController getForTesting(StateChangedListener stateChangedListener,
-                                           Context context) {
-        return new ContentObserverController(stateChangedListener, context, new Object());
-    }
-
-    private ContentObserverController(StateChangedListener stateChangedListener, Context context,
-                Object lock) {
-        super(stateChangedListener, context, lock);
-        mHandler = new Handler(context.getMainLooper());
+    public ContentObserverController(JobSchedulerService service) {
+        super(service);
+        mHandler = new Handler(mContext.getMainLooper());
     }
 
     @Override

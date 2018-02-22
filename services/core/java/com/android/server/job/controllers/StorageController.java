@@ -31,7 +31,6 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.job.JobSchedulerService;
-import com.android.server.job.StateChangedListener;
 import com.android.server.job.StateControllerProto;
 import com.android.server.storage.DeviceStorageMonitorService;
 
@@ -45,36 +44,16 @@ public final class StorageController extends StateController {
     private static final boolean DEBUG = JobSchedulerService.DEBUG
             || Log.isLoggable(TAG, Log.DEBUG);
 
-    private static final Object sCreationLock = new Object();
-    private static volatile StorageController sController;
-
     private final ArraySet<JobStatus> mTrackedTasks = new ArraySet<JobStatus>();
-    private StorageTracker mStorageTracker;
-
-    public static StorageController get(JobSchedulerService taskManagerService) {
-        synchronized (sCreationLock) {
-            if (sController == null) {
-                sController = new StorageController(taskManagerService,
-                        taskManagerService.getContext(), taskManagerService.getLock());
-            }
-        }
-        return sController;
-    }
+    private final StorageTracker mStorageTracker;
 
     @VisibleForTesting
     public StorageTracker getTracker() {
         return mStorageTracker;
     }
 
-    @VisibleForTesting
-    public static StorageController getForTesting(StateChangedListener stateChangedListener,
-            Context context) {
-        return new StorageController(stateChangedListener, context, new Object());
-    }
-
-    private StorageController(StateChangedListener stateChangedListener, Context context,
-            Object lock) {
-        super(stateChangedListener, context, lock);
+    public StorageController(JobSchedulerService service) {
+        super(service);
         mStorageTracker = new StorageTracker();
         mStorageTracker.startTracking();
     }

@@ -20,6 +20,8 @@ import android.content.Context;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.job.JobSchedulerService;
+import com.android.server.job.JobSchedulerService.Constants;
 import com.android.server.job.StateChangedListener;
 
 import java.util.function.Predicate;
@@ -30,15 +32,18 @@ import java.util.function.Predicate;
  * are ready to run, or whether they must be stopped.
  */
 public abstract class StateController {
+    protected final JobSchedulerService mService;
+    protected final StateChangedListener mStateChangedListener;
     protected final Context mContext;
     protected final Object mLock;
-    protected final StateChangedListener mStateChangedListener;
+    protected final Constants mConstants;
 
-    public StateController(StateChangedListener stateChangedListener, Context context,
-            Object lock) {
-        mStateChangedListener = stateChangedListener;
-        mContext = context;
-        mLock = lock;
+    StateController(JobSchedulerService service) {
+        mService = service;
+        mStateChangedListener = service;
+        mContext = service.getContext();
+        mLock = service.getLock();
+        mConstants = service.getConstants();
     }
 
     /**

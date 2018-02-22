@@ -33,7 +33,6 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.job.JobSchedulerService;
-import com.android.server.job.StateChangedListener;
 import com.android.server.job.StateControllerProto;
 
 import java.util.function.Predicate;
@@ -50,22 +49,8 @@ public final class IdleController extends StateController {
     final ArraySet<JobStatus> mTrackedTasks = new ArraySet<>();
     IdlenessTracker mIdleTracker;
 
-    // Singleton factory
-    private static Object sCreationLock = new Object();
-    private static volatile IdleController sController;
-
-    public static IdleController get(JobSchedulerService service) {
-        synchronized (sCreationLock) {
-            if (sController == null) {
-                sController = new IdleController(service, service.getContext(), service.getLock());
-            }
-            return sController;
-        }
-    }
-
-    private IdleController(StateChangedListener stateChangedListener, Context context,
-                Object lock) {
-        super(stateChangedListener, context, lock);
+    public IdleController(JobSchedulerService service) {
+        super(service);
         initIdleStateTracking();
     }
 
