@@ -1097,6 +1097,11 @@ package android.widget {
     method public android.graphics.Bitmap getContent();
     method public static android.graphics.PointF getMagnifierDefaultSize();
     method public android.graphics.Rect getWindowPositionOnScreen();
+    method public void setOnOperationCompleteCallback(android.widget.Magnifier.Callback);
+  }
+
+  public static abstract interface Magnifier.Callback {
+    method public abstract void onOperationComplete();
   }
 
   public class NumberPicker extends android.widget.LinearLayout {
