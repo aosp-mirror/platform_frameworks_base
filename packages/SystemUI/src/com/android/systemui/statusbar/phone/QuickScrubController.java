@@ -124,9 +124,10 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
         @Override
         public void onAnimationEnd(Animator animation) {
             mNavigationBarView.getHomeButton().setClickable(true);
-            mHomeButtonView = null;
             mQuickScrubActive = false;
             mTranslation = 0;
+            mQuickScrubEndAnimator.setCurrentPlayTime(mQuickScrubEndAnimator.getDuration());
+            mHomeButtonView = null;
         }
     };
 
@@ -147,8 +148,7 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
                         mIsVertical ? (absVelY > velocityX) : (velocityX > absVelY);
                 if (isValidFling) {
                     mDraggingActive = false;
-                    mButtonAnimator.setIntValues((int) mTranslation, 0);
-                    mButtonAnimator.start();
+                    animateEnd();
                     mHandler.removeCallbacks(mLongPressRunnable);
                     try {
                         final IOverviewProxy overviewProxy = mOverviewEventSender.getProxy();
@@ -226,7 +226,7 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
                 int x = (int) event.getX();
                 int y = (int) event.getY();
                 // End any existing quickscrub animations before starting the new transition
-                if (mQuickScrubEndAnimator != null) {
+                if (mHomeButtonView != null) {
                     mQuickScrubEndAnimator.end();
                 }
                 mHomeButtonView = homeButton.getCurrentView();
@@ -400,9 +400,7 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
     private void endQuickScrub(boolean animate) {
         mHandler.removeCallbacks(mLongPressRunnable);
         if (mDraggingActive || mQuickScrubActive) {
-            mButtonAnimator.setIntValues((int) mTranslation, 0);
-            mTrackAnimator.setFloatValues(mTrackAlpha, 0);
-            mQuickScrubEndAnimator.start();
+            animateEnd();
             try {
                 mOverviewEventSender.getProxy().onQuickScrubEnd();
                 if (DEBUG_OVERVIEW_PROXY) {
@@ -411,9 +409,9 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to send end of quick scrub.", e);
             }
-            if (!animate) {
-                mQuickScrubEndAnimator.end();
-            }
+        }
+        if (mHomeButtonView != null && !animate) {
+            mQuickScrubEndAnimator.end();
         }
         mDraggingActive = false;
     }
@@ -428,6 +426,12 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
     public void cancelQuickSwitch() {
         mAllowQuickSwitch = false;
         mHandler.removeCallbacks(mLongPressRunnable);
+    }
+
+    private void animateEnd() {
+        mButtonAnimator.setIntValues((int) mTranslation, 0);
+        mTrackAnimator.setFloatValues(mTrackAlpha, 0);
+        mQuickScrubEndAnimator.start();
     }
 
     private int getDimensionPixelSize(Context context, @DimenRes int resId) {
