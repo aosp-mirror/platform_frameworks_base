@@ -53,6 +53,8 @@ public final class TextClassifierConstants {
             "classify_text_max_range_length";
     private static final String GENERATE_LINKS_MAX_TEXT_LENGTH =
             "generate_links_max_text_length";
+    private static final String GENERATE_LINKS_LOG_SAMPLE_RATE =
+            "generate_links_log_sample_rate";
 
     private static final boolean SMART_SELECTION_DARK_LAUNCH_DEFAULT = false;
     private static final boolean SMART_SELECTION_ENABLED_FOR_EDIT_TEXT_DEFAULT = true;
@@ -60,6 +62,7 @@ public final class TextClassifierConstants {
     private static final int SUGGEST_SELECTION_MAX_RANGE_LENGTH_DEFAULT = 10 * 1000;
     private static final int CLASSIFY_TEXT_MAX_RANGE_LENGTH_DEFAULT = 10 * 1000;
     private static final int GENERATE_LINKS_MAX_TEXT_LENGTH_DEFAULT = 100 * 1000;
+    private static final int GENERATE_LINKS_LOG_SAMPLE_RATE_DEFAULT = 100;
 
     /** Default settings. */
     static final TextClassifierConstants DEFAULT = new TextClassifierConstants();
@@ -70,6 +73,7 @@ public final class TextClassifierConstants {
     private final int mSuggestSelectionMaxRangeLength;
     private final int mClassifyTextMaxRangeLength;
     private final int mGenerateLinksMaxTextLength;
+    private final int mGenerateLinksLogSampleRate;
 
     private TextClassifierConstants() {
         mDarkLaunch = SMART_SELECTION_DARK_LAUNCH_DEFAULT;
@@ -78,6 +82,7 @@ public final class TextClassifierConstants {
         mSuggestSelectionMaxRangeLength = SUGGEST_SELECTION_MAX_RANGE_LENGTH_DEFAULT;
         mClassifyTextMaxRangeLength = CLASSIFY_TEXT_MAX_RANGE_LENGTH_DEFAULT;
         mGenerateLinksMaxTextLength = GENERATE_LINKS_MAX_TEXT_LENGTH_DEFAULT;
+        mGenerateLinksLogSampleRate = GENERATE_LINKS_LOG_SAMPLE_RATE_DEFAULT;
     }
 
     private TextClassifierConstants(@Nullable String settings) {
@@ -106,6 +111,9 @@ public final class TextClassifierConstants {
         mGenerateLinksMaxTextLength = parser.getInt(
                 GENERATE_LINKS_MAX_TEXT_LENGTH,
                 GENERATE_LINKS_MAX_TEXT_LENGTH_DEFAULT);
+        mGenerateLinksLogSampleRate = parser.getInt(
+                GENERATE_LINKS_LOG_SAMPLE_RATE,
+                GENERATE_LINKS_LOG_SAMPLE_RATE_DEFAULT);
     }
 
     static TextClassifierConstants loadFromString(String settings) {
@@ -134,5 +142,9 @@ public final class TextClassifierConstants {
 
     public int getGenerateLinksMaxTextLength() {
         return mGenerateLinksMaxTextLength;
+    }
+
+    public int getGenerateLinksLogSampleRate() {
+        return mGenerateLinksLogSampleRate;
     }
 }

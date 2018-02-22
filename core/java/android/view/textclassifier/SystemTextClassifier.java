@@ -41,11 +41,13 @@ final class SystemTextClassifier implements TextClassifier {
 
     private final ITextClassifierService mManagerService;
     private final TextClassifier mFallback;
+    private final String mPackageName;
 
     SystemTextClassifier(Context context) throws ServiceManager.ServiceNotFoundException {
         mManagerService = ITextClassifierService.Stub.asInterface(
                 ServiceManager.getServiceOrThrow(Context.TEXT_CLASSIFICATION_SERVICE));
         mFallback = new TextClassifierImpl(context);
+        mPackageName = context.getPackageName();
     }
 
     /**
@@ -107,6 +109,11 @@ final class SystemTextClassifier implements TextClassifier {
             @NonNull CharSequence text, @Nullable TextLinks.Options options) {
         Utils.validate(text, false /* allowInMainThread */);
         try {
+            if (options == null) {
+                options = new TextLinks.Options().setCallingPackageName(mPackageName);
+            } else if (!mPackageName.equals(options.getCallingPackageName())) {
+                options.setCallingPackageName(mPackageName);
+            }
             final TextLinksCallback callback = new TextLinksCallback();
             mManagerService.onGenerateLinks(text, options, callback);
             final TextLinks links = callback.mReceiver.get();
