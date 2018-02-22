@@ -125,6 +125,38 @@ public final class MediaDescrambler implements AutoCloseable {
     }
 
     /**
+     * Scramble control value indicating that the samples are not scrambled.
+     * @see #descramble(ByteBuffer, ByteBuffer, android.media.MediaCodec.CryptoInfo)
+     */
+    public static final byte SCRAMBLE_CONTROL_UNSCRAMBLED = 0;
+
+    /**
+     * Scramble control value reserved and shouldn't be used currently.
+     * @see #descramble(ByteBuffer, ByteBuffer, android.media.MediaCodec.CryptoInfo)
+     */
+    public static final byte SCRAMBLE_CONTROL_RESERVED    = 1;
+
+    /**
+     * Scramble control value indicating that the even key is used.
+     * @see #descramble(ByteBuffer, ByteBuffer, android.media.MediaCodec.CryptoInfo)
+     */
+    public static final byte SCRAMBLE_CONTROL_EVEN_KEY     = 2;
+
+    /**
+     * Scramble control value indicating that the odd key is used.
+     * @see #descramble(ByteBuffer, ByteBuffer, android.media.MediaCodec.CryptoInfo)
+     */
+    public static final byte SCRAMBLE_CONTROL_ODD_KEY      = 3;
+
+    /**
+     * Scramble flag for a hint indicating that the descrambling request is for
+     * retrieving the PES header info only.
+     *
+     * @see #descramble(ByteBuffer, ByteBuffer, android.media.MediaCodec.CryptoInfo)
+     */
+    public static final byte SCRAMBLE_FLAG_PES_HEADER = (1 << 0);
+
+    /**
      * Descramble a ByteBuffer of data described by a
      * {@link android.media.MediaCodec.CryptoInfo} structure.
      *
@@ -133,7 +165,15 @@ public final class MediaDescrambler implements AutoCloseable {
      * @param dstBuf ByteBuffer to hold the descrambled data, which starts at
      * dstBuf.position().
      * @param cryptoInfo a {@link android.media.MediaCodec.CryptoInfo} structure
-     * describing the subsamples contained in src.
+     * describing the subsamples contained in srcBuf. The iv and mode fields in
+     * CryptoInfo are not used. key[0] contains the MPEG2TS scrambling control bits
+     * (as defined in ETSI TS 100 289 (2011): "Digital Video Broadcasting (DVB);
+     * Support for use of the DVB Scrambling Algorithm version 3 within digital
+     * broadcasting systems"), and the value must be one of {@link #SCRAMBLE_CONTROL_UNSCRAMBLED},
+     * {@link #SCRAMBLE_CONTROL_RESERVED}, {@link #SCRAMBLE_CONTROL_EVEN_KEY} or
+     * {@link #SCRAMBLE_CONTROL_ODD_KEY}. key[1] is a set of bit flags, with the
+     * only possible bit being {@link #SCRAMBLE_FLAG_PES_HEADER} currently.
+     * key[2~15] are not used.
      *
      * @return number of bytes that have been successfully descrambled, with negative
      * values indicating errors.
@@ -169,6 +209,7 @@ public final class MediaDescrambler implements AutoCloseable {
         try {
             return native_descramble(
                     cryptoInfo.key[0],
+                    cryptoInfo.key[1],
                     cryptoInfo.numSubSamples,
                     cryptoInfo.numBytesOfClearData,
                     cryptoInfo.numBytesOfEncryptedData,
@@ -204,7 +245,8 @@ public final class MediaDescrambler implements AutoCloseable {
     private native final void native_setup(@NonNull IHwBinder decramblerBinder);
     private native final void native_release();
     private native final int native_descramble(
-            byte key, int numSubSamples, int[] numBytesOfClearData, int[] numBytesOfEncryptedData,
+            byte key, byte flags, int numSubSamples,
+            int[] numBytesOfClearData, int[] numBytesOfEncryptedData,
             @NonNull ByteBuffer srcBuf, int srcOffset, int srcLimit,
             ByteBuffer dstBuf, int dstOffset, int dstLimit) throws RemoteException;
 

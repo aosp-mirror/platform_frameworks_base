@@ -19,57 +19,19 @@
 
 #include "jni.h"
 
-#include <android/hardware/cas/native/1.0/IDescrambler.h>
-
-#include <media/stagefright/foundation/ABase.h>
-#include <utils/Mutex.h>
+#include <utils/RefBase.h>
 
 namespace android {
-class IMemory;
-class MemoryDealer;
 
 namespace hardware {
-class HidlMemory;
-};
-using hardware::HidlMemory;
-using hardware::hidl_string;
-using hardware::hidl_vec;
-using namespace hardware::cas::V1_0;
-using namespace hardware::cas::native::V1_0;
+namespace cas {
+namespace native {
+namespace V1_0 {
+struct IDescrambler;
+}}}}
+using hardware::cas::native::V1_0::IDescrambler;
 
-struct JDescrambler : public RefBase {
-    JDescrambler(JNIEnv *env, jobject descramberBinderObj);
-
-    status_t descramble(
-            jbyte key,
-            ssize_t totalLength,
-            const hidl_vec<SubSample>& subSamples,
-            const void *srcPtr,
-            jint srcOffset,
-            void *dstPtr,
-            jint dstOffset,
-            Status *status,
-            uint32_t *bytesWritten,
-            hidl_string *detailedError);
-
-    static sp<IDescrambler> GetDescrambler(JNIEnv *env, jobject obj);
-
-protected:
-    virtual ~JDescrambler();
-
-private:
-    sp<IDescrambler> mDescrambler;
-    sp<IMemory> mMem;
-    sp<MemoryDealer> mDealer;
-    sp<HidlMemory> mHidlMemory;
-    SharedBuffer mDescramblerSrcBuffer;
-
-    Mutex mSharedMemLock;
-
-    bool ensureBufferCapacity(size_t neededSize);
-
-    DISALLOW_EVIL_CONSTRUCTORS(JDescrambler);
-};
+sp<IDescrambler> GetDescrambler(JNIEnv *env, jobject obj);
 
 }  // namespace android
 
