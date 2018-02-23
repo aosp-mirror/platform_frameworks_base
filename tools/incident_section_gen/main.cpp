@@ -411,6 +411,11 @@ static bool generateSectionListCpp(Descriptor const* descriptor) {
             case SECTION_LOG:
                 printf("    new LogSection(%d, %s),\n", field->number(), s.args().c_str());
                 break;
+            case SECTION_GZIP:
+                printf("    new GZipSection(%d,", field->number());
+                splitAndPrint(s.args());
+                printf(" NULL),\n");
+                break;
         }
     }
     printf("    NULL };\n");

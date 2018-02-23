@@ -84,6 +84,21 @@ private:
 };
 
 /**
+ * Section that reads in a file and gzips the content.
+ */
+class GZipSection : public Section {
+public:
+    GZipSection(int id, const char* filename, ...);
+    virtual ~GZipSection();
+
+    virtual status_t Execute(ReportRequestSet* requests) const;
+
+private:
+    // It looks up the content from multiple files and stops when the first one is available.
+    const char** mFilenames;
+};
+
+/**
  * Base class for sections that call a command that might need a timeout.
  */
 class WorkerThreadSection : public Section {
@@ -111,8 +126,6 @@ public:
 
 private:
     const char** mCommand;
-
-    void init(const char* command, va_list args);
 };
 
 /**

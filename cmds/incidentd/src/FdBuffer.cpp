@@ -76,6 +76,7 @@ status_t FdBuffer::read(int fd, int64_t timeout) {
                         return -errno;
                     }
                 } else if (amt == 0) {
+                    VLOG("Reached EOF of fd=%d", fd);
                     break;
                 }
                 mBuffer.wp()->move(amt);
@@ -156,10 +157,10 @@ status_t FdBuffer::readProcessedDataInStream(int fd, int toFd, int fromFd, int64
                 if (!(errno == EAGAIN || errno == EWOULDBLOCK)) {
                     VLOG("Fail to read fd %d: %s", fd, strerror(errno));
                     return -errno;
-                }                   // otherwise just continue
-            } else if (amt == 0) {  // reach EOF so don't have to poll pfds[0].
-                ::close(pfds[0].fd);
-                pfds[0].fd = -1;
+                }  // otherwise just continue
+            } else if (amt == 0) {
+                VLOG("Reached EOF of input file %d", fd);
+                pfds[0].fd = -1;  // reach EOF so don't have to poll pfds[0].
             } else {
                 rpos += amt;
                 cirSize += amt;
@@ -187,6 +188,7 @@ status_t FdBuffer::readProcessedDataInStream(int fd, int toFd, int fromFd, int64
 
         // if buffer is empty and fd is closed, close write fd.
         if (cirSize == 0 && pfds[0].fd == -1 && pfds[1].fd != -1) {
+            VLOG("Close write pipe %d", toFd);
             ::close(pfds[1].fd);
             pfds[1].fd = -1;
         }
@@ -207,6 +209,7 @@ status_t FdBuffer::readProcessedDataInStream(int fd, int toFd, int fromFd, int64
                 return -errno;
             }  // otherwise just continue
         } else if (amt == 0) {
+            VLOG("Reached EOF of fromFd %d", fromFd);
             break;
         } else {
             mBuffer.wp()->move(amt);

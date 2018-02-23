@@ -15,7 +15,8 @@
 LOCAL_PATH:= $(call my-dir)
 
 # proto files used in incidentd to generate cppstream proto headers.
-PROTO_FILES:= frameworks/base/core/proto/android/util/log.proto
+PROTO_FILES:= frameworks/base/core/proto/android/util/log.proto \
+        frameworks/base/core/proto/android/os/data.proto
 
 # ========= #
 # incidentd #
@@ -131,7 +132,7 @@ LOCAL_TEST_DATA := $(call find-test-data-in-subdirs, $(LOCAL_PATH), *, testdata)
 LOCAL_MODULE_CLASS := NATIVE_TESTS
 gen_src_dir := $(local-generated-sources-dir)
 # generate cppstream proto for testing
-GEN_PROTO := $(gen_src_dir)/log.proto.timestamp
+GEN_PROTO := $(gen_src_dir)/test.proto.timestamp
 $(GEN_PROTO): $(HOST_OUT_EXECUTABLES)/aprotoc $(HOST_OUT_EXECUTABLES)/protoc-gen-cppstream $(PROTO_FILES)
 $(GEN_PROTO): PRIVATE_GEN_SRC_DIR := $(gen_src_dir)
 $(GEN_PROTO): PRIVATE_CUSTOM_TOOL = \
