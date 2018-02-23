@@ -70,6 +70,7 @@ import com.android.internal.app.IAppOpsService;
 import com.android.server.AppStateTracker.Listener;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -660,6 +661,8 @@ public class AppStateTrackerTest {
         areRestrictedWithExemption(instance, UID_2, PACKAGE_2, NONE);
     }
 
+    @Ignore("b/73792882")
+    @Test
     public void loadPersistedAppOps() throws Exception {
         final AppStateTrackerTestable instance = newInstance();
 

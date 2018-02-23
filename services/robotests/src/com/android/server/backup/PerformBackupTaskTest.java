@@ -79,6 +79,7 @@ import com.android.server.testing.shadows.ShadowBackupDataInput;
 import com.android.server.testing.shadows.ShadowBackupDataOutput;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
@@ -489,8 +490,9 @@ public class PerformBackupTaskTest {
     }
 
     // TODO: Giving NPE at PerformBackupTask:524 because mCurrentPackage is null (PackageManager
-    // rightfully threw NameNotFoundException). Uncomment @Test when fixed.
-    // @Test
+    // rightfully threw NameNotFoundException). Remove @Ignore when fixed.
+    @Ignore
+    @Test
     public void testRunTask_whenAgentUnknown() throws Exception {
         // Not calling setUpAgent()
         TransportMock transportMock = setUpTransport(mTransport);
