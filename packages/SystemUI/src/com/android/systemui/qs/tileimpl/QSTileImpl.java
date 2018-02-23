@@ -50,7 +50,7 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.PagedTileLayout.TilePage;
 import com.android.systemui.qs.QSHost;
-import com.android.systemui.qs.QSTooltipView;
+import com.android.systemui.qs.QuickStatusBarHeader;
 
 import java.util.ArrayList;
 
@@ -197,7 +197,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
         Prefs.putInt(
                 mContext,
                 Prefs.Key.QS_LONG_PRESS_TOOLTIP_SHOWN_COUNT,
-                QSTooltipView.MAX_TOOLTIP_SHOWN_COUNT);
+                QuickStatusBarHeader.MAX_TOOLTIP_SHOWN_COUNT);
     }
 
     public LogMaker populate(LogMaker logMaker) {
