@@ -167,6 +167,9 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         @Override
         public void onRecentsAnimationStarted() {
             mNavigationBarView.setRecentsAnimationStarted(true);
+
+            // Use navbar dragging as a signal to hide the rotate button
+            setRotateSuggestionButtonState(false);
         }
 
         @Override
@@ -446,10 +449,11 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         }
 
         if (visible) { // Appear and change (cannot force)
-            // Stop any currently running hide animations
+            // Stop and clear any currently running hide animations
             if (mRotateHideAnimator != null && mRotateHideAnimator.isRunning()) {
-                mRotateHideAnimator.pause();
+                mRotateHideAnimator.cancel();
             }
+            mRotateHideAnimator = null;
 
             // Reset the alpha if any has changed due to hide animation
             view.setAlpha(1f);
@@ -978,7 +982,10 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
         @Override
         public void onActivityRequestedOrientationChanged(int taskId, int requestedOrientation) {
-            setRotateSuggestionButtonState(false);
+            // Only hide the icon if the top task changes its requestedOrientation
+            // Launcher can alter its requestedOrientation while it's not on top, don't hide on this
+            final boolean top = ActivityManagerWrapper.getInstance().getRunningTask().id == taskId;
+            if (top) setRotateSuggestionButtonState(false);
         }
     }
 
