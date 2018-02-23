@@ -497,7 +497,13 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                 importArgs.addEnums(KeymasterDefs.KM_TAG_PADDING, keymasterEncryptionPaddings);
                 importArgs.addEnums(KeymasterDefs.KM_TAG_PADDING,
                         KeyProperties.SignaturePadding.allToKeymaster(spec.getSignaturePaddings()));
-                KeymasterUtils.addUserAuthArgs(importArgs, spec);
+                KeymasterUtils.addUserAuthArgs(importArgs,
+                        spec.isUserAuthenticationRequired(),
+                        spec.getUserAuthenticationValidityDurationSeconds(),
+                        spec.isUserAuthenticationValidWhileOnBody(),
+                        spec.isInvalidatedByBiometricEnrollment(),
+                        spec.getBoundToSpecificSecureUserId(),
+                        spec.isUserConfirmationRequired());
                 importArgs.addDateIfNotNull(KeymasterDefs.KM_TAG_ACTIVE_DATETIME,
                         spec.getKeyValidityStart());
                 importArgs.addDateIfNotNull(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
@@ -694,7 +700,13 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             int[] keymasterPaddings = KeyProperties.EncryptionPadding.allToKeymaster(
                     params.getEncryptionPaddings());
             args.addEnums(KeymasterDefs.KM_TAG_PADDING, keymasterPaddings);
-            KeymasterUtils.addUserAuthArgs(args, params);
+            KeymasterUtils.addUserAuthArgs(args,
+                    params.isUserAuthenticationRequired(),
+                    params.getUserAuthenticationValidityDurationSeconds(),
+                    params.isUserAuthenticationValidWhileOnBody(),
+                    params.isInvalidatedByBiometricEnrollment(),
+                    params.getBoundToSpecificSecureUserId(),
+                    params.isUserConfirmationRequired());
             KeymasterUtils.addMinMacLengthAuthorizationIfNecessary(
                     args,
                     keymasterAlgorithm,
