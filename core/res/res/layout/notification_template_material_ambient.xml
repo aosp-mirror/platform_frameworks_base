@@ -43,6 +43,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
+            android:layout_weight="1"
             android:paddingStart="@dimen/notification_content_margin_start"
             android:paddingEnd="@dimen/notification_content_margin_end"
             android:clipToPadding="false"
@@ -75,19 +76,19 @@
                 android:maxLines="3"
             />
         </LinearLayout>
+        <FrameLayout android:id="@+id/actions_container"
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+                     android:layout_gravity="bottom">
+            <com.android.internal.widget.NotificationActionListLayout
+                android:id="@+id/actions"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/notification_action_list_height"
+                android:paddingEnd="4dp"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:visibility="gone"
+            />
+        </FrameLayout>
     </LinearLayout>
-    <FrameLayout android:id="@+id/actions_container"
-                 android:layout_width="match_parent"
-                 android:layout_height="wrap_content"
-                 android:layout_gravity="bottom">
-        <com.android.internal.widget.NotificationActionListLayout
-            android:id="@+id/actions"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/notification_action_list_height"
-            android:paddingEnd="4dp"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:visibility="gone"
-        />
-    </FrameLayout>
 </FrameLayout>
