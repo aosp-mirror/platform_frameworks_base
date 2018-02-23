@@ -23,6 +23,8 @@ import android.hardware.broadcastradio.V2_0.AmFmRegionConfig;
 import android.hardware.broadcastradio.V2_0.Announcement;
 import android.hardware.broadcastradio.V2_0.DabTableEntry;
 import android.hardware.broadcastradio.V2_0.IdentifierType;
+import android.hardware.broadcastradio.V2_0.Metadata;
+import android.hardware.broadcastradio.V2_0.MetadataKey;
 import android.hardware.broadcastradio.V2_0.ProgramFilter;
 import android.hardware.broadcastradio.V2_0.ProgramIdentifier;
 import android.hardware.broadcastradio.V2_0.ProgramInfo;
@@ -34,6 +36,7 @@ import android.hardware.broadcastradio.V2_0.VendorKeyValue;
 import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
+import android.hardware.radio.RadioMetadata;
 import android.os.ParcelableException;
 import android.util.Slog;
 
@@ -283,6 +286,77 @@ class Convert {
                 secondaryIds, null);
     }
 
+    private enum MetadataType {
+        INT, STRING
+    }
+
+    private static class MetadataDef {
+        private MetadataType type;
+        private String key;
+        private MetadataDef(MetadataType type, String key) {
+            this.type = type;
+            this.key = key;
+        }
+    }
+
+    private static final Map<Integer, MetadataDef> metadataKeys;
+    static {
+        metadataKeys = new HashMap<>();
+        metadataKeys.put(MetadataKey.RDS_PS, new MetadataDef(
+                MetadataType.STRING, RadioMetadata.METADATA_KEY_RDS_PS));
+        metadataKeys.put(MetadataKey.RDS_PTY, new MetadataDef(
+                MetadataType.INT, RadioMetadata.METADATA_KEY_RDS_PTY));
+        metadataKeys.put(MetadataKey.RBDS_PTY, new MetadataDef(
+                MetadataType.INT, RadioMetadata.METADATA_KEY_RBDS_PTY));
+        metadataKeys.put(MetadataKey.RDS_RT, new MetadataDef(
+                MetadataType.STRING, RadioMetadata.METADATA_KEY_RDS_RT));
+        metadataKeys.put(MetadataKey.SONG_TITLE, new MetadataDef(
+                MetadataType.STRING, RadioMetadata.METADATA_KEY_TITLE));
+        metadataKeys.put(MetadataKey.SONG_ARTIST, new MetadataDef(
+                MetadataType.STRING, RadioMetadata.METADATA_KEY_ARTIST));
+        metadataKeys.put(MetadataKey.SONG_ALBUM, new MetadataDef(
+                MetadataType.STRING, RadioMetadata.METADATA_KEY_ALBUM));
+        metadataKeys.put(MetadataKey.STATION_ICON, new MetadataDef(
+                MetadataType.INT, RadioMetadata.METADATA_KEY_ICON));
+        metadataKeys.put(MetadataKey.ALBUM_ART, new MetadataDef(
+                MetadataType.INT, RadioMetadata.METADATA_KEY_ART));
+        metadataKeys.put(MetadataKey.PROGRAM_NAME, new MetadataDef(
+                MetadataType.STRING, RadioMetadata.METADATA_KEY_PROGRAM_NAME));
+        metadataKeys.put(MetadataKey.DAB_ENSEMBLE_NAME, new MetadataDef(
+                MetadataType.STRING, RadioMetadata.METADATA_KEY_DAB_ENSEMBLE_NAME));
+        metadataKeys.put(MetadataKey.DAB_ENSEMBLE_NAME_SHORT, new MetadataDef(
+                MetadataType.STRING, RadioMetadata.METADATA_KEY_DAB_ENSEMBLE_NAME_SHORT));
+        metadataKeys.put(MetadataKey.DAB_SERVICE_NAME, new MetadataDef(
+                MetadataType.STRING, RadioMetadata.METADATA_KEY_DAB_SERVICE_NAME));
+        metadataKeys.put(MetadataKey.DAB_SERVICE_NAME_SHORT, new MetadataDef(
+                MetadataType.STRING, RadioMetadata.METADATA_KEY_DAB_SERVICE_NAME_SHORT));
+        metadataKeys.put(MetadataKey.DAB_COMPONENT_NAME, new MetadataDef(
+                MetadataType.STRING, RadioMetadata.METADATA_KEY_DAB_COMPONENT_NAME));
+        metadataKeys.put(MetadataKey.DAB_COMPONENT_NAME_SHORT, new MetadataDef(
+                MetadataType.STRING, RadioMetadata.METADATA_KEY_DAB_COMPONENT_NAME_SHORT));
+    }
+
+    private static @NonNull RadioMetadata metadataFromHal(@NonNull ArrayList<Metadata> meta) {
+        RadioMetadata.Builder builder = new RadioMetadata.Builder();
+
+        for (Metadata entry : meta) {
+            MetadataDef keyDef = metadataKeys.get(entry.key);
+            if (keyDef == null) {
+                Slog.i(TAG, "Ignored unknown metadata entry: " + MetadataKey.toString(entry.key));
+                continue;
+            }
+            if (keyDef.type == MetadataType.STRING) {
+                builder.putString(keyDef.key, entry.stringValue);
+            } else {  // MetadataType.INT
+                /* Current java API use 32-bit values for int metadata,
+                 * but we might change it in the future */
+                builder.putInt(keyDef.key, (int)entry.intValue);
+            }
+        }
+
+        return builder.build();
+    }
+
     static @NonNull RadioManager.ProgramInfo programInfoFromHal(@NonNull ProgramInfo info) {
         Collection<ProgramSelector.Identifier> relatedContent = info.relatedContent.stream().
                 map(id -> Objects.requireNonNull(programIdentifierFromHal(id))).
@@ -295,7 +369,7 @@ class Convert {
                 relatedContent,
                 info.infoFlags,
                 info.signalQuality,
-                null,  // TODO(b/69860743): metadata
+                metadataFromHal(info.metadata),
                 vendorInfoFromHal(info.vendorInfo)
         );
     }

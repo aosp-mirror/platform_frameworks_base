@@ -2115,8 +2115,15 @@ package android.hardware.radio {
     field public static final java.lang.String METADATA_KEY_ART = "android.hardware.radio.metadata.ART";
     field public static final java.lang.String METADATA_KEY_ARTIST = "android.hardware.radio.metadata.ARTIST";
     field public static final java.lang.String METADATA_KEY_CLOCK = "android.hardware.radio.metadata.CLOCK";
+    field public static final java.lang.String METADATA_KEY_DAB_COMPONENT_NAME = "android.hardware.radio.metadata.DAB_COMPONENT_NAME";
+    field public static final java.lang.String METADATA_KEY_DAB_COMPONENT_NAME_SHORT = "android.hardware.radio.metadata.DAB_COMPONENT_NAME_SHORT";
+    field public static final java.lang.String METADATA_KEY_DAB_ENSEMBLE_NAME = "android.hardware.radio.metadata.DAB_ENSEMBLE_NAME";
+    field public static final java.lang.String METADATA_KEY_DAB_ENSEMBLE_NAME_SHORT = "android.hardware.radio.metadata.DAB_ENSEMBLE_NAME_SHORT";
+    field public static final java.lang.String METADATA_KEY_DAB_SERVICE_NAME = "android.hardware.radio.metadata.DAB_SERVICE_NAME";
+    field public static final java.lang.String METADATA_KEY_DAB_SERVICE_NAME_SHORT = "android.hardware.radio.metadata.DAB_SERVICE_NAME_SHORT";
     field public static final java.lang.String METADATA_KEY_GENRE = "android.hardware.radio.metadata.GENRE";
     field public static final java.lang.String METADATA_KEY_ICON = "android.hardware.radio.metadata.ICON";
+    field public static final java.lang.String METADATA_KEY_PROGRAM_NAME = "android.hardware.radio.metadata.PROGRAM_NAME";
     field public static final java.lang.String METADATA_KEY_RBDS_PTY = "android.hardware.radio.metadata.RBDS_PTY";
     field public static final java.lang.String METADATA_KEY_RDS_PI = "android.hardware.radio.metadata.RDS_PI";
     field public static final java.lang.String METADATA_KEY_RDS_PS = "android.hardware.radio.metadata.RDS_PS";
