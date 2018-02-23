@@ -2732,6 +2732,7 @@ public final class Telephony {
          * This should be spread to other technologies,
          * but is currently only used for LTE (14) and eHRPD (13).
          * <P>Type: INTEGER</P>
+         * @deprecated this column is no longer supported, use {@link #NETWORK_TYPE_BITMASK} instead
          */
         @Deprecated
         public static final String BEARER = "bearer";
@@ -2744,13 +2745,14 @@ public final class Telephony {
          * Bitmask for a radio tech R is (1 << (R - 1))
          * <P>Type: INTEGER</P>
          * @hide
+         * @deprecated this column is no longer supported, use {@link #NETWORK_TYPE_BITMASK} instead
          */
         @Deprecated
         public static final String BEARER_BITMASK = "bearer_bitmask";
 
         /**
          * Radio technology (network type) bitmask.
-         * To check what values can be contained, refer to
+         * To check what values can be contained, refer to the NETWORK_TYPE_ constants in
          * {@link android.telephony.TelephonyManager}.
          * Bitmask for a radio tech R is (1 << (R - 1))
          * <P>Type: INTEGER</P>
