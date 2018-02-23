@@ -53,6 +53,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.ForceAppStandbyTrackerProto.ExemptedPackage;
 import com.android.server.ForceAppStandbyTrackerProto.RunAnyInBackgroundRestrictedPackages;
@@ -1182,72 +1183,67 @@ public class AppStateTracker {
         }
     }
 
-    public void dump(PrintWriter pw, String indent) {
+    @Deprecated
+    public void dump(PrintWriter pw, String prefix) {
+        dump(new IndentingPrintWriter(pw, "  ").setIndent(prefix));
+    }
+
+    public void dump(IndentingPrintWriter pw) {
         synchronized (mLock) {
-            pw.print(indent);
             pw.println("Forced App Standby Feature enabled: " + mForcedAppStandbyEnabled);
 
-            pw.print(indent);
             pw.print("Force all apps standby: ");
             pw.println(isForceAllAppsStandbyEnabled());
 
-            pw.print(indent);
             pw.print("Small Battery Device: ");
             pw.println(isSmallBatteryDevice());
 
-            pw.print(indent);
             pw.print("Force all apps standby for small battery device: ");
             pw.println(mForceAllAppStandbyForSmallBattery);
 
-            pw.print(indent);
             pw.print("Plugged In: ");
             pw.println(mIsPluggedIn);
 
-            pw.print(indent);
             pw.print("Active uids: ");
             dumpUids(pw, mActiveUids);
 
-            pw.print(indent);
             pw.print("Foreground uids: ");
             dumpUids(pw, mForegroundUids);
 
-            pw.print(indent);
             pw.print("Whitelist appids: ");
             pw.println(Arrays.toString(mPowerWhitelistedAllAppIds));
 
-            pw.print(indent);
             pw.print("Temp whitelist appids: ");
             pw.println(Arrays.toString(mTempWhitelistedAppIds));
 
-            pw.print(indent);
             pw.println("Exempted packages:");
+            pw.increaseIndent();
             for (int i = 0; i < mExemptedPackages.size(); i++) {
-                pw.print(indent);
-                pw.print("  User ");
+                pw.print("User ");
                 pw.print(mExemptedPackages.keyAt(i));
                 pw.println();
 
+                pw.increaseIndent();
                 for (int j = 0; j < mExemptedPackages.sizeAt(i); j++) {
-                    pw.print(indent);
-                    pw.print("    ");
                     pw.print(mExemptedPackages.valueAt(i, j));
                     pw.println();
                 }
+                pw.decreaseIndent();
             }
+            pw.decreaseIndent();
             pw.println();
 
-            pw.print(indent);
             pw.println("Restricted packages:");
+            pw.increaseIndent();
             for (Pair<Integer, String> uidAndPackage : mRunAnyRestrictedPackages) {
-                pw.print(indent);
-                pw.print("  ");
                 pw.print(UserHandle.formatUid(uidAndPackage.first));
                 pw.print(" ");
                 pw.print(uidAndPackage.second);
                 pw.println();
             }
+            pw.decreaseIndent();
 
-            mStatLogger.dump(pw, indent);
+            mStatLogger.dump(pw);
         }
     }
 

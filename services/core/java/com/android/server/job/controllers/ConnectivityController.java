@@ -21,7 +21,6 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 
 import android.app.job.JobInfo;
-import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.INetworkPolicyListener;
@@ -41,12 +40,13 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.job.JobSchedulerService;
+import com.android.server.job.JobSchedulerService.Constants;
 import com.android.server.job.JobServiceContext;
-import com.android.server.job.StateChangedListener;
 import com.android.server.job.StateControllerProto;
 
-import java.io.PrintWriter;
+import java.util.function.Predicate;
 
 /**
  * Handles changes in connectivity.
@@ -68,22 +68,8 @@ public final class ConnectivityController extends StateController implements
     @GuardedBy("mLock")
     private final ArraySet<JobStatus> mTrackedJobs = new ArraySet<>();
 
-    /** Singleton. */
-    private static ConnectivityController sSingleton;
-    private static Object sCreationLock = new Object();
-
-    public static ConnectivityController get(JobSchedulerService jms) {
-        synchronized (sCreationLock) {
-            if (sSingleton == null) {
-                sSingleton = new ConnectivityController(jms, jms.getContext(), jms.getLock());
-            }
-            return sSingleton;
-        }
-    }
-
-    private ConnectivityController(StateChangedListener stateChangedListener, Context context,
-            Object lock) {
-        super(stateChangedListener, context, lock);
+    public ConnectivityController(JobSchedulerService service) {
+        super(service);
 
         mConnManager = mContext.getSystemService(ConnectivityManager.class);
         mNetPolicyManager = mContext.getSystemService(NetworkPolicyManager.class);
@@ -122,7 +108,7 @@ public final class ConnectivityController extends StateController implements
      */
     @SuppressWarnings("unused")
     private static boolean isInsane(JobStatus jobStatus, Network network,
-            NetworkCapabilities capabilities) {
+            NetworkCapabilities capabilities, Constants constants) {
         final long estimatedBytes = jobStatus.getEstimatedNetworkBytes();
         if (estimatedBytes == JobInfo.NETWORK_BYTES_UNKNOWN) {
             // We don't know how large the job is; cross our fingers!
@@ -153,11 +139,11 @@ public final class ConnectivityController extends StateController implements
 
     @SuppressWarnings("unused")
     private static boolean isCongestionDelayed(JobStatus jobStatus, Network network,
-            NetworkCapabilities capabilities) {
+            NetworkCapabilities capabilities, Constants constants) {
         // If network is congested, and job is less than 50% through the
         // developer-requested window, then we're okay delaying the job.
         if (!capabilities.hasCapability(NET_CAPABILITY_NOT_CONGESTED)) {
-            return jobStatus.getFractionRunTime() < 0.5;
+            return jobStatus.getFractionRunTime() < constants.CONN_CONGESTION_DELAY_FRAC;
         } else {
             return false;
         }
@@ -165,14 +151,14 @@ public final class ConnectivityController extends StateController implements
 
     @SuppressWarnings("unused")
     private static boolean isStrictSatisfied(JobStatus jobStatus, Network network,
-            NetworkCapabilities capabilities) {
+            NetworkCapabilities capabilities, Constants constants) {
         return jobStatus.getJob().getRequiredNetwork().networkCapabilities
                 .satisfiedByNetworkCapabilities(capabilities);
     }
 
     @SuppressWarnings("unused")
     private static boolean isRelaxedSatisfied(JobStatus jobStatus, Network network,
-            NetworkCapabilities capabilities) {
+            NetworkCapabilities capabilities, Constants constants) {
         // Only consider doing this for prefetching jobs
         if ((jobStatus.getJob().getFlags() & JobInfo.FLAG_IS_PREFETCH) == 0) {
             return false;
@@ -184,7 +170,7 @@ public final class ConnectivityController extends StateController implements
                         .removeCapability(NET_CAPABILITY_NOT_METERED);
         if (relaxed.satisfiedByNetworkCapabilities(capabilities)) {
             // TODO: treat this as "maybe" response; need to check quotas
-            return jobStatus.getFractionRunTime() > 0.5;
+            return jobStatus.getFractionRunTime() > constants.CONN_PREFETCH_RELAX_FRAC;
         } else {
             return false;
         }
@@ -192,21 +178,21 @@ public final class ConnectivityController extends StateController implements
 
     @VisibleForTesting
     static boolean isSatisfied(JobStatus jobStatus, Network network,
-            NetworkCapabilities capabilities) {
+            NetworkCapabilities capabilities, Constants constants) {
         // Zeroth, we gotta have a network to think about being satisfied
         if (network == null || capabilities == null) return false;
 
         // First, are we insane?
-        if (isInsane(jobStatus, network, capabilities)) return false;
+        if (isInsane(jobStatus, network, capabilities, constants)) return false;
 
         // Second, is the network congested?
-        if (isCongestionDelayed(jobStatus, network, capabilities)) return false;
+        if (isCongestionDelayed(jobStatus, network, capabilities, constants)) return false;
 
         // Third, is the network a strict match?
-        if (isStrictSatisfied(jobStatus, network, capabilities)) return true;
+        if (isStrictSatisfied(jobStatus, network, capabilities, constants)) return true;
 
         // Third, is the network a relaxed match?
-        if (isRelaxedSatisfied(jobStatus, network, capabilities)) return true;
+        if (isRelaxedSatisfied(jobStatus, network, capabilities, constants)) return true;
 
         return false;
     }
@@ -222,7 +208,7 @@ public final class ConnectivityController extends StateController implements
         final NetworkCapabilities capabilities = mConnManager.getNetworkCapabilities(network);
 
         final boolean connected = (info != null) && info.isConnected();
-        final boolean satisfied = isSatisfied(jobStatus, network, capabilities);
+        final boolean satisfied = isSatisfied(jobStatus, network, capabilities, mConstants);
 
         final boolean changed = jobStatus
                 .setConnectivityConstraintSatisfied(connected && satisfied);
@@ -331,18 +317,15 @@ public final class ConnectivityController extends StateController implements
 
     @GuardedBy("mLock")
     @Override
-    public void dumpControllerStateLocked(PrintWriter pw, int filterUid) {
-        pw.print("Connectivity: connected=");
-        pw.println(mConnected);
-
-        pw.print("Tracking ");
-        pw.print(mTrackedJobs.size());
-        pw.println(" jobs");
+    public void dumpControllerStateLocked(IndentingPrintWriter pw,
+            Predicate<JobStatus> predicate) {
+        pw.println("System connected: " + mConnected);
+        pw.println();
 
         for (int i = 0; i < mTrackedJobs.size(); i++) {
             final JobStatus js = mTrackedJobs.valueAt(i);
-            if (js.shouldDump(filterUid)) {
-                pw.print("  #");
+            if (predicate.test(js)) {
+                pw.print("#");
                 js.printUniqueId(pw);
                 pw.print(" from ");
                 UserHandle.formatUid(pw, js.getSourceUid());
@@ -355,7 +338,8 @@ public final class ConnectivityController extends StateController implements
 
     @GuardedBy("mLock")
     @Override
-    public void dumpControllerStateLocked(ProtoOutputStream proto, long fieldId, int filterUid) {
+    public void dumpControllerStateLocked(ProtoOutputStream proto, long fieldId,
+            Predicate<JobStatus> predicate) {
         final long token = proto.start(fieldId);
         final long mToken = proto.start(StateControllerProto.CONNECTIVITY);
 
@@ -363,7 +347,7 @@ public final class ConnectivityController extends StateController implements
 
         for (int i = 0; i < mTrackedJobs.size(); i++) {
             final JobStatus js = mTrackedJobs.valueAt(i);
-            if (!js.shouldDump(filterUid)) {
+            if (!predicate.test(js)) {
                 continue;
             }
             final long jsToken = proto.start(StateControllerProto.ConnectivityController.TRACKED_JOBS);
