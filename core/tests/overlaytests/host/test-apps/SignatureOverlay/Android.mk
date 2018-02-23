@@ -19,6 +19,7 @@ my_package_prefix := com.android.server.om.hosttest.signature_overlay
 include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_PACKAGE_NAME := OverlayHostTests_BadSignatureOverlay
+LOCAL_SDK_VERSION := current
 LOCAL_COMPATIBILITY_SUITE := general-tests
 LOCAL_AAPT_FLAGS := --custom-package $(my_package_prefix)_bad
 include $(BUILD_PACKAGE)
@@ -26,6 +27,7 @@ include $(BUILD_PACKAGE)
 include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_PACKAGE_NAME := OverlayHostTests_PlatformSignatureStaticOverlay
+LOCAL_SDK_VERSION := current
 LOCAL_COMPATIBILITY_SUITE := general-tests
 LOCAL_MANIFEST_FILE := static/AndroidManifest.xml
 LOCAL_AAPT_FLAGS := --custom-package $(my_package_prefix)_static
@@ -34,6 +36,7 @@ include $(BUILD_PACKAGE)
 include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_PACKAGE_NAME := OverlayHostTests_PlatformSignatureOverlay
+LOCAL_SDK_VERSION := current
 LOCAL_COMPATIBILITY_SUITE := general-tests
 LOCAL_CERTIFICATE := platform
 LOCAL_AAPT_FLAGS := --custom-package $(my_package_prefix)_v1

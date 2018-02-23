@@ -2,6 +2,7 @@ LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
 LOCAL_PACKAGE_NAME := PrivAppPermissionTest
+LOCAL_SDK_VERSION := current
 LOCAL_PRIVILEGED_MODULE := true
 LOCAL_MANIFEST_FILE := system/AndroidManifest.xml
 LOCAL_REQUIRED_MODULES := privapp-permissions-test.xml
@@ -16,6 +17,7 @@ include $(BUILD_PREBUILT)
 
 include $(CLEAR_VARS)
 LOCAL_PACKAGE_NAME := VendorPrivAppPermissionTest
+LOCAL_SDK_VERSION := current
 LOCAL_PRIVILEGED_MODULE := true
 LOCAL_MANIFEST_FILE := vendor/AndroidManifest.xml
 LOCAL_VENDOR_MODULE := true
@@ -31,6 +33,7 @@ include $(BUILD_PREBUILT)
 
 include $(CLEAR_VARS)
 LOCAL_PACKAGE_NAME := ProductPrivAppPermissionTest
+LOCAL_SDK_VERSION := current
 LOCAL_PRIVILEGED_MODULE := true
 LOCAL_MANIFEST_FILE := product/AndroidManifest.xml
 LOCAL_PRODUCT_MODULE := true

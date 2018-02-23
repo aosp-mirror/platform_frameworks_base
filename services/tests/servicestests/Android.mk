@@ -42,6 +42,7 @@ LOCAL_JAVA_LIBRARIES := \
     android.test.base android.test.runner \
 
 LOCAL_PACKAGE_NAME := FrameworksServicesTests
+LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_COMPATIBILITY_SUITE := device-tests
 
 LOCAL_CERTIFICATE := platform

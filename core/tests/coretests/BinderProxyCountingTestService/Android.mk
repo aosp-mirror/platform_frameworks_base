@@ -21,6 +21,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := coretests-aidl
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
 LOCAL_PACKAGE_NAME := BinderProxyCountingTestService
+LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_CERTIFICATE := platform
 
 include $(BUILD_PACKAGE)

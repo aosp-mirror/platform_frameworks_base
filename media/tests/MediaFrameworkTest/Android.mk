@@ -13,5 +13,6 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     android-ex-camera2
 
 LOCAL_PACKAGE_NAME := mediaframeworktest
+LOCAL_PRIVATE_PLATFORM_APIS := true
 
 include $(BUILD_PACKAGE)

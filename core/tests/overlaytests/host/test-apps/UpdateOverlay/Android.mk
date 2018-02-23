@@ -18,6 +18,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_SRC_FILES := $(call all-java-files-under,src)
 LOCAL_PACKAGE_NAME := OverlayHostTests_UpdateOverlay
+LOCAL_SDK_VERSION := current
 LOCAL_COMPATIBILITY_SUITE := general-tests
 LOCAL_STATIC_JAVA_LIBRARIES := android-support-test
 include $(BUILD_PACKAGE)
@@ -27,6 +28,7 @@ my_package_prefix := com.android.server.om.hosttest.framework_overlay
 include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_PACKAGE_NAME := OverlayHostTests_FrameworkOverlayV1
+LOCAL_SDK_VERSION := current
 LOCAL_COMPATIBILITY_SUITE := general-tests
 LOCAL_CERTIFICATE := platform
 LOCAL_AAPT_FLAGS := --custom-package $(my_package_prefix)_v1
@@ -38,6 +40,7 @@ include $(BUILD_PACKAGE)
 include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_PACKAGE_NAME := OverlayHostTests_FrameworkOverlayV2
+LOCAL_SDK_VERSION := current
 LOCAL_COMPATIBILITY_SUITE := general-tests
 LOCAL_CERTIFICATE := platform
 LOCAL_AAPT_FLAGS := --custom-package $(my_package_prefix)_v2
@@ -51,6 +54,7 @@ my_package_prefix := com.android.server.om.hosttest.app_overlay
 include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_PACKAGE_NAME := OverlayHostTests_AppOverlayV1
+LOCAL_SDK_VERSION := current
 LOCAL_COMPATIBILITY_SUITE := general-tests
 LOCAL_CERTIFICATE := platform
 LOCAL_AAPT_FLAGS := --custom-package $(my_package_prefix)_v1
@@ -62,6 +66,7 @@ include $(BUILD_PACKAGE)
 include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_PACKAGE_NAME := OverlayHostTests_AppOverlayV2
+LOCAL_SDK_VERSION := current
 LOCAL_COMPATIBILITY_SUITE := general-tests
 LOCAL_CERTIFICATE := platform
 LOCAL_AAPT_FLAGS := --custom-package $(my_package_prefix)_v2

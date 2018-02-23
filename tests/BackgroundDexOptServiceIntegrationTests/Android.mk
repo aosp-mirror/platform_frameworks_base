@@ -27,6 +27,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-test \
 
 LOCAL_PACKAGE_NAME := BackgroundDexOptServiceIntegrationTests
+LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_COMPATIBILITY_SUITE := device-tests
 
 LOCAL_CERTIFICATE := platform

@@ -35,6 +35,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := tests
 LOCAL_PACKAGE_NAME := DexLoggerIntegrationTests
+LOCAL_SDK_VERSION := current
 LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_CERTIFICATE := platform
 LOCAL_SRC_FILES := $(call all-java-files-under, src/com/android/server/pm)

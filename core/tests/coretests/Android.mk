@@ -56,6 +56,7 @@ LOCAL_JAVA_LIBRARIES := \
     framework-atb-backward-compatibility \
 
 LOCAL_PACKAGE_NAME := FrameworksCoreTests
+LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_COMPATIBILITY_SUITE := device-tests
 
 LOCAL_CERTIFICATE := platform
