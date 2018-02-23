@@ -46,7 +46,7 @@ import org.junit.runner.RunWith;
 @SmallTest
 public class SmartReplyViewTest extends SysuiTestCase {
     private static final String TEST_RESULT_KEY = "test_result_key";
-    private static final String TEST_ACTION = "com.android.ACTION";
+    private static final String TEST_ACTION = "com.android.SMART_REPLY_VIEW_ACTION";
 
     private static final String[] TEST_CHOICES = new String[]{"Hello", "What's up?", "I'm here"};
 
