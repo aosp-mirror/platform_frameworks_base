@@ -16,11 +16,17 @@
 
 package com.android.server.connectivity;
 
+import static android.net.ConnectivityManager.MULTIPATH_PREFERENCE_HANDOVER;
+import static android.net.ConnectivityManager.MULTIPATH_PREFERENCE_RELIABILITY;
+import static android.net.ConnectivityManager.TYPE_MOBILE;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+
+import static com.android.server.net.NetworkPolicyManagerInternal.QUOTA_TYPE_MULTIPATH;
+
 import android.app.usage.NetworkStatsManager;
 import android.app.usage.NetworkStatsManager.UsageCallback;
 import android.content.Context;
-import android.net.INetworkStatsService;
-import android.net.INetworkPolicyManager;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.Network;
@@ -31,29 +37,17 @@ import android.net.NetworkStats;
 import android.net.NetworkTemplate;
 import android.net.StringNetworkSpecifier;
 import android.os.Handler;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.telephony.TelephonyManager;
 import android.util.DebugUtils;
 import android.util.Slog;
 
-import java.util.Calendar;
-import java.util.concurrent.ConcurrentHashMap;
-
-import com.android.internal.R;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.net.NetworkPolicyManagerInternal;
+import com.android.server.net.NetworkStatsManagerInternal;
 
-import static android.net.ConnectivityManager.MULTIPATH_PREFERENCE_HANDOVER;
-import static android.net.ConnectivityManager.MULTIPATH_PREFERENCE_RELIABILITY;
-import static android.net.ConnectivityManager.TYPE_MOBILE;
-import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
-import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
-import static android.provider.Settings.Global.NETWORK_AVOID_BAD_WIFI;
-import static android.provider.Settings.Global.NETWORK_METERED_MULTIPATH_PREFERENCE;
-import static com.android.server.net.NetworkPolicyManagerInternal.QUOTA_TYPE_MULTIPATH;
+import java.util.Calendar;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages multipath data budgets.
@@ -76,18 +70,14 @@ public class MultipathPolicyTracker {
     private final Handler mHandler;
 
     private ConnectivityManager mCM;
-    private NetworkStatsManager mStatsManager;
     private NetworkPolicyManager mNPM;
-    private TelephonyManager mTelephonyManager;
-    private INetworkStatsService mStatsService;
+    private NetworkStatsManager mStatsManager;
 
     private NetworkCallback mMobileNetworkCallback;
     private NetworkPolicyManager.Listener mPolicyListener;
 
     // STOPSHIP: replace this with a configurable mechanism.
     private static final long DEFAULT_DAILY_MULTIPATH_QUOTA = 2_500_000;
-
-    private volatile int mMeteredMultipathPreference;
 
     public MultipathPolicyTracker(Context ctx, Handler handler) {
         mContext = ctx;
@@ -97,12 +87,9 @@ public class MultipathPolicyTracker {
     }
 
     public void start() {
-        mCM = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        mNPM = (NetworkPolicyManager) mContext.getSystemService(Context.NETWORK_POLICY_SERVICE);
-        mStatsManager = (NetworkStatsManager) mContext.getSystemService(
-                Context.NETWORK_STATS_SERVICE);
-        mStatsService = INetworkStatsService.Stub.asInterface(
-                ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
+        mCM = mContext.getSystemService(ConnectivityManager.class);
+        mNPM = mContext.getSystemService(NetworkPolicyManager.class);
+        mStatsManager = mContext.getSystemService(NetworkStatsManager.class);
 
         registerTrackMobileCallback();
         registerNetworkPolicyListener();
@@ -119,6 +106,9 @@ public class MultipathPolicyTracker {
 
     // Called on an arbitrary binder thread.
     public Integer getMultipathPreference(Network network) {
+        if (network == null) {
+            return null;
+        }
         MultipathTracker t = mMultipathTrackers.get(network);
         if (t != null) {
             return t.getMultipathPreference();
@@ -149,8 +139,7 @@ public class MultipathPolicyTracker {
                         network, nc, e.getMessage()));
             }
 
-            TelephonyManager tele = (TelephonyManager) mContext.getSystemService(
-                    Context.TELEPHONY_SERVICE);
+            TelephonyManager tele = mContext.getSystemService(TelephonyManager.class);
             if (tele == null) {
                 throw new IllegalStateException(String.format("Missing TelephonyManager"));
             }
@@ -162,7 +151,7 @@ public class MultipathPolicyTracker {
 
             subscriberId = tele.getSubscriberId();
             mNetworkTemplate = new NetworkTemplate(
-                    NetworkTemplate.MATCH_MOBILE_ALL, subscriberId, new String[] { subscriberId },
+                    NetworkTemplate.MATCH_MOBILE, subscriberId, new String[] { subscriberId },
                     null, NetworkStats.METERED_ALL, NetworkStats.ROAMING_ALL,
                     NetworkStats.DEFAULT_NETWORK_NO);
             mUsageCallback = new UsageCallback() {
@@ -185,26 +174,21 @@ public class MultipathPolicyTracker {
             start.set(Calendar.SECOND, 0);
             start.set(Calendar.MILLISECOND, 0);
 
-            long bytes;
             try {
-                // TODO: Consider using NetworkStatsManager.getSummaryForDevice instead.
-                bytes = mStatsService.getNetworkTotalBytes(mNetworkTemplate,
-                        start.getTimeInMillis(), end.getTimeInMillis());
-                if (DBG) Slog.w(TAG, "Non-default data usage: " + bytes);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Can't fetch daily data usage: " + e);
-                bytes = -1;
-            } catch (IllegalStateException e) {
-                // Bandwidth control disabled?
-                bytes = -1;
+                final long bytes = LocalServices.getService(NetworkStatsManagerInternal.class)
+                        .getNetworkTotalBytes(mNetworkTemplate, start.getTimeInMillis(),
+                                end.getTimeInMillis());
+                if (DBG) Slog.d(TAG, "Non-default data usage: " + bytes);
+                return bytes;
+            } catch (RuntimeException e) {
+                Slog.w(TAG, "Failed to get data usage: " + e);
+                return -1;
             }
-            return bytes;
         }
 
         void updateMultipathBudget() {
-            NetworkPolicyManagerInternal npms = LocalServices.getService(
-                    NetworkPolicyManagerInternal.class);
-            long quota = npms.getSubscriptionOpportunisticQuota(this.network, QUOTA_TYPE_MULTIPATH);
+            long quota = LocalServices.getService(NetworkPolicyManagerInternal.class)
+                    .getSubscriptionOpportunisticQuota(this.network, QUOTA_TYPE_MULTIPATH);
             if (DBG) Slog.d(TAG, "Opportunistic quota from data plan: " + quota + " bytes");
 
             if (quota == 0) {
@@ -223,8 +207,10 @@ public class MultipathPolicyTracker {
             }
             mQuota = quota;
 
-            long usage = getDailyNonDefaultDataUsage();
-            long budget = Math.max(0, quota - usage);
+            // If we can't get current usage, assume the worst and don't give
+            // ourselves any budget to work with.
+            final long usage = getDailyNonDefaultDataUsage();
+            final long budget = (usage == -1) ? 0 : Math.max(0, quota - usage);
             if (budget > 0) {
                 if (DBG) Slog.d(TAG, "Setting callback for " + budget +
                         " bytes on network " + network);

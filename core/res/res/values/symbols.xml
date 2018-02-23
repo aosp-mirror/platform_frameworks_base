@@ -1971,10 +1971,6 @@
   <java-symbol type="string" name="config_wimaxServiceClassname" />
   <java-symbol type="string" name="config_wimaxServiceJarLocation" />
   <java-symbol type="string" name="config_wimaxStateTrackerClassname" />
-  <java-symbol type="string" name="data_usage_3g_limit_snoozed_title" />
-  <java-symbol type="string" name="data_usage_3g_limit_title" />
-  <java-symbol type="string" name="data_usage_4g_limit_snoozed_title" />
-  <java-symbol type="string" name="data_usage_4g_limit_title" />
   <java-symbol type="string" name="data_usage_limit_body" />
   <java-symbol type="string" name="data_usage_limit_snoozed_body" />
   <java-symbol type="string" name="data_usage_mobile_limit_snoozed_title" />
@@ -1987,6 +1983,7 @@
   <java-symbol type="string" name="data_usage_wifi_limit_title" />
   <java-symbol type="string" name="data_usage_rapid_title" />
   <java-symbol type="string" name="data_usage_rapid_body" />
+  <java-symbol type="string" name="data_usage_rapid_app_body" />
   <java-symbol type="string" name="default_wallpaper_component" />
   <java-symbol type="string" name="device_storage_monitor_notification_channel" />
   <java-symbol type="string" name="dlg_ok" />

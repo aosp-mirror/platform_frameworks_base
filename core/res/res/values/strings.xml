@@ -3772,31 +3772,23 @@
     <string name="extract_edit_menu_button">Edit</string>
 
     <!-- Notification title when data usage has exceeded warning threshold. [CHAR LIMIT=50] -->
-    <string name="data_usage_warning_title">Data usage alert</string>
+    <string name="data_usage_warning_title">Data warning</string>
     <!-- Notification body when data usage has exceeded warning threshold. [CHAR LIMIT=32] -->
-    <string name="data_usage_warning_body">Tap to view usage and settings.</string>
+    <string name="data_usage_warning_body">You've used <xliff:g id="app" example="3.8GB">%s</xliff:g> of data</string>
 
-    <!-- Notification title when 2G-3G data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
-    <string name="data_usage_3g_limit_title">2G-3G data limit reached</string>
-    <!-- Notification title when 4G data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
-    <string name="data_usage_4g_limit_title">4G data limit reached</string>
     <!-- Notification title when mobile data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=50] -->
     <string name="data_usage_mobile_limit_title">Mobile data limit reached</string>
     <!-- Notification title when Wi-Fi data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
     <string name="data_usage_wifi_limit_title">Wi-Fi data limit reached</string>
     <!-- Notification body when data usage has exceeded limit threshold, and has been disabled. -->
-    <string name="data_usage_limit_body">Data paused for rest of cycle</string>
+    <string name="data_usage_limit_body">Data paused for the rest of your cycle</string>
 
-    <!-- Notification title when 2G-3G data usage has exceeded limit threshold. [CHAR LIMIT=32] -->
-    <string name="data_usage_3g_limit_snoozed_title">2G-3G data limit exceeded</string>
-    <!-- Notification title when 4G data usage has exceeded limit threshold. [CHAR LIMIT=32] -->
-    <string name="data_usage_4g_limit_snoozed_title">4G data limit exceeded</string>
     <!-- Notification title when mobile data usage has exceeded limit threshold. [CHAR LIMIT=32] -->
-    <string name="data_usage_mobile_limit_snoozed_title">Mobile data limit exceeded</string>
+    <string name="data_usage_mobile_limit_snoozed_title">Over your mobile data limit</string>
     <!-- Notification title when Wi-Fi data usage has exceeded limit threshold. [CHAR LIMIT=32] -->
-    <string name="data_usage_wifi_limit_snoozed_title">Wi-Fi data limit exceeded</string>
+    <string name="data_usage_wifi_limit_snoozed_title">Over your Wi-Fi data limit</string>
     <!-- Notification body when data usage has exceeded limit threshold. -->
-    <string name="data_usage_limit_snoozed_body"><xliff:g id="size" example="3.8GB">%s</xliff:g> over specified limit.</string>
+    <string name="data_usage_limit_snoozed_body">You've gone <xliff:g id="size" example="3.8GB">%s</xliff:g> over your set limit</string>
 
     <!-- Notification title when background data usage is limited. [CHAR LIMIT=32] -->
     <string name="data_usage_restricted_title">Background data restricted</string>
@@ -3804,9 +3796,11 @@
     <string name="data_usage_restricted_body">Tap to remove restriction.</string>
 
     <!-- Notification title when there has been recent excessive data usage. [CHAR LIMIT=32] -->
-    <string name="data_usage_rapid_title">Large data usage</string>
+    <string name="data_usage_rapid_title">High mobile data usage</string>
     <!-- Notification body when there has been recent excessive data usage. [CHAR LIMIT=128] -->
-    <string name="data_usage_rapid_body">Your data usage over the last few days is larger than normal. Tap to view usage and settings.</string>
+    <string name="data_usage_rapid_body">Your apps have used more data than usual</string>
+    <!-- Notification body when there has been recent excessive data usage by a specific app. [CHAR LIMIT=128] -->
+    <string name="data_usage_rapid_app_body"><xliff:g id="app" example="Calculator">%s</xliff:g> has used more data than usual</string>
 
     <!-- SSL Certificate dialogs -->
     <!-- Title for an SSL Certificate dialog -->

@@ -106,6 +106,10 @@ public class NetworkStatsCollection implements FileRotator.Reader {
         reset();
     }
 
+    public void clear() {
+        reset();
+    }
+
     public void reset() {
         mStats.clear();
         mStartMillis = Long.MAX_VALUE;

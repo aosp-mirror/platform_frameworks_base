@@ -95,6 +95,7 @@ import android.telephony.TelephonyManager;
 
 import com.android.internal.net.VpnInfo;
 import com.android.internal.util.test.BroadcastInterceptingContext;
+import com.android.server.LocalServices;
 import com.android.server.net.NetworkStatsService.NetworkStatsSettings;
 import com.android.server.net.NetworkStatsService.NetworkStatsSettings.Config;
 
@@ -221,6 +222,9 @@ public class NetworkStatsServiceTest {
 
     @After
     public void tearDown() throws Exception {
+        // Registered by NetworkStatsService's constructor.
+        LocalServices.removeServiceForTest(NetworkStatsManagerInternal.class);
+
         IoUtils.deleteContents(mStatsDir);
 
         mServiceContext = null;
