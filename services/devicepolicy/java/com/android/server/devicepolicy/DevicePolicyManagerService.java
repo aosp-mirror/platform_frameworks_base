@@ -10410,7 +10410,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         public CharSequence getPrintingDisabledReasonForUser(@UserIdInt int userId) {
             synchronized (DevicePolicyManagerService.this) {
                 DevicePolicyData policy = getUserData(userId);
-                if (!mUserManager.hasUserRestriction(UserManager.DISALLOW_PRINTING)) {
+                if (!mUserManager.hasUserRestriction(UserManager.DISALLOW_PRINTING,
+                        UserHandle.of(userId))) {
                     Log.e(LOG_TAG, "printing is enabled");
                     return null;
                 }
