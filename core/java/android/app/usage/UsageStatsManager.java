@@ -28,6 +28,7 @@ import android.util.ArrayMap;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -388,8 +389,16 @@ public final class UsageStatsManager {
     @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
     public Map<String, Integer> getAppStandbyBuckets() {
         try {
-            return (Map<String, Integer>) mService.getAppStandbyBuckets(
+            final ParceledListSlice<AppStandbyInfo> slice = mService.getAppStandbyBuckets(
                     mContext.getOpPackageName(), mContext.getUserId());
+            final List<AppStandbyInfo> bucketList = slice.getList();
+            final ArrayMap<String, Integer> bucketMap = new ArrayMap<>();
+            final int n = bucketList.size();
+            for (int i = 0; i < n; i++) {
+                final AppStandbyInfo bucketInfo = bucketList.get(i);
+                bucketMap.put(bucketInfo.mPackageName, bucketInfo.mStandbyBucket);
+            }
+            return bucketMap;
         } catch (RemoteException e) {
         }
         return Collections.EMPTY_MAP;
@@ -404,8 +413,16 @@ public final class UsageStatsManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.CHANGE_APP_IDLE_STATE)
     public void setAppStandbyBuckets(Map<String, Integer> appBuckets) {
+        if (appBuckets == null) {
+            return;
+        }
+        final List<AppStandbyInfo> bucketInfoList = new ArrayList<>(appBuckets.size());
+        for (Map.Entry<String, Integer> bucketEntry : appBuckets.entrySet()) {
+            bucketInfoList.add(new AppStandbyInfo(bucketEntry.getKey(), bucketEntry.getValue()));
+        }
+        final ParceledListSlice<AppStandbyInfo> slice = new ParceledListSlice<>(bucketInfoList);
         try {
-            mService.setAppStandbyBuckets(appBuckets, mContext.getUserId());
+            mService.setAppStandbyBuckets(slice, mContext.getUserId());
         } catch (RemoteException e) {
         }
     }

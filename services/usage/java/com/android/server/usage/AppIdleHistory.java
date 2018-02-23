@@ -25,6 +25,7 @@ import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_NEVER;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
 
+import android.app.usage.AppStandbyInfo;
 import android.app.usage.UsageStatsManager;
 import android.os.SystemClock;
 import android.util.ArrayMap;
@@ -37,8 +38,6 @@ import android.util.Xml;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.server.LocalServices;
-import com.android.server.job.JobSchedulerInternal;
 
 import libcore.io.IoUtils;
 
@@ -53,8 +52,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
 
 /**
  * Keeps track of recent active state changes in apps.
@@ -384,14 +382,13 @@ public class AppIdleHistory {
         return appUsageHistory.currentBucket;
     }
 
-    public Map<String, Integer> getAppStandbyBuckets(int userId, long elapsedRealtime,
-            boolean appIdleEnabled) {
+    public ArrayList<AppStandbyInfo> getAppStandbyBuckets(int userId, boolean appIdleEnabled) {
         ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
         int size = userHistory.size();
-        HashMap<String, Integer> buckets = new HashMap<>(size);
+        ArrayList<AppStandbyInfo> buckets = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            buckets.put(userHistory.keyAt(i),
-                    appIdleEnabled ? userHistory.valueAt(i).currentBucket : STANDBY_BUCKET_ACTIVE);
+            buckets.add(new AppStandbyInfo(userHistory.keyAt(i),
+                    appIdleEnabled ? userHistory.valueAt(i).currentBucket : STANDBY_BUCKET_ACTIVE));
         }
         return buckets;
     }
