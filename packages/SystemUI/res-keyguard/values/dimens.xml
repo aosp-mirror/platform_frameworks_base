@@ -60,8 +60,8 @@
     <dimen name="widget_horizontal_padding">8dp</dimen>
     <dimen name="widget_icon_size">16dp</dimen>
     <dimen name="widget_icon_padding">8dp</dimen>
-    <!-- Dash between notification shelf and date/alarm -->
-    <dimen name="widget_bottom_separator_padding">29dp</dimen>
+    <!-- Space between notification shelf and dash above it -->
+    <dimen name="widget_bottom_separator_padding">28dp</dimen>
 
     <!-- The y translation to apply at the start in appear animations. -->
     <dimen name="appear_y_translation_start">32dp</dimen>

@@ -26,10 +26,6 @@
     <!-- The number of columns that the top level tiles span in the QuickSettings -->
     <integer name="quick_settings_user_time_settings_tile_span">1</integer>
 
-    <!-- The maximum count of notifications on Keyguard. The rest will be collapsed in an overflow
-         card. -->
-    <integer name="keyguard_max_notification_count">5</integer>
-
     <!-- Set to true to enable the user switcher on the keyguard. -->
     <bool name="config_keyguardUserSwitcher">true</bool>
 

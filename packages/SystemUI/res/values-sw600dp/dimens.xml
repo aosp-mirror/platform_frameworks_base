@@ -38,12 +38,6 @@
     <!-- On tablets this is just the close_handle_height -->
     <dimen name="peek_height">@dimen/close_handle_height</dimen>
 
-    <!-- The fraction of the screen height where the clock on the Keyguard has its center. The
-         max value is used when no notifications are displaying, and the min value is when the
-         highest possible number of notifications are showing. -->
-    <fraction name="keyguard_clock_y_fraction_max">34%</fraction>
-    <fraction name="keyguard_clock_y_fraction_min">24%</fraction>
-
     <!-- The margin between the clock and the notifications on Keyguard. See
          keyguard_clock_height_fraction_* for the difference between min and max.-->
     <dimen name="keyguard_clock_notifications_margin">44dp</dimen>
