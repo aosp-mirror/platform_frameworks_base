@@ -92,6 +92,38 @@ public final class MicrophoneInfo {
      */
     public static final int CHANNEL_MAPPING_PROCESSED = 2;
 
+    /**
+     * Value used for when the group of the microphone is unknown.
+     */
+    public static final int GROUP_UNKNOWN = -1;
+
+    /**
+     * Value used for when the index in the group of the microphone is unknown.
+     */
+    public static final int INDEX_IN_THE_GROUP_UNKNOWN = -1;
+
+    /**
+     * Value used for when the position of the microphone is unknown.
+     */
+    public static final Coordinate3F POSITION_UNKNOWN = new Coordinate3F(
+            -Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
+
+    /**
+     * Value used for when the orientation of the microphone is unknown.
+     */
+    public static final Coordinate3F ORIENTATION_UNKNOWN = new Coordinate3F(0.0f, 0.0f, 0.0f);
+
+    /**
+     * Value used for when the sensitivity of the microphone is unknown.
+     */
+    public static final float SENSITIVITY_UNKNOWN = -Float.MAX_VALUE;
+
+    /**
+     * Value used for when the SPL of the microphone is unknown. This value could be used when
+     * maximum SPL or minimum SPL is unknown.
+     */
+    public static final float SPL_UNKNOWN = -Float.MAX_VALUE;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "LOCATION_" }, value = {
             LOCATION_UNKNOWN,
@@ -216,7 +248,7 @@ public final class MicrophoneInfo {
      * Returns A device group id that can be used to group together microphones on the same
      * peripheral, attachments or logical groups. Main body is usually group 0.
      *
-     * @return the group of the microphone
+     * @return the group of the microphone or {@link #GROUP_UNKNOWN} if the group is unknown
      */
     public int getGroup() {
         return mGroup;
@@ -225,7 +257,8 @@ public final class MicrophoneInfo {
     /**
      * Returns unique index for device within its group.
      *
-     * @return the microphone's index in its group
+     * @return the microphone's index in its group or {@link #INDEX_IN_THE_GROUP_UNKNOWN} if the
+     * index in the group is unknown
      */
     public int getIndexInTheGroup() {
         return mIndexInTheGroup;
@@ -233,10 +266,11 @@ public final class MicrophoneInfo {
 
     /**
      * Returns A {@link Coordinate3F} object that represents the geometric location of microphone
-     * in meters, from botton-left-back corner of appliance. X-axis, Y-axis and Z-axis show
+     * in meters, from bottom-left-back corner of appliance. X-axis, Y-axis and Z-axis show
      * as the x, y, z values.
      *
-     * @return the geometric location of the microphone
+     * @return the geometric location of the microphone or {@link #POSITION_UNKNOWN} if the
+     * geometric location is unknown
      */
     public Coordinate3F getPosition() {
         return mPosition;
@@ -247,7 +281,8 @@ public final class MicrophoneInfo {
      * X-axis, Y-axis and Z-axis show as the x, y, z value. The orientation will be normalized
      * such as sqrt(x^2 + y^2 + z^2) equals 1.
      *
-     * @return the orientation of the microphone
+     * @return the orientation of the microphone or {@link #ORIENTATION_UNKNOWN} if orientation
+     * is unknown
      */
     public Coordinate3F getOrientation() {
         return mOrientation;
@@ -283,7 +318,8 @@ public final class MicrophoneInfo {
     /**
      * Returns the level in dBFS produced by a 1000Hz tone at 94 dB SPL.
      *
-     * @return the sensitivity of the microphone
+     * @return the sensitivity of the microphone or {@link #SENSITIVITY_UNKNOWN} if the sensitivity
+     * is unknown
      */
     public float getSensitivity() {
         return mSensitivity;
@@ -292,7 +328,7 @@ public final class MicrophoneInfo {
     /**
      * Returns the level in dB of the maximum SPL supported by the device at 1000Hz.
      *
-     * @return the maximum level in dB
+     * @return the maximum level in dB or {@link #SPL_UNKNOWN} if maximum SPL is unknown
      */
     public float getMaxSpl() {
         return mMaxSpl;
@@ -301,7 +337,7 @@ public final class MicrophoneInfo {
     /**
      * Returns the level in dB of the minimum SPL that can be registered by the device at 1000Hz.
      *
-     * @return the minimum level in dB
+     * @return the minimum level in dB or {@link #SPL_UNKNOWN} if minimum SPL is unknown
      */
     public float getMinSpl() {
         return mMinSpl;
@@ -327,8 +363,16 @@ public final class MicrophoneInfo {
         mPortId = portId;
     }
 
+    /**
+     * Set the channel mapping for the device.
+     * @hide
+     */
+    public void setChannelMapping(List<Pair<Integer, Integer>> channelMapping) {
+        mChannelMapping = channelMapping;
+    }
+
     /* A class containing three float value to represent a 3D coordinate */
-    public class Coordinate3F {
+    public static final class Coordinate3F {
         public final float x;
         public final float y;
         public final float z;
@@ -337,6 +381,18 @@ public final class MicrophoneInfo {
             this.x = x;
             this.y = y;
             this.z = z;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Coordinate3F)) {
+                return false;
+            }
+            Coordinate3F other = (Coordinate3F) obj;
+            return this.x == other.x && this.y == other.y && this.z == other.z;
         }
     }
 }

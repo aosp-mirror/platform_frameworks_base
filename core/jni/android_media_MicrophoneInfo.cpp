@@ -65,13 +65,11 @@ jint convertMicrophoneInfoFromNative(JNIEnv *env, jobject *jMicrophoneInfo,
     }
     jGeometricLocation = env->NewObject(gMicrophoneInfoCoordinateClass,
                                         gMicrophoneInfoCoordinateCstor,
-                                        NULL,
                                         microphoneInfo->getGeometricLocation()[0],
                                         microphoneInfo->getGeometricLocation()[1],
                                         microphoneInfo->getGeometricLocation()[2]);
     jOrientation = env->NewObject(gMicrophoneInfoCoordinateClass,
                                   gMicrophoneInfoCoordinateCstor,
-                                  NULL,
                                   microphoneInfo->getOrientation()[0],
                                   microphoneInfo->getOrientation()[1],
                                   microphoneInfo->getOrientation()[2]);
@@ -177,7 +175,7 @@ int register_android_media_MicrophoneInfo(JNIEnv *env)
             env, "android/media/MicrophoneInfo$Coordinate3F");
     gMicrophoneInfoCoordinateClass = MakeGlobalRefOrDie(env, microphoneInfoCoordinateClass);
     gMicrophoneInfoCoordinateCstor = GetMethodIDOrDie(env, microphoneInfoCoordinateClass, "<init>",
-           "(Landroid/media/MicrophoneInfo;FFF)V");
+           "(FFF)V");
 
     jclass pairClass = FindClassOrDie(env, "android/util/Pair");
     gPairClass = MakeGlobalRefOrDie(env, pairClass);
