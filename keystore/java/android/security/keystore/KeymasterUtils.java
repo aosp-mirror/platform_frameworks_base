@@ -102,7 +102,7 @@ public abstract class KeymasterUtils {
      *         require user authentication.
      */
     public static void addUserAuthArgs(KeymasterArguments args, UserAuthArgs spec) {
-        // TODO (67752510): Implement "unlocked device required"
+        args.addUnsignedInt(KeymasterDefs.KM_TAG_USER_ID, UserHandle.getCallingUserId());
 
         if (spec.isUserConfirmationRequired()) {
             args.addBoolean(KeymasterDefs.KM_TAG_TRUSTED_CONFIRMATION_REQUIRED);
@@ -110,6 +110,10 @@ public abstract class KeymasterUtils {
 
         if (spec.isTrustedUserPresenceRequired()) {
             args.addBoolean(KeymasterDefs.KM_TAG_TRUSTED_USER_PRESENCE_REQUIRED);
+        }
+
+        if (spec.isUnlockedDeviceRequired()) {
+            args.addBoolean(KeymasterDefs.KM_TAG_UNLOCKED_DEVICE_REQUIRED);
         }
 
         if (!spec.isUserAuthenticationRequired()) {
