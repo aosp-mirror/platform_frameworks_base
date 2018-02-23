@@ -233,11 +233,19 @@ bool AnomalyTracker::isInRefractoryPeriod(const uint64_t& timestampNs,
 void AnomalyTracker::informSubscribers(const MetricDimensionKey& key) {
     VLOG("informSubscribers called.");
     if (mSubscriptions.empty()) {
-        ALOGE("Attempt to call with no subscribers.");
+        // The config just wanted to log the anomaly. That's fine.
+        VLOG("No Subscriptions were associated with the alert.");
         return;
     }
 
     for (const Subscription& subscription : mSubscriptions) {
+        if (subscription.probability_of_informing() < 1
+                && ((float)rand() / RAND_MAX) >= subscription.probability_of_informing()) {
+            // Note that due to float imprecision, 0.0 and 1.0 might not truly mean never/always.
+            // The config writer was advised to use -0.1 and 1.1 for never/always.
+            ALOGI("Fate decided that a subscriber would not be informed.");
+            continue;
+        }
         switch (subscription.subscriber_information_case()) {
             case Subscription::SubscriberInformationCase::kIncidentdDetails:
                 if (!GenerateIncidentReport(subscription.incidentd_details(), mAlert, mConfigKey)) {
