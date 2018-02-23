@@ -21,7 +21,6 @@ import android.graphics.Point;
 import android.os.Handler;
 import android.util.Slog;
 import android.view.InputDevice;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
@@ -296,7 +295,8 @@ class TouchExplorer extends BaseEventStreamTransformation
                 // Already handled.
             } break;
             default:
-                throw new IllegalStateException("Illegal state: " + mCurrentState);
+                Slog.e(LOG_TAG, "Illegal state: " + mCurrentState);
+                clear(event, policyFlags);
         }
     }
 
@@ -649,8 +649,10 @@ class TouchExplorer extends BaseEventStreamTransformation
         }
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
-                throw new IllegalStateException("Dragging state can be reached only if two "
+                Slog.e(LOG_TAG, "Dragging state can be reached only if two "
                         + "pointers are already down");
+                clear(event, policyFlags);
+                return;
             }
             case MotionEvent.ACTION_POINTER_DOWN: {
                 // We are in dragging state so we have two pointers and another one
@@ -741,8 +743,10 @@ class TouchExplorer extends BaseEventStreamTransformation
     private void handleMotionEventStateDelegating(MotionEvent event, int policyFlags) {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
-                throw new IllegalStateException("Delegating state can only be reached if "
+                Slog.e(LOG_TAG, "Delegating state can only be reached if "
                         + "there is at least one pointer down!");
+                clear(event, policyFlags);
+                return;
             }
             case MotionEvent.ACTION_UP: {
                 // Offset the event if we are doing a long press as the
@@ -1093,7 +1097,7 @@ class TouchExplorer extends BaseEventStreamTransformation
             case STATE_GESTURE_DETECTING:
                 return "STATE_GESTURE_DETECTING";
             default:
-                throw new IllegalArgumentException("Unknown state: " + state);
+                return "Unknown state: " + state;
         }
     }
 
