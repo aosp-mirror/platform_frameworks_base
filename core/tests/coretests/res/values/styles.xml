@@ -19,4 +19,16 @@
         <item name="android:taskToBackEnterAnimation">@null</item>
         <item name="android:taskToBackExitAnimation">@null</item>
     </style>
+
+    <style name="LayoutInDisplayCutoutModeUnset">
+    </style>
+    <style name="LayoutInDisplayCutoutModeDefault">
+        <item name="android:windowLayoutInDisplayCutoutMode">default</item>
+    </style>
+    <style name="LayoutInDisplayCutoutModeAlways">
+        <item name="android:windowLayoutInDisplayCutoutMode">always</item>
+    </style>
+    <style name="LayoutInDisplayCutoutModeNever">
+        <item name="android:windowLayoutInDisplayCutoutMode">never</item>
+    </style>
 </resources>

@@ -2113,6 +2113,45 @@
              Corresponds to setting {@link android.view.View#SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR} on
              the decor view. -->
         <attr name="windowLightNavigationBar" format="boolean" />
+
+        <!-- Controls how the window is laid out if there is a {@code DisplayCutout}.
+        <p>
+        Defaults to {@code default}.
+
+        @see android.view.WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
+        @see android.view.WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+        @see android.view.WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
+        @see android.view.DisplayCutout
+        @see android.R.attr#layoutInDisplayCutoutMode -->
+        <attr name="windowLayoutInDisplayCutoutMode">
+            <!-- The window is allowed to extend into the {@code DisplayCutout} area, only if the
+            {@code DisplayCutout} is fully contained within the status bar. Otherwise, the window is
+            laid out such that it does not overlap with the {@code DisplayCutout} area.
+
+            @see android.view.DisplayCutout
+            @see android.view.WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
+            -->
+            <enum name="default" value="0" />
+            <!-- The window is always allowed to extend into the {@code DisplayCutout} area,
+            even if fullscreen or in landscape.
+            <p>
+            The window must make sure that no important content overlaps with the
+            {@link DisplayCutout}.
+
+            @see android.view.DisplayCutout
+            @see android.view.WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+            -->
+            <enum name="always" value="1" />
+            <!-- The window is never allowed to overlap with the DisplayCutout area.
+            <p>
+            This should be used with windows that transiently set {@code SYSTEM_UI_FLAG_FULLSCREEN}
+            to avoid a relayout of the window when the flag is set or cleared.
+
+            @see android.view.DisplayCutout
+            @see android.view.WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
+            -->
+            <enum name="never" value="2" />
+        </attr>
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->
