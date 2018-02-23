@@ -19,6 +19,7 @@ package com.android.server.connectivity;
 import static android.hardware.usb.UsbManager.USB_CONFIGURED;
 import static android.hardware.usb.UsbManager.USB_CONNECTED;
 import static android.hardware.usb.UsbManager.USB_FUNCTION_RNDIS;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_INTERFACE_NAME;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_MODE;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_STATE;
@@ -99,6 +100,7 @@ import com.android.server.net.BaseNetworkObserver;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1302,19 +1304,16 @@ public class Tethering extends BaseNetworkObserver {
 
         protected void setUpstreamNetwork(NetworkState ns) {
             String iface = null;
-            if (ns != null && ns.linkProperties != null) {
+            if (ns != null) {
                 // Find the interface with the default IPv4 route. It may be the
                 // interface described by linkProperties, or one of the interfaces
                 // stacked on top of it.
-                mLog.i("Finding IPv4 upstream interface on: " + ns.linkProperties);
-                RouteInfo ipv4Default = RouteInfo.selectBestRoute(
-                    ns.linkProperties.getAllRoutes(), Inet4Address.ANY);
-                if (ipv4Default != null) {
-                    iface = ipv4Default.getInterface();
-                    mLog.i("Found interface " + ipv4Default.getInterface());
-                } else {
-                    mLog.i("No IPv4 upstream interface, giving up.");
-                }
+                mLog.i("Looking for default routes on: " + ns.linkProperties);
+                final String iface4 = getIPv4DefaultRouteInterface(ns);
+                final String iface6 = getIPv6DefaultRouteInterface(ns);
+                mLog.i("IPv4/IPv6 upstream interface(s): " + iface4 + "/" + iface6);
+
+                iface = (iface4 != null) ? iface4 : null /* TODO: iface6 */;
             }
 
             if (iface != null) {
@@ -1955,6 +1954,31 @@ public class Tethering extends BaseNetworkObserver {
         tetherState.stateMachine.stop();
         mLog.log("removing TetheringInterfaceStateMachine for: " + iface);
         mTetherStates.remove(iface);
+    }
+
+    private static String getIPv4DefaultRouteInterface(NetworkState ns) {
+        if (ns == null) return null;
+        return getInterfaceForDestination(ns.linkProperties, Inet4Address.ANY);
+    }
+
+    private static String getIPv6DefaultRouteInterface(NetworkState ns) {
+        if (ns == null) return null;
+        // An upstream network's IPv6 capability is currently only useful if it
+        // can be 64share'd downstream (RFC 7278). For now, that means mobile
+        // upstream networks only.
+        if (ns.networkCapabilities == null ||
+                !ns.networkCapabilities.hasTransport(TRANSPORT_CELLULAR)) {
+            return null;
+        }
+
+        return getInterfaceForDestination(ns.linkProperties, Inet6Address.ANY);
+    }
+
+    private static String getInterfaceForDestination(LinkProperties lp, InetAddress dst) {
+        final RouteInfo ri = (lp != null)
+                ? RouteInfo.selectBestRoute(lp.getAllRoutes(), dst)
+                : null;
+        return (ri != null) ? ri.getInterface() : null;
     }
 
     private static String[] copy(String[] strarray) {
