@@ -8827,6 +8827,14 @@ public final class Settings {
         */
        public static final String NETWORK_SCORER_APP = "network_scorer_app";
 
+        /**
+         * Whether night display forced auto mode is available.
+         * 0 = unavailable, 1 = available.
+         * @hide
+         */
+        public static final String NIGHT_DISPLAY_FORCED_AUTO_MODE_AVAILABLE =
+                "night_display_forced_auto_mode_available";
+
        /**
         * If the NITZ_UPDATE_DIFF time is exceeded then an automatic adjustment
         * to SystemClock will be allowed even if NITZ_UPDATE_SPACING has not been

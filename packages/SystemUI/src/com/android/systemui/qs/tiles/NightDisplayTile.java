@@ -16,12 +16,16 @@
 
 package com.android.systemui.qs.tiles;
 
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_QS_MODE;
+
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Intent;
+import android.metrics.LogMaker;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.support.annotation.StringRes;
+import android.util.Log;
 import android.widget.Switch;
 
 import com.android.internal.app.ColorDisplayController;
@@ -65,6 +69,15 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
 
     @Override
     protected void handleClick() {
+        // Enroll in forced auto mode if eligible.
+        if ("1".equals(Settings.Global.getString(mContext.getContentResolver(),
+                Settings.Global.NIGHT_DISPLAY_FORCED_AUTO_MODE_AVAILABLE))
+                && mController.getAutoModeRaw() == -1) {
+            mController.setAutoMode(ColorDisplayController.AUTO_MODE_CUSTOM);
+            Log.i("NightDisplayTile", "Enrolled in forced night display auto mode");
+        }
+
+        // Change current activation state.
         final boolean activated = !mState.value;
         mController.setActivated(activated);
     }
@@ -144,6 +157,11 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
     @Override
     public int getMetricsCategory() {
         return MetricsEvent.QS_NIGHT_DISPLAY;
+    }
+
+    @Override
+    public LogMaker populate(LogMaker logMaker) {
+        return super.populate(logMaker).addTaggedData(FIELD_QS_MODE, mController.getAutoModeRaw());
     }
 
     @Override
