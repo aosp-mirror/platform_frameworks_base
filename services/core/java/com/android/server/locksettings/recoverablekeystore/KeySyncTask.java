@@ -289,6 +289,7 @@ public class KeySyncTask implements Runnable {
                 .setMaxAttempts(TRUSTED_HARDWARE_MAX_ATTEMPTS)
                 .setCounterId(counterId)
                 .setTrustedHardwarePublicKey(SecureBox.encodePublicKey(publicKey))
+                .setTrustedHardwareCertPath(certPath)
                 .setServerParams(vaultHandle)
                 .setKeyChainProtectionParams(metadataList)
                 .setWrappedApplicationKeys(createApplicationKeyEntries(encryptedApplicationKeys))

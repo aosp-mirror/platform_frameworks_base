@@ -273,12 +273,16 @@ public class KeySyncUtils {
      *
      * @param key The bytes of the key.
      * @return The key.
-     * @throws NoSuchAlgorithmException if the public key algorithm is unavailable.
      * @throws InvalidKeySpecException if the bytes of the key are not a valid key.
      */
-    public static PublicKey deserializePublicKey(byte[] key)
-            throws NoSuchAlgorithmException, InvalidKeySpecException {
-        KeyFactory keyFactory = KeyFactory.getInstance(PUBLIC_KEY_FACTORY_ALGORITHM);
+    public static PublicKey deserializePublicKey(byte[] key) throws InvalidKeySpecException {
+        KeyFactory keyFactory;
+        try {
+            keyFactory = KeyFactory.getInstance(PUBLIC_KEY_FACTORY_ALGORITHM);
+        } catch (NoSuchAlgorithmException e) {
+            // Should not happen
+            throw new RuntimeException(e);
+        }
         X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(key);
         return keyFactory.generatePublic(publicKeySpec);
     }
