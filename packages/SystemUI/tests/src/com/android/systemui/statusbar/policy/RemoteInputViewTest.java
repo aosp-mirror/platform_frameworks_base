@@ -47,7 +47,7 @@ public class RemoteInputViewTest extends SysuiTestCase {
 
     private static final String TEST_RESULT_KEY = "test_result_key";
     private static final String TEST_REPLY = "hello";
-    private static final String TEST_ACTION = "com.android.ACTION";
+    private static final String TEST_ACTION = "com.android.REMOTE_INPUT_VIEW_ACTION";
 
     @Mock private RemoteInputController mController;
     @Mock private ShortcutManager mShortcutManager;
@@ -93,6 +93,7 @@ public class RemoteInputViewTest extends SysuiTestCase {
     @Test
     public void testNoCrashWithoutVisibilityListener() {
         mView.setOnVisibilityChangedListener(null);
-        mView.onVisibilityChanged(mView, View.VISIBLE);
+        mView.setVisibility(View.INVISIBLE);
+        mView.setVisibility(View.VISIBLE);
     }
 }
