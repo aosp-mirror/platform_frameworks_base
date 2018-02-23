@@ -21,6 +21,7 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_PACKAGE_NAME := SettingsLibShell
+LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_PRIVILEGED_MODULE := true
