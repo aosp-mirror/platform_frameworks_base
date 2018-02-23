@@ -380,7 +380,7 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
     }
 
     private void startQuickScrub() {
-        if (!mQuickScrubActive) {
+        if (!mQuickScrubActive && mDraggingActive) {
             mQuickScrubActive = true;
             mLightTrackColor = mContext.getColor(R.color.quick_step_track_background_light);
             mDarkTrackColor = mContext.getColor(R.color.quick_step_track_background_dark);
@@ -394,6 +394,9 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to send start of quick scrub.", e);
             }
+        } else {
+            // After long press do not allow quick scrub/switch
+            mTouchDownX = -1;
         }
     }
 
