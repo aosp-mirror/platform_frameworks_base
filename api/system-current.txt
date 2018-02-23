@@ -4176,6 +4176,7 @@ package android.provider {
     method public static boolean putString(android.content.ContentResolver, java.lang.String, java.lang.String, java.lang.String, boolean);
     method public static void resetToDefaults(android.content.ContentResolver, java.lang.String);
     field public static final java.lang.String AUTOFILL_COMPAT_ALLOWED_PACKAGES = "autofill_compat_allowed_packages";
+    field public static final java.lang.String CARRIER_APP_WHITELIST = "carrier_app_whitelist";
     field public static final java.lang.String DEFAULT_SM_DP_PLUS = "default_sm_dp_plus";
     field public static final java.lang.String INSTALL_CARRIER_APP_NOTIFICATION_PERSISTENT = "install_carrier_app_notification_persistent";
     field public static final java.lang.String INSTALL_CARRIER_APP_NOTIFICATION_SLEEP_MILLIS = "install_carrier_app_notification_sleep_millis";
@@ -5220,6 +5221,7 @@ package android.telephony {
     method public int describeContents();
     method public int getCarrierPrivilegeStatus(android.content.pm.PackageInfo);
     method public int getCarrierPrivilegeStatus(android.content.pm.Signature, java.lang.String);
+    method public java.lang.String getCertificateHexString();
     method public java.lang.String getPackageName();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.telephony.UiccAccessRule> CREATOR;
