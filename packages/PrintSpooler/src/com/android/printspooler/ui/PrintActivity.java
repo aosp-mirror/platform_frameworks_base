@@ -306,19 +306,22 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         // This will take just a few milliseconds, so just wait to
         // bind to the local service before showing the UI.
         mSpoolerProvider = new PrintSpoolerProvider(this,
-                new Runnable() {
-            @Override
-            public void run() {
-                if (isFinishing() || isDestroyed()) {
-                    // onPause might have not been able to cancel the job, see PrintActivity#onPause
-                    // To be sure, cancel the job again. Double canceling does no harm.
-                    mSpoolerProvider.getSpooler().setPrintJobState(mPrintJob.getId(),
-                            PrintJobInfo.STATE_CANCELED, null);
-                } else {
-                    onConnectedToPrintSpooler(adapter);
-                }
-            }
-        });
+                () -> {
+                    if (isFinishing() || isDestroyed()) {
+                        if (savedInstanceState != null) {
+                            // onPause might have not been able to cancel the job, see
+                            // PrintActivity#onPause
+                            // To be sure, cancel the job again. Double canceling does no harm.
+                            mSpoolerProvider.getSpooler().setPrintJobState(mPrintJob.getId(),
+                                    PrintJobInfo.STATE_CANCELED, null);
+                        }
+                    } else {
+                        if (savedInstanceState == null) {
+                            mSpoolerProvider.getSpooler().createPrintJob(mPrintJob);
+                        }
+                        onConnectedToPrintSpooler(adapter);
+                    }
+                });
 
         getLoaderManager().initLoader(LOADER_ID_ENABLED_PRINT_SERVICES, null, this);
     }

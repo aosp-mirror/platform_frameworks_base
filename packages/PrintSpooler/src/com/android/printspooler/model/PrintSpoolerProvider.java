@@ -16,6 +16,8 @@
 
 package com.android.printspooler.model;
 
+import static android.content.Context.BIND_AUTO_CREATE;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -32,7 +34,7 @@ public class PrintSpoolerProvider implements ServiceConnection {
         mContext = context;
         mCallback = callback;
         Intent intent = new Intent(mContext, PrintSpoolerService.class);
-        mContext.bindService(intent, this, 0);
+        mContext.bindService(intent, this, BIND_AUTO_CREATE);
     }
 
     public PrintSpoolerService getSpooler() {

@@ -38,7 +38,6 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -235,15 +234,6 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
             // Not adding a print job means the client is dead - done.
             return null;
         }
-
-        // Spin the spooler to add the job and show the config UI.
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                mSpooler.createPrintJob(printJob);
-                return null;
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
 
         final long identity = Binder.clearCallingIdentity();
         try {
