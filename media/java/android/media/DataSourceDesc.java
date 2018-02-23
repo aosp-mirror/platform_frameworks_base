@@ -74,7 +74,7 @@ public final class DataSourceDesc {
     private List<HttpCookie> mUriCookies;
     private Context mUriContext;
 
-    private long mId = 0;
+    private String mMediaId;
     private long mStartPositionMs = 0;
     private long mEndPositionMs = LONG_MAX;
 
@@ -82,11 +82,11 @@ public final class DataSourceDesc {
     }
 
     /**
-     * Return the Id of data source.
-     * @return the Id of data source
+     * Return the media Id of data source.
+     * @return the media Id of data source
      */
-    public long getId() {
-        return mId;
+    public String getMediaId() {
+        return mMediaId;
     }
 
     /**
@@ -222,7 +222,7 @@ public final class DataSourceDesc {
         private List<HttpCookie> mUriCookies;
         private Context mUriContext;
 
-        private long mId = 0;
+        private String mMediaId;
         private long mStartPositionMs = 0;
         private long mEndPositionMs = LONG_MAX;
 
@@ -248,7 +248,7 @@ public final class DataSourceDesc {
             mUriCookies = dsd.mUriCookies;
             mUriContext = dsd.mUriContext;
 
-            mId = dsd.mId;
+            mMediaId = dsd.mMediaId;
             mStartPositionMs = dsd.mStartPositionMs;
             mEndPositionMs = dsd.mEndPositionMs;
         }
@@ -282,7 +282,7 @@ public final class DataSourceDesc {
             dsd.mUriCookies = mUriCookies;
             dsd.mUriContext = mUriContext;
 
-            dsd.mId = mId;
+            dsd.mMediaId = mMediaId;
             dsd.mStartPositionMs = mStartPositionMs;
             dsd.mEndPositionMs = mEndPositionMs;
 
@@ -290,13 +290,13 @@ public final class DataSourceDesc {
         }
 
         /**
-         * Sets the Id of this data source.
+         * Sets the media Id of this data source.
          *
-         * @param id the Id of this data source
+         * @param mediaId the media Id of this data source
          * @return the same Builder instance.
          */
-        public Builder setId(long id) {
-            mId = id;
+        public Builder setMediaId(String mediaId) {
+            mMediaId = mediaId;
             return this;
         }
 

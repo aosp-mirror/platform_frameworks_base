@@ -240,7 +240,7 @@ public abstract class MediaPlayerBase implements AutoCloseable {
      * gain. See {@link #getMaxPlayerVolume()} for the volume range supported by this player.
      * @param volume a value between 0.0f and {@link #getMaxPlayerVolume()}.
      */
-    public abstract void setVolume(float volume);
+    public abstract void setPlayerVolume(float volume);
 
     /**
      * Returns the current volume of this player to this player.
@@ -250,7 +250,7 @@ public abstract class MediaPlayerBase implements AutoCloseable {
     public abstract float getPlayerVolume();
 
     /**
-     * @return the maximum volume that can be used in {@link #setVolume(float)}.
+     * @return the maximum volume that can be used in {@link #setPlayerVolume(float)}.
      */
     public float getMaxPlayerVolume() { return 1.0f; }
 
