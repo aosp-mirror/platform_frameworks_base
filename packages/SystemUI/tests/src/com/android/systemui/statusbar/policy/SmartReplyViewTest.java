@@ -26,6 +26,7 @@ import android.app.RemoteInput;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -76,6 +77,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
         mSpacing = res.getDimensionPixelSize(R.dimen.smart_reply_button_spacing);
     }
 
+    @FlakyTest
     @Test
     public void testSendSmartReply_intentContainsResultsAndSource() throws InterruptedException {
         setRepliesFromRemoteInput(TEST_CHOICES);
@@ -180,6 +182,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
         assertEqualLayouts(expectedView.getChildAt(2), mView.getChildAt(2));
     }
 
+    @FlakyTest
     @Test
     public void testMeasure_choiceWithThreeLines() {
         final CharSequence[] choices = new CharSequence[]{"Hi", "Hello\nevery\nbody", "Bye"};
