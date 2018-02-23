@@ -64,6 +64,8 @@ import com.android.server.SystemService;
 import com.android.server.pm.Installer;
 import com.android.server.pm.UserManagerService;
 
+import libcore.util.EmptyArray;
+
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
@@ -303,10 +305,10 @@ public final class OverlayManagerService extends SystemService {
         schedulePersistSettings();
     }
 
-    private static Set<String> getDefaultOverlayPackages() {
+    private static String[] getDefaultOverlayPackages() {
         final String str = SystemProperties.get(DEFAULT_OVERLAYS_PROP);
         if (TextUtils.isEmpty(str)) {
-            return Collections.emptySet();
+            return EmptyArray.STRING;
         }
 
         final ArraySet<String> defaultPackages = new ArraySet<>();
@@ -315,7 +317,7 @@ public final class OverlayManagerService extends SystemService {
                 defaultPackages.add(packageName);
             }
         }
-        return defaultPackages;
+        return defaultPackages.toArray(new String[defaultPackages.size()]);
     }
 
     private final class PackageReceiver extends BroadcastReceiver {
