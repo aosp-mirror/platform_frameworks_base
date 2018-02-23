@@ -683,6 +683,23 @@ public class Handler {
         return enqueueMessage(queue, msg, 0);
     }
 
+    /**
+     * Executes the message synchronously if called on the same thread this handler corresponds to,
+     * or {@link #sendMessage pushes it to the queue} otherwise
+     *
+     * @return Returns true if the message was successfully ran or placed in to the
+     *         message queue.  Returns false on failure, usually because the
+     *         looper processing the message queue is exiting.
+     * @hide
+     */
+    public final boolean executeOrSendMessage(Message msg) {
+        if (mLooper == Looper.myLooper()) {
+            dispatchMessage(msg);
+            return true;
+        }
+        return sendMessage(msg);
+    }
+
     private boolean enqueueMessage(MessageQueue queue, Message msg, long uptimeMillis) {
         msg.target = this;
         if (mAsynchronous) {
