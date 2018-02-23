@@ -24,6 +24,7 @@ import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
@@ -325,12 +326,10 @@ public class SliceManager {
     }
 
     /**
-     * Turns a slice intent into a slice uri. Expects an explicit intent. If there is no
-     * {@link android.content.ContentProvider} associated with the given intent this will throw
-     * {@link IllegalArgumentException}.
+     * Turns a slice intent into a slice uri. Expects an explicit intent.
      *
      * @param intent The intent associated with a slice.
-     * @return The Slice Uri provided by the app or null if none is given.
+     * @return The Slice Uri provided by the app or null if none exists.
      * @see Slice
      * @see SliceProvider#onMapIntentToUri(Intent)
      * @see Intent
@@ -350,7 +349,16 @@ public class SliceManager {
         List<ResolveInfo> providers =
                 mContext.getPackageManager().queryIntentContentProviders(intent, 0);
         if (providers == null || providers.isEmpty()) {
-            throw new IllegalArgumentException("Unable to resolve intent " + intent);
+            // There are no providers, see if this activity has a direct link.
+            ResolveInfo resolve = mContext.getPackageManager().resolveActivity(intent,
+                    PackageManager.GET_META_DATA);
+            if (resolve != null && resolve.activityInfo != null
+                    && resolve.activityInfo.metaData != null
+                    && resolve.activityInfo.metaData.containsKey(SLICE_METADATA_KEY)) {
+                return Uri.parse(
+                        resolve.activityInfo.metaData.getString(SLICE_METADATA_KEY));
+            }
+            return null;
         }
         String authority = providers.get(0).providerInfo.authority;
         Uri uri = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
@@ -401,7 +409,16 @@ public class SliceManager {
         List<ResolveInfo> providers =
                 mContext.getPackageManager().queryIntentContentProviders(intent, 0);
         if (providers == null || providers.isEmpty()) {
-            throw new IllegalArgumentException("Unable to resolve intent " + intent);
+            // There are no providers, see if this activity has a direct link.
+            ResolveInfo resolve = mContext.getPackageManager().resolveActivity(intent,
+                    PackageManager.GET_META_DATA);
+            if (resolve != null && resolve.activityInfo != null
+                    && resolve.activityInfo.metaData != null
+                    && resolve.activityInfo.metaData.containsKey(SLICE_METADATA_KEY)) {
+                return bindSlice(Uri.parse(resolve.activityInfo.metaData
+                        .getString(SLICE_METADATA_KEY)), supportedSpecs);
+            }
+            return null;
         }
         String authority = providers.get(0).providerInfo.authority;
         Uri uri = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
