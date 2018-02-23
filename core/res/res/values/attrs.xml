@@ -5954,6 +5954,11 @@
         <!-- Indicates if the drawable needs to be mirrored when its layout direction is
              RTL (right-to-left). -->
         <attr name="autoMirrored" />
+        <!-- Replace the loop count in the encoded data. A repeat count of 0 means that
+             the animation will play once, regardless of the number of times specified
+             in the encoded data. Setting this to infinite (-1) will result in the
+             animation repeating as long as it is displayed (once start() is called). -->
+        <attr name="repeatCount"/>
     </declare-styleable>
 
     <!-- Drawable used to draw bitmaps. -->
