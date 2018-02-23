@@ -16,6 +16,7 @@
 
 package com.android.keyguard;
 
+import android.annotation.ColorInt;
 import android.app.PendingIntent;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
@@ -34,6 +35,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
@@ -307,8 +309,15 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         }
     }
 
-    public int getTextColor() {
+    @VisibleForTesting
+    int getTextColor() {
         return ColorUtils.blendARGB(mTextColor, Color.WHITE, mDarkAmount);
+    }
+
+    @VisibleForTesting
+    void setTextColor(@ColorInt int textColor) {
+        mTextColor = textColor;
+        updateTextColors();
     }
 
     /**

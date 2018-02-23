@@ -34,6 +34,7 @@
               android:layout_marginBottom="7dp"
               android:paddingStart="64dp"
               android:paddingEnd="64dp"
+              android:textColor="?attr/wallpaperTextColor"
               android:theme="@style/TextAppearance.Keyguard"
     />
     <LinearLayout android:id="@+id/row"
