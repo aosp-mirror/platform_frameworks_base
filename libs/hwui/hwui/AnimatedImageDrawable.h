@@ -72,6 +72,7 @@ public:
     // already stopped)
     bool stop();
     bool isRunning();
+    int getRepetitionCount() const { return mSkAnimatedImage->getRepetitionCount(); }
     void setRepetitionCount(int count) { mSkAnimatedImage->setRepetitionCount(count); }
 
     void setOnAnimationEndListener(std::unique_ptr<OnAnimationEndListener> listener) {
