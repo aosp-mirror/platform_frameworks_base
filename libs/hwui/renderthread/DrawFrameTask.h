@@ -74,6 +74,10 @@ public:
 
     void run();
 
+    void setFrameCallback(std::function<void(int64_t)>&& callback) {
+        mFrameCallback = std::move(callback);
+    }
+
 private:
     void postAndWait();
     bool syncFrameState(TreeInfo& info);
@@ -96,6 +100,8 @@ private:
     int64_t mSyncQueued;
 
     int64_t mFrameInfo[UI_THREAD_FRAME_INFO_SIZE];
+
+    std::function<void(int64_t)> mFrameCallback;
 };
 
 } /* namespace renderthread */

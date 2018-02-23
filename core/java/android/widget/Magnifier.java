@@ -471,12 +471,12 @@ public final class Magnifier {
          * Destroys this instance.
          */
         public void destroy() {
-            mRenderer.destroy();
-            mSurface.destroy();
-            mSurfaceControl.destroy();
-            mSurfaceSession.kill();
-            mBitmapRenderNode.destroy();
             synchronized (mLock) {
+                mRenderer.destroy();
+                mSurface.destroy();
+                mSurfaceControl.destroy();
+                mSurfaceSession.kill();
+                mBitmapRenderNode.destroy();
                 mHandler.removeCallbacks(mMagnifierUpdater);
                 if (mBitmap != null) {
                     mBitmap.recycle();
@@ -518,17 +518,22 @@ public final class Magnifier {
                     final int pendingY = mWindowPositionY;
 
                     callback = frame -> {
-                        mRenderer.setLightCenter(mDisplay, pendingX, pendingY);
-                        // Show or move the window at the content draw frame.
-                        SurfaceControl.openTransaction();
-                        mSurfaceControl.deferTransactionUntil(mSurface, frame);
-                        if (updateWindowPosition) {
-                            mSurfaceControl.setPosition(pendingX, pendingY);
+                        synchronized (mLock) {
+                            if (!mSurface.isValid()) {
+                                return;
+                            }
+                            mRenderer.setLightCenter(mDisplay, pendingX, pendingY);
+                            // Show or move the window at the content draw frame.
+                            SurfaceControl.openTransaction();
+                            mSurfaceControl.deferTransactionUntil(mSurface, frame);
+                            if (updateWindowPosition) {
+                                mSurfaceControl.setPosition(pendingX, pendingY);
+                            }
+                            if (firstDraw) {
+                                mSurfaceControl.show();
+                            }
+                            SurfaceControl.closeTransaction();
                         }
-                        if (firstDraw) {
-                            mSurfaceControl.show();
-                        }
-                        SurfaceControl.closeTransaction();
                     };
                 } else {
                     callback = null;

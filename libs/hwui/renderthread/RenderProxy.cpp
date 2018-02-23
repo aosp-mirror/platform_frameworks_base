@@ -270,6 +270,10 @@ void RenderProxy::setContentDrawBounds(int left, int top, int right, int bottom)
     mDrawFrameTask.setContentDrawBounds(left, top, right, bottom);
 }
 
+void RenderProxy::setFrameCallback(std::function<void(int64_t)>&& callback) {
+    mDrawFrameTask.setFrameCallback(std::move(callback));
+}
+
 void RenderProxy::serializeDisplayListTree() {
     mRenderThread.queue().post([=]() { mContext->serializeDisplayListTree(); });
 }
