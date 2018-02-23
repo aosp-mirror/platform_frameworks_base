@@ -26,7 +26,6 @@ import android.view.View;
 import android.widget.EditText;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -35,7 +34,6 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.util.ReflectionHelpers;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
-@Ignore
 public class CustomEditTextPreferenceTest {
 
     @Mock
@@ -50,7 +48,6 @@ public class CustomEditTextPreferenceTest {
     }
 
     @Test
-    @Ignore
     public void bindDialogView_shouldRequestFocus() {
         final String testText = "";
         final EditText editText = spy(new EditText(RuntimeEnvironment.application));
@@ -63,7 +60,6 @@ public class CustomEditTextPreferenceTest {
     }
 
     @Test
-    @Ignore
     public void getEditText_noDialog_shouldNotCrash() {
         ReflectionHelpers.setField(mPreference, "mFragment",
                 mock(CustomEditTextPreference.CustomPreferenceDialogFragment.class));
