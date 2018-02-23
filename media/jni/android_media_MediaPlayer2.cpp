@@ -760,7 +760,8 @@ android_media_MediaPlayer2_seekTo(JNIEnv *env, jobject thiz, jlong msec, jint mo
         return;
     }
     ALOGV("seekTo: %lld(msec), mode=%d", (long long)msec, mode);
-    process_media_player_call( env, thiz, mp->seekTo((int)msec, (MediaPlayer2SeekMode)mode), NULL, NULL );
+    process_media_player_call(env, thiz, mp->seekTo((int64_t)msec, (MediaPlayer2SeekMode)mode),
+                              NULL, NULL);
 }
 
 static void
@@ -838,7 +839,7 @@ android_media_MediaPlayer2_native_getMetrics(JNIEnv *env, jobject thiz)
     return mybundle;
 }
 
-static jint
+static jlong
 android_media_MediaPlayer2_getCurrentPosition(JNIEnv *env, jobject thiz)
 {
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
@@ -846,13 +847,13 @@ android_media_MediaPlayer2_getCurrentPosition(JNIEnv *env, jobject thiz)
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
         return 0;
     }
-    int msec;
+    int64_t msec;
     process_media_player_call( env, thiz, mp->getCurrentPosition(&msec), NULL, NULL );
-    ALOGV("getCurrentPosition: %d (msec)", msec);
-    return (jint) msec;
+    ALOGV("getCurrentPosition: %lld (msec)", (long long)msec);
+    return (jlong) msec;
 }
 
-static jint
+static jlong
 android_media_MediaPlayer2_getDuration(JNIEnv *env, jobject thiz)
 {
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
@@ -860,10 +861,10 @@ android_media_MediaPlayer2_getDuration(JNIEnv *env, jobject thiz)
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
         return 0;
     }
-    int msec;
+    int64_t msec;
     process_media_player_call( env, thiz, mp->getDuration(&msec), NULL, NULL );
-    ALOGV("getDuration: %d (msec)", msec);
-    return (jint) msec;
+    ALOGV("getDuration: %lld (msec)", (long long)msec);
+    return (jlong) msec;
 }
 
 static void
@@ -909,6 +910,28 @@ android_media_MediaPlayer2_setParameter(JNIEnv *env, jobject thiz, jint key, job
     } else {
         return false;
     }
+}
+
+static jobject
+android_media_MediaPlayer2_getParameter(JNIEnv *env, jobject thiz, jint key)
+{
+    ALOGV("getParameter: key %d", key);
+    sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return NULL;
+    }
+
+    jobject jParcel = createJavaParcelObject(env);
+    if (jParcel != NULL) {
+        Parcel* nativeParcel = parcelForJavaObject(env, jParcel);
+        status_t err = mp->getParameter(key, nativeParcel);
+        if (err != OK) {
+            env->DeleteLocalRef(jParcel);
+            return NULL;
+        }
+    }
+    return jParcel;
 }
 
 static void
@@ -1169,33 +1192,6 @@ static void android_media_MediaPlayer2_attachAuxEffect(JNIEnv *env,  jobject thi
         return;
     }
     process_media_player_call( env, thiz, mp->attachAuxEffect(effectId), NULL, NULL );
-}
-
-static void
-android_media_MediaPlayer2_setNextMediaPlayer(JNIEnv *env, jobject thiz, jobject java_player)
-{
-    ALOGV("setNextMediaPlayer");
-    sp<MediaPlayer2> thisplayer = getMediaPlayer(env, thiz);
-    if (thisplayer == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException", "This player not initialized");
-        return;
-    }
-    sp<MediaPlayer2> nextplayer = (java_player == NULL) ? NULL : getMediaPlayer(env, java_player);
-    if (nextplayer == NULL && java_player != NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException", "That player not initialized");
-        return;
-    }
-
-    if (nextplayer == thisplayer) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", "Next player can't be self");
-        return;
-    }
-    // tie the two players together
-    process_media_player_call(
-            env, thiz, thisplayer->setNextMediaPlayer(nextplayer),
-            "java/lang/IllegalArgumentException",
-            "setNextMediaPlayer failed." );
-    ;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -1498,12 +1494,13 @@ static const JNINativeMethod gMethods[] = {
     {"_notifyAt",           "(J)V",                             (void *)android_media_MediaPlayer2_notifyAt},
     {"_pause",              "()V",                              (void *)android_media_MediaPlayer2_pause},
     {"isPlaying",           "()Z",                              (void *)android_media_MediaPlayer2_isPlaying},
-    {"getCurrentPosition",  "()I",                              (void *)android_media_MediaPlayer2_getCurrentPosition},
-    {"getDuration",         "()I",                              (void *)android_media_MediaPlayer2_getDuration},
+    {"getCurrentPosition",  "()J",                              (void *)android_media_MediaPlayer2_getCurrentPosition},
+    {"getDuration",         "()J",                              (void *)android_media_MediaPlayer2_getDuration},
     {"_release",            "()V",                              (void *)android_media_MediaPlayer2_release},
     {"_reset",              "()V",                              (void *)android_media_MediaPlayer2_reset},
     {"_getAudioStreamType", "()I",                              (void *)android_media_MediaPlayer2_getAudioStreamType},
     {"setParameter",        "(ILandroid/os/Parcel;)Z",          (void *)android_media_MediaPlayer2_setParameter},
+    {"getParameter",        "(I)Landroid/os/Parcel;",           (void *)android_media_MediaPlayer2_getParameter},
     {"setLooping",          "(Z)V",                             (void *)android_media_MediaPlayer2_setLooping},
     {"isLooping",           "()Z",                              (void *)android_media_MediaPlayer2_isLooping},
     {"_setVolume",          "(FF)V",                            (void *)android_media_MediaPlayer2_setVolume},
@@ -1517,7 +1514,6 @@ static const JNINativeMethod gMethods[] = {
     {"setAudioSessionId",   "(I)V",                             (void *)android_media_MediaPlayer2_set_audio_session_id},
     {"_setAuxEffectSendLevel", "(F)V",                          (void *)android_media_MediaPlayer2_setAuxEffectSendLevel},
     {"attachAuxEffect",     "(I)V",                             (void *)android_media_MediaPlayer2_attachAuxEffect},
-    {"setNextMediaPlayer",  "(Landroid/media/MediaPlayer2;)V",  (void *)android_media_MediaPlayer2_setNextMediaPlayer},
     // Modular DRM
     { "_prepareDrm", "([B[B)V",                                 (void *)android_media_MediaPlayer2_prepareDrm },
     { "_releaseDrm", "()V",                                     (void *)android_media_MediaPlayer2_releaseDrm },

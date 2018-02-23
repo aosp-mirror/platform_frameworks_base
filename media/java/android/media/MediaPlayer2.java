@@ -1223,7 +1223,7 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
      *
      * @return the current position in milliseconds
      */
-    public abstract int getCurrentPosition();
+    public abstract long getCurrentPosition();
 
     /**
      * Gets the duration of the file.
@@ -1231,7 +1231,7 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
      * @return the duration in milliseconds, if no duration is available
      *         (for example, if streaming live content), -1 is returned.
      */
-    public abstract int getDuration();
+    public abstract long getDuration();
 
     /**
      * Gets the media metadata.
@@ -1278,27 +1278,6 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
     }
 
     /**
-     * Set the MediaPlayer2 to start when this MediaPlayer2 finishes playback
-     * (i.e. reaches the end of the stream).
-     * The media framework will attempt to transition from this player to
-     * the next as seamlessly as possible. The next player can be set at
-     * any time before completion, but shall be after setDataSource has been
-     * called successfully. The next player must be prepared by the
-     * app, and the application should not call play() on it.
-     * The next MediaPlayer2 must be different from 'this'. An exception
-     * will be thrown if next == this.
-     * The application may call setNextMediaPlayer(null) to indicate no
-     * next player should be started at the end of playback.
-     * If the current player is looping, it will keep looping and the next
-     * player will not be started.
-     *
-     * @param next the player to start after this one completes playback.
-     *
-     * @hide
-     */
-    public void setNextMediaPlayer(MediaPlayer2 next) { }
-
-    /**
      * Resets the MediaPlayer2 to its uninitialized state. After calling
      * this method, you will have to initialize it again by setting the
      * data source and calling prepareAsync().
@@ -1324,6 +1303,13 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
      * @throws IllegalArgumentException if the attributes are null or invalid.
      */
     public abstract void setAudioAttributes(AudioAttributes attributes);
+
+    /**
+     * Gets the audio attributes for this MediaPlayer2.
+     * @return attributes a set of audio attributes
+     * @throws IllegalArgumentException if the attributes are null or invalid.
+     */
+    public abstract AudioAttributes getAudioAttributes();
 
     /**
      * Sets the player to be looping or non-looping.
@@ -2029,8 +2015,9 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
          * Called to give the app the opportunity to configure DRM before the session is created
          *
          * @param mp the {@code MediaPlayer2} associated with this callback
+         * @param srcId the Id of this data source
          */
-        public void onDrmConfig(MediaPlayer2 mp);
+        public void onDrmConfig(MediaPlayer2 mp, long srcId);
     }
 
     /**
@@ -2051,24 +2038,25 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
         /**
          * Called to indicate DRM info is available
          *
-         * @param mp       the {@code MediaPlayer2} associated with this callback
-         * @param drmInfo  DRM info of the source including PSSH, and subset
-         *                 of crypto schemes supported by this device
+         * @param mp the {@code MediaPlayer2} associated with this callback
+         * @param srcId the Id of this data source
+         * @param drmInfo DRM info of the source including PSSH, and subset
+         *                of crypto schemes supported by this device
          */
-        public void onDrmInfo(MediaPlayer2 mp, DrmInfo drmInfo) { }
+        public void onDrmInfo(MediaPlayer2 mp, long srcId, DrmInfo drmInfo) { }
 
         /**
          * Called to notify the client that {@code prepareDrm} is finished and ready for key request/response.
          *
-         * @param mp      the {@code MediaPlayer2} associated with this callback
-         * @param status  the result of DRM preparation which can be
+         * @param mp the {@code MediaPlayer2} associated with this callback
+         * @param srcId the Id of this data source
+         * @param status the result of DRM preparation which can be
          * {@link #PREPARE_DRM_STATUS_SUCCESS},
          * {@link #PREPARE_DRM_STATUS_PROVISIONING_NETWORK_ERROR},
          * {@link #PREPARE_DRM_STATUS_PROVISIONING_SERVER_ERROR}, or
          * {@link #PREPARE_DRM_STATUS_PREPARATION_ERROR}.
          */
-        public void onDrmPrepared(MediaPlayer2 mp, @PrepareDrmStatusCode int status) { }
-
+        public void onDrmPrepared(MediaPlayer2 mp, long srcId, @PrepareDrmStatusCode int status) { }
     }
 
     /**
