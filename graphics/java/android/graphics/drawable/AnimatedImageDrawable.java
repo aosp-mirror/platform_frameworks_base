@@ -16,8 +16,6 @@
 
 package android.graphics.drawable;
 
-import dalvik.annotation.optimization.FastNative;
-
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -25,8 +23,6 @@ import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
-import android.util.AttributeSet;
-import android.view.InflateException;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
@@ -35,20 +31,21 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 
 import com.android.internal.R;
 
+import dalvik.annotation.optimization.FastNative;
+
+import libcore.util.NativeAllocationRegistry;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import libcore.io.IoUtils;
-import libcore.util.NativeAllocationRegistry;
-
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.Runnable;
 import java.util.ArrayList;
 
 /**
@@ -106,6 +103,16 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
             throw new IllegalStateException("called setLoopCount on empty AnimatedImageDrawable");
         }
         nSetLoopCount(mState.mNativePtr, loopCount);
+    }
+
+    /**
+     * Retrieve the number of times the animation will loop.
+     */
+    public int getLoopCount() {
+        if (mState.mNativePtr == 0) {
+            throw new IllegalStateException("called getLoopCount on empty AnimatedImageDrawable");
+        }
+        return nGetLoopCount(mState.mNativePtr);
     }
 
     /**
@@ -500,6 +507,8 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
     private static native boolean nStart(long nativePtr);
     @FastNative
     private static native boolean nStop(long nativePtr);
+    @FastNative
+    private static native int nGetLoopCount(long nativePtr);
     @FastNative
     private static native void nSetLoopCount(long nativePtr, int loopCount);
     // Pass the drawable down to native so it can call onAnimationEnd.
