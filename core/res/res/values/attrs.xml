@@ -8798,6 +8798,7 @@
         <attr name="layout_ignoreOffset" format="boolean" />
         <attr name="layout_gravity" />
         <attr name="layout_hasNestedScrollIndicator" format="boolean" />
+        <attr name="layout_maxHeight" />
     </declare-styleable>
 
     <!-- @hide -->
