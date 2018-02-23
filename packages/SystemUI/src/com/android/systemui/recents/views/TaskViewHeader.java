@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.Nullable;
+import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -37,6 +38,7 @@ import android.graphics.drawable.RippleDrawable;
 import android.os.CountDownTimer;
 import android.support.v4.graphics.ColorUtils;
 import android.util.AttributeSet;
+import android.util.IconDrawableFactory;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -64,6 +66,8 @@ import com.android.systemui.shared.recents.model.Task;
 /* The task bar view */
 public class TaskViewHeader extends FrameLayout
         implements View.OnClickListener, View.OnLongClickListener {
+
+    private static IconDrawableFactory sDrawableFactory;
 
     private static final float HIGHLIGHT_LIGHTNESS_INCREMENT = 0.075f;
     private static final float OVERLAY_LIGHTNESS_INCREMENT = -0.0625f;
@@ -628,7 +632,7 @@ public class TaskViewHeader extends FrameLayout
                 activityInfo.applicationInfo, userId));
         mAppTitleView.setTextColor(mTask.useLightOnPrimaryColor ?
                 mTaskBarViewLightTextColor : mTaskBarViewDarkTextColor);
-        mAppIconView.setImageDrawable(ActivityManagerWrapper.getInstance().getBadgedApplicationIcon(
+        mAppIconView.setImageDrawable(getIconDrawableFactory().getBadgedIcon(
                 activityInfo.applicationInfo, userId));
         mAppInfoView.setImageDrawable(mTask.useLightOnPrimaryColor
                 ? mLightInfoIcon
@@ -670,5 +674,12 @@ public class TaskViewHeader extends FrameLayout
             });
             revealAnim.start();
         }
+    }
+
+    private static IconDrawableFactory getIconDrawableFactory() {
+        if (sDrawableFactory == null) {
+            sDrawableFactory = IconDrawableFactory.newInstance(AppGlobals.getInitialApplication());
+        }
+        return sDrawableFactory;
     }
 }

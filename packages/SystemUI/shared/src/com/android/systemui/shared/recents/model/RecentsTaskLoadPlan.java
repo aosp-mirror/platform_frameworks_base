@@ -123,7 +123,7 @@ public class RecentsTaskLoadPlan {
                     ? loader.getAndUpdateContentDescription(taskKey, t.taskDescription)
                     : "";
             Drawable icon = isStackTask
-                    ? loader.getAndUpdateActivityIcon(taskKey, t.taskDescription, res, false)
+                    ? loader.getAndUpdateActivityIcon(taskKey, t.taskDescription, false)
                     : null;
             ThumbnailData thumbnail = loader.getAndUpdateThumbnail(taskKey,
                     false /* loadIfNotCached */, false /* storeInCache */);
@@ -179,7 +179,7 @@ public class RecentsTaskLoadPlan {
 
             if (opts.loadIcons && (isRunningTask || isVisibleTask)) {
                 if (task.icon == null) {
-                    task.icon = loader.getAndUpdateActivityIcon(taskKey, task.taskDescription, res,
+                    task.icon = loader.getAndUpdateActivityIcon(taskKey, task.taskDescription,
                             true);
                 }
             }

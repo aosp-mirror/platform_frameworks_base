@@ -17,15 +17,12 @@
 package com.android.systemui.shared.recents.model;
 
 import android.content.Context;
-import android.content.pm.ActivityInfo;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
 
 import com.android.systemui.shared.system.ActivityManagerWrapper;
-import com.android.systemui.shared.system.PackageManagerWrapper;
 
 /**
  * Background task resource loader
@@ -40,8 +37,7 @@ class BackgroundTaskLoader implements Runnable {
     private final Handler mMainThreadHandler;
 
     private final TaskResourceLoadQueue mLoadQueue;
-    private final TaskKeyLruCache<Drawable> mIconCache;
-    private final BitmapDrawable mDefaultIcon;
+    private final IconLoader mIconLoader;
 
     private boolean mStarted;
     private boolean mCancelled;
@@ -51,11 +47,9 @@ class BackgroundTaskLoader implements Runnable {
 
     /** Constructor, creates a new loading thread that loads task resources in the background */
     public BackgroundTaskLoader(TaskResourceLoadQueue loadQueue,
-            TaskKeyLruCache<Drawable> iconCache, BitmapDrawable defaultIcon,
-            OnIdleChangedListener onIdleChangedListener) {
+            IconLoader iconLoader, OnIdleChangedListener onIdleChangedListener) {
         mLoadQueue = loadQueue;
-        mIconCache = iconCache;
-        mDefaultIcon = defaultIcon;
+        mIconLoader = iconLoader;
         mMainThreadHandler = new Handler();
         mOnIdleChangedListener = onIdleChangedListener;
         mLoadThread = new HandlerThread("Recents-TaskResourceLoader",
@@ -140,32 +134,7 @@ class BackgroundTaskLoader implements Runnable {
         // Load the next item from the queue
         final Task t = mLoadQueue.nextTask();
         if (t != null) {
-            Drawable cachedIcon = mIconCache.get(t.key);
-
-            // Load the icon if it is stale or we haven't cached one yet
-            if (cachedIcon == null) {
-                cachedIcon = ActivityManagerWrapper.getInstance().getBadgedTaskDescriptionIcon(
-                        mContext, t.taskDescription, t.key.userId, mContext.getResources());
-
-                if (cachedIcon == null) {
-                    ActivityInfo info = PackageManagerWrapper.getInstance().getActivityInfo(
-                            t.key.getComponent(), t.key.userId);
-                    if (info != null) {
-                        if (DEBUG) Log.d(TAG, "Loading icon: " + t.key);
-                        cachedIcon = ActivityManagerWrapper.getInstance().getBadgedActivityIcon(
-                                info, t.key.userId);
-                    }
-                }
-
-                if (cachedIcon == null) {
-                    cachedIcon = mDefaultIcon;
-                }
-
-                // At this point, even if we can't load the icon, we will set the
-                // default icon.
-                mIconCache.put(t.key, cachedIcon);
-            }
-
+            final Drawable icon = mIconLoader.getIcon(t);
             if (DEBUG) Log.d(TAG, "Loading thumbnail: " + t.key);
             final ThumbnailData thumbnailData =
                     ActivityManagerWrapper.getInstance().getTaskThumbnail(t.key.id,
@@ -173,9 +142,8 @@ class BackgroundTaskLoader implements Runnable {
 
             if (!mCancelled) {
                 // Notify that the task data has changed
-                final Drawable finalIcon = cachedIcon;
                 mMainThreadHandler.post(
-                        () -> t.notifyTaskDataLoaded(thumbnailData, finalIcon));
+                        () -> t.notifyTaskDataLoaded(thumbnailData, icon));
             }
         }
     }
