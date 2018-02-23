@@ -390,5 +390,11 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
     public boolean startDisappearAnimation(Runnable finishRunnable) {
         return false;
     }
+
+    @Override
+    public CharSequence getTitle() {
+        return getContext().getString(
+                com.android.internal.R.string.keyguard_accessibility_sim_pin_unlock);
+    }
 }
 

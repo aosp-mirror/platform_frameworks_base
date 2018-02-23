@@ -3234,6 +3234,11 @@
   <java-symbol type="string" name="unsupported_compile_sdk_check_update" />
 
   <java-symbol type="string" name="battery_saver_warning_title" />
+  <java-symbol type="string" name="keyguard_accessibility_pattern_unlock" />
+  <java-symbol type="string" name="keyguard_accessibility_pin_unlock" />
+  <java-symbol type="string" name="keyguard_accessibility_sim_pin_unlock" />
+  <java-symbol type="string" name="keyguard_accessibility_sim_puk_unlock" />
+  <java-symbol type="string" name="keyguard_accessibility_password_unlock" />
 
   <java-symbol type="string" name="global_action_logout" />
   <java-symbol type="string" name="config_mainBuiltInDisplayCutout" />

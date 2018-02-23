@@ -7309,7 +7309,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private boolean isAccessibilityPane() {
-        return !TextUtils.isEmpty(mAccessibilityPaneTitle);
+        return mAccessibilityPaneTitle != null;
     }
 
     /**

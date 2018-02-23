@@ -2106,6 +2106,10 @@
     <string name="keyguard_accessibility_face_unlock">Face unlock.</string>
     <!-- Accessibility description of the pin lock. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_pin_unlock">Pin unlock.</string>
+    <!-- Accessibility description of the sim pin lock. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_sim_pin_unlock">Sim Pin unlock.</string>
+    <!-- Accessibility description of the sim puk lock. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_sim_puk_unlock">Sim Puk unlock.</string>
     <!-- Accessibility description of the password lock. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_password_unlock">Password unlock.</string>
     <!-- Accessibility description of the unlock pattern area. [CHAR_LIMIT=none] -->
