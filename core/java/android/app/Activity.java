@@ -1400,6 +1400,7 @@ public class Activity extends ContextThemeWrapper
      *
      * {@hide}
      */
+    @Override
     public int getNextAutofillId() {
         if (mLastAutofillId == Integer.MAX_VALUE - 1) {
             mLastAutofillId = View.LAST_APP_AUTOFILL_ID;
@@ -1408,6 +1409,14 @@ public class Activity extends ContextThemeWrapper
         mLastAutofillId++;
 
         return mLastAutofillId;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public AutofillId autofillClientGetNextAutofillId() {
+        return new AutofillId(getNextAutofillId());
     }
 
     /**
@@ -7752,7 +7761,7 @@ public class Activity extends ContextThemeWrapper
 
     /** @hide */
     @Override
-    public final boolean autofillIsCompatibilityModeEnabled() {
+    public final boolean autofillClientIsCompatibilityModeEnabled() {
         return isAutofillCompatibilityEnabled();
     }
 
