@@ -60,6 +60,15 @@ public class SliceManager {
     public static final String ACTION_REQUEST_SLICE_PERMISSION =
             "android.intent.action.REQUEST_SLICE_PERMISSION";
 
+    /**
+     * The meta-data key that allows an activity to easily be linked directly to a slice.
+     * <p>
+     * An activity can be statically linked to a slice uri by including a meta-data item
+     * for this key that contains a valid slice uri for the same application declaring
+     * the activity.
+     */
+    public static final String SLICE_METADATA_KEY = "android.metadata.SLICE_URI";
+
     private final ISliceManager mService;
     private final Context mContext;
     private final ArrayMap<Pair<Uri, SliceCallback>, ISliceListener> mListenerLookup =
