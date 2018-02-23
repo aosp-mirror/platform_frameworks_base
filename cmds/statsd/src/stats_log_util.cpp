@@ -183,6 +183,8 @@ void writeFieldValueTreeToStreamHelper(const std::vector<FieldValue>& dims, size
                 case STRING:
                     protoOutput->write(FIELD_TYPE_STRING | fieldNum, dim.mValue.str_value);
                     break;
+                default:
+                    break;
             }
             (*index)++;
         } else if (valueDepth > depth && valuePrefix == prefix) {

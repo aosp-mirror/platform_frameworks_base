@@ -16,6 +16,8 @@
 #define DEBUG false  // STOPSHIP if true
 #include "Log.h"
 
+#include <mutex>
+
 #include "HashableDimensionKey.h"
 #include "FieldValue.h"
 
@@ -48,6 +50,8 @@ android::hash_t hashDimension(const HashableDimensionKey& value) {
                 hash = android::JenkinsHashMixBytes(hash, (uint8_t*)&floatVal, sizeof(float));
                 break;
             }
+            default:
+                break;
         }
     }
     return JenkinsHashWhiten(hash);
@@ -62,26 +66,32 @@ bool filterValues(const vector<Matcher>& matcherFields, const vector<FieldValue>
     int prevAnyMatcherPrefix = 0;
     size_t prevPrevFanout = 0;
     size_t prevFanout = 0;
+
     // For each matcher get matched results.
+    vector<FieldValue> matchedResults(2);
     for (const auto& matcher : matcherFields) {
-        vector<FieldValue> matchedResults;
+        size_t num_matches = 0;
         for (const auto& value : values) {
             // TODO: potential optimization here to break early because all fields are naturally
             // sorted.
             if (value.mField.matches(matcher)) {
-                matchedResults.push_back(FieldValue(
-                        Field(value.mField.getTag(), (value.mField.getField() & matcher.mMask)),
-                        value.mValue));
+                if (num_matches >= matchedResults.size()) {
+                    matchedResults.resize(num_matches * 2);
+                }
+                matchedResults[num_matches].mField.setTag(value.mField.getTag());
+                matchedResults[num_matches].mField.setField(value.mField.getField() & matcher.mMask);
+                matchedResults[num_matches].mValue = value.mValue;
+                num_matches++;
             }
         }
 
-        if (matchedResults.size() == 0) {
+        if (num_matches == 0) {
             VLOG("We can't find a dimension value for matcher (%d)%#x.", matcher.mMatcher.getTag(),
                    matcher.mMatcher.getField());
             continue;
         }
 
-        if (matchedResults.size() == 1) {
+        if (num_matches == 1) {
             for (auto& dimension : *output) {
                 dimension.addValue(matchedResults[0]);
             }
@@ -117,23 +127,23 @@ bool filterValues(const vector<Matcher>& matcherFields, const vector<FieldValue>
             // First create fanout (fanout size is matchedResults.Size which could be one,
             // which means we do nothing here)
             oldSize = output->size();
-            for (size_t i = 1; i < matchedResults.size(); i++) {
+            for (size_t i = 1; i < num_matches; i++) {
                 output->insert(output->end(), output->begin(), output->begin() + oldSize);
             }
             prevPrevFanout = oldSize;
-            prevFanout = matchedResults.size();
+            prevFanout = num_matches;
         } else {
             // If we should not create fanout, e.g., uid tag from same position should be remain
             // together.
             oldSize = prevPrevFanout;
-            if (prevFanout != matchedResults.size()) {
+            if (prevFanout != num_matches) {
                 // sanity check.
                 ALOGE("2 Any matcher result in different output");
                 return false;
             }
         }
         // now add the matched field value to output
-        for (size_t i = 0; i < matchedResults.size(); i++) {
+        for (size_t i = 0; i < num_matches; i++) {
             for (int j = 0; j < oldSize; j++) {
                 (*output)[i * oldSize + j].addValue(matchedResults[i]);
             }

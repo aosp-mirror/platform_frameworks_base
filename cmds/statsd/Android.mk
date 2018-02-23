@@ -239,7 +239,8 @@ LOCAL_SRC_FILES := $(statsd_common_src) \
                    benchmark/main.cpp \
                    benchmark/hello_world_benchmark.cpp \
                    benchmark/log_event_benchmark.cpp \
-                   benchmark/stats_write_benchmark.cpp
+                   benchmark/stats_write_benchmark.cpp \
+                   benchmark/filter_value_benchmark.cpp
 
 LOCAL_C_INCLUDES := $(statsd_common_c_includes)
 
