@@ -568,16 +568,18 @@ public final class ImageDecoder implements AutoCloseable {
     /**
      * Create a new {@link Source} from a {@link java.nio.ByteBuffer}.
      *
-     * <p>The returned {@link Source} effectively takes ownership of the
-     * {@link java.nio.ByteBuffer}; i.e. no other code should modify it after
-     * this call.</p>
+     * <p>Decoding will start from {@link java.nio.ByteBuffer#position()}. The
+     * position of {@code buffer} will not be affected.</p>
      *
-     * Decoding will start from {@link java.nio.ByteBuffer#position()}. The
-     * position after decoding is undefined.
+     * <p>Note: If this {@code Source} is passed to {@link #decodeDrawable}, and
+     * the encoded image is animated, the returned {@link AnimatedImageDrawable}
+     * will continue reading from the {@code buffer}, so its contents must not
+     * be modified, even after the {@code AnimatedImageDrawable} is returned.
+     * {@code buffer}'s contents should never be modified during decode.</p>
      */
     @NonNull
     public static Source createSource(@NonNull ByteBuffer buffer) {
-        return new ByteBufferSource(buffer);
+        return new ByteBufferSource(buffer.slice());
     }
 
     /**
