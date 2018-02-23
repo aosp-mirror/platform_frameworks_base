@@ -21,7 +21,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.KeyguardManager;
 import android.hardware.fingerprint.FingerprintManager;
-import android.security.GateKeeper;
 import android.security.KeyStore;
 import android.text.TextUtils;
 
@@ -233,7 +232,7 @@ import javax.security.auth.x500.X500Principal;
  * key = (SecretKey) keyStore.getKey("key2", null);
  * }</pre>
  */
-public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAuthArgs {
+public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
 
     private static final X500Principal DEFAULT_CERT_SUBJECT = new X500Principal("CN=fake");
     private static final BigInteger DEFAULT_CERT_SERIAL_NUMBER = new BigInteger("1");
@@ -266,7 +265,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     private final boolean mInvalidatedByBiometricEnrollment;
     private final boolean mIsStrongBoxBacked;
     private final boolean mUserConfirmationRequired;
-    private final boolean mUnlockedDeviceRequired;
 
     /**
      * @hide should be built with Builder
@@ -297,8 +295,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
             boolean userAuthenticationValidWhileOnBody,
             boolean invalidatedByBiometricEnrollment,
             boolean isStrongBoxBacked,
-            boolean userConfirmationRequired,
-            boolean unlockedDeviceRequired) {
+            boolean userConfirmationRequired) {
         if (TextUtils.isEmpty(keyStoreAlias)) {
             throw new IllegalArgumentException("keyStoreAlias must not be empty");
         }
@@ -347,7 +344,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         mInvalidatedByBiometricEnrollment = invalidatedByBiometricEnrollment;
         mIsStrongBoxBacked = isStrongBoxBacked;
         mUserConfirmationRequired = userConfirmationRequired;
-        mUnlockedDeviceRequired = unlockedDeviceRequired;
     }
 
     /**
@@ -673,22 +669,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     }
 
     /**
-     * Returns {@code true} if the key cannot be used unless the device screen is unlocked.
-     *
-     * @see Builder#SetUnlockedDeviceRequired(boolean)
-     */
-    public boolean isUnlockedDeviceRequired() {
-        return mUnlockedDeviceRequired;
-    }
-
-    /**
-     * @hide
-     */
-    public long getBoundToSpecificSecureUserId() {
-        return GateKeeper.INVALID_SECURE_USER_ID;
-    }
-
-    /**
      * Builder of {@link KeyGenParameterSpec} instances.
      */
     public final static class Builder {
@@ -719,7 +699,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         private boolean mInvalidatedByBiometricEnrollment = true;
         private boolean mIsStrongBoxBacked = false;
         private boolean mUserConfirmationRequired;
-        private boolean mUnlockedDeviceRequired = false;
 
         /**
          * Creates a new instance of the {@code Builder}.
@@ -1288,18 +1267,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         }
 
         /**
-         * Sets whether the keystore requires the screen to be unlocked before allowing decryption
-         * using this key. If this is set to {@code true}, any attempt to decrypt using this key
-         * while the screen is locked will fail. A locked device requires a PIN, password,
-         * fingerprint, or other trusted factor to access.
-         */
-        @NonNull
-        public Builder setUnlockedDeviceRequired(boolean unlockedDeviceRequired) {
-            mUnlockedDeviceRequired = unlockedDeviceRequired;
-            return this;
-        }
-
-        /**
          * Builds an instance of {@code KeyGenParameterSpec}.
          */
         @NonNull
@@ -1330,8 +1297,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
                     mUserAuthenticationValidWhileOnBody,
                     mInvalidatedByBiometricEnrollment,
                     mIsStrongBoxBacked,
-                    mUserConfirmationRequired,
-                    mUnlockedDeviceRequired);
+                    mUserConfirmationRequired);
         }
     }
 }

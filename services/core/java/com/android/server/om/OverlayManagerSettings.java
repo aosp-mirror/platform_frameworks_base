@@ -20,6 +20,7 @@ import static com.android.server.om.OverlayManagerService.DEBUG;
 import static com.android.server.om.OverlayManagerService.TAG;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.om.OverlayInfo;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -39,6 +40,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -70,6 +72,9 @@ final class OverlayManagerSettings {
                 new SettingsItem(packageName, userId, targetPackageName, baseCodePath,
                         isStatic, priority, overlayCategory);
         if (isStatic) {
+            // All static overlays are always enabled.
+            item.setEnabled(true);
+
             int i;
             for (i = mItems.size() - 1; i >= 0; i--) {
                 SettingsItem parentItem = mItems.get(i);
@@ -120,6 +125,15 @@ final class OverlayManagerSettings {
             throw new BadKeyException(packageName, userId);
         }
         return mItems.get(idx).setBaseCodePath(path);
+    }
+
+    boolean setCategory(@NonNull final String packageName, final int userId,
+            @Nullable String category) throws BadKeyException {
+        final int idx = select(packageName, userId);
+        if (idx < 0) {
+            throw new BadKeyException(packageName, userId);
+        }
+        return mItems.get(idx).setCategory(category);
     }
 
     boolean getEnabled(@NonNull final String packageName, final int userId) throws BadKeyException {
@@ -420,7 +434,7 @@ final class OverlayManagerSettings {
         private OverlayInfo mCache;
         private boolean mIsStatic;
         private int mPriority;
-        private final String mCategory;
+        private String mCategory;
 
         SettingsItem(@NonNull final String packageName, final int userId,
                 @NonNull final String targetPackageName, @NonNull final String baseCodePath,
@@ -431,7 +445,7 @@ final class OverlayManagerSettings {
             mTargetPackageName = targetPackageName;
             mBaseCodePath = baseCodePath;
             mState = state;
-            mIsEnabled = isEnabled;
+            mIsEnabled = isEnabled || isStatic;
             mCategory = category;
             mCache = null;
             mIsStatic = isStatic;
@@ -483,9 +497,22 @@ final class OverlayManagerSettings {
             return mIsEnabled;
         }
 
-        private boolean setEnabled(final boolean enable) {
+        private boolean setEnabled(boolean enable) {
+            if (mIsStatic) {
+                return false;
+            }
+
             if (mIsEnabled != enable) {
                 mIsEnabled = enable;
+                invalidateCache();
+                return true;
+            }
+            return false;
+        }
+
+        private boolean setCategory(String category) {
+            if (!Objects.equals(mCategory, category)) {
+                mCategory = category.intern();
                 invalidateCache();
                 return true;
             }
