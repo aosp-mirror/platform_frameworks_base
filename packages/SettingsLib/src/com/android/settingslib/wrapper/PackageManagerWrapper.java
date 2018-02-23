@@ -130,6 +130,13 @@ public class PackageManagerWrapper {
     }
 
     /**
+     * Calls {@code PackageManager.queryIntentServices}
+     */
+    public List<ResolveInfo> queryIntentServices(Intent intent, int i) {
+        return mPm.queryIntentServices(intent, i);
+    }
+
+    /**
      * Calls {@code PackageManager.replacePreferredActivity}
      */
     public void replacePreferredActivity(IntentFilter homeFilter, int matchCategoryEmpty,
