@@ -3495,18 +3495,18 @@ public class DevicePolicyManager {
      *             that uses {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA}
      * @throws IllegalArgumentException if the input reason string is null or empty.
      */
-    public void wipeDataWithReason(int flags, @NonNull CharSequence reason) {
-        throwIfParentInstance("wipeDataWithReason");
+    public void wipeData(int flags, @NonNull CharSequence reason) {
+        throwIfParentInstance("wipeData");
         Preconditions.checkNotNull(reason, "CharSequence is null");
         wipeDataInternal(flags, reason.toString());
     }
 
     /**
      * Internal function for both {@link #wipeData(int)} and
-     * {@link #wipeDataWithReason(int, CharSequence)} to call.
+     * {@link #wipeData(int, CharSequence)} to call.
      *
      * @see #wipeData(int)
-     * @see #wipeDataWithReason(int, CharSequence)
+     * @see #wipeData(int, CharSequence)
      * @hide
      */
     private void wipeDataInternal(int flags, @NonNull String wipeReasonForUser) {

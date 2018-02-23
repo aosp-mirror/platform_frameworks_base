@@ -439,8 +439,7 @@ public class UserRestrictionsUtils {
     /**
      * Apply each user restriction.
      *
-     * <p>See also {@link
-     * com.android.providers.settings.SettingsProvider#isGlobalOrSecureSettingRestrictedForUser},
+     * <p>See also {@link android.os.UserManager#isSettingRestrictedForUser()},
      * which should be in sync with this method.
      */
     private static void applyUserRestriction(Context context, int userId, String key,
