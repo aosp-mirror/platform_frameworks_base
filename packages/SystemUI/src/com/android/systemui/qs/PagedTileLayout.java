@@ -1,5 +1,10 @@
 package com.android.systemui.qs;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -8,20 +13,34 @@ import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Interpolator;
+import android.view.animation.OvershootInterpolator;
+import android.widget.Scroller;
 
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanel.TileRecord;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     private static final boolean DEBUG = false;
 
     private static final String TAG = "PagedTileLayout";
+    private static final int REVEAL_SCROLL_DURATION_MILLIS = 750;
+    private static final float BOUNCE_ANIMATION_TENSION = 1.3f;
+    private static final long BOUNCE_ANIMATION_DURATION = 450L;
+    private static final int TILE_ANIMATION_STAGGER_DELAY = 85;
+    private static final Interpolator SCROLL_CUBIC = (t) -> {
+        t -= 1.0f;
+        return t * t * t + 1.0f;
+    };
+
 
     private final ArrayList<TileRecord> mTiles = new ArrayList<TileRecord>();
     private final ArrayList<TilePage> mPages = new ArrayList<TilePage>();
@@ -34,37 +53,17 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private int mPosition;
     private boolean mOffPage;
     private boolean mListening;
+    private Scroller mScroller;
+
+    private AnimatorSet mBounceAnimatorSet;
+    private int mAnimatingToPage = -1;
 
     public PagedTileLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mScroller = new Scroller(context, SCROLL_CUBIC);
         setAdapter(mAdapter);
-        setOnPageChangeListener(new OnPageChangeListener() {
-            @Override
-            public void onPageSelected(int position) {
-                if (mPageIndicator == null) return;
-                if (mPageListener != null) {
-                    mPageListener.onPageChanged(isLayoutRtl() ? position == mPages.size() - 1
-                            : position == 0);
-                }
-            }
-
-            @Override
-            public void onPageScrolled(int position, float positionOffset,
-                    int positionOffsetPixels) {
-                if (mPageIndicator == null) return;
-                setCurrentPage(position, positionOffset != 0);
-                mPageIndicator.setLocation(position + positionOffset);
-                if (mPageListener != null) {
-                    mPageListener.onPageChanged(positionOffsetPixels == 0 &&
-                            (isLayoutRtl() ? position == mPages.size() - 1 : position == 0));
-                }
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-            }
-        });
-        setCurrentItem(0);
+        setOnPageChangeListener(mOnPageChangeListener);
+        setCurrentItem(0, false);
     }
 
     @Override
@@ -97,6 +96,45 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
                 mPages.get(i).setListening(false);
             }
         }
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        // Suppress all touch event during reveal animation.
+        if (mAnimatingToPage != -1) {
+            return true;
+        }
+        return super.onInterceptTouchEvent(ev);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        // Suppress all touch event during reveal animation.
+        if (mAnimatingToPage != -1) {
+            return true;
+        }
+        return super.onTouchEvent(ev);
+    }
+
+    @Override
+    public void computeScroll() {
+        if (!mScroller.isFinished() && mScroller.computeScrollOffset()) {
+            scrollTo(mScroller.getCurrX(), mScroller.getCurrY());
+            float pageFraction = (float) getScrollX() / getWidth();
+            int position = (int) pageFraction;
+            float positionOffset = pageFraction - position;
+            mOnPageChangeListener.onPageScrolled(position, positionOffset, getScrollX());
+            // Keep on drawing until the animation has finished.
+            postInvalidateOnAnimation();
+            return;
+        }
+        if (mAnimatingToPage != -1) {
+            setCurrentItem(mAnimatingToPage, true);
+            mBounceAnimatorSet.start();
+            setOffscreenPageLimit(1);
+            mAnimatingToPage = -1;
+        }
+        super.computeScroll();
     }
 
     /**
@@ -257,9 +295,84 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         return mPages.get(0).mColumns;
     }
 
+    public void startTileReveal(Set<String> tileSpecs, final Runnable postAnimation) {
+        if (tileSpecs.isEmpty() || mPages.size() < 2 || getScrollX() != 0) {
+            // Do not start the reveal animation unless there are tiles to animate, multiple
+            // TilePages available and the user has not already started dragging.
+            return;
+        }
+
+        final int lastPageNumber = mPages.size() - 1;
+        final TilePage lastPage = mPages.get(lastPageNumber);
+        final ArrayList<Animator> bounceAnims = new ArrayList<>();
+        for (TileRecord tr : lastPage.mRecords) {
+            if (tileSpecs.contains(tr.tile.getTileSpec())) {
+                bounceAnims.add(setupBounceAnimator(tr.tileView, bounceAnims.size()));
+            }
+        }
+
+        if (bounceAnims.isEmpty()) {
+            // All tileSpecs are on the first page. Nothing to do.
+            // TODO: potentially show a bounce animation for first page QS tiles
+            return;
+        }
+
+        mBounceAnimatorSet = new AnimatorSet();
+        mBounceAnimatorSet.playTogether(bounceAnims);
+        mBounceAnimatorSet.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mBounceAnimatorSet = null;
+                postAnimation.run();
+            }
+        });
+        mAnimatingToPage = lastPageNumber;
+        setOffscreenPageLimit(mAnimatingToPage); // Ensure the page to reveal has been inflated.
+        mScroller.startScroll(getScrollX(), getScrollY(), getWidth() * mAnimatingToPage, 0,
+                REVEAL_SCROLL_DURATION_MILLIS);
+        postInvalidateOnAnimation();
+    }
+
+    private static Animator setupBounceAnimator(View view, int ordinal) {
+        view.setAlpha(0f);
+        view.setScaleX(0f);
+        view.setScaleY(0f);
+        ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(view,
+                PropertyValuesHolder.ofFloat(View.ALPHA, 1),
+                PropertyValuesHolder.ofFloat(View.SCALE_X, 1),
+                PropertyValuesHolder.ofFloat(View.SCALE_Y, 1));
+        animator.setDuration(BOUNCE_ANIMATION_DURATION);
+        animator.setStartDelay(ordinal * TILE_ANIMATION_STAGGER_DELAY);
+        animator.setInterpolator(new OvershootInterpolator(BOUNCE_ANIMATION_TENSION));
+        return animator;
+    }
+
+    private final ViewPager.OnPageChangeListener mOnPageChangeListener =
+            new ViewPager.SimpleOnPageChangeListener() {
+                @Override
+                public void onPageSelected(int position) {
+                    if (mPageIndicator == null) return;
+                    if (mPageListener != null) {
+                        mPageListener.onPageChanged(isLayoutRtl() ? position == mPages.size() - 1
+                                : position == 0);
+                    }
+                }
+
+                @Override
+                public void onPageScrolled(int position, float positionOffset,
+                        int positionOffsetPixels) {
+                    if (mPageIndicator == null) return;
+                    setCurrentPage(position, positionOffset != 0);
+                    mPageIndicator.setLocation(position + positionOffset);
+                    if (mPageListener != null) {
+                        mPageListener.onPageChanged(positionOffsetPixels == 0 &&
+                                (isLayoutRtl() ? position == mPages.size() - 1 : position == 0));
+                    }
+                }
+            };
+
     public static class TilePage extends TileLayout {
         private int mMaxRows = 3;
-
         public TilePage(Context context, AttributeSet attrs) {
             super(context, attrs);
             updateResources();
