@@ -19,6 +19,7 @@ package android.telephony;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -1214,6 +1215,7 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     public void setSystemAndNetworkId(int systemId, int networkId) {
         this.mSystemId = systemId;
         this.mNetworkId = networkId;
