@@ -2646,6 +2646,10 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>Include OIS data in the capture result.</p>
+     * <p>{@link CaptureResult#STATISTICS_OIS_SAMPLES android.statistics.oisSamples} provides OIS sample data in the
+     * output result metadata.</p>
+     *
+     * @see CaptureResult#STATISTICS_OIS_SAMPLES
      * @see CaptureRequest#STATISTICS_OIS_DATA_MODE
      */
     public static final int STATISTICS_OIS_DATA_MODE_ON = 1;

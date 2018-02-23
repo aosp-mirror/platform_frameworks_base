@@ -3911,9 +3911,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     /**
      * <p>A control for selecting whether OIS position information is included in output
      * result metadata.</p>
-     * <p>When set to ON,
-     * {@link CaptureResult#STATISTICS_OIS_TIMESTAMPS android.statistics.oisTimestamps}, android.statistics.oisShiftPixelX,
-     * and android.statistics.oisShiftPixelY provide OIS data in the output result metadata.</p>
      * <p><b>Possible values:</b>
      * <ul>
      *   <li>{@link #STATISTICS_OIS_DATA_MODE_OFF OFF}</li>
@@ -3922,8 +3919,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p><b>Available values for this device:</b><br>
      * android.Statistics.info.availableOisDataModes</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
-     *
-     * @see CaptureResult#STATISTICS_OIS_TIMESTAMPS
      * @see #STATISTICS_OIS_DATA_MODE_OFF
      * @see #STATISTICS_OIS_DATA_MODE_ON
      */
@@ -3939,8 +3934,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
      * @see CaptureResult#SENSOR_TIMESTAMP
+     * @hide
      */
-    @PublicKey
     public static final Key<long[]> STATISTICS_OIS_TIMESTAMPS =
             new Key<long[]>("android.statistics.oisTimestamps", long[].class);
 
@@ -3948,16 +3943,14 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>An array of shifts of OIS samples, in x direction.</p>
      * <p>The array contains the amount of shifts in x direction, in pixels, based on OIS samples.
      * A positive value is a shift from left to right in active array coordinate system. For
-     * example, if the optical center is (1000, 500) in active array coordinates, an shift of
+     * example, if the optical center is (1000, 500) in active array coordinates, a shift of
      * (3, 0) puts the new optical center at (1003, 500).</p>
      * <p>The number of shifts must match the number of timestamps in
-     * {@link CaptureResult#STATISTICS_OIS_TIMESTAMPS android.statistics.oisTimestamps}.</p>
+     * android.statistics.oisTimestamps.</p>
      * <p><b>Units</b>: Pixels in active array.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
-     *
-     * @see CaptureResult#STATISTICS_OIS_TIMESTAMPS
+     * @hide
      */
-    @PublicKey
     public static final Key<float[]> STATISTICS_OIS_X_SHIFTS =
             new Key<float[]>("android.statistics.oisXShifts", float[].class);
 
@@ -3965,18 +3958,33 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>An array of shifts of OIS samples, in y direction.</p>
      * <p>The array contains the amount of shifts in y direction, in pixels, based on OIS samples.
      * A positive value is a shift from top to bottom in active array coordinate system. For
-     * example, if the optical center is (1000, 500) in active array coordinates, an shift of
+     * example, if the optical center is (1000, 500) in active array coordinates, a shift of
      * (0, 5) puts the new optical center at (1000, 505).</p>
      * <p>The number of shifts must match the number of timestamps in
-     * {@link CaptureResult#STATISTICS_OIS_TIMESTAMPS android.statistics.oisTimestamps}.</p>
+     * android.statistics.oisTimestamps.</p>
      * <p><b>Units</b>: Pixels in active array.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
-     *
-     * @see CaptureResult#STATISTICS_OIS_TIMESTAMPS
+     * @hide
      */
-    @PublicKey
     public static final Key<float[]> STATISTICS_OIS_Y_SHIFTS =
             new Key<float[]>("android.statistics.oisYShifts", float[].class);
+
+    /**
+     * <p>An array of OIS samples.</p>
+     * <p>Each OIS sample contains the timestamp and the amount of shifts in x and y direction,
+     * in pixels, of the OIS sample.</p>
+     * <p>A positive value for a shift in x direction is a shift from left to right in active array
+     * coordinate system. For example, if the optical center is (1000, 500) in active array
+     * coordinates, a shift of (3, 0) puts the new optical center at (1003, 500).</p>
+     * <p>A positive value for a shift in y direction is a shift from top to bottom in active array
+     * coordinate system. For example, if the optical center is (1000, 500) in active array
+     * coordinates, a shift of (0, 5) puts the new optical center at (1000, 505).</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     */
+    @PublicKey
+    @SyntheticKey
+    public static final Key<android.hardware.camera2.params.OisSample[]> STATISTICS_OIS_SAMPLES =
+            new Key<android.hardware.camera2.params.OisSample[]>("android.statistics.oisSamples", android.hardware.camera2.params.OisSample[].class);
 
     /**
      * <p>Tonemapping / contrast / gamma curve for the blue
