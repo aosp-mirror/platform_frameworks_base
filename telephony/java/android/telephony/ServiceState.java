@@ -178,7 +178,6 @@ public class ServiceState implements Parcelable {
 
     /**
      * Number of radio technologies for GSM, UMTS and CDMA.
-     * @hide
      */
     private static final int NEXT_RIL_RADIO_TECHNOLOGY = 20;
 
