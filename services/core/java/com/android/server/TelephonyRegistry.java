@@ -394,8 +394,10 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 + " callback.asBinder=" + callback.asBinder());
         }
 
+        // TODO(b/70041899): Find a way to make this work for carrier-privileged callers.
         if (!TelephonyPermissions.checkCallingOrSelfReadPhoneState(
-                mContext, callingPackage, "addOnSubscriptionsChangedListener")) {
+                mContext, SubscriptionManager.INVALID_SUBSCRIPTION_ID, callingPackage,
+                "addOnSubscriptionsChangedListener")) {
             return;
         }
 
@@ -686,8 +688,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private boolean canReadPhoneState(String callingPackage, String message) {
         try {
+            // TODO(b/70041899): Find a way to make this work for carrier-privileged callers.
             return TelephonyPermissions.checkCallingOrSelfReadPhoneState(
-                    mContext, callingPackage, message);
+                    mContext, SubscriptionManager.INVALID_SUBSCRIPTION_ID, callingPackage, message);
         } catch (SecurityException e) {
             return false;
         }
@@ -1735,8 +1738,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
 
         if ((events & ENFORCE_PHONE_STATE_PERMISSION_MASK) != 0) {
-            if (!TelephonyPermissions.checkCallingOrSelfReadPhoneState(
-                    mContext, callingPackage, message)) {
+            // TODO(b/70041899): Find a way to make this work for carrier-privileged callers.
+            if (!TelephonyPermissions.checkCallingOrSelfReadPhoneState(mContext,
+                    SubscriptionManager.INVALID_SUBSCRIPTION_ID, callingPackage, message)) {
                 return false;
             }
         }
