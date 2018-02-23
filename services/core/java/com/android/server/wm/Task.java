@@ -687,11 +687,12 @@ class Task extends WindowContainer<AppWindowToken> {
         pw.println(doublePrefix + "mTempInsetBounds=" + mTempInsetBounds.toShortString());
 
         final String triplePrefix = doublePrefix + "  ";
+        final String quadruplePrefix = triplePrefix + "  ";
 
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             final AppWindowToken wtoken = mChildren.get(i);
             pw.println(triplePrefix + "Activity #" + i + " " + wtoken);
-            wtoken.dump(pw, triplePrefix, dumpAll);
+            wtoken.dump(pw, quadruplePrefix, dumpAll);
         }
     }
 
