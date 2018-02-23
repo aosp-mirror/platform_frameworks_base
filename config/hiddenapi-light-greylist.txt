@@ -116,6 +116,7 @@ Landroid/app/admin/DevicePolicyManager;->packageHasActiveAdmins(Ljava/lang/Strin
 Landroid/app/admin/DevicePolicyManager;->setActiveAdmin(Landroid/content/ComponentName;ZI)V
 Landroid/app/admin/DevicePolicyManager;->setActiveAdmin(Landroid/content/ComponentName;Z)V
 Landroid/app/admin/DevicePolicyManager;->throwIfParentInstance(Ljava/lang/String;)V
+Landroid/app/admin/DevicePolicyManager;->setDefaultSmsApplication(Landroid/content/ComponentName;Ljava/lang/String;)V
 Landroid/app/admin/IDevicePolicyManager$Stub;->TRANSACTION_packageHasActiveAdmins:I
 Landroid/app/admin/IDevicePolicyManager$Stub;->TRANSACTION_removeActiveAdmin:I
 Landroid/app/admin/SecurityLog$SecurityEvent;-><init>([B)V
