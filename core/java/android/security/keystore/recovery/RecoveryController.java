@@ -175,28 +175,13 @@ public class RecoveryController {
     }
 
     /**
-     * Deprecated - use getKeyChainSnapshot.
-     *
-     * Returns data necessary to store all recoverable keys. Key material is
-     * encrypted with user secret and recovery public key.
-     *
-     * @return Data necessary to recover keystore.
-     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
-     *     service.
+     * @deprecated Use {@link #getKeyChainSnapshot()}
+     * @removed
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public @Nullable KeyChainSnapshot getRecoveryData()
-            throws InternalRecoveryServiceException {
-        try {
-            return mBinder.getKeyChainSnapshot();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == ERROR_NO_SNAPSHOT_PENDING) {
-                return null;
-            }
-            throw wrapUnexpectedServiceSpecificException(e);
-        }
+    public @Nullable KeyChainSnapshot getRecoveryData() throws InternalRecoveryServiceException {
+        return getKeyChainSnapshot();
     }
 
     /**
@@ -268,17 +253,21 @@ public class RecoveryController {
     }
 
     /**
-     * Gets aliases of recoverable keys for the application.
-     *
-     * @param packageName which recoverable keys' aliases will be returned.
-     *
-     * @return {@code List} of all aliases.
+     * @deprecated Use {@link #getAliases()}.
+     * @removed
      */
+    @Deprecated
     public List<String> getAliases(@Nullable String packageName)
             throws InternalRecoveryServiceException {
+        return getAliases();
+    }
+
+    /**
+     * Returns a list of aliases of keys belonging to the application.
+     */
+    public List<String> getAliases() throws InternalRecoveryServiceException {
         try {
-            // TODO: update aidl
-            Map<String, Integer> allStatuses = mBinder.getRecoveryStatus(packageName);
+            Map<String, Integer> allStatuses = mBinder.getRecoveryStatus();
             return new ArrayList<>(allStatuses.keySet());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -323,28 +312,31 @@ public class RecoveryController {
     }
 
     /**
-     * Returns recovery status for Application's KeyStore key.
-     * Negative status values are reserved for recovery agent specific codes. List of common codes:
+     * @deprecated Use {@link #getRecoveryStatus(String)}.
+     * @removed
+     */
+    @Deprecated
+    public int getRecoveryStatus(String packageName, String alias)
+            throws InternalRecoveryServiceException {
+        return getRecoveryStatus(alias);
+    }
+
+    /**
+     * Returns the recovery status for the key with the given {@code alias}.
      *
      * <ul>
      *   <li>{@link #RECOVERY_STATUS_SYNCED}
      *   <li>{@link #RECOVERY_STATUS_SYNC_IN_PROGRESS}
-     *   <li>{@link #RECOVERY_STATUS_MISSING_ACCOUNT}
      *   <li>{@link #RECOVERY_STATUS_PERMANENT_FAILURE}
      * </ul>
      *
-     * @param packageName Application whose recoverable key status is returned.
-     * @param alias Application-specific key alias.
-     * @return Recovery status.
-     * @see #setRecoveryStatus
+     * @see #setRecoveryStatus(String, int)
      * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
      *     service.
      */
-    public int getRecoveryStatus(String packageName, String alias)
-            throws InternalRecoveryServiceException {
+    public int getRecoveryStatus(String alias) throws InternalRecoveryServiceException {
         try {
-            // TODO: update aidl
-            Map<String, Integer> allStatuses = mBinder.getRecoveryStatus(packageName);
+            Map<String, Integer> allStatuses = mBinder.getRecoveryStatus();
             Integer status = allStatuses.get(alias);
             if (status == null) {
                 return RecoveryController.RECOVERY_STATUS_PERMANENT_FAILURE;

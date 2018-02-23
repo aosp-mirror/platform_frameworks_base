@@ -291,7 +291,7 @@ public class RecoveryController {
             // IPC doesn't support generic Maps.
             @SuppressWarnings("unchecked")
             Map<String, Integer> result =
-                    (Map<String, Integer>) mBinder.getRecoveryStatus(/*packageName=*/ null);
+                    (Map<String, Integer>) mBinder.getRecoveryStatus();
             return result;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
