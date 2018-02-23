@@ -278,7 +278,7 @@ public class KeyStore {
     /**
      * Attempt to lock the keystore for {@code user}.
      *
-     * @param user Android user to lock.
+     * @param userId Android user to lock.
      * @return whether {@code user}'s keystore was locked.
      */
     public boolean lock(int userId) {
@@ -299,7 +299,7 @@ public class KeyStore {
      * This is required before keystore entries created with FLAG_ENCRYPTED can be accessed or
      * created.
      *
-     * @param user Android user ID to operate on
+     * @param userId Android user ID to operate on
      * @param password user's keystore password. Should be the most recent value passed to
      * {@link #onUserPasswordChanged} for the user.
      *
@@ -545,6 +545,7 @@ public class KeyStore {
         try {
             args = args != null ? args : new KeymasterArguments();
             entropy = entropy != null ? entropy : new byte[0];
+            // TODO(67752510): Apply USER_ID tag
             return mBinder.begin(getToken(), alias, purpose, pruneable, args, entropy, uid);
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
