@@ -235,6 +235,10 @@ public class KeyguardServiceDelegate {
         return false;
     }
 
+    public boolean hasKeyguard() {
+        return mKeyguardState.deviceHasKeyguard;
+    }
+
     public boolean isInputRestricted() {
         if (mKeyguardService != null) {
             mKeyguardState.inputRestricted = mKeyguardService.isInputRestricted();
