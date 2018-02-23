@@ -72,11 +72,14 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
             mAssetFd = afd;
         }
 
-        public  final long mNativePtr;
+        final long mNativePtr;
 
         // These just keep references so the native code can continue using them.
         private final InputStream mInputStream;
         private final AssetFileDescriptor mAssetFd;
+
+        int[] mThemeAttrs = null;
+        boolean mAutoMirrored = false;
     }
 
     private State mState;
@@ -99,7 +102,7 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
      *  <p>By default, the loop count in the encoded data is respected.</p>
      */
     public void setLoopCount(int loopCount) {
-        if (mState == null) {
+        if (mState.mNativePtr == 0) {
             throw new IllegalStateException("called setLoopCount on empty AnimatedImageDrawable");
         }
         nSetLoopCount(mState.mNativePtr, loopCount);
@@ -109,7 +112,7 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
      * Create an empty AnimatedImageDrawable.
      */
     public AnimatedImageDrawable() {
-        mState = null;
+        mState = new State(0, null, null);
     }
 
     @Override
@@ -123,6 +126,7 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
 
     private void updateStateFromTypedArray(TypedArray a, int srcDensityOverride)
             throws XmlPullParserException {
+        State oldState = mState;
         final Resources r = a.getResources();
         final int srcResId = a.getResourceId(R.styleable.AnimatedImageDrawable_src, 0);
         if (srcResId != 0) {
@@ -172,6 +176,16 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
             mIntrinsicWidth =  other.mIntrinsicWidth;
             mIntrinsicHeight = other.mIntrinsicHeight;
         }
+
+        mState.mThemeAttrs = a.extractThemeAttrs();
+        if (mState.mNativePtr == 0 && (mState.mThemeAttrs == null
+                || mState.mThemeAttrs[R.styleable.AnimatedImageDrawable_src] == 0)) {
+            throw new XmlPullParserException(a.getPositionDescription() +
+                    ": <animated-image> requires a valid 'src' attribute");
+        }
+
+        mState.mAutoMirrored = a.getBoolean(
+                R.styleable.AnimatedImageDrawable_autoMirrored, oldState.mAutoMirrored);
     }
 
     /**
@@ -225,7 +239,7 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
 
     @Override
     public void draw(@NonNull Canvas canvas) {
-        if (mState == null) {
+        if (mState.mNativePtr == 0) {
             throw new IllegalStateException("called draw on empty AnimatedImageDrawable");
         }
 
@@ -256,7 +270,7 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
                    + " 255! provided " + alpha);
         }
 
-        if (mState == null) {
+        if (mState.mNativePtr == 0) {
             throw new IllegalStateException("called setAlpha on empty AnimatedImageDrawable");
         }
 
@@ -266,7 +280,7 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
 
     @Override
     public int getAlpha() {
-        if (mState == null) {
+        if (mState.mNativePtr == 0) {
             throw new IllegalStateException("called getAlpha on empty AnimatedImageDrawable");
         }
         return nGetAlpha(mState.mNativePtr);
@@ -274,7 +288,7 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
 
     @Override
     public void setColorFilter(@Nullable ColorFilter colorFilter) {
-        if (mState == null) {
+        if (mState.mNativePtr == 0) {
             throw new IllegalStateException("called setColorFilter on empty AnimatedImageDrawable");
         }
 
@@ -298,9 +312,26 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
     }
 
     @Override
+    public void setAutoMirrored(boolean mirrored) {
+        if (mState.mAutoMirrored != mirrored) {
+            mState.mAutoMirrored = mirrored;
+            invalidateSelf();
+        }
+    }
+
+    @Override
+    public final boolean isAutoMirrored() {
+        return mState.mAutoMirrored;
+    }
+
+    @Override
     public boolean setVisible(boolean visible, boolean restart) {
         if (!super.setVisible(visible, restart)) {
             return false;
+        }
+
+        if (mState.mNativePtr == 0) {
+            throw new IllegalStateException("called setVisible on empty AnimatedImageDrawable");
         }
 
         if (!visible) {
@@ -319,7 +350,7 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
      */
     @Override
     public boolean isRunning() {
-        if (mState == null) {
+        if (mState.mNativePtr == 0) {
             throw new IllegalStateException("called isRunning on empty AnimatedImageDrawable");
         }
         return nIsRunning(mState.mNativePtr);
@@ -336,7 +367,7 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
      */
     @Override
     public void start() {
-        if (mState == null) {
+        if (mState.mNativePtr == 0) {
             throw new IllegalStateException("called start on empty AnimatedImageDrawable");
         }
 
@@ -354,7 +385,7 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
      */
     @Override
     public void stop() {
-        if (mState == null) {
+        if (mState.mNativePtr == 0) {
             throw new IllegalStateException("called stop on empty AnimatedImageDrawable");
         }
         if (nStop(mState.mNativePtr)) {
