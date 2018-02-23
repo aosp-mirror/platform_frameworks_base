@@ -76,6 +76,7 @@
                 android:layout_marginTop="22dp"
                 android:layout_below="@id/clock_view"
                 android:background="#f00"
+                android:backgroundTint="?attr/wallpaperTextColor"
                 android:layout_centerHorizontal="true" />
 
             <include layout="@layout/keyguard_status_area"
