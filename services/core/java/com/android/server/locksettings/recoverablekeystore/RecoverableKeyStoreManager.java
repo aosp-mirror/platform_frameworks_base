@@ -556,7 +556,7 @@ public class RecoverableKeyStoreManager {
      *
      * @return grant alias, which caller can use to access the key.
      */
-    public String generateKey(@NonNull String alias, byte[] account) throws RemoteException {
+    public String generateKey(@NonNull String alias) throws RemoteException {
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
 
@@ -576,8 +576,7 @@ public class RecoverableKeyStoreManager {
             byte[] secretKey =
                     mRecoverableKeyGenerator.generateAndStoreKey(encryptionKey, userId, uid, alias);
             mApplicationKeyStorage.setSymmetricKeyEntry(userId, uid, alias, secretKey);
-            String grantAlias = mApplicationKeyStorage.getGrantAlias(userId, uid, alias);
-            return grantAlias;
+            return mApplicationKeyStorage.getGrantAlias(userId, uid, alias);
         } catch (KeyStoreException | InvalidKeyException | RecoverableKeyStorageException e) {
             throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
         }
