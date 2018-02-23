@@ -10,6 +10,7 @@ LOCAL_JAVA_LIBRARIES := telephony-common ims-common
 LOCAL_STATIC_JAVA_LIBRARIES := junit legacy-android-test
 
 LOCAL_PACKAGE_NAME := SettingsProvider
+LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_CERTIFICATE := platform
 LOCAL_PRIVILEGED_MODULE := true
 

@@ -24,5 +24,6 @@ LOCAL_STATIC_JAVA_LIBRARIES := mockito-target legacy-android-test
 LOCAL_JAVA_LIBRARIES := android.test.runner
 
 LOCAL_PACKAGE_NAME := TtsTests
+LOCAL_PRIVATE_PLATFORM_APIS := true
 
 include $(BUILD_PACKAGE)
