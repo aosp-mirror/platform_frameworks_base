@@ -2341,6 +2341,12 @@ public class WifiManager {
     /** @hide */
     public static final long WIFI_FEATURE_WAPI             = 0x2000000000L; // WAPI
 
+    /** @hide */
+    public static final long WIFI_FEATURE_FILS_SHA256     = 0x4000000000L; // FILS-SHA256
+
+    /** @hide */
+    public static final long WIFI_FEATURE_FILS_SHA384     = 0x8000000000L; // FILS-SHA384
+
     private long getSupportedFeatures() {
         try {
             return mService.getSupportedFeatures();
