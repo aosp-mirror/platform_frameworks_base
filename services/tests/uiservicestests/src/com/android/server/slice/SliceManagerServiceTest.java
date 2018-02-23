@@ -32,6 +32,8 @@ import android.app.slice.ISliceListener;
 import android.app.slice.SliceSpec;
 import android.content.pm.PackageManagerInternal;
 import android.net.Uri;
+import android.os.Binder;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -59,6 +61,7 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
 
     private SliceManagerService mService;
     private PinnedSliceState mCreatedSliceState;
+    private IBinder mToken = new Binder();
 
     @Before
     public void setup() {
@@ -77,43 +80,11 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testAddListenerCreatesPinned() throws RemoteException {
-        mService.addSliceListener(TEST_URI, "pkg", mock(ISliceListener.class), EMPTY_SPECS);
-        verify(mService, times(1)).createPinnedSlice(eq(TEST_URI));
-    }
-
-    @Test
-    public void testAddListenerCreatesOnePinned() throws RemoteException {
-        mService.addSliceListener(TEST_URI, "pkg", mock(ISliceListener.class), EMPTY_SPECS);
-        mService.addSliceListener(TEST_URI, "pkg", mock(ISliceListener.class), EMPTY_SPECS);
-        verify(mService, times(1)).createPinnedSlice(eq(TEST_URI));
-    }
-
-    @Test
-    public void testRemoveListenerDestroysPinned() throws RemoteException {
-        ISliceListener listener = mock(ISliceListener.class);
-        mService.addSliceListener(TEST_URI, "pkg", listener, EMPTY_SPECS);
-
-        when(mCreatedSliceState.removeSliceListener(eq(listener))).thenReturn(false);
-        mService.removeSliceListener(TEST_URI, "pkg", listener);
-        verify(mCreatedSliceState, never()).destroy();
-
-        when(mCreatedSliceState.removeSliceListener(eq(listener))).thenReturn(true);
-        mService.removeSliceListener(TEST_URI, "pkg", listener);
-        verify(mCreatedSliceState).destroy();
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void testUnrecognizedThrows() throws RemoteException {
-        mService.removeSliceListener(TEST_URI, "pkg", mock(ISliceListener.class));
-    }
-
-    @Test
     public void testAddPinCreatesPinned() throws RemoteException {
         doReturn("pkg").when(mService).getDefaultHome(anyInt());
 
-        mService.pinSlice("pkg", TEST_URI, EMPTY_SPECS);
-        mService.pinSlice("pkg", TEST_URI, EMPTY_SPECS);
+        mService.pinSlice("pkg", TEST_URI, EMPTY_SPECS, mToken);
+        mService.pinSlice("pkg", TEST_URI, EMPTY_SPECS, mToken);
         verify(mService, times(1)).createPinnedSlice(eq(TEST_URI));
     }
 
@@ -121,15 +92,11 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
     public void testRemovePinDestroysPinned() throws RemoteException {
         doReturn("pkg").when(mService).getDefaultHome(anyInt());
 
-        mService.pinSlice("pkg", TEST_URI, EMPTY_SPECS);
+        mService.pinSlice("pkg", TEST_URI, EMPTY_SPECS, mToken);
 
-        when(mCreatedSliceState.unpin(eq("pkg"))).thenReturn(false);
-        mService.unpinSlice("pkg", TEST_URI);
+        when(mCreatedSliceState.unpin(eq("pkg"), eq(mToken))).thenReturn(false);
+        mService.unpinSlice("pkg", TEST_URI, mToken);
         verify(mCreatedSliceState, never()).destroy();
-
-        when(mCreatedSliceState.unpin(eq("pkg"))).thenReturn(true);
-        mService.unpinSlice("pkg", TEST_URI);
-        verify(mCreatedSliceState).destroy();
     }
 
 }

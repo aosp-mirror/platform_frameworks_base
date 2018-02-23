@@ -26,8 +26,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
@@ -73,6 +75,7 @@ public class SliceManager {
     private final Context mContext;
     private final ArrayMap<Pair<Uri, SliceCallback>, ISliceListener> mListenerLookup =
             new ArrayMap<>();
+    private final IBinder mToken = new Binder();
 
     /**
      * Permission denied.
@@ -105,7 +108,6 @@ public class SliceManager {
     @Deprecated
     public void registerSliceCallback(@NonNull Uri uri, @NonNull SliceCallback callback,
             @NonNull List<SliceSpec> specs) {
-        registerSliceCallback(uri, specs, mContext.getMainExecutor(), callback);
     }
 
     /**
@@ -114,7 +116,6 @@ public class SliceManager {
     @Deprecated
     public void registerSliceCallback(@NonNull Uri uri, @NonNull SliceCallback callback,
             @NonNull List<SliceSpec> specs, Executor executor) {
-        registerSliceCallback(uri, specs, executor, callback);
     }
 
     /**
@@ -132,7 +133,6 @@ public class SliceManager {
      */
     public void registerSliceCallback(@NonNull Uri uri, @NonNull List<SliceSpec> specs,
             @NonNull SliceCallback callback) {
-        registerSliceCallback(uri, specs, mContext.getMainExecutor(), callback);
     }
 
     /**
@@ -150,32 +150,7 @@ public class SliceManager {
      */
     public void registerSliceCallback(@NonNull Uri uri, @NonNull List<SliceSpec> specs,
             @NonNull @CallbackExecutor Executor executor, @NonNull SliceCallback callback) {
-        try {
-            mService.addSliceListener(uri, mContext.getPackageName(),
-                    getListener(uri, callback, new ISliceListener.Stub() {
-                        @Override
-                        public void onSliceUpdated(Slice s) throws RemoteException {
-                            executor.execute(() -> callback.onSliceUpdated(s));
-                        }
-                    }), specs.toArray(new SliceSpec[specs.size()]));
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
 
-    private ISliceListener getListener(Uri uri, SliceCallback callback,
-            ISliceListener listener) {
-        Pair<Uri, SliceCallback> key = new Pair<>(uri, callback);
-        if (mListenerLookup.containsKey(key)) {
-            try {
-                mService.removeSliceListener(uri, mContext.getPackageName(),
-                        mListenerLookup.get(key));
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-        mListenerLookup.put(key, listener);
-        return listener;
     }
 
     /**
@@ -189,12 +164,7 @@ public class SliceManager {
      * @see #registerSliceCallback
      */
     public void unregisterSliceCallback(@NonNull Uri uri, @NonNull SliceCallback callback) {
-        try {
-            mService.removeSliceListener(uri, mContext.getPackageName(),
-                    mListenerLookup.remove(new Pair<>(uri, callback)));
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+
     }
 
     /**
@@ -215,7 +185,7 @@ public class SliceManager {
     public void pinSlice(@NonNull Uri uri, @NonNull List<SliceSpec> specs) {
         try {
             mService.pinSlice(mContext.getPackageName(), uri,
-                    specs.toArray(new SliceSpec[specs.size()]));
+                    specs.toArray(new SliceSpec[specs.size()]), mToken);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -237,7 +207,7 @@ public class SliceManager {
      */
     public void unpinSlice(@NonNull Uri uri) {
         try {
-            mService.unpinSlice(mContext.getPackageName(), uri);
+            mService.unpinSlice(mContext.getPackageName(), uri, mToken);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -28,7 +28,6 @@ import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.ContentProviderHolder;
 import android.app.IActivityManager;
-import android.app.slice.ISliceListener;
 import android.app.slice.ISliceManager;
 import android.app.slice.SliceManager;
 import android.app.slice.SliceSpec;
@@ -39,7 +38,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
-import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
@@ -52,7 +50,6 @@ import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
-import android.util.Log;
 import android.util.Slog;
 import android.util.Xml.Encoding;
 
@@ -94,7 +91,6 @@ public class SliceManagerService extends ISliceManager.Stub {
     @GuardedBy("mLock")
     private final ArraySet<SliceGrant> mUserGrants = new ArraySet<>();
     private final Handler mHandler;
-    private final ContentObserver mObserver;
     @GuardedBy("mSliceAccessFile")
     private final AtomicFile mSliceAccessFile;
     @GuardedBy("mAccessList")
@@ -113,16 +109,6 @@ public class SliceManagerService extends ISliceManager.Stub {
         mAssistUtils = new AssistUtils(context);
         mHandler = new Handler(looper);
 
-        mObserver = new ContentObserver(mHandler) {
-            @Override
-            public void onChange(boolean selfChange, Uri uri, int userId) {
-                try {
-                    getPinnedSlice(maybeAddUserId(uri, userId)).onChange();
-                } catch (IllegalStateException e) {
-                    Log.e(TAG, "Received change for unpinned slice " + uri, e);
-                }
-            }
-        };
         final File systemDir = new File(Environment.getDataDirectory(), "system");
         mSliceAccessFile = new AtomicFile(new File(systemDir, "slice_access.xml"));
         mAccessList = new SliceFullAccessList(mContext);
@@ -163,40 +149,19 @@ public class SliceManagerService extends ISliceManager.Stub {
 
     ///  ----- ISliceManager stuff -----
     @Override
-    public void addSliceListener(Uri uri, String pkg, ISliceListener listener, SliceSpec[] specs)
-            throws RemoteException {
+    public void pinSlice(String pkg, Uri uri, SliceSpec[] specs, IBinder token) throws RemoteException {
         verifyCaller(pkg);
+        enforceAccess(pkg, uri);
         uri = maybeAddUserId(uri, Binder.getCallingUserHandle().getIdentifier());
-        enforceCrossUser(pkg, uri);
-        getOrCreatePinnedSlice(uri).addSliceListener(listener, pkg, specs,
-                checkAccess(pkg, uri, Binder.getCallingUid(), Binder.getCallingUid())
-                == PERMISSION_GRANTED);
+        getOrCreatePinnedSlice(uri).pin(pkg, specs, token);
     }
 
     @Override
-    public void removeSliceListener(Uri uri, String pkg, ISliceListener listener)
-            throws RemoteException {
+    public void unpinSlice(String pkg, Uri uri, IBinder token) throws RemoteException {
         verifyCaller(pkg);
+        enforceAccess(pkg, uri);
         uri = maybeAddUserId(uri, Binder.getCallingUserHandle().getIdentifier());
-        if (getPinnedSlice(uri).removeSliceListener(listener)) {
-            removePinnedSlice(uri);
-        }
-    }
-
-    @Override
-    public void pinSlice(String pkg, Uri uri, SliceSpec[] specs) throws RemoteException {
-        verifyCaller(pkg);
-        enforceFullAccess(pkg, "pinSlice", uri);
-        uri = maybeAddUserId(uri, Binder.getCallingUserHandle().getIdentifier());
-        getOrCreatePinnedSlice(uri).pin(pkg, specs);
-    }
-
-    @Override
-    public void unpinSlice(String pkg, Uri uri) throws RemoteException {
-        verifyCaller(pkg);
-        enforceFullAccess(pkg, "unpinSlice", uri);
-        uri = maybeAddUserId(uri, Binder.getCallingUserHandle().getIdentifier());
-        if (getPinnedSlice(uri).unpin(pkg)) {
+        if (getPinnedSlice(uri).unpin(pkg, token)) {
             removePinnedSlice(uri);
         }
     }
@@ -252,11 +217,6 @@ public class SliceManagerService extends ISliceManager.Stub {
             mContext.getContentResolver().notifyChange(uri, null);
         } finally {
             Binder.restoreCallingIdentity(ident);
-        }
-        synchronized (mLock) {
-            for (PinnedSliceState p : mPinnedSlicesByUri.values()) {
-                p.recheckPackage(pkg);
-            }
         }
     }
 
@@ -455,21 +415,6 @@ public class SliceManagerService extends ISliceManager.Stub {
             return false;
         }
         return cn.getPackageName().equals(pkg);
-    }
-
-    public void listen(Uri uri) {
-        mContext.getContentResolver().registerContentObserver(uri, true, mObserver);
-    }
-
-    public void unlisten(Uri uri) {
-        mContext.getContentResolver().unregisterContentObserver(mObserver);
-        synchronized (mLock) {
-            mPinnedSlicesByUri.forEach((u, s) -> {
-                if (s.isListening()) {
-                    listen(u);
-                }
-            });
-        }
     }
 
     private boolean isDefaultHomeApp(String pkg, int userId) {
