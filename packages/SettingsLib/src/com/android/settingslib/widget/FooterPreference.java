@@ -33,7 +33,7 @@ import com.android.settingslib.R;
 public class FooterPreference extends Preference {
 
     static final int ORDER_FOOTER = Integer.MAX_VALUE - 1;
-    static final String KEY_FOOTER = "footer_preference";
+    public static final String KEY_FOOTER = "footer_preference";
 
     public FooterPreference(Context context, AttributeSet attrs) {
         super(context, attrs, TypedArrayUtils.getAttr(
