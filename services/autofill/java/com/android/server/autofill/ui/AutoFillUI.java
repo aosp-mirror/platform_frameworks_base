@@ -34,6 +34,7 @@ import android.service.autofill.SaveInfo;
 import android.service.autofill.ValueFinder;
 import android.text.TextUtils;
 import android.util.Slog;
+import android.view.KeyEvent;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.IAutofillWindowPresenter;
@@ -78,6 +79,7 @@ public final class AutoFillUI {
                 IAutofillWindowPresenter presenter);
         void requestHideFillUi(AutofillId id);
         void startIntentSender(IntentSender intentSender);
+        void dispatchUnhandledKey(AutofillId id, KeyEvent keyEvent);
     }
 
     public AutoFillUI(@NonNull Context context) {
@@ -238,6 +240,13 @@ public final class AutoFillUI {
                 public void startIntentSender(IntentSender intentSender) {
                     if (mCallback != null) {
                         mCallback.startIntentSender(intentSender);
+                    }
+                }
+
+                @Override
+                public void dispatchUnhandledKey(KeyEvent keyEvent) {
+                    if (mCallback != null) {
+                        mCallback.dispatchUnhandledKey(focusedId, keyEvent);
                     }
                 }
             });

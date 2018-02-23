@@ -76,6 +76,7 @@ import android.util.LocalLog;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
+import android.view.KeyEvent;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
@@ -808,6 +809,27 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     Slog.d(TAG, "Do not show full UI on " + id + " as it is not the current view ("
                             + mCurrentViewId + ") anymore");
                 }
+            }
+        }
+    }
+
+    @Override
+    public void dispatchUnhandledKey(AutofillId id, KeyEvent keyEvent) {
+        synchronized (mLock) {
+            if (mDestroyed) {
+                Slog.w(TAG, "Call to Session#dispatchUnhandledKey() rejected - session: "
+                        + id + " destroyed");
+                return;
+            }
+            if (id.equals(mCurrentViewId)) {
+                try {
+                    mClient.dispatchUnhandledKey(this.id, id, keyEvent);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Error requesting to dispatch unhandled key", e);
+                }
+            } else {
+                Slog.w(TAG, "Do not dispatch unhandled key on " + id
+                        + " as it is not the current view (" + mCurrentViewId + ") anymore");
             }
         }
     }

@@ -7624,6 +7624,19 @@ public class Activity extends ContextThemeWrapper
 
     /** @hide */
     @Override
+    public final void autofillClientDispatchUnhandledKey(@NonNull View anchor,
+            @NonNull KeyEvent keyEvent) {
+        ViewRootImpl rootImpl = anchor.getViewRootImpl();
+        if (rootImpl != null) {
+            // dont care if anchorView is current focus, for example a custom view may only receive
+            // touchEvent, not focusable but can still trigger autofill window. The Key handling
+            // might be inside parent of the custom view.
+            rootImpl.dispatchKeyFromAutofill(keyEvent);
+        }
+    }
+
+    /** @hide */
+    @Override
     public final boolean autofillClientRequestHideFillUi() {
         if (mAutofillPopupWindow == null) {
             return false;
