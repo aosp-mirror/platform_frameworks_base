@@ -68,6 +68,17 @@ public class Letterbox {
     }
 
     /**
+     * Gets the insets between the outer and inner rects.
+     */
+    public Rect getInsets() {
+        return new Rect(
+                mLeft.getWidth(),
+                mTop.getHeight(),
+                mRight.getWidth(),
+                mBottom.getHeight());
+    }
+
+    /**
      * Hides the letterbox.
      *
      * @param t a transaction in which to hide the letterbox
@@ -140,6 +151,14 @@ public class Letterbox {
                 mSurface.destroy();
                 mSurface = null;
             }
+        }
+
+        public int getWidth() {
+            return Math.max(0, mLastRight - mLastLeft);
+        }
+
+        public int getHeight() {
+            return Math.max(0, mLastBottom - mLastTop);
         }
     }
 }

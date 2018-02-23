@@ -1728,6 +1728,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 frame.set(win.mContainingFrame);
             }
             surfaceInsets = win.getAttrs().surfaceInsets;
+            // XXX(b/72757033): These are insets relative to the window frame, but we're really
+            // interested in the insets relative to the frame we chose in the if-blocks above.
             insets.set(win.mContentInsets);
             stableInsets.set(win.mStableInsets);
         }
@@ -2119,5 +2121,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             stringName = sb.toString();
         }
         return stringName + ((mIsExiting) ? " mIsExiting=" : "");
+    }
+
+    Rect getLetterboxInsets() {
+        if (mLetterbox != null) {
+            return mLetterbox.getInsets();
+        } else {
+            return new Rect();
+        }
     }
 }

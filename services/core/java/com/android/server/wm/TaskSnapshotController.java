@@ -281,17 +281,25 @@ class TaskSnapshotController {
     }
 
     private Rect getInsetsFromTaskBounds(WindowState state, Task task) {
-        final Rect r = new Rect();
-        r.set(state.getContentFrameLw());
-        r.intersectUnchecked(state.getStableFrameLw());
+        // XXX(b/72757033): These are insets relative to the window frame, but we're really
+        // interested in the insets relative to the task bounds.
+        Rect insets = minRect(state.mContentInsets, state.mStableInsets);
+        insets = maxRect(insets, state.mAppToken.getLetterboxInsets());
+        return insets;
+    }
 
-        final Rect taskBounds = task.getBounds();
+    private Rect minRect(Rect rect1, Rect rect2) {
+        return new Rect(Math.min(rect1.left, rect2.left),
+                Math.min(rect1.top, rect2.top),
+                Math.min(rect1.right, rect2.right),
+                Math.min(rect1.bottom, rect2.bottom));
+    }
 
-        r.set(Math.max(0, r.left - taskBounds.left),
-                Math.max(0, r.top - taskBounds.top),
-                Math.max(0, taskBounds.right - r.right),
-                Math.max(0, taskBounds.bottom - r.bottom));
-        return r;
+    private Rect maxRect(Rect rect1, Rect rect2) {
+        return new Rect(Math.max(rect1.left, rect2.left),
+                Math.max(rect1.top, rect2.top),
+                Math.max(rect1.right, rect2.right),
+                Math.max(rect1.bottom, rect2.bottom));
     }
 
     /**
