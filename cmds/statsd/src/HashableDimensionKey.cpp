@@ -44,8 +44,8 @@ android::hash_t hashDimension(const HashableDimensionKey& value) {
                                                              fieldValue.mValue.str_value)));
                 break;
             case FLOAT: {
-                float floatVal = fieldValue.mValue.float_value;
-                hash = android::JenkinsHashMixBytes(hash, (uint8_t*)&floatVal, sizeof(float));
+                hash = android::JenkinsHashMix(hash,
+                                               android::hash_type(fieldValue.mValue.float_value));
                 break;
             }
         }
