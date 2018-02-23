@@ -161,7 +161,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         when(mService.mWindowManager.getNavBarPosition()).thenReturn(navBarPosition);
         mTask.getConfiguration().windowConfiguration.setAppBounds(taskBounds);
         mActivity.info.maxAspectRatio = aspectRatio;
-        mActivity.ensureActivityConfigurationLocked(
+        mActivity.ensureActivityConfiguration(
                 0 /* globalChanges */, false /* preserveWindow */);
         assertEquals(expectedActivityBounds, mActivity.getBounds());
     }

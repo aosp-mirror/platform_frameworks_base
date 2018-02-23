@@ -537,7 +537,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             if (updatedConfig) {
                 final ActivityRecord r = topRunningActivityLocked();
                 if (r != null && !deferResume) {
-                    kept = r.ensureActivityConfigurationLocked(0 /* globalChanges */,
+                    kept = r.ensureActivityConfiguration(0 /* globalChanges */,
                             preserveWindow);
                     mService.mStackSupervisor.ensureActivitiesVisibleLocked(r, 0,
                             !PRESERVE_WINDOWS);
