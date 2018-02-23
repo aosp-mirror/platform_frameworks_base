@@ -24,15 +24,11 @@
 
 #include <log/log.h>
 
-// ToDo: Fix code to be warning free
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <SkBitmap.h>
 #include <SkCanvas.h>
 #include <SkColor.h>
 #include <SkPaint.h>
 #include <SkBlendMode.h>
-#pragma GCC diagnostic pop
 
 namespace android {
 
