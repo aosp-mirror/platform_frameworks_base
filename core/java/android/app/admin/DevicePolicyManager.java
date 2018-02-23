@@ -9302,9 +9302,10 @@ public class DevicePolicyManager {
      * after calling this method.
      *
      * <p>The incoming target administrator must have the
-     * {@link DeviceAdminReceiver#SUPPORT_TRANSFER_OWNERSHIP_META_DATA} <code>meta-data</code> tag
-     * included in its corresponding <code>receiver</code> component with a value of {@code true}.
-     * Otherwise an {@link IllegalArgumentException} will be thrown.
+     * <code>&lt;support-transfer-ownership /&gt;</code> tag inside the
+     * <code>&lt;device-admin&gt;&lt;/device-admin&gt;</code> tags in the xml file referenced by
+     * {@link DeviceAdminReceiver#DEVICE_ADMIN_META_DATA}. Otherwise an
+     * {@link IllegalArgumentException} will be thrown.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @param target which {@link DeviceAdminReceiver} we want the new administrator to be

@@ -16,30 +16,30 @@
 
 package android.app.admin;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
-
 import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
+import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
-import android.content.res.Resources.NotFoundException;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.PersistableBundle;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Printer;
 import android.util.SparseArray;
 import android.util.Xml;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -266,6 +266,12 @@ public final class DeviceAdminInfo implements Parcelable {
      */
     int mUsesPolicies;
 
+    /**
+     * Whether this administrator can be a target in an ownership transfer.
+     *
+     * @see DevicePolicyManager#transferOwnership(ComponentName, ComponentName, PersistableBundle)
+     */
+    boolean mSupportsTransferOwnership;
 
     /**
      * Constructor.
@@ -347,6 +353,12 @@ public final class DeviceAdminInfo implements Parcelable {
                                     + getComponent() + ": " + policyName);
                         }
                     }
+                } else if (tagName.equals("support-transfer-ownership")) {
+                    if (parser.next() != XmlPullParser.END_TAG) {
+                        throw new XmlPullParserException(
+                                "support-transfer-ownership tag must be empty.");
+                    }
+                    mSupportsTransferOwnership = true;
                 }
             }
         } catch (NameNotFoundException e) {
@@ -360,6 +372,7 @@ public final class DeviceAdminInfo implements Parcelable {
     DeviceAdminInfo(Parcel source) {
         mActivityInfo = ActivityInfo.CREATOR.createFromParcel(source);
         mUsesPolicies = source.readInt();
+        mSupportsTransferOwnership = source.readBoolean();
     }
 
     /**
@@ -458,6 +471,13 @@ public final class DeviceAdminInfo implements Parcelable {
         return sRevKnownPolicies.get(policyIdent).tag;
     }
 
+    /**
+     * Return true if this administrator can be a target in an ownership transfer.
+     */
+    public boolean supportsTransferOwnership() {
+        return mSupportsTransferOwnership;
+    }
+
     /** @hide */
     public ArrayList<PolicyInfo> getUsedPolicies() {
         ArrayList<PolicyInfo> res = new ArrayList<PolicyInfo>();
@@ -502,6 +522,7 @@ public final class DeviceAdminInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         mActivityInfo.writeToParcel(dest, flags);
         dest.writeInt(mUsesPolicies);
+        dest.writeBoolean(mSupportsTransferOwnership);
     }
 
     /**

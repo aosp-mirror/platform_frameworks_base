@@ -12658,8 +12658,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final DeviceAdminInfo incomingDeviceInfo = findAdmin(target, callingUserId,
                 /* throwForMissingPermission= */ true);
         checkActiveAdminPrecondition(target, incomingDeviceInfo, policy);
-        if (!incomingDeviceInfo.getActivityInfo().metaData
-                .getBoolean(DeviceAdminReceiver.SUPPORT_TRANSFER_OWNERSHIP_META_DATA, false)) {
+        if (!incomingDeviceInfo.supportsTransferOwnership()) {
             throw new IllegalArgumentException("Provided target does not support "
                     + "ownership transfer.");
         }
