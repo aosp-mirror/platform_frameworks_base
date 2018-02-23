@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
+import android.media.MediaMetadata2;
 import android.media.MediaPlayerInterface;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
@@ -168,6 +169,27 @@ public class VideoView2 extends ViewGroupHelper<VideoView2Provider> {
         return mProvider.getMediaControlView2_impl();
     }
 
+    /**
+     * Sets MediaMetadata2 instance. It will replace the previously assigned MediaMetadata2 instance
+     * if any.
+     *
+     * @param metadata a MediaMetadata2 instance.
+     * @hide
+     */
+    public void setMediaMetadata(MediaMetadata2 metadata) {
+        mProvider.setMediaMetadata_impl(metadata);
+    }
+
+    /**
+     * Returns MediaMetadata2 instance which is retrieved from MediaPlayer2 inside VideoView2 by
+     * default or by {@link #setMediaMetadata} method.
+     * @hide
+     */
+    public MediaMetadata2 getMediaMetadata() {
+        // TODO: add to Javadoc whether this value can be null or not when integrating with
+        // MediaSession2.
+        return mProvider.getMediaMetadata_impl();
+    }
 
     /**
      * Returns MediaController instance which is connected with MediaSession that VideoView2 is
