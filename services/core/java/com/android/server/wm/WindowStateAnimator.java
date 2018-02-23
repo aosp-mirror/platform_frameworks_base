@@ -862,17 +862,19 @@ class WindowStateAnimator {
         float surfaceWidth = mSurfaceController.getWidth();
         float surfaceHeight = mSurfaceController.getHeight();
 
+        final Rect insets = attrs.surfaceInsets;
+
         if (isForceScaled()) {
-            int hInsets = attrs.surfaceInsets.left + attrs.surfaceInsets.right;
-            int vInsets = attrs.surfaceInsets.top + attrs.surfaceInsets.bottom;
+            int hInsets = insets.left + insets.right;
+            int vInsets = insets.top + insets.bottom;
             float surfaceContentWidth = surfaceWidth - hInsets;
             float surfaceContentHeight = surfaceHeight - vInsets;
             if (!mForceScaleUntilResize) {
                 mSurfaceController.forceScaleableInTransaction(true);
             }
 
-            int posX = mTmpSize.left;
-            int posY = mTmpSize.top;
+            int posX = 0;
+            int posY = 0;
             task.mStack.getDimBounds(mTmpStackBounds);
 
             boolean allowStretching = false;
@@ -919,9 +921,19 @@ class WindowStateAnimator {
                 posX -= (int) (tw * mExtraHScale * mTmpSourceBounds.left);
                 posY -= (int) (th * mExtraVScale * mTmpSourceBounds.top);
 
-                // Always clip to the stack bounds since the surface can be larger with the current
-                // scale
-                clipRect = null;
+                // In pinned mode the clip rectangle applied to us by our stack has been
+                // expanded outwards to allow for shadows. However in case of source bounds set
+                // we need to crop to within the surface. The code above has scaled and positioned
+                // the surface to fit the unexpanded stack bounds, but now we need to reapply
+                // the cropping that the stack would have applied if it weren't expanded. This
+                // can be different in each direction based on the source bounds.
+                clipRect = mTmpClipRect;
+                clipRect.set((int)((insets.left + mTmpSourceBounds.left) * tw),
+                        (int)((insets.top + mTmpSourceBounds.top) * th),
+                        insets.left + (int)(surfaceWidth
+                                - (tw* (surfaceWidth - mTmpSourceBounds.right))),
+                        insets.top + (int)(surfaceHeight
+                                - (th * (surfaceHeight - mTmpSourceBounds.bottom))));
             } else {
                 // We want to calculate the scaling based on the content area, not based on
                 // the entire surface, so that we scale in sync with windows that don't have insets.
@@ -947,8 +959,8 @@ class WindowStateAnimator {
             // non inset content at the same position, we have to shift the whole window
             // forward. Likewise for scaling up, we've increased this distance, and we need
             // to shift by a negative number to compensate.
-            posX += attrs.surfaceInsets.left * (1 - mExtraHScale);
-            posY += attrs.surfaceInsets.top * (1 - mExtraVScale);
+            posX += insets.left * (1 - mExtraHScale);
+            posY += insets.top * (1 - mExtraVScale);
 
             mSurfaceController.setPositionInTransaction((float) Math.floor(posX),
                     (float) Math.floor(posY), recoveringMemory);

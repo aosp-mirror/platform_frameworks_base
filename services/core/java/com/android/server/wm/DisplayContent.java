@@ -747,7 +747,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mDividerControllerLocked = new DockedStackDividerController(service, this);
         mPinnedStackControllerLocked = new PinnedStackController(service, this);
 
-        mSurfaceSize = Math.max(mBaseDisplayHeight, mBaseDisplayWidth);
+        // We use this as our arbitrary surface size for buffer-less parents
+        // that don't impose cropping on their children. It may need to be larger
+        // than the display size because fullscreen windows can be shifted offscreen
+        // due to surfaceInsets. 2 times the largest display dimension feels like an
+        // appropriately arbitrary number. Eventually we would like to give SurfaceFlinger
+        // layers the ability to match their parent sizes and be able to skip
+        // such arbitrary size settings.
+        mSurfaceSize = Math.max(mBaseDisplayHeight, mBaseDisplayWidth) * 2;
 
         final SurfaceControl.Builder b = mService.makeSurfaceBuilder(mSession)
                 .setSize(mSurfaceSize, mSurfaceSize)
