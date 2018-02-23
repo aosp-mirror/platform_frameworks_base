@@ -26,12 +26,14 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Handler;
 import android.util.Pair;
 
 public class PipAppOpsListener {
     private static final String TAG = PipAppOpsListener.class.getSimpleName();
 
     private Context mContext;
+    private Handler mHandler;
     private IActivityManager mActivityManager;
     private AppOpsManager mAppOpsManager;
 
@@ -50,7 +52,7 @@ public class PipAppOpsListener {
                     if (appInfo.packageName.equals(topPipActivityInfo.first.getPackageName()) &&
                             mAppOpsManager.checkOpNoThrow(OP_PICTURE_IN_PICTURE, appInfo.uid,
                                     packageName) != MODE_ALLOWED) {
-                        mMotionHelper.dismissPip();
+                        mHandler.post(() -> mMotionHelper.dismissPip());
                     }
                 }
             } catch (NameNotFoundException e) {
@@ -63,6 +65,7 @@ public class PipAppOpsListener {
     public PipAppOpsListener(Context context, IActivityManager activityManager,
             PipMotionHelper motionHelper) {
         mContext = context;
+        mHandler = new Handler(mContext.getMainLooper());
         mActivityManager = activityManager;
         mAppOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         mMotionHelper = motionHelper;
