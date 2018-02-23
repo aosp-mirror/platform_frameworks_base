@@ -21,9 +21,6 @@ import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Looper;
 import android.os.Trace;
@@ -36,7 +33,6 @@ import com.android.systemui.shared.recents.model.RecentsTaskLoadPlan.PreloadOpti
 import com.android.systemui.shared.recents.model.Task.TaskKey;
 import com.android.systemui.shared.recents.model.TaskKeyLruCache.EvictionCallback;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
-import com.android.systemui.shared.system.PackageManagerWrapper;
 
 import java.io.PrintWriter;
 import java.util.Map;
@@ -61,8 +57,6 @@ public class RecentsTaskLoader {
     // Disable all thumbnail loading.
     public static final int SVELTE_DISABLE_LOADING = 3;
 
-    private final Context mContext;
-
     // This activity info LruCache is useful because it can be expensive to retrieve ActivityInfos
     // for many tasks, which we use to get the activity labels and icons.  Unlike the other caches
     // below, this is per-package so we can't invalidate the items in the cache based on the last
@@ -73,6 +67,7 @@ public class RecentsTaskLoader {
     private final TaskKeyLruCache<String> mActivityLabelCache;
     private final TaskKeyLruCache<String> mContentDescriptionCache;
     private final TaskResourceLoadQueue mLoadQueue;
+    private final IconLoader mIconLoader;
     private final BackgroundTaskLoader mLoader;
     private final HighResThumbnailLoader mHighResThumbnailLoader;
     @GuardedBy("this")
@@ -86,7 +81,6 @@ public class RecentsTaskLoader {
 
     private int mDefaultTaskBarBackgroundColor;
     private int mDefaultTaskViewBackgroundColor;
-    private final BitmapDrawable mDefaultIcon;
 
     private EvictionCallback mClearActivityInfoOnEviction = new EvictionCallback() {
         @Override
@@ -99,15 +93,9 @@ public class RecentsTaskLoader {
 
     public RecentsTaskLoader(Context context, int maxThumbnailCacheSize, int maxIconCacheSize,
             int svelteLevel) {
-        mContext = context;
         mMaxThumbnailCacheSize = maxThumbnailCacheSize;
         mMaxIconCacheSize = maxIconCacheSize;
         mSvelteLevel = svelteLevel;
-
-        // Create the default assets
-        Bitmap icon = Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8);
-        icon.eraseColor(0);
-        mDefaultIcon = new BitmapDrawable(context.getResources(), icon);
 
         // Initialize the proxy, cache and loaders
         int numRecentTasks = ActivityManager.getMaxRecentTasksStatic();
@@ -119,8 +107,15 @@ public class RecentsTaskLoader {
         mContentDescriptionCache = new TaskKeyLruCache<>(numRecentTasks,
                 mClearActivityInfoOnEviction);
         mActivityInfoCache = new LruCache<>(numRecentTasks);
-        mLoader = new BackgroundTaskLoader(mLoadQueue, mIconCache, mDefaultIcon,
+
+        mIconLoader = createNewIconLoader(context, mIconCache, mActivityInfoCache);
+        mLoader = new BackgroundTaskLoader(mLoadQueue, mIconLoader,
                 mHighResThumbnailLoader::setTaskLoadQueueIdle);
+    }
+
+    protected IconLoader createNewIconLoader(Context context,TaskKeyLruCache<Drawable> iconCache,
+            LruCache<ComponentName, ActivityInfo> activityInfoCache) {
+        return new IconLoader.DefaultIconLoader(context, iconCache, activityInfoCache);
     }
 
     /**
@@ -187,7 +182,7 @@ public class RecentsTaskLoader {
      */
     public void loadTaskData(Task t) {
         Drawable icon = mIconCache.getAndInvalidateIfModified(t.key);
-        icon = icon != null ? icon : mDefaultIcon;
+        icon = icon != null ? icon : mIconLoader.getDefaultIcon(t.key.userId);
         mLoadQueue.addTask(t);
         t.notifyTaskDataLoaded(t.thumbnail, icon);
     }
@@ -195,7 +190,7 @@ public class RecentsTaskLoader {
     /** Releases the task resource data back into the pool. */
     public void unloadTaskData(Task t) {
         mLoadQueue.removeTask(t);
-        t.notifyTaskDataUnloaded(mDefaultIcon);
+        t.notifyTaskDataUnloaded(mIconLoader.getDefaultIcon(t.key.userId));
     }
 
     /** Completely removes the resource data from the pool. */
@@ -205,7 +200,7 @@ public class RecentsTaskLoader {
         mActivityLabelCache.remove(t.key);
         mContentDescriptionCache.remove(t.key);
         if (notifyTaskDataUnloaded) {
-            t.notifyTaskDataUnloaded(mDefaultIcon);
+            t.notifyTaskDataUnloaded(mIconLoader.getDefaultIcon(t.key.userId));
         }
     }
 
@@ -326,35 +321,8 @@ public class RecentsTaskLoader {
      * Returns the cached task icon if the task key is not expired, updating the cache if it is.
      */
     Drawable getAndUpdateActivityIcon(TaskKey taskKey, ActivityManager.TaskDescription td,
-            Resources res, boolean loadIfNotCached) {
-        // Return the cached activity icon if it exists
-        Drawable icon = mIconCache.getAndInvalidateIfModified(taskKey);
-        if (icon != null) {
-            return icon;
-        }
-
-        if (loadIfNotCached) {
-            // Return and cache the task description icon if it exists
-            icon = ActivityManagerWrapper.getInstance().getBadgedTaskDescriptionIcon(mContext, td,
-                    taskKey.userId, res);
-            if (icon != null) {
-                mIconCache.put(taskKey, icon);
-                return icon;
-            }
-
-            // Load the icon from the activity info and cache it
-            ActivityInfo activityInfo = getAndUpdateActivityInfo(taskKey);
-            if (activityInfo != null) {
-                icon = ActivityManagerWrapper.getInstance().getBadgedActivityIcon(activityInfo,
-                        taskKey.userId);
-                if (icon != null) {
-                    mIconCache.put(taskKey, icon);
-                    return icon;
-                }
-            }
-        }
-        // We couldn't load any icon
-        return null;
+            boolean loadIfNotCached) {
+        return mIconLoader.getAndInvalidateIfModified(taskKey, td, loadIfNotCached);
     }
 
     /**
@@ -417,18 +385,7 @@ public class RecentsTaskLoader {
      * task key is expired.
      */
     ActivityInfo getAndUpdateActivityInfo(TaskKey taskKey) {
-        ComponentName cn = taskKey.getComponent();
-        ActivityInfo activityInfo = mActivityInfoCache.get(cn);
-        if (activityInfo == null) {
-            activityInfo = PackageManagerWrapper.getInstance().getActivityInfo(cn, taskKey.userId);
-            if (cn == null || activityInfo == null) {
-                Log.e(TAG, "Unexpected null component name or activity info: " + cn + ", " +
-                        activityInfo);
-                return null;
-            }
-            mActivityInfoCache.put(cn, activityInfo);
-        }
-        return activityInfo;
+        return mIconLoader.getAndUpdateActivityInfo(taskKey);
     }
 
     /**
