@@ -22,8 +22,10 @@
     <dimen name="docked_divider_handle_width">2dp</dimen>
     <dimen name="docked_divider_handle_height">16dp</dimen>
 
+    <dimen name="brightness_mirror_height">96dp</dimen>
+
     <dimen name="qs_tile_margin_top">2dp</dimen>
-    <dimen name="qs_brightness_padding_top">0dp</dimen>
+    <dimen name="qs_header_tooltip_height">24dp</dimen>
 
     <dimen name="battery_detail_graph_space_top">9dp</dimen>
     <dimen name="battery_detail_graph_space_bottom">9dp</dimen>
