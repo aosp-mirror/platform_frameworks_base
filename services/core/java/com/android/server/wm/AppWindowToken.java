@@ -367,6 +367,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (mClientHidden == hideClient || (hideClient && mDeferHidingClient)) {
             return;
         }
+        if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM, "setClientHidden: " + this
+                + " clientHidden=" + hideClient + " Callers=" + Debug.getCallers(5));
         mClientHidden = hideClient;
         sendAppVisibilityToClients();
     }
