@@ -17,7 +17,6 @@
 package com.android.internal.os;
 
 import android.annotation.Nullable;
-import android.os.SystemClock;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -46,20 +45,17 @@ import java.nio.IntBuffer;
  * which has a shorter throttle interval and returns cached result from last read when the request
  * is throttled.
  *
- * This class is NOT thread-safe and NOT designed to be accessed by more than one caller (due to
- * the nature of {@link #readDelta(Callback)}).
+ * This class is NOT thread-safe and NOT designed to be accessed by more than one caller since each
+ * caller has its own view of delta.
  */
-public class KernelUidCpuActiveTimeReader {
-    private static final String TAG = "KernelUidCpuActiveTimeReader";
-    // Throttle interval in milliseconds
-    private static final long DEFAULT_THROTTLE_INTERVAL = 10_000L;
+public class KernelUidCpuActiveTimeReader extends
+        KernelUidCpuTimeReaderBase<KernelUidCpuActiveTimeReader.Callback> {
+    private static final String TAG = KernelUidCpuActiveTimeReader.class.getSimpleName();
 
     private final KernelCpuProcReader mProcReader;
-    private long mLastTimeReadMs = Long.MIN_VALUE;
-    private long mThrottleInterval = DEFAULT_THROTTLE_INTERVAL;
     private SparseArray<Double> mLastUidCpuActiveTimeMs = new SparseArray<>();
 
-    public interface Callback {
+    public interface Callback extends KernelUidCpuTimeReaderBase.Callback {
         /**
          * Notifies when new data is available.
          *
@@ -78,11 +74,8 @@ public class KernelUidCpuActiveTimeReader {
         mProcReader = procReader;
     }
 
-    public void readDelta(@Nullable Callback cb) {
-        if (SystemClock.elapsedRealtime() < mLastTimeReadMs + mThrottleInterval) {
-            Slog.w(TAG, "Throttle");
-            return;
-        }
+    @Override
+    protected void readDeltaImpl(@Nullable Callback cb) {
         synchronized (mProcReader) {
             final ByteBuffer bytes = mProcReader.readBytes();
             if (bytes == null || bytes.remaining() <= 4) {
@@ -124,14 +117,9 @@ public class KernelUidCpuActiveTimeReader {
                     }
                 }
             }
-            // Slog.i(TAG, "Read uids: " + numUids);
-        }
-        mLastTimeReadMs = SystemClock.elapsedRealtime();
-    }
-
-    public void setThrottleInterval(long throttleInterval) {
-        if (throttleInterval >= 0) {
-            mThrottleInterval = throttleInterval;
+            if (DEBUG) {
+                Slog.d(TAG, "Read uids: " + numUids);
+            }
         }
     }
 
