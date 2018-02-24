@@ -98,6 +98,9 @@ public class NetworkMetrics {
 
     /** Accumulate a single netd sock_diag poll result reported by netd. */
     public void addTcpStatsResult(int sent, int lost, int rttUs, int sentAckDiffMs) {
+        if (pendingSummary == null) {
+            pendingSummary = new Summary(netId, transports);
+        }
         pendingSummary.tcpLossRate.count(lost, sent);
         pendingSummary.roundTripTimeUs.count(rttUs);
         pendingSummary.sentAckTimeDiffenceMs.count(sentAckDiffMs);
