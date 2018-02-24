@@ -1359,9 +1359,7 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
                             UsbManager.USB_FUNCTION_NONE).equals(
                             getSystemProperty(USB_STATE_PROPERTY, UsbManager.USB_FUNCTION_NONE));
                 }
-                // Mask out adb, since it is stored in mAdbEnabled
-                mCurrentFunctions = UsbManager.usbFunctionsFromString(mCurrentFunctionsStr)
-                        & ~UsbManager.FUNCTION_ADB;
+                mCurrentFunctions = UsbManager.FUNCTION_NONE;
                 mCurrentUsbFunctionsReceived = true;
 
                 String state = FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim();
