@@ -101,5 +101,4 @@ interface IUserManager {
     boolean requestQuietModeEnabled(String callingPackage, boolean enableQuietMode, int userHandle, in IntentSender target);
     long getUserStartRealtime();
     long getUserUnlockRealtime();
-    boolean isSettingRestrictedForUser(String setting, int userId, String value);
 }
