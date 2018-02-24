@@ -355,6 +355,47 @@ class UserUsageStatsService {
         return new UsageEvents(results, table);
     }
 
+    UsageEvents queryEventsForPackage(final long beginTime, final long endTime,
+            final String packageName) {
+        final ArraySet<String> names = new ArraySet<>();
+        names.add(packageName);
+        final List<UsageEvents.Event> results = queryStats(UsageStatsManager.INTERVAL_DAILY,
+                beginTime, endTime, (stats, mutable, accumulatedResult) -> {
+                    if (stats.events == null) {
+                        return;
+                    }
+
+                    final int startIndex = stats.events.closestIndexOnOrAfter(beginTime);
+                    if (startIndex < 0) {
+                        return;
+                    }
+
+                    final int size = stats.events.size();
+                    for (int i = startIndex; i < size; i++) {
+                        if (stats.events.keyAt(i) >= endTime) {
+                            return;
+                        }
+
+                        final UsageEvents.Event event = stats.events.valueAt(i);
+                        if (!packageName.equals(event.mPackage)) {
+                            continue;
+                        }
+                        if (event.mClass != null) {
+                            names.add(event.mClass);
+                        }
+                        accumulatedResult.add(event);
+                    }
+                });
+
+        if (results == null || results.isEmpty()) {
+            return null;
+        }
+
+        final String[] table = names.toArray(new String[names.size()]);
+        Arrays.sort(table);
+        return new UsageEvents(results, table);
+    }
+
     void persistActiveStats() {
         if (mStatsChanged) {
             Slog.i(TAG, mLogPrefix + "Flushing usage stats to disk");
