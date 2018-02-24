@@ -18,13 +18,27 @@ package android.content.res;
 
 import static android.content.ConfigurationProto.DENSITY_DPI;
 import static android.content.ConfigurationProto.FONT_SCALE;
+import static android.content.ConfigurationProto.HARD_KEYBOARD_HIDDEN;
+import static android.content.ConfigurationProto.HDR_COLOR_MODE;
+import static android.content.ConfigurationProto.KEYBOARD_HIDDEN;
+import static android.content.ConfigurationProto.LOCALES;
+import static android.content.ConfigurationProto.MCC;
+import static android.content.ConfigurationProto.MNC;
+import static android.content.ConfigurationProto.NAVIGATION;
+import static android.content.ConfigurationProto.NAVIGATION_HIDDEN;
 import static android.content.ConfigurationProto.ORIENTATION;
 import static android.content.ConfigurationProto.SCREEN_HEIGHT_DP;
 import static android.content.ConfigurationProto.SCREEN_LAYOUT;
 import static android.content.ConfigurationProto.SCREEN_WIDTH_DP;
 import static android.content.ConfigurationProto.SMALLEST_SCREEN_WIDTH_DP;
+import static android.content.ConfigurationProto.TOUCHSCREEN;
 import static android.content.ConfigurationProto.UI_MODE;
+import static android.content.ConfigurationProto.WIDE_COLOR_GAMUT;
 import static android.content.ConfigurationProto.WINDOW_CONFIGURATION;
+import static android.content.ResourcesConfigurationProto.CONFIGURATION;
+import static android.content.ResourcesConfigurationProto.SCREEN_HEIGHT_PX;
+import static android.content.ResourcesConfigurationProto.SCREEN_WIDTH_PX;
+import static android.content.ResourcesConfigurationProto.SDK_VERSION;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -38,6 +52,7 @@ import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.proto.ProtoOutputStream;
 import android.view.View;
 
@@ -1076,7 +1091,19 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId) {
         final long token = protoOutputStream.start(fieldId);
         protoOutputStream.write(FONT_SCALE, fontScale);
+        protoOutputStream.write(MCC, mcc);
+        protoOutputStream.write(MNC, mnc);
+        mLocaleList.writeToProto(protoOutputStream, LOCALES);
         protoOutputStream.write(SCREEN_LAYOUT, screenLayout);
+        protoOutputStream.write(HDR_COLOR_MODE,
+                (colorMode & Configuration.COLOR_MODE_HDR_MASK) >> COLOR_MODE_HDR_SHIFT);
+        protoOutputStream.write(WIDE_COLOR_GAMUT,
+                colorMode & Configuration.COLOR_MODE_WIDE_COLOR_GAMUT_MASK);
+        protoOutputStream.write(TOUCHSCREEN, touchscreen);
+        protoOutputStream.write(KEYBOARD_HIDDEN, keyboardHidden);
+        protoOutputStream.write(HARD_KEYBOARD_HIDDEN, hardKeyboardHidden);
+        protoOutputStream.write(NAVIGATION, navigation);
+        protoOutputStream.write(NAVIGATION_HIDDEN, navigationHidden);
         protoOutputStream.write(ORIENTATION, orientation);
         protoOutputStream.write(UI_MODE, uiMode);
         protoOutputStream.write(SCREEN_WIDTH_DP, screenWidthDp);
@@ -1084,6 +1111,36 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         protoOutputStream.write(SMALLEST_SCREEN_WIDTH_DP, smallestScreenWidthDp);
         protoOutputStream.write(DENSITY_DPI, densityDpi);
         windowConfiguration.writeToProto(protoOutputStream, WINDOW_CONFIGURATION);
+        protoOutputStream.end(token);
+    }
+
+    /**
+     * Write full {@link android.content.ResourcesConfigurationProto} to protocol buffer output
+     * stream.
+     *
+     * @param protoOutputStream Stream to write the Configuration object to.
+     * @param fieldId           Field Id of the Configuration as defined in the parent message
+     * @param metrics           Current display information
+     * @hide
+     */
+    public void writeResConfigToProto(ProtoOutputStream protoOutputStream, long fieldId,
+            DisplayMetrics metrics) {
+        final int width, height;
+        if (metrics.widthPixels >= metrics.heightPixels) {
+            width = metrics.widthPixels;
+            height = metrics.heightPixels;
+        } else {
+            //noinspection SuspiciousNameCombination
+            width = metrics.heightPixels;
+            //noinspection SuspiciousNameCombination
+            height = metrics.widthPixels;
+        }
+
+        final long token = protoOutputStream.start(fieldId);
+        writeToProto(protoOutputStream, CONFIGURATION);
+        protoOutputStream.write(SDK_VERSION, Build.VERSION.RESOURCES_SDK_INT);
+        protoOutputStream.write(SCREEN_WIDTH_PX, width);
+        protoOutputStream.write(SCREEN_HEIGHT_PX, height);
         protoOutputStream.end(token);
     }
 
@@ -1925,11 +1982,21 @@ public final class Configuration implements Parcelable, Comparable<Configuration
 
     /**
      * Returns a string representation of the configuration that can be parsed
-     * by build tools (like AAPT).
+     * by build tools (like AAPT), without display metrics included
      *
      * @hide
      */
     public static String resourceQualifierString(Configuration config) {
+        return resourceQualifierString(config, null);
+    }
+
+    /**
+     * Returns a string representation of the configuration that can be parsed
+     * by build tools (like AAPT).
+     *
+     * @hide
+     */
+    public static String resourceQualifierString(Configuration config, DisplayMetrics metrics) {
         ArrayList<String> parts = new ArrayList<String>();
 
         if (config.mcc != 0) {
@@ -2175,6 +2242,20 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 break;
             default:
                 break;
+        }
+
+        if (metrics != null) {
+            final int width, height;
+            if (metrics.widthPixels >= metrics.heightPixels) {
+                width = metrics.widthPixels;
+                height = metrics.heightPixels;
+            } else {
+                //noinspection SuspiciousNameCombination
+                width = metrics.heightPixels;
+                //noinspection SuspiciousNameCombination
+                height = metrics.widthPixels;
+            }
+            parts.add(width + "x" + height);
         }
 
         parts.add("v" + Build.VERSION.RESOURCES_SDK_INT);
