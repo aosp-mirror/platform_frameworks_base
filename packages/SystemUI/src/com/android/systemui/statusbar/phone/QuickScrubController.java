@@ -176,8 +176,10 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
 
         mTrackAnimator = ObjectAnimator.ofFloat();
         mTrackAnimator.addUpdateListener(mTrackAnimatorListener);
+        mTrackAnimator.setFloatValues(0);
         mButtonAnimator = ObjectAnimator.ofInt();
         mButtonAnimator.addUpdateListener(mButtonTranslationListener);
+        mButtonAnimator.setIntValues(0);
         mQuickScrubEndAnimator = new AnimatorSet();
         mQuickScrubEndAnimator.playTogether(mTrackAnimator, mButtonAnimator);
         mQuickScrubEndAnimator.setDuration(ANIM_DURATION_MS);
@@ -434,6 +436,7 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
     private void animateEnd() {
         mButtonAnimator.setIntValues((int) mTranslation, 0);
         mTrackAnimator.setFloatValues(mTrackAlpha, 0);
+        mQuickScrubEndAnimator.setCurrentPlayTime(0);
         mQuickScrubEndAnimator.start();
     }
 
