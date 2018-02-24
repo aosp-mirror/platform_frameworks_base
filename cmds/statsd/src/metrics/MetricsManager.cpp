@@ -198,31 +198,59 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
         // Uid is 3rd from last field and must match the caller's uid,
         // unless that caller is statsd itself (statsd is allowed to spoof uids).
         long appHookUid = event.GetLong(event.size()-2, &err);
+        if (err != NO_ERROR ) {
+            VLOG("APP_BREADCRUMB_REPORTED had error when parsing the uid");
+            return;
+        }
         int32_t loggerUid = event.GetUid();
-        if (err != NO_ERROR || (loggerUid != appHookUid && loggerUid != AID_STATSD)) {
-            VLOG("AppHook has invalid uid: claimed %ld but caller is %d", appHookUid, loggerUid);
+        if (loggerUid != appHookUid && loggerUid != AID_STATSD) {
+            VLOG("APP_BREADCRUMB_REPORTED has invalid uid: claimed %ld but caller is %d",
+                 appHookUid, loggerUid);
             return;
         }
 
         // Label is 2nd from last field and must be from [0, 15].
         long appHookLabel = event.GetLong(event.size()-1, &err);
-        if (err != NO_ERROR || appHookLabel < 0 || appHookLabel > 15) {
-            VLOG("AppHook does not have valid label %ld", appHookLabel);
+        if (err != NO_ERROR ) {
+            VLOG("APP_BREADCRUMB_REPORTED had error when parsing the label field");
+            return;
+        } else if (appHookLabel < 0 || appHookLabel > 15) {
+            VLOG("APP_BREADCRUMB_REPORTED does not have valid label %ld", appHookLabel);
             return;
         }
 
         // The state must be from 0,3. This part of code must be manually updated.
         long appHookState = event.GetLong(event.size(), &err);
-        if (err != NO_ERROR || appHookState < 0 || appHookState > 3) {
-            VLOG("AppHook does not have valid state %ld", appHookState);
+        if (err != NO_ERROR ) {
+            VLOG("APP_BREADCRUMB_REPORTED had error when parsing the state field");
+            return;
+        } else if (appHookState < 0 || appHookState > 3) {
+            VLOG("APP_BREADCRUMB_REPORTED does not have valid state %ld", appHookState);
             return;
         }
     } else if (event.GetTagId() == android::util::DAVEY_OCCURRED) {
         // Daveys can be logged from any app since they are logged in libs/hwui/JankTracker.cpp.
         // Check that the davey duration is reasonable. Max length check is for privacy.
         status_t err = NO_ERROR;
+
+        // Uid is the first field provided.
+        long jankUid = event.GetLong(1, &err);
+        if (err != NO_ERROR ) {
+            VLOG("Davey occurred had error when parsing the uid");
+            return;
+        }
+        int32_t loggerUid = event.GetUid();
+        if (loggerUid != jankUid && loggerUid != AID_STATSD) {
+            VLOG("DAVEY_OCCURRED has invalid uid: claimed %ld but caller is %d", jankUid,
+                 loggerUid);
+            return;
+        }
+
         long duration = event.GetLong(event.size(), &err);
-        if (err != NO_ERROR || duration > 100000) {
+        if (err != NO_ERROR ) {
+            VLOG("Davey occurred had error when parsing the duration");
+            return;
+        } else if (duration > 100000) {
             VLOG("Davey duration is unreasonably long: %ld", duration);
             return;
         }

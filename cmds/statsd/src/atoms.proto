@@ -763,8 +763,11 @@ message CallStateChanged {
  *   frameworks/base/libs/hwui/JankTracker.cpp
  */
 message DaveyOccurred {
+    // The UID that logged this atom.
+    optional int32 uid = 1;
+
     // Amount of time it took to render the frame. Should be >=700ms.
-    optional int64 jank_duration_millis = 1;
+    optional int64 jank_duration_millis = 2;
 }
 
 /**
