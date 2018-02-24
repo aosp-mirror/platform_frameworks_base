@@ -48,6 +48,9 @@ import java.util.List;
  * and the {@link android.content.Intent#ACTION_SEARCH ACTION_SEARCH}
  * {@link android.content.Intent Intent}.
  *
+ * <p>
+ * {@link Configuration#UI_MODE_TYPE_WATCH} does not support this system service.
+ *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
  * <p>For more information about using the search dialog and adding search

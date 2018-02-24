@@ -3370,7 +3370,11 @@ public abstract class Context {
      * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.app.SearchManager} for handling searches.
      *
-     * @see #getSystemService(String)
+     * <p>
+     * {@link Configuration#UI_MODE_TYPE_WATCH} does not support
+     * {@link android.app.SearchManager}.
+     *
+     * @see #getSystemService
      * @see android.app.SearchManager
      */
     public static final String SEARCH_SERVICE = "search";
