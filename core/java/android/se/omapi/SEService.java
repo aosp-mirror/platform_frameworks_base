@@ -59,6 +59,21 @@ public class SEService {
      */
     public static final int NO_SUCH_ELEMENT_ERROR = 2;
 
+    /**
+     * Interface to send call-backs to the application when the service is connected.
+     */
+    public abstract static class SecureElementListener extends ISecureElementListener.Stub {
+        @Override
+        public IBinder asBinder() {
+            return this;
+        }
+
+        /**
+         * Called by the framework when the service is connected.
+         */
+        public void serviceConnected() {};
+    }
+
     private static final String TAG = "OMAPI.SEService";
 
     private final Object mLock = new Object();
@@ -98,9 +113,9 @@ public class SEService {
      *            the context of the calling application. Cannot be
      *            <code>null</code>.
      * @param listener
-     *            a ISecureElementListener object. Can be <code>null</code>.
+     *            a SecureElementListener object. Can be <code>null</code>.
      */
-    public SEService(Context context, ISecureElementListener listener) {
+    public SEService(Context context, SecureElementListener listener) {
 
         if (context == null) {
             throw new NullPointerException("context must not be null");
