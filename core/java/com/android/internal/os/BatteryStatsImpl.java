@@ -137,7 +137,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 175 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 176 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS;
@@ -14602,6 +14602,7 @@ public class BatteryStatsImpl extends BatteryStats {
             u.mJobsFreshnessTimeMs.writeSummaryFromParcelLocked(out);
             for (int i = 0; i < JOB_FRESHNESS_BUCKETS.length; i++) {
                 if (u.mJobsFreshnessBuckets[i] != null) {
+                    out.writeInt(1);
                     u.mJobsFreshnessBuckets[i].writeSummaryFromParcelLocked(out);
                 } else {
                     out.writeInt(0);
