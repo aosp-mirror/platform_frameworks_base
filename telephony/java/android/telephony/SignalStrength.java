@@ -57,7 +57,9 @@ public class SignalStrength implements Parcelable {
      */
     public static final int INVALID = Integer.MAX_VALUE;
 
-    private static final int LTE_RSRP_THRESHOLDS_NUM = 6;
+    private static final int LTE_RSRP_THRESHOLDS_NUM = 4;
+    private static final int MAX_LTE_RSRP = -44;
+    private static final int MIN_LTE_RSRP = -140;
 
     /** Parameters reported by the Radio */
     private int mGsmSignalStrength; // Valid values are (0-31, 99) as defined in TS 27.007 8.5
@@ -81,7 +83,8 @@ public class SignalStrength implements Parcelable {
                             // onSignalStrengthResult.
     private boolean mUseOnlyRsrpForLteLevel; // Use only RSRP for the number of LTE signal bar.
 
-    // The threshold of LTE RSRP for determining the display level of LTE signal bar.
+    // The threshold of LTE RSRP for determining the display level of LTE signal bar. Note that the
+    // min and max are fixed at MIN_LTE_RSRP (-140) and MAX_LTE_RSRP (-44).
     private int mLteRsrpThresholds[] = new int[LTE_RSRP_THRESHOLDS_NUM];
 
     /**
@@ -319,7 +322,8 @@ public class SignalStrength implements Parcelable {
 
         // TS 36.214 Physical Layer Section 5.1.3, TS 36.331 RRC
         mLteSignalStrength = (mLteSignalStrength >= 0) ? mLteSignalStrength : 99;
-        mLteRsrp = ((mLteRsrp >= 44) && (mLteRsrp <= 140)) ? -mLteRsrp : SignalStrength.INVALID;
+        mLteRsrp = ((-mLteRsrp >= MIN_LTE_RSRP) && (-mLteRsrp <= MAX_LTE_RSRP)) ? -mLteRsrp
+                : SignalStrength.INVALID;
         mLteRsrq = ((mLteRsrq >= 3) && (mLteRsrq <= 20)) ? -mLteRsrq : SignalStrength.INVALID;
         mLteRssnr = ((mLteRssnr >= -200) && (mLteRssnr <= 300)) ? mLteRssnr
                 : SignalStrength.INVALID;
@@ -735,24 +739,29 @@ public class SignalStrength implements Parcelable {
      */
     public int getLteLevel() {
         /*
-         * TS 36.214 Physical Layer Section 5.1.3 TS 36.331 RRC RSSI = received
-         * signal + noise RSRP = reference signal dBm RSRQ = quality of signal
-         * dB= Number of Resource blocksxRSRP/RSSI SNR = gain=signal/noise ratio
-         * = -10log P1/P2 dB
+         * TS 36.214 Physical Layer Section 5.1.3
+         * TS 36.331 RRC
+         *
+         * RSSI = received signal + noise
+         * RSRP = reference signal dBm
+         * RSRQ = quality of signal dB = Number of Resource blocks*RSRP/RSSI
+         * SNR = gain = signal/noise ratio = -10log P1/P2 dB
          */
         int rssiIconLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN, rsrpIconLevel = -1, snrIconLevel = -1;
 
-        if (mLteRsrp > mLteRsrpThresholds[5]) {
-            rsrpIconLevel = -1;
-        } else if (mLteRsrp >= (mLteRsrpThresholds[4] - mLteRsrpBoost)) {
-            rsrpIconLevel = SIGNAL_STRENGTH_GREAT;
+        if (mLteRsrp > MAX_LTE_RSRP || mLteRsrp < MIN_LTE_RSRP) {
+            if (mLteRsrp != INVALID) {
+                Log.wtf(LOG_TAG, "getLteLevel - invalid lte rsrp: mLteRsrp=" + mLteRsrp);
+            }
         } else if (mLteRsrp >= (mLteRsrpThresholds[3] - mLteRsrpBoost)) {
-            rsrpIconLevel = SIGNAL_STRENGTH_GOOD;
+            rsrpIconLevel = SIGNAL_STRENGTH_GREAT;
         } else if (mLteRsrp >= (mLteRsrpThresholds[2] - mLteRsrpBoost)) {
-            rsrpIconLevel = SIGNAL_STRENGTH_MODERATE;
+            rsrpIconLevel = SIGNAL_STRENGTH_GOOD;
         } else if (mLteRsrp >= (mLteRsrpThresholds[1] - mLteRsrpBoost)) {
+            rsrpIconLevel = SIGNAL_STRENGTH_MODERATE;
+        } else if (mLteRsrp >= (mLteRsrpThresholds[0] - mLteRsrpBoost)) {
             rsrpIconLevel = SIGNAL_STRENGTH_POOR;
-        } else if (mLteRsrp >= mLteRsrpThresholds[0]) {
+        } else {
             rsrpIconLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
         }
 
