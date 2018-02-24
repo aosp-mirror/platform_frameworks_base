@@ -21,6 +21,7 @@ package android.se.omapi;
 
 /**
  * Interface to receive call-backs when the service is connected.
+ * @hide
  */
 interface ISecureElementListener {
   /**
