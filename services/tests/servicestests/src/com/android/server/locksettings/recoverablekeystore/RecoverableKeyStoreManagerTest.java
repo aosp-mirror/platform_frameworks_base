@@ -45,6 +45,7 @@ import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.recovery.KeyDerivationParams;
 import android.security.keystore.recovery.KeyChainProtectionParams;
+import android.security.keystore.recovery.RecoveryCertPath;
 import android.security.keystore.recovery.WrappedApplicationKey;
 import android.support.test.filters.SmallTest;
 import android.support.test.InstrumentationRegistry;
@@ -67,6 +68,10 @@ import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.security.cert.CertPath;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.Map;
 import java.util.Random;
@@ -335,6 +340,46 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
+    public void startRecoverySessionWithCertPath_storesTheSessionInfo() throws Exception {
+        mRecoverableKeyStoreManager.startRecoverySessionWithCertPath(
+                TEST_SESSION_ID,
+                RecoveryCertPath.createRecoveryCertPath(TestData.CERT_PATH_1),
+                TEST_VAULT_PARAMS,
+                TEST_VAULT_CHALLENGE,
+                ImmutableList.of(
+                        new KeyChainProtectionParams(
+                                TYPE_LOCKSCREEN,
+                                UI_FORMAT_PASSWORD,
+                                KeyDerivationParams.createSha256Params(TEST_SALT),
+                                TEST_SECRET)));
+
+        assertEquals(1, mRecoverySessionStorage.size());
+        RecoverySessionStorage.Entry entry =
+                mRecoverySessionStorage.get(Binder.getCallingUid(), TEST_SESSION_ID);
+        assertArrayEquals(TEST_SECRET, entry.getLskfHash());
+        assertEquals(KEY_CLAIMANT_LENGTH_BYTES, entry.getKeyClaimant().length);
+    }
+
+    @Test
+    public void startRecoverySessionWithCertPath_checksPermissionFirst() throws Exception {
+        mRecoverableKeyStoreManager.startRecoverySessionWithCertPath(
+                TEST_SESSION_ID,
+                RecoveryCertPath.createRecoveryCertPath(TestData.CERT_PATH_1),
+                TEST_VAULT_PARAMS,
+                TEST_VAULT_CHALLENGE,
+                ImmutableList.of(
+                        new KeyChainProtectionParams(
+                                TYPE_LOCKSCREEN,
+                                UI_FORMAT_PASSWORD,
+                                KeyDerivationParams.createSha256Params(TEST_SALT),
+                                TEST_SECRET)));
+
+        verify(mMockContext, times(2))
+                .enforceCallingOrSelfPermission(
+                        eq(Manifest.permission.RECOVER_KEYSTORE), any());
+    }
+
+    @Test
     public void startRecoverySession_storesTheSessionInfo() throws Exception {
         mRecoverableKeyStoreManager.startRecoverySession(
                 TEST_SESSION_ID,
@@ -428,6 +473,66 @@ public class RecoverableKeyStoreManagerTest {
             fail("should have thrown");
         } catch (ServiceSpecificException e) {
             assertThat(e.getMessage()).contains("do not match");
+        }
+    }
+
+    @Test
+    public void startRecoverySessionWithCertPath_throwsIfBadNumberOfSecrets() throws Exception {
+        try {
+            mRecoverableKeyStoreManager.startRecoverySessionWithCertPath(
+                    TEST_SESSION_ID,
+                    RecoveryCertPath.createRecoveryCertPath(TestData.CERT_PATH_1),
+                    TEST_VAULT_PARAMS,
+                    TEST_VAULT_CHALLENGE,
+                    ImmutableList.of());
+            fail("should have thrown");
+        } catch (UnsupportedOperationException e) {
+            assertThat(e.getMessage()).startsWith(
+                    "Only a single KeyChainProtectionParams is supported");
+        }
+    }
+
+    @Test
+    public void startRecoverySessionWithCertPath_throwsIfPublicKeysMismatch() throws Exception {
+        byte[] vaultParams = TEST_VAULT_PARAMS.clone();
+        vaultParams[1] ^= (byte) 1;  // Flip 1 bit
+        try {
+            mRecoverableKeyStoreManager.startRecoverySessionWithCertPath(
+                    TEST_SESSION_ID,
+                    RecoveryCertPath.createRecoveryCertPath(TestData.CERT_PATH_1),
+                    vaultParams,
+                    TEST_VAULT_CHALLENGE,
+                    ImmutableList.of(
+                            new KeyChainProtectionParams(
+                                    TYPE_LOCKSCREEN,
+                                    UI_FORMAT_PASSWORD,
+                                    KeyDerivationParams.createSha256Params(TEST_SALT),
+                                    TEST_SECRET)));
+            fail("should have thrown");
+        } catch (ServiceSpecificException e) {
+            assertThat(e.getMessage()).contains("do not match");
+        }
+    }
+
+    @Test
+    public void startRecoverySessionWithCertPath_throwsIfEmptyCertPath() throws Exception {
+        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+        CertPath emptyCertPath = certFactory.generateCertPath(new ArrayList<X509Certificate>());
+        try {
+            mRecoverableKeyStoreManager.startRecoverySessionWithCertPath(
+                    TEST_SESSION_ID,
+                    RecoveryCertPath.createRecoveryCertPath(emptyCertPath),
+                    TEST_VAULT_PARAMS,
+                    TEST_VAULT_CHALLENGE,
+                    ImmutableList.of(
+                            new KeyChainProtectionParams(
+                                    TYPE_LOCKSCREEN,
+                                    UI_FORMAT_PASSWORD,
+                                    KeyDerivationParams.createSha256Params(TEST_SALT),
+                                    TEST_SECRET)));
+            fail("should have thrown");
+        } catch (ServiceSpecificException e) {
+            assertThat(e.getMessage()).contains("CertPath is empty");
         }
     }
 

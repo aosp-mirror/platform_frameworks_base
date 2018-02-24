@@ -4274,7 +4274,7 @@ package android.security.keystore.recovery {
     method public int getMaxAttempts();
     method public byte[] getServerParams();
     method public int getSnapshotVersion();
-    method public byte[] getTrustedHardwarePublicKey();
+    method public java.security.cert.CertPath getTrustedHardwareCertPath();
     method public java.util.List<android.security.keystore.recovery.WrappedApplicationKey> getWrappedApplicationKeys();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.security.keystore.recovery.KeyChainSnapshot> CREATOR;
@@ -4318,7 +4318,7 @@ package android.security.keystore.recovery {
   public class RecoverySession implements java.lang.AutoCloseable {
     method public void close();
     method public java.util.Map<java.lang.String, byte[]> recoverKeys(byte[], java.util.List<android.security.keystore.recovery.WrappedApplicationKey>) throws android.security.keystore.recovery.DecryptionFailedException, android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.SessionExpiredException;
-    method public byte[] start(byte[], byte[], byte[], java.util.List<android.security.keystore.recovery.KeyChainProtectionParams>) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
+    method public byte[] start(java.security.cert.CertPath, byte[], byte[], java.util.List<android.security.keystore.recovery.KeyChainProtectionParams>) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
   }
 
   public class SessionExpiredException extends java.security.GeneralSecurityException {

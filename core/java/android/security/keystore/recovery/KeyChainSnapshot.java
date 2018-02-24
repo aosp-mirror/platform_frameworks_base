@@ -23,6 +23,7 @@ import android.os.Parcelable;
 
 import com.android.internal.util.Preconditions;
 
+import java.security.cert.CertPath;
 import java.util.List;
 
 /**
@@ -52,7 +53,8 @@ public final class KeyChainSnapshot implements Parcelable {
     private int mMaxAttempts = DEFAULT_MAX_ATTEMPTS;
     private long mCounterId = DEFAULT_COUNTER_ID;
     private byte[] mServerParams;
-    private byte[] mPublicKey;
+    private byte[] mPublicKey;  // The raw public key bytes used
+    private CertPath mCertPath;  // The certificate path including the intermediate certificates
     private List<KeyChainProtectionParams> mKeyChainProtectionParams;
     private List<WrappedApplicationKey> mEntryRecoveryData;
     private byte[] mEncryptedRecoveryKeyBlob;
@@ -111,11 +113,22 @@ public final class KeyChainSnapshot implements Parcelable {
     /**
      * Public key used to encrypt {@code encryptedRecoveryKeyBlob}.
      *
-     * See implementation for binary key format
+     * See implementation for binary key format.
+     *
+     * @deprecated Use {@link #getTrustedHardwareCertPath} instead.
+     * @removed
      */
-    // TODO: document key format.
+    @Deprecated
     public @NonNull byte[] getTrustedHardwarePublicKey() {
         return mPublicKey;
+    }
+
+    /**
+     * CertPath containing the public key used to encrypt {@code encryptedRecoveryKeyBlob}.
+     */
+    // TODO: Change to @NonNull
+    public CertPath getTrustedHardwareCertPath() {
+        return mCertPath;
     }
 
     /**
@@ -207,9 +220,25 @@ public final class KeyChainSnapshot implements Parcelable {
          *
          * @param publicKey The public key
          * @return This builder.
+         * @deprecated Use {@link #setTrustedHardwareCertPath} instead.
+         * @removed
          */
+        @Deprecated
         public Builder setTrustedHardwarePublicKey(byte[] publicKey) {
             mInstance.mPublicKey = publicKey;
+            return this;
+        }
+
+        /**
+         * Sets CertPath used to validate the trusted hardware public key. The CertPath should
+         * contain a certificate of the trusted hardware public key and any necessary intermediate
+         * certificates.
+         *
+         * @param certPath The public key
+         * @return This builder.
+         */
+        public Builder setTrustedHardwareCertPath(CertPath certPath) {
+            mInstance.mCertPath = certPath;
             return this;
         }
 

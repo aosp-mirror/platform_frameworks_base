@@ -24,6 +24,7 @@ import android.os.ServiceSpecificException;
 import android.util.Log;
 
 import java.security.SecureRandom;
+import java.security.cert.CertPath;
 import java.security.cert.CertificateException;
 import java.util.List;
 import java.util.Map;
@@ -91,7 +92,10 @@ public class RecoverySession implements AutoCloseable {
      *     format.
      * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
      *     service.
+     * @deprecated Use {@link #start(CertPath, byte[], byte[], List)} instead.
+     * @removed
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     @NonNull public byte[] start(
             @NonNull byte[] verifierPublicKey,
@@ -104,6 +108,55 @@ public class RecoverySession implements AutoCloseable {
                     mRecoveryController.getBinder().startRecoverySession(
                             mSessionId,
                             verifierPublicKey,
+                            vaultParams,
+                            vaultChallenge,
+                            secrets);
+            return recoveryClaim;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == RecoveryController.ERROR_BAD_CERTIFICATE_FORMAT) {
+                throw new CertificateException(e.getMessage());
+            }
+            throw mRecoveryController.wrapUnexpectedServiceSpecificException(e);
+        }
+    }
+
+    /**
+     * Starts a recovery session and returns a blob with proof of recovery secret possession.
+     * The method generates a symmetric key for a session, which trusted remote device can use to
+     * return recovery key.
+     *
+     * @param verifierCertPath The certificate path used to create the recovery blob on the source
+     *     device. Keystore will verify the certificate path by using the root of trust.
+     * @param vaultParams Must match the parameters in the corresponding field in the recovery blob.
+     *     Used to limit number of guesses.
+     * @param vaultChallenge Data passed from server for this recovery session and used to prevent
+     *     replay attacks
+     * @param secrets Secrets provided by user, the method only uses type and secret fields.
+     * @return The recovery claim. Claim provides a b binary blob with recovery claim. It is
+     *     encrypted with verifierPublicKey and contains a proof of user secrets, session symmetric
+     *     key and parameters necessary to identify the counter with the number of failed recovery
+     *     attempts.
+     * @throws CertificateException if the {@code verifierCertPath} is invalid.
+     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
+     *     service.
+     */
+    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
+    @NonNull public byte[] start(
+            @NonNull CertPath verifierCertPath,
+            @NonNull byte[] vaultParams,
+            @NonNull byte[] vaultChallenge,
+            @NonNull List<KeyChainProtectionParams> secrets)
+            throws CertificateException, InternalRecoveryServiceException {
+        // Wrap the CertPath in a Parcelable so it can be passed via Binder calls.
+        RecoveryCertPath recoveryCertPath =
+                RecoveryCertPath.createRecoveryCertPath(verifierCertPath);
+        try {
+            byte[] recoveryClaim =
+                    mRecoveryController.getBinder().startRecoverySessionWithCertPath(
+                            mSessionId,
+                            recoveryCertPath,
                             vaultParams,
                             vaultChallenge,
                             secrets);
