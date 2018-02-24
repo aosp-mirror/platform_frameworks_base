@@ -447,6 +447,11 @@ public abstract class BatteryStats implements Parcelable {
          */
         public abstract LongCounter getScanTimeCounter();
 
+        /**
+         * @return a non-null {@link LongCounter} representing time spent (milliseconds) in the
+         * sleep state.
+         */
+        public abstract LongCounter getSleepTimeCounter();
 
         /**
          * @return a non-null {@link LongCounter} representing time spent (milliseconds) in the
@@ -3408,8 +3413,6 @@ public abstract class BatteryStats implements Parcelable {
         for (LongCounter txState : counter.getTxTimeCounters()) {
             totalTxTimeMs += txState.getCountLocked(which);
         }
-        final long sleepTimeMs
-            = totalControllerActivityTimeMs - (idleTimeMs + rxTimeMs + totalTxTimeMs);
 
         if (controllerName.equals(WIFI_CONTROLLER_NAME)) {
             final long scanTimeMs = counter.getScanTimeCounter().getCountLocked(which);
@@ -3423,18 +3426,34 @@ public abstract class BatteryStats implements Parcelable {
             sb.append(formatRatioLocked(scanTimeMs, totalControllerActivityTimeMs));
             sb.append(")");
             pw.println(sb.toString());
+
+            final long sleepTimeMs
+                = totalControllerActivityTimeMs - (idleTimeMs + rxTimeMs + totalTxTimeMs);
+            sb.setLength(0);
+            sb.append(prefix);
+            sb.append("     ");
+            sb.append(controllerName);
+            sb.append(" Sleep time:  ");
+            formatTimeMs(sb, sleepTimeMs);
+            sb.append("(");
+            sb.append(formatRatioLocked(sleepTimeMs, totalControllerActivityTimeMs));
+            sb.append(")");
+            pw.println(sb.toString());
         }
 
-        sb.setLength(0);
-        sb.append(prefix);
-        sb.append("     ");
-        sb.append(controllerName);
-        sb.append(" Sleep time:  ");
-        formatTimeMs(sb, sleepTimeMs);
-        sb.append("(");
-        sb.append(formatRatioLocked(sleepTimeMs, totalControllerActivityTimeMs));
-        sb.append(")");
-        pw.println(sb.toString());
+        if (controllerName.equals(CELLULAR_CONTROLLER_NAME)) {
+            final long sleepTimeMs = counter.getSleepTimeCounter().getCountLocked(which);
+            sb.setLength(0);
+            sb.append(prefix);
+            sb.append("     ");
+            sb.append(controllerName);
+            sb.append(" Sleep time:  ");
+            formatTimeMs(sb, sleepTimeMs);
+            sb.append("(");
+            sb.append(formatRatioLocked(sleepTimeMs, totalControllerActivityTimeMs));
+            sb.append(")");
+            pw.println(sb.toString());
+        }
 
         sb.setLength(0);
         sb.append(prefix);
