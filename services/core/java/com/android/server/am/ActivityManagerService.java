@@ -22355,7 +22355,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Update the configuration with WM first and check if any of the stacks need to be resized
         // due to the configuration change. If so, resize the stacks now and do any relaunches if
         // necessary. This way we don't need to relaunch again afterwards in
-        // ensureActivityConfigurationLocked().
+        // ensureActivityConfiguration().
         if (mWindowManager != null) {
             final int[] resizedStacks =
                     mWindowManager.setNewDisplayOverrideConfiguration(mTempConfig, displayId);
@@ -22383,7 +22383,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             if (starting != null) {
-                kept = starting.ensureActivityConfigurationLocked(changes,
+                kept = starting.ensureActivityConfiguration(changes,
                         false /* preserveWindow */);
                 // And we need to make sure at this point that all other activities
                 // are made visible with the correct configuration.

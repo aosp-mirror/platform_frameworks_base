@@ -361,7 +361,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     private boolean mTurnScreenOn;
 
     /**
-     * Temp configs used in {@link #ensureActivityConfigurationLocked(int, boolean)}
+     * Temp configs used in {@link #ensureActivityConfiguration(int, boolean)}
      */
     private final Configuration mTmpConfig = new Configuration();
     private final Rect mTmpBounds = new Rect();
@@ -2365,13 +2365,27 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         outBounds.offsetTo(left, 0 /* top */);
     }
 
+    boolean ensureActivityConfiguration(int globalChanges, boolean preserveWindow) {
+        return ensureActivityConfiguration(globalChanges, preserveWindow,
+                false /* ignoreStopState */);
+    }
+
     /**
-     * Make sure the given activity matches the current configuration. Returns false if the activity
-     * had to be destroyed.  Returns true if the configuration is the same, or the activity will
-     * remain running as-is for whatever reason. Ensures the HistoryRecord is updated with the
-     * correct configuration and all other bookkeeping is handled.
+     * Make sure the given activity matches the current configuration. Ensures the HistoryRecord
+     * is updated with the correct configuration and all other bookkeeping is handled.
+     *
+     * @param globalChanges The changes to the global configuration.
+     * @param preserveWindow If the activity window should be preserved on screen if the activity
+     *                       is relaunched.
+     * @param ignoreStopState If we should try to relaunch the activity even if it is in the stopped
+     *                        state. This is useful for the case where we know the activity will be
+     *                        visible soon and we want to ensure its configuration before we make it
+     *                        visible.
+     * @return True if the activity was relaunched and false if it wasn't relaunched because we
+     *         can't or the app handles the specific configuration that is changing.
      */
-    boolean ensureActivityConfigurationLocked(int globalChanges, boolean preserveWindow) {
+    boolean ensureActivityConfiguration(int globalChanges, boolean preserveWindow,
+            boolean ignoreStopState) {
         final ActivityStack stack = getStack();
         if (stack.mConfigWillChange) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
@@ -2387,8 +2401,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             return true;
         }
 
-        // Skip updating configuration for activity that are stopping or stopped.
-        if (mState == STOPPING || mState == STOPPED) {
+        if (!ignoreStopState && (mState == STOPPING || mState == STOPPED)) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Skipping config check stopped or stopping: " + this);
             return true;

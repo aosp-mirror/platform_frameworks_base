@@ -123,7 +123,6 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
@@ -1851,7 +1850,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         // First: if this is not the current activity being started, make
                         // sure it matches the current configuration.
                         if (r != starting) {
-                            r.ensureActivityConfigurationLocked(0 /* globalChanges */, preserveWindows);
+                            // Ensure activity configuration ignoring stop state since we are
+                            // becoming visible.
+                            r.ensureActivityConfiguration(0 /* globalChanges */, preserveWindows,
+                                    true /* ignoreStopState */);
                         }
 
                         if (r.app == null || r.app.thread == null) {
@@ -4627,7 +4629,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     (start.getTask() == task) ? activities.indexOf(start) : activities.size() - 1;
             for (; activityIndex >= 0; --activityIndex) {
                 final ActivityRecord r = activities.get(activityIndex);
-                updatedConfig |= r.ensureActivityConfigurationLocked(0 /* globalChanges */,
+                updatedConfig |= r.ensureActivityConfiguration(0 /* globalChanges */,
                         preserveWindow);
                 if (r.fullscreen) {
                     behindFullscreen = true;
