@@ -2240,7 +2240,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
         @Override
         public void onAppIdleStateChanged(final String packageName, final @UserIdInt int userId,
-                boolean idle, int bucket) {
+                boolean idle, int bucket, int reason) {
             final int uid = mLocalPM.getPackageUid(packageName,
                     PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
             if (uid < 0) {

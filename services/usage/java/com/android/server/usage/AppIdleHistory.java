@@ -16,10 +16,12 @@
 
 package com.android.server.usage;
 
-import static android.app.usage.UsageStatsManager.REASON_DEFAULT;
-import static android.app.usage.UsageStatsManager.REASON_FORCED;
-import static android.app.usage.UsageStatsManager.REASON_PREDICTED;
-import static android.app.usage.UsageStatsManager.REASON_USAGE;
+import static android.app.usage.UsageStatsManager.REASON_MAIN_DEFAULT;
+import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED;
+import static android.app.usage.UsageStatsManager.REASON_MAIN_MASK;
+import static android.app.usage.UsageStatsManager.REASON_MAIN_PREDICTED;
+import static android.app.usage.UsageStatsManager.REASON_MAIN_USAGE;
+import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_USER_INTERACTION;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_NEVER;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
@@ -112,8 +114,10 @@ public class AppIdleHistory {
         // Standby bucket
         @UsageStatsManager.StandbyBuckets
         int currentBucket;
-        // Reason for setting the standby bucket. TODO: Switch to int.
-        String bucketingReason;
+        // Reason for setting the standby bucket. The value here is a combination of
+        // one of UsageStatsManager.REASON_MAIN_* and one (or none) of
+        // UsageStatsManager.REASON_SUB_*. Also see REASON_MAIN_MASK and REASON_SUB_MASK.
+        int bucketingReason;
         // In-memory only, last bucket for which the listeners were informed
         int lastInformedBucket;
         // The last time a job was run for this app, using elapsed timebase
@@ -212,13 +216,14 @@ public class AppIdleHistory {
      * @param appUsageHistory the usage record for the app being updated
      * @param packageName name of the app being updated, for logging purposes
      * @param newBucket the bucket to set the app to
+     * @param usageReason the sub-reason for usage, one of REASON_SUB_USAGE_*
      * @param elapsedRealtime mark as used time if non-zero
      * @param timeout set the timeout of the specified bucket, if non-zero. Can only be used
      *                with bucket values of ACTIVE and WORKING_SET.
      * @return
      */
     public AppUsageHistory reportUsage(AppUsageHistory appUsageHistory, String packageName,
-            int newBucket, long elapsedRealtime, long timeout) {
+            int newBucket, int usageReason, long elapsedRealtime, long timeout) {
         // Set the timeout if applicable
         if (timeout > elapsedRealtime) {
             // Convert to elapsed timebase
@@ -246,10 +251,10 @@ public class AppIdleHistory {
             if (DEBUG) {
                 Slog.d(TAG, "Moved " + packageName + " to bucket=" + appUsageHistory
                         .currentBucket
-                        + ", reason=" + appUsageHistory.bucketingReason);
+                        + ", reason=0x0" + Integer.toHexString(appUsageHistory.bucketingReason));
             }
         }
-        appUsageHistory.bucketingReason = REASON_USAGE;
+        appUsageHistory.bucketingReason = REASON_MAIN_USAGE | usageReason;
 
         return appUsageHistory;
     }
@@ -262,16 +267,17 @@ public class AppIdleHistory {
      * @param packageName
      * @param userId
      * @param newBucket the bucket to set the app to
-     * @param elapsedRealtime mark as used time if non-zero
+     * @param usageReason sub reason for usage
+     * @param nowElapsed mark as used time if non-zero
      * @param timeout set the timeout of the specified bucket, if non-zero. Can only be used
      *                with bucket values of ACTIVE and WORKING_SET.
      * @return
      */
     public AppUsageHistory reportUsage(String packageName, int userId, int newBucket,
-            long nowElapsed, long timeout) {
+            int usageReason, long nowElapsed, long timeout) {
         ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
         AppUsageHistory history = getPackageHistory(userHistory, packageName, nowElapsed, true);
-        return reportUsage(history, packageName, newBucket, nowElapsed, timeout);
+        return reportUsage(history, packageName, newBucket, usageReason, nowElapsed, timeout);
     }
 
     private ArrayMap<String, AppUsageHistory> getUserHistory(int userId) {
@@ -293,7 +299,7 @@ public class AppIdleHistory {
             appUsageHistory.lastUsedScreenTime = getScreenOnTime(elapsedRealtime);
             appUsageHistory.lastPredictedTime = getElapsedTime(0);
             appUsageHistory.currentBucket = STANDBY_BUCKET_NEVER;
-            appUsageHistory.bucketingReason = REASON_DEFAULT;
+            appUsageHistory.bucketingReason = REASON_MAIN_DEFAULT;
             appUsageHistory.lastInformedBucket = -1;
             appUsageHistory.lastJobRunTime = Long.MIN_VALUE; // long long time ago
             userHistory.put(packageName, appUsageHistory);
@@ -328,18 +334,18 @@ public class AppIdleHistory {
     }
 
     public void setAppStandbyBucket(String packageName, int userId, long elapsedRealtime,
-            int bucket, String reason) {
+            int bucket, int reason) {
         ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
         AppUsageHistory appUsageHistory =
                 getPackageHistory(userHistory, packageName, elapsedRealtime, true);
         appUsageHistory.currentBucket = bucket;
         appUsageHistory.bucketingReason = reason;
-        if (reason.startsWith(REASON_PREDICTED)) {
+        if ((reason & REASON_MAIN_MASK) == REASON_MAIN_PREDICTED) {
             appUsageHistory.lastPredictedTime = getElapsedTime(elapsedRealtime);
         }
         if (DEBUG) {
             Slog.d(TAG, "Moved " + packageName + " to bucket=" + appUsageHistory.currentBucket
-                    + ", reason=" + appUsageHistory.bucketingReason);
+                    + ", reason=0x0" + Integer.toHexString(appUsageHistory.bucketingReason));
         }
     }
 
@@ -393,11 +399,11 @@ public class AppIdleHistory {
         return buckets;
     }
 
-    public String getAppStandbyReason(String packageName, int userId, long elapsedRealtime) {
+    public int getAppStandbyReason(String packageName, int userId, long elapsedRealtime) {
         ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
         AppUsageHistory appUsageHistory =
                 getPackageHistory(userHistory, packageName, elapsedRealtime, false);
-        return appUsageHistory != null ? appUsageHistory.bucketingReason : null;
+        return appUsageHistory != null ? appUsageHistory.bucketingReason : 0;
     }
 
     public long getElapsedTime(long elapsedRealtime) {
@@ -411,11 +417,11 @@ public class AppIdleHistory {
                 elapsedRealtime, true);
         if (idle) {
             appUsageHistory.currentBucket = STANDBY_BUCKET_RARE;
-            appUsageHistory.bucketingReason = REASON_FORCED;
+            appUsageHistory.bucketingReason = REASON_MAIN_FORCED;
         } else {
             appUsageHistory.currentBucket = STANDBY_BUCKET_ACTIVE;
             // This is to pretend that the app was just used, don't freeze the state anymore.
-            appUsageHistory.bucketingReason = REASON_USAGE;
+            appUsageHistory.bucketingReason = REASON_MAIN_USAGE | REASON_SUB_USAGE_USER_INTERACTION;
         }
         return appUsageHistory.currentBucket;
     }
@@ -516,7 +522,7 @@ public class AppIdleHistory {
                         appUsageHistory.currentBucket = currentBucketString == null
                                 ? STANDBY_BUCKET_ACTIVE
                                 : Integer.parseInt(currentBucketString);
-                        appUsageHistory.bucketingReason =
+                        String bucketingReason =
                                 parser.getAttributeValue(null, ATTR_BUCKETING_REASON);
                         appUsageHistory.lastJobRunTime = getLongValue(parser,
                                 ATTR_LAST_RUN_JOB_TIME, Long.MIN_VALUE);
@@ -524,8 +530,13 @@ public class AppIdleHistory {
                                 ATTR_BUCKET_ACTIVE_TIMEOUT_TIME, 0L);
                         appUsageHistory.bucketWorkingSetTimeoutTime = getLongValue(parser,
                                 ATTR_BUCKET_WORKING_SET_TIMEOUT_TIME, 0L);
-                        if (appUsageHistory.bucketingReason == null) {
-                            appUsageHistory.bucketingReason = REASON_DEFAULT;
+                        appUsageHistory.bucketingReason = REASON_MAIN_DEFAULT;
+                        if (bucketingReason != null) {
+                            try {
+                                appUsageHistory.bucketingReason =
+                                        Integer.parseInt(bucketingReason, 16);
+                            } catch (NumberFormatException nfe) {
+                            }
                         }
                         appUsageHistory.lastInformedBucket = -1;
                         userHistory.put(packageName, appUsageHistory);
@@ -574,7 +585,8 @@ public class AppIdleHistory {
                         Long.toString(history.lastPredictedTime));
                 xml.attribute(null, ATTR_CURRENT_BUCKET,
                         Integer.toString(history.currentBucket));
-                xml.attribute(null, ATTR_BUCKETING_REASON, history.bucketingReason);
+                xml.attribute(null, ATTR_BUCKETING_REASON,
+                        Integer.toHexString(history.bucketingReason));
                 if (history.bucketActiveTimeoutTime > 0) {
                     xml.attribute(null, ATTR_BUCKET_ACTIVE_TIMEOUT_TIME, Long.toString(history
                             .bucketActiveTimeoutTime));
@@ -600,7 +612,7 @@ public class AppIdleHistory {
     }
 
     public void dump(IndentingPrintWriter idpw, int userId, String pkg) {
-        idpw.println("Package idle stats:");
+        idpw.println("App Standby States:");
         idpw.increaseIndent();
         ArrayMap<String, AppUsageHistory> userHistory = mIdleHistory.get(userId);
         final long elapsedRealtime = SystemClock.elapsedRealtime();
@@ -615,24 +627,25 @@ public class AppIdleHistory {
                 continue;
             }
             idpw.print("package=" + packageName);
-            idpw.print(" userId=" + userId);
-            idpw.print(" lastUsedElapsed=");
+            idpw.print(" u=" + userId);
+            idpw.print(" bucket=" + appUsageHistory.currentBucket
+                    + " reason="
+                    + UsageStatsManager.reasonToString(appUsageHistory.bucketingReason));
+            idpw.print(" used=");
             TimeUtils.formatDuration(totalElapsedTime - appUsageHistory.lastUsedElapsedTime, idpw);
-            idpw.print(" lastUsedScreenOn=");
+            idpw.print(" usedScr=");
             TimeUtils.formatDuration(screenOnTime - appUsageHistory.lastUsedScreenTime, idpw);
-            idpw.print(" lastPredictedTime=");
+            idpw.print(" lastPred=");
             TimeUtils.formatDuration(totalElapsedTime - appUsageHistory.lastPredictedTime, idpw);
-            idpw.print(" bucketActiveTimeoutTime=");
-            TimeUtils.formatDuration(totalElapsedTime - appUsageHistory.bucketActiveTimeoutTime,
+            idpw.print(" activeLeft=");
+            TimeUtils.formatDuration(appUsageHistory.bucketActiveTimeoutTime - totalElapsedTime,
                     idpw);
-            idpw.print(" bucketWorkingSetTimeoutTime=");
-            TimeUtils.formatDuration(totalElapsedTime - appUsageHistory.bucketWorkingSetTimeoutTime,
+            idpw.print(" wsLeft=");
+            TimeUtils.formatDuration(appUsageHistory.bucketWorkingSetTimeoutTime - totalElapsedTime,
                     idpw);
-            idpw.print(" lastJobRunTime=");
+            idpw.print(" lastJob=");
             TimeUtils.formatDuration(totalElapsedTime - appUsageHistory.lastJobRunTime, idpw);
             idpw.print(" idle=" + (isIdle(packageName, userId, elapsedRealtime) ? "y" : "n"));
-            idpw.print(" bucket=" + appUsageHistory.currentBucket
-                    + " reason=" + appUsageHistory.bucketingReason);
             idpw.println();
         }
         idpw.println();

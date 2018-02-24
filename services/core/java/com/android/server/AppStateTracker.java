@@ -678,7 +678,7 @@ public class AppStateTracker {
     final class StandbyTracker extends AppIdleStateChangeListener {
         @Override
         public void onAppIdleStateChanged(String packageName, int userId, boolean idle,
-                int bucket) {
+                int bucket, int reason) {
             if (DEBUG) {
                 Slog.d(TAG,"onAppIdleStateChanged: " + packageName + " u" + userId
                         + (idle ? " idle" : " active") + " " + bucket);

@@ -120,10 +120,10 @@ public class UsageStatsService extends SystemService implements
             new UsageStatsManagerInternal.AppIdleStateChangeListener() {
                 @Override
                 public void onAppIdleStateChanged(String packageName, int userId, boolean idle,
-                        int bucket) {
+                        int bucket, int reason) {
                     Event event = new Event();
                     event.mEventType = Event.STANDBY_BUCKET_CHANGED;
-                    event.mBucket = bucket;
+                    event.mBucketAndReason = (bucket << 16) | (reason & 0xFFFF);
                     event.mPackage = packageName;
                     // This will later be converted to system time.
                     event.mTimeStamp = SystemClock.elapsedRealtime();
@@ -741,9 +741,9 @@ public class UsageStatsService extends SystemService implements
                 throw re.rethrowFromSystemServer();
             }
             final boolean shellCaller = callingUid == 0 || callingUid == Process.SHELL_UID;
-            final String reason = shellCaller
-                    ? UsageStatsManager.REASON_FORCED
-                    : UsageStatsManager.REASON_PREDICTED + ":" + callingUid;
+            final int reason = shellCaller
+                    ? UsageStatsManager.REASON_MAIN_FORCED
+                    : UsageStatsManager.REASON_MAIN_PREDICTED;
             final long token = Binder.clearCallingIdentity();
             try {
                 // Caller cannot set their own standby state
@@ -798,9 +798,9 @@ public class UsageStatsService extends SystemService implements
                 throw re.rethrowFromSystemServer();
             }
             final boolean shellCaller = callingUid == 0 || callingUid == Process.SHELL_UID;
-            final String reason = shellCaller
-                    ? UsageStatsManager.REASON_FORCED
-                    : UsageStatsManager.REASON_PREDICTED + ":" + callingUid;
+            final int reason = shellCaller
+                    ? UsageStatsManager.REASON_MAIN_FORCED
+                    : UsageStatsManager.REASON_MAIN_PREDICTED;
             final long token = Binder.clearCallingIdentity();
             try {
                 final long elapsedRealtime = SystemClock.elapsedRealtime();

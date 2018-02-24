@@ -520,7 +520,8 @@ class UserUsageStatsService {
             pw.printPair("shortcutId", event.mShortcutId);
         }
         if (event.mEventType == UsageEvents.Event.STANDBY_BUCKET_CHANGED) {
-            pw.printPair("standbyBucket", event.mBucket);
+            pw.printPair("standbyBucket", event.getStandbyBucket());
+            pw.printPair("reason", UsageStatsManager.reasonToString(event.getStandbyReason()));
         }
         pw.printHexPair("flags", event.mFlags);
         pw.println();

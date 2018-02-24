@@ -109,7 +109,8 @@ public final class UsageEvents implements Parcelable {
         public static final int NOTIFICATION_SEEN = 10;
 
         /**
-         * An event type denoting a change in App Standby Bucket.
+         * An event type denoting a change in App Standby Bucket. Additional bucket information
+         * is contained in mBucketAndReason.
          * @hide
          */
         @SystemApi
@@ -180,11 +181,12 @@ public final class UsageEvents implements Parcelable {
         public String[] mContentAnnotations;
 
         /**
-         * The app standby bucket assigned.
+         * The app standby bucket assigned and reason. Bucket is the high order 16 bits, reason
+         * is the low order 16 bits.
          * Only present for {@link #STANDBY_BUCKET_CHANGED} event types
          * {@hide}
          */
-        public int mBucket;
+        public int mBucketAndReason;
 
         /** @hide */
         @EventFlags
@@ -205,7 +207,7 @@ public final class UsageEvents implements Parcelable {
             mContentType = orig.mContentType;
             mContentAnnotations = orig.mContentAnnotations;
             mFlags = orig.mFlags;
-            mBucket = orig.mBucket;
+            mBucketAndReason = orig.mBucketAndReason;
         }
 
         /**
@@ -268,7 +270,19 @@ public final class UsageEvents implements Parcelable {
          */
         @SystemApi
         public int getStandbyBucket() {
-            return mBucket;
+            return (mBucketAndReason & 0xFFFF0000) >>> 16;
+        }
+
+        /**
+         * Returns the reason for the bucketing, if the event is of type
+         * {@link #STANDBY_BUCKET_CHANGED}, otherwise returns 0. Reason values include
+         * the main reason which is one of REASON_MAIN_*, OR'ed with REASON_SUB_*, if there
+         * are sub-reasons for the main reason, such as REASON_SUB_USAGE_* when the main reason
+         * is REASON_MAIN_USAGE.
+         * @hide
+         */
+        public int getStandbyReason() {
+            return mBucketAndReason & 0x0000FFFF;
         }
 
         /** @hide */
@@ -428,7 +442,7 @@ public final class UsageEvents implements Parcelable {
                 p.writeStringArray(event.mContentAnnotations);
                 break;
             case Event.STANDBY_BUCKET_CHANGED:
-                p.writeInt(event.mBucket);
+                p.writeInt(event.mBucketAndReason);
                 break;
         }
     }
@@ -474,7 +488,7 @@ public final class UsageEvents implements Parcelable {
                 eventOut.mContentAnnotations = p.createStringArray();
                 break;
             case Event.STANDBY_BUCKET_CHANGED:
-                eventOut.mBucket = p.readInt();
+                eventOut.mBucketAndReason = p.readInt();
                 break;
         }
     }
