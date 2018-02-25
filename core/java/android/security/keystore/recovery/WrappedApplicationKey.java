@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package android.security.keystore.recovery;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -29,7 +28,6 @@ import com.android.internal.util.Preconditions;
  *
  * <ul>
  *   <li>Alias - Keystore alias of the key.
- *   <li>Account Recovery Agent specific account associated with the key.
  *   <li>Encrypted key material.
  * </ul>
  *
@@ -43,7 +41,6 @@ public final class WrappedApplicationKey implements Parcelable {
     private String mAlias;
     // The only supported format is AES-256 symmetric key.
     private byte[] mEncryptedKeyMaterial;
-    private byte[] mAccount;
 
     /**
      * Builder for creating {@link WrappedApplicationKey}.
@@ -63,13 +60,11 @@ public final class WrappedApplicationKey implements Parcelable {
         }
 
         /**
-         * Sets Recovery agent specific account.
-         *
-         * @param account The account.
-         * @return This builder.
+         * @deprecated AOSP does not associate keys with accounts. This may be done by system app.
+         * @removed
          */
+        @Deprecated
         public Builder setAccount(@NonNull byte[] account) {
-            mInstance.mAccount = account;
             return this;
         }
 
@@ -94,15 +89,11 @@ public final class WrappedApplicationKey implements Parcelable {
         @NonNull public WrappedApplicationKey build() {
             Preconditions.checkNotNull(mInstance.mAlias);
             Preconditions.checkNotNull(mInstance.mEncryptedKeyMaterial);
-            if (mInstance.mAccount == null) {
-                mInstance.mAccount = new byte[]{};
-            }
             return mInstance;
         }
     }
 
-    private WrappedApplicationKey() {
-    }
+    private WrappedApplicationKey() { }
 
     /**
      * Deprecated - consider using Builder.
@@ -127,12 +118,13 @@ public final class WrappedApplicationKey implements Parcelable {
         return mEncryptedKeyMaterial;
     }
 
-    /** Account, default value is empty array */
+    /**
+     * @deprecated AOSP does not associate keys with accounts. This may be done by system app.
+     * @removed
+     */
+    @Deprecated
     public @NonNull byte[] getAccount() {
-        if (mAccount == null) {
-            return new byte[]{};
-        }
-        return mAccount;
+        return new byte[0];
     }
 
     public static final Parcelable.Creator<WrappedApplicationKey> CREATOR =
@@ -150,7 +142,6 @@ public final class WrappedApplicationKey implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(mAlias);
         out.writeByteArray(mEncryptedKeyMaterial);
-        out.writeByteArray(mAccount);
     }
 
     /**
@@ -159,7 +150,6 @@ public final class WrappedApplicationKey implements Parcelable {
     protected WrappedApplicationKey(Parcel in) {
         mAlias = in.readString();
         mEncryptedKeyMaterial = in.createByteArray();
-        mAccount = in.createByteArray();
     }
 
     @Override
