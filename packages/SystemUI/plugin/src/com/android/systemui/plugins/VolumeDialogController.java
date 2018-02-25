@@ -181,6 +181,5 @@ public interface VolumeDialogController {
         void onScreenOff();
         void onShowSafetyWarning(int flags);
         void onAccessibilityModeChanged(Boolean showA11yStream);
-        void onConnectedDeviceChanged(String deviceName);
     }
 }

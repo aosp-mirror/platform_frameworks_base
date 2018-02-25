@@ -307,6 +307,8 @@ message Subscription {
     PerfettoDetails perfetto_details = 5;
     BroadcastSubscriberDetails broadcast_subscriber_details = 6;
   }
+
+  optional float probability_of_informing = 7 [default = 1.1];
 }
 
 message StatsdConfig {

@@ -310,7 +310,7 @@ void VulkanManager::createBuffers(VulkanSurface* surface, VkFormat format, VkExt
     for (uint32_t i = 0; i < surface->mImageCount; ++i) {
         GrVkImageInfo info;
         info.fImage = surface->mImages[i];
-        info.fAlloc = {VK_NULL_HANDLE, 0, 0, 0};
+        info.fAlloc = GrVkAlloc();
         info.fImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         info.fImageTiling = VK_IMAGE_TILING_OPTIMAL;
         info.fFormat = format;

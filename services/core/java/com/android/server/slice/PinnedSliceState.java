@@ -16,7 +16,6 @@ package com.android.server.slice;
 
 import static android.app.slice.SliceManager.PERMISSION_GRANTED;
 
-import android.app.slice.ISliceListener;
 import android.app.slice.Slice;
 import android.app.slice.SliceProvider;
 import android.app.slice.SliceSpec;
@@ -106,10 +105,6 @@ public class PinnedSliceState {
         setSlicePinned(false);
     }
 
-    public void onChange() {
-        mService.getHandler().post(this::handleBind);
-    }
-
     private void setSlicePinned(boolean pinned) {
         synchronized (mLock) {
             if (mSlicePinned == pinned) return;
@@ -122,45 +117,23 @@ public class PinnedSliceState {
         }
     }
 
-    public void addSliceListener(ISliceListener listener, String pkg, SliceSpec[] specs,
-            boolean hasPermission) {
+    public void pin(String pkg, SliceSpec[] specs, IBinder token) {
         synchronized (mLock) {
-            if (mListeners.size() == 0) {
-                mService.listen(mUri);
-            }
+            mListeners.put(token, new ListenerInfo(token, pkg, true,
+                    Binder.getCallingUid(), Binder.getCallingPid()));
             try {
-                listener.asBinder().linkToDeath(mDeathRecipient, 0);
+                token.linkToDeath(mDeathRecipient, 0);
             } catch (RemoteException e) {
             }
-            mListeners.put(listener.asBinder(), new ListenerInfo(listener, pkg, hasPermission,
-                    Binder.getCallingUid(), Binder.getCallingPid()));
             mergeSpecs(specs);
-            setSlicePinned(hasPermission);
-        }
-    }
-
-    public boolean removeSliceListener(ISliceListener listener) {
-        synchronized (mLock) {
-            listener.asBinder().unlinkToDeath(mDeathRecipient, 0);
-            if (mListeners.containsKey(listener.asBinder()) && mListeners.size() == 1) {
-                mService.unlisten(mUri);
-            }
-            mListeners.remove(listener.asBinder());
-        }
-        return !hasPinOrListener();
-    }
-
-    public void pin(String pkg, SliceSpec[] specs) {
-        synchronized (mLock) {
             setSlicePinned(true);
-            mPinnedPkgs.add(pkg);
-            mergeSpecs(specs);
         }
     }
 
-    public boolean unpin(String pkg) {
+    public boolean unpin(String pkg, IBinder token) {
         synchronized (mLock) {
-            mPinnedPkgs.remove(pkg);
+            token.unlinkToDeath(mDeathRecipient, 0);
+            mListeners.remove(token);
         }
         return !hasPinOrListener();
     }
@@ -168,30 +141,6 @@ public class PinnedSliceState {
     public boolean isListening() {
         synchronized (mLock) {
             return !mListeners.isEmpty();
-        }
-    }
-
-    public void recheckPackage(String pkg) {
-        synchronized (mLock) {
-            for (int i = 0; i < mListeners.size(); i++) {
-                ListenerInfo info = mListeners.valueAt(i);
-                if (!info.hasPermission && Objects.equals(info.pkg, pkg)) {
-                    mService.getHandler().post(() -> {
-                        // This bind lets the app itself participate in the permission grant.
-                        Slice s = doBind(info);
-                        if (mService.checkAccess(info.pkg, mUri, info.callingUid, info.callingPid)
-                                == PERMISSION_GRANTED) {
-                            info.hasPermission = true;
-                            setSlicePinned(true);
-                            try {
-                                info.listener.onSliceUpdated(s);
-                            } catch (RemoteException e) {
-                                checkSelfRemove();
-                            }
-                        }
-                    });
-                }
-            }
         }
     }
 
@@ -213,7 +162,6 @@ public class PinnedSliceState {
     private void checkSelfRemove() {
         if (!hasPinOrListener()) {
             // All the listeners died, remove from pinned state.
-            mService.unlisten(mUri);
             mService.removePinnedSlice(mUri);
         }
     }
@@ -223,67 +171,11 @@ public class PinnedSliceState {
         synchronized (mLock) {
             for (int i = mListeners.size() - 1; i >= 0; i--) {
                 ListenerInfo l = mListeners.valueAt(i);
-                if (!l.listener.asBinder().isBinderAlive()) {
+                if (!l.token.isBinderAlive()) {
                     mListeners.removeAt(i);
                 }
             }
             checkSelfRemove();
-        }
-    }
-
-    private void handleBind() {
-        Slice cachedSlice = doBind(null);
-        synchronized (mLock) {
-            if (!hasPinOrListener()) return;
-            for (int i = mListeners.size() - 1; i >= 0; i--) {
-                ListenerInfo info = mListeners.valueAt(i);
-                Slice s = cachedSlice;
-                if (s == null || s.hasHint(Slice.HINT_CALLER_NEEDED)
-                        || !info.hasPermission) {
-                    s = doBind(info);
-                }
-                if (s == null) {
-                    mListeners.removeAt(i);
-                    continue;
-                }
-                try {
-                    info.listener.onSliceUpdated(s);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Unable to notify slice " + mUri, e);
-                    mListeners.removeAt(i);
-                    continue;
-                }
-            }
-            checkSelfRemove();
-        }
-    }
-
-    private Slice doBind(ListenerInfo info) {
-        try (ContentProviderClient client = getClient()) {
-            if (client == null) return null;
-            Bundle extras = new Bundle();
-            extras.putParcelable(SliceProvider.EXTRA_BIND_URI, mUri);
-            extras.putParcelableArrayList(SliceProvider.EXTRA_SUPPORTED_SPECS,
-                    new ArrayList<>(Arrays.asList(mSupportedSpecs)));
-            if (info != null) {
-                extras.putString(SliceProvider.EXTRA_OVERRIDE_PKG, info.pkg);
-                extras.putInt(SliceProvider.EXTRA_OVERRIDE_UID, info.callingUid);
-                extras.putInt(SliceProvider.EXTRA_OVERRIDE_PID, info.callingPid);
-            }
-            final Bundle res;
-            try {
-                res = client.call(SliceProvider.METHOD_SLICE, null, extras);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Unable to bind slice " + mUri, e);
-                return null;
-            }
-            if (res == null) return null;
-            Bundle.setDefusable(res, true);
-            return res.getParcelable(SliceProvider.EXTRA_SLICE);
-        } catch (Throwable t) {
-            // Calling out of the system process, make sure they don't throw anything at us.
-            Log.e(TAG, "Caught throwable while binding " + mUri, t);
-            return null;
         }
     }
 
@@ -315,15 +207,15 @@ public class PinnedSliceState {
 
     private class ListenerInfo {
 
-        private ISliceListener listener;
+        private IBinder token;
         private String pkg;
         private boolean hasPermission;
         private int callingUid;
         private int callingPid;
 
-        public ListenerInfo(ISliceListener listener, String pkg, boolean hasPermission,
+        public ListenerInfo(IBinder token, String pkg, boolean hasPermission,
                 int callingUid, int callingPid) {
-            this.listener = listener;
+            this.token = token;
             this.pkg = pkg;
             this.hasPermission = hasPermission;
             this.callingUid = callingUid;

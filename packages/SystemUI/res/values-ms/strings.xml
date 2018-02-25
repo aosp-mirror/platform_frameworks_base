@@ -103,12 +103,11 @@
     <string name="camera_label" msgid="7261107956054836961">"buka kamera"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Pilih reka letak tugas baharu"</string>
     <string name="cancel" msgid="6442560571259935130">"Batal"</string>
-    <!-- no translation found for accessibility_fingerprint_dialog_fingerprint_icon (3125122495414253226) -->
+    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
     <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_app_icon (3228052542929174609) -->
-    <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_help_area (5730471601819225159) -->
-    <skip />
+    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Ikon cap jari"</string>
+    <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"Ikon aplikasi"</string>
+    <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Bahagian mesej bantuan"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Butang zum keserasian."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Skrin zum lebih kecil kepada lebih besar."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth disambungkan."</string>
@@ -275,6 +274,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"Bekas Pencuci Mulut"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Penyelamat skrin"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Jangan ganggu"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Keutamaan sahaja"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Penggera sahaja"</string>
@@ -311,6 +312,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi Dimatikan"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi Dihidupkan"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Tiada rangkaian Wi-Fi tersedia"</string>
+    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"Penggera"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Hantar"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Menghantar"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Peranti tidak bernama"</string>
@@ -327,9 +329,11 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"Menyambung..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Penambatan"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Tempat liputan"</string>
-    <!-- no translation found for quick_settings_hotspot_secondary_label_transient (7161046712706277215) -->
-    <skip />
-    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (2324635800672199428) -->
+    <string name="quick_settings_hotspot_secondary_label_transient" msgid="7161046712706277215">"Menghidupkan…"</string>
+    <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
+      <item quantity="other">%d peranti</item>
+      <item quantity="one">%d peranti</item>
+    </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Pemberitahuan"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Lampu suluh"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Data mudah alih"</string>
@@ -339,10 +343,8 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> digunakan"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> had"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Amaran <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <!-- no translation found for quick_settings_work_mode_on_label (3421274215098764735) -->
-    <skip />
-    <!-- no translation found for quick_settings_work_mode_off_label (8856918707867192186) -->
-    <skip />
+    <string name="quick_settings_work_mode_on_label" msgid="3421274215098764735">"Profil kerja"</string>
+    <string name="quick_settings_work_mode_off_label" msgid="8856918707867192186">"Pemberitahuan &amp; apl dimatikan"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Cahaya Malam"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Dihidupkan pd senja"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Hingga matahari terbit"</string>
@@ -360,8 +362,6 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> dilumpuhkan dalam mod selamat."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Kosongkan semua"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Seret ke sini untuk menggunakan skrin pisah"</string>
-    <!-- no translation found for recents_swipe_up_onboarding (3824607135920170001) -->
-    <skip />
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Mendatar Terpisah"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Menegak Terpisah"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Tersuai Terpisah"</string>
@@ -502,11 +502,18 @@
     <string name="volume_zen_end_now" msgid="6930243045593601084">"Matikan sekarang"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Kembangkan"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Runtuhkan"</string>
+    <string name="accessibility_output_chooser" msgid="8185317493017988680">"Tukar peranti output"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Skrin telah disemat"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Tindakan ini memastikan skrin kelihatan sehingga anda menyahsemat. Sentuh &amp; tahan Kembali dan Ikhtisar untuk menyahsemat."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Tindakan ini memastikan skrin kelihatan sehingga anda menyahsemat. Sentuh &amp; tahan Kembali dan Skrin Utama untuk menyahsemat."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Tindakan ini memastikan skrin kelihatan sehingga anda menyahsemat. Sentuh &amp; tahan Ikhtisar untuk menyahsemat."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Tindakan ini memastikan skrin kelihatan sehingga anda menyahsemat. Sentuh &amp; tahan Skrin Utama untuk menyahsemat."</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"Untuk menyahsemat skrin ini, sentuh &amp; tahan butang Kembali dan Ikhtisar"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Untuk menyahsemat skrin ini, sentuh &amp; tahan butang Kembali dan Skrin Utama"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Faham"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Tidak"</string>
+    <string name="screen_pinning_start" msgid="1022122128489278317">"Skrin disemat"</string>
+    <string name="screen_pinning_exit" msgid="5187339744262325372">"Skrin dinyahsemat"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Sembunyikan <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Mesej itu akan terpapar semula pada kali seterusnya anda menghidupkan apl dalam tetapan."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Sembunyikan"</string>
@@ -529,8 +536,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Ketik untuk meredam. Perkhidmatan kebolehaksesan mungkin diredamkan."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Ketik untuk menetapkan pada getar."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Ketik untuk meredam."</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s kawalan kelantangan ditunjukkan. Leret ke atas untuk mengetepikan."</string>
-    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Kawalan kelantangan disembunyikan"</string>
+    <string name="volume_dialog_title" msgid="7272969888820035876">"%s kawalan kelantangan"</string>
     <string name="output_title" msgid="5355078100792942802">"Output media"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Output panggilan telefon"</string>
     <string name="output_none_found" msgid="5544982839808921091">"Tiada peranti ditemui"</string>
@@ -586,8 +592,7 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Dengan kawalan pemberitahuan berkuasa, anda boleh menetapkan tahap kepentingan dari 0 hingga 5 untuk pemberitahuan apl. \n\n"<b>"Tahap 5"</b>" \n- Tunjukkan pada bahagian atas senarai pemberitahuan \n- Benarkan gangguan skrin penuh \n- Sentiasa intai \n\n"<b>"Tahap 4"</b>" \n- Halang gangguan skrin penuh \n- Sentiasa intai \n\n"<b>"Tahap 3"</b>" \n- Halang gangguan skrin penuh \n- Jangan intai \n\n"<b>"Tahap 2"</b>" \n- Halang gangguan skrin penuh \n- Jangan intai \n- Jangan berbunyi dan bergetar \n\n"<b>"Tahap 1"</b>" \n- Halang gangguan skrin penuh \n- Jangan intai \n- Jangan berbunyi atau bergetar \n- Sembunyikan daripada skrin kunci dan bar status \n- Tunjukkan di bahagian bawah senarai pemberitahuan \n\n"<b>"Tahap 0"</b>" \n- Sekat semua pemberitahuan daripada apl"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Pemberitahuan"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Anda tidak akan melihat pemberitahuan ini lagi"</string>
-    <!-- no translation found for inline_blocking_helper (3055064577771478591) -->
-    <skip />
+    <string name="inline_blocking_helper" msgid="3055064577771478591">"Biasanya anda mengetepikan pemberitahuan ini. \nTerus tunjukkan pemberitahuan?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Terus tunjukkan pemberitahuan ini?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Hentikan pemberitahuan"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Terus tunjukkan"</string>
@@ -681,9 +686,8 @@
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Papan Keratan"</item>
     <item msgid="5742013440802239414">"Kod Kunci"</item>
-    <item msgid="8802889973626281575">"Penukar papan kekunci"</item>
-    <item msgid="7095517796293767867">"Cadangan putaran"</item>
-    <item msgid="8494159969042135235">"Tiada"</item>
+    <item msgid="1951959982985094069">"Pengesahan putaran, penukar papan kekunci"</item>
+    <item msgid="8175437057325747277">"Tiada"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"Biasa"</item>

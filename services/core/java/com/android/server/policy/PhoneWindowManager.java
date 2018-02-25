@@ -2655,6 +2655,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
                 attrs.flags &= ~WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
                 break;
+            case TYPE_DREAM:
+                // Dreams don't have an app window token and can thus not be letterboxed.
+                // Hence always let them extend under the cutout.
+                attrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+                break;
             case TYPE_STATUS_BAR:
 
                 // If the Keyguard is in a hidden state (occluded by another window), we force to
@@ -5244,9 +5249,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean attachedInParent = attached != null && !layoutInScreen;
         // Ensure that windows with a DEFAULT or NEVER display cutout mode are laid out in
         // the cutout safe zone.
-        // Windows that are attached to a parent and laid out in said parent are already avoiding
-        // the cutout according to that parent and don't need to be further constrained.
-        if (cutoutMode != LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS && !attachedInParent) {
+        if (cutoutMode != LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS) {
             final Rect displayCutoutSafeExceptMaybeTop = mTmpRect;
             displayCutoutSafeExceptMaybeTop.set(displayFrames.mDisplayCutoutSafe);
             if (layoutInScreen && layoutInsetDecor && !requestedFullscreen
@@ -5257,7 +5260,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // the window from that area.
                 displayCutoutSafeExceptMaybeTop.top = Integer.MIN_VALUE;
             }
-            pf.intersectUnchecked(displayCutoutSafeExceptMaybeTop);
+            // Windows that are attached to a parent and laid out in said parent are already
+            // avoidingthe cutout according to that parent and don't need to be further constrained.
+            if (!attachedInParent) {
+                pf.intersectUnchecked(displayCutoutSafeExceptMaybeTop);
+            }
+            // Make sure that NO_LIMITS windows clipped to the display don't extend into the display
+            // don't extend under the cutout.
+            df.intersectUnchecked(displayCutoutSafeExceptMaybeTop);
         }
 
         // Content should never appear in the cutout.
@@ -6695,7 +6705,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mWindowManagerDrawComplete = false;
             mScreenOnListener = screenOnListener;
 
-            if (mKeyguardDelegate != null) {
+            if (mKeyguardDelegate != null && mKeyguardDelegate.hasKeyguard()) {
                 mHandler.removeMessages(MSG_KEYGUARD_DRAWN_TIMEOUT);
                 mHandler.sendEmptyMessageDelayed(MSG_KEYGUARD_DRAWN_TIMEOUT,
                         getKeyguardDrawnTimeout());

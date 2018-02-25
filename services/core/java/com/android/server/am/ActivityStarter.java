@@ -1107,7 +1107,7 @@ class ActivityStarter {
                     case START_TASK_TO_FRONT: {
                         // ActivityRecord may represent a different activity, but it should not be
                         // in the resumed state.
-                        if (r.nowVisible && r.state == RESUMED) {
+                        if (r.nowVisible && r.isState(RESUMED)) {
                             outResult.timeout = false;
                             outResult.who = r.realActivity;
                             outResult.totalTime = 0;
@@ -1516,7 +1516,7 @@ class ActivityStarter {
                     final TaskRecord task = mSupervisor.anyTaskForIdLocked(
                             mOptions.getLaunchTaskId());
                     final ActivityRecord top = task != null ? task.getTopActivity() : null;
-                    if (top != null && top.state != RESUMED) {
+                    if (top != null && !top.isState(RESUMED)) {
 
                         // The caller specifies that we'd like to be avoided to be moved to the
                         // front, so be it!

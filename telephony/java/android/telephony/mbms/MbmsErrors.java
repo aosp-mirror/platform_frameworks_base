@@ -108,8 +108,8 @@ public class MbmsErrors {
 
         /**
          * Indicates that the app called
-         * {@link MbmsStreamingSession#startStreaming(
-         * StreamingServiceInfo, StreamingServiceCallback, android.os.Handler)}
+         * {@link MbmsStreamingSession#startStreaming(StreamingServiceInfo,
+         * java.util.concurrent.Executor, StreamingServiceCallback)}
          * more than once for the same {@link StreamingServiceInfo}.
          */
         public static final int ERROR_DUPLICATE_START_STREAM = 303;

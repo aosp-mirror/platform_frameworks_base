@@ -16,11 +16,9 @@
 
 package com.android.frameworks.perftests.am.tests;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.IBinder;
 import android.perftests.utils.ManualBenchmarkState;
 import android.perftests.utils.PerfManualStatusReporter;
 import android.support.test.InstrumentationRegistry;
@@ -28,20 +26,16 @@ import android.support.test.InstrumentationRegistry;
 import com.android.frameworks.perftests.am.util.TargetPackageUtils;
 import com.android.frameworks.perftests.am.util.TimeReceiver;
 
-import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.function.LongSupplier;
 
 public class BasePerfTest {
     private static final String TAG = BasePerfTest.class.getSimpleName();
-    private static final long AWAIT_SERVICE_CONNECT_MS = 2000;
 
     private TimeReceiver mTimeReceiver;
+    private ServiceConnection mAliveServiceConnection;
 
     @Rule
     public PerfManualStatusReporter mPerfManualStatusReporter = new PerfManualStatusReporter();
@@ -54,11 +48,6 @@ public class BasePerfTest {
         mTimeReceiver = new TimeReceiver();
     }
 
-    @After
-    public void tearDown() {
-        TargetPackageUtils.killTargetPackage(mContext);
-    }
-
     protected void addReceivedTimeNs(String type) {
         mTimeReceiver.addTimeForTypeToQueue(type, System.nanoTime());
     }
@@ -69,46 +58,6 @@ public class BasePerfTest {
                 TargetPackageUtils.SERVICE_NAME);
         putTimeReceiverBinderExtra(intent);
         return intent;
-    }
-
-    protected ServiceConnection bindAndWaitForConnectedService() {
-        return bindAndWaitForConnectedService(0);
-    }
-
-    protected ServiceConnection bindAndWaitForConnectedService(int flags) {
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-        final ServiceConnection serviceConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                countDownLatch.countDown();
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-            }
-        };
-
-        final Intent intent = createServiceIntent();
-        final boolean success = mContext.bindService(intent, serviceConnection,
-                Context.BIND_AUTO_CREATE | flags);
-        Assert.assertTrue("Could not bind to service", success);
-
-        try {
-            boolean connectedSuccess = countDownLatch.await(AWAIT_SERVICE_CONNECT_MS,
-                    TimeUnit.MILLISECONDS);
-            Assert.assertTrue("Timeout when waiting for ServiceConnection.onServiceConnected()",
-                    connectedSuccess);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
-        return serviceConnection;
-    }
-
-    protected void unbindFromService(ServiceConnection serviceConnection) {
-        if (serviceConnection != null) {
-            mContext.unbindService(serviceConnection);
-        }
     }
 
     protected Intent createBroadcastIntent(String action) {
@@ -125,11 +74,14 @@ public class BasePerfTest {
 
     private void setUpIteration() {
         mTimeReceiver.clear();
-        TargetPackageUtils.killTargetPackage(mContext);
+    }
+
+    private void tearDownIteration() {
+        TargetPackageUtils.killTargetPackage(mContext, mAliveServiceConnection);
     }
 
     protected void startTargetPackage() {
-        TargetPackageUtils.startTargetPackage(mContext, mTimeReceiver);
+        mAliveServiceConnection = TargetPackageUtils.startTargetPackage(mContext);
     }
 
     protected long getReceivedTimeNs(String type) {
@@ -142,6 +94,7 @@ public class BasePerfTest {
         while (benchmarkState.keepRunning(elapsedTimeNs)) {
             setUpIteration();
             elapsedTimeNs = func.getAsLong();
+            tearDownIteration();
         }
     }
 }

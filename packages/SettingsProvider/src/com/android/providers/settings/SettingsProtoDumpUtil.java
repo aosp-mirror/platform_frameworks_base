@@ -448,6 +448,9 @@ class SettingsProtoDumpUtil {
                 Settings.Global.CARRIER_APP_WHITELIST,
                 GlobalSettingsProto.CARRIER_APP_WHITELIST);
         dumpSetting(s, p,
+                Settings.Global.CARRIER_APP_NAMES,
+                GlobalSettingsProto.CARRIER_APP_NAMES);
+        dumpSetting(s, p,
                 Settings.Global.USB_MASS_STORAGE_ENABLED,
                 GlobalSettingsProto.USB_MASS_STORAGE_ENABLED);
         dumpSetting(s, p,

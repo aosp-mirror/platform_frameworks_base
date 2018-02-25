@@ -448,11 +448,17 @@ public class PackageInstaller {
 
     /**
      * Uninstall the given package, removing it completely from the device. This
-     * method is only available to the current "installer of record" for the
-     * package.
+     * method is available to:
+     * <ul>
+     * <li>the current "installer of record" for the package
+     * <li>the device owner
+     * <li>the affiliated profile owner
+     * </ul>
      *
      * @param packageName The package to uninstall.
      * @param statusReceiver Where to deliver the result.
+     *
+     * @see android.app.admin.DevicePolicyManager
      */
     @RequiresPermission(anyOf = {
             Manifest.permission.DELETE_PACKAGES,
@@ -480,14 +486,22 @@ public class PackageInstaller {
 
     /**
      * Uninstall the given package with a specific version code, removing it
-     * completely from the device. This method is only available to the current
-     * "installer of record" for the package. If the version code of the package
+     * completely from the device. If the version code of the package
      * does not match the one passed in the versioned package argument this
      * method is a no-op. Use {@link PackageManager#VERSION_CODE_HIGHEST} to
      * uninstall the latest version of the package.
+     * <p>
+     * This method is available to:
+     * <ul>
+     * <li>the current "installer of record" for the package
+     * <li>the device owner
+     * <li>the affiliated profile owner
+     * </ul>
      *
      * @param versionedPackage The versioned package to uninstall.
      * @param statusReceiver Where to deliver the result.
+     *
+     * @see android.app.admin.DevicePolicyManager
      */
     @RequiresPermission(anyOf = {
             Manifest.permission.DELETE_PACKAGES,
@@ -941,9 +955,14 @@ public class PackageInstaller {
          * Once this method is called, the session is sealed and no additional
          * mutations may be performed on the session. If the device reboots
          * before the session has been finalized, you may commit the session again.
+         * <p>
+         * If the installer is the device owner or the affiliated profile owner, there will be no
+         * user intervention.
          *
          * @throws SecurityException if streams opened through
          *             {@link #openWrite(String, long, long)} are still open.
+         *
+         * @see android.app.admin.DevicePolicyManager
          */
         public void commit(@NonNull IntentSender statusReceiver) {
             try {

@@ -34,6 +34,7 @@ import android.os.ServiceSpecificException;
 import android.os.UserHandle;
 import android.security.keystore.recovery.KeyChainProtectionParams;
 import android.security.keystore.recovery.KeyChainSnapshot;
+import android.security.keystore.recovery.RecoveryCertPath;
 import android.security.keystore.recovery.RecoveryController;
 import android.security.keystore.recovery.WrappedApplicationKey;
 import android.security.KeyStore;
@@ -57,7 +58,10 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertPath;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
@@ -277,29 +281,11 @@ public class RecoverableKeyStoreManager {
     }
 
     /**
-     * Updates recovery status for the application given its {@code packageName}.
-     *
-     * @param packageName which recoverable key statuses will be returned
-     * @param aliases - KeyStore aliases or {@code null} for all aliases of the app
-     * @param status - new status
+     * Sets the recovery status of key with {@code alias} to {@code status}.
      */
-    public void setRecoveryStatus(
-            @NonNull String packageName, @Nullable String[] aliases, int status)
-            throws RemoteException {
+    public void setRecoveryStatus(String alias, int status) throws RemoteException {
         checkRecoverKeyStorePermission();
-        int uid = Binder.getCallingUid();
-        if (packageName != null) {
-            // TODO: get uid for package name, when many apps are supported.
-        }
-        if (aliases == null) {
-            // Get all keys for the app.
-            Map<String, Integer> allKeys = mDatabase.getStatusForAllKeys(uid);
-            aliases = new String[allKeys.size()];
-            allKeys.keySet().toArray(aliases);
-        }
-        for (String alias: aliases) {
-            mDatabase.setRecoveryStatus(uid, alias, status);
-        }
+        mDatabase.setRecoveryStatus(Binder.getCallingUid(), alias, status);
     }
 
     /**
@@ -369,7 +355,7 @@ public class RecoverableKeyStoreManager {
     }
 
     /**
-     * Initializes recovery session.
+     * Initializes recovery session given the X509-encoded public key of the recovery service.
      *
      * @param sessionId A unique ID to identify the recovery session.
      * @param verifierPublicKey X509-encoded public key.
@@ -377,6 +363,8 @@ public class RecoverableKeyStoreManager {
      * @param vaultChallenge Challenge issued by vault service.
      * @param secrets Lock-screen hashes. For now only a single secret is supported.
      * @return Encrypted bytes of recovery claim. This can then be issued to the vault service.
+     * @deprecated Use {@link #startRecoverySessionWithCertPath(String, RecoveryCertPath, byte[],
+     *         byte[], List)} instead.
      *
      * @hide
      */
@@ -398,11 +386,9 @@ public class RecoverableKeyStoreManager {
         PublicKey publicKey;
         try {
             publicKey = KeySyncUtils.deserializePublicKey(verifierPublicKey);
-        } catch (NoSuchAlgorithmException e) {
-            // Should never happen
-            throw new RuntimeException(e);
         } catch (InvalidKeySpecException e) {
-            throw new ServiceSpecificException(ERROR_BAD_CERTIFICATE_FORMAT, "Not a valid X509 key");
+            throw new ServiceSpecificException(ERROR_BAD_CERTIFICATE_FORMAT,
+                    "Not a valid X509 key");
         }
         // The raw public key bytes contained in vaultParams must match the ones given in
         // verifierPublicKey; otherwise, the user secret may be decrypted by a key that is not owned
@@ -432,6 +418,52 @@ public class RecoverableKeyStoreManager {
         } catch (InvalidKeyException e) {
             throw new ServiceSpecificException(ERROR_BAD_CERTIFICATE_FORMAT, e.getMessage());
         }
+    }
+
+    /**
+     * Initializes recovery session given the certificate path of the recovery service.
+     *
+     * @param sessionId A unique ID to identify the recovery session.
+     * @param verifierCertPath The certificate path of the recovery service.
+     * @param vaultParams Additional params associated with vault.
+     * @param vaultChallenge Challenge issued by vault service.
+     * @param secrets Lock-screen hashes. For now only a single secret is supported.
+     * @return Encrypted bytes of recovery claim. This can then be issued to the vault service.
+     *
+     * @hide
+     */
+    public @NonNull byte[] startRecoverySessionWithCertPath(
+            @NonNull String sessionId,
+            @NonNull RecoveryCertPath verifierCertPath,
+            @NonNull byte[] vaultParams,
+            @NonNull byte[] vaultChallenge,
+            @NonNull List<KeyChainProtectionParams> secrets)
+            throws RemoteException {
+        checkRecoverKeyStorePermission();
+
+        CertPath certPath;
+        try {
+            certPath = verifierCertPath.getCertPath();
+        } catch (CertificateException e) {
+            throw new ServiceSpecificException(ERROR_BAD_CERTIFICATE_FORMAT,
+                    "Failed decode the certificate path");
+        }
+
+        // TODO: Validate the cert path according to the root of trust
+
+        if (certPath.getCertificates().isEmpty()) {
+            throw new ServiceSpecificException(ERROR_BAD_CERTIFICATE_FORMAT,
+                    "The given CertPath is empty");
+        }
+        byte[] verifierPublicKey = certPath.getCertificates().get(0).getPublicKey().getEncoded();
+        if (verifierPublicKey == null) {
+            Log.e(TAG, "Failed to encode verifierPublicKey");
+            throw new ServiceSpecificException(ERROR_BAD_CERTIFICATE_FORMAT,
+                    "Failed to encode verifierPublicKey");
+        }
+
+        return startRecoverySession(
+                sessionId, verifierPublicKey, vaultParams, vaultChallenge, secrets);
     }
 
     /**

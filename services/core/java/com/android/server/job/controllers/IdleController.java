@@ -26,18 +26,21 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.UserHandle;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.job.JobSchedulerService;
-import com.android.server.job.StateChangedListener;
 import com.android.server.job.StateControllerProto;
 
-import java.io.PrintWriter;
+import java.util.function.Predicate;
 
 public final class IdleController extends StateController {
-    private static final String TAG = "IdleController";
+    private static final String TAG = "JobScheduler.Idle";
+    private static final boolean DEBUG = JobSchedulerService.DEBUG
+            || Log.isLoggable(TAG, Log.DEBUG);
 
     // Policy: we decide that we're "idle" if the device has been unused /
     // screen off or dreaming for at least this long
@@ -46,22 +49,8 @@ public final class IdleController extends StateController {
     final ArraySet<JobStatus> mTrackedTasks = new ArraySet<>();
     IdlenessTracker mIdleTracker;
 
-    // Singleton factory
-    private static Object sCreationLock = new Object();
-    private static volatile IdleController sController;
-
-    public static IdleController get(JobSchedulerService service) {
-        synchronized (sCreationLock) {
-            if (sController == null) {
-                sController = new IdleController(service, service.getContext(), service.getLock());
-            }
-            return sController;
-        }
-    }
-
-    private IdleController(StateChangedListener stateChangedListener, Context context,
-                Object lock) {
-        super(stateChangedListener, context, lock);
+    public IdleController(JobSchedulerService service) {
+        super(service);
         initIdleStateTracking();
     }
 
@@ -200,18 +189,17 @@ public final class IdleController extends StateController {
     }
 
     @Override
-    public void dumpControllerStateLocked(PrintWriter pw, int filterUid) {
-        pw.print("Idle: ");
-        pw.println(mIdleTracker.isIdle());
-        pw.print("Tracking ");
-        pw.print(mTrackedTasks.size());
-        pw.println(":");
+    public void dumpControllerStateLocked(IndentingPrintWriter pw,
+            Predicate<JobStatus> predicate) {
+        pw.println("Currently idle: " + mIdleTracker.isIdle());
+        pw.println();
+
         for (int i = 0; i < mTrackedTasks.size(); i++) {
             final JobStatus js = mTrackedTasks.valueAt(i);
-            if (!js.shouldDump(filterUid)) {
+            if (!predicate.test(js)) {
                 continue;
             }
-            pw.print("  #");
+            pw.print("#");
             js.printUniqueId(pw);
             pw.print(" from ");
             UserHandle.formatUid(pw, js.getSourceUid());
@@ -220,7 +208,8 @@ public final class IdleController extends StateController {
     }
 
     @Override
-    public void dumpControllerStateLocked(ProtoOutputStream proto, long fieldId, int filterUid) {
+    public void dumpControllerStateLocked(ProtoOutputStream proto, long fieldId,
+            Predicate<JobStatus> predicate) {
         final long token = proto.start(fieldId);
         final long mToken = proto.start(StateControllerProto.IDLE);
 
@@ -228,7 +217,7 @@ public final class IdleController extends StateController {
 
         for (int i = 0; i < mTrackedTasks.size(); i++) {
             final JobStatus js = mTrackedTasks.valueAt(i);
-            if (!js.shouldDump(filterUid)) {
+            if (!predicate.test(js)) {
                 continue;
             }
             final long jsToken = proto.start(StateControllerProto.IdleController.TRACKED_JOBS);

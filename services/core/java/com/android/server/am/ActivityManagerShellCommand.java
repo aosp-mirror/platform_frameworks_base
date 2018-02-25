@@ -23,24 +23,34 @@ import android.app.IActivityController;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
 import android.app.IUidObserver;
+import android.app.KeyguardManager;
 import android.app.ProfilerInfo;
 import android.app.WaitResult;
+import android.app.usage.AppStandbyInfo;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.IUsageStatsManager;
 import android.app.usage.UsageStatsManager;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DeviceConfigurationProto;
+import android.content.GlobalConfigurationProto;
 import android.content.IIntentReceiver;
 import android.content.Intent;
+import android.content.pm.ConfigurationInfo;
+import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
+import android.content.pm.SharedLibraryInfo;
 import android.content.pm.UserInfo;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -56,8 +66,11 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.DebugUtils;
 import android.util.DisplayMetrics;
+import android.util.proto.ProtoOutputStream;
+import android.view.Display;
 
 import com.android.internal.util.HexDump;
+import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
 
 import java.io.BufferedReader;
@@ -73,6 +86,11 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.microedition.khronos.egl.EGL10;
+import javax.microedition.khronos.egl.EGLContext;
+import javax.microedition.khronos.opengles.GL;
+import javax.microedition.khronos.opengles.GL10;
 
 import static android.app.ActivityManager.RESIZE_MODE_SYSTEM;
 import static android.app.ActivityManager.RESIZE_MODE_USER;
@@ -442,12 +460,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     options.setTaskOverlay(true, true /* canResume */);
                 }
             }
-            android.util.Log.d("bfranz", "I was here: " + mIsLockTask);
             if (mIsLockTask) {
                 if (options == null) {
                     options = ActivityOptions.makeBasic();
                 }
-                options.setLockTaskMode(true);
+                options.setLockTaskEnabled(true);
             }
             if (mWaitOption) {
                 result = mInterface.startActivityAndWait(null, null, intent, mimeType,
@@ -1835,17 +1852,112 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
     }
 
-    int runGetConfig(PrintWriter pw) throws RemoteException {
-        int days = 14;
-        String option = getNextOption();
-        if (option != null) {
-            if (!option.equals("--days")) {
-                throw new IllegalArgumentException("unrecognized option " + option);
-            }
+    private void writeDeviceConfig(ProtoOutputStream protoOutputStream, long fieldId,
+            PrintWriter pw, Configuration config, DisplayManager dm) {
+        Point stableSize = dm.getStableDisplaySize();
+        long token = -1;
+        if (protoOutputStream != null) {
+            token = protoOutputStream.start(fieldId);
+            protoOutputStream.write(DeviceConfigurationProto.STABLE_SCREEN_WIDTH_PX, stableSize.x);
+            protoOutputStream.write(DeviceConfigurationProto.STABLE_SCREEN_HEIGHT_PX, stableSize.y);
+            protoOutputStream.write(DeviceConfigurationProto.STABLE_DENSITY_DPI,
+                    DisplayMetrics.DENSITY_DEVICE_STABLE);
+        }
+        if (pw != null) {
+            pw.print("stable-width-px: "); pw.println(stableSize.x);
+            pw.print("stable-height-px: "); pw.println(stableSize.y);
+            pw.print("stable-density-dpi: "); pw.println(DisplayMetrics.DENSITY_DEVICE_STABLE);
+        }
 
-            days = Integer.parseInt(getNextArgRequired());
-            if (days <= 0) {
-                throw new IllegalArgumentException("--days must be a positive integer");
+        MemInfoReader memreader = new MemInfoReader();
+        memreader.readMemInfo();
+        KeyguardManager kgm = mInternal.mContext.getSystemService(KeyguardManager.class);
+        if (protoOutputStream != null) {
+            protoOutputStream.write(DeviceConfigurationProto.TOTAL_RAM, memreader.getTotalSize());
+            protoOutputStream.write(DeviceConfigurationProto.LOW_RAM,
+                    ActivityManager.isLowRamDeviceStatic());
+            protoOutputStream.write(DeviceConfigurationProto.MAX_CORES,
+                    Runtime.getRuntime().availableProcessors());
+            protoOutputStream.write(DeviceConfigurationProto.HAS_SECURE_SCREEN_LOCK,
+                    kgm.isDeviceSecure());
+        }
+        if (pw != null) {
+            pw.print("total-ram: "); pw.println(memreader.getTotalSize());
+            pw.print("low-ram: "); pw.println(ActivityManager.isLowRamDeviceStatic());
+            pw.print("max-cores: "); pw.println(Runtime.getRuntime().availableProcessors());
+            pw.print("has-secure-screen-lock: "); pw.println(kgm.isDeviceSecure());
+        }
+
+        ConfigurationInfo configInfo = mInternal.getDeviceConfigurationInfo();
+        if (configInfo.reqGlEsVersion != ConfigurationInfo.GL_ES_VERSION_UNDEFINED) {
+            if (protoOutputStream != null) {
+                protoOutputStream.write(DeviceConfigurationProto.OPENGL_VERSION,
+                        configInfo.reqGlEsVersion);
+            }
+            if (pw != null) {
+                pw.print("opengl-version: 0x");
+                pw.println(Integer.toHexString(configInfo.reqGlEsVersion));
+            }
+        }
+
+        /*
+        GL10 gl = ((GL10)((EGL10)EGLContext.getEGL()).eglGetCurrentContext().getGL());
+        protoOutputStream.write(DeviceConfigurationProto.OPENGL_VERSION,
+                gl.glGetString(GL10.GL_VERSION));
+        String glExtensions = gl.glGetString(GL10.GL_EXTENSIONS);
+        for (String ext : glExtensions.split(" ")) {
+            protoOutputStream.write(DeviceConfigurationProto.OPENGL_EXTENSIONS, ext);
+        }
+        */
+
+        PackageManager pm = mInternal.mContext.getPackageManager();
+        List<SharedLibraryInfo> slibs = pm.getSharedLibraries(0);
+        for (int i = 0; i < slibs.size(); i++) {
+            if (protoOutputStream != null) {
+                protoOutputStream.write(DeviceConfigurationProto.SHARED_LIBRARIES,
+                        slibs.get(i).getName());
+            }
+            if (pw != null) {
+                pw.print("shared-libraries: "); pw.println(slibs.get(i).getName());
+            }
+        }
+
+        FeatureInfo[] features = pm.getSystemAvailableFeatures();
+        for (int i = 0; i < features.length; i++) {
+            if (features[i].name != null) {
+                if (protoOutputStream != null) {
+                    protoOutputStream.write(DeviceConfigurationProto.FEATURES, features[i].name);
+                }
+                if (pw != null) {
+                    pw.print("features: "); pw.println(features[i].name);
+                }
+            }
+        }
+
+        if (protoOutputStream != null) {
+            protoOutputStream.end(token);
+        }
+    }
+
+    int runGetConfig(PrintWriter pw) throws RemoteException {
+        int days = -1;
+        boolean asProto = false;
+        boolean inclDevice = false;
+
+        String opt;
+        while ((opt=getNextOption()) != null) {
+            if (opt.equals("--days")) {
+                days = Integer.parseInt(getNextArgRequired());
+                if (days <= 0) {
+                    throw new IllegalArgumentException("--days must be a positive integer");
+                }
+            } else if (opt.equals("--proto")) {
+                asProto = true;
+            } else if (opt.equals("--device")) {
+                inclDevice = true;
+            } else {
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
             }
         }
 
@@ -1855,18 +1967,38 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return -1;
         }
 
-        pw.println("config: " + Configuration.resourceQualifierString(config));
-        pw.println("abi: " + TextUtils.join(",", Build.SUPPORTED_ABIS));
+        DisplayManager dm = mInternal.mContext.getSystemService(DisplayManager.class);
+        Display display = dm.getDisplay(Display.DEFAULT_DISPLAY);
+        DisplayMetrics metrics = new DisplayMetrics();
+        display.getMetrics(metrics);
 
-        final List<Configuration> recentConfigs = getRecentConfigurations(days);
-        final int recentConfigSize = recentConfigs.size();
-        if (recentConfigSize > 0) {
-            pw.println("recentConfigs:");
-        }
+        if (asProto) {
+            final ProtoOutputStream proto = new ProtoOutputStream(getOutFileDescriptor());
+            config.writeResConfigToProto(proto, GlobalConfigurationProto.RESOURCES, metrics);
+            if (inclDevice) {
+                writeDeviceConfig(proto, GlobalConfigurationProto.DEVICE, null, config, dm);
+            }
+            proto.flush();
 
-        for (int i = 0; i < recentConfigSize; i++) {
-            pw.println("  config: " + Configuration.resourceQualifierString(
-                    recentConfigs.get(i)));
+        } else {
+            pw.println("config: " + Configuration.resourceQualifierString(config, metrics));
+            pw.println("abi: " + TextUtils.join(",", Build.SUPPORTED_ABIS));
+            if (inclDevice) {
+                writeDeviceConfig(null, -1, pw, config, dm);
+            }
+
+            if (days >= 0) {
+                final List<Configuration> recentConfigs = getRecentConfigurations(days);
+                final int recentConfigSize = recentConfigs.size();
+                if (recentConfigSize > 0) {
+                    pw.println("recentConfigs:");
+                    for (int i = 0; i < recentConfigSize; i++) {
+                        pw.println("  config: " + Configuration.resourceQualifierString(
+                                recentConfigs.get(i)));
+                    }
+                }
+            }
+
         }
         return 0;
     }
@@ -1945,15 +2077,16 @@ final class ActivityManagerShellCommand extends ShellCommand {
         if (!multiple) {
             usm.setAppStandbyBucket(packageName, bucketNameToBucketValue(value), userId);
         } else {
-            HashMap<String, Integer> buckets = new HashMap<>();
-            buckets.put(packageName, bucket);
+            ArrayList<AppStandbyInfo> bucketInfoList = new ArrayList<>();
+            bucketInfoList.add(new AppStandbyInfo(packageName, bucket));
             while ((packageName = getNextArg()) != null) {
                 value = getNextArgRequired();
                 bucket = bucketNameToBucketValue(value);
                 if (bucket < 0) continue;
-                buckets.put(packageName, bucket);
+                bucketInfoList.add(new AppStandbyInfo(packageName, bucket));
             }
-            usm.setAppStandbyBuckets(buckets, userId);
+            ParceledListSlice<AppStandbyInfo> slice = new ParceledListSlice<>(bucketInfoList);
+            usm.setAppStandbyBuckets(slice, userId);
         }
         return 0;
     }
@@ -1978,11 +2111,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
             int bucket = usm.getAppStandbyBucket(packageName, null, userId);
             pw.println(bucket);
         } else {
-            Map<String, Integer> buckets = (Map<String, Integer>) usm.getAppStandbyBuckets(
+            ParceledListSlice<AppStandbyInfo> buckets = usm.getAppStandbyBuckets(
                     SHELL_PACKAGE_NAME, userId);
-            for (Map.Entry<String, Integer> entry: buckets.entrySet()) {
-                pw.print(entry.getKey()); pw.print(": ");
-                pw.println(entry.getValue());
+            for (AppStandbyInfo bucketInfo : buckets.getList()) {
+                pw.print(bucketInfo.mPackageName); pw.print(": ");
+                pw.println(bucketInfo.mStandbyBucket);
             }
         }
         return 0;
@@ -2728,8 +2861,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Gets the process state of an app given its <UID>.");
             pw.println("  attach-agent <PROCESS> <FILE>");
             pw.println("    Attach an agent to the specified <PROCESS>, which may be either a process name or a PID.");
-            pw.println("  get-config");
-            pw.println("      Rtrieve the configuration and any recent configurations of the device.");
+            pw.println("  get-config [--days N] [--device] [--proto]");
+            pw.println("      Retrieve the configuration and any recent configurations of the device.");
+            pw.println("      --days: also return last N days of configurations that have been seen.");
+            pw.println("      --device: also output global device configuration info.");
+            pw.println("      --proto: return result as a proto; does not include --days info.");
             pw.println("  supports-multiwindow");
             pw.println("      Returns true if the device supports multiwindow.");
             pw.println("  supports-split-screen-multi-window");

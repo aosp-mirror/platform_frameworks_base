@@ -537,7 +537,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             if (updatedConfig) {
                 final ActivityRecord r = topRunningActivityLocked();
                 if (r != null && !deferResume) {
-                    kept = r.ensureActivityConfigurationLocked(0 /* globalChanges */,
+                    kept = r.ensureActivityConfiguration(0 /* globalChanges */,
                             preserveWindow);
                     mService.mStackSupervisor.ensureActivitiesVisibleLocked(r, 0,
                             !PRESERVE_WINDOWS);
@@ -1103,7 +1103,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             // Increment the total number of non-finishing activities
             reportOut.numActivities++;
 
-            if (reportOut.top == null || (reportOut.top.state == ActivityState.INITIALIZING)) {
+            if (reportOut.top == null || (reportOut.top.isState(ActivityState.INITIALIZING))) {
                 reportOut.top = r;
                 // Reset the number of running activities until we hit the first non-initializing
                 // activity

@@ -46,6 +46,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Choreographer;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -411,6 +412,13 @@ public final class AutofillManager {
                 @Nullable Rect virtualBounds, IAutofillWindowPresenter presenter);
 
         /**
+         * Dispatch unhandled keyevent from Autofill window
+         * @param anchor The real view the UI needs to anchor to.
+         * @param keyEvent Unhandled KeyEvent from autofill window.
+         */
+        void autofillClientDispatchUnhandledKey(@NonNull View anchor, @NonNull KeyEvent keyEvent);
+
+        /**
          * Request hiding the autofill UI.
          *
          * @return Whether the UI was hidden.
@@ -490,7 +498,17 @@ public final class AutofillManager {
         /**
           * @return Whether compatibility mode is enabled.
           */
-        boolean autofillIsCompatibilityModeEnabled();
+        boolean autofillClientIsCompatibilityModeEnabled();
+
+        /**
+         * Gets the next unique autofill ID.
+         *
+         * <p>Typically used to manage views whose content is recycled - see
+         * {@link View#setAutofillId(AutofillId)} for more info.
+         *
+         * @return An ID that is unique in the activity.
+         */
+        @Nullable AutofillId autofillClientGetNextAutofillId();
     }
 
     /**
@@ -773,7 +791,7 @@ public final class AutofillManager {
     /** Returns AutofillCallback if need fire EVENT_INPUT_UNAVAILABLE */
     @GuardedBy("mLock")
     private AutofillCallback notifyViewEnteredLocked(@NonNull View view, int flags) {
-        final AutofillId id = getAutofillId(view);
+        final AutofillId id = view.getAutofillId();
         if (shouldIgnoreViewEnteredLocked(id, flags)) return null;
 
         AutofillCallback callback = null;
@@ -823,7 +841,7 @@ public final class AutofillManager {
         if (mEnabled && isActiveLocked()) {
             // dont notify exited when Activity is already in background
             if (!isClientDisablingEnterExitEvent()) {
-                final AutofillId id = getAutofillId(view);
+                final AutofillId id = view.getAutofillId();
 
                 // Update focus on existing session.
                 updateSessionLocked(id, null, null, ACTION_VIEW_EXITED, 0);
@@ -866,6 +884,7 @@ public final class AutofillManager {
             if (mEnabled && isActiveLocked()) {
                 final AutofillId id = virtual ? getAutofillId(view, virtualId)
                         : view.getAutofillId();
+                if (sVerbose) Log.v(TAG, "visibility changed for " + id + ": " + isVisible);
                 if (!isVisible && mFillableIds != null) {
                     if (mFillableIds.contains(id)) {
                         if (sDebug) Log.d(TAG, "Hidding UI when view " + id + " became invisible");
@@ -874,6 +893,8 @@ public final class AutofillManager {
                 }
                 if (mTrackedViews != null) {
                     mTrackedViews.notifyViewVisibilityChangedLocked(id, isVisible);
+                } else if (sVerbose) {
+                    Log.v(TAG, "Ignoring visibility change on " + id + ": no tracked views");
                 }
             }
         }
@@ -1004,7 +1025,7 @@ public final class AutofillManager {
             if (mLastAutofilledData == null) {
                 view.setAutofilled(false);
             } else {
-                id = getAutofillId(view);
+                id = view.getAutofillId();
                 if (mLastAutofilledData.containsKey(id)) {
                     value = view.getAutofillValue();
                     valueWasRead = true;
@@ -1029,7 +1050,7 @@ public final class AutofillManager {
             }
 
             if (id == null) {
-                id = getAutofillId(view);
+                id = view.getAutofillId();
             }
 
             if (!valueWasRead) {
@@ -1429,8 +1450,27 @@ public final class AutofillManager {
         }
     }
 
-    private static AutofillId getAutofillId(View view) {
-        return new AutofillId(view.getAutofillViewId());
+    /**
+     * Gets the next unique autofill ID for the activity context.
+     *
+     * <p>Typically used to manage views whose content is recycled - see
+     * {@link View#setAutofillId(AutofillId)} for more info.
+     *
+     * @return An ID that is unique in the activity, or {@code null} if autofill is not supported in
+     * the {@link Context} associated with this {@link AutofillManager}.
+     */
+    @Nullable
+    public AutofillId getNextAutofillId() {
+        final AutofillClient client = getClient();
+        if (client == null) return null;
+
+        final AutofillId id = client.autofillClientGetNextAutofillId();
+
+        if (id == null && sDebug) {
+            Log.d(TAG, "getNextAutofillId(): client " + client + " returned null");
+        }
+
+        return id;
     }
 
     private static AutofillId getAutofillId(View parent, int virtualId) {
@@ -1668,6 +1708,24 @@ public final class AutofillManager {
         }
     }
 
+    private void dispatchUnhandledKey(int sessionId, AutofillId id, KeyEvent keyEvent) {
+        final View anchor = findView(id);
+        if (anchor == null) {
+            return;
+        }
+
+        AutofillCallback callback = null;
+        synchronized (mLock) {
+            if (mSessionId == sessionId) {
+                AutofillClient client = getClient();
+
+                if (client != null) {
+                    client.autofillClientDispatchUnhandledKey(anchor, keyEvent);
+                }
+            }
+        }
+    }
+
     /** @hide */
     public static final int SET_STATE_FLAG_ENABLED = 0x01;
     /** @hide */
@@ -1713,7 +1771,7 @@ public final class AutofillManager {
                 if (mLastAutofilledData == null) {
                     mLastAutofilledData = new ParcelableMap(1);
                 }
-                mLastAutofilledData.put(getAutofillId(view), targetValue);
+                mLastAutofilledData.put(view.getAutofillId(), targetValue);
             }
             view.setAutofilled(true);
         }
@@ -2606,6 +2664,14 @@ public final class AutofillManager {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
                 afm.post(() -> afm.notifyNoFillUi(sessionId, id, sessionFinishedState));
+            }
+        }
+
+        @Override
+        public void dispatchUnhandledKey(int sessionId, AutofillId id, KeyEvent fullScreen) {
+            final AutofillManager afm = mAfm.get();
+            if (afm != null) {
+                afm.post(() -> afm.dispatchUnhandledKey(sessionId, id, fullScreen));
             }
         }
 

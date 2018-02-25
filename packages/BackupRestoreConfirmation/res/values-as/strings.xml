@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="backup_confirm_title" msgid="827563724209303345">"সম্পূৰ্ণ বেকআপ"</string>
+    <string name="restore_confirm_title" msgid="5469365809567486602">"সম্পূৰ্ণ পুনঃস্থাপন"</string>
+    <string name="backup_confirm_text" msgid="1878021282758896593">"এটা সংযোগ হৈ থকা ডেস্কট\'প কম্পিউটাৰলৈ সকলো ডেটাক সম্পূৰ্ণৰূপে পুনঃস্থাপনৰ বাবে অনুৰোধ কৰা হৈছে। আপুনি এই কাৰ্যক অনুমতি দিব বিচাৰেনে?\n\nযদিহে আপুনি নিজৰ ফালৰ পৰা এই অনুৰোধটো কৰা নাই, তেন্তে এই কাৰ্যক অনুমতি নিদিব।"</string>
+    <string name="allow_backup_button_label" msgid="4217228747769644068">"মোৰ ডেটাৰ বেকআপ লওক"</string>
+    <string name="deny_backup_button_label" msgid="6009119115581097708">"বেকআপ নল\'ব"</string>
+    <string name="restore_confirm_text" msgid="7499866728030461776">"সংযোগ হৈ থকা এটা ডেস্কটপ কম্পিউটাৰৰ পৰা সকলো ডেটাৰ সম্পূৰ্ণ পুনঃস্থাপনৰ বাবে অনুৰোধ কৰা হৈছে। আপুনি এই কাৰ্য সম্পন্ন হ\'বলৈ দিব বিচাৰেনে?\n\nযদিহে আপুনে নিজৰ ফালৰ পৰা এই অনুৰোধটো কৰা নাই, তেন্তে এই কাৰ্য আৰম্ভ হ\'বলৈ নিদিব। এই কাৰ্যই ডিভাইচত থকা সকলো ডেটা সলনি কৰিব!"</string>
+    <string name="allow_restore_button_label" msgid="3081286752277127827">"মোৰ ডেটা পুনঃস্থাপন কৰক"</string>
+    <string name="deny_restore_button_label" msgid="1724367334453104378">"পুনঃস্থাপন নকৰিব"</string>
+    <string name="current_password_text" msgid="8268189555578298067">"অনুগ্ৰহ কৰি আপোনাৰ বৰ্তমানৰ বেকআপ পাছৱৰ্ডটো তলত দিয়ক:"</string>
+    <string name="device_encryption_restore_text" msgid="1570864916855208992">"অনুগ্ৰহ কৰি তলত আপোনাৰ ডিভাইচৰ এনক্ৰিপশ্বন পাছৱৰ্ডটো দিয়ক৷"</string>
+    <string name="device_encryption_backup_text" msgid="5866590762672844664">"অনুগ্ৰহ কৰি তলত আপোনাৰ ডিভাইচৰ এনক্ৰিপশ্বন পাছৱৰ্ডটো দিয়ক৷ এই পাছৱৰ্ডটো বেকআপ কাৰ্যৰ আৰ্কাইভ কৰিবলৈও ব্যৱহাৰ কৰা হ\'ব৷"</string>
+    <string name="backup_enc_password_text" msgid="4981585714795233099">"সম্পূৰ্ণৰূপে বেকআপ লোৱা ডেটা এনক্ৰিপ্ট কৰিবলৈ অনুগ্ৰহ কৰি এটা পাছৱৰ্ড দিয়ক। এই ঠাইটো খালী ৰাখিলে আপোনাৰ বৰ্তমানৰ বেকআপ পাছৱৰ্ডটো ব্যৱহাৰ কৰা হ\'ব:"</string>
+    <string name="backup_enc_password_optional" msgid="1350137345907579306">"যদি আপুনি সম্পূৰ্ণ বেকআপ ডেটা এনক্ৰিপ্ট কৰিব বিচাৰিছে, তেতিয়াহ\'লে তলত পাছৱৰ্ড এটা দিয়ক:"</string>
+    <string name="backup_enc_password_required" msgid="7889652203371654149">"যিহেতু আপোনাৰ ডিভাইচটো এনক্ৰিপ্ট কৰা হৈছে, আপুনি আপোনাৰ বেকআপ এনক্ৰিপ্ট কৰাৰ প্ৰয়োজন। অনুগ্ৰহ কৰি তলত এটা পাছৱৰ্ড দিয়ক:"</string>
+    <string name="restore_enc_password_text" msgid="6140898525580710823">"যদি পুনঃস্থাপন কৰিবলগীয়া ডেটা এনক্ৰিপ্ট কৰা আছে, তেন্তে তলত পাছৱৰ্ড দিয়ক:"</string>
+    <string name="toast_backup_started" msgid="550354281452756121">"বেকআপ লোৱা কাৰ্য আৰম্ভ কৰি আছে..."</string>
+    <string name="toast_backup_ended" msgid="3818080769548726424">"বেকআপ লোৱা সম্পূৰ্ণ হ\'ল"</string>
+    <string name="toast_restore_started" msgid="7881679218971277385">"পুনঃস্থাপন কাৰ্য আৰম্ভ কৰি আছে..."</string>
+    <string name="toast_restore_ended" msgid="1764041639199696132">"পুনঃস্থাপন কাৰ্য সমাপ্ত হ\'ল"</string>
+    <string name="toast_timeout" msgid="5276598587087626877">"কাৰ্যটোৰ সময়সীমা উকলি গ\'ল"</string>
+</resources>

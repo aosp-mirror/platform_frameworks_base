@@ -201,6 +201,12 @@ message ConstantsProto {
     // be indices into this array, rather than the raw constants used by
     // AppIdleHistory.
     repeated int32 standby_beats = 20;
+    // The fraction of a job's running window that must pass before we
+    // consider running it when the network is congested.
+    optional double conn_congestion_delay_frac = 21;
+    // The fraction of a prefetch job's running window that must pass before
+    // we consider matching it against a metered network.
+    optional double conn_prefetch_relax_frac = 22;
 }
 
 message StateControllerProto {

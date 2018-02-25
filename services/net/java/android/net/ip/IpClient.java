@@ -72,6 +72,7 @@ import java.util.Objects;
 import java.util.List;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.concurrent.CountDownLatch;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -100,6 +101,11 @@ public class IpClient extends StateMachine {
 
     /**
      * Callbacks for handling IpClient events.
+     *
+     * These methods are called by IpClient on its own thread. Implementations
+     * of this class MUST NOT carry out long-running computations or hold locks
+     * for which there might be contention with other code calling public
+     * methods of the same IpClient instance.
      */
     public static class Callback {
         // In order to receive onPreDhcpAction(), call #withPreDhcpAction()
@@ -545,6 +551,7 @@ public class IpClient extends StateMachine {
     private final String mClatInterfaceName;
     @VisibleForTesting
     protected final Callback mCallback;
+    private final CountDownLatch mShutdownLatch;
     private final INetworkManagementService mNwService;
     private final NetlinkTracker mNetlinkTracker;
     private final WakeupMessage mProvisioningTimeoutAlarm;
@@ -597,6 +604,7 @@ public class IpClient extends StateMachine {
         mInterfaceName = ifName;
         mClatInterfaceName = CLAT_PREFIX + ifName;
         mCallback = new LoggingCallbackWrapper(callback);
+        mShutdownLatch = new CountDownLatch(1);
         mNwService = nwService;
 
         mLog = new SharedLog(MAX_LOG_RECORDS, mTag);
@@ -704,12 +712,24 @@ public class IpClient extends StateMachine {
     @Override
     protected void onQuitting() {
         mCallback.onQuit();
+        mShutdownLatch.countDown();
     }
 
     // Shut down this IpClient instance altogether.
     public void shutdown() {
         stop();
         sendMessage(CMD_TERMINATE_AFTER_STOP);
+    }
+
+    // In order to avoid deadlock, this method MUST NOT be called on the
+    // IpClient instance's thread. This prohibition includes code executed by
+    // when methods on the passed-in IpClient.Callback instance are called.
+    public void awaitShutdown() {
+        try {
+            mShutdownLatch.await();
+        } catch (InterruptedException e) {
+            mLog.e("Interrupted while awaiting shutdown: " + e);
+        }
     }
 
     public static ProvisioningConfiguration.Builder buildProvisioningConfiguration() {

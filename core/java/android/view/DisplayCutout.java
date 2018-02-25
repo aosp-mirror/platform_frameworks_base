@@ -23,6 +23,8 @@ import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
+
 import android.content.res.Resources;
 import android.graphics.Matrix;
 import android.graphics.Path;
@@ -38,6 +40,7 @@ import android.util.Size;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Objects;
@@ -72,6 +75,17 @@ public final class DisplayCutout {
      */
     public static final DisplayCutout NO_CUTOUT = new DisplayCutout(ZERO_RECT, EMPTY_REGION,
             new Size(0, 0));
+
+
+    private static final Object CACHE_LOCK = new Object();
+    @GuardedBy("CACHE_LOCK")
+    private static String sCachedSpec;
+    @GuardedBy("CACHE_LOCK")
+    private static int sCachedDisplayWidth;
+    @GuardedBy("CACHE_LOCK")
+    private static float sCachedDensity;
+    @GuardedBy("CACHE_LOCK")
+    private static DisplayCutout sCachedCutout;
 
     private final Rect mSafeInsets;
     private final Region mBounds;
@@ -350,9 +364,25 @@ public final class DisplayCutout {
      * @hide
      */
     public static DisplayCutout fromResources(Resources res, int displayWidth) {
-        String spec = res.getString(R.string.config_mainBuiltInDisplayCutout);
+        return fromSpec(res.getString(R.string.config_mainBuiltInDisplayCutout),
+                displayWidth, res.getDisplayMetrics().density);
+    }
+
+    /**
+     * Creates an instance according to the supplied {@link android.util.PathParser.PathData} spec.
+     *
+     * @hide
+     */
+    @VisibleForTesting(visibility = PRIVATE)
+    public static DisplayCutout fromSpec(String spec, int displayWidth, float density) {
         if (TextUtils.isEmpty(spec)) {
             return null;
+        }
+        synchronized (CACHE_LOCK) {
+            if (spec.equals(sCachedSpec) && sCachedDisplayWidth == displayWidth
+                    && sCachedDensity == density) {
+                return sCachedCutout;
+            }
         }
         spec = spec.trim();
         final boolean inDp = spec.endsWith(DP_MARKER);
@@ -370,12 +400,19 @@ public final class DisplayCutout {
 
         final Matrix m = new Matrix();
         if (inDp) {
-            final float dpToPx = res.getDisplayMetrics().density;
-            m.postScale(dpToPx, dpToPx);
+            m.postScale(density, density);
         }
         m.postTranslate(displayWidth / 2f, 0);
         p.transform(m);
-        return fromBounds(p);
+
+        final DisplayCutout result = fromBounds(p);
+        synchronized (CACHE_LOCK) {
+            sCachedSpec = spec;
+            sCachedDisplayWidth = displayWidth;
+            sCachedDensity = density;
+            sCachedCutout = result;
+        }
+        return result;
     }
 
     /**

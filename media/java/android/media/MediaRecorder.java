@@ -29,6 +29,7 @@ import android.os.PersistableBundle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Surface;
 
 import java.io.File;
@@ -105,6 +106,8 @@ public class MediaRecorder implements AudioRouting
     private OnErrorListener mOnErrorListener;
     private OnInfoListener mOnInfoListener;
 
+    private int mChannelCount;
+
     /**
      * Default constructor.
      */
@@ -119,6 +122,7 @@ public class MediaRecorder implements AudioRouting
             mEventHandler = null;
         }
 
+        mChannelCount = 1;
         String packageName = ActivityThread.currentPackageName();
         /* Native setup requires a weak reference to our object.
          * It's easier to create it here than in C++.
@@ -755,6 +759,7 @@ public class MediaRecorder implements AudioRouting
         if (numChannels <= 0) {
             throw new IllegalArgumentException("Number of channels is not positive");
         }
+        mChannelCount = numChannels;
         setParameter("audio-param-number-of-channels=" + numChannels);
     }
 
@@ -1432,6 +1437,20 @@ public class MediaRecorder implements AudioRouting
             return new ArrayList<MicrophoneInfo>();
         }
         AudioManager.setPortIdForMicrophones(activeMicrophones);
+
+        // Use routed device when there is not information returned by hal.
+        if (activeMicrophones.size() == 0) {
+            AudioDeviceInfo device = getRoutedDevice();
+            if (device != null) {
+                MicrophoneInfo microphone = AudioManager.microphoneInfoFromAudioDeviceInfo(device);
+                ArrayList<Pair<Integer, Integer>> channelMapping = new ArrayList<>();
+                for (int i = 0; i < mChannelCount; i++) {
+                    channelMapping.add(new Pair(i, MicrophoneInfo.CHANNEL_MAPPING_DIRECT));
+                }
+                microphone.setChannelMapping(channelMapping);
+                activeMicrophones.add(microphone);
+            }
+        }
         return activeMicrophones;
     }
 

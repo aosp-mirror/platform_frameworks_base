@@ -125,6 +125,7 @@ package android {
     field public static final java.lang.String PERFORM_SIM_ACTIVATION = "android.permission.PERFORM_SIM_ACTIVATION";
     field public static final java.lang.String PROVIDE_RESOLVER_RANKER_SERVICE = "android.permission.PROVIDE_RESOLVER_RANKER_SERVICE";
     field public static final java.lang.String PROVIDE_TRUST_AGENT = "android.permission.PROVIDE_TRUST_AGENT";
+    field public static final java.lang.String QUERY_TIME_ZONE_RULES = "android.permission.QUERY_TIME_ZONE_RULES";
     field public static final java.lang.String READ_CONTENT_RATING_SYSTEMS = "android.permission.READ_CONTENT_RATING_SYSTEMS";
     field public static final java.lang.String READ_DREAM_STATE = "android.permission.READ_DREAM_STATE";
     field public static final java.lang.String READ_FRAME_BUFFER = "android.permission.READ_FRAME_BUFFER";
@@ -203,6 +204,7 @@ package android {
     field public static final int isVrOnly = 16844152; // 0x1010578
     field public static final int requiredSystemPropertyName = 16844133; // 0x1010565
     field public static final int requiredSystemPropertyValue = 16844134; // 0x1010566
+    field public static final int userRestriction = 16844165; // 0x1010585
   }
 
   public static final class R.raw {
@@ -469,7 +471,11 @@ package android.app.backup {
     method public android.app.backup.RestoreSession beginRestoreSession();
     method public void cancelBackups();
     method public long getAvailableRestoreToken(java.lang.String);
+    method public android.content.Intent getConfigurationIntent(java.lang.String);
     method public java.lang.String getCurrentTransport();
+    method public android.content.Intent getDataManagementIntent(java.lang.String);
+    method public java.lang.String getDataManagementLabel(java.lang.String);
+    method public java.lang.String getDestinationString(java.lang.String);
     method public boolean isAppEligibleForBackup(java.lang.String);
     method public boolean isBackupEnabled();
     method public boolean isBackupServiceActive(android.os.UserHandle);
@@ -4171,6 +4177,8 @@ package android.provider {
     method public static boolean putString(android.content.ContentResolver, java.lang.String, java.lang.String, java.lang.String, boolean);
     method public static void resetToDefaults(android.content.ContentResolver, java.lang.String);
     field public static final java.lang.String AUTOFILL_COMPAT_ALLOWED_PACKAGES = "autofill_compat_allowed_packages";
+    field public static final java.lang.String CARRIER_APP_NAMES = "carrier_app_names";
+    field public static final java.lang.String CARRIER_APP_WHITELIST = "carrier_app_whitelist";
     field public static final java.lang.String DEFAULT_SM_DP_PLUS = "default_sm_dp_plus";
     field public static final java.lang.String INSTALL_CARRIER_APP_NOTIFICATION_PERSISTENT = "install_carrier_app_notification_persistent";
     field public static final java.lang.String INSTALL_CARRIER_APP_NOTIFICATION_SLEEP_MILLIS = "install_carrier_app_notification_sleep_millis";
@@ -4266,7 +4274,7 @@ package android.security.keystore.recovery {
     method public int getMaxAttempts();
     method public byte[] getServerParams();
     method public int getSnapshotVersion();
-    method public byte[] getTrustedHardwarePublicKey();
+    method public java.security.cert.CertPath getTrustedHardwareCertPath();
     method public java.util.List<android.security.keystore.recovery.WrappedApplicationKey> getWrappedApplicationKeys();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.security.keystore.recovery.KeyChainSnapshot> CREATOR;
@@ -4287,6 +4295,7 @@ package android.security.keystore.recovery {
   }
 
   public class RecoveryController {
+    method public android.security.keystore.recovery.RecoverySession createRecoverySession();
     method public byte[] generateAndStoreKey(java.lang.String, byte[]) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.LockScreenRequiredException;
     method public java.util.List<java.lang.String> getAliases(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public static android.security.keystore.recovery.RecoveryController getInstance(android.content.Context);
@@ -4298,10 +4307,9 @@ package android.security.keystore.recovery {
     method public void recoverySecretAvailable(android.security.keystore.recovery.KeyChainProtectionParams) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public void removeKey(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public void setRecoverySecretTypes(int[]) throws android.security.keystore.recovery.InternalRecoveryServiceException;
-    method public void setRecoveryStatus(java.lang.String, java.lang.String, int) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.content.pm.PackageManager.NameNotFoundException;
+    method public void setRecoveryStatus(java.lang.String, int) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public void setServerParams(byte[]) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public void setSnapshotCreatedPendingIntent(android.app.PendingIntent) throws android.security.keystore.recovery.InternalRecoveryServiceException;
-    field public static final int RECOVERY_STATUS_MISSING_ACCOUNT = 2; // 0x2
     field public static final int RECOVERY_STATUS_PERMANENT_FAILURE = 3; // 0x3
     field public static final int RECOVERY_STATUS_SYNCED = 0; // 0x0
     field public static final int RECOVERY_STATUS_SYNC_IN_PROGRESS = 1; // 0x1
@@ -4310,7 +4318,7 @@ package android.security.keystore.recovery {
   public class RecoverySession implements java.lang.AutoCloseable {
     method public void close();
     method public java.util.Map<java.lang.String, byte[]> recoverKeys(byte[], java.util.List<android.security.keystore.recovery.WrappedApplicationKey>) throws android.security.keystore.recovery.DecryptionFailedException, android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.SessionExpiredException;
-    method public byte[] start(byte[], byte[], byte[], java.util.List<android.security.keystore.recovery.KeyChainProtectionParams>) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
+    method public byte[] start(java.security.cert.CertPath, byte[], byte[], java.util.List<android.security.keystore.recovery.KeyChainProtectionParams>) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
   }
 
   public class SessionExpiredException extends java.security.GeneralSecurityException {
@@ -5215,6 +5223,7 @@ package android.telephony {
     method public int describeContents();
     method public int getCarrierPrivilegeStatus(android.content.pm.PackageInfo);
     method public int getCarrierPrivilegeStatus(android.content.pm.Signature, java.lang.String);
+    method public java.lang.String getCertificateHexString();
     method public java.lang.String getPackageName();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.telephony.UiccAccessRule> CREATOR;
@@ -6160,12 +6169,7 @@ package android.telephony.ims.stub {
 
 package android.telephony.mbms {
 
-  public final class DownloadRequest implements android.os.Parcelable {
-    method public byte[] getOpaqueData();
-  }
-
   public static class DownloadRequest.Builder {
-    method public android.telephony.mbms.DownloadRequest.Builder setOpaqueData(byte[]);
     method public android.telephony.mbms.DownloadRequest.Builder setServiceId(java.lang.String);
   }
 

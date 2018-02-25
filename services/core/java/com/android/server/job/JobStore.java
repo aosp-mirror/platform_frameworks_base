@@ -19,6 +19,7 @@ package com.android.server.job;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 import static com.android.server.job.JobSchedulerService.sSystemClock;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.app.job.JobInfo;
@@ -62,6 +63,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -286,20 +288,21 @@ public final class JobStore {
      * transient unified collections for them to iterate over and then discard, or creating
      * iterators every time a client needs to perform a sweep.
      */
-    public void forEachJob(JobStatusFunctor functor) {
-        mJobSet.forEachJob(functor);
+    public void forEachJob(Consumer<JobStatus> functor) {
+        mJobSet.forEachJob(null, functor);
     }
 
-    public void forEachJob(int uid, JobStatusFunctor functor) {
+    public void forEachJob(@Nullable Predicate<JobStatus> filterPredicate,
+            Consumer<JobStatus> functor) {
+        mJobSet.forEachJob(filterPredicate, functor);
+    }
+
+    public void forEachJob(int uid, Consumer<JobStatus> functor) {
         mJobSet.forEachJob(uid, functor);
     }
 
-    public void forEachJobForSourceUid(int sourceUid, JobStatusFunctor functor) {
+    public void forEachJobForSourceUid(int sourceUid, Consumer<JobStatus> functor) {
         mJobSet.forEachJobForSourceUid(sourceUid, functor);
-    }
-
-    public interface JobStatusFunctor {
-        public void process(JobStatus jobStatus);
     }
 
     /** Version of the db schema. */
@@ -342,12 +345,9 @@ public final class JobStore {
             final List<JobStatus> storeCopy = new ArrayList<JobStatus>();
             synchronized (mLock) {
                 // Clone the jobs so we can release the lock before writing.
-                mJobSet.forEachJob(new JobStatusFunctor() {
-                    @Override
-                    public void process(JobStatus job) {
-                        if (job.isPersisted()) {
-                            storeCopy.add(new JobStatus(job));
-                        }
+                mJobSet.forEachJob(null, (job) -> {
+                    if (job.isPersisted()) {
+                        storeCopy.add(new JobStatus(job));
                     }
                 });
             }
@@ -1184,31 +1184,35 @@ public final class JobStore {
             return total;
         }
 
-        public void forEachJob(JobStatusFunctor functor) {
+        public void forEachJob(@Nullable Predicate<JobStatus> filterPredicate,
+                Consumer<JobStatus> functor) {
             for (int uidIndex = mJobs.size() - 1; uidIndex >= 0; uidIndex--) {
                 ArraySet<JobStatus> jobs = mJobs.valueAt(uidIndex);
                 if (jobs != null) {
                     for (int i = jobs.size() - 1; i >= 0; i--) {
-                        functor.process(jobs.valueAt(i));
+                        final JobStatus jobStatus = jobs.valueAt(i);
+                        if ((filterPredicate == null) || filterPredicate.test(jobStatus)) {
+                            functor.accept(jobStatus);
+                        }
                     }
                 }
             }
         }
 
-        public void forEachJob(int callingUid, JobStatusFunctor functor) {
+        public void forEachJob(int callingUid, Consumer<JobStatus> functor) {
             ArraySet<JobStatus> jobs = mJobs.get(callingUid);
             if (jobs != null) {
                 for (int i = jobs.size() - 1; i >= 0; i--) {
-                    functor.process(jobs.valueAt(i));
+                    functor.accept(jobs.valueAt(i));
                 }
             }
         }
 
-        public void forEachJobForSourceUid(int sourceUid, JobStatusFunctor functor) {
+        public void forEachJobForSourceUid(int sourceUid, Consumer<JobStatus> functor) {
             final ArraySet<JobStatus> jobs = mJobsPerSourceUid.get(sourceUid);
             if (jobs != null) {
                 for (int i = jobs.size() - 1; i >= 0; i--) {
-                    functor.process(jobs.valueAt(i));
+                    functor.accept(jobs.valueAt(i));
                 }
             }
         }

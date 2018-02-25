@@ -5278,10 +5278,55 @@ message MetricsEvent {
     // OS: P
     FIELD_QS_MODE = 1311;
 
+
     // OPEN: Settings->Developer Options->Default USB
     // CATEGORY: SETTINGS
     // OS: P
     USB_DEFAULT = 1312;
+
+    // CATEGORY: The category for all actions related to TextClassifier generateLinks.
+    // OS: P
+    TEXT_CLASSIFIER_GENERATE_LINKS = 1313;
+
+    // FIELD: milliseconds spent generating links.
+    // CATEGORY: TEXT_CLASSIFIER_GENERATE_LINKS
+    // OS: P
+    FIELD_LINKIFY_LATENCY = 1314;
+
+    // FIELD: length of the input text in characters.
+    // CATEGORY: TEXT_CLASSIFIER_GENERATE_LINKS
+    // OS: P
+    FIELD_LINKIFY_TEXT_LENGTH = 1315;
+
+    // FIELD: number of links detected.
+    // CATEGORY: TEXT_CLASSIFIER_GENERATE_LINKS
+    // OS: P
+    FIELD_LINKIFY_NUM_LINKS = 1316;
+
+    // FIELD: length of all links in characters.
+    // CATEGORY: TEXT_CLASSIFIER_GENERATE_LINKS
+    // OS: P
+    FIELD_LINKIFY_LINK_LENGTH = 1317;
+
+    // FIELD: the type of entity the stats are for.
+    // CATEGORY: TEXT_CLASSIFIER_GENERATE_LINKS
+    // OS: P
+    FIELD_LINKIFY_ENTITY_TYPE = 1318;
+
+    // FIELD: a random uid for a single call to generateLinks
+    // CATEGORY: TEXT_CLASSIFIER_GENERATE_LINKS
+    // OS: P
+    FIELD_LINKIFY_CALL_ID = 1319;
+
+    // FIELD: The compiler filter used when when optimizing the package.
+    //        Logged together with app transition events.
+    // OS: P
+    PACKAGE_OPTIMIZATION_COMPILATION_FILTER = 1320;
+
+    // FIELD: The reason for optimizing the package.
+    //        Logged together with app transition events.
+    // OS: P
+    PACKAGE_OPTIMIZATION_COMPILATION_REASON = 1321;
 
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.

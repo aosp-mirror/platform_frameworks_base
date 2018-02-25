@@ -103,6 +103,8 @@
     <string name="camera_label" msgid="7261107956054836961">"kamerani ochish"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Yangi vazifa tartibini tanlash"</string>
     <string name="cancel" msgid="6442560571259935130">"Bekor qilish"</string>
+    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
+    <skip />
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Barmoq izi belgisi"</string>
     <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"Ilova ikonkasi"</string>
     <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Yordam xabari"</string>
@@ -274,6 +276,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"Dessert Case"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Ekran lavhasi"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Bezovta qilinmasin"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Faqat muhimlari"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Faqat signallar"</string>
@@ -534,8 +538,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Ovozini o‘chirish uchun ustiga bosing. Maxsus imkoniyatlar ishlamasligi mumkin."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Tebranishni yoqish uchun ustiga bosing."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Ovozsiz qilish uchun ustiga bosing."</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Ovoz balandligini boshqarish tugmalari ko‘rsatilgan: %s. Yopish uchun tepaga suring."</string>
-    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Ovoz balandligini boshqarish tugmalari yashirilgan"</string>
+    <string name="volume_dialog_title" msgid="7272969888820035876">"%s tovush balandligi tugmalari"</string>
     <string name="output_title" msgid="5355078100792942802">"Media chiqishi"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Telefon chaqiruvlari"</string>
     <string name="output_none_found" msgid="5544982839808921091">"Hech qanday qurilma topilmadi"</string>
@@ -685,9 +688,8 @@
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Vaqtinchalik xotira"</item>
     <item msgid="5742013440802239414">"Tugma kodi"</item>
-    <item msgid="8802889973626281575">"Klaviaturani almashtirish"</item>
-    <item msgid="7095517796293767867">"Burilish"</item>
-    <item msgid="8494159969042135235">"Hech biri"</item>
+    <item msgid="1951959982985094069">"Burishni tasdiqlash, klaviaturani almashtirish"</item>
+    <item msgid="8175437057325747277">"Hech biri"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"Odatiy"</item>

@@ -47,6 +47,7 @@ import java.util.Map;
  * <p>A recovery agent requires the privileged permission
  * {@code android.Manifest.permission#RECOVER_KEYSTORE}.
  *
+ * @deprecated Use {@link android.security.keystore.recovery.RecoveryController}.
  * @hide
  */
 public class RecoveryController {
@@ -259,7 +260,9 @@ public class RecoveryController {
             @NonNull String packageName, @Nullable String[] aliases, int status)
             throws NameNotFoundException, InternalRecoveryServiceException {
         try {
-            mBinder.setRecoveryStatus(packageName, aliases, status);
+            for (String alias : aliases) {
+                mBinder.setRecoveryStatus(alias, status);
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {

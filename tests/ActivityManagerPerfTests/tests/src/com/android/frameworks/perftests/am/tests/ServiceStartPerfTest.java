@@ -23,6 +23,7 @@ import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.perftests.am.util.Constants;
+import com.android.frameworks.perftests.am.util.TargetPackageUtils;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -86,7 +87,8 @@ public class ServiceStartPerfTest extends BasePerfTest {
     public void startServiceAlreadyBound() {
         runPerfFunction(() -> {
             final ServiceConnection alreadyBoundServiceConnection =
-                    bindAndWaitForConnectedService();
+                    TargetPackageUtils.bindAndWaitForConnectedService(mContext,
+                            createServiceIntent());
             try {
                 final Intent intent = createServiceIntent();
 
@@ -96,20 +98,21 @@ public class ServiceStartPerfTest extends BasePerfTest {
 
                 return endTimeNs - startTimeNs;
             } finally {
-                unbindFromService(alreadyBoundServiceConnection);
+                TargetPackageUtils.unbindFromService(mContext, alreadyBoundServiceConnection);
             }
         });
     }
 
     /**
      * Benchmark time from Context.startService() with FLAG_GRANT_READ_URI_PERMISSION to
-     * Service.onStartCommand() when target process is running.
+     * Service.onStartCommand() when target service is already running.
      */
     @Test
     public void startServiceProcessRunningReadUriPermission() {
         runPerfFunction(() -> {
             final ServiceConnection alreadyBoundServiceConnection =
-                    bindAndWaitForConnectedService();
+                    TargetPackageUtils.bindAndWaitForConnectedService(mContext,
+                            createServiceIntent());
             try {
                 final Intent intent = createServiceIntent();
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -120,7 +123,7 @@ public class ServiceStartPerfTest extends BasePerfTest {
 
                 return endTimeNs - startTimeNs;
             } finally {
-                unbindFromService(alreadyBoundServiceConnection);
+                TargetPackageUtils.unbindFromService(mContext, alreadyBoundServiceConnection);
             }
         });
     }

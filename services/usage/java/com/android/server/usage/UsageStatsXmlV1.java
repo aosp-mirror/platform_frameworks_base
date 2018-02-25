@@ -26,10 +26,7 @@ import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.content.res.Configuration;
-import android.text.TextUtils;
 import android.util.ArrayMap;
-import android.util.Log;
-import android.util.LogWriter;
 
 import java.io.IOException;
 import java.net.ProtocolException;
@@ -175,7 +172,7 @@ final class UsageStatsXmlV1 {
                 event.mShortcutId = (id != null) ? id.intern() : null;
                 break;
             case UsageEvents.Event.STANDBY_BUCKET_CHANGED:
-                event.mBucket = XmlUtils.readIntAttribute(parser, STANDBY_BUCKET_ATTR, 0);
+                event.mBucketAndReason = XmlUtils.readIntAttribute(parser, STANDBY_BUCKET_ATTR, 0);
                 break;
         }
 
@@ -281,8 +278,8 @@ final class UsageStatsXmlV1 {
                 }
                 break;
             case UsageEvents.Event.STANDBY_BUCKET_CHANGED:
-                if (event.mBucket != 0) {
-                    XmlUtils.writeIntAttribute(xml, STANDBY_BUCKET_ATTR, event.mBucket);
+                if (event.mBucketAndReason != 0) {
+                    XmlUtils.writeIntAttribute(xml, STANDBY_BUCKET_ATTR, event.mBucketAndReason);
                 }
         }
 

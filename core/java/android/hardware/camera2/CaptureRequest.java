@@ -24,6 +24,7 @@ import android.hardware.camera2.impl.SyntheticKey;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.utils.HashCodeHelpers;
 import android.hardware.camera2.utils.TypeReference;
+import android.hardware.camera2.utils.SurfaceUtils;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
@@ -643,6 +644,30 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
                         break;
                     }
                 }
+
+                if (!streamFound) {
+                    // Check if we can match s by native object ID
+                    long reqSurfaceId = SurfaceUtils.getSurfaceId(s);
+                    for (int j = 0; j < configuredOutputs.size(); ++j) {
+                        int streamId = configuredOutputs.keyAt(j);
+                        OutputConfiguration outConfig = configuredOutputs.valueAt(j);
+                        int surfaceId = 0;
+                        for (Surface outSurface : outConfig.getSurfaces()) {
+                            if (reqSurfaceId == SurfaceUtils.getSurfaceId(outSurface)) {
+                                streamFound = true;
+                                mStreamIdxArray[i] = streamId;
+                                mSurfaceIdxArray[i] = surfaceId;
+                                i++;
+                                break;
+                            }
+                            surfaceId++;
+                        }
+                        if (streamFound) {
+                            break;
+                        }
+                    }
+                }
+
                 if (!streamFound) {
                     mStreamIdxArray = null;
                     mSurfaceIdxArray = null;
@@ -2759,9 +2784,6 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     /**
      * <p>A control for selecting whether OIS position information is included in output
      * result metadata.</p>
-     * <p>When set to ON,
-     * {@link CaptureResult#STATISTICS_OIS_TIMESTAMPS android.statistics.oisTimestamps}, android.statistics.oisShiftPixelX,
-     * and android.statistics.oisShiftPixelY provide OIS data in the output result metadata.</p>
      * <p><b>Possible values:</b>
      * <ul>
      *   <li>{@link #STATISTICS_OIS_DATA_MODE_OFF OFF}</li>
@@ -2770,8 +2792,6 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p><b>Available values for this device:</b><br>
      * android.Statistics.info.availableOisDataModes</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
-     *
-     * @see CaptureResult#STATISTICS_OIS_TIMESTAMPS
      * @see #STATISTICS_OIS_DATA_MODE_OFF
      * @see #STATISTICS_OIS_DATA_MODE_ON
      */

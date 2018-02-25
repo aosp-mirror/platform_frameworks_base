@@ -88,6 +88,7 @@
     <string name="accessibility_home" msgid="8217216074895377641">"ホーム"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"メニュー"</string>
     <string name="accessibility_accessibility_button" msgid="7601252764577607915">"ユーザー補助機能"</string>
+    <string name="accessibility_rotate_button" msgid="7402949513740253006">"画面を回転します"</string>
     <string name="accessibility_recent" msgid="5208608566793607626">"最近"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"検索"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"カメラ"</string>
@@ -102,6 +103,11 @@
     <string name="camera_label" msgid="7261107956054836961">"カメラを起動"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"新しいタスクレイアウトの選択"</string>
     <string name="cancel" msgid="6442560571259935130">"キャンセル"</string>
+    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
+    <skip />
+    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"指紋アイコン"</string>
+    <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"アプリのアイコン"</string>
+    <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"ヘルプ メッセージ領域"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"互換ズームボタン。"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"小さい画面から大きい画面に拡大。"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetoothに接続済み。"</string>
@@ -180,7 +186,8 @@
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"マナーモード着信。"</string>
     <!-- no translation found for accessibility_casting (6887382141726543668) -->
     <skip />
-    <string name="accessibility_work_mode" msgid="2478631941714607225">"Work モード"</string>
+    <!-- no translation found for accessibility_work_mode (702887484664647430) -->
+    <skip />
     <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"<xliff:g id="APP">%s</xliff:g>を削除します。"</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g>は削除されました。"</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"最近のアプリケーションをすべて消去しました。"</string>
@@ -269,6 +276,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"デザートケース"</string>
     <string name="start_dreams" msgid="5640361424498338327">"スクリーン セーバー"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"イーサネット"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"マナーモード"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"優先する通知のみ"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"アラームのみ"</string>
@@ -277,6 +286,10 @@
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth（端末数<xliff:g id="NUMBER">%d</xliff:g>）"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth OFF"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"ペア設定されたデバイスがありません"</string>
+    <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="7106697106764717416">"電池 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
+    <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"オーディオ"</string>
+    <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"ヘッドセット"</string>
+    <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"入力"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"画面の明るさ"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"自動回転"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"画面を自動回転します"</string>
@@ -301,6 +314,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi OFF"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi: ON"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Wi-Fiネットワークを利用できません"</string>
+    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"アラーム"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"キャスト"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"キャストしています"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"名前のないデバイス"</string>
@@ -317,6 +331,11 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"接続しています..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"テザリング"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"アクセスポイント"</string>
+    <string name="quick_settings_hotspot_secondary_label_transient" msgid="7161046712706277215">"ON にしています…"</string>
+    <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
+      <item quantity="other">%d 台の端末</item>
+      <item quantity="one">%d 台の端末</item>
+    </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"通知"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ライト"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"モバイルデータ"</string>
@@ -326,8 +345,13 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g>使用中"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"上限: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"警告: 上限は<xliff:g id="DATA_LIMIT">%s</xliff:g>です"</string>
-    <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Work モード"</string>
+    <string name="quick_settings_work_mode_on_label" msgid="3421274215098764735">"仕事用プロファイル"</string>
+    <string name="quick_settings_work_mode_off_label" msgid="8856918707867192186">"通知とアプリは OFF です"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"読書灯"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"日の入りに ON"</string>
+    <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"日の出まで"</string>
+    <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> に ON"</string>
+    <string name="quick_settings_night_secondary_label_until" msgid="8664820079774824618">"<xliff:g id="TIME">%s</xliff:g> まで"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC は無効です"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC は有効です"</string>
@@ -480,11 +504,18 @@
     <string name="volume_zen_end_now" msgid="6930243045593601084">"OFF にする"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"展開"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"折りたたむ"</string>
+    <string name="accessibility_output_chooser" msgid="8185317493017988680">"出力デバイスを選択"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"画面が固定されました"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"固定を解除するまで画面が常に表示されるようになります。[戻る] と [最近] を同時に押し続けると固定が解除されます。"</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"固定を解除するまで画面が常に表示されるようになります。[戻る] と [ホーム] を同時に押し続けると固定が解除されます。"</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"固定を解除するまで画面が常に表示されるようになります。[最近] を押し続けると固定が解除されます。"</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"固定を解除するまで画面が常に表示されるようになります。[ホーム] を押し続けると固定が解除されます。"</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"この画面の固定を解除するには [戻る] ボタンと [最近] ボタンを押し続けます"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"この画面の固定を解除するには [戻る] ボタンと [ホーム] ボタンを押し続けます"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"はい"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"いいえ"</string>
+    <string name="screen_pinning_start" msgid="1022122128489278317">"画面を固定しました"</string>
+    <string name="screen_pinning_exit" msgid="5187339744262325372">"画面の固定を解除しました"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g>を非表示にしますか？"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"次回、設定でONにすると再表示されます。"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"非表示"</string>
@@ -507,8 +538,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s。タップしてミュートします。ユーザー補助機能サービスがミュートされる場合があります。"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s。タップしてバイブレーションに設定します。"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s。タップしてミュートします。"</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s の音量調節が表示されています。閉じるには、上にスワイプします。"</string>
-    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"音量調節を非表示にしました"</string>
+    <string name="volume_dialog_title" msgid="7272969888820035876">"%s の音量調節"</string>
     <string name="output_title" msgid="5355078100792942802">"メディア出力"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"通話の出力"</string>
     <string name="output_none_found" msgid="5544982839808921091">"デバイスが見つかりません"</string>
@@ -564,6 +594,7 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"電源通知管理では、アプリの通知の重要度をレベル 0～5 で設定できます。\n\n"<b>"レベル 5"</b>" \n- 通知リストの一番上に表示する \n- 全画面表示を許可する \n- 常にポップアップする \n\n"<b>"レベル 4"</b>" \n- 全画面表示しない \n- 常にポップアップする \n\n"<b>"レベル 3"</b>" \n- 全画面表示しない \n- ポップアップしない \n\n"<b>"レベル 2"</b>" \n- 全画面表示しない \n- ポップアップしない \n- 音やバイブレーションを使用しない \n\n"<b>"レベル 1"</b>" \n- 全画面表示しない \n- ポップアップしない \n- 音やバイブレーションを使用しない \n- ロック画面やステータスバーに表示しない \n- 通知リストの一番下に表示する \n\n"<b>"レベル 0"</b>" \n- アプリからのすべての通知をブロックする"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"通知"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"今後、この通知は表示されません"</string>
+    <string name="inline_blocking_helper" msgid="3055064577771478591">"通常、この通知は非表示にしています。\n引き続き、表示しますか？"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"この通知を今後も表示しますか？"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"通知を表示しない"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"今後も表示する"</string>
@@ -657,7 +688,7 @@
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"クリップボード"</item>
     <item msgid="5742013440802239414">"キーコード"</item>
-    <item msgid="8802889973626281575">"キーボードを切り替え"</item>
+    <item msgid="1951959982985094069">"回転して確認、キーボードの切り替え"</item>
     <item msgid="8175437057325747277">"なし"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
@@ -782,4 +813,10 @@
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"タップして電池やデータの使用量を確認"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"モバイルデータを OFF にしますか？"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"アプリが許可リクエストを隠しているため、設定側でユーザーの応答を確認できません。"</string>
+    <string name="slice_permission_title" msgid="7465009437851044444">"「<xliff:g id="APP_2">%2$s</xliff:g>」のスライスの表示を「<xliff:g id="APP_0">%1$s</xliff:g>」に許可しますか？"</string>
+    <string name="slice_permission_text_1" msgid="3514586565609596523">"- 「<xliff:g id="APP">%1$s</xliff:g>」からの情報の読み取り"</string>
+    <string name="slice_permission_text_2" msgid="3146758297471143723">"- 「<xliff:g id="APP">%1$s</xliff:g>」内部での操作"</string>
+    <string name="slice_permission_checkbox" msgid="7986504458640562900">"すべてのアプリのスライスを表示することを「<xliff:g id="APP">%1$s</xliff:g>」に許可する"</string>
+    <string name="slice_permission_allow" msgid="2340244901366722709">"許可"</string>
+    <string name="slice_permission_deny" msgid="7683681514008048807">"拒否"</string>
 </resources>

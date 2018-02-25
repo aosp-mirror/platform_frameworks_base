@@ -27,12 +27,13 @@
 #include <android/hardware/cas/native/1.0/BnHwDescrambler.h>
 #include <binder/MemoryDealer.h>
 #include <hidl/HidlSupport.h>
+#include <hidlmemory/FrameworkUtils.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <nativehelper/ScopedLocalRef.h>
 
 namespace android {
 
-using hardware::hidl_handle;
+using hardware::fromHeap;
 
 struct fields_t {
     jfieldID context;
@@ -146,14 +147,8 @@ bool JDescrambler::ensureBufferCapacity(size_t neededSize) {
         return false;
     }
 
-    native_handle_t* nativeHandle = native_handle_create(1, 0);
-    if (!nativeHandle) {
-        ALOGE("ensureBufferCapacity: failed to create native handle");
-        return false;
-    }
-    nativeHandle->data[0] = heap->getHeapID();
-    mDescramblerSrcBuffer.heapBase = hidl_memory("ashmem",
-            hidl_handle(nativeHandle), heap->getSize());
+    mHidlMemory = fromHeap(heap);
+    mDescramblerSrcBuffer.heapBase = *mHidlMemory;
     mDescramblerSrcBuffer.offset = (uint64_t) offset;
     mDescramblerSrcBuffer.size = (uint64_t) size;
     return true;

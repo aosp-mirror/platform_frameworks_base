@@ -65,8 +65,6 @@ public class RecoveryController {
     public static final int RECOVERY_STATUS_SYNCED = 0;
     /** Waiting for recovery agent to sync the key. */
     public static final int RECOVERY_STATUS_SYNC_IN_PROGRESS = 1;
-    /** Recovery account is not available. */
-    public static final int RECOVERY_STATUS_MISSING_ACCOUNT = 2;
     /** Key cannot be synced. */
     public static final int RECOVERY_STATUS_PERMANENT_FAILURE = 3;
 
@@ -290,24 +288,33 @@ public class RecoveryController {
     }
 
     /**
-     * Updates recovery status for given key. It is used to notify keystore that key was
-     * successfully stored on the server or there were an error. Application can check this value
-     * using {@code getRecoveyStatus}.
-     *
-     * @param packageName Application whose recoverable key's status are to be updated.
-     * @param alias Application-specific key alias.
-     * @param status Status specific to recovery agent.
-     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
-     *     service.
+     * @deprecated Use {@link #setRecoveryStatus(String, int)}
+     * @removed
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     public void setRecoveryStatus(
             @NonNull String packageName, String alias, int status)
             throws NameNotFoundException, InternalRecoveryServiceException {
+        setRecoveryStatus(alias, status);
+    }
+
+    /**
+     * Sets the recovery status for given key. It is used to notify the keystore that the key was
+     * successfully stored on the server or that there was an error. An application can check this
+     * value using {@link #getRecoveryStatus(String, String)}.
+     *
+     * @param alias The alias of the key whose status to set.
+     * @param status The status of the key. One of {@link #RECOVERY_STATUS_SYNCED},
+     *     {@link #RECOVERY_STATUS_SYNC_IN_PROGRESS} or {@link #RECOVERY_STATUS_PERMANENT_FAILURE}.
+     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
+     *     service.
+     */
+    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
+    public void setRecoveryStatus(String alias, int status)
+            throws InternalRecoveryServiceException {
         try {
-            // TODO: update aidl
-            String[] aliases = alias == null ? null : new String[]{alias};
-            mBinder.setRecoveryStatus(packageName, aliases, status);
+            mBinder.setRecoveryStatus(alias, status);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
@@ -543,6 +550,15 @@ public class RecoveryController {
         } catch (ServiceSpecificException e) {
             throw wrapUnexpectedServiceSpecificException(e);
         }
+    }
+
+    /**
+     * Returns a new {@link RecoverySession}.
+     *
+     * <p>A recovery session is required to restore keys from a remote store.
+     */
+    public RecoverySession createRecoverySession() {
+        return RecoverySession.newInstance(this);
     }
 
     InternalRecoveryServiceException wrapUnexpectedServiceSpecificException(

@@ -19,6 +19,7 @@ package android.telephony;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -178,7 +179,6 @@ public class ServiceState implements Parcelable {
 
     /**
      * Number of radio technologies for GSM, UMTS and CDMA.
-     * @hide
      */
     private static final int NEXT_RIL_RADIO_TECHNOLOGY = 20;
 
@@ -340,6 +340,8 @@ public class ServiceState implements Parcelable {
         mIsEmergencyOnly = s.mIsEmergencyOnly;
         mIsDataRoamingFromRegistration = s.mIsDataRoamingFromRegistration;
         mIsUsingCarrierAggregation = s.mIsUsingCarrierAggregation;
+        mChannelNumber = s.mChannelNumber;
+        mCellBandwidths = Arrays.copyOf(s.mCellBandwidths, s.mCellBandwidths.length);
         mLteEarfcnRsrpBoost = s.mLteEarfcnRsrpBoost;
         mNetworkRegistrationStates = new ArrayList<>(s.mNetworkRegistrationStates);
     }
@@ -1214,6 +1216,7 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     public void setSystemAndNetworkId(int systemId, int networkId) {
         this.mSystemId = systemId;
         this.mNetworkId = networkId;

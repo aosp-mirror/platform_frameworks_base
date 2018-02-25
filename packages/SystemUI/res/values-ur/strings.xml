@@ -103,6 +103,8 @@
     <string name="camera_label" msgid="7261107956054836961">"کیمرا کھولیں"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"نئے کام کا لے آؤٹ منتخب کریں"</string>
     <string name="cancel" msgid="6442560571259935130">"منسوخ کریں"</string>
+    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
+    <skip />
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"فنگر پرنٹ آئیکن"</string>
     <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"ایپلیکیشن کا آئیکن"</string>
     <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"امدادی پیغام کا علاقہ"</string>
@@ -272,6 +274,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"ڈیزرٹ کیس"</string>
     <string name="start_dreams" msgid="5640361424498338327">"اسکرین سیور"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ایتھرنیٹ"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"ڈسٹرب نہ کریں"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"صرف ترجیحی"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"صرف الارمز"</string>
@@ -308,8 +312,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"‏Wi-Fi آف ہے"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"‏Wi-Fi آن ہے"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"‏کوئی WI-FI نیٹ ورک دستیاب نہیں"</string>
-    <!-- no translation found for quick_settings_alarm_title (2416759007342260676) -->
-    <skip />
+    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"الارم"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"کاسٹ کریں"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"کاسٹنگ"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"بغیر نام والا آلہ"</string>
@@ -359,7 +362,6 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"محفوظ موڈ میں <xliff:g id="APP">%s</xliff:g> غیر فعال ہوتی ہے۔"</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"سبھی کو صاف کریں"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"اسپلٹ اسکرین استعمال کرنے کیلئے یہاں گھسیٹیں"</string>
-    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"ایپس سوئچ کرنے کیلئے اوپر سوائپ کریں"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"بلحاظ افقی الگ کریں"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"بلحاظ عمودی الگ کریں"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"بلحاظ حسب ضرورت الگ کریں"</string>
@@ -500,25 +502,18 @@
     <string name="volume_zen_end_now" msgid="6930243045593601084">"ابھی بند کریں"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"پھیلائیں"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"سکیڑیں"</string>
-    <!-- no translation found for accessibility_output_chooser (8185317493017988680) -->
-    <skip />
+    <string name="accessibility_output_chooser" msgid="8185317493017988680">"آؤٹ پٹ آلہ سوئچ کریں"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"اسکرین پن کردہ ہے"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"یہ اسے اس وقت تک نظر میں رکھتا ہے جب تک آپ اس سے پن ہٹا نہیں دیتے۔ پن ہٹانے کیلئے پیچھے اور مجموعی جائزہ بٹنز کو ٹچ کریں اور دبائے رکھیں۔"</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible (8281145542163727971) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"یہ اس کو اس وقت تک مد نظر رکھتا ہے جب تک آپ اس سے پن نہیں ہٹا دیتے۔ پن ہٹانے کیلئے \"پیچھے\" اور \"ہوم\" بٹنز کو ٹچ کریں اور دبائے رکھیں۔"</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"یہ اسے اس وقت تک نظر میں رکھتا ہے جب تک آپ اس سے پن ہٹا نہیں دیتے۔ پن ہٹانے کیلئے مجموعی جائزہ بٹن کو ٹچ کریں اور دبائے رکھیں۔"</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible_accessible (6134833683151189507) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (2266705122951934150) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (8252402309499161281) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"یہ اس کو اس وقت تک مد نظر رکھتا ہے جب تک آپ اس سے پن نہیں ہٹا دیتے۔ پن ہٹانے کیلئے \"ہوم\" بٹن کو ٹچ کریں اور دبائے رکھیں۔"</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"اس اسکرین سے پن ہٹانے کیلئے، \"پیچھے\" اور \"مجموعی جائزہ\" بٹنز کو ٹچ کریں اور دبائے رکھیں"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"اس اسکرین سے پن ہٹانے کیلئے، \"پیچھے\" اور \"ہوم\" بٹنز کو ٹچ کریں اور دبائے رکھیں"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"سمجھ آ گئی"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"نہیں شکریہ"</string>
-    <!-- no translation found for screen_pinning_start (1022122128489278317) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (5187339744262325372) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="1022122128489278317">"اسکرین کو پن کر دیا گیا"</string>
+    <string name="screen_pinning_exit" msgid="5187339744262325372">"اسکرین کا پن ہٹا دیا گیا"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> کو چھپائیں؟"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"اگلی بار جب آپ اسے ترتیبات میں آن کریں گے تو یہ ظاہر ہوگی۔"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"چھپائیں"</string>
@@ -541,8 +536,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"‏‎%1$s۔ خاموش کرنے کیلئے تھپتھپائیں۔ ایکسیسبیلٹی سروسز شاید خاموش ہوں۔"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"‏‎%1$s۔ ارتعاش پر سیٹ کرنے کیلئے تھپتھپائیں۔"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"‏‎%1$s۔ خاموش کرنے کیلئے تھپتھپائیں۔"</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"‏%s والیوم کے کنٹرولز دکھائے جا رہے ہیں۔ برخاست کرنے کیلئے سوائپ کریں۔"</string>
-    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"والیوم کے کنٹرولز مخفی ہیں"</string>
+    <string name="volume_dialog_title" msgid="7272969888820035876">"‏‎%s والیوم کے کنٹرولز"</string>
     <string name="output_title" msgid="5355078100792942802">"میڈیا آؤٹ پٹ"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"فون کال کا آؤٹ پٹ"</string>
     <string name="output_none_found" msgid="5544982839808921091">"کوئی آلہ نہیں ملا"</string>
@@ -692,9 +686,8 @@
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"کلپ بورڈ"</item>
     <item msgid="5742013440802239414">"کی کوڈ"</item>
-    <item msgid="8802889973626281575">"کی بورڈ سوئچر"</item>
-    <item msgid="7095517796293767867">"گردش کی تجویز"</item>
-    <item msgid="8494159969042135235">"کوئی نہیں"</item>
+    <item msgid="1951959982985094069">"گردش کی تصدیق، کی بورڈ سوئچر"</item>
+    <item msgid="8175437057325747277">"کوئی نہیں"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"حسب معمول"</item>

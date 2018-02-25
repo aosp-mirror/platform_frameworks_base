@@ -132,6 +132,11 @@ static jboolean AnimatedImageDrawable_nStop(JNIEnv* env, jobject /*clazz*/, jlon
 // Java's LOOP_INFINITE relies on this being the same.
 static_assert(SkCodec::kRepetitionCountInfinite == -1);
 
+static jint AnimatedImageDrawable_nGetLoopCount(JNIEnv* env, jobject /*clazz*/, jlong nativePtr) {
+    auto* drawable = reinterpret_cast<AnimatedImageDrawable*>(nativePtr);
+    return drawable->getRepetitionCount();
+}
+
 static void AnimatedImageDrawable_nSetLoopCount(JNIEnv* env, jobject /*clazz*/, jlong nativePtr,
                                                 jint loopCount) {
     auto* drawable = reinterpret_cast<AnimatedImageDrawable*>(nativePtr);
@@ -218,6 +223,7 @@ static const JNINativeMethod gAnimatedImageDrawableMethods[] = {
     { "nIsRunning",          "(J)Z",                                                         (void*) AnimatedImageDrawable_nIsRunning },
     { "nStart",              "(J)Z",                                                         (void*) AnimatedImageDrawable_nStart },
     { "nStop",               "(J)Z",                                                         (void*) AnimatedImageDrawable_nStop },
+    { "nGetLoopCount",       "(J)I",                                                         (void*) AnimatedImageDrawable_nGetLoopCount },
     { "nSetLoopCount",       "(JI)V",                                                        (void*) AnimatedImageDrawable_nSetLoopCount },
     { "nSetOnAnimationEndListener", "(JLandroid/graphics/drawable/AnimatedImageDrawable;)V", (void*) AnimatedImageDrawable_nSetOnAnimationEndListener },
     { "nNativeByteSize",     "(J)J",                                                         (void*) AnimatedImageDrawable_nNativeByteSize },

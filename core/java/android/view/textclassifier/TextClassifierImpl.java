@@ -36,10 +36,10 @@ import android.provider.CalendarContract;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.view.textclassifier.logging.DefaultLogger;
+import android.view.textclassifier.logging.GenerateLinksLogger;
 import android.view.textclassifier.logging.Logger;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.Preconditions;
 
 import java.io.File;
@@ -79,20 +79,11 @@ public final class TextClassifierImpl implements TextClassifier {
     private static final String MODEL_FILE_REGEX = "textclassifier\\.(.*)\\.model";
     private static final String UPDATED_MODEL_FILE_PATH =
             "/data/misc/textclassifier/textclassifier.model";
-    private static final List<String> ENTITY_TYPES_ALL =
-            Collections.unmodifiableList(Arrays.asList(
-                    TextClassifier.TYPE_ADDRESS,
-                    TextClassifier.TYPE_EMAIL,
-                    TextClassifier.TYPE_PHONE,
-                    TextClassifier.TYPE_URL,
-                    TextClassifier.TYPE_DATE,
-                    TextClassifier.TYPE_DATE_TIME,
-                    TextClassifier.TYPE_FLIGHT_NUMBER));
 
     private final Context mContext;
     private final TextClassifier mFallback;
 
-    private final MetricsLogger mMetricsLogger = new MetricsLogger();
+    private final GenerateLinksLogger mGenerateLinksLogger;
 
     private final Object mLock = new Object();
     @GuardedBy("mLock") // Do not access outside this lock.
@@ -113,6 +104,8 @@ public final class TextClassifierImpl implements TextClassifier {
     public TextClassifierImpl(Context context) {
         mContext = Preconditions.checkNotNull(context);
         mFallback = TextClassifier.NO_OP;
+        mGenerateLinksLogger = new GenerateLinksLogger(
+                getSettings().getGenerateLinksLogSampleRate());
     }
 
     /** @inheritDoc */
@@ -226,13 +219,14 @@ public final class TextClassifierImpl implements TextClassifier {
         }
 
         try {
+            final long startTimeMs = System.currentTimeMillis();
             final LocaleList defaultLocales = options != null ? options.getDefaultLocales() : null;
             final Calendar refTime = Calendar.getInstance();
             final Collection<String> entitiesToIdentify =
                     options != null && options.getEntityConfig() != null
                             ? options.getEntityConfig().resolveEntityListModifications(
                                     getEntitiesForHints(options.getEntityConfig().getHints()))
-                            : ENTITY_TYPES_ALL;
+                            : getSettings().getEntityListDefault();
             final TextClassifierImplNative nativeImpl =
                     getNative(defaultLocales);
             final TextClassifierImplNative.AnnotatedSpan[] annotations =
@@ -255,7 +249,15 @@ public final class TextClassifierImpl implements TextClassifier {
                 }
                 builder.addLink(span.getStartIndex(), span.getEndIndex(), entityScores);
             }
-            return builder.build();
+            final TextLinks links = builder.build();
+            final long endTimeMs = System.currentTimeMillis();
+            final String callingPackageName =
+                    options == null || options.getCallingPackageName() == null
+                            ? mContext.getPackageName()  // local (in process) TC.
+                            : options.getCallingPackageName();
+            mGenerateLinksLogger.logGenerateLinks(
+                    text, links, callingPackageName, endTimeMs - startTimeMs);
+            return links;
         } catch (Throwable t) {
             // Avoid throwing from this method. Log the error.
             Log.e(LOG_TAG, "Error getting links info.", t);
@@ -270,7 +272,18 @@ public final class TextClassifierImpl implements TextClassifier {
     }
 
     private Collection<String> getEntitiesForHints(Collection<String> hints) {
-        return ENTITY_TYPES_ALL;
+        final boolean editable = hints.contains(HINT_TEXT_IS_EDITABLE);
+        final boolean notEditable = hints.contains(HINT_TEXT_IS_NOT_EDITABLE);
+
+        // Use the default if there is no hint, or conflicting ones.
+        final boolean useDefault = editable == notEditable;
+        if (useDefault) {
+            return getSettings().getEntityListDefault();
+        } else if (editable) {
+            return getSettings().getEntityListEditable();
+        } else {  // notEditable
+            return getSettings().getEntityListNotEditable();
+        }
     }
 
     @Override

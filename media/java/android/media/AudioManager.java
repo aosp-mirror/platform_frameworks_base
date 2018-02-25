@@ -53,6 +53,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.view.KeyEvent;
 
@@ -3913,6 +3914,21 @@ public class AudioManager {
     }
 
      /**
+     * Indicate Hearing Aid connection state change.
+     * @param device Bluetooth device connected/disconnected
+     * @param state new connection state (BluetoothProfile.STATE_xxx)
+     * {@hide}
+     */
+    public void setHearingAidDeviceConnectionState(BluetoothDevice device, int state) {
+        final IAudioService service = getService();
+        try {
+            service.setHearingAidDeviceConnectionState(device, state);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+     /**
      * Indicate A2DP source or sink connection state change.
      * @param device Bluetooth device connected/disconnected
      * @param state  new connection state (BluetoothProfile.STATE_xxx)
@@ -4769,6 +4785,28 @@ public class AudioManager {
     }
 
     /**
+     * Convert {@link AudioDeviceInfo} to {@link MicrophoneInfo}.
+     * @hide
+     */
+    public static MicrophoneInfo microphoneInfoFromAudioDeviceInfo(AudioDeviceInfo deviceInfo) {
+        int deviceType = deviceInfo.getType();
+        int micLocation = (deviceType == AudioDeviceInfo.TYPE_BUILTIN_MIC
+                || deviceType == AudioDeviceInfo.TYPE_TELEPHONY) ? MicrophoneInfo.LOCATION_MAINBODY
+                : deviceType == AudioDeviceInfo.TYPE_UNKNOWN ? MicrophoneInfo.LOCATION_UNKNOWN
+                        : MicrophoneInfo.LOCATION_PERIPHERAL;
+        MicrophoneInfo microphone = new MicrophoneInfo(
+                deviceInfo.getPort().name() + deviceInfo.getId(),
+                deviceInfo.getPort().type(), deviceInfo.getAddress(), micLocation,
+                MicrophoneInfo.GROUP_UNKNOWN, MicrophoneInfo.INDEX_IN_THE_GROUP_UNKNOWN,
+                MicrophoneInfo.POSITION_UNKNOWN, MicrophoneInfo.ORIENTATION_UNKNOWN,
+                new ArrayList<Pair<Float, Float>>(), new ArrayList<Pair<Integer, Integer>>(),
+                MicrophoneInfo.SENSITIVITY_UNKNOWN, MicrophoneInfo.SPL_UNKNOWN,
+                MicrophoneInfo.SPL_UNKNOWN, MicrophoneInfo.DIRECTIONALITY_UNKNOWN);
+        microphone.setId(deviceInfo.getId());
+        return microphone;
+    }
+
+    /**
      * Returns a list of {@link MicrophoneInfo} that corresponds to the characteristics
      * of all available microphones. The list is empty when no microphones are available
      * on the device. An error during the query will result in an IOException being thrown.
@@ -4785,6 +4823,15 @@ public class AudioManager {
             return new ArrayList<MicrophoneInfo>(); // Always return a list.
         }
         setPortIdForMicrophones(microphones);
+        AudioDeviceInfo[] devices = getDevicesStatic(GET_DEVICES_INPUTS);
+        for (AudioDeviceInfo device : devices) {
+            if (device.getType() == AudioDeviceInfo.TYPE_BUILTIN_MIC ||
+                    device.getType() == AudioDeviceInfo.TYPE_TELEPHONY) {
+                continue;
+            }
+            MicrophoneInfo microphone = microphoneInfoFromAudioDeviceInfo(device);
+            microphones.add(microphone);
+        }
         return microphones;
     }
 

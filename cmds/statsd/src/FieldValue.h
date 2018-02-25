@@ -31,7 +31,7 @@ const int32_t kMaxLogDepth = 2;
 const int32_t kLastBitMask = 0x80;
 const int32_t kClearLastBitDeco = 0x7f;
 
-enum Type { INT, LONG, FLOAT, STRING };
+enum Type { UNKNOWN, INT, LONG, FLOAT, STRING };
 
 int32_t getEncodedField(int32_t pos[], int32_t depth, bool includeDepth);
 
@@ -82,6 +82,8 @@ private:
     int32_t mField;
 
 public:
+    Field() {}
+
     Field(int32_t tag, int32_t pos[], int32_t depth) : mTag(tag) {
         mField = getEncodedField(pos, depth, true);
     }
@@ -229,6 +231,8 @@ struct Matcher {
  *
  */
 struct Value {
+    Value() : type(UNKNOWN) {}
+
     Value(int32_t v) {
         int_value = v;
         type = INT;
@@ -280,15 +284,13 @@ struct Value {
     bool operator!=(const Value& that) const;
 
     bool operator<(const Value& that) const;
-
-private:
-    Value(){};
 };
 
 /**
  * Represents a log item, or a dimension item (They are essentially the same).
  */
 struct FieldValue {
+    FieldValue() {}
     FieldValue(const Field& field, const Value& value) : mField(field), mValue(value) {
     }
     bool operator==(const FieldValue& that) const {

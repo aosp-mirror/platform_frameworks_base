@@ -80,6 +80,7 @@ import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
 import android.security.keystore.UserNotAuthenticatedException;
 import android.security.keystore.recovery.KeyChainProtectionParams;
+import android.security.keystore.recovery.RecoveryCertPath;
 import android.security.keystore.recovery.WrappedApplicationKey;
 import android.security.keystore.recovery.KeyChainSnapshot;
 import android.service.gatekeeper.GateKeeperResponse;
@@ -2001,9 +2002,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public void setRecoveryStatus(@NonNull String packageName, @Nullable String[] aliases,
-            int status) throws RemoteException {
-        mRecoverableKeyStoreManager.setRecoveryStatus(packageName, aliases, status);
+    public void setRecoveryStatus(String alias, int status) throws RemoteException {
+        mRecoverableKeyStoreManager.setRecoveryStatus(alias, status);
     }
 
     public Map getRecoveryStatus(@Nullable String packageName) throws RemoteException {
@@ -2040,6 +2040,15 @@ public class LockSettingsService extends ILockSettings.Stub {
             throws RemoteException {
         return mRecoverableKeyStoreManager.startRecoverySession(sessionId, verifierPublicKey,
                 vaultParams, vaultChallenge, secrets);
+    }
+
+    @Override
+    public byte[] startRecoverySessionWithCertPath(@NonNull String sessionId,
+            @NonNull RecoveryCertPath verifierCertPath, @NonNull byte[] vaultParams,
+            @NonNull byte[] vaultChallenge, @NonNull List<KeyChainProtectionParams> secrets)
+            throws RemoteException {
+        return mRecoverableKeyStoreManager.startRecoverySessionWithCertPath(
+                sessionId, verifierCertPath, vaultParams, vaultChallenge, secrets);
     }
 
     public void closeSession(@NonNull String sessionId) throws RemoteException {

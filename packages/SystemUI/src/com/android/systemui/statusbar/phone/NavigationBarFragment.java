@@ -580,8 +580,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
     private boolean shouldDisableNavbarGestures() {
         return !mStatusBar.isDeviceProvisioned()
-                || (mDisabledFlags1 & StatusBarManager.DISABLE_SEARCH) != 0
-                || mNavigationBarView.getRecentsButton().getVisibility() != View.VISIBLE;
+                || (mDisabledFlags1 & StatusBarManager.DISABLE_SEARCH) != 0;
     }
 
     private void repositionNavigationBar() {
@@ -600,13 +599,10 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
         // Change the cancel pin gesture to home and back if recents button is invisible
         boolean recentsVisible = mNavigationBarView.isRecentsButtonVisible();
-        ButtonDispatcher homeButton = mNavigationBarView.getHomeButton();
         ButtonDispatcher backButton = mNavigationBarView.getBackButton();
         if (recentsVisible) {
-            homeButton.setOnLongClickListener(this::onHomeLongClick);
             backButton.setOnLongClickListener(this::onLongPressBackRecents);
         } else {
-            homeButton.setOnLongClickListener(this::onLongPressBackHome);
             backButton.setOnLongClickListener(this::onLongPressBackHome);
         }
     }
@@ -629,6 +625,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
         ButtonDispatcher homeButton = mNavigationBarView.getHomeButton();
         homeButton.setOnTouchListener(this::onHomeTouch);
+        homeButton.setOnLongClickListener(this::onHomeLongClick);
 
         ButtonDispatcher accessibilityButton = mNavigationBarView.getAccessibilityButton();
         accessibilityButton.setOnClickListener(this::onAccessibilityClick);
@@ -681,6 +678,9 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
     @VisibleForTesting
     boolean onHomeLongClick(View v) {
+        if (!mNavigationBarView.isRecentsButtonVisible() && mNavigationBarView.inScreenPinning()) {
+            return onLongPressBackHome(v);
+        }
         if (shouldDisableNavbarGestures()) {
             return false;
         }

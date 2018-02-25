@@ -8827,6 +8827,14 @@ public final class Settings {
         */
        public static final String NETWORK_SCORER_APP = "network_scorer_app";
 
+        /**
+         * Whether night display forced auto mode is available.
+         * 0 = unavailable, 1 = available.
+         * @hide
+         */
+        public static final String NIGHT_DISPLAY_FORCED_AUTO_MODE_AVAILABLE =
+                "night_display_forced_auto_mode_available";
+
        /**
         * If the NITZ_UPDATE_DIFF time is exceeded then an automatic adjustment
         * to SystemClock will be allowed even if NITZ_UPDATE_SPACING has not been
@@ -9077,14 +9085,28 @@ public final class Settings {
          */
         public static final String TETHER_OFFLOAD_DISABLED = "tether_offload_disabled";
 
-       /**
-        * List of carrier apps which are whitelisted to prompt the user for install when
-        * a sim card with matching uicc carrier privilege rules is inserted.
-        *
-        * The value is "package1;package2;..."
-        * @hide
-        */
-       public static final String CARRIER_APP_WHITELIST = "carrier_app_whitelist";
+        /**
+         * List of certificate (hex string representation of the application's certificate - SHA-1
+         * or SHA-256) and carrier app package pairs which are whitelisted to prompt the user for
+         * install when a sim card with matching UICC carrier privilege rules is inserted.  The
+         * certificate is used as a key, so the certificate encoding here must be the same as the
+         * certificate encoding used on the SIM.
+         *
+         * The value is "cert1:package1;cert2:package2;..."
+         * @hide
+         */
+        @SystemApi
+        public static final String CARRIER_APP_WHITELIST = "carrier_app_whitelist";
+
+        /**
+         * Map of package name to application names.  Package names must be lower cased as they are
+         * used as a key in the map.  The application names cannot and will not be localized.
+         *
+         * The value is "packageName1:appName1;packageName2:appName2;..."
+         * @hide
+         */
+        @SystemApi
+        public static final String CARRIER_APP_NAMES = "carrier_app_names";
 
        /**
         * USB Mass Storage Enabled
@@ -10314,6 +10336,16 @@ public final class Settings {
         public static final String SYS_VDSO = "sys_vdso";
 
         /**
+        * UidCpuPower global setting. This links the sys.uidcpupower system property.
+        * The following values are supported:
+        * 0 -> /proc/uid_cpupower/* are disabled
+        * 1 -> /proc/uid_cpupower/* are enabled
+        * Any other value defaults to enabled.
+        * @hide
+        */
+        public static final String SYS_UIDCPUPOWER = "sys_uidcpupower";
+
+        /**
          * An integer to reduce the FPS by this factor. Only for experiments. Need to reboot the
          * device for this setting to take full effect.
          *
@@ -10471,7 +10503,8 @@ public final class Settings {
 
         /**
          * TextClassifier specific settings.
-         * This is encoded as a key=value list, separated by commas. Ex:
+         * This is encoded as a key=value list, separated by commas. String[] types like
+         * entity_list_default use ":" as delimiter for values. Ex:
          *
          * <pre>
          * smart_selection_dark_launch              (boolean)
@@ -10479,6 +10512,10 @@ public final class Settings {
          * suggest_selection_max_range_length       (int)
          * classify_text_max_range_length           (int)
          * generate_links_max_text_length           (int)
+         * generate_links_log_sample_rate           (int)
+         * entity_list_default                      (String[])
+         * entity_list_not_editable                 (String[])
+         * entity_list_editable                     (String[])
          * </pre>
          *
          * <p>

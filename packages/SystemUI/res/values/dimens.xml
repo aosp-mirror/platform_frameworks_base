@@ -259,16 +259,28 @@
 
     <dimen name="notification_panel_width">@dimen/match_parent</dimen>
 
+    <dimen name="brightness_mirror_height">108dp</dimen>
+
     <!-- The width of the panel that holds the quick settings. -->
     <dimen name="qs_panel_width">@dimen/notification_panel_width</dimen>
 
     <!-- the amount the volume panel should be offset at the end from the view next to it (or
-    the scren edge, in portrait-->
-    <dimen name="volume_dialog_base_margin">12dp</dimen>
+    the screen edge, in portrait-->
+    <dimen name="volume_dialog_base_margin">8dp</dimen>
 
-    <dimen name="volume_dialog_panel_width">100dp</dimen>
+    <dimen name="volume_dialog_panel_width">64dp</dimen>
 
-    <dimen name="output_chooser_panel_width">320dp</dimen>
+    <dimen name="volume_dialog_slider_height">101dp</dimen>
+
+    <dimen name="volume_dialog_row_height">252dp</dimen>
+
+    <dimen name="volume_dialog_ringer_size">64dp</dimen>
+
+    <dimen name="volume_dialog_tap_target_size">48dp</dimen>
+
+    <dimen name="volume_dialog_spacer">4dp</dimen>
+
+    <dimen name="volume_dialog_slider_margin_top">13dp</dimen>
 
     <!-- Gravity for the notification panel -->
     <integer name="notification_panel_layout_gravity">0x31</integer><!-- center_horizontal|top -->
@@ -290,7 +302,7 @@
 
     <dimen name="qs_tile_height">106dp</dimen>
     <dimen name="qs_tile_margin">19dp</dimen>
-    <dimen name="qs_tile_margin_top">32dp</dimen>
+    <dimen name="qs_tile_margin_top">18dp</dimen>
     <dimen name="qs_quick_tile_size">48dp</dimen>
     <dimen name="qs_quick_tile_padding">12dp</dimen>
     <dimen name="qs_header_gear_translation">16dp</dimen>
@@ -316,7 +328,6 @@
     <dimen name="qs_detail_image_height">56dp</dimen>
     <dimen name="qs_detail_image_padding">16dp</dimen>
     <dimen name="qs_detail_item_height">48dp</dimen>
-    <dimen name="qs_brightness_padding_top">6dp</dimen>
     <dimen name="qs_detail_header_text_size">20sp</dimen>
     <dimen name="qs_detail_button_text_size">14sp</dimen>
     <dimen name="qs_detail_item_primary_text_size">16sp</dimen>
@@ -334,9 +345,7 @@
     <dimen name="qs_detail_item_icon_width">32dp</dimen>
     <dimen name="qs_detail_item_icon_marginStart">0dp</dimen>
     <dimen name="qs_detail_item_icon_marginEnd">20dp</dimen>
-    <dimen name="qs_header_padding_start">16dp</dimen>
-    <dimen name="qs_header_padding_end">24dp</dimen>
-    <dimen name="qs_header_tooltip_height">32dp</dimen>
+    <dimen name="qs_header_tooltip_height">30dp</dimen>
     <dimen name="qs_footer_padding_start">16dp</dimen>
     <dimen name="qs_footer_padding_end">24dp</dimen>
     <dimen name="qs_footer_icon_size">16dp</dimen>
@@ -362,6 +371,9 @@
     <dimen name="qs_footer_dialog_icon_margin">8sp</dimen>
     <!-- Padding between subtitles and the following text in the QSFooter dialog -->
     <dimen name="qs_footer_dialog_subtitle_padding">20dp</dimen>
+
+    <dimen name="seek_bar_height">3dp</dimen>
+    <dimen name="seek_bar_corner_radius">3dp</dimen>
 
     <!-- Zen mode panel: condition item button padding -->
     <dimen name="zen_mode_condition_detail_button_padding">8dp</dimen>
@@ -427,15 +439,10 @@
     <!-- Minimum distance the user has to drag down to go to the full shade. -->
     <dimen name="keyguard_drag_down_min_distance">100dp</dimen>
 
-    <!-- The fraction of the screen height where the clock on the Keyguard has its center. The
-         max value is used when no notifications are displaying, and the min value is when the
-         highest possible number of notifications are showing. -->
-    <fraction name="keyguard_clock_y_fraction_max">45%</fraction>
-    <fraction name="keyguard_clock_y_fraction_min">19.8%</fraction>
-
-    <!-- The margin between the clock and the notifications on Keyguard. See
-         keyguard_clock_height_fraction_* for the difference between min and max.-->
+    <!-- The margin between the clock and the notifications on Keyguard.-->
     <dimen name="keyguard_clock_notifications_margin">30dp</dimen>
+    <!-- Minimum margin between clock and top of screen or ambient indication -->
+    <dimen name="keyguard_clock_top_margin">26dp</dimen>
     <dimen name="heads_up_scrim_height">250dp</dimen>
 
     <item name="scrim_behind_alpha" format="float" type="dimen">0.62</item>
@@ -872,9 +879,6 @@
     <!-- the maximum offset in either direction that elements are moved vertically to prevent
             burn-in on AOD -->
     <dimen name="burn_in_prevention_offset_y">50dp</dimen>
-
-    <!-- padding between the notification stack and the keyguard status view when dozing -->
-    <dimen name="dozing_stack_padding">30dp</dimen>
 
     <dimen name="corner_size">16dp</dimen>
     <dimen name="top_padding">0dp</dimen>

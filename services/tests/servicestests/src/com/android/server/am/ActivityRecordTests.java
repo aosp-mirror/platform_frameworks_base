@@ -22,6 +22,8 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.server.am.ActivityStack.ActivityState.DESTROYED;
+import static com.android.server.am.ActivityStack.ActivityState.DESTROYING;
 import static com.android.server.am.ActivityStack.ActivityState.INITIALIZING;
 import static com.android.server.am.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.am.ActivityStack.ActivityState.STOPPED;
@@ -119,20 +121,20 @@ public class ActivityRecordTests extends ActivityTestsBase {
             }
             return null;
         }).when(mActivity.app.thread).scheduleTransaction(any());
-        mActivity.state = STOPPED;
+        mActivity.setState(STOPPED, "testPausingWhenVisibleFromStopped");
 
         mActivity.makeVisibleIfNeeded(null /* starting */);
 
-        assertEquals(mActivity.state, PAUSING);
+        assertTrue(mActivity.isState(PAUSING));
 
         assertTrue(pauseFound.value);
 
         // Make sure that the state does not change for current non-stopping states.
-        mActivity.state = INITIALIZING;
+        mActivity.setState(INITIALIZING, "testPausingWhenVisibleFromStopped");
 
         mActivity.makeVisibleIfNeeded(null /* starting */);
 
-        assertEquals(mActivity.state, INITIALIZING);
+        assertTrue(mActivity.isState(INITIALIZING));
     }
 
     @Test
@@ -159,7 +161,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         when(mService.mWindowManager.getNavBarPosition()).thenReturn(navBarPosition);
         mTask.getConfiguration().windowConfiguration.setAppBounds(taskBounds);
         mActivity.info.maxAspectRatio = aspectRatio;
-        mActivity.ensureActivityConfigurationLocked(
+        mActivity.ensureActivityConfiguration(
                 0 /* globalChanges */, false /* preserveWindow */);
         assertEquals(expectedActivityBounds, mActivity.getBounds());
     }
@@ -197,7 +199,23 @@ public class ActivityRecordTests extends ActivityTestsBase {
         record.canBeLaunchedOnDisplay(DEFAULT_DISPLAY);
 
 
-        verify(mService.mStackSupervisor, times(1)).canPlaceEntityOnDisplay(anyInt(), eq(expected), anyInt(), anyInt(),
-                eq(record.info));
+        verify(mService.mStackSupervisor, times(1)).canPlaceEntityOnDisplay(anyInt(), eq(expected),
+                anyInt(), anyInt(), eq(record.info));
+    }
+
+    @Test
+    public void testFinishingAfterDestroying() throws Exception {
+        assertFalse(mActivity.finishing);
+        mActivity.setState(DESTROYING, "testFinishingAfterDestroying");
+        assertTrue(mActivity.isState(DESTROYING));
+        assertTrue(mActivity.finishing);
+    }
+
+    @Test
+    public void testFinishingAfterDestroyed() throws Exception {
+        assertFalse(mActivity.finishing);
+        mActivity.setState(DESTROYED, "testFinishingAfterDestroyed");
+        assertTrue(mActivity.isState(DESTROYED));
+        assertTrue(mActivity.finishing);
     }
 }

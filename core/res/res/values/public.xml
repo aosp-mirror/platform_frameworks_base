@@ -2870,6 +2870,8 @@
       <public name="outlineAmbientShadowColor" />
       <public name="maxLongVersionCode" />
       <public name="urlBarResourceId" />
+      <!-- @hide @SystemApi -->
+      <public name="userRestriction" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">

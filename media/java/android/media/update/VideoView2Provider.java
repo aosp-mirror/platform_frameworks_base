@@ -18,6 +18,7 @@ package android.media.update;
 
 import android.annotation.SystemApi;
 import android.media.AudioAttributes;
+import android.media.MediaMetadata2;
 import android.media.MediaPlayerInterface;
 import android.media.session.MediaController;
 import android.media.session.PlaybackState;
@@ -51,8 +52,10 @@ public interface VideoView2Provider extends ViewGroupProvider {
     void initialize(AttributeSet attrs, int defStyleAttr, int defStyleRes);
 
     void setMediaControlView2_impl(MediaControlView2 mediaControlView, long intervalMs);
+    void setMediaMetadata_impl(MediaMetadata2 metadata);
     MediaController getMediaController_impl();
     MediaControlView2 getMediaControlView2_impl();
+    MediaMetadata2 getMediaMetadata_impl();
     void setSubtitleEnabled_impl(boolean enable);
     boolean isSubtitleEnabled_impl();
     // TODO: remove setSpeed_impl once MediaController2 is ready.

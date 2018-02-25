@@ -4985,7 +4985,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                                     notificationKey)) {
                                 // Show work challenge, do not run PendingIntent and
                                 // remove notification
-                                collapsePanel();
+                                collapseOnMainThread();
                                 return;
                             }
                         }
@@ -5026,11 +5026,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     }
                 }
                 if (shouldCollapse()) {
-                    if (Looper.getMainLooper().isCurrentThread()) {
-                        collapsePanel();
-                    } else {
-                        mStackScroller.post(this::collapsePanel);
-                    }
+                    collapseOnMainThread();
                 }
 
                 try {
@@ -5056,6 +5052,14 @@ public class StatusBar extends SystemUI implements DemoMode,
 
             return !mNotificationPanel.isFullyCollapsed();
         }, afterKeyguardGone);
+    }
+
+    private void collapseOnMainThread() {
+        if (Looper.getMainLooper().isCurrentThread()) {
+            collapsePanel();
+        } else {
+            mStackScroller.post(this::collapsePanel);
+        }
     }
 
     private boolean shouldCollapse() {

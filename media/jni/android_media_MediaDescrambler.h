@@ -28,7 +28,10 @@ namespace android {
 class IMemory;
 class MemoryDealer;
 
-using hardware::hidl_memory;
+namespace hardware {
+class HidlMemory;
+};
+using hardware::HidlMemory;
 using hardware::hidl_string;
 using hardware::hidl_vec;
 using namespace hardware::cas::V1_0;
@@ -58,6 +61,7 @@ private:
     sp<IDescrambler> mDescrambler;
     sp<IMemory> mMem;
     sp<MemoryDealer> mDealer;
+    sp<HidlMemory> mHidlMemory;
     SharedBuffer mDescramblerSrcBuffer;
 
     Mutex mSharedMemLock;

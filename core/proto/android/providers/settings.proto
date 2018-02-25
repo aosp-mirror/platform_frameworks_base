@@ -179,9 +179,11 @@ message GlobalSettingsProto {
     optional SettingProto tether_dun_required = 114 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto tether_dun_apn = 115;
     optional SettingProto tether_offload_disabled = 301 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    // List of carrier apps which are whitelisted to prompt the user for install
-    // when a SIM card with marchin UICC carrier privilege rules is inserted.
+    // List of carrier app certificate mapped to carrier app package id which are whitelisted to
+    // prompt the user for install when a SIM card with matching UICC carrier privilege rules is
+    // inserted.
     optional SettingProto carrier_app_whitelist = 116 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto carrier_app_names = 358 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto usb_mass_storage_enabled = 117 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto use_google_mail = 118 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto webview_data_reduction_proxy_key = 119;
@@ -433,7 +435,7 @@ message GlobalSettingsProto {
 
     // Please insert fields in the same order as in
     // frameworks/base/core/java/android/provider/Settings.java.
-    // Next tag = 356;
+    // Next tag = 359;
 }
 
 message SecureSettingsProto {

@@ -167,6 +167,17 @@ package android.app.admin {
 
 }
 
+package android.app.backup {
+
+  public class BackupManager {
+    method public android.content.Intent getConfigurationIntent(java.lang.String);
+    method public android.content.Intent getDataManagementIntent(java.lang.String);
+    method public java.lang.String getDataManagementLabel(java.lang.String);
+    method public java.lang.String getDestinationString(java.lang.String);
+  }
+
+}
+
 package android.app.usage {
 
   public class StorageStatsManager {
@@ -721,6 +732,10 @@ package android.telephony {
     field public static final java.lang.String MBMS_STREAMING_SERVICE_OVERRIDE_METADATA = "mbms-streaming-service-override";
   }
 
+  public class ServiceState implements android.os.Parcelable {
+    method public void setSystemAndNetworkId(int, int);
+  }
+
 }
 
 package android.telephony.mbms {
@@ -1097,6 +1112,11 @@ package android.widget {
     method public android.graphics.Bitmap getContent();
     method public static android.graphics.PointF getMagnifierDefaultSize();
     method public android.graphics.Rect getWindowPositionOnScreen();
+    method public void setOnOperationCompleteCallback(android.widget.Magnifier.Callback);
+  }
+
+  public static abstract interface Magnifier.Callback {
+    method public abstract void onOperationComplete();
   }
 
   public class NumberPicker extends android.widget.LinearLayout {

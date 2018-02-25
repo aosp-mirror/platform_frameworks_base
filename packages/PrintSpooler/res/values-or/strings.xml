@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="4469836075319831821">"ପ୍ରିଣ୍ଟ ସ୍ପୁଲର୍‍"</string>
+    <string name="more_options_button" msgid="2243228396432556771">"ଅଧିକ ବିକଳ୍ପ"</string>
+    <string name="label_destination" msgid="9132510997381599275">"ଲକ୍ଷ୍ୟସ୍ଥଳ"</string>
+    <string name="label_copies" msgid="3634531042822968308">"କପୀଗୁଡ଼ିକ"</string>
+    <string name="label_copies_summary" msgid="3861966063536529540">"କପୀଗୁଡ଼ିକ:"</string>
+    <string name="label_paper_size" msgid="908654383827777759">"କାଗଜର ଆକାର"</string>
+    <string name="label_paper_size_summary" msgid="5668204981332138168">"କାଗଜର ଆକାର:"</string>
+    <string name="label_color" msgid="1108690305218188969">"ରଙ୍ଗ"</string>
+    <!-- no translation found for label_duplex (5370037254347072243) -->
+    <skip />
+    <string name="label_orientation" msgid="2853142581990496477">"ଓରିଏଣ୍ଟେଶନ୍‍"</string>
+    <!-- no translation found for label_pages (7768589729282182230) -->
+    <skip />
+    <!-- no translation found for destination_default_text (5422708056807065710) -->
+    <skip />
+    <!-- no translation found for template_all_pages (3322235982020148762) -->
+    <skip />
+    <!-- no translation found for template_page_range (428638530038286328) -->
+    <skip />
+    <string name="pages_range_example" msgid="8558694453556945172">"ଯେପରିକି 1—5,8,11—13"</string>
+    <string name="print_preview" msgid="8010217796057763343">"ପ୍ରିଣ୍ଟ ଝଲକ"</string>
+    <string name="install_for_print_preview" msgid="6366303997385509332">"ଝଲକ ଦେଖିବା ପାଇଁ PDF ଭ୍ୟୁଅର୍‍ ଇନଷ୍ଟଲ୍‍ କରନ୍ତୁ"</string>
+    <string name="printing_app_crashed" msgid="854477616686566398">"ପ୍ରିଣ୍ଟିଙ୍ଗ ଆପ୍‍ କ୍ରାଶ୍‍ ହୋଇଗଲା"</string>
+    <string name="generating_print_job" msgid="3119608742651698916">"ପ୍ରିଣ୍ଟ ଜବ୍‍ ତିଆରି କରାଯାଉଛି"</string>
+    <string name="save_as_pdf" msgid="5718454119847596853">"PDF ଭାବରେ ସେଭ୍‍ କରନ୍ତୁ"</string>
+    <string name="all_printers" msgid="5018829726861876202">"ସମସ୍ତ ପ୍ରିଣ୍ଟର୍‌…"</string>
+    <string name="print_dialog" msgid="32628687461331979">"ପ୍ରିଣ୍ଟ ଡାୟଲଗ୍‍"</string>
+    <!-- no translation found for current_page_template (5145005201131935302) -->
+    <skip />
+    <!-- no translation found for page_description_template (6831239682256197161) -->
+    <skip />
+    <!-- no translation found for summary_template (8899734908625669193) -->
+    <skip />
+    <!-- no translation found for expand_handle (7282974448109280522) -->
+    <skip />
+    <!-- no translation found for collapse_handle (6886637989442507451) -->
+    <skip />
+    <string name="print_button" msgid="645164566271246268">"ପ୍ରିଣ୍ଟ କରନ୍ତୁ"</string>
+    <!-- no translation found for savetopdf_button (2976186791686924743) -->
+    <skip />
+    <!-- no translation found for print_options_expanded (6944679157471691859) -->
+    <skip />
+    <!-- no translation found for print_options_collapsed (7455930445670414332) -->
+    <skip />
+    <string name="search" msgid="5421724265322228497">"ସର୍ଚ୍ଚ କରନ୍ତୁ"</string>
+    <string name="all_printers_label" msgid="3178848870161526399">"ସମସ୍ତ ପ୍ରିଣ୍ଟର୍‌"</string>
+    <string name="add_print_service_label" msgid="5356702546188981940">"ସେବା ଯୋଡ଼ନ୍ତୁ"</string>
+    <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"ସର୍ଚ୍ଚ ବକ୍ସ ଦେଖାଯାଇଛି"</string>
+    <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"ସର୍ଚ୍ଚ ବକ୍ସ ଲୁଚି ରହିଛି"</string>
+    <string name="print_add_printer" msgid="1088656468360653455">"ପ୍ରିଣ୍ଟର୍‌ ଯୋଡ଼ନ୍ତୁ"</string>
+    <string name="print_select_printer" msgid="7388760939873368698">"ପ୍ରିଣ୍ଟର୍‍ ଚୟନ କରନ୍ତୁ"</string>
+    <string name="print_forget_printer" msgid="5035287497291910766">"ପ୍ରିଣ୍ଟର୍‍ ଭୁଲିଯାଆନ୍ତୁ"</string>
+    <!-- no translation found for print_search_result_count_utterance (6997663738361080868) -->
+    <!-- no translation found for printer_extended_description_template (1366699227703381874) -->
+    <skip />
+    <!-- no translation found for printer_info_desc (7181988788991581654) -->
+    <skip />
+    <!-- no translation found for notification_channel_progress (872788690775721436) -->
+    <skip />
+    <!-- no translation found for notification_channel_failure (9042250774797916414) -->
+    <skip />
+    <!-- no translation found for could_not_create_file (3425025039427448443) -->
+    <skip />
+    <!-- no translation found for print_services_disabled_toast (9089060734685174685) -->
+    <skip />
+    <string name="print_searching_for_printers" msgid="6550424555079932867">"ପ୍ରିଣ୍ଟର୍‌ ଖୋଜାଯାଉଛି"</string>
+    <!-- no translation found for print_no_print_services (8561247706423327966) -->
+    <skip />
+    <string name="print_no_printers" msgid="4869403323900054866">"କୌଣସି ପ୍ରିଣ୍ଟର୍‍ ମିଳିଲା ନାହିଁ"</string>
+    <!-- no translation found for cannot_add_printer (7840348733668023106) -->
+    <skip />
+    <!-- no translation found for select_to_add_printers (3800709038689830974) -->
+    <skip />
+    <!-- no translation found for enable_print_service (3482815747043533842) -->
+    <skip />
+    <!-- no translation found for enabled_services_title (7036986099096582296) -->
+    <skip />
+    <!-- no translation found for recommended_services_title (3799434882937956924) -->
+    <skip />
+    <!-- no translation found for disabled_services_title (7313253167968363211) -->
+    <skip />
+    <!-- no translation found for all_services_title (5578662754874906455) -->
+    <skip />
+    <!-- no translation found for print_services_recommendation_subtitle (5678487708807185138) -->
+    <string name="printing_notification_title_template" msgid="295903957762447362">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> ପ୍ରିଣ୍ଟ କରାଯାଉଛି"</string>
+    <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> କ୍ୟାନ୍ସଲ୍‍ କରାଯାଉଛି"</string>
+    <string name="failed_notification_title_template" msgid="2256217208186530973">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> ପ୍ରିଣ୍ଟର୍‍ ତ୍ରୁଟି"</string>
+    <string name="blocked_notification_title_template" msgid="1175435827331588646">"ପ୍ରିଣ୍ଟର୍‍ ଦ୍ୱାରା ରୋକାଯାଇଥିବା <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
+    <string name="cancel" msgid="4373674107267141885">"କ୍ୟାନ୍ସଲ୍‍"</string>
+    <string name="restart" msgid="2472034227037808749">"ରିଷ୍ଟାର୍ଟ କରନ୍ତୁ"</string>
+    <string name="no_connection_to_printer" msgid="2159246915977282728">"ପ୍ରିଣ୍ଟର୍‍କୁ କୌଣସି ସଂଯୋଗ ନାହିଁ"</string>
+    <string name="reason_unknown" msgid="5507940196503246139">"ଅଜଣା"</string>
+    <!-- no translation found for print_service_security_warning_title (2160752291246775320) -->
+    <skip />
+    <!-- no translation found for print_service_security_warning_summary (1427434625361692006) -->
+    <skip />
+  <string-array name="color_mode_labels">
+    <item msgid="7602948745415174937">"କଳା ଓ ଧଳା"</item>
+    <item msgid="2762241247228983754">"ରଙ୍ଗ"</item>
+  </string-array>
+  <string-array name="duplex_mode_labels">
+    <item msgid="3882302912790928315">"କିଛିନୁହେଁ"</item>
+    <item msgid="7296563835355641719">"ଲମ୍ବା ପ୍ରାନ୍ତ"</item>
+    <item msgid="79513688117503758">"ଛୋଟ ପ୍ରାନ୍ତ"</item>
+  </string-array>
+  <string-array name="orientation_labels">
+    <item msgid="4061931020926489228">"ପୋର୍ଟ୍ରେଟ୍"</item>
+    <item msgid="3199660090246166812">"ଲ୍ୟାଣ୍ଡସ୍କେପ୍"</item>
+  </string-array>
+    <string name="print_write_error_message" msgid="5787642615179572543">"ଫାଇଲ‍ରେ ଲେଖିପାରିଲା ନାହିଁ"</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"କାମ କଲାନାହିଁ, ପୁଣିଥରେ ଚେଷ୍ଟା କରନ୍ତୁ"</string>
+    <string name="print_error_retry" msgid="1426421728784259538">"ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
+    <string name="print_error_printer_unavailable" msgid="8985614415253203381">"ପ୍ରିଣ୍ଟର୍‍ ବର୍ତ୍ତମାନ ଉପଲବ୍ଧ ନାହିଁ।"</string>
+    <!-- no translation found for print_cannot_load_page (6179560924492912009) -->
+    <skip />
+    <string name="print_preparing_preview" msgid="3939930735671364712">"ଝଲକ ତିଆରି କରାଯାଉଛି…"</string>
+</resources>

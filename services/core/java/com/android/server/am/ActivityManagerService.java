@@ -5451,24 +5451,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    @Override
-    public final void requestActivityRelaunch(IBinder token) {
-        synchronized(this) {
-            ActivityRecord r = ActivityRecord.isInStackLocked(token);
-            if (r == null) {
-                return;
-            }
-            final long origId = Binder.clearCallingIdentity();
-            try {
-                r.forceNewConfig = true;
-                r.ensureActivityConfigurationLocked(0 /* globalChanges */,
-                        true /* preserveWindow */);
-            } finally {
-                Binder.restoreCallingIdentity(origId);
-            }
-        }
-    }
-
     /**
      * This is the internal entry point for handling Activity.finish().
      *
@@ -5707,8 +5689,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             final long origId = Binder.clearCallingIdentity();
 
-            if (self.state == ActivityState.RESUMED
-                    || self.state == ActivityState.PAUSING) {
+            if (self.isState(ActivityState.RESUMED, ActivityState.PAUSING)) {
                 mWindowManager.overridePendingAppTransition(packageName,
                         enterAnim, exitAnim, null);
             }
@@ -22374,7 +22355,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Update the configuration with WM first and check if any of the stacks need to be resized
         // due to the configuration change. If so, resize the stacks now and do any relaunches if
         // necessary. This way we don't need to relaunch again afterwards in
-        // ensureActivityConfigurationLocked().
+        // ensureActivityConfiguration().
         if (mWindowManager != null) {
             final int[] resizedStacks =
                     mWindowManager.setNewDisplayOverrideConfiguration(mTempConfig, displayId);
@@ -22402,7 +22383,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             if (starting != null) {
-                kept = starting.ensureActivityConfigurationLocked(changes,
+                kept = starting.ensureActivityConfiguration(changes,
                         false /* preserveWindow */);
                 // And we need to make sure at this point that all other activities
                 // are made visible with the correct configuration.
@@ -22792,7 +22773,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         }
                     }
                     break;
-                } else if (r.state == ActivityState.PAUSING || r.state == ActivityState.PAUSED) {
+                } else if (r.isState(ActivityState.PAUSING, ActivityState.PAUSED)) {
                     if (adj > ProcessList.PERCEPTIBLE_APP_ADJ) {
                         adj = ProcessList.PERCEPTIBLE_APP_ADJ;
                         app.adjType = "pause-activity";
@@ -22807,7 +22788,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     app.cached = false;
                     app.empty = false;
                     foregroundActivities = true;
-                } else if (r.state == ActivityState.STOPPING) {
+                } else if (r.isState(ActivityState.STOPPING)) {
                     if (adj > ProcessList.PERCEPTIBLE_APP_ADJ) {
                         adj = ProcessList.PERCEPTIBLE_APP_ADJ;
                         app.adjType = "stop-activity";
@@ -23201,9 +23182,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     final ActivityRecord a = cr.activity;
                     if ((cr.flags&Context.BIND_ADJUST_WITH_ACTIVITY) != 0) {
-                        if (a != null && adj > ProcessList.FOREGROUND_APP_ADJ &&
-                            (a.visible || a.state == ActivityState.RESUMED ||
-                             a.state == ActivityState.PAUSING)) {
+                        if (a != null && adj > ProcessList.FOREGROUND_APP_ADJ && (a.visible
+                                || a.isState(ActivityState.RESUMED, ActivityState.PAUSING))) {
                             adj = ProcessList.FOREGROUND_APP_ADJ;
                             if ((cr.flags&Context.BIND_NOT_FOREGROUND) == 0) {
                                 if ((cr.flags&Context.BIND_IMPORTANT) != 0) {
@@ -25749,7 +25729,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         public void notifyAppTransitionFinished() {
             synchronized (ActivityManagerService.this) {
                 mStackSupervisor.notifyAppTransitionDone();
-                mKeyguardController.notifyAppTransitionDone();
             }
         }
 

@@ -302,7 +302,6 @@ public final class JobStatus {
         this.numFailures = numFailures;
 
         int requiredConstraints = job.getConstraintFlags();
-
         if (job.getRequiredNetwork() != null) {
             requiredConstraints |= CONSTRAINT_CONNECTIVITY;
         }
@@ -323,6 +322,13 @@ public final class JobStatus {
         mInternalFlags = internalFlags;
 
         updateEstimatedNetworkBytesLocked();
+
+        if (job.getRequiredNetwork() != null) {
+            // Later, when we check if a given network satisfies the required
+            // network, we need to know the UID that is requesting it, so push
+            // our source UID into place.
+            job.getRequiredNetwork().networkCapabilities.setSingleUid(this.sourceUid);
+        }
     }
 
     /** Copy constructor: used specifically when cloning JobStatus objects for persistence,
@@ -880,11 +886,6 @@ public final class JobStatus {
 
     public long getLastFailedRunTime() {
         return mLastFailedRunTime;
-    }
-
-    public boolean shouldDump(int filterUid) {
-        return filterUid == -1 || UserHandle.getAppId(getUid()) == filterUid
-                || UserHandle.getAppId(getSourceUid()) == filterUid;
     }
 
     /**

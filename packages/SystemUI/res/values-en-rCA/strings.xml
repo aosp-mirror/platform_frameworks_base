@@ -103,6 +103,8 @@
     <string name="camera_label" msgid="7261107956054836961">"open camera"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Select new task layout"</string>
     <string name="cancel" msgid="6442560571259935130">"Cancel"</string>
+    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
+    <skip />
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Fingerprint icon"</string>
     <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"Application icon"</string>
     <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Help message area"</string>
@@ -272,6 +274,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"Dessert Case"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Screen saver"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Do not disturb"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Priority only"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Alarms only"</string>
@@ -308,8 +312,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi Off"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi On"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"No Wi-Fi networks available"</string>
-    <!-- no translation found for quick_settings_alarm_title (2416759007342260676) -->
-    <skip />
+    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"Alarm"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Casting"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Unnamed device"</string>
@@ -359,7 +362,6 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> is disabled in safe-mode."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Clear all"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Drag here to use split screen"</string>
-    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Swipe up to switch apps"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Split Horizontal"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Split Vertical"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Split Customised"</string>
@@ -503,21 +505,15 @@
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Switch output device"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Screen is pinned"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"This keeps it in view until you unpin. Touch &amp; hold Back and Overview to unpin."</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible (8281145542163727971) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"This keeps it in view until you unpin. Touch &amp; hold Back and Home to unpin."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"This keeps it in view until you unpin. Touch &amp; hold Overview to unpin."</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible_accessible (6134833683151189507) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (2266705122951934150) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (8252402309499161281) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"This keeps it in view until you unpin. Touch &amp; hold Home to unpin."</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"To unpin this screen, touch &amp; hold Back and Overview buttons"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"To unpin this screen, touch &amp; hold Back and Home buttons"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Got it"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"No, thanks"</string>
-    <!-- no translation found for screen_pinning_start (1022122128489278317) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (5187339744262325372) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="1022122128489278317">"Screen pinned"</string>
+    <string name="screen_pinning_exit" msgid="5187339744262325372">"Screen unpinned"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Hide <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"It will reappear the next time you turn it on in settings."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Hide"</string>
@@ -540,8 +536,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Tap to mute. Accessibility services may be muted."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Tap to set to vibrate."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Tap to mute."</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s volume controls shown. Swipe up to dismiss."</string>
-    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Volume controls hidden"</string>
+    <string name="volume_dialog_title" msgid="7272969888820035876">"%s volume controls"</string>
     <string name="output_title" msgid="5355078100792942802">"Media output"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Phone call output"</string>
     <string name="output_none_found" msgid="5544982839808921091">"No devices found"</string>
@@ -691,9 +686,8 @@
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Clipboard"</item>
     <item msgid="5742013440802239414">"Keycode"</item>
-    <item msgid="8802889973626281575">"Keyboard switcher"</item>
-    <item msgid="7095517796293767867">"Rotation suggestion"</item>
-    <item msgid="8494159969042135235">"None"</item>
+    <item msgid="1951959982985094069">"Rotate confirm, keyboard switcher"</item>
+    <item msgid="8175437057325747277">"None"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"Normal"</item>

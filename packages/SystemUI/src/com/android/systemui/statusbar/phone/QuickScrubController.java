@@ -124,9 +124,10 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
         @Override
         public void onAnimationEnd(Animator animation) {
             mNavigationBarView.getHomeButton().setClickable(true);
-            mHomeButtonView = null;
             mQuickScrubActive = false;
             mTranslation = 0;
+            mQuickScrubEndAnimator.setCurrentPlayTime(mQuickScrubEndAnimator.getDuration());
+            mHomeButtonView = null;
         }
     };
 
@@ -147,8 +148,7 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
                         mIsVertical ? (absVelY > velocityX) : (velocityX > absVelY);
                 if (isValidFling) {
                     mDraggingActive = false;
-                    mButtonAnimator.setIntValues((int) mTranslation, 0);
-                    mButtonAnimator.start();
+                    animateEnd();
                     mHandler.removeCallbacks(mLongPressRunnable);
                     try {
                         final IOverviewProxy overviewProxy = mOverviewEventSender.getProxy();
@@ -176,8 +176,10 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
 
         mTrackAnimator = ObjectAnimator.ofFloat();
         mTrackAnimator.addUpdateListener(mTrackAnimatorListener);
+        mTrackAnimator.setFloatValues(0);
         mButtonAnimator = ObjectAnimator.ofInt();
         mButtonAnimator.addUpdateListener(mButtonTranslationListener);
+        mButtonAnimator.setIntValues(0);
         mQuickScrubEndAnimator = new AnimatorSet();
         mQuickScrubEndAnimator.playTogether(mTrackAnimator, mButtonAnimator);
         mQuickScrubEndAnimator.setDuration(ANIM_DURATION_MS);
@@ -226,7 +228,7 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
                 int x = (int) event.getX();
                 int y = (int) event.getY();
                 // End any existing quickscrub animations before starting the new transition
-                if (mQuickScrubEndAnimator != null) {
+                if (mHomeButtonView != null) {
                     mQuickScrubEndAnimator.end();
                 }
                 mHomeButtonView = homeButton.getCurrentView();
@@ -380,7 +382,7 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
     }
 
     private void startQuickScrub() {
-        if (!mQuickScrubActive) {
+        if (!mQuickScrubActive && mDraggingActive) {
             mQuickScrubActive = true;
             mLightTrackColor = mContext.getColor(R.color.quick_step_track_background_light);
             mDarkTrackColor = mContext.getColor(R.color.quick_step_track_background_dark);
@@ -394,15 +396,16 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to send start of quick scrub.", e);
             }
+        } else {
+            // After long press do not allow quick scrub/switch
+            mTouchDownX = -1;
         }
     }
 
     private void endQuickScrub(boolean animate) {
         mHandler.removeCallbacks(mLongPressRunnable);
         if (mDraggingActive || mQuickScrubActive) {
-            mButtonAnimator.setIntValues((int) mTranslation, 0);
-            mTrackAnimator.setFloatValues(mTrackAlpha, 0);
-            mQuickScrubEndAnimator.start();
+            animateEnd();
             try {
                 mOverviewEventSender.getProxy().onQuickScrubEnd();
                 if (DEBUG_OVERVIEW_PROXY) {
@@ -411,9 +414,9 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to send end of quick scrub.", e);
             }
-            if (!animate) {
-                mQuickScrubEndAnimator.end();
-            }
+        }
+        if (mHomeButtonView != null && !animate) {
+            mQuickScrubEndAnimator.end();
         }
         mDraggingActive = false;
     }
@@ -428,6 +431,13 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
     public void cancelQuickSwitch() {
         mAllowQuickSwitch = false;
         mHandler.removeCallbacks(mLongPressRunnable);
+    }
+
+    private void animateEnd() {
+        mButtonAnimator.setIntValues((int) mTranslation, 0);
+        mTrackAnimator.setFloatValues(mTrackAlpha, 0);
+        mQuickScrubEndAnimator.setCurrentPlayTime(0);
+        mQuickScrubEndAnimator.start();
     }
 
     private int getDimensionPixelSize(Context context, @DimenRes int resId) {

@@ -24,10 +24,13 @@ import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
@@ -60,10 +63,20 @@ public class SliceManager {
     public static final String ACTION_REQUEST_SLICE_PERMISSION =
             "android.intent.action.REQUEST_SLICE_PERMISSION";
 
+    /**
+     * The meta-data key that allows an activity to easily be linked directly to a slice.
+     * <p>
+     * An activity can be statically linked to a slice uri by including a meta-data item
+     * for this key that contains a valid slice uri for the same application declaring
+     * the activity.
+     */
+    public static final String SLICE_METADATA_KEY = "android.metadata.SLICE_URI";
+
     private final ISliceManager mService;
     private final Context mContext;
     private final ArrayMap<Pair<Uri, SliceCallback>, ISliceListener> mListenerLookup =
             new ArrayMap<>();
+    private final IBinder mToken = new Binder();
 
     /**
      * Permission denied.
@@ -96,7 +109,6 @@ public class SliceManager {
     @Deprecated
     public void registerSliceCallback(@NonNull Uri uri, @NonNull SliceCallback callback,
             @NonNull List<SliceSpec> specs) {
-        registerSliceCallback(uri, specs, mContext.getMainExecutor(), callback);
     }
 
     /**
@@ -105,7 +117,6 @@ public class SliceManager {
     @Deprecated
     public void registerSliceCallback(@NonNull Uri uri, @NonNull SliceCallback callback,
             @NonNull List<SliceSpec> specs, Executor executor) {
-        registerSliceCallback(uri, specs, executor, callback);
     }
 
     /**
@@ -123,7 +134,6 @@ public class SliceManager {
      */
     public void registerSliceCallback(@NonNull Uri uri, @NonNull List<SliceSpec> specs,
             @NonNull SliceCallback callback) {
-        registerSliceCallback(uri, specs, mContext.getMainExecutor(), callback);
     }
 
     /**
@@ -141,32 +151,7 @@ public class SliceManager {
      */
     public void registerSliceCallback(@NonNull Uri uri, @NonNull List<SliceSpec> specs,
             @NonNull @CallbackExecutor Executor executor, @NonNull SliceCallback callback) {
-        try {
-            mService.addSliceListener(uri, mContext.getPackageName(),
-                    getListener(uri, callback, new ISliceListener.Stub() {
-                        @Override
-                        public void onSliceUpdated(Slice s) throws RemoteException {
-                            executor.execute(() -> callback.onSliceUpdated(s));
-                        }
-                    }), specs.toArray(new SliceSpec[specs.size()]));
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
 
-    private ISliceListener getListener(Uri uri, SliceCallback callback,
-            ISliceListener listener) {
-        Pair<Uri, SliceCallback> key = new Pair<>(uri, callback);
-        if (mListenerLookup.containsKey(key)) {
-            try {
-                mService.removeSliceListener(uri, mContext.getPackageName(),
-                        mListenerLookup.get(key));
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-        mListenerLookup.put(key, listener);
-        return listener;
     }
 
     /**
@@ -180,12 +165,7 @@ public class SliceManager {
      * @see #registerSliceCallback
      */
     public void unregisterSliceCallback(@NonNull Uri uri, @NonNull SliceCallback callback) {
-        try {
-            mService.removeSliceListener(uri, mContext.getPackageName(),
-                    mListenerLookup.remove(new Pair<>(uri, callback)));
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+
     }
 
     /**
@@ -206,7 +186,7 @@ public class SliceManager {
     public void pinSlice(@NonNull Uri uri, @NonNull List<SliceSpec> specs) {
         try {
             mService.pinSlice(mContext.getPackageName(), uri,
-                    specs.toArray(new SliceSpec[specs.size()]));
+                    specs.toArray(new SliceSpec[specs.size()]), mToken);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -228,7 +208,7 @@ public class SliceManager {
      */
     public void unpinSlice(@NonNull Uri uri) {
         try {
-            mService.unpinSlice(mContext.getPackageName(), uri);
+            mService.unpinSlice(mContext.getPackageName(), uri, mToken);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -316,12 +296,10 @@ public class SliceManager {
     }
 
     /**
-     * Turns a slice intent into a slice uri. Expects an explicit intent. If there is no
-     * {@link android.content.ContentProvider} associated with the given intent this will throw
-     * {@link IllegalArgumentException}.
+     * Turns a slice intent into a slice uri. Expects an explicit intent.
      *
      * @param intent The intent associated with a slice.
-     * @return The Slice Uri provided by the app or null if none is given.
+     * @return The Slice Uri provided by the app or null if none exists.
      * @see Slice
      * @see SliceProvider#onMapIntentToUri(Intent)
      * @see Intent
@@ -341,7 +319,16 @@ public class SliceManager {
         List<ResolveInfo> providers =
                 mContext.getPackageManager().queryIntentContentProviders(intent, 0);
         if (providers == null || providers.isEmpty()) {
-            throw new IllegalArgumentException("Unable to resolve intent " + intent);
+            // There are no providers, see if this activity has a direct link.
+            ResolveInfo resolve = mContext.getPackageManager().resolveActivity(intent,
+                    PackageManager.GET_META_DATA);
+            if (resolve != null && resolve.activityInfo != null
+                    && resolve.activityInfo.metaData != null
+                    && resolve.activityInfo.metaData.containsKey(SLICE_METADATA_KEY)) {
+                return Uri.parse(
+                        resolve.activityInfo.metaData.getString(SLICE_METADATA_KEY));
+            }
+            return null;
         }
         String authority = providers.get(0).providerInfo.authority;
         Uri uri = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
@@ -392,7 +379,16 @@ public class SliceManager {
         List<ResolveInfo> providers =
                 mContext.getPackageManager().queryIntentContentProviders(intent, 0);
         if (providers == null || providers.isEmpty()) {
-            throw new IllegalArgumentException("Unable to resolve intent " + intent);
+            // There are no providers, see if this activity has a direct link.
+            ResolveInfo resolve = mContext.getPackageManager().resolveActivity(intent,
+                    PackageManager.GET_META_DATA);
+            if (resolve != null && resolve.activityInfo != null
+                    && resolve.activityInfo.metaData != null
+                    && resolve.activityInfo.metaData.containsKey(SLICE_METADATA_KEY)) {
+                return bindSlice(Uri.parse(resolve.activityInfo.metaData
+                        .getString(SLICE_METADATA_KEY)), supportedSpecs);
+            }
+            return null;
         }
         String authority = providers.get(0).providerInfo.authority;
         Uri uri = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)

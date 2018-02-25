@@ -137,7 +137,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 175 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 176 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS;
@@ -2823,6 +2823,7 @@ public class BatteryStatsImpl extends BatteryStats {
             implements Parcelable {
         private final LongSamplingCounter mIdleTimeMillis;
         private final LongSamplingCounter mScanTimeMillis;
+        private final LongSamplingCounter mSleepTimeMillis;
         private final LongSamplingCounter mRxTimeMillis;
         private final LongSamplingCounter[] mTxTimeMillis;
         private final LongSamplingCounter mPowerDrainMaMs;
@@ -2830,6 +2831,7 @@ public class BatteryStatsImpl extends BatteryStats {
         public ControllerActivityCounterImpl(TimeBase timeBase, int numTxStates) {
             mIdleTimeMillis = new LongSamplingCounter(timeBase);
             mScanTimeMillis = new LongSamplingCounter(timeBase);
+            mSleepTimeMillis = new LongSamplingCounter(timeBase);
             mRxTimeMillis = new LongSamplingCounter(timeBase);
             mTxTimeMillis = new LongSamplingCounter[numTxStates];
             for (int i = 0; i < numTxStates; i++) {
@@ -2841,6 +2843,7 @@ public class BatteryStatsImpl extends BatteryStats {
         public ControllerActivityCounterImpl(TimeBase timeBase, int numTxStates, Parcel in) {
             mIdleTimeMillis = new LongSamplingCounter(timeBase, in);
             mScanTimeMillis = new LongSamplingCounter(timeBase, in);
+            mSleepTimeMillis = new LongSamplingCounter(timeBase, in);
             mRxTimeMillis = new LongSamplingCounter(timeBase, in);
             final int recordedTxStates = in.readInt();
             if (recordedTxStates != numTxStates) {
@@ -2857,6 +2860,7 @@ public class BatteryStatsImpl extends BatteryStats {
         public void readSummaryFromParcel(Parcel in) {
             mIdleTimeMillis.readSummaryFromParcelLocked(in);
             mScanTimeMillis.readSummaryFromParcelLocked(in);
+            mSleepTimeMillis.readSummaryFromParcelLocked(in);
             mRxTimeMillis.readSummaryFromParcelLocked(in);
             final int recordedTxStates = in.readInt();
             if (recordedTxStates != mTxTimeMillis.length) {
@@ -2876,6 +2880,7 @@ public class BatteryStatsImpl extends BatteryStats {
         public void writeSummaryToParcel(Parcel dest) {
             mIdleTimeMillis.writeSummaryFromParcelLocked(dest);
             mScanTimeMillis.writeSummaryFromParcelLocked(dest);
+            mSleepTimeMillis.writeSummaryFromParcelLocked(dest);
             mRxTimeMillis.writeSummaryFromParcelLocked(dest);
             dest.writeInt(mTxTimeMillis.length);
             for (LongSamplingCounter counter : mTxTimeMillis) {
@@ -2888,6 +2893,7 @@ public class BatteryStatsImpl extends BatteryStats {
         public void writeToParcel(Parcel dest, int flags) {
             mIdleTimeMillis.writeToParcel(dest);
             mScanTimeMillis.writeToParcel(dest);
+            mSleepTimeMillis.writeToParcel(dest);
             mRxTimeMillis.writeToParcel(dest);
             dest.writeInt(mTxTimeMillis.length);
             for (LongSamplingCounter counter : mTxTimeMillis) {
@@ -2899,6 +2905,7 @@ public class BatteryStatsImpl extends BatteryStats {
         public void reset(boolean detachIfReset) {
             mIdleTimeMillis.reset(detachIfReset);
             mScanTimeMillis.reset(detachIfReset);
+            mSleepTimeMillis.reset(detachIfReset);
             mRxTimeMillis.reset(detachIfReset);
             for (LongSamplingCounter counter : mTxTimeMillis) {
                 counter.reset(detachIfReset);
@@ -2909,6 +2916,7 @@ public class BatteryStatsImpl extends BatteryStats {
         public void detach() {
             mIdleTimeMillis.detach();
             mScanTimeMillis.detach();
+            mSleepTimeMillis.detach();
             mRxTimeMillis.detach();
             for (LongSamplingCounter counter : mTxTimeMillis) {
                 counter.detach();
@@ -2932,6 +2940,15 @@ public class BatteryStatsImpl extends BatteryStats {
         @Override
         public LongSamplingCounter getScanTimeCounter() {
             return mScanTimeMillis;
+        }
+
+        /**
+         * @return a LongSamplingCounter, measuring time spent in the sleep state in
+         * milliseconds.
+         */
+        @Override
+        public LongSamplingCounter getSleepTimeCounter() {
+            return mSleepTimeMillis;
         }
 
         /**
@@ -11438,6 +11455,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 mHasModemReporting = true;
                 mModemActivity.getIdleTimeCounter().addCountLocked(
                         deltaInfo.getIdleTimeMillis());
+                mModemActivity.getSleepTimeCounter().addCountLocked(
+                        deltaInfo.getSleepTimeMillis());
                 mModemActivity.getRxTimeCounter().addCountLocked(deltaInfo.getRxTimeMillis());
                 for (int lvl = 0; lvl < ModemActivityInfo.TX_POWER_LEVELS; lvl++) {
                     mModemActivity.getTxTimeCounters()[lvl]
@@ -12960,6 +12979,7 @@ public class BatteryStatsImpl extends BatteryStats {
         final int which = STATS_SINCE_CHARGED;
         final long rawRealTime = SystemClock.elapsedRealtime() * 1000;
         final ControllerActivityCounter counter = getModemControllerActivity();
+        final long sleepTimeMs = counter.getSleepTimeCounter().getCountLocked(which);
         final long idleTimeMs = counter.getIdleTimeCounter().getCountLocked(which);
         final long rxTimeMs = counter.getRxTimeCounter().getCountLocked(which);
         final long energyConsumedMaMs = counter.getPowerCounter().getCountLocked(which);
@@ -12979,10 +12999,6 @@ public class BatteryStatsImpl extends BatteryStats {
             txTimeMs[i] = counter.getTxTimeCounters()[i].getCountLocked(which);
             totalTxTimeMs += txTimeMs[i];
         }
-        final long totalControllerActivityTimeMs
-            = computeBatteryRealtime(SystemClock.elapsedRealtime() * 1000, which) / 1000;
-        final long sleepTimeMs
-            = totalControllerActivityTimeMs - (idleTimeMs + rxTimeMs + totalTxTimeMs);
         s.setLoggingDurationMs(computeBatteryRealtime(rawRealTime, which) / 1000);
         s.setKernelActiveTimeMs(getMobileRadioActiveTime(rawRealTime, which) / 1000);
         s.setNumPacketsTx(getNetworkActivityPackets(NETWORK_MOBILE_TX_DATA, which));
@@ -14602,6 +14618,7 @@ public class BatteryStatsImpl extends BatteryStats {
             u.mJobsFreshnessTimeMs.writeSummaryFromParcelLocked(out);
             for (int i = 0; i < JOB_FRESHNESS_BUCKETS.length; i++) {
                 if (u.mJobsFreshnessBuckets[i] != null) {
+                    out.writeInt(1);
                     u.mJobsFreshnessBuckets[i].writeSummaryFromParcelLocked(out);
                 } else {
                     out.writeInt(0);

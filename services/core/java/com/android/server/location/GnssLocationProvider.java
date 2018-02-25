@@ -1704,7 +1704,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
             mStarted = false;
             mSingleShot = false;
             native_stop();
-            mTimeToFirstFix = 0;
             mLastFixTime = 0;
 
             // reset SV count to zero

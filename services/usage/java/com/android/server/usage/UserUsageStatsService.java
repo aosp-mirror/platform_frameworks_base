@@ -24,6 +24,7 @@ import android.app.usage.UsageStatsManager;
 import android.content.res.Configuration;
 import android.os.SystemClock;
 import android.content.Context;
+import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -474,25 +475,25 @@ class UserUsageStatsService {
         mDatabase.checkinDailyFiles(new UsageStatsDatabase.CheckinAction() {
             @Override
             public boolean checkin(IntervalStats stats) {
-                printIntervalStats(pw, stats, false, null);
+                printIntervalStats(pw, stats, true, null);
                 return true;
             }
         });
     }
 
     void dump(IndentingPrintWriter pw, String pkg) {
-        // This is not a check-in, only dump in-memory stats.
+        printLast24HrEvents(pw, true, pkg);
         for (int interval = 0; interval < mCurrentStats.length; interval++) {
             pw.print("In-memory ");
             pw.print(intervalToString(interval));
             pw.println(" stats");
-            printIntervalStats(pw, mCurrentStats[interval], true, pkg);
+            printIntervalStats(pw, mCurrentStats[interval], false, pkg);
         }
     }
 
     private String formatDateTime(long dateTime, boolean pretty) {
         if (pretty) {
-            return "\"" + DateUtils.formatDateTime(mContext, dateTime, sDateFormatFlags) + "\"";
+            return "\"" + DateFormat.format("yyyy-MM-dd HH:mm:ss", dateTime).toString() + "\"";
         }
         return Long.toString(dateTime);
     }
@@ -504,8 +505,83 @@ class UserUsageStatsService {
         return Long.toString(elapsedTime);
     }
 
+
+    void printEvent(IndentingPrintWriter pw, UsageEvents.Event event, boolean prettyDates) {
+        pw.printPair("time", formatDateTime(event.mTimeStamp, prettyDates));
+        pw.printPair("type", eventToString(event.mEventType));
+        pw.printPair("package", event.mPackage);
+        if (event.mClass != null) {
+            pw.printPair("class", event.mClass);
+        }
+        if (event.mConfiguration != null) {
+            pw.printPair("config", Configuration.resourceQualifierString(event.mConfiguration));
+        }
+        if (event.mShortcutId != null) {
+            pw.printPair("shortcutId", event.mShortcutId);
+        }
+        if (event.mEventType == UsageEvents.Event.STANDBY_BUCKET_CHANGED) {
+            pw.printPair("standbyBucket", event.getStandbyBucket());
+            pw.printPair("reason", UsageStatsManager.reasonToString(event.getStandbyReason()));
+        }
+        pw.printHexPair("flags", event.mFlags);
+        pw.println();
+    }
+
+    void printLast24HrEvents(IndentingPrintWriter pw, boolean prettyDates, final String pkg) {
+        final long endTime = System.currentTimeMillis();
+        UnixCalendar yesterday = new UnixCalendar(endTime);
+        yesterday.addDays(-1);
+
+        final long beginTime = yesterday.getTimeInMillis();
+
+        List<UsageEvents.Event> events = queryStats(UsageStatsManager.INTERVAL_DAILY,
+                beginTime, endTime, new StatCombiner<UsageEvents.Event>() {
+                    @Override
+                    public void combine(IntervalStats stats, boolean mutable,
+                            List<UsageEvents.Event> accumulatedResult) {
+                        if (stats.events == null) {
+                            return;
+                        }
+
+                        final int startIndex = stats.events.closestIndexOnOrAfter(beginTime);
+                        if (startIndex < 0) {
+                            return;
+                        }
+
+                        final int size = stats.events.size();
+                        for (int i = startIndex; i < size; i++) {
+                            if (stats.events.keyAt(i) >= endTime) {
+                                return;
+                            }
+
+                            UsageEvents.Event event = stats.events.valueAt(i);
+                            if (pkg != null && !pkg.equals(event.mPackage)) {
+                                continue;
+                            }
+                            accumulatedResult.add(event);
+                        }
+                    }
+                });
+
+        pw.print("Last 24 hour events (");
+        if (prettyDates) {
+            pw.printPair("timeRange", "\"" + DateUtils.formatDateRange(mContext,
+                    beginTime, endTime, sDateFormatFlags) + "\"");
+        } else {
+            pw.printPair("beginTime", beginTime);
+            pw.printPair("endTime", endTime);
+        }
+        pw.println(")");
+        pw.increaseIndent();
+        for (UsageEvents.Event event : events) {
+            printEvent(pw, event, prettyDates);
+        }
+        pw.decreaseIndent();
+    }
+
     void printIntervalStats(IndentingPrintWriter pw, IntervalStats stats,
-            boolean prettyDates, String pkg) {
+            boolean checkin, String pkg) {
+        boolean prettyDates = !checkin;
         if (prettyDates) {
             pw.printPair("timeRange", "\"" + DateUtils.formatDateRange(mContext,
                     stats.beginTime, stats.endTime, sDateFormatFlags) + "\"");
@@ -578,34 +654,22 @@ class UserUsageStatsService {
             pw.decreaseIndent();
         }
 
-        pw.println("events");
-        pw.increaseIndent();
-        final TimeSparseArray<UsageEvents.Event> events = stats.events;
-        final int eventCount = events != null ? events.size() : 0;
-        for (int i = 0; i < eventCount; i++) {
-            final UsageEvents.Event event = events.valueAt(i);
-            if (pkg != null && !pkg.equals(event.mPackage)) {
-                continue;
+        // The last 24 hours of events is already printed in the non checkin dump
+        // No need to repeat here.
+        if (checkin) {
+            pw.println("events");
+            pw.increaseIndent();
+            final TimeSparseArray<UsageEvents.Event> events = stats.events;
+            final int eventCount = events != null ? events.size() : 0;
+            for (int i = 0; i < eventCount; i++) {
+                final UsageEvents.Event event = events.valueAt(i);
+                if (pkg != null && !pkg.equals(event.mPackage)) {
+                    continue;
+                }
+                printEvent(pw, event, prettyDates);
             }
-            pw.printPair("time", formatDateTime(event.mTimeStamp, prettyDates));
-            pw.printPair("type", eventToString(event.mEventType));
-            pw.printPair("package", event.mPackage);
-            if (event.mClass != null) {
-                pw.printPair("class", event.mClass);
-            }
-            if (event.mConfiguration != null) {
-                pw.printPair("config", Configuration.resourceQualifierString(event.mConfiguration));
-            }
-            if (event.mShortcutId != null) {
-                pw.printPair("shortcutId", event.mShortcutId);
-            }
-            if (event.mEventType == UsageEvents.Event.STANDBY_BUCKET_CHANGED) {
-                pw.printPair("standbyBucket", event.mBucket);
-            }
-            pw.printHexPair("flags", event.mFlags);
-            pw.println();
+            pw.decreaseIndent();
         }
-        pw.decreaseIndent();
         pw.decreaseIndent();
     }
 

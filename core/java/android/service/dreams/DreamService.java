@@ -665,6 +665,11 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     private void updateDoze() {
+        if (mWindowToken == null) {
+            Slog.w(TAG, "Updating doze without a window token.");
+            return;
+        }
+
         if (mDozing) {
             try {
                 mSandman.startDozing(mWindowToken, mDozeScreenState, mDozeScreenBrightness);

@@ -37,6 +37,7 @@ import android.graphics.Rect;
 import android.os.PowerManager;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
+import android.util.Log;
 import android.util.MathUtils;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -172,7 +173,6 @@ public class NotificationPanelView extends PanelView implements
     private Animator mClockAnimator;
     private int mClockAnimationTargetX = Integer.MIN_VALUE;
     private int mClockAnimationTargetY = Integer.MIN_VALUE;
-    private int mTopPaddingAdjustment;
     private KeyguardClockPositionAlgorithm mClockPositionAlgorithm =
             new KeyguardClockPositionAlgorithm();
     private KeyguardClockPositionAlgorithm.Result mClockPositionResult =
@@ -244,6 +244,7 @@ public class NotificationPanelView extends PanelView implements
     private int mQsNotificationTopPadding;
     private float mExpandOffset;
     private boolean mHideIconsDuringNotificationLaunch = true;
+    private int mStackScrollerMeasuringPass;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -459,17 +460,17 @@ public class NotificationPanelView extends PanelView implements
         if (mStatusBarState != StatusBarState.KEYGUARD) {
             stackScrollerPadding = (mQs != null ? mQs.getHeader().getHeight() : 0) + mQsPeekHeight
             +  mQsNotificationTopPadding;
-            mTopPaddingAdjustment = 0;
         } else {
+            final int totalHeight = getHeight();
+            final int bottomPadding = Math.max(mIndicationBottomPadding, mAmbientIndicationBottomPadding);
             mClockPositionAlgorithm.setup(
-                    mStatusBar.getMaxNotificationsWhileLocked(),
-                    getMaxPanelHeight(),
+                    mStatusBarMinHeight,
+                    totalHeight - bottomPadding,
+                    calculatePanelHeightShade() - mNotificationStackScroller.getTopPadding(),
                     getExpandedHeight(),
-                    mNotificationStackScroller.getNotGoneChildCount(),
-                    getHeight(),
+                    getMaxPanelHeight(),
+                    totalHeight,
                     mKeyguardStatusView.getHeight(),
-                    mEmptyDragAmount,
-                    mKeyguardStatusView.getClockBottom(),
                     mDarkAmount);
             mClockPositionAlgorithm.run(mClockPositionResult);
             if (animate || mClockAnimator != null) {
@@ -478,14 +479,16 @@ public class NotificationPanelView extends PanelView implements
                 mKeyguardStatusView.setX(mClockPositionResult.clockX);
                 mKeyguardStatusView.setY(mClockPositionResult.clockY);
             }
-            updateClock(mClockPositionResult.clockAlpha, mClockPositionResult.clockScale);
+            updateClock();
             stackScrollerPadding = mClockPositionResult.stackScrollerPadding;
-            mTopPaddingAdjustment = mClockPositionResult.stackScrollerPaddingAdjustment;
         }
         mNotificationStackScroller.setIntrinsicPadding(stackScrollerPadding);
         mNotificationStackScroller.setAntiBurnInOffsetX(mClockPositionResult.clockX);
         mKeyguardBottomArea.setBurnInXOffset(mClockPositionResult.clockX);
+
+        mStackScrollerMeasuringPass++;
         requestScrollerTopPaddingUpdate(animate);
+        mStackScrollerMeasuringPass = 0;
     }
 
     /**
@@ -493,8 +496,7 @@ public class NotificationPanelView extends PanelView implements
      * @return the maximum keyguard notifications that can fit on the screen
      */
     public int computeMaxKeyguardNotifications(int maximum) {
-        float minPadding = mClockPositionAlgorithm.getMinStackScrollerPadding(getHeight(),
-                mKeyguardStatusView.getHeight());
+        float minPadding = mClockPositionAlgorithm.getMinStackScrollerPadding();
         int notificationPadding = Math.max(1, getResources().getDimensionPixelSize(
                 R.dimen.notification_divider_height));
         NotificationShelf shelf = mNotificationStackScroller.getNotificationShelf();
@@ -579,12 +581,10 @@ public class NotificationPanelView extends PanelView implements
         });
     }
 
-    private void updateClock(float alpha, float scale) {
+    private void updateClock() {
         if (!mKeyguardStatusViewAnimating) {
-            mKeyguardStatusView.setAlpha(alpha * mQsClockAlphaOverride);
+            mKeyguardStatusView.setAlpha(mClockPositionResult.clockAlpha * mQsClockAlphaOverride);
         }
-        mKeyguardStatusView.setScaleX(scale);
-        mKeyguardStatusView.setScaleY(scale);
     }
 
     public void animateToFullShade(long delay) {
@@ -1316,7 +1316,7 @@ public class NotificationPanelView extends PanelView implements
         newClockAlpha = 1 - MathUtils.constrain(newClockAlpha, 0, 1);
         if (newClockAlpha != mQsClockAlphaOverride) {
             mQsClockAlphaOverride = Interpolators.ALPHA_OUT.getInterpolation(newClockAlpha);
-            updateClock(mClockPositionResult.clockAlpha, mClockPositionResult.clockScale);
+            updateClock();
         }
 
         if (mAccessibilityManager.isEnabled()) {
@@ -1356,15 +1356,15 @@ public class NotificationPanelView extends PanelView implements
                 && (mQsExpandImmediate || mIsExpanding && mQsExpandedWhenExpandingStarted)) {
 
             // Either QS pushes the notifications down when fully expanded, or QS is fully above the
-            // notifications (mostly on tablets). maxNotifications denotes the normal top padding
-            // on Keyguard, maxQs denotes the top padding from the quick settings panel. We need to
-            // take the maximum and linearly interpolate with the panel expansion for a nice motion.
-            int maxNotifications = mClockPositionResult.stackScrollerPadding
-                    - mClockPositionResult.stackScrollerPaddingAdjustment;
-            int maxQs = mQsMaxExpansionHeight + mQsNotificationTopPadding;
+            // notifications (mostly on tablets). maxNotificationPadding denotes the normal top
+            // padding on Keyguard, maxQsPadding denotes the top padding from the quick settings
+            // panel. We need to take the maximum and linearly interpolate with the panel expansion
+            // for a nice motion.
+            int maxNotificationPadding = mClockPositionResult.stackScrollerPadding;
+            int maxQsPadding = mQsMaxExpansionHeight + mQsNotificationTopPadding;
             int max = mStatusBarState == StatusBarState.KEYGUARD
-                    ? Math.max(maxNotifications, maxQs)
-                    : maxQs;
+                    ? Math.max(maxNotificationPadding, maxQsPadding)
+                    : maxQsPadding;
             return (int) interpolate(getExpandedFraction(),
                     mQsMinExpansionHeight, max);
         } else if (mQsSizeChangeAnimator != null) {
@@ -1507,7 +1507,7 @@ public class NotificationPanelView extends PanelView implements
         if (mQsExpandImmediate || mQsExpanded || mIsExpanding && mQsExpandedWhenExpandingStarted) {
             maxHeight = calculatePanelHeightQsExpanded();
         } else {
-            maxHeight = calculatePanelHeightShade();
+            maxHeight = Math.max(calculatePanelHeightShade(), calculatePanelHeightShadeExpanded());
         }
         maxHeight = Math.max(maxHeight, min);
         return maxHeight;
@@ -1524,7 +1524,15 @@ public class NotificationPanelView extends PanelView implements
     @Override
     protected void onHeightUpdated(float expandedHeight) {
         if (!mQsExpanded || mQsExpandImmediate || mIsExpanding && mQsExpandedWhenExpandingStarted) {
-            positionClockAndNotifications();
+            // Updating the clock position will set the top padding which might
+            // trigger a new panel height and re-position the clock.
+            // This is a circular dependency and should be avoided, otherwise we'll have
+            // a stack overflow.
+            if (mStackScrollerMeasuringPass > 2) {
+                if (DEBUG) Log.d(TAG, "Unstable notification panel height. Aborting.");
+            } else {
+                positionClockAndNotifications();
+            }
         }
         if (mQsExpandImmediate || mQsExpanded && !mQsTracking && mQsExpansionAnimator == null
                 && !mQsExpansionFromOverscroll) {
@@ -1568,10 +1576,16 @@ public class NotificationPanelView extends PanelView implements
 
     private int calculatePanelHeightShade() {
         int emptyBottomMargin = mNotificationStackScroller.getEmptyBottomMargin();
-        int maxHeight = mNotificationStackScroller.getHeight() - emptyBottomMargin
-                - mTopPaddingAdjustment;
+        int maxHeight = mNotificationStackScroller.getHeight() - emptyBottomMargin;
         maxHeight += mNotificationStackScroller.getTopPaddingOverflow();
         return maxHeight;
+    }
+
+    private int calculatePanelHeightShadeExpanded() {
+        return mNotificationStackScroller.getHeight()
+                - mNotificationStackScroller.getEmptyBottomMargin()
+                - mNotificationStackScroller.getTopPadding()
+                + mClockPositionAlgorithm.getExpandedClockBottom();
     }
 
     private int calculatePanelHeightQsExpanded() {
@@ -1598,8 +1612,7 @@ public class NotificationPanelView extends PanelView implements
         }
         float totalHeight = Math.max(
                 maxQsHeight, mStatusBarState == StatusBarState.KEYGUARD
-                        ? mClockPositionResult.stackScrollerPadding - mTopPaddingAdjustment
-                        : 0)
+                        ? mClockPositionResult.stackScrollerPadding : 0)
                 + notificationHeight + mNotificationStackScroller.getTopPaddingOverflow();
         if (totalHeight > mNotificationStackScroller.getHeight()) {
             float fullyCollapsedHeight = maxQsHeight
@@ -2272,8 +2285,9 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
-    protected void dispatchDraw(Canvas canvas) {
-        super.dispatchDraw(canvas);
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+
         if (DEBUG) {
             Paint p = new Paint();
             p.setColor(Color.RED);
@@ -2288,6 +2302,9 @@ public class NotificationPanelView extends PanelView implements
             p.setColor(Color.YELLOW);
             canvas.drawLine(0, calculatePanelHeightShade(), getWidth(),
                     calculatePanelHeightShade(), p);
+            p.setColor(Color.GRAY);
+            canvas.drawLine(0, calculatePanelHeightShadeExpanded(), getWidth(),
+                    calculatePanelHeightShadeExpanded(), p);
             p.setColor(Color.MAGENTA);
             canvas.drawLine(0, calculateQsTopPadding(), getWidth(),
                     calculateQsTopPadding(), p);

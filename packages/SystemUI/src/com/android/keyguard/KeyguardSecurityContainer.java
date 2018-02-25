@@ -119,19 +119,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         return false;
     }
 
-    public void announceCurrentSecurityMethod() {
-        View v = (View) getSecurityView(mCurrentSecuritySelection);
-        if (v != null) {
-            v.announceForAccessibility(v.getContentDescription());
-        }
-    }
-
-    public CharSequence getCurrentSecurityModeContentDescription() {
-        View v = (View) getSecurityView(mCurrentSecuritySelection);
-        if (v != null) {
-            return v.getContentDescription();
-        }
-        return "";
+    public CharSequence getTitle() {
+        return mSecurityViewFlipper.getTitle();
     }
 
     private KeyguardSecurityView getSecurityView(SecurityMode securityMode) {

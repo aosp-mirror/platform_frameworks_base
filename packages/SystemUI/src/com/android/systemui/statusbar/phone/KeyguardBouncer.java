@@ -152,7 +152,6 @@ public class KeyguardBouncer {
                 mKeyguardView.requestLayout();
             }
             mShowingSoon = false;
-            mKeyguardView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
         }
     };
 
@@ -264,6 +263,7 @@ public class KeyguardBouncer {
         mStatusBarHeight = mRoot.getResources().getDimensionPixelOffset(
                 com.android.systemui.R.dimen.status_bar_height);
         mRoot.setVisibility(View.INVISIBLE);
+        mRoot.setAccessibilityPaneTitle(mKeyguardView.getAccessibilityTitleForCurrentMode());
 
         final WindowInsets rootInsets = mRoot.getRootWindowInsets();
         if (rootInsets != null) {

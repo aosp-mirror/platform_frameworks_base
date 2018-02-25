@@ -524,6 +524,7 @@ public final class AutofillManagerService extends SystemService {
 
     private void addCompatibilityModeRequestsLocked(@NonNull AutofillManagerServiceImpl service
             , int userId) {
+        mAutofillCompatState.reset();
         final ArrayMap<String, Pair<Long, String>> compatPackages =
                 service.getCompatibilityPackagesLocked();
         if (compatPackages == null || compatPackages.isEmpty()) {
@@ -623,6 +624,15 @@ public final class AutofillManagerService extends SystemService {
                     if (mUserSpecs.size() <= 0) {
                         mUserSpecs = null;
                     }
+                }
+            }
+        }
+
+        void reset() {
+            synchronized (mLock) {
+                if (mUserSpecs != null) {
+                    mUserSpecs.clear();
+                    mUserSpecs = null;
                 }
             }
         }
@@ -1045,6 +1055,9 @@ public final class AutofillManagerService extends SystemService {
                     Settings.Secure.AUTOFILL_SERVICE), false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.USER_SETUP_COMPLETE), false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.AUTOFILL_COMPAT_ALLOWED_PACKAGES), false, this,
+                    UserHandle.USER_ALL);
         }
 
         @Override

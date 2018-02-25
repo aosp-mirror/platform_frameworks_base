@@ -91,6 +91,22 @@ package android.os {
 
 }
 
+package android.security.keystore.recovery {
+
+  public final class KeyChainSnapshot implements android.os.Parcelable {
+    method public deprecated byte[] getTrustedHardwarePublicKey();
+  }
+
+  public class RecoveryController {
+    method public deprecated void setRecoveryStatus(java.lang.String, java.lang.String, int) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.content.pm.PackageManager.NameNotFoundException;
+  }
+
+  public class RecoverySession implements java.lang.AutoCloseable {
+    method public deprecated byte[] start(byte[], byte[], byte[], java.util.List<android.security.keystore.recovery.KeyChainProtectionParams>) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
+  }
+
+}
+
 package android.service.notification {
 
   public abstract class NotificationListenerService extends android.app.Service {

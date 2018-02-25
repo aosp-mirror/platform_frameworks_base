@@ -1346,6 +1346,10 @@
 
     <string name="volume_dialog_title">%s volume controls</string>
 
+    <string name="volume_dialog_ringer_guidance_vibrate">Calls and notifications will vibrate</string>
+    <string name="volume_dialog_ringer_guidance_silent">Calls and notifications will be muted</string>
+    <string name="volume_dialog_ringer_guidance_ring">Calls and notifications will ring</string>
+
     <string name="output_title">Media output</string>
     <string name="output_calls_title">Phone call output</string>
     <string name="output_none_found">No devices found</string>

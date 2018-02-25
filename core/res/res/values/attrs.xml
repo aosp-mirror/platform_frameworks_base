@@ -5905,6 +5905,9 @@
         <!-- Identifier of the image file. This attribute is mandatory.
              It must be an image file with multiple frames, e.g. gif or webp -->
         <attr name="src" />
+        <!-- Indicates if the drawable needs to be mirrored when its layout direction is
+             RTL (right-to-left). -->
+        <attr name="autoMirrored" />
     </declare-styleable>
 
     <!-- Drawable used to draw bitmaps. -->
@@ -6328,6 +6331,9 @@
         <!-- Special option for window animations: if this window is on top
              of a wallpaper, don't animate the wallpaper with it. -->
         <attr name="detachWallpaper" format="boolean" />
+        <!-- Special option for window animations: show the wallpaper behind when running this
+             animation. -->
+        <attr name="showWallpaper" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="AnimationSet">
@@ -8000,6 +8006,8 @@
         <attr name="icon"/>
         <!-- The activity to launch when the setting is clicked on. -->
         <attr name="settingsActivity"/>
+        <!-- The user restriction for this preference. -->
+        <attr name="userRestriction"/>
     </declare-styleable>
 
     <!-- =============================== -->

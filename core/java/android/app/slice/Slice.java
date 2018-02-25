@@ -71,16 +71,6 @@ public final class Slice implements Parcelable {
     public @interface SliceHint {}
 
     /**
-     * The meta-data key that allows an activity to easily be linked directly to a slice.
-     * <p>
-     * An activity can be statically linked to a slice uri by including a meta-data item
-     * for this key that contains a valid slice uri for the same application declaring
-     * the activity.
-     * @hide
-     */
-    public static final String SLICE_METADATA_KEY = "android.metadata.SLICE_URI";
-
-    /**
      * Hint that this content is a title of other content in the slice. This can also indicate that
      * the content should be used in the shortcut representation of the slice (icon, label, action),
      * normally this should be indicated by adding the hint on the action containing that content.

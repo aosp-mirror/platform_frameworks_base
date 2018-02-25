@@ -19,7 +19,8 @@
 <!-- This should in sync with task_open_enter.xml -->
 <set xmlns:android="http://schemas.android.com/apk/res/android"
     android:shareInterpolator="false"
-    android:zAdjustment="top">
+    android:zAdjustment="top"
+    android:showWallpaper="true">
 
     <alpha
         android:fromAlpha="1"

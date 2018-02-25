@@ -105,12 +105,11 @@
     <string name="camera_label" msgid="7261107956054836961">"otwórz aparat"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Wybierz nowy układ zadań"</string>
     <string name="cancel" msgid="6442560571259935130">"Anuluj"</string>
-    <!-- no translation found for accessibility_fingerprint_dialog_fingerprint_icon (3125122495414253226) -->
+    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
     <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_app_icon (3228052542929174609) -->
-    <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_help_area (5730471601819225159) -->
-    <skip />
+    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Ikona odcisku palca"</string>
+    <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"Ikona aplikacji"</string>
+    <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Obszar komunikatu pomocy"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Przycisk powiększenia na potrzeby zgodności."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Powiększa mniejszy ekran do większego."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth połączony."</string>
@@ -279,6 +278,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"Półka ze słodkościami"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Wygaszacz ekranu"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Nie przeszkadzać"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Tylko priorytetowe"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Tylko alarmy"</string>
@@ -315,6 +316,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi wyłączone"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi wł."</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Brak dostępnych sieci Wi-Fi"</string>
+    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"Alarm"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Przesyłanie"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Przesyłam"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Urządzenie bez nazwy"</string>
@@ -331,9 +333,13 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"Łączę..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Powiązanie"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
-    <!-- no translation found for quick_settings_hotspot_secondary_label_transient (7161046712706277215) -->
-    <skip />
-    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (2324635800672199428) -->
+    <string name="quick_settings_hotspot_secondary_label_transient" msgid="7161046712706277215">"Włączam…"</string>
+    <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
+      <item quantity="few">%d urządzenia</item>
+      <item quantity="many">%d urządzeń</item>
+      <item quantity="other">%d urządzenia</item>
+      <item quantity="one">%d urządzenie</item>
+    </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Powiadomienia"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Latarka"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Mobilna transmisja danych"</string>
@@ -343,10 +349,8 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"Wykorzystano <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Limit <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Ostrzeżenie: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <!-- no translation found for quick_settings_work_mode_on_label (3421274215098764735) -->
-    <skip />
-    <!-- no translation found for quick_settings_work_mode_off_label (8856918707867192186) -->
-    <skip />
+    <string name="quick_settings_work_mode_on_label" msgid="3421274215098764735">"Profil służbowy"</string>
+    <string name="quick_settings_work_mode_off_label" msgid="8856918707867192186">"Powiadomienia i aplikacje są wyłączone"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Podświetlenie nocne"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Włącz o zachodzie"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Do wschodu słońca"</string>
@@ -364,8 +368,6 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Aplikacja <xliff:g id="APP">%s</xliff:g> została wyłączona w trybie bezpiecznym."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Wyczyść wszystko"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Przeciągnij tutaj, by podzielić ekran"</string>
-    <!-- no translation found for recents_swipe_up_onboarding (3824607135920170001) -->
-    <skip />
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Podziel poziomo"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Podziel pionowo"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Podziel niestandardowo"</string>
@@ -454,7 +456,7 @@
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8973606847896650284">"Organizacja <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> może monitorować ruch w sieci w Twoim profilu do pracy"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="679658227269205728">"Sieć może być monitorowana"</string>
     <string name="quick_settings_disclosure_vpns" msgid="8170318392053156330">"Urządzenie połączone z sieciami VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"Profil do pracy połączony z aplikacją <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"Profil służbowy połączony z aplikacją <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"Profil osobisty połączony z aplikacją <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6943724064780847080">"Urządzenie połączone z aplikacją <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="1652495295941959815">"Zarządzanie urządzeniami"</string>
@@ -474,7 +476,7 @@
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"Administrator włączył rejestrowanie sieciowe, które pozwala monitorować ruch na Twoim urządzeniu."</string>
     <string name="monitoring_description_named_vpn" msgid="7403457334088909254">"Łączysz się z aplikacją <xliff:g id="VPN_APP">%1$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
     <string name="monitoring_description_two_named_vpns" msgid="4198511413729213802">"Łączysz się z aplikacjami <xliff:g id="VPN_APP_0">%1$s</xliff:g> i <xliff:g id="VPN_APP_1">%2$s</xliff:g>, które mogą monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"Twój profil do pracy jest połączony z aplikacją <xliff:g id="VPN_APP">%1$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"Twój profil służbowy jest połączony z aplikacją <xliff:g id="VPN_APP">%1$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"Twój profil osobisty jest połączony z aplikacją <xliff:g id="VPN_APP">%1$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"Twoim urządzeniem zarządza <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> używa aplikacji <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> do zarządzania Twoim urządzeniem."</string>
@@ -506,11 +508,18 @@
     <string name="volume_zen_end_now" msgid="6930243045593601084">"Wyłącz teraz"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Rozwiń"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Zwiń"</string>
+    <string name="accessibility_output_chooser" msgid="8185317493017988680">"Przełącz urządzenie wyjściowe"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekran jest przypięty"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Ekran będzie widoczny, dopóki go nie odepniesz. Aby to zrobić, kliknij i przytrzymaj Wstecz oraz Przegląd."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Ekran będzie widoczny, dopóki go nie odepniesz. Aby to zrobić, naciśnij i przytrzymaj Wstecz oraz Ekran główny."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Ekran będzie widoczny, dopóki go nie odepniesz. Aby to zrobić, kliknij i przytrzymaj Przegląd."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Ekran będzie widoczny, dopóki go nie odepniesz. Aby to zrobić, naciśnij i przytrzymaj Ekran główny."</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"Aby odpiąć ten ekran, naciśnij i przytrzymaj przyciski Wstecz oraz Przegląd"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Aby odpiąć ten ekran, naciśnij i przytrzymaj przyciski Wstecz oraz Ekran główny"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"OK"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Nie, dziękuję"</string>
+    <string name="screen_pinning_start" msgid="1022122128489278317">"Ekran przypięty"</string>
+    <string name="screen_pinning_exit" msgid="5187339744262325372">"Ekran odpięty"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Ukryć <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Pojawi się ponownie, gdy następnym włączysz go w ustawieniach."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Ukryj"</string>
@@ -533,8 +542,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Kliknij, by wyciszyć. Ułatwienia dostępu mogą być wyciszone."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Kliknij, by włączyć wibracje."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Kliknij, by wyciszyć."</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Wyświetlane są elementy sterowania głośnością aplikacji %s. Przesuń palcem, by odrzucić."</string>
-    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Elementy sterowania głośnością ukryte"</string>
+    <string name="volume_dialog_title" msgid="7272969888820035876">"Sterowanie głośnością: %s"</string>
     <string name="output_title" msgid="5355078100792942802">"Wyjście multimediów"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Wyjście dla połączeń telefonicznych"</string>
     <string name="output_none_found" msgid="5544982839808921091">"Nie znaleziono urządzeń"</string>
@@ -553,7 +561,7 @@
     <string name="show_demo_mode" msgid="2018336697782464029">"Pokaż tryb demonstracyjny"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"Alarm"</string>
-    <string name="status_bar_work" msgid="6022553324802866373">"Profil do pracy"</string>
+    <string name="status_bar_work" msgid="6022553324802866373">"Profil służbowy"</string>
     <string name="status_bar_airplane" msgid="7057575501472249002">"Tryb samolotowy"</string>
     <string name="add_tile" msgid="2995389510240786221">"Dodaj nazwę"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Rozgłaszana nazwa"</string>
@@ -563,7 +571,7 @@
     <string name="alarm_template_far" msgid="4242179982586714810">"w: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Szybkie ustawienia, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
-    <string name="accessibility_managed_profile" msgid="6613641363112584120">"Profil do pracy"</string>
+    <string name="accessibility_managed_profile" msgid="6613641363112584120">"Profil służbowy"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Dobra zabawa, ale nie dla każdego"</string>
     <string name="tuner_warning" msgid="8730648121973575701">"Kalibrator System UI udostępnia dodatkowe sposoby dostrajania i dostosowywania interfejsu Androida. Te eksperymentalne funkcje mogą się zmienić, popsuć lub zniknąć w przyszłych wersjach. Zachowaj ostrożność."</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"Te eksperymentalne funkcje mogą się zmienić, popsuć lub zniknąć w przyszłych wersjach. Zachowaj ostrożność."</string>
@@ -590,8 +598,7 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Dzięki zaawansowanym ustawieniom możesz określić poziom ważności powiadomień z aplikacji w skali od 0 do 5. \n\n"<b>"Poziom 5"</b>" \n– Pokazuj u góry listy powiadomień \n– Zezwalaj na powiadomienia na pełnym ekranie \n– Zawsze pokazuj podgląd \n\n"<b>"Poziom 4"</b>" \n– Wyłącz powiadomienia na pełnym ekranie \n– Zawsze pokazuj podgląd \n\n"<b>"Poziom 3"</b>" \n– Wyłącz powiadomienia na pełnym ekranie \n– Nigdy nie pokazuj podglądu \n\n"<b>"Poziom 2"</b>" \n– Wyłącz powiadomienia na pełnym ekranie \n– Nigdy nie pokazuj podglądu \n– NIgdy nie powiadamiaj dźwiękiem ani wibracjami \n\n"<b>"Poziom 1"</b>" \n– Wyłącz powiadomienia na pełnym ekranie \n– Nigdy nie pokazuj podglądu \n– NIgdy nie powiadamiaj dźwiękiem ani wibracjami \n– Ukrywaj na ekranie blokady i pasku stanu \n– Pokazuj u dołu listy powiadomień \n\n"<b>"Poziom 0"</b>" \n– Blokuj wszystkie powiadomienia aplikacji"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Powiadomienia"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Te powiadomienia nie będą już wyświetlane"</string>
-    <!-- no translation found for inline_blocking_helper (3055064577771478591) -->
-    <skip />
+    <string name="inline_blocking_helper" msgid="3055064577771478591">"Zwykle odrzucasz te powiadomienia. \nNadal je pokazywać?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Nadal pokazywać te powiadomienia?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Zatrzymaj powiadomienia"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Pokazuj nadal"</string>
@@ -689,9 +696,8 @@
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Schowek"</item>
     <item msgid="5742013440802239414">"Klawisz"</item>
-    <item msgid="8802889973626281575">"Przełączanie klawiatury"</item>
-    <item msgid="7095517796293767867">"Sugestia obrotu"</item>
-    <item msgid="8494159969042135235">"Brak"</item>
+    <item msgid="1951959982985094069">"Potwierdzenie obrotu, przełącznik klawiatury"</item>
+    <item msgid="8175437057325747277">"Brak"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"Normalny"</item>

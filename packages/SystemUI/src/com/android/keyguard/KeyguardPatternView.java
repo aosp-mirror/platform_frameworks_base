@@ -491,4 +491,10 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     public boolean hasOverlappingRendering() {
         return false;
     }
+
+    @Override
+    public CharSequence getTitle() {
+        return getContext().getString(
+                com.android.internal.R.string.keyguard_accessibility_pattern_unlock);
+    }
 }

@@ -18,6 +18,8 @@ package com.android.server.accessibility;
 
 import static android.provider.Settings.Secure.SHOW_MODE_AUTO;
 
+import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
+
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.content.ComponentName;
@@ -158,8 +160,8 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             mSystemSupport.onClientChange(false);
             // Initialize the service on the main handler after we're done setting up for
             // the new configuration (for example, initializing the input filter).
-            mMainHandler.obtainMessage(
-                    AccessibilityManagerService.MainHandler.MSG_INIT_SERVICE, this).sendToTarget();
+            mMainHandler.sendMessage(obtainMessage(
+                    AccessibilityServiceConnection::initializeService, this));
         }
     }
 

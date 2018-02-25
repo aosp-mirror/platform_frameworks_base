@@ -1211,7 +1211,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (rotation == ROTATION_0) {
             return cutout.computeSafeInsets(mInitialDisplayWidth, mInitialDisplayHeight);
         }
-        final boolean rotated = (rotation == ROTATION_90 || mRotation == ROTATION_270);
+        final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
         final Path bounds = cutout.getBounds().getBoundaryPath();
         transformPhysicalToLogicalCoordinates(rotation, mInitialDisplayWidth, mInitialDisplayHeight,
                 mTmpMatrix);

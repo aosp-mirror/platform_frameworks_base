@@ -41,6 +41,7 @@ import javax.annotation.Nullable;
 
 import libcore.io.IoUtils;
 
+import static com.android.server.timezone.RulesManagerService.REQUIRED_QUERY_PERMISSION;
 import static com.android.server.timezone.RulesManagerService.REQUIRED_UPDATER_PERMISSION;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -91,25 +92,25 @@ public class RulesManagerServiceTest {
 
     @Test(expected = SecurityException.class)
     public void getRulesState_noCallerPermission() throws Exception {
-        configureCallerDoesNotHavePermission();
+        configureCallerDoesNotHaveQueryPermission();
         mRulesManagerService.getRulesState();
     }
 
     @Test(expected = SecurityException.class)
     public void requestInstall_noCallerPermission() throws Exception {
-        configureCallerDoesNotHavePermission();
+        configureCallerDoesNotHaveUpdatePermission();
         mRulesManagerService.requestInstall(null, null, null);
     }
 
     @Test(expected = SecurityException.class)
     public void requestUninstall_noCallerPermission() throws Exception {
-        configureCallerDoesNotHavePermission();
+        configureCallerDoesNotHaveUpdatePermission();
         mRulesManagerService.requestUninstall(null, null);
     }
 
     @Test(expected = SecurityException.class)
     public void requestNothing_noCallerPermission() throws Exception {
-        configureCallerDoesNotHavePermission();
+        configureCallerDoesNotHaveUpdatePermission();
         mRulesManagerService.requestNothing(null, true);
     }
 
@@ -916,10 +917,16 @@ public class RulesManagerServiceTest {
                 .enforceCallerHasPermission(REQUIRED_UPDATER_PERMISSION);
     }
 
-    private void configureCallerDoesNotHavePermission() {
+    private void configureCallerDoesNotHaveUpdatePermission() {
         doThrow(new SecurityException("Simulated permission failure"))
                 .when(mMockPermissionHelper)
                 .enforceCallerHasPermission(REQUIRED_UPDATER_PERMISSION);
+    }
+
+    private void configureCallerDoesNotHaveQueryPermission() {
+        doThrow(new SecurityException("Simulated permission failure"))
+                .when(mMockPermissionHelper)
+                .enforceCallerHasPermission(REQUIRED_QUERY_PERMISSION);
     }
 
     private void configureStageInstallExpectation(int resultCode)

@@ -103,6 +103,8 @@
     <string name="camera_label" msgid="7261107956054836961">"ကင်မရာ ဖွင့်ရန်"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"အလုပ်သစ်စီစဥ်မှုကို ရွေးပါ။"</string>
     <string name="cancel" msgid="6442560571259935130">"မလုပ်တော့"</string>
+    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
+    <skip />
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"လက်ဗွေ သင်္ကေတ"</string>
     <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"အပလီကေးရှင်း သင်္ကေတ"</string>
     <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"အကူအညီမက်ဆေ့ဂျ် နေရာ"</string>
@@ -272,6 +274,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"မုန့်ထည့်သော ပုံး"</string>
     <string name="start_dreams" msgid="5640361424498338327">"ဖန်သားပြင်အသုံးပြုမှု ချွေတာမှုစနစ်"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"အီသာနက်"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"မနှောင့်ယှက်ရ"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"ဦးစားပေးများသာ"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"နှိုးစက်များသာ"</string>
@@ -308,8 +312,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"ဝိုင်ဖိုင်ပိတ်ရန်"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi ကိုဖွင့်ပါ"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Wi-Fi ကွန်ရက် မရှိပါ"</string>
-    <!-- no translation found for quick_settings_alarm_title (2416759007342260676) -->
-    <skip />
+    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"နှိုးစက်"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"ကာစ်တင်"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"အမည်မတပ် ကိရိယာ"</string>
@@ -359,7 +362,6 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> ကို ဘေးကင်းလုံခြုံသည့်မုဒ်တွင် ပိတ်ထားပါသည်။"</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"အားလုံး ဖယ်ရှားပါ"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"မျက်နှာပြင် ခွဲခြမ်းပြသခြင်းကို အသုံးပြုရန် ဤနေရာသို့ ပွတ်၍ဆွဲထည့်ပါ"</string>
-    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"အက်ပ်များကို ဖွင့်ရန် အပေါ်သို့ ပွတ်ဆွဲပါ"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"ရေပြင်ညီ ပိုင်းမည်"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ဒေါင်လိုက်ပိုင်းမည်"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"စိတ်ကြိုက် ပိုင်းမည်"</string>
@@ -503,21 +505,15 @@
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"အထွက် စက်ပစ္စည်းကို ပြောင်းပါ"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"မျက်နှာပြင် ပင်ထိုးပြီးပါပြီ"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"သင်ပင်မဖြုတ်မခြင်း ၎င်းကို ပြသထားပါမည်။ ပင်ဖြုတ်ရန် Back နှင့် Overview ကို ထိ၍ဖိထားပါ။"</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible (8281145542163727971) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"သင်က ပင်မဖြုတ်မခြင်း ၎င်းကို ပြသထားပါမည်။ ပင်ဖြုတ်ရန် \'နောက်သို့\' နှင့် \'ပင်မ\' ခလုတ်တို့ကို တို့၍ဖိထားပါ။"</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"သင်ပင်မဖြုတ်မချင်း ၎င်းကိုပြသထားပါမည်။ ပင်ဖြုတ်ရန် Overview ကိုထိပြီး ဖိထားပါ။"</string>
-    <!-- no translation found for screen_pinning_description_recents_invisible_accessible (6134833683151189507) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (2266705122951934150) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (8252402309499161281) -->
-    <skip />
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"သင်က ပင်မဖြုတ်မချင်း ၎င်းကိုပြသထားပါမည်။ ပင်ဖြုတ်ရန် \'ပင်မ\' ခလုတ်ကို တို့၍ဖိထားပါ။"</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"ဤမျက်နှာပြင်ကို ပင်ဖြုတ်ရန်အတွက် \'နောက်သို့\' နှင့် \'အနှစ်ချုပ်\' ခလုတ်တို့ကို တို့၍ဖိထားပါ"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"ဤမျက်နှာပြင်ကို ပင်ဖြုတ်ရန်အတွက် \'နောက်သို့\' နှင့် \'ပင်မ\' ခလုတ်တို့ကို တို့၍ဖိထားပါ"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"ရပါပြီ"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"မလိုတော့ပါ"</string>
-    <!-- no translation found for screen_pinning_start (1022122128489278317) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (5187339744262325372) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="1022122128489278317">"မျက်နှာပြင်ကို ပင်ထိုးထားသည်"</string>
+    <string name="screen_pinning_exit" msgid="5187339744262325372">"မျက်နှာပြင်ကို ပင်ဖြုတ်လိုက်ပါပြီ"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ဝှက်မည်လား?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"နောက်တစ်ကြိမ်သင် ချိန်ညှိချက်များဖွင့်လျှင် ၎င်းပေါ်လာပါမည်။"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"ဖျောက်ထားမည်"</string>
@@ -540,8 +536,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s။ အသံပိတ်ရန် တို့ပါ။ အများသုံးစွဲနိုင်မှု ဝန်ဆောင်မှုများကို အသံပိတ်ထားနိုင်ပါသည်။"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s။ တုန်ခါခြင်းသို့ သတ်မှတ်ရန်တို့ပါ။"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s။ အသံတိတ်ရန် တို့ပါ။"</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"အသံအတိုးအလျှော့ခလုတ် %s ပြသထားပါသည်။ ပယ်ရန် အပေါ်သို့ပွတ်ဆွဲပါ။"</string>
-    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"အသံအတိုးအလျှော့ခလုတ်များကို ဝှက်ထားပါသည်"</string>
+    <string name="volume_dialog_title" msgid="7272969888820035876">"%s အသံအတိုးအလျှော့ ခလုတ်များ"</string>
     <string name="output_title" msgid="5355078100792942802">"မီဒီယာ အထွက်"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"ဖုန်းလိုင်း အထွက်"</string>
     <string name="output_none_found" msgid="5544982839808921091">"မည်သည့် စက်ပစ္စည်းမျှ မတွေ့ပါ"</string>
@@ -691,9 +686,8 @@
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"ကလစ်ဘုတ်"</item>
     <item msgid="5742013440802239414">"ကီးကုဒ်"</item>
-    <item msgid="8802889973626281575">"ကီးဘုတ် ပြောင်းလဲပေးသည့်စနစ်"</item>
-    <item msgid="7095517796293767867">"လှည့်မှု အကြံပြုချက်"</item>
-    <item msgid="8494159969042135235">"တစ်ခုမျှမရှိ"</item>
+    <item msgid="1951959982985094069">"လှည့်ခြင်းကို အတည်ပြုရန်၊ ကီးဘုတ်ပြောင်း ကိရိယာ"</item>
+    <item msgid="8175437057325747277">"တစ်ခုမျှမရှိ"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"ပုံမှန်"</item>

@@ -328,6 +328,7 @@ final public class MediaMuxer {
         RandomAccessFile file = null;
         try {
             file = new RandomAccessFile(path, "rws");
+            file.setLength(0);
             FileDescriptor fd = file.getFD();
             setUpMediaMuxer(fd, format);
         } finally {

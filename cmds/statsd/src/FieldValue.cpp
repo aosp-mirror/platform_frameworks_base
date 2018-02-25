@@ -135,6 +135,8 @@ Value::Value(const Value& from) {
         case STRING:
             str_value = from.str_value;
             break;
+        default:
+            break;
     }
 }
 
@@ -148,6 +150,8 @@ std::string Value::toString() const {
             return std::to_string(float_value) + "[F]";
         case STRING:
             return str_value + "[S]";
+        default:
+            return "[UNKNOWN]";
     }
 }
 
@@ -163,6 +167,8 @@ bool Value::operator==(const Value& that) const {
             return float_value == that.float_value;
         case STRING:
             return str_value == that.str_value;
+        default:
+            return false;
     }
 }
 
@@ -177,6 +183,8 @@ bool Value::operator!=(const Value& that) const {
             return float_value != that.float_value;
         case STRING:
             return str_value != that.str_value;
+        default:
+            return false;
     }
 }
 
