@@ -4297,12 +4297,11 @@ package android.security.keystore.recovery {
   public class RecoveryController {
     method public android.security.keystore.recovery.RecoverySession createRecoverySession();
     method public byte[] generateAndStoreKey(java.lang.String, byte[]) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.LockScreenRequiredException;
-    method public java.util.List<java.lang.String> getAliases(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
+    method public java.util.List<java.lang.String> getAliases() throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public static android.security.keystore.recovery.RecoveryController getInstance(android.content.Context);
     method public int[] getPendingRecoverySecretTypes() throws android.security.keystore.recovery.InternalRecoveryServiceException;
-    method public android.security.keystore.recovery.KeyChainSnapshot getRecoveryData() throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public int[] getRecoverySecretTypes() throws android.security.keystore.recovery.InternalRecoveryServiceException;
-    method public int getRecoveryStatus(java.lang.String, java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
+    method public int getRecoveryStatus(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public void initRecoveryService(java.lang.String, byte[]) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
     method public void recoverySecretAvailable(android.security.keystore.recovery.KeyChainProtectionParams) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public void removeKey(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;

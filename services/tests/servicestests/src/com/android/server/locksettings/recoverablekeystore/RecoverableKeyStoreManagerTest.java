@@ -753,12 +753,12 @@ public class RecoverableKeyStoreManagerTest {
         WrappedKey wrappedKey = new WrappedKey(NONCE, KEY_MATERIAL, GENERATION_ID, status);
         mRecoverableKeyStoreDb.insertKey(userId, uid, alias, wrappedKey);
         Map<String, Integer> statuses =
-                mRecoverableKeyStoreManager.getRecoveryStatus(/*packageName=*/ null);
+                mRecoverableKeyStoreManager.getRecoveryStatus();
         assertThat(statuses).hasSize(1);
         assertThat(statuses).containsEntry(alias, status);
 
         mRecoverableKeyStoreManager.setRecoveryStatus(alias, status2);
-        statuses = mRecoverableKeyStoreManager.getRecoveryStatus(/*packageName=*/ null);
+        statuses = mRecoverableKeyStoreManager.getRecoveryStatus();
         assertThat(statuses).hasSize(1);
         assertThat(statuses).containsEntry(alias, status2); // updated
     }
