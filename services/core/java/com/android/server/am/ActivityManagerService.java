@@ -9409,6 +9409,25 @@ public class ActivityManagerService extends IActivityManager.Stub
                     allowed = false;
                 }
             }
+            if (pi.pathPermissions != null) {
+                final int N = pi.pathPermissions.length;
+                for (int i=0; i<N; i++) {
+                    if (pi.pathPermissions[i] != null
+                            && pi.pathPermissions[i].match(grantUri.uri.getPath())) {
+                        if ((modeFlags&Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0) {
+                            if (pi.pathPermissions[i].getReadPermission() != null) {
+                                allowed = false;
+                            }
+                        }
+                        if ((modeFlags&Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != 0) {
+                            if (pi.pathPermissions[i].getWritePermission() != null) {
+                                allowed = false;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
             if (allowed) {
                 return -1;
             }
