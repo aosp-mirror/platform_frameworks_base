@@ -168,4 +168,5 @@ Fingerprint UI.
 
 ---
 
+ * [Plugins](/packages/SystemUI/docs/plugins.md)
  * [Demo Mode](/packages/SystemUI/docs/demo_mode.md)
