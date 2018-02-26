@@ -37,6 +37,7 @@ import android.widget.LinearLayout;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -74,6 +75,11 @@ public class SmartReplyViewTest extends SysuiTestCase {
         mDoubleLinePaddingHorizontal = res.getDimensionPixelSize(
                 R.dimen.smart_reply_button_padding_horizontal_double_line);
         mSpacing = res.getDimensionPixelSize(R.dimen.smart_reply_button_spacing);
+    }
+
+    @After
+    public void tearDown() {
+        mContext.unregisterReceiver(mReceiver);
     }
 
     @Test
