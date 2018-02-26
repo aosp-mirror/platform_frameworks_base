@@ -39,6 +39,7 @@ import org.junit.runner.RunWith;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
+import java.util.Random;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -51,7 +52,7 @@ public class RecoverableKeyGeneratorTest {
     private static final int TEST_GENERATION_ID = 3;
     private static final String ANDROID_KEY_STORE_PROVIDER = "AndroidKeyStore";
     private static final String KEY_ALGORITHM = "AES";
-    private static final int KEY_SIZE_BYTES = 32;
+    private static final int KEY_SIZE_BYTES = RecoverableKeyGenerator.KEY_SIZE_BITS / Byte.SIZE;
     private static final String KEY_WRAP_ALGORITHM = "AES/GCM/NoPadding";
     private static final String TEST_ALIAS = "karlin";
     private static final String WRAPPING_KEY_ALIAS = "RecoverableKeyGeneratorTestWrappingKey";
@@ -71,7 +72,7 @@ public class RecoverableKeyGeneratorTest {
         mDatabaseFile = context.getDatabasePath(DATABASE_FILE_NAME);
         mRecoverableKeyStoreDb = RecoverableKeyStoreDb.newInstance(context);
 
-        AndroidKeyStoreSecretKey platformKey = generateAndroidKeyStoreKey();
+        AndroidKeyStoreSecretKey platformKey = generatePlatformKey();
         mPlatformKey = new PlatformEncryptionKey(TEST_GENERATION_ID, platformKey);
         mDecryptKey = new PlatformDecryptionKey(TEST_GENERATION_ID, platformKey);
         mRecoverableKeyGenerator = RecoverableKeyGenerator.newInstance(mRecoverableKeyStoreDb);
@@ -117,7 +118,21 @@ public class RecoverableKeyGeneratorTest {
         assertArrayEquals(rawMaterial, unwrappedMaterial);
     }
 
-    private AndroidKeyStoreSecretKey generateAndroidKeyStoreKey() throws Exception {
+    @Test
+    public void importKey_storesTheWrappedVersionOfTheRawMaterial() throws Exception {
+        byte[] rawMaterial = randomBytes(KEY_SIZE_BYTES);
+        mRecoverableKeyGenerator.importKey(
+                mPlatformKey, TEST_USER_ID, KEYSTORE_UID_SELF, TEST_ALIAS, rawMaterial);
+
+        WrappedKey wrappedKey = mRecoverableKeyStoreDb.getKey(KEYSTORE_UID_SELF, TEST_ALIAS);
+        Cipher cipher = Cipher.getInstance(KEY_WRAP_ALGORITHM);
+        cipher.init(Cipher.DECRYPT_MODE, mDecryptKey.getKey(),
+                new GCMParameterSpec(GCM_TAG_LENGTH_BITS, wrappedKey.getNonce()));
+        byte[] unwrappedMaterial = cipher.doFinal(wrappedKey.getKeyMaterial());
+        assertArrayEquals(rawMaterial, unwrappedMaterial);
+    }
+
+    private AndroidKeyStoreSecretKey generatePlatformKey() throws Exception {
         KeyGenerator keyGenerator = KeyGenerator.getInstance(
                 KEY_ALGORITHM,
                 ANDROID_KEY_STORE_PROVIDER);
@@ -131,5 +146,11 @@ public class RecoverableKeyGeneratorTest {
 
     private static byte[] getUtf8Bytes(String s) {
         return s.getBytes(StandardCharsets.UTF_8);
+    }
+
+    private static byte[] randomBytes(int n) {
+        byte[] bytes = new byte[n];
+        new Random().nextBytes(bytes);
+        return bytes;
     }
 }

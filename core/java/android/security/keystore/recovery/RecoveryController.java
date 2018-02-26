@@ -113,6 +113,14 @@ public class RecoveryController {
      */
     public static final int ERROR_DECRYPTION_FAILED = 26;
 
+    /**
+     * Error thrown if the format of a given key is invalid. This might be because the key has a
+     * wrong length, invalid content, etc.
+     *
+     * @hide
+     */
+    public static final int ERROR_INVALID_KEY_FORMAT = 27;
+
 
     private final ILockSettings mBinder;
     private final KeyStore mKeyStore;
@@ -461,6 +469,7 @@ public class RecoveryController {
         }
     }
 
+    // TODO: Unhide the following APIs, generateKey(), importKey(), and getKey()
     /**
      * @deprecated Use {@link #generateKey(String)}.
      * @removed
@@ -485,6 +494,40 @@ public class RecoveryController {
             String grantAlias = mBinder.generateKey(alias);
             if (grantAlias == null) {
                 throw new InternalRecoveryServiceException("null grant alias");
+            }
+            return AndroidKeyStoreProvider.loadAndroidKeyStoreKeyFromKeystore(
+                    mKeyStore,
+                    grantAlias,
+                    KeyStore.UID_SELF);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (UnrecoverableKeyException e) {
+            throw new InternalRecoveryServiceException("Failed to get key from keystore", e);
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == ERROR_INSECURE_USER) {
+                throw new LockScreenRequiredException(e.getMessage());
+            }
+            throw wrapUnexpectedServiceSpecificException(e);
+        }
+    }
+
+    /**
+     * Imports a 256-bit recoverable AES key with the given {@code alias} and the raw bytes {@code
+     * keyBytes}.
+     *
+     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
+     *     service.
+     * @throws LockScreenRequiredException if the user does not have a lock screen set. A lock
+     *     screen is required to generate recoverable keys.
+     *
+     * @hide
+     */
+    public Key importKey(@NonNull String alias, byte[] keyBytes)
+            throws InternalRecoveryServiceException, LockScreenRequiredException {
+        try {
+            String grantAlias = mBinder.importKey(alias, keyBytes);
+            if (grantAlias == null) {
+                throw new InternalRecoveryServiceException("Null grant alias");
             }
             return AndroidKeyStoreProvider.loadAndroidKeyStoreKeyFromKeystore(
                     mKeyStore,

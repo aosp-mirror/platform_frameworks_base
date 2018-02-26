@@ -68,6 +68,7 @@ interface ILockSettings {
     KeyChainSnapshot getKeyChainSnapshot();
     byte[] generateAndStoreKey(String alias);
     String generateKey(String alias);
+    String importKey(String alias, in byte[] keyBytes);
     String getKey(String alias);
     void removeKey(String alias);
     void setSnapshotCreatedPendingIntent(in PendingIntent intent);

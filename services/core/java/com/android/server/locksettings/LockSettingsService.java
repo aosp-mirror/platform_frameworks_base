@@ -2079,6 +2079,11 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
+    public String importKey(@NonNull String alias, byte[] keyBytes) throws RemoteException {
+        return mRecoverableKeyStoreManager.importKey(alias, keyBytes);
+    }
+
+    @Override
     public String getKey(@NonNull String alias) throws RemoteException {
         return mRecoverableKeyStoreManager.getKey(alias);
     }
