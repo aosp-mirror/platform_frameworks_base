@@ -784,6 +784,20 @@ public class KeyStore {
     }
 
     /**
+     * Requests keystore to check if the confirmationui HAL is available.
+     *
+     * @return whether the confirmationUI HAL is available.
+     */
+    public boolean isConfirmationPromptSupported() {
+        try {
+            return mBinder.isConfirmationPromptSupported();
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+            return false;
+        }
+    }
+
+    /**
      * Returns a {@link KeyStoreException} corresponding to the provided keystore/keymaster error
      * code.
      */
