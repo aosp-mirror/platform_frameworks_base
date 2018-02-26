@@ -29,6 +29,8 @@ import android.service.textclassifier.ITextClassifierService;
 import android.service.textclassifier.ITextLinksCallback;
 import android.service.textclassifier.ITextSelectionCallback;
 
+import com.android.internal.util.Preconditions;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -40,13 +42,16 @@ final class SystemTextClassifier implements TextClassifier {
     private static final String LOG_TAG = "SystemTextClassifier";
 
     private final ITextClassifierService mManagerService;
+    private final TextClassificationConstants mSettings;
     private final TextClassifier mFallback;
     private final String mPackageName;
 
-    SystemTextClassifier(Context context) throws ServiceManager.ServiceNotFoundException {
+    SystemTextClassifier(Context context, TextClassificationConstants settings)
+                throws ServiceManager.ServiceNotFoundException {
         mManagerService = ITextClassifierService.Stub.asInterface(
                 ServiceManager.getServiceOrThrow(Context.TEXT_CLASSIFICATION_SERVICE));
-        mFallback = new TextClassifierImpl(context);
+        mSettings = Preconditions.checkNotNull(settings);
+        mFallback = new TextClassifierImpl(context, settings);
         mPackageName = context.getPackageName();
     }
 
@@ -108,6 +113,11 @@ final class SystemTextClassifier implements TextClassifier {
     public TextLinks generateLinks(
             @NonNull CharSequence text, @Nullable TextLinks.Options options) {
         Utils.validate(text, false /* allowInMainThread */);
+
+        if (!mSettings.isSmartLinkifyEnabled()) {
+            return TextClassifier.NO_OP.generateLinks(text, options);
+        }
+
         try {
             if (options == null) {
                 options = new TextLinks.Options().setCallingPackageName(mPackageName);
