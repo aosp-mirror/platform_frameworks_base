@@ -422,6 +422,7 @@ public final class Call {
         /**
          * Indicates the call used Assisted Dialing.
          * See also {@link Connection#PROPERTY_ASSISTED_DIALING_USED}
+         * @hide
          */
         public static final int PROPERTY_ASSISTED_DIALING_USED = 0x00000200;
 
