@@ -217,6 +217,14 @@ struct Matcher {
     const Field mMatcher;
     const int32_t mMask;
 
+    inline const Field& getMatcher() const {
+        return mMatcher;
+    }
+
+    inline int32_t getMask() const {
+        return mMask;
+    }
+
     bool hasAnyPositionMatcher(int* prefix) const {
         if (mMatcher.getDepth() == 2 && mMatcher.getRawPosAtDepth(2) == 0) {
             (*prefix) = mMatcher.getPrefix(2);
@@ -224,6 +232,10 @@ struct Matcher {
         }
         return false;
     }
+
+    inline bool operator!=(const Matcher& that) const {
+        return mMatcher != that.getMatcher() || mMask != that.getMask();
+    };
 };
 
 /**

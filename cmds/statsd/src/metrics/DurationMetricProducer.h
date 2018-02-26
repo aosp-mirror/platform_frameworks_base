@@ -50,12 +50,16 @@ public:
                                          const sp<AlarmMonitor>& anomalyAlarmMonitor) override;
 
 protected:
+    void onMatchedLogEventLocked(const size_t matcherIndex, const LogEvent& event) override;
     void onMatchedLogEventInternalLocked(
             const size_t matcherIndex, const MetricDimensionKey& eventKey,
             const ConditionKey& conditionKeys, bool condition,
             const LogEvent& event) override;
 
 private:
+    void handleStartEvent(const MetricDimensionKey& eventKey, const ConditionKey& conditionKeys,
+                          bool condition, const LogEvent& event);
+
     void onDumpReportLocked(const uint64_t dumpTimeNs,
                             android::util::ProtoOutputStream* protoOutput) override;
 
@@ -92,12 +96,16 @@ private:
     // The dimension from the atom predicate. e.g., uid, wakelock name.
     vector<Matcher> mInternalDimensions;
 
+    // This boolean is true iff When mInternalDimensions == mDimensionsInWhat
+    bool mUseWhatDimensionAsInternalDimension;
+
     // Save the past buckets and we can clear when the StatsLogReport is dumped.
     // TODO: Add a lock to mPastBuckets.
     std::unordered_map<MetricDimensionKey, std::vector<DurationBucket>> mPastBuckets;
 
-    // The current bucket.
-    std::unordered_map<MetricDimensionKey, std::unique_ptr<DurationTracker>>
+    // The duration trackers in the current bucket.
+    std::unordered_map<HashableDimensionKey,
+        std::unordered_map<HashableDimensionKey, std::unique_ptr<DurationTracker>>>
             mCurrentSlicedDurationTrackerMap;
 
     // Helper function to create a duration tracker given the metric aggregation type.

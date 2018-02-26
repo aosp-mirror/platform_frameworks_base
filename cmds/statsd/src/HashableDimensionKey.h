@@ -144,7 +144,8 @@ bool filterValues(const std::vector<Matcher>& matcherFields, const std::vector<F
 void filterGaugeValues(const std::vector<Matcher>& matchers, const std::vector<FieldValue>& values,
                        std::vector<FieldValue>* output);
 
-void getDimensionForCondition(const LogEvent& event, Metric2Condition links,
+void getDimensionForCondition(const std::vector<FieldValue>& eventValues,
+                              const Metric2Condition& links,
                               std::vector<HashableDimensionKey>* conditionDimension);
 
 }  // namespace statsd
