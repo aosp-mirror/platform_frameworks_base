@@ -17,6 +17,9 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.MODE_DEFAULT;
+import static android.app.AppOpsManager.OP_NONE;
 import static android.os.PowerManager.DRAW_WAKE_LOCK;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -2571,7 +2574,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    public void setAppOpVisibilityLw(boolean state) {
+    private void setAppOpVisibilityLw(boolean state) {
         if (mAppOpVisibility != state) {
             mAppOpVisibility = state;
             if (state) {
@@ -2584,6 +2587,49 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 showLw(true, true);
             } else {
                 hideLw(true, true);
+            }
+        }
+    }
+
+    void initAppOpsState() {
+        if (mAppOp == OP_NONE || !mAppOpVisibility) {
+            return;
+        }
+        // If the app op was MODE_DEFAULT we would have checked the permission
+        // and add the window only if the permission was granted. Therefore, if
+        // the mode is MODE_DEFAULT we want the op to succeed as the window is
+        // shown.
+        final int mode = mService.mAppOps.startOpNoThrow(mAppOp,
+                getOwningUid(), getOwningPackage(), true);
+        if (mode != MODE_ALLOWED && mode != MODE_DEFAULT) {
+            setAppOpVisibilityLw(false);
+        }
+    }
+
+    void resetAppOpsState() {
+        if (mAppOp != OP_NONE && mAppOpVisibility) {
+            mService.mAppOps.finishOp(mAppOp, getOwningUid(), getOwningPackage());
+        }
+    }
+
+    void updateAppOpsState() {
+        if (mAppOp == OP_NONE) {
+            return;
+        }
+        final int uid = getOwningUid();
+        final String packageName = getOwningPackage();
+        if (mAppOpVisibility) {
+            // There is a race between the check and the finish calls but this is fine
+            // as this would mean we will get another change callback and will reconcile.
+            int mode = mService.mAppOps.checkOpNoThrow(mAppOp, uid, packageName);
+            if (mode != MODE_ALLOWED && mode != MODE_DEFAULT) {
+                mService.mAppOps.finishOp(mAppOp, uid, packageName);
+                setAppOpVisibilityLw(false);
+            }
+        } else {
+            final int mode = mService.mAppOps.startOpNoThrow(mAppOp, uid, packageName);
+            if (mode == MODE_ALLOWED || mode == MODE_DEFAULT) {
+                setAppOpVisibilityLw(true);
             }
         }
     }

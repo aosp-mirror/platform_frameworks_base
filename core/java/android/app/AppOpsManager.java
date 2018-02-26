@@ -31,7 +31,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.ArrayMap;
 
@@ -168,6 +167,7 @@ public class AppOpsManager {
     /** @hide */
     public static final int OP_WRITE_SETTINGS = 23;
     /** @hide Required to draw on top of other apps. */
+    @TestApi
     public static final int OP_SYSTEM_ALERT_WINDOW = 24;
     /** @hide */
     public static final int OP_ACCESS_NOTIFICATIONS = 25;
@@ -1540,6 +1540,7 @@ public class AppOpsManager {
      *
      * @hide
      */
+    @TestApi
     public interface OnOpActiveChangedListener {
         /**
          * Called when the active state of an app op changes.
@@ -1731,7 +1732,7 @@ public class AppOpsManager {
      * Monitor for changes to the operating mode for the given op in the given app package.
      *
      * <p> If you don't hold the {@link android.Manifest.permission#WATCH_APPOPS} permission
-     * to watch changes only for your UID.
+     * you can watch changes only for your UID.
      *
      * @param op The operation to monitor, one of OP_*.
      * @param packageName The name of the application to monitor.
@@ -1788,6 +1789,9 @@ public class AppOpsManager {
      * watched ops for a registered callback you need to unregister and register it
      * again.
      *
+     * <p> If you don't hold the {@link android.Manifest.permission#WATCH_APPOPS} permission
+     * you can watch changes only for your UID.
+     *
      * @param ops The ops to watch.
      * @param callback Where to report changes.
      *
@@ -1798,7 +1802,9 @@ public class AppOpsManager {
      *
      * @hide
      */
-    @RequiresPermission(Manifest.permission.WATCH_APPOPS)
+    @TestApi
+    // TODO: Uncomment below annotation once b/73559440 is fixed
+    // @RequiresPermission(value=Manifest.permission.WATCH_APPOPS, conditional=true)
     public void startWatchingActive(@NonNull int[] ops,
             @NonNull OnOpActiveChangedListener callback) {
         Preconditions.checkNotNull(ops, "ops cannot be null");
@@ -1836,6 +1842,7 @@ public class AppOpsManager {
      *
      * @hide
      */
+    @TestApi
     public void stopWatchingActive(@NonNull OnOpActiveChangedListener callback) {
         synchronized (mActiveWatchers) {
             final IAppOpsActiveCallback cb = mActiveWatchers.get(callback);
@@ -2087,15 +2094,11 @@ public class AppOpsManager {
      * @hide
      */
     public int noteOp(int op, int uid, String packageName) {
-        try {
-            int mode = mService.noteOperation(op, uid, packageName);
-            if (mode == MODE_ERRORED) {
-                throw new SecurityException(buildSecurityExceptionMsg(op, uid, packageName));
-            }
-            return mode;
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        final int mode = noteOpNoThrow(op, uid, packageName);
+        if (mode == MODE_ERRORED) {
+            throw new SecurityException(buildSecurityExceptionMsg(op, uid, packageName));
         }
+        return mode;
     }
 
     /**
@@ -2174,6 +2177,11 @@ public class AppOpsManager {
         }
     }
 
+    /** @hide */
+    public int startOp(int op) {
+        return startOp(op, Process.myUid(), mContext.getOpPackageName());
+    }
+
     /**
      * Report that an application has started executing a long-running operation.  Note that you
      * must pass in both the uid and name of the application to be checked; this function will
@@ -2182,6 +2190,7 @@ public class AppOpsManager {
      * the current time and the operation will be marked as "running".  In this case you must
      * later call {@link #finishOp(int, int, String)} to report when the application is no
      * longer performing the operation.
+     *
      * @param op The operation to start.  One of the OP_* constants.
      * @param uid The user id of the application attempting to perform the operation.
      * @param packageName The name of the application attempting to perform the operation.
@@ -2192,15 +2201,34 @@ public class AppOpsManager {
      * @hide
      */
     public int startOp(int op, int uid, String packageName) {
-        try {
-            int mode = mService.startOperation(getToken(mService), op, uid, packageName);
-            if (mode == MODE_ERRORED) {
-                throw new SecurityException(buildSecurityExceptionMsg(op, uid, packageName));
-            }
-            return mode;
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        return startOp(op, uid, packageName, false);
+    }
+
+    /**
+     * Report that an application has started executing a long-running operation. Similar
+     * to {@link #startOp(String, int, String) except that if the mode is {@link #MODE_DEFAULT}
+     * the operation should succeed since the caller has performed its standard permission
+     * checks which passed and would perform the protected operation for this mode.
+     *
+     * @param op The operation to start.  One of the OP_* constants.
+     * @param uid The user id of the application attempting to perform the operation.
+     * @param packageName The name of the application attempting to perform the operation.
+     * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
+     * {@link #MODE_IGNORED} if it is not allowed and should be silently ignored (without
+     * causing the app to crash).
+     * @param startIfModeDefault Whether to start if mode is {@link #MODE_DEFAULT}.
+     *
+     * @throws SecurityException If the app has been configured to crash on this op or
+     * the package is not in the passed in UID.
+     *
+     * @hide
+     */
+    public int startOp(int op, int uid, String packageName, boolean startIfModeDefault) {
+        final int mode = startOpNoThrow(op, uid, packageName, startIfModeDefault);
+        if (mode == MODE_ERRORED) {
+            throw new SecurityException(buildSecurityExceptionMsg(op, uid, packageName));
         }
+        return mode;
     }
 
     /**
@@ -2209,16 +2237,30 @@ public class AppOpsManager {
      * @hide
      */
     public int startOpNoThrow(int op, int uid, String packageName) {
+        return startOpNoThrow(op, uid, packageName, false);
+    }
+
+    /**
+     * Like {@link #startOp(int, int, String, boolean)} but instead of throwing a
+     * {@link SecurityException} it returns {@link #MODE_ERRORED}.
+     *
+     * @param op The operation to start.  One of the OP_* constants.
+     * @param uid The user id of the application attempting to perform the operation.
+     * @param packageName The name of the application attempting to perform the operation.
+     * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
+     * {@link #MODE_IGNORED} if it is not allowed and should be silently ignored (without
+     * causing the app to crash).
+     * @param startIfModeDefault Whether to start if mode is {@link #MODE_DEFAULT}.
+     *
+     * @hide
+     */
+    public int startOpNoThrow(int op, int uid, String packageName, boolean startIfModeDefault) {
         try {
-            return mService.startOperation(getToken(mService), op, uid, packageName);
+            return mService.startOperation(getToken(mService), op, uid, packageName,
+                    startIfModeDefault);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-    }
-
-    /** @hide */
-    public int startOp(int op) {
-        return startOp(op, Process.myUid(), mContext.getOpPackageName());
     }
 
     /**
@@ -2241,8 +2283,21 @@ public class AppOpsManager {
         finishOp(op, Process.myUid(), mContext.getOpPackageName());
     }
 
-    /** @hide */
-    @RequiresPermission(Manifest.permission.WATCH_APPOPS)
+    /**
+     * Checks whether the given op for a UID and package is active.
+     *
+     * <p> If you don't hold the {@link android.Manifest.permission#WATCH_APPOPS} permission
+     * you can query only for your UID.
+     *
+     * @see #startWatchingActive(int[], OnOpActiveChangedListener)
+     * @see #stopWatchingMode(OnOpChangedListener)
+     * @see #finishOp(int)
+     * @see #startOp(int)
+     *
+     * @hide */
+    @TestApi
+    // TODO: Uncomment below annotation once b/73559440 is fixed
+    // @RequiresPermission(value=Manifest.permission.WATCH_APPOPS, conditional=true)
     public boolean isOperationActive(int code, int uid, String packageName) {
         try {
             return mService.isOperationActive(code, uid, packageName);

@@ -1384,14 +1384,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
             win.attach();
             mWindowMap.put(client.asBinder(), win);
-            if (win.mAppOp != AppOpsManager.OP_NONE) {
-                int startOpResult = mAppOps.startOpNoThrow(win.mAppOp, win.getOwningUid(),
-                        win.getOwningPackage());
-                if ((startOpResult != AppOpsManager.MODE_ALLOWED) &&
-                        (startOpResult != AppOpsManager.MODE_DEFAULT)) {
-                    win.setAppOpVisibilityLw(false);
-                }
-            }
+
+            win.initAppOpsState();
 
             final boolean hideSystemAlertWindows = !mHidingNonSystemOverlayWindows.isEmpty();
             win.setForceHideNonSystemOverlayWindowIfNeeded(hideSystemAlertWindows);
@@ -1656,9 +1650,8 @@ public class WindowManagerService extends IWindowManager.Stub
     void postWindowRemoveCleanupLocked(WindowState win) {
         if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "postWindowRemoveCleanupLocked: " + win);
         mWindowMap.remove(win.mClient.asBinder());
-        if (win.mAppOp != AppOpsManager.OP_NONE) {
-            mAppOps.finishOp(win.mAppOp, win.getOwningUid(), win.getOwningPackage());
-        }
+
+        win.resetAppOpsState();
 
         if (mCurrentFocus == null) {
             mWinRemovedSinceNullFocus.add(win);
