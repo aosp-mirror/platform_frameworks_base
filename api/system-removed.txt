@@ -108,6 +108,14 @@ package android.security.keystore.recovery {
     method public deprecated byte[] start(byte[], byte[], byte[], java.util.List<android.security.keystore.recovery.KeyChainProtectionParams>) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
   }
 
+  public final class WrappedApplicationKey implements android.os.Parcelable {
+    method public deprecated byte[] getAccount();
+  }
+
+  public static class WrappedApplicationKey.Builder {
+    method public deprecated android.security.keystore.recovery.WrappedApplicationKey.Builder setAccount(byte[]);
+  }
+
 }
 
 package android.service.notification {

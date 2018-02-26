@@ -4326,7 +4326,6 @@ package android.security.keystore.recovery {
 
   public final class WrappedApplicationKey implements android.os.Parcelable {
     method public int describeContents();
-    method public byte[] getAccount();
     method public java.lang.String getAlias();
     method public byte[] getEncryptedKeyMaterial();
     method public void writeToParcel(android.os.Parcel, int);
@@ -4336,7 +4335,6 @@ package android.security.keystore.recovery {
   public static class WrappedApplicationKey.Builder {
     ctor public WrappedApplicationKey.Builder();
     method public android.security.keystore.recovery.WrappedApplicationKey build();
-    method public android.security.keystore.recovery.WrappedApplicationKey.Builder setAccount(byte[]);
     method public android.security.keystore.recovery.WrappedApplicationKey.Builder setAlias(java.lang.String);
     method public android.security.keystore.recovery.WrappedApplicationKey.Builder setEncryptedKeyMaterial(byte[]);
   }
