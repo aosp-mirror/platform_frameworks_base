@@ -380,11 +380,10 @@ public final class UsbDescriptorParser {
                 if (DEBUG) {
                     Log.d(TAG, "  type:0x" + Integer.toHexString(type));
                 }
-                if ((type >= UsbTerminalTypes.TERMINAL_IN_UNDEFINED
-                            && type <= UsbTerminalTypes.TERMINAL_IN_PROC_MIC_ARRAY)
-                        || (type >= UsbTerminalTypes.TERMINAL_BIDIR_UNDEFINED
-                            && type <= UsbTerminalTypes.TERMINAL_BIDIR_SKRPHONE_CANCEL)
-                        || (type == UsbTerminalTypes.TERMINAL_USB_STREAMING)) {
+                int terminalCategory = type & ~0xFF;
+                if (terminalCategory != UsbTerminalTypes.TERMINAL_USB_UNDEFINED
+                        && terminalCategory != UsbTerminalTypes.TERMINAL_OUT_UNDEFINED) {
+                    // If not explicitly a USB connection or output, it could be an input.
                     hasInput = true;
                     break;
                 }
@@ -419,10 +418,10 @@ public final class UsbDescriptorParser {
                 if (DEBUG) {
                     Log.d(TAG, "  type:0x" + Integer.toHexString(type));
                 }
-                if ((type >= UsbTerminalTypes.TERMINAL_OUT_UNDEFINED
-                            && type <= UsbTerminalTypes.TERMINAL_OUT_LFSPEAKER)
-                        || (type >= UsbTerminalTypes.TERMINAL_BIDIR_UNDEFINED
-                            && type <= UsbTerminalTypes.TERMINAL_BIDIR_SKRPHONE_CANCEL)) {
+                int terminalCategory = type & ~0xFF;
+                if (terminalCategory != UsbTerminalTypes.TERMINAL_USB_UNDEFINED
+                        && terminalCategory != UsbTerminalTypes.TERMINAL_IN_UNDEFINED) {
+                    // If not explicitly a USB connection or input, it could be an output.
                     hasOutput = true;
                     break;
                 }
