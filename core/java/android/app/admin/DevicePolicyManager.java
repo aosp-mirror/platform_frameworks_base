@@ -9392,6 +9392,11 @@ public class DevicePolicyManager {
     /**
      * Called by device owner to add an override APN.
      *
+     * <p>This method may returns {@code -1} if {@code apnSetting} conflicts with an existing
+     * override APN. Update the existing conflicted APN with
+     * {@link #updateOverrideApn(ComponentName, int, ApnSetting)} instead of adding a new entry.
+     * <p>See {@link ApnSetting} for the definition of conflict.
+     *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @param apnSetting the override APN to insert
      * @return The {@code id} of inserted override APN. Or {@code -1} when failed to insert into
@@ -9414,6 +9419,12 @@ public class DevicePolicyManager {
 
     /**
      * Called by device owner to update an override APN.
+     *
+     * <p>This method may returns {@code false} if there is no override APN with the given
+     * {@code apnId}.
+     * <p>This method may also returns {@code false} if {@code apnSetting} conflicts with an
+     * existing override APN. Update the existing conflicted APN instead.
+     * <p>See {@link ApnSetting} for the definition of conflict.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @param apnId the {@code id} of the override APN to update
@@ -9439,6 +9450,9 @@ public class DevicePolicyManager {
 
     /**
      * Called by device owner to remove an override APN.
+     *
+     * <p>This method may returns {@code false} if there is no override APN with the given
+     * {@code apnId}.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @param apnId the {@code id} of the override APN to remove
