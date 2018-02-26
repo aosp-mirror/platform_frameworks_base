@@ -43,8 +43,7 @@
     <skip />
     <!-- no translation found for bugreport_confirm_dont_repeat (6179945398364357318) -->
     <skip />
-    <!-- no translation found for bugreport_storage_title (5332488144740527109) -->
-    <skip />
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"ବଗ୍ ରିପୋର୍ଟ"</string>
     <!-- no translation found for bugreport_unreadable_text (586517851044535486) -->
     <skip />
     <!-- no translation found for bugreport_add_details_to_zip_failed (1302931926486712371) -->
