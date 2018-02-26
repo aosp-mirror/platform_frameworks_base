@@ -778,7 +778,7 @@ public class WifiTrackerTest {
 
         mAccessPointsChangedLatch = new CountDownLatch(1);
         tracker.mReceiver.onReceive(mContext, new Intent(WifiManager.WIFI_STATE_CHANGED_ACTION));
-        assertThat(mAccessPointsChangedLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
+        assertThat(mAccessPointsChangedLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS)).isTrue();
 
         assertThat(tracker.getAccessPoints()).isEmpty();
     }
