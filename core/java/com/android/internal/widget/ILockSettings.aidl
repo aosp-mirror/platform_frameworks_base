@@ -74,7 +74,7 @@ interface ILockSettings {
     Map getRecoverySnapshotVersions();
     void setServerParams(in byte[] serverParams);
     void setRecoveryStatus(in String alias, int status);
-    Map getRecoveryStatus(in String packageName);
+    Map getRecoveryStatus();
     void setRecoverySecretTypes(in int[] secretTypes);
     int[] getRecoverySecretTypes();
     int[] getPendingRecoverySecretTypes();

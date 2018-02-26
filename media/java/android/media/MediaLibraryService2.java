@@ -87,12 +87,12 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          *
          * @param controller controller to notify
          * @param parentId parent id with changes in its children
-         * @param childCount number of children.
+         * @param itemCount number of children.
          * @param extras extra information from session to controller
          */
         public void notifyChildrenChanged(@NonNull ControllerInfo controller,
-                @NonNull String parentId, int childCount, @Nullable Bundle extras) {
-            mProvider.notifyChildrenChanged_impl(controller, parentId, childCount, extras);
+                @NonNull String parentId, int itemCount, @Nullable Bundle extras) {
+            mProvider.notifyChildrenChanged_impl(controller, parentId, itemCount, extras);
         }
 
         /**
@@ -101,13 +101,13 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          * {@link MediaBrowser2#subscribe(String, Bundle)}.
          *
          * @param parentId parent id
-         * @param childCount number of children
+         * @param itemCount number of children
          * @param extras extra information from session to controller
          */
         // This is for the backward compatibility.
-        public void notifyChildrenChanged(@NonNull String parentId, int childCount,
+        public void notifyChildrenChanged(@NonNull String parentId, int itemCount,
                 @Nullable Bundle extras) {
-            mProvider.notifyChildrenChanged_impl(parentId, childCount, extras);
+            mProvider.notifyChildrenChanged_impl(parentId, itemCount, extras);
         }
 
         /**
@@ -151,7 +151,7 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          * @see LibraryRoot#EXTRA_OFFLINE
          * @see LibraryRoot#EXTRA_SUGGESTED
          */
-        public @Nullable LibraryRoot onGetRoot(@NonNull ControllerInfo controllerInfo,
+        public @Nullable LibraryRoot onGetLibraryRoot(@NonNull ControllerInfo controllerInfo,
                 @Nullable Bundle rootHints) {
             return null;
         }
@@ -161,11 +161,11 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          * <p>
          * Return {@code null} for no result or error.
          *
-         * @param itemId item id to get media item.
+         * @param mediaId item id to get media item.
          * @return a media item. {@code null} for no result or error.
          */
-        public @Nullable MediaItem2 onLoadItem(@NonNull ControllerInfo controllerInfo,
-                @NonNull String itemId) {
+        public @Nullable MediaItem2 onGetItem(@NonNull ControllerInfo controllerInfo,
+                @NonNull String mediaId) {
             return null;
         }
 
@@ -180,33 +180,33 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          * @param extras extra bundle
          * @return list of children. Can be {@code null}.
          */
-        public @Nullable List<MediaItem2> onLoadChildren(@NonNull ControllerInfo controller,
+        public @Nullable List<MediaItem2> onGetChildren(@NonNull ControllerInfo controller,
                 @NonNull String parentId, int page, int pageSize, @Nullable Bundle extras) {
             return null;
         }
 
         /**
-         * Called when a controller subscribed to the parent.
+         * Called when a controller subscribes to the parent.
          * <p>
          * It's your responsibility to keep subscriptions by your own and call
-         * {@link MediaLibrarySession#notifyChildrenChanged(ControllerInfo, String, Bundle)} when
-         * the parent is changed.
+         * {@link MediaLibrarySession#notifyChildrenChanged(ControllerInfo, String, int, Bundle)}
+         * when the parent is changed.
          *
          * @param controller controller
          * @param parentId parent id
          * @param extras extra bundle
          */
-        public void onSubscribed(@NonNull ControllerInfo controller, @NonNull String parentId,
+        public void onSubscribe(@NonNull ControllerInfo controller, @NonNull String parentId,
                 @Nullable Bundle extras) {
         }
 
         /**
-         * Called when a controller unsubscribed to the parent.
+         * Called when a controller unsubscribes to the parent.
          *
          * @param controller controller
          * @param parentId parent id
          */
-        public void onUnsubscribed(@NonNull ControllerInfo controller, @NonNull String parentId) {
+        public void onUnsubscribe(@NonNull ControllerInfo controller, @NonNull String parentId) {
         }
 
         /**
@@ -234,7 +234,7 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          * @param extras The bundle of service-specific arguments sent from the media browser.
          * @return search result. {@code null} for error.
          */
-        public @Nullable List<MediaItem2> onLoadSearchResult(@NonNull ControllerInfo controllerInfo,
+        public @Nullable List<MediaItem2> onGetSearchResult(@NonNull ControllerInfo controllerInfo,
                 @NonNull String query, int page, int pageSize, @Nullable Bundle extras) {
             return null;
         }
@@ -322,7 +322,8 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          * supplied as a root hint for retrieving media items that are recently played.
          * If the media library service can provide such media items, the implementation must return
          * the key in the root hint when
-         * {@link MediaLibrarySessionCallback#onGetRoot(ControllerInfo, Bundle)} is called back.
+         * {@link MediaLibrarySessionCallback#onGetLibraryRoot(ControllerInfo, Bundle)} is called
+         * back.
          *
          * <p>The root hint may contain multiple keys.
          *
@@ -340,7 +341,8 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          * internet connection.
          * If the media library service can provide such media items, the implementation must return
          * the key in the root hint when
-         * {@link MediaLibrarySessionCallback#onGetRoot(ControllerInfo, Bundle)} is called back.
+         * {@link MediaLibrarySessionCallback#onGetLibraryRoot(ControllerInfo, Bundle)} is called
+         * back.
          *
          * <p>The root hint may contain multiple keys.
          *
@@ -359,7 +361,8 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          * suggestion.
          * If the media library service can provide such media items, the implementation must return
          * the key in the root hint when
-         * {@link MediaLibrarySessionCallback#onGetRoot(ControllerInfo, Bundle)} is called back.
+         * {@link MediaLibrarySessionCallback#onGetLibraryRoot(ControllerInfo, Bundle)} is called
+         * back.
          *
          * <p>The root hint may contain multiple keys.
          *

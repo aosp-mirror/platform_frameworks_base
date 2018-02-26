@@ -289,16 +289,14 @@ public class RecoverableKeyStoreManager {
     }
 
     /**
-     * Gets recovery status for caller or other application {@code packageName}.
-     * @param packageName which recoverable keys statuses will be returned.
+     * Returns recovery statuses for all keys belonging to the calling uid.
      *
-     * @return {@code Map} from KeyStore alias to recovery status.
+     * @return {@link Map} from key alias to recovery status. Recovery status is one of
+     *     {@link RecoveryController#RECOVERY_STATUS_SYNCED},
+     *     {@link RecoveryController#RECOVERY_STATUS_SYNC_IN_PROGRESS} or
+     *     {@link RecoveryController#RECOVERY_STATUS_PERMANENT_FAILURE}.
      */
-    public @NonNull Map<String, Integer> getRecoveryStatus(@Nullable String packageName)
-            throws RemoteException {
-        // Any application should be able to check status for its own keys.
-        // If caller is a recovery agent it can check statuses for other packages, but
-        // only for recoverable keys it manages.
+    public @NonNull Map<String, Integer> getRecoveryStatus() throws RemoteException {
         return mDatabase.getStatusForAllKeys(Binder.getCallingUid());
     }
 
