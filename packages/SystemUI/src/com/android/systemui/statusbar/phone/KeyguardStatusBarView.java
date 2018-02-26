@@ -87,10 +87,10 @@ public class KeyguardStatusBarView extends RelativeLayout
         super.onFinishInflate();
         mSystemIconsSuperContainer = findViewById(R.id.system_icons_super_container);
         mSystemIconsContainer = findViewById(R.id.system_icons_container);
-        mMultiUserSwitch = (MultiUserSwitch) findViewById(R.id.multi_user_switch);
-        mMultiUserAvatar = (ImageView) findViewById(R.id.multi_user_avatar);
-        mCarrierLabel = (TextView) findViewById(R.id.keyguard_carrier_text);
-        mBatteryView = (BatteryMeterView) mSystemIconsContainer.findViewById(R.id.battery);
+        mMultiUserSwitch = findViewById(R.id.multi_user_switch);
+        mMultiUserAvatar = findViewById(R.id.multi_user_avatar);
+        mCarrierLabel = findViewById(R.id.keyguard_carrier_text);
+        mBatteryView = mSystemIconsContainer.findViewById(R.id.battery);
 
         loadDimens();
         updateUserSwitcher();
@@ -220,7 +220,7 @@ public class KeyguardStatusBarView extends RelativeLayout
         Dependency.get(ConfigurationController.class).addCallback(this);
         mIconManager = new TintedIconManager(findViewById(R.id.statusIcons));
         Dependency.get(StatusBarIconController.class).addIconGroup(mIconManager);
-        onOverlayChanged();
+        onThemeChanged();
     }
 
     @Override
@@ -291,12 +291,9 @@ public class KeyguardStatusBarView extends RelativeLayout
                             .setDuration(300)
                             .setStartDelay(0)
                             .setInterpolator(Interpolators.ALPHA_OUT)
-                            .withEndAction(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mMultiUserSwitch.setAlpha(1f);
-                                    getOverlay().remove(mMultiUserSwitch);
-                                }
+                            .withEndAction(() -> {
+                                mMultiUserSwitch.setAlpha(1f);
+                                getOverlay().remove(mMultiUserSwitch);
                             })
                             .start();
 
