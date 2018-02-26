@@ -981,7 +981,7 @@ public final class ImageDecoder implements AutoCloseable {
     }
 
     @NonNull
-    private Bitmap decodeBitmap() throws IOException {
+    private Bitmap decodeBitmapInternal() throws IOException {
         checkState();
         // nDecodeBitmap calls onPartialImage only if mOnPartialImageListener
         // exists
@@ -1012,15 +1012,24 @@ public final class ImageDecoder implements AutoCloseable {
      *
      *  @param src representing the encoded image.
      *  @param listener for learning the {@link ImageInfo} and changing any
-     *      default settings on the {@code ImageDecoder}. If not {@code null},
-     *      this will be called on the same thread as {@code decodeDrawable}
-     *      before that method returns.
+     *      default settings on the {@code ImageDecoder}. This will be called on
+     *      the same thread as {@code decodeDrawable} before that method returns.
      *  @return Drawable for displaying the image.
      *  @throws IOException if {@code src} is not found, is an unsupported
      *      format, or cannot be decoded for any reason.
      */
     @NonNull
     public static Drawable decodeDrawable(@NonNull Source src,
+            @NonNull OnHeaderDecodedListener listener) throws IOException {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener cannot be null! "
+                    + "Use decodeDrawable(Source) to not have a listener");
+        }
+        return decodeDrawableImpl(src, listener);
+    }
+
+    @NonNull
+    private static Drawable decodeDrawableImpl(@NonNull Source src,
             @Nullable OnHeaderDecodedListener listener) throws IOException {
         try (ImageDecoder decoder = src.createImageDecoder()) {
             decoder.mSource = src;
@@ -1057,7 +1066,7 @@ public final class ImageDecoder implements AutoCloseable {
                 return d;
             }
 
-            Bitmap bm = decoder.decodeBitmap();
+            Bitmap bm = decoder.decodeBitmapInternal();
             bm.setDensity(srcDensity);
 
             Resources res = src.getResources();
@@ -1084,7 +1093,7 @@ public final class ImageDecoder implements AutoCloseable {
     @NonNull
     public static Drawable decodeDrawable(@NonNull Source src)
             throws IOException {
-        return decodeDrawable(src, null);
+        return decodeDrawableImpl(src, null);
     }
 
     /**
@@ -1092,15 +1101,24 @@ public final class ImageDecoder implements AutoCloseable {
      *
      *  @param src representing the encoded image.
      *  @param listener for learning the {@link ImageInfo} and changing any
-     *      default settings on the {@code ImageDecoder}. If not {@code null},
-     *      this will be called on the same thread as {@code decodeBitmap}
-     *      before that method returns.
+     *      default settings on the {@code ImageDecoder}. This will be called on
+     *      the same thread as {@code decodeBitmap} before that method returns.
      *  @return Bitmap containing the image.
      *  @throws IOException if {@code src} is not found, is an unsupported
      *      format, or cannot be decoded for any reason.
      */
     @NonNull
     public static Bitmap decodeBitmap(@NonNull Source src,
+            @NonNull OnHeaderDecodedListener listener) throws IOException {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener cannot be null! "
+                    + "Use decodeBitmap(Source) to not have a listener");
+        }
+        return decodeBitmapImpl(src, listener);
+    }
+
+    @NonNull
+    private static Bitmap decodeBitmapImpl(@NonNull Source src,
             @Nullable OnHeaderDecodedListener listener) throws IOException {
         try (ImageDecoder decoder = src.createImageDecoder()) {
             decoder.mSource = src;
@@ -1109,7 +1127,7 @@ public final class ImageDecoder implements AutoCloseable {
             // this call potentially manipulates the decoder so it must be performed prior to
             // decoding the bitmap
             final int srcDensity = computeDensity(src, decoder);
-            Bitmap bm = decoder.decodeBitmap();
+            Bitmap bm = decoder.decodeBitmapInternal();
             bm.setDensity(srcDensity);
 
             Rect padding = decoder.mOutPaddingRect;
@@ -1167,7 +1185,7 @@ public final class ImageDecoder implements AutoCloseable {
      */
     @NonNull
     public static Bitmap decodeBitmap(@NonNull Source src) throws IOException {
-        return decodeBitmap(src, null);
+        return decodeBitmapImpl(src, null);
     }
 
     /**
