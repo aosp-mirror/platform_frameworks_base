@@ -80,46 +80,57 @@ public class MediaControlView2 extends ViewGroupHelper<MediaControlView2Provider
 
     /**
      * MediaControlView2 button value for playing and pausing media.
+     * @hide
      */
     public static final int BUTTON_PLAY_PAUSE = 1;
     /**
      * MediaControlView2 button value for jumping 30 seconds forward.
+     * @hide
      */
     public static final int BUTTON_FFWD = 2;
     /**
      * MediaControlView2 button value for jumping 10 seconds backward.
+     * @hide
      */
     public static final int BUTTON_REW = 3;
     /**
      * MediaControlView2 button value for jumping to next media.
+     * @hide
      */
     public static final int BUTTON_NEXT = 4;
     /**
      * MediaControlView2 button value for jumping to previous media.
+     * @hide
      */
     public static final int BUTTON_PREV = 5;
     /**
      * MediaControlView2 button value for showing/hiding subtitle track.
+     * @hide
      */
     public static final int BUTTON_SUBTITLE = 6;
     /**
      * MediaControlView2 button value for toggling full screen.
+     * @hide
      */
     public static final int BUTTON_FULL_SCREEN = 7;
     /**
      * MediaControlView2 button value for showing/hiding overflow buttons.
+     * @hide
      */
     public static final int BUTTON_OVERFLOW = 8;
     /**
      * MediaControlView2 button value for muting audio.
+     * @hide
      */
     public static final int BUTTON_MUTE = 9;
     /**
      * MediaControlView2 button value for adjusting aspect ratio of view.
+     * @hide
      */
     public static final int BUTTON_ASPECT_RATIO = 10;
     /**
      * MediaControlView2 button value for showing/hiding settings page.
+     * @hide
      */
     public static final int BUTTON_SETTINGS = 11;
 
@@ -187,6 +198,7 @@ public class MediaControlView2 extends ViewGroupHelper<MediaControlView2Provider
      * <li>{@link #BUTTON_SETTINGS}
      * </ul>
      * @param visibility One of {@link #VISIBLE}, {@link #INVISIBLE}, or {@link #GONE}.
+     * @hide
      */
     public void setButtonVisibility(@Button int button, @Visibility int visibility) {
         mProvider.setButtonVisibility_impl(button, visibility);
