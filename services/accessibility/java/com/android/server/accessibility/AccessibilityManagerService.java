@@ -2945,7 +2945,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED
                 | AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY;
 
-        // In Z order
+        // In Z order top to bottom
         public List<AccessibilityWindowInfo> mWindows;
         public SparseArray<AccessibilityWindowInfo> mA11yWindowInfoById = new SparseArray<>();
         public SparseArray<WindowInfo> mWindowInfoById = new SparseArray<>();
@@ -3136,6 +3136,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                             ? mWindowsForAccessibilityCallback.populateReportedWindow(windowInfo)
                             : null;
                     if (window != null) {
+
+                        // Flip layers in list to be consistent with AccessibilityService#getWindows
+                        window.setLayer(windowCount - 1 - window.getLayer());
+
                         final int windowId = window.getId();
                         if (window.isFocused()) {
                             mFocusedWindowId = windowId;

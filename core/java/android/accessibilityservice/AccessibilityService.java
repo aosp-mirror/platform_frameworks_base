@@ -537,7 +537,7 @@ public abstract class AccessibilityService extends Service {
      * anything behind it, then only the modal window will be reported
      * (assuming it is the top one). For convenience the returned windows
      * are ordered in a descending layer order, which is the windows that
-     * are higher in the Z-order are reported first. Since the user can always
+     * are on top are reported first. Since the user can always
      * interact with the window that has input focus by typing, the focused
      * window is always returned (even if covered by a modal window).
      * <p>
