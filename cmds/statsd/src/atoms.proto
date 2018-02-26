@@ -130,6 +130,9 @@ message Atom {
         FullBatteryCapacity full_battery_capacity = 10020;
         Temperature temperature = 10021;
     }
+
+    // DO NOT USE field numbers above 100,000 in AOSP. Field numbers above
+    // 100,000 are reserved for non-AOSP (e.g. OEMs) to use.
 }
 
 /**
