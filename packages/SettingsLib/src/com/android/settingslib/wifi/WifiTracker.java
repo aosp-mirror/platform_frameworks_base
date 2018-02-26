@@ -527,10 +527,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
 
         WifiConfiguration connectionConfig = null;
         if (mLastInfo != null) {
-            // TODO(sghuman): Refactor to match config network id when updating configs below, and
-            // then update network info and wifi info only on match
-            connectionConfig = getWifiConfigurationForNetworkId(
-                    mLastInfo.getNetworkId(), configs);
+            connectionConfig = getWifiConfigurationForNetworkId(mLastInfo.getNetworkId(), configs);
         }
 
         // Rather than dropping and reacquiring the lock multiple times in this method, we lock
@@ -562,6 +559,17 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                 accessPoint.update(configsByKey.get(entry.getKey()));
 
                 accessPoints.add(accessPoint);
+            }
+
+            // If there were no scan results, create an AP for the currently connected network (if
+            // it exists).
+            // TODO(sghuman): Investigate if this works for an ephemeral (auto-connected) network
+            // when there are no scan results, as it may not have a valid WifiConfiguration
+            if (accessPoints.isEmpty() && connectionConfig != null) {
+                AccessPoint activeAp = new AccessPoint(mContext, connectionConfig);
+                activeAp.update(connectionConfig, mLastInfo, mLastNetworkInfo);
+                accessPoints.add(activeAp);
+                scoresToRequest.add(NetworkKey.createFromWifiInfo(mLastInfo));
             }
 
             requestScoresForNetworkKeys(scoresToRequest);
