@@ -808,7 +808,6 @@
   <java-symbol type="string" name="number_picker_increment_scroll_action" />
   <java-symbol type="string" name="number_picker_increment_scroll_mode" />
   <java-symbol type="string" name="old_app_action" />
-  <java-symbol type="string" name="old_app_description" />
   <java-symbol type="string" name="older" />
   <java-symbol type="string" name="open_permission_deny" />
   <java-symbol type="string" name="orgTypeCustom" />
