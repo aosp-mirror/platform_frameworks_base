@@ -52,6 +52,29 @@ public:
             const vector<Matcher>& dimensionFields,
             std::unordered_set<HashableDimensionKey>& dimensionsKeySet) const override;
 
+    // Only one child predicate can have dimension.
+    const std::set<HashableDimensionKey>* getChangedToTrueDimensions(
+            const std::vector<sp<ConditionTracker>>& allConditions) const override {
+        for (const auto& child : mChildren) {
+            auto result = allConditions[child]->getChangedToTrueDimensions(allConditions);
+            if (result != nullptr) {
+                return result;
+            }
+        }
+        return nullptr;
+    }
+    // Only one child predicate can have dimension.
+    const std::set<HashableDimensionKey>* getChangedToFalseDimensions(
+            const std::vector<sp<ConditionTracker>>& allConditions) const override {
+        for (const auto& child : mChildren) {
+            auto result = allConditions[child]->getChangedToFalseDimensions(allConditions);
+            if (result != nullptr) {
+                return result;
+            }
+        }
+        return nullptr;
+    }
+
 private:
     LogicalOperation mLogicalOperation;
 

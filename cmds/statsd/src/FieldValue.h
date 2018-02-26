@@ -41,6 +41,7 @@ int32_t encodeMatcherMask(int32_t mask[], int32_t depth);
 inline int32_t getSimpleField(size_t field) {
     return ((int32_t)field << 8 * 2);
 }
+
 /**
  * Field is a wrapper class for 2 integers that represents the field of a log element in its Atom
  * proto.
@@ -201,9 +202,9 @@ public:
  *     }
  *
  * We translate the FieldMatcher into a Field, and mask
- * First: [Matcher Field] 0x02010101  [Mask]0xffff7fff
- * Last:  [Matcher Field] 0x02018001  [Mask]0xffff80ff
- * Any:   [Matcher Field] 0x02010001  [Mask]0xffff00ff
+ * First: [Matcher Field] 0x02010101  [Mask]0xff7f7f7f
+ * Last:  [Matcher Field] 0x02018001  [Mask]0xff7f807f
+ * Any:   [Matcher Field] 0x02010001  [Mask]0xff7f007f
  *
  * [To match a log Field with a Matcher] we apply the bit mask to the log Field and check if
  * the result is equal to the Matcher Field. That's a bit wise AND operation + check if 2 ints are
@@ -235,8 +236,16 @@ struct Matcher {
 
     inline bool operator!=(const Matcher& that) const {
         return mMatcher != that.getMatcher() || mMask != that.getMask();
-    };
+    }
+
+    inline bool operator==(const Matcher& that) const {
+        return mMatcher == that.mMatcher && mMask == that.mMask;
+    }
 };
+
+inline Matcher getSimpleMatcher(int32_t tag, size_t field) {
+    return Matcher(Field(tag, getSimpleField(field)), 0xff7f0000);
+}
 
 /**
  * A wrapper for a union type to contain multiple types of values.
