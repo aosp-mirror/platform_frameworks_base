@@ -149,7 +149,7 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
     }
 
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        if (mNavigationBarView.inScreenPinning()) {
+        if (mNavigationBarView.inScreenPinning() || mStatusBar.isKeyguardShowing()) {
             return false;
         }
 
@@ -182,7 +182,7 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
     }
 
     public boolean onTouchEvent(MotionEvent event) {
-        if (mNavigationBarView.inScreenPinning()) {
+        if (mNavigationBarView.inScreenPinning() || mStatusBar.isKeyguardShowing()) {
             return false;
         }
 
