@@ -163,6 +163,11 @@ package android.graphics {
     method public deprecated android.graphics.Rasterizer setRasterizer(android.graphics.Rasterizer);
   }
 
+  public class Picture {
+    method public static deprecated android.graphics.Picture createFromStream(java.io.InputStream);
+    method public deprecated void writeToStream(java.io.OutputStream);
+  }
+
   public deprecated class PixelXorXfermode extends android.graphics.Xfermode {
     ctor public PixelXorXfermode(int);
   }
