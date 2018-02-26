@@ -236,7 +236,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                     pw.println("        " + "mTsListener=" + req.mTsListener);
                     pw.println("        " + "mScListener=" + req.mScListener);
                     pw.println(
-                            "        " + "mScLocale=" + req.mLocale + " mUid=" + req.mUserId);
+                            "        " + "mScLocale=" + req.mLocale + " mUid=" + req.mUid);
                 }
                 final int numOnGoingSessionRequests = grp.mOnGoingSessionRequests.size();
                 for (int j = 0; j < numOnGoingSessionRequests; j++) {
@@ -246,7 +246,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                     pw.println("        " + "mTsListener=" + req.mTsListener);
                     pw.println("        " + "mScListener=" + req.mScListener);
                     pw.println(
-                            "        " + "mScLocale=" + req.mLocale + " mUid=" + req.mUserId);
+                            "        " + "mScLocale=" + req.mLocale + " mUid=" + req.mUid);
                 }
                 final int N = grp.mListeners.getRegisteredCallbackCount();
                 for (int j = 0; j < N; j++) {
@@ -738,8 +738,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     }
 
     private static final class SessionRequest {
-        @UserIdInt
-        public final int mUserId;
+        public final int mUid;
         @Nullable
         public final String mLocale;
         @NonNull
@@ -749,10 +748,10 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         @Nullable
         public final Bundle mBundle;
 
-        SessionRequest(@UserIdInt final int userId, @Nullable String locale,
+        SessionRequest(int uid, @Nullable String locale,
                 @NonNull ITextServicesSessionListener tsListener,
                 @NonNull ISpellCheckerSessionListener scListener, @Nullable Bundle bundle) {
-            mUserId = userId;
+            mUid = uid;
             mLocale = locale;
             mTsListener = tsListener;
             mScListener = scListener;
