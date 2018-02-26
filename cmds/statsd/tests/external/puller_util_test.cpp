@@ -34,7 +34,7 @@ using testing::Contains;
  * Test merge isolated and host uid
  */
 
-int uidAtomTagId = android::util::CPU_TIME_PER_UID_FREQ;
+int uidAtomTagId = android::util::CPU_CLUSTER_TIME;
 int nonUidAtomTagId = android::util::SYSTEM_UPTIME;
 int timestamp = 1234;
 int isolatedUid = 30;
