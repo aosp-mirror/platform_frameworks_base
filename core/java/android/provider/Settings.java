@@ -11168,6 +11168,20 @@ public final class Settings {
         public static final String ZEN_MODE_CONFIG_ETAG = "zen_mode_config_etag";
 
         /**
+         * If 0, turning on dnd manually will last indefinitely.
+         * Else if non-negative, turning on dnd manually will last for this many minutes.
+         * Else (if negative), turning on dnd manually will surface a dialog that prompts
+         * user to specify a duration.
+         * @hide
+         */
+        public static final String ZEN_DURATION = "zen_duration";
+
+        private static final Validator ZEN_DURATION_VALIDATOR = ANY_INTEGER_VALIDATOR;
+
+        /** @hide */ public static final int ZEN_DURATION_PROMPT = -1;
+        /** @hide */ public static final int ZEN_DURATION_FOREVER = 0;
+
+        /**
          * Defines global heads up toggle.  One of HEADS_UP_OFF, HEADS_UP_ON.
          *
          * @hide
@@ -11541,7 +11555,8 @@ public final class Settings {
             BLUETOOTH_ON,
             PRIVATE_DNS_MODE,
             PRIVATE_DNS_SPECIFIER,
-            SOFT_AP_TIMEOUT_ENABLED
+            SOFT_AP_TIMEOUT_ENABLED,
+            ZEN_DURATION,
         };
 
         /**
@@ -11580,6 +11595,7 @@ public final class Settings {
             VALIDATORS.put(WIFI_CARRIER_NETWORKS_AVAILABLE_NOTIFICATION_ON,
                     WIFI_CARRIER_NETWORKS_AVAILABLE_NOTIFICATION_ON_VALIDATOR);
             VALIDATORS.put(APP_AUTO_RESTRICTION_ENABLED, APP_AUTO_RESTRICTION_ENABLED_VALIDATOR);
+            VALIDATORS.put(ZEN_DURATION, ZEN_DURATION_VALIDATOR);
         }
 
         /**

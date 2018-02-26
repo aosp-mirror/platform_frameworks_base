@@ -5363,7 +5363,6 @@ message MetricsEvent {
     // OS: P
     ACTION_PANEL_VIEW_EXPAND = 1328;
 
-
     // FIELD: Rotation of the device
     // CATEGORY: GLOBAL_SYSTEM_UI
     // OS: P

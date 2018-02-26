@@ -433,9 +433,11 @@ message GlobalSettingsProto {
     optional SettingProto show_mute_in_crash_dialog = 352 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingsProto show_zen_upgrade_notification = 354  [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingsProto app_auto_restriction_enabled = 359  [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingsProto zen_duration = 360  [ (android.privacy).dest = DEST_AUTOMATIC ];
+
     // Please insert fields in the same order as in
     // frameworks/base/core/java/android/provider/Settings.java.
-    // Next tag = 360;
+    // Next tag = 361;
 }
 
 message SecureSettingsProto {

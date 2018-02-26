@@ -1141,6 +1141,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.APP_AUTO_RESTRICTION_ENABLED,
                 GlobalSettingsProto.APP_AUTO_RESTRICTION_ENABLED);
+        dumpSetting(s, p,
+                Settings.Global.ZEN_DURATION,
+                GlobalSettingsProto.ZEN_DURATION);
 
         // Please insert new settings using the same order as in Settings.Global.
     }

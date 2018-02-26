@@ -4490,7 +4490,7 @@
 
     <!-- Zen mode condition - summary: time duration in hours. [CHAR LIMIT=NONE] -->
     <plurals name="zen_mode_duration_hours_summary">
-        <item quantity="one">For one hour (until <xliff:g id="formattedTime" example="10:00 PM">%2$s</xliff:g>)</item>
+        <item quantity="one">For 1 hour (until <xliff:g id="formattedTime" example="10:00 PM">%2$s</xliff:g>)</item>
         <item quantity="other">For %1$d hours (until <xliff:g id="formattedTime" example="10:00 PM">%2$s</xliff:g>)</item>
     </plurals>
 
@@ -4514,7 +4514,7 @@
 
     <!-- Zen mode condition - line one: time duration in hours. [CHAR LIMIT=NONE] -->
     <plurals name="zen_mode_duration_hours">
-        <item quantity="one">For one hour</item>
+        <item quantity="one">For 1 hour</item>
         <item quantity="other">For %d hours</item>
     </plurals>
 
