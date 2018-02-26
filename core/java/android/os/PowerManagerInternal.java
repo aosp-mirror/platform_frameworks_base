@@ -141,6 +141,14 @@ public abstract class PowerManagerInternal {
     public abstract void setDozeOverrideFromDreamManager(
             int screenState, int screenBrightness);
 
+    /**
+     * Used by sidekick manager to tell the power manager if it shouldn't change the display state
+     * when a draw wake lock is acquired. Some processes may grab such a wake lock to do some work
+     * in a powered-up state, but we shouldn't give up sidekick control over the display until this
+     * override is lifted.
+     */
+    public abstract void setDrawWakeLockOverrideFromSidekick(boolean keepState);
+
     public abstract PowerSaveState getLowPowerState(int serviceType);
 
     public abstract void registerLowPowerModeObserver(LowPowerModeListener listener);

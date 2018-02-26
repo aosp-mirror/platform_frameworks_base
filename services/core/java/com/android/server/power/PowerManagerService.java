@@ -488,6 +488,9 @@ public final class PowerManagerService extends SystemService
     // The screen brightness to use while dozing.
     private int mDozeScreenBrightnessOverrideFromDreamManager = PowerManager.BRIGHTNESS_DEFAULT;
 
+    // Keep display state when dozing.
+    private boolean mDrawWakeLockOverrideFromSidekick;
+
     // Time when we last logged a warning about calling userActivity() without permission.
     private long mLastWarningAboutUserActivityPermission = Long.MIN_VALUE;
 
@@ -2424,7 +2427,8 @@ public final class PowerManagerService extends SystemService
 
             if (mDisplayPowerRequest.policy == DisplayPowerRequest.POLICY_DOZE) {
                 mDisplayPowerRequest.dozeScreenState = mDozeScreenStateOverrideFromDreamManager;
-                if ((mWakeLockSummary & WAKE_LOCK_DRAW) != 0) {
+                if ((mWakeLockSummary & WAKE_LOCK_DRAW) != 0
+                        && !mDrawWakeLockOverrideFromSidekick) {
                     if (mDisplayPowerRequest.dozeScreenState == Display.STATE_DOZE_SUSPEND) {
                         mDisplayPowerRequest.dozeScreenState = Display.STATE_DOZE;
                     }
@@ -3176,6 +3180,16 @@ public final class PowerManagerService extends SystemService
         }
     }
 
+    private void setDrawWakeLockOverrideFromSidekickInternal(boolean keepState) {
+        synchronized (mLock) {
+            if (mDrawWakeLockOverrideFromSidekick != keepState) {
+                mDrawWakeLockOverrideFromSidekick = keepState;
+                mDirty |= DIRTY_SETTINGS;
+                updatePowerStateLocked();
+            }
+        }
+    }
+
     @VisibleForTesting
     void setVrModeEnabled(boolean enabled) {
         mIsVrModeEnabled = enabled;
@@ -3381,6 +3395,7 @@ public final class PowerManagerService extends SystemService
                     + mUserInactiveOverrideFromWindowManager);
             pw.println("  mDozeScreenStateOverrideFromDreamManager="
                     + mDozeScreenStateOverrideFromDreamManager);
+            pw.println("  mDrawWakeLockOverrideFromSidekick=" + mDrawWakeLockOverrideFromSidekick);
             pw.println("  mDozeScreenBrightnessOverrideFromDreamManager="
                     + mDozeScreenBrightnessOverrideFromDreamManager);
             pw.println("  mScreenBrightnessSettingMinimum=" + mScreenBrightnessSettingMinimum);
@@ -3715,6 +3730,10 @@ public final class PowerManagerService extends SystemService
                     PowerServiceSettingsAndConfigurationDumpProto
                             .DOZE_SCREEN_STATE_OVERRIDE_FROM_DREAM_MANAGER,
                     mDozeScreenStateOverrideFromDreamManager);
+            proto.write(
+                    PowerServiceSettingsAndConfigurationDumpProto
+                            .DRAW_WAKE_LOCK_OVERRIDE_FROM_SIDEKICK,
+                    mDrawWakeLockOverrideFromSidekick);
             proto.write(
                     PowerServiceSettingsAndConfigurationDumpProto
                             .DOZED_SCREEN_BRIGHTNESS_OVERRIDE_FROM_DREAM_MANAGER,
@@ -4700,6 +4719,11 @@ public final class PowerManagerService extends SystemService
         @Override
         public void setUserActivityTimeoutOverrideFromWindowManager(long timeoutMillis) {
             setUserActivityTimeoutOverrideFromWindowManagerInternal(timeoutMillis);
+        }
+
+        @Override
+        public void setDrawWakeLockOverrideFromSidekick(boolean keepState) {
+            setDrawWakeLockOverrideFromSidekickInternal(keepState);
         }
 
         @Override
