@@ -93,8 +93,7 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"短訊"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"留言訊息"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi 通話"</string>
-    <!-- no translation found for notification_channel_sim (4052095493875188564) -->
-    <skip />
+    <string name="notification_channel_sim" msgid="4052095493875188564">"SIM 卡狀態"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"對方曾要求 TTY 完整模式"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"對方曾要求 TTY 模式 (HCO)"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"對方曾要求 TTY 模式 (VCO)"</string>
@@ -240,8 +239,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"設定"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"協助"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"語音助手"</string>
-    <!-- no translation found for global_action_lockdown (1099326950891078929) -->
-    <skip />
+    <string name="global_action_lockdown" msgid="1099326950891078929">"鎖定"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"新通知"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"虛擬鍵盤"</string>
@@ -828,8 +826,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"提示：輕按兩下即可放大縮小。"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"自動填入"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"設定自動填入功能"</string>
-    <!-- no translation found for autofill_window_title (921006636895825007) -->
-    <skip />
+    <string name="autofill_window_title" msgid="921006636895825007">"自動填入"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">"， "</string>
@@ -1088,13 +1085,18 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"正在啟動應用程式。"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"啟動完成。"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"正在執行 <xliff:g id="APP">%1$s</xliff:g>"</string>
-    <string name="heavy_weight_notification_detail" msgid="867643381388543170">"輕按即可切換至應用程式"</string>
-    <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"切換應用程式？"</string>
-    <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"另一個應用程式已在執行，您必須停止執行該應用程式，才能啟動新的應用程式。"</string>
-    <string name="old_app_action" msgid="493129172238566282">"返回 <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
-    <string name="old_app_description" msgid="2082094275580358049">"請勿啟動新的應用程式。"</string>
-    <string name="new_app_action" msgid="5472756926945440706">"啟動 <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
-    <string name="new_app_description" msgid="1932143598371537340">"停止舊的應用程式，且不儲存。"</string>
+    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
+    <skip />
+    <!-- no translation found for old_app_action (3044685170829526403) -->
+    <skip />
+    <!-- no translation found for new_app_action (6694851182870774403) -->
+    <skip />
+    <!-- no translation found for new_app_description (5894852887817332322) -->
+    <skip />
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> 的記憶體用量已超過限額"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"已收集堆轉儲；輕按即可分享"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"分享堆轉儲？"</string>
@@ -1200,12 +1202,9 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM 卡已新增"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"重新啟動裝置，才能使用流動網絡。"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"重新啟動"</string>
-    <!-- no translation found for install_carrier_app_notification_title (9056007111024059888) -->
-    <skip />
-    <!-- no translation found for install_carrier_app_notification_text (3346681446158696001) -->
-    <skip />
-    <!-- no translation found for install_carrier_app_notification_button (3094206295081900849) -->
-    <skip />
+    <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"啟動流動服務"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"下載流動網絡供應商應用程式，即可啟用新 SIM 卡"</string>
+    <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"下載應用程式"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"已插入新的 SIM 卡"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"輕按即可設定"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"設定時間"</string>
@@ -1838,10 +1837,7 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"偵測到有害的應用程式"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"「<xliff:g id="APP_0">%1$s</xliff:g>」想顯示「<xliff:g id="APP_2">%2$s</xliff:g>」的快訊"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"編輯"</string>
-    <!-- no translation found for notification_channel_system_changes (5072715579030948646) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_title (3799603322910377294) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_content (6603123479476554768) -->
-    <skip />
+    <string name="notification_channel_system_changes" msgid="5072715579030948646">"系統變更"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"請勿騷擾已變更"</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"輕按即可查看您的干擾行為設定"</string>
 </resources>

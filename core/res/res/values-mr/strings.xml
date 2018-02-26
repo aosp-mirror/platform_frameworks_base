@@ -93,8 +93,7 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS संदेश"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"व्हॉइसमेल संदेश"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"वाय-फाय कॉलिंग"</string>
-    <!-- no translation found for notification_channel_sim (4052095493875188564) -->
-    <skip />
+    <string name="notification_channel_sim" msgid="4052095493875188564">"सिम स्थिती"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"समवयस्क व्यक्तीने TTY मोड पूर्ण ची विनंती केली"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"समवयस्क व्यक्तीने TTY मोड HCO ची विनंती केली"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"समवयस्क व्यक्तीने TTY मोड VCO ची विनंती केली"</string>
@@ -240,8 +239,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"सेटिंग्ज"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"सहाय्यता"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"व्हॉइस सहाय्य"</string>
-    <!-- no translation found for global_action_lockdown (1099326950891078929) -->
-    <skip />
+    <string name="global_action_lockdown" msgid="1099326950891078929">"लॉकडाउन"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"नवीन सूचना"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"व्हर्च्युअल कीबोर्ड"</string>
@@ -828,8 +826,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"टीप: झूम कमी करण्यासाठी आणि वाढवण्यासाठी दोनदा-टॅप करा."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"स्वयं-भरण"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"स्वयं-भरण सेट करा"</string>
-    <!-- no translation found for autofill_window_title (921006636895825007) -->
-    <skip />
+    <string name="autofill_window_title" msgid="921006636895825007">"अॉटोफिल"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1088,13 +1085,18 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"अॅप्स प्रारंभ करत आहे."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"बूट समाप्त होत आहे."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> चालत आहे"</string>
-    <string name="heavy_weight_notification_detail" msgid="867643381388543170">"अॅपवर स्विच करण्यासाठी टॅप करा"</string>
-    <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"अॅप्स स्विच करायचे?"</string>
-    <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"आपण एक नवीन प्रारंभ करण्यापूर्वी आधीपासून चालणारा दुसरा अॅप थांबविणे आवश्यक आहे."</string>
-    <string name="old_app_action" msgid="493129172238566282">"<xliff:g id="OLD_APP">%1$s</xliff:g> कडे परत"</string>
-    <string name="old_app_description" msgid="2082094275580358049">"नवीन अॅप प्रारंभ करू नका."</string>
-    <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> सुरू करा"</string>
-    <string name="new_app_description" msgid="1932143598371537340">"जतन न करता जुना अॅप थांबवा."</string>
+    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
+    <skip />
+    <!-- no translation found for old_app_action (3044685170829526403) -->
+    <skip />
+    <!-- no translation found for new_app_action (6694851182870774403) -->
+    <skip />
+    <!-- no translation found for new_app_description (5894852887817332322) -->
+    <skip />
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> ने मेमेरी मर्यादा वाढविली"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"हीप डंप संकलित केला गेला आहे; सामायिक करण्यासाठी टॅप करा"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"हीप डंप सामायिक करायचे?"</string>
@@ -1201,12 +1203,9 @@
     <string name="sim_added_title" msgid="3719670512889674693">"सिम कार्ड जोडले"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"मोबाईल नेटवर्कवर अॅक्सेस करण्यासाठी तुमचे डिव्हाइस रीस्टार्ट करा."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"रीस्टार्ट"</string>
-    <!-- no translation found for install_carrier_app_notification_title (9056007111024059888) -->
-    <skip />
-    <!-- no translation found for install_carrier_app_notification_text (3346681446158696001) -->
-    <skip />
-    <!-- no translation found for install_carrier_app_notification_button (3094206295081900849) -->
-    <skip />
+    <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"मोबाइल सेवा अ‍ॅक्टिव्हेट करा"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"तुमचे नवीन सिम अ‍ॅक्टिव्हेट करण्यासाठी वाहकाचे अ‍ॅप डाउनलोड करा"</string>
+    <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"अ‍ॅप डाउनलोड करा"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"नवीन सिम घाला"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"ते सेट करण्यासाठी टॅप करा"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"वेळ सेट करा"</string>

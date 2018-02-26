@@ -1085,13 +1085,18 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Ilovalar ishga tushirilmoqda."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Tizimni yuklashni tugatish."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> ishlamoqda"</string>
-    <string name="heavy_weight_notification_detail" msgid="867643381388543170">"Ilovaga o‘tish uchun bosing"</string>
-    <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"Ilovalar almashtirilsinmi?"</string>
-    <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"Boshqa ilova ishlab turibdi. Yangisini ishga tushirishdan oldin avvalgisini yoping."</string>
-    <string name="old_app_action" msgid="493129172238566282">"<xliff:g id="OLD_APP">%1$s</xliff:g>ga qaytish"</string>
-    <string name="old_app_description" msgid="2082094275580358049">"Yangi ilova ishga tushirilmasin."</string>
-    <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g>ni ishga tushirish"</string>
-    <string name="new_app_description" msgid="1932143598371537340">"O‘zgarishlarni saqlamasdan, eski ilova yopilsin"</string>
+    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
+    <skip />
+    <!-- no translation found for old_app_action (3044685170829526403) -->
+    <skip />
+    <!-- no translation found for new_app_action (6694851182870774403) -->
+    <skip />
+    <!-- no translation found for new_app_description (5894852887817332322) -->
+    <skip />
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> foydalanish uchun ajratilgan xotira chegarasidan o‘tib ketdi"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Hip-damp yaratildi; uni yuborish uchun bosing"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Hip-damp ma’lumotlari bilan ulashasizmi?"</string>
@@ -1833,7 +1838,7 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"Zararli ilova aniqlandi"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> ilovasi <xliff:g id="APP_2">%2$s</xliff:g> ilovasidan fragmentlar ko‘rsatish uchun ruxsat so‘ramoqda"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"Tahrirlash"</string>
-    <string name="notification_channel_system_changes" msgid="5072715579030948646">"Tizimda o‘zgartirishlar"</string>
+    <string name="notification_channel_system_changes" msgid="5072715579030948646">"Tizimga oid o‘zgarishlar"</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Bezovta qilinmasin rejimi sozlamalari o‘zgartirildi"</string>
     <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"Ularni tekshirish uchun bosing."</string>
 </resources>

@@ -93,7 +93,7 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS မက်ဆေ့ဂျ်များ"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"အသံမေးလ် မက်ဆေ့ဂျ်များ"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi ခေါ်ဆိုမှု"</string>
-    <string name="notification_channel_sim" msgid="4052095493875188564">"ဆင်းမ် အခြေအနေ"</string>
+    <string name="notification_channel_sim" msgid="4052095493875188564">"ဆင်းမ်ကဒ် အခြေအနေ"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"အခြားစက်မှ TTY မုဒ် FULL ပြုရန် တောင်းဆို၏"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"အခြားစက်မှ TTY မုဒ် HCO ပြုရန် တောင်းဆို၏"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"TTY မုဒ် VCO ပြုရန် အခြားစက်မှ တောင်းဆို၏"</string>
@@ -1085,13 +1085,18 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"အက်ပ်များကို စတင်နေ"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"လုပ်ငန်းစနစ်ထည့်သွင်း၍ ပြန်လည်စတင်ရန် ပြီးပါပြီ"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> က အလုပ်လုပ်နေသည်"</string>
-    <string name="heavy_weight_notification_detail" msgid="867643381388543170">"အက်ပ်သို့ပြောင်းရန် တို့ပါ"</string>
-    <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"အက်ပ်များကို ပြောင်းမလား?"</string>
-    <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"အခြား အက်ပ်တစ်ခု အလုပ်လုပ်နေ၍ သင်က အသစ် တစ်ခုကို မစမီ ၎င်းကို ရပ်ပစ်ရမည်။"</string>
-    <string name="old_app_action" msgid="493129172238566282">"<xliff:g id="OLD_APP">%1$s</xliff:g>သို့ပြန်သွားရန်"</string>
-    <string name="old_app_description" msgid="2082094275580358049">"pp အသစ်ကို မစတင်ပါနှင့်။"</string>
-    <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g>စတင်ပါ"</string>
-    <string name="new_app_description" msgid="1932143598371537340">"အက်ပ်အဟောင်းကို မသိမ်းဆည်းဘဲ ရပ်လိုက်ပါ။"</string>
+    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
+    <skip />
+    <!-- no translation found for old_app_action (3044685170829526403) -->
+    <skip />
+    <!-- no translation found for new_app_action (6694851182870774403) -->
+    <skip />
+    <!-- no translation found for new_app_description (5894852887817332322) -->
+    <skip />
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> သိမ်းထားနိုင်မှု အကန့်အသတ် ကျော်လွန်နေ"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"သိမ်းဆည်းနိုင်မှု ပမာဏကျော်လွန်သွားပါပြီ။ မျှဝေရန် တို့ပါ"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"အရေးပေါ် သိမ်းထားပေးမှု ကို မျှဝေမလား။"</string>
@@ -1199,7 +1204,7 @@
     <string name="sim_added_message" msgid="6599945301141050216">"မိုးဘိုင်းကွန်ရက်ကို ဆက်သွယ်ရန် စက်ကို ပြန် စ ပါ"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"အစက ပြန်စရန်"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"မိုဘိုင်းဝန်ဆောင်မှု စတင်ဖွင့်လှစ်ရန်"</string>
-    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"သင့်ဆင်းမ် အသစ်ကို စတင်အသုံးပြုရန် ဝန်ဆောင်မှုပေးသူအက်ပ်ကို ဒေါင်းလုဒ်လုပ်ပါ"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"သင့်ဆင်းမ်ကဒ်အသစ်ကို စတင်အသုံးပြုရန် ဝန်ဆောင်မှုပေးသူအက်ပ်ကို ဒေါင်းလုဒ်လုပ်ပါ"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"အက်ပ် ဒေါင်းလုဒ်လုပ်ရန်"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"SIM အသစ်ထည့်သွင်းလိုက်ပါသည်"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"၎င်းကိုတပ်ဆင်ရန် တို့ပါ"</string>

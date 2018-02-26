@@ -93,8 +93,7 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"ಎಸ್‌ಎಂಎಸ್ ಸಂದೇಶಗಳು"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"ಧ್ವನಿಮೇಲ್ ಸಂದೇಶಗಳು"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"ವೈ-ಫೈ ಕರೆ ಮಾಡುವಿಕೆ"</string>
-    <!-- no translation found for notification_channel_sim (4052095493875188564) -->
-    <skip />
+    <string name="notification_channel_sim" msgid="4052095493875188564">"ಸಿಮ್‌ ಸ್ಥಿತಿ"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"ಪೀರ್ ವಿನಂತಿಸಿಕೊಂಡ TTY ಮೋಡ್ ಪೂರ್ಣಗೊಂಡಿದೆ"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"ಪೀರ್ ವಿನಂತಿಸಿಕೊಂಡ TTY ಮೋಡ್ HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"ಪೀರ್ ವಿನಂತಿಸಿಕೊಂಡ TTY ಮೋಡ್ VCO"</string>
@@ -240,8 +239,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"ಸಹಾಯ ಮಾಡು"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"ಧ್ವನಿ ಸಹಾಯಕ"</string>
-    <!-- no translation found for global_action_lockdown (1099326950891078929) -->
-    <skip />
+    <string name="global_action_lockdown" msgid="1099326950891078929">"ಲಾಕ್‌ಡೌನ್‌"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"ಹೊಸ ಅಧಿಸೂಚನೆ"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"ವರ್ಚುಯಲ್ ಕೀಬೋರ್ಡ್"</string>
@@ -828,8 +826,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"ಸಲಹೆ: ಝೂಮ್ ಇನ್ ಮತ್ತು ಝೂಮ್ ಔಟ್ ಮಾಡಲು ಡಬಲ್-ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"ಸ್ವಯಂತುಂಬುವಿಕೆ"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"ಸ್ವಯಂತುಂಬುವಿಕೆಯನ್ನು ಹೊಂದಿಸಿ"</string>
-    <!-- no translation found for autofill_window_title (921006636895825007) -->
-    <skip />
+    <string name="autofill_window_title" msgid="921006636895825007">"ಸ್ವಯಂತುಂಬುವಿಕೆ"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1088,13 +1085,18 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"ಬೂಟ್ ಪೂರ್ಣಗೊಳಿಸಲಾಗುತ್ತಿದೆ."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> ರನ್ ಆಗುತ್ತಿದೆ"</string>
-    <string name="heavy_weight_notification_detail" msgid="867643381388543170">"ಅಪ್ಲಿಕೇಶನ್‌ ಬದಲಾಯಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
-    <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಬದಲಾಯಿಸುವುದೇ?"</string>
-    <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"ಮತ್ತೊಂದು ಅಪ್ಲಿಕೇಶನ್‌ ಈಗಾಗಲೇ ಚಾಲ್ತಿಯಲ್ಲಿದೆ ನೀವು ಹೊಸದೊಂದು ಪ್ರಾರಂಭಿಸುವ ಮೊದಲು ಅದನ್ನು ನಿಲ್ಲಿಸಬೇಕು."</string>
-    <string name="old_app_action" msgid="493129172238566282">"<xliff:g id="OLD_APP">%1$s</xliff:g> ಗೆ ಹಿಂತಿರುಗಿ"</string>
-    <string name="old_app_description" msgid="2082094275580358049">"ಹೊಸ ಅಪ್ಲಿಕೇಶನ್‌ ಪ್ರಾರಂಭಿಸಬೇಡಿ."</string>
-    <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> ಪ್ರಾರಂಭಿಸಿ"</string>
-    <string name="new_app_description" msgid="1932143598371537340">"ಉಳಿಸದೇ ಹಳೆಯ ಅಪ್ಲಿಕೇಶನ್ ನಿಲ್ಲಿಸಿ."</string>
+    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
+    <skip />
+    <!-- no translation found for old_app_action (3044685170829526403) -->
+    <skip />
+    <!-- no translation found for new_app_action (6694851182870774403) -->
+    <skip />
+    <!-- no translation found for new_app_description (5894852887817332322) -->
+    <skip />
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> ಮೆಮೊರಿ ಮಿತಿಯನ್ನು ಮೀರಿದೆ"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"ಹೀಪ್ ಡಂಪ್ ಅನ್ನು ಸಂಗ್ರಹಿಸಲಾಗಿದೆ; ಹಂಚಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"ಹೀಪ್ ಡಂಪ್ ಹಂಚಿಕೊಳ್ಳುವುದೇ?"</string>
@@ -1201,12 +1203,9 @@
     <string name="sim_added_title" msgid="3719670512889674693">"ಸಿಮ್‌ ಕಾರ್ಡ್ ಸೇರಿಸಲಾಗಿದೆ"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"ಮೊಬೈಲ್ ನೆಟ್‍ವರ್ಕ್ ಪ್ರವೇಶಿಸಲು ನಿಮ್ಮ ಸಾಧನವನ್ನು ಮರುಪ್ರಾರಂಭಿಸಿ."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"ಮರುಪ್ರಾರಂಭಿಸು"</string>
-    <!-- no translation found for install_carrier_app_notification_title (9056007111024059888) -->
-    <skip />
-    <!-- no translation found for install_carrier_app_notification_text (3346681446158696001) -->
-    <skip />
-    <!-- no translation found for install_carrier_app_notification_button (3094206295081900849) -->
-    <skip />
+    <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"ಮೊಬೈಲ್ ಸೇವೆಯನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"ನಿಮ್ಮ ಹೊಸ ಸಿಮ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲು ವಾಹಕ ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಬಳಸಿ"</string>
+    <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"ಅಪ್ಲಿಕೇಶನ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"ಹೊಸ ಸಿಮ್ ಸೇರಿಸಲಾಗಿದೆ"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"ಇದನ್ನು ಸ್ಥಾಪಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"ಸಮಯವನ್ನು ಹೊಂದಿಸಿ"</string>

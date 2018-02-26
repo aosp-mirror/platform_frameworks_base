@@ -1085,13 +1085,18 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Iniciando aplicaciones"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Finalizando inicio..."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> en ejecución"</string>
-    <string name="heavy_weight_notification_detail" msgid="867643381388543170">"Toca para cambiar a la aplicación"</string>
-    <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"¿Cambiar aplicaciones?"</string>
-    <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"Se está ejecutando otra aplicación. Para iniciar una aplicación nueva, debes detenerla."</string>
-    <string name="old_app_action" msgid="493129172238566282">"Volver a <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
-    <string name="old_app_description" msgid="2082094275580358049">"No iniciar la nueva aplicación"</string>
-    <string name="new_app_action" msgid="5472756926945440706">"Iniciar <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
-    <string name="new_app_description" msgid="1932143598371537340">"Detener la aplicación anterior sin guardar"</string>
+    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
+    <skip />
+    <!-- no translation found for old_app_action (3044685170829526403) -->
+    <skip />
+    <!-- no translation found for new_app_action (6694851182870774403) -->
+    <skip />
+    <!-- no translation found for new_app_description (5894852887817332322) -->
+    <skip />
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> ha superado el límite de memoria"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Se ha recopilado un volcado de pila. Toca para compartirlo"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"¿Compartir volcado de pila?"</string>
@@ -1198,7 +1203,7 @@
     <string name="sim_added_message" msgid="6599945301141050216">"Reinicia el dispositivo para acceder a la red móvil."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Reiniciar"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Activar servicio móvil"</string>
-    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Descara la aplicación del operador para activar tu nueva tarjeta SIM"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Descarga la aplicación del operador para activar tu nueva tarjeta SIM"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Descargar aplicación"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Nueva SIM insertada"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Toca para configurar"</string>

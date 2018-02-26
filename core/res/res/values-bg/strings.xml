@@ -93,8 +93,7 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS съобщения"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Съобщения в гласовата поща"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Обаждания през Wi-Fi"</string>
-    <!-- no translation found for notification_channel_sim (4052095493875188564) -->
-    <skip />
+    <string name="notification_channel_sim" msgid="4052095493875188564">"Състояние на SIM картата"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Отсрещният потребител заяви пълен TTY режим (FULL)"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Отсрещният потребител заяви TTY режим с пренос на слух (HCO)"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Отсрещният потребител заяви TTY режим с пренос на глас (VCО)"</string>
@@ -240,8 +239,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"Настройки"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Помощ"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Гласова помощ"</string>
-    <!-- no translation found for global_action_lockdown (1099326950891078929) -->
-    <skip />
+    <string name="global_action_lockdown" msgid="1099326950891078929">"Заключване"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"Ново известие"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Виртуална клавиатура"</string>
@@ -828,8 +826,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Съвет: Докоснете двукратно, за да увеличите или намалите мащаба."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Автопоп."</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Автопоп.: Настройка"</string>
-    <!-- no translation found for autofill_window_title (921006636895825007) -->
-    <skip />
+    <string name="autofill_window_title" msgid="921006636895825007">"Автоматично попълване"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1088,13 +1085,18 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Приложенията се стартират."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Зареждането завършва."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> се изпълнява"</string>
-    <string name="heavy_weight_notification_detail" msgid="867643381388543170">"Докоснете за превключване към приложението"</string>
-    <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"Да се превключат ли приложенията?"</string>
-    <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"Вече се изпълнява друго приложение, което трябва да бъде спряно, преди да можете да стартирате ново."</string>
-    <string name="old_app_action" msgid="493129172238566282">"Назад към <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
-    <string name="old_app_description" msgid="2082094275580358049">"Новото приложение да не се стартира."</string>
-    <string name="new_app_action" msgid="5472756926945440706">"Стартиране на <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
-    <string name="new_app_description" msgid="1932143598371537340">"Спиране на старото приложение без запазване."</string>
+    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
+    <skip />
+    <!-- no translation found for old_app_action (3044685170829526403) -->
+    <skip />
+    <!-- no translation found for new_app_action (6694851182870774403) -->
+    <skip />
+    <!-- no translation found for new_app_description (5894852887817332322) -->
+    <skip />
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> надхвърли ограничението за памет"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Извлечена е моментна снимка на паметта. Докоснете, за да я споделите"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Да се сподели ли моментната снимка на паметта?"</string>
@@ -1200,12 +1202,9 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM картата е добавена"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Рестартирайте устройството си, за да осъществите достъп до мобилната мрежа."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Рестартиране"</string>
-    <!-- no translation found for install_carrier_app_notification_title (9056007111024059888) -->
-    <skip />
-    <!-- no translation found for install_carrier_app_notification_text (3346681446158696001) -->
-    <skip />
-    <!-- no translation found for install_carrier_app_notification_button (3094206295081900849) -->
-    <skip />
+    <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Активиране на мобилната услуга"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Изтеглете приложението на оператора, за да активирате новата си SIM карта"</string>
+    <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Изтегляне на приложението"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Поставена е нова SIM карта"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Докоснете, за да я настроите"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Задаване на часа"</string>

@@ -93,8 +93,7 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS സന്ദേശങ്ങൾ"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"വോയ്‌സ്‌മെയിൽ സന്ദേശങ്ങൾ"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"വൈഫൈ കോളിംഗ്"</string>
-    <!-- no translation found for notification_channel_sim (4052095493875188564) -->
-    <skip />
+    <string name="notification_channel_sim" msgid="4052095493875188564">"സിം നില"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് \'ഫുൾ\'"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് VCO"</string>
@@ -240,8 +239,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"ക്രമീകരണം"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"അസിസ്റ്റ്"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"വോയ്‌സ് സഹായം"</string>
-    <!-- no translation found for global_action_lockdown (1099326950891078929) -->
-    <skip />
+    <string name="global_action_lockdown" msgid="1099326950891078929">"ലോക്ക്‌ഡൗൺ"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"പുതിയ അറിയിപ്പ്"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"വെർച്വൽ കീബോർഡ്"</string>
@@ -828,8 +826,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"നുറുങ്ങ്: സൂം ഇൻ ചെയ്യാനും സൂം ഔട്ട് ചെയ്യാനും ഇരട്ട-ടാപ്പുചെയ്യുക."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"ഓട്ടോഫിൽ"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"ഓട്ടോഫിൽ സജ്ജീകരിക്കുക"</string>
-    <!-- no translation found for autofill_window_title (921006636895825007) -->
-    <skip />
+    <string name="autofill_window_title" msgid="921006636895825007">"സ്വമേധയാ പൂരിപ്പിക്കൽ"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1088,13 +1085,18 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"അപ്ലിക്കേഷനുകൾ ആരംഭിക്കുന്നു."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"ബൂട്ട് ചെയ്യൽ പൂർത്തിയാകുന്നു."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> പ്രവർത്തിക്കുന്നു"</string>
-    <string name="heavy_weight_notification_detail" msgid="867643381388543170">"ആപ്പിലേക്ക് മാറുന്നതിന് ടാപ്പുചെയ്യുക"</string>
-    <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"അപ്ലിക്കേഷനുകൾ മാറണോ?"</string>
-    <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"നിങ്ങൾക്ക് പുതിയ ഒരു അപ്ലിക്കേഷൻ ആരംഭിക്കാനാവുന്നതിന് മുമ്പ്, ഇതിനകം പ്രവർത്തിക്കുന്ന മറ്റ് അപ്ലിക്കേഷൻ നിർത്തണം."</string>
-    <string name="old_app_action" msgid="493129172238566282">"<xliff:g id="OLD_APP">%1$s</xliff:g> എന്നതിലേക്ക് മടങ്ങുക"</string>
-    <string name="old_app_description" msgid="2082094275580358049">"പുതിയ അപ്ലിക്കേഷൻ ആരംഭിക്കരുത്."</string>
-    <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> ആരംഭിക്കുക"</string>
-    <string name="new_app_description" msgid="1932143598371537340">"സംരക്ഷിക്കാതെ തന്നെ പഴയ അപ്ലിക്കേഷൻ നിർത്തുക."</string>
+    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
+    <skip />
+    <!-- no translation found for old_app_action (3044685170829526403) -->
+    <skip />
+    <!-- no translation found for new_app_action (6694851182870774403) -->
+    <skip />
+    <!-- no translation found for new_app_description (5894852887817332322) -->
+    <skip />
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> മെമ്മറി പരിധി കവിഞ്ഞു"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"ഹീപ്പ് ഡംപ് ശേഖരിച്ചു; പങ്കിടാൻ ടാപ്പുചെയ്യുക"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"ഹീപ്പ് ഡംപ് പങ്കിടണോ?"</string>
@@ -1201,12 +1203,9 @@
     <string name="sim_added_title" msgid="3719670512889674693">"സിം കാർഡ് ചേർത്തു"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"മൊബൈൽ നെറ്റ്‌വർക്ക് ആക്‌സസ്സുചെയ്യാൻ നിങ്ങളുടെ ഉപകരണം പുനരാരംഭിക്കുക."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"പുനരാരംഭിക്കുക"</string>
-    <!-- no translation found for install_carrier_app_notification_title (9056007111024059888) -->
-    <skip />
-    <!-- no translation found for install_carrier_app_notification_text (3346681446158696001) -->
-    <skip />
-    <!-- no translation found for install_carrier_app_notification_button (3094206295081900849) -->
-    <skip />
+    <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"മൊബൈൽ സേവനം സജീവമാക്കുക"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"പുതിയ സിം സജീവമാക്കാൻ കാരിയർ ആപ്പ് ഡൗൺലോഡ് ചെയ്യുക"</string>
+    <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"ആപ്പ് ഡൗൺലോഡ് ചെയ്യുക"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"പുതിയ സിം ഇട്ടു"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"ഇത് സജ്ജമാക്കുന്നതിന് ടാപ്പുചെയ്യുക"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"സമയം സജ്ജീകരിക്കുക"</string>
@@ -1841,5 +1840,5 @@
     <string name="screenshot_edit" msgid="7867478911006447565">"എഡിറ്റ് ചെയ്യുക"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"സിസ്‌റ്റത്തിലെ മാറ്റങ്ങൾ"</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\'ശല്യപ്പെടുത്തരുത്\' മാറ്റി"</string>
-    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"തടസ്സങ്ങൾക്കായുള്ള പ്രവർത്തന ക്രമീകരണം പരിശോധിക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"തടസ്സങ്ങൾക്കായി ക്രമീകരിച്ചിട്ടുള്ളത് എന്താണെന്ന് പരിശോധിക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
 </resources>

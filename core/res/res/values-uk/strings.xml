@@ -1125,13 +1125,18 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Запуск програм."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Завершення завантаження."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"Працює <xliff:g id="APP">%1$s</xliff:g>"</string>
-    <string name="heavy_weight_notification_detail" msgid="867643381388543170">"Торкніться, щоб відкрити додаток"</string>
-    <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"Переключитися між програмами?"</string>
-    <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"Уже працює інша програма, яку потрібно зупинити перед тим, як запускати нову програму."</string>
-    <string name="old_app_action" msgid="493129172238566282">"Поверн. до <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
-    <string name="old_app_description" msgid="2082094275580358049">"Не запускати нову програму."</string>
-    <string name="new_app_action" msgid="5472756926945440706">"Запуст. <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
-    <string name="new_app_description" msgid="1932143598371537340">"Зупинити попередню програму без збереження."</string>
+    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
+    <skip />
+    <!-- no translation found for old_app_action (3044685170829526403) -->
+    <skip />
+    <!-- no translation found for new_app_action (6694851182870774403) -->
+    <skip />
+    <!-- no translation found for new_app_description (5894852887817332322) -->
+    <skip />
     <string name="dump_heap_notification" msgid="2618183274836056542">"Процес <xliff:g id="PROC">%1$s</xliff:g> перевищив ліміт пам’яті"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Дані динамічної пам’яті зібрано. Торкніться, щоб поділитися"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Поділитися даними динамічної пам’яті?"</string>
