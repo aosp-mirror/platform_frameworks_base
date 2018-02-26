@@ -16,12 +16,12 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
-import static android.security.keystore.RecoveryController.ERROR_BAD_CERTIFICATE_FORMAT;
-import static android.security.keystore.RecoveryController.ERROR_DECRYPTION_FAILED;
-import static android.security.keystore.RecoveryController.ERROR_INSECURE_USER;
-import static android.security.keystore.RecoveryController.ERROR_NO_SNAPSHOT_PENDING;
-import static android.security.keystore.RecoveryController.ERROR_SERVICE_INTERNAL_ERROR;
-import static android.security.keystore.RecoveryController.ERROR_SESSION_EXPIRED;
+import static android.security.keystore.recovery.RecoveryController.ERROR_BAD_CERTIFICATE_FORMAT;
+import static android.security.keystore.recovery.RecoveryController.ERROR_DECRYPTION_FAILED;
+import static android.security.keystore.recovery.RecoveryController.ERROR_INSECURE_USER;
+import static android.security.keystore.recovery.RecoveryController.ERROR_NO_SNAPSHOT_PENDING;
+import static android.security.keystore.recovery.RecoveryController.ERROR_SERVICE_INTERNAL_ERROR;
+import static android.security.keystore.recovery.RecoveryController.ERROR_SESSION_EXPIRED;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -58,10 +58,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertPath;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
