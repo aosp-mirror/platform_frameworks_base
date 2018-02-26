@@ -358,6 +358,9 @@ public final class AutofillManager {
     @GuardedBy("mLock")
     @Nullable private ArraySet<AutofillId> mFillableIds;
 
+    /** id of last requested autofill ui */
+    @Nullable private AutofillId mIdShownFillUi;
+
     /**
      * Views that were already "entered" - if they're entered again when the session is not active,
      * they're ignored
@@ -1547,6 +1550,7 @@ public final class AutofillManager {
         mTrackedViews = null;
         mFillableIds = null;
         mSaveTriggerId = null;
+        mIdShownFillUi = null;
         if (resetEnteredIds) {
             mEnteredIds = null;
         }
@@ -1676,8 +1680,9 @@ public final class AutofillManager {
 
                 if (client != null) {
                     if (client.autofillClientRequestShowFillUi(anchor, width, height,
-                            anchorBounds, presenter) && mCallback != null) {
+                            anchorBounds, presenter)) {
                         callback = mCallback;
+                        mIdShownFillUi = id;
                     }
                 }
             }
@@ -1944,10 +1949,23 @@ public final class AutofillManager {
         }
     }
 
-    private void requestHideFillUi(AutofillId id) {
-        final View anchor = findView(id);
+    /** @hide */
+    public void requestHideFillUi() {
+        requestHideFillUi(mIdShownFillUi, true);
+    }
+
+    private void requestHideFillUi(AutofillId id, boolean force) {
+        final View anchor = id == null ? null : findView(id);
         if (sVerbose) Log.v(TAG, "requestHideFillUi(" + id + "): anchor = " + anchor);
         if (anchor == null) {
+            if (force) {
+                // When user taps outside autofill window, force to close fill ui even id does
+                // not match.
+                AutofillClient client = getClient();
+                if (client != null) {
+                    client.autofillClientRequestHideFillUi();
+                }
+            }
             return;
         }
         requestHideFillUi(id, anchor);
@@ -1963,7 +1981,8 @@ public final class AutofillManager {
             //    service being uninstalled and the UI being dismissed.
             AutofillClient client = getClient();
             if (client != null) {
-                if (client.autofillClientRequestHideFillUi() && mCallback != null) {
+                if (client.autofillClientRequestHideFillUi()) {
+                    mIdShownFillUi = null;
                     callback = mCallback;
                 }
             }
@@ -2655,7 +2674,7 @@ public final class AutofillManager {
         public void requestHideFillUi(int sessionId, AutofillId id) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
-                afm.post(() -> afm.requestHideFillUi(id));
+                afm.post(() -> afm.requestHideFillUi(id, false));
             }
         }
 

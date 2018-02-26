@@ -590,7 +590,7 @@ final class FillUi {
         }
     }
 
-    final class AnchoredWindow implements View.OnTouchListener {
+    final class AnchoredWindow {
         private final @NonNull OverlayControl mOverlayControl;
         private final WindowManager mWm;
         private final View mContentView;
@@ -623,7 +623,6 @@ final class FillUi {
                     params.accessibilityTitle = mContentView.getContext()
                             .getString(R.string.autofill_picker_accessibility_title);
                     mWm.addView(mContentView, params);
-                    mContentView.setOnTouchListener(this);
                     mOverlayControl.hideOverlays();
                     mShowing = true;
                 } else {
@@ -647,7 +646,6 @@ final class FillUi {
         void hide() {
             try {
                 if (mShowing) {
-                    mContentView.setOnTouchListener(null);
                     mWm.removeView(mContentView);
                     mShowing = false;
                 }
@@ -660,16 +658,6 @@ final class FillUi {
             } finally {
                 mOverlayControl.showOverlays();
             }
-        }
-
-        @Override
-        public boolean onTouch(View view, MotionEvent event) {
-            // When the window is touched outside, hide the window.
-            if (view == mContentView && event.getAction() == MotionEvent.ACTION_OUTSIDE) {
-                mCallback.onCanceled();
-                return true;
-            }
-            return false;
         }
     }
 
