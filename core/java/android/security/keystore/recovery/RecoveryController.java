@@ -46,11 +46,11 @@ import java.util.Map;
  * <p>The RecoveryController must be paired with a recovery agent. The recovery agent is responsible
  * for transporting the keychain to remote trusted hardware. This hardware must prevent brute force
  * attempts against the user's lock screen by limiting the number of allowed guesses (to, e.g., 10).
- * After  that number of incorrect guesses, the trusted hardware no longer allows access to the
+ * After that number of incorrect guesses, the trusted hardware no longer allows access to the
  * key chain.
  *
- * <p>For now only the recovery agent itself is able to create keys, so it is expected that the
- * recovery agent is itself the system app.
+ * <p>Only the recovery agent itself is able to create keys, so it is expected that the recovery
+ * agent is itself the system app.
  *
  * <p>A recovery agent requires the privileged permission
  * {@code android.Manifest.permission#RECOVER_KEYSTORE}.
