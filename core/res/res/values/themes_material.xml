@@ -259,6 +259,7 @@ please see themes_device_defaults.xml.
         <item name="progressBarStyleInverse">@style/Widget.Material.ProgressBar.Inverse</item>
         <item name="progressBarStyleSmallInverse">@style/Widget.Material.ProgressBar.Small.Inverse</item>
         <item name="progressBarStyleLargeInverse">@style/Widget.Material.ProgressBar.Large.Inverse</item>
+        <item name="progressBarCornerRadius">@dimen/progress_bar_corner_material</item>
         <item name="seekBarStyle">@style/Widget.Material.SeekBar</item>
         <item name="ratingBarStyle">@style/Widget.Material.RatingBar</item>
         <item name="ratingBarStyleIndicator">@style/Widget.Material.RatingBar.Indicator</item>
@@ -631,6 +632,7 @@ please see themes_device_defaults.xml.
         <item name="progressBarStyleInverse">@style/Widget.Material.Light.ProgressBar.Inverse</item>
         <item name="progressBarStyleSmallInverse">@style/Widget.Material.Light.ProgressBar.Small.Inverse</item>
         <item name="progressBarStyleLargeInverse">@style/Widget.Material.Light.ProgressBar.Large.Inverse</item>
+        <item name="progressBarCornerRadius">@dimen/progress_bar_corner_material</item>
         <item name="seekBarStyle">@style/Widget.Material.Light.SeekBar</item>
         <item name="ratingBarStyle">@style/Widget.Material.Light.RatingBar</item>
         <item name="ratingBarStyleIndicator">@style/Widget.Material.Light.RatingBar.Indicator</item>
