@@ -2429,6 +2429,18 @@
     <string name="more_item_label">More</string>
     <!-- Prepended to the shortcut for a menu item to indicate that the user should hold the MENU button together with the shortcut to invoke the item. For example, if the shortcut to open a new tab in browser is MENU and B together, then this would be prepended to the letter "B" -->
     <string name="prepend_shortcut_label">Menu+</string>
+    <!-- Prepended to the shortcut for a menu item to indicate that the user should hold the META key together with the shortcut to invoke the item. -->
+    <string name="menu_meta_shortcut_label">Meta+</string>
+    <!-- Prepended to the shortcut for a menu item to indicate that the user should hold the CTRL key together with the shortcut to invoke the item. -->
+    <string name="menu_ctrl_shortcut_label">Ctrl+</string>
+    <!-- Prepended to the shortcut for a menu item to indicate that the user should hold the ALT key together with the shortcut to invoke the item. -->
+    <string name="menu_alt_shortcut_label">Alt+</string>
+    <!-- Prepended to the shortcut for a menu item to indicate that the user should hold the SHIFT key together with the shortcut to invoke the item. -->
+    <string name="menu_shift_shortcut_label">Shift+</string>
+    <!-- Prepended to the shortcut for a menu item to indicate that the user should hold the SYM key together with the shortcut to invoke the item. -->
+    <string name="menu_sym_shortcut_label">Sym+</string>
+    <!-- Prepended to the shortcut for a menu item to indicate that the user should hold the FUNCTION key together with the shortcut to invoke the item. -->
+    <string name="menu_function_shortcut_label">Function+</string>
     <!-- Displayed in place of the regular shortcut letter when a menu item has Menu+space for the shortcut. -->
     <string name="menu_space_shortcut_label">space</string>
     <!-- Displayed in place of the regular shortcut letter when a menu item has Menu+enter for the shortcut. -->
