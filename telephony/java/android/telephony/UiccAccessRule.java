@@ -228,6 +228,15 @@ public final class UiccAccessRule implements Parcelable {
     }
 
     @Override
+    public int hashCode() {
+        int result = 1;
+        result = 31 * result + Arrays.hashCode(mCertificateHash);
+        result = 31 * result + Objects.hashCode(mPackageName);
+        result = 31 * result + Objects.hashCode(mAccessType);
+        return result;
+    }
+
+    @Override
     public String toString() {
         return "cert: " + IccUtils.bytesToHexString(mCertificateHash) + " pkg: " +
                 mPackageName + " access: " + mAccessType;
