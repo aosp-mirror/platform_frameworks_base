@@ -103,8 +103,7 @@
     <string name="camera_label" msgid="7261107956054836961">"open camera"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Select new task layout"</string>
     <string name="cancel" msgid="6442560571259935130">"Cancel"</string>
-    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
-    <skip />
+    <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Touch the fingerprint sensor"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Fingerprint icon"</string>
     <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"Application icon"</string>
     <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Help message area"</string>
@@ -274,8 +273,7 @@
     <string name="dessert_case" msgid="1295161776223959221">"Dessert Case"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Screen saver"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
-    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
-    <skip />
+    <string name="quick_settings_header_onboarding_text" msgid="7872508260264044734">"Press &amp; hold on the icons for more options"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Do not disturb"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Priority only"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Alarms only"</string>
@@ -537,6 +535,12 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Tap to set to vibrate."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Tap to mute."</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s volume controls"</string>
+    <!-- no translation found for volume_dialog_ringer_guidance_vibrate (8902050240801159042) -->
+    <skip />
+    <!-- no translation found for volume_dialog_ringer_guidance_silent (2128975224280276122) -->
+    <skip />
+    <!-- no translation found for volume_dialog_ringer_guidance_ring (6144469689490528338) -->
+    <skip />
     <string name="output_title" msgid="5355078100792942802">"Media output"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Phone call output"</string>
     <string name="output_none_found" msgid="5544982839808921091">"No devices found"</string>
