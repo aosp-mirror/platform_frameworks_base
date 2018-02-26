@@ -87,6 +87,7 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerServiceDumpProto.ActiveJob;
 import com.android.server.job.JobSchedulerServiceDumpProto.PendingJob;
+import com.android.server.job.JobSchedulerServiceDumpProto.RegisteredJob;
 import com.android.server.job.controllers.AppIdleController;
 import com.android.server.job.controllers.BackgroundJobsController;
 import com.android.server.job.controllers.BatteryController;
@@ -2937,6 +2938,23 @@ public final class JobSchedulerService extends com.android.server.SystemService
         synchronized (mLock) {
             mConstants.dump(pw);
             pw.println();
+
+            pw.println("  Heartbeat:");
+            pw.print("    Current:    "); pw.println(mHeartbeat);
+            pw.println("    Next");
+            pw.print("      ACTIVE:   "); pw.println(mNextBucketHeartbeat[0]);
+            pw.print("      WORKING:  "); pw.println(mNextBucketHeartbeat[1]);
+            pw.print("      FREQUENT: "); pw.println(mNextBucketHeartbeat[2]);
+            pw.print("      RARE:     "); pw.println(mNextBucketHeartbeat[3]);
+            pw.print("    Last heartbeat: ");
+            TimeUtils.formatDuration(mLastHeartbeatTime, nowElapsed, pw);
+            pw.println();
+            pw.print("    Next heartbeat: ");
+            TimeUtils.formatDuration(mLastHeartbeatTime + mConstants.STANDBY_HEARTBEAT_TIME,
+                    nowElapsed, pw);
+            pw.println();
+            pw.println();
+
             pw.println("Started users: " + Arrays.toString(mStartedUsers));
             pw.print("Registered ");
             pw.print(mJobs.size());
@@ -2954,6 +2972,10 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     }
 
                     job.dump(pw, "    ", true, nowElapsed);
+                    pw.print("    Last run heartbeat: ");
+                    pw.print(heartbeatWhenJobsLastRun(job));
+                    pw.println();
+
                     pw.print("    Ready: ");
                     pw.print(isReadyToBeExecutedLocked(job));
                     pw.print(" (job=");
@@ -3096,6 +3118,16 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
         synchronized (mLock) {
             mConstants.dump(proto, JobSchedulerServiceDumpProto.SETTINGS);
+            proto.write(JobSchedulerServiceDumpProto.CURRENT_HEARTBEAT, mHeartbeat);
+            proto.write(JobSchedulerServiceDumpProto.NEXT_HEARTBEAT, mNextBucketHeartbeat[0]);
+            proto.write(JobSchedulerServiceDumpProto.NEXT_HEARTBEAT, mNextBucketHeartbeat[1]);
+            proto.write(JobSchedulerServiceDumpProto.NEXT_HEARTBEAT, mNextBucketHeartbeat[2]);
+            proto.write(JobSchedulerServiceDumpProto.NEXT_HEARTBEAT, mNextBucketHeartbeat[3]);
+            proto.write(JobSchedulerServiceDumpProto.LAST_HEARTBEAT_TIME_MILLIS,
+                    mLastHeartbeatTime - nowUptime);
+            proto.write(JobSchedulerServiceDumpProto.NEXT_HEARTBEAT_TIME_MILLIS,
+                    mLastHeartbeatTime + mConstants.STANDBY_HEARTBEAT_TIME - nowUptime);
+
             for (int u : mStartedUsers) {
                 proto.write(JobSchedulerServiceDumpProto.STARTED_USERS, u);
             }
@@ -3134,6 +3166,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     }
                     proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_COMPONENT_PRESENT,
                             componentPresent);
+                    proto.write(RegisteredJob.LAST_RUN_HEARTBEAT, heartbeatWhenJobsLastRun(job));
 
                     proto.end(rjToken);
                 }
