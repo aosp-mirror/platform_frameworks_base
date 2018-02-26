@@ -48,7 +48,6 @@ import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.BackupManager;
 import android.app.backup.BackupTransport;
-import android.app.backup.FullBackupDataOutput;
 import android.app.backup.IBackupManager;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
@@ -76,7 +75,6 @@ import com.android.server.backup.transport.TransportClient;
 import com.android.server.testing.FrameworkRobolectricTestRunner;
 import com.android.server.testing.SystemLoaderClasses;
 import com.android.server.testing.SystemLoaderPackages;
-import com.android.server.testing.shadows.FrameworkShadowPackageManager;
 import com.android.server.testing.shadows.ShadowBackupDataInput;
 import com.android.server.testing.shadows.ShadowBackupDataOutput;
 
@@ -90,7 +88,6 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.shadows.ShadowPackageManager;
 import org.robolectric.shadows.ShadowQueuedWork;
@@ -106,7 +103,6 @@ import java.util.stream.Stream;
     manifest = Config.NONE,
     sdk = 26,
     shadows = {
-        FrameworkShadowPackageManager.class,
         ShadowBackupDataInput.class,
         ShadowBackupDataOutput.class,
         ShadowQueuedWork.class
@@ -151,7 +147,7 @@ public class PerformBackupTaskTest {
         assertThat(dataDir.mkdir()).isTrue();
 
         PackageManager packageManager = application.getPackageManager();
-        mShadowPackageManager = Shadow.extract(packageManager);
+        mShadowPackageManager = shadowOf(packageManager);
 
         mWakeLock = createBackupWakeLock(application);
 
