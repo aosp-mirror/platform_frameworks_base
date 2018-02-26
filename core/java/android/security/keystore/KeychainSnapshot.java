@@ -25,21 +25,7 @@ import com.android.internal.util.Preconditions;
 import java.util.List;
 
 /**
- * A snapshot of a version of the keystore. Two events can trigger the generation of a new snapshot:
- *
- * <ul>
- *     <li>The user's lock screen changes. (A key derived from the user's lock screen is used to
- *         protected the keychain, which is why this forces a new snapshot.)
- *     <li>A key is added to or removed from the recoverable keychain.
- * </ul>
- *
- * <p>The snapshot data is also encrypted with the remote trusted hardware's public key, so even
- * the recovery agent itself should not be able to decipher the data. The recovery agent sends an
- * instance of this to the remote trusted hardware whenever a new snapshot is generated. During a
- * recovery flow, the recovery agent retrieves a snapshot from the remote trusted hardware. It then
- * sends it to the framework, where it is decrypted using the user's lock screen from their previous
- * device.
- *
+ * @deprecated Use {@link android.security.keystore.recovery.KeyChainSnapshot}.
  * @hide
  */
 public final class KeychainSnapshot implements Parcelable {
