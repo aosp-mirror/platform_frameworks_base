@@ -24,17 +24,13 @@
     <string name="label_paper_size" msgid="908654383827777759">"କାଗଜର ଆକାର"</string>
     <string name="label_paper_size_summary" msgid="5668204981332138168">"କାଗଜର ଆକାର:"</string>
     <string name="label_color" msgid="1108690305218188969">"ରଙ୍ଗ"</string>
-    <!-- no translation found for label_duplex (5370037254347072243) -->
-    <skip />
+    <string name="label_duplex" msgid="5370037254347072243">"ଦୁଇ-ତରଫା"</string>
     <string name="label_orientation" msgid="2853142581990496477">"ଓରିଏଣ୍ଟେଶନ୍‍"</string>
-    <!-- no translation found for label_pages (7768589729282182230) -->
-    <skip />
+    <string name="label_pages" msgid="7768589729282182230">"ପୃଷ୍ଠା"</string>
     <!-- no translation found for destination_default_text (5422708056807065710) -->
     <skip />
-    <!-- no translation found for template_all_pages (3322235982020148762) -->
-    <skip />
-    <!-- no translation found for template_page_range (428638530038286328) -->
-    <skip />
+    <string name="template_all_pages" msgid="3322235982020148762">"ସମସ୍ତ <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
+    <string name="template_page_range" msgid="428638530038286328">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g>ର ରେଞ୍ଜ"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"ଯେପରିକି 1—5,8,11—13"</string>
     <string name="print_preview" msgid="8010217796057763343">"ପ୍ରିଣ୍ଟ ଝଲକ"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"ଝଲକ ଦେଖିବା ପାଇଁ PDF ଭ୍ୟୁଅର୍‍ ଇନଷ୍ଟଲ୍‍ କରନ୍ତୁ"</string>
@@ -45,21 +41,14 @@
     <string name="print_dialog" msgid="32628687461331979">"ପ୍ରିଣ୍ଟ ଡାୟଲଗ୍‍"</string>
     <!-- no translation found for current_page_template (5145005201131935302) -->
     <skip />
-    <!-- no translation found for page_description_template (6831239682256197161) -->
-    <skip />
-    <!-- no translation found for summary_template (8899734908625669193) -->
-    <skip />
-    <!-- no translation found for expand_handle (7282974448109280522) -->
-    <skip />
-    <!-- no translation found for collapse_handle (6886637989442507451) -->
-    <skip />
+    <string name="page_description_template" msgid="6831239682256197161">"<xliff:g id="PAGE_COUNT">%2$d</xliff:g>ରୁ <xliff:g id="CURRENT_PAGE">%1$d</xliff:g> ପୃଷ୍ଠା"</string>
+    <string name="summary_template" msgid="8899734908625669193">"ସାରାଂଶ, କପୀ <xliff:g id="COPIES">%1$s</xliff:g>, କାଗଜ ଆକାର <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
+    <string name="expand_handle" msgid="7282974448109280522">"ହ୍ୟାଣ୍ଡେଲ୍ ବଡ଼ କରନ୍ତୁ"</string>
+    <string name="collapse_handle" msgid="6886637989442507451">"ହ୍ୟାଣ୍ଡେଲ୍ ଛୋଟ କରନ୍ତୁ"</string>
     <string name="print_button" msgid="645164566271246268">"ପ୍ରିଣ୍ଟ କରନ୍ତୁ"</string>
-    <!-- no translation found for savetopdf_button (2976186791686924743) -->
-    <skip />
-    <!-- no translation found for print_options_expanded (6944679157471691859) -->
-    <skip />
-    <!-- no translation found for print_options_collapsed (7455930445670414332) -->
-    <skip />
+    <string name="savetopdf_button" msgid="2976186791686924743">"PDFରେ ସେଭ୍‍ କରନ୍ତୁ"</string>
+    <string name="print_options_expanded" msgid="6944679157471691859">"ପ୍ରିଣ୍ଟ ବିକଳ୍ପକୁ ବଡ଼ କରାଯାଇଛି"</string>
+    <string name="print_options_collapsed" msgid="7455930445670414332">"ପ୍ରିଣ୍ଟ ବିକଳ୍ପକୁ ଛୋଟ କରାଯାଇଛି"</string>
     <string name="search" msgid="5421724265322228497">"ସର୍ଚ୍ଚ କରନ୍ତୁ"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"ସମସ୍ତ ପ୍ରିଣ୍ଟର୍‌"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"ସେବା ଯୋଡ଼ନ୍ତୁ"</string>
@@ -68,7 +57,10 @@
     <string name="print_add_printer" msgid="1088656468360653455">"ପ୍ରିଣ୍ଟର୍‌ ଯୋଡ଼ନ୍ତୁ"</string>
     <string name="print_select_printer" msgid="7388760939873368698">"ପ୍ରିଣ୍ଟର୍‍ ଚୟନ କରନ୍ତୁ"</string>
     <string name="print_forget_printer" msgid="5035287497291910766">"ପ୍ରିଣ୍ଟର୍‍ ଭୁଲିଯାଆନ୍ତୁ"</string>
-    <!-- no translation found for print_search_result_count_utterance (6997663738361080868) -->
+    <plurals name="print_search_result_count_utterance" formatted="false" msgid="6997663738361080868">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g>ଟି ପ୍ରିଣ୍ଟର୍‍ ମିଳିଲା</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$s</xliff:g>ଟି ପ୍ରିଣ୍ଟର୍‍ ମିଳିଲା</item>
+    </plurals>
     <!-- no translation found for printer_extended_description_template (1366699227703381874) -->
     <skip />
     <!-- no translation found for printer_info_desc (7181988788991581654) -->
