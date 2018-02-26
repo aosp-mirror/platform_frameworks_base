@@ -158,6 +158,10 @@ public final class JobSchedulerService extends com.android.server.SystemService
     static final int MSG_CHECK_JOB = 1;
     static final int MSG_STOP_JOB = 2;
     static final int MSG_CHECK_JOB_GREEDY = 3;
+    static final int MSG_UID_STATE_CHANGED = 4;
+    static final int MSG_UID_GONE = 5;
+    static final int MSG_UID_ACTIVE = 6;
+    static final int MSG_UID_IDLE = 7;
 
     /**
      * Track Services that have currently active or pending jobs. The index is provided by
@@ -735,32 +739,19 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
     final private IUidObserver mUidObserver = new IUidObserver.Stub() {
         @Override public void onUidStateChanged(int uid, int procState, long procStateSeq) {
-            updateUidState(uid, procState);
+            mHandler.obtainMessage(MSG_UID_STATE_CHANGED, uid, procState).sendToTarget();
         }
 
         @Override public void onUidGone(int uid, boolean disabled) {
-            updateUidState(uid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
-            if (disabled) {
-                cancelJobsForUid(uid, "uid gone");
-            }
-            synchronized (mLock) {
-                mDeviceIdleJobsController.setUidActiveLocked(uid, false);
-            }
+            mHandler.obtainMessage(MSG_UID_GONE, uid, disabled ? 1 : 0).sendToTarget();
         }
 
         @Override public void onUidActive(int uid) throws RemoteException {
-            synchronized (mLock) {
-                mDeviceIdleJobsController.setUidActiveLocked(uid, true);
-            }
+            mHandler.obtainMessage(MSG_UID_ACTIVE, uid, 0).sendToTarget();
         }
 
         @Override public void onUidIdle(int uid, boolean disabled) {
-            if (disabled) {
-                cancelJobsForUid(uid, "app uid idle");
-            }
-            synchronized (mLock) {
-                mDeviceIdleJobsController.setUidActiveLocked(uid, false);
-            }
+            mHandler.obtainMessage(MSG_UID_IDLE, uid, disabled ? 1 : 0).sendToTarget();
         }
 
         @Override public void onUidCachedChanged(int uid, boolean cached) {
@@ -1557,6 +1548,44 @@ public final class JobSchedulerService extends com.android.server.SystemService
                         cancelJobImplLocked((JobStatus) message.obj, null,
                                 "app no longer allowed to run");
                         break;
+
+                    case MSG_UID_STATE_CHANGED: {
+                        final int uid = message.arg1;
+                        final int procState = message.arg2;
+                        updateUidState(uid, procState);
+                        break;
+                    }
+                    case MSG_UID_GONE: {
+                        final int uid = message.arg1;
+                        final boolean disabled = message.arg2 != 0;
+                        updateUidState(uid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
+                        if (disabled) {
+                            cancelJobsForUid(uid, "uid gone");
+                        }
+                        synchronized (mLock) {
+                            mDeviceIdleJobsController.setUidActiveLocked(uid, false);
+                        }
+                        break;
+                    }
+                    case MSG_UID_ACTIVE: {
+                        final int uid = message.arg1;
+                        synchronized (mLock) {
+                            mDeviceIdleJobsController.setUidActiveLocked(uid, true);
+                        }
+                        break;
+                    }
+                    case MSG_UID_IDLE: {
+                        final int uid = message.arg1;
+                        final boolean disabled = message.arg2 != 0;
+                        if (disabled) {
+                            cancelJobsForUid(uid, "app uid idle");
+                        }
+                        synchronized (mLock) {
+                            mDeviceIdleJobsController.setUidActiveLocked(uid, false);
+                        }
+                        break;
+                    }
+
                 }
                 maybeRunPendingJobsLocked();
                 // Don't remove JOB_EXPIRED in case one came along while processing the queue.
