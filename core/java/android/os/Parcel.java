@@ -2803,8 +2803,8 @@ public final class Parcel {
                     Class<?> parcelableClass = Class.forName(name, false /* initialize */,
                             parcelableClassLoader);
                     if (!Parcelable.class.isAssignableFrom(parcelableClass)) {
-                        throw new BadParcelableException("Parcelable protocol requires that the "
-                                + "class implements Parcelable");
+                        throw new BadParcelableException("Parcelable protocol requires subclassing "
+                                + "from Parcelable on class " + name);
                     }
                     Field f = parcelableClass.getField("CREATOR");
                     if ((f.getModifiers() & Modifier.STATIC) == 0) {

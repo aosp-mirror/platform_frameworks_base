@@ -13029,6 +13029,22 @@ public class ActivityManagerService extends IActivityManager.Stub
         return mSleeping;
     }
 
+    void reportGlobalUsageEventLocked(int event) {
+        mUsageStatsService.reportEvent("android", mUserController.getCurrentUserId(), event);
+        int[] profiles = mUserController.getCurrentProfileIds();
+        if (profiles != null) {
+            for (int i = profiles.length - 1; i >= 0; i--) {
+                mUsageStatsService.reportEvent((String)null, profiles[i], event);
+            }
+        }
+    }
+
+    void reportCurWakefulnessUsageEventLocked() {
+        reportGlobalUsageEventLocked(mWakefulness == PowerManagerInternal.WAKEFULNESS_AWAKE
+                ? UsageEvents.Event.SCREEN_INTERACTIVE
+                : UsageEvents.Event.SCREEN_NON_INTERACTIVE);
+    }
+
     void onWakefulnessChanged(int wakefulness) {
         synchronized(this) {
             boolean wasAwake = mWakefulness == PowerManagerInternal.WAKEFULNESS_AWAKE;
@@ -13038,6 +13054,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (wasAwake != isAwake) {
                 // Also update state in a special way for running foreground services UI.
                 mServices.updateScreenStateLocked(isAwake);
+                reportCurWakefulnessUsageEventLocked();
                 mHandler.obtainMessage(DISPATCH_SCREEN_AWAKE_MSG, isAwake ? 1 : 0, 0)
                         .sendToTarget();
             }
