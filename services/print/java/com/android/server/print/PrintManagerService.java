@@ -718,7 +718,8 @@ public final class PrintManagerService extends SystemService {
         }
 
         private boolean isPrintingEnabled() {
-            return !mUserManager.hasUserRestriction(UserManager.DISALLOW_PRINTING);
+            return !mUserManager.hasUserRestriction(UserManager.DISALLOW_PRINTING,
+                    Binder.getCallingUserHandle());
         }
 
         private void dump(@NonNull DualDumpOutputStream dumpStream,
