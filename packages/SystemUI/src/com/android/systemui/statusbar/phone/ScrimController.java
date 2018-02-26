@@ -167,6 +167,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private Callback mCallback;
     private boolean mWallpaperSupportsAmbientMode;
     private boolean mScreenOn;
+    private float mNotificationDensity;
 
     // Scrim blanking callbacks
     private Choreographer.FrameCallback mPendingFrameCallback;
@@ -251,7 +252,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         mCurrentInFrontTint = state.getFrontTint();
         mCurrentBehindTint = state.getBehindTint();
         mCurrentInFrontAlpha = state.getFrontAlpha();
-        mCurrentBehindAlpha = state.getBehindAlpha();
+        mCurrentBehindAlpha = state.getBehindAlpha(mNotificationDensity);
         applyExpansionToAlpha();
 
         // Cancel blanking transitions that were pending before we requested a new state
@@ -396,12 +397,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             // Either darken of make the scrim transparent when you
             // pull down the shade
             float interpolatedFract = getInterpolatedFraction();
+            float alphaBehind = mState.getBehindAlpha(mNotificationDensity);
             if (mDarkenWhileDragging) {
-                mCurrentBehindAlpha = MathUtils.lerp(mScrimBehindAlphaUnlocking,
-                        mScrimBehindAlphaKeyguard, interpolatedFract);
+                mCurrentBehindAlpha = MathUtils.lerp(mScrimBehindAlphaUnlocking, alphaBehind,
+                        interpolatedFract);
                 mCurrentInFrontAlpha = (1f - interpolatedFract) * SCRIM_IN_FRONT_ALPHA_LOCKED;
             } else {
-                mCurrentBehindAlpha = MathUtils.lerp(0 /* start */, mScrimBehindAlphaKeyguard,
+                mCurrentBehindAlpha = MathUtils.lerp(0 /* start */, alphaBehind,
                         interpolatedFract);
                 mCurrentInFrontAlpha = 0;
             }
@@ -415,15 +417,14 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     public void setNotificationCount(int notificationCount) {
         final float maxNotificationDensity = 3;
         float notificationDensity = Math.min(notificationCount / maxNotificationDensity, 1f);
-        float newAlpha = MathUtils.map(0, 1,
-                GRADIENT_SCRIM_ALPHA, GRADIENT_SCRIM_ALPHA_BUSY,
-                notificationDensity);
-        if (mScrimBehindAlphaKeyguard != newAlpha) {
-            mScrimBehindAlphaKeyguard = newAlpha;
+        if (mNotificationDensity == notificationDensity) {
+            return;
+        }
+        mNotificationDensity = notificationDensity;
 
-            if (mState == ScrimState.KEYGUARD || mState == ScrimState.BOUNCER) {
-                scheduleUpdate();
-            }
+        if (mState == ScrimState.KEYGUARD) {
+            applyExpansionToAlpha();
+            scheduleUpdate();
         }
     }
 
