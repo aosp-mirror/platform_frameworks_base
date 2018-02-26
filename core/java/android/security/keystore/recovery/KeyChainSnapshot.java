@@ -290,7 +290,6 @@ public final class KeyChainSnapshot implements Parcelable {
                     "entryRecoveryData");
             Preconditions.checkNotNull(mInstance.mEncryptedRecoveryKeyBlob);
             Preconditions.checkNotNull(mInstance.mServerParams);
-            Preconditions.checkNotNull(mInstance.mPublicKey);
             return mInstance;
         }
     }
