@@ -302,7 +302,7 @@ public class BackupHandler extends Handler {
                     sets = transport.getAvailableRestoreSets();
                     // cache the result in the active session
                     synchronized (params.session) {
-                        params.session.mRestoreSets = sets;
+                        params.session.setRestoreSets(sets);
                     }
                     if (sets == null) {
                         EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);

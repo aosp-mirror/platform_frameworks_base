@@ -30,6 +30,7 @@ import static com.android.server.backup.internal.BackupHandler.MSG_BACKUP_RESTOR
 import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_OPERATION_TIMEOUT;
 import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_SESSION_TIMEOUT;
 
+import android.annotation.Nullable;
 import android.app.ApplicationThreadConstants;
 import android.app.IBackupAgent;
 import android.app.backup.BackupDataInput;
@@ -158,12 +159,18 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
     private final int mEphemeralOpToken;
 
-    // Invariant: mWakelock is already held, and this task is responsible for
-    // releasing it at the end of the restore operation.
-    public PerformUnifiedRestoreTask(BackupManagerService backupManagerService,
-            TransportClient transportClient, IRestoreObserver observer,
-            IBackupManagerMonitor monitor, long restoreSetToken, PackageInfo targetPackage,
-            int pmToken, boolean isFullSystemRestore, String[] filterSet,
+    // This task can assume that the wakelock is properly held for it and doesn't have to worry
+    // about releasing it.
+    public PerformUnifiedRestoreTask(
+            BackupManagerService backupManagerService,
+            TransportClient transportClient,
+            IRestoreObserver observer,
+            IBackupManagerMonitor monitor,
+            long restoreSetToken,
+            @Nullable PackageInfo targetPackage,
+            int pmToken,
+            boolean isFullSystemRestore,
+            @Nullable String[] filterSet,
             OnTaskFinishedListener listener) {
         this.backupManagerService = backupManagerService;
         mTransportManager = backupManagerService.getTransportManager();
@@ -336,7 +343,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
      *
      *   [ state change => FINAL ]
      *
-     * 7. t.finishRestore(), release wakelock, etc.
+     * 7. t.finishRestore(), call listeners, etc.
      *
      *
      */
