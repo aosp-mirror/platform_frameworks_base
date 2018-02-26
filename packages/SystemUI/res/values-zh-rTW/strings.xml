@@ -505,9 +505,9 @@
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"切換輸出裝置"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"螢幕已固定"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。按住 [返回] 按鈕和 [總覽] 按鈕即可取消固定。"</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。按住 [返回] 按鈕和主螢幕按鈕即可取消固定。"</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"這會讓應用程式顯示在螢幕上，直到取消固定為止。按住 [返回] 按鈕和主螢幕按鈕即可取消固定。"</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。按住 [總覽] 按鈕即可取消固定。"</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。按住主螢幕按鈕即可取消固定。"</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"這會讓應用程式顯示在螢幕上，直到取消固定為止。按住主螢幕按鈕即可取消固定。"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"如要取消固定這個螢幕畫面，請按住「返回」按鈕和「總覽」按鈕"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"如要取消固定這個螢幕畫面，請按住「返回」按鈕和主螢幕按鈕"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"知道了"</string>
@@ -537,6 +537,12 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s。輕觸即可設為震動。"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s。輕觸即可設為靜音。"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"「%s」音量控制項"</string>
+    <!-- no translation found for volume_dialog_ringer_guidance_vibrate (8902050240801159042) -->
+    <skip />
+    <!-- no translation found for volume_dialog_ringer_guidance_silent (2128975224280276122) -->
+    <skip />
+    <!-- no translation found for volume_dialog_ringer_guidance_ring (6144469689490528338) -->
+    <skip />
     <string name="output_title" msgid="5355078100792942802">"媒體輸出"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"通話輸出"</string>
     <string name="output_none_found" msgid="5544982839808921091">"找不到裝置"</string>

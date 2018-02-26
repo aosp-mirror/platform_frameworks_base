@@ -537,6 +537,12 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s। ভাইব্রেট করতে ট্যাপ করুন।"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s। নিঃশব্দ করতে ট্যাপ করুন।"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s ভলিউম নিয়ন্ত্রণ"</string>
+    <!-- no translation found for volume_dialog_ringer_guidance_vibrate (8902050240801159042) -->
+    <skip />
+    <!-- no translation found for volume_dialog_ringer_guidance_silent (2128975224280276122) -->
+    <skip />
+    <!-- no translation found for volume_dialog_ringer_guidance_ring (6144469689490528338) -->
+    <skip />
     <string name="output_title" msgid="5355078100792942802">"মিডিয়া আউটপুট"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"ফোন কল আউটপুট"</string>
     <string name="output_none_found" msgid="5544982839808921091">"কোনও ডিভাইস খুঁজে পাওয়া যায়নি"</string>
