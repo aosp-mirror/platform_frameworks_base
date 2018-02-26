@@ -19,6 +19,7 @@ package android.security.keystore.recovery;
 import android.annotation.SystemApi;
 
 import java.security.GeneralSecurityException;
+
 /**
  * An error thrown when something went wrong internally in the recovery service.
  *
