@@ -580,6 +580,8 @@ public final class UiAutomation {
         // Execute the command *without* the lock being held.
         command.run();
 
+        List<AccessibilityEvent> receivedEvents = new ArrayList<>();
+
         // Acquire the lock and wait for the event.
         try {
             // Wait for the event.
@@ -600,14 +602,14 @@ public final class UiAutomation {
                     if (filter.accept(event)) {
                         return event;
                     }
-                    event.recycle();
+                    receivedEvents.add(event);
                 }
                 // Check if timed out and if not wait.
                 final long elapsedTimeMillis = SystemClock.uptimeMillis() - startTimeMillis;
                 final long remainingTimeMillis = timeoutMillis - elapsedTimeMillis;
                 if (remainingTimeMillis <= 0) {
                     throw new TimeoutException("Expected event not received within: "
-                            + timeoutMillis + " ms.");
+                            + timeoutMillis + " ms among: " + receivedEvents);
                 }
                 synchronized (mLock) {
                     if (mEventQueue.isEmpty()) {
@@ -620,6 +622,11 @@ public final class UiAutomation {
                 }
             }
         } finally {
+            int size = receivedEvents.size();
+            for (int i = 0; i < size; i++) {
+                receivedEvents.get(i).recycle();
+            }
+
             synchronized (mLock) {
                 mWaitingForEventDelivery = false;
                 mEventQueue.clear();
