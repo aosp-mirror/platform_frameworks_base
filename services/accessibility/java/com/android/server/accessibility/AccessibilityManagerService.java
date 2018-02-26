@@ -3300,7 +3300,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         if (mAccessibilityFocusedWindowId != windowId) {
                             mMainHandler.sendMessage(obtainMessage(
                                     AccessibilityManagerService::clearAccessibilityFocus,
-                                    AccessibilityManagerService.this, 0));
+                                    AccessibilityManagerService.this,
+                                    box(mAccessibilityFocusedWindowId)));
                             mSecurityPolicy.setAccessibilityFocusedWindowLocked(windowId);
                             mAccessibilityFocusNodeId = nodeId;
                         }
