@@ -70,12 +70,12 @@ import com.android.internal.app.IAppOpsService;
 import com.android.server.AppStateTracker.Listener;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -191,6 +191,9 @@ public class AppStateTrackerTest {
 
     private final HashMap<String, Integer> mGlobalSettings = new HashMap<>();
 
+    private Answer<List<PackageOps>> mGetPackagesForOps =
+            inv -> new ArrayList<PackageOps>();
+
     @Before
     public void setUp() {
         mMainHandler = new Handler(Looper.getMainLooper());
@@ -230,7 +233,7 @@ public class AppStateTrackerTest {
                 .thenAnswer(inv -> getPowerSaveState());
         when(mMockAppOpsManager.getPackagesForOps(
                 any(int[].class)
-                )).thenAnswer(inv -> new ArrayList<AppOpsManager.PackageOps>());
+                )).thenAnswer(mGetPackagesForOps);
 
         mMockContentResolver = new MockContentResolver();
         when(mMockContext.getContentResolver()).thenReturn(mMockContentResolver);
@@ -661,7 +664,6 @@ public class AppStateTrackerTest {
         areRestrictedWithExemption(instance, UID_2, PACKAGE_2, NONE);
     }
 
-    @Ignore("b/73792882")
     @Test
     public void loadPersistedAppOps() throws Exception {
         final AppStateTrackerTestable instance = newInstance();
@@ -705,6 +707,13 @@ public class AppStateTrackerTest {
                 AppOpsManager.MODE_IGNORED, 0, 0, 0, 0, null));
 
         ops.add(new PackageOps(PACKAGE_3, UID_10_3, entries));
+
+        mGetPackagesForOps = inv -> {
+            final int[] arg = (int[]) inv.getArgument(0);
+            assertEquals(1, arg.length);
+            assertEquals(AppOpsManager.OP_RUN_ANY_IN_BACKGROUND, arg[0]);
+            return ops;
+        };
 
         callStart(instance);
 
