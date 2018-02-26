@@ -398,6 +398,17 @@ public class AccessibilityShortcutControllerTest {
     }
 
     @Test
+    public void testOnAccessibilityShortcut_forServiceWithNoSummary_doesNotCrash()
+            throws Exception {
+        configureShortcutEnabled(ENABLED_EXCEPT_LOCK_SCREEN);
+        configureValidShortcutService();
+        when(mServiceInfo.loadSummary(any())).thenReturn(null);
+        Settings.Secure.putInt(mContentResolver, ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 1);
+        getController().performAccessibilityShortcut();
+        verify(mAccessibilityManagerService).performAccessibilityShortcut();
+    }
+
+    @Test
     public void testOnAccessibilityShortcut_forFrameworkFeature_callsServiceWithNoToast()
             throws Exception {
         configureShortcutEnabled(ENABLED_EXCEPT_LOCK_SCREEN);
