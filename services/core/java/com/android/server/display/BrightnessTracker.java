@@ -333,8 +333,16 @@ public class BrightnessTracker {
 
         try {
             final ActivityManager.StackInfo focusedStack = mInjector.getFocusedStack();
-            builder.setUserId(focusedStack.userId);
-            builder.setPackageName(focusedStack.topActivity.getPackageName());
+            if (focusedStack != null && focusedStack.topActivity != null) {
+                builder.setUserId(focusedStack.userId);
+                builder.setPackageName(focusedStack.topActivity.getPackageName());
+            } else {
+                // Ignore the event because we can't determine user / package.
+                if (DEBUG) {
+                    Slog.d(TAG, "Ignoring event due to null focusedStack.");
+                }
+                return;
+            }
         } catch (RemoteException e) {
             // Really shouldn't be possible.
             return;
