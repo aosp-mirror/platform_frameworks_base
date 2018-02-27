@@ -77,6 +77,7 @@ public class StatusBarIconList {
     }
 
     public void dump(PrintWriter pw) {
+        pw.println("StatusBarIconList state:");
         final int N = mSlots.size();
         pw.println("  icon slots: " + N);
         for (int i=0; i<N; i++) {

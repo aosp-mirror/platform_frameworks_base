@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-/**
- * A container for Status bar system icons. Limits the number of system icons and handles overflow
- * similar to NotificationIconController. Can be used to layout nested StatusIconContainers
- *
- * Children are expected to be of type StatusBarIconView.
- */
 package com.android.systemui.statusbar.phone;
 
 import android.annotation.Nullable;
@@ -33,12 +27,22 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.stack.ViewState;
 
+/**
+ * A container for Status bar system icons. Limits the number of system icons and handles overflow
+ * similar to NotificationIconController. Can be used to layout nested StatusIconContainers
+ *
+ * Children are expected to be of type StatusBarIconView.
+ */
 public class StatusIconContainer extends AlphaOptimizedLinearLayout {
 
     private static final String TAG = "StatusIconContainer";
     private static final boolean DEBUG = false;
     private static final int MAX_ICONS = 5;
     private static final int MAX_DOTS = 3;
+
+    public StatusIconContainer(Context context) {
+        this(context, null);
+    }
 
     public StatusIconContainer(Context context, AttributeSet attrs) {
         super(context, attrs);

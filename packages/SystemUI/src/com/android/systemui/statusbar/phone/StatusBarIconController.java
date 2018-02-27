@@ -18,6 +18,7 @@ import static android.app.StatusBarManager.DISABLE2_SYSTEM_ICONS;
 import static android.app.StatusBarManager.DISABLE_NONE;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -29,6 +30,7 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.systemui.DemoMode;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.StatusBarIconView;
@@ -109,6 +111,20 @@ public interface StatusBarIconController {
             super.onSetIcon(viewIndex, icon);
             mDarkIconDispatcher.applyDark((ImageView) mGroup.getChildAt(viewIndex));
         }
+
+        @Override
+        protected DemoStatusIcons createDemoStatusIcons() {
+            DemoStatusIcons icons = super.createDemoStatusIcons();
+            mDarkIconDispatcher.addDarkReceiver(icons);
+
+            return icons;
+        }
+
+        @Override
+        protected void exitDemoMode() {
+            mDarkIconDispatcher.removeDarkReceiver(mDemoStatusIcons);
+            super.exitDemoMode();
+        }
     }
 
     public static class TintedIconManager extends IconManager {
@@ -134,15 +150,28 @@ public interface StatusBarIconController {
                 }
             }
         }
+
+        @Override
+        protected DemoStatusIcons createDemoStatusIcons() {
+            DemoStatusIcons icons = super.createDemoStatusIcons();
+            icons.setColor(mColor);
+            return icons;
+        }
     }
 
     /**
      * Turns info from StatusBarIconController into ImageViews in a ViewGroup.
      */
-    public static class IconManager {
+    public static class IconManager implements DemoMode {
         protected final ViewGroup mGroup;
         protected final Context mContext;
         protected final int mIconSize;
+        // Whether or not these icons show up in dumpsys
+        protected boolean mShouldLog = false;
+
+        // Enables SystemUI demo mode to take effect in this group
+        protected boolean mDemoable = true;
+        protected DemoStatusIcons mDemoStatusIcons;
 
         public IconManager(ViewGroup group) {
             mGroup = group;
@@ -157,6 +186,22 @@ public interface StatusBarIconController {
                 // In case we miss the first onAttachedToWindow event
                 tracker.onViewAttachedToWindow(mGroup);
             }
+        }
+
+        public boolean isDemoable() {
+            return mDemoable;
+        }
+
+        public void setIsDemoable(boolean demoable) {
+            mDemoable = demoable;
+        }
+
+        public void setShouldLog(boolean should) {
+            mShouldLog = should;
+        }
+
+        public boolean shouldLog() {
+            return mShouldLog;
         }
 
         protected void onIconAdded(int index, String slot, boolean blocked,
@@ -217,6 +262,32 @@ public interface StatusBarIconController {
         public void onSetIcon(int viewIndex, StatusBarIcon icon) {
             StatusBarIconView view = (StatusBarIconView) mGroup.getChildAt(viewIndex);
             view.set(icon);
+        }
+
+        @Override
+        public void dispatchDemoCommand(String command, Bundle args) {
+            if (!mDemoable) {
+                return;
+            }
+
+            if (mDemoStatusIcons != null && command.equals(COMMAND_EXIT)) {
+                mDemoStatusIcons.dispatchDemoCommand(command, args);
+                exitDemoMode();
+            } else {
+                if (mDemoStatusIcons == null) {
+                    mDemoStatusIcons = createDemoStatusIcons();
+                }
+                mDemoStatusIcons.dispatchDemoCommand(command, args);
+            }
+        }
+
+        protected void exitDemoMode() {
+            mDemoStatusIcons.remove();
+            mDemoStatusIcons = null;
+        }
+
+        protected DemoStatusIcons createDemoStatusIcons() {
+            return new DemoStatusIcons((LinearLayout) mGroup, mIconSize);
         }
     }
 }
