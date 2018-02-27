@@ -130,13 +130,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     private final ArrayList<TaskStack> mTmpStackList = new ArrayList();
     private final ArrayList<Integer> mTmpStackIds = new ArrayList<>();
 
-    // State for the RemoteSurfaceTrace system used in testing. If this is enabled SurfaceControl
-    // instances will be replaced with an instance that writes a binary representation of all
-    // commands to mSurfaceTraceFd.
-    boolean mSurfaceTraceEnabled;
-    ParcelFileDescriptor mSurfaceTraceFd;
-    RemoteEventTrace mRemoteEventTrace;
-
     final WallpaperController mWallpaperController;
 
     private final Handler mHandler;
@@ -1011,30 +1004,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                 default:
                     break;
             }
-        }
-    }
-
-    void enableSurfaceTrace(ParcelFileDescriptor pfd) {
-        final FileDescriptor fd = pfd.getFileDescriptor();
-        if (mSurfaceTraceEnabled) {
-            disableSurfaceTrace();
-        }
-        mSurfaceTraceEnabled = true;
-        mRemoteEventTrace = new RemoteEventTrace(mService, fd);
-        mSurfaceTraceFd = pfd;
-        for (int displayNdx = mChildren.size() - 1; displayNdx >= 0; --displayNdx) {
-            final DisplayContent dc = mChildren.get(displayNdx);
-            dc.enableSurfaceTrace(fd);
-        }
-    }
-
-    void disableSurfaceTrace() {
-        mSurfaceTraceEnabled = false;
-        mRemoteEventTrace = null;
-        mSurfaceTraceFd = null;
-        for (int displayNdx = mChildren.size() - 1; displayNdx >= 0; --displayNdx) {
-            final DisplayContent dc = mChildren.get(displayNdx);
-            dc.disableSurfaceTrace();
         }
     }
 

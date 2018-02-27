@@ -74,8 +74,6 @@ public class WindowManagerShellCommand extends ShellCommand {
                     return runSetScreenCapture(pw);
                 case "dismiss-keyguard":
                     return runDismissKeyguard(pw);
-                case "surface-trace":
-                    return runSurfaceTrace(pw);
                 case "tracing":
                     // XXX this should probably be changed to use openFileForSystem() to create
                     // the output trace file, so the shell gets the correct semantics for where
@@ -235,46 +233,6 @@ public class WindowManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int runSurfaceTrace(PrintWriter pw) throws RemoteException {
-        final ParcelFileDescriptor pfd;
-        try {
-            pfd = ParcelFileDescriptor.dup(getOutFileDescriptor());
-        } catch (IOException e) {
-            getErrPrintWriter().println("Unable to dup output stream: " + e.getMessage());
-            return -1;
-        }
-        mInternal.enableSurfaceTrace(pfd);
-
-        // Read input until an explicit quit command is sent or the stream is closed (meaning
-        // the user killed the command).
-        try {
-            InputStream input = getRawInputStream();
-            InputStreamReader converter = new InputStreamReader(input);
-            BufferedReader in = new BufferedReader(converter);
-            String line;
-
-            while ((line = in.readLine()) != null) {
-                if (line.length() <= 0) {
-                    // no-op
-                } else if ("q".equals(line) || "quit".equals(line)) {
-                    break;
-                } else {
-                    pw.println("Invalid command: " + line);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace(pw);
-        } finally {
-            mInternal.disableSurfaceTrace();
-            try {
-                pfd.close();
-            } catch (IOException e) {
-            }
-        }
-
-        return 0;
-    }
-
     private int parseDimension(String s) throws NumberFormatException {
         if (s.endsWith("px")) {
             return Integer.parseInt(s.substring(0, s.length() - 2));
@@ -311,8 +269,6 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("    Enable or disable screen capture.");
         pw.println("  dismiss-keyguard");
         pw.println("    Dismiss the keyguard, prompting user for auth if necessary.");
-        pw.println("  surface-trace");
-        pw.println("    Log surface commands to stdout in a binary format.");
         if (!IS_USER) {
             pw.println("  tracing (start | stop)");
             pw.println("    Start or stop window tracing.");
