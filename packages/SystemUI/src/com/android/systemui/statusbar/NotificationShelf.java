@@ -698,7 +698,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         if (!hasOverflow) {
             // we have to ensure that adding the low priority notification won't lead to an
             // overflow
-            collapsedPadding -= (1.0f + OVERFLOW_EARLY_AMOUNT) * mCollapsedIcons.getIconSize();
+            collapsedPadding -= mCollapsedIcons.getNoOverflowExtraPadding();
         } else {
             // Partial overflow padding will fill enough space to add extra dots
             collapsedPadding -= mCollapsedIcons.getPartialOverflowExtraPadding();

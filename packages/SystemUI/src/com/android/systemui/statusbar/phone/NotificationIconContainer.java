@@ -56,6 +56,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private static final int NO_VALUE = Integer.MIN_VALUE;
     private static final String TAG = "NotificationIconContainer";
     private static final boolean DEBUG = false;
+    private static final boolean DEBUG_OVERFLOW = false;
     private static final int CANNED_ANIMATION_DURATION = 100;
     private static final AnimationProperties DOT_ANIMATION_PROPERTIES = new AnimationProperties() {
         private AnimationFilter mAnimationFilter = new AnimationFilter().animateX();
@@ -107,6 +108,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private final HashMap<View, IconState> mIconStates = new HashMap<>();
     private int mDotPadding;
     private int mStaticDotRadius;
+    private int mStaticDotDiameter;
     private int mActualLayoutWidth = NO_VALUE;
     private float mActualPaddingEnd = NO_VALUE;
     private float mActualPaddingStart = NO_VALUE;
@@ -122,17 +124,21 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private ArrayMap<String, ArrayList<StatusBarIcon>> mReplacingIcons;
     // Keep track of the last visible icon so collapsed container can report on its location
     private IconState mLastVisibleIconState;
+    private float mVisualOverflowStart;
+    // Keep track of overflow in range [0, 3]
+    private int mNumDots;
 
 
     public NotificationIconContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
         initDimens();
-        setWillNotDraw(!DEBUG);
+        setWillNotDraw(!(DEBUG || DEBUG_OVERFLOW));
     }
 
     private void initDimens() {
         mDotPadding = getResources().getDimensionPixelSize(R.dimen.overflow_icon_dot_padding);
         mStaticDotRadius = getResources().getDimensionPixelSize(R.dimen.overflow_dot_radius);
+        mStaticDotDiameter = 2 * mStaticDotRadius;
     }
 
     @Override
@@ -142,6 +148,30 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         paint.setColor(Color.RED);
         paint.setStyle(Paint.Style.STROKE);
         canvas.drawRect(getActualPaddingStart(), 0, getLayoutEnd(), getHeight(), paint);
+
+        if (DEBUG_OVERFLOW) {
+            if (mLastVisibleIconState == null) {
+                return;
+            }
+
+            int height = getHeight();
+            int end = getFinalTranslationX();
+
+            // Visualize the "end" of the layout
+            paint.setColor(Color.BLUE);
+            canvas.drawLine(end, 0, end, height, paint);
+
+            paint.setColor(Color.BLACK);
+            int lastIcon = (int) mLastVisibleIconState.xTranslation;
+            canvas.drawLine(lastIcon, 0, lastIcon, height, paint);
+
+            paint.setColor(Color.RED);
+            canvas.drawLine(mVisualOverflowStart, 0, mVisualOverflowStart, height, paint);
+
+            paint.setColor(Color.YELLOW);
+            float overflow = getMaxOverflowStart();
+            canvas.drawLine(overflow, 0, overflow, height, paint);
+        }
     }
 
     @Override
@@ -282,7 +312,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     }
 
     /**
-     * Calulate the horizontal translations for each notification based on how much the icons
+     * Calculate the horizontal translations for each notification based on how much the icons
      * are inserted into the notification container.
      * If this is not a whole number, the fraction means by how much the icon is appearing.
      */
@@ -293,9 +323,9 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         int maxVisibleIcons = mDark ? MAX_VISIBLE_ICONS_WHEN_DARK :
                     mIsStaticLayout ? MAX_STATIC_ICONS : childCount;
         float layoutEnd = getLayoutEnd();
-        float overflowStart = layoutEnd - mIconSize * (2 + OVERFLOW_EARLY_AMOUNT);
+        float overflowStart = getMaxOverflowStart();
+        mVisualOverflowStart = 0;
         boolean hasAmbient = mSpeedBumpIndex != -1 && mSpeedBumpIndex < getChildCount();
-        float visualOverflowStart = 0;
         for (int i = 0; i < childCount; i++) {
             View view = getChildAt(i);
             IconState iconState = mIconStates.get(view);
@@ -310,45 +340,40 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                 noOverflowAfter = noOverflowAfter && !hasAmbient && !forceOverflow;
             }
             iconState.visibleState = StatusBarIconView.STATE_ICON;
-            if (firstOverflowIndex == -1 && (forceOverflow
-                    || (translationX >= (noOverflowAfter ? layoutEnd - mIconSize : overflowStart)))) {
+
+            boolean isOverflowing =
+                    (translationX >= (noOverflowAfter ? layoutEnd - mIconSize : overflowStart));
+            if (firstOverflowIndex == -1 && (forceOverflow || isOverflowing)) {
                 firstOverflowIndex = noOverflowAfter && !forceOverflow ? i - 1 : i;
-                int totalDotLength = mStaticDotRadius * 6 + 2 * mDotPadding;
-                visualOverflowStart = overflowStart + mIconSize * (1 + OVERFLOW_EARLY_AMOUNT)
-                        - totalDotLength / 2
-                        - mIconSize * 0.5f + mStaticDotRadius;
+                mVisualOverflowStart = layoutEnd - mIconSize
+                        - 2 * (mStaticDotDiameter + mDotPadding);
                 if (forceOverflow) {
-                    visualOverflowStart = Math.min(translationX, visualOverflowStart
-                            + mStaticDotRadius * 2 + mDotPadding);
-                } else {
-                    visualOverflowStart += (translationX - overflowStart) / mIconSize
-                            * (mStaticDotRadius * 2 + mDotPadding);
+                    mVisualOverflowStart = Math.min(translationX, mVisualOverflowStart);
                 }
             }
             translationX += iconState.iconAppearAmount * view.getWidth() * drawingScale;
         }
+        mNumDots = 0;
         if (firstOverflowIndex != -1) {
-            int numDots = 1;
-            translationX = visualOverflowStart;
+            translationX = mVisualOverflowStart;
             for (int i = firstOverflowIndex; i < childCount; i++) {
                 View view = getChildAt(i);
                 IconState iconState = mIconStates.get(view);
                 int dotWidth = mStaticDotRadius * 2 + mDotPadding;
                 iconState.xTranslation = translationX;
-                if (numDots <= MAX_DOTS) {
-                    if (numDots == 1 && iconState.iconAppearAmount < 0.8f) {
+                if (mNumDots < MAX_DOTS) {
+                    if (mNumDots == 0 && iconState.iconAppearAmount < 0.8f) {
                         iconState.visibleState = StatusBarIconView.STATE_ICON;
-                        numDots--;
                     } else {
                         iconState.visibleState = StatusBarIconView.STATE_DOT;
+                        mNumDots++;
                     }
-                    translationX += (numDots == MAX_DOTS ? MAX_DOTS * dotWidth : dotWidth)
+                    translationX += (mNumDots == MAX_DOTS ? MAX_DOTS * dotWidth : dotWidth)
                             * iconState.iconAppearAmount;
                     mLastVisibleIconState = iconState;
                 } else {
                     iconState.visibleState = StatusBarIconView.STATE_HIDDEN;
                 }
-                numDots++;
             }
         } else if (childCount > 0) {
             View lastChild = getChildAt(childCount - 1);
@@ -360,7 +385,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             if (firstOverflowIndex != -1) {
                 // If we have an overflow, only count those half for centering because the dots
                 // don't have a lot of visual weight.
-                float deltaIgnoringOverflow = (getLayoutEnd() - visualOverflowStart) / 2;
+                float deltaIgnoringOverflow = (getLayoutEnd() - mVisualOverflowStart) / 2;
                 delta = (deltaIgnoringOverflow + delta) / 2;
             }
             for (int i = 0; i < childCount; i++) {
@@ -440,7 +465,13 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             return 0;
         }
 
-        return (int) (mLastVisibleIconState.xTranslation + mIconSize * (1 + OVERFLOW_EARLY_AMOUNT));
+        int translation = (int) (mLastVisibleIconState.xTranslation + mIconSize);
+        // There's a chance that last translation goes beyond the edge maybe
+        return Math.min(getWidth(), translation);
+    }
+
+    private float getMaxOverflowStart() {
+        return getLayoutEnd() - mIconSize * (2 + OVERFLOW_EARLY_AMOUNT);
     }
 
     public void setChangingViewPositions(boolean changingViewPositions) {
@@ -471,12 +502,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     }
 
     public boolean hasOverflow() {
-        if (mIsStaticLayout) {
-            return getChildCount() > MAX_STATIC_ICONS;
-        }
-
-        float width = (getChildCount() + OVERFLOW_EARLY_AMOUNT) * mIconSize;
-        return width - (getWidth() - getActualPaddingStart() - getActualPaddingEnd()) > 0;
+        return mNumDots > 0;
     }
 
     /**
@@ -486,12 +512,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
      * This method has no meaning for non-static containers
      */
     public boolean hasPartialOverflow() {
-        if (mIsStaticLayout) {
-            int count = getChildCount();
-            return count > MAX_STATIC_ICONS && count <= MAX_STATIC_ICONS + MAX_DOTS;
-        }
-
-        return false;
+        return mNumDots > 0 && mNumDots < MAX_DOTS;
     }
 
     /**
@@ -504,7 +525,30 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             return 0;
         }
 
-        return (MAX_STATIC_ICONS + MAX_DOTS - getChildCount()) * (mStaticDotRadius + mDotPadding);
+        int partialOverflowAmount = (MAX_DOTS - mNumDots) * (mStaticDotRadius * 2 + mDotPadding);
+
+        int adjustedWidth = getFinalTranslationX() + partialOverflowAmount;
+        // In case we actually give too much padding...
+        if (adjustedWidth > getWidth()) {
+            partialOverflowAmount = getWidth() - getFinalTranslationX();
+        }
+
+        return partialOverflowAmount;
+    }
+
+    // Give some extra room for btw notifications if we can
+    public int getNoOverflowExtraPadding() {
+        if (mNumDots != 0) {
+            return 0;
+        }
+
+        int collapsedPadding = (int) ((1.0f + OVERFLOW_EARLY_AMOUNT) * getIconSize());
+
+        if (collapsedPadding + getFinalTranslationX() > getWidth()) {
+            collapsedPadding = getWidth() - getFinalTranslationX();
+        }
+
+        return collapsedPadding;
     }
 
     public int getIconSize() {
