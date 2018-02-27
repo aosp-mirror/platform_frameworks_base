@@ -15,24 +15,30 @@
 package com.android.systemui.qs;
 
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
-import static android.app.StatusBarManager.DISABLE_NONE;
+import static com.android.systemui.keyguard.KeyguardSliceProvider.formatNextAlarm;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.app.AlarmManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.provider.AlarmClock;
 import android.support.annotation.VisibleForTesting;
+import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.RelativeLayout;
-import android.widget.TextClock;
+import android.widget.TextView;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.Dependency;
+import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.R.id;
 import com.android.systemui.SysUiServiceProvider;
@@ -43,11 +49,23 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.statusbar.policy.NextAlarmController;
 
-public class QuickStatusBarHeader extends RelativeLayout
-        implements CommandQueue.Callbacks, View.OnClickListener {
+/**
+ * View that contains the top-most bits of the screen (primarily the status bar with date, time, and
+ * battery) and also contains the {@link QuickQSPanel} along with some of the panel's inner
+ * contents.
+ */
+public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue.Callbacks,
+        View.OnClickListener, NextAlarmController.NextAlarmChangeCallback {
 
-    private ActivityStarter mActivityStarter;
+    /** Delay for auto fading out the long press tooltip after it's fully visible (in ms). */
+    private static final long AUTO_FADE_OUT_DELAY_MS = DateUtils.SECOND_IN_MILLIS * 6;
+    private static final int FADE_ANIMATION_DURATION_MS = 300;
+    private static final int TOOLTIP_NOT_YET_SHOWN_COUNT = 0;
+    public static final int MAX_TOOLTIP_SHOWN_COUNT = 3;
+
+    private final Handler mHandler = new Handler();
 
     private QSPanel mQsPanel;
 
@@ -58,20 +76,39 @@ public class QuickStatusBarHeader extends RelativeLayout
     protected QuickQSPanel mHeaderQsPanel;
     protected QSTileHost mHost;
     private TintedIconManager mIconManager;
-    private TouchAnimator mAlphaAnimator;
+    private TouchAnimator mStatusIconsAlphaAnimator;
+    private TouchAnimator mHeaderTextContainerAlphaAnimator;
 
     private View mQuickQsStatusIcons;
-
     private View mDate;
+    private View mHeaderTextContainerView;
+    /** View corresponding to the next alarm info (including the icon). */
+    private View mNextAlarmView;
+    /** Tooltip for educating users that they can long press on icons to see more details. */
+    private View mLongPressTooltipView;
+    /** {@link TextView} containing the actual text indicating when the next alarm will go off. */
+    private TextView mNextAlarmTextView;
+
+    private NextAlarmController mAlarmController;
+    private String mNextAlarmText;
+    /** Counts how many times the long press tooltip has been shown to the user. */
+    private int mShownCount;
+
+    /**
+     * Runnable for automatically fading out the long press tooltip (as if it were animating away).
+     */
+    private final Runnable mAutoFadeOutTooltipRunnable = () -> hideLongPressTooltip(false);
 
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        mAlarmController = Dependency.get(NextAlarmController.class);
+        mShownCount = getStoredShownCount();
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        Resources res = getResources();
 
         mHeaderQsPanel = findViewById(R.id.quick_qs_panel);
         mDate = findViewById(R.id.date);
@@ -79,8 +116,11 @@ public class QuickStatusBarHeader extends RelativeLayout
         mQuickQsStatusIcons = findViewById(R.id.quick_qs_status_icons);
         mIconManager = new TintedIconManager(findViewById(R.id.statusIcons));
 
-        // RenderThread is doing more harm than good when touching the header (to expand quick
-        // settings), so disable it for this view
+        // Views corresponding to the header info section (e.g. tooltip and next alarm).
+        mHeaderTextContainerView = findViewById(R.id.header_text_container);
+        mLongPressTooltipView = findViewById(R.id.long_press_tooltip);
+        mNextAlarmView = findViewById(R.id.next_alarm);
+        mNextAlarmTextView = findViewById(R.id.next_alarm_text);
 
         updateResources();
 
@@ -98,8 +138,6 @@ public class QuickStatusBarHeader extends RelativeLayout
 
         BatteryMeterView battery = findViewById(R.id.battery);
         battery.setForceShowPercent(true);
-
-        mActivityStarter = Dependency.get(ActivityStarter.class);
     }
 
     private void applyDarkness(int id, Rect tintArea, float intensity, int color) {
@@ -129,21 +167,26 @@ public class QuickStatusBarHeader extends RelativeLayout
     }
 
     private void updateResources() {
-        updateAlphaAnimator();
+        // Update height, especially due to landscape mode restricting space.
+        mHeaderTextContainerView.getLayoutParams().height =
+                mContext.getResources().getDimensionPixelSize(R.dimen.qs_header_tooltip_height);
+        mHeaderTextContainerView.setLayoutParams(mHeaderTextContainerView.getLayoutParams());
+
+        updateStatusIconAlphaAnimator();
+        updateHeaderTextContainerAlphaAnimator();
     }
 
-    private void updateAlphaAnimator() {
-        mAlphaAnimator = new TouchAnimator.Builder()
+    private void updateStatusIconAlphaAnimator() {
+        mStatusIconsAlphaAnimator = new TouchAnimator.Builder()
                 .addFloat(mQuickQsStatusIcons, "alpha", 1, 0)
                 .build();
     }
 
-    public int getCollapsedHeight() {
-        return getHeight();
-    }
-
-    public int getExpandedHeight() {
-        return getHeight();
+    private void updateHeaderTextContainerAlphaAnimator() {
+        mHeaderTextContainerAlphaAnimator = new TouchAnimator.Builder()
+                .addFloat(mHeaderTextContainerView, "alpha", 0, 1)
+                .setStartDelay(.5f)
+                .build();
     }
 
     public void setExpanded(boolean expanded) {
@@ -153,10 +196,47 @@ public class QuickStatusBarHeader extends RelativeLayout
         updateEverything();
     }
 
-    public void setExpansion(float headerExpansionFraction) {
-        if (mAlphaAnimator != null ) {
-            mAlphaAnimator.setPosition(headerExpansionFraction);
+    /**
+     * Animates the inner contents based on the given expansion details.
+     *
+     * @param isKeyguardShowing whether or not we're showing the keyguard (a.k.a. lockscreen)
+     * @param expansionFraction how much the QS panel is expanded/pulled out (up to 1f)
+     * @param panelTranslationY how much the panel has physically moved down vertically (required
+     *                          for keyguard animations only)
+     */
+    public void setExpansion(boolean isKeyguardShowing, float expansionFraction,
+                             float panelTranslationY) {
+        final float keyguardExpansionFraction = isKeyguardShowing ? 1f : expansionFraction;
+        if (mStatusIconsAlphaAnimator != null) {
+            mStatusIconsAlphaAnimator.setPosition(keyguardExpansionFraction);
         }
+
+        if (isKeyguardShowing) {
+            // If the keyguard is showing, we want to offset the text so that it comes in at the
+            // same time as the panel as it slides down.
+            mHeaderTextContainerView.setTranslationY(panelTranslationY);
+        } else {
+            mHeaderTextContainerView.setTranslationY(0f);
+        }
+
+        if (mHeaderTextContainerAlphaAnimator != null) {
+            mHeaderTextContainerAlphaAnimator.setPosition(keyguardExpansionFraction);
+        }
+
+        // Check the original expansion fraction - we don't want to show the tooltip until the
+        // panel is pulled all the way out.
+        if (expansionFraction == 1f) {
+            // QS is fully expanded, bring in the tooltip.
+            showLongPressTooltip();
+        }
+    }
+
+    /** Returns the latest stored tooltip shown count from SharedPreferences. */
+    private int getStoredShownCount() {
+        return Prefs.getInt(
+                mContext,
+                Prefs.Key.QS_LONG_PRESS_TOOLTIP_SHOWN_COUNT,
+                TOOLTIP_NOT_YET_SHOWN_COUNT);
     }
 
     @Override
@@ -191,6 +271,12 @@ public class QuickStatusBarHeader extends RelativeLayout
         }
         mHeaderQsPanel.setListening(listening);
         mListening = listening;
+
+        if (listening) {
+            mAlarmController.addCallback(this);
+        } else {
+            mAlarmController.removeCallback(this);
+        }
     }
 
     @Override
@@ -198,6 +284,125 @@ public class QuickStatusBarHeader extends RelativeLayout
         if(v == mDate){
             Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(new Intent(
                     AlarmClock.ACTION_SHOW_ALARMS),0);
+        }
+    }
+
+    @Override
+    public void onNextAlarmChanged(AlarmManager.AlarmClockInfo nextAlarm) {
+        mNextAlarmText = nextAlarm != null ? formatNextAlarm(mContext, nextAlarm) : null;
+        if (mNextAlarmText != null) {
+            hideLongPressTooltip(true /* shouldFadeInAlarmText */);
+        } else {
+            hideAlarmText();
+        }
+        updateHeaderTextContainerAlphaAnimator();
+    }
+
+    /**
+     * Animates in the long press tooltip (as long as the next alarm text isn't currently occupying
+     * the space).
+     */
+    public void showLongPressTooltip() {
+        // If we have alarm text to show, don't bother fading in the tooltip.
+        if (!TextUtils.isEmpty(mNextAlarmText)) {
+            return;
+        }
+
+        if (mShownCount < MAX_TOOLTIP_SHOWN_COUNT) {
+            mLongPressTooltipView.animate().cancel();
+            mLongPressTooltipView.setVisibility(View.VISIBLE);
+            mLongPressTooltipView.animate()
+                    .alpha(1f)
+                    .setDuration(FADE_ANIMATION_DURATION_MS)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            mHandler.postDelayed(
+                                    mAutoFadeOutTooltipRunnable, AUTO_FADE_OUT_DELAY_MS);
+                        }
+                    })
+                    .start();
+
+            // Increment and drop the shown count in prefs for the next time we're deciding to
+            // fade in the tooltip. We first sanity check that the tooltip count hasn't changed yet
+            // in prefs (say, from a long press).
+            if (getStoredShownCount() <= mShownCount) {
+                Prefs.putInt(mContext, Prefs.Key.QS_LONG_PRESS_TOOLTIP_SHOWN_COUNT, ++mShownCount);
+            }
+        }
+    }
+
+    /**
+     * Fades out the long press tooltip if it's partially visible - short circuits any running
+     * animation. Additionally has the ability to fade in the alarm info text.
+     *
+     * @param shouldShowAlarmText whether we should fade in the next alarm text
+     */
+    private void hideLongPressTooltip(boolean shouldShowAlarmText) {
+        mLongPressTooltipView.animate().cancel();
+        if (mLongPressTooltipView.getVisibility() == View.VISIBLE
+                && mLongPressTooltipView.getAlpha() != 0f) {
+            mHandler.removeCallbacks(mAutoFadeOutTooltipRunnable);
+            mLongPressTooltipView.animate()
+                    .alpha(0f)
+                    .setDuration(FADE_ANIMATION_DURATION_MS)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            mLongPressTooltipView.setVisibility(View.INVISIBLE);
+
+                            if (shouldShowAlarmText) {
+                                showAlarmText();
+                            }
+                        }
+                    })
+                    .start();
+        } else {
+            mLongPressTooltipView.setVisibility(View.INVISIBLE);
+
+            if (shouldShowAlarmText) {
+                showAlarmText();
+            }
+        }
+    }
+
+    /**
+     * Fades in the updated alarm text. Note that if there's already an alarm showing, this will
+     * immediately hide it and fade in the updated time.
+     */
+    private void showAlarmText() {
+        mNextAlarmView.setAlpha(0f);
+        mNextAlarmView.setVisibility(View.VISIBLE);
+        mNextAlarmTextView.setText(mNextAlarmText);
+
+        mNextAlarmView.animate()
+                .alpha(1f)
+                .setDuration(FADE_ANIMATION_DURATION_MS)
+                .start();
+    }
+
+    /**
+     * Fades out and hides the next alarm text. This also resets the text contents to null in
+     * preparation for the next alarm update.
+     */
+    private void hideAlarmText() {
+        if (mNextAlarmView.getVisibility() == View.VISIBLE) {
+            mNextAlarmView.animate()
+                    .alpha(0f)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            // Reset the alpha regardless of how the animation ends for the next
+                            // time we show this view/want to animate it.
+                            mNextAlarmView.setVisibility(View.INVISIBLE);
+                            mNextAlarmView.setAlpha(1f);
+                            mNextAlarmTextView.setText(null);
+                        }
+                    })
+                    .start();
+        } else {
+            // Next alarm view is already hidden, only need to clear the text.
+            mNextAlarmTextView.setText(null);
         }
     }
 

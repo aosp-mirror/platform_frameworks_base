@@ -20,7 +20,6 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Space;
 
@@ -123,7 +122,7 @@ public class QuickQSPanel extends QSPanel {
 
     @Override
     public void onTuningChanged(String key, String newValue) {
-        if (QS_SHOW_BRIGHTNESS.equals(key) || QS_SHOW_LONG_PRESS_TOOLTIP.equals(key)) {
+        if (QS_SHOW_BRIGHTNESS.equals(key)) {
             // No Brightness or Tooltip for you!
             super.onTuningChanged(key, "0");
         }
