@@ -22,6 +22,7 @@ import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_SESSI
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_GET_RESTORE_SETS;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_RESTORE;
 
+import android.annotation.Nullable;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IRestoreObserver;
 import android.app.backup.IRestoreSession;
@@ -53,13 +54,15 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
     private final TransportManager mTransportManager;
     private final String mTransportName;
     private final BackupManagerService mBackupManagerService;
-    private final String mPackageName;
+    @Nullable private final String mPackageName;
     public RestoreSet[] mRestoreSets = null;
     boolean mEnded = false;
     boolean mTimedOut = false;
 
-    public ActiveRestoreSession(BackupManagerService backupManagerService,
-            String packageName, String transportName) {
+    public ActiveRestoreSession(
+            BackupManagerService backupManagerService,
+            @Nullable String packageName,
+            String transportName) {
         mBackupManagerService = backupManagerService;
         mPackageName = packageName;
         mTransportManager = backupManagerService.getTransportManager();
@@ -358,6 +361,10 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
         } finally {
             Binder.restoreCallingIdentity(oldId);
         }
+    }
+
+    public void setRestoreSets(RestoreSet[] restoreSets) {
+        mRestoreSets = restoreSets;
     }
 
     /**

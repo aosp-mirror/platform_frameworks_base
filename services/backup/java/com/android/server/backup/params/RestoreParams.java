@@ -16,6 +16,7 @@
 
 package com.android.server.backup.params;
 
+import android.annotation.Nullable;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IRestoreObserver;
 import android.content.pm.PackageInfo;
@@ -28,10 +29,10 @@ public class RestoreParams {
     public final IRestoreObserver observer;
     public final IBackupManagerMonitor monitor;
     public final long token;
-    public final PackageInfo packageInfo;
+    @Nullable public final PackageInfo packageInfo;
     public final int pmToken; // in post-install restore, the PM's token for this transaction
     public final boolean isSystemRestore;
-    public final String[] filterSet;
+    @Nullable public final String[] filterSet;
     public final OnTaskFinishedListener listener;
 
     /**
@@ -129,10 +130,10 @@ public class RestoreParams {
             IRestoreObserver observer,
             IBackupManagerMonitor monitor,
             long token,
-            PackageInfo packageInfo,
+            @Nullable PackageInfo packageInfo,
             int pmToken,
             boolean isSystemRestore,
-            String[] filterSet,
+            @Nullable String[] filterSet,
             OnTaskFinishedListener listener) {
         this.transportClient = transportClient;
         this.observer = observer;
