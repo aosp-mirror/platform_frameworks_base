@@ -13982,7 +13982,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 // setFlags invocation.
                 shouldNotifyFocusableAvailable = true;
             } else {
-                if (hasFocus()) clearFocus();
+                if (isFocused()) clearFocus();
             }
         }
 
