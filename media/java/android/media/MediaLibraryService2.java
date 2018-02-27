@@ -198,16 +198,25 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
             // Ideally it's better to make it inner class of service to enforce, it violates API
             // guideline that Builders should be the inner class of the building target.
             public Builder(@NonNull MediaLibraryService2 service,
-                    @NonNull MediaPlayerBase player,
                     @NonNull @CallbackExecutor Executor callbackExecutor,
                     @NonNull MediaLibrarySessionCallback callback) {
                 super((instance) -> ApiLoader.getProvider(service)
-                        .createMediaLibraryService2Builder(service, (Builder) instance, player,
+                        .createMediaLibraryService2Builder(service, (Builder) instance,
                                 callbackExecutor, callback));
             }
 
             @Override
-            public Builder setVolumeProvider(@Nullable VolumeProvider2 volumeProvider) {
+            public Builder setPlayer(@NonNull MediaPlayerBase player) {
+                return super.setPlayer(player);
+            }
+
+            @Override
+            public Builder setPlaylistController(@NonNull MediaPlaylistController mplc) {
+                return super.setPlaylistController(mplc);
+            }
+
+            @Override
+            public Builder setVolumeProvider(@NonNull VolumeProvider2 volumeProvider) {
                 return super.setVolumeProvider(volumeProvider);
             }
 
