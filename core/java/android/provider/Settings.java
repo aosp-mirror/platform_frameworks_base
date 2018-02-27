@@ -10578,6 +10578,21 @@ public final class Settings {
         public static final java.lang.String APP_STANDBY_ENABLED = "app_standby_enabled";
 
         /**
+         * Whether or not app auto restriction is enabled. When it is enabled, settings app will
+         * auto restrict the app if it has bad behavior(e.g. hold wakelock for long time).
+         *
+         * Type: boolean (0 for false, 1 for true)
+         * Default: 1
+         *
+         * @hide
+         */
+        public static final java.lang.String APP_AUTO_RESTRICTION_ENABLED =
+                "app_auto_restriction_enabled";
+
+        private static final Validator APP_AUTO_RESTRICTION_ENABLED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * Feature flag to enable or disable the Forced App Standby feature.
          * Type: int (0 for false, 1 for true)
          * Default: 1
@@ -11491,6 +11506,7 @@ public final class Settings {
         public static final String[] SETTINGS_TO_BACKUP = {
             BUGREPORT_IN_POWER_MENU,
             STAY_ON_WHILE_PLUGGED_IN,
+            APP_AUTO_RESTRICTION_ENABLED,
             AUTO_TIME,
             AUTO_TIME_ZONE,
             POWER_SOUNDS_ENABLED,
@@ -11549,6 +11565,7 @@ public final class Settings {
             VALIDATORS.put(SOFT_AP_TIMEOUT_ENABLED, SOFT_AP_TIMEOUT_ENABLED_VALIDATOR);
             VALIDATORS.put(WIFI_CARRIER_NETWORKS_AVAILABLE_NOTIFICATION_ON,
                     WIFI_CARRIER_NETWORKS_AVAILABLE_NOTIFICATION_ON_VALIDATOR);
+            VALIDATORS.put(APP_AUTO_RESTRICTION_ENABLED, APP_AUTO_RESTRICTION_ENABLED_VALIDATOR);
         }
 
         /**

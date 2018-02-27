@@ -1138,6 +1138,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.SHOW_ZEN_UPGRADE_NOTIFICATION,
                 GlobalSettingsProto.SHOW_ZEN_UPGRADE_NOTIFICATION);
+        dumpSetting(s, p,
+                Settings.Global.APP_AUTO_RESTRICTION_ENABLED,
+                GlobalSettingsProto.APP_AUTO_RESTRICTION_ENABLED);
 
         // Please insert new settings using the same order as in Settings.Global.
     }
