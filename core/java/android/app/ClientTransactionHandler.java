@@ -65,8 +65,7 @@ public abstract class ClientTransactionHandler {
 
     /** Pause the activity. */
     public abstract void handlePauseActivity(IBinder token, boolean finished, boolean userLeaving,
-            int configChanges, boolean dontReport, PendingTransactionActions pendingActions,
-            String reason);
+            int configChanges, PendingTransactionActions pendingActions, String reason);
 
     /** Resume the activity. */
     public abstract void handleResumeActivity(IBinder token, boolean clearHide, boolean isForward,

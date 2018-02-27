@@ -185,8 +185,8 @@ public class TransactionExecutor {
                     break;
                 case ON_PAUSE:
                     mTransactionHandler.handlePauseActivity(r.token, false /* finished */,
-                            false /* userLeaving */, 0 /* configChanges */,
-                            true /* dontReport */, mPendingActions, "LIFECYCLER_PAUSE_ACTIVITY");
+                            false /* userLeaving */, 0 /* configChanges */, mPendingActions,
+                            "LIFECYCLER_PAUSE_ACTIVITY");
                     break;
                 case ON_STOP:
                     mTransactionHandler.handleStopActivity(r.token, false /* show */,
