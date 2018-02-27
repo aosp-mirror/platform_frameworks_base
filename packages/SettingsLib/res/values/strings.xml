@@ -553,7 +553,7 @@
     <string name="select_private_dns_configuration_title">Private DNS</string>
     <string name="select_private_dns_configuration_dialog_title">Select Private DNS Mode</string>
     <string name="private_dns_mode_off">Off</string>
-    <string name="private_dns_mode_opportunistic">Opportunistic</string>
+    <string name="private_dns_mode_opportunistic">Automatic</string>
     <string name="private_dns_mode_provider">Private DNS provider hostname</string>
     <string name="private_dns_mode_provider_hostname_hint">Enter hostname of DNS provider</string>
 
