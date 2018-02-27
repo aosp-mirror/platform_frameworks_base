@@ -524,6 +524,7 @@ public class SettingsBackupTest {
                  Settings.Secure.NFC_PAYMENT_FOREGROUND,
                  Settings.Secure.NIGHT_DISPLAY_ACTIVATED,
                  Settings.Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME,
+                 Settings.Secure.NUM_ROTATION_SUGGESTIONS_ACCEPTED,
                  Settings.Secure.PACKAGE_VERIFIER_STATE,
                  Settings.Secure.PACKAGE_VERIFIER_USER_CONSENT,
                  Settings.Secure.PARENTAL_CONTROL_LAST_UPDATE,
