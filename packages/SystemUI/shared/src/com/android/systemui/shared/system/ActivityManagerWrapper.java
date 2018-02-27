@@ -17,6 +17,7 @@
 package com.android.systemui.shared.system;
 
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
+import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
 import static android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
@@ -403,6 +404,25 @@ public class ActivityManagerWrapper {
     }
 
     /**
+     * @return whether screen pinning is active.
+     */
+    public boolean isScreenPinningActive() {
+        try {
+            return ActivityManager.getService().getLockTaskModeState() == LOCK_TASK_MODE_PINNED;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * @return whether screen pinning is enabled.
+     */
+    public boolean isScreenPinningEnabled() {
+        final ContentResolver cr = AppGlobals.getInitialApplication().getContentResolver();
+        return Settings.System.getInt(cr, Settings.System.LOCK_TO_APP_ENABLED, 0) != 0;
+    }
+
+    /**
      * @return whether there is currently a locked task (ie. in screen pinning).
      */
     public boolean isLockToAppActive() {
@@ -415,9 +435,9 @@ public class ActivityManagerWrapper {
 
     /**
      * @return whether screen pinning is enabled.
+     * @deprecated See {@link #isScreenPinningEnabled}
      */
     public boolean isLockToAppEnabled() {
-        final ContentResolver cr = AppGlobals.getInitialApplication().getContentResolver();
-        return Settings.System.getInt(cr, Settings.System.LOCK_TO_APP_ENABLED, 0) != 0;
+        return isScreenPinningEnabled();
     }
 }
