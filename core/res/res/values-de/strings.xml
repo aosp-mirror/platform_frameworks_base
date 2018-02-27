@@ -1085,13 +1085,18 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Apps werden gestartet..."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Start wird abgeschlossen..."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> läuft"</string>
-    <string name="heavy_weight_notification_detail" msgid="867643381388543170">"Zum Wechseln der App tippen"</string>
-    <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"Apps wechseln?"</string>
-    <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"Es wird bereits eine andere App ausgeführt, die vor dem Start einer neuen beendet werden muss."</string>
-    <string name="old_app_action" msgid="493129172238566282">"Zu <xliff:g id="OLD_APP">%1$s</xliff:g> zurückkehren"</string>
-    <string name="old_app_description" msgid="2082094275580358049">"Neue App nicht starten"</string>
-    <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> starten"</string>
-    <string name="new_app_description" msgid="1932143598371537340">"Alte App beenden, ohne zu speichern"</string>
+    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
+    <skip />
+    <!-- no translation found for old_app_action (3044685170829526403) -->
+    <skip />
+    <!-- no translation found for new_app_action (6694851182870774403) -->
+    <skip />
+    <!-- no translation found for new_app_description (5894852887817332322) -->
+    <skip />
     <string name="dump_heap_notification" msgid="2618183274836056542">"Speicherlimit für \"<xliff:g id="PROC">%1$s</xliff:g>\" überschritten"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Heap-Dump wurde erfasst. Zum Teilen tippen"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Heap-Dump teilen?"</string>
@@ -1198,7 +1203,7 @@
     <string name="sim_added_message" msgid="6599945301141050216">"Starte zur Nutzung des Mobilfunknetzes dein Gerät neu."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Neu starten"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Mobilfunkdienst aktivieren"</string>
-    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Mobilfunkanbieter-App herunterladen, um deine neue SIM-Karte zu aktivieren"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Mobilfunkanbieter-App herunterladen, um meine neue SIM-Karte zu aktivieren"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"App herunterladen"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Neue SIM-Karte eingelegt"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Zum Einrichten tippen"</string>
@@ -1834,5 +1839,5 @@
     <string name="screenshot_edit" msgid="7867478911006447565">"Bearbeiten"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Systemänderungen"</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\"Bitte nicht stören\" wurde geändert"</string>
-    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"Zum Prüfen der Verhaltenseinstellungen für Unterbrechungen hier tippen"</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"Tippen, um Einstellungen für den Modus \"Bitte nicht stören\" zu überprüfen"</string>
 </resources>

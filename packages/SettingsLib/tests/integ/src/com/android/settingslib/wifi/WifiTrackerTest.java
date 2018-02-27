@@ -696,6 +696,36 @@ public class WifiTrackerTest {
     }
 
     @Test
+    public void onStartShouldDisplayConnectedAccessPointWhenThereAreNoScanResults()
+            throws Exception {
+        Network mockNetwork = mock(Network.class);
+        when(mockWifiManager.getCurrentNetwork()).thenReturn(mockNetwork);
+
+        when(mockWifiManager.getConnectionInfo()).thenReturn(CONNECTED_AP_1_INFO);
+
+        NetworkInfo networkInfo = new NetworkInfo(
+                ConnectivityManager.TYPE_WIFI, 0, "Type Wifi", "subtype");
+        networkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTED, "connected", "test");
+        when(mockConnectivityManager.getNetworkInfo(any(Network.class))).thenReturn(networkInfo);
+
+        // Don't return any scan results
+        when(mockWifiManager.getScanResults()).thenReturn(new ArrayList<>());
+
+        WifiTracker tracker = createMockedWifiTracker();
+        startTracking(tracker);
+
+        verify(mockWifiManager).getConnectionInfo();
+        verify(mockWifiManager, times(1)).getConfiguredNetworks();
+        verify(mockConnectivityManager).getNetworkInfo(any(Network.class));
+
+        // mStaleAccessPoints is true
+        verify(mockWifiListenerExecutor, never()).onAccessPointsChanged();
+
+        assertThat(tracker.getAccessPoints().size()).isEqualTo(1);
+        assertThat(tracker.getAccessPoints().get(0).isActive()).isTrue();
+    }
+
+    @Test
     public void stopTrackingShouldRemoveAllPendingWork() throws Exception {
         WifiTracker tracker = createMockedWifiTracker();
         startTracking(tracker);
@@ -778,7 +808,7 @@ public class WifiTrackerTest {
 
         mAccessPointsChangedLatch = new CountDownLatch(1);
         tracker.mReceiver.onReceive(mContext, new Intent(WifiManager.WIFI_STATE_CHANGED_ACTION));
-        assertThat(mAccessPointsChangedLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
+        assertThat(mAccessPointsChangedLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS)).isTrue();
 
         assertThat(tracker.getAccessPoints()).isEmpty();
     }

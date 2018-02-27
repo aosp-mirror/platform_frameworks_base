@@ -87,6 +87,7 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerServiceDumpProto.ActiveJob;
 import com.android.server.job.JobSchedulerServiceDumpProto.PendingJob;
+import com.android.server.job.JobSchedulerServiceDumpProto.RegisteredJob;
 import com.android.server.job.controllers.AppIdleController;
 import com.android.server.job.controllers.BackgroundJobsController;
 import com.android.server.job.controllers.BatteryController;
@@ -158,6 +159,10 @@ public final class JobSchedulerService extends com.android.server.SystemService
     static final int MSG_CHECK_JOB = 1;
     static final int MSG_STOP_JOB = 2;
     static final int MSG_CHECK_JOB_GREEDY = 3;
+    static final int MSG_UID_STATE_CHANGED = 4;
+    static final int MSG_UID_GONE = 5;
+    static final int MSG_UID_ACTIVE = 6;
+    static final int MSG_UID_IDLE = 7;
 
     /**
      * Track Services that have currently active or pending jobs. The index is provided by
@@ -735,32 +740,19 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
     final private IUidObserver mUidObserver = new IUidObserver.Stub() {
         @Override public void onUidStateChanged(int uid, int procState, long procStateSeq) {
-            updateUidState(uid, procState);
+            mHandler.obtainMessage(MSG_UID_STATE_CHANGED, uid, procState).sendToTarget();
         }
 
         @Override public void onUidGone(int uid, boolean disabled) {
-            updateUidState(uid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
-            if (disabled) {
-                cancelJobsForUid(uid, "uid gone");
-            }
-            synchronized (mLock) {
-                mDeviceIdleJobsController.setUidActiveLocked(uid, false);
-            }
+            mHandler.obtainMessage(MSG_UID_GONE, uid, disabled ? 1 : 0).sendToTarget();
         }
 
         @Override public void onUidActive(int uid) throws RemoteException {
-            synchronized (mLock) {
-                mDeviceIdleJobsController.setUidActiveLocked(uid, true);
-            }
+            mHandler.obtainMessage(MSG_UID_ACTIVE, uid, 0).sendToTarget();
         }
 
         @Override public void onUidIdle(int uid, boolean disabled) {
-            if (disabled) {
-                cancelJobsForUid(uid, "app uid idle");
-            }
-            synchronized (mLock) {
-                mDeviceIdleJobsController.setUidActiveLocked(uid, false);
-            }
+            mHandler.obtainMessage(MSG_UID_IDLE, uid, disabled ? 1 : 0).sendToTarget();
         }
 
         @Override public void onUidCachedChanged(int uid, boolean cached) {
@@ -1557,6 +1549,44 @@ public final class JobSchedulerService extends com.android.server.SystemService
                         cancelJobImplLocked((JobStatus) message.obj, null,
                                 "app no longer allowed to run");
                         break;
+
+                    case MSG_UID_STATE_CHANGED: {
+                        final int uid = message.arg1;
+                        final int procState = message.arg2;
+                        updateUidState(uid, procState);
+                        break;
+                    }
+                    case MSG_UID_GONE: {
+                        final int uid = message.arg1;
+                        final boolean disabled = message.arg2 != 0;
+                        updateUidState(uid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
+                        if (disabled) {
+                            cancelJobsForUid(uid, "uid gone");
+                        }
+                        synchronized (mLock) {
+                            mDeviceIdleJobsController.setUidActiveLocked(uid, false);
+                        }
+                        break;
+                    }
+                    case MSG_UID_ACTIVE: {
+                        final int uid = message.arg1;
+                        synchronized (mLock) {
+                            mDeviceIdleJobsController.setUidActiveLocked(uid, true);
+                        }
+                        break;
+                    }
+                    case MSG_UID_IDLE: {
+                        final int uid = message.arg1;
+                        final boolean disabled = message.arg2 != 0;
+                        if (disabled) {
+                            cancelJobsForUid(uid, "app uid idle");
+                        }
+                        synchronized (mLock) {
+                            mDeviceIdleJobsController.setUidActiveLocked(uid, false);
+                        }
+                        break;
+                    }
+
                 }
                 maybeRunPendingJobsLocked();
                 // Don't remove JOB_EXPIRED in case one came along while processing the queue.
@@ -2908,6 +2938,23 @@ public final class JobSchedulerService extends com.android.server.SystemService
         synchronized (mLock) {
             mConstants.dump(pw);
             pw.println();
+
+            pw.println("  Heartbeat:");
+            pw.print("    Current:    "); pw.println(mHeartbeat);
+            pw.println("    Next");
+            pw.print("      ACTIVE:   "); pw.println(mNextBucketHeartbeat[0]);
+            pw.print("      WORKING:  "); pw.println(mNextBucketHeartbeat[1]);
+            pw.print("      FREQUENT: "); pw.println(mNextBucketHeartbeat[2]);
+            pw.print("      RARE:     "); pw.println(mNextBucketHeartbeat[3]);
+            pw.print("    Last heartbeat: ");
+            TimeUtils.formatDuration(mLastHeartbeatTime, nowElapsed, pw);
+            pw.println();
+            pw.print("    Next heartbeat: ");
+            TimeUtils.formatDuration(mLastHeartbeatTime + mConstants.STANDBY_HEARTBEAT_TIME,
+                    nowElapsed, pw);
+            pw.println();
+            pw.println();
+
             pw.println("Started users: " + Arrays.toString(mStartedUsers));
             pw.print("Registered ");
             pw.print(mJobs.size());
@@ -2925,6 +2972,10 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     }
 
                     job.dump(pw, "    ", true, nowElapsed);
+                    pw.print("    Last run heartbeat: ");
+                    pw.print(heartbeatWhenJobsLastRun(job));
+                    pw.println();
+
                     pw.print("    Ready: ");
                     pw.print(isReadyToBeExecutedLocked(job));
                     pw.print(" (job=");
@@ -3067,6 +3118,16 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
         synchronized (mLock) {
             mConstants.dump(proto, JobSchedulerServiceDumpProto.SETTINGS);
+            proto.write(JobSchedulerServiceDumpProto.CURRENT_HEARTBEAT, mHeartbeat);
+            proto.write(JobSchedulerServiceDumpProto.NEXT_HEARTBEAT, mNextBucketHeartbeat[0]);
+            proto.write(JobSchedulerServiceDumpProto.NEXT_HEARTBEAT, mNextBucketHeartbeat[1]);
+            proto.write(JobSchedulerServiceDumpProto.NEXT_HEARTBEAT, mNextBucketHeartbeat[2]);
+            proto.write(JobSchedulerServiceDumpProto.NEXT_HEARTBEAT, mNextBucketHeartbeat[3]);
+            proto.write(JobSchedulerServiceDumpProto.LAST_HEARTBEAT_TIME_MILLIS,
+                    mLastHeartbeatTime - nowUptime);
+            proto.write(JobSchedulerServiceDumpProto.NEXT_HEARTBEAT_TIME_MILLIS,
+                    mLastHeartbeatTime + mConstants.STANDBY_HEARTBEAT_TIME - nowUptime);
+
             for (int u : mStartedUsers) {
                 proto.write(JobSchedulerServiceDumpProto.STARTED_USERS, u);
             }
@@ -3105,6 +3166,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     }
                     proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_COMPONENT_PRESENT,
                             componentPresent);
+                    proto.write(RegisteredJob.LAST_RUN_HEARTBEAT, heartbeatWhenJobsLastRun(job));
 
                     proto.end(rjToken);
                 }

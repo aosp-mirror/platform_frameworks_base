@@ -379,6 +379,9 @@ message WifiLog {
 
   // Number of connectivity single scan requests.
   optional int32 num_connectivity_oneshot_scans = 93;
+
+  // WifiWake statistics
+  optional WifiWakeStats wifi_wake_stats = 94;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -1158,4 +1161,40 @@ message WifiPowerStats {
 
   // Amount of time wifi is in tx (ms)
   optional int64 tx_time_ms = 5;
+}
+
+// Metrics for Wifi Wake
+message WifiWakeStats {
+  // An individual session for Wifi Wake
+  message Session {
+    // A Wifi Wake lifecycle event
+    message Event {
+      // Elapsed time in milliseconds since start of session.
+      optional int64 elapsed_time_millis = 1;
+
+      // Number of scans that have occurred since start of session.
+      optional int32 elapsed_scans = 2;
+    }
+
+    // Start time of session in milliseconds.
+    optional int64 start_time_millis = 1;
+
+    // The number of networks the lock was initialized with at start.
+    optional int32 locked_networks_at_start = 2;
+
+    // Event for unlocking the WakeupLock. Does not occur if lock was initialized with 0 networks.
+    optional Event unlock_event = 3;
+
+    // Event for triggering wakeup.
+    optional Event wakeup_event = 4;
+
+    // Event for WifiWake reset event. This event marks the end of a session.
+    optional Event reset_event = 5;
+  }
+
+  // Total number of sessions for Wifi Wake.
+  optional int32 num_sessions = 1;
+
+  // Session information for every Wifi Wake session (up to a maximum of 10).
+  repeated Session sessions = 2;
 }

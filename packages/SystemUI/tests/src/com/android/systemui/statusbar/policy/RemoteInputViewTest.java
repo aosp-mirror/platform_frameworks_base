@@ -34,6 +34,7 @@ import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.RemoteInputController;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,6 +67,11 @@ public class RemoteInputViewTest extends SysuiTestCase {
 
         ExpandableNotificationRow row = new NotificationTestHelper(mContext).createRow();
         mView = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
+    }
+
+    @After
+    public void tearDown() {
+        mContext.unregisterReceiver(mReceiver);
     }
 
     @Test

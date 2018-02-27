@@ -42,6 +42,7 @@ import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.IRemoteVolumeController;
 import android.media.ISessionTokensListener;
+import android.media.MediaController2;
 import android.media.MediaLibraryService2;
 import android.media.MediaSessionService2;
 import android.media.SessionToken2;
@@ -70,6 +71,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.speech.RecognizerIntent;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -86,7 +88,10 @@ import com.android.server.Watchdog.Monitor;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * System implementation of MediaSessionManager
@@ -132,14 +137,7 @@ public class MediaSessionService extends SystemService implements Monitor {
     // MediaSession2 support
     // TODO(jaewan): Support multi-user and managed profile.
     // TODO(jaewan): Make it priority list for handling volume/media key.
-    private final List<MediaSession2Record> mSessions = new ArrayList<>();
-
-    private final MediaSession2Record.SessionDestroyedListener mSessionDestroyedListener =
-            (record) -> {
-                synchronized (mLock) {
-                    destroySessionLocked(record);
-                }
-            };
+    private final Map<SessionToken2, MediaController2> mSessionRecords = new ArrayMap<>();
 
     public MediaSessionService(Context context) {
         super(context);
@@ -523,12 +521,13 @@ public class MediaSessionService extends SystemService implements Monitor {
         synchronized (mLock) {
             // List to keep the session services that need be removed because they don't exist
             // in the 'services' above.
-            List<MediaSession2Record> removeCandidates = new ArrayList<>();
-            for (int i = 0; i < mSessions.size(); i++) {
-                if (mSessions.get(i).getToken().getType() != TYPE_SESSION) {
-                    removeCandidates.add(mSessions.get(i));
+            Set<SessionToken2> sessionTokensToRemove = new HashSet<>();
+            for (SessionToken2 token : mSessionRecords.keySet()) {
+                if (token.getType() != TYPE_SESSION) {
+                    sessionTokensToRemove.add(token);
                 }
             }
+
             for (int i = 0; i < services.size(); i++) {
                 if (services.get(i) == null || services.get(i).serviceInfo == null) {
                     continue;
@@ -550,54 +549,22 @@ public class MediaSessionService extends SystemService implements Monitor {
                     Log.w(TAG, "Invalid session service", e);
                     continue;
                 }
-                boolean found = false;
-                for (int j = 0; j < mSessions.size(); j++) {
-                    if (token.equals(mSessions.get(j).getToken())) {
-                        // If the token already exists, keep it in the mSessions.
-                        removeCandidates.remove(mSessions.get(j));
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
+                // If the token already exists, keep it in the mSessions by removing from
+                // sessionTokensToRemove.
+                if (!sessionTokensToRemove.remove(token)) {
                     // New session service is found.
-                    MediaSession2Record record = new MediaSession2Record(getContext(),
-                            token, mSessionDestroyedListener);
-                    mSessions.add(record);
+                    mSessionRecords.put(token, null);
                 }
             }
-            for (int i = 0; i < removeCandidates.size(); i++) {
-                removeCandidates.get(i).onSessionDestroyed();
-                mSessions.remove(removeCandidates.get(i));
+            for (SessionToken2 token : sessionTokensToRemove) {
+                mSessionRecords.remove(token);
             }
-            removeCandidates.clear();
         }
         if (DEBUG) {
-            Log.d(TAG, "Found " + mSessions.size() + " session services");
-            for (int i = 0; i < mSessions.size(); i++) {
-                Log.d(TAG, "   " + mSessions.get(i).getToken());
+            Log.d(TAG, "Found " + mSessionRecords.size() + " session services");
+            for (SessionToken2 token : mSessionRecords.keySet()) {
+                Log.d(TAG, "   " + token);
             }
-        }
-    }
-
-    private MediaSession2Record getSessionRecordLocked(int uid, String packageName, String id) {
-        for (int i = 0; i < mSessions.size(); i++) {
-            SessionToken2 token = mSessions.get(i).getToken();
-            if (token.getUid() == uid && token.getPackageName().equals(packageName)
-                    && token.getId().equals(id)) {
-                return mSessions.get(i);
-            }
-        }
-        return null;
-    }
-
-    private void destroySessionLocked(MediaSession2Record record) {
-        if (DEBUG) {
-            Log.d(TAG, record.toString() + " becomes inactive");
-        }
-        record.onSessionDestroyed();
-        if (record.getToken().getType() == TYPE_SESSION) {
-            mSessions.remove(record);
         }
     }
 
@@ -809,6 +776,16 @@ public class MediaSessionService extends SystemService implements Monitor {
             return null;
         }
         return mUserRecords.get(fullUserId);
+    }
+
+    void destroySession2Internal(SessionToken2 token) {
+        synchronized (mLock) {
+            if (token.getType() == SessionToken2.TYPE_SESSION) {
+                mSessionRecords.remove(token);
+            } else {
+                mSessionRecords.put(token, null);
+            }
+        }
     }
 
     /**
@@ -1502,12 +1479,12 @@ public class MediaSessionService extends SystemService implements Monitor {
 
                 // TODO(jaewan): Remove this debug command before ship.
                 if (args != null && args.length > 0 && "--purge".equals(args[0])) {
-                    mSessions.clear();
+                    mSessionRecords.clear();
                 }
                 pw.println();
-                pw.println("Session2: size=" + mSessions.size());
-                for (int i = 0; i < mSessions.size(); i++) {
-                    pw.println("  " + mSessions.get(i));
+                pw.println("Session2: size=" + mSessionRecords.size());
+                for (SessionToken2 token : mSessionRecords.keySet()) {
+                    pw.println("  " + token);
                 }
             }
         }
@@ -1524,28 +1501,25 @@ public class MediaSessionService extends SystemService implements Monitor {
          *     otherwise.
          */
         @Override
-        public boolean onSessionCreated(Bundle sessionToken) {
+        public boolean createSession2(Bundle sessionToken) {
             final int uid = Binder.getCallingUid();
-            final int pid = Binder.getCallingPid();
             final SessionToken2 token = SessionToken2.fromBundle(getContext(), sessionToken);
             if (token == null || token.getUid() != uid) {
                 Log.w(TAG, "onSessionCreated failed, expected caller uid=" + token.getUid()
                         + " but from uid=" + uid);
             }
             if (DEBUG) {
-                Log.d(TAG, "onSessionCreated " + token);
+                Log.d(TAG, "createSession2: " + token);
             }
             synchronized (mLock) {
-                MediaSession2Record record = getSessionRecordLocked(
-                        uid, token.getPackageName(), token.getId());
-                if (record != null) {
-                    return record.onSessionCreated(token);
-                } else {
-                    record = new MediaSession2Record(
-                            getContext(), token, mSessionDestroyedListener);
-                    mSessions.add(record);
-                    return record.onSessionCreated(token);
+                MediaController2 controller = mSessionRecords.get(token);
+                if (controller != null && controller.isConnected()) {
+                    return false;
                 }
+                Context context = getContext();
+                mSessionRecords.put(token, new MediaController2(context, token,
+                        context.getMainExecutor(), new ControllerCallback(token)));
+                return true;
             }
         }
 
@@ -1563,29 +1537,17 @@ public class MediaSessionService extends SystemService implements Monitor {
          * @param sessionToken SessionToken2 object in bundled form
          */
         @Override
-        public void onSessionDestroyed(Bundle sessionToken) {
+        public void destroySession2(Bundle sessionToken) {
             final int uid = Binder.getCallingUid();
-            final int pid = Binder.getCallingPid();
             final SessionToken2 token = SessionToken2.fromBundle(getContext(), sessionToken);
             if (token == null || token.getUid() != uid) {
                 Log.w(TAG, "onSessionDestroyed failed, expected caller uid=" + token.getUid()
                         + " but from uid=" + uid);
             }
             if (DEBUG) {
-                Log.d(TAG, "onSessionDestroyed " + token);
+                Log.d(TAG, "destroySession2 " + token);
             }
-            synchronized (mLock) {
-                MediaSession2Record record = getSessionRecordLocked(
-                        uid, token.getPackageName(), token.getId());
-                if (record != null) {
-                    record.onSessionDestroyed();
-                } else {
-                    if (DEBUG) {
-                        Log.d(TAG, "Cannot find a session record to destroy. uid=" + uid
-                                + ", pkg=" + token.getPackageName() + ", id=" + token.getId());
-                    }
-                }
-            }
+            destroySession2Internal(token);
         }
 
         // TODO(jaewan): Protect this API with permission
@@ -1594,19 +1556,15 @@ public class MediaSessionService extends SystemService implements Monitor {
                 boolean sessionServiceOnly) throws RemoteException {
             List<Bundle> tokens = new ArrayList<>();
             synchronized (mLock) {
-                for (int i = 0; i < mSessions.size(); i++) {
-                    MediaSession2Record record = mSessions.get(i);
-                    boolean isSessionService = (record.getToken().getType() != TYPE_SESSION);
-                    boolean isActive = record.getController() != null;
-                    if ((!activeSessionOnly && isSessionService)
-                            || (!sessionServiceOnly && isActive)) {
-                        SessionToken2 token = record.getToken();
-                        if (token != null) {
-                            tokens.add(token.toBundle());
-                        } else {
-                            Log.wtf(TAG, "Null token for record=" + record);
-                        }
+                for (Map.Entry<SessionToken2, MediaController2> record
+                        : mSessionRecords.entrySet()) {
+                    boolean isSessionService = (record.getKey().getType() != TYPE_SESSION);
+                    boolean isActive = record.getValue() != null;
+                    if ((activeSessionOnly && !isActive)
+                            || (sessionServiceOnly && !isSessionService) ){
+                        continue;
                     }
+                    tokens.add(record.getKey().toBundle());
                 }
             }
             return tokens;
@@ -2018,4 +1976,18 @@ public class MediaSessionService extends SystemService implements Monitor {
             obtainMessage(MSG_SESSIONS_CHANGED, userIdInteger).sendToTarget();
         }
     }
+
+    private class ControllerCallback extends MediaController2.ControllerCallback {
+
+        private final SessionToken2 mToken;
+
+        ControllerCallback(SessionToken2 token) {
+            mToken = token;
+        }
+
+        @Override
+        public void onDisconnected() {
+            destroySession2Internal(mToken);
+        }
+    };
 }

@@ -7103,6 +7103,14 @@ public final class Settings {
                 SHOW_ROTATION_SUGGESTIONS_ENABLED;
 
         /**
+         * The number of accepted rotation suggestions. Used to determine if the user has been
+         * introduced to rotation suggestions.
+         * @hide
+         */
+        public static final String NUM_ROTATION_SUGGESTIONS_ACCEPTED =
+                "num_rotation_suggestions_accepted";
+
+        /**
          * Read only list of the service components that the current user has explicitly allowed to
          * see and assist with all of the user's notifications.
          *

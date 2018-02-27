@@ -99,6 +99,7 @@ public class UsageStatsService extends SystemService implements
     static final int MSG_REPORT_EVENT = 0;
     static final int MSG_FLUSH_TO_DISK = 1;
     static final int MSG_REMOVE_USER = 2;
+    static final int MSG_UID_STATE_CHANGED = 3;
 
     private final Object mLock = new Object();
     Handler mHandler;
@@ -220,18 +221,7 @@ public class UsageStatsService extends SystemService implements
     private final IUidObserver mUidObserver = new IUidObserver.Stub() {
         @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq) {
-            final int newCounter = (procState <= ActivityManager.PROCESS_STATE_TOP) ? 0 : 1;
-            synchronized (mUidToKernelCounter) {
-                final int oldCounter = mUidToKernelCounter.get(uid, 0);
-                if (newCounter != oldCounter) {
-                    mUidToKernelCounter.put(uid, newCounter);
-                    try {
-                        FileUtils.stringToFile(KERNEL_COUNTER_FILE, uid + " " + newCounter);
-                    } catch (IOException e) {
-                        Slog.w(TAG, "Failed to update counter set: " + e);
-                    }
-                }
-            }
+            mHandler.obtainMessage(MSG_UID_STATE_CHANGED, uid, procState).sendToTarget();
         }
 
         @Override
@@ -560,6 +550,25 @@ public class UsageStatsService extends SystemService implements
                 case MSG_REMOVE_USER:
                     onUserRemoved(msg.arg1);
                     break;
+
+                case MSG_UID_STATE_CHANGED: {
+                    final int uid = msg.arg1;
+                    final int procState = msg.arg2;
+
+                    final int newCounter = (procState <= ActivityManager.PROCESS_STATE_TOP) ? 0 : 1;
+                    synchronized (mUidToKernelCounter) {
+                        final int oldCounter = mUidToKernelCounter.get(uid, 0);
+                        if (newCounter != oldCounter) {
+                            mUidToKernelCounter.put(uid, newCounter);
+                            try {
+                                FileUtils.stringToFile(KERNEL_COUNTER_FILE, uid + " " + newCounter);
+                            } catch (IOException e) {
+                                Slog.w(TAG, "Failed to update counter set: " + e);
+                            }
+                        }
+                    }
+                    break;
+                }
 
                 default:
                     super.handleMessage(msg);

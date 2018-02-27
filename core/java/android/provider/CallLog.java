@@ -223,13 +223,14 @@ public class CallLog {
         /** Call was WIFI call. */
         public static final int FEATURES_WIFI = 1 << 3;
 
+        /** Call was on RTT at some point */
+        public static final int FEATURES_RTT = 1 << 4;
+
         /**
          * Indicates the call underwent Assisted Dialing.
+         * @hide
          */
-        public static final int FEATURES_ASSISTED_DIALING_USED = 1 << 4;
-
-        /** Call was on RTT at some point */
-        public static final int FEATURES_RTT = 1 << 5;
+        public static final Integer FEATURES_ASSISTED_DIALING_USED = 0x10;
 
         /**
          * The phone number as the user entered it.

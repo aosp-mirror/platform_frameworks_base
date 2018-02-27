@@ -74,7 +74,9 @@ public class ImsSmsImplBase {
     /** @hide */
     @IntDef({
             DELIVER_STATUS_OK,
-            DELIVER_STATUS_ERROR
+            DELIVER_STATUS_ERROR_GENERIC,
+            DELIVER_STATUS_ERROR_NO_MEMORY,
+            DELIVER_STATUS_ERROR_REQUEST_NOT_SUPPORTED
         })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DeliverStatusResult {}
@@ -86,7 +88,17 @@ public class ImsSmsImplBase {
     /**
      * Message was not delivered.
      */
-    public static final int DELIVER_STATUS_ERROR = 2;
+    public static final int DELIVER_STATUS_ERROR_GENERIC = 2;
+
+    /**
+     * Message was not delivered due to lack of memory.
+     */
+    public static final int DELIVER_STATUS_ERROR_NO_MEMORY = 3;
+
+    /**
+     * Message was not delivered as the request is not supported.
+     */
+    public static final int DELIVER_STATUS_ERROR_REQUEST_NOT_SUPPORTED = 4;
 
     /** @hide */
     @IntDef({
@@ -105,7 +117,6 @@ public class ImsSmsImplBase {
      * Error while setting status report.
      */
     public static final int STATUS_REPORT_STATUS_ERROR = 2;
-
 
     // Lock for feature synchronization
     private final Object mLock = new Object();
@@ -157,7 +168,9 @@ public class ImsSmsImplBase {
      * @param token token provided in {@link #onSmsReceived(int, String, byte[])}
      * @param result result of delivering the message. Valid values are:
      *  {@link #DELIVER_STATUS_OK},
-     *  {@link #DELIVER_STATUS_ERROR}
+     *  {@link #DELIVER_STATUS_ERROR_GENERIC},
+     *  {@link #DELIVER_STATUS_ERROR_NO_MEMORY},
+     *  {@link #DELIVER_STATUS_ERROR_REQUEST_NOT_SUPPORTED}
      * @param messageRef the message reference
      */
     public void acknowledgeSms(int token, @DeliverStatusResult int messageRef, int result) {
@@ -200,7 +213,7 @@ public class ImsSmsImplBase {
                 mListener.onSmsReceived(token, format, pdu);
             } catch (RemoteException e) {
                 Log.e(LOG_TAG, "Can not deliver sms: " + e.getMessage());
-                acknowledgeSms(token, 0, DELIVER_STATUS_ERROR);
+                acknowledgeSms(token, 0, DELIVER_STATUS_ERROR_GENERIC);
             }
         }
     }

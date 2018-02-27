@@ -16,7 +16,6 @@
 
 package android.media.update;
 
-import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.media.AudioAttributes;
 import android.media.MediaController2.PlaybackInfo;
@@ -65,6 +64,11 @@ public interface MediaController2Provider extends TransportControlProvider {
     PlaylistParams getPlaylistParams_impl();
     void setPlaylistParams_impl(PlaylistParams params);
     PlaybackState2 getPlaybackState_impl();
+    int getPlayerState_impl();
+    long getPosition_impl();
+    float getPlaybackSpeed_impl();
+    long getBufferedPosition_impl();
+    MediaItem2 getCurrentPlaylistItem_impl();
 
     interface PlaybackInfoProvider {
         int getPlaybackType_impl();

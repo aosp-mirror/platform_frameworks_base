@@ -19,7 +19,6 @@ package android.media;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
-import android.annotation.SystemApi;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.media.update.ApiLoader;
@@ -33,15 +32,13 @@ import java.util.Set;
 
 /**
  * Contains metadata about an item, such as the title, artist, etc.
- *
- * @hide
  */
+// New version of MediaMetadata with following changes
+//   - Don't implement Parcelable for updatable support.
+//   - Also support MediaDescription features. MediaDescription is deprecated instead because
+//     it was insufficient for controller to display media contents.
+// TODO(jaewan): Add @see for APIs from MediaDescription
 public final class MediaMetadata2 {
-    // New version of MediaMetadata that no longer implements Parcelable but added from/toBundle()
-    // for updatable.
-    // MediaDescription is deprecated because it was insufficient for controller to display media
-    // contents. Added getExtra() here to support all the features from the MediaDescription.
-
     /**
      * The title of the media.
      */
@@ -220,11 +217,23 @@ public final class MediaMetadata2 {
     /**
      * A Uri formatted String representing the content. This value is specific to the
      * service providing the content. It may be used with
-     * {@link MediaController2#playFromUri(String, Bundle)}
+     * {@link MediaController2#playFromUri(Uri, Bundle)}
      * to initiate playback when provided by a {@link MediaBrowser2} connected to
      * the same app.
      */
     public static final String METADATA_KEY_MEDIA_URI = "android.media.metadata.MEDIA_URI";
+
+    /**
+     * The radio frequency in Float format if this metdata representing radio content.
+     */
+    public static final String METADATA_KEY_RADIO_FREQUENCY =
+            "android.media.metadata.RADIO_FREQUENCY";
+
+    /**
+     * The radio callsign in String format if this metdata representing radio content.
+     */
+    public static final String METADATA_KEY_RADIO_CALLSIGN =
+            "android.media.metadata.RADIO_CALLSIGN";
 
     /**
      * The bluetooth folder type of the media specified in the section 6.10.2.2 of the Bluetooth
@@ -327,9 +336,8 @@ public final class MediaMetadata2 {
 
     /**
      * A {@link Bundle} extra.
-     * @hide
      */
-    public static final String METADATA_KEY_EXTRA = "android.media.metadata.EXTRA";
+    public static final String METADATA_KEY_EXTRAS = "android.media.metadata.EXTRAS";
 
     /**
      * @hide
@@ -339,7 +347,7 @@ public final class MediaMetadata2 {
             METADATA_KEY_DATE, METADATA_KEY_GENRE, METADATA_KEY_ALBUM_ARTIST, METADATA_KEY_ART_URI,
             METADATA_KEY_ALBUM_ART_URI, METADATA_KEY_DISPLAY_TITLE, METADATA_KEY_DISPLAY_SUBTITLE,
             METADATA_KEY_DISPLAY_DESCRIPTION, METADATA_KEY_DISPLAY_ICON_URI,
-            METADATA_KEY_MEDIA_ID, METADATA_KEY_MEDIA_URI})
+            METADATA_KEY_MEDIA_ID, METADATA_KEY_MEDIA_URI, METADATA_KEY_RADIO_CALLSIGN})
     @Retention(RetentionPolicy.SOURCE)
     public @interface TextKey {}
 
@@ -366,12 +374,18 @@ public final class MediaMetadata2 {
     @Retention(RetentionPolicy.SOURCE)
     public @interface RatingKey {}
 
+    /**
+     * @hide
+     */
+    @StringDef({METADATA_KEY_RADIO_FREQUENCY})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FloatKey {}
+
     private final MediaMetadata2Provider mProvider;
 
     /**
      * @hide
      */
-    @SystemApi
     public MediaMetadata2(MediaMetadata2Provider provider) {
         mProvider = provider;
     }
@@ -399,9 +413,9 @@ public final class MediaMetadata2 {
     }
 
     /**
-     * Returns the value associated with the given key, or null if no mapping of
-     * the desired type exists for the given key or a null value is explicitly
-     * associated with the key.
+     * Returns the media id, or {@code null} if the id doesn't exist.
+     *<p>
+     * This is equivalent to the {@link #getString(String)} with the {@link #METADATA_KEY_MEDIA_ID}.
      *
      * @return media id. Can be {@code null}
      * @see #METADATA_KEY_MEDIA_ID
@@ -459,12 +473,23 @@ public final class MediaMetadata2 {
     }
 
     /**
+     * Return the value associated with the given key, or 0.0f if no long exists
+     * for the given key.
+     *
+     * @param key The key the value is stored under
+     * @return a float value
+     */
+    public float getFloat(@NonNull @FloatKey String key) {
+        return mProvider.getFloat_impl(key);
+    }
+
+    /**
      * Get the extra {@link Bundle} from the metadata object.
      *
      * @return A {@link Bundle} or {@code null}
      */
-    public @Nullable Bundle getExtra() {
-        return mProvider.getExtra_impl();
+    public @Nullable Bundle getExtras() {
+        return mProvider.getExtras_impl();
     }
 
     /**
@@ -539,7 +564,6 @@ public final class MediaMetadata2 {
         /**
          * @hide
          */
-        @SystemApi
         public Builder(@NonNull MediaMetadata2Provider.BuilderProvider provider) {
             mProvider = provider;
         }
@@ -594,6 +618,7 @@ public final class MediaMetadata2 {
          * <li>{@link #METADATA_KEY_DISPLAY_SUBTITLE}</li>
          * <li>{@link #METADATA_KEY_DISPLAY_DESCRIPTION}</li>
          * <li>{@link #METADATA_KEY_DISPLAY_ICON_URI}</li>
+         * <li>{@link #METADATA_KEY_RADIO_CALLSIGN}</li>
          * </ul>
          *
          * @param key The key for referencing this value
@@ -667,10 +692,29 @@ public final class MediaMetadata2 {
         }
 
         /**
-         * Set an extra {@link Bundle} into the metadata.
+         * Put a float value into the metadata. Custom keys may be used, but if
+         * the METADATA_KEYs defined in this class are used they may only be one
+         * of the following:
+         * <ul>
+         * <li>{@link #METADATA_KEY_RADIO_FREQUENCY}</li>
+         * </ul>
+         *
+         * @param key The key for referencing this value
+         * @param value The float value to store
+         * @return The Builder to allow chaining
          */
-        public @NonNull Builder setExtra(@Nullable Bundle bundle) {
-            return mProvider.setExtra_impl(bundle);
+        public @NonNull Builder putFloat(@NonNull @LongKey String key, float value) {
+            return mProvider.putFloat_impl(key, value);
+        }
+
+        /**
+         * Set a bundle of extras.
+         *
+         * @param extras The extras to include with this description or null.
+         * @return The Builder to allow chaining
+         */
+        public Builder setExtras(@Nullable Bundle extras) {
+            return mProvider.setExtras_impl(extras);
         }
 
         /**

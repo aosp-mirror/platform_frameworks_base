@@ -36,6 +36,11 @@ message JobSchedulerServiceDumpProto {
 
     optional ConstantsProto settings = 1;
 
+    optional int32 current_heartbeat = 14;
+    repeated int32 next_heartbeat = 15;
+    optional int64 last_heartbeat_time_millis = 16;
+    optional int64 next_heartbeat_time_millis = 17;
+
     repeated int32 started_users = 2;
 
     message RegisteredJob {
@@ -54,6 +59,8 @@ message JobSchedulerServiceDumpProto {
         optional bool is_job_currently_active = 6;
         optional bool is_uid_backing_up = 7;
         optional bool is_component_present = 8;
+
+        optional int64 last_run_heartbeat = 9;
     }
     repeated RegisteredJob registered_jobs = 3;
 

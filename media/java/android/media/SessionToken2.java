@@ -18,7 +18,6 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.content.Context;
 import android.media.session.MediaSessionManager;
 import android.media.update.ApiLoader;
@@ -36,8 +35,11 @@ import java.lang.annotation.RetentionPolicy;
  * {@link MediaController2} to communicate with the session.
  * <p>
  * It can be also obtained by {@link MediaSessionManager}.
- * @hide
  */
+// New version of MediaSession.Token for following reasons
+//   - Stop implementing Parcelable for updatable support
+//   - Represent session and library service (formerly browser service) in one class.
+//     Previously MediaSession.Token was for session and ComponentName was for service.
 public final class SessionToken2 {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(value = {TYPE_SESSION, TYPE_SESSION_SERVICE, TYPE_LIBRARY_SERVICE})
@@ -86,7 +88,6 @@ public final class SessionToken2 {
      * Constructor for the token.
      * @hide
      */
-    @SystemApi
     public SessionToken2(@NonNull SessionToken2Provider provider) {
         mProvider = provider;
     }
@@ -106,7 +107,9 @@ public final class SessionToken2 {
         return mProvider.toString_impl();
     }
 
-    @SystemApi
+    /**
+     * @hide
+     */
     public SessionToken2Provider getProvider() {
         return mProvider;
     }
@@ -147,7 +150,7 @@ public final class SessionToken2 {
      * @return
      */
     public static SessionToken2 fromBundle(@NonNull Context context, @NonNull Bundle bundle) {
-        return ApiLoader.getProvider(context).SessionToken2_fromBundle(context, bundle);
+        return ApiLoader.getProvider(context).fromBundle_SessionToken2(context, bundle);
     }
 
     /**

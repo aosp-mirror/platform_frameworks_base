@@ -1087,13 +1087,18 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"යෙදුම් ආරම්භ කරමින්."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"ඇරඹුම අවසාන කරමින්."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> ධාවනය වෙමින්"</string>
-    <string name="heavy_weight_notification_detail" msgid="867643381388543170">"යෙදුමට මාරු වීමට තට්ටු කරන්න"</string>
-    <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"යෙදුම් මාරු වනවාද?"</string>
-    <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"අලුත් යෙදුමක් ආරම්භ කිරීමට පෙර තවමත් ක්‍රියාවෙහි යෙදෙමින් පවතින යෙදුම නැවැත්විය යුතුයි."</string>
-    <string name="old_app_action" msgid="493129172238566282">"<xliff:g id="OLD_APP">%1$s</xliff:g> වෙත ආපසු යන්න"</string>
-    <string name="old_app_description" msgid="2082094275580358049">"නව යෙදුම ආරම්භ නොකරන්න."</string>
-    <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> අරඹන්න"</string>
-    <string name="new_app_description" msgid="1932143598371537340">"සුරැකීමකින් තොරව පරණ යෙදුම නවත්වන්න."</string>
+    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
+    <skip />
+    <!-- no translation found for old_app_action (3044685170829526403) -->
+    <skip />
+    <!-- no translation found for new_app_action (6694851182870774403) -->
+    <skip />
+    <!-- no translation found for new_app_description (5894852887817332322) -->
+    <skip />
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> මතකයේ සීමාව ඉක්මවා ඇත"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"ඉවත දැමීම් ගොඩ රැස් කර ඇත. බෙදා ගැනීමට තට්ටු කරන්න"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"සංච නික්ෂේපය බෙදාගන්න ද?"</string>

@@ -316,7 +316,7 @@ void StatsLogProcessor::flushIfNecessaryLocked(
         StatsdStats::kMaxMetricsBytesPerConfig) {  // Too late. We need to start clearing data.
         // TODO(b/70571383): By 12/15/2017 add API to drop data directly
         ProtoOutputStream proto;
-        metricsManager.onDumpReport(time(nullptr) * NS_PER_SEC, &proto);
+        metricsManager.onDumpReport(timestampNs, &proto);
         StatsdStats::getInstance().noteDataDropped(key);
         VLOG("StatsD had to toss out metrics for %s", key.ToString().c_str());
     } else if (totalBytes > .9 * StatsdStats::kMaxMetricsBytesPerConfig) {
@@ -340,7 +340,7 @@ void StatsLogProcessor::WriteDataToDisk() {
     for (auto& pair : mMetricsManagers) {
         const ConfigKey& key = pair.first;
         vector<uint8_t> data;
-        onDumpReportLocked(key, time(nullptr) * NS_PER_SEC, &data);
+        onDumpReportLocked(key, getElapsedRealtimeNs(), &data);
         // TODO: Add a guardrail to prevent accumulation of file on disk.
         string file_name = StringPrintf("%s/%ld_%d_%lld", STATS_DATA_DIR,
              (long)getWallClockSec(), key.GetUid(), (long long)key.GetId());

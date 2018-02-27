@@ -30,7 +30,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.robolectric.shadow.api.Shadow.extract;
+import static org.robolectric.Shadows.shadowOf;
 import static org.testng.Assert.expectThrows;
 
 import static java.util.Arrays.asList;
@@ -58,7 +58,6 @@ import com.android.server.backup.transport.TransportNotRegisteredException;
 import com.android.server.testing.FrameworkRobolectricTestRunner;
 import com.android.server.testing.SystemLoaderPackages;
 import com.android.server.testing.shadows.FrameworkShadowContextImpl;
-import com.android.server.testing.shadows.FrameworkShadowPackageManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -79,7 +78,7 @@ import java.util.stream.Stream;
 @Config(
     manifest = Config.NONE,
     sdk = 26,
-    shadows = {FrameworkShadowPackageManager.class, FrameworkShadowContextImpl.class}
+    shadows = {FrameworkShadowContextImpl.class}
 )
 @SystemLoaderPackages({"com.android.server.backup"})
 @Presubmit
@@ -107,8 +106,7 @@ public class TransportManagerTest {
         MockitoAnnotations.initMocks(this);
 
         mContext = RuntimeEnvironment.application;
-        mShadowPackageManager =
-                (FrameworkShadowPackageManager) extract(mContext.getPackageManager());
+        mShadowPackageManager = shadowOf(mContext.getPackageManager());
 
         mTransportA1 = genericTransport(PACKAGE_A, "TransportFoo");
         mTransportA2 = genericTransport(PACKAGE_A, "TransportBar");

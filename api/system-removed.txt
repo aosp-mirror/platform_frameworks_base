@@ -98,6 +98,7 @@ package android.security.keystore.recovery {
   }
 
   public class RecoveryController {
+    method public deprecated java.security.Key generateKey(java.lang.String, byte[]) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.LockScreenRequiredException;
     method public deprecated java.util.List<java.lang.String> getAliases(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public deprecated android.security.keystore.recovery.KeyChainSnapshot getRecoveryData() throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public deprecated int getRecoveryStatus(java.lang.String, java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
@@ -106,6 +107,14 @@ package android.security.keystore.recovery {
 
   public class RecoverySession implements java.lang.AutoCloseable {
     method public deprecated byte[] start(byte[], byte[], byte[], java.util.List<android.security.keystore.recovery.KeyChainProtectionParams>) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
+  }
+
+  public final class WrappedApplicationKey implements android.os.Parcelable {
+    method public deprecated byte[] getAccount();
+  }
+
+  public static class WrappedApplicationKey.Builder {
+    method public deprecated android.security.keystore.recovery.WrappedApplicationKey.Builder setAccount(byte[]);
   }
 
 }

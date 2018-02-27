@@ -19,7 +19,6 @@ package android.media;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.IntDef;
-import android.annotation.SystemApi;
 import android.content.Context;
 import android.media.update.ApiLoader;
 import android.media.update.Rating2Provider;
@@ -36,12 +35,10 @@ import java.lang.annotation.RetentionPolicy;
  * {@link #RATING_5_STARS} or {@link #RATING_PERCENTAGE}) and the actual rating value (which may
  * be defined as "unrated"), both of which are defined when the rating instance is constructed
  * through one of the factory methods.
- * @hide
  */
+// New version of Rating with following change
+//   - Don't implement Parcelable for updatable support.
 public final class Rating2 {
-    // Mostly same as the android.media.Rating, but it's no longer implements Parcelable for
-    // updatable support.
-
     /**
      * @hide
      */
@@ -100,7 +97,6 @@ public final class Rating2 {
     /**
      * @hide
      */
-    @SystemApi
     public Rating2(@NonNull Rating2Provider provider) {
         mProvider = provider;
     }
@@ -113,7 +109,6 @@ public final class Rating2 {
     /**
      * @hide
      */
-    @SystemApi
     public Rating2Provider getProvider() {
         return mProvider;
     }

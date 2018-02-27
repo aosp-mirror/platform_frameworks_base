@@ -17,10 +17,8 @@
 package android.security.keystore.recovery;
 
 /**
- * Error thrown when the recovery agent supplies an invalid X509 certificate.
- *
+ * @deprecated Not used.
  * @hide
- * Deprecated
  */
 public class BadCertificateFormatException extends RecoveryControllerException {
     public BadCertificateFormatException(String msg) {

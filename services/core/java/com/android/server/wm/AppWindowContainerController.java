@@ -367,15 +367,14 @@ public class AppWindowContainerController
                     if (wtoken.isHidden()) {
                         wtoken.waitingToShow = true;
                     }
-
-                    if (wtoken.isClientHidden()) {
-                        // In the case where we are making an app visible but holding off for a
-                        // transition, we still need to tell the client to make its windows visible
-                        // so they get drawn. Otherwise, we will wait on performing the transition
-                        // until all windows have been drawn, they never will be, and we are sad.
-                        wtoken.setClientHidden(false);
-                    }
                 }
+
+                // In the case where we are making an app visible but holding off for a transition,
+                // we still need to tell the client to make its windows visible so they get drawn.
+                // Otherwise, we will wait on performing the transition until all windows have been
+                // drawn, they never will be, and we are sad.
+                wtoken.setClientHidden(false);
+
                 wtoken.requestUpdateWallpaperIfNeeded();
 
                 if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "No longer Stopped: " + wtoken);

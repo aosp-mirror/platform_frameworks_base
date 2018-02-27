@@ -128,6 +128,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.IntSupplier;
@@ -2055,7 +2056,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         ComponentName componentName = ComponentName.unflattenFromString(componentId);
-        if (componentName.equals(userState.mServiceAssignedToAccessibilityButton)) {
+        if (Objects.equals(componentName, userState.mServiceAssignedToAccessibilityButton)) {
             return false;
         }
         userState.mServiceAssignedToAccessibilityButton = componentName;
@@ -3300,7 +3301,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         if (mAccessibilityFocusedWindowId != windowId) {
                             mMainHandler.sendMessage(obtainMessage(
                                     AccessibilityManagerService::clearAccessibilityFocus,
-                                    AccessibilityManagerService.this, 0));
+                                    AccessibilityManagerService.this,
+                                    box(mAccessibilityFocusedWindowId)));
                             mSecurityPolicy.setAccessibilityFocusedWindowLocked(windowId);
                             mAccessibilityFocusNodeId = nodeId;
                         }

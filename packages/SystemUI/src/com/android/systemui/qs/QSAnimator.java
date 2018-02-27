@@ -66,10 +66,6 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private TouchAnimator mNonfirstPageDelayedAnimator;
     private TouchAnimator mBrightnessAnimator;
 
-    /**
-     * Whether we're in the middle of animating between the collapsed and expanded states.
-     */
-    private boolean mIsAnimating;
     private boolean mOnKeyguard;
 
     private boolean mAllowFancy;
@@ -94,9 +90,6 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             Log.w(TAG, "QS Not using page layout");
         }
         panel.setPageListener(this);
-
-        // At time of creation, the QS panel is never animating.
-        mIsAnimating = false;
     }
 
     public void onRtlChanged() {
@@ -251,11 +244,6 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             } else {
                 mBrightnessAnimator = null;
             }
-            View headerView = mQsPanel.getHeaderView();
-            if (headerView!= null) {
-                firstPageBuilder.addFloat(headerView, "translationY", heightDiff, 0);
-                mAllViews.add(headerView);
-            }
             mFirstPageAnimator = firstPageBuilder
                     .setListener(this)
                     .build();
@@ -342,21 +330,11 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
     @Override
     public void onAnimationAtStart() {
-        if (mIsAnimating) {
-            mQsPanel.onCollapse();
-        }
-        mIsAnimating = false;
-
         mQuickQsPanel.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void onAnimationAtEnd() {
-        if (mIsAnimating) {
-            mQsPanel.onExpanded();
-        }
-        mIsAnimating = false;
-
         mQuickQsPanel.setVisibility(View.INVISIBLE);
         final int N = mQuickQsViews.size();
         for (int i = 0; i < N; i++) {
@@ -366,11 +344,6 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
     @Override
     public void onAnimationStarted() {
-        if (!mIsAnimating) {
-            mQsPanel.onAnimating();
-        }
-        mIsAnimating = true;
-
         mQuickQsPanel.setVisibility(mOnKeyguard ? View.INVISIBLE : View.VISIBLE);
         if (mOnFirstPage) {
             final int N = mQuickQsViews.size();

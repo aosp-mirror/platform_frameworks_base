@@ -53,6 +53,7 @@ import android.util.MutableBoolean;
 
 import org.junit.runner.RunWith;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 
@@ -111,7 +112,8 @@ public class ActivityRecordTests extends ActivityTestsBase {
     }
 
     // TODO: b/71582913
-    //@Test
+    @Ignore("b/71582913")
+    @Test
     public void testPausingWhenVisibleFromStopped() throws Exception {
         final MutableBoolean pauseFound = new MutableBoolean(false);
         doAnswer((InvocationOnMock invocationOnMock) -> {

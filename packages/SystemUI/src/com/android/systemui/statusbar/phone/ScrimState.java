@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import android.graphics.Color;
 import android.os.Trace;
+import android.util.MathUtils;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.statusbar.ScrimView;
@@ -54,6 +55,13 @@ public enum ScrimState {
             }
             mCurrentBehindAlpha = mScrimBehindAlphaKeyguard;
             mCurrentInFrontAlpha = 0;
+        }
+
+        @Override
+        public float getBehindAlpha(float busynessFactor) {
+            return MathUtils.map(0 /* start */, 1 /* stop */,
+                   ScrimController.GRADIENT_SCRIM_ALPHA, ScrimController.GRADIENT_SCRIM_ALPHA_BUSY,
+                   busynessFactor);
         }
     },
 
@@ -183,7 +191,7 @@ public enum ScrimState {
         return mCurrentInFrontAlpha;
     }
 
-    public float getBehindAlpha() {
+    public float getBehindAlpha(float busyness) {
         return mCurrentBehindAlpha;
     }
 

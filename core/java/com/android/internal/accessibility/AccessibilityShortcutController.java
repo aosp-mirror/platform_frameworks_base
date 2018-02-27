@@ -319,7 +319,7 @@ public class AccessibilityShortcutController {
         }
         final PackageManager pm = mContext.getPackageManager();
         String label = serviceInfo.getResolveInfo().loadLabel(pm).toString();
-        String summary = serviceInfo.loadSummary(pm).toString();
+        CharSequence summary = serviceInfo.loadSummary(pm);
         if (!includeSummary || TextUtils.isEmpty(summary)) {
             return label;
         }

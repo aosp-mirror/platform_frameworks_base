@@ -622,29 +622,25 @@ void util_multiplyMV(JNIEnv *env, jclass clazz,
 
 // ---------------------------------------------------------------------------
 
-static int checkInternalFormat(SkColorType colorType, int format, int type)
+static int checkInternalFormat(SkColorType colorType, int internalformat,
+    int type)
 {
     switch(colorType) {
         case kN32_SkColorType:
+            return (type == GL_UNSIGNED_BYTE &&
+                internalformat == GL_RGBA) ? 0 : -1;
         case kAlpha_8_SkColorType:
-            if (type == GL_UNSIGNED_BYTE)
-                return 0;
+            return (type == GL_UNSIGNED_BYTE &&
+                internalformat == GL_ALPHA) ? 0 : -1;
         case kARGB_4444_SkColorType:
+            return (type == GL_UNSIGNED_SHORT_4_4_4_4 &&
+                internalformat == GL_RGBA) ? 0 : -1;
         case kRGB_565_SkColorType:
-            switch (type) {
-                case GL_UNSIGNED_SHORT_4_4_4_4:
-                case GL_UNSIGNED_SHORT_5_6_5:
-                case GL_UNSIGNED_SHORT_5_5_5_1:
-                    return 0;
-                case GL_UNSIGNED_BYTE:
-                    if (format == GL_LUMINANCE_ALPHA)
-                        return 0;
-            }
-            break;
+            return (type == GL_UNSIGNED_SHORT_5_6_5 &&
+                internalformat == GL_RGB) ? 0 : -1;
         case kRGBA_F16_SkColorType:
-            if (type == GL_HALF_FLOAT && format == GL_RGBA16F)
-                return 0;
-            break;
+            return (type == GL_HALF_FLOAT &&
+                internalformat == GL_RGBA16F) ? 0 : -1;
         default:
             break;
     }

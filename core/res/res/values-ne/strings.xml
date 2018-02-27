@@ -93,8 +93,7 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS सन्देशहरू"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"भ्वाइस मेल सन्देशहरू"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi कल"</string>
-    <!-- no translation found for notification_channel_sim (4052095493875188564) -->
-    <skip />
+    <string name="notification_channel_sim" msgid="4052095493875188564">"SIM को स्थिति"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"सहकर्मी अनुरोध गरियो। TTY मोड पूर्ण"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"सहकर्मी अनुरोध गरियो। TTY मोड HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"सहकर्मी अनुरोध गरियो। TTY मोड VCO"</string>
@@ -240,8 +239,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"सेटिङहरू"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"सहायता दिनुहोस्"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"आवाज सहायता"</string>
-    <!-- no translation found for global_action_lockdown (1099326950891078929) -->
-    <skip />
+    <string name="global_action_lockdown" msgid="1099326950891078929">"लकडाउन गर्नु…"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"९९९+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"नयाँ सूचना"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"भर्चुअल किबोर्ड"</string>
@@ -828,8 +826,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"जुक्ति: जुमलाई ठूलो र सानो पार्न दुई पटक हान्नुहोस्।"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"स्वतः भर्ने"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"अटोफिल सेटअप गर्नुहोस्"</string>
-    <!-- no translation found for autofill_window_title (921006636895825007) -->
-    <skip />
+    <string name="autofill_window_title" msgid="921006636895825007">"स्वतः भरण"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$१$२$३"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -1094,13 +1091,18 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"सुरुवात अनुप्रयोगहरू।"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"बुट पुरा हुँदै।"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> चलिरहेको छ"</string>
-    <string name="heavy_weight_notification_detail" msgid="867643381388543170">"अनुप्रयोगमा स्विच गर्न ट्याप गर्नुहोस्"</string>
-    <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"अनुप्रयोगहरू स्विच गर्ने हो?"</string>
-    <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"अर्को अनुप्रयोग पहिले नै चालु छ जुन तपाईंले एउटा नयाँ सुरु गर्नु अघि बन्द गर्नुपर्ने हुन्छ।"</string>
-    <string name="old_app_action" msgid="493129172238566282">"<xliff:g id="OLD_APP">%1$s</xliff:g> मा फर्कनुहोस्"</string>
-    <string name="old_app_description" msgid="2082094275580358049">"नयाँ अनुप्रयोग सुरु नगर्नुहोस्।"</string>
-    <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> सुरु गर्नुहोस्"</string>
-    <string name="new_app_description" msgid="1932143598371537340">"बचत नगरी पुरानो अनुप्रयोग रोक्नुहोस्।"</string>
+    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
+    <skip />
+    <!-- no translation found for old_app_action (3044685170829526403) -->
+    <skip />
+    <!-- no translation found for new_app_action (6694851182870774403) -->
+    <skip />
+    <!-- no translation found for new_app_description (5894852887817332322) -->
+    <skip />
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> ले मेमोरी सीमा नाघ्यो"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"हिप डम्पलाई संग्रह गरिएको छ, साझेदारी गर्न छुनुहोस्"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"हिप डम्प साझेदारी गर्नुहुन्छ?"</string>
@@ -1206,12 +1208,9 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM कार्ड थप गरियो"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"मोबाइल नेटवर्क पहुँच गर्न तपाईँको उपकरण पुनःस्टार्ट गर्नुहोस्।"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"पुनः सुरु गर्नुहोस्"</string>
-    <!-- no translation found for install_carrier_app_notification_title (9056007111024059888) -->
-    <skip />
-    <!-- no translation found for install_carrier_app_notification_text (3346681446158696001) -->
-    <skip />
-    <!-- no translation found for install_carrier_app_notification_button (3094206295081900849) -->
-    <skip />
+    <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"मोबाइल सेवा सक्रिय गर्नुहोस्"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"आफ्नो नयाँ SIM सक्रिय गर्न सेवा प्रदायकको अनुप्रयोग डाउनलोड गर्नुहोस्"</string>
+    <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"अनुप्रयोग डाउनलोड गर्नुहोस्"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"नयाँ SIM घुसाइयो"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"यसलाई सेटअप गर्न ट्याप गर्नुहोस्"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"समय मिलाउनुहोस्"</string>

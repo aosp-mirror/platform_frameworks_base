@@ -11,7 +11,6 @@ import java.util.Set;
 /**
  * @hide
  */
-// TODO(jaewan): SystemApi
 public interface MediaMetadata2Provider {
     boolean containsKey_impl(String key);
     CharSequence getText_impl(String key);
@@ -23,7 +22,8 @@ public interface MediaMetadata2Provider {
     Set<String> keySet_impl();
     int size_impl();
     Bitmap getBitmap_impl(String key);
-    Bundle getExtra_impl();
+    float getFloat_impl(String key);
+    Bundle getExtras_impl();
 
     interface BuilderProvider {
         Builder putText_impl(String key, CharSequence value);
@@ -31,7 +31,8 @@ public interface MediaMetadata2Provider {
         Builder putLong_impl(String key, long value);
         Builder putRating_impl(String key, Rating2 value);
         Builder putBitmap_impl(String key, Bitmap value);
-        Builder setExtra_impl(Bundle bundle);
+        Builder putFloat_impl(String key, float value);
+        Builder setExtras_impl(Bundle bundle);
         MediaMetadata2 build_impl();
     }
 }

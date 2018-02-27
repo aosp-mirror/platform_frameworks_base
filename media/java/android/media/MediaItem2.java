@@ -19,7 +19,6 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.content.Context;
 import android.media.update.ApiLoader;
 import android.media.update.MediaItem2Provider;
@@ -35,7 +34,6 @@ import java.lang.annotation.RetentionPolicy;
  * When it's sent to a controller or browser, it's anonymized and data descriptor wouldn't be sent.
  * <p>
  * This object isn't a thread safe.
- * @hide
  */
 public class MediaItem2 {
     /** @hide */
@@ -64,7 +62,9 @@ public class MediaItem2 {
      * @param mediaId id of this item. It must be unique whithin this app
      * @param metadata metadata with the media id.
      * @param flags The flags for this item.
+     * @hide
      */
+    // TODO(jaewan): Remove this
     public MediaItem2(@NonNull Context context, @NonNull String mediaId,
             @NonNull DataSourceDesc dsd, @Nullable MediaMetadata2 metadata,
             @Flags int flags) {
@@ -76,7 +76,6 @@ public class MediaItem2 {
      * Create a new media item
      * @hide
      */
-    @SystemApi
     public MediaItem2(MediaItem2Provider provider) {
         mProvider = provider;
     }
@@ -155,5 +154,88 @@ public class MediaItem2 {
      */
     public @Nullable DataSourceDesc getDataSourceDesc() {
         return mProvider.getDataSourceDesc_impl();
+    }
+
+    /**
+     * Build {@link MediaItem2}
+     */
+    // TODO(jaewan): Move it to updatable
+    public static final class Builder {
+        private Context mContext;
+        private @Flags int mFlags;
+        private String mMediaId;
+        private MediaMetadata2 mMetadata;
+        private DataSourceDesc mDataSourceDesc;
+
+        /**
+         * Constructor for {@link Builder}
+         *
+         * @param context
+         * @param flags
+         */
+        public Builder(@NonNull Context context, @Flags int flags) {
+            mContext = context;
+            mFlags = flags;
+        }
+
+        /**
+         * Set the media id of this instance. {@code null} for unset.
+         * <p>
+         * Media id is used to identify a media contents between session and controller.
+         * <p>
+         * If the metadata is set with the {@link #setMetadata(MediaMetadata2)} and it has
+         * media id, id from {@link #setMediaId(String)} will be ignored and metadata's id will be
+         * used instead. If the id isn't set neither by {@link #setMediaId(String)} nor
+         * {@link #setMetadata(MediaMetadata2)}, id will be automatically generated.
+         *
+         * @param mediaId media id
+         * @return this instance for chaining
+         */
+        public Builder setMediaId(@Nullable String mediaId) {
+            mMediaId = mediaId;
+            return this;
+        }
+
+        /**
+         * Set the metadata of this instance. {@code null} for unset.
+         * <p>
+         * If the metadata is set with the {@link #setMetadata(MediaMetadata2)} and it has
+         * media id, id from {@link #setMediaId(String)} will be ignored and metadata's id will be
+         * used instead. If the id isn't set neither by {@link #setMediaId(String)} nor
+         * {@link #setMetadata(MediaMetadata2)}, id will be automatically generated.
+         *
+         * @param metadata metadata
+         * @return this instance for chaining
+         */
+        public Builder setMetadata(@Nullable MediaMetadata2 metadata) {
+            mMetadata = metadata;
+            return this;
+        }
+
+        /**
+         * Set the data source descriptor for this instance. {@code null} for unset.
+         *
+         * @param dataSourceDesc data source descriptor
+         * @return this instance for chaining
+         */
+        public Builder setDataSourceDesc(@Nullable DataSourceDesc dataSourceDesc) {
+            mDataSourceDesc = dataSourceDesc;
+            return this;
+        }
+
+        /**
+         * Build {@link MediaItem2}.
+         *
+         * @return a new {@link MediaItem2}.
+         */
+        public MediaItem2 build() {
+            String id = (mMetadata != null)
+                    ? mMetadata.getString(MediaMetadata2.METADATA_KEY_MEDIA_ID) : null;
+            if (id == null) {
+                //  TODO(jaewan): Double check if its sufficient (e.g. Use UUID instead?)
+                id = (mMediaId != null) ? mMediaId : toString();
+            }
+            return new MediaItem2(mContext, id, mDataSourceDesc, mMetadata, mFlags);
+        }
     }
 }

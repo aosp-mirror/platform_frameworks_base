@@ -18,7 +18,6 @@ package android.media.update;
 /**
  * @hide
  */
-// TODO(jaewan): @SystemApi
 public interface VolumeProvider2Provider {
     int getControlType_impl();
     int getMaxVolume_impl();

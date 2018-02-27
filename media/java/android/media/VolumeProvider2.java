@@ -18,7 +18,6 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.content.Context;
 import android.media.update.ApiLoader;
 import android.media.update.VolumeProvider2Provider;
@@ -32,12 +31,11 @@ import java.lang.annotation.RetentionPolicy;
  * {@link #setCurrentVolume(int)} each time the volume being provided changes.
  * <p>
  * You can set a volume provider on a session by calling
- * {@link MediaSession2#setPlayer(MediaPlayerInterface, VolumeProvider2)}.
- *
- * @hide
+ * {@link MediaSession2#setPlayer(MediaPlayerBase, VolumeProvider2)}.
  */
+// New version of VolumeProvider with following changes
+//   - Don't implement Parcelable for updatable support.
 public abstract class VolumeProvider2 {
-
     /**
      * @hide
      */
@@ -85,7 +83,6 @@ public abstract class VolumeProvider2 {
     /**
      * @hide
      */
-    @SystemApi
     public VolumeProvider2Provider getProvider() {
         return mProvider;
     }

@@ -46,11 +46,11 @@ import java.util.Map;
  * <p>The RecoveryController must be paired with a recovery agent. The recovery agent is responsible
  * for transporting the keychain to remote trusted hardware. This hardware must prevent brute force
  * attempts against the user's lock screen by limiting the number of allowed guesses (to, e.g., 10).
- * After  that number of incorrect guesses, the trusted hardware no longer allows access to the
+ * After that number of incorrect guesses, the trusted hardware no longer allows access to the
  * key chain.
  *
- * <p>For now only the recovery agent itself is able to create keys, so it is expected that the
- * recovery agent is itself the system app.
+ * <p>Only the recovery agent itself is able to create keys, so it is expected that the recovery
+ * agent is itself the system app.
  *
  * <p>A recovery agent requires the privileged permission
  * {@code android.Manifest.permission#RECOVER_KEYSTORE}.
@@ -462,35 +462,38 @@ public class RecoveryController {
     }
 
     /**
-     * Generates a AES256/GCM/NoPADDING key called {@code alias} and loads it into the recoverable
-     * key store. Returns {@link javax.crypto.SecretKey}.
-     *
-     * @param alias The key alias.
-     * @param account The account associated with the key.
-     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
-     *     service.
-     * @throws LockScreenRequiredException if the user has not set a lock screen. This is required
-     *     to generate recoverable keys, as the snapshots are encrypted using a key derived from the
-     *     lock screen.
-     * @hide
+     * @deprecated Use {@link #generateKey(String)}.
+     * @removed
      */
+    @Deprecated
     public Key generateKey(@NonNull String alias, byte[] account)
             throws InternalRecoveryServiceException, LockScreenRequiredException {
-        // TODO: update RecoverySession.recoverKeys
+        return generateKey(alias);
+    }
+
+    /**
+     * Generates a recoverable key with the given {@code alias}.
+     *
+     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
+     *     service.
+     * @throws LockScreenRequiredException if the user does not have a lock screen set. A lock
+     *     screen is required to generate recoverable keys.
+     */
+    public Key generateKey(@NonNull String alias) throws InternalRecoveryServiceException,
+            LockScreenRequiredException {
         try {
-            String grantAlias = mBinder.generateKey(alias, account);
+            String grantAlias = mBinder.generateKey(alias);
             if (grantAlias == null) {
-                return null;
+                throw new InternalRecoveryServiceException("null grant alias");
             }
-            Key result = AndroidKeyStoreProvider.loadAndroidKeyStoreKeyFromKeystore(
+            return AndroidKeyStoreProvider.loadAndroidKeyStoreKeyFromKeystore(
                     mKeyStore,
                     grantAlias,
                     KeyStore.UID_SELF);
-            return result;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (UnrecoverableKeyException e) {
-            throw new InternalRecoveryServiceException("Access to newly generated key failed for");
+            throw new InternalRecoveryServiceException("Failed to get key from keystore", e);
         } catch (ServiceSpecificException e) {
             if (e.errorCode == ERROR_INSECURE_USER) {
                 throw new LockScreenRequiredException(e.getMessage());

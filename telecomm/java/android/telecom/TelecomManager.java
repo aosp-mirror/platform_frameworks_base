@@ -111,12 +111,6 @@ public class TelecomManager {
             "android.telecom.action.SHOW_RESPOND_VIA_SMS_SETTINGS";
 
     /**
-     * The {@link android.content.Intent} action used to show the assisted dialing settings.
-     */
-    public static final String ACTION_SHOW_ASSISTED_DIALING_SETTINGS =
-            "android.telecom.action.SHOW_ASSISTED_DIALING_SETTINGS";
-
-    /**
      * The {@link android.content.Intent} action used to show the settings page used to configure
      * {@link PhoneAccount} preferences.
      */
@@ -619,15 +613,10 @@ public class TelecomManager {
     /**
      * The boolean indicated by this extra controls whether or not a call is eligible to undergo
      * assisted dialing. This extra is stored under {@link #EXTRA_OUTGOING_CALL_EXTRAS}.
+     * @hide
      */
     public static final String EXTRA_USE_ASSISTED_DIALING =
             "android.telecom.extra.USE_ASSISTED_DIALING";
-
-    /**
-     * The bundle indicated by this extra store information related to the assisted dialing action.
-     */
-    public static final String EXTRA_ASSISTED_DIALING_TRANSFORMATION_INFO =
-            "android.telecom.extra.ASSISTED_DIALING_TRANSFORMATION_INFO";
 
     /**
      * The following 4 constants define how properties such as phone numbers and names are

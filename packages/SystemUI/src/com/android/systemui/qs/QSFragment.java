@@ -272,21 +272,27 @@ public class QSFragment extends Fragment implements QS {
         mContainer.setExpansion(expansion);
         final float translationScaleY = expansion - 1;
         if (!mHeaderAnimating) {
-            int height = mHeader.getHeight();
-            getView().setTranslationY(mKeyguardShowing ? (translationScaleY * height)
-                    : headerTranslation);
+            getView().setTranslationY(
+                    mKeyguardShowing
+                            ? translationScaleY * mHeader.getHeight()
+                            : headerTranslation);
         }
         if (expansion == mLastQSExpansion) {
             return;
         }
         mLastQSExpansion = expansion;
-        mHeader.setExpansion(mKeyguardShowing ? 1 : expansion);
-        mFooter.setExpansion(mKeyguardShowing ? 1 : expansion);
+
+        boolean fullyExpanded = expansion == 1;
         int heightDiff = mQSPanel.getBottom() - mHeader.getBottom() + mHeader.getPaddingBottom()
                 + mFooter.getHeight();
+        float panelTranslationY = translationScaleY * heightDiff;
+
+        // Let the views animate their contents correctly by giving them the necessary context.
+        mHeader.setExpansion(mKeyguardShowing, expansion, panelTranslationY);
+        mFooter.setExpansion(mKeyguardShowing ? 1 : expansion);
         mQSPanel.setTranslationY(translationScaleY * heightDiff);
-        boolean fullyExpanded = expansion == 1;
         mQSDetail.setFullyExpanded(fullyExpanded);
+
         if (fullyExpanded) {
             // Always draw within the bounds of the view when fully expanded.
             mQSPanel.setClipBounds(null);

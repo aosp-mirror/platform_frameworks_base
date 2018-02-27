@@ -115,6 +115,8 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     private final static int BUTTON_FADE_IN_OUT_DURATION_MS = 100;
     private final static int ROTATE_BUTTON_LOOP_DURATION_MS = 2000;
 
+    private static final int NUM_ACCEPTED_ROTATION_SUGGESTIONS_FOR_INTRODUCTION = 3;
+
     /** Allow some time inbetween the long press for back and recents. */
     private static final int LOCK_TO_APP_GESTURE_TOLERENCE = 200;
 
@@ -156,6 +158,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
     private final Runnable mRemoveRotationProposal = () -> setRotateSuggestionButtonState(false);
     private Animator mRotateHideAnimator;
+    private ViewRippler mViewRippler = new ViewRippler();
 
     private final OverviewProxyListener mOverviewProxyListener = new OverviewProxyListener() {
         @Override
@@ -167,6 +170,9 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         @Override
         public void onRecentsAnimationStarted() {
             mNavigationBarView.setRecentsAnimationStarted(true);
+
+            // Use navbar dragging as a signal to hide the rotate button
+            setRotateSuggestionButtonState(false);
         }
 
         @Override
@@ -446,10 +452,11 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         }
 
         if (visible) { // Appear and change (cannot force)
-            // Stop any currently running hide animations
+            // Stop and clear any currently running hide animations
             if (mRotateHideAnimator != null && mRotateHideAnimator.isRunning()) {
-                mRotateHideAnimator.pause();
+                mRotateHideAnimator.cancel();
             }
+            mRotateHideAnimator = null;
 
             // Reset the alpha if any has changed due to hide animation
             view.setAlpha(1f);
@@ -460,11 +467,15 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
                 animIcon.start();
             }
 
+            if (!isRotateSuggestionIntroduced()) mViewRippler.start(view);
+
             // Set visibility, may fail if a11y service is active.
             // If invisible, call will stop animation.
             mNavigationBarView.setRotateButtonVisibility(true);
 
         } else { // Hide
+
+            mViewRippler.stop(); // Prevent any pending ripples, force hide or not
 
             if (force) {
                 // If a hide animator is running stop it and make invisible
@@ -513,6 +524,25 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         if (mAccessibilityFeedbackEnabled) return 20000;
         if (mHoveringRotationSuggestion) return 16000;
         return 6000;
+    }
+
+    private boolean isRotateSuggestionIntroduced() {
+        ContentResolver cr = getContext().getContentResolver();
+        return Settings.Secure.getInt(cr, Settings.Secure.NUM_ROTATION_SUGGESTIONS_ACCEPTED, 0)
+                >= NUM_ACCEPTED_ROTATION_SUGGESTIONS_FOR_INTRODUCTION;
+    }
+
+    private void incrementNumAcceptedRotationSuggestionsIfNeeded() {
+        // Get the number of accepted suggestions
+        ContentResolver cr = getContext().getContentResolver();
+        final int numSuggestions = Settings.Secure.getInt(cr,
+                Settings.Secure.NUM_ROTATION_SUGGESTIONS_ACCEPTED, 0);
+
+        // Increment the number of accepted suggestions only if it would change intro mode
+        if (numSuggestions < NUM_ACCEPTED_ROTATION_SUGGESTIONS_FOR_INTRODUCTION) {
+            Settings.Secure.putInt(cr, Settings.Secure.NUM_ROTATION_SUGGESTIONS_ACCEPTED,
+                    numSuggestions + 1);
+        }
     }
 
     // Injected from StatusBar at creation.
@@ -857,6 +887,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
     private void onRotateSuggestionClick(View v) {
         mMetricsLogger.action(MetricsEvent.ACTION_ROTATION_SUGGESTION_ACCEPTED);
+        incrementNumAcceptedRotationSuggestionsIfNeeded();
         mRotationLockController.setRotationLockedAtAngle(true, mLastRotationSuggestion);
     }
 
@@ -978,8 +1009,40 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
         @Override
         public void onActivityRequestedOrientationChanged(int taskId, int requestedOrientation) {
-            setRotateSuggestionButtonState(false);
+            // Only hide the icon if the top task changes its requestedOrientation
+            // Launcher can alter its requestedOrientation while it's not on top, don't hide on this
+            final boolean top = ActivityManagerWrapper.getInstance().getRunningTask().id == taskId;
+            if (top) setRotateSuggestionButtonState(false);
         }
+    }
+
+    private class ViewRippler {
+        private static final int RIPPLE_OFFSET_MS = 50;
+        private static final int RIPPLE_INTERVAL_MS = 2000;
+        private View mRoot;
+
+        public void start(View root) {
+            stop(); // Stop any pending ripple animations
+
+            mRoot = root;
+
+            // Schedule pending ripples, offset the 1st to avoid problems with visibility change
+            mRoot.postOnAnimationDelayed(mRipple, RIPPLE_OFFSET_MS);
+            mRoot.postOnAnimationDelayed(mRipple, RIPPLE_INTERVAL_MS);
+            mRoot.postOnAnimationDelayed(mRipple, 2*RIPPLE_INTERVAL_MS);
+        }
+
+        public void stop() {
+            if (mRoot != null) mRoot.removeCallbacks(mRipple);
+        }
+
+        private final Runnable mRipple = new Runnable() {
+            @Override
+            public void run() { // Cause the ripple to fire via false presses
+                mRoot.setPressed(true);
+                mRoot.setPressed(false);
+            }
+        };
     }
 
     public static View create(Context context, FragmentListener listener) {

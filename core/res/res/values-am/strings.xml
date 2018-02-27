@@ -93,8 +93,7 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"የኤስኤምኤስ መልዕክቶች"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"የድምጽ መልዕክቶች"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"የWi-Fi ጥሪ"</string>
-    <!-- no translation found for notification_channel_sim (4052095493875188564) -->
-    <skip />
+    <string name="notification_channel_sim" msgid="4052095493875188564">"የሲም ሁኔታ"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"ቢጤ መልዕክት መጻጻፊያ ስልክ ሁነታ FULL ጠይቋል"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"ቢጤ መልዕክት መጻጻፊያ ስልክ ሁነታ HCO ጠይቋል"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"ቢጤ መልዕክት መጻጻፊያ ስልክ ሁነታ VCO ጠይቋል"</string>
@@ -240,8 +239,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"ቅንብሮች"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"ደግፍ"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"የድምጽ እርዳታ"</string>
-    <!-- no translation found for global_action_lockdown (1099326950891078929) -->
-    <skip />
+    <string name="global_action_lockdown" msgid="1099326950891078929">"መቆለፊያ"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"አዲስ ማሳወቂያ"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"ምናባዊ የቁልፍ ሰሌዳ"</string>
@@ -828,8 +826,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"ጠቃሚ ምክር፦ ለማጉላት እና ለማሳነስ ሁለቴ-መታ አድርግ።"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"ራስ ሙላ"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"በራስ ሰር ሙላ አዘጋጅ"</string>
-    <!-- no translation found for autofill_window_title (921006636895825007) -->
-    <skip />
+    <string name="autofill_window_title" msgid="921006636895825007">"ራስ-ሙላ"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">"፣ "</string>
@@ -1088,13 +1085,18 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"መተግበሪያዎችን በማስጀመር ላይ፡፡"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"አጨራረስ ማስነሻ፡፡"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> አሂድ"</string>
-    <string name="heavy_weight_notification_detail" msgid="867643381388543170">"ወደ መተግበሪያ ለመቀየር መታ ያድርጉ"</string>
-    <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"መተግበሪያዎችን ለውጥ?"</string>
-    <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"አዲስ ከመጀመርህ በፊት መቆም ያለበት ሌላ መተግበሪያ እየሄደ ነው።"</string>
-    <string name="old_app_action" msgid="493129172238566282">"ወደ <xliff:g id="OLD_APP">%1$s</xliff:g> ተመለስ"</string>
-    <string name="old_app_description" msgid="2082094275580358049">"አዲሱን መተግበሪያ አትጀምር።"</string>
-    <string name="new_app_action" msgid="5472756926945440706">"ጀምር <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
-    <string name="new_app_description" msgid="1932143598371537340">"የድሮውን ትግበራ ሳታስቀምጥ አቁም።"</string>
+    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
+    <skip />
+    <!-- no translation found for old_app_action (3044685170829526403) -->
+    <skip />
+    <!-- no translation found for new_app_action (6694851182870774403) -->
+    <skip />
+    <!-- no translation found for new_app_description (5894852887817332322) -->
+    <skip />
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> የማህደረ ትውስታ ገደብን አልፏል"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"የቆሻሻ ቁልል ተሰብስቧል፤ ለማጋራት መታ ያድርጉ"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"የቆሻሻ ቁልል ይጋራ?"</string>
@@ -1200,12 +1202,9 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM ካርድ አክል"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"የተንቀሳቃሽ አውታረ መረብን ለመድረስ መሣሪያህን ድጋሚ አስነሳ።"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"ዳግም ጀምር"</string>
-    <!-- no translation found for install_carrier_app_notification_title (9056007111024059888) -->
-    <skip />
-    <!-- no translation found for install_carrier_app_notification_text (3346681446158696001) -->
-    <skip />
-    <!-- no translation found for install_carrier_app_notification_button (3094206295081900849) -->
-    <skip />
+    <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"የሞባይል አገልግሎትን አግብር"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"የእርስዎን አዲስ ሲም ለማግበር የአገልግሎት አቅራቢውን መተግበሪያ ያውርዱ"</string>
+    <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"መተግበሪያን አውርድ"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"አዲስ ሲም ገብቷል"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"ለማዋቀር መታ ያድርጉ"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"ጊዜ አዘጋጅ"</string>

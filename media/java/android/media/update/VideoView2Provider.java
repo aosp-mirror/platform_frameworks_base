@@ -19,7 +19,7 @@ package android.media.update;
 import android.annotation.SystemApi;
 import android.media.AudioAttributes;
 import android.media.MediaMetadata2;
-import android.media.MediaPlayerInterface;
+import android.media.MediaPlayerBase;
 import android.media.session.MediaController;
 import android.media.session.PlaybackState;
 import android.media.session.MediaSession;
@@ -65,7 +65,7 @@ public interface VideoView2Provider extends ViewGroupProvider {
     /**
      * @hide
      */
-    void setRouteAttributes_impl(List<String> routeCategories, MediaPlayerInterface player);
+    void setRouteAttributes_impl(List<String> routeCategories, MediaPlayerBase player);
     // TODO: remove setRouteAttributes_impl with MediaSession.Callback once MediaSession2 is ready.
     void setRouteAttributes_impl(List<String> routeCategories, MediaSession.Callback sessionPlayer);
     void setVideoPath_impl(String path);

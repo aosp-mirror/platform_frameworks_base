@@ -343,29 +343,28 @@ public final class MediaSessionManager {
      * Called when a {@link MediaSession2} is created.
      * @hide
      */
-    // TODO(jaewan): System API
-    public boolean onSessionCreated(@NonNull SessionToken2 token) {
+    public boolean createSession2(@NonNull SessionToken2 token) {
         if (token == null) {
             return false;
         }
         try {
-            return mService.onSessionCreated(token.toBundle());
+            return mService.createSession2(token.toBundle());
         } catch (RemoteException e) {
             Log.wtf(TAG, "Cannot communicate with the service.", e);
         }
         return false;
     }
 
-    /** Called when a {@link MediaSession2} is destroyed.
+    /**
+     * Called when a {@link MediaSession2} is destroyed.
      * @hide
      */
-    // TODO(jaewan): System API
-    public void onSessionDestroyed(@NonNull SessionToken2 token) {
+    public void destroySession2(@NonNull SessionToken2 token) {
         if (token == null) {
             return;
         }
         try {
-            mService.onSessionDestroyed(token.toBundle());
+            mService.destroySession2(token.toBundle());
         } catch (RemoteException e) {
             Log.wtf(TAG, "Cannot communicate with the service.", e);
         }
@@ -381,9 +380,7 @@ public final class MediaSessionManager {
      * using the {@link NotificationListenerService} APIs.
      *
      * @return list of tokens
-     * @hide
      */
-    // TODO(jaewan): Unhide
     public List<SessionToken2> getActiveSessionTokens() {
         try {
             List<Bundle> bundles = mService.getSessionTokens(
@@ -404,9 +401,7 @@ public final class MediaSessionManager {
      * using the {@link NotificationListenerService} APIs.
      *
      * @return list of tokens
-     * @hide
      */
-    // TODO(jaewan): Unhide
     public List<SessionToken2> getSessionServiceTokens() {
         try {
             List<Bundle> bundles = mService.getSessionTokens(
@@ -429,9 +424,7 @@ public final class MediaSessionManager {
      * @return list of tokens
      * @see #getActiveSessionTokens
      * @see #getSessionServiceTokens
-     * @hide
      */
-    // TODO(jaewan): Unhide
     public List<SessionToken2> getAllSessionTokens() {
         try {
             List<Bundle> bundles = mService.getSessionTokens(
@@ -452,9 +445,7 @@ public final class MediaSessionManager {
      *
      * @param executor executor to run this command
      * @param listener The listener to add.
-     * @hide
      */
-    // TODO(jaewan): Unhide
     public void addOnSessionTokensChangedListener(@NonNull @CallbackExecutor Executor executor,
             @NonNull OnSessionTokensChangedListener listener) {
         addOnSessionTokensChangedListener(UserHandle.myUserId(), executor, listener);
@@ -501,9 +492,7 @@ public final class MediaSessionManager {
      * Stop receiving session token updates on the specified listener.
      *
      * @param listener The listener to remove.
-     * @hide
      */
-    // TODO(jaewan): Unhide
     public void removeOnSessionTokensChangedListener(
             @NonNull OnSessionTokensChangedListener listener) {
         if (listener == null) {
@@ -660,9 +649,7 @@ public final class MediaSessionManager {
     /**
      * Listens for changes to the {@link #getAllSessionTokens()}. This can be added
      * using {@link #addOnActiveSessionsChangedListener}.
-     * @hide
      */
-    // TODO(jaewan): Unhide
     public interface OnSessionTokensChangedListener {
         void onSessionTokensChanged(@NonNull List<SessionToken2> tokens);
     }

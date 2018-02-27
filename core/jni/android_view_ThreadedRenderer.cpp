@@ -68,6 +68,10 @@ struct {
     jmethodID callback;
 } gFrameMetricsObserverClassInfo;
 
+struct {
+    jmethodID onFrameDraw;
+} gFrameDrawingCallback;
+
 static JNIEnv* getenv(JavaVM* vm) {
     JNIEnv* env;
     if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
@@ -849,6 +853,44 @@ static void android_view_ThreadedRenderer_setContentDrawBounds(JNIEnv* env,
     proxy->setContentDrawBounds(left, top, right, bottom);
 }
 
+class JGlobalRefHolder {
+public:
+    JGlobalRefHolder(JavaVM* vm, jobject object) : mVm(vm), mObject(object) {}
+
+    virtual ~JGlobalRefHolder() {
+        getenv(mVm)->DeleteGlobalRef(mObject);
+        mObject = nullptr;
+    }
+
+    jobject object() { return mObject; }
+    JavaVM* vm() { return mVm; }
+
+private:
+    JGlobalRefHolder(const JGlobalRefHolder&) = delete;
+    void operator=(const JGlobalRefHolder&) = delete;
+
+    JavaVM* mVm;
+    jobject mObject;
+};
+
+static void android_view_ThreadedRenderer_setFrameCallback(JNIEnv* env,
+        jobject clazz, jlong proxyPtr, jobject frameCallback) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    if (!frameCallback) {
+        proxy->setFrameCallback(nullptr);
+    } else {
+        JavaVM* vm = nullptr;
+        LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&vm) != JNI_OK, "Unable to get Java VM");
+        auto globalCallbackRef = std::make_shared<JGlobalRefHolder>(vm,
+                env->NewGlobalRef(frameCallback));
+        proxy->setFrameCallback([globalCallbackRef](int64_t frameNr) {
+            JNIEnv* env = getenv(globalCallbackRef->vm());
+            env->CallVoidMethod(globalCallbackRef->object(), gFrameDrawingCallback.onFrameDraw,
+                    static_cast<jlong>(frameNr));
+        });
+    }
+}
+
 static jint android_view_ThreadedRenderer_copySurfaceInto(JNIEnv* env,
         jobject clazz, jobject jsurface, jint left, jint top,
         jint right, jint bottom, jobject jbitmap) {
@@ -1034,6 +1076,8 @@ static const JNINativeMethod gMethods[] = {
     { "nRemoveRenderNode", "(JJ)V", (void*) android_view_ThreadedRenderer_removeRenderNode},
     { "nDrawRenderNode", "(JJ)V", (void*) android_view_ThreadedRendererd_drawRenderNode},
     { "nSetContentDrawBounds", "(JIIII)V", (void*)android_view_ThreadedRenderer_setContentDrawBounds},
+    { "nSetFrameCallback", "(JLandroid/view/ThreadedRenderer$FrameDrawingCallback;)V",
+            (void*)android_view_ThreadedRenderer_setFrameCallback},
     { "nAddFrameMetricsObserver",
             "(JLandroid/view/FrameMetricsObserver;)J",
             (void*)android_view_ThreadedRenderer_addFrameMetricsObserver },
@@ -1077,6 +1121,11 @@ int register_android_view_ThreadedRenderer(JNIEnv* env) {
     jclass metricsClass = FindClassOrDie(env, "android/view/FrameMetrics");
     gFrameMetricsObserverClassInfo.timingDataBuffer = GetFieldIDOrDie(
             env, metricsClass, "mTimingData", "[J");
+
+    jclass frameCallbackClass = FindClassOrDie(env,
+            "android/view/ThreadedRenderer$FrameDrawingCallback");
+    gFrameDrawingCallback.onFrameDraw = GetMethodIDOrDie(env, frameCallbackClass,
+            "onFrameDraw", "(J)V");
 
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
