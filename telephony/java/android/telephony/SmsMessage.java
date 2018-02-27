@@ -277,6 +277,31 @@ public class SmsMessage {
     }
 
     /**
+     * Create an SmsMessage from an SMS EF record.
+     *
+     * @param index Index of SMS record. This should be index in ArrayList
+     *              returned by SmsManager.getAllMessagesFromSim + 1.
+     * @param data Record data.
+     * @param subId Subscription Id of the SMS
+     * @return An SmsMessage representing the record.
+     *
+     * @hide
+     */
+    public static SmsMessage createFromEfRecord(int index, byte[] data, int subId) {
+        SmsMessageBase wrappedMessage;
+
+        if (isCdmaVoice(subId)) {
+            wrappedMessage = com.android.internal.telephony.cdma.SmsMessage.createFromEfRecord(
+                    index, data);
+        } else {
+            wrappedMessage = com.android.internal.telephony.gsm.SmsMessage.createFromEfRecord(
+                    index, data);
+        }
+
+        return wrappedMessage != null ? new SmsMessage(wrappedMessage) : null;
+    }
+
+    /**
      * Get the TP-Layer-Length for the given SMS-SUBMIT PDU Basically, the
      * length in bytes (not hex chars) less the SMSC header
      *
@@ -836,6 +861,7 @@ public class SmsMessage {
          int activePhone = TelephonyManager.getDefault().getCurrentPhoneType(subId);
          return (PHONE_TYPE_CDMA == activePhone);
    }
+
     /**
      * Decide if the carrier supports long SMS.
      * {@hide}
