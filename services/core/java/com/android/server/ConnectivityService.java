@@ -5439,8 +5439,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (!networkAgent.everConnected && state == NetworkInfo.State.CONNECTED) {
             networkAgent.everConnected = true;
 
+            if (networkAgent.linkProperties == null) {
+                Slog.wtf(TAG, networkAgent.name() + " connected with null LinkProperties");
+            }
+
             updateLinkProperties(networkAgent, null);
-            notifyIfacesChangedForNetworkStats();
 
             networkAgent.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_CONNECTED);
             scheduleUnvalidatedPrompt(networkAgent);
