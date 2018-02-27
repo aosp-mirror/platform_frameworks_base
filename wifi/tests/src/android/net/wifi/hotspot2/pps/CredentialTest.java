@@ -263,6 +263,7 @@ public class CredentialTest {
      *
      * @throws Exception
      */
+    @Test
     public void validateCertCredentialWithoutCaCert() throws Exception {
         Credential cred = createCredentialWithCertificateCredential();
         cred.setCaCertificate(null);
