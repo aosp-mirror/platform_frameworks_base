@@ -395,6 +395,7 @@
   <java-symbol type="integer" name="config_wifi_framework_current_network_boost" />
   <java-symbol type="integer" name="config_bluetooth_max_advertisers" />
   <java-symbol type="integer" name="config_bluetooth_max_scan_filters" />
+  <java-symbol type="integer" name="config_bluetooth_max_connected_audio_devices" />
   <java-symbol type="integer" name="config_burnInProtectionMinHorizontalOffset" />
   <java-symbol type="integer" name="config_burnInProtectionMaxHorizontalOffset" />
   <java-symbol type="integer" name="config_burnInProtectionMinVerticalOffset" />
