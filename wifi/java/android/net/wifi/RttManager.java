@@ -999,6 +999,7 @@ public class RttManager {
                             // just in case legacy API needed some relatively real timestamp
                             legacyResults[i].ts = SystemClock.elapsedRealtime() * 1000;
                         }
+                        i++;
                     }
                     listener.onSuccess(legacyResults);
                 }
