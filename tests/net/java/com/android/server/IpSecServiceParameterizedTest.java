@@ -281,6 +281,7 @@ public class IpSecServiceParameterizedTest {
                         anyInt());
     }
 
+    @Test
     public void testCreateTwoTransformsWithSameSpis() throws Exception {
         IpSecConfig ipSecConfig = new IpSecConfig();
         addDefaultSpisAndRemoteAddrToIpSecConfig(ipSecConfig);
