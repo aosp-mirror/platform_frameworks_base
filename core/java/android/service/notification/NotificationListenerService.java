@@ -1220,6 +1220,7 @@ public abstract class NotificationListenerService extends Service {
                 // convert icon metadata to legacy format for older clients
                 createLegacyIconExtras(sbn.getNotification());
                 maybePopulateRemoteViews(sbn.getNotification());
+                maybePopulatePeople(sbn.getNotification());
             } catch (IllegalArgumentException e) {
                 // warn and drop corrupt notification
                 Log.w(TAG, "onNotificationPosted: can't rebuild notification from " +
