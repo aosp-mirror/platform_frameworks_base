@@ -28,11 +28,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Playback state for a {@link MediaPlayerInterface}, to be shared between {@link MediaSession2} and
+ * Playback state for a {@link MediaPlayerBase}, to be shared between {@link MediaSession2} and
  * {@link MediaController2}. This includes a playback state {@link #STATE_PLAYING},
  * the current playback position and extra.
  * @hide
  */
+// TODO(jaewan): Remove this.
 public final class PlaybackState2 {
     // Similar to the PlaybackState with following changes
     //    - Not implement Parcelable and added from/toBundle()

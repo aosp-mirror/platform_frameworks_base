@@ -23,7 +23,7 @@ import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaMetadata2;
-import android.media.MediaPlayerInterface;
+import android.media.MediaPlayerBase;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
@@ -277,7 +277,7 @@ public class VideoView2 extends ViewGroupHelper<VideoView2Provider> {
      * @hide
      */
     public void setRouteAttributes(@NonNull List<String> routeCategories,
-            @Nullable MediaPlayerInterface player) {
+            @Nullable MediaPlayerBase player) {
         mProvider.setRouteAttributes_impl(routeCategories, player);
     }
 

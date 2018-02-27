@@ -19,10 +19,10 @@ package android.media;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.media.MediaSession2.BuilderBase;
+import android.media.MediaLibraryService2.MediaLibrarySession.Builder;
+import android.media.MediaLibraryService2.MediaLibrarySession.MediaLibrarySessionCallback;
 import android.media.MediaSession2.ControllerInfo;
 import android.media.update.ApiLoader;
 import android.media.update.MediaLibraryService2Provider.LibraryRootProvider;
@@ -40,7 +40,7 @@ import java.util.concurrent.Executor;
  * and ask the application to start playing it. They may also be used to control content that
  * is already playing by way of a {@link MediaSession2}.
  * <p>
- * To extend this class, adding followings directly to your {@code AndroidManifest.xml}.
+ * When extending this class, also add the following to your {@code AndroidManifest.xml}.
  * <pre>
  * &lt;service android:name="component_name_of_your_implementation" &gt;
  *   &lt;intent-filter&gt;
@@ -48,11 +48,12 @@ import java.util.concurrent.Executor;
  *   &lt;/intent-filter&gt;
  * &lt;/service&gt;</pre>
  * <p>
- * A {@link MediaLibraryService2} is extension of {@link MediaSessionService2}. IDs shouldn't
+ * The {@link MediaLibraryService2} class derives from {@link MediaSessionService2}. IDs shouldn't
  * be shared between the {@link MediaSessionService2} and {@link MediaSession2}. By
  * default, an empty string will be used for ID of the service. If you want to specify an ID,
  * declare metadata in the manifest as follows.
- * @hide
+ *
+ * @see MediaSessionService2
  */
 public abstract class MediaLibraryService2 extends MediaSessionService2 {
     /**
@@ -63,15 +64,178 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
 
     /**
      * Session for the {@link MediaLibraryService2}. Build this object with
-     * {@link MediaLibrarySessionBuilder} and return in {@link #onCreateSession(String)}.
+     * {@link Builder} and return in {@link #onCreateSession(String)}.
      */
-    public static class MediaLibrarySession extends MediaSession2 {
+    public static final class MediaLibrarySession extends MediaSession2 {
         private final MediaLibrarySessionProvider mProvider;
+
+        /**
+         * Callback for the {@link MediaLibrarySession}.
+         */
+        public static class MediaLibrarySessionCallback extends MediaSession2.SessionCallback {
+            public MediaLibrarySessionCallback(Context context) {
+                super(context);
+            }
+
+            /**
+             * Called to get the root information for browsing by a particular client.
+             * <p>
+             * The implementation should verify that the client package has permission
+             * to access browse media information before returning the root id; it
+             * should return null if the client is not allowed to access this
+             * information.
+             *
+             * @param controllerInfo information of the controller requesting access to browse media.
+             * @param rootHints An optional bundle of service-specific arguments to send
+             * to the media library service when connecting and retrieving the
+             * root id for browsing, or null if none. The contents of this
+             * bundle may affect the information returned when browsing.
+             * @return The {@link LibraryRoot} for accessing this app's content or null.
+             * @see LibraryRoot#EXTRA_RECENT
+             * @see LibraryRoot#EXTRA_OFFLINE
+             * @see LibraryRoot#EXTRA_SUGGESTED
+             */
+            public @Nullable LibraryRoot onGetLibraryRoot(@NonNull ControllerInfo controllerInfo,
+                    @Nullable Bundle rootHints) {
+                return null;
+            }
+
+            /**
+             * Called to get an item. Return result here for the browser.
+             * <p>
+             * Return {@code null} for no result or error.
+             *
+             * @param mediaId item id to get media item.
+             * @return a media item. {@code null} for no result or error.
+             */
+            public @Nullable MediaItem2 onGetItem(@NonNull ControllerInfo controllerInfo,
+                    @NonNull String mediaId) {
+                return null;
+            }
+
+            /**
+             * Called to get children of given parent id. Return the children here for the browser.
+             * <p>
+             * Return an empty list for no children, and return {@code null} for the error.
+             *
+             * @param parentId parent id to get children
+             * @param page number of page
+             * @param pageSize size of the page
+             * @param extras extra bundle
+             * @return list of children. Can be {@code null}.
+             */
+            public @Nullable List<MediaItem2> onGetChildren(@NonNull ControllerInfo controller,
+                    @NonNull String parentId, int page, int pageSize, @Nullable Bundle extras) {
+                return null;
+            }
+
+            /**
+             * Called when a controller subscribes to the parent.
+             * <p>
+             * It's your responsibility to keep subscriptions by your own and call
+             * {@link MediaLibrarySession#notifyChildrenChanged(ControllerInfo, String, int, Bundle)}
+             * when the parent is changed.
+             *
+             * @param controller controller
+             * @param parentId parent id
+             * @param extras extra bundle
+             */
+            public void onSubscribe(@NonNull ControllerInfo controller, @NonNull String parentId,
+                    @Nullable Bundle extras) {
+            }
+
+            /**
+             * Called when a controller unsubscribes to the parent.
+             *
+             * @param controller controller
+             * @param parentId parent id
+             */
+            public void onUnsubscribe(@NonNull ControllerInfo controller,
+                    @NonNull String parentId) {
+            }
+
+            /**
+             * Called when a controller requests search.
+             *
+             * @param query The search query sent from the media browser. It contains keywords
+             *              separated by space.
+             * @param extras The bundle of service-specific arguments sent from the media browser.
+             */
+            public void onSearch(@NonNull ControllerInfo controllerInfo, @NonNull String query,
+                    @Nullable Bundle extras) {
+            }
+
+            /**
+             * Called to get the search result. Return search result here for the browser which has
+             * requested search previously.
+             * <p>
+             * Return an empty list for no search result, and return {@code null} for the error.
+             *
+             * @param controllerInfo Information of the controller requesting the search result.
+             * @param query The search query which was previously sent through
+             *              {@link #onSearch(ControllerInfo, String, Bundle)} call.
+             * @param page page number. Starts from {@code 1}.
+             * @param pageSize page size. Should be greater or equal to {@code 1}.
+             * @param extras The bundle of service-specific arguments sent from the media browser.
+             * @return search result. {@code null} for error.
+             */
+            public @Nullable List<MediaItem2> onGetSearchResult(
+                    @NonNull ControllerInfo controllerInfo, @NonNull String query, int page,
+                    int pageSize, @Nullable Bundle extras) {
+                return null;
+            }
+        }
+
+        /**
+         * Builder for {@link MediaLibrarySession}.
+         */
+        // Override all methods just to show them with the type instead of generics in Javadoc.
+        // This workarounds javadoc issue described in the MediaSession2.BuilderBase.
+        public static final class Builder extends BuilderBase<MediaLibrarySession, Builder,
+                MediaLibrarySessionCallback> {
+            // Builder requires MediaLibraryService2 instead of Context just to ensure that the
+            // builder can be only instantiated within the MediaLibraryService2.
+            // Ideally it's better to make it inner class of service to enforce, it violates API
+            // guideline that Builders should be the inner class of the building target.
+            public Builder(@NonNull MediaLibraryService2 service,
+                    @NonNull MediaPlayerBase player,
+                    @NonNull @CallbackExecutor Executor callbackExecutor,
+                    @NonNull MediaLibrarySessionCallback callback) {
+                super((instance) -> ApiLoader.getProvider(service)
+                        .createMediaLibraryService2Builder(service, (Builder) instance, player,
+                                callbackExecutor, callback));
+            }
+
+            @Override
+            public Builder setVolumeProvider(@Nullable VolumeProvider2 volumeProvider) {
+                return super.setVolumeProvider(volumeProvider);
+            }
+
+            @Override
+            public Builder setSessionActivity(@Nullable PendingIntent pi) {
+                return super.setSessionActivity(pi);
+            }
+
+            @Override
+            public Builder setId(String id) {
+                return super.setId(id);
+            }
+
+            @Override
+            public Builder setSessionCallback(@NonNull Executor executor,
+                    @NonNull MediaLibrarySessionCallback callback) {
+                return super.setSessionCallback(executor, callback);
+            }
+
+            @Override
+            public MediaLibrarySession build() {
+                return super.build();
+            }
+        }
 
         /**
          * @hide
          */
-        @SystemApi
         public MediaLibrarySession(MediaLibrarySessionProvider provider) {
             super(provider);
             mProvider = provider;
@@ -124,166 +288,6 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
         }
     }
 
-    /**
-     * Callback for the {@link MediaLibrarySession}.
-     */
-    public static class MediaLibrarySessionCallback extends MediaSession2.SessionCallback {
-
-        public MediaLibrarySessionCallback(Context context) {
-            super(context);
-        }
-
-        /**
-         * Called to get the root information for browsing by a particular client.
-         * <p>
-         * The implementation should verify that the client package has permission
-         * to access browse media information before returning the root id; it
-         * should return null if the client is not allowed to access this
-         * information.
-         *
-         * @param controllerInfo information of the controller requesting access to browse media.
-         * @param rootHints An optional bundle of service-specific arguments to send
-         * to the media library service when connecting and retrieving the
-         * root id for browsing, or null if none. The contents of this
-         * bundle may affect the information returned when browsing.
-         * @return The {@link LibraryRoot} for accessing this app's content or null.
-         * @see LibraryRoot#EXTRA_RECENT
-         * @see LibraryRoot#EXTRA_OFFLINE
-         * @see LibraryRoot#EXTRA_SUGGESTED
-         */
-        public @Nullable LibraryRoot onGetLibraryRoot(@NonNull ControllerInfo controllerInfo,
-                @Nullable Bundle rootHints) {
-            return null;
-        }
-
-        /**
-         * Called to get an item. Return result here for the browser.
-         * <p>
-         * Return {@code null} for no result or error.
-         *
-         * @param mediaId item id to get media item.
-         * @return a media item. {@code null} for no result or error.
-         */
-        public @Nullable MediaItem2 onGetItem(@NonNull ControllerInfo controllerInfo,
-                @NonNull String mediaId) {
-            return null;
-        }
-
-        /**
-         * Called to get children of given parent id. Return the children here for the browser.
-         * <p>
-         * Return an empty list for no children, and return {@code null} for the error.
-         *
-         * @param parentId parent id to get children
-         * @param page number of page
-         * @param pageSize size of the page
-         * @param extras extra bundle
-         * @return list of children. Can be {@code null}.
-         */
-        public @Nullable List<MediaItem2> onGetChildren(@NonNull ControllerInfo controller,
-                @NonNull String parentId, int page, int pageSize, @Nullable Bundle extras) {
-            return null;
-        }
-
-        /**
-         * Called when a controller subscribes to the parent.
-         * <p>
-         * It's your responsibility to keep subscriptions by your own and call
-         * {@link MediaLibrarySession#notifyChildrenChanged(ControllerInfo, String, int, Bundle)}
-         * when the parent is changed.
-         *
-         * @param controller controller
-         * @param parentId parent id
-         * @param extras extra bundle
-         */
-        public void onSubscribe(@NonNull ControllerInfo controller, @NonNull String parentId,
-                @Nullable Bundle extras) {
-        }
-
-        /**
-         * Called when a controller unsubscribes to the parent.
-         *
-         * @param controller controller
-         * @param parentId parent id
-         */
-        public void onUnsubscribe(@NonNull ControllerInfo controller, @NonNull String parentId) {
-        }
-
-        /**
-         * Called when a controller requests search.
-         *
-         * @param query The search query sent from the media browser. It contains keywords separated
-         *              by space.
-         * @param extras The bundle of service-specific arguments sent from the media browser.
-         */
-        public void onSearch(@NonNull ControllerInfo controllerInfo, @NonNull String query,
-                @Nullable Bundle extras) {
-        }
-
-        /**
-         * Called to get the search result. Return search result here for the browser which has
-         * requested search previously.
-         * <p>
-         * Return an empty list for no search result, and return {@code null} for the error.
-         *
-         * @param controllerInfo Information of the controller requesting the search result.
-         * @param query The search query which was previously sent through
-         *              {@link #onSearch(ControllerInfo, String, Bundle)} call.
-         * @param page page number. Starts from {@code 1}.
-         * @param pageSize page size. Should be greater or equal to {@code 1}.
-         * @param extras The bundle of service-specific arguments sent from the media browser.
-         * @return search result. {@code null} for error.
-         */
-        public @Nullable List<MediaItem2> onGetSearchResult(@NonNull ControllerInfo controllerInfo,
-                @NonNull String query, int page, int pageSize, @Nullable Bundle extras) {
-            return null;
-        }
-    }
-
-    /**
-     * Builder for {@link MediaLibrarySession}.
-     */
-    // Override all methods just to show them with the type instead of generics in Javadoc.
-    // This workarounds javadoc issue described in the MediaSession2.BuilderBase.
-    public class MediaLibrarySessionBuilder extends BuilderBase<MediaLibrarySession,
-            MediaLibrarySessionBuilder, MediaLibrarySessionCallback> {
-        public MediaLibrarySessionBuilder(
-                @NonNull Context context, @NonNull MediaPlayerInterface player,
-                @NonNull @CallbackExecutor Executor callbackExecutor,
-                @NonNull MediaLibrarySessionCallback callback) {
-            super((instance) -> ApiLoader.getProvider(context).createMediaLibraryService2Builder(
-                    context, (MediaLibrarySessionBuilder) instance, player, callbackExecutor,
-                    callback));
-        }
-
-        @Override
-        public MediaLibrarySessionBuilder setVolumeProvider(
-                @Nullable VolumeProvider2 volumeProvider) {
-            return super.setVolumeProvider(volumeProvider);
-        }
-
-        @Override
-        public MediaLibrarySessionBuilder setSessionActivity(@Nullable PendingIntent pi) {
-            return super.setSessionActivity(pi);
-        }
-
-        @Override
-        public MediaLibrarySessionBuilder setId(String id) {
-            return super.setId(id);
-        }
-
-        @Override
-        public MediaLibrarySessionBuilder setSessionCallback(
-                @NonNull Executor executor, @NonNull MediaLibrarySessionCallback callback) {
-            return super.setSessionCallback(executor, callback);
-        }
-
-        @Override
-        public MediaLibrarySession build() {
-            return super.build();
-        }
-    }
-
     @Override
     MediaSessionService2Provider createProvider() {
         return ApiLoader.getProvider(this).createMediaLibraryService2(this);
@@ -302,7 +306,7 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
      *
      * @param sessionId session id written in the AndroidManifest.xml.
      * @return a new library session
-     * @see MediaLibrarySessionBuilder
+     * @see Builder
      * @see #getSession()
      * @throws RuntimeException if returned session is invalid
      */

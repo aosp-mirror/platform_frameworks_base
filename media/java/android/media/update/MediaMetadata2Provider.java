@@ -11,7 +11,6 @@ import java.util.Set;
 /**
  * @hide
  */
-// TODO(jaewan): SystemApi
 public interface MediaMetadata2Provider {
     boolean containsKey_impl(String key);
     CharSequence getText_impl(String key);
