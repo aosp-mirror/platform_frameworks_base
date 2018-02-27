@@ -5328,6 +5328,11 @@ message MetricsEvent {
     // OS: P
     PACKAGE_OPTIMIZATION_COMPILATION_REASON = 1321;
 
+    // FIELD: The camera API level used.
+    // CATEGORY: CAMERA
+    // OS: P
+    FIELD_CAMERA_API_LEVEL = 1322;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
