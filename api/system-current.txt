@@ -6130,7 +6130,9 @@ package android.telephony.ims.stub {
     method public final void onSmsReceived(int, java.lang.String, byte[]) throws java.lang.RuntimeException;
     method public final void onSmsStatusReportReceived(int, int, java.lang.String, byte[]) throws java.lang.RuntimeException;
     method public void sendSms(int, int, java.lang.String, java.lang.String, boolean, byte[]);
-    field public static final int DELIVER_STATUS_ERROR = 2; // 0x2
+    field public static final int DELIVER_STATUS_ERROR_GENERIC = 2; // 0x2
+    field public static final int DELIVER_STATUS_ERROR_NO_MEMORY = 3; // 0x3
+    field public static final int DELIVER_STATUS_ERROR_REQUEST_NOT_SUPPORTED = 4; // 0x4
     field public static final int DELIVER_STATUS_OK = 1; // 0x1
     field public static final int SEND_STATUS_ERROR = 2; // 0x2
     field public static final int SEND_STATUS_ERROR_FALLBACK = 4; // 0x4
