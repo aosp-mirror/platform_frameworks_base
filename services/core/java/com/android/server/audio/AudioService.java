@@ -1494,17 +1494,6 @@ public class AudioService extends IAudioService.Stub
         if (adjustVolume && (direction != AudioManager.ADJUST_SAME)) {
             mAudioHandler.removeMessages(MSG_UNMUTE_STREAM);
 
-            // Check if volume update should be send to AVRCP
-            if (streamTypeAlias == AudioSystem.STREAM_MUSIC &&
-                (device & AudioSystem.DEVICE_OUT_ALL_A2DP) != 0 &&
-                (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
-                synchronized (mA2dpAvrcpLock) {
-                    if (mA2dp != null && mAvrcpAbsVolSupported) {
-                        mA2dp.adjustAvrcpAbsoluteVolume(direction);
-                    }
-                }
-            }
-
             if (isMuteAdjust) {
                 boolean state;
                 if (direction == AudioManager.ADJUST_TOGGLE_MUTE) {
@@ -1553,8 +1542,20 @@ public class AudioService extends IAudioService.Stub
                         0);
             }
 
-            // Check if volume update should be sent to Hdmi system audio.
             int newIndex = mStreamStates[streamType].getIndex(device);
+
+            // Check if volume update should be send to AVRCP
+            if (streamTypeAlias == AudioSystem.STREAM_MUSIC &&
+                (device & AudioSystem.DEVICE_OUT_ALL_A2DP) != 0 &&
+                (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
+                synchronized (mA2dpAvrcpLock) {
+                    if (mA2dp != null && mAvrcpAbsVolSupported) {
+                        mA2dp.setAvrcpAbsoluteVolume(newIndex / 10);
+                    }
+                }
+            }
+
+            // Check if volume update should be sent to Hdmi system audio.
             if (streamTypeAlias == AudioSystem.STREAM_MUSIC) {
                 setSystemAudioVolume(oldIndex, newIndex, getStreamMaxVolume(streamType), flags);
             }
