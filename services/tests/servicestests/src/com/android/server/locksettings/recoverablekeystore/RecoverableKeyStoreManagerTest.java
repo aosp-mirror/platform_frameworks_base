@@ -132,6 +132,7 @@ public class RecoverableKeyStoreManagerTest {
     private static final String TEST_ALIAS = "nick";
     private static final String TEST_ALIAS2 = "bob";
     private static final int RECOVERABLE_KEY_SIZE_BYTES = 32;
+    private static final int APPLICATION_KEY_SIZE_BYTES = 32;
     private static final int GENERATION_ID = 1;
     private static final byte[] NONCE = getUtf8Bytes("nonce");
     private static final byte[] KEY_MATERIAL = getUtf8Bytes("keymaterial");
@@ -206,6 +207,39 @@ public class RecoverableKeyStoreManagerTest {
     public void generateAndStoreKey_returnsAKeyOfAppropriateSize() throws Exception {
         assertThat(mRecoverableKeyStoreManager.generateAndStoreKey(TEST_ALIAS))
                 .hasLength(RECOVERABLE_KEY_SIZE_BYTES);
+    }
+
+    @Test
+    public void importKey_storesTheKey() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+        byte[] keyMaterial = randomBytes(APPLICATION_KEY_SIZE_BYTES);
+
+        mRecoverableKeyStoreManager.importKey(TEST_ALIAS, keyMaterial);
+
+        assertThat(mRecoverableKeyStoreDb.getKey(uid, TEST_ALIAS)).isNotNull();
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isTrue();
+    }
+
+    @Test
+    public void importKey_throwsIfInvalidLength() throws Exception {
+        byte[] keyMaterial = randomBytes(APPLICATION_KEY_SIZE_BYTES - 1);
+        try {
+            mRecoverableKeyStoreManager.importKey(TEST_ALIAS, keyMaterial);
+            fail("should have thrown");
+        } catch (ServiceSpecificException e) {
+            assertThat(e.getMessage()).contains("not contain 256 bits");
+        }
+    }
+
+    @Test
+    public void importKey_throwsIfNullKey() throws Exception {
+        try {
+            mRecoverableKeyStoreManager.importKey(TEST_ALIAS, /*keyBytes=*/ null);
+            fail("should have thrown");
+        } catch (ServiceSpecificException e) {
+            assertThat(e.getMessage()).contains("not contain 256 bits");
+        }
     }
 
     @Test
