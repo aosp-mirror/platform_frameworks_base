@@ -49,6 +49,10 @@ import com.android.systemui.R;
 import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Shows onboarding for the new recents interaction in P (codenamed quickstep).
  */
@@ -65,6 +69,7 @@ public class RecentsOnboarding {
     private final Context mContext;
     private final WindowManager mWindowManager;
     private final OverviewProxyService mOverviewProxyService;
+    private Set<String> mBlacklistedPackages;
     private final View mLayout;
     private final TextView mTextView;
     private final ImageView mDismissView;
@@ -85,6 +90,10 @@ public class RecentsOnboarding {
         public void onTaskStackChanged() {
             ActivityManager.RunningTaskInfo info = ActivityManagerWrapper.getInstance()
                     .getRunningTask(ACTIVITY_TYPE_UNDEFINED /* ignoreActivityType */);
+            if (mBlacklistedPackages.contains(info.baseActivity.getPackageName())) {
+                hide(true);
+                return;
+            }
             int activityType = info.configuration.windowConfiguration.getActivityType();
             int numAppsLaunched = Prefs.getInt(mContext, Prefs.Key.NUM_APPS_LAUNCHED, 0);
             if (activityType == ACTIVITY_TYPE_STANDARD) {
@@ -122,6 +131,9 @@ public class RecentsOnboarding {
         mOverviewProxyService = overviewProxyService;
         final Resources res = context.getResources();
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        mBlacklistedPackages = new HashSet<>();
+        Collections.addAll(mBlacklistedPackages, res.getStringArray(
+                R.array.recents_onboarding_blacklisted_packages));
         mLayout = LayoutInflater.from(mContext).inflate(R.layout.recents_onboarding, null);
         mTextView = mLayout.findViewById(R.id.onboarding_text);
         mDismissView = mLayout.findViewById(R.id.dismiss);
