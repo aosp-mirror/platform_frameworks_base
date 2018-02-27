@@ -59,24 +59,21 @@ import java.nio.IntBuffer;
  * which has a shorter throttle interval and returns cached result from last read when the request
  * is throttled.
  *
- * This class is NOT thread-safe and NOT designed to be accessed by more than one caller (due to
- * the nature of {@link #readDelta(Callback)}).
+ * This class is NOT thread-safe and NOT designed to be accessed by more than one caller since each
+ * caller has its own view of delta.
  */
-public class KernelUidCpuFreqTimeReader {
-    private static final boolean DEBUG = false;
-    private static final String TAG = "KernelUidCpuFreqTimeReader";
+public class KernelUidCpuFreqTimeReader extends
+        KernelUidCpuTimeReaderBase<KernelUidCpuFreqTimeReader.Callback> {
+    private static final String TAG = KernelUidCpuFreqTimeReader.class.getSimpleName();
     static final String UID_TIMES_PROC_FILE = "/proc/uid_time_in_state";
-    // Throttle interval in milliseconds
-    private static final long DEFAULT_THROTTLE_INTERVAL = 10_000L;
 
-    public interface Callback {
+    public interface Callback extends KernelUidCpuTimeReaderBase.Callback {
         void onUidCpuFreqTime(int uid, long[] cpuFreqTimeMs);
     }
 
     private long[] mCpuFreqs;
     private long[] mCurTimes; // Reuse to prevent GC.
     private long[] mDeltaTimes; // Reuse to prevent GC.
-    private long mThrottleInterval = DEFAULT_THROTTLE_INTERVAL;
     private int mCpuFreqsCount;
     private long mLastTimeReadMs = Long.MIN_VALUE;
     private long mNowTimeMs;
@@ -150,30 +147,20 @@ public class KernelUidCpuFreqTimeReader {
         mReadBinary = readBinary;
     }
 
-    public void setThrottleInterval(long throttleInterval) {
-        if (throttleInterval >= 0) {
-            mThrottleInterval = throttleInterval;
-        }
-    }
-
-    public void readDelta(@Nullable Callback callback) {
+    @Override
+    protected void readDeltaImpl(@Nullable Callback callback) {
         if (mCpuFreqs == null) {
             return;
         }
-        if (SystemClock.elapsedRealtime() < mLastTimeReadMs + mThrottleInterval) {
-            Slog.w(TAG, "Throttle");
-            return;
-        }
-        mNowTimeMs = SystemClock.elapsedRealtime();
         if (mReadBinary) {
             readDeltaBinary(callback);
         } else {
             readDeltaString(callback);
         }
-        mLastTimeReadMs = mNowTimeMs;
     }
 
     private void readDeltaString(@Nullable Callback callback) {
+        mNowTimeMs = SystemClock.elapsedRealtime();
         final int oldMask = StrictMode.allowThreadDiskReadsMask();
         try (BufferedReader reader = new BufferedReader(new FileReader(UID_TIMES_PROC_FILE))) {
             readDelta(reader, callback);
@@ -182,6 +169,7 @@ public class KernelUidCpuFreqTimeReader {
         } finally {
             StrictMode.setThreadPolicyMask(oldMask);
         }
+        mLastTimeReadMs = mNowTimeMs;
     }
 
     @VisibleForTesting
@@ -232,7 +220,9 @@ public class KernelUidCpuFreqTimeReader {
                     }
                 }
             }
-            // Slog.i(TAG, "Read uids: "+numUids);
+            if (DEBUG) {
+                Slog.d(TAG, "Read uids: " + numUids);
+            }
         }
     }
 
