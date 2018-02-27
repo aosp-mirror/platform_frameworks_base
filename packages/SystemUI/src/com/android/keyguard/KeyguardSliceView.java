@@ -160,8 +160,8 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
             mRow.addView(button);
 
             PendingIntent pendingIntent = null;
-            if (rc.getPrimaryAction() != null) {
-                pendingIntent = rc.getPrimaryAction().getAction();
+            if (rc.getContentIntent() != null) {
+                pendingIntent = rc.getContentIntent().getAction();
             }
             mClickActions.put(button, pendingIntent);
 
