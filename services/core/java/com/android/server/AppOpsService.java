@@ -61,8 +61,8 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
-
 import com.android.internal.util.function.pooled.PooledLambda;
+
 import libcore.util.EmptyArray;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -1961,10 +1961,16 @@ public class AppOpsService extends IAppOpsService.Stub {
         int mode;
         int packageUid;
         int nonpackageUid;
+        final static Binder sBinder = new Binder();
+        IBinder mToken;
 
         Shell(IAppOpsService iface, AppOpsService internal) {
             mInterface = iface;
             mInternal = internal;
+            try {
+                mToken = mInterface.getToken(sBinder);
+            } catch (RemoteException e) {
+            }
         }
 
         @Override
@@ -2149,6 +2155,10 @@ public class AppOpsService extends IAppOpsService.Stub {
         pw.println("AppOps service (appops) commands:");
         pw.println("  help");
         pw.println("    Print this help text.");
+        pw.println("  start [--user <USER_ID>] <PACKAGE | UID> <OP> ");
+        pw.println("    Starts a given operation for a particular application.");
+        pw.println("  stop [--user <USER_ID>] <PACKAGE | UID> <OP> ");
+        pw.println("    Stops a given operation for a particular application.");
         pw.println("  set [--user <USER_ID>] <PACKAGE | UID> <OP> <MODE>");
         pw.println("    Set the mode for a particular application and operation.");
         pw.println("  get [--user <USER_ID>] <PACKAGE | UID> [<OP>]");
@@ -2344,6 +2354,34 @@ public class AppOpsService extends IAppOpsService.Stub {
                         pw.println("Last settings read.");
                     } finally {
                         Binder.restoreCallingIdentity(token);
+                    }
+                    return 0;
+                }
+                case "start": {
+                    int res = shell.parseUserPackageOp(true, err);
+                    if (res < 0) {
+                        return res;
+                    }
+
+                    if (shell.packageName != null) {
+                        shell.mInterface.startOperation(shell.mToken,
+                                shell.op, shell.packageUid, shell.packageName, true);
+                    } else {
+                        return -1;
+                    }
+                    return 0;
+                }
+                case "stop": {
+                    int res = shell.parseUserPackageOp(true, err);
+                    if (res < 0) {
+                        return res;
+                    }
+
+                    if (shell.packageName != null) {
+                        shell.mInterface.finishOperation(shell.mToken,
+                                shell.op, shell.packageUid, shell.packageName);
+                    } else {
+                        return -1;
                     }
                     return 0;
                 }
