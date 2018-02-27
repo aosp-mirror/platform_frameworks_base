@@ -13,16 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef METRIC_UTIL_H
-#define METRIC_UTIL_H
+
+#pragma once
+
 #include <memory>
 #include <set>
 #include <unordered_map>
 #include <vector>
 
+#include "../anomaly/AlarmTracker.h"
 #include "../condition/ConditionTracker.h"
 #include "../external/StatsPullerManagerImpl.h"
 #include "../matchers/LogMatchingTracker.h"
+#include "../metrics/MetricProducer.h"
 
 namespace android {
 namespace os {
@@ -93,11 +96,15 @@ bool initMetrics(
 // Parameters are the members of MetricsManager. See MetricsManager for declaration.
 bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config,
                       const UidMap& uidMap,
-                      const long timeBaseSec, std::set<int>& allTagIds,
+                      const sp<AlarmMonitor>& anomalyAlarmMonitor,
+                      const sp<AlarmMonitor>& periodicAlarmMonitor,
+                      const long timeBaseSec,
+                      std::set<int>& allTagIds,
                       std::vector<sp<LogMatchingTracker>>& allAtomMatchers,
                       std::vector<sp<ConditionTracker>>& allConditionTrackers,
                       std::vector<sp<MetricProducer>>& allMetricProducers,
                       vector<sp<AnomalyTracker>>& allAnomalyTrackers,
+                      vector<sp<AlarmTracker>>& allPeriodicAlarmTrackers,
                       std::unordered_map<int, std::vector<int>>& conditionToMetricMap,
                       std::unordered_map<int, std::vector<int>>& trackerToMetricMap,
                       std::unordered_map<int, std::vector<int>>& trackerToConditionMap,
@@ -106,4 +113,3 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config,
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
-#endif  // METRIC_UTIL_H

@@ -12,28 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "anomaly/AnomalyMonitor.h"
+#include "anomaly/AlarmMonitor.h"
 
 #include <gtest/gtest.h>
 
 using namespace android::os::statsd;
 
 #ifdef __ANDROID__
-TEST(AnomalyMonitor, popSoonerThan) {
+TEST(AlarmMonitor, popSoonerThan) {
     std::string emptyMetricId;
     std::string emptyDimensionId;
-    unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> set;
-    AnomalyMonitor am(2);
+    unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> set;
+    AlarmMonitor am(2, [](const sp<IStatsCompanionService>&, int64_t){},
+                    [](const sp<IStatsCompanionService>&){});
 
     set = am.popSoonerThan(5);
     EXPECT_TRUE(set.empty());
 
-    sp<const AnomalyAlarm> a = new AnomalyAlarm{10};
-    sp<const AnomalyAlarm> b = new AnomalyAlarm{20};
-    sp<const AnomalyAlarm> c = new AnomalyAlarm{20};
-    sp<const AnomalyAlarm> d = new AnomalyAlarm{30};
-    sp<const AnomalyAlarm> e = new AnomalyAlarm{40};
-    sp<const AnomalyAlarm> f = new AnomalyAlarm{50};
+    sp<const InternalAlarm> a = new InternalAlarm{10};
+    sp<const InternalAlarm> b = new InternalAlarm{20};
+    sp<const InternalAlarm> c = new InternalAlarm{20};
+    sp<const InternalAlarm> d = new InternalAlarm{30};
+    sp<const InternalAlarm> e = new InternalAlarm{40};
+    sp<const InternalAlarm> f = new InternalAlarm{50};
 
     am.add(a);
     am.add(b);

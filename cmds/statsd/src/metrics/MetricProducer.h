@@ -124,7 +124,8 @@ public:
     }
 
     /* If alert is valid, adds an AnomalyTracker and returns it. If invalid, returns nullptr. */
-    virtual sp<AnomalyTracker> addAnomalyTracker(const Alert &alert) {
+    virtual sp<AnomalyTracker> addAnomalyTracker(const Alert &alert,
+                                                 const sp<AlarmMonitor>& anomalyAlarmMonitor) {
         std::lock_guard<std::mutex> lock(mMutex);
         sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert, mConfigKey);
         if (anomalyTracker != nullptr) {

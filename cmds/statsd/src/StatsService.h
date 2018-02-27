@@ -18,7 +18,7 @@
 #define STATS_SERVICE_H
 
 #include "StatsLogProcessor.h"
-#include "anomaly/AnomalyMonitor.h"
+#include "anomaly/AlarmMonitor.h"
 #include "config/ConfigManager.h"
 #include "external/StatsPullerManager.h"
 #include "packages/UidMap.h"
@@ -58,6 +58,8 @@ public:
     virtual Status statsCompanionReady();
     virtual Status informAnomalyAlarmFired();
     virtual Status informPollAlarmFired();
+    virtual Status informAlarmForSubscriberTriggeringFired();
+
     virtual Status informAllUidData(const vector<int32_t>& uid, const vector<int64_t>& version,
                                     const vector<String16>& app);
     virtual Status informOnePackage(const String16& app, int32_t uid, int64_t version);
@@ -244,9 +246,14 @@ private:
     sp<StatsLogProcessor> mProcessor;
 
     /**
-     * The anomaly detector.
+     * The alarm monitor for anomaly detection.
      */
-    const sp<AnomalyMonitor> mAnomalyMonitor;
+    const sp<AlarmMonitor> mAnomalyAlarmMonitor;
+
+    /**
+     * The alarm monitor for alarms to directly trigger subscriber.
+     */
+    const sp<AlarmMonitor> mPeriodicAlarmMonitor;
 
     /**
      * Whether this is an eng build.

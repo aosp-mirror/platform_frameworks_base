@@ -34,7 +34,8 @@ namespace statsd {
 
 class StatsLogProcessor : public ConfigListener {
 public:
-    StatsLogProcessor(const sp<UidMap>& uidMap, const sp<AnomalyMonitor>& anomalyMonitor,
+    StatsLogProcessor(const sp<UidMap>& uidMap, const sp<AlarmMonitor>& anomalyAlarmMonitor,
+                      const sp<AlarmMonitor>& subscriberTriggerAlarmMonitor,
                       const long timeBaseSec,
                       const std::function<void(const ConfigKey&)>& sendBroadcast);
     virtual ~StatsLogProcessor();
@@ -48,10 +49,15 @@ public:
 
     void onDumpReport(const ConfigKey& key, const uint64_t dumpTimeNs, vector<uint8_t>* outData);
 
-    /* Tells MetricsManager that the alarms in anomalySet have fired. Modifies anomalySet. */
+    /* Tells MetricsManager that the alarms in alarmSet have fired. Modifies anomaly alarmSet. */
     void onAnomalyAlarmFired(
             const uint64_t timestampNs,
-            unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> anomalySet);
+            unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> alarmSet);
+
+    /* Tells MetricsManager that the alarms in alarmSet have fired. Modifies periodic alarmSet. */
+    void onPeriodicAlarmFired(
+            const uint64_t timestampNs,
+            unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> alarmSet);
 
     /* Flushes data to disk. Data on memory will be gone after written to disk. */
     void WriteDataToDisk();
@@ -76,7 +82,9 @@ private:
 
     StatsPullerManager mStatsPullerManager;
 
-    sp<AnomalyMonitor> mAnomalyMonitor;
+    sp<AlarmMonitor> mAnomalyAlarmMonitor;
+
+    sp<AlarmMonitor> mPeriodicAlarmMonitor;
 
     void onDumpReportLocked(const ConfigKey& key, const uint64_t dumpTimeNs,
                             vector<uint8_t>* outData);

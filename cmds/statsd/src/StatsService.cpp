@@ -50,49 +50,73 @@ namespace statsd {
 constexpr const char* kPermissionDump = "android.permission.DUMP";
 #define STATS_SERVICE_DIR "/data/misc/stats-service"
 
-// ======================================================================
 /**
  * Watches for the death of the stats companion (system process).
  */
 class CompanionDeathRecipient : public IBinder::DeathRecipient {
 public:
-    CompanionDeathRecipient(const sp<AnomalyMonitor>& anomalyMonitor);
+    CompanionDeathRecipient(const sp<AlarmMonitor>& anomalyAlarmMonitor,
+                            const sp<AlarmMonitor>& periodicAlarmMonitor) :
+                                mAnomalyAlarmMonitor(anomalyAlarmMonitor),
+                                mPeriodicAlarmMonitor(periodicAlarmMonitor)  {}
     virtual void binderDied(const wp<IBinder>& who);
 
 private:
-    const sp<AnomalyMonitor> mAnomalyMonitor;
+   sp<AlarmMonitor> mAnomalyAlarmMonitor;
+   sp<AlarmMonitor> mPeriodicAlarmMonitor;
 };
-
-CompanionDeathRecipient::CompanionDeathRecipient(const sp<AnomalyMonitor>& anomalyMonitor)
-    : mAnomalyMonitor(anomalyMonitor) {
-}
 
 void CompanionDeathRecipient::binderDied(const wp<IBinder>& who) {
     ALOGW("statscompanion service died");
-    mAnomalyMonitor->setStatsCompanionService(nullptr);
+    mAnomalyAlarmMonitor->setStatsCompanionService(nullptr);
+    mPeriodicAlarmMonitor->setStatsCompanionService(nullptr);
     SubscriberReporter::getInstance().setStatsCompanionService(nullptr);
 }
 
-// ======================================================================
 StatsService::StatsService(const sp<Looper>& handlerLooper)
-    : mAnomalyMonitor(new AnomalyMonitor(MIN_DIFF_TO_UPDATE_REGISTERED_ALARM_SECS))
-{
+    : mAnomalyAlarmMonitor(new AlarmMonitor(MIN_DIFF_TO_UPDATE_REGISTERED_ALARM_SECS,
+       [](const sp<IStatsCompanionService>& sc, int64_t timeMillis) {
+           if (sc != nullptr) {
+               sc->setAnomalyAlarm(timeMillis);
+               StatsdStats::getInstance().noteRegisteredAnomalyAlarmChanged();
+           }
+       },
+       [](const sp<IStatsCompanionService>& sc) {
+           if (sc != nullptr) {
+               sc->cancelAnomalyAlarm();
+               StatsdStats::getInstance().noteRegisteredAnomalyAlarmChanged();
+           }
+       })),
+   mPeriodicAlarmMonitor(new AlarmMonitor(MIN_DIFF_TO_UPDATE_REGISTERED_ALARM_SECS,
+      [](const sp<IStatsCompanionService>& sc, int64_t timeMillis) {
+           if (sc != nullptr) {
+               sc->setAlarmForSubscriberTriggering(timeMillis);
+               StatsdStats::getInstance().noteRegisteredPeriodicAlarmChanged();
+           }
+      },
+      [](const sp<IStatsCompanionService>& sc) {
+           if (sc != nullptr) {
+               sc->cancelAlarmForSubscriberTriggering();
+               StatsdStats::getInstance().noteRegisteredPeriodicAlarmChanged();
+           }
+
+      }))  {
     mUidMap = new UidMap();
     StatsPuller::SetUidMap(mUidMap);
     mConfigManager = new ConfigManager();
-    mProcessor = new StatsLogProcessor(mUidMap, mAnomalyMonitor, getElapsedRealtimeSec(),
-        [this](const ConfigKey& key) {
-            sp<IStatsCompanionService> sc = getStatsCompanionService();
-            auto receiver = mConfigManager->GetConfigReceiver(key);
-            if (sc == nullptr) {
-                VLOG("Could not find StatsCompanionService");
-            } else if (receiver == nullptr) {
-                VLOG("Statscompanion could not find a broadcast receiver for %s",
-                     key.ToString().c_str());
-            } else {
-                sc->sendDataBroadcast(receiver);
-            }
+    mProcessor = new StatsLogProcessor(mUidMap, mAnomalyAlarmMonitor, mPeriodicAlarmMonitor,
+                                       getElapsedRealtimeSec(), [this](const ConfigKey& key) {
+        sp<IStatsCompanionService> sc = getStatsCompanionService();
+        auto receiver = mConfigManager->GetConfigReceiver(key);
+        if (sc == nullptr) {
+            VLOG("Could not find StatsCompanionService");
+        } else if (receiver == nullptr) {
+            VLOG("Statscompanion could not find a broadcast receiver for %s",
+                 key.ToString().c_str());
+        } else {
+            sc->sendDataBroadcast(receiver);
         }
+    }
     );
 
     mConfigManager->AddListener(mProcessor);
@@ -622,7 +646,8 @@ status_t StatsService::cmd_dump_memory_info(FILE* out) {
 
 status_t StatsService::cmd_clear_puller_cache(FILE* out) {
     IPCThreadState* ipc = IPCThreadState::self();
-    VLOG("StatsService::cmd_clear_puller_cache with Pid %i, Uid %i", ipc->getCallingPid(), ipc->getCallingUid());
+    VLOG("StatsService::cmd_clear_puller_cache with Pid %i, Uid %i",
+            ipc->getCallingPid(), ipc->getCallingUid());
     if (checkCallingPermission(String16(kPermissionDump))) {
         int cleared = mStatsPullerManager.ForceClearPullerCache();
         fprintf(out, "Puller removed %d cached data!\n", cleared);
@@ -677,14 +702,36 @@ Status StatsService::informAnomalyAlarmFired() {
         return Status::fromExceptionCode(Status::EX_SECURITY,
                                          "Only system uid can call informAnomalyAlarmFired");
     }
+
     uint64_t currentTimeSec = getElapsedRealtimeSec();
-    std::unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> anomalySet =
-            mAnomalyMonitor->popSoonerThan(static_cast<uint32_t>(currentTimeSec));
-    if (anomalySet.size() > 0) {
+    std::unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> alarmSet =
+            mAnomalyAlarmMonitor->popSoonerThan(static_cast<uint32_t>(currentTimeSec));
+    if (alarmSet.size() > 0) {
         VLOG("Found an anomaly alarm that fired.");
-        mProcessor->onAnomalyAlarmFired(currentTimeSec * NS_PER_SEC, anomalySet);
+        mProcessor->onAnomalyAlarmFired(currentTimeSec * NS_PER_SEC, alarmSet);
     } else {
         VLOG("Cannot find an anomaly alarm that fired. Perhaps it was recently cancelled.");
+    }
+    return Status::ok();
+}
+
+Status StatsService::informAlarmForSubscriberTriggeringFired() {
+    VLOG("StatsService::informAlarmForSubscriberTriggeringFired was called");
+
+    if (IPCThreadState::self()->getCallingUid() != AID_SYSTEM) {
+        return Status::fromExceptionCode(
+                Status::EX_SECURITY,
+                "Only system uid can call informAlarmForSubscriberTriggeringFired");
+    }
+
+    uint64_t currentTimeSec = time(nullptr);
+    std::unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> alarmSet =
+            mPeriodicAlarmMonitor->popSoonerThan(static_cast<uint32_t>(currentTimeSec));
+    if (alarmSet.size() > 0) {
+        VLOG("Found periodic alarm fired.");
+        mProcessor->onPeriodicAlarmFired(currentTimeSec * NS_PER_SEC, alarmSet);
+    } else {
+        ALOGW("Cannot find an periodic alarm that fired. Perhaps it was recently cancelled.");
     }
     return Status::ok();
 }
@@ -773,10 +820,11 @@ Status StatsService::statsCompanionReady() {
                 "statscompanion unavailable despite it contacting statsd!");
     }
     VLOG("StatsService::statsCompanionReady linking to statsCompanion.");
-    IInterface::asBinder(statsCompanion)->linkToDeath(new CompanionDeathRecipient(mAnomalyMonitor));
-    mAnomalyMonitor->setStatsCompanionService(statsCompanion);
+    IInterface::asBinder(statsCompanion)->linkToDeath(
+            new CompanionDeathRecipient(mAnomalyAlarmMonitor, mPeriodicAlarmMonitor));
+    mAnomalyAlarmMonitor->setStatsCompanionService(statsCompanion);
+    mPeriodicAlarmMonitor->setStatsCompanionService(statsCompanion);
     SubscriberReporter::getInstance().setStatsCompanionService(statsCompanion);
-
     return Status::ok();
 }
 

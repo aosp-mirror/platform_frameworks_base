@@ -46,7 +46,8 @@ public:
 
     virtual ~DurationMetricProducer();
 
-    sp<AnomalyTracker> addAnomalyTracker(const Alert &alert) override;
+    sp<AnomalyTracker> addAnomalyTracker(const Alert &alert,
+                                         const sp<AlarmMonitor>& anomalyAlarmMonitor) override;
 
 protected:
     void onMatchedLogEventInternalLocked(

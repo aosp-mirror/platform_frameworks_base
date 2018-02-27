@@ -40,7 +40,7 @@ public:
         mValues = values;
     }
 
-    HashableDimensionKey(){};
+    HashableDimensionKey() {};
 
     HashableDimensionKey(const HashableDimensionKey& that) : mValues(that.getValues()){};
 

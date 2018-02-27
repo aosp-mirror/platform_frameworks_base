@@ -49,13 +49,17 @@ namespace statsd {
 const int FIELD_ID_METRICS = 1;
 
 MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
-                               const long timeBaseSec, sp<UidMap> uidMap)
+                               const long timeBaseSec,
+                               const sp<UidMap> &uidMap,
+                               const sp<AlarmMonitor>& anomalyAlarmMonitor,
+                               const sp<AlarmMonitor>& periodicAlarmMonitor)
     : mConfigKey(key), mUidMap(uidMap), mLastReportTimeNs(timeBaseSec * NS_PER_SEC) {
     mConfigValid =
-            initStatsdConfig(key, config, *uidMap, timeBaseSec, mTagIds, mAllAtomMatchers,
-                             mAllConditionTrackers,
-                             mAllMetricProducers, mAllAnomalyTrackers, mConditionToMetricMap,
-                             mTrackerToMetricMap, mTrackerToConditionMap, mNoReportMetricIds);
+            initStatsdConfig(key, config, *uidMap, anomalyAlarmMonitor, periodicAlarmMonitor,
+                             timeBaseSec, mTagIds, mAllAtomMatchers,
+                             mAllConditionTrackers, mAllMetricProducers, mAllAnomalyTrackers,
+                             mAllPeriodicAlarmTrackers, mConditionToMetricMap, mTrackerToMetricMap,
+                             mTrackerToConditionMap, mNoReportMetricIds);
 
     if (config.allowed_log_source_size() == 0) {
         // TODO(b/70794411): uncomment the following line and remove the hard coded log source
@@ -340,16 +344,19 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
     }
 }
 
-void MetricsManager::onAnomalyAlarmFired(const uint64_t timestampNs,
-                         unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>>& anomalySet) {
+void MetricsManager::onAnomalyAlarmFired(
+        const uint64_t timestampNs,
+        unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>>& alarmSet) {
     for (const auto& itr : mAllAnomalyTrackers) {
-        itr->informAlarmsFired(timestampNs, anomalySet);
+        itr->informAlarmsFired(timestampNs, alarmSet);
     }
 }
 
-void MetricsManager::setAnomalyMonitor(const sp<AnomalyMonitor>& anomalyMonitor) {
-    for (auto& itr : mAllAnomalyTrackers) {
-        itr->setAnomalyMonitor(anomalyMonitor);
+void MetricsManager::onPeriodicAlarmFired(
+        const uint64_t timestampNs,
+        unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>>& alarmSet) {
+    for (const auto& itr : mAllPeriodicAlarmTrackers) {
+        itr->informAlarmsFired(timestampNs, alarmSet);
     }
 }
 

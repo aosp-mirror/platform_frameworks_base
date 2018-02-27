@@ -100,6 +100,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     private final PendingIntent mAnomalyAlarmIntent;
     private final PendingIntent mPullingAlarmIntent;
+    private final PendingIntent mPeriodicAlarmIntent;
     private final BroadcastReceiver mAppUpdateReceiver;
     private final BroadcastReceiver mUserUpdateReceiver;
     private final ShutdownEventReceiver mShutdownEventReceiver;
@@ -123,6 +124,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 new Intent(mContext, AnomalyAlarmReceiver.class), 0);
         mPullingAlarmIntent = PendingIntent.getBroadcast(
                 mContext, 0, new Intent(mContext, PullingAlarmReceiver.class), 0);
+        mPeriodicAlarmIntent = PendingIntent.getBroadcast(
+                mContext, 0, new Intent(mContext, PeriodicAlarmReceiver.class), 0);
         mAppUpdateReceiver = new AppUpdateReceiver();
         mUserUpdateReceiver = new BroadcastReceiver() {
             @Override
@@ -329,7 +332,28 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    private final static class ShutdownEventReceiver extends BroadcastReceiver {
+    public final static class PeriodicAlarmReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (DEBUG)
+                Slog.d(TAG, "Time to poll something.");
+            synchronized (sStatsdLock) {
+                if (sStatsd == null) {
+                    Slog.w(TAG, "Could not access statsd to inform it of periodic alarm firing.");
+                    return;
+                }
+                try {
+                    // Two-way call to statsd to retain AlarmManager wakelock
+                    sStatsd.informAlarmForSubscriberTriggeringFired();
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to inform statsd of periodic alarm firing.", e);
+                }
+            }
+            // AlarmManager releases its own wakelock here.
+        }
+    }
+
+    public final static class ShutdownEventReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             /**
@@ -379,6 +403,35 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         final long callingToken = Binder.clearCallingIdentity();
         try {
             mAlarmManager.cancel(mAnomalyAlarmIntent);
+        } finally {
+            Binder.restoreCallingIdentity(callingToken);
+        }
+    }
+
+    @Override // Binder call
+    public void setAlarmForSubscriberTriggering(long timestampMs) {
+        enforceCallingPermission();
+        if (DEBUG)
+            Slog.d(TAG, "Setting periodic alarm at " + timestampMs);
+        final long callingToken = Binder.clearCallingIdentity();
+        try {
+            // using ELAPSED_REALTIME, not ELAPSED_REALTIME_WAKEUP, so if device is asleep, will
+            // only fire when it awakens.
+            // This alarm is inexact, leaving its exactness completely up to the OS optimizations.
+            mAlarmManager.set(AlarmManager.ELAPSED_REALTIME, timestampMs, mPeriodicAlarmIntent);
+        } finally {
+            Binder.restoreCallingIdentity(callingToken);
+        }
+    }
+
+    @Override // Binder call
+    public void cancelAlarmForSubscriberTriggering() {
+        enforceCallingPermission();
+        if (DEBUG)
+            Slog.d(TAG, "Cancelling periodic alarm");
+        final long callingToken = Binder.clearCallingIdentity();
+        try {
+            mAlarmManager.cancel(mPeriodicAlarmIntent);
         } finally {
             Binder.restoreCallingIdentity(callingToken);
         }

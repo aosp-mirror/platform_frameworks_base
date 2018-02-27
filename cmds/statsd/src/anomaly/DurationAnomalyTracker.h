@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "AnomalyMonitor.h"
+#include "AlarmMonitor.h"
 #include "AnomalyTracker.h"
 
 namespace android {
@@ -27,7 +27,8 @@ using std::unordered_map;
 
 class DurationAnomalyTracker : public virtual AnomalyTracker {
 public:
-    DurationAnomalyTracker(const Alert& alert, const ConfigKey& configKey);
+    DurationAnomalyTracker(const Alert& alert, const ConfigKey& configKey,
+                           const sp<AlarmMonitor>& alarmMonitor);
 
     virtual ~DurationAnomalyTracker();
 
@@ -40,11 +41,6 @@ public:
     // Stop all the alarms owned by this tracker.
     void stopAllAlarms();
 
-    // Init the AnomalyMonitor which is shared across anomaly trackers.
-    void setAnomalyMonitor(const sp<AnomalyMonitor>& anomalyMonitor) override {
-        mAnomalyMonitor = anomalyMonitor;
-    }
-
     // Declares the anomaly when the alarm expired given the current timestamp.
     void declareAnomalyIfAlarmExpired(const MetricDimensionKey& dimensionKey,
                                       const uint64_t& timestampNs);
@@ -53,17 +49,16 @@ public:
     // and removes it from firedAlarms.
     // Note that this will generally be called from a different thread from the other functions;
     // the caller is responsible for thread safety.
-    void informAlarmsFired(
-            const uint64_t& timestampNs,
-            unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>>& firedAlarms) override;
+    void informAlarmsFired(const uint64_t& timestampNs,
+            unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>>& firedAlarms) override;
 
 protected:
     // The alarms owned by this tracker. The alarm monitor also shares the alarm pointers when they
     // are still active.
-    std::unordered_map<MetricDimensionKey, sp<const AnomalyAlarm>> mAlarms;
+    std::unordered_map<MetricDimensionKey, sp<const InternalAlarm>> mAlarms;
 
     // Anomaly alarm monitor.
-    sp<AnomalyMonitor> mAnomalyMonitor;
+    sp<AlarmMonitor> mAlarmMonitor;
 
     // Resets all bucket data. For use when all the data gets stale.
     void resetStorage() override;

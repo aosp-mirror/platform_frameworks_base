@@ -24,8 +24,9 @@ namespace android {
 namespace os {
 namespace statsd {
 
-DurationAnomalyTracker::DurationAnomalyTracker(const Alert& alert, const ConfigKey& configKey)
-    : AnomalyTracker(alert, configKey) {
+DurationAnomalyTracker::DurationAnomalyTracker(const Alert& alert, const ConfigKey& configKey,
+                                               const sp<AlarmMonitor>& alarmMonitor)
+    : AnomalyTracker(alert, configKey), mAlarmMonitor(alarmMonitor) {
 }
 
 DurationAnomalyTracker::~DurationAnomalyTracker() {
@@ -59,10 +60,10 @@ void DurationAnomalyTracker::startAlarm(const MetricDimensionKey& dimensionKey,
         VLOG("Setting a delayed anomaly alarm lest it fall in the refractory period");
         timestampSec = getRefractoryPeriodEndsSec(dimensionKey) + 1;
     }
-    sp<const AnomalyAlarm> alarm = new AnomalyAlarm{timestampSec};
+    sp<const InternalAlarm> alarm = new InternalAlarm{timestampSec};
     mAlarms.insert({dimensionKey, alarm});
-    if (mAnomalyMonitor != nullptr) {
-        mAnomalyMonitor->add(alarm);
+    if (mAlarmMonitor != nullptr) {
+        mAlarmMonitor->add(alarm);
     }
 }
 
@@ -70,8 +71,8 @@ void DurationAnomalyTracker::stopAlarm(const MetricDimensionKey& dimensionKey) {
     auto itr = mAlarms.find(dimensionKey);
     if (itr != mAlarms.end()) {
         mAlarms.erase(dimensionKey);
-        if (mAnomalyMonitor != nullptr) {
-            mAnomalyMonitor->remove(itr->second);
+        if (mAlarmMonitor != nullptr) {
+            mAlarmMonitor->remove(itr->second);
         }
     }
 }
@@ -86,16 +87,16 @@ void DurationAnomalyTracker::stopAllAlarms() {
     }
 }
 
-void DurationAnomalyTracker::informAlarmsFired(
-        const uint64_t& timestampNs,
-        unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>>& firedAlarms) {
+void DurationAnomalyTracker::informAlarmsFired(const uint64_t& timestampNs,
+        unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>>& firedAlarms) {
+
     if (firedAlarms.empty() || mAlarms.empty()) return;
     // Find the intersection of firedAlarms and mAlarms.
     // The for loop is inefficient, since it loops over all keys, but that's okay since it is very
-    // seldomly called. The alternative would be having AnomalyAlarms store information about the
+    // seldomly called. The alternative would be having InternalAlarms store information about the
     // DurationAnomalyTracker and key, but that's a lot of data overhead to speed up something that
     // is rarely ever called.
-    unordered_map<MetricDimensionKey, sp<const AnomalyAlarm>> matchedAlarms;
+    unordered_map<MetricDimensionKey, sp<const InternalAlarm>> matchedAlarms;
     for (const auto& kv : mAlarms) {
         if (firedAlarms.count(kv.second) > 0) {
             matchedAlarms.insert({kv.first, kv.second});
