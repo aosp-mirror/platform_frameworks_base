@@ -784,3 +784,182 @@ python_binary_host {
         "fontTools",
     ],
 }
+
+// TODO: Don't rely on this list once droiddoc can take a list of packages to document
+frameworks_base_subdirs = [
+    "core/java",
+    "graphics/java",
+    "location/java",
+    "media/java",
+    "media/mca/effect/java",
+    "media/mca/filterfw/java",
+    "media/mca/filterpacks/java",
+    "drm/java",
+    "opengl/java",
+    "sax/java",
+    "telecomm/java",
+    "telephony/java",
+    "wifi/java",
+    "lowpan/java",
+    "keystore/java",
+    "rs/java",
+]
+
+packages_to_document = [
+    "android",
+    "javax/microedition/khronos",
+    "org/apache/http/conn",
+    "org/apache/http/params",
+]
+
+// The since flag (-since N.xml API_LEVEL) is used to add API Level information
+// to the reference documentation. Must be in order of oldest to newest.
+//
+// Conscrypt (com.android.org.conscrypt) is an implementation detail and should
+// not be referenced in the documentation.
+framework_docs_args = "-android -manifest $(location core/res/AndroidManifest.xml) " +
+     "-hidePackage com.android.okhttp -hidePackage com.android.org.conscrypt -hidePackage com.android.server " +
+     "-since $(location api/1.xml) 1 " +
+     "-since $(location api/2.xml) 2 " +
+     "-since $(location api/3.xml) 3 " +
+     "-since $(location api/4.xml) 4 " +
+     "-since $(location api/5.xml) 5 " +
+     "-since $(location api/6.xml) 6 " +
+     "-since $(location api/7.xml) 7 " +
+     "-since $(location api/8.xml) 8 " +
+     "-since $(location api/9.xml) 9 " +
+     "-since $(location api/10.xml) 10 " +
+     "-since $(location api/11.xml) 11 " +
+     "-since $(location api/12.xml) 12 " +
+     "-since $(location api/13.xml) 13 " +
+     "-since $(location api/14.txt) 14 " +
+     "-since $(location api/15.txt) 15 " +
+     "-since $(location api/16.txt) 16 " +
+     "-since $(location api/17.txt) 17 " +
+     "-since $(location api/18.txt) 18 " +
+     "-since $(location api/19.txt) 19 " +
+     "-since $(location api/20.txt) 20 " +
+     "-since $(location api/21.txt) 21 " +
+     "-since $(location api/22.txt) 22 " +
+     "-since $(location api/23.txt) 23 " +
+     "-since $(location api/24.txt) 24 " +
+     "-since $(location api/25.txt) 25 " +
+     "-since $(location api/26.txt) 26 " +
+     "-since $(location api/27.txt) 27 " +
+     "-werror -lerror -hide 111 -hide 113 -hide 125 -hide 126 -hide 127 -hide 128 " +
+     "-overview $(location core/java/overview.html) " +
+     // Federate Support Library references against local API file.
+     "-federate SupportLib https://developer.android.com " +
+     "-federationapi SupportLib $(location current/support-api.txt) "
+
+doc_defaults {
+    name: "framework-docs-default",
+    srcs: [
+        // test mock src files.
+        "test-mock/src/android/test/mock/**/*.java",
+        // test runner excluding mock src files.
+        "test-runner/src/**/*.java",
+        "test-base/src/**/*.java",
+        ":opt-telephony-srcs",
+        ":opt-net-voip-srcs",
+        ":openjdk_javadoc_files",
+        ":non_openjdk_javadoc_files",
+        ":android_icu4j_src_files_for_docs",
+        ":gen-ojluni-jaif-annotated-srcs",
+    ],
+    exclude_srcs: [
+        ":annotated_ojluni_files",
+    ],
+    srcs_lib: "framework",
+    srcs_lib_whitelist_dirs: frameworks_base_subdirs,
+    srcs_lib_whitelist_pkgs: packages_to_document,
+    libs: [
+        "core-oj",
+        "core-libart",
+        "conscrypt",
+        "bouncycastle",
+        "okhttp",
+        "ext",
+        "framework",
+        "voip-common",
+        "android.test.mock",
+    ],
+    local_sourcepaths: frameworks_base_subdirs,
+    html_dirs: [
+        "docs/html",
+    ],
+    knowntags: [
+        "docs/knowntags.txt",
+        ":known-oj-tags",
+    ],
+    custom_template: "droiddoc-templates-sdk",
+    hdf: [
+        "dac true",
+        "sdk.codename O",
+        "sdk.preview.version 1",
+        "sdk.version 7.0",
+        "sdk.rel.id 1",
+        "sdk.preview 0",
+    ],
+    resourcesdir: "docs/html/reference/images",
+    resourcesoutdir: "reference/android/images",
+}
+
+droiddoc {
+    name: "api-stubs-docs",
+    defaults: ["framework-docs-default"],
+    arg_files: [
+        "core/res/AndroidManifest.xml",
+        ":api-version-xml",
+        "core/java/overview.html",
+        ":current-support-api",
+    ],
+    args: framework_docs_args +
+          "-referenceonly -api $(genDir)/PACKAGING/public_api.txt -privateApi $(genDir)/PACKAGING/private.txt "+
+          "-privateDexApi $(genDir)/PACKAGING/private-dex.txt -removedApi $(genDir)/PACKAGING/removed.txt -nodocs",
+    out: [
+        "PACKAGING/public_api.txt",
+        "PACKAGING/private.txt",
+        "PACKAGING/private-dex.txt",
+    ]
+}
+
+droiddoc {
+    name: "system-api-stubs-docs",
+    defaults: ["framework-docs-default"],
+    arg_files: [
+        "core/res/AndroidManifest.xml",
+        ":api-version-xml",
+        "core/java/overview.html",
+        ":current-support-api",
+    ],
+    args: framework_docs_args +
+          "-referenceonly -showAnnotation android.annotation.SystemApi " +
+          "-api $(genDir)/PACKAGING/system-api.txt -privateApi $(genDir)/PACKAGING/system-private.txt " +
+          "-privateDexApi $(genDir)/PACKAGING/system-private-dex.txt -removedApi $(genDir)/PACKAGING/system-removed.txt " +
+          "-exactApi $(genDir)/PACKAGING/system-exact.txt -nodocs",
+    out: [
+        "PACKAGING/system-api.txt",
+        "PACKAGING/system-private.txt",
+        "PACKAGING/system-private-dex.txt",
+    ]
+}
+
+droiddoc {
+    name: "test-api-stubs-docs",
+    defaults: ["framework-docs-default"],
+    arg_files: [
+        "core/res/AndroidManifest.xml",
+        ":api-version-xml",
+        "core/java/overview.html",
+        ":current-support-api",
+    ],
+    args: framework_docs_args +
+          "-referenceonly -showAnnotation android.annotation.TestApi " +
+          "-api $(genDir)/PACKAGING/test-api.txt " +
+          "-removedApi $(genDir)/PACKAGING/test-removed.txt " +
+          "-exactApi $(genDir)/PACKAGING/test-exact.txt -nodocs",
+    out: [
+        "PACKAGING/test-api.txt",
+    ]
+}
