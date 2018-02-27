@@ -143,7 +143,6 @@ framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES := \
 	bouncycastle \
 	okhttp \
 	ext \
-	icu4j \
 	framework \
 	voip-common \
 
