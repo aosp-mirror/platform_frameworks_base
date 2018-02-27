@@ -42,6 +42,7 @@ import static java.util.stream.Stream.concat;
 
 import android.annotation.Nullable;
 import android.app.backup.BackupManager;
+import android.app.backup.BackupTransport;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -85,12 +86,6 @@ import java.util.stream.Stream;
 public class TransportManagerTest {
     private static final String PACKAGE_A = "some.package.a";
     private static final String PACKAGE_B = "some.package.b";
-
-    /**
-     * GMSCore depends on this constant so we define it here on top of the definition in {@link
-     * TransportManager} to verify this extra is passed
-     */
-    private static final String EXTRA_TRANSPORT_REGISTRATION = "transport_registration";
 
     @Mock private OnTransportRegisteredListener mListener;
     @Mock private TransportClientManager mTransportClientManager;
@@ -210,7 +205,8 @@ public class TransportManagerTest {
         verify(mTransportClientManager)
                 .getTransportClient(
                         eq(mTransportA1.getTransportComponent()),
-                        argThat(bundle -> bundle.getBoolean(EXTRA_TRANSPORT_REGISTRATION)),
+                        argThat(bundle ->
+                                bundle.getBoolean(BackupTransport.EXTRA_TRANSPORT_REGISTRATION)),
                         anyString());
     }
 

@@ -83,6 +83,13 @@ public class BackupTransport {
      */
     public static final int FLAG_NON_INCREMENTAL = 1 << 2;
 
+    /**
+     * Used as a boolean extra in the binding intent of transports. We pass {@code true} to
+     * notify transports that the current connection is used for registering the transport.
+     */
+    public static final String EXTRA_TRANSPORT_REGISTRATION =
+            "android.app.backup.extra.TRANSPORT_REGISTRATION";
+
     IBackupTransport mBinderImpl = new TransportImpl();
 
     public IBinder getBinder() {
