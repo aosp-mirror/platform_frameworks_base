@@ -406,6 +406,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 }
                 break;
             default:
+                // TODO: Removing the child before reinserting requires the caller to provide a
+                //       position that takes into account the removed child (if the index of the
+                //       child < position, then the position should be adjusted). We should consider
+                //       doing this adjustment here and remove any adjustments in the callers.
                 mChildren.remove(child);
                 mChildren.add(position, child);
         }

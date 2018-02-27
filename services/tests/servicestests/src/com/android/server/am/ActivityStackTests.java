@@ -408,11 +408,19 @@ public class ActivityStackTests extends ActivityTestsBase {
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         final TestActivityStack fullscreenStack2 = createStackForShouldBeVisibleTest(display,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final TestActivityStack fullscreenStack3 = createStackForShouldBeVisibleTest(display,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final TestActivityStack fullscreenStack4 = createStackForShouldBeVisibleTest(display,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         final TestActivityStack homeStack = createStackForShouldBeVisibleTest(display,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, true /* onTop */);
 
         display.moveHomeStackBehindStack(fullscreenStack1);
         assertTrue(display.getStackAboveHome() == fullscreenStack1);
+        display.moveHomeStackBehindStack(fullscreenStack2);
+        assertTrue(display.getStackAboveHome() == fullscreenStack2);
+        display.moveHomeStackBehindStack(fullscreenStack4);
+        assertTrue(display.getStackAboveHome() == fullscreenStack4);
         display.moveHomeStackBehindStack(fullscreenStack2);
         assertTrue(display.getStackAboveHome() == fullscreenStack2);
     }
