@@ -17,22 +17,30 @@
 package com.android.settingslib.utils;
 
 import android.content.Context;
+import android.icu.text.DateFormat;
 import android.icu.text.MeasureFormat;
 import android.icu.text.MeasureFormat.FormatWidth;
 import android.icu.util.Measure;
 import android.icu.util.MeasureUnit;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.R;
-import com.android.settingslib.utils.StringUtil;
+import java.time.Clock;
+import java.time.Instant;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 /** Utility class for keeping power related strings consistent**/
 public class PowerUtil {
+
     private static final long SEVEN_MINUTES_MILLIS = TimeUnit.MINUTES.toMillis(7);
     private static final long FIFTEEN_MINUTES_MILLIS = TimeUnit.MINUTES.toMillis(15);
     private static final long ONE_DAY_MILLIS = TimeUnit.DAYS.toMillis(1);
+    private static final long TWO_DAYS_MILLIS = TimeUnit.DAYS.toMillis(2);
+    private static final long ONE_HOUR_MILLIS = TimeUnit.HOURS.toMillis(1);
 
     /**
      * This method produces the text used in various places throughout the system to describe the
@@ -57,11 +65,15 @@ public class PowerUtil {
                         FIFTEEN_MINUTES_MILLIS,
                         false /* withSeconds */);
                 return getUnderFifteenString(context, timeString, percentageString);
+            } else if (drainTimeMs >= TWO_DAYS_MILLIS) {
+                // just say more than two day if over 48 hours
+                return getMoreThanTwoDaysString(context, percentageString);
             } else if (drainTimeMs >= ONE_DAY_MILLIS) {
-                // just say more than one day if over 24 hours
-                return getMoreThanOneDayString(context, percentageString);
+                // show remaining days & hours if more than a day
+                return getMoreThanOneDayString(context, drainTimeMs,
+                        percentageString, basedOnUsage);
             } else {
-                // show a regular time remaining string
+                // show the time of day we think you'll run out
                 return getRegularTimeRemainingString(context, drainTimeMs,
                         percentageString, basedOnUsage);
             }
@@ -83,34 +95,18 @@ public class PowerUtil {
                 ? context.getString(R.string.power_remaining_less_than_duration_only, timeString)
                 : context.getString(
                         R.string.power_remaining_less_than_duration,
-                        percentageString,
-                        timeString);
+                        timeString,
+                        percentageString);
 
     }
 
-    private static String getMoreThanOneDayString(Context context, String percentageString) {
-        final Locale currentLocale = context.getResources().getConfiguration().getLocales().get(0);
-        final MeasureFormat frmt = MeasureFormat.getInstance(currentLocale, FormatWidth.SHORT);
-
-        final Measure daysMeasure = new Measure(1, MeasureUnit.DAY);
-
-        return TextUtils.isEmpty(percentageString)
-                ? context.getString(R.string.power_remaining_only_more_than_subtext,
-                        frmt.formatMeasures(daysMeasure))
-                : context.getString(
-                        R.string.power_remaining_more_than_subtext,
-                        percentageString,
-                        frmt.formatMeasures(daysMeasure));
-    }
-
-    private static String getRegularTimeRemainingString(Context context, long drainTimeMs,
+    private static String getMoreThanOneDayString(Context context, long drainTimeMs,
             String percentageString, boolean basedOnUsage) {
-        // round to the nearest 15 min to not appear oversly precise
-        final long roundedTimeMs = roundToNearestThreshold(drainTimeMs,
-                FIFTEEN_MINUTES_MILLIS);
+        final long roundedTimeMs = roundToNearestThreshold(drainTimeMs, ONE_HOUR_MILLIS);
         CharSequence timeString = StringUtil.formatElapsedTime(context,
                 roundedTimeMs,
                 false /* withSeconds */);
+
         if (TextUtils.isEmpty(percentageString)) {
             int id = basedOnUsage
                     ? R.string.power_remaining_duration_only_enhanced
@@ -120,7 +116,48 @@ public class PowerUtil {
             int id = basedOnUsage
                     ? R.string.power_discharging_duration_enhanced
                     : R.string.power_discharging_duration;
-            return context.getString(id, percentageString, timeString);
+            return context.getString(id, timeString, percentageString);
+        }
+    }
+
+    private static String getMoreThanTwoDaysString(Context context, String percentageString) {
+        final Locale currentLocale = context.getResources().getConfiguration().getLocales().get(0);
+        final MeasureFormat frmt = MeasureFormat.getInstance(currentLocale, FormatWidth.SHORT);
+
+        final Measure daysMeasure = new Measure(2, MeasureUnit.DAY);
+
+        return TextUtils.isEmpty(percentageString)
+                ? context.getString(R.string.power_remaining_only_more_than_subtext,
+                        frmt.formatMeasures(daysMeasure))
+                : context.getString(
+                        R.string.power_remaining_more_than_subtext,
+                        frmt.formatMeasures(daysMeasure),
+                        percentageString);
+    }
+
+    private static String getRegularTimeRemainingString(Context context, long drainTimeMs,
+            String percentageString, boolean basedOnUsage) {
+        // Get the time of day we think device will die rounded to the nearest 15 min.
+        final long roundedTimeOfDayMs =
+                roundToNearestThreshold(
+                        System.currentTimeMillis() + drainTimeMs,
+                        FIFTEEN_MINUTES_MILLIS);
+
+        // convert the time to a properly formatted string.
+        DateFormat fmt = DateFormat.getTimeInstance(DateFormat.SHORT);
+        Date date = Date.from(Instant.ofEpochMilli(roundedTimeOfDayMs));
+        CharSequence timeString = fmt.format(date);
+
+        if (TextUtils.isEmpty(percentageString)) {
+            int id = basedOnUsage
+                    ? R.string.power_discharge_by_only_enhanced
+                    : R.string.power_discharge_by_only;
+            return context.getString(id, timeString);
+        } else {
+            int id = basedOnUsage
+                    ? R.string.power_discharge_by_enhanced
+                    : R.string.power_discharge_by;
+            return context.getString(id, timeString, percentageString);
         }
     }
 
