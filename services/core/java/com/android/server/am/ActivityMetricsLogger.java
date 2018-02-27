@@ -51,7 +51,6 @@ import android.util.SparseIntArray;
 import android.util.StatsLog;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.SomeArgs;
 import com.android.server.LocalServices;
 
@@ -75,6 +74,8 @@ class ActivityMetricsLogger {
     private static final long INVALID_START_TIME = -1;
 
     private static final int MSG_CHECK_VISIBILITY = 0;
+    private static final int MSG_LOG_APP_TRANSITION = 1;
+    private static final int MSG_LOG_APP_START_MEMORY_STATE_CAPTURE = 2;
 
     // Preallocated strings we are sending to tron, so we don't have to allocate a new one every
     // time we log.
@@ -115,6 +116,13 @@ class ActivityMetricsLogger {
                     final SomeArgs args = (SomeArgs) msg.obj;
                     checkVisibility((TaskRecord) args.arg1, (ActivityRecord) args.arg2);
                     break;
+                case MSG_LOG_APP_TRANSITION:
+                    logAppTransition(msg.arg1, msg.arg2,
+                            (WindowingModeTransitionInfoSnapshot) msg.obj);
+                    break;
+                case MSG_LOG_APP_START_MEMORY_STATE_CAPTURE:
+                    logAppStartMemoryStateCapture((WindowingModeTransitionInfo) msg.obj);
+                    break;
             }
         }
     }
@@ -133,13 +141,11 @@ class ActivityMetricsLogger {
 
     private final class WindowingModeTransitionInfoSnapshot {
         final private ApplicationInfo applicationInfo;
-        final private ProcessRecord processRecord;
         final private String packageName;
         final private String launchedActivityName;
         final private String launchedActivityLaunchedFromPackage;
         final private String launchedActivityLaunchToken;
         final private String launchedActivityAppRecordRequiredAbi;
-        final private String processName;
         final private int reason;
         final private int startingWindowDelayMs;
         final private int bindApplicationDelayMs;
@@ -160,8 +166,6 @@ class ActivityMetricsLogger {
             bindApplicationDelayMs = info.bindApplicationDelayMs;
             windowsDrawnDelayMs = info.windowsDrawnDelayMs;
             type = getTransitionType(info);
-            processRecord = findProcessForActivity(info.launchedActivity);
-            processName = info.launchedActivity.processName;
         }
     }
 
@@ -501,14 +505,15 @@ class ActivityMetricsLogger {
             // This will avoid any races with other operations that modify the ActivityRecord.
             final WindowingModeTransitionInfoSnapshot infoSnapshot =
                     new WindowingModeTransitionInfoSnapshot(info);
-            BackgroundThread.getHandler().post(() -> logAppTransition(
-                mCurrentTransitionDeviceUptime, mCurrentTransitionDelayMs, infoSnapshot));
+            mHandler.obtainMessage(MSG_LOG_APP_TRANSITION, mCurrentTransitionDeviceUptime,
+                    mCurrentTransitionDelayMs, infoSnapshot).sendToTarget();
 
             info.launchedActivity.info.launchToken = null;
+            mHandler.obtainMessage(MSG_LOG_APP_START_MEMORY_STATE_CAPTURE, info).sendToTarget();
         }
     }
 
-    // This gets called on a background thread without holding the activity manager lock.
+    // This gets called on the handler without holding the activity manager lock.
     private void logAppTransition(int currentTransitionDeviceUptime, int currentTransitionDelayMs,
             WindowingModeTransitionInfoSnapshot info) {
         final LogMaker builder = new LogMaker(APP_TRANSITION);
@@ -567,7 +572,6 @@ class ActivityMetricsLogger {
                 launchToken,
                 packageOptimizationInfo.getCompilationReason(),
                 packageOptimizationInfo.getCompilationFilter());
-        logAppStartMemoryStateCapture(info);
     }
 
     private int convertAppStartTransitionType(int tronType) {
@@ -625,14 +629,15 @@ class ActivityMetricsLogger {
         return -1;
     }
 
-    private void logAppStartMemoryStateCapture(WindowingModeTransitionInfoSnapshot info) {
-        if (info.processRecord == null) {
+    private void logAppStartMemoryStateCapture(WindowingModeTransitionInfo info) {
+        final ProcessRecord processRecord = findProcessForActivity(info.launchedActivity);
+        if (processRecord == null) {
             if (DEBUG_METRICS) Slog.i(TAG, "logAppStartMemoryStateCapture processRecord null");
             return;
         }
 
-        final int pid = info.processRecord.pid;
-        final int uid = info.applicationInfo.uid;
+        final int pid = processRecord.pid;
+        final int uid = info.launchedActivity.appInfo.uid;
         final MemoryStat memoryStat = readMemoryStatFromMemcg(uid, pid);
         if (memoryStat == null) {
             if (DEBUG_METRICS) Slog.i(TAG, "logAppStartMemoryStateCapture memoryStat null");
@@ -642,8 +647,8 @@ class ActivityMetricsLogger {
         StatsLog.write(
                 StatsLog.APP_START_MEMORY_STATE_CAPTURED,
                 uid,
-                info.processName,
-                info.launchedActivityName,
+                info.launchedActivity.processName,
+                info.launchedActivity.info.name,
                 memoryStat.pgfault,
                 memoryStat.pgmajfault,
                 memoryStat.rssInBytes,
