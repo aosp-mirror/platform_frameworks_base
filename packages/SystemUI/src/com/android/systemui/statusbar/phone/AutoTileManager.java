@@ -14,7 +14,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.app.AlarmManager.AlarmClockInfo;
 import android.content.Context;
 import android.os.Handler;
 import android.provider.Settings.Secure;
@@ -28,8 +27,6 @@ import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.DataSaverController.Listener;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.HotspotController.Callback;
-import com.android.systemui.statusbar.policy.NextAlarmController;
-import com.android.systemui.statusbar.policy.NextAlarmController.NextAlarmChangeCallback;
 
 /**
  * Manages which tiles should be automatically added to QS.
@@ -40,7 +37,6 @@ public class AutoTileManager {
     public static final String INVERSION = "inversion";
     public static final String WORK = "work";
     public static final String NIGHT = "night";
-    public static final String ALARM = "alarm";
 
     private final Context mContext;
     private final QSTileHost mHost;
@@ -87,9 +83,6 @@ public class AutoTileManager {
             && ColorDisplayController.isAvailable(mContext)) {
             Dependency.get(ColorDisplayController.class).setListener(mColorDisplayCallback);
         }
-        if (!mAutoTracker.isAdded(ALARM)) {
-            Dependency.get(NextAlarmController.class).addCallback(mNextAlarmChangeCallback);
-        }
     }
 
     public void destroy() {
@@ -101,7 +94,6 @@ public class AutoTileManager {
         Dependency.get(DataSaverController.class).removeCallback(mDataSaverListener);
         Dependency.get(ManagedProfileController.class).removeCallback(mProfileCallback);
         Dependency.get(ColorDisplayController.class).setListener(null);
-        Dependency.get(NextAlarmController.class).removeCallback(mNextAlarmChangeCallback);
     }
 
     private final ManagedProfileController.Callback mProfileCallback =
@@ -146,19 +138,6 @@ public class AutoTileManager {
                 mAutoTracker.setTileAdded(HOTSPOT);
                 mHandler.post(() -> Dependency.get(HotspotController.class)
                         .removeCallback(mHotspotCallback));
-            }
-        }
-    };
-
-    private final NextAlarmChangeCallback mNextAlarmChangeCallback = new NextAlarmChangeCallback() {
-        @Override
-        public void onNextAlarmChanged(AlarmClockInfo nextAlarm) {
-            if (mAutoTracker.isAdded(ALARM)) return;
-            if (nextAlarm != null) {
-                mHost.addTile(ALARM);
-                mAutoTracker.setTileAdded(ALARM);
-                mHandler.post(() -> Dependency.get(NextAlarmController.class)
-                    .removeCallback(mNextAlarmChangeCallback));
             }
         }
     };
