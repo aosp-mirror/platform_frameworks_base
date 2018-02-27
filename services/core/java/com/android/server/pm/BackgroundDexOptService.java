@@ -144,6 +144,12 @@ public class BackgroundDexOptService extends JobService {
         Intent intent = registerReceiver(null, filter);
         int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
         int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+        boolean present = intent.getBooleanExtra(BatteryManager.EXTRA_PRESENT, true);
+
+        if (!present) {
+            // No battery, treat as if 100%, no possibility of draining battery.
+            return 100;
+        }
 
         if (level < 0 || scale <= 0) {
             // Battery data unavailable. This should never happen, so assume the worst.
