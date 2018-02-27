@@ -257,7 +257,7 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
     public static NetworkPolicy getNetworkPolicyFromBackup(DataInputStream in) throws IOException,
             BackupUtils.BadVersionException {
         final int version = in.readInt();
-        if (version > VERSION_RAPID) {
+        if (version < VERSION_INIT || version > VERSION_RAPID) {
             throw new BackupUtils.BadVersionException("Unknown backup version: " + version);
         }
 
