@@ -16,15 +16,13 @@
 
 package com.android.server.locksettings.recoverablekeystore.storage;
 
-import static android.security.keystore.RecoveryController.ERROR_SERVICE_INTERNAL_ERROR;
+import static android.security.keystore.recovery.RecoveryController.ERROR_SERVICE_INTERNAL_ERROR;
 
 import android.annotation.Nullable;
 import android.os.ServiceSpecificException;
 import android.security.Credentials;
-import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
-import android.security.keystore.recovery.KeyChainSnapshot;
 import android.security.KeyStore;
 
 import com.android.internal.annotations.VisibleForTesting;
