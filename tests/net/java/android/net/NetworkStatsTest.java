@@ -39,8 +39,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.os.Process;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.test.filters.SmallTest;
+import android.util.ArrayMap;
 
 import com.google.android.collect.Sets;
 
@@ -771,6 +773,88 @@ public class NetworkStatsTest {
         assertEquals(2, stats.size());
         assertEquals(entry1, stats.getValues(0, null));
         assertEquals(entry2, stats.getValues(1, null));
+    }
+
+    @Test
+    public void testApply464xlatAdjustments() {
+        final String v4Iface = "v4-wlan0";
+        final String baseIface = "wlan0";
+        final String otherIface = "other";
+        final int appUid = 10001;
+        final int rootUid = Process.ROOT_UID;
+        ArrayMap<String, String> stackedIface = new ArrayMap<>();
+        stackedIface.put(v4Iface, baseIface);
+
+        NetworkStats.Entry otherEntry = new NetworkStats.Entry(
+                otherIface, appUid, SET_DEFAULT, TAG_NONE,
+                2600  /* rxBytes */,
+                2 /* rxPackets */,
+                3800 /* txBytes */,
+                3 /* txPackets */,
+                0 /* operations */);
+
+        NetworkStats stats = new NetworkStats(TEST_START, 3)
+                .addValues(v4Iface, appUid, SET_DEFAULT, TAG_NONE,
+                        30501490  /* rxBytes */,
+                        22401 /* rxPackets */,
+                        876235 /* txBytes */,
+                        13805 /* txPackets */,
+                        0 /* operations */)
+                .addValues(baseIface, rootUid, SET_DEFAULT, TAG_NONE,
+                        31113087,
+                        22588,
+                        1169942,
+                        13902,
+                        0)
+                .addValues(otherEntry);
+
+        stats.apply464xlatAdjustments(stackedIface);
+
+        assertEquals(3, stats.size());
+        assertValues(stats, 0, v4Iface, appUid, SET_DEFAULT, TAG_NONE,
+                METERED_NO, ROAMING_NO, DEFAULT_NETWORK_NO,
+                30949510,
+                22401,
+                1152335,
+                13805,
+                0);
+        assertValues(stats, 1, baseIface, 0, SET_DEFAULT, TAG_NONE,
+                METERED_NO, ROAMING_NO, DEFAULT_NETWORK_NO,
+                163577,
+                187,
+                17607,
+                97,
+                0);
+        assertEquals(otherEntry, stats.getValues(2, null));
+    }
+
+    @Test
+    public void testApply464xlatAdjustments_noStackedIface() {
+        NetworkStats.Entry firstEntry = new NetworkStats.Entry(
+                "if1", 10002, SET_DEFAULT, TAG_NONE,
+                2600  /* rxBytes */,
+                2 /* rxPackets */,
+                3800 /* txBytes */,
+                3 /* txPackets */,
+                0 /* operations */);
+        NetworkStats.Entry secondEntry = new NetworkStats.Entry(
+                "if2", 10002, SET_DEFAULT, TAG_NONE,
+                5000  /* rxBytes */,
+                3 /* rxPackets */,
+                6000 /* txBytes */,
+                4 /* txPackets */,
+                0 /* operations */);
+
+        NetworkStats stats = new NetworkStats(TEST_START, 2)
+                .addValues(firstEntry)
+                .addValues(secondEntry);
+
+        // Empty map: no adjustment
+        stats.apply464xlatAdjustments(new ArrayMap<>());
+
+        assertEquals(2, stats.size());
+        assertEquals(firstEntry, stats.getValues(0, null));
+        assertEquals(secondEntry, stats.getValues(1, null));
     }
 
     private static void assertContains(NetworkStats stats,  String iface, int uid, int set,
