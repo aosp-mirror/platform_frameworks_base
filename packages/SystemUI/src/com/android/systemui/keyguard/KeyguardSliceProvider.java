@@ -19,6 +19,7 @@ package com.android.systemui.keyguard;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -27,6 +28,7 @@ import android.icu.text.DateFormat;
 import android.icu.text.DisplayContext;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -36,6 +38,7 @@ import com.android.systemui.statusbar.policy.NextAlarmControllerImpl;
 
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import androidx.app.slice.Slice;
 import androidx.app.slice.SliceProvider;
@@ -53,6 +56,12 @@ public class KeyguardSliceProvider extends SliceProvider implements
     public static final String KEYGUARD_NEXT_ALARM_URI =
             "content://com.android.systemui.keyguard/alarm";
 
+    /**
+     * Only show alarms that will ring within N hours.
+     */
+    @VisibleForTesting
+    static final int ALARM_VISIBILITY_HOURS = 12;
+
     private final Date mCurrentTime = new Date();
     protected final Uri mSliceUri;
     protected final Uri mDateUri;
@@ -65,6 +74,10 @@ public class KeyguardSliceProvider extends SliceProvider implements
     private boolean mRegisteredEveryMinute;
     private String mNextAlarm;
     private NextAlarmController mNextAlarmController;
+    protected AlarmManager mAlarmManager;
+    protected ContentResolver mContentResolver;
+    private AlarmManager.AlarmClockInfo mNextAlarmInfo;
+    private final AlarmManager.OnAlarmListener mUpdateNextAlarm = this::updateNextAlarm;
 
     /**
      * Receiver responsible for time ticking and updating the date format.
@@ -105,17 +118,26 @@ public class KeyguardSliceProvider extends SliceProvider implements
     public Slice onBindSlice(Uri sliceUri) {
         ListBuilder builder = new ListBuilder(getContext(), mSliceUri);
         builder.addRow(new RowBuilder(builder, mDateUri).setTitle(mLastText));
-        if (!TextUtils.isEmpty(mNextAlarm)) {
-            Icon icon = Icon.createWithResource(getContext(), R.drawable.ic_access_alarms_big);
-            builder.addRow(new RowBuilder(builder, mAlarmUri)
-                    .setTitle(mNextAlarm).addEndItem(icon));
+        addNextAlarm(builder);
+        return builder.build();
+    }
+
+    protected void addNextAlarm(ListBuilder builder) {
+        if (TextUtils.isEmpty(mNextAlarm)) {
+            return;
         }
 
-        return builder.build();
+        Icon alarmIcon = Icon.createWithResource(getContext(), R.drawable.ic_access_alarms_big);
+        RowBuilder alarmRowBuilder = new RowBuilder(builder, mAlarmUri)
+                .setTitle(mNextAlarm)
+                .addEndItem(alarmIcon);
+        builder.addRow(alarmRowBuilder);
     }
 
     @Override
     public boolean onCreateSliceProvider() {
+        mAlarmManager = getContext().getSystemService(AlarmManager.class);
+        mContentResolver = getContext().getContentResolver();
         mNextAlarmController = new NextAlarmControllerImpl(getContext());
         mNextAlarmController.addCallback(this);
         mDatePattern = getContext().getString(R.string.system_ui_aod_date_pattern);
@@ -124,15 +146,25 @@ public class KeyguardSliceProvider extends SliceProvider implements
         return true;
     }
 
-    public static String formatNextAlarm(Context context, AlarmManager.AlarmClockInfo info) {
-        if (info == null) {
-            return "";
+    private void updateNextAlarm() {
+        if (withinNHours(mNextAlarmInfo, ALARM_VISIBILITY_HOURS)) {
+            String pattern = android.text.format.DateFormat.is24HourFormat(getContext(),
+                    ActivityManager.getCurrentUser()) ? "H:mm" : "h:mm";
+            mNextAlarm = android.text.format.DateFormat.format(pattern,
+                    mNextAlarmInfo.getTriggerTime()).toString();
+        } else {
+            mNextAlarm = "";
         }
-        String skeleton = android.text.format.DateFormat
-                .is24HourFormat(context, ActivityManager.getCurrentUser()) ? "EHm" : "Ehma";
-        String pattern = android.text.format.DateFormat
-                .getBestDateTimePattern(Locale.getDefault(), skeleton);
-        return android.text.format.DateFormat.format(pattern, info.getTriggerTime()).toString();
+        mContentResolver.notifyChange(mSliceUri, null /* observer */);
+    }
+
+    private boolean withinNHours(AlarmManager.AlarmClockInfo alarmClockInfo, int hours) {
+        if (alarmClockInfo == null) {
+            return false;
+        }
+
+        long limit = System.currentTimeMillis() + TimeUnit.HOURS.toMillis(hours);
+        return mNextAlarmInfo.getTriggerTime() <= limit;
     }
 
     /**
@@ -181,7 +213,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
         final String text = getFormattedDate();
         if (!text.equals(mLastText)) {
             mLastText = text;
-            getContext().getContentResolver().notifyChange(mSliceUri, null /* observer */);
+            mContentResolver.notifyChange(mSliceUri, null /* observer */);
         }
     }
 
@@ -203,7 +235,15 @@ public class KeyguardSliceProvider extends SliceProvider implements
 
     @Override
     public void onNextAlarmChanged(AlarmManager.AlarmClockInfo nextAlarm) {
-        mNextAlarm = formatNextAlarm(getContext(), nextAlarm);
-        getContext().getContentResolver().notifyChange(mSliceUri, null /* observer */);
+        mNextAlarmInfo = nextAlarm;
+        mAlarmManager.cancel(mUpdateNextAlarm);
+
+        long triggerAt = mNextAlarmInfo == null ? -1 : mNextAlarmInfo.getTriggerTime()
+                - TimeUnit.HOURS.toMillis(ALARM_VISIBILITY_HOURS);
+        if (triggerAt > 0) {
+            mAlarmManager.setExact(AlarmManager.RTC, triggerAt, "lock_screen_next_alarm",
+                    mUpdateNextAlarm, mHandler);
+        }
+        updateNextAlarm();
     }
 }
