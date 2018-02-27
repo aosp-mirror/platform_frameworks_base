@@ -1114,6 +1114,9 @@
         <!-- The color applied to framework switch thumbs in their normal state. -->
         <attr name="colorSwitchThumbNormal" format="color" />
 
+        <!-- The color applied to framework progress and seek bar backgrounds in their normal state. -->
+        <attr name="colorProgressBackgroundNormal" format="color" />
+
         <!-- The color applied to the edge effect on scrolling containers. -->
         <attr name="colorEdgeEffect" format="color" />
 
