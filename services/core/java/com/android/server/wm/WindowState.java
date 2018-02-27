@@ -4274,14 +4274,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // When we change the Surface size, in scenarios which may require changing
         // the surface position in sync with the resize, we use a preserved surface
         // so we can freeze it while waiting for the client to report draw on the newly
-        // sized surface.  Don't preserve surfaces if the insets change while animating the pinned
-        // stack since it can lead to issues if a new surface is created while calculating the
-        // scale for the animation using the source hint rect
-        // (see WindowStateAnimator#setSurfaceBoundariesLocked()).
-        if (isDragResizeChanged()
-                || (surfaceInsetsChanging() && !inPinnedWindowingMode())) {
-            mLastSurfaceInsets.set(mAttrs.surfaceInsets);
-
+        // sized surface. At the moment this logic is only in place for switching
+        // in and out of the big surface for split screen resize.
+        if (isDragResizeChanged()) {
             setDragResizing();
             // We can only change top level windows to the full-screen surface when
             // resizing (as we only have one full-screen surface). So there is no need
@@ -4529,9 +4524,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         transformFrameToSurfacePosition(mFrame.left, mFrame.top, mSurfacePosition);
+
         if (!mSurfaceAnimator.hasLeash() && !mLastSurfacePosition.equals(mSurfacePosition)) {
             t.setPosition(mSurfaceControl, mSurfacePosition.x, mSurfacePosition.y);
             mLastSurfacePosition.set(mSurfacePosition.x, mSurfacePosition.y);
+            if (surfaceInsetsChanging() && mWinAnimator.hasSurface()) {
+                mLastSurfaceInsets.set(mAttrs.surfaceInsets);
+                t.deferTransactionUntil(mSurfaceControl,
+                        mWinAnimator.mSurfaceController.mSurfaceControl.getHandle(),
+                        mAttrs.frameNumber);
+            }
         }
     }
 

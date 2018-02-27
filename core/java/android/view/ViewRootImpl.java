@@ -6440,18 +6440,24 @@ public final class ViewRootImpl implements ViewParent,
             params.backup();
             mTranslator.translateWindowLayout(params);
         }
+
         if (params != null) {
             if (DBG) Log.d(mTag, "WindowLayout in layoutWindow:" + params);
-        }
 
-        if (params != null && mOrigWindowType != params.type) {
-            // For compatibility with old apps, don't crash here.
-            if (mTargetSdkVersion < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-                Slog.w(mTag, "Window type can not be changed after "
-                        + "the window is added; ignoring change of " + mView);
-                params.type = mOrigWindowType;
+            if (mOrigWindowType != params.type) {
+                // For compatibility with old apps, don't crash here.
+                if (mTargetSdkVersion < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+                    Slog.w(mTag, "Window type can not be changed after "
+                            + "the window is added; ignoring change of " + mView);
+                    params.type = mOrigWindowType;
+                }
+            }
+
+            if (mSurface.isValid()) {
+                params.frameNumber = mSurface.getNextFrameNumber();
             }
         }
+
         int relayoutResult = mWindowSession.relayout(
                 mWindow, mSeq, params,
                 (int) (mView.getMeasuredWidth() * appScale + 0.5f),
