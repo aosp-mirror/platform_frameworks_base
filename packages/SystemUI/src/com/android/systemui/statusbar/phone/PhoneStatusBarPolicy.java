@@ -762,20 +762,31 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (action.equals(AudioManager.RINGER_MODE_CHANGED_ACTION) ||
-                    action.equals(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION)) {
-                updateVolumeZen();
-            } else if (action.equals(TelephonyIntents.ACTION_SIM_STATE_CHANGED)) {
-                updateSimState(intent);
-            } else if (action.equals(TelecomManager.ACTION_CURRENT_TTY_MODE_CHANGED)) {
-                updateTTY(intent.getIntExtra(TelecomManager.EXTRA_CURRENT_TTY_MODE,
-                        TelecomManager.TTY_MODE_OFF));
-            } else if (action.equals(Intent.ACTION_MANAGED_PROFILE_AVAILABLE) ||
-                    action.equals(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE) ||
-                    action.equals(Intent.ACTION_MANAGED_PROFILE_REMOVED)) {
-                updateManagedProfile();
-            } else if (action.equals(AudioManager.ACTION_HEADSET_PLUG)) {
-                updateHeadsetPlug(intent);
+            switch (action) {
+                case AudioManager.RINGER_MODE_CHANGED_ACTION:
+                case AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION:
+                    updateVolumeZen();
+                    break;
+                case TelephonyIntents.ACTION_SIM_STATE_CHANGED:
+                    // Avoid rebroadcast because SysUI is direct boot aware.
+                    if (intent.getBooleanExtra(TelephonyIntents.EXTRA_REBROADCAST_ON_UNLOCK,
+                            false)) {
+                        break;
+                    }
+                    updateSimState(intent);
+                    break;
+                case TelecomManager.ACTION_CURRENT_TTY_MODE_CHANGED:
+                    updateTTY(intent.getIntExtra(TelecomManager.EXTRA_CURRENT_TTY_MODE,
+                            TelecomManager.TTY_MODE_OFF));
+                    break;
+                case Intent.ACTION_MANAGED_PROFILE_AVAILABLE:
+                case Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE:
+                case Intent.ACTION_MANAGED_PROFILE_REMOVED:
+                    updateManagedProfile();
+                    break;
+                case AudioManager.ACTION_HEADSET_PLUG:
+                    updateHeadsetPlug(intent);
+                    break;
             }
         }
     };

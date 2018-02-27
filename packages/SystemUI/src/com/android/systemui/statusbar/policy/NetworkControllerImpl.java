@@ -403,54 +403,62 @@ public class NetworkControllerImpl extends BroadcastReceiver
             Log.d(TAG, "onReceive: intent=" + intent);
         }
         final String action = intent.getAction();
-        if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION) ||
-                action.equals(ConnectivityManager.INET_CONDITION_ACTION)) {
-            updateConnectivity();
-        } else if (action.equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)) {
-            refreshLocale();
-            updateAirplaneMode(false);
-        } else if (action.equals(TelephonyIntents.ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED)) {
-            // We are using different subs now, we might be able to make calls.
-            recalculateEmergency();
-        } else if (action.equals(TelephonyIntents.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)) {
-            // Notify every MobileSignalController so they can know whether they are the
-            // data sim or not.
-            for (int i = 0; i < mMobileSignalControllers.size(); i++) {
-                MobileSignalController controller = mMobileSignalControllers.valueAt(i);
-                controller.handleBroadcast(intent);
-            }
-        } else if (action.equals(TelephonyIntents.ACTION_SIM_STATE_CHANGED)) {
-            // Might have different subscriptions now.
-            updateMobileControllers();
-        } else if (action.equals(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED)) {
-            mLastServiceState = ServiceState.newFromBundle(intent.getExtras());
-            if (mMobileSignalControllers.size() == 0) {
-                // If none of the subscriptions are active, we might need to recalculate
-                // emergency state.
+        switch (action) {
+            case ConnectivityManager.CONNECTIVITY_ACTION:
+            case ConnectivityManager.INET_CONDITION_ACTION:
+                updateConnectivity();
+                break;
+            case Intent.ACTION_AIRPLANE_MODE_CHANGED:
+                refreshLocale();
+                updateAirplaneMode(false);
+                break;
+            case TelephonyIntents.ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED:
+                // We are using different subs now, we might be able to make calls.
                 recalculateEmergency();
-            }
-        } else if (action.equals(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED)) {
-            mConfig = Config.readConfig(mContext);
-            mReceiverHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    handleConfigurationChanged();
+                break;
+            case TelephonyIntents.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED:
+                // Notify every MobileSignalController so they can know whether they are the
+                // data sim or not.
+                for (int i = 0; i < mMobileSignalControllers.size(); i++) {
+                    MobileSignalController controller = mMobileSignalControllers.valueAt(i);
+                    controller.handleBroadcast(intent);
                 }
-            });
-        } else {
-            int subId = intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY,
-                    SubscriptionManager.INVALID_SUBSCRIPTION_ID);
-            if (SubscriptionManager.isValidSubscriptionId(subId)) {
-                if (mMobileSignalControllers.indexOfKey(subId) >= 0) {
-                    mMobileSignalControllers.get(subId).handleBroadcast(intent);
+                break;
+            case TelephonyIntents.ACTION_SIM_STATE_CHANGED:
+                // Avoid rebroadcast because SysUI is direct boot aware.
+                if (intent.getBooleanExtra(TelephonyIntents.EXTRA_REBROADCAST_ON_UNLOCK, false)) {
+                    break;
+                }
+                // Might have different subscriptions now.
+                updateMobileControllers();
+                break;
+            case TelephonyIntents.ACTION_SERVICE_STATE_CHANGED:
+                mLastServiceState = ServiceState.newFromBundle(intent.getExtras());
+                if (mMobileSignalControllers.size() == 0) {
+                    // If none of the subscriptions are active, we might need to recalculate
+                    // emergency state.
+                    recalculateEmergency();
+                }
+                break;
+            case CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED:
+                mConfig = Config.readConfig(mContext);
+                mReceiverHandler.post(this::handleConfigurationChanged);
+                break;
+            default:
+                int subId = intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY,
+                        SubscriptionManager.INVALID_SUBSCRIPTION_ID);
+                if (SubscriptionManager.isValidSubscriptionId(subId)) {
+                    if (mMobileSignalControllers.indexOfKey(subId) >= 0) {
+                        mMobileSignalControllers.get(subId).handleBroadcast(intent);
+                    } else {
+                        // Can't find this subscription...  We must be out of date.
+                        updateMobileControllers();
+                    }
                 } else {
-                    // Can't find this subscription...  We must be out of date.
-                    updateMobileControllers();
+                    // No sub id, must be for the wifi.
+                    mWifiSignalController.handleBroadcast(intent);
                 }
-            } else {
-                // No sub id, must be for the wifi.
-                mWifiSignalController.handleBroadcast(intent);
-            }
+                break;
         }
     }
 

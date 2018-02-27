@@ -736,7 +736,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     private DisplayClientState mDisplayClientState = new DisplayClientState();
 
-    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+    @VisibleForTesting
+    final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -773,6 +774,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                                 maxChargingMicroWatt));
                 mHandler.sendMessage(msg);
             } else if (TelephonyIntents.ACTION_SIM_STATE_CHANGED.equals(action)) {
+                // ACTION_SIM_STATE_CHANGED is rebroadcast after unlocking the device to
+                // keep compatibility with apps that aren't direct boot aware.
+                // SysUI should just ignore this broadcast because it was already received
+                // and processed previously.
+                if (intent.getBooleanExtra(TelephonyIntents.EXTRA_REBROADCAST_ON_UNLOCK, false)) {
+                    return;
+                }
                 SimData args = SimData.fromIntent(intent);
                 if (DEBUG_SIM_STATES) {
                     Log.v(TAG, "action " + action
@@ -1508,7 +1516,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     /**
      * Handle {@link #MSG_SIM_STATE_CHANGE}
      */
-    private void handleSimStateChange(int subId, int slotId, State state) {
+    @VisibleForTesting
+    protected void handleSimStateChange(int subId, int slotId, State state) {
 
         if (DEBUG_SIM_STATES) {
             Log.d(TAG, "handleSimStateChange(subId=" + subId + ", slotId="
