@@ -423,6 +423,13 @@ status_t StatsService::cmd_config(FILE* in, FILE* out, FILE* err, Vector<String8
             }
 
             if (args[1] == "update") {
+                char* endp;
+                int64_t configID = strtoll(name.c_str(), &endp, 10);
+                if (endp == name.c_str() || *endp != '\0') {
+                    fprintf(err, "Error parsing config ID.\n");
+                    return UNKNOWN_ERROR;
+                }
+
                 // Read stream into buffer.
                 string buffer;
                 if (!android::base::ReadFdToString(fileno(in), &buffer)) {
@@ -438,7 +445,7 @@ status_t StatsService::cmd_config(FILE* in, FILE* out, FILE* err, Vector<String8
                 }
 
                 // Add / update the config.
-                mConfigManager->UpdateConfig(ConfigKey(uid, StrToInt64(name)), config);
+                mConfigManager->UpdateConfig(ConfigKey(uid, configID), config);
             } else {
                 if (argCount == 2) {
                     cmd_remove_all_configs(out);

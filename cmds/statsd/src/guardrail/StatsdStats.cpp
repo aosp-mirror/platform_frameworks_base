@@ -367,7 +367,7 @@ void StatsdStats::dumpStats(FILE* out) const {
     fprintf(out, "%lu Config in icebox: \n", (unsigned long)mIceBox.size());
     for (const auto& configStats : mIceBox) {
         fprintf(out,
-                "Config {%d-%lld}: creation=%d, deletion=%d, #metric=%d, #condition=%d, "
+                "Config {%d_%lld}: creation=%d, deletion=%d, #metric=%d, #condition=%d, "
                 "#matcher=%d, #alert=%d,  valid=%d\n",
                 configStats.uid(), (long long)configStats.id(), configStats.creation_time_sec(),
                 configStats.deletion_time_sec(), configStats.metric_count(),
