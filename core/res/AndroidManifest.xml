@@ -3867,6 +3867,12 @@
     <permission android:name="android.permission.WATCH_APPOPS"
         android:protectionLevel="signature" />
 
+    <!-- Allows an application to directly open the "Open by default" page inside a package's
+         Details screen.
+         @hide <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.OPEN_APPLICATION_DETAILS_OPEN_BY_DEFAULT_PAGE"
+                android:protectionLevel="signature" />
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"
