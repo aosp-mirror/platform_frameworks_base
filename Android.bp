@@ -498,7 +498,7 @@ java_library {
         "telephony/java/android/telephony/ims/aidl/IImsRcsFeature.aidl",
         "telephony/java/android/telephony/ims/aidl/IImsServiceController.aidl",
         "telephony/java/android/telephony/ims/aidl/IImsServiceControllerListener.aidl",
-	    "telephony/java/android/telephony/ims/aidl/IImsSmsListener.aidl",
+        "telephony/java/android/telephony/ims/aidl/IImsSmsListener.aidl",
         "telephony/java/android/telephony/mbms/IMbmsDownloadSessionCallback.aidl",
         "telephony/java/android/telephony/mbms/IMbmsStreamingSessionCallback.aidl",
         "telephony/java/android/telephony/mbms/IDownloadStateCallback.aidl",
@@ -683,7 +683,8 @@ java_library {
     // Loaded with System.loadLibrary by android.view.textclassifier
     required: [
         "libtextclassifier",
-        "libmedia2_jni",],
+        "libmedia2_jni",
+    ],
 
     javac_shard_size: 150,
 
@@ -833,7 +834,7 @@ gensrcs {
         "  -I . " +
         "  $(in)",
 
-    output_extension = "proto.h",
+    output_extension: "proto.h",
 }
 
 subdirs = [
