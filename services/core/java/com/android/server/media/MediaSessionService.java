@@ -521,10 +521,10 @@ public class MediaSessionService extends SystemService implements Monitor {
         synchronized (mLock) {
             // List to keep the session services that need be removed because they don't exist
             // in the 'services' above.
-            Set<SessionToken2> sessionTokensToRemove = new HashSet<>(mSessionRecords.keySet());
-            for (SessionToken2 token : sessionTokensToRemove) {
-                if (token.getType() == TYPE_SESSION) {
-                    sessionTokensToRemove.remove(token);
+            Set<SessionToken2> sessionTokensToRemove = new HashSet<>();
+            for (SessionToken2 token : mSessionRecords.keySet()) {
+                if (token.getType() != TYPE_SESSION) {
+                    sessionTokensToRemove.add(token);
                 }
             }
 
