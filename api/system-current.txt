@@ -368,7 +368,6 @@ package android.app {
   }
 
   public final class StatsManager {
-    method public boolean addConfiguration(long, byte[], java.lang.String, java.lang.String);
     method public boolean addConfiguration(long, byte[]);
     method public byte[] getData(long);
     method public byte[] getMetadata();
