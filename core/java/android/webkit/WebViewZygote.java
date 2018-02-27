@@ -169,6 +169,8 @@ public class WebViewZygote {
             final String zip = (zipPaths.size() == 1) ? zipPaths.get(0) :
                     TextUtils.join(File.pathSeparator, zipPaths);
 
+            String libFileName = WebViewFactory.getWebViewLibrary(sPackage.applicationInfo);
+
             // In the case where the ApplicationInfo has been modified by the stub WebView,
             // we need to use the original ApplicationInfo to determine what the original classpath
             // would have been to use as a cache key.
@@ -179,7 +181,7 @@ public class WebViewZygote {
             ZygoteProcess.waitForConnectionToZygote(sZygote.getPrimarySocketAddress());
 
             Log.d(LOGTAG, "Preloading package " + zip + " " + librarySearchPath);
-            sZygote.preloadPackageForAbi(zip, librarySearchPath, cacheKey,
+            sZygote.preloadPackageForAbi(zip, librarySearchPath, libFileName, cacheKey,
                                          Build.SUPPORTED_ABIS[0]);
         } catch (Exception e) {
             Log.e(LOGTAG, "Error connecting to webview zygote", e);

@@ -234,17 +234,14 @@ public class WebViewLibraryLoader {
      * <p class="note"><b>Note:</b> Assumes that we have waited for relro creation.
      *
      * @param clazzLoader class loader used to find the linker namespace to load the library into.
-     * @param packageInfo the package from which WebView is loaded.
+     * @param libraryFileName the filename of the library to load.
      */
-    static int loadNativeLibrary(ClassLoader clazzLoader, PackageInfo packageInfo)
-            throws WebViewFactory.MissingWebViewPackageException {
+    public static int loadNativeLibrary(ClassLoader clazzLoader, String libraryFileName) {
         if (!sAddressSpaceReserved) {
             Log.e(LOGTAG, "can't load with relro file; address space not reserved");
             return WebViewFactory.LIBLOAD_ADDRESS_SPACE_NOT_RESERVED;
         }
 
-        final String libraryFileName =
-                WebViewFactory.getWebViewLibrary(packageInfo.applicationInfo);
         String relroPath = VMRuntime.getRuntime().is64Bit() ? CHROMIUM_WEBVIEW_NATIVE_RELRO_64 :
                                                               CHROMIUM_WEBVIEW_NATIVE_RELRO_32;
         int result = nativeLoadWithRelroFile(libraryFileName, relroPath, clazzLoader);
