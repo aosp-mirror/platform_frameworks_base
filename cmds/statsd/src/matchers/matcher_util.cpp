@@ -87,6 +87,10 @@ bool tryMatchString(const UidMap& uidMap, const Field& field, const Value& value
                     const string& str_match) {
     if (isAttributionUidField(field, value)) {
         int uid = value.int_value;
+        auto aidIt = UidMap::sAidToUidMapping.find(str_match);
+        if (aidIt != UidMap::sAidToUidMapping.end()) {
+            return ((int)aidIt->second) == uid;
+        }
         std::set<string> packageNames = uidMap.getAppNamesFromUid(uid, true /* normalize*/);
         return packageNames.find(str_match) != packageNames.end();
     } else if (value.getType() == STRING) {
@@ -207,6 +211,9 @@ bool matchesSimple(const UidMap& uidMap, const FieldValueMatcher& matcher,
             }
             return false;
         }
+        // Finally, we get to the point of real value matching.
+        // If the field matcher ends with ANY, then we have [start, end) range > 1.
+        // In the following, we should return true, when ANY of the values matches.
         case FieldValueMatcher::ValueMatcherCase::kEqBool: {
             for (int i = start; i < end; i++) {
                 if ((values[i].mValue.getType() == INT &&
@@ -225,9 +232,36 @@ bool matchesSimple(const UidMap& uidMap, const FieldValueMatcher& matcher,
                     return true;
                 }
             }
-        }
             return false;
-        case FieldValueMatcher::ValueMatcherCase::kEqInt:
+        }
+        case FieldValueMatcher::ValueMatcherCase::kNeqAllString: {
+            const auto& str_list = matcher.neq_all_string();
+            for (int i = start; i < end; i++) {
+                bool notEqAll = true;
+                for (const auto& str : str_list.str_value()) {
+                    if (tryMatchString(uidMap, values[i].mField, values[i].mValue, str)) {
+                        notEqAll = false;
+                        break;
+                    }
+                }
+                if (notEqAll) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        case FieldValueMatcher::ValueMatcherCase::kEqAnyString: {
+            const auto& str_list = matcher.eq_any_string();
+            for (int i = start; i < end; i++) {
+                for (const auto& str : str_list.str_value()) {
+                    if (tryMatchString(uidMap, values[i].mField, values[i].mValue, str)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        case FieldValueMatcher::ValueMatcherCase::kEqInt: {
             for (int i = start; i < end; i++) {
                 if (values[i].mValue.getType() == INT &&
                     (matcher.eq_int() == values[i].mValue.int_value)) {
@@ -240,7 +274,8 @@ bool matchesSimple(const UidMap& uidMap, const FieldValueMatcher& matcher,
                 }
             }
             return false;
-        case FieldValueMatcher::ValueMatcherCase::kLtInt:
+        }
+        case FieldValueMatcher::ValueMatcherCase::kLtInt: {
             for (int i = start; i < end; i++) {
                 if (values[i].mValue.getType() == INT &&
                     (values[i].mValue.int_value < matcher.lt_int())) {
@@ -253,7 +288,8 @@ bool matchesSimple(const UidMap& uidMap, const FieldValueMatcher& matcher,
                 }
             }
             return false;
-        case FieldValueMatcher::ValueMatcherCase::kGtInt:
+        }
+        case FieldValueMatcher::ValueMatcherCase::kGtInt: {
             for (int i = start; i < end; i++) {
                 if (values[i].mValue.getType() == INT &&
                     (values[i].mValue.int_value > matcher.gt_int())) {
@@ -266,7 +302,8 @@ bool matchesSimple(const UidMap& uidMap, const FieldValueMatcher& matcher,
                 }
             }
             return false;
-        case FieldValueMatcher::ValueMatcherCase::kLtFloat:
+        }
+        case FieldValueMatcher::ValueMatcherCase::kLtFloat: {
             for (int i = start; i < end; i++) {
                 if (values[i].mValue.getType() == FLOAT &&
                     (values[i].mValue.float_value < matcher.lt_float())) {
@@ -274,7 +311,8 @@ bool matchesSimple(const UidMap& uidMap, const FieldValueMatcher& matcher,
                 }
             }
             return false;
-        case FieldValueMatcher::ValueMatcherCase::kGtFloat:
+        }
+        case FieldValueMatcher::ValueMatcherCase::kGtFloat: {
             for (int i = start; i < end; i++) {
                 if (values[i].mValue.getType() == FLOAT &&
                     (values[i].mValue.float_value > matcher.gt_float())) {
@@ -282,7 +320,8 @@ bool matchesSimple(const UidMap& uidMap, const FieldValueMatcher& matcher,
                 }
             }
             return false;
-        case FieldValueMatcher::ValueMatcherCase::kLteInt:
+        }
+        case FieldValueMatcher::ValueMatcherCase::kLteInt: {
             for (int i = start; i < end; i++) {
                 if (values[i].mValue.getType() == INT &&
                     (values[i].mValue.int_value <= matcher.lte_int())) {
@@ -295,7 +334,8 @@ bool matchesSimple(const UidMap& uidMap, const FieldValueMatcher& matcher,
                 }
             }
             return false;
-        case FieldValueMatcher::ValueMatcherCase::kGteInt:
+        }
+        case FieldValueMatcher::ValueMatcherCase::kGteInt: {
             for (int i = start; i < end; i++) {
                 if (values[i].mValue.getType() == INT &&
                     (values[i].mValue.int_value >= matcher.gte_int())) {
@@ -308,6 +348,7 @@ bool matchesSimple(const UidMap& uidMap, const FieldValueMatcher& matcher,
                 }
             }
             return false;
+        }
         default:
             return false;
     }

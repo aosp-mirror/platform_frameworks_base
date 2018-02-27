@@ -74,11 +74,18 @@ message FieldValueMatcher {
     int64 gte_int = 11;
 
     MessageMatcher matches_tuple = 12;
+
+    StringListMatcher eq_any_string = 13;
+    StringListMatcher neq_all_string = 14;
   }
 }
 
 message MessageMatcher {
   repeated FieldValueMatcher field_value_matcher = 1;
+}
+
+message StringListMatcher {
+    repeated string str_value = 1;
 }
 
 enum LogicalOperation {
