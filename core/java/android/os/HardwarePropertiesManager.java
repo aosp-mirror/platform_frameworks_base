@@ -63,6 +63,8 @@ public class HardwarePropertiesManager {
     /**
      * Device temperature types.
      */
+    // These constants are also defined in android/os/enums.proto.
+    // Any change to the types here or in the thermal hal should be made in the proto as well.
     /** Temperature of CPUs in Celsius. */
     public static final int DEVICE_TEMPERATURE_CPU = Constants.TemperatureType.CPU;
 

@@ -36,6 +36,7 @@ statsd_common_src := \
     src/external/StatsCompanionServicePuller.cpp \
     src/external/SubsystemSleepStatePuller.cpp \
     src/external/ResourceHealthManagerPuller.cpp \
+    src/external/ResourceThermalManagerPuller.cpp \
     src/external/CpuTimePerUidPuller.cpp \
     src/external/CpuTimePerUidFreqPuller.cpp \
     src/external/KernelUidCpuActiveTimeReader.cpp \
@@ -99,6 +100,7 @@ statsd_common_shared_libraries := \
     android.hardware.health@2.0 \
     android.hardware.power@1.0 \
     android.hardware.power@1.1 \
+    android.hardware.thermal@1.0 \
     libmemunreachable
 
 # =========
