@@ -17,12 +17,14 @@
 package com.android.server.wm;
 
 import android.annotation.ColorInt;
-import android.graphics.Point;
+import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.animation.Animation;
 
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
+
+import java.io.PrintWriter;
 
 /**
  * Interface that describes an animation and bridges the animation start to the component
@@ -83,4 +85,14 @@ interface AnimationAdapter {
      * @return the desired start time of the status bar transition, in uptime millis
      */
     long getStatusBarTransitionsStartTime();
+
+    void dump(PrintWriter pw, String prefix);
+
+    default void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        writeToProto(proto);
+        proto.end(token);
+    }
+
+    void writeToProto(ProtoOutputStream proto);
 }
