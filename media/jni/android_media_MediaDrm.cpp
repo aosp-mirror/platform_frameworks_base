@@ -31,10 +31,10 @@
 #include <binder/Parcel.h>
 #include <binder/PersistableBundle.h>
 #include <cutils/properties.h>
-#include <media/IDrm.h>
-#include <media/IMediaDrmService.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/MediaErrors.h>
+#include <mediadrm/IDrm.h>
+#include <mediadrm/IMediaDrmService.h>
 
 using ::android::os::PersistableBundle;
 

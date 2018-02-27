@@ -36,7 +36,6 @@
 
 #include <gui/Surface.h>
 
-#include <media/ICrypto.h>
 #include <media/MediaCodecBuffer.h>
 #include <media/stagefright/MediaCodec.h>
 #include <media/stagefright/foundation/ABuffer.h>
@@ -46,6 +45,7 @@
 #include <media/stagefright/foundation/AString.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/PersistentSurface.h>
+#include <mediadrm/ICrypto.h>
 #include <nativehelper/ScopedLocalRef.h>
 
 #include <system/window.h>
