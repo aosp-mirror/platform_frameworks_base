@@ -94,10 +94,18 @@ void DrawFrameTask::run() {
 
     // Grab a copy of everything we need
     CanvasContext* context = mContext;
+    std::function<void(int64_t)> callback = std::move(mFrameCallback);
 
     // From this point on anything in "this" is *UNSAFE TO ACCESS*
     if (canUnblockUiThread) {
         unblockUiThread();
+    }
+
+    // Even if we aren't drawing this vsync pulse the next frame number will still be accurate
+    if (CC_UNLIKELY(callback)) {
+        context->enqueueFrameWork([callback, frameNr = context->getFrameNumber()]() {
+            callback(frameNr);
+        });
     }
 
     if (CC_LIKELY(canDrawThisFrame)) {

@@ -1008,10 +1008,8 @@ public final class ThreadedRenderer {
             final long vsync = AnimationUtils.currentAnimationTimeMillis() * 1000000L;
             mFrameInfo.setVsync(vsync, vsync);
             mFrameInfo.addFlags(1 << 2 /* VSYNC */);
-            // TODO: remove this fence
-            nFence(mNativeProxy);
             if (callback != null) {
-                callback.onFrameDraw(mSurface.getNextFrameNumber());
+                nSetFrameCallback(mNativeProxy, callback);
             }
             nSyncAndDrawFrame(mNativeProxy, mFrameInfo.mFrameInfo, mFrameInfo.mFrameInfo.length);
         }
@@ -1184,6 +1182,7 @@ public final class ThreadedRenderer {
     private static native void nDrawRenderNode(long nativeProxy, long rootRenderNode);
     private static native void nSetContentDrawBounds(long nativeProxy, int left,
              int top, int right, int bottom);
+    private static native void nSetFrameCallback(long nativeProxy, FrameDrawingCallback callback);
 
     private static native long nAddFrameMetricsObserver(long nativeProxy, FrameMetricsObserver observer);
     private static native void nRemoveFrameMetricsObserver(long nativeProxy, long nativeObserver);

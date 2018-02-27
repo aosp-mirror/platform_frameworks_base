@@ -115,6 +115,7 @@ public:
     ANDROID_API void removeRenderNode(RenderNode* node);
     ANDROID_API void drawRenderNode(RenderNode* node);
     ANDROID_API void setContentDrawBounds(int left, int top, int right, int bottom);
+    ANDROID_API void setFrameCallback(std::function<void(int64_t)>&& callback);
 
     ANDROID_API void addFrameMetricsObserver(FrameMetricsObserver* observer);
     ANDROID_API void removeFrameMetricsObserver(FrameMetricsObserver* observer);
