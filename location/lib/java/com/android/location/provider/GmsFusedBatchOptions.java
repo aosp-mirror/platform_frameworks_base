@@ -105,7 +105,7 @@ public class GmsFusedBatchOptions {
      * Method definitions for internal use.
      */
 
-    /*
+    /**
      * @hide
      */
     public FusedBatchOptions getParcelableOptions() {
