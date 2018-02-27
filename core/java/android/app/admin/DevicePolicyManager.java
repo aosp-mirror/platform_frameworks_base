@@ -5627,6 +5627,29 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by a device owner to set the default SMS application.
+     * <p>
+     * The calling device admin must be a device owner. If it is not, a security exception will be
+     * thrown.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param packageName The name of the package to set as the default SMS application.
+     * @throws SecurityException if {@code admin} is not a device owner.
+     *
+     * @hide
+     */
+    public void setDefaultSmsApplication(@NonNull ComponentName admin, String packageName) {
+        throwIfParentInstance("setDefaultSmsApplication");
+        if (mService != null) {
+            try {
+                mService.setDefaultSmsApplication(admin, packageName);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
      * Called by a profile owner or device owner to grant permission to a package to manage
      * application restrictions for the calling user via {@link #setApplicationRestrictions} and
      * {@link #getApplicationRestrictions}.

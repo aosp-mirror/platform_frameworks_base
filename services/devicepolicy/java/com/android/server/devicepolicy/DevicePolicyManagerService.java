@@ -206,6 +206,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.telephony.SmsApplication;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
@@ -8214,6 +8215,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mInjector.binderRestoreCallingIdentity(id);
             }
         }
+    }
+
+    @Override
+    public void setDefaultSmsApplication(ComponentName admin, String packageName) {
+        Preconditions.checkNotNull(admin, "ComponentName is null");
+        synchronized (this) {
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+        }
+        mInjector.binderWithCleanCallingIdentity(() ->
+                SmsApplication.setDefaultApplication(packageName, mContext));
     }
 
     @Override
