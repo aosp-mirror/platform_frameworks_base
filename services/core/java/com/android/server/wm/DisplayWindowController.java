@@ -50,7 +50,9 @@ public class DisplayWindowController
             }
 
             if (mContainer == null) {
-                throw new IllegalArgumentException("Trying to add displayId=" + displayId);
+                throw new IllegalArgumentException("Trying to add displayId=" + displayId
+                        + " display=" + display
+                        + " dc=" + mRoot.getDisplayContent(displayId));
             }
         }
     }
