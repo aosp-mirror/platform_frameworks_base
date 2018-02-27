@@ -37,6 +37,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
+import android.view.ViewConfiguration;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -753,8 +754,7 @@ public class MenuBuilder implements Menu {
     private void setShortcutsVisibleInner(boolean shortcutsVisible) {
         mShortcutsVisible = shortcutsVisible
                 && mResources.getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS
-                && mResources.getBoolean(
-                        com.android.internal.R.bool.config_showMenuShortcutsWhenKeyboardPresent);
+                && ViewConfiguration.get(mContext).shouldShowMenuShortcutsWhenKeyboardPresent();
     }
 
     /**
