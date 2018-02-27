@@ -17,8 +17,7 @@
 package android.security.keystore;
 
 /**
- * Error thrown when attempting to use a {@link RecoverySession} that has since expired.
- *
+ * @deprecated Use {@link android.security.keystore.recovery.SessionExpiredException}.
  * @hide
  */
 public class SessionExpiredException extends RecoveryControllerException {

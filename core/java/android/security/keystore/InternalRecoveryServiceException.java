@@ -17,11 +17,7 @@
 package android.security.keystore;
 
 /**
- * An error thrown when something went wrong internally in the recovery service.
- *
- * <p>This is an unexpected error, and indicates a problem with the service itself, rather than the
- * caller having performed some kind of illegal action.
- *
+ * @deprecated Use {@link android.security.keystore.recovery.InternalRecoveryServiceException}.
  * @hide
  */
 public class InternalRecoveryServiceException extends RecoveryControllerException {

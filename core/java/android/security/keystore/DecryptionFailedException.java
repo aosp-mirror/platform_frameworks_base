@@ -17,9 +17,7 @@
 package android.security.keystore;
 
 /**
- * Error thrown when decryption failed, due to an agent error. i.e., using the incorrect key,
- * trying to decrypt garbage data, trying to decrypt data that has somehow been corrupted, etc.
- *
+ * @deprecated Use {@link android.security.keystore.recovery.DecryptionFailedException}.
  * @hide
  */
 public class DecryptionFailedException extends RecoveryControllerException {

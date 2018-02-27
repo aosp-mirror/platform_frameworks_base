@@ -17,10 +17,7 @@
 package android.security.keystore;
 
 /**
- * Error thrown when trying to generate keys for a profile that has no lock screen set.
- *
- * <p>A lock screen must be set, as the lock screen is used to encrypt the snapshot.
- *
+ * @deprecated Use {@link android.security.keystore.recovery.LockScreenRequiredException}.
  * @hide
  */
 public class LockScreenRequiredException extends RecoveryControllerException {

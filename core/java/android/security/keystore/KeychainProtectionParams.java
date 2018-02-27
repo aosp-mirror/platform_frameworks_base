@@ -28,23 +28,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 
 /**
- * A {@link KeychainSnapshot} is protected with a key derived from the user's lock screen. This
- * class wraps all the data necessary to derive the same key on a recovering device:
- *
- * <ul>
- *     <li>UI parameters for the user's lock screen - so that if e.g., the user was using a pattern,
- *         the recovering device can display the pattern UI to the user when asking them to enter
- *         the lock screen from their previous device.
- *     <li>The algorithm used to derive a key from the user's lock screen, e.g. SHA-256 with a salt.
- * </ul>
- *
- * <p>As such, this data is sent along with the {@link KeychainSnapshot} when syncing the current
- * version of the keychain.
- *
- * <p>For now, the recoverable keychain only supports a single layer of protection, which is the
- * user's lock screen. In the future, the keychain will support multiple layers of protection
- * (e.g. an additional keychain password, along with the lock screen).
- *
+ * @deprecated Use {@link android.security.keystore.recovery.KeyChainProtectionParams}.
  * @hide
  */
 public final class KeychainProtectionParams implements Parcelable {

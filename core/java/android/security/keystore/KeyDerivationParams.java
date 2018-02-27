@@ -27,9 +27,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Collection of parameters which define a key derivation function.
- * Currently only supports salted SHA-256
- *
+ * @deprecated Use {@link android.security.keystore.recovery.KeyDerivationParams}.
  * @hide
  */
 public final class KeyDerivationParams implements Parcelable {

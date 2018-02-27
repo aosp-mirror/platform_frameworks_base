@@ -17,8 +17,7 @@
 package android.security.keystore;
 
 /**
- * An attempt to recover a keychain protected by remote secure hardware.
- *
+ * @deprecated Use {@link android.security.keystore.recovery.RecoverySession}.
  * @hide
  */
 public class RecoveryClaim {

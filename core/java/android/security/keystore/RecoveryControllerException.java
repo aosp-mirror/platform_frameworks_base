@@ -19,8 +19,7 @@ package android.security.keystore;
 import java.security.GeneralSecurityException;
 
 /**
- * Base exception for errors thrown by {@link RecoveryController}.
- *
+ * @deprecated Use {@link android.security.keystore.recovery.RecoveryController}.
  * @hide
  */
 public abstract class RecoveryControllerException extends GeneralSecurityException {
