@@ -1590,6 +1590,9 @@
     <!-- Operating volatage for bluetooth controller. 0 by default-->
     <integer translatable="false" name="config_bluetooth_operating_voltage_mv">0</integer>
 
+    <!-- Max number of connected audio devices supported by Bluetooth stack -->
+    <integer name="config_bluetooth_max_connected_audio_devices">1</integer>
+
     <!-- Whether supported profiles should be reloaded upon enabling bluetooth -->
     <bool name="config_bluetooth_reload_supported_profiles_when_enabled">false</bool>
 
