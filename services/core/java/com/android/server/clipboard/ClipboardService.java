@@ -16,6 +16,7 @@
 
 package com.android.server.clipboard;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -24,9 +25,9 @@ import android.app.KeyguardManager;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ContentProvider;
+import android.content.Context;
 import android.content.IClipboard;
 import android.content.IOnPrimaryClipChangedListener;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
@@ -37,7 +38,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.IUserManager;
 import android.os.Parcel;
-import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -49,14 +49,10 @@ import android.util.SparseArray;
 
 import com.android.server.SystemService;
 
-import java.util.HashSet;
-import java.util.List;
-
-import java.lang.Thread;
-import java.lang.Runnable;
-import java.lang.InterruptedException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.HashSet;
+import java.util.List;
 
 // The following class is Android Emulator specific. It is used to read and
 // write contents of the host system's clipboard.
@@ -182,7 +178,8 @@ public class ClipboardService extends SystemService {
                                          new String[]{"text/plain"},
                                          new ClipData.Item(contents));
                         synchronized(mClipboards) {
-                            setPrimaryClipInternal(getClipboard(0), clip);
+                            setPrimaryClipInternal(getClipboard(0), clip,
+                                    android.os.Process.SYSTEM_UID);
                         }
                     }
                 });
@@ -218,7 +215,10 @@ public class ClipboardService extends SystemService {
         final RemoteCallbackList<IOnPrimaryClipChangedListener> primaryClipListeners
                 = new RemoteCallbackList<IOnPrimaryClipChangedListener>();
 
+        /** Current primary clip. */
         ClipData primaryClip;
+        /** UID that set {@link #primaryClip}. */
+        int primaryClipUid = android.os.Process.NOBODY_UID;
 
         final HashSet<String> activePermissionOwners
                 = new HashSet<String>();
@@ -246,13 +246,8 @@ public class ClipboardService extends SystemService {
         @Override
         public void setPrimaryClip(ClipData clip, String callingPackage) {
             synchronized (this) {
-                if (clip != null && clip.getItemCount() <= 0) {
+                if (clip == null || clip.getItemCount() <= 0) {
                     throw new IllegalArgumentException("No items");
-                }
-                if (clip.getItemAt(0).getText() != null &&
-                    mHostClipboardMonitor != null) {
-                    mHostClipboardMonitor.setHostClipboard(
-                        clip.getItemAt(0).getText().toString());
                 }
                 final int callingUid = Binder.getCallingUid();
                 if (!clipboardAccessAllowed(AppOpsManager.OP_WRITE_CLIPBOARD, callingPackage,
@@ -260,44 +255,19 @@ public class ClipboardService extends SystemService {
                     return;
                 }
                 checkDataOwnerLocked(clip, callingUid);
-                final int userId = UserHandle.getUserId(callingUid);
-                PerUserClipboard clipboard = getClipboard(userId);
-                revokeUris(clipboard);
-                setPrimaryClipInternal(clipboard, clip);
-                List<UserInfo> related = getRelatedProfiles(userId);
-                if (related != null) {
-                    int size = related.size();
-                    if (size > 1) { // Related profiles list include the current profile.
-                        boolean canCopy = false;
-                        try {
-                            canCopy = !mUm.getUserRestrictions(userId).getBoolean(
-                                    UserManager.DISALLOW_CROSS_PROFILE_COPY_PASTE);
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "Remote Exception calling UserManager: " + e);
-                        }
-                        // Copy clip data to related users if allowed. If disallowed, then remove
-                        // primary clip in related users to prevent pasting stale content.
-                        if (!canCopy) {
-                            clip = null;
-                        } else {
-                            // We want to fix the uris of the related user's clip without changing the
-                            // uris of the current user's clip.
-                            // So, copy the ClipData, and then copy all the items, so that nothing
-                            // is shared in memmory.
-                            clip = new ClipData(clip);
-                            for (int i = clip.getItemCount() - 1; i >= 0; i--) {
-                                clip.setItemAt(i, new ClipData.Item(clip.getItemAt(i)));
-                            }
-                            clip.fixUrisLight(userId);
-                        }
-                        for (int i = 0; i < size; i++) {
-                            int id = related.get(i).id;
-                            if (id != userId) {
-                                setPrimaryClipInternal(getClipboard(id), clip);
-                            }
-                        }
-                    }
+                setPrimaryClipInternal(clip, callingUid);
+            }
+        }
+
+        @Override
+        public void clearPrimaryClip(String callingPackage) {
+            synchronized (this) {
+                final int callingUid = Binder.getCallingUid();
+                if (!clipboardAccessAllowed(AppOpsManager.OP_WRITE_CLIPBOARD, callingPackage,
+                        callingUid)) {
+                    return;
                 }
+                setPrimaryClipInternal(null, callingUid);
             }
         }
 
@@ -398,12 +368,74 @@ public class ClipboardService extends SystemService {
         return related;
     }
 
-    void setPrimaryClipInternal(PerUserClipboard clipboard, ClipData clip) {
+    void setPrimaryClipInternal(@Nullable ClipData clip, int callingUid) {
+        // Push clipboard to host, if any
+        if (mHostClipboardMonitor != null) {
+            if (clip == null) {
+                // Someone really wants the clipboard cleared, so push empty
+                mHostClipboardMonitor.setHostClipboard("");
+            } else if (clip.getItemCount() > 0) {
+                final CharSequence text = clip.getItemAt(0).getText();
+                if (text != null) {
+                    mHostClipboardMonitor.setHostClipboard(text.toString());
+                }
+            }
+        }
+
+        // Update this user
+        final int userId = UserHandle.getUserId(callingUid);
+        setPrimaryClipInternal(getClipboard(userId), clip, callingUid);
+
+        // Update related users
+        List<UserInfo> related = getRelatedProfiles(userId);
+        if (related != null) {
+            int size = related.size();
+            if (size > 1) { // Related profiles list include the current profile.
+                boolean canCopy = false;
+                try {
+                    canCopy = !mUm.getUserRestrictions(userId).getBoolean(
+                            UserManager.DISALLOW_CROSS_PROFILE_COPY_PASTE);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Remote Exception calling UserManager: " + e);
+                }
+                // Copy clip data to related users if allowed. If disallowed, then remove
+                // primary clip in related users to prevent pasting stale content.
+                if (!canCopy) {
+                    clip = null;
+                } else {
+                    // We want to fix the uris of the related user's clip without changing the
+                    // uris of the current user's clip.
+                    // So, copy the ClipData, and then copy all the items, so that nothing
+                    // is shared in memmory.
+                    clip = new ClipData(clip);
+                    for (int i = clip.getItemCount() - 1; i >= 0; i--) {
+                        clip.setItemAt(i, new ClipData.Item(clip.getItemAt(i)));
+                    }
+                    clip.fixUrisLight(userId);
+                }
+                for (int i = 0; i < size; i++) {
+                    int id = related.get(i).id;
+                    if (id != userId) {
+                        setPrimaryClipInternal(getClipboard(id), clip, callingUid);
+                    }
+                }
+            }
+        }
+    }
+
+    void setPrimaryClipInternal(PerUserClipboard clipboard, @Nullable ClipData clip,
+            int callingUid) {
+        revokeUris(clipboard);
         clipboard.activePermissionOwners.clear();
         if (clip == null && clipboard.primaryClip == null) {
             return;
         }
         clipboard.primaryClip = clip;
+        if (clip != null) {
+            clipboard.primaryClipUid = callingUid;
+        } else {
+            clipboard.primaryClipUid = android.os.Process.NOBODY_UID;
+        }
         if (clip != null) {
             final ClipDescription description = clip.getDescription();
             if (description != null) {
@@ -479,12 +511,12 @@ public class ClipboardService extends SystemService {
         }
     }
 
-    private final void grantUriLocked(Uri uri, String pkg, int userId) {
+    private final void grantUriLocked(Uri uri, int primaryClipUid, String pkg, int userId) {
         long ident = Binder.clearCallingIdentity();
         try {
             int sourceUserId = ContentProvider.getUserIdFromUri(uri, userId);
             uri = ContentProvider.getUriWithoutUserId(uri);
-            mAm.grantUriPermissionFromOwner(mPermissionOwner, Process.myUid(), pkg,
+            mAm.grantUriPermissionFromOwner(mPermissionOwner, primaryClipUid, pkg,
                     uri, Intent.FLAG_GRANT_READ_URI_PERMISSION, sourceUserId, userId);
         } catch (RemoteException e) {
         } finally {
@@ -492,13 +524,14 @@ public class ClipboardService extends SystemService {
         }
     }
 
-    private final void grantItemLocked(ClipData.Item item, String pkg, int userId) {
+    private final void grantItemLocked(ClipData.Item item, int primaryClipUid, String pkg,
+            int userId) {
         if (item.getUri() != null) {
-            grantUriLocked(item.getUri(), pkg, userId);
+            grantUriLocked(item.getUri(), primaryClipUid, pkg, userId);
         }
         Intent intent = item.getIntent();
         if (intent != null && intent.getData() != null) {
-            grantUriLocked(intent.getData(), pkg, userId);
+            grantUriLocked(intent.getData(), primaryClipUid, pkg, userId);
         }
     }
 
@@ -524,7 +557,8 @@ public class ClipboardService extends SystemService {
         if (clipboard.primaryClip != null && !clipboard.activePermissionOwners.contains(pkg)) {
             final int N = clipboard.primaryClip.getItemCount();
             for (int i=0; i<N; i++) {
-                grantItemLocked(clipboard.primaryClip.getItemAt(i), pkg, UserHandle.getUserId(uid));
+                grantItemLocked(clipboard.primaryClip.getItemAt(i), clipboard.primaryClipUid, pkg,
+                        UserHandle.getUserId(uid));
             }
             clipboard.activePermissionOwners.add(pkg);
         }
