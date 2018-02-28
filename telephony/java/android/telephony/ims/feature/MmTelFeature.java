@@ -332,20 +332,14 @@ public class MmTelFeature extends ImsFeature {
     public static final int PROCESS_CALL_IMS = 0;
     /**
      * To be returned by {@link #shouldProcessCall(String[])} when the telephony framework should
-     * not process the outgoing NON_EMERGENCY call as IMS and should instead use circuit switch.
+     * not process the outgoing call as IMS and should instead use circuit switch.
      */
     public static final int PROCESS_CALL_CSFB = 1;
-    /**
-     * To be returned by {@link #shouldProcessCall(String[])} when the telephony framework should
-     * not process the outgoing EMERGENCY call as IMS and should instead use circuit switch.
-     */
-    public static final int PROCESS_CALL_EMERGENCY_CSFB = 2;
 
     @IntDef(flag = true,
             value = {
                     PROCESS_CALL_IMS,
-                    PROCESS_CALL_CSFB,
-                    PROCESS_CALL_EMERGENCY_CSFB
+                    PROCESS_CALL_CSFB
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProcessCallResult {}
@@ -536,12 +530,15 @@ public class MmTelFeature extends ImsFeature {
 
     /**
      * Called by the framework to determine if the outgoing call, designated by the outgoing
-     * {@link Uri}s, should be processed as an IMS call or CSFB call.
+     * {@link String}s, should be processed as an IMS call or CSFB call. If this method's
+     * functionality is not overridden, the platform will process every call as IMS as long as the
+     * MmTelFeature reports that the {@link MmTelCapabilities#CAPABILITY_TYPE_VOICE} capability is
+     * available.
      * @param numbers An array of {@link String}s that will be used for placing the call. There can
      *         be multiple {@link String}s listed in the case when we want to place an outgoing
      *         call as a conference.
      * @return a {@link ProcessCallResult} to the framework, which will be used to determine if the
-     *        call wil lbe placed over IMS or via CSFB.
+     *        call will be placed over IMS or via CSFB.
      */
     public @ProcessCallResult int shouldProcessCall(String[] numbers) {
         return PROCESS_CALL_IMS;
