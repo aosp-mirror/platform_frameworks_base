@@ -360,6 +360,23 @@ public class Notification implements Parcelable
     @Deprecated
     public RemoteViews headsUpContentView;
 
+    private boolean mUsesStandardHeader;
+
+    private static final ArraySet<Integer> STANDARD_LAYOUTS = new ArraySet<>();
+    static {
+        STANDARD_LAYOUTS.add(R.layout.notification_template_material_base);
+        STANDARD_LAYOUTS.add(R.layout.notification_template_material_big_base);
+        STANDARD_LAYOUTS.add(R.layout.notification_template_material_big_picture);
+        STANDARD_LAYOUTS.add(R.layout.notification_template_material_big_text);
+        STANDARD_LAYOUTS.add(R.layout.notification_template_material_inbox);
+        STANDARD_LAYOUTS.add(R.layout.notification_template_material_messaging);
+        STANDARD_LAYOUTS.add(R.layout.notification_template_material_media);
+        STANDARD_LAYOUTS.add(R.layout.notification_template_material_big_media);
+        STANDARD_LAYOUTS.add(R.layout.notification_template_ambient_header);
+        STANDARD_LAYOUTS.add(R.layout.notification_template_header);
+        STANDARD_LAYOUTS.add(R.layout.notification_template_material_ambient);
+    }
+
     /**
      * A large bitmap to be shown in the notification content area.
      *
@@ -2534,6 +2551,8 @@ public class Notification implements Parcelable
         }
 
         parcel.writeInt(mGroupAlertBehavior);
+
+        // mUsesStandardHeader is not written because it should be recomputed in listeners
     }
 
     /**
@@ -4092,6 +4111,25 @@ public class Notification implements Parcelable
             }
         }
 
+        /**
+         * @hide
+         */
+        public boolean usesStandardHeader() {
+            if (mN.mUsesStandardHeader) {
+                return true;
+            }
+            if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.N) {
+                if (mN.contentView == null && mN.bigContentView == null) {
+                    return true;
+                }
+            }
+            boolean contentViewUsesHeader = mN.contentView == null
+                    || STANDARD_LAYOUTS.contains(mN.contentView.getLayoutId());
+            boolean bigContentViewUsesHeader = mN.bigContentView == null
+                    || STANDARD_LAYOUTS.contains(mN.bigContentView.getLayoutId());
+            return contentViewUsesHeader && bigContentViewUsesHeader;
+        }
+
         private void resetStandardTemplate(RemoteViews contentView) {
             resetNotificationHeader(contentView);
             resetContentMargins(contentView);
@@ -4123,6 +4161,7 @@ public class Notification implements Parcelable
             contentView.setViewVisibility(R.id.time, View.GONE);
             contentView.setImageViewIcon(R.id.profile_badge, null);
             contentView.setViewVisibility(R.id.profile_badge, View.GONE);
+            mN.mUsesStandardHeader = false;
         }
 
         private void resetContentMargins(RemoteViews contentView) {
@@ -4444,6 +4483,7 @@ public class Notification implements Parcelable
                 bindProfileBadge(contentView);
             }
             bindExpandButton(contentView);
+            mN.mUsesStandardHeader = true;
         }
 
         private void bindExpandButton(RemoteViews contentView) {

@@ -18,13 +18,13 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto;
 
 import java.util.Arrays;
@@ -34,17 +34,19 @@ import java.util.Arrays;
  */
 public class ForegroundServiceControllerImpl
         implements ForegroundServiceController {
-  
+
     // shelf life of foreground services before they go bad
     public static final long FG_SERVICE_GRACE_MILLIS = 5000;
 
     private static final String TAG = "FgServiceController";
     private static final boolean DBG = false;
 
+    private final Context mContext;
     private final SparseArray<UserServices> mUserServices = new SparseArray<>();
     private final Object mMutex = new Object();
 
     public ForegroundServiceControllerImpl(Context context) {
+        mContext = context;
     }
 
     @Override
@@ -53,6 +55,52 @@ public class ForegroundServiceControllerImpl
             final UserServices services = mUserServices.get(userId);
             if (services == null) return false;
             return services.isDungeonNeeded();
+        }
+    }
+
+    @Override
+    public boolean isSystemAlertWarningNeeded(int userId, String pkg) {
+        synchronized (mMutex) {
+            final UserServices services = mUserServices.get(userId);
+            if (services == null) return false;
+            return services.getStandardLayoutKey(pkg) == null;
+        }
+    }
+
+    @Override
+    public String getStandardLayoutKey(int userId, String pkg) {
+        synchronized (mMutex) {
+            final UserServices services = mUserServices.get(userId);
+            if (services == null) return null;
+            return services.getStandardLayoutKey(pkg);
+        }
+    }
+
+    @Override
+    public ArraySet<Integer> getAppOps(int userId, String pkg) {
+        synchronized (mMutex) {
+            final UserServices services = mUserServices.get(userId);
+            if (services == null) {
+                return null;
+            }
+            return services.getFeatures(pkg);
+        }
+    }
+
+    @Override
+    public void onAppOpChanged(int code, int uid, String packageName, boolean active) {
+        int userId = UserHandle.getUserId(uid);
+        synchronized (mMutex) {
+            UserServices userServices = mUserServices.get(userId);
+            if (userServices == null) {
+                userServices = new UserServices();
+                mUserServices.put(userId, userServices);
+            }
+            if (active) {
+                userServices.addOp(packageName, code);
+            } else {
+                userServices.removeOp(packageName, code);
+            }
         }
     }
 
@@ -102,9 +150,16 @@ public class ForegroundServiceControllerImpl
                 }
             } else {
                 userServices.removeNotification(sbn.getPackageName(), sbn.getKey());
-                if (0 != (sbn.getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE)
-                        && newImportance > NotificationManager.IMPORTANCE_MIN) {
-                    userServices.addNotification(sbn.getPackageName(), sbn.getKey());
+                if (0 != (sbn.getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE)) {
+                    if (newImportance > NotificationManager.IMPORTANCE_MIN) {
+                        userServices.addImportantNotification(sbn.getPackageName(), sbn.getKey());
+                    }
+                    final Notification.Builder builder = Notification.Builder.recoverBuilder(
+                            mContext, sbn.getNotification());
+                    if (builder.usesStandardHeader()) {
+                        userServices.addStandardLayoutNotification(
+                                sbn.getPackageName(), sbn.getKey());
+                    }
                 }
             }
         }
@@ -117,48 +172,133 @@ public class ForegroundServiceControllerImpl
                 && sbn.getPackageName().equals("android");
     }
 
+    @Override
+    public boolean isSystemAlertNotification(StatusBarNotification sbn) {
+        // TODO: tag system alert notifications so they can be suppressed if app's notification
+        // is tagged
+        return false;
+    }
+
     /**
      * Struct to track relevant packages and notifications for a userid's foreground services.
      */
     private static class UserServices {
         private String[] mRunning = null;
         private long mServiceStartTime = 0;
-        private ArrayMap<String, ArraySet<String>> mNotifications = new ArrayMap<>(1);
+        // package -> sufficiently important posted notification keys
+        private ArrayMap<String, ArraySet<String>> mImportantNotifications = new ArrayMap<>(1);
+        // package -> standard layout posted notification keys
+        private ArrayMap<String, ArraySet<String>> mStandardLayoutNotifications = new ArrayMap<>(1);
+
+        // package -> app ops
+        private ArrayMap<String, ArraySet<Integer>> mAppOps = new ArrayMap<>(1);
+
         public void setRunningServices(String[] pkgs, long serviceStartTime) {
             mRunning = pkgs != null ? Arrays.copyOf(pkgs, pkgs.length) : null;
             mServiceStartTime = serviceStartTime;
         }
-        public void addNotification(String pkg, String key) {
-            if (mNotifications.get(pkg) == null) {
-                mNotifications.put(pkg, new ArraySet<String>());
+
+        public void addOp(String pkg, int op) {
+            if (mAppOps.get(pkg) == null) {
+                mAppOps.put(pkg, new ArraySet<>(3));
             }
-            mNotifications.get(pkg).add(key);
+            mAppOps.get(pkg).add(op);
         }
-        public boolean removeNotification(String pkg, String key) {
+
+        public boolean removeOp(String pkg, int op) {
             final boolean found;
-            final ArraySet<String> keys = mNotifications.get(pkg);
+            final ArraySet<Integer> keys = mAppOps.get(pkg);
+            if (keys == null) {
+                found = false;
+            } else {
+                found = keys.remove(op);
+                if (keys.size() == 0) {
+                    mAppOps.remove(pkg);
+                }
+            }
+            return found;
+        }
+
+        public void addImportantNotification(String pkg, String key) {
+            addNotification(mImportantNotifications, pkg, key);
+        }
+
+        public boolean removeImportantNotification(String pkg, String key) {
+            return removeNotification(mImportantNotifications, pkg, key);
+        }
+
+        public void addStandardLayoutNotification(String pkg, String key) {
+            addNotification(mStandardLayoutNotifications, pkg, key);
+        }
+
+        public boolean removeStandardLayoutNotification(String pkg, String key) {
+            return removeNotification(mStandardLayoutNotifications, pkg, key);
+        }
+
+        public boolean removeNotification(String pkg, String key) {
+            boolean removed = false;
+            removed |= removeImportantNotification(pkg, key);
+            removed |= removeStandardLayoutNotification(pkg, key);
+            return removed;
+        }
+
+        public void addNotification(ArrayMap<String, ArraySet<String>> map, String pkg,
+                String key) {
+            if (map.get(pkg) == null) {
+                map.put(pkg, new ArraySet<>());
+            }
+            map.get(pkg).add(key);
+        }
+
+        public boolean removeNotification(ArrayMap<String, ArraySet<String>> map,
+                String pkg, String key) {
+            final boolean found;
+            final ArraySet<String> keys = map.get(pkg);
             if (keys == null) {
                 found = false;
             } else {
                 found = keys.remove(key);
                 if (keys.size() == 0) {
-                    mNotifications.remove(pkg);
+                    map.remove(pkg);
                 }
             }
             return found;
         }
+
         public boolean isDungeonNeeded() {
             if (mRunning != null
                 && System.currentTimeMillis() - mServiceStartTime >= FG_SERVICE_GRACE_MILLIS) {
 
                 for (String pkg : mRunning) {
-                    final ArraySet<String> set = mNotifications.get(pkg);
+                    final ArraySet<String> set = mImportantNotifications.get(pkg);
                     if (set == null || set.size() == 0) {
                         return true;
                     }
                 }
             }
             return false;
+        }
+
+        public ArraySet<Integer> getFeatures(String pkg) {
+            return mAppOps.get(pkg);
+        }
+
+        public String getStandardLayoutKey(String pkg) {
+            final ArraySet<String> set = mStandardLayoutNotifications.get(pkg);
+            if (set == null || set.size() == 0) {
+                return null;
+            }
+            return set.valueAt(0);
+        }
+
+        @Override
+        public String toString() {
+            return "UserServices{" +
+                    "mRunning=" + Arrays.toString(mRunning) +
+                    ", mServiceStartTime=" + mServiceStartTime +
+                    ", mImportantNotifications=" + mImportantNotifications +
+                    ", mStandardLayoutNotifications=" + mStandardLayoutNotifications +
+                    '}';
         }
     }
 }

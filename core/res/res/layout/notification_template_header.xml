@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-
+<!-- extends ViewGroup -->
 <NotificationHeaderView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:theme="@style/Theme.Material.Notification"
@@ -126,5 +126,42 @@
         android:visibility="gone"
         android:contentDescription="@string/notification_work_profile_content_description"
         />
+
+    <LinearLayout
+        android:id="@+id/app_ops"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:orientation="horizontal" >
+        <ImageButton
+            android:id="@+id/camera"
+            android:layout_width="?attr/notificationHeaderIconSize"
+            android:layout_height="?attr/notificationHeaderIconSize"
+            android:src="@drawable/ic_camera"
+            android:tint="@color/notification_secondary_text_color_light"
+            android:background="?android:selectableItemBackgroundBorderless"
+            android:layout_marginStart="6dp"
+            android:visibility="gone"
+            />
+        <ImageButton
+            android:id="@+id/mic"
+            android:layout_width="?attr/notificationHeaderIconSize"
+            android:layout_height="?attr/notificationHeaderIconSize"
+            android:src="@drawable/ic_mic"
+            android:tint="@color/notification_secondary_text_color_light"
+            android:background="?android:selectableItemBackgroundBorderless"
+            android:layout_marginStart="4dp"
+            android:visibility="gone"
+            />
+        <ImageButton
+            android:id="@+id/overlay"
+            android:layout_width="?attr/notificationHeaderIconSize"
+            android:layout_height="?attr/notificationHeaderIconSize"
+            android:src="@drawable/ic_alert_window_layer"
+            android:tint="@color/notification_secondary_text_color_light"
+            android:background="?android:selectableItemBackgroundBorderless"
+            android:layout_marginStart="4dp"
+            android:visibility="gone"
+            />
+    </LinearLayout>
 </NotificationHeaderView>
 

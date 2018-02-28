@@ -23,14 +23,17 @@ import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.app.AppOpsManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -273,5 +276,41 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         verify(mRow).setRemoved();
 
         assertNull(mEntryManager.getNotificationData().get(mSbn.getKey()));
+    }
+
+    @Test
+    public void testUpdateAppOps_foregroundNoti() {
+        com.android.systemui.util.Assert.isNotMainThread();
+
+        when(mForegroundServiceController.getStandardLayoutKey(anyInt(), anyString()))
+                .thenReturn("something");
+        mEntry.row = mRow;
+        mEntryManager.getNotificationData().add(mEntry);
+
+
+        mHandler.post(() -> {
+            mEntryManager.updateNotificationsForAppOps(
+                    AppOpsManager.OP_CAMERA, mEntry.notification.getUid(),
+                    mEntry.notification.getPackageName(), true);
+        });
+        waitForIdleSync(mHandler);
+
+        verify(mPresenter, times(1)).updateNotificationViews();
+        assertTrue(mEntryManager.getNotificationData().get(mEntry.key).mActiveAppOps.contains(
+                AppOpsManager.OP_CAMERA));
+    }
+
+    @Test
+    public void testUpdateAppOps_otherNoti() {
+        com.android.systemui.util.Assert.isNotMainThread();
+
+        when(mForegroundServiceController.getStandardLayoutKey(anyInt(), anyString()))
+                .thenReturn(null);
+        mHandler.post(() -> {
+            mEntryManager.updateNotificationsForAppOps(AppOpsManager.OP_CAMERA, 1000, "pkg", true);
+        });
+        waitForIdleSync(mHandler);
+
+        verify(mPresenter, never()).updateNotificationViews();
     }
 }
