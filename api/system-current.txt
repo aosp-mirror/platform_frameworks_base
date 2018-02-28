@@ -5103,7 +5103,6 @@ package android.telephony.ims.feature {
     method public void setUiTtyMode(int, android.os.Message);
     method public int shouldProcessCall(java.lang.String[]);
     field public static final int PROCESS_CALL_CSFB = 1; // 0x1
-    field public static final int PROCESS_CALL_EMERGENCY_CSFB = 2; // 0x2
     field public static final int PROCESS_CALL_IMS = 0; // 0x0
   }
 
