@@ -56,8 +56,11 @@ import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
+import android.os.ServiceSpecificException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.UserManager.UserOperationException;
+import android.os.UserManager.UserOperationResult;
 import android.provider.ContactsContract.Directory;
 import android.provider.Settings;
 import android.security.AttestedKeyPair;
@@ -6572,6 +6575,9 @@ public class DevicePolicyManager {
      * <p>
      * If the adminExtras are not null, they will be stored on the device until the user is started
      * for the first time. Then the extras will be passed to the admin when onEnable is called.
+     * <p>From {@link android.os.Build.VERSION_CODES#P} onwards, if targeting
+     * {@link android.os.Build.VERSION_CODES#P}, throws {@link UserOperationException} instead of
+     * returning {@code null} on failure.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param name The user's name.
@@ -6586,6 +6592,9 @@ public class DevicePolicyManager {
      * @return the {@link android.os.UserHandle} object for the created user, or {@code null} if the
      *         user could not be created.
      * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws UserOperationException if the user could not be created and the calling app is
+     * targeting {@link android.os.Build.VERSION_CODES#P} and running on
+     * {@link android.os.Build.VERSION_CODES#P}.
      */
     public @Nullable UserHandle createAndManageUser(@NonNull ComponentName admin,
             @NonNull String name,
@@ -6594,6 +6603,8 @@ public class DevicePolicyManager {
         throwIfParentInstance("createAndManageUser");
         try {
             return mService.createAndManageUser(admin, name, profileOwner, adminExtras, flags);
+        } catch (ServiceSpecificException e) {
+            throw new UserOperationException(e.getMessage(), e.errorCode);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -6637,77 +6648,15 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Indicates user operation is successful.
-     *
-     * @see #startUserInBackground(ComponentName, UserHandle)
-     * @see #stopUser(ComponentName, UserHandle)
-     * @see #logoutUser(ComponentName)
-     */
-    public static final int USER_OPERATION_SUCCESS = 0;
-
-    /**
-     * Indicates user operation failed for unknown reason.
-     *
-     * @see #startUserInBackground(ComponentName, UserHandle)
-     * @see #stopUser(ComponentName, UserHandle)
-     * @see #logoutUser(ComponentName)
-     */
-    public static final int USER_OPERATION_ERROR_UNKNOWN = 1;
-
-    /**
-     * Indicates user operation failed because target user is a managed profile.
-     *
-     * @see #startUserInBackground(ComponentName, UserHandle)
-     * @see #stopUser(ComponentName, UserHandle)
-     * @see #logoutUser(ComponentName)
-     */
-    public static final int USER_OPERATION_ERROR_MANAGED_PROFILE = 2;
-
-    /**
-     * Indicates user operation failed because maximum running user limit has reached.
-     *
-     * @see #startUserInBackground(ComponentName, UserHandle)
-     */
-    public static final int USER_OPERATION_ERROR_MAX_RUNNING_USERS = 3;
-
-    /**
-     * Indicates user operation failed because the target user is in foreground.
-     *
-     * @see #stopUser(ComponentName, UserHandle)
-     * @see #logoutUser(ComponentName)
-     */
-    public static final int USER_OPERATION_ERROR_CURRENT_USER = 4;
-
-    /**
-     * Result returned from
-     * <ul>
-     * <li>{@link #startUserInBackground(ComponentName, UserHandle)}</li>
-     * <li>{@link #stopUser(ComponentName, UserHandle)}</li>
-     * <li>{@link #logoutUser(ComponentName)}</li>
-     * </ul>
-     *
-     * @hide
-     */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "USER_OPERATION_" }, value = {
-            USER_OPERATION_SUCCESS,
-            USER_OPERATION_ERROR_UNKNOWN,
-            USER_OPERATION_ERROR_MANAGED_PROFILE,
-            USER_OPERATION_ERROR_MAX_RUNNING_USERS,
-            USER_OPERATION_ERROR_CURRENT_USER
-    })
-    public @interface UserOperationResult {}
-
-    /**
      * Called by a device owner to start the specified secondary user in background.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param userHandle the user to be started in background.
      * @return one of the following result codes:
-     * {@link #USER_OPERATION_ERROR_UNKNOWN},
-     * {@link #USER_OPERATION_SUCCESS},
-     * {@link #USER_OPERATION_ERROR_MANAGED_PROFILE},
-     * {@link #USER_OPERATION_ERROR_MAX_RUNNING_USERS},
+     * {@link UserManager#USER_OPERATION_ERROR_UNKNOWN},
+     * {@link UserManager#USER_OPERATION_SUCCESS},
+     * {@link UserManager#USER_OPERATION_ERROR_MANAGED_PROFILE},
+     * {@link UserManager#USER_OPERATION_ERROR_MAX_RUNNING_USERS},
      * @throws SecurityException if {@code admin} is not a device owner.
      * @see #getSecondaryUsers(ComponentName)
      */
@@ -6727,10 +6676,10 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param userHandle the user to be stopped.
      * @return one of the following result codes:
-     * {@link #USER_OPERATION_ERROR_UNKNOWN},
-     * {@link #USER_OPERATION_SUCCESS},
-     * {@link #USER_OPERATION_ERROR_MANAGED_PROFILE},
-     * {@link #USER_OPERATION_ERROR_CURRENT_USER}
+     * {@link UserManager#USER_OPERATION_ERROR_UNKNOWN},
+     * {@link UserManager#USER_OPERATION_SUCCESS},
+     * {@link UserManager#USER_OPERATION_ERROR_MANAGED_PROFILE},
+     * {@link UserManager#USER_OPERATION_ERROR_CURRENT_USER}
      * @throws SecurityException if {@code admin} is not a device owner.
      * @see #getSecondaryUsers(ComponentName)
      */
@@ -6750,10 +6699,10 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return one of the following result codes:
-     * {@link #USER_OPERATION_ERROR_UNKNOWN},
-     * {@link #USER_OPERATION_SUCCESS},
-     * {@link #USER_OPERATION_ERROR_MANAGED_PROFILE},
-     * {@link #USER_OPERATION_ERROR_CURRENT_USER}
+     * {@link UserManager#USER_OPERATION_ERROR_UNKNOWN},
+     * {@link UserManager#USER_OPERATION_SUCCESS},
+     * {@link UserManager#USER_OPERATION_ERROR_MANAGED_PROFILE},
+     * {@link UserManager#USER_OPERATION_ERROR_CURRENT_USER}
      * @throws SecurityException if {@code admin} is not a profile owner affiliated with the device.
      * @see #getSecondaryUsers(ComponentName)
      */
