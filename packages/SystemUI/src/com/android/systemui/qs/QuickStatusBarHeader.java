@@ -15,10 +15,10 @@
 package com.android.systemui.qs;
 
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
-import static com.android.systemui.keyguard.KeyguardSliceProvider.formatNextAlarm;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.content.Context;
 import android.content.Intent;
@@ -50,6 +50,8 @@ import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconMa
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.policy.NextAlarmController;
+
+import java.util.Locale;
 
 /**
  * View that contains the top-most bits of the screen (primarily the status bar with date, time, and
@@ -289,7 +291,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
 
     @Override
     public void onNextAlarmChanged(AlarmManager.AlarmClockInfo nextAlarm) {
-        mNextAlarmText = nextAlarm != null ? formatNextAlarm(mContext, nextAlarm) : null;
+        mNextAlarmText = nextAlarm != null ? formatNextAlarm(nextAlarm) : null;
         if (mNextAlarmText != null) {
             hideLongPressTooltip(true /* shouldFadeInAlarmText */);
         } else {
@@ -429,5 +431,16 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
 
     public void setCallback(Callback qsPanelCallback) {
         mHeaderQsPanel.setCallback(qsPanelCallback);
+    }
+
+    private String formatNextAlarm(AlarmManager.AlarmClockInfo info) {
+        if (info == null) {
+            return "";
+        }
+        String skeleton = android.text.format.DateFormat
+                .is24HourFormat(mContext, ActivityManager.getCurrentUser()) ? "EHm" : "Ehma";
+        String pattern = android.text.format.DateFormat
+                .getBestDateTimePattern(Locale.getDefault(), skeleton);
+        return android.text.format.DateFormat.format(pattern, info.getTriggerTime()).toString();
     }
 }
