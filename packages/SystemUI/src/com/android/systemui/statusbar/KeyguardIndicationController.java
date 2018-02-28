@@ -411,12 +411,14 @@ public class KeyguardIndicationController {
                 break;
         }
 
+        String percentage = NumberFormat.getPercentInstance()
+                .format(mBatteryLevel / 100f);
         if (hasChargingTime) {
             String chargingTimeFormatted = Formatter.formatShortElapsedTimeRoundingUpToMinutes(
                     mContext, chargingTimeRemaining);
-            return mContext.getResources().getString(chargingId, chargingTimeFormatted);
+            return mContext.getResources().getString(chargingId, chargingTimeFormatted, percentage);
         } else {
-            return mContext.getResources().getString(chargingId);
+            return mContext.getResources().getString(chargingId, percentage);
         }
     }
 
