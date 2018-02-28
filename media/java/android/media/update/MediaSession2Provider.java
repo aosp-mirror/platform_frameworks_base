@@ -16,11 +16,12 @@
 
 package android.media.update;
 
+import android.annotation.NonNull;
 import android.app.PendingIntent;
 import android.media.MediaItem2;
 import android.media.MediaMetadata2;
 import android.media.MediaPlayerBase;
-import android.media.MediaPlayerBase.EventCallback;
+import android.media.MediaPlayerBase.PlayerEventCallback;
 import android.media.MediaSession2;
 import android.media.MediaSession2.Command;
 import android.media.MediaSession2.CommandButton;
@@ -57,13 +58,14 @@ public interface MediaSession2Provider extends TransportControlProvider {
     void addPlaylistItem_impl(int index, MediaItem2 item);
     void removePlaylistItem_impl(MediaItem2 item);
     void editPlaylistItem_impl(MediaItem2 item);
+    void replacePlaylistItem_impl(int index, MediaItem2 item);
     List<MediaItem2> getPlaylist_impl();
     MediaItem2 getCurrentPlaylistItem_impl();
     void setPlaylistParams_impl(PlaylistParams params);
     PlaylistParams getPlaylistParams_impl();
     void notifyError_impl(int errorCode, int extra);
-    void registerPlayerEventCallback_impl(Executor executor, EventCallback callback);
-    void unregisterPlayerEventCallback_impl(EventCallback callback);
+    void registerPlayerEventCallback_impl(Executor executor, PlayerEventCallback callback);
+    void unregisterPlayerEventCallback_impl(PlayerEventCallback callback);
 
     interface CommandProvider {
         int getCommandCode_impl();

@@ -371,7 +371,7 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
      * Request that the player prepare its playback. In other words, other sessions can continue
      * to play during the preparation of this session. This method can be used to speed up the
      * start of the playback. Once the preparation is done, the session will change its playback
-     * state to {@link MediaPlayerBase#STATE_PAUSED}. Afterwards, {@link #play} can be called to
+     * state to {@link MediaPlayerBase#PLAYER_STATE_PAUSED}. Afterwards, {@link #play} can be called to
      * start playback.
      */
     public void prepare() {
@@ -479,7 +479,7 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
      * Request that the player prepare playback for a specific media id. In other words, other
      * sessions can continue to play during the preparation of this session. This method can be
      * used to speed up the start of the playback. Once the preparation is done, the session
-     * will change its playback state to {@link MediaPlayerBase#STATE_PAUSED}. Afterwards,
+     * will change its playback state to {@link MediaPlayerBase#PLAYER_STATE_PAUSED}. Afterwards,
      * {@link #play} can be called to start playback. If the preparation is not needed,
      * {@link #playFromMediaId} can be directly called without this method.
      *
@@ -496,7 +496,7 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
      * query should be treated as a request to prepare any music. In other words, other sessions
      * can continue to play during the preparation of this session. This method can be used to
      * speed up the start of the playback. Once the preparation is done, the session will
-     * change its playback state to {@link MediaPlayerBase#STATE_PAUSED}. Afterwards,
+     * change its playback state to {@link MediaPlayerBase#PLAYER_STATE_PAUSED}. Afterwards,
      * {@link #play} can be called to start playback. If the preparation is not needed,
      * {@link #playFromSearch} can be directly called without this method.
      *
@@ -512,7 +512,7 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
      * Request that the player prepare playback for a specific {@link Uri}. In other words,
      * other sessions can continue to play during the preparation of this session. This method
      * can be used to speed up the start of the playback. Once the preparation is done, the
-     * session will change its playback state to {@link MediaPlayerBase#STATE_PAUSED}. Afterwards,
+     * session will change its playback state to {@link MediaPlayerBase#PLAYER_STATE_PAUSED}. Afterwards,
      * {@link #play} can be called to start playback. If the preparation is not needed,
      * {@link #playFromUri} can be directly called without this method.
      *
@@ -698,17 +698,24 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
     }
 
     /**
-     * Removes the media item at index in the play list.
+     * Removes the media item at index in the playlist.
      *<p>
      * If index is same as the current index of the playlist, current playback
      * will be stopped and playback moves to next source in the list.
-     *
-     * @throws IllegalArgumentException if the play list is null
-     * @throws IndexOutOfBoundsException if index is outside play list range
      */
     @Override
     public void removePlaylistItem(@NonNull MediaItem2 item) {
         mProvider.removePlaylistItem_impl(item);
+    }
+
+    /**
+     * Replace the media item at index in the playlist.
+     * @param index the index of the item to replace
+     * @param item the new item
+     */
+    @Override
+    public void replacePlaylistItem(int index, @NonNull MediaItem2 item) {
+        mProvider.replacePlaylistItem_impl(index, item);
     }
 
     /**

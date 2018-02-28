@@ -34,151 +34,133 @@ public abstract class MediaPlayerBase implements AutoCloseable {
     /**
      * @hide
      */
-    @IntDef({STATE_IDLE, STATE_PAUSED, STATE_PLAYING, STATE_ERROR})
+    @IntDef({
+        PLAYER_STATE_IDLE,
+        PLAYER_STATE_PAUSED,
+        PLAYER_STATE_PLAYING,
+        PLAYER_STATE_ERROR })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface State {}
+    public @interface PlayerState {}
+
+    /**
+     * @hide
+     */
+    @IntDef({
+        BUFFERING_STATE_UNKNOWN,
+        BUFFERING_STATE_BUFFERING_AND_PLAYABLE,
+        BUFFERING_STATE_BUFFERING_AND_STARVED,
+        BUFFERING_STATE_BUFFERING_COMPLETE })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface BuffState {}
 
     /**
      * State when the player is idle, and needs configuration to start playback.
      */
-    public static final int STATE_IDLE = 0;
+    public static final int PLAYER_STATE_IDLE = 0;
 
     /**
      * State when the player's playback is paused
      */
-    public static final int STATE_PAUSED = 0;
+    public static final int PLAYER_STATE_PAUSED = 1;
 
     /**
      * State when the player's playback is ongoing
      */
-    public static final int STATE_PLAYING = 0;
+    public static final int PLAYER_STATE_PLAYING = 2;
 
     /**
      * State when the player is in error state and cannot be recovered self.
      */
-    public static final int STATE_ERROR = 0;
+    public static final int PLAYER_STATE_ERROR = 3;
 
     /**
-     * Unspecified media player error.
-     * @hide
+     * Buffering state is unknown.
      */
-    public static final int MEDIA_ERROR_UNKNOWN = MediaPlayer2.MEDIA_ERROR_UNKNOWN;
+    public static final int BUFFERING_STATE_UNKNOWN = 0;
 
     /**
-     * The video is streamed and its container is not valid for progressive
-     * playback i.e the video's index (e.g moov atom) is not at the start of the
-     * file.
-     * @hide
+     * Buffering state indicating the player is buffering but enough has been buffered
+     * for this player to be able to play the content.
+     * See {@link #getBufferedPosition()} for how far is buffered already.
      */
-    public static final int MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK =
-            MediaPlayer2.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK;
+    public static final int BUFFERING_STATE_BUFFERING_AND_PLAYABLE = 1;
 
     /**
-     * File or network related operation errors.
-     * @hide
+     * Buffering state indicating the player is buffering, but the player is currently starved
+     * for data, and cannot play.
      */
-    public static final int MEDIA_ERROR_IO = MediaPlayer2.MEDIA_ERROR_IO;
+    public static final int BUFFERING_STATE_BUFFERING_AND_STARVED = 2;
 
     /**
-     * Bitstream is not conforming to the related coding standard or file spec.
-     * @hide
+     * Buffering state indicating the player is done buffering, and the remainder of the content is
+     * available for playback.
      */
-    public static final int MEDIA_ERROR_MALFORMED = MediaPlayer2.MEDIA_ERROR_MALFORMED;
+    public static final int BUFFERING_STATE_BUFFERING_COMPLETE = 3;
 
     /**
-     * Bitstream is conforming to the related coding standard or file spec, but
-     * the media framework does not support the feature.
-     * @hide
-     */
-    public static final int MEDIA_ERROR_UNSUPPORTED = MediaPlayer2.MEDIA_ERROR_UNSUPPORTED;
-
-    /**
-     * Some operation takes too long to complete, usually more than 3-5 seconds.
-     * @hide
-     */
-    public static final int MEDIA_ERROR_TIMED_OUT = MediaPlayer2.MEDIA_ERROR_TIMED_OUT;
-
-    /**
-     * Callbacks to listens to the changes in {@link PlaybackState2} and error.
-     * @hide
-     */
-    public static abstract class EventCallback {
-        /**
-         * Called when {@link PlaybackState2} for this player is changed.
-         */
-        public void onPlaybackStateChanged(PlaybackState2 state) { }
-
-        /**
-         * Called to indicate an error.
-         *
-         * @param mediaId optional mediaId to indicate error
-         * @param what what
-         * @param extra
-         */
-        public void onError(@Nullable String mediaId, int what, int extra) { }
-    }
-
-    // Transport controls that session will send command directly to this player.
-    /**
-     * Start or resumes playback
+     * Starts or resumes playback.
      */
     public abstract void play();
 
     /**
-     * @hide
+     * Prepares the player for playback.
+     * See {@link PlayerEventCallback#onMediaPrepared(MediaPlayerBase, DataSourceDesc)} for being
+     * notified when the preparation phase completed. During this time, the player may allocate
+     * resources required to play, such as audio and video decoders.
      */
     public abstract void prepare();
 
     /**
-     * Pause playback
+     * Pauses playback.
      */
     public abstract void pause();
 
     /**
-     * @hide
-     */
-    public abstract void stop();
-
-    /**
-     * @hide
-     */
-    public abstract void skipToPrevious();
-
-    /**
-     * @hide
+     *
      */
     public abstract void skipToNext();
 
     /**
-     * @hide
+     * Moves the playback head to the specified position
+     * @param pos the new playback position expressed in ms.
      */
     public abstract void seekTo(long pos);
 
-    /**
-     * @hide
-     */
-    public abstract void fastForward();
+    public static final long UNKNOWN_TIME = -1;
 
     /**
-     * @hide
+     * Returns the current playback head position.
+     * @return the current play position in ms, or {@link #UNKNOWN_TIME} if unknown.
      */
-    public abstract void rewind();
+    public long getCurrentPosition() { return UNKNOWN_TIME; }
 
     /**
-     * @hide
+     * Returns the duration of the current data source, or {@link #UNKNOWN_TIME} if unknown.
+     * @return the duration in ms, or {@link #UNKNOWN_TIME}.
      */
-    public abstract PlaybackState2 getPlaybackState();
+    public long getDuration() { return UNKNOWN_TIME; }
 
     /**
-     * Return player state.
-     *
-     * @return player state
-     * @see #STATE_IDLE
-     * @see #STATE_PLAYING
-     * @see #STATE_PAUSED
-     * @see #STATE_ERROR
+     * Returns the duration of the current data source, or {@link #UNKNOWN_TIME} if unknown.
+     * @return the duration in ms, or {@link #UNKNOWN_TIME}.
      */
-    public abstract @State int getPlayerState();
+    public long getBufferedPosition() { return UNKNOWN_TIME; }
+
+    /**
+     * Returns the current player state.
+     * See also {@link PlayerEventCallback#onPlayerStateChanged(MediaPlayerBase, int)} for
+     * notification of changes.
+     * @return the current player state
+     */
+    public abstract @PlayerState int getPlayerState();
+
+    /**
+     * Returns the current buffering state of the player.
+     * During buffering, see {@link #getBufferedPosition()} for the quantifying the amount already
+     * buffered.
+     * @return the buffering state.
+     */
+    public abstract @BuffState int getBufferingState();
 
     /**
      * Sets the {@link AudioAttributes} to be used during the playback of the media.
@@ -193,55 +175,136 @@ public abstract class MediaPlayerBase implements AutoCloseable {
     public abstract @Nullable AudioAttributes getAudioAttributes();
 
     /**
-     * @hide
+     * Sets the data source to be played.
+     * @param dsd
      */
-    public abstract void addPlaylistItem(int index, MediaItem2 item);
+    public abstract void setDataSource(@NonNull DataSourceDesc dsd);
 
     /**
-     * @hide
+     * Sets the data source that will be played immediately after the current one is done playing.
+     * @param dsd
      */
-    public abstract void removePlaylistItem(MediaItem2 item);
+    public abstract void setNextDataSource(@NonNull DataSourceDesc dsd);
 
     /**
-     * @hide
+     * Sets the list of data sources that will be sequentially played after the current one. Each
+     * data source is played immediately after the previous one is done playing.
+     * @param dsds
      */
-    public abstract void setPlaylist(List<MediaItem2> playlist);
+    public abstract void setNextDataSources(@NonNull List<DataSourceDesc> dsds);
 
     /**
-     * @hide
+     * Returns the current data source.
+     * @return the current data source, or null if none is set, or none available to play.
      */
-    public abstract List<MediaItem2> getPlaylist();
+    public abstract @Nullable DataSourceDesc getCurrentDataSource();
 
     /**
-     * @hide
+     * Configures the player to loop on the current data source.
+     * @param loop true if the current data source is meant to loop.
      */
-    public abstract void setCurrentPlaylistItem(MediaItem2 item);
+    public abstract void loopCurrent(boolean loop);
 
     /**
-     * @hide
+     * Sets the playback speed.
+     * A value of 1.0f is the default playback value.
+     * A negative value indicates reverse playback, check {@link #isReversePlaybackSupported()}
+     * before using negative values.<br>
+     * After changing the playback speed, it is recommended to query the actual speed supported
+     * by the player, see {@link #getPlaybackSpeed()}.
+     * @param speed
      */
-    public abstract void setPlaylistParams(PlaylistParams params);
+    public abstract void setPlaybackSpeed(float speed);
 
     /**
-     * @hide
+     * Returns the actual playback speed to be used by the player when playing.
+     * Note that it may differ from the speed set in {@link #setPlaybackSpeed(float)}.
+     * @return the actual playback speed
      */
-    public abstract PlaylistParams getPlaylistParams();
+    public float getPlaybackSpeed() { return 1.0f; }
 
     /**
-     * Register a {@link EventCallback}.
-     *
-     * @param executor a callback executor
-     * @param callback a EventCallback
-     * @hide
+     * Indicates whether reverse playback is supported.
+     * Reverse playback is indicated by negative playback speeds, see
+     * {@link #setPlaybackSpeed(float)}.
+     * @return true if reverse playback is supported.
      */
-    public abstract void registerEventCallback(@NonNull @CallbackExecutor Executor executor,
-            @NonNull EventCallback callback);
+    public boolean isReversePlaybackSupported() { return false; }
 
     /**
-     * Unregister previously registered {@link EventCallback}.
-     *
-     * @param callback a EventCallback
-     * @hide
+     * Sets the volume of the audio of the media to play, expressed as a linear multiplier
+     * on the audio samples.
+     * Note that this volume is specific to the player, and is separate from stream volume
+     * used across the platform.<br>
+     * A value of 0.0f indicates muting, a value of 1.0f is the nominal unattenuated and unamplified
+     * gain. See {@link #getMaxPlayerVolume()} for the volume range supported by this player.
+     * @param volume a value between 0.0f and {@link #getMaxPlayerVolume()}.
      */
-    public abstract void unregisterEventCallback(@NonNull EventCallback callback);
+    public abstract void setVolume(float volume);
+
+    /**
+     * Returns the current volume of this player to this player.
+     * Note that it does not take into account the associated stream volume.
+     * @return the player volume.
+     */
+    public abstract float getPlayerVolume();
+
+    /**
+     * @return the maximum volume that can be used in {@link #setVolume(float)}.
+     */
+    public float getMaxPlayerVolume() { return 1.0f; }
+
+    /**
+     * Adds a callback to be notified of events for this player.
+     * @param e the {@link Executor} to be used for the events.
+     * @param cb the callback to receive the events.
+     */
+    public abstract void registerPlayerEventCallback(@NonNull Executor e,
+            @NonNull PlayerEventCallback cb);
+
+    /**
+     * Removes a previously registered callback for player events
+     * @param cb the callback to remove
+     */
+    public abstract void unregisterPlayerEventCallback(@NonNull PlayerEventCallback cb);
+
+    /**
+     * A callback class to receive notifications for events on the media player.
+     * See {@link MediaPlayerBase#registerPlayerEventCallback(Executor, PlayerEventCallback)} to
+     * register this callback.
+     */
+    public static abstract class PlayerEventCallback {
+        /**
+         * Called when the player's curretn data source has changed.
+         * @param mpb the player whose data source changed.
+         * @param dsd the new current data source.
+         */
+        public void onCurrentDataSourceChanged(@NonNull MediaPlayerBase mpb,
+                @Nullable DataSourceDesc dsd) { }
+        /**
+         * Called when the player is <i>prepared</i>, i.e. it is ready to play the content
+         * referenced by the given data source.
+         * @param mpb the player that is prepared.
+         * @param dsd the data source that the player is prepared to play.
+         */
+        public void onMediaPrepared(@NonNull MediaPlayerBase mpb, @NonNull DataSourceDesc dsd) { }
+
+        /**
+         * Called to indicate that the state of the player has changed.
+         * See {@link MediaPlayerBase#getPlayerState()} for polling the player state.
+         * @param mpb the player whose state has changed.
+         * @param state the new state of the player.
+         */
+        public void onPlayerStateChanged(@NonNull MediaPlayerBase mpb, @PlayerState int state) { }
+
+        /**
+         * Called to report buffering events for a data source.
+         * @param mpb the player that is buffering
+         * @param dsd the data source for which buffering is happening.
+         * @param state the new buffering state.
+         */
+        public void onBufferingStateChanged(@NonNull MediaPlayerBase mpb,
+                @NonNull DataSourceDesc dsd, @BuffState int state) { }
+    }
+
 }
