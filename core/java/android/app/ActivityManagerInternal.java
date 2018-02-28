@@ -27,7 +27,6 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.SparseIntArray;
-import android.view.RemoteAnimationAdapter;
 
 import com.android.internal.app.IVoiceInteractor;
 
@@ -263,17 +262,6 @@ public abstract class ActivityManagerInternal {
      * @see android.view.WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY
      */
     public abstract void setHasOverlayUi(int pid, boolean hasOverlayUi);
-
-    /**
-     * Sets if the given pid is currently running a remote animation, which is taken a signal for
-     * determining oom adjustment and scheduling behavior.
-     *
-     * @param pid The pid we are setting overlay UI for.
-     * @param runningRemoteAnimation True if the process is running a remote animation, false
-     *                               otherwise.
-     * @see RemoteAnimationAdapter
-     */
-    public abstract void setRunningRemoteAnimation(int pid, boolean runningRemoteAnimation);
 
     /**
      * Called after the network policy rules are updated by

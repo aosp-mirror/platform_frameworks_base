@@ -103,7 +103,6 @@ class RemoteAnimationController {
                 onAnimationFinished();
             }
         });
-        sendRunningRemoteAnimation(true);
     }
 
     private RemoteAnimationTarget[] createAnimations() {
@@ -132,7 +131,6 @@ class RemoteAnimationController {
                 mService.closeSurfaceTransaction("RemoteAnimationController#finished");
             }
         }
-        sendRunningRemoteAnimation(false);
     }
 
     private void invokeAnimationCancelled() {
@@ -148,14 +146,6 @@ class RemoteAnimationController {
             mFinishedCallback.release();
             mFinishedCallback = null;
         }
-    }
-
-    private void sendRunningRemoteAnimation(boolean running) {
-        final int pid = mRemoteAnimationAdapter.getCallingPid();
-        if (pid == 0) {
-            throw new RuntimeException("Calling pid of remote animation was null");
-        }
-        mService.sendSetRunningRemoteAnimation(pid, running);
     }
 
     private static final class FinishedCallback extends IRemoteAnimationFinishedCallback.Stub {
@@ -256,7 +246,6 @@ class RemoteAnimationController {
                 mHandler.removeCallbacks(mTimeoutRunnable);
                 releaseFinishedCallback();
                 invokeAnimationCancelled();
-                sendRunningRemoteAnimation(false);
             }
         }
 
