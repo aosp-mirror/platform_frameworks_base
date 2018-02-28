@@ -16,15 +16,17 @@
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
-    android:layout_width="@dimen/navigation_side_padding"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_weight="0"
     >
+    <!-- Use width & height=match_parent for parent FrameLayout and buttons because they are placed
+    inside a view that has a size controlled by weight. Ensure weight is large enough to support
+    icon size. -->
+
     <com.android.systemui.statusbar.policy.KeyButtonView
         android:id="@+id/menu"
-        android:layout_width="@dimen/navigation_extra_key_width"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginEnd="2dp"
         android:scaleType="centerInside"
         systemui:keyCode="82"
         systemui:playSound="false"
@@ -33,27 +35,24 @@
         />
     <com.android.systemui.statusbar.policy.KeyButtonView
         android:id="@+id/ime_switcher"
-        android:layout_width="@dimen/navigation_extra_key_width"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginEnd="2dp"
         android:visibility="invisible"
         android:contentDescription="@string/accessibility_ime_switch_button"
         android:scaleType="centerInside"
         />
     <com.android.systemui.statusbar.policy.KeyButtonView
         android:id="@+id/rotate_suggestion"
-        android:layout_width="@dimen/navigation_extra_key_width"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginEnd="2dp"
         android:visibility="invisible"
         android:scaleType="centerInside"
         android:contentDescription="@string/accessibility_rotate_button"
         />
     <com.android.systemui.statusbar.policy.KeyButtonView
         android:id="@+id/accessibility_button"
-        android:layout_width="@dimen/navigation_extra_key_width"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginEnd="2dp"
         android:visibility="invisible"
         android:contentDescription="@string/accessibility_accessibility_button"
         android:scaleType="centerInside"
