@@ -38,10 +38,10 @@ public class AccessibilityNodeInfoTest {
     public void testStandardActions_serializationFlagIsValid() {
         AccessibilityAction brokenStandardAction = CollectionUtils.find(
                 new ArrayList<>(AccessibilityAction.sStandardActions),
-                action -> Long.bitCount(action.mSerializationFlag) != 1);
+                action -> Integer.bitCount(action.mSerializationFlag) != 1);
         if (brokenStandardAction != null) {
             String message = "Invalid serialization flag(0x"
-                    + Long.toHexString(brokenStandardAction.mSerializationFlag)
+                    + Integer.toHexString(brokenStandardAction.mSerializationFlag)
                     + ") in " + brokenStandardAction;
             if (brokenStandardAction.mSerializationFlag == 0L) {
                 message += "\nThis is likely due to an overflow";
@@ -56,7 +56,7 @@ public class AccessibilityNodeInfoTest {
                         && action.getId() != action.mSerializationFlag);
         if (brokenStandardAction != null) {
             fail("Serialization flag(0x"
-                    + Long.toHexString(brokenStandardAction.mSerializationFlag)
+                    + Integer.toHexString(brokenStandardAction.mSerializationFlag)
                     + ") is different from legacy action id(0x"
                     + Integer.toHexString(brokenStandardAction.getId())
                     + ") in " + brokenStandardAction);

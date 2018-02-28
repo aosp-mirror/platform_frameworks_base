@@ -3333,7 +3333,7 @@ public class AccessibilityNodeInfo implements Parcelable {
                 final int actionCount = mActions.size();
 
                 int nonStandardActionCount = 0;
-                long defaultStandardActions = 0;
+                int defaultStandardActions = 0;
                 for (int i = 0; i < actionCount; i++) {
                     AccessibilityAction action = mActions.get(i);
                     if (isDefaultStandardAction(action)) {
@@ -3342,7 +3342,7 @@ public class AccessibilityNodeInfo implements Parcelable {
                         nonStandardActionCount++;
                     }
                 }
-                parcel.writeLong(defaultStandardActions);
+                parcel.writeInt(defaultStandardActions);
 
                 parcel.writeInt(nonStandardActionCount);
                 for (int i = 0; i < actionCount; i++) {
@@ -3540,7 +3540,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
 
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
-            final long standardActions = parcel.readLong();
+            final int standardActions = parcel.readInt();
             addStandardActions(standardActions);
             final int nonStandardActionCount = parcel.readInt();
             for (int i = 0; i < nonStandardActionCount; i++) {
@@ -3636,7 +3636,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         return null;
     }
 
-    private static AccessibilityAction getActionSingletonBySerializationFlag(long flag) {
+    private static AccessibilityAction getActionSingletonBySerializationFlag(int flag) {
         final int actions = AccessibilityAction.sStandardActions.size();
         for (int i = 0; i < actions; i++) {
             AccessibilityAction currentAction = AccessibilityAction.sStandardActions.valueAt(i);
@@ -3648,10 +3648,10 @@ public class AccessibilityNodeInfo implements Parcelable {
         return null;
     }
 
-    private void addStandardActions(long serializationIdMask) {
-        long remainingIds = serializationIdMask;
+    private void addStandardActions(int serializationIdMask) {
+        int remainingIds = serializationIdMask;
         while (remainingIds > 0) {
-            final int id = 1 << Long.numberOfTrailingZeros(remainingIds);
+            final int id = 1 << Integer.numberOfTrailingZeros(remainingIds);
             remainingIds &= ~id;
             AccessibilityAction action = getActionSingletonBySerializationFlag(id);
             addAction(action);
@@ -4276,7 +4276,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         private final CharSequence mLabel;
 
         /** @hide */
-        public long mSerializationFlag = -1L;
+        public int mSerializationFlag = -1;
 
         /**
          * Creates a new AccessibilityAction. For adding a standard action without a specific label,
@@ -4310,7 +4310,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         private AccessibilityAction(int standardActionId) {
             this(standardActionId, null);
 
-            mSerializationFlag = bitAt(sStandardActions.size());
+            mSerializationFlag = (int) bitAt(sStandardActions.size());
             sStandardActions.add(this);
         }
 
