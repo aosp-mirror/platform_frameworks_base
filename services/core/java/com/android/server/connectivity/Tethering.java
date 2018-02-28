@@ -249,6 +249,7 @@ public class Tethering extends BaseNetworkObserver {
                 "CarrierConfigChangeListener", mContext, smHandler, filter,
                 (Intent ignored) -> {
                     mLog.log("OBSERVED carrier config change");
+                    updateConfiguration();
                     reevaluateSimCardProvisioning();
                 });
         // TODO: Remove SimChangeListener altogether. For now, we retain it
@@ -261,27 +262,35 @@ public class Tethering extends BaseNetworkObserver {
                 });
 
         mStateReceiver = new StateReceiver();
-        filter = new IntentFilter();
+
+        // Load tethering configuration.
+        updateConfiguration();
+
+        startStateMachineUpdaters();
+    }
+
+    private void startStateMachineUpdaters() {
+        mCarrierConfigChange.startListening();
+
+        final Handler handler = mTetherMasterSM.getHandler();
+        IntentFilter filter = new IntentFilter();
         filter.addAction(UsbManager.ACTION_USB_STATE);
         filter.addAction(CONNECTIVITY_ACTION);
         filter.addAction(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
-        mContext.registerReceiver(mStateReceiver, filter, null, smHandler);
+        mContext.registerReceiver(mStateReceiver, filter, null, handler);
 
         filter = new IntentFilter();
         filter.addAction(Intent.ACTION_MEDIA_SHARED);
         filter.addAction(Intent.ACTION_MEDIA_UNSHARED);
         filter.addDataScheme("file");
-        mContext.registerReceiver(mStateReceiver, filter, null, smHandler);
+        mContext.registerReceiver(mStateReceiver, filter, null, handler);
 
-        UserManagerInternal userManager = LocalServices.getService(UserManagerInternal.class);
-
-        // this check is useful only for some unit tests; example: ConnectivityServiceTest
-        if (userManager != null) {
-            userManager.addUserRestrictionsListener(new TetheringUserRestrictionListener(this));
+        final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
+        // This check is useful only for some unit tests; example: ConnectivityServiceTest.
+        if (umi != null) {
+            umi.addUserRestrictionsListener(new TetheringUserRestrictionListener(this));
         }
-        // load device config info
-        updateConfiguration();
     }
 
     private WifiManager getWifiManager() {
@@ -383,17 +392,15 @@ public class Tethering extends BaseNetworkObserver {
      */
     @VisibleForTesting
     protected boolean isTetherProvisioningRequired() {
-        String[] provisionApp = mContext.getResources().getStringArray(
-                com.android.internal.R.array.config_mobile_hotspot_provision_app);
+        final TetheringConfiguration cfg = mConfig;
         if (mSystemProperties.getBoolean(DISABLE_PROVISIONING_SYSPROP_KEY, false)
-                || provisionApp == null) {
+                || cfg.provisioningApp.length == 0) {
             return false;
         }
-
         if (carrierConfigAffirmsEntitlementCheckNotRequired()) {
             return false;
         }
-        return (provisionApp.length == 2);
+        return (cfg.provisioningApp.length == 2);
     }
 
     // The logic here is aimed solely at confirming that a CarrierConfig exists
@@ -414,20 +421,6 @@ public class Tethering extends BaseNetworkObserver {
         final boolean isEntitlementCheckRequired = carrierConfig.getBoolean(
                 CarrierConfigManager.KEY_REQUIRE_ENTITLEMENT_CHECKS_BOOL);
         return !isEntitlementCheckRequired;
-    }
-
-    // Used by the SIM card change observation code.
-    // TODO: De-duplicate above code.
-    private boolean hasMobileHotspotProvisionApp() {
-        try {
-            if (!mContext.getResources().getString(com.android.internal.R.string.
-                    config_mobile_hotspot_provision_app_no_ui).isEmpty()) {
-                Log.d(TAG, "re-evaluate provisioning");
-                return true;
-            }
-        } catch (Resources.NotFoundException e) {}
-        Log.d(TAG, "no prov-check needed for new SIM");
-        return false;
     }
 
     /**
@@ -1185,7 +1178,7 @@ public class Tethering extends BaseNetworkObserver {
     }
 
     private void reevaluateSimCardProvisioning() {
-        if (!hasMobileHotspotProvisionApp()) return;
+        if (!mConfig.hasMobileHotspotProvisionApp()) return;
         if (carrierConfigAffirmsEntitlementCheckNotRequired()) return;
 
         ArrayList<Integer> tethered = new ArrayList<>();
@@ -1544,7 +1537,6 @@ public class Tethering extends BaseNetworkObserver {
                     return;
                 }
 
-                mCarrierConfigChange.startListening();
                 mSimChange.startListening();
                 mUpstreamNetworkMonitor.start();
 
@@ -1562,7 +1554,6 @@ public class Tethering extends BaseNetworkObserver {
                 mOffload.stop();
                 mUpstreamNetworkMonitor.stop();
                 mSimChange.stopListening();
-                mCarrierConfigChange.stopListening();
                 notifyDownstreamsOfNewUpstreamIface(null);
                 handleNewUpstreamNetworkState(null);
             }
