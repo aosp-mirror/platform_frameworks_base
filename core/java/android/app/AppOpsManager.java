@@ -1738,8 +1738,7 @@ public class AppOpsManager {
      * @param callback Where to report changes.
      * @hide
      */
-    // TODO: Uncomment below annotation once b/73559440 is fixed
-    // @RequiresPermission(value=Manifest.permission.WATCH_APPOPS, conditional=true)
+    @RequiresPermission(value=android.Manifest.permission.WATCH_APPOPS, conditional=true)
     public void startWatchingMode(int op, String packageName, final OnOpChangedListener callback) {
         synchronized (mModeWatchers) {
             IAppOpsCallback cb = mModeWatchers.get(callback);
