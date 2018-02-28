@@ -59,7 +59,15 @@ bool StartsWith(const android::StringPiece& str, const android::StringPiece& pre
 // Returns true if the string ends with suffix.
 bool EndsWith(const android::StringPiece& str, const android::StringPiece& suffix);
 
-// Creates a new StringPiece16 that points to a substring of the original string without leading or
+// Creates a new StringPiece that points to a substring of the original string without leading
+// whitespace.
+android::StringPiece TrimLeadingWhitespace(const android::StringPiece& str);
+
+// Creates a new StringPiece that points to a substring of the original string without trailing
+// whitespace.
+android::StringPiece TrimTrailingWhitespace(const android::StringPiece& str);
+
+// Creates a new StringPiece that points to a substring of the original string without leading or
 // trailing whitespace.
 android::StringPiece TrimWhitespace(const android::StringPiece& str);
 
@@ -141,9 +149,12 @@ std::string GetString(const android::ResStringPool& pool, size_t idx);
 // break the string interpolation.
 bool VerifyJavaStringFormat(const android::StringPiece& str);
 
+bool AppendStyledString(const android::StringPiece& input, bool preserve_spaces,
+                        std::string* out_str, std::string* out_error);
+
 class StringBuilder {
  public:
-  explicit StringBuilder(bool preserve_spaces = false);
+  StringBuilder() = default;
 
   StringBuilder& Append(const android::StringPiece& str);
   const std::string& ToString() const;
@@ -158,7 +169,6 @@ class StringBuilder {
   explicit operator bool() const;
 
  private:
-  bool preserve_spaces_;
   std::string str_;
   size_t utf16_len_ = 0;
   bool quote_ = false;

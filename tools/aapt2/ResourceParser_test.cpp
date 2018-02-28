@@ -95,6 +95,16 @@ TEST_F(ResourceParserTest, ParseQuotedString) {
   ASSERT_THAT(str, NotNull());
   EXPECT_THAT(*str, StrValueEq("  hey there "));
   EXPECT_THAT(str->untranslatable_sections, IsEmpty());
+
+  ASSERT_TRUE(TestParse(R"(<string name="bar">Isn\'t it cool?</string>)"));
+  str = test::GetValue<String>(&table_, "string/bar");
+  ASSERT_THAT(str, NotNull());
+  EXPECT_THAT(*str, StrValueEq("Isn't it cool?"));
+
+  ASSERT_TRUE(TestParse(R"(<string name="baz">"Isn't it cool?"</string>)"));
+  str = test::GetValue<String>(&table_, "string/baz");
+  ASSERT_THAT(str, NotNull());
+  EXPECT_THAT(*str, StrValueEq("Isn't it cool?"));
 }
 
 TEST_F(ResourceParserTest, ParseEscapedString) {
@@ -126,16 +136,16 @@ TEST_F(ResourceParserTest, ParseStyledString) {
   StyledString* str = test::GetValue<StyledString>(&table_, "string/foo");
   ASSERT_THAT(str, NotNull());
 
-  EXPECT_THAT(str->value->value, Eq("This is my aunt\u2019s fickle string"));
+  EXPECT_THAT(str->value->value, StrEq("This is my aunt\u2019s fickle string"));
   EXPECT_THAT(str->value->spans, SizeIs(2));
   EXPECT_THAT(str->untranslatable_sections, IsEmpty());
 
-  EXPECT_THAT(*str->value->spans[0].name, Eq("b"));
-  EXPECT_THAT(str->value->spans[0].first_char, Eq(17u));
+  EXPECT_THAT(*str->value->spans[0].name, StrEq("b"));
+  EXPECT_THAT(str->value->spans[0].first_char, Eq(18u));
   EXPECT_THAT(str->value->spans[0].last_char, Eq(30u));
 
-  EXPECT_THAT(*str->value->spans[1].name, Eq("small"));
-  EXPECT_THAT(str->value->spans[1].first_char, Eq(24u));
+  EXPECT_THAT(*str->value->spans[1].name, StrEq("small"));
+  EXPECT_THAT(str->value->spans[1].first_char, Eq(25u));
   EXPECT_THAT(str->value->spans[1].last_char, Eq(30u));
 }
 
@@ -144,7 +154,7 @@ TEST_F(ResourceParserTest, ParseStringWithWhitespace) {
 
   String* str = test::GetValue<String>(&table_, "string/foo");
   ASSERT_THAT(str, NotNull());
-  EXPECT_THAT(*str->value, Eq("This is what I think"));
+  EXPECT_THAT(*str->value, StrEq("This is what I think"));
   EXPECT_THAT(str->untranslatable_sections, IsEmpty());
 
   ASSERT_TRUE(TestParse(R"(<string name="foo2">"  This is what  I think  "</string>)"));
@@ -152,6 +162,25 @@ TEST_F(ResourceParserTest, ParseStringWithWhitespace) {
   str = test::GetValue<String>(&table_, "string/foo2");
   ASSERT_THAT(str, NotNull());
   EXPECT_THAT(*str, StrValueEq("  This is what  I think  "));
+}
+
+TEST_F(ResourceParserTest, ParseStyledStringWithWhitespace) {
+  std::string input = R"(<string name="foo">  <b> My <i> favorite</i> string </b>  </string>)";
+  ASSERT_TRUE(TestParse(input));
+
+  StyledString* str = test::GetValue<StyledString>(&table_, "string/foo");
+  ASSERT_THAT(str, NotNull());
+  EXPECT_THAT(str->value->value, StrEq("  My  favorite string  "));
+  EXPECT_THAT(str->untranslatable_sections, IsEmpty());
+
+  ASSERT_THAT(str->value->spans, SizeIs(2u));
+  EXPECT_THAT(*str->value->spans[0].name, StrEq("b"));
+  EXPECT_THAT(str->value->spans[0].first_char, Eq(1u));
+  EXPECT_THAT(str->value->spans[0].last_char, Eq(21u));
+
+  EXPECT_THAT(*str->value->spans[1].name, StrEq("i"));
+  EXPECT_THAT(str->value->spans[1].first_char, Eq(5u));
+  EXPECT_THAT(str->value->spans[1].last_char, Eq(13u));
 }
 
 TEST_F(ResourceParserTest, IgnoreXliffTagsOtherThanG) {
@@ -182,12 +211,9 @@ TEST_F(ResourceParserTest, RecordUntranslateableXliffSectionsInString) {
   String* str = test::GetValue<String>(&table_, "string/foo");
   ASSERT_THAT(str, NotNull());
   EXPECT_THAT(*str, StrValueEq("There are %1$d apples"));
-  ASSERT_THAT(str->untranslatable_sections, SizeIs(1));
 
-  // We expect indices and lengths that span to include the whitespace
-  // before %1$d. This is due to how the StringBuilder withholds whitespace unless
-  // needed (to deal with line breaks, etc.).
-  EXPECT_THAT(str->untranslatable_sections[0].start, Eq(9u));
+  ASSERT_THAT(str->untranslatable_sections, SizeIs(1));
+  EXPECT_THAT(str->untranslatable_sections[0].start, Eq(10u));
   EXPECT_THAT(str->untranslatable_sections[0].end, Eq(14u));
 }
 
@@ -199,14 +225,16 @@ TEST_F(ResourceParserTest, RecordUntranslateableXliffSectionsInStyledString) {
 
   StyledString* str = test::GetValue<StyledString>(&table_, "string/foo");
   ASSERT_THAT(str, NotNull());
-  EXPECT_THAT(str->value->value, Eq("There are %1$d apples"));
-  ASSERT_THAT(str->untranslatable_sections, SizeIs(1));
+  EXPECT_THAT(str->value->value, Eq(" There are %1$d apples"));
 
-  // We expect indices and lengths that span to include the whitespace
-  // before %1$d. This is due to how the StringBuilder withholds whitespace unless
-  // needed (to deal with line breaks, etc.).
-  EXPECT_THAT(str->untranslatable_sections[0].start, Eq(9u));
-  EXPECT_THAT(str->untranslatable_sections[0].end, Eq(14u));
+  ASSERT_THAT(str->untranslatable_sections, SizeIs(1));
+  EXPECT_THAT(str->untranslatable_sections[0].start, Eq(11u));
+  EXPECT_THAT(str->untranslatable_sections[0].end, Eq(15u));
+
+  ASSERT_THAT(str->value->spans, SizeIs(1u));
+  EXPECT_THAT(*str->value->spans[0].name, StrEq("b"));
+  EXPECT_THAT(str->value->spans[0].first_char, Eq(11u));
+  EXPECT_THAT(str->value->spans[0].last_char, Eq(14u));
 }
 
 TEST_F(ResourceParserTest, ParseNull) {
