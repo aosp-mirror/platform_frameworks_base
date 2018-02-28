@@ -1046,6 +1046,14 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         return calculateBgColor(false /* withTint */, false /* withOverride */);
     }
 
+    public boolean isPinned() {
+        return false;
+    }
+
+    public boolean isHeadsUpAnimatingAway() {
+        return false;
+    }
+
     public interface OnActivatedListener {
         void onActivated(ActivatableNotificationView view);
         void onActivationReset(ActivatableNotificationView view);

@@ -722,6 +722,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
+    @Override
     public boolean isPinned() {
         return mIsPinned;
     }
@@ -1101,6 +1102,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * @return if the view was just heads upped and is now animating away. During such a time the
      * layout needs to be kept consistent
      */
+    @Override
     public boolean isHeadsUpAnimatingAway() {
         return mHeadsupDisappearRunning;
     }

@@ -289,6 +289,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private HashSet<Pair<ExpandableNotificationRow, Boolean>> mHeadsUpChangeAnimations
             = new HashSet<>();
     private HeadsUpManagerPhone mHeadsUpManager;
+    private NotificationRoundnessManager mRoundnessManager = new NotificationRoundnessManager();
     private boolean mTrackingHeadsUp;
     private ScrimController mScrimController;
     private boolean mForceNoOverlappingRendering;
@@ -440,6 +441,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         mSeparatorWidth = res.getDimensionPixelSize(R.dimen.widget_separator_width);
         mSeparatorThickness = res.getDimensionPixelSize(R.dimen.widget_separator_thickness);
         mDarkSeparatorPadding = res.getDimensionPixelSize(R.dimen.widget_bottom_separator_padding);
+        mRoundnessManager.setAnimatedChildren(mChildrenToAddAnimated);
+        mRoundnessManager.setOnRoundingChangedCallback(this::invalidate);
 
         updateWillNotDraw();
         mBackgroundPaint.setAntiAlias(true);
@@ -2929,42 +2932,18 @@ public class NotificationStackScrollLayout extends ViewGroup
     private void updateFirstAndLastBackgroundViews() {
         ActivatableNotificationView firstChild = getFirstChildWithBackground();
         ActivatableNotificationView lastChild = getLastChildWithBackground();
-        boolean firstChanged = firstChild != mFirstVisibleBackgroundChild;
-        boolean lastChanged = lastChild != mLastVisibleBackgroundChild;
         if (mAnimationsEnabled && mIsExpanded) {
-            mAnimateNextBackgroundTop = firstChanged;
-            mAnimateNextBackgroundBottom = lastChanged;
+            mAnimateNextBackgroundTop = firstChild != mFirstVisibleBackgroundChild;
+            mAnimateNextBackgroundBottom = lastChild != mLastVisibleBackgroundChild;
         } else {
             mAnimateNextBackgroundTop = false;
             mAnimateNextBackgroundBottom = false;
         }
-        if (firstChanged && mFirstVisibleBackgroundChild != null
-                && !mFirstVisibleBackgroundChild.isRemoved()) {
-            mFirstVisibleBackgroundChild.setTopRoundness(0.0f,
-                    mFirstVisibleBackgroundChild.isShown());
-        }
-        if (lastChanged && mLastVisibleBackgroundChild != null
-                && !mLastVisibleBackgroundChild.isRemoved()) {
-            mLastVisibleBackgroundChild.setBottomRoundness(0.0f,
-                    mLastVisibleBackgroundChild.isShown());
-        }
         mFirstVisibleBackgroundChild = firstChild;
         mLastVisibleBackgroundChild = lastChild;
         mAmbientState.setLastVisibleBackgroundChild(lastChild);
-        applyRoundedNess();
-    }
-
-    private void applyRoundedNess() {
-        if (mFirstVisibleBackgroundChild != null) {
-            mFirstVisibleBackgroundChild.setTopRoundness(1.0f,
-                    mFirstVisibleBackgroundChild.isShown()
-                            && !mChildrenToAddAnimated.contains(mFirstVisibleBackgroundChild));
-        }
-        if (mLastVisibleBackgroundChild != null) {
-            mLastVisibleBackgroundChild.setBottomRoundness(1.0f,
-                    mLastVisibleBackgroundChild.isShown()
-                            && !mChildrenToAddAnimated.contains(mLastVisibleBackgroundChild));
-        }
+        mRoundnessManager.setFirstAndLastBackgroundChild(mFirstVisibleBackgroundChild,
+                mLastVisibleBackgroundChild);
         invalidate();
     }
 
@@ -3572,6 +3551,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private void setIsExpanded(boolean isExpanded) {
         boolean changed = isExpanded != mIsExpanded;
         mIsExpanded = isExpanded;
+        mRoundnessManager.setExpanded(isExpanded);
         mStackScrollAlgorithm.setIsExpanded(isExpanded);
         if (changed) {
             if (!mIsExpanded) {
@@ -4288,6 +4268,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void setHeadsUpManager(HeadsUpManagerPhone headsUpManager) {
         mHeadsUpManager = headsUpManager;
         mAmbientState.setHeadsUpManager(headsUpManager);
+        mHeadsUpManager.addListener(mRoundnessManager);
     }
 
     public void generateHeadsUpAnimation(ExpandableNotificationRow row, boolean isHeadsUp) {

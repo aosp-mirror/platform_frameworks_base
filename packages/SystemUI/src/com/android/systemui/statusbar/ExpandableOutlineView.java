@@ -276,12 +276,18 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         setClipToOutline(mAlwaysRoundBothCorners);
     }
 
-    public void setTopRoundness(float topRoundness, boolean animate) {
+    /**
+     * Set the topRoundness of this view.
+     * @return Whether the roundness was changed.
+     */
+    public boolean setTopRoundness(float topRoundness, boolean animate) {
         if (mTopRoundness != topRoundness) {
             mTopRoundness = topRoundness;
             PropertyAnimator.setProperty(this, TOP_ROUNDNESS, topRoundness,
                     ROUNDNESS_PROPERTIES, animate);
+            return true;
         }
+        return false;
     }
 
     protected void applyRoundness() {
@@ -305,12 +311,18 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         return mCurrentBottomRoundness * mOutlineRadius;
     }
 
-    public void setBottomRoundness(float bottomRoundness, boolean animate) {
+    /**
+     * Set the bottom roundness of this view.
+     * @return Whether the roundness was changed.
+     */
+    public boolean setBottomRoundness(float bottomRoundness, boolean animate) {
         if (mBottomRoundness != bottomRoundness) {
             mBottomRoundness = bottomRoundness;
             PropertyAnimator.setProperty(this, BOTTOM_ROUNDNESS, bottomRoundness,
                     ROUNDNESS_PROPERTIES, animate);
+            return true;
         }
+        return false;
     }
 
     protected void setBackgroundTop(int backgroundTop) {
