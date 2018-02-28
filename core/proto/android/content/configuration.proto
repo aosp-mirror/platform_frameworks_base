@@ -35,9 +35,9 @@ message ConfigurationProto {
   optional uint32 mnc = 3;
   repeated LocaleProto locales = 4;
   optional uint32 screen_layout = 5;
-  optional uint32 hdr_color_mode = 6;
-  optional uint32 wide_color_gamut = 7;
-  optional uint32 touchscreen = 8;
+  optional uint32 color_mode = 6;
+  optional uint32 touchscreen = 7;
+  optional uint32 keyboard = 8;
   optional uint32 keyboard_hidden = 9;
   optional uint32 hard_keyboard_hidden = 10;
   optional uint32 navigation = 11;

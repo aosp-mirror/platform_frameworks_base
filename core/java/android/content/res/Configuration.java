@@ -16,10 +16,11 @@
 
 package android.content.res;
 
+import static android.content.ConfigurationProto.COLOR_MODE;
 import static android.content.ConfigurationProto.DENSITY_DPI;
 import static android.content.ConfigurationProto.FONT_SCALE;
 import static android.content.ConfigurationProto.HARD_KEYBOARD_HIDDEN;
-import static android.content.ConfigurationProto.HDR_COLOR_MODE;
+import static android.content.ConfigurationProto.KEYBOARD;
 import static android.content.ConfigurationProto.KEYBOARD_HIDDEN;
 import static android.content.ConfigurationProto.LOCALES;
 import static android.content.ConfigurationProto.MCC;
@@ -33,7 +34,6 @@ import static android.content.ConfigurationProto.SCREEN_WIDTH_DP;
 import static android.content.ConfigurationProto.SMALLEST_SCREEN_WIDTH_DP;
 import static android.content.ConfigurationProto.TOUCHSCREEN;
 import static android.content.ConfigurationProto.UI_MODE;
-import static android.content.ConfigurationProto.WIDE_COLOR_GAMUT;
 import static android.content.ConfigurationProto.WINDOW_CONFIGURATION;
 import static android.content.ResourcesConfigurationProto.CONFIGURATION;
 import static android.content.ResourcesConfigurationProto.SCREEN_HEIGHT_PX;
@@ -1095,11 +1095,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         protoOutputStream.write(MNC, mnc);
         mLocaleList.writeToProto(protoOutputStream, LOCALES);
         protoOutputStream.write(SCREEN_LAYOUT, screenLayout);
-        protoOutputStream.write(HDR_COLOR_MODE,
-                (colorMode & Configuration.COLOR_MODE_HDR_MASK) >> COLOR_MODE_HDR_SHIFT);
-        protoOutputStream.write(WIDE_COLOR_GAMUT,
-                colorMode & Configuration.COLOR_MODE_WIDE_COLOR_GAMUT_MASK);
+        protoOutputStream.write(COLOR_MODE, colorMode);
         protoOutputStream.write(TOUCHSCREEN, touchscreen);
+        protoOutputStream.write(KEYBOARD, keyboard);
         protoOutputStream.write(KEYBOARD_HIDDEN, keyboardHidden);
         protoOutputStream.write(HARD_KEYBOARD_HIDDEN, hardKeyboardHidden);
         protoOutputStream.write(NAVIGATION, navigation);
