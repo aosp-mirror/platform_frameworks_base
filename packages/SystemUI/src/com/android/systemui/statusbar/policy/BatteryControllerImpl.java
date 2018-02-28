@@ -24,8 +24,10 @@ import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.os.PowerSaveState;
 import android.util.Log;
-import com.android.systemui.DemoMode;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -52,13 +54,19 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     protected boolean mCharging;
     protected boolean mCharged;
     protected boolean mPowerSave;
+    protected boolean mAodPowerSave;
     private boolean mTestmode = false;
     private boolean mHasReceivedBattery = false;
 
     public BatteryControllerImpl(Context context) {
+        this(context, context.getSystemService(PowerManager.class));
+    }
+
+    @VisibleForTesting
+    BatteryControllerImpl(Context context, PowerManager powerManager) {
         mContext = context;
         mHandler = new Handler();
-        mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        mPowerManager = powerManager;
 
         registerReceiver();
         updatePowerSave();
@@ -166,6 +174,11 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         return mPowerSave;
     }
 
+    @Override
+    public boolean isAodPowerSave() {
+        return mAodPowerSave;
+    }
+
     private void updatePowerSave() {
         setPowerSave(mPowerManager.isPowerSaveMode());
     }
@@ -173,6 +186,11 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     private void setPowerSave(boolean powerSave) {
         if (powerSave == mPowerSave) return;
         mPowerSave = powerSave;
+
+        // AOD power saving setting might be different from PowerManager power saving mode.
+        PowerSaveState state = mPowerManager.getPowerSaveState(PowerManager.ServiceType.AOD);
+        mAodPowerSave = state.batterySaverEnabled;
+
         if (DEBUG) Log.d(TAG, "Power save is " + (mPowerSave ? "on" : "off"));
         firePowerSaveChanged();
     }
