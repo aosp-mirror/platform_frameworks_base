@@ -823,6 +823,12 @@ interface ITelephony {
     IImsConfig getImsConfig(int slotId, int feature);
 
     /**
+    * Returns true if emergency calling is available for the MMTEL feature associated with the
+    * slot specified.
+    */
+    boolean isEmergencyMmTelAvailable(int slotId);
+
+    /**
      * Set the network selection mode to automatic.
      *
      * @param subId the id of the subscription to update.

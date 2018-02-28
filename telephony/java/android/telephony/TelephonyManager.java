@@ -5107,6 +5107,24 @@ public class TelephonyManager {
     }
 
     /**
+     * Determines if emergency calling is allowed for the MMTEL feature on the slot provided.
+     * @param slotIndex The SIM slot of the MMTEL feature
+     * @return true if emergency calling is allowed, false otherwise.
+     * @hide
+     */
+    public boolean isEmergencyMmTelAvailable(int slotIndex) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.isEmergencyMmTelAvailable(slotIndex);
+            }
+        } catch (RemoteException e) {
+            Rlog.e(TAG, "isEmergencyMmTelAvailable, RemoteException: " + e.getMessage());
+        }
+        return false;
+    }
+
+    /**
      * Set IMS registration state
      *
      * @param Registration state
