@@ -2834,6 +2834,18 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mDisplayMetrics.density;
     }
 
+    float getDisplayWidth() {
+        return mDisplayMetrics.widthPixels;
+    }
+
+    float getDisplayHeight() {
+        return mDisplayMetrics.heightPixels;
+    }
+
+    int getRotation() {
+        return mDisplay.getRotation();
+    }
+
     public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned,
             boolean dismissShade) {
         startActivityDismissingKeyguard(intent, onlyProvisioned, dismissShade,
