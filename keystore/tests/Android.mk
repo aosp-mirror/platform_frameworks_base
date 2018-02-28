@@ -24,6 +24,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-test
 
 LOCAL_PACKAGE_NAME := KeystoreTests
+LOCAL_PRIVATE_PLATFORM_APIS := true
 
 LOCAL_JAVA_LIBRARIES := android.test.runner
 
