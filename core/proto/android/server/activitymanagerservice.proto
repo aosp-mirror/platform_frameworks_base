@@ -58,6 +58,9 @@ message ActivityStackSupervisorProto {
   optional KeyguardControllerProto keyguard_controller = 3;
   optional int32 focused_stack_id = 4;
   optional .com.android.server.wm.proto.IdentifierProto resumed_activity = 5;
+  // Whether or not the home activity is the recents activity. This is needed for the CTS tests to
+  // know what activity types to check for when invoking splitscreen multi-window.
+  optional bool is_home_recents_component = 6;
 }
 
 /* represents ActivityStackSupervisor.ActivityDisplay */

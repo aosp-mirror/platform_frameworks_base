@@ -2782,6 +2782,13 @@ public class WindowManagerService extends IWindowManager.Stub
         mDockedStackCreateBounds = bounds;
     }
 
+    public void checkSplitScreenMinimizedChanged(boolean animate) {
+        synchronized (mWindowMap) {
+            final DisplayContent displayContent = getDefaultDisplayContentLocked();
+            displayContent.getDockedDividerController().checkMinimizeChanged(animate);
+        }
+    }
+
     public boolean isValidPictureInPictureAspectRatio(int displayId, float aspectRatio) {
         final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
         return displayContent.getPinnedStackController().isValidPictureInPictureAspectRatio(

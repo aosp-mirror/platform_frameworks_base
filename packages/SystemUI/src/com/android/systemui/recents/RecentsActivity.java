@@ -96,6 +96,7 @@ import com.android.systemui.recents.views.RecentsView;
 import com.android.systemui.recents.views.SystemBarScrimViews;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 
+import com.android.systemui.shared.system.WindowManagerWrapper;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
@@ -836,12 +837,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         mRecentsView.getViewTreeObserver().removeOnPreDrawListener(this);
         // We post to make sure that this information is delivered after this traversals is
         // finished.
-        mRecentsView.post(new Runnable() {
-            @Override
-            public void run() {
-                Recents.getSystemServices().endProlongedAnimations();
-            }
-        });
+        mRecentsView.post(() -> WindowManagerWrapper.getInstance().endProlongedAnimations());
         return true;
     }
 

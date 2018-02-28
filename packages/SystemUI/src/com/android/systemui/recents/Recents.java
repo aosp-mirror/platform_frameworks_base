@@ -45,8 +45,10 @@ import android.widget.Toast;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.Dependency;
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
+import com.android.systemui.OverviewProxyService;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.SystemUI;
@@ -99,6 +101,8 @@ public class Recents extends SystemUI
     private static RecentsDebugFlags sDebugFlags;
     private static RecentsTaskLoader sTaskLoader;
     private static RecentsConfiguration sConfiguration;
+
+    private OverviewProxyService mOverviewProxyService;
 
     private Handler mHandler;
     private RecentsImpl mImpl;
@@ -208,6 +212,7 @@ public class Recents extends SystemUI
         sTaskLoader.setDefaultColors(defaultTaskBarBackgroundColor, defaultTaskViewBackgroundColor);
         mHandler = new Handler();
         mImpl = new RecentsImpl(mContext);
+        mOverviewProxyService = Dependency.get(OverviewProxyService.class);
 
         // Register with the event bus
         EventBus.getDefault().register(this, EVENT_BUS_PRIORITY);
@@ -247,6 +252,13 @@ public class Recents extends SystemUI
             return;
         }
 
+        if (mOverviewProxyService.getProxy() != null) {
+            // TODO: Proxy to Launcher
+            if (!triggeredFromAltTab) {
+                return;
+            }
+        }
+
         ActivityManagerWrapper.getInstance().closeSystemWindows(SYSTEM_DIALOG_REASON_RECENT_APPS);
         int recentsGrowTarget = getComponent(Divider.class).getView().growsRecents();
         int currentUser = sSystemServicesProxy.getCurrentUser();
@@ -282,6 +294,13 @@ public class Recents extends SystemUI
             return;
         }
 
+        if (mOverviewProxyService.getProxy() != null) {
+            // TODO: Proxy to Launcher
+            if (!triggeredFromAltTab) {
+                return;
+            }
+        }
+
         int currentUser = sSystemServicesProxy.getCurrentUser();
         if (sSystemServicesProxy.isSystemUser(currentUser)) {
             mImpl.hideRecents(triggeredFromAltTab, triggeredFromHomeKey);
@@ -310,6 +329,11 @@ public class Recents extends SystemUI
         // Ensure the device has been provisioned before allowing the user to interact with
         // recents
         if (!isUserSetup()) {
+            return;
+        }
+
+        if (mOverviewProxyService.getProxy() != null) {
+            // TODO: Proxy to Launcher
             return;
         }
 
@@ -345,6 +369,11 @@ public class Recents extends SystemUI
             return;
         }
 
+        if (mOverviewProxyService.getProxy() != null) {
+            // TODO: Proxy to Launcher
+            return;
+        }
+
         int currentUser = sSystemServicesProxy.getCurrentUser();
         if (sSystemServicesProxy.isSystemUser(currentUser)) {
             mImpl.preloadRecents();
@@ -370,6 +399,11 @@ public class Recents extends SystemUI
         // Ensure the device has been provisioned before allowing the user to interact with
         // recents
         if (!isUserSetup()) {
+            return;
+        }
+
+        if (mOverviewProxyService.getProxy() != null) {
+            // TODO: Proxy to Launcher
             return;
         }
 
