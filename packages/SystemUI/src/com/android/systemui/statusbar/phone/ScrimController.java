@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.phone;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.app.AlarmManager;
 import android.app.WallpaperManager;
@@ -362,7 +361,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
      *
      * The expansion fraction is tied to the scrim opacity.
      *
-     * @param fraction From 0 to 1 where 0 means collapse and 1 expanded.
+     * @param fraction From 0 to 1 where 0 means collapsed and 1 expanded.
      */
     public void setPanelExpansion(float fraction) {
         if (mExpansionFraction != fraction) {
@@ -381,8 +380,25 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             if (mPinnedHeadsUpCount != 0) {
                 updateHeadsUpScrim(false);
             }
-            updateScrim(false /* animate */, mScrimInFront, mCurrentInFrontAlpha);
-            updateScrim(false /* animate */, mScrimBehind, mCurrentBehindAlpha);
+
+            setOrAdaptCurrentAnimation(mScrimBehind);
+            setOrAdaptCurrentAnimation(mScrimInFront);
+        }
+    }
+
+    private void setOrAdaptCurrentAnimation(View scrim) {
+        if (!isAnimating(scrim)) {
+            updateScrimColor(scrim, getCurrentScrimAlpha(scrim), getCurrentScrimTint(scrim));
+        } else {
+            ValueAnimator previousAnimator = (ValueAnimator) scrim.getTag(TAG_KEY_ANIM);
+            float alpha = getCurrentScrimAlpha(scrim);
+            float previousEndValue = (Float) scrim.getTag(TAG_END_ALPHA);
+            float previousStartValue = (Float) scrim.getTag(TAG_START_ALPHA);
+            float relativeDiff = alpha - previousEndValue;
+            float newStartValue = previousStartValue + relativeDiff;
+            scrim.setTag(TAG_START_ALPHA, newStartValue);
+            scrim.setTag(TAG_END_ALPHA, alpha);
+            previousAnimator.setCurrentPlayTime(previousAnimator.getCurrentPlayTime());
         }
     }
 
@@ -523,14 +539,14 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         setScrimAlpha(mScrimInFront, alpha);
     }
 
-    private void setScrimAlpha(View scrim, float alpha) {
+    private void setScrimAlpha(ScrimView scrim, float alpha) {
         if (alpha == 0f) {
             scrim.setClickable(false);
         } else {
             // Eat touch events (unless dozing).
             scrim.setClickable(!(mState == ScrimState.AOD));
         }
-        updateScrim(mAnimateChange, scrim, alpha);
+        updateScrim(scrim, alpha);
     }
 
     private void updateScrimColor(View scrim, float alpha, int tint) {
@@ -554,21 +570,17 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         dispatchScrimsVisible();
     }
 
-    private int getCurrentScrimTint(View scrim) {
-        return scrim == mScrimInFront ? mCurrentInFrontTint : mCurrentBehindTint;
-    }
-
     private void startScrimAnimation(final View scrim, float current) {
         ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
         final int initialScrimTint = scrim instanceof ScrimView ? ((ScrimView) scrim).getTint() :
                 Color.TRANSPARENT;
         anim.addUpdateListener(animation -> {
+            final float startAlpha = (Float) scrim.getTag(TAG_START_ALPHA);
             final float animAmount = (float) animation.getAnimatedValue();
-            final int finalScrimTint = scrim == mScrimInFront ?
-                    mCurrentInFrontTint : mCurrentBehindTint;
-            float finalScrimAlpha = scrim == mScrimInFront ?
-                    mCurrentInFrontAlpha : mCurrentBehindAlpha;
-            float alpha = MathUtils.lerp(current, finalScrimAlpha, animAmount);
+            final int finalScrimTint = getCurrentScrimTint(scrim);
+            final float finalScrimAlpha = getCurrentScrimAlpha(scrim);
+            float alpha = MathUtils.lerp(startAlpha, finalScrimAlpha, animAmount);
+            alpha = MathUtils.constrain(alpha, 0f, 1f);
             int tint = ColorUtils.blendARGB(initialScrimTint, finalScrimTint, animAmount);
             updateScrimColor(scrim, alpha, tint);
             dispatchScrimsVisible();
@@ -579,12 +591,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         anim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                final int finalScrimTint = scrim == mScrimInFront ?
-                        mCurrentInFrontTint : mCurrentBehindTint;
-                float finalScrimAlpha = scrim == mScrimInFront ?
-                        mCurrentInFrontAlpha : mCurrentBehindAlpha;
-                updateScrimColor(scrim, finalScrimAlpha, finalScrimTint);
-
                 if (mKeyguardFadingOutInProgress) {
                     mKeyguardFadeoutAnimation = null;
                     mKeyguardFadingOutInProgress = false;
@@ -600,12 +606,42 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
                 }
             }
         });
-        anim.start();
         if (mAnimateKeyguardFadingOut) {
             mKeyguardFadingOutInProgress = true;
             mKeyguardFadeoutAnimation = anim;
         }
+
+        // Cache alpha values because we might want to update this animator in the future if
+        // the user expands the panel while the animation is still running.
+        scrim.setTag(TAG_START_ALPHA, current);
+        scrim.setTag(TAG_END_ALPHA, getCurrentScrimAlpha(scrim));
+
         scrim.setTag(TAG_KEY_ANIM, anim);
+        anim.start();
+    }
+
+    private float getCurrentScrimAlpha(View scrim) {
+        if (scrim == mScrimInFront) {
+            return mCurrentInFrontAlpha;
+        } else if (scrim == mScrimBehind) {
+            return mCurrentBehindAlpha;
+        } else if (scrim == mHeadsUpScrim) {
+            return calculateHeadsUpAlpha();
+        } else {
+            throw new IllegalArgumentException("Unknown scrim view");
+        }
+    }
+
+    private int getCurrentScrimTint(View scrim) {
+        if (scrim == mScrimInFront) {
+            return mCurrentInFrontTint;
+        } else if (scrim == mScrimBehind) {
+            return mCurrentBehindTint;
+        } else if (scrim == mHeadsUpScrim) {
+            return Color.TRANSPARENT;
+        } else {
+            throw new IllegalArgumentException("Unknown scrim view");
+        }
     }
 
     protected Interpolator getInterpolator() {
@@ -693,7 +729,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     }
 
     private void updateHeadsUpScrim(boolean animate) {
-        updateScrim(animate, mHeadsUpScrim, calculateHeadsUpAlpha());
+        if (animate) {
+            mAnimationDuration = ANIMATION_DURATION;
+            cancelAnimator((ValueAnimator) mHeadsUpScrim.getTag(TAG_KEY_ANIM));
+            startScrimAnimation(mHeadsUpScrim, mHeadsUpScrim.getAlpha());
+        } else {
+            setOrAdaptCurrentAnimation(mHeadsUpScrim);
+        }
     }
 
     @VisibleForTesting
@@ -701,32 +743,28 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         mOnAnimationFinished = onAnimationFinished;
     }
 
-    private void updateScrim(boolean animate, View scrim, float alpha) {
-        final float currentAlpha = scrim instanceof ScrimView ? ((ScrimView) scrim).getViewAlpha()
-            : scrim.getAlpha();
+    private void updateScrim(ScrimView scrim, float alpha) {
+        final float currentAlpha = scrim.getViewAlpha();
 
         ValueAnimator previousAnimator = ViewState.getChildTag(scrim, TAG_KEY_ANIM);
-        float animEndValue = -1;
         if (previousAnimator != null) {
-            if (animate || alpha == currentAlpha) {
+            if (mAnimateChange) {
                 // We are not done yet! Defer calling the finished listener.
-                if (animate) {
-                    mDeferFinishedListener = true;
-                }
-                cancelAnimator(previousAnimator);
-                mDeferFinishedListener = false;
-            } else {
-                animEndValue = ViewState.getChildTag(scrim, TAG_END_ALPHA);
+                mDeferFinishedListener = true;
             }
+            // Previous animators should always be cancelled. Not doing so would cause
+            // overlap, especially on states that don't animate, leading to flickering,
+            // and in the worst case, an internal state that doesn't represent what
+            // transitionTo requested.
+            cancelAnimator(previousAnimator);
+            mDeferFinishedListener = false;
         }
 
         if (mPendingFrameCallback != null) {
             // Display is off and we're waiting.
-            cancelAnimator(previousAnimator);
             return;
         } else if (mBlankScreen) {
             // Need to blank the display before continuing.
-            cancelAnimator(previousAnimator);
             blankDisplay();
             return;
         } else if (!mScreenBlankingCallbackCalled) {
@@ -744,36 +782,17 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         }
 
         final ScrimView scrimView = scrim instanceof  ScrimView ? (ScrimView) scrim : null;
-        final boolean wantsAlphaUpdate = alpha != currentAlpha && alpha != animEndValue;
+        final boolean wantsAlphaUpdate = alpha != currentAlpha;
         final boolean wantsTintUpdate = scrimView != null
                 && scrimView.getTint() != getCurrentScrimTint(scrimView);
 
         if (wantsAlphaUpdate || wantsTintUpdate) {
-            if (animate) {
-                final float fromAlpha = scrimView == null ? scrim.getAlpha()
-                        : scrimView.getViewAlpha();
-                startScrimAnimation(scrim, fromAlpha);
-                scrim.setTag(TAG_START_ALPHA, currentAlpha);
-                scrim.setTag(TAG_END_ALPHA, alpha);
+            if (mAnimateChange) {
+                startScrimAnimation(scrim, currentAlpha);
             } else {
-                if (previousAnimator != null) {
-                    float previousStartValue = ViewState.getChildTag(scrim, TAG_START_ALPHA);
-                    float previousEndValue = ViewState.getChildTag(scrim, TAG_END_ALPHA);
-                    // we need to increase all animation keyframes of the previous animator by the
-                    // relative change to the end value
-                    PropertyValuesHolder[] values = previousAnimator.getValues();
-                    float relativeDiff = alpha - previousEndValue;
-                    float newStartValue = previousStartValue + relativeDiff;
-                    newStartValue = Math.max(0, Math.min(1.0f, newStartValue));
-                    values[0].setFloatValues(newStartValue, alpha);
-                    scrim.setTag(TAG_START_ALPHA, newStartValue);
-                    scrim.setTag(TAG_END_ALPHA, alpha);
-                    previousAnimator.setCurrentPlayTime(previousAnimator.getCurrentPlayTime());
-                } else {
-                    // update the alpha directly
-                    updateScrimColor(scrim, alpha, getCurrentScrimTint(scrim));
-                    onFinished();
-                }
+                // update the alpha directly
+                updateScrimColor(scrim, alpha, getCurrentScrimTint(scrim));
+                onFinished();
             }
         } else {
             onFinished();
