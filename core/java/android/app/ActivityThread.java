@@ -3900,8 +3900,7 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     @Override
     public void handlePauseActivity(IBinder token, boolean finished, boolean userLeaving,
-            int configChanges, boolean dontReport, PendingTransactionActions pendingActions,
-            String reason) {
+            int configChanges, PendingTransactionActions pendingActions, String reason) {
         ActivityClientRecord r = mActivities.get(token);
         if (r != null) {
             if (userLeaving) {
@@ -3914,15 +3913,6 @@ public final class ActivityThread extends ClientTransactionHandler {
             // Make sure any pending writes are now committed.
             if (r.isPreHoneycomb()) {
                 QueuedWork.waitToFinish();
-            }
-
-            // Tell the activity manager we have paused.
-            if (!dontReport) {
-                try {
-                    ActivityManager.getService().activityPaused(token);
-                } catch (RemoteException ex) {
-                    throw ex.rethrowFromSystemServer();
-                }
             }
             mSomeActivitiesChanged = true;
         }
