@@ -25,6 +25,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -729,8 +730,8 @@ public class AppStateTrackerTest {
     private void assertNoCallbacks(Listener l) throws Exception {
         waitUntilMainHandlerDrain();
         verify(l, times(0)).updateAllJobs();
-        verify(l, times(0)).updateJobsForUid(anyInt());
-        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
+        verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
+        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
@@ -752,8 +753,8 @@ public class AppStateTrackerTest {
 
         waitUntilMainHandlerDrain();
         verify(l, times(1)).updateAllJobs();
-        verify(l, times(0)).updateJobsForUid(anyInt());
-        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
+        verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
+        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
@@ -766,8 +767,8 @@ public class AppStateTrackerTest {
 
         waitUntilMainHandlerDrain();
         verify(l, times(1)).updateAllJobs();
-        verify(l, times(0)).updateJobsForUid(anyInt());
-        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
+        verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
+        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(1)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
@@ -796,8 +797,8 @@ public class AppStateTrackerTest {
 
         waitUntilMainHandlerDrain();
         verify(l, times(0)).updateAllJobs();
-        verify(l, times(0)).updateJobsForUid(anyInt());
-        verify(l, times(1)).updateJobsForUidPackage(eq(UID_10_2), eq(PACKAGE_2));
+        verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
+        verify(l, times(1)).updateJobsForUidPackage(eq(UID_10_2), eq(PACKAGE_2), anyBoolean());
 
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
@@ -808,8 +809,8 @@ public class AppStateTrackerTest {
 
         waitUntilMainHandlerDrain();
         verify(l, times(0)).updateAllJobs();
-        verify(l, times(0)).updateJobsForUid(anyInt());
-        verify(l, times(1)).updateJobsForUidPackage(eq(UID_10_2), eq(PACKAGE_2));
+        verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
+        verify(l, times(1)).updateJobsForUidPackage(eq(UID_10_2), eq(PACKAGE_2), anyBoolean());
 
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
@@ -819,8 +820,8 @@ public class AppStateTrackerTest {
         setAppOps(UID_10_2, PACKAGE_2, false);
 
         verify(l, times(0)).updateAllJobs();
-        verify(l, times(0)).updateJobsForUid(anyInt());
-        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
+        verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
+        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
@@ -835,8 +836,8 @@ public class AppStateTrackerTest {
 
         waitUntilMainHandlerDrain();
         verify(l, times(1)).updateAllJobs();
-        verify(l, times(0)).updateJobsForUid(anyInt());
-        verify(l, times(1)).updateJobsForUidPackage(eq(UID_10_2), eq(PACKAGE_2));
+        verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
+        verify(l, times(1)).updateJobsForUidPackage(eq(UID_10_2), eq(PACKAGE_2), anyBoolean());
 
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
@@ -849,8 +850,8 @@ public class AppStateTrackerTest {
 
         waitUntilMainHandlerDrain();
         verify(l, times(1)).updateAllJobs();
-        verify(l, times(0)).updateJobsForUid(anyInt());
-        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
+        verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
+        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(1)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
@@ -864,8 +865,8 @@ public class AppStateTrackerTest {
 
         waitUntilMainHandlerDrain();
         verify(l, times(1)).updateAllJobs();
-        verify(l, times(0)).updateJobsForUid(anyInt());
-        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
+        verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
+        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
@@ -876,8 +877,8 @@ public class AppStateTrackerTest {
 
         waitUntilMainHandlerDrain();
         verify(l, times(1)).updateAllJobs();
-        verify(l, times(0)).updateJobsForUid(anyInt());
-        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
+        verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
+        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(1)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
@@ -889,8 +890,8 @@ public class AppStateTrackerTest {
 
         waitUntilMainHandlerDrain();
         verify(l, times(1)).updateAllJobs();
-        verify(l, times(0)).updateJobsForUid(anyInt());
-        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
+        verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
+        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
@@ -901,8 +902,8 @@ public class AppStateTrackerTest {
 
         waitUntilMainHandlerDrain();
         verify(l, times(1)).updateAllJobs();
-        verify(l, times(0)).updateJobsForUid(anyInt());
-        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
+        verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
+        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
@@ -915,8 +916,8 @@ public class AppStateTrackerTest {
 
         waitUntilMainHandlerDrain();
         verify(l, times(1)).updateAllJobs();
-        verify(l, times(0)).updateJobsForUid(anyInt());
-        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
+        verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
+        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
@@ -928,8 +929,8 @@ public class AppStateTrackerTest {
         waitUntilMainHandlerDrain();
         // Called once for updating all whitelist and once for updating temp whitelist
         verify(l, times(2)).updateAllJobs();
-        verify(l, times(0)).updateJobsForUid(anyInt());
-        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
+        verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
+        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
@@ -940,8 +941,8 @@ public class AppStateTrackerTest {
 
         waitUntilMainHandlerDrain();
         verify(l, times(1)).updateAllJobs();
-        verify(l, times(0)).updateJobsForUid(anyInt());
-        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
+        verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
+        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(1)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
@@ -953,8 +954,8 @@ public class AppStateTrackerTest {
 
         waitUntilMainHandlerDrain();
         verify(l, times(1)).updateAllJobs();
-        verify(l, times(0)).updateJobsForUid(anyInt());
-        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
+        verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
+        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
@@ -965,8 +966,8 @@ public class AppStateTrackerTest {
 
         waitUntilMainHandlerDrain();
         verify(l, times(1)).updateAllJobs();
-        verify(l, times(0)).updateJobsForUid(anyInt());
-        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
+        verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
+        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
@@ -985,8 +986,8 @@ public class AppStateTrackerTest {
 
         waitUntilMainHandlerDrain();
         verify(l, times(0)).updateAllJobs();
-        verify(l, times(1)).updateJobsForUid(eq(UID_10_1));
-        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
+        verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
+        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(1)).unblockAlarmsForUid(eq(UID_10_1));
@@ -997,8 +998,8 @@ public class AppStateTrackerTest {
 
         waitUntilMainHandlerDrain();
         verify(l, times(0)).updateAllJobs();
-        verify(l, times(1)).updateJobsForUid(eq(UID_10_1));
-        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
+        verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
+        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
@@ -1009,8 +1010,8 @@ public class AppStateTrackerTest {
 
         waitUntilMainHandlerDrain();
         verify(l, times(0)).updateAllJobs();
-        verify(l, times(1)).updateJobsForUid(eq(UID_10_1));
-        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
+        verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
+        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(1)).unblockAlarmsForUid(eq(UID_10_1));
@@ -1021,8 +1022,8 @@ public class AppStateTrackerTest {
 
         waitUntilMainHandlerDrain();
         verify(l, times(0)).updateAllJobs();
-        verify(l, times(1)).updateJobsForUid(eq(UID_10_1));
-        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
+        verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
+        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
@@ -1035,8 +1036,8 @@ public class AppStateTrackerTest {
 
         waitUntilMainHandlerDrain();
         verify(l, times(1)).updateAllJobs();
-        verify(l, times(0)).updateJobsForUid(eq(UID_10_1));
-        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
+        verify(l, times(0)).updateJobsForUid(eq(UID_10_1), anyBoolean());
+        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(1)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
@@ -1047,8 +1048,8 @@ public class AppStateTrackerTest {
 
         waitUntilMainHandlerDrain();
         verify(l, times(0)).updateAllJobs();
-        verify(l, times(1)).updateJobsForUid(eq(UID_10_1));
-        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
+        verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
+        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(1)).unblockAlarmsForUid(eq(UID_10_1));
@@ -1059,8 +1060,8 @@ public class AppStateTrackerTest {
 
         waitUntilMainHandlerDrain();
         verify(l, times(0)).updateAllJobs();
-        verify(l, times(1)).updateJobsForUid(eq(UID_10_1));
-        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
+        verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
+        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
@@ -1071,8 +1072,8 @@ public class AppStateTrackerTest {
 
         waitUntilMainHandlerDrain();
         verify(l, times(0)).updateAllJobs();
-        verify(l, times(1)).updateJobsForUid(eq(UID_10_1));
-        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
+        verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
+        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(1)).unblockAlarmsForUid(eq(UID_10_1));
@@ -1083,8 +1084,8 @@ public class AppStateTrackerTest {
 
         waitUntilMainHandlerDrain();
         verify(l, times(0)).updateAllJobs();
-        verify(l, times(1)).updateJobsForUid(eq(UID_10_1));
-        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
+        verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
+        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());

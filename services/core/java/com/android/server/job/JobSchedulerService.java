@@ -88,7 +88,6 @@ import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerServiceDumpProto.ActiveJob;
 import com.android.server.job.JobSchedulerServiceDumpProto.PendingJob;
 import com.android.server.job.JobSchedulerServiceDumpProto.RegisteredJob;
-import com.android.server.job.controllers.AppIdleController;
 import com.android.server.job.controllers.BackgroundJobsController;
 import com.android.server.job.controllers.BatteryController;
 import com.android.server.job.controllers.ConnectivityController;
@@ -1051,7 +1050,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 final JobStatus job = jsc.getRunningJobLocked();
                 if (job != null
                         && (job.getJob().getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) == 0
-                        && !job.dozeWhitelisted) {
+                        && !job.dozeWhitelisted
+                        && !job.uidActive) {
                     // We will report active if we have a job running and it is not an exception
                     // due to being in the foreground or whitelisted.
                     active = true;
@@ -1115,7 +1115,6 @@ public final class JobSchedulerService extends com.android.server.SystemService
         mStorageController = new StorageController(this);
         mControllers.add(mStorageController);
         mControllers.add(new BackgroundJobsController(this));
-        mControllers.add(new AppIdleController(this));
         mControllers.add(new ContentObserverController(this));
         mDeviceIdleJobsController = new DeviceIdleJobsController(this);
         mControllers.add(mDeviceIdleJobsController);
@@ -1867,6 +1866,9 @@ public final class JobSchedulerService extends com.android.server.SystemService
         // scheduled are sitting there, not ready yet) and very cheap to check (just
         // a few conditions on data in JobStatus).
         if (!jobReady) {
+            if (job.getSourcePackageName().equals("android.jobscheduler.cts.jobtestapp")) {
+                Slog.v(TAG, "    NOT READY: " + job);
+            }
             return false;
         }
 
@@ -1905,9 +1907,21 @@ public final class JobSchedulerService extends com.android.server.SystemService
         // an appropriate amount of time since the last invocation.  During device-
         // wide parole, standby bucketing is ignored.
         //
-        // But if a job has FLAG_EXEMPT_FROM_APP_STANDBY, don't check it.
-        if (!mInParole && !job.getJob().isExemptedFromAppStandby()) {
+        // Jobs in 'active' apps are not subject to standby, nor are jobs that are
+        // specifically marked as exempt.
+        if (DEBUG_STANDBY) {
+            Slog.v(TAG, "isReadyToBeExecutedLocked: " + job.toShortString()
+                    + " parole=" + mInParole + " active=" + job.uidActive
+                    + " exempt=" + job.getJob().isExemptedFromAppStandby());
+        }
+        if (!mInParole
+                && !job.uidActive
+                && !job.getJob().isExemptedFromAppStandby()) {
             final int bucket = job.getStandbyBucket();
+            if (DEBUG_STANDBY) {
+                Slog.v(TAG, "  bucket=" + bucket + " heartbeat=" + mHeartbeat
+                        + " next=" + mNextBucketHeartbeat[bucket]);
+            }
             if (mHeartbeat < mNextBucketHeartbeat[bucket]) {
                 // Only skip this job if the app is still waiting for the end of its nominal
                 // bucket interval.  Once it's waited that long, we let it go ahead and clear.

@@ -258,7 +258,7 @@ public class AppStateTracker {
          */
         private void onRunAnyAppOpsChanged(AppStateTracker sender,
                 int uid, @NonNull String packageName) {
-            updateJobsForUidPackage(uid, packageName);
+            updateJobsForUidPackage(uid, packageName, sender.isUidActive(uid));
 
             if (!sender.areAlarmsRestricted(uid, packageName, /*allowWhileIdle=*/ false)) {
                 unblockAlarmsForUidPackage(uid, packageName);
@@ -279,9 +279,11 @@ public class AppStateTracker {
          * This is called when the active/idle state changed for a UID.
          */
         private void onUidActiveStateChanged(AppStateTracker sender, int uid) {
-            updateJobsForUid(uid);
+            final boolean isActive = sender.isUidActive(uid);
 
-            if (sender.isUidActive(uid)) {
+            updateJobsForUid(uid, isActive);
+
+            if (isActive) {
                 unblockAlarmsForUid(uid);
             }
         }
@@ -346,14 +348,14 @@ public class AppStateTracker {
          * Called when the job restrictions for a UID might have changed, so the job
          * scheduler should re-evaluate all restrictions for all jobs.
          */
-        public void updateJobsForUid(int uid) {
+        public void updateJobsForUid(int uid, boolean isNowActive) {
         }
 
         /**
          * Called when the job restrictions for a UID - package might have changed, so the job
          * scheduler should re-evaluate all restrictions for all jobs.
          */
-        public void updateJobsForUidPackage(int uid, String packageName) {
+        public void updateJobsForUidPackage(int uid, String packageName, boolean isNowActive) {
         }
 
         /**

@@ -28,16 +28,31 @@ import com.android.server.AppStateTracker;
 import com.android.server.AppStateTracker.Listener;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
+import com.android.server.job.JobStore;
 import com.android.server.job.StateControllerProto;
 import com.android.server.job.StateControllerProto.BackgroundJobsController.TrackedJob;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+/**
+ * Tracks the following pieces of JobStatus state:
+ *
+ * - the CONSTRAINT_BACKGROUND_NOT_RESTRICTED general constraint bit, which
+ *    is used to selectively permit battery-saver exempted jobs to run; and
+ *
+ * - the uid-active boolean state expressed by the AppStateTracker.  Jobs in 'active'
+ *    uids are inherently eligible to run jobs regardless of the uid's standby bucket.
+ */
 public final class BackgroundJobsController extends StateController {
     private static final String TAG = "JobScheduler.Background";
     private static final boolean DEBUG = JobSchedulerService.DEBUG
             || Log.isLoggable(TAG, Log.DEBUG);
+
+    // Tri-state about possible "is this uid 'active'?" knowledge
+    static final int UNKNOWN = 0;
+    static final int KNOWN_ACTIVE = 1;
+    static final int KNOWN_INACTIVE = 2;
 
     private final AppStateTracker mAppStateTracker;
 
@@ -51,7 +66,7 @@ public final class BackgroundJobsController extends StateController {
 
     @Override
     public void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob) {
-        updateSingleJobRestrictionLocked(jobStatus);
+        updateSingleJobRestrictionLocked(jobStatus, UNKNOWN);
     }
 
     @Override
@@ -137,23 +152,24 @@ public final class BackgroundJobsController extends StateController {
     }
 
     private void updateAllJobRestrictionsLocked() {
-        updateJobRestrictionsLocked(/*filterUid=*/ -1);
+        updateJobRestrictionsLocked(/*filterUid=*/ -1, UNKNOWN);
     }
 
-    private void updateJobRestrictionsForUidLocked(int uid) {
-
-        // TODO Use forEachJobForSourceUid() once we have it.
-
-        updateJobRestrictionsLocked(/*filterUid=*/ uid);
+    private void updateJobRestrictionsForUidLocked(int uid, boolean isActive) {
+        updateJobRestrictionsLocked(uid, (isActive) ? KNOWN_ACTIVE : KNOWN_INACTIVE);
     }
 
-    private void updateJobRestrictionsLocked(int filterUid) {
-        final UpdateJobFunctor updateTrackedJobs =
-                new UpdateJobFunctor(filterUid);
+    private void updateJobRestrictionsLocked(int filterUid, int newActiveState) {
+        final UpdateJobFunctor updateTrackedJobs = new UpdateJobFunctor(newActiveState);
 
         final long start = DEBUG ? SystemClock.elapsedRealtimeNanos() : 0;
 
-        mService.getJobStore().forEachJob(updateTrackedJobs);
+        final JobStore store = mService.getJobStore();
+        if (filterUid > 0) {
+            store.forEachJobForSourceUid(filterUid, updateTrackedJobs);
+        } else {
+            store.forEachJob(updateTrackedJobs);
+        }
 
         final long time = DEBUG ? (SystemClock.elapsedRealtimeNanos() - start) : 0;
         if (DEBUG) {
@@ -170,7 +186,7 @@ public final class BackgroundJobsController extends StateController {
         }
     }
 
-    boolean updateSingleJobRestrictionLocked(JobStatus jobStatus) {
+    boolean updateSingleJobRestrictionLocked(JobStatus jobStatus, int activeState) {
 
         final int uid = jobStatus.getSourceUid();
         final String packageName = jobStatus.getSourcePackageName();
@@ -179,28 +195,32 @@ public final class BackgroundJobsController extends StateController {
                 (jobStatus.getInternalFlags() & JobStatus.INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION)
                         != 0);
 
-        return jobStatus.setBackgroundNotRestrictedConstraintSatisfied(canRun);
+        final boolean isActive;
+        if (activeState == UNKNOWN) {
+            isActive = mAppStateTracker.isUidActive(uid);
+        } else {
+            isActive = (activeState == KNOWN_ACTIVE);
+        }
+        boolean didChange = jobStatus.setBackgroundNotRestrictedConstraintSatisfied(canRun);
+        didChange |= jobStatus.setUidActive(isActive);
+        return didChange;
     }
 
     private final class UpdateJobFunctor implements Consumer<JobStatus> {
-        private final int mFilterUid;
-
+        final int activeState;
         boolean mChanged = false;
         int mTotalCount = 0;
         int mCheckedCount = 0;
 
-        UpdateJobFunctor(int filterUid) {
-            mFilterUid = filterUid;
+        public UpdateJobFunctor(int newActiveState) {
+            activeState = newActiveState;
         }
 
         @Override
         public void accept(JobStatus jobStatus) {
             mTotalCount++;
-            if ((mFilterUid > 0) && (mFilterUid != jobStatus.getSourceUid())) {
-                return;
-            }
             mCheckedCount++;
-            if (updateSingleJobRestrictionLocked(jobStatus)) {
+            if (updateSingleJobRestrictionLocked(jobStatus, activeState)) {
                 mChanged = true;
             }
         }
@@ -215,16 +235,16 @@ public final class BackgroundJobsController extends StateController {
         }
 
         @Override
-        public void updateJobsForUid(int uid) {
+        public void updateJobsForUid(int uid, boolean isActive) {
             synchronized (mLock) {
-                updateJobRestrictionsForUidLocked(uid);
+                updateJobRestrictionsForUidLocked(uid, isActive);
             }
         }
 
         @Override
-        public void updateJobsForUidPackage(int uid, String packageName) {
+        public void updateJobsForUidPackage(int uid, String packageName, boolean isActive) {
             synchronized (mLock) {
-                updateJobRestrictionsForUidLocked(uid);
+                updateJobRestrictionsForUidLocked(uid, isActive);
             }
         }
     };

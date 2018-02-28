@@ -73,7 +73,6 @@ public final class JobStatus {
     static final int CONSTRAINT_TIMING_DELAY = 1<<31;
     static final int CONSTRAINT_DEADLINE = 1<<30;
     static final int CONSTRAINT_CONNECTIVITY = 1<<28;
-    static final int CONSTRAINT_APP_NOT_IDLE = 1<<27;
     static final int CONSTRAINT_CONTENT_TRIGGER = 1<<26;
     static final int CONSTRAINT_DEVICE_NOT_DOZING = 1<<25;
     static final int CONSTRAINT_BACKGROUND_NOT_RESTRICTED = 1<<22;
@@ -152,6 +151,9 @@ public final class JobStatus {
 
     // Set to true if doze constraint was satisfied due to app being whitelisted.
     public boolean dozeWhitelisted;
+
+    // Set to true when the app is "active" per AppStateTracker
+    public boolean uidActive;
 
     /**
      * Flag for {@link #trackingControllers}: the battery controller is currently tracking this job.
@@ -838,10 +840,6 @@ public final class JobStatus {
         return setConstraintSatisfied(CONSTRAINT_CONNECTIVITY, state);
     }
 
-    boolean setAppNotIdleConstraintSatisfied(boolean state) {
-        return setConstraintSatisfied(CONSTRAINT_APP_NOT_IDLE, state);
-    }
-
     boolean setContentTriggerConstraintSatisfied(boolean state) {
         return setConstraintSatisfied(CONSTRAINT_CONTENT_TRIGGER, state);
     }
@@ -853,6 +851,14 @@ public final class JobStatus {
 
     boolean setBackgroundNotRestrictedConstraintSatisfied(boolean state) {
         return setConstraintSatisfied(CONSTRAINT_BACKGROUND_NOT_RESTRICTED, state);
+    }
+
+    boolean setUidActive(final boolean newActiveState) {
+        if (newActiveState != uidActive) {
+            uidActive = newActiveState;
+            return true;
+        }
+        return false; /* unchanged */
     }
 
     boolean setConstraintSatisfied(int constraint, boolean state) {
@@ -904,13 +910,11 @@ public final class JobStatus {
         // NotRestrictedInBackground implicit constraint must be satisfied
         final boolean deadlineSatisfied = (!job.isPeriodic() && hasDeadlineConstraint()
                 && (satisfiedConstraints & CONSTRAINT_DEADLINE) != 0);
-        final boolean notIdle = (satisfiedConstraints & CONSTRAINT_APP_NOT_IDLE) != 0;
         final boolean notDozing = (satisfiedConstraints & CONSTRAINT_DEVICE_NOT_DOZING) != 0
                 || (job.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0;
         final boolean notRestrictedInBg =
                 (satisfiedConstraints & CONSTRAINT_BACKGROUND_NOT_RESTRICTED) != 0;
-        return (isConstraintsSatisfied() || deadlineSatisfied) && notIdle && notDozing
-                && notRestrictedInBg;
+        return (isConstraintsSatisfied() || deadlineSatisfied) && notDozing && notRestrictedInBg;
     }
 
     static final int CONSTRAINTS_OF_INTEREST = CONSTRAINT_CHARGING | CONSTRAINT_BATTERY_NOT_LOW
@@ -989,9 +993,6 @@ public final class JobStatus {
         }
         if (job.isPersisted()) {
             sb.append(" PERSISTED");
-        }
-        if ((satisfiedConstraints&CONSTRAINT_APP_NOT_IDLE) == 0) {
-            sb.append(" WAIT:APP_NOT_IDLE");
         }
         if ((satisfiedConstraints&CONSTRAINT_DEVICE_NOT_DOZING) == 0) {
             sb.append(" WAIT:DEV_NOT_DOZING");
@@ -1091,9 +1092,6 @@ public final class JobStatus {
         if ((constraints&CONSTRAINT_CONNECTIVITY) != 0) {
             pw.print(" CONNECTIVITY");
         }
-        if ((constraints&CONSTRAINT_APP_NOT_IDLE) != 0) {
-            pw.print(" APP_NOT_IDLE");
-        }
         if ((constraints&CONSTRAINT_CONTENT_TRIGGER) != 0) {
             pw.print(" CONTENT_TRIGGER");
         }
@@ -1132,9 +1130,6 @@ public final class JobStatus {
         }
         if ((constraints & CONSTRAINT_CONNECTIVITY) != 0) {
             proto.write(fieldId, JobStatusDumpProto.CONSTRAINT_CONNECTIVITY);
-        }
-        if ((constraints & CONSTRAINT_APP_NOT_IDLE) != 0) {
-            proto.write(fieldId, JobStatusDumpProto.CONSTRAINT_APP_NOT_IDLE);
         }
         if ((constraints & CONSTRAINT_CONTENT_TRIGGER) != 0) {
             proto.write(fieldId, JobStatusDumpProto.CONSTRAINT_CONTENT_TRIGGER);
@@ -1306,6 +1301,9 @@ public final class JobStatus {
             pw.println();
             if (dozeWhitelisted) {
                 pw.print(prefix); pw.println("Doze whitelisted: true");
+            }
+            if (uidActive) {
+                pw.print(prefix); pw.println("Uid: active");
             }
         }
         if (trackingControllers != 0) {
