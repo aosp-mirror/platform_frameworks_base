@@ -54,7 +54,7 @@ public class TileLayoutTest extends SysuiTestCase {
         // Layout needs to leave space for the tile margins. Three times the margin size is
         // sufficient for any number of columns.
         mLayoutSizeForOneTile =
-                mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_margin) * 3;
+                mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal) * 3;
     }
 
     private QSPanel.TileRecord createTileRecord() {
