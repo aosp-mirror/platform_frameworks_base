@@ -40,6 +40,7 @@ import java.security.cert.CertPathBuilderException;
 import java.security.cert.CertPathValidator;
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertStore;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.CollectionCertStoreParameters;
@@ -290,6 +291,42 @@ public final class CertUtils {
             throw new CertValidationException(e);
         }
         return certPath;
+    }
+
+    /**
+     * Validates a given {@code CertPath} against the trusted root certificate.
+     *
+     * @param trustedRoot the trusted root certificate
+     * @param certPath the certificate path to be validated
+     * @throws CertValidationException if the given certificate path is invalid, e.g., is expired,
+     *                                 or does not have a valid signature
+     */
+    public static void validateCertPath(X509Certificate trustedRoot, CertPath certPath)
+            throws CertValidationException {
+        validateCertPath(/*validationDate=*/ null, trustedRoot, certPath);
+    }
+
+    /**
+     * Validates a given {@code CertPath} against a given {@code validationDate}. If the given
+     * validation date is null, the current date will be used.
+     */
+    @VisibleForTesting
+    static void validateCertPath(@Nullable Date validationDate, X509Certificate trustedRoot,
+            CertPath certPath) throws CertValidationException {
+        if (certPath.getCertificates().isEmpty()) {
+            throw new CertValidationException("The given certificate path is empty");
+        }
+        if (!(certPath.getCertificates().get(0) instanceof X509Certificate)) {
+            throw new CertValidationException(
+                    "The given certificate path does not contain X509 certificates");
+        }
+
+        List<X509Certificate> certificates = (List<X509Certificate>) certPath.getCertificates();
+        X509Certificate leafCert = certificates.get(0);
+        List<X509Certificate> intermediateCerts =
+                certificates.subList(/*fromIndex=*/ 1, certificates.size());
+
+        validateCert(validationDate, trustedRoot, intermediateCerts, leafCert);
     }
 
     @VisibleForTesting
