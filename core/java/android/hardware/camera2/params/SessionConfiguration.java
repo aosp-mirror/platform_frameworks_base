@@ -17,10 +17,10 @@
 
 package android.hardware.camera2.params;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.IntDef;
-import android.os.Handler;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
@@ -31,6 +31,7 @@ import android.hardware.camera2.params.OutputConfiguration;
 import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -78,7 +79,7 @@ public final class SessionConfiguration {
     private List<OutputConfiguration> mOutputConfigurations;
     private CameraCaptureSession.StateCallback mStateCallback;
     private int mSessionType;
-    private Handler mHandler = null;
+    private Executor mExecutor = null;
     private InputConfiguration mInputConfig = null;
     private CaptureRequest mSessionParameters = null;
 
@@ -87,10 +88,9 @@ public final class SessionConfiguration {
      *
      * @param sessionType The session type.
      * @param outputs A list of output configurations for the capture session.
+     * @param executor The executor which should be used to invoke the callback. In general it is
+     *                 recommended that camera operations are not done on the main (UI) thread.
      * @param cb A state callback interface implementation.
-     * @param handler The handler on which the callback will be invoked. If it is
-     *                set to null, the callback will be invoked on the current thread's
-     *                {@link android.os.Looper looper}.
      *
      * @see #SESSION_REGULAR
      * @see #SESSION_HIGH_SPEED
@@ -101,11 +101,12 @@ public final class SessionConfiguration {
      */
     public SessionConfiguration(@SessionMode int sessionType,
             @NonNull List<OutputConfiguration> outputs,
-            @NonNull CameraCaptureSession.StateCallback cb, @Nullable Handler handler) {
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull CameraCaptureSession.StateCallback cb) {
         mSessionType = sessionType;
         mOutputConfigurations = Collections.unmodifiableList(new ArrayList<>(outputs));
         mStateCallback = cb;
-        mHandler = handler;
+        mExecutor = executor;
     }
 
     /**
@@ -136,14 +137,12 @@ public final class SessionConfiguration {
     }
 
     /**
-     * Retrieve the {@link CameraCaptureSession.StateCallback} for the capture session.
+     * Retrieve the {@link java.util.concurrent.Executor} for the capture session.
      *
-     * @return The handler on which the callback will be invoked. If it is
-     *         set to null, the callback will be invoked on the current thread's
-     *         {@link android.os.Looper looper}.
+     * @return The Executor on which the callback will be invoked.
      */
-    public Handler getHandler() {
-        return mHandler;
+    public Executor getExecutor() {
+        return mExecutor;
     }
 
     /**

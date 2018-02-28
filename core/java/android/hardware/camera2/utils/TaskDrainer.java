@@ -15,11 +15,11 @@
  */
 package android.hardware.camera2.utils;
 
-import android.os.Handler;
 import android.util.Log;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 import static com.android.internal.util.Preconditions.*;
 
@@ -55,7 +55,7 @@ public class TaskDrainer<T> {
     private static final String TAG = "TaskDrainer";
     private final boolean DEBUG = false;
 
-    private final Handler mHandler;
+    private final Executor mExecutor;
     private final DrainListener mListener;
     private final String mName;
 
@@ -73,28 +73,27 @@ public class TaskDrainer<T> {
 
     /**
      * Create a new task drainer; {@code onDrained} callbacks will be posted to the listener
-     * via the {@code handler}.
+     * via the {@code executor}.
      *
-     * @param handler a non-{@code null} handler to use to post runnables to
+     * @param executor a non-{@code null} executor to use for listener execution
      * @param listener a non-{@code null} listener where {@code onDrained} will be called
      */
-    public TaskDrainer(Handler handler, DrainListener listener) {
-        mHandler = checkNotNull(handler, "handler must not be null");
+    public TaskDrainer(Executor executor, DrainListener listener) {
+        mExecutor = checkNotNull(executor, "executor must not be null");
         mListener = checkNotNull(listener, "listener must not be null");
         mName = null;
     }
 
     /**
      * Create a new task drainer; {@code onDrained} callbacks will be posted to the listener
-     * via the {@code handler}.
+     * via the {@code executor}.
      *
-     * @param handler a non-{@code null} handler to use to post runnables to
+     * @param executor a non-{@code null} executor to use for listener execution
      * @param listener a non-{@code null} listener where {@code onDrained} will be called
      * @param name an optional name used for debug logging
      */
-    public TaskDrainer(Handler handler, DrainListener listener, String name) {
-        // XX: Probably don't need a handler at all here
-        mHandler = checkNotNull(handler, "handler must not be null");
+    public TaskDrainer(Executor executor, DrainListener listener, String name) {
+        mExecutor = checkNotNull(executor, "executor must not be null");
         mListener = checkNotNull(listener, "listener must not be null");
         mName = name;
     }
@@ -200,15 +199,12 @@ public class TaskDrainer<T> {
     }
 
     private void postDrained() {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
+        mExecutor.execute(() -> {
                 if (DEBUG) {
                     Log.v(TAG + "[" + mName + "]", "onDrained");
                 }
 
                 mListener.onDrained();
-            }
         });
     }
 }
