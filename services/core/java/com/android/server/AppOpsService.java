@@ -232,7 +232,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    final ArrayMap<IBinder, ClientState> mClients = new ArrayMap<IBinder, ClientState>();
+    final ArrayMap<IBinder, ClientState> mClients = new ArrayMap<>();
 
     public final class ClientState extends Binder implements DeathRecipient {
         final ArrayList<Op> mStartedOps = new ArrayList<>();
@@ -264,7 +264,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         public void binderDied() {
             synchronized (AppOpsService.this) {
                 for (int i=mStartedOps.size()-1; i>=0; i--) {
-                    finishOperationLocked(mStartedOps.get(i));
+                    finishOperationLocked(mStartedOps.get(i), /*finishNested*/ true);
                 }
                 mClients.remove(mAppToken);
             }
@@ -395,6 +395,27 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (ops != null && uidState.pkgOps.isEmpty()
                     && getPackagesForUid(uid).length <= 0) {
                 mUidStates.remove(uid);
+            }
+
+            // Finish ops other packages started on behalf of the package.
+            final int clientCount = mClients.size();
+            for (int i = 0; i < clientCount; i++) {
+                final ClientState client = mClients.valueAt(i);
+                if (client.mStartedOps == null) {
+                    continue;
+                }
+                final int opCount = client.mStartedOps.size();
+                for (int j = opCount - 1; j >= 0; j--) {
+                    final Op op = client.mStartedOps.get(j);
+                    if (uid == op.uid && packageName.equals(op.packageName)) {
+                        finishOperationLocked(op, /*finishNested*/ true);
+                        client.mStartedOps.remove(j);
+                        if (op.nesting <= 0) {
+                            scheduleOpActiveChangedIfNeededLocked(op.op,
+                                    uid, packageName, false);
+                        }
+                    }
+                }
             }
 
             if (ops != null) {
@@ -1326,7 +1347,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 throw new IllegalStateException("Operation not started: uid" + op.uid
                         + " pkg=" + op.packageName + " op=" + op.op);
             }
-            finishOperationLocked(op);
+            finishOperationLocked(op, /*finishNested*/ false);
             if (op.nesting <= 0) {
                 scheduleOpActiveChangedIfNeededLocked(code, uid, packageName, false);
             }
@@ -1387,9 +1408,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         return AppOpsManager.permissionToOpCode(permission);
     }
 
-    void finishOperationLocked(Op op) {
-        if (op.nesting <= 1) {
-            if (op.nesting == 1) {
+    void finishOperationLocked(Op op, boolean finishNested) {
+        if (op.nesting <= 1 || finishNested) {
+            if (op.nesting == 1 || finishNested) {
                 op.duration = (int)(System.currentTimeMillis() - op.time);
                 op.time += op.duration;
             } else {
