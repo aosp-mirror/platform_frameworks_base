@@ -19,6 +19,7 @@ package android.os;
 import android.Manifest;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.Application;
 import android.content.Context;
 import android.text.TextUtils;
@@ -287,6 +288,7 @@ public class Build {
          * we are operating under, we bump the assumed resource platform version by 1.
          * @hide
          */
+        @TestApi
         public static final int RESOURCES_SDK_INT = SDK_INT + ACTIVE_CODENAMES.length;
 
         /**

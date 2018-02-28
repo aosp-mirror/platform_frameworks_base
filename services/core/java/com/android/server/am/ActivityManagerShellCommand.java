@@ -51,6 +51,7 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
+import android.opengl.GLES10;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -82,16 +83,18 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import javax.microedition.khronos.egl.EGL10;
+import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
-import javax.microedition.khronos.opengles.GL;
-import javax.microedition.khronos.opengles.GL10;
+import javax.microedition.khronos.egl.EGLDisplay;
+import javax.microedition.khronos.egl.EGLSurface;
 
 import static android.app.ActivityManager.RESIZE_MODE_SYSTEM;
 import static android.app.ActivityManager.RESIZE_MODE_USER;
@@ -1858,6 +1861,137 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
     }
 
+    /**
+     * Adds all supported GL extensions for a provided EGLConfig to a set by creating an EGLContext
+     * and EGLSurface and querying extensions.
+     *
+     * @param egl An EGL API object
+     * @param display An EGLDisplay to create a context and surface with
+     * @param config The EGLConfig to get the extensions for
+     * @param surfaceSize eglCreatePbufferSurface generic parameters
+     * @param contextAttribs eglCreateContext generic parameters
+     * @param glExtensions A Set<String> to add GL extensions to
+     */
+    private static void addExtensionsForConfig(
+            EGL10 egl,
+            EGLDisplay display,
+            EGLConfig config,
+            int[] surfaceSize,
+            int[] contextAttribs,
+            Set<String> glExtensions) {
+        // Create a context.
+        EGLContext context =
+                egl.eglCreateContext(display, config, EGL10.EGL_NO_CONTEXT, contextAttribs);
+        // No-op if we can't create a context.
+        if (context == EGL10.EGL_NO_CONTEXT) {
+            return;
+        }
+
+        // Create a surface.
+        EGLSurface surface = egl.eglCreatePbufferSurface(display, config, surfaceSize);
+        if (surface == EGL10.EGL_NO_SURFACE) {
+            egl.eglDestroyContext(display, context);
+            return;
+        }
+
+        // Update the current surface and context.
+        egl.eglMakeCurrent(display, surface, surface, context);
+
+        // Get the list of extensions.
+        String extensionList = GLES10.glGetString(GLES10.GL_EXTENSIONS);
+        if (!TextUtils.isEmpty(extensionList)) {
+            // The list of extensions comes from the driver separated by spaces.
+            // Split them apart and add them into a Set for deduping purposes.
+            for (String extension : extensionList.split(" ")) {
+                glExtensions.add(extension);
+            }
+        }
+
+        // Tear down the context and surface for this config.
+        egl.eglMakeCurrent(display, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
+        egl.eglDestroySurface(display, surface);
+        egl.eglDestroyContext(display, context);
+    }
+
+
+    Set<String> getGlExtensionsFromDriver() {
+        Set<String> glExtensions = new HashSet<>();
+
+        // Get the EGL implementation.
+        EGL10 egl = (EGL10) EGLContext.getEGL();
+        if (egl == null) {
+            getErrPrintWriter().println("Warning: couldn't get EGL");
+            return glExtensions;
+        }
+
+        // Get the default display and initialize it.
+        EGLDisplay display = egl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY);
+        int[] version = new int[2];
+        egl.eglInitialize(display, version);
+
+        // Call getConfigs() in order to find out how many there are.
+        int[] numConfigs = new int[1];
+        if (!egl.eglGetConfigs(display, null, 0, numConfigs)) {
+            getErrPrintWriter().println("Warning: couldn't get EGL config count");
+            return glExtensions;
+        }
+
+        // Allocate space for all configs and ask again.
+        EGLConfig[] configs = new EGLConfig[numConfigs[0]];
+        if (!egl.eglGetConfigs(display, configs, numConfigs[0], numConfigs)) {
+            getErrPrintWriter().println("Warning: couldn't get EGL configs");
+            return glExtensions;
+        }
+
+        // Allocate surface size parameters outside of the main loop to cut down
+        // on GC thrashing.  1x1 is enough since we are only using it to get at
+        // the list of extensions.
+        int[] surfaceSize =
+                new int[] {
+                        EGL10.EGL_WIDTH, 1,
+                        EGL10.EGL_HEIGHT, 1,
+                        EGL10.EGL_NONE
+                };
+
+        // For when we need to create a GLES2.0 context.
+        final int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
+        int[] gles2 = new int[] {EGL_CONTEXT_CLIENT_VERSION, 2, EGL10.EGL_NONE};
+
+        // For getting return values from eglGetConfigAttrib
+        int[] attrib = new int[1];
+
+        for (int i = 0; i < numConfigs[0]; i++) {
+            // Get caveat for this config in order to skip slow (i.e. software) configs.
+            egl.eglGetConfigAttrib(display, configs[i], EGL10.EGL_CONFIG_CAVEAT, attrib);
+            if (attrib[0] == EGL10.EGL_SLOW_CONFIG) {
+                continue;
+            }
+
+            // If the config does not support pbuffers we cannot do an eglMakeCurrent
+            // on it in addExtensionsForConfig(), so skip it here. Attempting to make
+            // it current with a pbuffer will result in an EGL_BAD_MATCH error
+            egl.eglGetConfigAttrib(display, configs[i], EGL10.EGL_SURFACE_TYPE, attrib);
+            if ((attrib[0] & EGL10.EGL_PBUFFER_BIT) == 0) {
+                continue;
+            }
+
+            final int EGL_OPENGL_ES_BIT = 0x0001;
+            final int EGL_OPENGL_ES2_BIT = 0x0004;
+            egl.eglGetConfigAttrib(display, configs[i], EGL10.EGL_RENDERABLE_TYPE, attrib);
+            if ((attrib[0] & EGL_OPENGL_ES_BIT) != 0) {
+                addExtensionsForConfig(egl, display, configs[i], surfaceSize, null, glExtensions);
+            }
+            if ((attrib[0] & EGL_OPENGL_ES2_BIT) != 0) {
+                addExtensionsForConfig(egl, display, configs[i], surfaceSize, gles2, glExtensions);
+            }
+        }
+
+        // Release all EGL resources.
+        egl.eglTerminate(display);
+
+        return glExtensions;
+    }
+
     private void writeDeviceConfig(ProtoOutputStream protoOutputStream, long fieldId,
             PrintWriter pw, Configuration config, DisplayManager dm) {
         Point stableSize = dm.getStableDisplaySize();
@@ -1906,18 +2040,24 @@ final class ActivityManagerShellCommand extends ShellCommand {
             }
         }
 
-        /*
-        GL10 gl = ((GL10)((EGL10)EGLContext.getEGL()).eglGetCurrentContext().getGL());
-        protoOutputStream.write(DeviceConfigurationProto.OPENGL_VERSION,
-                gl.glGetString(GL10.GL_VERSION));
-        String glExtensions = gl.glGetString(GL10.GL_EXTENSIONS);
-        for (String ext : glExtensions.split(" ")) {
-            protoOutputStream.write(DeviceConfigurationProto.OPENGL_EXTENSIONS, ext);
+        Set<String> glExtensionsSet = getGlExtensionsFromDriver();
+        String[] glExtensions = new String[glExtensionsSet.size()];
+        glExtensions = glExtensionsSet.toArray(glExtensions);
+        Arrays.sort(glExtensions);
+        for (int i = 0; i < glExtensions.length; i++) {
+            if (protoOutputStream != null) {
+                protoOutputStream.write(DeviceConfigurationProto.OPENGL_EXTENSIONS,
+                        glExtensions[i]);
+            }
+            if (pw != null) {
+                pw.print("opengl-extensions: "); pw.println(glExtensions[i]);
+            }
+
         }
-        */
 
         PackageManager pm = mInternal.mContext.getPackageManager();
         List<SharedLibraryInfo> slibs = pm.getSharedLibraries(0);
+        Collections.sort(slibs, Comparator.comparing(SharedLibraryInfo::getName));
         for (int i = 0; i < slibs.size(); i++) {
             if (protoOutputStream != null) {
                 protoOutputStream.write(DeviceConfigurationProto.SHARED_LIBRARIES,
@@ -1929,6 +2069,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         FeatureInfo[] features = pm.getSystemAvailableFeatures();
+        Arrays.sort(features, (o1, o2) ->
+                (o1.name == o2.name ? 0 : (o1.name == null ? -1 : o1.name.compareTo(o2.name))));
         for (int i = 0; i < features.length; i++) {
             if (features[i].name != null) {
                 if (protoOutputStream != null) {

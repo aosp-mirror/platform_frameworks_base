@@ -71,6 +71,7 @@ import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.os.RoSystemProperties;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.FastPrintWriter;
+import com.android.internal.util.MemInfoReader;
 import com.android.server.LocalServices;
 
 import org.xmlpull.v1.XmlSerializer;
@@ -961,6 +962,17 @@ public class ActivityManager {
     static public boolean isHighEndGfx() {
         return !isLowRamDeviceStatic() &&
                 !Resources.getSystem().getBoolean(com.android.internal.R.bool.config_avoidGfxAccel);
+    }
+
+    /**
+     * Return the total number of bytes of RAM this device has.
+     * @hide
+     */
+    @TestApi
+    public long getTotalRam() {
+        MemInfoReader memreader = new MemInfoReader();
+        memreader.readMemInfo();
+        return memreader.getTotalSize();
     }
 
     /**

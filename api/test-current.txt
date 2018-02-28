@@ -12,6 +12,7 @@ package android.app {
   public class ActivityManager {
     method public void addOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener, int);
     method public int getPackageImportance(java.lang.String);
+    method public long getTotalRam();
     method public int getUidImportance(int);
     method public void removeOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener);
     method public void removeStacksInWindowingModes(int[]) throws java.lang.SecurityException;
@@ -351,6 +352,7 @@ package android.hardware.display {
 
   public final class DisplayManager {
     method public java.util.List<android.hardware.display.BrightnessChangeEvent> getBrightnessEvents();
+    method public android.graphics.Point getStableDisplaySize();
     method public void setBrightnessConfiguration(android.hardware.display.BrightnessConfiguration);
   }
 
@@ -445,6 +447,10 @@ package android.net {
 }
 
 package android.os {
+
+  public static class Build.VERSION {
+    field public static final int RESOURCES_SDK_INT;
+  }
 
   public class IncidentManager {
     method public void reportIncident(android.os.IncidentReportArgs);

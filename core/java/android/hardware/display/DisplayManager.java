@@ -615,6 +615,7 @@ public final class DisplayManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     public Point getStableDisplaySize() {
         return mGlobal.getStableDisplaySize();
     }
