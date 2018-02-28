@@ -3555,6 +3555,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                     + (this.mPendingInits.size() == 0 ? "not " : "") + "pending init");
             pw.println("Auto-restore is " + (mAutoRestore ? "enabled" : "disabled"));
             if (mBackupRunning) pw.println("Backup currently running");
+            pw.println(isBackupOperationInProgress() ? "Backup in progress" : "No backups running");
             pw.println("Last backup pass started: " + mLastBackupPass
                     + " (now = " + System.currentTimeMillis() + ')');
             pw.println("  next scheduled: " + KeyValueBackupJob.nextScheduled());
