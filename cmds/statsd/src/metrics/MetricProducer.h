@@ -233,7 +233,7 @@ protected:
             const LogEvent& event) = 0;
 
     // Consume the parsed stats log entry that already matched the "what" of the metric.
-    void onMatchedLogEventLocked(const size_t matcherIndex, const LogEvent& event);
+    virtual void onMatchedLogEventLocked(const size_t matcherIndex, const LogEvent& event);
 
     mutable std::mutex mMutex;
 };
