@@ -260,7 +260,7 @@ public class WindowStateTests extends WindowTestsBase {
 
         // Call prepareWindowToDisplayDuringRelayout for a windows that are not children of an
         // appWindowToken. Both windows have the FLAG_TURNS_SCREEN_ON so both should call wakeup
-        final WindowToken windowToken = new WindowTestUtils.TestWindowToken(FIRST_SUB_WINDOW,
+        final WindowToken windowToken = WindowTestUtils.createTestWindowToken(FIRST_SUB_WINDOW,
                 mDisplayContent);
         final WindowState firstWindow = createWindow(null, TYPE_APPLICATION, windowToken,
                 "firstWindow");
