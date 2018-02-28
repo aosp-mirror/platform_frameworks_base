@@ -817,6 +817,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mHeadsUpManager = new HeadsUpManagerPhone(context, mStatusBarWindow, mGroupManager, this,
                 mVisualStabilityManager);
+        Dependency.get(ConfigurationController.class).addCallback(mHeadsUpManager);
         mHeadsUpManager.addListener(this);
         mHeadsUpManager.addListener(mNotificationPanel);
         mHeadsUpManager.addListener(mGroupManager);
@@ -1073,7 +1074,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         // end old BaseStatusBar.onDensityOrFontScaleChanged().
         mScrimController.onDensityOrFontScaleChanged();
         // TODO: Remove this.
-        if (mStatusBarView != null) mStatusBarView.onDensityOrFontScaleChanged();
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.onDensityOrFontScaleChanged();
         }
@@ -3083,6 +3083,9 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         loadDimens();
 
+        if (mStatusBarView != null) {
+            mStatusBarView.updateResources();
+        }
         if (mNotificationPanel != null) {
             mNotificationPanel.updateResources();
         }
