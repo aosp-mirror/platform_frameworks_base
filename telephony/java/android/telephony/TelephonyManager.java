@@ -7183,18 +7183,16 @@ public class TelephonyManager {
      *
      * @return Carrier id of the current subscription. Return {@link #UNKNOWN_CARRIER_ID} if the
      * subscription is unavailable or the carrier cannot be identified.
-     * @throws IllegalStateException if telephony service is unavailable.
      */
     public int getAndroidCarrierIdForSubscription() {
         try {
             ITelephony service = getITelephony();
-            return service.getSubscriptionCarrierId(getSubId());
+            if (service != null) {
+                return service.getSubscriptionCarrierId(getSubId());
+            }
         } catch (RemoteException ex) {
             // This could happen if binder process crashes.
             ex.rethrowAsRuntimeException();
-        } catch (NullPointerException ex) {
-            // This could happen before phone restarts due to crashing.
-            throw new IllegalStateException("Telephony service unavailable");
         }
         return UNKNOWN_CARRIER_ID;
     }
@@ -7210,18 +7208,16 @@ public class TelephonyManager {
      *
      * @return Carrier name of the current subscription. Return {@code null} if the subscription is
      * unavailable or the carrier cannot be identified.
-     * @throws IllegalStateException if telephony service is unavailable.
      */
     public CharSequence getAndroidCarrierNameForSubscription() {
         try {
             ITelephony service = getITelephony();
-            return service.getSubscriptionCarrierName(getSubId());
+            if (service != null) {
+                return service.getSubscriptionCarrierName(getSubId());
+            }
         } catch (RemoteException ex) {
             // This could happen if binder process crashes.
             ex.rethrowAsRuntimeException();
-        } catch (NullPointerException ex) {
-            // This could happen before phone restarts due to crashing.
-            throw new IllegalStateException("Telephony service unavailable");
         }
         return null;
     }
