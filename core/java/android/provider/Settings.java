@@ -10516,8 +10516,11 @@ public final class Settings {
          * entity_list_default use ":" as delimiter for values. Ex:
          *
          * <pre>
-         * smart_selection_dark_launch              (boolean)
-         * smart_selection_enabled_for_edit_text    (boolean)
+         * model_dark_launch_enabled                (boolean)
+         * smart_selection_enabled                  (boolean)
+         * smart_text_share_enabled                 (boolean)
+         * smart_linkify_enabled                    (boolean)
+         * smart_select_animation_enabled           (boolean)
          * suggest_selection_max_range_length       (int)
          * classify_text_max_range_length           (int)
          * generate_links_max_text_length           (int)
@@ -10530,7 +10533,7 @@ public final class Settings {
          * <p>
          * Type: string
          * @hide
-         * see also android.view.textclassifier.TextClassifierConstants
+         * see also android.view.textclassifier.TextClassificationConstants
          */
         public static final String TEXT_CLASSIFIER_CONSTANTS = "text_classifier_constants";
 

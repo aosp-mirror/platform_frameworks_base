@@ -329,14 +329,6 @@ public interface TextClassifier {
     }
 
     /**
-     * Returns this TextClassifier's settings.
-     * @hide
-     */
-    default TextClassifierConstants getSettings() {
-        return TextClassifierConstants.DEFAULT;
-    }
-
-    /**
      * Configuration object for specifying what entities to identify.
      *
      * Configs are initially based on a predefined preset, and can be modified from there.

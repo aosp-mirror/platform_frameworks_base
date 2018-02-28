@@ -30,11 +30,15 @@ import java.util.StringJoiner;
  * This is encoded as a key=value list, separated by commas. Ex:
  *
  * <pre>
- * smart_selection_dark_launch              (boolean)
- * smart_selection_enabled_for_edit_text    (boolean)
+ * model_dark_launch_enabled                (boolean)
+ * smart_selection_enabled                  (boolean)
+ * smart_text_share_enabled                 (boolean)
+ * smart_linkify_enabled                    (boolean)
+ * smart_select_animation_enabled           (boolean)
  * suggest_selection_max_range_length       (int)
  * classify_text_max_range_length           (int)
  * generate_links_max_text_length           (int)
+ * generate_links_log_sample_rate           (int)
  * entity_list_default                      (String[])
  * entity_list_not_editable                 (String[])
  * entity_list_editable                     (String[])
@@ -46,20 +50,24 @@ import java.util.StringJoiner;
  *
  * Example of setting the values for testing.
  * adb shell settings put global text_classifier_constants \
- *      smart_selection_dark_launch=true,smart_selection_enabled_for_edit_text=true,\
+ *      model_dark_launch_enabled=true,smart_selection_enabled=true,\
  *      entity_list_default=phone:address
  * @hide
  */
-public final class TextClassifierConstants {
+public final class TextClassificationConstants {
 
-    private static final String LOG_TAG = "TextClassifierConstants";
+    private static final String LOG_TAG = "TextClassificationConstants";
 
-    private static final String SMART_SELECTION_DARK_LAUNCH =
-            "smart_selection_dark_launch";
-    private static final String SMART_SELECTION_ENABLED_FOR_EDIT_TEXT =
-            "smart_selection_enabled_for_edit_text";
+    private static final String MODEL_DARK_LAUNCH_ENABLED =
+            "model_dark_launch_enabled";
+    private static final String SMART_SELECTION_ENABLED =
+            "smart_selection_enabled";
+    private static final String SMART_TEXT_SHARE_ENABLED =
+            "smart_text_share_enabled";
     private static final String SMART_LINKIFY_ENABLED =
             "smart_linkify_enabled";
+    private static final String SMART_SELECT_ANIMATION_ENABLED =
+            "smart_select_animation_enabled";
     private static final String SUGGEST_SELECTION_MAX_RANGE_LENGTH =
             "suggest_selection_max_range_length";
     private static final String CLASSIFY_TEXT_MAX_RANGE_LENGTH =
@@ -75,9 +83,11 @@ public final class TextClassifierConstants {
     private static final String ENTITY_LIST_EDITABLE =
             "entity_list_editable";
 
-    private static final boolean SMART_SELECTION_DARK_LAUNCH_DEFAULT = false;
-    private static final boolean SMART_SELECTION_ENABLED_FOR_EDIT_TEXT_DEFAULT = true;
+    private static final boolean MODEL_DARK_LAUNCH_ENABLED_DEFAULT = false;
+    private static final boolean SMART_SELECTION_ENABLED_DEFAULT = true;
+    private static final boolean SMART_TEXT_SHARE_ENABLED_DEFAULT = true;
     private static final boolean SMART_LINKIFY_ENABLED_DEFAULT = true;
+    private static final boolean SMART_SELECT_ANIMATION_ENABLED_DEFAULT = true;
     private static final int SUGGEST_SELECTION_MAX_RANGE_LENGTH_DEFAULT = 10 * 1000;
     private static final int CLASSIFY_TEXT_MAX_RANGE_LENGTH_DEFAULT = 10 * 1000;
     private static final int GENERATE_LINKS_MAX_TEXT_LENGTH_DEFAULT = 100 * 1000;
@@ -92,12 +102,11 @@ public final class TextClassifierConstants {
             .add(TextClassifier.TYPE_DATE_TIME)
             .add(TextClassifier.TYPE_FLIGHT_NUMBER).toString();
 
-    /** Default settings. */
-    static final TextClassifierConstants DEFAULT = new TextClassifierConstants();
-
-    private final boolean mDarkLaunch;
-    private final boolean mSuggestSelectionEnabledForEditableText;
+    private final boolean mModelDarkLaunchEnabled;
+    private final boolean mSmartSelectionEnabled;
+    private final boolean mSmartTextShareEnabled;
     private final boolean mSmartLinkifyEnabled;
+    private final boolean mSmartSelectionAnimationEnabled;
     private final int mSuggestSelectionMaxRangeLength;
     private final int mClassifyTextMaxRangeLength;
     private final int mGenerateLinksMaxTextLength;
@@ -106,20 +115,7 @@ public final class TextClassifierConstants {
     private final List<String> mEntityListNotEditable;
     private final List<String> mEntityListEditable;
 
-    private TextClassifierConstants() {
-        mDarkLaunch = SMART_SELECTION_DARK_LAUNCH_DEFAULT;
-        mSuggestSelectionEnabledForEditableText = SMART_SELECTION_ENABLED_FOR_EDIT_TEXT_DEFAULT;
-        mSmartLinkifyEnabled = SMART_LINKIFY_ENABLED_DEFAULT;
-        mSuggestSelectionMaxRangeLength = SUGGEST_SELECTION_MAX_RANGE_LENGTH_DEFAULT;
-        mClassifyTextMaxRangeLength = CLASSIFY_TEXT_MAX_RANGE_LENGTH_DEFAULT;
-        mGenerateLinksMaxTextLength = GENERATE_LINKS_MAX_TEXT_LENGTH_DEFAULT;
-        mGenerateLinksLogSampleRate = GENERATE_LINKS_LOG_SAMPLE_RATE_DEFAULT;
-        mEntityListDefault = parseEntityList(ENTITY_LIST_DEFAULT_VALUE);
-        mEntityListNotEditable = mEntityListDefault;
-        mEntityListEditable = mEntityListDefault;
-    }
-
-    private TextClassifierConstants(@Nullable String settings) {
+    private TextClassificationConstants(@Nullable String settings) {
         final KeyValueListParser parser = new KeyValueListParser(',');
         try {
             parser.setString(settings);
@@ -127,15 +123,21 @@ public final class TextClassifierConstants {
             // Failed to parse the settings string, log this and move on with defaults.
             Slog.e(LOG_TAG, "Bad TextClassifier settings: " + settings);
         }
-        mDarkLaunch = parser.getBoolean(
-                SMART_SELECTION_DARK_LAUNCH,
-                SMART_SELECTION_DARK_LAUNCH_DEFAULT);
-        mSuggestSelectionEnabledForEditableText = parser.getBoolean(
-                SMART_SELECTION_ENABLED_FOR_EDIT_TEXT,
-                SMART_SELECTION_ENABLED_FOR_EDIT_TEXT_DEFAULT);
+        mModelDarkLaunchEnabled = parser.getBoolean(
+                MODEL_DARK_LAUNCH_ENABLED,
+                MODEL_DARK_LAUNCH_ENABLED_DEFAULT);
+        mSmartSelectionEnabled = parser.getBoolean(
+                SMART_SELECTION_ENABLED,
+                SMART_SELECTION_ENABLED_DEFAULT);
+        mSmartTextShareEnabled = parser.getBoolean(
+            SMART_TEXT_SHARE_ENABLED,
+            SMART_TEXT_SHARE_ENABLED_DEFAULT);
         mSmartLinkifyEnabled = parser.getBoolean(
                 SMART_LINKIFY_ENABLED,
                 SMART_LINKIFY_ENABLED_DEFAULT);
+        mSmartSelectionAnimationEnabled = parser.getBoolean(
+                SMART_SELECT_ANIMATION_ENABLED,
+                SMART_SELECT_ANIMATION_ENABLED_DEFAULT);
         mSuggestSelectionMaxRangeLength = parser.getInt(
                 SUGGEST_SELECTION_MAX_RANGE_LENGTH,
                 SUGGEST_SELECTION_MAX_RANGE_LENGTH_DEFAULT);
@@ -160,20 +162,28 @@ public final class TextClassifierConstants {
     }
 
     /** Load from a settings string. */
-    public static TextClassifierConstants loadFromString(String settings) {
-        return new TextClassifierConstants(settings);
+    public static TextClassificationConstants loadFromString(String settings) {
+        return new TextClassificationConstants(settings);
     }
 
-    public boolean isDarkLaunch() {
-        return mDarkLaunch;
+    public boolean isModelDarkLaunchEnabled() {
+        return mModelDarkLaunchEnabled;
     }
 
-    public boolean isSuggestSelectionEnabledForEditableText() {
-        return mSuggestSelectionEnabledForEditableText;
+    public boolean isSmartSelectionEnabled() {
+        return mSmartSelectionEnabled;
+    }
+
+    public boolean isSmartTextShareEnabled() {
+        return mSmartTextShareEnabled;
     }
 
     public boolean isSmartLinkifyEnabled() {
         return mSmartLinkifyEnabled;
+    }
+
+    public boolean isSmartSelectionAnimationEnabled() {
+        return mSmartSelectionAnimationEnabled;
     }
 
     public int getSuggestSelectionMaxRangeLength() {
