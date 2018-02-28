@@ -22,7 +22,6 @@
 #include "android-base/stringprintf.h"
 #include "config/ConfigKey.h"
 #include "config/ConfigManager.h"
-#include "guardrail/MemoryLeakTrackUtil.h"
 #include "guardrail/StatsdStats.h"
 #include "storage/StorageManager.h"
 #include "subscriber/SubscriberReporter.h"
@@ -638,9 +637,7 @@ status_t StatsService::cmd_remove_all_configs(FILE* out) {
 }
 
 status_t StatsService::cmd_dump_memory_info(FILE* out) {
-    std::string s = dumpMemInfo(100);
-    fprintf(out, "Memory Info\n");
-    fprintf(out, "%s", s.c_str());
+    fprintf(out, "meminfo not available.\n");
     return NO_ERROR;
 }
 

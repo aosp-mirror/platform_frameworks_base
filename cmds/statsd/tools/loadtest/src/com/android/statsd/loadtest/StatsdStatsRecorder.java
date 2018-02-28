@@ -16,7 +16,7 @@
 package com.android.statsd.loadtest;
 
 import android.content.Context;
-import com.android.os.StatsLogCommon.StatsdStatsReport;
+import com.android.os.StatsLog.StatsdStatsReport;
 import com.android.internal.os.StatsdConfigProto.TimeUnit;
 
 public class StatsdStatsRecorder extends PerfDataRecorder {
