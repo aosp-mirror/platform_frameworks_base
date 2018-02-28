@@ -1103,10 +1103,15 @@ public final class Telephony {
                 "android.provider.Telephony.MMS_DOWNLOADED";
 
             /**
-             * Broadcast Action: A debug code has been entered in the dialer. These "secret codes"
-             * are used to activate developer menus by dialing certain codes. And they are of the
-             * form {@code *#*#&lt;code&gt;#*#*}. The intent will have the data URI:
-             * {@code android_secret_code://&lt;code&gt;}.
+             * Broadcast Action: A debug code has been entered in the dialer. This intent is
+             * broadcast by the system and OEM telephony apps may need to receive these broadcasts.
+             * These "secret codes" are used to activate developer menus by dialing certain codes.
+             * And they are of the form {@code *#*#&lt;code&gt;#*#*}. The intent will have the data
+             * URI: {@code android_secret_code://&lt;code&gt;}. It is possible that a manifest
+             * receiver would be woken up even if it is not currently running.
+             *
+             * <p>Requires {@code android.Manifest.permission#CONTROL_INCALL_EXPERIENCE} to
+             * send and receive.</p>
              */
             @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
             public static final String SECRET_CODE_ACTION =
