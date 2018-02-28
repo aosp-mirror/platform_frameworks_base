@@ -18,7 +18,8 @@ package android.util;
 
 /**
  * StatsLog provides an API for developers to send events to statsd. The events can be used to
- * define custom metrics inside statsd.
+ * define custom metrics inside statsd. We will rate-limit how often the calls can be made inside
+ * statsd.
  */
 public final class StatsLog extends StatsLogInternal {
     private static final String TAG = "StatsManager";
