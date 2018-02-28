@@ -154,7 +154,7 @@ public:
     void editRawFixed32(size_t pos, uint32_t val);
 
     /**
-     * Copy _size_ bytes of data starting at __srcPos__ to wp.
+     * Copy _size_ bytes of data starting at __srcPos__ to wp, srcPos must be larger than wp.pos().
      */
     void copy(size_t srcPos, size_t size);
 

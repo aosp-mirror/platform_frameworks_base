@@ -26,7 +26,7 @@ using namespace android::util;
 using namespace std;
 
 /**
- * Reads a file into a buffer, and then writes that data to an FdSet.
+ * Reads data from fd into a buffer, fd must be closed explicitly.
  */
 class FdBuffer {
 public:
@@ -82,6 +82,11 @@ public:
      * Reader API for data stored in FdBuffer
      */
     EncodedBuffer::iterator data() const;
+
+    /**
+     * Return the internal buffer, don't call unless you are familiar with EncodedBuffer.
+     */
+    EncodedBuffer* getInternalBuffer() { return &mBuffer; }
 
 private:
     EncodedBuffer mBuffer;

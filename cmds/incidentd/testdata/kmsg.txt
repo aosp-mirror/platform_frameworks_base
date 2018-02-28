@@ -1,0 +1,47 @@
+[0] bldr_log_init: bldr_log_base=0x83600000, bldr_log_size=458752
+B -    626409 - [INFO][XBL]: Bypass appsbl verification on DEVELOPMENT device
+B -    729255 - [INFO][XBL]: Bypass appsbl verification on DEVELOPMENT device
+B -    729285 - boot_elf_load_and_verify_image: boot_auth_compute_verify_hash for 9:0
+D -    104829 - APPSBL Image Loaded, Delta - (2498816 Bytes)
+B -    729468 - SBL1, End
+D -    643611 - SBL1, Delta
+S - Flash Throughput, 129000 KB/s  (4729638 Bytes,  36613 us)
+S - DDR Frequency, 1017 MHz
+0x400, 0x400
+B -    482296 - Basic DDR tests done
+B -    544638 - clock_init, Start
+D -       244 - clock_init, Delta
+B -    544913 - HTC RPM DATARAM UPDATE info: Done
+B -    545004 - Image Load, Start
+B -    548359 - boot_elf_load_and_verify_image: boot_auth_compute_verify_hash for 5:0
+D -      3386 - QSEE Dev Config Image Loaded, Delta - (46232 Bytes)
+B -    548725 - Image Load, Start
+B -    550860 - boot_elf_load_and_verify_image: boot_auth_compute_verify_hash for 512:0
+D -      2166 - APDP Image Loaded, Delta - (7696 Bytes)
+B -    550891 - Image Load, Start
+B -    601612 - boot_elf_load_and_verify_image: boot_auth_compute_verify_hash for 7:0
+D -     50782 - QSEE Image Loaded, Delta - (1648640 Bytes)
+B -    601704 - Image Load, Start
+D -       244 - SEC Image Loaded, Delta - (4096 Bytes)
+B -    602344 - 0x1310 = 0x24
+B -    602375 - is_above_vbat_weak = 1, pon_reasons (with usb_in checked) = 0x31
+B -    602466 - sbl1_efs_handle_cookies, Start
+D -        91 - sbl1_efs_handle_cookies, Delta
+B -    602558 - Image Load, Start
+B -    613446 - boot_elf_load_and_verify_image: boot_auth_compute_verify_hash for 21:0
+D -     11010 - QHEE Image Loaded, Delta - (258280 Bytes)
+B -    613568 - Image Load, Start
+B -    624274 - boot_elf_load_and_verify_image: boot_auth_compute_verify_hash for 10:0
+D -     10736 - RPM Image Loaded, Delta - (224104 Bytes)
+B -    624335 - Image Load, Start
+D -         0 - STI Image Loaded, Delta - (0 Bytes)
+B -    624548 - Image Load, Start
+m_driver_init, Delta
+B -    471804 - pm_sbl_chg
+ ******************** [ START SECOND] ******************** 
+^@B -    736605 - [INFO][XBL]: Bypass appsbl verification on DEVELOPMENT device
+B -    839451 - [INFO][XBL]: Bypass appsbl verification on DEVELOPMENT device
+B -    839482 - boot_elf_load_and_verify_image: boot_auth_compute_verify_hash for 9:0
+D -    104828 - APPSBL Image Loaded, Delta - (2498816 Bytes)
+B -    839665 - SBL1, End
+D -    753838 - SBL1, Delta
