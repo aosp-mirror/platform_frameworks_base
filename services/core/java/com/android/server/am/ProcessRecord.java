@@ -129,12 +129,6 @@ final class ProcessRecord {
                                 // When true the process will oom adj score will be set to
                                 // ProcessList#PERCEPTIBLE_APP_ADJ at minimum to reduce the chance
                                 // of the process getting killed.
-    boolean runningRemoteAnimation; // Is the process currently running a RemoteAnimation? When true
-                                // the process will be set to use the
-                                // ProcessList#SCHED_GROUP_TOP_APP scheduling group to boost
-                                // performance, as well as oom adj score will be set to
-                                // ProcessList#VISIBLE_APP_ADJ at minimum to reduce the chance
-                                // of the process getting killed.
     boolean pendingUiClean;     // Want to clean up resources from showing UI?
     boolean hasAboveClient;     // Bound using BIND_ABOVE_CLIENT, so want to be lower
     boolean treatLikeActivity;  // Bound using BIND_TREAT_LIKE_ACTIVITY
@@ -342,10 +336,9 @@ final class ProcessRecord {
                     pw.print(" hasAboveClient="); pw.print(hasAboveClient);
                     pw.print(" treatLikeActivity="); pw.println(treatLikeActivity);
         }
-        if (hasTopUi || hasOverlayUi || runningRemoteAnimation) {
+        if (hasTopUi || hasOverlayUi) {
             pw.print(prefix); pw.print("hasTopUi="); pw.print(hasTopUi);
-                    pw.print(" hasOverlayUi="); pw.print(hasOverlayUi);
-                    pw.print(" runningRemoteAnimation="); pw.println(runningRemoteAnimation);
+                    pw.print(" hasOverlayUi="); pw.println(hasOverlayUi);
         }
         if (foregroundServices || forcingToImportant != null) {
             pw.print(prefix); pw.print("foregroundServices="); pw.print(foregroundServices);
