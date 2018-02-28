@@ -3351,23 +3351,23 @@ public final class Telephony {
      * Contains carrier identification information for the current subscriptions.
      * @see SubscriptionManager#getActiveSubscriptionIdList()
      */
-    public static final class CarrierIdentification implements BaseColumns {
+    public static final class CarrierId implements BaseColumns {
         /**
          * Not instantiable.
          * @hide
          */
-        private CarrierIdentification() {}
+        private CarrierId() {}
 
         /**
          * The {@code content://} style URI for this provider.
          */
-        public static final Uri CONTENT_URI = Uri.parse("content://carrier_identification");
+        public static final Uri CONTENT_URI = Uri.parse("content://carrier_id");
 
         /**
-         * The authority string for the CarrierIdentification Provider
+         * The authority string for the CarrierId Provider
          * @hide
          */
-        public static final String AUTHORITY = "carrier_identification";
+        public static final String AUTHORITY = "carrier_id";
 
 
         /**
@@ -3394,14 +3394,14 @@ public final class Telephony {
          * @see TelephonyManager#getAndroidCarrierNameForSubscription()
          * <P>Type: TEXT </P>
          */
-        public static final String NAME = "carrier_name";
+        public static final String CARRIER_NAME = "carrier_name";
 
         /**
          * A unique carrier id
          * @see TelephonyManager#getAndroidCarrierIdForSubscription()
          * <P>Type: INTEGER </P>
          */
-        public static final String CID = "carrier_id";
+        public static final String CARRIER_ID = "carrier_id";
 
         /**
          * Contains mappings between matching rules with carrier id for all carriers.
@@ -3459,7 +3459,7 @@ public final class Telephony {
             /**
              * The {@code content://} URI for this table.
              */
-            public static final Uri CONTENT_URI = Uri.parse("content://carrier_identification/all");
+            public static final Uri CONTENT_URI = Uri.parse("content://carrier_id/all");
         }
     }
 }
