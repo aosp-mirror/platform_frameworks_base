@@ -176,7 +176,6 @@ public class RecoveryController {
 
     /**
      * @deprecated Use {@link #getKeyChainSnapshot()}
-     * @removed
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
@@ -254,7 +253,6 @@ public class RecoveryController {
 
     /**
      * @deprecated Use {@link #getAliases()}.
-     * @removed
      */
     @Deprecated
     public List<String> getAliases(@Nullable String packageName)
@@ -278,7 +276,6 @@ public class RecoveryController {
 
     /**
      * @deprecated Use {@link #setRecoveryStatus(String, int)}
-     * @removed
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
@@ -313,7 +310,6 @@ public class RecoveryController {
 
     /**
      * @deprecated Use {@link #getRecoveryStatus(String)}.
-     * @removed
      */
     @Deprecated
     public int getRecoveryStatus(String packageName, String alias)
@@ -463,7 +459,6 @@ public class RecoveryController {
 
     /**
      * @deprecated Use {@link #generateKey(String)}.
-     * @removed
      */
     @Deprecated
     public Key generateKey(@NonNull String alias, byte[] account)

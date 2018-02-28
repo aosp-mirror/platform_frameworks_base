@@ -93,7 +93,6 @@ public class RecoverySession implements AutoCloseable {
      * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
      *     service.
      * @deprecated Use {@link #start(CertPath, byte[], byte[], List)} instead.
-     * @removed
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
