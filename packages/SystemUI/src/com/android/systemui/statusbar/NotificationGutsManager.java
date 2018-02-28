@@ -15,9 +15,13 @@
  */
 package com.android.systemui.statusbar;
 
+import static android.app.AppOpsManager.OP_CAMERA;
+import static android.app.AppOpsManager.OP_RECORD_AUDIO;
+import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.service.notification.NotificationListenerService.Ranking
         .USER_SENTIMENT_NEGATIVE;
 
+import android.app.AppOpsManager;
 import android.app.INotificationManager;
 import android.app.NotificationChannel;
 import android.content.Context;
@@ -147,6 +151,23 @@ public class NotificationGutsManager implements Dumpable {
         mPresenter.startNotificationGutsIntent(intent, appUid, row);
     }
 
+    protected void startAppOpsSettingsActivity(String pkg, int uid, ArraySet<Integer> ops,
+            ExpandableNotificationRow row) {
+        if (ops.contains(OP_SYSTEM_ALERT_WINDOW)) {
+            if (ops.contains(OP_CAMERA) || ops.contains(OP_RECORD_AUDIO)) {
+                startAppNotificationSettingsActivity(pkg, uid, null, row);
+            } else {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+                intent.setData(Uri.fromParts("package", pkg, null));
+                mPresenter.startNotificationGutsIntent(intent, uid, row);
+            }
+        } else if (ops.contains(OP_CAMERA) || ops.contains(OP_RECORD_AUDIO)) {
+            Intent intent = new Intent(Intent.ACTION_MANAGE_APP_PERMISSIONS);
+            intent.putExtra(Intent.EXTRA_PACKAGE_NAME, pkg);
+            mPresenter.startNotificationGutsIntent(intent, uid, row);
+        }
+    }
+
     public void bindGuts(final ExpandableNotificationRow row) {
         bindGuts(row, mGutsMenuItem);
     }
@@ -183,6 +204,22 @@ public class NotificationGutsManager implements Dumpable {
             guts.setHeightChangedListener((NotificationGuts g) -> {
                 mListContainer.onHeightChanged(row, row.isShown() /* needsAnimation */);
             });
+        }
+
+        if (gutsView instanceof AppOpsInfo) {
+            AppOpsInfo info = (AppOpsInfo) gutsView;
+            final UserHandle userHandle = sbn.getUser();
+            PackageManager pmUser = StatusBar.getPackageManagerForUser(mContext,
+                    userHandle.getIdentifier());
+            final AppOpsInfo.OnSettingsClickListener onSettingsClick = (View v,
+                    String pkg, int uid, ArraySet<Integer> ops) -> {
+                mMetricsLogger.action(MetricsProto.MetricsEvent.ACTION_OPS_GUTS_SETTINGS);
+                guts.resetFalsingCheck();
+                startAppOpsSettingsActivity(pkg, uid, ops, row);
+            };
+            if (!row.getEntry().mActiveAppOps.isEmpty()) {
+                info.bindGuts(pmUser, onSettingsClick, sbn, row.getEntry().mActiveAppOps);
+            }
         }
 
         if (gutsView instanceof NotificationInfo) {

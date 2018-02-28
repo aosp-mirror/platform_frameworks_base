@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -153,14 +154,15 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShowAppOpsIcons_noHeader() {
+    public void testShowAppOps_noHeader() {
         // public notification is custom layout - no header
         mGroup.setSensitive(true, true);
-        mGroup.showAppOpsIcons(new ArraySet<>());
+        mGroup.setAppOpsOnClickListener(null);
+        mGroup.showAppOpsIcons(null);
     }
 
     @Test
-    public void testShowAppOpsIcons_header() throws Exception {
+    public void testShowAppOpsIcons_header() {
         NotificationHeaderView mockHeader = mock(NotificationHeaderView.class);
 
         NotificationContentView publicLayout = mock(NotificationContentView.class);
@@ -180,5 +182,17 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         verify(privateLayout, times(1)).showAppOpsIcons(ops);
         verify(publicLayout, times(1)).showAppOpsIcons(ops);
 
+    }
+
+    @Test
+    public void testAppOpsOnClick() {
+        ExpandableNotificationRow.OnAppOpsClickListener l = mock(
+                ExpandableNotificationRow.OnAppOpsClickListener.class);
+        View view = mock(View.class);
+
+        mGroup.setAppOpsOnClickListener(l);
+
+        mGroup.getAppOpsOnClickListener().onClick(view);
+        verify(l, times(1)).onClick(any(), anyInt(), anyInt(), any());
     }
 }
