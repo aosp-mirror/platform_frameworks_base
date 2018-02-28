@@ -41,78 +41,143 @@ import java.util.Set;
 public final class MediaMetadata2 {
     /**
      * The title of the media.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_TITLE = "android.media.metadata.TITLE";
 
     /**
      * The artist of the media.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_ARTIST = "android.media.metadata.ARTIST";
 
     /**
      * The duration of the media in ms. A negative duration indicates that the
      * duration is unknown (or infinite).
+     *
+     * @see Builder#putLong(String, long)
+     * @see #getLong(String)
      */
     public static final String METADATA_KEY_DURATION = "android.media.metadata.DURATION";
 
     /**
      * The album title for the media.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_ALBUM = "android.media.metadata.ALBUM";
 
     /**
      * The author of the media.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_AUTHOR = "android.media.metadata.AUTHOR";
 
     /**
      * The writer of the media.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_WRITER = "android.media.metadata.WRITER";
 
     /**
      * The composer of the media.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_COMPOSER = "android.media.metadata.COMPOSER";
 
     /**
      * The compilation status of the media.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_COMPILATION = "android.media.metadata.COMPILATION";
 
     /**
      * The date the media was created or published. The format is unspecified
      * but RFC 3339 is recommended.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_DATE = "android.media.metadata.DATE";
 
     /**
      * The year the media was created or published as a long.
+     *
+     * @see Builder#putLong(String, long)
+     * @see #getLong(String)
      */
     public static final String METADATA_KEY_YEAR = "android.media.metadata.YEAR";
 
     /**
      * The genre of the media.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_GENRE = "android.media.metadata.GENRE";
 
     /**
      * The track number for the media.
+     *
+     * @see Builder#putLong(String, long)
+     * @see #getLong(String)
      */
     public static final String METADATA_KEY_TRACK_NUMBER = "android.media.metadata.TRACK_NUMBER";
 
     /**
      * The number of tracks in the media's original source.
+     *
+     * @see Builder#putLong(String, long)
+     * @see #getLong(String)
      */
     public static final String METADATA_KEY_NUM_TRACKS = "android.media.metadata.NUM_TRACKS";
 
     /**
      * The disc number for the media's original source.
+     *
+     * @see Builder#putLong(String, long)
+     * @see #getLong(String)
      */
     public static final String METADATA_KEY_DISC_NUMBER = "android.media.metadata.DISC_NUMBER";
 
     /**
      * The artist for the album of the media's original source.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_ALBUM_ARTIST = "android.media.metadata.ALBUM_ARTIST";
 
@@ -122,11 +187,19 @@ public final class MediaMetadata2 {
      * The artwork should be relatively small and may be scaled down
      * if it is too large. For higher resolution artwork
      * {@link #METADATA_KEY_ART_URI} should be used instead.
+     *
+     * @see Builder#putBitmap(String, Bitmap)
+     * @see #getBitmap(String)
      */
     public static final String METADATA_KEY_ART = "android.media.metadata.ART";
 
     /**
      * The artwork for the media as a Uri style String.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_ART_URI = "android.media.metadata.ART_URI";
 
@@ -136,26 +209,36 @@ public final class MediaMetadata2 {
      * The artwork should be relatively small and may be scaled down
      * if it is too large. For higher resolution artwork
      * {@link #METADATA_KEY_ALBUM_ART_URI} should be used instead.
+     *
+     * @see Builder#putBitmap(String, Bitmap)
+     * @see #getBitmap(String)
      */
     public static final String METADATA_KEY_ALBUM_ART = "android.media.metadata.ALBUM_ART";
 
     /**
      * The artwork for the album of the media's original source as a Uri style
      * String.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_ALBUM_ART_URI = "android.media.metadata.ALBUM_ART_URI";
 
     /**
      * The user's rating for the media.
      *
-     * @see Rating
+     * @see Builder#putRating(String, Rating2)
+     * @see #getRating(String)
      */
     public static final String METADATA_KEY_USER_RATING = "android.media.metadata.USER_RATING";
 
     /**
      * The overall rating for the media.
      *
-     * @see Rating
+     * @see Builder#putRating(String, Rating2)
+     * @see #getRating(String)
      */
     public static final String METADATA_KEY_RATING = "android.media.metadata.RATING";
 
@@ -164,6 +247,11 @@ public final class MediaMetadata2 {
      * the same as {@link #METADATA_KEY_TITLE} but may differ for some formats.
      * When displaying media described by this metadata this should be preferred
      * if present.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_DISPLAY_TITLE = "android.media.metadata.DISPLAY_TITLE";
 
@@ -171,6 +259,11 @@ public final class MediaMetadata2 {
      * A subtitle that is suitable for display to the user. When displaying a
      * second line for media described by this metadata this should be preferred
      * to other fields if present.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_DISPLAY_SUBTITLE
             = "android.media.metadata.DISPLAY_SUBTITLE";
@@ -179,6 +272,11 @@ public final class MediaMetadata2 {
      * A description that is suitable for display to the user. When displaying
      * more information for media described by this metadata this should be
      * preferred to other fields if present.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_DISPLAY_DESCRIPTION
             = "android.media.metadata.DISPLAY_DESCRIPTION";
@@ -191,6 +289,9 @@ public final class MediaMetadata2 {
      * The icon should be relatively small and may be scaled down
      * if it is too large. For higher resolution artwork
      * {@link #METADATA_KEY_DISPLAY_ICON_URI} should be used instead.
+     *
+     * @see Builder#putBitmap(String, Bitmap)
+     * @see #getBitmap(String)
      */
     public static final String METADATA_KEY_DISPLAY_ICON
             = "android.media.metadata.DISPLAY_ICON";
@@ -200,6 +301,11 @@ public final class MediaMetadata2 {
      * displaying more information for media described by this metadata the
      * display description should be preferred to other fields when present.
      * This must be a Uri style String.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_DISPLAY_ICON_URI
             = "android.media.metadata.DISPLAY_ICON_URI";
@@ -211,6 +317,11 @@ public final class MediaMetadata2 {
      * {@link MediaController2#playFromMediaId(String, Bundle)}
      * to initiate playback when provided by a {@link MediaBrowser2} connected to
      * the same app.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_MEDIA_ID = "android.media.metadata.MEDIA_ID";
 
@@ -220,17 +331,30 @@ public final class MediaMetadata2 {
      * {@link MediaController2#playFromUri(Uri, Bundle)}
      * to initiate playback when provided by a {@link MediaBrowser2} connected to
      * the same app.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_MEDIA_URI = "android.media.metadata.MEDIA_URI";
 
     /**
      * The radio frequency in Float format if this metdata representing radio content.
+     *
+     * @see Builder#putFloat(String, float)
+     * @see #getFloat(String)
      */
     public static final String METADATA_KEY_RADIO_FREQUENCY =
             "android.media.metadata.RADIO_FREQUENCY";
 
     /**
      * The radio callsign in String format if this metdata representing radio content.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_RADIO_CALLSIGN =
             "android.media.metadata.RADIO_CALLSIGN";
@@ -247,6 +371,9 @@ public final class MediaMetadata2 {
      * <li>{@link #BT_FOLDER_TYPE_PLAYLISTS}</li>
      * <li>{@link #BT_FOLDER_TYPE_YEARS}</li>
      * </ul>
+     *
+     * @see Builder#putLong(String, long)
+     * @see #getLong(String)
      */
     public static final String METADATA_KEY_BT_FOLDER_TYPE
             = "android.media.metadata.BT_FOLDER_TYPE";
@@ -297,6 +424,9 @@ public final class MediaMetadata2 {
      * Whether the media is an advertisement. A value of 0 indicates it is not an advertisement. A
      * value of 1 or non-zero indicates it is an advertisement. If not specified, this value is set
      * to 0 by default.
+     *
+     * @see Builder#putLong(String, long)
+     * @see #getLong(String)
      */
     public static final String METADATA_KEY_ADVERTISEMENT = "android.media.metadata.ADVERTISEMENT";
 
@@ -309,6 +439,9 @@ public final class MediaMetadata2 {
      * <li>{@link #STATUS_DOWNLOADING}</li>
      * <li>{@link #STATUS_DOWNLOADED}</li>
      * </ul>
+     *
+     * @see Builder#putLong(String, long)
+     * @see #getLong(String)
      */
     public static final String METADATA_KEY_DOWNLOAD_STATUS =
             "android.media.metadata.DOWNLOAD_STATUS";
