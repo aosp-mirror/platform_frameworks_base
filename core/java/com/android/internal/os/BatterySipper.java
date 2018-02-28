@@ -113,19 +113,20 @@ public class BatterySipper implements Comparable<BatterySipper> {
     public double bluetoothPowerMah;
 
     public enum DrainType {
-        IDLE,
-        CELL,
-        PHONE,
-        WIFI,
-        BLUETOOTH,
-        FLASHLIGHT,
-        SCREEN,
+        AMBIENT_DISPLAY,
         APP,
-        USER,
-        UNACCOUNTED,
-        OVERCOUNTED,
+        BLUETOOTH,
         CAMERA,
-        MEMORY
+        CELL,
+        FLASHLIGHT,
+        IDLE,
+        MEMORY,
+        OVERCOUNTED,
+        PHONE,
+        SCREEN,
+        UNACCOUNTED,
+        USER,
+        WIFI,
     }
 
     public BatterySipper(DrainType drainType, Uid uid, double value) {
