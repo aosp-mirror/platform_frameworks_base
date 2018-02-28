@@ -2953,6 +2953,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *       1                           PFLAG3_NO_REVEAL_ON_FOCUS
      *      1                            PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT
      *     1                             PFLAG3_SCREEN_READER_FOCUSABLE
+     *    1                              PFLAG3_AGGREGATED_VISIBLE
+     *   1                               PFLAG3_AUTOFILLID_EXPLICITLY_SET
+     *  1                                available
      * |-------|-------|-------|-------|
      */
 
@@ -3242,6 +3245,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * The last aggregated visibility. Used to detect when it truly changes.
      */
     private static final int PFLAG3_AGGREGATED_VISIBLE = 0x20000000;
+
+    /**
+     * Used to indicate that {@link #mAutofillId} was explicitly set through
+     * {@link #setAutofillId(AutofillId)}.
+     */
+    private static final int PFLAG3_AUTOFILLID_EXPLICITLY_SET = 0x40000000;
 
     /* End of masks for mPrivateFlags3 */
 
@@ -8205,16 +8214,28 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @throws IllegalArgumentException if the id is an autofill id associated with a virtual view.
      */
     public void setAutofillId(@Nullable AutofillId id) {
+        // TODO(b/37566627): add unit / CTS test for all possible combinations below
         if (android.view.autofill.Helper.sVerbose) {
             Log.v(VIEW_LOG_TAG, "setAutofill(): from " + mAutofillId + " to " + id);
         }
         if (isAttachedToWindow()) {
             throw new IllegalStateException("Cannot set autofill id when view is attached");
         }
-        if (id.isVirtual()) {
+        if (id != null && id.isVirtual()) {
             throw new IllegalStateException("Cannot set autofill id assigned to virtual views");
         }
+        if (id == null && (mPrivateFlags3 & PFLAG3_AUTOFILLID_EXPLICITLY_SET) == 0) {
+            // Ignore reset because it was never explicitly set before.
+            return;
+        }
         mAutofillId = id;
+        if (id != null) {
+            mAutofillViewId = id.getViewId();
+            mPrivateFlags3 |= PFLAG3_AUTOFILLID_EXPLICITLY_SET;
+        } else {
+            mAutofillViewId = NO_ID;
+            mPrivateFlags3 &= ~PFLAG3_AUTOFILLID_EXPLICITLY_SET;
+        }
     }
 
     /**
@@ -18524,7 +18545,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 // Hence prevent the same autofill view id from being restored multiple times.
                 ((BaseSavedState) state).mSavedData &= ~BaseSavedState.AUTOFILL_ID;
 
-                mAutofillViewId = baseState.mAutofillViewId;
+                if ((mPrivateFlags3 & PFLAG3_AUTOFILLID_EXPLICITLY_SET) != 0) {
+                    // Ignore when view already set it through setAutofillId();
+                    if (android.view.autofill.Helper.sDebug) {
+                        Log.d(VIEW_LOG_TAG, "onRestoreInstanceState(): not setting autofillId to "
+                                + baseState.mAutofillViewId + " because view explicitly set it to "
+                                + mAutofillId);
+                    }
+                } else {
+                    mAutofillViewId = baseState.mAutofillViewId;
+                    mAutofillId = null; // will be set on demand by getAutofillId()
+                }
             }
         }
     }
