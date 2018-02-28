@@ -141,11 +141,23 @@ public class SystemConfig {
     // Package names that are exempted from private API blacklisting
     final ArraySet<String> mHiddenApiPackageWhitelist = new ArraySet<>();
 
+    // The list of carrier applications which should be disabled until used.
+    // This function suppresses update notifications for these pre-installed apps.
+    // In SubscriptionInfoUpdater, the listed applications are disabled until used when all of the
+    // following conditions are met.
+    // 1. Not currently carrier-privileged according to the inserted SIM
+    // 2. Pre-installed
+    // 3. In the default state (enabled but not explicitly)
+    // And SubscriptionInfoUpdater undoes this and marks the app enabled when a SIM is inserted
+    // that marks the app as carrier privileged. It also grants the app default permissions
+    // for Phone and Location. As such, apps MUST only ever be added to this list if they
+    // obtain user consent to access their location through other means.
+    final ArraySet<String> mDisabledUntilUsedPreinstalledCarrierApps = new ArraySet<>();
+
     // These are the packages of carrier-associated apps which should be disabled until used until
     // a SIM is inserted which grants carrier privileges to that carrier app.
     final ArrayMap<String, List<String>> mDisabledUntilUsedPreinstalledCarrierAssociatedApps =
             new ArrayMap<>();
-
 
     final ArrayMap<String, ArraySet<String>> mPrivAppPermissions = new ArrayMap<>();
     final ArrayMap<String, ArraySet<String>> mPrivAppDenyPermissions = new ArrayMap<>();
@@ -229,6 +241,10 @@ public class SystemConfig {
 
     public ArraySet<ComponentName> getBackupTransportWhitelist() {
         return mBackupTransportWhitelist;
+    }
+
+    public ArraySet<String> getDisabledUntilUsedPreinstalledCarrierApps() {
+        return mDisabledUntilUsedPreinstalledCarrierApps;
     }
 
     public ArrayMap<String, List<String>> getDisabledUntilUsedPreinstalledCarrierAssociatedApps() {
@@ -623,6 +639,18 @@ public class SystemConfig {
                                     carrierPkgname, associatedPkgs);
                         }
                         associatedPkgs.add(pkgname);
+                    }
+                    XmlUtils.skipCurrentTag(parser);
+                } else if ("disabled-until-used-preinstalled-carrier-app".equals(name)
+                        && allowAppConfigs) {
+                    String pkgname = parser.getAttributeValue(null, "package");
+                    if (pkgname == null) {
+                        Slog.w(TAG,
+                                "<disabled-until-used-preinstalled-carrier-app> without "
+                                        + "package in " + permFile + " at "
+                                        + parser.getPositionDescription());
+                    } else {
+                        mDisabledUntilUsedPreinstalledCarrierApps.add(pkgname);
                     }
                     XmlUtils.skipCurrentTag(parser);
                 } else if ("privapp-permissions".equals(name) && allowPrivappPermissions) {
