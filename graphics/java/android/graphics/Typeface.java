@@ -21,6 +21,7 @@ import static android.content.res.FontResourcesParser.FontFamilyFilesResourceEnt
 import static android.content.res.FontResourcesParser.FontFileResourceEntry;
 import static android.content.res.FontResourcesParser.ProviderResourceEntry;
 
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -49,6 +50,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
@@ -117,6 +120,11 @@ public class Typeface {
      */
     public long native_instance;
 
+    /** @hide */
+    @IntDef(value = {NORMAL, BOLD, ITALIC, BOLD_ITALIC})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Style {}
+
     // Style
     public static final int NORMAL = 0;
     public static final int BOLD = 1;
@@ -124,8 +132,15 @@ public class Typeface {
     public static final int BOLD_ITALIC = 3;
     /** @hide */ public static final int STYLE_MASK = 0x03;
 
-    private int mStyle = 0;
-    private int mWeight = 0;
+    private @Style int mStyle = 0;
+
+    /**
+     * A maximum value for the weight value.
+     * @hide
+     */
+    public static final int MAX_WEIGHT = 1000;
+
+    private @IntRange(from = 0, to = MAX_WEIGHT) int mWeight = 0;
 
     // Value for weight and italic. Indicates the value is resolved by font metadata.
     // Must be the same as the C++ constant in core/jni/android/graphics/FontFamily.cpp
@@ -153,7 +168,7 @@ public class Typeface {
     }
 
     /** Returns the typeface's intrinsic style attributes */
-    public int getStyle() {
+    public @Style int getStyle() {
         return mStyle;
     }
 
@@ -659,7 +674,7 @@ public class Typeface {
      *               e.g. NORMAL, BOLD, ITALIC, BOLD_ITALIC
      * @return The best matching typeface.
      */
-    public static Typeface create(String familyName, int style) {
+    public static Typeface create(String familyName, @Style int style) {
         return create(sSystemFontMap.get(familyName), style);
     }
 
@@ -680,7 +695,7 @@ public class Typeface {
      *               e.g. NORMAL, BOLD, ITALIC, BOLD_ITALIC
      * @return The best matching typeface.
      */
-    public static Typeface create(Typeface family, int style) {
+    public static Typeface create(Typeface family, @Style int style) {
         if ((style & ~STYLE_MASK) != 0) {
             style = NORMAL;
         }
@@ -776,7 +791,7 @@ public class Typeface {
      *
      * @return the default typeface that corresponds to the style
      */
-    public static Typeface defaultFromStyle(int style) {
+    public static Typeface defaultFromStyle(@Style int style) {
         return sDefaults[style];
     }
 

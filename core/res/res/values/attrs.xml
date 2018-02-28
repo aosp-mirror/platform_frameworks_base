@@ -4472,6 +4472,8 @@
         <attr name="textSize" />
         <!-- Style (normal, bold, italic, bold|italic) for the text. -->
         <attr name="textStyle" />
+        <!-- Weight for the font used in the TextView. -->
+        <attr name="textFontWeight" />
         <!-- Typeface (normal, sans, serif, monospace) for the text. -->
         <attr name="typeface" />
         <!-- Font family (named by string or as a font resource reference) for the text. -->
@@ -4561,6 +4563,8 @@
         <attr name="typeface" />
         <!-- Style (normal, bold, italic, bold|italic) for the text. -->
         <attr name="textStyle" />
+        <!-- Weight for the font used in the TextView. -->
+        <attr name="textFontWeight" />
         <!-- Font family (named by string or as a font resource reference) for the text. -->
         <attr name="fontFamily" />
         <!-- Text color for links. -->
