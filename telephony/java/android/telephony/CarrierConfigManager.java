@@ -1813,7 +1813,14 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_CONFIG_APPLIED_BOOL = "carrier_config_applied_bool";
 
     /**
-     * List of thresholds of RSRP for determining the display level of LTE signal bar.
+     * A list of 4 LTE RSRP thresholds above which a signal level is considered POOR,
+     * MODERATE, GOOD, or EXCELLENT, to be used in SignalStrength reporting.
+     *
+     * Note that the min and max thresholds are fixed at -140 and -44, as explained in
+     * TS 36.133 9.1.4 - RSRP Measurement Report Mapping.
+     * <p>
+     * See SignalStrength#MAX_LTE_RSRP and SignalStrength#MIN_LTE_RSRP. Any signal level outside
+     * these boundaries is considered invalid.
      * @hide
      */
     public static final String KEY_LTE_RSRP_THRESHOLDS_INT_ARRAY =
@@ -2132,12 +2139,10 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_CONFIG_APPLIED_BOOL, false);
         sDefaults.putIntArray(KEY_LTE_RSRP_THRESHOLDS_INT_ARRAY,
                 new int[] {
-                        -140, /* SIGNAL_STRENGTH_NONE_OR_UNKNOWN */
                         -128, /* SIGNAL_STRENGTH_POOR */
                         -118, /* SIGNAL_STRENGTH_MODERATE */
                         -108, /* SIGNAL_STRENGTH_GOOD */
                         -98,  /* SIGNAL_STRENGTH_GREAT */
-                        -44
                 });
     }
 
