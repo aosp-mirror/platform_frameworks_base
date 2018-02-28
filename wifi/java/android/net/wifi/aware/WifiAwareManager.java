@@ -27,6 +27,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -420,9 +421,12 @@ public class WifiAwareManager {
                     "createNetworkSpecifier: Invalid 'role' argument when creating a network "
                             + "specifier");
         }
-        if (peerHandle == null) {
-            throw new IllegalArgumentException(
-                    "createNetworkSpecifier: Invalid peer handle - cannot be null");
+        if (role == WIFI_AWARE_DATA_PATH_ROLE_INITIATOR || !WifiAwareUtils.isLegacyVersion(mContext,
+                Build.VERSION_CODES.P)) {
+            if (peerHandle == null) {
+                throw new IllegalArgumentException(
+                        "createNetworkSpecifier: Invalid peer handle - cannot be null");
+            }
         }
 
         return new WifiAwareNetworkSpecifier(
@@ -453,9 +457,12 @@ public class WifiAwareManager {
                     "createNetworkSpecifier: Invalid 'role' argument when creating a network "
                             + "specifier");
         }
-        if (peer == null) {
-            throw new IllegalArgumentException(
-                    "createNetworkSpecifier: Invalid peer MAC - cannot be null");
+        if (role == WIFI_AWARE_DATA_PATH_ROLE_INITIATOR || !WifiAwareUtils.isLegacyVersion(mContext,
+                Build.VERSION_CODES.P)) {
+            if (peer == null) {
+                throw new IllegalArgumentException(
+                        "createNetworkSpecifier: Invalid peer MAC - cannot be null");
+            }
         }
         if (peer != null && peer.length != 6) {
             throw new IllegalArgumentException("createNetworkSpecifier: Invalid peer MAC address");
