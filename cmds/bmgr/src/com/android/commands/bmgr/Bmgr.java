@@ -297,6 +297,10 @@ public final class Bmgr {
             super.backupFinished(status);
             System.out.println("Backup finished with result: "
                     + convertBackupStatusToString(status));
+            if (status == BackupManager.ERROR_BACKUP_CANCELLED) {
+                System.out.println("Backups can be cancelled if a backup is already running, check "
+                                + "backup dumpsys");
+            }
         }
     }
 
@@ -318,7 +322,7 @@ public final class Bmgr {
             case BackupManager.ERROR_TRANSPORT_QUOTA_EXCEEDED:
                 return "Size quota exceeded";
             case BackupManager.ERROR_BACKUP_CANCELLED:
-                return "Backup Cancelled";
+                return "Backup cancelled";
             default:
                 return "Unknown error";
         }
