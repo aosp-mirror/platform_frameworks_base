@@ -21,21 +21,19 @@ import android.annotation.NonNull;
 import java.util.List;
 
 /**
- * Controller interfaces for playlist management for both {@link MediaSession2} and
- * {@link MediaController2} that related with metadata. This ensures that two classes share the same
- * interface.
- * <p>
- * This class only includes methods that involves {@link MediaItem2}. Because other APIs are
- * considered as the part of {@link MediaPlayerBase} (e.g. set/getPlaylistParams()}. Note that
- * setPlaylist() isn't added on purpose because it's considered as session specific.
- *
- * @hide
+ * Controller interface for playlist management.
+ * Playlists are composed of one or multiple {@link MediaItem2} instances, which combine metadata
+ * and data sources (as {@link DataSourceDesc})
+ * Used by {@link MediaSession2} and {@link MediaController2}.
  */
+ // This class only includes methods that contain {@link MediaItem2}.
+ // Note that setPlaylist() isn't added on purpose because it's considered session-specific.
+
 public interface MediaPlaylistController {
-    // TODO(jaewan): is Index correct here?
     void addPlaylistItem(int index, @NonNull MediaItem2 item);
     void removePlaylistItem(@NonNull MediaItem2 item);
     MediaItem2 getCurrentPlaylistItem();
     void skipToPlaylistItem(@NonNull MediaItem2 item);
+    void replacePlaylistItem(int index, @NonNull MediaItem2 item);
     List<MediaItem2> getPlaylist();
 }

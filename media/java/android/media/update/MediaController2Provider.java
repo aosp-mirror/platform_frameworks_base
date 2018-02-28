@@ -16,6 +16,7 @@
 
 package android.media.update;
 
+import android.annotation.NonNull;
 import android.app.PendingIntent;
 import android.media.AudioAttributes;
 import android.media.MediaController2.PlaybackInfo;
@@ -60,6 +61,7 @@ public interface MediaController2Provider extends TransportControlProvider {
 
     void removePlaylistItem_impl(MediaItem2 index);
     void addPlaylistItem_impl(int index, MediaItem2 item);
+    void replacePlaylistItem_impl(int index, MediaItem2 item);
 
     PlaylistParams getPlaylistParams_impl();
     void setPlaylistParams_impl(PlaylistParams params);

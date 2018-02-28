@@ -23,7 +23,7 @@ import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.media.MediaPlayerBase.EventCallback;
+import android.media.MediaPlayerBase.PlayerEventCallback;
 import android.media.session.MediaSession;
 import android.media.session.MediaSession.Callback;
 import android.media.session.PlaybackState;
@@ -764,6 +764,16 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
                     context, (Builder) instance, player));
         }
 
+        public Builder(Context context, @NonNull MediaPlayerBase player,
+                @NonNull MediaPlaylistController mplc) {
+            //TODO use the MediaPlaylistController
+            super((instance) -> ApiLoader.getProvider(context).createMediaSession2Builder(
+                    context, (Builder) instance, player));
+            if (mplc == null) {
+                throw new IllegalArgumentException("Illegal null PlaylistController");
+            }
+        }
+
         @Override
         public Builder setVolumeProvider(@Nullable VolumeProvider2 volumeProvider) {
             return super.setVolumeProvider(volumeProvider);
@@ -1400,6 +1410,16 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
     }
 
     /**
+     * Replace the media item at index in the playlist.
+     * @param index the index of the item to replace
+     * @param item the new item
+     */
+    @Override
+    public void replacePlaylistItem(int index, @NonNull MediaItem2 item) {
+        mProvider.replacePlaylistItem_impl(index, item);
+    }
+
+    /**
      * Return the playlist which is lastly set.
      *
      * @return playlist
@@ -1461,7 +1481,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      */
     // TODO(jaewan): Unhide or remove
     public void registerPlayerEventCallback(@NonNull @CallbackExecutor Executor executor,
-            @NonNull EventCallback callback) {
+            @NonNull PlayerEventCallback callback) {
         mProvider.registerPlayerEventCallback_impl(executor, callback);
     }
 
@@ -1473,7 +1493,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * @hide
      */
     // TODO(jaewan): Unhide or remove
-    public void unregisterPlayerEventCallback(@NonNull EventCallback callback) {
+    public void unregisterPlayerEventCallback(@NonNull PlayerEventCallback callback) {
         mProvider.unregisterPlayerEventCallback_impl(callback);
     }
 
