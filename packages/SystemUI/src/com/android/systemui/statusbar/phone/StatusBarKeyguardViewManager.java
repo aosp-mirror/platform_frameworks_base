@@ -24,6 +24,7 @@ import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.util.StatsLog;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -140,6 +141,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mShowing = true;
         mStatusBarWindowManager.setKeyguardShowing(true);
         reset(true /* hideBouncerWhenShowing */);
+        StatsLog.write(StatsLog.KEYGUARD_STATE_CHANGED,
+            StatsLog.KEYGUARD_STATE_CHANGED__STATE__SHOWN);
     }
 
     /**
@@ -289,6 +292,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void setOccluded(boolean occluded, boolean animate) {
         mStatusBar.setOccluded(occluded);
         if (occluded && !mOccluded && mShowing) {
+            StatsLog.write(StatsLog.KEYGUARD_STATE_CHANGED,
+                StatsLog.KEYGUARD_STATE_CHANGED__STATE__OCCLUDED);
             if (mStatusBar.isInLaunchTransition()) {
                 mOccluded = true;
                 mStatusBar.fadeKeyguardAfterLaunchTransition(null /* beforeFading */,
@@ -301,6 +306,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                         });
                 return;
             }
+        } else if (!occluded && mOccluded && mShowing) {
+            StatsLog.write(StatsLog.KEYGUARD_STATE_CHANGED,
+                StatsLog.KEYGUARD_STATE_CHANGED__STATE__SHOWN);
         }
         boolean isOccluding = !mOccluded && occluded;
         mOccluded = occluded;
@@ -398,6 +406,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mStatusBarWindowManager.setKeyguardShowing(false);
             mViewMediatorCallback.keyguardGone();
         }
+        StatsLog.write(StatsLog.KEYGUARD_STATE_CHANGED,
+            StatsLog.KEYGUARD_STATE_CHANGED__STATE__HIDDEN);
     }
 
     public void onDensityOrFontScaleChanged() {

@@ -25,6 +25,7 @@ import android.support.annotation.VisibleForTesting;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
+import android.util.StatsLog;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -430,9 +431,13 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         public void reportUnlockAttempt(int userId, boolean success, int timeoutMs) {
             KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
             if (success) {
+                StatsLog.write(StatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED,
+                    StatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__RESULT__SUCCESS);
                 monitor.clearFailedUnlockAttempts();
                 mLockPatternUtils.reportSuccessfulPasswordAttempt(userId);
             } else {
+                StatsLog.write(StatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED,
+                    StatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__RESULT__FAILURE);
                 KeyguardSecurityContainer.this.reportFailedUnlockAttempt(userId, timeoutMs);
             }
         }
