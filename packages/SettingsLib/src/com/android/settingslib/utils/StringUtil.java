@@ -33,74 +33,74 @@ import java.util.Locale;
 /** Utility class for generally useful string methods **/
 public class StringUtil {
 
-  public static final int SECONDS_PER_MINUTE = 60;
-  public static final int SECONDS_PER_HOUR = 60 * 60;
-  public static final int SECONDS_PER_DAY = 24 * 60 * 60;
+    public static final int SECONDS_PER_MINUTE = 60;
+    public static final int SECONDS_PER_HOUR = 60 * 60;
+    public static final int SECONDS_PER_DAY = 24 * 60 * 60;
 
-  /**
-   * Returns elapsed time for the given millis, in the following format:
-   * 2d 5h 40m 29s
-   * @param context the application context
-   * @param millis the elapsed time in milli seconds
-   * @param withSeconds include seconds?
-   * @return the formatted elapsed time
-   */
-  public static CharSequence formatElapsedTime(Context context, double millis,
-          boolean withSeconds) {
-      SpannableStringBuilder sb = new SpannableStringBuilder();
-      int seconds = (int) Math.floor(millis / 1000);
-      if (!withSeconds) {
-          // Round up.
-          seconds += 30;
-      }
+    /**
+    * Returns elapsed time for the given millis, in the following format:
+    * 2d 5h 40m 29s
+    * @param context the application context
+     * @param millis the elapsed time in milli seconds
+     * @param withSeconds include seconds?
+     * @return the formatted elapsed time
+     */
+    public static CharSequence formatElapsedTime(Context context, double millis,
+            boolean withSeconds) {
+        SpannableStringBuilder sb = new SpannableStringBuilder();
+        int seconds = (int) Math.floor(millis / 1000);
+        if (!withSeconds) {
+            // Round up.
+            seconds += 30;
+        }
 
-      int days = 0, hours = 0, minutes = 0;
-      if (seconds >= SECONDS_PER_DAY) {
-          days = seconds / SECONDS_PER_DAY;
-          seconds -= days * SECONDS_PER_DAY;
-      }
-      if (seconds >= SECONDS_PER_HOUR) {
-          hours = seconds / SECONDS_PER_HOUR;
-          seconds -= hours * SECONDS_PER_HOUR;
-      }
-      if (seconds >= SECONDS_PER_MINUTE) {
-          minutes = seconds / SECONDS_PER_MINUTE;
-          seconds -= minutes * SECONDS_PER_MINUTE;
-      }
+        int days = 0, hours = 0, minutes = 0;
+        if (seconds >= SECONDS_PER_DAY) {
+            days = seconds / SECONDS_PER_DAY;
+            seconds -= days * SECONDS_PER_DAY;
+        }
+        if (seconds >= SECONDS_PER_HOUR) {
+            hours = seconds / SECONDS_PER_HOUR;
+            seconds -= hours * SECONDS_PER_HOUR;
+        }
+        if (seconds >= SECONDS_PER_MINUTE) {
+            minutes = seconds / SECONDS_PER_MINUTE;
+            seconds -= minutes * SECONDS_PER_MINUTE;
+        }
 
-      final ArrayList<Measure> measureList = new ArrayList(4);
-      if (days > 0) {
-          measureList.add(new Measure(days, MeasureUnit.DAY));
-      }
-      if (hours > 0) {
-          measureList.add(new Measure(hours, MeasureUnit.HOUR));
-      }
-      if (minutes > 0) {
-          measureList.add(new Measure(minutes, MeasureUnit.MINUTE));
-      }
-      if (withSeconds && seconds > 0) {
-          measureList.add(new Measure(seconds, MeasureUnit.SECOND));
-      }
-      if (measureList.size() == 0) {
-          // Everything addable was zero, so nothing was added. We add a zero.
-          measureList.add(new Measure(0, withSeconds ? MeasureUnit.SECOND : MeasureUnit.MINUTE));
-      }
-      final Measure[] measureArray = measureList.toArray(new Measure[measureList.size()]);
+        final ArrayList<Measure> measureList = new ArrayList(4);
+        if (days > 0) {
+            measureList.add(new Measure(days, MeasureUnit.DAY));
+        }
+        if (hours > 0) {
+            measureList.add(new Measure(hours, MeasureUnit.HOUR));
+        }
+        if (minutes > 0) {
+            measureList.add(new Measure(minutes, MeasureUnit.MINUTE));
+        }
+        if (withSeconds && seconds > 0) {
+            measureList.add(new Measure(seconds, MeasureUnit.SECOND));
+        }
+        if (measureList.size() == 0) {
+            // Everything addable was zero, so nothing was added. We add a zero.
+            measureList.add(new Measure(0, withSeconds ? MeasureUnit.SECOND : MeasureUnit.MINUTE));
+        }
+        final Measure[] measureArray = measureList.toArray(new Measure[measureList.size()]);
 
-      final Locale locale = context.getResources().getConfiguration().locale;
-      final MeasureFormat measureFormat = MeasureFormat.getInstance(
-              locale, FormatWidth.NARROW);
-      sb.append(measureFormat.formatMeasures(measureArray));
+        final Locale locale = context.getResources().getConfiguration().locale;
+        final MeasureFormat measureFormat = MeasureFormat.getInstance(
+                locale, FormatWidth.NARROW);
+        sb.append(measureFormat.formatMeasures(measureArray));
 
-      if (measureArray.length == 1 && MeasureUnit.MINUTE.equals(measureArray[0].getUnit())) {
-          // Add ttsSpan if it only have minute value, because it will be read as "meters"
-          final TtsSpan ttsSpan = new TtsSpan.MeasureBuilder().setNumber(minutes)
-                  .setUnit("minute").build();
-          sb.setSpan(ttsSpan, 0, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-      }
+        if (measureArray.length == 1 && MeasureUnit.MINUTE.equals(measureArray[0].getUnit())) {
+            // Add ttsSpan if it only have minute value, because it will be read as "meters"
+            final TtsSpan ttsSpan = new TtsSpan.MeasureBuilder().setNumber(minutes)
+                    .setUnit("minute").build();
+            sb.setSpan(ttsSpan, 0, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
 
-      return sb;
-  }
+        return sb;
+    }
 
     /**
      * Returns relative time for the given millis in the past, in a short format such as "2 days

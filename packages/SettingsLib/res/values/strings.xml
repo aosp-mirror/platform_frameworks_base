@@ -876,47 +876,53 @@
     <!-- Summary shown for color space correction preference when its value is overridden by another preference [CHAR LIMIT=35] -->
     <string name="daltonizer_type_overridden">Overridden by <xliff:g id="title" example="Simulate color space">%1$s</xliff:g></string>
 
-  <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery discharging -->
-  <string name="power_remaining_duration_only">About <xliff:g id="time">%1$s</xliff:g> left</string>
-  <!-- [CHAR_LIMIT=60] Label for estimated remaining duration of battery discharging -->
-  <string name="power_remaining_duration_only_enhanced">About <xliff:g id="time">%1$s</xliff:g> left based on your usage</string>
-  <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery charging -->
-  <string name="power_remaining_charging_duration_only"><xliff:g id="time">%1$s</xliff:g> left until fully charged</string>
+    <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery discharging -->
+    <string name="power_remaining_duration_only">About <xliff:g id="time">%1$s</xliff:g> left</string>
+    <!-- [CHAR_LIMIT=40] Label for battery level chart when discharging with duration -->
+    <string name="power_discharging_duration">About <xliff:g id="time">%1$s</xliff:g> left (<xliff:g id="level">%2$s</xliff:g>)</string>
+    <!-- [CHAR_LIMIT=60] Label for estimated remaining duration of battery discharging -->
+    <string name="power_remaining_duration_only_enhanced">About <xliff:g id="time">%1$s</xliff:g> left based on your usage</string>
+    <!-- [CHAR_LIMIT=60] Label for battery level chart when discharging with duration and using enhanced estimate -->
+    <string name="power_discharging_duration_enhanced">About <xliff:g id="time">%1$s</xliff:g> left based on your usage (<xliff:g id="level">%2$s</xliff:g>)</string>
+    <!-- [CHAR_LIMIT=40] Short label for estimated remaining duration of battery charging/discharging -->
+    <string name="power_remaining_duration_only_short"><xliff:g id="time">%1$s</xliff:g> left</string>
 
-  <!-- [CHAR_LIMIT=40] Short label for estimated remaining duration of battery charging/discharging -->
-  <string name="power_remaining_duration_only_short"><xliff:g id="time">%1$s</xliff:g> left</string>
+    <!-- [CHAR_LIMIT=100] Label for enhanced estimated time that phone will run out of battery -->
+    <string name="power_discharge_by_enhanced">Will last until about about <xliff:g id="time">%1$s</xliff:g> based on your usage (<xliff:g id="level">%2$s</xliff:g>)</string>
+    <!-- [CHAR_LIMIT=100] Label for enhanced estimated time that phone will run out of battery with no percentage -->
+    <string name="power_discharge_by_only_enhanced">Will last until about about <xliff:g id="time">%1$s</xliff:g> based on your usage</string>
+    <!-- [CHAR_LIMIT=100] Label for estimated time that phone will run out of battery -->
+    <string name="power_discharge_by">Will last until about about <xliff:g id="time">%1$s</xliff:g> (<xliff:g id="level">%2$s</xliff:g>)</string>
+    <!-- [CHAR_LIMIT=100] Label for estimated time that phone will run out of battery -->
+    <string name="power_discharge_by_only">Will last until about about <xliff:g id="time">%1$s</xliff:g></string>
 
-  <!-- [CHAR_LIMIT=60] label for estimated remaining duration of battery when under a certain amount -->
-  <string name="power_remaining_less_than_duration_only">Less than <xliff:g id="threshold">%1$s</xliff:g> remaining</string>
-  <!-- [CHAR_LIMIT=60] label for estimated remaining duration of battery when under a certain amount with the percentage -->
-  <string name="power_remaining_less_than_duration"><xliff:g id="level">%1$s</xliff:g> - Less than <xliff:g id="threshold">%2$s</xliff:g> remaining</string>
+    <!-- [CHAR_LIMIT=60] label for estimated remaining duration of battery when under a certain amount -->
+    <string name="power_remaining_less_than_duration_only">Less than <xliff:g id="threshold">%1$s</xliff:g> remaining</string>
+    <!-- [CHAR_LIMIT=60] label for estimated remaining duration of battery when under a certain amount with the percentage -->
+    <string name="power_remaining_less_than_duration">Less than <xliff:g id="threshold">%1$s</xliff:g> remaining (<xliff:g id="level">%2$s</xliff:g>)</string>
 
-  <!-- Used to let users know that they have more than some amount of battery life remaining with percentage. ex: 75% - more than 1 day remaining [CHAR LIMIT = 80] -->
-  <string name="power_remaining_more_than_subtext"><xliff:g id="level">%1$s</xliff:g>more than <xliff:g id="time_remaining">%2$s</xliff:g> remaining</string>
-  <!-- Used to let users know that they have more than some amount of battery life remaining. ex: more than 1 day remaining [CHAR LIMIT = 40] -->
-  <string name="power_remaining_only_more_than_subtext">more than <xliff:g id="time_remaining">%1$s</xliff:g> remaining</string>
+    <!-- Used to let users know that they have more than some amount of battery life remaining with percentage. ex: 75% - more than 1 day remaining [CHAR LIMIT = 80] -->
+    <string name="power_remaining_more_than_subtext">More than <xliff:g id="time_remaining">%1$s</xliff:g> remaining (<xliff:g id="level">%2$s</xliff:g>)</string>
+    <!-- Used to let users know that they have more than some amount of battery life remaining. ex: more than 1 day remaining [CHAR LIMIT = 40] -->
+    <string name="power_remaining_only_more_than_subtext">More than <xliff:g id="time_remaining">%1$s</xliff:g> remaining</string>
 
-  <!-- [CHAR_LIMIT=50] Short label for imminent shutdown warning of device -->
-  <string name="power_remaining_duration_only_shutdown_imminent" product="default">phone may shutdown soon</string>
-  <!-- [CHAR_LIMIT=50] Short label for imminent shutdown warning of device -->
-  <string name="power_remaining_duration_only_shutdown_imminent" product="tablet">tablet may shutdown soon</string>
-  <!-- [CHAR_LIMIT=50] Short label for imminent shutdown warning of device -->
-  <string name="power_remaining_duration_only_shutdown_imminent" product="device">device may shutdown soon</string>
-
-  <!-- [CHAR_LIMIT=40] Label for battery level chart when discharging with duration -->
-  <string name="power_discharging_duration"><xliff:g id="level">%1$s</xliff:g> - about <xliff:g id="time">%2$s</xliff:g> left</string>
-  <!-- [CHAR_LIMIT=60] Label for battery level chart when discharging with duration and using enhanced estimate -->
-  <string name="power_discharging_duration_enhanced"><xliff:g id="level">%1$s</xliff:g> - about <xliff:g id="time">%2$s</xliff:g> left based on your usage</string>
-
-  <!-- [CHAR_LIMIT=60] Label for battery level chart when shutdown is imminent-->
-  <string name="power_remaining_duration_shutdown_imminent" product="default"><xliff:g id="level">%1$s</xliff:g> - phone may shutdown soon</string>
-  <!-- [CHAR_LIMIT=60] Label for battery level chart when shutdown is imminent-->
-  <string name="power_remaining_duration_shutdown_imminent" product="tablet"><xliff:g id="level">%1$s</xliff:g> - tablet may shutdown soon</string>
-  <!-- [CHAR_LIMIT=60] Label for battery level chart when shutdown is imminent-->
-  <string name="power_remaining_duration_shutdown_imminent" product="device"><xliff:g id="level">%1$s</xliff:g> - device may shutdown soon</string>
+    <!-- [CHAR_LIMIT=50] Short label for imminent shutdown warning of device -->
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default">Phone may shutdown soon</string>
+    <!-- [CHAR_LIMIT=50] Short label for imminent shutdown warning of device -->
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet">Tablet may shutdown soon</string>
+    <!-- [CHAR_LIMIT=50] Short label for imminent shutdown warning of device -->
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device">Device may shutdown soon</string>
+    <!-- [CHAR_LIMIT=60] Label for battery level chart when shutdown is imminent-->
+    <string name="power_remaining_duration_shutdown_imminent" product="default">Phone may shutdown soon (<xliff:g id="level">%1$s</xliff:g>)</string>
+    <!-- [CHAR_LIMIT=60] Label for battery level chart when shutdown is imminent-->
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet">Tablet may shutdown soon (<xliff:g id="level">%1$s</xliff:g>)</string>
+    <!-- [CHAR_LIMIT=60] Label for battery level chart when shutdown is imminent-->
+    <string name="power_remaining_duration_shutdown_imminent" product="device">Device may shutdown soon (<xliff:g id="level">%1$s</xliff:g>)</string>
 
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging -->
     <string name="power_charging"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="state">%2$s</xliff:g></string>
+    <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery charging -->
+    <string name="power_remaining_charging_duration_only"><xliff:g id="time">%1$s</xliff:g> left until fully charged</string>
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
     <string name="power_charging_duration"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="time">%2$s</xliff:g> until fully charged</string>
 
