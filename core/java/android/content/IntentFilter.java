@@ -1872,9 +1872,10 @@ public class IntentFilter implements Parcelable {
                 du.println(sb.toString());
             }
         }
-        if (mPriority != 0 || mHasPartialTypes) {
+        if (mPriority != 0 || mOrder != 0 || mHasPartialTypes) {
             sb.setLength(0);
             sb.append(prefix); sb.append("mPriority="); sb.append(mPriority);
+                    sb.append(", mOrder="); sb.append(mOrder);
                     sb.append(", mHasPartialTypes="); sb.append(mHasPartialTypes);
             du.println(sb.toString());
         }
@@ -1951,6 +1952,7 @@ public class IntentFilter implements Parcelable {
         dest.writeInt(mHasPartialTypes ? 1 : 0);
         dest.writeInt(getAutoVerify() ? 1 : 0);
         dest.writeInt(mInstantAppVisibility);
+        dest.writeInt(mOrder);
     }
 
     /**
@@ -2020,6 +2022,7 @@ public class IntentFilter implements Parcelable {
         mHasPartialTypes = source.readInt() > 0;
         setAutoVerify(source.readInt() > 0);
         setVisibilityToInstantApp(source.readInt());
+        mOrder = source.readInt();
     }
 
     private final boolean findMimeType(String type) {

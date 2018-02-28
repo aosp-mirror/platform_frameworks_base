@@ -3641,7 +3641,9 @@ public class PackageParser {
         // getting added to the wrong package.
         final CachedComponentArgs cachedArgs = new CachedComponentArgs();
         int type;
-
+        boolean hasActivityOrder = false;
+        boolean hasReceiverOrder = false;
+        boolean hasServiceOrder = false;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
                 && (type != XmlPullParser.END_TAG || parser.getDepth() > innerDepth)) {
             if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
@@ -3657,6 +3659,7 @@ public class PackageParser {
                     return false;
                 }
 
+                hasActivityOrder |= (a.order != 0);
                 owner.activities.add(a);
 
             } else if (tagName.equals("receiver")) {
@@ -3667,6 +3670,7 @@ public class PackageParser {
                     return false;
                 }
 
+                hasReceiverOrder |= (a.order != 0);
                 owner.receivers.add(a);
 
             } else if (tagName.equals("service")) {
@@ -3676,6 +3680,7 @@ public class PackageParser {
                     return false;
                 }
 
+                hasServiceOrder |= (s.order != 0);
                 owner.services.add(s);
 
             } else if (tagName.equals("provider")) {
@@ -3694,6 +3699,7 @@ public class PackageParser {
                     return false;
                 }
 
+                hasActivityOrder |= (a.order != 0);
                 owner.activities.add(a);
 
             } else if (parser.getName().equals("meta-data")) {
@@ -3827,6 +3833,15 @@ public class PackageParser {
             }
         }
 
+        if (hasActivityOrder) {
+            Collections.sort(owner.activities, (a1, a2) -> Integer.compare(a2.order, a1.order));
+        }
+        if (hasReceiverOrder) {
+            Collections.sort(owner.receivers,  (r1, r2) -> Integer.compare(r2.order, r1.order));
+        }
+        if (hasServiceOrder) {
+            Collections.sort(owner.services,  (s1, s2) -> Integer.compare(s2.order, s1.order));
+        }
         // Must be ran after the entire {@link ApplicationInfo} has been fully processed and after
         // every activity info has had a chance to set it from its attributes.
         setMaxAspectRatio(owner);
@@ -4368,6 +4383,7 @@ public class PackageParser {
                             + mArchiveSourcePath + " "
                             + parser.getPositionDescription());
                 } else {
+                    a.order = Math.max(intent.getOrder(), a.order);
                     a.intents.add(intent);
                 }
                 // adjust activity flags when we implicitly expose it via a browsable filter
@@ -4745,6 +4761,7 @@ public class PackageParser {
                             + mArchiveSourcePath + " "
                             + parser.getPositionDescription());
                 } else {
+                    a.order = Math.max(intent.getOrder(), a.order);
                     a.intents.add(intent);
                 }
                 // adjust activity flags when we implicitly expose it via a browsable filter
@@ -4952,6 +4969,7 @@ public class PackageParser {
                     intent.setVisibilityToInstantApp(IntentFilter.VISIBILITY_EXPLICIT);
                     outInfo.info.flags |= ProviderInfo.FLAG_VISIBLE_TO_INSTANT_APP;
                 }
+                outInfo.order = Math.max(intent.getOrder(), outInfo.order);
                 outInfo.intents.add(intent);
 
             } else if (parser.getName().equals("meta-data")) {
@@ -5241,6 +5259,7 @@ public class PackageParser {
                     intent.setVisibilityToInstantApp(IntentFilter.VISIBILITY_EXPLICIT);
                     s.info.flags |= ServiceInfo.FLAG_VISIBLE_TO_INSTANT_APP;
                 }
+                s.order = Math.max(intent.getOrder(), s.order);
                 s.intents.add(intent);
             } else if (parser.getName().equals("meta-data")) {
                 if ((s.metaData=parseMetaData(res, parser, s.metaData,
@@ -5465,6 +5484,10 @@ public class PackageParser {
         int priority = sa.getInt(
                 com.android.internal.R.styleable.AndroidManifestIntentFilter_priority, 0);
         outInfo.setPriority(priority);
+
+        int order = sa.getInt(
+                com.android.internal.R.styleable.AndroidManifestIntentFilter_order, 0);
+        outInfo.setOrder(order);
 
         TypedValue v = sa.peekValue(
                 com.android.internal.R.styleable.AndroidManifestIntentFilter_label);
@@ -7053,6 +7076,8 @@ public class PackageParser {
 
         public Bundle metaData;
         public Package owner;
+        /** The order of this component in relation to its peers */
+        public int order;
 
         ComponentName componentName;
         String componentShortName;
@@ -7571,6 +7596,7 @@ public class PackageParser {
 
             for (ActivityIntentInfo aii : intents) {
                 aii.activity = this;
+                order = Math.max(aii.getOrder(), order);
             }
 
             if (info.permission != null) {
@@ -7660,6 +7686,7 @@ public class PackageParser {
 
             for (ServiceIntentInfo aii : intents) {
                 aii.service = this;
+                order = Math.max(aii.getOrder(), order);
             }
 
             if (info.permission != null) {
