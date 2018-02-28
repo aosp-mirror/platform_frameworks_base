@@ -509,14 +509,10 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             // on-going notification for the user to control their visibility.
             if (visible) {
                 changed = mAlertWindowSurfaces.add(surfaceController);
-                if (changed) {
-                    MetricsLoggerWrapper.logAppOverlayEnter(mUid, mPackageName, true);
-                }
+                MetricsLoggerWrapper.logAppOverlayEnter(mUid, mPackageName, changed, type, true);
             } else {
                 changed = mAlertWindowSurfaces.remove(surfaceController);
-                if (changed) {
-                    MetricsLoggerWrapper.logAppOverlayExit(mUid, mPackageName, true);
-                }
+                MetricsLoggerWrapper.logAppOverlayExit(mUid, mPackageName, changed, type, true);
             }
 
             if (changed) {
@@ -537,14 +533,10 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
         if (visible) {
             changed = mAppOverlaySurfaces.add(surfaceController);
-            if (changed) {
-                MetricsLoggerWrapper.logAppOverlayEnter(mUid, mPackageName, false);
-            }
+            MetricsLoggerWrapper.logAppOverlayEnter(mUid, mPackageName, changed, type, false);
         } else {
             changed = mAppOverlaySurfaces.remove(surfaceController);
-            if (changed) {
-                MetricsLoggerWrapper.logAppOverlayExit(mUid, mPackageName, false);
-            }
+            MetricsLoggerWrapper.logAppOverlayExit(mUid, mPackageName, changed, type, false);
         }
 
         if (changed) {
