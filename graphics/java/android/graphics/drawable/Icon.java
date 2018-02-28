@@ -18,11 +18,14 @@ package android.graphics.drawable;
 
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
-import android.content.res.ColorStateList;
+import android.annotation.IdRes;
+import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -60,16 +63,39 @@ import java.util.Objects;
 public final class Icon implements Parcelable {
     private static final String TAG = "Icon";
 
-    /** @hide */
+    /**
+     * An icon that was created using {@link Icon#createWithBitmap(Bitmap)}.
+     * @see #getType
+     */
     public static final int TYPE_BITMAP   = 1;
-    /** @hide */
+    /**
+     * An icon that was created using {@link Icon#createWithResource}.
+     * @see #getType
+     */
     public static final int TYPE_RESOURCE = 2;
-    /** @hide */
+    /**
+     * An icon that was created using {@link Icon#createWithData(byte[], int, int)}.
+     * @see #getType
+     */
     public static final int TYPE_DATA     = 3;
-    /** @hide */
+    /**
+     * An icon that was created using {@link Icon#createWithContentUri}
+     * or {@link Icon#createWithFilePath(String)}.
+     * @see #getType
+     */
     public static final int TYPE_URI      = 4;
-    /** @hide */
+    /**
+     * An icon that was created using {@link Icon#createWithAdaptiveBitmap}.
+     * @see #getType
+     */
     public static final int TYPE_ADAPTIVE_BITMAP = 5;
+
+    /**
+     * @hide
+     */
+    @IntDef({TYPE_BITMAP, TYPE_RESOURCE, TYPE_DATA, TYPE_URI, TYPE_ADAPTIVE_BITMAP})
+    public @interface IconType {
+    }
 
     private static final int VERSION_STREAM_SERIALIZER = 1;
 
@@ -99,14 +125,12 @@ public final class Icon implements Parcelable {
     private int             mInt2;
 
     /**
-     * @return The type of image data held in this Icon. One of
-     * {@link #TYPE_BITMAP},
-     * {@link #TYPE_RESOURCE},
-     * {@link #TYPE_DATA}, or
-     * {@link #TYPE_URI}.
-     * {@link #TYPE_ADAPTIVE_BITMAP}
-     * @hide
+     * Gets the type of the icon provided.
+     * <p>
+     * Note that new types may be added later, so callers should guard against other
+     * types being returned.
      */
+    @IconType
     public int getType() {
         return mType;
     }
@@ -179,9 +203,13 @@ public final class Icon implements Parcelable {
     }
 
     /**
-     * @return The package containing resources for this {@link #TYPE_RESOURCE} Icon.
-     * @hide
+     * Gets the package used to create this icon.
+     * <p>
+     * Only valid for icons of type {@link #TYPE_RESOURCE}.
+     * Note: This package may not be available if referenced in the future, and it is
+     * up to the caller to ensure safety if this package is re-used and/or persisted.
      */
+    @NonNull
     public String getResPackage() {
         if (mType != TYPE_RESOURCE) {
             throw new IllegalStateException("called getResPackage() on " + this);
@@ -190,9 +218,13 @@ public final class Icon implements Parcelable {
     }
 
     /**
-     * @return The resource ID for this {@link #TYPE_RESOURCE} Icon.
-     * @hide
+     * Gets the resource used to create this icon.
+     * <p>
+     * Only valid for icons of type {@link #TYPE_RESOURCE}.
+     * Note: This resource may not be available if the application changes at all, and it is
+     * up to the caller to ensure safety if this resource is re-used and/or persisted.
      */
+    @IdRes
     public int getResId() {
         if (mType != TYPE_RESOURCE) {
             throw new IllegalStateException("called getResId() on " + this);
@@ -212,9 +244,13 @@ public final class Icon implements Parcelable {
     }
 
     /**
-     * @return The {@link android.net.Uri} for this {@link #TYPE_URI} Icon.
-     * @hide
+     * Gets the uri used to create this icon.
+     * <p>
+     * Only valid for icons of type {@link #TYPE_URI}.
+     * Note: This uri may not be available in the future, and it is
+     * up to the caller to ensure safety if this uri is re-used and/or persisted.
      */
+    @NonNull
     public Uri getUri() {
         return Uri.parse(getUriString());
     }

@@ -659,7 +659,6 @@ Landroid/graphics/drawable/GradientDrawable$GradientState;->mAngle:I
 Landroid/graphics/drawable/GradientDrawable$GradientState;->mPadding:Landroid/graphics/Rect;
 Landroid/graphics/drawable/GradientDrawable$GradientState;->mPositions:[F
 Landroid/graphics/drawable/GradientDrawable;->mPadding:Landroid/graphics/Rect;
-Landroid/graphics/drawable/Icon;->getResPackage()Ljava/lang/String;
 Landroid/graphics/drawable/NinePatchDrawable;->mNinePatchState:Landroid/graphics/drawable/NinePatchDrawable$NinePatchState;
 Landroid/graphics/drawable/NinePatchDrawable$NinePatchState;->mNinePatch:Landroid/graphics/NinePatch;
 Landroid/graphics/drawable/StateListDrawable;->extractStateSet(Landroid/util/AttributeSet;)[I
