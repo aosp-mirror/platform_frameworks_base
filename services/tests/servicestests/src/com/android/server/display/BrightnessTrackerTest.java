@@ -338,6 +338,26 @@ public class BrightnessTrackerTest {
         assertFalse(event.isDefaultBrightnessConfig);
         assertEquals(1.0, event.powerBrightnessFactor, FLOAT_DELTA);
         assertFalse(event.isUserSetBrightness);
+
+        // Pretend user 1 is a profile of user 0.
+        mInjector.mProfiles = new int[]{0, 1};
+        events = tracker.getEvents(0, true).getList();
+        // Both events should now be returned.
+        assertEquals(2, events.size());
+        BrightnessChangeEvent userZeroEvent;
+        BrightnessChangeEvent userOneEvent;
+        if (events.get(0).userId == 0) {
+            userZeroEvent = events.get(0);
+            userOneEvent = events.get(1);
+        } else {
+            userZeroEvent = events.get(1);
+            userOneEvent = events.get(0);
+        }
+        assertEquals(0, userZeroEvent.userId);
+        assertEquals("com.example.app", userZeroEvent.packageName);
+        assertEquals(1, userOneEvent.userId);
+        // Events from user 1 should have the package name redacted
+        assertNull(userOneEvent.packageName);
     }
 
     @Test
@@ -597,6 +617,7 @@ public class BrightnessTrackerTest {
         Handler mHandler;
         boolean mIdleScheduled;
         boolean mInteractive = true;
+        int[] mProfiles;
 
         public TestInjector(Handler handler) {
             mHandler = handler;
@@ -682,6 +703,15 @@ public class BrightnessTrackerTest {
         }
 
         @Override
+        public int[] getProfileIds(UserManager userManager, int userId) {
+            if (mProfiles != null) {
+                return mProfiles;
+            } else {
+                return new int[]{userId};
+            }
+        }
+
+        @Override
         public ActivityManager.StackInfo getFocusedStack() throws RemoteException {
             ActivityManager.StackInfo focusedStack = new ActivityManager.StackInfo();
             focusedStack.userId = 0;
@@ -689,15 +719,18 @@ public class BrightnessTrackerTest {
             return focusedStack;
         }
 
+        @Override
         public void scheduleIdleJob(Context context) {
             // Don't actually schedule jobs during unit tests.
             mIdleScheduled = true;
         }
 
+        @Override
         public void cancelIdleJob(Context context) {
             mIdleScheduled = false;
         }
 
+        @Override
         public boolean isInteractive(Context context) {
             return mInteractive;
         }
