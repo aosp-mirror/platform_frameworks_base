@@ -73,7 +73,6 @@ public class RecoverySession implements AutoCloseable {
 
     /**
      * @deprecated Use {@link #start(CertPath, byte[], byte[], List)} instead.
-     * @removed
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
