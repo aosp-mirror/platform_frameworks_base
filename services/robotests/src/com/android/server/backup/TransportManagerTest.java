@@ -97,7 +97,6 @@ public class TransportManagerTest {
     private TransportData mTransportA1;
     private TransportData mTransportA2;
     private TransportData mTransportB1;
-
     private ShadowPackageManager mShadowPackageManager;
     private Context mContext;
 

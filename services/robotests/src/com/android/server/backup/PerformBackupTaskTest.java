@@ -19,6 +19,7 @@ package com.android.server.backup;
 import static com.android.server.backup.testing.BackupManagerServiceTestUtils.createBackupWakeLock;
 import static com.android.server.backup.testing.BackupManagerServiceTestUtils.setUpBackupManagerServiceBasics;
 import static com.android.server.backup.testing.BackupManagerServiceTestUtils.startBackupThreadAndGetLooper;
+
 import static com.android.server.backup.testing.TransportData.backupTransport;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -102,18 +103,10 @@ import java.util.stream.Stream;
 @Config(
     manifest = Config.NONE,
     sdk = 26,
-    shadows = {
-        ShadowBackupDataInput.class,
-        ShadowBackupDataOutput.class,
-        ShadowQueuedWork.class
-    }
+    shadows = {ShadowBackupDataInput.class, ShadowBackupDataOutput.class, ShadowQueuedWork.class}
 )
 @SystemLoaderPackages({"com.android.server.backup", "android.app.backup"})
-@SystemLoaderClasses({
-    IBackupTransport.class,
-    IBackupAgent.class,
-    PackageInfo.class
-})
+@SystemLoaderClasses({IBackupTransport.class, IBackupAgent.class, PackageInfo.class})
 @Presubmit
 public class PerformBackupTaskTest {
     private static final String PACKAGE_1 = "com.example.package1";
@@ -579,6 +572,7 @@ public class PerformBackupTaskTest {
         return task;
     }
 
+    /** Matches {@link PackageInfo} whose package name is {@code packageName}. */
     private static ArgumentMatcher<PackageInfo> packageInfo(String packageName) {
         // We have to test for packageInfo nulity because of Mockito's own stubbing with argThat().
         // E.g. if you do:
