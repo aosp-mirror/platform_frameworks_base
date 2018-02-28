@@ -16,6 +16,8 @@
 
 package com.android.server.pm;
 
+import android.annotation.AnyThread;
+import android.annotation.WorkerThread;
 import android.app.IInstantAppResolver;
 import android.app.InstantAppResolverService;
 import android.content.ComponentName;
@@ -37,6 +39,7 @@ import android.util.Slog;
 import android.util.TimedRemoteCaller;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.os.BackgroundThread;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +71,7 @@ final class InstantAppResolverConnection implements DeathRecipient {
     private static final int STATE_IDLE    = 0; // no bind operation is ongoing
     private static final int STATE_BINDING = 1; // someone is binding and waiting
     private static final int STATE_PENDING = 2; // a bind is pending, but the caller is not waiting
+    private final Handler mBgHandler;
 
     @GuardedBy("mLock")
     private int mBindState = STATE_IDLE;
@@ -78,6 +82,7 @@ final class InstantAppResolverConnection implements DeathRecipient {
             Context context, ComponentName componentName, String action) {
         mContext = context;
         mIntent = new Intent(action).setComponent(componentName);
+        mBgHandler = BackgroundThread.getHandler();
     }
 
     public final List<InstantAppResolveInfo> getInstantAppResolveInfoList(Intent sanitizedIntent,
@@ -131,6 +136,7 @@ final class InstantAppResolverConnection implements DeathRecipient {
         }
     }
 
+    @WorkerThread
     private IInstantAppResolver getRemoteInstanceLazy(String token)
             throws ConnectionException, TimeoutException, InterruptedException {
         long binderToken = Binder.clearCallingIdentity();
@@ -157,6 +163,7 @@ final class InstantAppResolverConnection implements DeathRecipient {
         }
     }
 
+    @WorkerThread
     private IInstantAppResolver bind(String token)
             throws ConnectionException, TimeoutException, InterruptedException {
         boolean doUnbind = false;
@@ -241,6 +248,19 @@ final class InstantAppResolverConnection implements DeathRecipient {
         }
     }
 
+    @AnyThread
+    void optimisticBind() {
+        mBgHandler.post(() -> {
+            try {
+                if (bind("Optimistic Bind") != null && DEBUG_INSTANT) {
+                    Slog.i(TAG, "Optimistic bind succeeded.");
+                }
+            } catch (ConnectionException | TimeoutException | InterruptedException e) {
+                Slog.e(TAG, "Optimistic bind failed.", e);
+            }
+        });
+    }
+
     @Override
     public void binderDied() {
         if (DEBUG_INSTANT) {
@@ -249,6 +269,7 @@ final class InstantAppResolverConnection implements DeathRecipient {
         synchronized (mLock) {
             handleBinderDiedLocked();
         }
+        optimisticBind();
     }
 
     @GuardedBy("mLock")
