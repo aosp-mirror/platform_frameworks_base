@@ -6490,22 +6490,27 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, true, ALLOW_FULL_ONLY, "killBackgroundProcesses", null);
+        final int[] userIds = mUserController.expandUserId(userId);
+
         long callingId = Binder.clearCallingIdentity();
         try {
             IPackageManager pm = AppGlobals.getPackageManager();
-            synchronized(this) {
+            for (int targetUserId : userIds) {
                 int appId = -1;
                 try {
                     appId = UserHandle.getAppId(
-                            pm.getPackageUid(packageName, MATCH_DEBUG_TRIAGED_MISSING, userId));
+                            pm.getPackageUid(packageName, MATCH_DEBUG_TRIAGED_MISSING,
+                                    targetUserId));
                 } catch (RemoteException e) {
                 }
                 if (appId == -1) {
                     Slog.w(TAG, "Invalid packageName: " + packageName);
                     return;
                 }
-                killPackageProcessesLocked(packageName, appId, userId,
-                        ProcessList.SERVICE_ADJ, false, true, true, false, "kill background");
+                synchronized (this) {
+                    killPackageProcessesLocked(packageName, appId, targetUserId,
+                            ProcessList.SERVICE_ADJ, false, true, true, false, "kill background");
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);

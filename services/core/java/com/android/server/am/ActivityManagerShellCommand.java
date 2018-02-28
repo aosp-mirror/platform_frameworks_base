@@ -2811,7 +2811,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  crash [--user <USER_ID>] <PACKAGE|PID>");
             pw.println("      Induce a VM crash in the specified package or process");
             pw.println("  kill [--user <USER_ID> | all | current] <PACKAGE>");
-            pw.println("      Kill all processes associated with the given application.");
+            pw.println("      Kill all background processes associated with the given application.");
             pw.println("  kill-all");
             pw.println("      Kill all processes that are safe to kill (cached, etc).");
             pw.println("  make-uid-idle [--user <USER_ID> | all | current] <PACKAGE>");
