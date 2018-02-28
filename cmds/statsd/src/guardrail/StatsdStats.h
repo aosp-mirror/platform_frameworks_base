@@ -170,6 +170,11 @@ public:
     void noteRegisteredAnomalyAlarmChanged();
 
     /**
+     * Report that statsd modified the periodic alarm registered with StatsCompanionService.
+     */
+    void noteRegisteredPeriodicAlarmChanged();
+
+    /**
      * Records the number of snapshot and delta entries that are being dropped from the uid map.
      */
     void noteUidMapDropped(int snapshots, int deltas);
@@ -263,6 +268,9 @@ private:
     // Stores the number of times statsd modified the anomaly alarm registered with
     // StatsCompanionService.
     int mAnomalyAlarmRegisteredStats = 0;
+
+    // Stores the number of times statsd registers the periodic alarm changes
+    int mPeriodicAlarmRegisteredStats = 0;
 
     // Stores the number of times an anomaly detection alert has been declared
     // (per config, per alert name). The map size is capped by kMaxConfigCount.

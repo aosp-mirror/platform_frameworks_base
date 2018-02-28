@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define DEBUG true  // STOPSHIP if true
+#define DEBUG false  // STOPSHIP if true
 #include "Log.h"
 
 #include <android/hardware/health/2.0/IHealth.h>
@@ -47,7 +47,6 @@ sp<android::hardware::health::V2_0::IHealth> gHealthHal = nullptr;
 bool getHealthHal() {
     if (gHealthHal == nullptr) {
         gHealthHal = get_health_service();
-
     }
     return gHealthHal != nullptr;
 }

@@ -167,8 +167,8 @@
     <color name="user_icon_default_white">#ffffffff</color><!-- white -->
 
     <!-- Default profile badge colors -->
-    <color name="profile_badge_1">#ffff6d00</color><!-- Orange -->
-    <color name="profile_badge_2">#ff000000</color><!-- Black -->
+    <color name="profile_badge_1">#ff1A73E8</color><!-- Blue -->
+    <color name="profile_badge_2">#ffff6d00</color><!-- Orange -->
     <color name="profile_badge_3">#ff22f033</color><!-- Green -->
 
     <!-- Default instant app badge color -->

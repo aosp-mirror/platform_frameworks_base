@@ -60,11 +60,12 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     public static final String QS_SHOW_HEADER = "qs_show_header";
 
     protected final Context mContext;
-    protected final ArrayList<TileRecord> mRecords = new ArrayList<TileRecord>();
+    protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
     protected final View mBrightnessView;
     private final H mHandler = new H();
     private final View mPageIndicator;
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
+    private final QSTileRevealController mQsTileRevealController;
 
     protected boolean mExpanded;
     protected boolean mListening;
@@ -108,6 +109,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         addView(mPageIndicator);
 
         ((PagedTileLayout) mTileLayout).setPageIndicator((PageIndicator) mPageIndicator);
+        mQsTileRevealController = new QSTileRevealController(mContext, this,
+                ((PagedTileLayout) mTileLayout));
 
         addDivider();
 
@@ -134,6 +137,10 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     public View getPageIndicator() {
         return mPageIndicator;
+    }
+
+    public QSTileRevealController getQsTileRevealController() {
+        return mQsTileRevealController;
     }
 
     public boolean isShowingCustomize() {
@@ -352,6 +359,9 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     }
 
     public void setTiles(Collection<QSTile> tiles, boolean collapsedView) {
+        if (!collapsedView) {
+            mQsTileRevealController.updateRevealedTiles(tiles);
+        }
         for (TileRecord record : mRecords) {
             mTileLayout.removeTile(record);
             record.tile.removeCallback(record.callback);

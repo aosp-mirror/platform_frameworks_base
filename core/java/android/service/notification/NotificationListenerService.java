@@ -85,7 +85,10 @@ import java.util.List;
  * or after {@link #onListenerDisconnected()}.
  * </p>
  * <p> Notification listeners cannot get notification access or be bound by the system on
- * {@link ActivityManager#isLowRamDevice() low ram} devices</p>
+ * {@linkplain ActivityManager#isLowRamDevice() low-RAM} devices. The system also ignores
+ * notification listeners running in a work profile. A
+ * {@link android.app.admin.DevicePolicyManager} might block notifications originating from a work
+ * profile.</p>
  */
 public abstract class NotificationListenerService extends Service {
 
@@ -1217,6 +1220,7 @@ public abstract class NotificationListenerService extends Service {
                 // convert icon metadata to legacy format for older clients
                 createLegacyIconExtras(sbn.getNotification());
                 maybePopulateRemoteViews(sbn.getNotification());
+                maybePopulatePeople(sbn.getNotification());
             } catch (IllegalArgumentException e) {
                 // warn and drop corrupt notification
                 Log.w(TAG, "onNotificationPosted: can't rebuild notification from " +

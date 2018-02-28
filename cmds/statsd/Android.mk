@@ -21,9 +21,11 @@ statsd_common_src := \
     src/statsd_config.proto \
     src/FieldValue.cpp \
     src/stats_log_util.cpp \
-    src/anomaly/AnomalyMonitor.cpp \
+    src/anomaly/AlarmMonitor.cpp \
+    src/anomaly/AlarmTracker.cpp \
     src/anomaly/AnomalyTracker.cpp \
     src/anomaly/DurationAnomalyTracker.cpp \
+    src/anomaly/subscriber_util.cpp \
     src/condition/CombinationConditionTracker.cpp \
     src/condition/condition_util.cpp \
     src/condition/SimpleConditionTracker.cpp \
@@ -36,6 +38,7 @@ statsd_common_src := \
     src/external/StatsCompanionServicePuller.cpp \
     src/external/SubsystemSleepStatePuller.cpp \
     src/external/ResourceHealthManagerPuller.cpp \
+    src/external/ResourceThermalManagerPuller.cpp \
     src/external/CpuTimePerUidPuller.cpp \
     src/external/CpuTimePerUidFreqPuller.cpp \
     src/external/KernelUidCpuActiveTimeReader.cpp \
@@ -99,6 +102,7 @@ statsd_common_shared_libraries := \
     android.hardware.health@2.0 \
     android.hardware.power@1.0 \
     android.hardware.power@1.1 \
+    android.hardware.thermal@1.0 \
     libmemunreachable
 
 # =========
@@ -170,7 +174,8 @@ LOCAL_SRC_FILES := \
     src/atom_field_options.proto \
     src/atoms.proto \
     src/stats_log.proto \
-    tests/AnomalyMonitor_test.cpp \
+    tests/AlarmMonitor_test.cpp \
+    tests/anomaly/AlarmTracker_test.cpp \
     tests/anomaly/AnomalyTracker_test.cpp \
     tests/ConfigManager_test.cpp \
     tests/external/puller_util_test.cpp \

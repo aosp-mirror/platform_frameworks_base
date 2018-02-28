@@ -49,5 +49,7 @@ Adding tests
       can be reported in an iteration
   * If the target package should be running before your test logic starts, add startTargetPackage();
     at the beginning of the iteration
+
 * Reporting
-  * Look at go/am-perf for how to add new tests to dashboards and receive notification on regression
+  * Look at internal documentation for how to add new tests to dashboards and receive notification
+    on regressions

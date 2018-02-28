@@ -758,8 +758,9 @@ public final class ImageDecoder implements AutoCloseable {
 
     /** @hide **/
     @Retention(SOURCE)
-    @IntDef({ ALLOCATOR_DEFAULT, ALLOCATOR_SOFTWARE, ALLOCATOR_SHARED_MEMORY,
-              ALLOCATOR_HARDWARE })
+    @IntDef(value = { ALLOCATOR_DEFAULT, ALLOCATOR_SOFTWARE,
+              ALLOCATOR_SHARED_MEMORY, ALLOCATOR_HARDWARE },
+              prefix = {"ALLOCATOR_"})
     public @interface Allocator {};
 
     /**

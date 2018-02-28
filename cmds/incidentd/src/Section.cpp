@@ -18,12 +18,8 @@
 
 #include "Section.h"
 
-#include <errno.h>
-#include <sys/prctl.h>
-#include <unistd.h>
 #include <wait.h>
 
-#include <memory>
 #include <mutex>
 
 #include <android-base/file.h>
@@ -37,6 +33,7 @@
 #include "FdBuffer.h"
 #include "Privacy.h"
 #include "PrivacyBuffer.h"
+#include "frameworks/base/core/proto/android/os/data.proto.h"
 #include "frameworks/base/core/proto/android/util/log.proto.h"
 #include "incidentd_util.h"
 
@@ -52,31 +49,11 @@ const int FIELD_ID_INCIDENT_METADATA = 2;
 const int WAIT_MAX = 5;
 const struct timespec WAIT_INTERVAL_NS = {0, 200 * 1000 * 1000};
 const char INCIDENT_HELPER[] = "/system/bin/incident_helper";
+const char GZIP[] = "/system/bin/gzip";
 
-static pid_t fork_execute_incident_helper(const int id, const char* name, Fpipe& p2cPipe,
-                                          Fpipe& c2pPipe) {
+static pid_t fork_execute_incident_helper(const int id, Fpipe* p2cPipe, Fpipe* c2pPipe) {
     const char* ihArgs[]{INCIDENT_HELPER, "-s", String8::format("%d", id).string(), NULL};
-    // fork used in multithreaded environment, avoid adding unnecessary code in child process
-    pid_t pid = fork();
-    if (pid == 0) {
-        if (TEMP_FAILURE_RETRY(dup2(p2cPipe.readFd(), STDIN_FILENO)) != 0 || !p2cPipe.close() ||
-            TEMP_FAILURE_RETRY(dup2(c2pPipe.writeFd(), STDOUT_FILENO)) != 1 || !c2pPipe.close()) {
-            ALOGW("%s can't setup stdin and stdout for incident helper", name);
-            _exit(EXIT_FAILURE);
-        }
-
-        /* make sure the child dies when incidentd dies */
-        prctl(PR_SET_PDEATHSIG, SIGKILL);
-
-        execv(INCIDENT_HELPER, const_cast<char**>(ihArgs));
-
-        ALOGW("%s failed in incident helper process: %s", name, strerror(errno));
-        _exit(EXIT_FAILURE);  // always exits with failure if any
-    }
-    // close the fds used in incident helper
-    close(p2cPipe.readFd());
-    close(c2pPipe.writeFd());
-    return pid;
+    return fork_execute_cmd(INCIDENT_HELPER, const_cast<char**>(ihArgs), p2cPipe, c2pPipe);
 }
 
 // ================================================================================
@@ -254,10 +231,12 @@ status_t MetadataSection::Execute(ReportRequestSet* requests) const {
     return NO_ERROR;
 }
 // ================================================================================
+static inline bool isSysfs(const char* filename) { return strncmp(filename, "/sys/", 5) == 0; }
+
 FileSection::FileSection(int id, const char* filename, const int64_t timeoutMs)
     : Section(id, timeoutMs), mFilename(filename) {
     name = filename;
-    mIsSysfs = strncmp(filename, "/sys/", 5) == 0;
+    mIsSysfs = isSysfs(filename);
 }
 
 FileSection::~FileSection() {}
@@ -280,7 +259,7 @@ status_t FileSection::Execute(ReportRequestSet* requests) const {
         return -errno;
     }
 
-    pid_t pid = fork_execute_incident_helper(this->id, this->name.string(), p2cPipe, c2pPipe);
+    pid_t pid = fork_execute_incident_helper(this->id, &p2cPipe, &c2pPipe);
     if (pid == -1) {
         ALOGW("FileSection '%s' failed to fork", this->name.string());
         return -errno;
@@ -289,6 +268,8 @@ status_t FileSection::Execute(ReportRequestSet* requests) const {
     // parent process
     status_t readStatus = buffer.readProcessedDataInStream(fd, p2cPipe.writeFd(), c2pPipe.readFd(),
                                                            this->timeoutMs, mIsSysfs);
+    close(fd);  // close the fd anyway.
+
     if (readStatus != NO_ERROR || buffer.timedOut()) {
         ALOGW("FileSection '%s' failed to read data from incident helper: %s, timedout: %s",
               this->name.string(), strerror(-readStatus), buffer.timedOut() ? "true" : "false");
@@ -313,7 +294,99 @@ status_t FileSection::Execute(ReportRequestSet* requests) const {
 
     return NO_ERROR;
 }
+// ================================================================================
+GZipSection::GZipSection(int id, const char* filename, ...) : Section(id) {
+    name = "gzip ";
+    name += filename;
+    va_list args;
+    va_start(args, filename);
+    mFilenames = varargs(filename, args);
+    va_end(args);
+}
 
+GZipSection::~GZipSection() {}
+
+status_t GZipSection::Execute(ReportRequestSet* requests) const {
+    // Reads the files in order, use the first available one.
+    int index = 0;
+    int fd = -1;
+    while (mFilenames[index] != NULL) {
+        fd = open(mFilenames[index], O_RDONLY | O_CLOEXEC);
+        if (fd != -1) {
+            break;
+        }
+        ALOGW("GZipSection failed to open file %s", mFilenames[index]);
+        index++;  // look at the next file.
+    }
+    VLOG("GZipSection is using file %s, fd=%d", mFilenames[index], fd);
+    if (fd == -1) return -1;
+
+    FdBuffer buffer;
+    Fpipe p2cPipe;
+    Fpipe c2pPipe;
+    // initiate pipes to pass data to/from gzip
+    if (!p2cPipe.init() || !c2pPipe.init()) {
+        ALOGW("GZipSection '%s' failed to setup pipes", this->name.string());
+        return -errno;
+    }
+
+    const char* gzipArgs[]{GZIP, NULL};
+    pid_t pid = fork_execute_cmd(GZIP, const_cast<char**>(gzipArgs), &p2cPipe, &c2pPipe);
+    if (pid == -1) {
+        ALOGW("GZipSection '%s' failed to fork", this->name.string());
+        return -errno;
+    }
+    // parent process
+
+    // construct Fdbuffer to output GZippedfileProto, the reason to do this instead of using
+    // ProtoOutputStream is to avoid allocation of another buffer inside ProtoOutputStream.
+    EncodedBuffer* internalBuffer = buffer.getInternalBuffer();
+    internalBuffer->writeHeader((uint32_t)GZippedFileProto::FILENAME, WIRE_TYPE_LENGTH_DELIMITED);
+    String8 usedFile(mFilenames[index]);
+    internalBuffer->writeRawVarint32(usedFile.size());
+    for (size_t i = 0; i < usedFile.size(); i++) {
+        internalBuffer->writeRawByte(mFilenames[index][i]);
+    }
+    internalBuffer->writeHeader((uint32_t)GZippedFileProto::GZIPPED_DATA,
+                                WIRE_TYPE_LENGTH_DELIMITED);
+    size_t editPos = internalBuffer->wp()->pos();
+    internalBuffer->wp()->move(8);  // reserve 8 bytes for the varint of the data size.
+    size_t dataBeginAt = internalBuffer->wp()->pos();
+    VLOG("GZipSection '%s' editPos=%zd, dataBeginAt=%zd", this->name.string(), editPos,
+         dataBeginAt);
+
+    status_t readStatus = buffer.readProcessedDataInStream(
+            fd, p2cPipe.writeFd(), c2pPipe.readFd(), this->timeoutMs, isSysfs(mFilenames[index]));
+    close(fd);  // close the fd anyway.
+
+    if (readStatus != NO_ERROR || buffer.timedOut()) {
+        ALOGW("GZipSection '%s' failed to read data from gzip: %s, timedout: %s",
+              this->name.string(), strerror(-readStatus), buffer.timedOut() ? "true" : "false");
+        kill_child(pid);
+        return readStatus;
+    }
+
+    status_t gzipStatus = wait_child(pid);
+    if (gzipStatus != NO_ERROR) {
+        ALOGW("GZipSection '%s' abnormal child process: %s", this->name.string(),
+              strerror(-gzipStatus));
+        return gzipStatus;
+    }
+    // Revisit the actual size from gzip result and edit the internal buffer accordingly.
+    size_t dataSize = buffer.size() - dataBeginAt;
+    internalBuffer->wp()->rewind()->move(editPos);
+    internalBuffer->writeRawVarint32(dataSize);
+    internalBuffer->copy(dataBeginAt, dataSize);
+    VLOG("GZipSection '%s' wrote %zd bytes in %d ms, dataSize=%zd", this->name.string(),
+         buffer.size(), (int)buffer.durationMs(), dataSize);
+    status_t err = write_report_requests(this->id, buffer, requests);
+    if (err != NO_ERROR) {
+        ALOGW("GZipSection '%s' failed writing: %s", this->name.string(), strerror(-err));
+        return err;
+    }
+
+    return NO_ERROR;
+}
 // ================================================================================
 struct WorkerThreadData : public virtual RefBase {
     const WorkerThreadSection* section;
@@ -457,42 +530,20 @@ status_t WorkerThreadSection::Execute(ReportRequestSet* requests) const {
 }
 
 // ================================================================================
-void CommandSection::init(const char* command, va_list args) {
-    va_list copied_args;
-    int numOfArgs = 0;
-
-    va_copy(copied_args, args);
-    while (va_arg(copied_args, const char*) != NULL) {
-        numOfArgs++;
-    }
-    va_end(copied_args);
-
-    // allocate extra 1 for command and 1 for NULL terminator
-    mCommand = (const char**)malloc(sizeof(const char*) * (numOfArgs + 2));
-
-    mCommand[0] = command;
-    name = command;
-    for (int i = 0; i < numOfArgs; i++) {
-        const char* arg = va_arg(args, const char*);
-        mCommand[i + 1] = arg;
-        name += " ";
-        name += arg;
-    }
-    mCommand[numOfArgs + 1] = NULL;
-}
-
 CommandSection::CommandSection(int id, const int64_t timeoutMs, const char* command, ...)
     : Section(id, timeoutMs) {
+    name = command;
     va_list args;
     va_start(args, command);
-    init(command, args);
+    mCommand = varargs(command, args);
     va_end(args);
 }
 
 CommandSection::CommandSection(int id, const char* command, ...) : Section(id) {
+    name = command;
     va_list args;
     va_start(args, command);
-    init(command, args);
+    mCommand = varargs(command, args);
     va_end(args);
 }
 
@@ -527,7 +578,7 @@ status_t CommandSection::Execute(ReportRequestSet* requests) const {
               strerror(errno));
         _exit(err);  // exit with command error code
     }
-    pid_t ihPid = fork_execute_incident_helper(this->id, this->name.string(), cmdPipe, ihPipe);
+    pid_t ihPid = fork_execute_incident_helper(this->id, &cmdPipe, &ihPipe);
     if (ihPid == -1) {
         ALOGW("CommandSection '%s' failed to fork", this->name.string());
         return -errno;
@@ -544,8 +595,7 @@ status_t CommandSection::Execute(ReportRequestSet* requests) const {
     }
 
     // TODO: wait for command here has one trade-off: the failed status of command won't be detected
-    // until
-    //       buffer timeout, but it has advatage on starting the data stream earlier.
+    // until buffer timeout, but it has advatage on starting the data stream earlier.
     status_t cmdStatus = wait_child(cmdPid);
     status_t ihStatus = wait_child(ihPid);
     if (cmdStatus != NO_ERROR || ihStatus != NO_ERROR) {

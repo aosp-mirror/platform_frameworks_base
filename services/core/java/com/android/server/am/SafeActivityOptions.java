@@ -121,10 +121,16 @@ class SafeActivityOptions {
         if (mOriginalOptions != null) {
             checkPermissions(intent, aInfo, callerApp, supervisor, mOriginalOptions,
                     mOriginalCallingPid, mOriginalCallingUid);
+            if (mOriginalOptions.getRemoteAnimationAdapter() != null) {
+                mOriginalOptions.getRemoteAnimationAdapter().setCallingPid(mOriginalCallingPid);
+            }
         }
         if (mCallerOptions != null) {
             checkPermissions(intent, aInfo, callerApp, supervisor, mCallerOptions,
                     mRealCallingPid, mRealCallingUid);
+            if (mCallerOptions.getRemoteAnimationAdapter() != null) {
+                mCallerOptions.getRemoteAnimationAdapter().setCallingPid(mRealCallingPid);
+            }
         }
         return mergeActivityOptions(mOriginalOptions, mCallerOptions);
     }

@@ -26,7 +26,7 @@ namespace statsd {
 /**
  * Calls incidentd to trigger an incident report and put in dropbox for uploading.
  */
-bool GenerateIncidentReport(const IncidentdDetails& config, const Alert& alert,
+bool GenerateIncidentReport(const IncidentdDetails& config, const int64_t& rule_id,
                             const ConfigKey& configKey);
 
 }  // namespace statsd

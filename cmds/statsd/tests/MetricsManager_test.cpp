@@ -271,19 +271,25 @@ StatsdConfig buildCirclePredicates() {
 
 TEST(MetricsManagerTest, TestGoodConfig) {
     UidMap uidMap;
+    sp<AlarmMonitor> anomalyAlarmMonitor;
+    sp<AlarmMonitor> periodicAlarmMonitor;
     StatsdConfig config = buildGoodConfig();
     set<int> allTagIds;
     vector<sp<LogMatchingTracker>> allAtomMatchers;
     vector<sp<ConditionTracker>> allConditionTrackers;
     vector<sp<MetricProducer>> allMetricProducers;
     std::vector<sp<AnomalyTracker>> allAnomalyTrackers;
+    std::vector<sp<AlarmTracker>> allAlarmTrackers;
     unordered_map<int, std::vector<int>> conditionToMetricMap;
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
     std::set<int64_t> noReportMetricIds;
 
-    EXPECT_TRUE(initStatsdConfig(kConfigKey, config, uidMap, timeBaseSec, allTagIds, allAtomMatchers,
+    EXPECT_TRUE(initStatsdConfig(kConfigKey, config, uidMap,
+                                 anomalyAlarmMonitor, periodicAlarmMonitor,
+                                 timeBaseSec, allTagIds, allAtomMatchers,
                                  allConditionTrackers, allMetricProducers, allAnomalyTrackers,
+                                 allAlarmTrackers,
                                  conditionToMetricMap, trackerToMetricMap, trackerToConditionMap,
                                  noReportMetricIds));
     EXPECT_EQ(1u, allMetricProducers.size());
@@ -293,112 +299,148 @@ TEST(MetricsManagerTest, TestGoodConfig) {
 
 TEST(MetricsManagerTest, TestDimensionMetricsWithMultiTags) {
     UidMap uidMap;
+    sp<AlarmMonitor> anomalyAlarmMonitor;
+    sp<AlarmMonitor> periodicAlarmMonitor;
     StatsdConfig config = buildDimensionMetricsWithMultiTags();
     set<int> allTagIds;
     vector<sp<LogMatchingTracker>> allAtomMatchers;
     vector<sp<ConditionTracker>> allConditionTrackers;
     vector<sp<MetricProducer>> allMetricProducers;
     std::vector<sp<AnomalyTracker>> allAnomalyTrackers;
+    std::vector<sp<AlarmTracker>> allAlarmTrackers;
     unordered_map<int, std::vector<int>> conditionToMetricMap;
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
     std::set<int64_t> noReportMetricIds;
 
-    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap, timeBaseSec, allTagIds, allAtomMatchers,
+    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap,
+                                  anomalyAlarmMonitor, periodicAlarmMonitor,
+                                  timeBaseSec, allTagIds, allAtomMatchers,
                                   allConditionTrackers, allMetricProducers, allAnomalyTrackers,
+                                  allAlarmTrackers,
                                   conditionToMetricMap, trackerToMetricMap, trackerToConditionMap,
                                   noReportMetricIds));
 }
 
 TEST(MetricsManagerTest, TestCircleLogMatcherDependency) {
     UidMap uidMap;
+    sp<AlarmMonitor> anomalyAlarmMonitor;
+    sp<AlarmMonitor> periodicAlarmMonitor;
     StatsdConfig config = buildCircleMatchers();
     set<int> allTagIds;
     vector<sp<LogMatchingTracker>> allAtomMatchers;
     vector<sp<ConditionTracker>> allConditionTrackers;
     vector<sp<MetricProducer>> allMetricProducers;
     std::vector<sp<AnomalyTracker>> allAnomalyTrackers;
+    std::vector<sp<AlarmTracker>> allAlarmTrackers;
     unordered_map<int, std::vector<int>> conditionToMetricMap;
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
     std::set<int64_t> noReportMetricIds;
 
-    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap, timeBaseSec, allTagIds, allAtomMatchers,
+    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap,
+                                  anomalyAlarmMonitor, periodicAlarmMonitor,
+                                  timeBaseSec, allTagIds, allAtomMatchers,
                                   allConditionTrackers, allMetricProducers, allAnomalyTrackers,
+                                  allAlarmTrackers,
                                   conditionToMetricMap, trackerToMetricMap, trackerToConditionMap,
                                   noReportMetricIds));
 }
 
 TEST(MetricsManagerTest, TestMissingMatchers) {
     UidMap uidMap;
+    sp<AlarmMonitor> anomalyAlarmMonitor;
+    sp<AlarmMonitor> periodicAlarmMonitor;
     StatsdConfig config = buildMissingMatchers();
     set<int> allTagIds;
     vector<sp<LogMatchingTracker>> allAtomMatchers;
     vector<sp<ConditionTracker>> allConditionTrackers;
     vector<sp<MetricProducer>> allMetricProducers;
     std::vector<sp<AnomalyTracker>> allAnomalyTrackers;
+    std::vector<sp<AlarmTracker>> allAlarmTrackers;
     unordered_map<int, std::vector<int>> conditionToMetricMap;
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
     std::set<int64_t> noReportMetricIds;
-    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap, timeBaseSec, allTagIds, allAtomMatchers,
+    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap,
+                                  anomalyAlarmMonitor, periodicAlarmMonitor,
+                                  timeBaseSec, allTagIds, allAtomMatchers,
                                   allConditionTrackers, allMetricProducers, allAnomalyTrackers,
+                                  allAlarmTrackers,
                                   conditionToMetricMap, trackerToMetricMap, trackerToConditionMap,
                                   noReportMetricIds));
 }
 
 TEST(MetricsManagerTest, TestMissingPredicate) {
     UidMap uidMap;
+    sp<AlarmMonitor> anomalyAlarmMonitor;
+    sp<AlarmMonitor> periodicAlarmMonitor;
     StatsdConfig config = buildMissingPredicate();
     set<int> allTagIds;
     vector<sp<LogMatchingTracker>> allAtomMatchers;
     vector<sp<ConditionTracker>> allConditionTrackers;
     vector<sp<MetricProducer>> allMetricProducers;
     std::vector<sp<AnomalyTracker>> allAnomalyTrackers;
+    std::vector<sp<AlarmTracker>> allAlarmTrackers;
     unordered_map<int, std::vector<int>> conditionToMetricMap;
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
     std::set<int64_t> noReportMetricIds;
-    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap, timeBaseSec, allTagIds, allAtomMatchers,
+    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap,
+                                  anomalyAlarmMonitor, periodicAlarmMonitor,
+                                  timeBaseSec, allTagIds, allAtomMatchers,
                                   allConditionTrackers, allMetricProducers, allAnomalyTrackers,
+                                  allAlarmTrackers,
                                   conditionToMetricMap, trackerToMetricMap, trackerToConditionMap,
                                   noReportMetricIds));
 }
 
 TEST(MetricsManagerTest, TestCirclePredicateDependency) {
     UidMap uidMap;
+    sp<AlarmMonitor> anomalyAlarmMonitor;
+    sp<AlarmMonitor> periodicAlarmMonitor;
     StatsdConfig config = buildCirclePredicates();
     set<int> allTagIds;
     vector<sp<LogMatchingTracker>> allAtomMatchers;
     vector<sp<ConditionTracker>> allConditionTrackers;
     vector<sp<MetricProducer>> allMetricProducers;
     std::vector<sp<AnomalyTracker>> allAnomalyTrackers;
+    std::vector<sp<AlarmTracker>> allAlarmTrackers;
     unordered_map<int, std::vector<int>> conditionToMetricMap;
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
     std::set<int64_t> noReportMetricIds;
 
-    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap, timeBaseSec, allTagIds, allAtomMatchers,
+    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap,
+                                  anomalyAlarmMonitor, periodicAlarmMonitor,
+                                  timeBaseSec, allTagIds, allAtomMatchers,
                                   allConditionTrackers, allMetricProducers, allAnomalyTrackers,
+                                  allAlarmTrackers,
                                   conditionToMetricMap, trackerToMetricMap, trackerToConditionMap,
                                   noReportMetricIds));
 }
 
 TEST(MetricsManagerTest, testAlertWithUnknownMetric) {
     UidMap uidMap;
+    sp<AlarmMonitor> anomalyAlarmMonitor;
+    sp<AlarmMonitor> periodicAlarmMonitor;
     StatsdConfig config = buildAlertWithUnknownMetric();
     set<int> allTagIds;
     vector<sp<LogMatchingTracker>> allAtomMatchers;
     vector<sp<ConditionTracker>> allConditionTrackers;
     vector<sp<MetricProducer>> allMetricProducers;
     std::vector<sp<AnomalyTracker>> allAnomalyTrackers;
+    std::vector<sp<AlarmTracker>> allAlarmTrackers;
     unordered_map<int, std::vector<int>> conditionToMetricMap;
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
     std::set<int64_t> noReportMetricIds;
 
-    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap, timeBaseSec, allTagIds, allAtomMatchers,
+    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap,
+                                  anomalyAlarmMonitor, periodicAlarmMonitor,
+                                  timeBaseSec, allTagIds, allAtomMatchers,
                                   allConditionTrackers, allMetricProducers, allAnomalyTrackers,
+                                  allAlarmTrackers,
                                   conditionToMetricMap, trackerToMetricMap, trackerToConditionMap,
                                   noReportMetricIds));
 }

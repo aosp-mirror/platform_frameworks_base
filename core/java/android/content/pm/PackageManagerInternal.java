@@ -236,6 +236,11 @@ public abstract class PackageManagerInternal {
             int userId);
 
     /**
+     * @return The default home activity component name.
+     */
+    public abstract ComponentName getDefaultHomeActivity(int userId);
+
+    /**
      * Called by DeviceOwnerManagerService to set the package names of device owner and profile
      * owners.
      */

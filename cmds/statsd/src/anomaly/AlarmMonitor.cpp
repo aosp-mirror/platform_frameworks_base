@@ -17,21 +17,24 @@
 #define DEBUG false
 #include "Log.h"
 
-#include "anomaly/AnomalyMonitor.h"
+#include "anomaly/AlarmMonitor.h"
 #include "guardrail/StatsdStats.h"
 
 namespace android {
 namespace os {
 namespace statsd {
 
-AnomalyMonitor::AnomalyMonitor(uint32_t minDiffToUpdateRegisteredAlarmTimeSec)
-    : mRegisteredAlarmTimeSec(0), mMinUpdateTimeSec(minDiffToUpdateRegisteredAlarmTimeSec) {
-}
+AlarmMonitor::AlarmMonitor(
+        uint32_t minDiffToUpdateRegisteredAlarmTimeSec,
+        const std::function<void(const sp<IStatsCompanionService>&, int64_t)>& updateAlarm,
+        const std::function<void(const sp<IStatsCompanionService>&)>& cancelAlarm)
+    : mRegisteredAlarmTimeSec(0), mMinUpdateTimeSec(minDiffToUpdateRegisteredAlarmTimeSec),
+      mUpdateAlarm(updateAlarm),
+      mCancelAlarm(cancelAlarm) {}
 
-AnomalyMonitor::~AnomalyMonitor() {
-}
+AlarmMonitor::~AlarmMonitor() {}
 
-void AnomalyMonitor::setStatsCompanionService(sp<IStatsCompanionService> statsCompanionService) {
+void AlarmMonitor::setStatsCompanionService(sp<IStatsCompanionService> statsCompanionService) {
     std::lock_guard<std::mutex> lock(mLock);
     sp<IStatsCompanionService> tmpForLock = mStatsCompanionService;
     mStatsCompanionService = statsCompanionService;
@@ -40,13 +43,13 @@ void AnomalyMonitor::setStatsCompanionService(sp<IStatsCompanionService> statsCo
         return;
     }
     VLOG("Creating link to statsCompanionService");
-    const sp<const AnomalyAlarm> top = mPq.top();
+    const sp<const InternalAlarm> top = mPq.top();
     if (top != nullptr) {
         updateRegisteredAlarmTime_l(top->timestampSec);
     }
 }
 
-void AnomalyMonitor::add(sp<const AnomalyAlarm> alarm) {
+void AlarmMonitor::add(sp<const InternalAlarm> alarm) {
     std::lock_guard<std::mutex> lock(mLock);
     if (alarm == nullptr) {
         ALOGW("Asked to add a null alarm.");
@@ -66,7 +69,7 @@ void AnomalyMonitor::add(sp<const AnomalyAlarm> alarm) {
     }
 }
 
-void AnomalyMonitor::remove(sp<const AnomalyAlarm> alarm) {
+void AlarmMonitor::remove(sp<const InternalAlarm> alarm) {
     std::lock_guard<std::mutex> lock(mLock);
     if (alarm == nullptr) {
         ALOGW("Asked to remove a null alarm.");
@@ -89,13 +92,13 @@ void AnomalyMonitor::remove(sp<const AnomalyAlarm> alarm) {
 
 // More efficient than repeatedly calling remove(mPq.top()) since it batches the
 // updates to the registered alarm.
-unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> AnomalyMonitor::popSoonerThan(
+unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> AlarmMonitor::popSoonerThan(
         uint32_t timestampSec) {
     VLOG("Removing alarms with time <= %u", timestampSec);
-    unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> oldAlarms;
+    unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> oldAlarms;
     std::lock_guard<std::mutex> lock(mLock);
 
-    for (sp<const AnomalyAlarm> t = mPq.top(); t != nullptr && t->timestampSec <= timestampSec;
+    for (sp<const InternalAlarm> t = mPq.top(); t != nullptr && t->timestampSec <= timestampSec;
         t = mPq.top()) {
         oldAlarms.insert(t);
         mPq.pop();  // remove t
@@ -113,25 +116,19 @@ unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> AnomalyMonitor::popS
     return oldAlarms;
 }
 
-void AnomalyMonitor::updateRegisteredAlarmTime_l(uint32_t timestampSec) {
+void AlarmMonitor::updateRegisteredAlarmTime_l(uint32_t timestampSec) {
     VLOG("Updating reg alarm time to %u", timestampSec);
     mRegisteredAlarmTimeSec = timestampSec;
-    if (mStatsCompanionService != nullptr) {
-        mStatsCompanionService->setAnomalyAlarm(secToMs(mRegisteredAlarmTimeSec));
-        StatsdStats::getInstance().noteRegisteredAnomalyAlarmChanged();
-    }
+    mUpdateAlarm(mStatsCompanionService, secToMs(mRegisteredAlarmTimeSec));
 }
 
-void AnomalyMonitor::cancelRegisteredAlarmTime_l() {
+void AlarmMonitor::cancelRegisteredAlarmTime_l() {
     VLOG("Cancelling reg alarm.");
     mRegisteredAlarmTimeSec = 0;
-    if (mStatsCompanionService != nullptr) {
-        mStatsCompanionService->cancelAnomalyAlarm();
-        StatsdStats::getInstance().noteRegisteredAnomalyAlarmChanged();
-    }
+    mCancelAlarm(mStatsCompanionService);
 }
 
-int64_t AnomalyMonitor::secToMs(uint32_t timeSec) {
+int64_t AlarmMonitor::secToMs(uint32_t timeSec) {
     return ((int64_t)timeSec) * 1000;
 }
 

@@ -129,6 +129,7 @@ TEST(GaugeMetricProducerTest, TestNoCondition) {
 }
 
 TEST(GaugeMetricProducerTest, TestPushedEventsWithUpgrade) {
+    sp<AlarmMonitor> alarmMonitor;
     GaugeMetric metric;
     metric.set_id(metricId);
     metric.set_bucket(ONE_MINUTE);
@@ -145,8 +146,9 @@ TEST(GaugeMetricProducerTest, TestPushedEventsWithUpgrade) {
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
                                       -1 /* -1 means no pulling */, bucketStartTimeNs,
                                       pullerManager);
+
     gaugeProducer.setBucketSize(60 * NS_PER_SEC);
-    sp<AnomalyTracker> anomalyTracker = gaugeProducer.addAnomalyTracker(alert);
+    sp<AnomalyTracker> anomalyTracker = gaugeProducer.addAnomalyTracker(alert, alarmMonitor);
     EXPECT_TRUE(anomalyTracker != nullptr);
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
@@ -339,6 +341,7 @@ TEST(GaugeMetricProducerTest, TestWithCondition) {
 }
 
 TEST(GaugeMetricProducerTest, TestAnomalyDetection) {
+    sp<AlarmMonitor> alarmMonitor;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     shared_ptr<MockStatsPullerManager> pullerManager =
@@ -363,7 +366,7 @@ TEST(GaugeMetricProducerTest, TestAnomalyDetection) {
     alert.set_num_buckets(2);
     const int32_t refPeriodSec = 60;
     alert.set_refractory_period_secs(refPeriodSec);
-    sp<AnomalyTracker> anomalyTracker = gaugeProducer.addAnomalyTracker(alert);
+    sp<AnomalyTracker> anomalyTracker = gaugeProducer.addAnomalyTracker(alert, alarmMonitor);
 
     int tagId = 1;
     std::shared_ptr<LogEvent> event1 = std::make_shared<LogEvent>(tagId, bucketStartTimeNs + 1);

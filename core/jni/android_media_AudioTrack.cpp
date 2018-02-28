@@ -282,7 +282,7 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this, job
 
         // compute the frame count
         size_t frameCount;
-        if (audio_is_linear_pcm(format)) {
+        if (audio_has_proportional_frames(format)) {
             const size_t bytesPerSample = audio_bytes_per_sample(format);
             frameCount = buffSizeInBytes / (channelCount * bytesPerSample);
         } else {

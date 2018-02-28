@@ -49,13 +49,17 @@ namespace statsd {
 const int FIELD_ID_METRICS = 1;
 
 MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
-                               const long timeBaseSec, sp<UidMap> uidMap)
+                               const long timeBaseSec,
+                               const sp<UidMap> &uidMap,
+                               const sp<AlarmMonitor>& anomalyAlarmMonitor,
+                               const sp<AlarmMonitor>& periodicAlarmMonitor)
     : mConfigKey(key), mUidMap(uidMap), mLastReportTimeNs(timeBaseSec * NS_PER_SEC) {
     mConfigValid =
-            initStatsdConfig(key, config, *uidMap, timeBaseSec, mTagIds, mAllAtomMatchers,
-                             mAllConditionTrackers,
-                             mAllMetricProducers, mAllAnomalyTrackers, mConditionToMetricMap,
-                             mTrackerToMetricMap, mTrackerToConditionMap, mNoReportMetricIds);
+            initStatsdConfig(key, config, *uidMap, anomalyAlarmMonitor, periodicAlarmMonitor,
+                             timeBaseSec, mTagIds, mAllAtomMatchers,
+                             mAllConditionTrackers, mAllMetricProducers, mAllAnomalyTrackers,
+                             mAllPeriodicAlarmTrackers, mConditionToMetricMap, mTrackerToMetricMap,
+                             mTrackerToConditionMap, mNoReportMetricIds);
 
     if (config.allowed_log_source_size() == 0) {
         // TODO(b/70794411): uncomment the following line and remove the hard coded log source
@@ -198,31 +202,59 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
         // Uid is 3rd from last field and must match the caller's uid,
         // unless that caller is statsd itself (statsd is allowed to spoof uids).
         long appHookUid = event.GetLong(event.size()-2, &err);
+        if (err != NO_ERROR ) {
+            VLOG("APP_BREADCRUMB_REPORTED had error when parsing the uid");
+            return;
+        }
         int32_t loggerUid = event.GetUid();
-        if (err != NO_ERROR || (loggerUid != appHookUid && loggerUid != AID_STATSD)) {
-            VLOG("AppHook has invalid uid: claimed %ld but caller is %d", appHookUid, loggerUid);
+        if (loggerUid != appHookUid && loggerUid != AID_STATSD) {
+            VLOG("APP_BREADCRUMB_REPORTED has invalid uid: claimed %ld but caller is %d",
+                 appHookUid, loggerUid);
             return;
         }
 
         // Label is 2nd from last field and must be from [0, 15].
         long appHookLabel = event.GetLong(event.size()-1, &err);
-        if (err != NO_ERROR || appHookLabel < 0 || appHookLabel > 15) {
-            VLOG("AppHook does not have valid label %ld", appHookLabel);
+        if (err != NO_ERROR ) {
+            VLOG("APP_BREADCRUMB_REPORTED had error when parsing the label field");
+            return;
+        } else if (appHookLabel < 0 || appHookLabel > 15) {
+            VLOG("APP_BREADCRUMB_REPORTED does not have valid label %ld", appHookLabel);
             return;
         }
 
         // The state must be from 0,3. This part of code must be manually updated.
         long appHookState = event.GetLong(event.size(), &err);
-        if (err != NO_ERROR || appHookState < 0 || appHookState > 3) {
-            VLOG("AppHook does not have valid state %ld", appHookState);
+        if (err != NO_ERROR ) {
+            VLOG("APP_BREADCRUMB_REPORTED had error when parsing the state field");
+            return;
+        } else if (appHookState < 0 || appHookState > 3) {
+            VLOG("APP_BREADCRUMB_REPORTED does not have valid state %ld", appHookState);
             return;
         }
     } else if (event.GetTagId() == android::util::DAVEY_OCCURRED) {
         // Daveys can be logged from any app since they are logged in libs/hwui/JankTracker.cpp.
         // Check that the davey duration is reasonable. Max length check is for privacy.
         status_t err = NO_ERROR;
+
+        // Uid is the first field provided.
+        long jankUid = event.GetLong(1, &err);
+        if (err != NO_ERROR ) {
+            VLOG("Davey occurred had error when parsing the uid");
+            return;
+        }
+        int32_t loggerUid = event.GetUid();
+        if (loggerUid != jankUid && loggerUid != AID_STATSD) {
+            VLOG("DAVEY_OCCURRED has invalid uid: claimed %ld but caller is %d", jankUid,
+                 loggerUid);
+            return;
+        }
+
         long duration = event.GetLong(event.size(), &err);
-        if (err != NO_ERROR || duration > 100000) {
+        if (err != NO_ERROR ) {
+            VLOG("Davey occurred had error when parsing the duration");
+            return;
+        } else if (duration > 100000) {
             VLOG("Davey duration is unreasonably long: %ld", duration);
             return;
         }
@@ -312,16 +344,19 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
     }
 }
 
-void MetricsManager::onAnomalyAlarmFired(const uint64_t timestampNs,
-                         unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>>& anomalySet) {
+void MetricsManager::onAnomalyAlarmFired(
+        const uint64_t timestampNs,
+        unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>>& alarmSet) {
     for (const auto& itr : mAllAnomalyTrackers) {
-        itr->informAlarmsFired(timestampNs, anomalySet);
+        itr->informAlarmsFired(timestampNs, alarmSet);
     }
 }
 
-void MetricsManager::setAnomalyMonitor(const sp<AnomalyMonitor>& anomalyMonitor) {
-    for (auto& itr : mAllAnomalyTrackers) {
-        itr->setAnomalyMonitor(anomalyMonitor);
+void MetricsManager::onPeriodicAlarmFired(
+        const uint64_t timestampNs,
+        unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>>& alarmSet) {
+    for (const auto& itr : mAllPeriodicAlarmTrackers) {
+        itr->informAlarmsFired(timestampNs, alarmSet);
     }
 }
 

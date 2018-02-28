@@ -620,7 +620,12 @@ public class DockedStackDividerController {
         if (wasMinimized && mMinimizedDock && containsAppInDockedStack(openingApps)
                 && appTransition != TRANSIT_NONE &&
                 !AppTransition.isKeyguardGoingAwayTransit(appTransition)) {
-            mService.showRecentApps();
+            if (mService.mAmInternal.isRecentsComponentHomeActivity(mService.mCurrentUserId)) {
+                // When the home activity is the recents component and we are already minimized,
+                // then there is nothing to do here since home is already visible
+            } else {
+                mService.showRecentApps();
+            }
         }
     }
 
@@ -641,7 +646,7 @@ public class DockedStackDividerController {
         return mMinimizedDock;
     }
 
-    private void checkMinimizeChanged(boolean animate) {
+    void checkMinimizeChanged(boolean animate) {
         if (mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility() == null) {
             return;
         }
@@ -693,7 +698,7 @@ public class DockedStackDividerController {
         final boolean imeChanged = clearImeAdjustAnimation();
         boolean minimizedChange = false;
         if (isHomeStackResizable()) {
-            notifyDockedStackMinimizedChanged(minimizedDock, true /* animate */,
+            notifyDockedStackMinimizedChanged(minimizedDock, animate,
                     true /* isHomeStackResizable */);
             minimizedChange = true;
         } else {

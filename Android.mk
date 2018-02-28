@@ -143,7 +143,6 @@ framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES := \
 	bouncycastle \
 	okhttp \
 	ext \
-	icu4j \
 	framework \
 	voip-common \
 
@@ -195,6 +194,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -since $(SRC_API_DIR)/25.txt 25 \
     -since $(SRC_API_DIR)/26.txt 26 \
     -since $(SRC_API_DIR)/27.txt 27 \
+    -since ./frameworks/base/api/current.txt P \
     -werror -lerror -hide 111 -hide 113 -hide 125 -hide 126 -hide 127 -hide 128 \
     -overview $(LOCAL_PATH)/core/java/overview.html \
 

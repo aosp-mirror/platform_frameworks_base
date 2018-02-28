@@ -248,8 +248,14 @@ static void CopyAttributes(Element* el, android::ResXMLParser* parser, StringPoo
 
       android::Res_value res_value;
       if (parser->getAttributeValue(i, &res_value) > 0) {
-        attr.compiled_value = ResourceUtils::ParseBinaryResValue(
-            ResourceType::kAnim, {}, parser->getStrings(), res_value, out_pool);
+        // Only compile the value if it is not a string, or it is a string that differs from
+        // the raw attribute value.
+        int32_t raw_value_idx = parser->getAttributeValueStringID(i);
+        if (res_value.dataType != android::Res_value::TYPE_STRING || raw_value_idx < 0 ||
+            static_cast<uint32_t>(raw_value_idx) != res_value.data) {
+          attr.compiled_value = ResourceUtils::ParseBinaryResValue(
+              ResourceType::kAnim, {}, parser->getStrings(), res_value, out_pool);
+        }
       }
 
       el->attributes.push_back(std::move(attr));
@@ -262,8 +268,8 @@ std::unique_ptr<XmlResource> Inflate(const void* data, size_t len, std::string* 
   // an enum, which causes errors when qualifying it with android::
   using namespace android;
 
-  StringPool string_pool;
-  std::unique_ptr<Element> root;
+  std::unique_ptr<XmlResource> xml_resource = util::make_unique<XmlResource>();
+
   std::stack<Element*> node_stack;
   std::unique_ptr<Element> pending_element;
 
@@ -322,12 +328,12 @@ std::unique_ptr<XmlResource> Inflate(const void* data, size_t len, std::string* 
         }
 
         Element* this_el = el.get();
-        CopyAttributes(el.get(), &tree, &string_pool);
+        CopyAttributes(el.get(), &tree, &xml_resource->string_pool);
 
         if (!node_stack.empty()) {
           node_stack.top()->AppendChild(std::move(el));
         } else {
-          root = std::move(el);
+          xml_resource->root = std::move(el);
         }
         node_stack.push(this_el);
         break;
@@ -359,7 +365,7 @@ std::unique_ptr<XmlResource> Inflate(const void* data, size_t len, std::string* 
         break;
     }
   }
-  return util::make_unique<XmlResource>(ResourceFile{}, std::move(string_pool), std::move(root));
+  return xml_resource;
 }
 
 std::unique_ptr<XmlResource> XmlResource::Clone() const {

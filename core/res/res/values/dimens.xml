@@ -541,7 +541,7 @@
     <!-- Magnifier dimensions -->
     <dimen name="magnifier_width">100dp</dimen>
     <dimen name="magnifier_height">48dp</dimen>
-    <dimen name="magnifier_elevation">2dp</dimen>
+    <dimen name="magnifier_elevation">4dp</dimen>
     <dimen name="magnifier_offset">42dp</dimen>
     <item type="dimen" format="float" name="magnifier_zoom_scale">1.25</item>
 

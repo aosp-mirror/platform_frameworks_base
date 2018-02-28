@@ -19,6 +19,7 @@ package com.android.server.backup;
 import android.annotation.Nullable;
 import android.annotation.WorkerThread;
 import android.app.backup.BackupManager;
+import android.app.backup.BackupTransport;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -57,8 +58,6 @@ public class TransportManager {
 
     @VisibleForTesting
     public static final String SERVICE_ACTION_TRANSPORT_HOST = "android.backup.TRANSPORT_HOST";
-
-    private static final String EXTRA_TRANSPORT_REGISTRATION = "transport_registration";
 
     private final Intent mTransportServiceIntent = new Intent(SERVICE_ACTION_TRANSPORT_HOST);
     private final Context mContext;
@@ -587,7 +586,7 @@ public class TransportManager {
         String callerLogString = "TransportManager.registerTransport()";
 
         Bundle extras = new Bundle();
-        extras.putBoolean(EXTRA_TRANSPORT_REGISTRATION, true);
+        extras.putBoolean(BackupTransport.EXTRA_TRANSPORT_REGISTRATION, true);
 
         TransportClient transportClient = mTransportClientManager.getTransportClient(
             transportComponent, extras, callerLogString);

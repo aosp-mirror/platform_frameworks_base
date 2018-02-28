@@ -21,6 +21,7 @@ import static android.app.ActivityManagerInternal.APP_TRANSITION_SNAPSHOT;
 import static android.app.ActivityManagerInternal.APP_TRANSITION_SPLASH_SCREEN;
 import static android.app.ActivityManagerInternal.APP_TRANSITION_WINDOWS_DRAWN;
 
+import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
@@ -607,6 +608,10 @@ class WindowSurfacePlacer {
         // Given no app transition pass it through instead of a wallpaper transition
         if (transit == TRANSIT_NONE) {
             return TRANSIT_NONE;
+        }
+        // Never update the transition for the wallpaper if we are just docking from recents
+        if (transit == TRANSIT_DOCK_TASK_FROM_RECENTS) {
+            return TRANSIT_DOCK_TASK_FROM_RECENTS;
         }
 
         // if wallpaper is animating in or out set oldWallpaper to null else to wallpaper

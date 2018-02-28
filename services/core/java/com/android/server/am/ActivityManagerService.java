@@ -5140,6 +5140,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     public void startRecentsActivity(Intent intent, IAssistDataReceiver assistDataReceiver,
                 IRecentsAnimationRunner recentsAnimationRunner) {
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "startRecentsActivity()");
+        final int callingPid = Binder.getCallingPid();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
@@ -5165,7 +5166,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 // Start a new recents animation
                 final RecentsAnimation anim = new RecentsAnimation(this, mStackSupervisor,
-                        mActivityStartController, mWindowManager, mUserController);
+                        mActivityStartController, mWindowManager, mUserController, callingPid);
                 anim.startRecentsActivity(intent, recentsAnimationRunner, recentsComponent,
                         recentsUid);
             }
@@ -9407,6 +9408,25 @@ public class ActivityManagerService extends IActivityManager.Stub
             if ((modeFlags&Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != 0) {
                 if (pi.writePermission != null) {
                     allowed = false;
+                }
+            }
+            if (pi.pathPermissions != null) {
+                final int N = pi.pathPermissions.length;
+                for (int i=0; i<N; i++) {
+                    if (pi.pathPermissions[i] != null
+                            && pi.pathPermissions[i].match(grantUri.uri.getPath())) {
+                        if ((modeFlags&Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0) {
+                            if (pi.pathPermissions[i].getReadPermission() != null) {
+                                allowed = false;
+                            }
+                        }
+                        if ((modeFlags&Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != 0) {
+                            if (pi.pathPermissions[i].getWritePermission() != null) {
+                                allowed = false;
+                            }
+                        }
+                        break;
+                    }
                 }
             }
             if (allowed) {
@@ -14306,6 +14326,28 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    void setRunningRemoteAnimation(int pid, boolean runningRemoteAnimation) {
+        synchronized (ActivityManagerService.this) {
+            final ProcessRecord pr;
+            synchronized (mPidsSelfLocked) {
+                pr = mPidsSelfLocked.get(pid);
+                if (pr == null) {
+                    Slog.w(TAG, "setRunningRemoteAnimation called on unknown pid: " + pid);
+                    return;
+                }
+            }
+            if (pr.runningRemoteAnimation == runningRemoteAnimation) {
+                return;
+            }
+            pr.runningRemoteAnimation = runningRemoteAnimation;
+            if (DEBUG_OOM_ADJ) {
+                Slog.i(TAG, "Setting runningRemoteAnimation=" + pr.runningRemoteAnimation
+                        + " for pid=" + pid);
+            }
+            updateOomAdjLocked(pr, true);
         }
     }
 
@@ -22686,6 +22728,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             foregroundActivities = true;
             procState = PROCESS_STATE_CUR_TOP;
             if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Making top: " + app);
+        } else if (app.runningRemoteAnimation) {
+            adj = ProcessList.VISIBLE_APP_ADJ;
+            schedGroup = ProcessList.SCHED_GROUP_TOP_APP;
+            app.adjType = "running-remote-anim";
+            procState = PROCESS_STATE_CUR_TOP;
+            if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Making running remote anim: " + app);
         } else if (app.instr != null) {
             // Don't want to kill running instrumentation.
             adj = ProcessList.FOREGROUND_APP_ADJ;
@@ -22761,7 +22809,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                         app.adjType = "vis-activity";
                         if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to vis-activity: " + app);
                     }
-                    schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
+                    if (schedGroup < ProcessList.SCHED_GROUP_DEFAULT) {
+                        schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
+                    }
                     app.cached = false;
                     app.empty = false;
                     foregroundActivities = true;
@@ -22784,7 +22834,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                         app.adjType = "pause-activity";
                         if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to pause-activity: " + app);
                     }
-                    schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
+                    if (schedGroup < ProcessList.SCHED_GROUP_DEFAULT) {
+                        schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
+                    }
                     app.cached = false;
                     app.empty = false;
                     foregroundActivities = true;
@@ -25925,6 +25977,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
+        @Override
+        public void setRunningRemoteAnimation(int pid, boolean runningRemoteAnimation) {
+            ActivityManagerService.this.setRunningRemoteAnimation(pid, runningRemoteAnimation);
+        }
+
         /**
          * Called after the network policy rules are updated by
          * {@link com.android.server.net.NetworkPolicyManagerService} for a specific {@param uid}
@@ -26115,6 +26172,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         public boolean isCallerRecents(int callingUid) {
             return getRecentTasks().isCallerRecents(callingUid);
+        }
+
+        public boolean isRecentsComponentHomeActivity(int userId) {
+            return getRecentTasks().isRecentsComponentHomeActivity(userId);
         }
 
         @Override
@@ -26470,6 +26531,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             throws RemoteException {
         enforceCallingPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS,
                 "registerRemoteAnimations");
+        definition.setCallingPid(Binder.getCallingPid());
         synchronized (this) {
             final ActivityRecord r = ActivityRecord.isInStackLocked(token);
             if (r == null) {

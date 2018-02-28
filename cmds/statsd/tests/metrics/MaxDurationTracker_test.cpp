@@ -276,13 +276,15 @@ TEST(MaxDurationTrackerTest, TestAnomalyDetection) {
     alert.set_num_buckets(2);
     const int32_t refPeriodSec = 45;
     alert.set_refractory_period_secs(refPeriodSec);
-    sp<DurationAnomalyTracker> anomalyTracker = new DurationAnomalyTracker(alert, kConfigKey);
+    sp<AlarmMonitor> alarmMonitor;
+    sp<DurationAnomalyTracker> anomalyTracker =
+        new DurationAnomalyTracker(alert, kConfigKey, alarmMonitor);
     MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, dimensionInCondition,
                                false, bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
                                true, {anomalyTracker});
 
     tracker.noteStart(key1, true, eventStartTimeNs, conditionKey1);
-    sp<const AnomalyAlarm> alarm = anomalyTracker->mAlarms.begin()->second;
+    sp<const InternalAlarm> alarm = anomalyTracker->mAlarms.begin()->second;
     EXPECT_EQ((long long)(53ULL * NS_PER_SEC), (long long)(alarm->timestampSec * NS_PER_SEC));
 
     // Remove the anomaly alarm when the duration is no longer fully met.
@@ -336,7 +338,9 @@ TEST(MaxDurationTrackerTest, TestAnomalyPredictedTimestamp) {
     alert.set_num_buckets(2);
     const int32_t refPeriodSec = 45;
     alert.set_refractory_period_secs(refPeriodSec);
-    sp<DurationAnomalyTracker> anomalyTracker = new DurationAnomalyTracker(alert, kConfigKey);
+    sp<AlarmMonitor> alarmMonitor;
+    sp<DurationAnomalyTracker> anomalyTracker =
+        new DurationAnomalyTracker(alert, kConfigKey, alarmMonitor);
     MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, dimensionInCondition,
                                false, bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
                                true, {anomalyTracker});
@@ -390,7 +394,9 @@ TEST(MaxDurationTrackerTest, TestAnomalyPredictedTimestamp_UpdatedOnStop) {
     alert.set_num_buckets(2);
     const int32_t refPeriodSec = 45;
     alert.set_refractory_period_secs(refPeriodSec);
-    sp<DurationAnomalyTracker> anomalyTracker = new DurationAnomalyTracker(alert, kConfigKey);
+    sp<AlarmMonitor> alarmMonitor;
+    sp<DurationAnomalyTracker> anomalyTracker =
+        new DurationAnomalyTracker(alert, kConfigKey, alarmMonitor);
     MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, dimensionInCondition,
                                false, bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
                                true, {anomalyTracker});

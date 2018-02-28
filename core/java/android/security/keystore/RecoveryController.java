@@ -31,22 +31,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * An assistant for generating {@link javax.crypto.SecretKey} instances that can be recovered by
- * other Android devices belonging to the user. The exported keychain is protected by the user's
- * lock screen.
- *
- * <p>The RecoveryController must be paired with a recovery agent. The recovery agent is responsible
- * for transporting the keychain to remote trusted hardware. This hardware must prevent brute force
- * attempts against the user's lock screen by limiting the number of allowed guesses (to, e.g., 10).
- * After  that number of incorrect guesses, the trusted hardware no longer allows access to the
- * key chain.
- *
- * <p>For now only the recovery agent itself is able to create keys, so it is expected that the
- * recovery agent is itself the system app.
- *
- * <p>A recovery agent requires the privileged permission
- * {@code android.Manifest.permission#RECOVER_KEYSTORE}.
- *
  * @deprecated Use {@link android.security.keystore.recovery.RecoveryController}.
  * @hide
  */

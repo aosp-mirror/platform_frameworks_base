@@ -1615,12 +1615,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         dest.writeInt(mnc);
 
         fixUpLocaleList();
-        final int localeListSize = mLocaleList.size();
-        dest.writeInt(localeListSize);
-        for (int i = 0; i < localeListSize; ++i) {
-            final Locale l = mLocaleList.get(i);
-            dest.writeString(l.toLanguageTag());
-        }
+        dest.writeParcelable(mLocaleList, flags);
 
         if(userSetLocale) {
             dest.writeInt(1);
@@ -1654,12 +1649,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         mcc = source.readInt();
         mnc = source.readInt();
 
-        final int localeListSize = source.readInt();
-        final Locale[] localeArray = new Locale[localeListSize];
-        for (int i = 0; i < localeListSize; ++i) {
-            localeArray[i] = Locale.forLanguageTag(source.readString());
-        }
-        mLocaleList = new LocaleList(localeArray);
+        mLocaleList = source.readParcelable(LocaleList.class.getClassLoader());
         locale = mLocaleList.get(0);
 
         userSetLocale = (source.readInt()==1);

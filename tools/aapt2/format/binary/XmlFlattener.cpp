@@ -25,12 +25,16 @@
 #include "androidfw/ResourceTypes.h"
 #include "utils/misc.h"
 
+#include "ResourceUtils.h"
 #include "SdkConstants.h"
+#include "ValueVisitor.h"
 #include "format/binary/ChunkWriter.h"
 #include "format/binary/ResourceTypeExtensions.h"
 #include "xml/XmlDom.h"
 
 using namespace android;
+
+using ::aapt::ResourceUtils::StringBuilder;
 
 namespace aapt {
 
@@ -88,9 +92,9 @@ class XmlFlattenerVisitor : public xml::ConstVisitor {
     ResXMLTree_cdataExt* flat_text = writer.NextBlock<ResXMLTree_cdataExt>();
 
     // Process plain strings to make sure they get properly escaped.
-    util::StringBuilder builder;
-    builder.Append(node->text);
-    AddString(builder.ToString(), kLowPriority, &flat_text->data);
+    StringBuilder builder;
+    builder.AppendText(node->text);
+    AddString(builder.to_string(), kLowPriority, &flat_text->data);
 
     writer.Finish();
   }
@@ -153,6 +157,9 @@ class XmlFlattenerVisitor : public xml::ConstVisitor {
  private:
   DISALLOW_COPY_AND_ASSIGN(XmlFlattenerVisitor);
 
+  // We are adding strings to a StringPool whose strings will be sorted and merged with other
+  // string pools. That means we can't encode the ID of a string directly. Instead, we defer the
+  // writing of the ID here, until after the StringPool is merged and sorted.
   void AddString(const StringPiece& str, uint32_t priority, android::ResStringPool_ref* dest,
                  bool treat_empty_string_as_null = false) {
     if (str.empty() && treat_empty_string_as_null) {
@@ -164,6 +171,9 @@ class XmlFlattenerVisitor : public xml::ConstVisitor {
     }
   }
 
+  // We are adding strings to a StringPool whose strings will be sorted and merged with other
+  // string pools. That means we can't encode the ID of a string directly. Instead, we defer the
+  // writing of the ID here, until after the StringPool is merged and sorted.
   void AddString(const StringPool::Ref& ref, android::ResStringPool_ref* dest) {
     string_refs.push_back(StringFlattenDest{ref, dest});
   }
@@ -248,30 +258,39 @@ class XmlFlattenerVisitor : public xml::ConstVisitor {
         AddString(name_ref, &flat_attr->name);
       }
 
-      // Process plain strings to make sure they get properly escaped.
-      StringPiece raw_value = xml_attr->value;
-
-      util::StringBuilder str_builder(true /*preserve_spaces*/);
-      str_builder.Append(xml_attr->value);
-
-      if (!options_.keep_raw_values) {
-        raw_value = str_builder.ToString();
-      }
-
-      if (options_.keep_raw_values || !xml_attr->compiled_value) {
-        // Keep raw values if the value is not compiled or
-        // if we're building a static library (need symbols).
-        AddString(raw_value, kLowPriority, &flat_attr->rawValue);
-      }
-
-      if (xml_attr->compiled_value) {
-        CHECK(xml_attr->compiled_value->Flatten(&flat_attr->typedValue));
+      std::string processed_str;
+      Maybe<StringPiece> compiled_text;
+      if (xml_attr->compiled_value != nullptr) {
+        // Make sure we're not flattening a String. A String can be referencing a string from
+        // a different StringPool than we're using here to build the binary XML.
+        String* string_value = ValueCast<String>(xml_attr->compiled_value.get());
+        if (string_value != nullptr) {
+          // Mark the String's text as needing to be serialized.
+          compiled_text = StringPiece(*string_value->value);
+        } else {
+          // Serialize this compiled value safely.
+          CHECK(xml_attr->compiled_value->Flatten(&flat_attr->typedValue));
+        }
       } else {
-        // Flatten as a regular string type.
-        flat_attr->typedValue.dataType = android::Res_value::TYPE_STRING;
+        // There is no compiled value, so treat the raw string as compiled, once it is processed to
+        // make sure escape sequences are properly interpreted.
+        processed_str =
+            StringBuilder(true /*preserve_spaces*/).AppendText(xml_attr->value).to_string();
+        compiled_text = StringPiece(processed_str);
+      }
 
-        AddString(str_builder.ToString(), kLowPriority,
-                  (ResStringPool_ref*)&flat_attr->typedValue.data);
+      if (compiled_text) {
+        // Write out the compiled text and raw_text.
+        flat_attr->typedValue.dataType = android::Res_value::TYPE_STRING;
+        AddString(compiled_text.value(), kLowPriority,
+                  reinterpret_cast<ResStringPool_ref*>(&flat_attr->typedValue.data));
+        if (options_.keep_raw_values) {
+          AddString(xml_attr->value, kLowPriority, &flat_attr->rawValue);
+        } else {
+          AddString(compiled_text.value(), kLowPriority, &flat_attr->rawValue);
+        }
+      } else if (options_.keep_raw_values && !xml_attr->value.empty()) {
+        AddString(xml_attr->value, kLowPriority, &flat_attr->rawValue);
       }
 
       flat_attr->typedValue.size = util::HostToDevice16(sizeof(flat_attr->typedValue));

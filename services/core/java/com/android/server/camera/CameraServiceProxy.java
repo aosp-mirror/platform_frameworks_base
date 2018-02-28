@@ -103,13 +103,15 @@ public class CameraServiceProxy extends SystemService
     private static class CameraUsageEvent {
         public final int mCameraFacing;
         public final String mClientName;
+        public final int mAPILevel;
 
         private boolean mCompleted;
         private long mDurationOrStartTimeMs;  // Either start time, or duration once completed
 
-        public CameraUsageEvent(int facing, String clientName) {
+        public CameraUsageEvent(int facing, String clientName, int apiLevel) {
             mCameraFacing = facing;
             mClientName = clientName;
+            mAPILevel = apiLevel;
             mDurationOrStartTimeMs = SystemClock.elapsedRealtime();
             mCompleted = false;
         }
@@ -168,13 +170,13 @@ public class CameraServiceProxy extends SystemService
 
         @Override
         public void notifyCameraState(String cameraId, int newCameraState, int facing,
-                String clientName) {
+                String clientName, int apiLevel) {
             String state = cameraStateToString(newCameraState);
             String facingStr = cameraFacingToString(facing);
             if (DEBUG) Slog.v(TAG, "Camera " + cameraId + " facing " + facingStr + " state now " +
-                    state + " for client " + clientName);
+                    state + " for client " + clientName + " API Level " + apiLevel);
 
-            updateActivityCount(cameraId, newCameraState, facing, clientName);
+            updateActivityCount(cameraId, newCameraState, facing, clientName, apiLevel);
         }
     };
 
@@ -293,6 +295,7 @@ public class CameraServiceProxy extends SystemService
                         .setType(MetricsEvent.TYPE_ACTION)
                         .setSubtype(subtype)
                         .setLatency(e.getDuration())
+                        .addTaggedData(MetricsEvent.FIELD_CAMERA_API_LEVEL, e.mAPILevel)
                         .setPackageName(e.mClientName);
                 mLogger.write(l);
             }
@@ -368,7 +371,8 @@ public class CameraServiceProxy extends SystemService
         return true;
     }
 
-    private void updateActivityCount(String cameraId, int newCameraState, int facing, String clientName) {
+    private void updateActivityCount(String cameraId, int newCameraState, int facing,
+            String clientName, int apiLevel) {
         synchronized(mLock) {
             // Update active camera list and notify NFC if necessary
             boolean wasEmpty = mActiveCameraUsage.isEmpty();
@@ -376,7 +380,7 @@ public class CameraServiceProxy extends SystemService
                 case ICameraServiceProxy.CAMERA_STATE_OPEN:
                     break;
                 case ICameraServiceProxy.CAMERA_STATE_ACTIVE:
-                    CameraUsageEvent newEvent = new CameraUsageEvent(facing, clientName);
+                    CameraUsageEvent newEvent = new CameraUsageEvent(facing, clientName, apiLevel);
                     CameraUsageEvent oldEvent = mActiveCameraUsage.put(cameraId, newEvent);
                     if (oldEvent != null) {
                         Slog.w(TAG, "Camera " + cameraId + " was already marked as active");

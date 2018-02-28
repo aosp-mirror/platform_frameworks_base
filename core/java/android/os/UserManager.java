@@ -913,6 +913,9 @@ public class UserManager {
      * Specifies if user switching is blocked on the current user.
      *
      * <p> This restriction can only be set by the device owner, it will be applied to all users.
+     * Device owner can still switch user via
+     * {@link DevicePolicyManager#switchUser(ComponentName, UserHandle)} when this restriction is
+     * set.
      *
      * <p>The default value is <code>false</code>.
      *
@@ -1038,6 +1041,85 @@ public class UserManager {
      * {@link #createUserCreationIntent(String, String, String, PersistableBundle)}.
      */
     public static final int USER_CREATION_FAILED_NO_MORE_USERS = Activity.RESULT_FIRST_USER + 1;
+
+    /**
+     * Indicates user operation is successful.
+     */
+    public static final int USER_OPERATION_SUCCESS = 0;
+
+    /**
+     * Indicates user operation failed for unknown reason.
+     */
+    public static final int USER_OPERATION_ERROR_UNKNOWN = 1;
+
+    /**
+     * Indicates user operation failed because target user is a managed profile.
+     */
+    public static final int USER_OPERATION_ERROR_MANAGED_PROFILE = 2;
+
+    /**
+     * Indicates user operation failed because maximum running user limit has been reached.
+     */
+    public static final int USER_OPERATION_ERROR_MAX_RUNNING_USERS = 3;
+
+    /**
+     * Indicates user operation failed because the target user is in the foreground.
+     */
+    public static final int USER_OPERATION_ERROR_CURRENT_USER = 4;
+
+    /**
+     * Indicates user operation failed because device has low data storage.
+     */
+    public static final int USER_OPERATION_ERROR_LOW_STORAGE = 5;
+
+    /**
+     * Indicates user operation failed because maximum user limit has been reached.
+     */
+    public static final int USER_OPERATION_ERROR_MAX_USERS = 6;
+
+    /**
+     * Result returned from various user operations.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "USER_OPERATION_" }, value = {
+            USER_OPERATION_SUCCESS,
+            USER_OPERATION_ERROR_UNKNOWN,
+            USER_OPERATION_ERROR_MANAGED_PROFILE,
+            USER_OPERATION_ERROR_MAX_RUNNING_USERS,
+            USER_OPERATION_ERROR_CURRENT_USER,
+            USER_OPERATION_ERROR_LOW_STORAGE,
+            USER_OPERATION_ERROR_MAX_USERS
+    })
+    public @interface UserOperationResult {}
+
+    /**
+     * Thrown to indicate user operation failed.
+     */
+    public static class UserOperationException extends RuntimeException {
+        private final @UserOperationResult int mUserOperationResult;
+
+        /**
+         * Constructs a UserOperationException with specific result code.
+         *
+         * @param message the detail message
+         * @param userOperationResult the result code
+         * @hide
+         */
+        public UserOperationException(String message,
+                @UserOperationResult int userOperationResult) {
+            super(message);
+            mUserOperationResult = userOperationResult;
+        }
+
+        /**
+         * Returns the operation result code.
+         */
+        public @UserOperationResult int getUserOperationResult() {
+            return mUserOperationResult;
+        }
+    }
 
     /** @hide */
     public static UserManager get(Context context) {

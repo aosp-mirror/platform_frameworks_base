@@ -17,16 +17,19 @@
 #define DEBUG false  // STOPSHIP if true
 #include "Log.h"
 
+#include "metrics_manager_util.h"
+
 #include "../condition/CombinationConditionTracker.h"
 #include "../condition/SimpleConditionTracker.h"
 #include "../external/StatsPullerManager.h"
 #include "../matchers/CombinationLogMatchingTracker.h"
 #include "../matchers/SimpleLogMatchingTracker.h"
-#include "CountMetricProducer.h"
-#include "DurationMetricProducer.h"
-#include "EventMetricProducer.h"
-#include "GaugeMetricProducer.h"
-#include "ValueMetricProducer.h"
+#include "../metrics/CountMetricProducer.h"
+#include "../metrics/DurationMetricProducer.h"
+#include "../metrics/EventMetricProducer.h"
+#include "../metrics/GaugeMetricProducer.h"
+#include "../metrics/ValueMetricProducer.h"
+
 #include "stats_util.h"
 
 using std::set;
@@ -494,6 +497,7 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const long ti
 
 bool initAlerts(const StatsdConfig& config,
                 const unordered_map<int64_t, int>& metricProducerMap,
+                const sp<AlarmMonitor>& anomalyAlarmMonitor,
                 vector<sp<MetricProducer>>& allMetricProducers,
                 vector<sp<AnomalyTracker>>& allAnomalyTrackers) {
     unordered_map<int64_t, int> anomalyTrackerMap;
@@ -512,7 +516,7 @@ bool initAlerts(const StatsdConfig& config,
         }
         const int metricIndex = itr->second;
         sp<MetricProducer> metric = allMetricProducers[metricIndex];
-        sp<AnomalyTracker> anomalyTracker = metric->addAnomalyTracker(alert);
+        sp<AnomalyTracker> anomalyTracker = metric->addAnomalyTracker(alert, anomalyAlarmMonitor);
         if (anomalyTracker == nullptr) {
             // The ALOGW for this invalid alert was already displayed in addAnomalyTracker().
             return false;
@@ -522,6 +526,9 @@ bool initAlerts(const StatsdConfig& config,
     }
     for (int i = 0; i < config.subscription_size(); ++i) {
         const Subscription& subscription = config.subscription(i);
+        if (subscription.rule_type() != Subscription::ALERT) {
+            continue;
+        }
         if (subscription.subscriber_information_case() ==
             Subscription::SubscriberInformationCase::SUBSCRIBER_INFORMATION_NOT_SET) {
             ALOGW("subscription \"%lld\" has no subscriber info.\"",
@@ -540,13 +547,60 @@ bool initAlerts(const StatsdConfig& config,
     return true;
 }
 
+bool initAlarms(const StatsdConfig& config, const ConfigKey& key,
+                const sp<AlarmMonitor>& periodicAlarmMonitor,
+                const long timeBaseSec,
+                vector<sp<AlarmTracker>>& allAlarmTrackers) {
+    unordered_map<int64_t, int> alarmTrackerMap;
+    uint64_t startMillis = (uint64_t)timeBaseSec * MS_PER_SEC;
+    for (int i = 0; i < config.alarm_size(); i++) {
+        const Alarm& alarm = config.alarm(i);
+        if (alarm.offset_millis() <= 0) {
+            ALOGW("Alarm offset_millis should be larger than 0.");
+            return false;
+        }
+        if (alarm.period_millis() <= 0) {
+            ALOGW("Alarm period_millis should be larger than 0.");
+            return false;
+        }
+        alarmTrackerMap.insert(std::make_pair(alarm.id(), allAlarmTrackers.size()));
+        allAlarmTrackers.push_back(
+            new AlarmTracker(startMillis, alarm, key, periodicAlarmMonitor));
+    }
+    for (int i = 0; i < config.subscription_size(); ++i) {
+        const Subscription& subscription = config.subscription(i);
+        if (subscription.rule_type() != Subscription::ALARM) {
+            continue;
+        }
+        if (subscription.subscriber_information_case() ==
+            Subscription::SubscriberInformationCase::SUBSCRIBER_INFORMATION_NOT_SET) {
+            ALOGW("subscription \"%lld\" has no subscriber info.\"",
+                (long long)subscription.id());
+            return false;
+        }
+        const auto& itr = alarmTrackerMap.find(subscription.rule_id());
+        if (itr == alarmTrackerMap.end()) {
+            ALOGW("subscription \"%lld\" has unknown rule id: \"%lld\"",
+                (long long)subscription.id(), (long long)subscription.rule_id());
+            return false;
+        }
+        const int trackerIndex = itr->second;
+        allAlarmTrackers[trackerIndex]->addSubscription(subscription);
+    }
+    return true;
+}
+
 bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config,
                       const UidMap& uidMap,
-                      const long timeBaseSec, set<int>& allTagIds,
+                      const sp<AlarmMonitor>& anomalyAlarmMonitor,
+                      const sp<AlarmMonitor>& periodicAlarmMonitor,
+                      const long timeBaseSec,
+                      set<int>& allTagIds,
                       vector<sp<LogMatchingTracker>>& allAtomMatchers,
                       vector<sp<ConditionTracker>>& allConditionTrackers,
                       vector<sp<MetricProducer>>& allMetricProducers,
                       vector<sp<AnomalyTracker>>& allAnomalyTrackers,
+                      vector<sp<AlarmTracker>>& allPeriodicAlarmTrackers,
                       unordered_map<int, std::vector<int>>& conditionToMetricMap,
                       unordered_map<int, std::vector<int>>& trackerToMetricMap,
                       unordered_map<int, std::vector<int>>& trackerToConditionMap,
@@ -573,10 +627,16 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config,
         ALOGE("initMetricProducers failed");
         return false;
     }
-    if (!initAlerts(config, metricProducerMap, allMetricProducers, allAnomalyTrackers)) {
+    if (!initAlerts(config, metricProducerMap, anomalyAlarmMonitor, allMetricProducers,
+                    allAnomalyTrackers)) {
         ALOGE("initAlerts failed");
         return false;
     }
+    if (!initAlarms(config, key, periodicAlarmMonitor, timeBaseSec, allPeriodicAlarmTrackers)) {
+        ALOGE("initAlarms failed");
+        return false;
+    }
+
     return true;
 }
 

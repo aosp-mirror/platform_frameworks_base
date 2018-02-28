@@ -138,6 +138,7 @@ public class UsbPortManager {
     }
 
     public void systemReady() {
+	mSystemReady = true;
         if (mProxy != null) {
             try {
                 mProxy.queryPortStatus();
@@ -146,7 +147,6 @@ public class UsbPortManager {
                         "ServiceStart: Failed to query port status", e);
             }
         }
-        mSystemReady = true;
     }
 
     public UsbPort[] getPorts() {

@@ -34,6 +34,8 @@ import android.util.Log;
 import android.view.SurfaceControl;
 
 import com.android.systemui.OverviewProxyService.OverviewProxyListener;
+import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.DockedFirstAnimationFrameEvent;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.system.GraphicBufferCompat;
@@ -103,6 +105,15 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             long token = Binder.clearCallingIdentity();
             try {
                 mHandler.post(OverviewProxyService.this::notifyRecentsAnimationStarted);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        public void onSplitScreenInvoked() {
+            long token = Binder.clearCallingIdentity();
+            try {
+                EventBus.getDefault().post(new DockedFirstAnimationFrameEvent());
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

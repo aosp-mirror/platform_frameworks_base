@@ -36,9 +36,11 @@ const string kApp2 = "app2.sharing.1";
 
 TEST(UidMapTest, TestIsolatedUID) {
     sp<UidMap> m = new UidMap();
-    sp<AnomalyMonitor> anomalyMonitor;
+    sp<AlarmMonitor> anomalyAlarmMonitor;
+    sp<AlarmMonitor> subscriberAlarmMonitor;
     // Construct the processor with a dummy sendBroadcast function that does nothing.
-    StatsLogProcessor p(m, anomalyMonitor, 0, [](const ConfigKey& key) {});
+    StatsLogProcessor p(m, anomalyAlarmMonitor, subscriberAlarmMonitor, 0,
+        [](const ConfigKey& key) {});
     LogEvent addEvent(android::util::ISOLATED_UID_CHANGED, 1);
     addEvent.write(100);  // parent UID
     addEvent.write(101);  // isolated UID

@@ -5328,6 +5328,21 @@ message MetricsEvent {
     // OS: P
     PACKAGE_OPTIMIZATION_COMPILATION_REASON = 1321;
 
+    // FIELD: The camera API level used.
+    // CATEGORY: CAMERA
+    // OS: P
+    FIELD_CAMERA_API_LEVEL = 1322;
+
+    // OPEN: Settings > Battery > Battery tip > Battery tip Dialog
+    // CATEGORY: SETTINGS
+    // OS: P
+    FUELGAUGE_BATTERY_TIP_DIALOG = 1323;
+
+    // OPEN: Settings > Battery > Battery tip
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_BATTERY_TIP_SHOWN = 1324;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

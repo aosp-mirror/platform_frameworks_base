@@ -26,11 +26,14 @@
 #include "ResourceUtils.h"
 #include "ResourceValues.h"
 #include "ValueVisitor.h"
+#include "text/Utf8Iterator.h"
 #include "util/ImmutableMap.h"
 #include "util/Maybe.h"
 #include "util/Util.h"
 #include "xml/XmlPullParser.h"
 
+using ::aapt::ResourceUtils::StringBuilder;
+using ::aapt::text::Utf8Iterator;
 using ::android::StringPiece;
 
 namespace aapt {
@@ -169,114 +172,212 @@ ResourceParser::ResourceParser(IDiagnostics* diag, ResourceTable* table,
       config_(config),
       options_(options) {}
 
-/**
- * Build a string from XML that converts nested elements into Span objects.
- */
+// Base class Node for representing the various Spans and UntranslatableSections of an XML string.
+// This will be used to traverse and flatten the XML string into a single std::string, with all
+// Span and Untranslatable data maintained in parallel, as indices into the string.
+class Node {
+ public:
+  virtual ~Node() = default;
+
+  // Adds the given child node to this parent node's set of child nodes, moving ownership to the
+  // parent node as well.
+  // Returns a pointer to the child node that was added as a convenience.
+  template <typename T>
+  T* AddChild(std::unique_ptr<T> node) {
+    T* raw_ptr = node.get();
+    children.push_back(std::move(node));
+    return raw_ptr;
+  }
+
+  virtual void Build(StringBuilder* builder) const {
+    for (const auto& child : children) {
+      child->Build(builder);
+    }
+  }
+
+  std::vector<std::unique_ptr<Node>> children;
+};
+
+// A chunk of text in the XML string. This lives between other tags, such as XLIFF tags and Spans.
+class SegmentNode : public Node {
+ public:
+  std::string data;
+
+  void Build(StringBuilder* builder) const override {
+    builder->AppendText(data);
+  }
+};
+
+// A tag that will be encoded into the final flattened string. Tags like <b> or <i>.
+class SpanNode : public Node {
+ public:
+  std::string name;
+
+  void Build(StringBuilder* builder) const override {
+    StringBuilder::SpanHandle span_handle = builder->StartSpan(name);
+    Node::Build(builder);
+    builder->EndSpan(span_handle);
+  }
+};
+
+// An XLIFF 'g' tag, which marks a section of the string as untranslatable.
+class UntranslatableNode : public Node {
+ public:
+  void Build(StringBuilder* builder) const override {
+    StringBuilder::UntranslatableHandle handle = builder->StartUntranslatable();
+    Node::Build(builder);
+    builder->EndUntranslatable(handle);
+  }
+};
+
+// Build a string from XML that converts nested elements into Span objects.
 bool ResourceParser::FlattenXmlSubtree(
     xml::XmlPullParser* parser, std::string* out_raw_string, StyleString* out_style_string,
     std::vector<UntranslatableSection>* out_untranslatable_sections) {
-  // Keeps track of formatting tags (<b>, <i>) and the range of characters for which they apply.
-  // The stack elements refer to the indices in out_style_string->spans.
-  // By first adding to the out_style_string->spans vector, and then using the stack to refer
-  // to this vector, the original order of tags is preserved in cases such as <b><i>hello</b></i>.
-  std::vector<size_t> span_stack;
-
-  // Clear the output variables.
-  out_raw_string->clear();
-  out_style_string->spans.clear();
-  out_untranslatable_sections->clear();
-
-  // The StringBuilder will concatenate the various segments of text which are initially
-  // separated by tags. It also handles unicode escape codes and quotations.
-  util::StringBuilder builder;
+  std::string raw_string;
+  std::string current_text;
 
   // The first occurrence of a <xliff:g> tag. Nested <xliff:g> tags are illegal.
   Maybe<size_t> untranslatable_start_depth;
 
+  Node root;
+  std::vector<Node*> node_stack;
+  node_stack.push_back(&root);
+
+  bool saw_span_node = false;
+  SegmentNode* first_segment = nullptr;
+  SegmentNode* last_segment = nullptr;
+
   size_t depth = 1;
-  while (xml::XmlPullParser::IsGoodEvent(parser->Next())) {
+  while (depth > 0 && xml::XmlPullParser::IsGoodEvent(parser->Next())) {
     const xml::XmlPullParser::Event event = parser->event();
 
-    if (event == xml::XmlPullParser::Event::kStartElement) {
-      if (parser->element_namespace().empty()) {
-        // This is an HTML tag which we encode as a span. Add it to the span stack.
-        std::string span_name = parser->element_name();
-        const auto end_attr_iter = parser->end_attributes();
-        for (auto attr_iter = parser->begin_attributes(); attr_iter != end_attr_iter; ++attr_iter) {
-          span_name += ";";
-          span_name += attr_iter->name;
-          span_name += "=";
-          span_name += attr_iter->value;
+    // First take care of any SegmentNodes that should be created.
+    if (event == xml::XmlPullParser::Event::kStartElement ||
+        event == xml::XmlPullParser::Event::kEndElement) {
+      if (!current_text.empty()) {
+        std::unique_ptr<SegmentNode> segment_node = util::make_unique<SegmentNode>();
+        segment_node->data = std::move(current_text);
+        last_segment = node_stack.back()->AddChild(std::move(segment_node));
+        if (first_segment == nullptr) {
+          first_segment = last_segment;
         }
+        current_text = {};
+      }
+    }
 
-        // Make sure the string is representable in our binary format.
-        if (builder.Utf16Len() > std::numeric_limits<uint32_t>::max()) {
-          diag_->Error(DiagMessage(source_.WithLine(parser->line_number()))
-                       << "style string '" << builder.ToString() << "' is too long");
-          return false;
-        }
+    switch (event) {
+      case xml::XmlPullParser::Event::kText: {
+        current_text += parser->text();
+        raw_string += parser->text();
+      } break;
 
-        out_style_string->spans.push_back(
-            Span{std::move(span_name), static_cast<uint32_t>(builder.Utf16Len())});
-        span_stack.push_back(out_style_string->spans.size() - 1);
-      } else if (parser->element_namespace() == sXliffNamespaceUri) {
-        if (parser->element_name() == "g") {
-          if (untranslatable_start_depth) {
-            // We've already encountered an <xliff:g> tag, and nested <xliff:g> tags are illegal.
-            diag_->Error(DiagMessage(source_.WithLine(parser->line_number()))
-                         << "illegal nested XLIFF 'g' tag");
-            return false;
-          } else {
-            // Mark the start of an untranslatable section. Use UTF8 indices/lengths.
-            untranslatable_start_depth = depth;
-            const size_t current_idx = builder.ToString().size();
-            out_untranslatable_sections->push_back(UntranslatableSection{current_idx, current_idx});
+      case xml::XmlPullParser::Event::kStartElement: {
+        if (parser->element_namespace().empty()) {
+          // This is an HTML tag which we encode as a span. Add it to the span stack.
+          std::unique_ptr<SpanNode> span_node = util::make_unique<SpanNode>();
+          span_node->name = parser->element_name();
+          const auto end_attr_iter = parser->end_attributes();
+          for (auto attr_iter = parser->begin_attributes(); attr_iter != end_attr_iter;
+               ++attr_iter) {
+            span_node->name += ";";
+            span_node->name += attr_iter->name;
+            span_node->name += "=";
+            span_node->name += attr_iter->value;
           }
+
+          node_stack.push_back(node_stack.back()->AddChild(std::move(span_node)));
+          saw_span_node = true;
+        } else if (parser->element_namespace() == sXliffNamespaceUri) {
+          // This is an XLIFF tag, which is not encoded as a span.
+          if (parser->element_name() == "g") {
+            // Check that an 'untranslatable' tag is not already being processed. Nested
+            // <xliff:g> tags are illegal.
+            if (untranslatable_start_depth) {
+              diag_->Error(DiagMessage(source_.WithLine(parser->line_number()))
+                           << "illegal nested XLIFF 'g' tag");
+              return false;
+            } else {
+              // Mark the beginning of an 'untranslatable' section.
+              untranslatable_start_depth = depth;
+              node_stack.push_back(
+                  node_stack.back()->AddChild(util::make_unique<UntranslatableNode>()));
+            }
+          } else {
+            // Ignore unknown XLIFF tags, but don't warn.
+            node_stack.push_back(node_stack.back()->AddChild(util::make_unique<Node>()));
+          }
+        } else {
+          // Besides XLIFF, any other namespaced tag is unsupported and ignored.
+          diag_->Warn(DiagMessage(source_.WithLine(parser->line_number()))
+                      << "ignoring element '" << parser->element_name()
+                      << "' with unknown namespace '" << parser->element_namespace() << "'");
+          node_stack.push_back(node_stack.back()->AddChild(util::make_unique<Node>()));
         }
-        // Ignore other xliff tags, they get handled by other tools.
 
-      } else {
-        // Besides XLIFF, any other namespaced tag is unsupported and ignored.
-        diag_->Warn(DiagMessage(source_.WithLine(parser->line_number()))
-                    << "ignoring element '" << parser->element_name()
-                    << "' with unknown namespace '" << parser->element_namespace() << "'");
-      }
+        // Enter one level inside the element.
+        depth++;
+      } break;
 
-      // Enter one level inside the element.
-      depth++;
-    } else if (event == xml::XmlPullParser::Event::kText) {
-      // Record both the raw text and append to the builder to deal with escape sequences
-      // and quotations.
-      out_raw_string->append(parser->text());
-      builder.Append(parser->text());
-    } else if (event == xml::XmlPullParser::Event::kEndElement) {
-      // Return one level from within the element.
-      depth--;
-      if (depth == 0) {
+      case xml::XmlPullParser::Event::kEndElement: {
+        // Return one level from within the element.
+        depth--;
+        if (depth == 0) {
+          break;
+        }
+
+        node_stack.pop_back();
+        if (untranslatable_start_depth == make_value(depth)) {
+          // This is the end of an untranslatable section.
+          untranslatable_start_depth = {};
+        }
+      } break;
+
+      default:
+        // ignore.
         break;
-      }
-
-      if (parser->element_namespace().empty()) {
-        // This is an HTML tag which we encode as a span. Update the span
-        // stack and pop the top entry.
-        Span& top_span = out_style_string->spans[span_stack.back()];
-        top_span.last_char = builder.Utf16Len() - 1;
-        span_stack.pop_back();
-      } else if (untranslatable_start_depth == make_value(depth)) {
-        // This is the end of an untranslatable section. Use UTF8 indices/lengths.
-        UntranslatableSection& untranslatable_section = out_untranslatable_sections->back();
-        untranslatable_section.end = builder.ToString().size();
-        untranslatable_start_depth = {};
-      }
-    } else if (event == xml::XmlPullParser::Event::kComment) {
-      // Ignore.
-    } else {
-      LOG(FATAL) << "unhandled XML event";
     }
   }
 
-  CHECK(span_stack.empty()) << "spans haven't been fully processed";
-  out_style_string->str = builder.ToString();
+  // Sanity check to make sure we processed all the nodes.
+  CHECK(node_stack.size() == 1u);
+  CHECK(node_stack.back() == &root);
+
+  if (!saw_span_node) {
+    // If there were no spans, we must treat this string a little differently (according to AAPT).
+    // Find and strip the leading whitespace from the first segment, and the trailing whitespace
+    // from the last segment.
+    if (first_segment != nullptr) {
+      // Trim leading whitespace.
+      StringPiece trimmed = util::TrimLeadingWhitespace(first_segment->data);
+      if (trimmed.size() != first_segment->data.size()) {
+        first_segment->data = trimmed.to_string();
+      }
+    }
+
+    if (last_segment != nullptr) {
+      // Trim trailing whitespace.
+      StringPiece trimmed = util::TrimTrailingWhitespace(last_segment->data);
+      if (trimmed.size() != last_segment->data.size()) {
+        last_segment->data = trimmed.to_string();
+      }
+    }
+  }
+
+  // Have the XML structure flatten itself into the StringBuilder. The StringBuilder will take
+  // care of recording the correctly adjusted Spans and UntranslatableSections.
+  StringBuilder builder;
+  root.Build(&builder);
+  if (!builder) {
+    diag_->Error(DiagMessage(source_.WithLine(parser->line_number())) << builder.GetError());
+    return false;
+  }
+
+  ResourceUtils::FlattenedXmlString flattened_string = builder.GetFlattenedString();
+  *out_raw_string = std::move(raw_string);
+  *out_untranslatable_sections = std::move(flattened_string.untranslatable_sections);
+  out_style_string->str = std::move(flattened_string.text);
+  out_style_string->spans = std::move(flattened_string.spans);
   return true;
 }
 

@@ -101,4 +101,12 @@ public class WindowManagerWrapper {
             Log.w(TAG, "Failed to override pending app transition (remote): ", e);
         }
     }
+
+    public void endProlongedAnimations() {
+        try {
+            WindowManagerGlobal.getWindowManagerService().endProlongedAnimations();
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to end prolonged animations: ", e);
+        }
+    }
 }

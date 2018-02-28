@@ -160,6 +160,7 @@ import android.os.RecoverySystem;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceSpecificException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -206,6 +207,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.telephony.SmsApplication;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
@@ -219,6 +221,7 @@ import com.android.server.SystemService;
 import com.android.server.devicepolicy.DevicePolicyManagerService.ActiveAdmin.TrustAgentInfo;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.UserRestrictionsUtils;
+import com.android.server.storage.DeviceStorageMonitorInternal;
 
 import com.google.android.collect.Sets;
 
@@ -8217,6 +8220,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
+    public void setDefaultSmsApplication(ComponentName admin, String packageName) {
+        Preconditions.checkNotNull(admin, "ComponentName is null");
+        synchronized (this) {
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+        }
+        mInjector.binderWithCleanCallingIdentity(() ->
+                SmsApplication.setDefaultApplication(packageName, mContext));
+    }
+
+    @Override
     public boolean setApplicationRestrictionsManagingPackage(ComponentName admin,
             String packageName) {
         try {
@@ -8873,13 +8886,40 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final boolean demo = (flags & DevicePolicyManager.MAKE_USER_DEMO) != 0
                 && UserManager.isDeviceInDemoMode(mContext);
         final boolean leaveAllSystemAppsEnabled = (flags & LEAVE_ALL_SYSTEM_APPS_ENABLED) != 0;
+        final int targetSdkVersion;
+
         // Create user.
         UserHandle user = null;
         synchronized (this) {
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
 
+            final int callingUid = mInjector.binderGetCallingUid();
             final long id = mInjector.binderClearCallingIdentity();
             try {
+                targetSdkVersion = mInjector.getPackageManagerInternal().getUidTargetSdkVersion(
+                        callingUid);
+
+                // Return detail error code for checks inside
+                // UserManagerService.createUserInternalUnchecked.
+                DeviceStorageMonitorInternal deviceStorageMonitorInternal =
+                        LocalServices.getService(DeviceStorageMonitorInternal.class);
+                if (deviceStorageMonitorInternal.isMemoryLow()) {
+                    if (targetSdkVersion >= Build.VERSION_CODES.P) {
+                        throw new ServiceSpecificException(
+                                UserManager.USER_OPERATION_ERROR_LOW_STORAGE, "low device storage");
+                    } else {
+                        return null;
+                    }
+                }
+                if (!mUserManager.canAddMoreUsers()) {
+                    if (targetSdkVersion >= Build.VERSION_CODES.P) {
+                        throw new ServiceSpecificException(
+                                UserManager.USER_OPERATION_ERROR_MAX_USERS, "user limit reached");
+                    } else {
+                        return null;
+                    }
+                }
+
                 int userInfoFlags = 0;
                 if (ephemeral) {
                     userInfoFlags |= UserInfo.FLAG_EPHEMERAL;
@@ -8903,7 +8943,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         }
         if (user == null) {
-            return null;
+            if (targetSdkVersion >= Build.VERSION_CODES.P) {
+                throw new ServiceSpecificException(UserManager.USER_OPERATION_ERROR_UNKNOWN,
+                        "failed to create user");
+            } else {
+                return null;
+            }
         }
 
         final int userHandle = user.getIdentifier();
@@ -8949,7 +8994,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return user;
         } catch (Throwable re) {
             mUserManager.removeUser(userHandle);
-            return null;
+            if (targetSdkVersion >= Build.VERSION_CODES.P) {
+                throw new ServiceSpecificException(UserManager.USER_OPERATION_ERROR_UNKNOWN,
+                        re.getMessage());
+            } else {
+                return null;
+            }
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
         }
@@ -9030,24 +9080,24 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final int userId = userHandle.getIdentifier();
         if (isManagedProfile(userId)) {
             Log.w(LOG_TAG, "Managed profile cannot be started in background");
-            return DevicePolicyManager.USER_OPERATION_ERROR_MANAGED_PROFILE;
+            return UserManager.USER_OPERATION_ERROR_MANAGED_PROFILE;
         }
 
         final long id = mInjector.binderClearCallingIdentity();
         try {
             if (!mInjector.getActivityManagerInternal().canStartMoreUsers()) {
                 Log.w(LOG_TAG, "Cannot start more users in background");
-                return DevicePolicyManager.USER_OPERATION_ERROR_MAX_RUNNING_USERS;
+                return UserManager.USER_OPERATION_ERROR_MAX_RUNNING_USERS;
             }
 
             if (mInjector.getIActivityManager().startUserInBackground(userId)) {
-                return DevicePolicyManager.USER_OPERATION_SUCCESS;
+                return UserManager.USER_OPERATION_SUCCESS;
             } else {
-                return DevicePolicyManager.USER_OPERATION_ERROR_UNKNOWN;
+                return UserManager.USER_OPERATION_ERROR_UNKNOWN;
             }
         } catch (RemoteException e) {
             // Same process, should not happen.
-            return DevicePolicyManager.USER_OPERATION_ERROR_UNKNOWN;
+            return UserManager.USER_OPERATION_ERROR_UNKNOWN;
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
         }
@@ -9065,7 +9115,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final int userId = userHandle.getIdentifier();
         if (isManagedProfile(userId)) {
             Log.w(LOG_TAG, "Managed profile cannot be stopped");
-            return DevicePolicyManager.USER_OPERATION_ERROR_MANAGED_PROFILE;
+            return UserManager.USER_OPERATION_ERROR_MANAGED_PROFILE;
         }
 
         return stopUserUnchecked(userId);
@@ -9086,7 +9136,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         if (isManagedProfile(callingUserId)) {
             Log.w(LOG_TAG, "Managed profile cannot be logout");
-            return DevicePolicyManager.USER_OPERATION_ERROR_MANAGED_PROFILE;
+            return UserManager.USER_OPERATION_ERROR_MANAGED_PROFILE;
         }
 
         final long id = mInjector.binderClearCallingIdentity();
@@ -9094,11 +9144,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (!mInjector.getIActivityManager().switchUser(UserHandle.USER_SYSTEM)) {
                 Log.w(LOG_TAG, "Failed to switch to primary user");
                 // This should never happen as target user is UserHandle.USER_SYSTEM
-                return DevicePolicyManager.USER_OPERATION_ERROR_UNKNOWN;
+                return UserManager.USER_OPERATION_ERROR_UNKNOWN;
             }
         } catch (RemoteException e) {
             // Same process, should not happen.
-            return DevicePolicyManager.USER_OPERATION_ERROR_UNKNOWN;
+            return UserManager.USER_OPERATION_ERROR_UNKNOWN;
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
         }
@@ -9111,15 +9161,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         try {
             switch (mInjector.getIActivityManager().stopUser(userId, true /*force*/, null)) {
                 case ActivityManager.USER_OP_SUCCESS:
-                    return DevicePolicyManager.USER_OPERATION_SUCCESS;
+                    return UserManager.USER_OPERATION_SUCCESS;
                 case ActivityManager.USER_OP_IS_CURRENT:
-                    return DevicePolicyManager.USER_OPERATION_ERROR_CURRENT_USER;
+                    return UserManager.USER_OPERATION_ERROR_CURRENT_USER;
                 default:
-                    return DevicePolicyManager.USER_OPERATION_ERROR_UNKNOWN;
+                    return UserManager.USER_OPERATION_ERROR_UNKNOWN;
             }
         } catch (RemoteException e) {
             // Same process, should not happen.
-            return DevicePolicyManager.USER_OPERATION_ERROR_UNKNOWN;
+            return UserManager.USER_OPERATION_ERROR_UNKNOWN;
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
         }

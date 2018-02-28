@@ -368,7 +368,6 @@ package android.app {
   }
 
   public final class StatsManager {
-    method public boolean addConfiguration(long, byte[], java.lang.String, java.lang.String);
     method public boolean addConfiguration(long, byte[]);
     method public byte[] getData(long);
     method public byte[] getMetadata();
@@ -617,6 +616,7 @@ package android.app.backup {
     method public java.lang.String transportDirName();
     field public static final int AGENT_ERROR = -1003; // 0xfffffc15
     field public static final int AGENT_UNKNOWN = -1004; // 0xfffffc14
+    field public static final java.lang.String EXTRA_TRANSPORT_REGISTRATION = "android.app.backup.extra.TRANSPORT_REGISTRATION";
     field public static final int FLAG_INCREMENTAL = 2; // 0x2
     field public static final int FLAG_NON_INCREMENTAL = 4; // 0x4
     field public static final int FLAG_USER_INITIATED = 1; // 0x1
@@ -4180,6 +4180,7 @@ package android.provider {
     field public static final java.lang.String CARRIER_APP_NAMES = "carrier_app_names";
     field public static final java.lang.String CARRIER_APP_WHITELIST = "carrier_app_whitelist";
     field public static final java.lang.String DEFAULT_SM_DP_PLUS = "default_sm_dp_plus";
+    field public static final java.lang.String EUICC_PROVISIONED = "euicc_provisioned";
     field public static final java.lang.String INSTALL_CARRIER_APP_NOTIFICATION_PERSISTENT = "install_carrier_app_notification_persistent";
     field public static final java.lang.String INSTALL_CARRIER_APP_NOTIFICATION_SLEEP_MILLIS = "install_carrier_app_notification_sleep_millis";
     field public static final java.lang.String OTA_DISABLE_AUTOMATIC_UPDATE = "ota_disable_automatic_update";
@@ -5983,7 +5984,6 @@ package android.telephony.ims.feature {
     method public void setUiTtyMode(int, android.os.Message);
     method public int shouldProcessCall(java.lang.String[]);
     field public static final int PROCESS_CALL_CSFB = 1; // 0x1
-    field public static final int PROCESS_CALL_EMERGENCY_CSFB = 2; // 0x2
     field public static final int PROCESS_CALL_IMS = 0; // 0x0
   }
 

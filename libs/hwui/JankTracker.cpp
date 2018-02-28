@@ -165,7 +165,7 @@ void JankTracker::finishFrame(const FrameInfo& frame) {
         ALOGI("%s", ss.str().c_str());
         // Just so we have something that counts up, the value is largely irrelevant
         ATRACE_INT(ss.str().c_str(), ++sDaveyCount);
-        android::util::stats_write(android::util::DAVEY_OCCURRED, ns2ms(totalDuration));
+        android::util::stats_write(android::util::DAVEY_OCCURRED, getuid(), ns2ms(totalDuration));
     }
 }
 

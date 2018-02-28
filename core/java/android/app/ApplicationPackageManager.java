@@ -1354,11 +1354,10 @@ public class ApplicationPackageManager extends PackageManager {
         if (badgeColor == null) {
             return null;
         }
-        badgeColor.setTint(getUserBadgeColor(user));
         Drawable badgeForeground = getDrawableForDensity(
                 com.android.internal.R.drawable.ic_corp_badge_case, density);
-        Drawable badge = new LayerDrawable(
-                new Drawable[] {badgeColor, badgeForeground });
+        badgeForeground.setTint(getUserBadgeColor(user));
+        Drawable badge = new LayerDrawable(new Drawable[] {badgeColor, badgeForeground });
         return badge;
     }
 

@@ -24,6 +24,7 @@ import android.annotation.UiThread;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
@@ -319,6 +320,10 @@ public final class Magnifier {
      * producing a shakiness effect for the magnifier content.
      */
     private static class InternalPopupWindow {
+        // The alpha set on the magnifier's content, which defines how
+        // prominent the white background is.
+        private static final int CONTENT_BITMAP_ALPHA = 242;
+
         // Display associated to the view the magnifier is attached to.
         private final Display mDisplay;
         // The size of the content of the magnifier.
@@ -511,10 +516,13 @@ public final class Magnifier {
                 final DisplayListCanvas canvas =
                         mBitmapRenderNode.start(mContentWidth, mContentHeight);
                 try {
+                    canvas.drawColor(Color.WHITE);
+
                     final Rect srcRect = new Rect(0, 0, mBitmap.getWidth(), mBitmap.getHeight());
                     final Rect dstRect = new Rect(0, 0, mContentWidth, mContentHeight);
                     final Paint paint = new Paint();
                     paint.setFilterBitmap(true);
+                    paint.setAlpha(CONTENT_BITMAP_ALPHA);
                     canvas.drawBitmap(mBitmap, srcRect, dstRect, paint);
                 } finally {
                     mBitmapRenderNode.end(canvas);

@@ -538,6 +538,7 @@ public final class PowerManager {
             ServiceType.DATA_SAVER,
             ServiceType.FORCE_ALL_APPS_STANDBY,
             ServiceType.OPTIONAL_SENSORS,
+            ServiceType.AOD,
     })
     public @interface ServiceType {
         int NULL = 0;
@@ -551,6 +552,7 @@ public final class PowerManager {
         int SOUND = 8;
         int BATTERY_STATS = 9;
         int DATA_SAVER = 10;
+        int AOD = 14;
 
         /**
          * Whether to enable force-app-standby on all apps or not.

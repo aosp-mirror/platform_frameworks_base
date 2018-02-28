@@ -24,7 +24,7 @@ public class PageIndicator extends ViewGroup {
     // The size of a single dot in relation to the whole animation.
     private static final float SINGLE_SCALE = .4f;
 
-    private static final float MINOR_ALPHA = .3f;
+    private static final float MINOR_ALPHA = .42f;
 
     private final ArrayList<Integer> mQueuedPositions = new ArrayList<>();
 
@@ -53,7 +53,7 @@ public class PageIndicator extends ViewGroup {
             removeViewAt(getChildCount() - 1);
         }
         TypedArray array = getContext().obtainStyledAttributes(
-                new int[]{android.R.attr.colorForeground});
+                new int[]{android.R.attr.colorControlActivated});
         int color = array.getColor(0, 0);
         array.recycle();
         while (numPages > getChildCount()) {

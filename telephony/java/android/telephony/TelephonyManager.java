@@ -5281,6 +5281,24 @@ public class TelephonyManager {
     }
 
     /**
+     * Determines if emergency calling is allowed for the MMTEL feature on the slot provided.
+     * @param slotIndex The SIM slot of the MMTEL feature
+     * @return true if emergency calling is allowed, false otherwise.
+     * @hide
+     */
+    public boolean isEmergencyMmTelAvailable(int slotIndex) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.isEmergencyMmTelAvailable(slotIndex);
+            }
+        } catch (RemoteException e) {
+            Rlog.e(TAG, "isEmergencyMmTelAvailable, RemoteException: " + e.getMessage());
+        }
+        return false;
+    }
+
+    /**
      * Set IMS registration state
      *
      * @param Registration state
@@ -7183,18 +7201,16 @@ public class TelephonyManager {
      *
      * @return Carrier id of the current subscription. Return {@link #UNKNOWN_CARRIER_ID} if the
      * subscription is unavailable or the carrier cannot be identified.
-     * @throws IllegalStateException if telephony service is unavailable.
      */
     public int getAndroidCarrierIdForSubscription() {
         try {
             ITelephony service = getITelephony();
-            return service.getSubscriptionCarrierId(getSubId());
+            if (service != null) {
+                return service.getSubscriptionCarrierId(getSubId());
+            }
         } catch (RemoteException ex) {
             // This could happen if binder process crashes.
             ex.rethrowAsRuntimeException();
-        } catch (NullPointerException ex) {
-            // This could happen before phone restarts due to crashing.
-            throw new IllegalStateException("Telephony service unavailable");
         }
         return UNKNOWN_CARRIER_ID;
     }
@@ -7210,18 +7226,16 @@ public class TelephonyManager {
      *
      * @return Carrier name of the current subscription. Return {@code null} if the subscription is
      * unavailable or the carrier cannot be identified.
-     * @throws IllegalStateException if telephony service is unavailable.
      */
     public CharSequence getAndroidCarrierNameForSubscription() {
         try {
             ITelephony service = getITelephony();
-            return service.getSubscriptionCarrierName(getSubId());
+            if (service != null) {
+                return service.getSubscriptionCarrierName(getSubId());
+            }
         } catch (RemoteException ex) {
             // This could happen if binder process crashes.
             ex.rethrowAsRuntimeException();
-        } catch (NullPointerException ex) {
-            // This could happen before phone restarts due to crashing.
-            throw new IllegalStateException("Telephony service unavailable");
         }
         return null;
     }
@@ -7667,6 +7681,85 @@ public class TelephonyManager {
                 telephony.setUserDataEnabled(subId, enable);
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#setUserDataEnabled", e);
+        }
+    }
+
+    /**
+     * In this mode, modem will not send specified indications when screen is off.
+     * @hide
+     */
+    public static final int INDICATION_UPDATE_MODE_NORMAL                   = 1;
+
+    /**
+     * In this mode, modem will still send specified indications when screen is off.
+     * @hide
+     */
+    public static final int INDICATION_UPDATE_MODE_IGNORE_SCREEN_OFF        = 2;
+
+    /** @hide */
+    @IntDef(prefix = { "INDICATION_UPDATE_MODE_" }, value = {
+            INDICATION_UPDATE_MODE_NORMAL,
+            INDICATION_UPDATE_MODE_IGNORE_SCREEN_OFF
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface IndicationUpdateMode{}
+
+    /**
+     * The indication for signal strength update.
+     * @hide
+     */
+    public static final int INDICATION_FILTER_SIGNAL_STRENGTH               = 0x1;
+
+    /**
+     * The indication for full network state update.
+     * @hide
+     */
+    public static final int INDICATION_FILTER_FULL_NETWORK_STATE            = 0x2;
+
+    /**
+     * The indication for data call dormancy changed update.
+     * @hide
+     */
+    public static final int INDICATION_FILTER_DATA_CALL_DORMANCY_CHANGED    = 0x4;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "INDICATION_FILTER_" }, value = {
+            INDICATION_FILTER_SIGNAL_STRENGTH,
+            INDICATION_FILTER_FULL_NETWORK_STATE,
+            INDICATION_FILTER_DATA_CALL_DORMANCY_CHANGED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface IndicationFilters{}
+
+    /**
+     * Sets radio indication update mode. This can be used to control the behavior of indication
+     * update from modem to Android frameworks. For example, by default several indication updates
+     * are turned off when screen is off, but in some special cases (e.g. carkit is connected but
+     * screen is off) we want to turn on those indications even when the screen is off.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     *
+     * @param filters Indication filters. Should be a bitmask of INDICATION_FILTER_XXX.
+     * @see #INDICATION_FILTER_SIGNAL_STRENGTH
+     * @see #INDICATION_FILTER_FULL_NETWORK_STATE
+     * @see #INDICATION_FILTER_DATA_CALL_DORMANCY_CHANGED
+     * @param updateMode The voice activation state
+     * @see #INDICATION_UPDATE_MODE_NORMAL
+     * @see #INDICATION_UPDATE_MODE_IGNORE_SCREEN_OFF
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setRadioIndicationUpdateMode(@IndicationFilters int filters,
+                                             @IndicationUpdateMode int updateMode) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.setRadioIndicationUpdateMode(getSubId(), filters, updateMode);
+            }
+        } catch (RemoteException ex) {
+            // This could happen if binder process crashes.
+            ex.rethrowAsRuntimeException();
         }
     }
 }

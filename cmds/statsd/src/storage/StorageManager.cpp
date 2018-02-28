@@ -195,6 +195,20 @@ void StorageManager::appendConfigMetricsReport(ProtoOutputStream& proto) {
     }
 }
 
+bool StorageManager::readFileToString(const char* file, string* content) {
+    int fd = open(file, O_RDONLY | O_CLOEXEC);
+    bool res = false;
+    if (fd != -1) {
+        if (android::base::ReadFdToString(fd, content)) {
+            res = true;
+        } else {
+            VLOG("Failed to read file %s\n", file);
+        }
+        close(fd);
+    }
+    return res;
+}
+
 void StorageManager::readConfigFromDisk(map<ConfigKey, StatsdConfig>& configsMap) {
     unique_ptr<DIR, decltype(&closedir)> dir(opendir(STATS_SERVICE_DIR), closedir);
     if (dir == NULL) {

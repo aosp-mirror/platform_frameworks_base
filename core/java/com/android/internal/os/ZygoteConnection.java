@@ -155,7 +155,7 @@ class ZygoteConnection {
 
         if (parsedArgs.preloadPackage != null) {
             handlePreloadPackage(parsedArgs.preloadPackage, parsedArgs.preloadPackageLibs,
-                    parsedArgs.preloadPackageCacheKey);
+                    parsedArgs.preloadPackageLibFileName, parsedArgs.preloadPackageCacheKey);
             return null;
         }
 
@@ -290,7 +290,8 @@ class ZygoteConnection {
         return mSocketOutStream;
     }
 
-    protected void handlePreloadPackage(String packagePath, String libsPath, String cacheKey) {
+    protected void handlePreloadPackage(String packagePath, String libsPath, String libFileName,
+            String cacheKey) {
         throw new RuntimeException("Zyogte does not support package preloading");
     }
 
@@ -402,10 +403,24 @@ class ZygoteConnection {
         String appDataDir;
 
         /**
-         * Whether to preload a package, with the package path in the remainingArgs.
+         * The APK path of the package to preload, when using --preload-package.
          */
         String preloadPackage;
+
+        /**
+         * The native library path of the package to preload, when using --preload-package.
+         */
         String preloadPackageLibs;
+
+        /**
+         * The filename of the native library to preload, when using --preload-package.
+         */
+        String preloadPackageLibFileName;
+
+        /**
+         * The cache key under which to enter the preloaded package into the classloader cache,
+         * when using --preload-package.
+         */
         String preloadPackageCacheKey;
 
         /**
@@ -571,6 +586,7 @@ class ZygoteConnection {
                 } else if (arg.equals("--preload-package")) {
                     preloadPackage = args[++curArg];
                     preloadPackageLibs = args[++curArg];
+                    preloadPackageLibFileName = args[++curArg];
                     preloadPackageCacheKey = args[++curArg];
                 } else if (arg.equals("--preload-default")) {
                     preloadDefault = true;

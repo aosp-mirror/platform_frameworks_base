@@ -166,10 +166,11 @@ void filterGaugeValues(const std::vector<Matcher>& matcherFields,
     }
 }
 
-void getDimensionForCondition(const LogEvent& event, Metric2Condition links,
+void getDimensionForCondition(const std::vector<FieldValue>& eventValues,
+                              const Metric2Condition& links,
                               vector<HashableDimensionKey>* conditionDimension) {
     // Get the dimension first by using dimension from what.
-    filterValues(links.metricFields, event.getValues(), conditionDimension);
+    filterValues(links.metricFields, eventValues, conditionDimension);
 
     // Then replace the field with the dimension from condition.
     for (auto& dim : *conditionDimension) {

@@ -20,6 +20,7 @@ option java_multiple_files = true;
 import "frameworks/base/core/proto/android/os/batterytype.proto";
 import "frameworks/base/core/proto/android/os/cpufreq.proto";
 import "frameworks/base/core/proto/android/os/cpuinfo.proto";
+import "frameworks/base/core/proto/android/os/data.proto";
 import "frameworks/base/core/proto/android/os/kernelwake.proto";
 import "frameworks/base/core/proto/android/os/pagetypeinfo.proto";
 import "frameworks/base/core/proto/android/os/procrank.proto";
@@ -52,9 +53,8 @@ import "frameworks/base/libs/incident/proto/android/section.proto";
 
 package android.os;
 
-// privacy field options must not be set at this level because all
-// the sections are able to be controlled and configured by section ids.
-// Instead privacy field options need to be configured in each section proto message.
+// Privacy tag can be marked to override UNSET messages so generic
+// message type can be handled case by case, e.g. GZippedFileProto.
 message IncidentProto {
     reserved 1001;
 
@@ -149,6 +149,12 @@ message IncidentProto {
     optional BatteryTypeProto battery_type = 2006 [
         (section).type = SECTION_FILE,
         (section).args = "/sys/class/power_supply/bms/battery_type"
+    ];
+
+    optional GZippedFileProto last_kmsg = 2007 [
+        (section).type = SECTION_GZIP,
+        (section).args = "/sys/fs/pstore/console-ramoops /sys/fs/pstore/console-ramoops-0 /proc/last_kmsg",
+        (privacy).dest = DEST_AUTOMATIC
     ];
 
     // System Services

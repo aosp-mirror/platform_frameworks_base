@@ -16,12 +16,13 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
-import static android.security.keystore.RecoveryController.ERROR_BAD_CERTIFICATE_FORMAT;
-import static android.security.keystore.RecoveryController.ERROR_DECRYPTION_FAILED;
-import static android.security.keystore.RecoveryController.ERROR_INSECURE_USER;
-import static android.security.keystore.RecoveryController.ERROR_NO_SNAPSHOT_PENDING;
-import static android.security.keystore.RecoveryController.ERROR_SERVICE_INTERNAL_ERROR;
-import static android.security.keystore.RecoveryController.ERROR_SESSION_EXPIRED;
+import static android.security.keystore.recovery.RecoveryController.ERROR_BAD_CERTIFICATE_FORMAT;
+import static android.security.keystore.recovery.RecoveryController.ERROR_DECRYPTION_FAILED;
+import static android.security.keystore.recovery.RecoveryController.ERROR_INSECURE_USER;
+import static android.security.keystore.recovery.RecoveryController.ERROR_INVALID_KEY_FORMAT;
+import static android.security.keystore.recovery.RecoveryController.ERROR_NO_SNAPSHOT_PENDING;
+import static android.security.keystore.recovery.RecoveryController.ERROR_SERVICE_INTERNAL_ERROR;
+import static android.security.keystore.recovery.RecoveryController.ERROR_SESSION_EXPIRED;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -58,10 +59,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertPath;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
@@ -507,6 +506,7 @@ public class RecoverableKeyStoreManager {
      *
      * <p>TODO: Once AndroidKeyStore has added move api, do not return raw bytes.
      *
+     * @deprecated
      * @hide
      */
     public byte[] generateAndStoreKey(@NonNull String alias) throws RemoteException {
@@ -583,6 +583,57 @@ public class RecoverableKeyStoreManager {
     }
 
     /**
+     * Imports a 256-bit AES-GCM key named {@code alias}. The key is stored in system service
+     * keystore namespace.
+     *
+     * @param alias the alias provided by caller as a reference to the key.
+     * @param keyBytes the raw bytes of the 256-bit AES key.
+     * @return grant alias, which caller can use to access the key.
+     * @throws RemoteException if the given key is invalid or some internal errors occur.
+     *
+     * @hide
+     */
+    public String importKey(@NonNull String alias, @NonNull byte[] keyBytes)
+            throws RemoteException {
+        if (keyBytes == null ||
+                keyBytes.length != RecoverableKeyGenerator.KEY_SIZE_BITS / Byte.SIZE) {
+            Log.e(TAG, "The given key for import doesn't have the required length "
+                    + RecoverableKeyGenerator.KEY_SIZE_BITS);
+            throw new ServiceSpecificException(ERROR_INVALID_KEY_FORMAT,
+                    "The given key does not contain " + RecoverableKeyGenerator.KEY_SIZE_BITS
+                            + " bits.");
+        }
+
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+
+        // TODO: Refactor RecoverableKeyGenerator to wrap the PlatformKey logic
+
+        PlatformEncryptionKey encryptionKey;
+        try {
+            encryptionKey = mPlatformKeyManager.getEncryptKey(userId);
+        } catch (NoSuchAlgorithmException e) {
+            // Impossible: all algorithms must be supported by AOSP
+            throw new RuntimeException(e);
+        } catch (KeyStoreException | UnrecoverableKeyException e) {
+            throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
+        } catch (InsecureUserException e) {
+            throw new ServiceSpecificException(ERROR_INSECURE_USER, e.getMessage());
+        }
+
+        try {
+            // Wrap the key by the platform key and store the wrapped key locally
+            mRecoverableKeyGenerator.importKey(encryptionKey, userId, uid, alias, keyBytes);
+
+            // Import the key to Android KeyStore and get grant
+            mApplicationKeyStorage.setSymmetricKeyEntry(userId, uid, alias, keyBytes);
+            return mApplicationKeyStorage.getGrantAlias(userId, uid, alias);
+        } catch (KeyStoreException | InvalidKeyException | RecoverableKeyStorageException e) {
+            throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
+        }
+    }
+
+    /**
      * Gets a key named {@code alias} in caller's namespace.
      *
      * @return grant alias, which caller can use to access the key.
@@ -629,14 +680,6 @@ public class RecoverableKeyStoreManager {
         } catch (NoSuchAlgorithmException e) {
             // Should never happen: all the algorithms used are required by AOSP implementations
             throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
-        }
-    }
-
-    private String constructLoggingMessage(String key, byte[] value) {
-        if (value == null) {
-            return key + " is null";
-        } else {
-            return key + ": " + HexDump.toHexString(value);
         }
     }
 

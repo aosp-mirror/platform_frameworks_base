@@ -17,7 +17,10 @@
 package android.security;
 
 import android.annotation.NonNull;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.provider.Settings;
+import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -86,6 +89,7 @@ public class ConfirmationDialog {
     private byte[] mExtraData;
     private ConfirmationCallback mCallback;
     private Executor mExecutor;
+    private Context mContext;
 
     private final KeyStore mKeyStore = KeyStore.getInstance();
 
@@ -190,13 +194,37 @@ public class ConfirmationDialog {
             if (mExtraData == null) {
                 throw new IllegalArgumentException("extraData must be set");
             }
-            return new ConfirmationDialog(mPromptText, mExtraData);
+            return new ConfirmationDialog(context, mPromptText, mExtraData);
         }
     }
 
-    private ConfirmationDialog(CharSequence promptText, byte[] extraData) {
+    private ConfirmationDialog(Context context, CharSequence promptText, byte[] extraData) {
+        mContext = context;
         mPromptText = promptText;
         mExtraData = extraData;
+    }
+
+    private static final int UI_OPTION_ACCESSIBILITY_INVERTED_FLAG = 1 << 0;
+    private static final int UI_OPTION_ACCESSIBILITY_MAGNIFIED_FLAG = 1 << 1;
+
+    private int getUiOptionsAsFlags() {
+        int uiOptionsAsFlags = 0;
+        try {
+            ContentResolver contentResolver = mContext.getContentResolver();
+            int inversionEnabled = Settings.Secure.getInt(contentResolver,
+                    Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
+            if (inversionEnabled == 1) {
+                uiOptionsAsFlags |= UI_OPTION_ACCESSIBILITY_INVERTED_FLAG;
+            }
+            float fontScale = Settings.System.getFloat(contentResolver,
+                    Settings.System.FONT_SCALE);
+            if (fontScale > 1.0) {
+                uiOptionsAsFlags |= UI_OPTION_ACCESSIBILITY_MAGNIFIED_FLAG;
+            }
+        } catch (SettingNotFoundException e) {
+            Log.w(TAG, "Unexpected SettingNotFoundException");
+        }
+        return uiOptionsAsFlags;
     }
 
     /**
@@ -220,8 +248,7 @@ public class ConfirmationDialog {
         mCallback = callback;
         mExecutor = executor;
 
-        int uiOptionsAsFlags = 0;
-        // TODO: set AccessibilityInverted, AccessibilityMagnified in uiOptionsAsFlags as needed.
+        int uiOptionsAsFlags = getUiOptionsAsFlags();
         String locale = Locale.getDefault().toLanguageTag();
         int responseCode = mKeyStore.presentConfirmationPrompt(
                 mCallbackBinder, mPromptText.toString(), mExtraData, locale, uiOptionsAsFlags);
@@ -277,7 +304,6 @@ public class ConfirmationDialog {
      * @return true if confirmation prompts are supported by the device.
      */
     public static boolean isSupported() {
-        // TODO: read and return system property.
-        return true;
+        return KeyStore.getInstance().isConfirmationPromptSupported();
     }
 }

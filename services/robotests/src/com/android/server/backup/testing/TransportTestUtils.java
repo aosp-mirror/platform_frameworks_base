@@ -115,6 +115,7 @@ public class TransportTestUtils {
                     .thenReturn(transportDirName);
             when(transportManager.getTransportDirName(eq(transportComponent)))
                     .thenReturn(transportDirName);
+            when(transportManager.isTransportRegistered(eq(transportName))).thenReturn(true);
             // TODO: Mock rest of description methods
         } else {
             // Transport not registered
@@ -127,6 +128,7 @@ public class TransportTestUtils {
                     .thenThrow(TransportNotRegisteredException.class);
             when(transportManager.getTransportDirName(eq(transportComponent)))
                     .thenThrow(TransportNotRegisteredException.class);
+            when(transportManager.isTransportRegistered(eq(transportName))).thenReturn(false);
         }
         return transportMock;
     }

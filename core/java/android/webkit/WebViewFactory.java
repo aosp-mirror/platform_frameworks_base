@@ -205,25 +205,21 @@ public final class WebViewFactory {
         }
 
         PackageManager packageManager = AppGlobals.getInitialApplication().getPackageManager();
-        PackageInfo packageInfo;
+        String libraryFileName;
         try {
-            packageInfo = packageManager.getPackageInfo(packageName,
+            PackageInfo packageInfo = packageManager.getPackageInfo(packageName,
                     PackageManager.GET_META_DATA | PackageManager.MATCH_DEBUG_TRIAGED_MISSING);
+            libraryFileName = getWebViewLibrary(packageInfo.applicationInfo);
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(LOGTAG, "Couldn't find package " + packageName);
             return LIBLOAD_WRONG_PACKAGE_NAME;
         }
 
-        try {
-            int loadNativeRet = WebViewLibraryLoader.loadNativeLibrary(clazzLoader, packageInfo);
-            // If we failed waiting for relro we want to return that fact even if we successfully
-            // load the relro file.
-            if (loadNativeRet == LIBLOAD_SUCCESS) return response.status;
-            return loadNativeRet;
-        } catch (MissingWebViewPackageException e) {
-            Log.e(LOGTAG, "Couldn't load native library: " + e);
-            return LIBLOAD_FAILED_TO_LOAD_LIBRARY;
-        }
+        int loadNativeRet = WebViewLibraryLoader.loadNativeLibrary(clazzLoader, libraryFileName);
+        // If we failed waiting for relro we want to return that fact even if we successfully
+        // load the relro file.
+        if (loadNativeRet == LIBLOAD_SUCCESS) return response.status;
+        return loadNativeRet;
     }
 
     static WebViewFactoryProvider getProvider() {
@@ -454,7 +450,8 @@ public final class WebViewFactory {
                 ClassLoader clazzLoader = webViewContext.getClassLoader();
 
                 Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.loadNativeLibrary()");
-                WebViewLibraryLoader.loadNativeLibrary(clazzLoader, sPackageInfo);
+                WebViewLibraryLoader.loadNativeLibrary(clazzLoader,
+                        getWebViewLibrary(sPackageInfo.applicationInfo));
                 Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
 
                 Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "Class.forName()");

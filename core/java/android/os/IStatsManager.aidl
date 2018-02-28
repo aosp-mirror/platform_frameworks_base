@@ -47,6 +47,13 @@ interface IStatsManager {
     void informPollAlarmFired();
 
     /**
+     * Tells statsd that it is time to handle periodic alarms. Statsd will be responsible for
+     * determing what alarm subscriber to trigger.
+     * Two-way binder call so that caller's method (and corresponding wakelocks) will linger.
+     */
+    void informAlarmForSubscriberTriggeringFired();
+
+    /**
      * Tells statsd to store data to disk.
      */
     void writeDataToDisk();

@@ -23,10 +23,10 @@
 #include <climits>
 #include "CpuTimePerUidFreqPuller.h"
 #include "CpuTimePerUidPuller.h"
-#include "ResourceHealthManagerPuller.h"
 #include "KernelUidCpuActiveTimeReader.h"
 #include "KernelUidCpuClusterTimeReader.h"
-#include "SubsystemSleepStatePuller.h"
+#include "ResourceHealthManagerPuller.h"
+#include "ResourceThermalManagerPuller.h"
 #include "StatsCompanionServicePuller.h"
 #include "StatsPullerManagerImpl.h"
 #include "StatsService.h"
@@ -118,7 +118,9 @@ const std::map<int, PullAtomInfo> StatsPullerManagerImpl::kAllPullAtomInfo = {
          {{}, {}, 1, new ResourceHealthManagerPuller(android::util::FULL_BATTERY_CAPACITY)}},
         // process_memory_state
         {android::util::PROCESS_MEMORY_STATE,
-         {{4,5,6,7,8}, {2,3}, 0, new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_STATE)}}};
+         {{4,5,6,7,8}, {2,3}, 0, new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_STATE)}},
+        // temperature
+        {android::util::TEMPERATURE, {{}, {}, 1, new ResourceThermalManagerPuller()}}};
 
 StatsPullerManagerImpl::StatsPullerManagerImpl()
     : mCurrentPullingInterval(LONG_MAX) {

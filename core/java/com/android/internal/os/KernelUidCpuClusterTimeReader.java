@@ -17,7 +17,6 @@
 package com.android.internal.os;
 
 import android.annotation.Nullable;
-import android.os.SystemClock;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -50,17 +49,14 @@ import java.nio.IntBuffer;
  * which has a shorter throttle interval and returns cached result from last read when the request
  * is throttled.
  *
- * This class is NOT thread-safe and NOT designed to be accessed by more than one caller (due to
- * the nature of {@link #readDelta(Callback)}).
+ * This class is NOT thread-safe and NOT designed to be accessed by more than one caller since each
+ * caller has its own view of delta.
  */
-public class KernelUidCpuClusterTimeReader {
-    private static final String TAG = "KernelUidCpuClusterTimeReader";
-    // Throttle interval in milliseconds
-    private static final long DEFAULT_THROTTLE_INTERVAL = 10_000L;
+public class KernelUidCpuClusterTimeReader extends
+        KernelUidCpuTimeReaderBase<KernelUidCpuClusterTimeReader.Callback> {
+    private static final String TAG = KernelUidCpuClusterTimeReader.class.getSimpleName();
 
     private final KernelCpuProcReader mProcReader;
-    private long mLastTimeReadMs = Long.MIN_VALUE;
-    private long mThrottleInterval = DEFAULT_THROTTLE_INTERVAL;
     private SparseArray<double[]> mLastUidPolicyTimeMs = new SparseArray<>();
 
     private int mNumClusters = -1;
@@ -70,7 +66,7 @@ public class KernelUidCpuClusterTimeReader {
     private double[] mCurTime; // Reuse to avoid GC.
     private long[] mDeltaTime; // Reuse to avoid GC.
 
-    public interface Callback {
+    public interface Callback extends KernelUidCpuTimeReaderBase.Callback {
         /**
          * Notifies when new data is available.
          *
@@ -90,17 +86,8 @@ public class KernelUidCpuClusterTimeReader {
         mProcReader = procReader;
     }
 
-    public void setThrottleInterval(long throttleInterval) {
-        if (throttleInterval >= 0) {
-            mThrottleInterval = throttleInterval;
-        }
-    }
-
-    public void readDelta(@Nullable Callback cb) {
-        if (SystemClock.elapsedRealtime() < mLastTimeReadMs + mThrottleInterval) {
-            Slog.w(TAG, "Throttle");
-            return;
-        }
+    @Override
+    protected void readDeltaImpl(@Nullable Callback cb) {
         synchronized (mProcReader) {
             ByteBuffer bytes = mProcReader.readBytes();
             if (bytes == null || bytes.remaining() <= 4) {
@@ -142,14 +129,15 @@ public class KernelUidCpuClusterTimeReader {
             int numUids = buf.remaining() / (mNumCores + 1);
 
             for (int i = 0; i < numUids; i++) {
-                processUidLocked(buf, cb);
+                processUid(buf, cb);
             }
-            // Slog.i(TAG, "Read uids: " + numUids);
+            if (DEBUG) {
+                Slog.d(TAG, "Read uids: " + numUids);
+            }
         }
-        mLastTimeReadMs = SystemClock.elapsedRealtime();
     }
 
-    private void processUidLocked(IntBuffer buf, @Nullable Callback cb) {
+    private void processUid(IntBuffer buf, @Nullable Callback cb) {
         int uid = buf.get();
         double[] lastTimes = mLastUidPolicyTimeMs.get(uid);
         if (lastTimes == null) {

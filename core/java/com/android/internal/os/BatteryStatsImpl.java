@@ -12606,7 +12606,7 @@ public class BatteryStatsImpl extends BatteryStats {
         temp = Math.max(0, temp);
 
         reportChangesToStatsLog(mHaveBatteryLevel ? mHistoryCur : null,
-                status, plugType, level, temp);
+                status, plugType, level);
 
         final boolean onBattery = isOnBattery(plugType, status);
         final long uptime = mClocks.uptimeMillis();
@@ -12805,7 +12805,7 @@ public class BatteryStatsImpl extends BatteryStats {
     // Inform StatsLog of setBatteryState changes.
     // If this is the first reporting, pass in recentPast == null.
     private void reportChangesToStatsLog(HistoryItem recentPast,
-            final int status, final int plugType, final int level, final int temp) {
+            final int status, final int plugType, final int level) {
 
         if (recentPast == null || recentPast.batteryStatus != status) {
             StatsLog.write(StatsLog.CHARGING_STATE_CHANGED, status);
@@ -12816,8 +12816,6 @@ public class BatteryStatsImpl extends BatteryStats {
         if (recentPast == null || recentPast.batteryLevel != level) {
             StatsLog.write(StatsLog.BATTERY_LEVEL_CHANGED, level);
         }
-        // Let's just always print the temperature, regardless of whether it changed.
-        StatsLog.write(StatsLog.DEVICE_TEMPERATURE_REPORTED, temp);
     }
 
     public long getAwakeTimeBattery() {
@@ -13438,6 +13436,7 @@ public class BatteryStatsImpl extends BatteryStats {
         private void updateKernelUidReadersThrottleTime(long oldTimeMs, long newTimeMs) {
             KERNEL_UID_READERS_THROTTLE_TIME = newTimeMs;
             if (oldTimeMs != newTimeMs) {
+                mKernelUidCpuTimeReader.setThrottleInterval(KERNEL_UID_READERS_THROTTLE_TIME);
                 mKernelUidCpuFreqTimeReader.setThrottleInterval(KERNEL_UID_READERS_THROTTLE_TIME);
                 mKernelUidCpuActiveTimeReader.setThrottleInterval(KERNEL_UID_READERS_THROTTLE_TIME);
                 mKernelUidCpuClusterTimeReader

@@ -19,9 +19,7 @@ package android.security.keystore;
 import java.security.SecureRandom;
 
 /**
- * Session to recover a {@link KeychainSnapshot} from the remote trusted hardware, initiated by a
- * recovery agent.
- *
+ * @deprecated Use {@link android.security.keystore.recovery.RecoverySession}.
  * @hide
  */
 public class RecoverySession implements AutoCloseable {

@@ -21,6 +21,7 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
+import android.util.StatsLog;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -152,6 +153,8 @@ public class KeyguardBouncer {
                 mKeyguardView.requestLayout();
             }
             mShowingSoon = false;
+            StatsLog.write(StatsLog.KEYGUARD_BOUNCER_STATE_CHANGED,
+                StatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SHOWN);
         }
     };
 
@@ -183,6 +186,8 @@ public class KeyguardBouncer {
 
     public void hide(boolean destroyView) {
         if (isShowing()) {
+            StatsLog.write(StatsLog.KEYGUARD_BOUNCER_STATE_CHANGED,
+                StatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__HIDDEN);
             mDismissCallbackRegistry.notifyDismissCancelled();
         }
         mFalsingManager.onBouncerHidden();

@@ -23,16 +23,7 @@ import android.os.Parcelable;
 import com.android.internal.util.Preconditions;
 
 /**
- * Helper class with data necessary recover a single application key, given a recovery key.
- *
- * <ul>
- *   <li>Alias - Keystore alias of the key.
- *   <li>Encrypted key material.
- * </ul>
- *
- * Note that Application info is not included. Recovery Agent can only make its own keys
- * recoverable.
- *
+ * @deprecated Use {@link android.security.keystore.recovery.WrappedApplicationKey}.
  * @hide
  */
 public final class WrappedApplicationKey implements Parcelable {

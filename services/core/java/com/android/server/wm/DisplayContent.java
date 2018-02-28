@@ -3583,7 +3583,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     if (s.inSplitScreenWindowingMode() && mSplitScreenDividerAnchor != null) {
                         t.setLayer(mSplitScreenDividerAnchor, layer++);
                     }
-                    if (s.isSelfOrChildAnimating()) {
+                    if (s.isAppAnimating() && state != ALWAYS_ON_TOP_STATE) {
                         // Ensure the animation layer ends up above the
                         // highest animating stack and no higher.
                         layerForAnimationLayer = layer++;
@@ -3630,6 +3630,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private final class AboveAppWindowContainers extends NonAppWindowContainers {
         AboveAppWindowContainers(String name, WindowManagerService service) {
             super(name, service);
+        }
+
+        @Override
+        void assignChildLayers(SurfaceControl.Transaction t) {
+            assignChildLayers(t, null /* imeContainer */);
         }
 
         void assignChildLayers(SurfaceControl.Transaction t, WindowContainer imeContainer) {

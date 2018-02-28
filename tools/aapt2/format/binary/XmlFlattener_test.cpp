@@ -286,4 +286,92 @@ TEST_F(XmlFlattenerTest, ProcessEscapedStrings) {
   EXPECT_THAT(tree.getText(&len), StrEq(u"\\d{5}"));
 }
 
+TEST_F(XmlFlattenerTest, FlattenRawValueOnlyMakesCompiledValueToo) {
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"(<element foo="bar" />)");
+
+  // Raw values are kept when encoding an attribute with no compiled value, regardless of option.
+  XmlFlattenerOptions options;
+  options.keep_raw_values = false;
+
+  android::ResXMLTree tree;
+  ASSERT_TRUE(Flatten(doc.get(), &tree, options));
+
+  while (tree.next() != android::ResXMLTree::START_TAG) {
+    ASSERT_THAT(tree.getEventType(), Ne(android::ResXMLTree::BAD_DOCUMENT));
+    ASSERT_THAT(tree.getEventType(), Ne(android::ResXMLTree::END_DOCUMENT));
+  }
+
+  ASSERT_THAT(tree.getAttributeCount(), Eq(1u));
+  EXPECT_THAT(tree.getAttributeValueStringID(0), Ge(0));
+  EXPECT_THAT(tree.getAttributeDataType(0), Eq(android::Res_value::TYPE_STRING));
+  EXPECT_THAT(tree.getAttributeValueStringID(0), Eq(tree.getAttributeData(0)));
+}
+
+TEST_F(XmlFlattenerTest, FlattenCompiledStringValuePreservesRawValue) {
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"(<element foo="bar" />)");
+  doc->root->attributes[0].compiled_value =
+      util::make_unique<String>(doc->string_pool.MakeRef("bar"));
+
+  // Raw values are kept when encoding a string anyways.
+  XmlFlattenerOptions options;
+  options.keep_raw_values = false;
+
+  android::ResXMLTree tree;
+  ASSERT_TRUE(Flatten(doc.get(), &tree, options));
+
+  while (tree.next() != android::ResXMLTree::START_TAG) {
+    ASSERT_THAT(tree.getEventType(), Ne(android::ResXMLTree::BAD_DOCUMENT));
+    ASSERT_THAT(tree.getEventType(), Ne(android::ResXMLTree::END_DOCUMENT));
+  }
+
+  ASSERT_THAT(tree.getAttributeCount(), Eq(1u));
+  EXPECT_THAT(tree.getAttributeValueStringID(0), Ge(0));
+  EXPECT_THAT(tree.getAttributeDataType(0), Eq(android::Res_value::TYPE_STRING));
+  EXPECT_THAT(tree.getAttributeValueStringID(0), Eq(tree.getAttributeData(0)));
+}
+
+TEST_F(XmlFlattenerTest, FlattenCompiledValueExcludesRawValueWithKeepRawOptionFalse) {
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"(<element foo="true" />)");
+  doc->root->attributes[0].compiled_value = ResourceUtils::MakeBool(true);
+
+  XmlFlattenerOptions options;
+  options.keep_raw_values = false;
+
+  android::ResXMLTree tree;
+  ASSERT_TRUE(Flatten(doc.get(), &tree, options));
+
+  while (tree.next() != android::ResXMLTree::START_TAG) {
+    ASSERT_THAT(tree.getEventType(), Ne(android::ResXMLTree::BAD_DOCUMENT));
+    ASSERT_THAT(tree.getEventType(), Ne(android::ResXMLTree::END_DOCUMENT));
+  }
+
+  ASSERT_THAT(tree.getAttributeCount(), Eq(1u));
+  EXPECT_THAT(tree.getAttributeValueStringID(0), Eq(-1));
+  EXPECT_THAT(tree.getAttributeDataType(0), Eq(android::Res_value::TYPE_INT_BOOLEAN));
+}
+
+TEST_F(XmlFlattenerTest, FlattenCompiledValueExcludesRawValueWithKeepRawOptionTrue) {
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"(<element foo="true" />)");
+  doc->root->attributes[0].compiled_value = ResourceUtils::MakeBool(true);
+
+  XmlFlattenerOptions options;
+  options.keep_raw_values = true;
+
+  android::ResXMLTree tree;
+  ASSERT_TRUE(Flatten(doc.get(), &tree, options));
+
+  while (tree.next() != android::ResXMLTree::START_TAG) {
+    ASSERT_THAT(tree.getEventType(), Ne(android::ResXMLTree::BAD_DOCUMENT));
+    ASSERT_THAT(tree.getEventType(), Ne(android::ResXMLTree::END_DOCUMENT));
+  }
+
+  ASSERT_THAT(tree.getAttributeCount(), Eq(1u));
+  EXPECT_THAT(tree.getAttributeValueStringID(0), Ge(0));
+
+  size_t len;
+  EXPECT_THAT(tree.getAttributeStringValue(0, &len), StrEq(u"true"));
+
+  EXPECT_THAT(tree.getAttributeDataType(0), Eq(android::Res_value::TYPE_INT_BOOLEAN));
+}
+
 }  // namespace aapt

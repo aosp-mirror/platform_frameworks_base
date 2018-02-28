@@ -47,7 +47,7 @@ import java.util.List;
 class UserUsageStatsService {
     private static final String TAG = "UsageStatsService";
     private static final boolean DEBUG = UsageStatsService.DEBUG;
-    private static final SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd/HH:mm:ss");
     private static final int sDateFormatFlags =
             DateUtils.FORMAT_SHOW_DATE
             | DateUtils.FORMAT_SHOW_TIME
@@ -572,11 +572,13 @@ class UserUsageStatsService {
             pw.printPair("endTime", endTime);
         }
         pw.println(")");
-        pw.increaseIndent();
-        for (UsageEvents.Event event : events) {
-            printEvent(pw, event, prettyDates);
+        if (events != null) {
+            pw.increaseIndent();
+            for (UsageEvents.Event event : events) {
+                printEvent(pw, event, prettyDates);
+            }
+            pw.decreaseIndent();
         }
-        pw.decreaseIndent();
     }
 
     void printIntervalStats(IndentingPrintWriter pw, IntervalStats stats,

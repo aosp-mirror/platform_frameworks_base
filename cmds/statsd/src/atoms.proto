@@ -72,7 +72,7 @@ message Atom {
         BatteryLevelChanged battery_level_changed = 30;
         ChargingStateChanged charging_state_changed = 31;
         PluggedStateChanged plugged_state_changed = 32;
-        DeviceTemperatureReported device_temperature_reported = 33;
+        // TODO: 33 is blank, but is available for use.
         DeviceOnStatusChanged device_on_status_changed = 34;
         WakeupAlarmOccurred wakeup_alarm_occurred = 35;
         KernelWakeupReported kernel_wakeup_reported = 36;
@@ -101,11 +101,14 @@ message Atom {
         OverlayStateChanged overlay_state_changed = 59;
         ForegroundServiceStateChanged foreground_service_state_changed = 60;
         CallStateChanged call_state_changed = 61;
+        KeyguardStateChanged keyguard_state_changed = 62;
+        KeyguardBouncerStateChanged keyguard_bouncer_state_changed = 63;
+        KeyguardBouncerPasswordEntered keyguard_bouncer_password_entered = 64;
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10021
+    // Next: 10022
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -128,7 +131,11 @@ message Atom {
         DiskSpace disk_space = 10018;
         RemainingBatteryCapacity remaining_battery_capacity = 10019;
         FullBatteryCapacity full_battery_capacity = 10020;
+        Temperature temperature = 10021;
     }
+
+    // DO NOT USE field numbers above 100,000 in AOSP. Field numbers above
+    // 100,000 are reserved for non-AOSP (e.g. OEMs) to use.
 }
 
 /**
@@ -536,17 +543,6 @@ message PluggedStateChanged {
     optional android.os.BatteryPluggedStateEnum state = 1;
 }
 
-/**
- * Logs the temperature of the device, in tenths of a degree Celsius.
- *
- * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
- */
-message DeviceTemperatureReported {
-    // Temperature in tenths of a degree C.
-    optional int32 temperature = 1;
-}
-
 // TODO: Define this more precisely.
 // TODO: Log the ON state somewhere. It isn't currently logged anywhere.
 /**
@@ -757,14 +753,74 @@ message CallStateChanged {
 }
 
 /**
+ * Logs keyguard state. The keyguard is the lock screen.
+ *
+ * Logged from:
+ *   frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBarKeyguardViewManager.java
+ */
+message KeyguardStateChanged {
+    enum State {
+        UNKNOWN = 0;
+        // The keyguard is hidden when the phone is unlocked.
+        HIDDEN = 1;
+        // The keyguard is shown when the phone is locked (screen turns off).
+        SHOWN= 2;
+        // The keyguard is occluded when something is overlaying the keyguard.
+        // Eg. Opening the camera while on the lock screen.
+        OCCLUDED = 3;
+    }
+    optional State state = 1;
+}
+
+/**
+ * Logs keyguard bouncer state. The bouncer is a part of the keyguard, and
+ * prompts the user to enter a password (pattern, pin, etc).
+ *
+ * Logged from:
+ *   frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/KeyguardBouncer.java
+ */
+
+message KeyguardBouncerStateChanged {
+    enum State {
+        UNKNOWN = 0;
+        // Bouncer is hidden, either as a result of successfully entering the
+        // password, screen timing out, or user going back to lock screen.
+        HIDDEN = 1;
+        // This is when the user is being prompted to enter the password.
+        SHOWN = 2;
+    }
+    optional State state = 1;
+}
+
+/**
+ * Logs the result of entering a password into the keyguard bouncer.
+ *
+ * Logged from:
+ *   frameworks/base/packages/SystemUI/src/com/android/keyguard/KeyguardSecurityContainer.java
+ */
+message KeyguardBouncerPasswordEntered {
+    enum BouncerResult {
+        UNKNOWN = 0;
+        // The password entered was incorrect.
+        FAILURE = 1;
+        // The password entered was correct.
+        SUCCESS = 2;
+    }
+    optional BouncerResult result = 1;
+}
+
+/**
  * Logs the duration of a davey (jank of >=700ms) when it occurs
  *
  * Logged from:
  *   frameworks/base/libs/hwui/JankTracker.cpp
  */
 message DaveyOccurred {
+    // The UID that logged this atom.
+    optional int32 uid = 1;
+
     // Amount of time it took to render the frame. Should be >=700ms.
-    optional int64 jank_duration_millis = 1;
+    optional int64 jank_duration_millis = 2;
 }
 
 /**
@@ -1508,7 +1564,8 @@ message DiskSpace {
 
 /**
  * Pulls battery coulomb counter, which is the remaining battery charge in uAh.
- * Logged from: frameworks/base/cmds/statsd/src/external/ResourceHealthManagerPuller.cpp
+ * Pulled from:
+ *   frameworks/base/cmds/statsd/src/external/ResourceHealthManagerPuller.cpp
  */
 message RemainingBatteryCapacity {
     optional int32 charge_uAh = 1;
@@ -1516,8 +1573,26 @@ message RemainingBatteryCapacity {
 
 /**
  * Pulls battery capacity, which is the battery capacity when full in uAh.
- * Logged from: frameworks/base/cmds/statsd/src/external/ResourceHealthManagerPuller.cpp
+ * Pulled from:
+ *   frameworks/base/cmds/statsd/src/external/ResourceHealthManagerPuller.cpp
  */
 message FullBatteryCapacity {
     optional int32 capacity_uAh = 1;
+}
+
+/**
+ * Pulls the temperature of various parts of the device, in Celsius.
+ *
+ * Pulled from:
+ *   frameworks/base/cmds/statsd/src/external/ResourceThermalManagerPuller.cpp
+ */
+message Temperature {
+    // The type of temperature being reported. Eg. CPU, GPU, SKIN, BATTERY.
+    optional android.os.TemperatureTypeEnum sensor_location = 1;
+
+    // The name of the temperature source. Eg. CPU0
+    optional string sensor_name = 2;
+
+    // Temperature in degrees C.
+    optional float temperature_C = 3;
 }

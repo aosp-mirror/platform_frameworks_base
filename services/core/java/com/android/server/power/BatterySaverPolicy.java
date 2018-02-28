@@ -68,6 +68,7 @@ public class BatterySaverPolicy extends ContentObserver {
     private static final String KEY_FORCE_ALL_APPS_STANDBY = "force_all_apps_standby";
     private static final String KEY_FORCE_BACKGROUND_CHECK = "force_background_check";
     private static final String KEY_OPTIONAL_SENSORS_DISABLED = "optional_sensors_disabled";
+    private static final String KEY_AOD_DISABLED = "aod_disabled";
 
     private static final String KEY_CPU_FREQ_INTERACTIVE = "cpufreq-i";
     private static final String KEY_CPU_FREQ_NONINTERACTIVE = "cpufreq-n";
@@ -200,10 +201,16 @@ public class BatterySaverPolicy extends ContentObserver {
     private boolean mForceBackgroundCheck;
 
     /**
-     * Weather to show non-essential sensors (e.g. edge sensors) or not.
+     * Whether to show non-essential sensors (e.g. edge sensors) or not.
      */
     @GuardedBy("mLock")
     private boolean mOptionalSensorsDisabled;
+
+    /**
+     * Whether AOD is enabled or not.
+     */
+    @GuardedBy("mLock")
+    private boolean mAodDisabled;
 
     @GuardedBy("mLock")
     private Context mContext;
@@ -339,6 +346,7 @@ public class BatterySaverPolicy extends ContentObserver {
         mForceAllAppsStandby = parser.getBoolean(KEY_FORCE_ALL_APPS_STANDBY, true);
         mForceBackgroundCheck = parser.getBoolean(KEY_FORCE_BACKGROUND_CHECK, true);
         mOptionalSensorsDisabled = parser.getBoolean(KEY_OPTIONAL_SENSORS_DISABLED, true);
+        mAodDisabled = parser.getBoolean(KEY_AOD_DISABLED, true);
 
         // Get default value from Settings.Secure
         final int defaultGpsMode = Settings.Secure.getInt(mContentResolver, SECURE_KEY_GPS_MODE,
@@ -375,6 +383,7 @@ public class BatterySaverPolicy extends ContentObserver {
 
         if (mLaunchBoostDisabled) sb.append("l");
         if (mOptionalSensorsDisabled) sb.append("S");
+        if (mAodDisabled) sb.append("o");
 
         sb.append(mGpsMode);
 
@@ -437,6 +446,9 @@ public class BatterySaverPolicy extends ContentObserver {
                 case ServiceType.OPTIONAL_SENSORS:
                     return builder.setBatterySaverEnabled(mOptionalSensorsDisabled)
                             .build();
+                case ServiceType.AOD:
+                    return builder.setBatterySaverEnabled(mAodDisabled)
+                            .build();
                 default:
                     return builder.setBatterySaverEnabled(realMode)
                             .build();
@@ -491,6 +503,7 @@ public class BatterySaverPolicy extends ContentObserver {
             pw.println("  " + KEY_FORCE_ALL_APPS_STANDBY + "=" + mForceAllAppsStandby);
             pw.println("  " + KEY_FORCE_BACKGROUND_CHECK + "=" + mForceBackgroundCheck);
             pw.println("  " + KEY_OPTIONAL_SENSORS_DISABLED + "=" + mOptionalSensorsDisabled);
+            pw.println("  " + KEY_AOD_DISABLED + "=" + mAodDisabled);
             pw.println();
 
             pw.print("  Interactive File values:\n");
