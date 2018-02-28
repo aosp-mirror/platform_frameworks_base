@@ -13348,7 +13348,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         private static final boolean DEFAULT_TRACK_CPU_TIMES_BY_PROC_STATE = true;
         private static final boolean DEFAULT_TRACK_CPU_ACTIVE_CLUSTER_TIME = true;
-        private static final boolean DEFAULT_READ_BINARY_CPU_TIME = false;
+        private static final boolean DEFAULT_READ_BINARY_CPU_TIME = true;
         private static final long DEFAULT_PROC_STATE_CPU_TIMES_READ_DELAY_MS = 5_000;
         private static final long DEFAULT_KERNEL_UID_READERS_THROTTLE_TIME = 10_000;
 
