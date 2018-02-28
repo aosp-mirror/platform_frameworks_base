@@ -64,15 +64,9 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
                              mTrackerToConditionMap, mNoReportMetricIds);
 
     if (config.allowed_log_source_size() == 0) {
-        // TODO(b/70794411): uncomment the following line and remove the hard coded log source
-        // after all configs have the log source added.
-        // mConfigValid = false;
-        // ALOGE("Log source white list is empty! This config won't get any data.");
-
-        mAllowedUid.push_back(AID_ROOT);
-        mAllowedUid.push_back(AID_STATSD);
-        mAllowedUid.push_back(AID_SYSTEM);
-        mAllowedLogSources.insert(mAllowedUid.begin(), mAllowedUid.end());
+        mConfigValid = false;
+        ALOGE("Log source whitelist is empty! This config won't get any data. Suggest adding at "
+                      "least AID_SYSTEM and AID_STATSD to the allowed_log_source field.");
     } else {
         for (const auto& source : config.allowed_log_source()) {
             auto it = UidMap::sAidToUidMapping.find(source);
