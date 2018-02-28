@@ -21,12 +21,9 @@ import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.drawable.Icon;
-import android.os.AsyncTask;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
 import android.support.v4.util.ArrayMap;
-import android.support.v4.util.ArraySet;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -127,6 +124,9 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private float mVisualOverflowStart;
     // Keep track of overflow in range [0, 3]
     private int mNumDots;
+    private StatusBarIconView mIsolatedIcon;
+    private Rect mIsolatedIconLocation;
+    private int[] mAbsolutePosition = new int[2];
 
 
     public NotificationIconContainer(Context context, AttributeSet attrs) {
@@ -196,11 +196,16 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                 mIconSize = child.getWidth();
             }
         }
+        getLocationOnScreen(mAbsolutePosition);
         if (mIsStaticLayout) {
-            resetViewStates();
-            calculateIconTranslations();
-            applyIconStates();
+            updateState();
         }
+    }
+
+    private void updateState() {
+        resetViewStates();
+        calculateIconTranslations();
+        applyIconStates();
     }
 
     public void applyIconStates() {
@@ -306,7 +311,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             View view = getChildAt(i);
             ViewState iconState = mIconStates.get(view);
             iconState.initFrom(view);
-            iconState.alpha = 1.0f;
+            iconState.alpha = mIsolatedIcon == null || view == mIsolatedIcon ? 1.0f : 0.0f;
             iconState.hidden = false;
         }
     }
@@ -400,6 +405,16 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                 View view = getChildAt(i);
                 IconState iconState = mIconStates.get(view);
                 iconState.xTranslation = getWidth() - iconState.xTranslation - view.getWidth();
+            }
+        }
+        if (mIsolatedIcon != null) {
+            IconState iconState = mIconStates.get(mIsolatedIcon);
+            if (iconState != null) {
+                // Most of the time the icon isn't yet added when this is called but only happening
+                // later
+                iconState.xTranslation = mIsolatedIconLocation.left - mAbsolutePosition[0]
+                        - (1 - mIsolatedIcon.getIconScale()) * mIsolatedIcon.getWidth() / 2.0f;
+                iconState.visibleState = StatusBarIconView.STATE_ICON;
             }
         }
     }
@@ -571,6 +586,12 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
 
     public void setReplacingIcons(ArrayMap<String, ArrayList<StatusBarIcon>> replacingIcons) {
         mReplacingIcons = replacingIcons;
+    }
+
+    public void showIconIsolated(StatusBarIconView icon, Rect absoluteIconPosition) {
+        mIsolatedIcon = icon;
+        mIsolatedIconLocation = absoluteIconPosition;
+        updateState();
     }
 
     public class IconState extends ViewState {

@@ -52,6 +52,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
 
     protected final ViewInvertHelper mInvertHelper;
     protected final ViewTransformationHelper mTransformationHelper;
+    private final int mTranslationForHeader;
 
     protected int mColor;
     private ImageView mIcon;
@@ -63,6 +64,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     private boolean mIsLowPriority;
     private boolean mTransformLowPriorityTitle;
     private boolean mShowExpandButtonAtEnd;
+    protected float mHeaderTranslation;
 
     protected NotificationHeaderViewWrapper(Context ctx, View view, ExpandableNotificationRow row) {
         super(ctx, view, row);
@@ -99,6 +101,10 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         resolveHeaderViews();
         updateInvertHelper();
         addAppOpsOnClickListener(row);
+        mTranslationForHeader = ctx.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.notification_content_margin)
+                - ctx.getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.notification_content_margin_top);
     }
 
     @Override
@@ -240,6 +246,19 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     public void updateExpandability(boolean expandable, View.OnClickListener onClickListener) {
         mExpandButton.setVisibility(expandable ? View.VISIBLE : View.GONE);
         mNotificationHeader.setOnClickListener(expandable ? onClickListener : null);
+    }
+
+    @Override
+    public void setHeaderVisibleAmount(float headerVisibleAmount) {
+        super.setHeaderVisibleAmount(headerVisibleAmount);
+        mNotificationHeader.setAlpha(headerVisibleAmount);
+        mHeaderTranslation = (1.0f - headerVisibleAmount) * mTranslationForHeader;
+        mView.setTranslationY(mHeaderTranslation);
+    }
+
+    @Override
+    public int getHeaderTranslation() {
+        return (int) mHeaderTranslation;
     }
 
     @Override

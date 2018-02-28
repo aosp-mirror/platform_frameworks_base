@@ -20,7 +20,6 @@ import android.view.View;
 
 import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
 import java.util.HashSet;
@@ -35,6 +34,8 @@ class NotificationRoundnessManager implements OnHeadsUpChangedListener {
     private ActivatableNotificationView mLast;
     private HashSet<View> mAnimatedChildren;
     private Runnable mRoundingChangedCallback;
+    private ExpandableNotificationRow mTrackedHeadsUp;
+    private float mAppearFraction;
 
     @Override
     public void onHeadsUpPinned(ExpandableNotificationRow headsUp) {
@@ -66,11 +67,20 @@ class NotificationRoundnessManager implements OnHeadsUpChangedListener {
         if (view == mLast && !top) {
             return 1.0f;
         }
+        if (view == mTrackedHeadsUp && mAppearFraction <= 0.0f) {
+            // If we're pushing up on a headsup the appear fraction is < 0 and it needs to still be
+            // rounded.
+            return 1.0f;
+        }
         return 0.0f;
     }
 
-    public void setExpanded(boolean expanded) {
-        mExpanded = expanded;
+    public void setExpanded(float expandedHeight, float appearFraction) {
+        mExpanded = expandedHeight != 0.0f;
+        mAppearFraction = appearFraction;
+        if (mTrackedHeadsUp != null) {
+            updateRounding(mTrackedHeadsUp, true);
+        }
     }
 
     public void setFirstAndLastBackgroundChild(ActivatableNotificationView first,
@@ -105,5 +115,9 @@ class NotificationRoundnessManager implements OnHeadsUpChangedListener {
 
     public void setOnRoundingChangedCallback(Runnable roundingChangedCallback) {
         mRoundingChangedCallback = roundingChangedCallback;
+    }
+
+    public void setTrackingHeadsUp(ExpandableNotificationRow row) {
+        mTrackedHeadsUp = row;
     }
 }

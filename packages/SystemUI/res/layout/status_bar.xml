@@ -3,16 +3,16 @@
 **
 ** Copyright 2006, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0 
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
 -->
@@ -34,7 +34,7 @@
         android:id="@+id/notification_lights_out"
         android:layout_width="@dimen/status_bar_icon_size"
         android:layout_height="match_parent"
-        android:paddingStart="6dip"
+        android:paddingStart="@dimen/status_bar_padding_start"
         android:paddingBottom="2dip"
         android:src="@drawable/ic_sysbar_lights_out_dot_small"
         android:scaleType="center"
@@ -44,7 +44,7 @@
     <LinearLayout android:id="@+id/status_bar_contents"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingStart="6dp"
+        android:paddingStart="@dimen/status_bar_padding_start"
         android:paddingEnd="8dp"
         android:orientation="horizontal"
         >
@@ -53,33 +53,41 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout="@layout/operator_name" />
-
-        <LinearLayout
+        <FrameLayout
             android:layout_height="match_parent"
             android:layout_width="0dp"
-            android:layout_weight="1"
-        >
-            <com.android.systemui.statusbar.policy.Clock
-                android:id="@+id/clock"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:textAppearance="@style/TextAppearance.StatusBar.Clock"
-                android:singleLine="true"
-                android:paddingStart="@dimen/status_bar_left_clock_starting_padding"
-                android:paddingEnd="@dimen/status_bar_left_clock_end_padding"
-                android:gravity="center_vertical|start"
-            />
+            android:layout_weight="1">
 
-            <!-- The alpha of this area is controlled from both PhoneStatusBarTransitions and
-                 PhoneStatusBar (DISABLE_NOTIFICATION_ICONS). -->
-            <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
-                android:id="@+id/notification_icon_area"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="horizontal" />
+            <include layout="@layout/heads_up_status_bar_layout" />
 
-        </LinearLayout>
+            <LinearLayout
+                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                android:clipChildren="false"
+            >
+                <com.android.systemui.statusbar.policy.Clock
+                    android:id="@+id/clock"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:textAppearance="@style/TextAppearance.StatusBar.Clock"
+                    android:singleLine="true"
+                    android:paddingStart="@dimen/status_bar_left_clock_starting_padding"
+                    android:paddingEnd="@dimen/status_bar_left_clock_end_padding"
+                    android:gravity="center_vertical|start"
+                />
+
+                <!-- The alpha of this area is controlled from both PhoneStatusBarTransitions and
+                     PhoneStatusBar (DISABLE_NOTIFICATION_ICONS). -->
+                <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
+                    android:id="@+id/notification_icon_area"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:clipChildren="false"/>
+
+            </LinearLayout>
+        </FrameLayout>
 
         <!-- Space should cover the notch (if it exists) and let other views lay out around it -->
         <android.widget.Space

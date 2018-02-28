@@ -50,6 +50,7 @@ public class StackScrollAlgorithm {
     private boolean mIsExpanded;
     private boolean mClipNotificationScrollToTop;
     private int mStatusBarHeight;
+    private float mHeadsUpInset;
 
     public StackScrollAlgorithm(Context context) {
         initView(context);
@@ -68,6 +69,8 @@ public class StackScrollAlgorithm {
         mCollapsedSize = res.getDimensionPixelSize(R.dimen.notification_min_height);
         mStatusBarHeight = res.getDimensionPixelSize(R.dimen.status_bar_height);
         mClipNotificationScrollToTop = res.getBoolean(R.bool.config_clipNotificationScrollToTop);
+        mHeadsUpInset = mStatusBarHeight + res.getDimensionPixelSize(
+                R.dimen.heads_up_status_bar_padding);
     }
 
     public void getStackScrollState(AmbientState ambientState, StackScrollState resultState) {
@@ -457,7 +460,7 @@ public class StackScrollAlgorithm {
                 }
             }
             if (row.isPinned()) {
-                childState.yTranslation = Math.max(childState.yTranslation, 0);
+                childState.yTranslation = Math.max(childState.yTranslation, mHeadsUpInset);
                 childState.height = Math.max(row.getIntrinsicHeight(), childState.height);
                 childState.hidden = false;
                 ExpandableViewState topState = resultState.getViewStateForView(topHeadsUpEntry);

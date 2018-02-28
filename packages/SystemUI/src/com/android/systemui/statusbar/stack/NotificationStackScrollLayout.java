@@ -94,8 +94,8 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
-import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
 
@@ -108,6 +108,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 /**
  * A layout which handles a dynamic amount of notifications and presents them in a scrollable stack.
@@ -404,6 +405,8 @@ public class NotificationStackScrollLayout extends ViewGroup
     private final Rect mTmpRect = new Rect();
     private int mClockBottom;
     private int mAntiBurnInOffsetX;
+    private ArrayList<BiConsumer<Float, Float>> mExpandedHeightListeners = new ArrayList<>();
+    private int mHeadsUpInset;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -443,6 +446,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mDarkSeparatorPadding = res.getDimensionPixelSize(R.dimen.widget_bottom_separator_padding);
         mRoundnessManager.setAnimatedChildren(mChildrenToAddAnimated);
         mRoundnessManager.setOnRoundingChangedCallback(this::invalidate);
+        addOnExpandedHeightListener(mRoundnessManager::setExpanded);
 
         updateWillNotDraw();
         mBackgroundPaint.setAntiAlias(true);
@@ -585,13 +589,15 @@ public class NotificationStackScrollLayout extends ViewGroup
                 res.getDimensionPixelSize(R.dimen.notification_divider_height_increased);
         mMinTopOverScrollToEscape = res.getDimensionPixelSize(
                 R.dimen.min_top_overscroll_to_qs);
-        mStatusBarHeight = res.getDimensionPixelOffset(R.dimen.status_bar_height);
+        mStatusBarHeight = res.getDimensionPixelSize(R.dimen.status_bar_height);
         mBottomMargin = res.getDimensionPixelSize(R.dimen.notification_panel_margin_bottom);
         mSidePaddings = res.getDimensionPixelSize(R.dimen.notification_side_paddings);
         mMinInteractionHeight = res.getDimensionPixelSize(
                 R.dimen.notification_min_interaction_height);
         mCornerRadius = res.getDimensionPixelSize(
                 Utils.getThemeAttr(mContext, android.R.attr.dialogCornerRadius));
+        mHeadsUpInset = mStatusBarHeight + res.getDimensionPixelSize(
+                R.dimen.heads_up_status_bar_padding);
     }
 
     public void setDrawBackgroundAsSrc(boolean asSrc) {
@@ -704,7 +710,8 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void updateAlgorithmLayoutMinHeight() {
-        mAmbientState.setLayoutMinHeight(mQsExpanded && !onKeyguard() ? getLayoutMinHeight() : 0);
+        mAmbientState.setLayoutMinHeight(mQsExpanded && !onKeyguard() || isHeadsUpTransition()
+                ? getLayoutMinHeight() : 0);
     }
 
     /**
@@ -857,11 +864,12 @@ public class NotificationStackScrollLayout extends ViewGroup
         float translationY;
         float appearEndPosition = getAppearEndPosition();
         float appearStartPosition = getAppearStartPosition();
+        float appearFraction = 1.0f;
         if (height >= appearEndPosition) {
             translationY = 0;
             stackHeight = (int) height;
         } else {
-            float appearFraction = getAppearFraction(height);
+            appearFraction = getAppearFraction(height);
             if (appearFraction >= 0) {
                 translationY = NotificationUtils.interpolate(getExpandTranslationStart(), 0,
                         appearFraction);
@@ -870,7 +878,12 @@ public class NotificationStackScrollLayout extends ViewGroup
                 // start
                 translationY = height - appearStartPosition + getExpandTranslationStart();
             }
-            stackHeight = (int) (height - translationY);
+            if (isHeadsUpTransition()) {
+                stackHeight = mFirstVisibleBackgroundChild.getPinnedHeadsUpHeight();
+                translationY = MathUtils.lerp(mHeadsUpInset - mTopPadding, 0, appearFraction);
+            } else {
+                stackHeight = (int) (height - translationY);
+            }
         }
         if (stackHeight != mCurrentStackHeight) {
             mCurrentStackHeight = stackHeight;
@@ -878,6 +891,10 @@ public class NotificationStackScrollLayout extends ViewGroup
             requestChildrenUpdate();
         }
         setStackTranslation(translationY);
+        for (int i = 0; i < mExpandedHeightListeners.size(); i++) {
+            BiConsumer<Float, Float> listener = mExpandedHeightListeners.get(i);
+            listener.accept(mExpandedHeight, appearFraction);
+        }
     }
 
     private void setRequestedClipBounds(Rect clipRect) {
@@ -912,12 +929,8 @@ public class NotificationStackScrollLayout extends ViewGroup
      *         Measured in absolute height.
      */
     private float getAppearStartPosition() {
-        if (mTrackingHeadsUp && mFirstVisibleBackgroundChild != null) {
-            if (mAmbientState.isAboveShelf(mFirstVisibleBackgroundChild)) {
-                // If we ever expanded beyond the first notification, it's allowed to merge into
-                // the shelf
-                return mFirstVisibleBackgroundChild.getPinnedHeadsUpHeight();
-            }
+        if (isHeadsUpTransition()) {
+            return mHeadsUpInset + mFirstVisibleBackgroundChild.getPinnedHeadsUpHeight();
         }
         return getMinExpansionHeight();
     }
@@ -951,22 +964,24 @@ public class NotificationStackScrollLayout extends ViewGroup
         int appearPosition;
         int notGoneChildCount = getNotGoneChildCount();
         if (mEmptyShadeView.getVisibility() == GONE && notGoneChildCount != 0) {
-            int minNotificationsForShelf = 1;
-            if (mTrackingHeadsUp
+            if (isHeadsUpTransition()
                     || (mHeadsUpManager.hasPinnedHeadsUp() && !mAmbientState.isDark())) {
                 appearPosition = getTopHeadsUpPinnedHeight();
-                minNotificationsForShelf = 2;
             } else {
                 appearPosition = 0;
-            }
-            if (notGoneChildCount >= minNotificationsForShelf
-                    && mShelf.getVisibility() != GONE) {
-                appearPosition += mShelf.getIntrinsicHeight();
+                if (notGoneChildCount >= 1 && mShelf.getVisibility() != GONE) {
+                    appearPosition += mShelf.getIntrinsicHeight();
+                }
             }
         } else {
             appearPosition = mEmptyShadeView.getHeight();
         }
         return appearPosition + (onKeyguard() ? mTopPadding : mIntrinsicPadding);
+    }
+
+    private boolean isHeadsUpTransition() {
+        return mTrackingHeadsUp && mFirstVisibleBackgroundChild != null
+                && mAmbientState.isAboveShelf(mFirstVisibleBackgroundChild);
     }
 
     /**
@@ -2524,6 +2539,9 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public int getLayoutMinHeight() {
+        if (isHeadsUpTransition()) {
+            return getTopHeadsUpPinnedHeight();
+        }
         return mShelf.getVisibility() == GONE ? 0 : mShelf.getIntrinsicHeight();
     }
 
@@ -3551,7 +3569,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     private void setIsExpanded(boolean isExpanded) {
         boolean changed = isExpanded != mIsExpanded;
         mIsExpanded = isExpanded;
-        mRoundnessManager.setExpanded(isExpanded);
         mStackScrollAlgorithm.setIsExpanded(isExpanded);
         if (changed) {
             if (!mIsExpanded) {
@@ -4300,8 +4317,9 @@ public class NotificationStackScrollLayout extends ViewGroup
         requestChildrenUpdate();
     }
 
-    public void setTrackingHeadsUp(boolean trackingHeadsUp) {
-        mTrackingHeadsUp = trackingHeadsUp;
+    public void setTrackingHeadsUp(ExpandableNotificationRow row) {
+        mTrackingHeadsUp = row != null;
+        mRoundnessManager.setTrackingHeadsUp(row);
     }
 
     public void setScrimController(ScrimController scrimController) {
@@ -4481,6 +4499,16 @@ public class NotificationStackScrollLayout extends ViewGroup
                                 : "invisible",
                 getAlpha(),
                 mAmbientState.getScrollY()));
+    }
+
+    /**
+     * Add a listener whenever the expanded height changes. The first value passed as an argument
+     * is the expanded height and the second one is the appearFraction.
+     *
+     * @param listener the listener to notify.
+     */
+    public void addOnExpandedHeightListener(BiConsumer<Float, Float> listener) {
+        mExpandedHeightListeners.add(listener);
     }
 
     /**

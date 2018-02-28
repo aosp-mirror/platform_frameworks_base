@@ -65,7 +65,7 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
         mRoundnessManager.setOnRoundingChangedCallback(mRoundnessCallback);
         mRoundnessManager.setAnimatedChildren(mAnimatedChildren);
         mRoundnessManager.setFirstAndLastBackgroundChild(mFirst, mFirst);
-        mRoundnessManager.setExpanded(true);
+        mRoundnessManager.setExpanded(1.0f, 1.0f);
     }
 
     @Test
@@ -112,7 +112,7 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
     @Test
     public void testRoundedWhenPinnedAndCollapsed() {
         mFirst.setPinned(true);
-        mRoundnessManager.setExpanded(false);
+        mRoundnessManager.setExpanded(0.0f /* expandedHeight */, 0.0f /* appearFraction */);
         mRoundnessManager.setFirstAndLastBackgroundChild(mSecond, mSecond);
         Assert.assertEquals(1.0f, mFirst.getCurrentBottomRoundness(), 0.0f);
         Assert.assertEquals(1.0f, mFirst.getCurrentTopRoundness(), 0.0f);
@@ -121,7 +121,7 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
     @Test
     public void testRoundedWhenGoingAwayAndCollapsed() {
         mFirst.setHeadsUpAnimatingAway(true);
-        mRoundnessManager.setExpanded(false);
+        mRoundnessManager.setExpanded(0.0f /* expandedHeight */, 0.0f /* appearFraction */);
         mRoundnessManager.setFirstAndLastBackgroundChild(mSecond, mSecond);
         Assert.assertEquals(1.0f, mFirst.getCurrentBottomRoundness(), 0.0f);
         Assert.assertEquals(1.0f, mFirst.getCurrentTopRoundness(), 0.0f);
@@ -130,7 +130,25 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
     @Test
     public void testRoundedNormalRoundingWhenExpanded() {
         mFirst.setHeadsUpAnimatingAway(true);
-        mRoundnessManager.setExpanded(true);
+        mRoundnessManager.setExpanded(1.0f /* expandedHeight */, 0.0f /* appearFraction */);
+        mRoundnessManager.setFirstAndLastBackgroundChild(mSecond, mSecond);
+        Assert.assertEquals(0.0f, mFirst.getCurrentBottomRoundness(), 0.0f);
+        Assert.assertEquals(0.0f, mFirst.getCurrentTopRoundness(), 0.0f);
+    }
+
+    @Test
+    public void testTrackingHeadsUpRoundedIfPushingUp() {
+        mRoundnessManager.setExpanded(1.0f /* expandedHeight */, -0.5f /* appearFraction */);
+        mRoundnessManager.setTrackingHeadsUp(mFirst);
+        mRoundnessManager.setFirstAndLastBackgroundChild(mSecond, mSecond);
+        Assert.assertEquals(1.0f, mFirst.getCurrentBottomRoundness(), 0.0f);
+        Assert.assertEquals(1.0f, mFirst.getCurrentTopRoundness(), 0.0f);
+    }
+
+    @Test
+    public void testTrackingHeadsUpNotRoundedIfPushingDown() {
+        mRoundnessManager.setExpanded(1.0f /* expandedHeight */, 0.5f /* appearFraction */);
+        mRoundnessManager.setTrackingHeadsUp(mFirst);
         mRoundnessManager.setFirstAndLastBackgroundChild(mSecond, mSecond);
         Assert.assertEquals(0.0f, mFirst.getCurrentBottomRoundness(), 0.0f);
         Assert.assertEquals(0.0f, mFirst.getCurrentTopRoundness(), 0.0f);
