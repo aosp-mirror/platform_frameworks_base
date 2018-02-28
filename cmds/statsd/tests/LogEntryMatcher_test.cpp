@@ -294,6 +294,159 @@ TEST(AtomMatcherTest, TestAttributionMatcher) {
     EXPECT_FALSE(matchesSimple(uidMap, *simpleMatcher, event));
 }
 
+TEST(AtomMatcherTest, TestNeqAnyStringMatcher) {
+    UidMap uidMap;
+    uidMap.updateMap(
+            {1111, 1111, 2222, 3333, 3333} /* uid list */, {1, 1, 2, 1, 2} /* version list */,
+            {android::String16("pkg0"), android::String16("pkg1"), android::String16("pkg1"),
+             android::String16("Pkg2"), android::String16("PkG3")} /* package name list */);
+
+    AttributionNodeInternal attribution_node1;
+    attribution_node1.set_uid(1111);
+    attribution_node1.set_tag("location1");
+
+    AttributionNodeInternal attribution_node2;
+    attribution_node2.set_uid(2222);
+    attribution_node2.set_tag("location2");
+
+    AttributionNodeInternal attribution_node3;
+    attribution_node3.set_uid(3333);
+    attribution_node3.set_tag("location3");
+
+    AttributionNodeInternal attribution_node4;
+    attribution_node4.set_uid(1066);
+    attribution_node4.set_tag("location3");
+    std::vector<AttributionNodeInternal> attribution_nodes = {attribution_node1, attribution_node2,
+                                                              attribution_node3, attribution_node4};
+
+    // Set up the event
+    LogEvent event(TAG_ID, 0);
+    event.write(attribution_nodes);
+    event.write("some value");
+    // Convert to a LogEvent
+    event.init();
+
+    // Set up the matcher
+    AtomMatcher matcher;
+    auto simpleMatcher = matcher.mutable_simple_atom_matcher();
+    simpleMatcher->set_atom_id(TAG_ID);
+
+    // Match first node.
+    auto attributionMatcher = simpleMatcher->add_field_value_matcher();
+    attributionMatcher->set_field(FIELD_ID_1);
+    attributionMatcher->set_position(Position::FIRST);
+    attributionMatcher->mutable_matches_tuple()->add_field_value_matcher()->set_field(
+            ATTRIBUTION_UID_FIELD_ID);
+    auto neqStringList = attributionMatcher->mutable_matches_tuple()
+                                 ->mutable_field_value_matcher(0)
+                                 ->mutable_neq_all_string();
+    neqStringList->add_str_value("pkg2");
+    neqStringList->add_str_value("pkg3");
+
+    auto fieldMatcher = simpleMatcher->add_field_value_matcher();
+    fieldMatcher->set_field(FIELD_ID_2);
+    fieldMatcher->set_eq_string("some value");
+
+    EXPECT_TRUE(matchesSimple(uidMap, *simpleMatcher, event));
+
+    neqStringList->Clear();
+    neqStringList->add_str_value("pkg1");
+    neqStringList->add_str_value("pkg3");
+    EXPECT_FALSE(matchesSimple(uidMap, *simpleMatcher, event));
+
+    attributionMatcher->set_position(Position::ANY);
+    neqStringList->Clear();
+    neqStringList->add_str_value("maps.com");
+    EXPECT_TRUE(matchesSimple(uidMap, *simpleMatcher, event));
+
+    neqStringList->Clear();
+    neqStringList->add_str_value("PkG3");
+    EXPECT_TRUE(matchesSimple(uidMap, *simpleMatcher, event));
+
+    attributionMatcher->set_position(Position::LAST);
+    neqStringList->Clear();
+    neqStringList->add_str_value("AID_STATSD");
+    EXPECT_FALSE(matchesSimple(uidMap, *simpleMatcher, event));
+}
+
+TEST(AtomMatcherTest, TestEqAnyStringMatcher) {
+    UidMap uidMap;
+    uidMap.updateMap(
+            {1111, 1111, 2222, 3333, 3333} /* uid list */, {1, 1, 2, 1, 2} /* version list */,
+            {android::String16("pkg0"), android::String16("pkg1"), android::String16("pkg1"),
+             android::String16("Pkg2"), android::String16("PkG3")} /* package name list */);
+
+    AttributionNodeInternal attribution_node1;
+    attribution_node1.set_uid(1067);
+    attribution_node1.set_tag("location1");
+
+    AttributionNodeInternal attribution_node2;
+    attribution_node2.set_uid(2222);
+    attribution_node2.set_tag("location2");
+
+    AttributionNodeInternal attribution_node3;
+    attribution_node3.set_uid(3333);
+    attribution_node3.set_tag("location3");
+
+    AttributionNodeInternal attribution_node4;
+    attribution_node4.set_uid(1066);
+    attribution_node4.set_tag("location3");
+    std::vector<AttributionNodeInternal> attribution_nodes = {attribution_node1, attribution_node2,
+                                                              attribution_node3, attribution_node4};
+
+    // Set up the event
+    LogEvent event(TAG_ID, 0);
+    event.write(attribution_nodes);
+    event.write("some value");
+    // Convert to a LogEvent
+    event.init();
+
+    // Set up the matcher
+    AtomMatcher matcher;
+    auto simpleMatcher = matcher.mutable_simple_atom_matcher();
+    simpleMatcher->set_atom_id(TAG_ID);
+
+    // Match first node.
+    auto attributionMatcher = simpleMatcher->add_field_value_matcher();
+    attributionMatcher->set_field(FIELD_ID_1);
+    attributionMatcher->set_position(Position::FIRST);
+    attributionMatcher->mutable_matches_tuple()->add_field_value_matcher()->set_field(
+            ATTRIBUTION_UID_FIELD_ID);
+    auto eqStringList = attributionMatcher->mutable_matches_tuple()
+                                ->mutable_field_value_matcher(0)
+                                ->mutable_eq_any_string();
+    eqStringList->add_str_value("AID_ROOT");
+    eqStringList->add_str_value("AID_INCIDENTD");
+
+    auto fieldMatcher = simpleMatcher->add_field_value_matcher();
+    fieldMatcher->set_field(FIELD_ID_2);
+    fieldMatcher->set_eq_string("some value");
+
+    EXPECT_TRUE(matchesSimple(uidMap, *simpleMatcher, event));
+
+    attributionMatcher->set_position(Position::ANY);
+    eqStringList->Clear();
+    eqStringList->add_str_value("AID_STATSD");
+    EXPECT_TRUE(matchesSimple(uidMap, *simpleMatcher, event));
+
+    eqStringList->Clear();
+    eqStringList->add_str_value("pkg1");
+    EXPECT_TRUE(matchesSimple(uidMap, *simpleMatcher, event));
+
+    auto normalStringField = fieldMatcher->mutable_eq_any_string();
+    normalStringField->add_str_value("some value123");
+    normalStringField->add_str_value("some value");
+    EXPECT_TRUE(matchesSimple(uidMap, *simpleMatcher, event));
+
+    normalStringField->Clear();
+    normalStringField->add_str_value("AID_STATSD");
+    EXPECT_FALSE(matchesSimple(uidMap, *simpleMatcher, event));
+
+    eqStringList->Clear();
+    eqStringList->add_str_value("maps.com");
+    EXPECT_FALSE(matchesSimple(uidMap, *simpleMatcher, event));
+}
+
 TEST(AtomMatcherTest, TestBoolMatcher) {
     UidMap uidMap;
     // Set up the matcher
