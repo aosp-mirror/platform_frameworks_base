@@ -22,8 +22,12 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
+import android.media.DataSourceDesc;
+import android.media.MediaItem2;
 import android.media.MediaMetadata2;
+import android.media.MediaPlayer2;
 import android.media.MediaPlayerBase;
+import android.media.SessionToken2;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
@@ -45,14 +49,14 @@ import java.util.concurrent.Executor;
 
 // TODO: Replace MediaSession wtih MediaSession2 once MediaSession2 is submitted.
 /**
- * Displays a video file.  VideoView2 class is a View class which is wrapping MediaPlayer2 so that
- * developers can easily implement a video rendering application.
+ * Displays a video file.  VideoView2 class is a View class which is wrapping {@link MediaPlayer2}
+ * so that developers can easily implement a video rendering application.
  *
  * <p>
  * <em> Data sources that VideoView2 supports : </em>
  * VideoView2 can play video files and audio-only files as
  * well. It can load from various sources such as resources or content providers. The supported
- * media file formats are the same as MediaPlayer2.
+ * media file formats are the same as {@link MediaPlayer2}.
  *
  * <p>
  * <em> View type can be selected : </em>
@@ -101,8 +105,6 @@ import java.util.concurrent.Executor;
  * does not restore the current play state, play position, selected tracks. Applications should save
  * and restore these on their own in {@link android.app.Activity#onSaveInstanceState} and
  * {@link android.app.Activity#onRestoreInstanceState}.
- *
- * @hide
  */
 public class VideoView2 extends ViewGroupHelper<VideoView2Provider> {
     /** @hide */
@@ -199,9 +201,21 @@ public class VideoView2 extends ViewGroupHelper<VideoView2Provider> {
      * before calling this method.
      *
      * @throws IllegalStateException if interal MediaSession is not created yet.
+     * @hide  TODO: remove
      */
     public MediaController getMediaController() {
         return mProvider.getMediaController_impl();
+    }
+
+    /**
+     * Returns {@link android.media.SessionToken2} so that developers create their own
+     * {@link android.media.MediaController2} instance. This method should be called when VideoView2
+     * is attached to window, or it throws IllegalStateException.
+     *
+     * @throws IllegalStateException if interal MediaSession is not created yet.
+     */
+    public SessionToken2 getMediaSessionToken() {
+        return mProvider.getMediaSessionToken_impl();
     }
 
     /**
@@ -265,6 +279,7 @@ public class VideoView2 extends ViewGroupHelper<VideoView2Provider> {
         mProvider.setAudioAttributes_impl(attributes);
     }
 
+    // TODO: unhide this method when MediaPlayerInterface became unhidden.
     /**
      * Sets a remote player for handling playback of the selected route from MediaControlView2.
      * If this is not called, MediaCotrolView2 will not show the route button.
@@ -302,6 +317,8 @@ public class VideoView2 extends ViewGroupHelper<VideoView2Provider> {
      * Sets video path.
      *
      * @param path the path of the video.
+     *
+     * @hide TODO remove
      */
     public void setVideoPath(String path) {
         mProvider.setVideoPath_impl(path);
@@ -311,6 +328,8 @@ public class VideoView2 extends ViewGroupHelper<VideoView2Provider> {
      * Sets video URI.
      *
      * @param uri the URI of the video.
+     *
+     * @hide TODO remove
      */
     public void setVideoUri(Uri uri) {
         mProvider.setVideoUri_impl(uri);
@@ -325,9 +344,30 @@ public class VideoView2 extends ViewGroupHelper<VideoView2Provider> {
      *                changed with key/value pairs through the headers parameter with
      *                "android-allow-cross-domain-redirect" as the key and "0" or "1" as the value
      *                to disallow or allow cross domain redirection.
+     *
+     * @hide TODO remove
      */
     public void setVideoUri(Uri uri, Map<String, String> headers) {
         mProvider.setVideoUri_impl(uri, headers);
+    }
+
+    /**
+     * Sets {@link MediaItem2} object to render using VideoView2. Alternative way to set media
+     * object to VideoView2 is {@link #setDataSource}.
+     * @param mediaItem the MediaItem2 to play
+     * @see #setDataSource
+     */
+    public void setMediaItem(@NonNull MediaItem2 mediaItem) {
+        mProvider.setMediaItem_impl(mediaItem);
+    }
+
+    /**
+     * Sets {@link DataSourceDesc} object to render using VideoView2.
+     * @param dataSource the {@link DataSourceDesc} object to play.
+     * @see #setMediaItem
+     */
+    public void setDataSource(@NonNull DataSourceDesc dataSource) {
+        mProvider.setDataSource_impl(dataSource);
     }
 
     /**
@@ -361,6 +401,7 @@ public class VideoView2 extends ViewGroupHelper<VideoView2Provider> {
      *                   in {@link MediaControlView2}.
      * @param executor executor to run callbacks on.
      * @param listener A listener to be called when a custom button is clicked.
+     * @hide  TODO remove
      */
     public void setCustomActions(List<PlaybackState.CustomAction> actionList,
             Executor executor, OnCustomActionListener listener) {
@@ -371,7 +412,6 @@ public class VideoView2 extends ViewGroupHelper<VideoView2Provider> {
      * Registers a callback to be invoked when a view type change is done.
      * {@see #setViewType(int)}
      * @param l The callback that will be run
-     *
      * @hide
      */
     @VisibleForTesting
@@ -382,6 +422,7 @@ public class VideoView2 extends ViewGroupHelper<VideoView2Provider> {
     /**
      * Registers a callback to be invoked when the fullscreen mode should be changed.
      * @param l The callback that will be run
+     * @hide  TODO remove
      */
     public void setFullScreenRequestListener(OnFullScreenRequestListener l) {
         mProvider.setFullScreenRequestListener_impl(l);
@@ -410,6 +451,7 @@ public class VideoView2 extends ViewGroupHelper<VideoView2Provider> {
     /**
      * Interface definition of a callback to be invoked to inform the fullscreen mode is changed.
      * Application should handle the fullscreen mode accordingly.
+     * @hide  TODO remove
      */
     public interface OnFullScreenRequestListener {
         /**
@@ -420,8 +462,8 @@ public class VideoView2 extends ViewGroupHelper<VideoView2Provider> {
 
     /**
      * Interface definition of a callback to be invoked to inform that a custom action is performed.
+     * @hide  TODO remove
      */
-    // TODO: When MediaSession2 is ready, modify the method to match the signature.
     public interface OnCustomActionListener {
         /**
          * Called to indicate that a custom action is performed.
