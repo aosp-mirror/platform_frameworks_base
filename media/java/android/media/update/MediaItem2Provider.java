@@ -17,6 +17,8 @@
 package android.media.update;
 
 import android.media.DataSourceDesc;
+import android.media.MediaItem2;
+import android.media.MediaItem2.Builder;
 import android.media.MediaMetadata2;
 import android.os.Bundle;
 
@@ -33,4 +35,11 @@ public interface MediaItem2Provider {
     MediaMetadata2 getMetadata_impl();
     String getMediaId_impl();
     DataSourceDesc getDataSourceDesc_impl();
+
+    interface BuilderProvider {
+        Builder setMediaId_impl(String mediaId);
+        Builder setMetadata_impl(MediaMetadata2 metadata);
+        Builder setDataSourceDesc_impl(DataSourceDesc dataSourceDesc);
+        MediaItem2 build_impl();
+    }
 }

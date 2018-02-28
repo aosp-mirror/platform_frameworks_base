@@ -86,7 +86,7 @@ public interface StaticProvider {
             MediaMetadata2 playlistMetadata);
     PlaylistParams fromBundle_PlaylistParams(Context context, Bundle bundle);
     CommandButtonProvider.BuilderProvider createMediaSession2CommandButtonBuilder(Context context,
-            MediaSession2.CommandButton.Builder builder);
+            MediaSession2.CommandButton.Builder instance);
     BuilderBaseProvider<MediaSession2, SessionCallback> createMediaSession2Builder(
             Context context, MediaSession2.Builder instance, MediaPlayerBase player);
 
@@ -113,8 +113,8 @@ public interface StaticProvider {
             String packageName, String serviceName, int uid);
     SessionToken2 fromBundle_SessionToken2(Context context, Bundle bundle);
 
-    MediaItem2Provider createMediaItem2(Context context, MediaItem2 mediaItem2,
-            String mediaId, DataSourceDesc dsd, MediaMetadata2 metadata, int flags);
+    MediaItem2Provider.BuilderProvider createMediaItem2Builder(
+            Context context, MediaItem2.Builder instance, int flags);
     MediaItem2 fromBundle_MediaItem2(Context context, Bundle bundle);
 
     VolumeProvider2Provider createVolumeProvider2(Context context, VolumeProvider2 instance,
@@ -122,9 +122,9 @@ public interface StaticProvider {
 
     MediaMetadata2 fromBundle_MediaMetadata2(Context context, Bundle bundle);
     MediaMetadata2Provider.BuilderProvider createMediaMetadata2Builder(
-            Context context, MediaMetadata2.Builder builder);
+            Context context, MediaMetadata2.Builder instance);
     MediaMetadata2Provider.BuilderProvider createMediaMetadata2Builder(
-            Context context, MediaMetadata2.Builder builder, MediaMetadata2 source);
+            Context context, MediaMetadata2.Builder instance, MediaMetadata2 source);
 
     Rating2 newUnratedRating_Rating2(Context context, int ratingStyle);
     Rating2 fromBundle_Rating2(Context context, Bundle bundle);
