@@ -94,10 +94,10 @@ const char** varargs(const char* first, va_list rest) {
     // allocate extra 1 for NULL terminator
     const char** ret = (const char**)malloc(sizeof(const char*) * (numOfArgs + 1));
     ret[0] = first;
-    for (int i = 0; i < numOfArgs; i++) {
+    for (int i = 1; i < numOfArgs; i++) {
         const char* arg = va_arg(rest, const char*);
-        ret[i + 1] = arg;
+        ret[i] = arg;
     }
-    ret[numOfArgs + 1] = NULL;
+    ret[numOfArgs] = NULL;
     return ret;
 }
