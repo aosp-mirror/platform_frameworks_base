@@ -295,6 +295,18 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
+    public void initRecoveryService_throwsIfInvalidCert() throws Exception {
+        byte[] modifiedCertXml = TestData.getCertXml();
+        modifiedCertXml[modifiedCertXml.length - 50] ^= 1;  // Flip a bit in the certificate
+        try {
+            mRecoverableKeyStoreManager.initRecoveryService(ROOT_CERTIFICATE_ALIAS, modifiedCertXml);
+            fail("should have thrown");
+        } catch (ServiceSpecificException e) {
+            assertThat(e.getMessage()).contains("validate cert");
+        }
+    }
+
+    @Test
     public void initRecoveryService_updatesWithLargerSerial() throws Exception {
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
@@ -352,6 +364,70 @@ public class RecoverableKeyStoreManagerTest {
         assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertPath(userId, uid)).isNull();
         assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid)).isNull();
         assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId, uid)).isNotNull();
+    }
+
+    @Test
+    public void initRecoveryServiceWithSigFile_succeeds() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+        mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
+
+        mRecoverableKeyStoreManager.initRecoveryServiceWithSigFile(
+                ROOT_CERTIFICATE_ALIAS, TestData.getCertXml(), TestData.getSigXml());
+
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isTrue();
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertPath(userId, uid)).isEqualTo(
+                TestData.CERT_PATH_1);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId, uid)).isNull();
+    }
+
+    @Test
+    public void initRecoveryServiceWithSigFile_throwsIfNullCertFile() throws Exception {
+        try {
+            mRecoverableKeyStoreManager.initRecoveryServiceWithSigFile(
+                    ROOT_CERTIFICATE_ALIAS, /*recoveryServiceCertFile=*/ null,
+                    TestData.getSigXml());
+            fail("should have thrown");
+        } catch (ServiceSpecificException e) {
+            assertThat(e.getMessage()).contains("is null");
+        }
+    }
+
+    @Test
+    public void initRecoveryServiceWithSigFile_throwsIfNullSigFile() throws Exception {
+        try {
+            mRecoverableKeyStoreManager.initRecoveryServiceWithSigFile(
+                    ROOT_CERTIFICATE_ALIAS, TestData.getCertXml(),
+                    /*recoveryServiceSigFile=*/ null);
+            fail("should have thrown");
+        } catch (ServiceSpecificException e) {
+            assertThat(e.getMessage()).contains("is null");
+        }
+    }
+
+    @Test
+    public void initRecoveryServiceWithSigFile_throwsIfWrongSigFileFormat() throws Exception {
+        try {
+            mRecoverableKeyStoreManager.initRecoveryServiceWithSigFile(
+                    ROOT_CERTIFICATE_ALIAS, TestData.getCertXml(),
+                    getUtf8Bytes("wrong-sig-file-format"));
+            fail("should have thrown");
+        } catch (ServiceSpecificException e) {
+            assertThat(e.getMessage()).contains("parse the sig file");
+        }
+    }
+
+    @Test
+    public void initRecoveryServiceWithSigFile_throwsIfInvalidFileSignature() throws Exception {
+        byte[] modifiedCertXml = TestData.getCertXml();
+        modifiedCertXml[modifiedCertXml.length - 1] = 0;  // Change the last new line char to a zero
+        try {
+            mRecoverableKeyStoreManager.initRecoveryServiceWithSigFile(
+                    ROOT_CERTIFICATE_ALIAS, modifiedCertXml, TestData.getSigXml());
+            fail("should have thrown");
+        } catch (ServiceSpecificException e) {
+            assertThat(e.getMessage()).contains("is invalid");
+        }
     }
 
     @Test

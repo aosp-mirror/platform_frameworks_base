@@ -9,6 +9,7 @@ import java.security.cert.CertificateFactory;
 
 public final class TestData {
 
+    private static final long DEFAULT_SERIAL = 1000;
     private static final String CERT_PATH_ENCODING = "PkiPath";
 
     private static final String CERT_PATH_1_BASE64 = ""
@@ -89,10 +90,11 @@ public final class TestData {
 
     private static final String THM_CERT_XML_BEFORE_SERIAL = ""
             + "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            + "<certificates>\n"
-            + "  <metadata>\n"
-            + "    <serial>\n";
-    private static final String THM_CERT_XML_AFTER_SERIAL = ""
+                    + "<certificates>\n"
+                    + "  <metadata>\n"
+                    + "    <serial>\n"
+                    + "      ";
+    private static final String THM_CERT_XML_AFTER_SERIAL = "\n"
             + "    </serial>\n"
             + "    <creation-time>\n"
             + "      1515697631\n"
@@ -163,6 +165,53 @@ public final class TestData {
             + "    </cert>\n"
             + "  </endpoints>\n"
             + "</certificates>\n";
+    private static final String THM_SIG_XML = ""
+            + "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            + "<signature>\n"
+            + "  <intermediates>\n"
+            + "  </intermediates>\n"
+            + "  <certificate>\n"
+            + "    MIIFLzCCAxegAwIBAgICEAAwDQYJKoZIhvcNAQELBQAwIDEeMBwGA1UEAwwVR29v\n"
+            + "    Z2xlIENyeXB0QXV0aFZhdWx0MB4XDTE4MDIwMzAwNDIwM1oXDTI4MDIwMTAwNDIw\n"
+            + "    M1owLTErMCkGA1UEAwwiR29vZ2xlIENyeXB0QXV0aFZhdWx0IEludGVybWVkaWF0\n"
+            + "    ZTCCAiIwDQYJKoZIhvcNAQEBBQADggIPADCCAgoCggIBANyQeJvRfqtDIOqTjnX1\n"
+            + "    vl27Q6sI+TfRdcrDP4fPnLhwZlpYoZwc4dZLZf1gClHM7TT8Ru8WRZVRNUbbvAnn\n"
+            + "    hX4LccdI4BRYeESB8Va+8fB+f0dMPHUESTv1pConsO4nTpKf9Y6Iy0pUBPnoyLyZ\n"
+            + "    6QHGkw6t1mrCVwutRWxnEQezDn9x5m7hxJbNztLOWds0rVwKDJEMapZ/oaneEYTz\n"
+            + "    qRQ60zWL3lGBQinD7D/PTDGkXqQjJBOMr4qOJgf9EE4kgRybqxJZmUyi0otKfaWF\n"
+            + "    /5cvzJTETEgdOix95vTvtBZbjDYEHY1kzjA8A7fDhrDfcU2KANBzZJBiadQRiYhw\n"
+            + "    PyTHvv4lYKALEElzbNMde0HFa5cBD6J6C3xE75AP3ul3pcoz3E+wA6RxYunv2j4A\n"
+            + "    miXg/l/C+Bgzr2YziXAfXa/zpEjhqm09A5qDQoMgdfIpuNpDICC/fSXgqQOl/a5Y\n"
+            + "    4OE45PA1tU9hSbexhSWEFxvKFOTxio32w9ThABqjmwpMBhmAH+aWF5DKlNTDK+rP\n"
+            + "    ptHMZ6FUHeW0/2ALIp0jThVcRS5QFaTdJPJXZERB6fn8soCezq/XULPbZmsR0K80\n"
+            + "    uB62fJXsImw5r/AP8aJRYvZNrunOyGL1qEmqutw09FsDM4tw0pmQV7GHM+mie6j+\n"
+            + "    k2txpF1rV+t6lfFWSZuyA5QvAgMBAAGjZjBkMB0GA1UdDgQWBBR3qZ3aEI+WZ/dW\n"
+            + "    QRfkV8PEoEttoDAfBgNVHSMEGDAWgBSbZfrqOYH54EJpkdKMZjMcz/Hp+DASBgNV\n"
+            + "    HRMBAf8ECDAGAQH/AgEBMA4GA1UdDwEB/wQEAwIBhjANBgkqhkiG9w0BAQsFAAOC\n"
+            + "    AgEAWBKGG5b5ZVOjA3TzQ8t/RNY+UcAIcdQ+CF/usUbGBSMnKkKWgTzgF6DdE6k/\n"
+            + "    mXX0IOpn07I/MDXPpUDN4ZfIWFm9vLsba1kMFE/+/S7ymdIB0LkXyXxWHZgZ2ATe\n"
+            + "    xkPbm+l0GLs/QR/othB604lefzo+qCaBbUXqXPEOMoKyL2Sl5TQBbAN05WDvjzCS\n"
+            + "    7nSjxQTOxXDHMV322gaWB7+efcUfknsS4bMCUXBOgeqnBNUR6BoB3SX2avn6tLtS\n"
+            + "    t3dfzQEcOoIFxcTtSpu3PDlj6WajAwKdbSQU3TZ0L10u3Zz0jEL72w8gDl5OStkG\n"
+            + "    SuRNVEYuPavb2PucL2blVopwGpwtkNbLylGdrzJpmmuA10Tx39ZNj2dWyJzT03zM\n"
+            + "    0XlDRuGFZrdCieUH1dblmoOC6JyW+f7lO1ETNIC1I7LEz6B8beXTCM7LAiTVoVrn\n"
+            + "    ZFqoBY8vrso4zobe8o2kydbmGuYeuKO4rGJqsYihl+RkxHmKMrS4WC/f+no0cv9h\n"
+            + "    AFockmGQp63lOGI/HBb37WT9lxdV5jbpeH7bYan/y2jtlbyC48+I3WF+kP7t/Uh1\n"
+            + "    KYcOuxlBDtt/NXRummzI00Ht7YRzLD4ZCfLbufK0EskMZ1EG6tvBC/OmlA7pCaWT\n"
+            + "    St8KzOHtsYKgJA3Fea4OxDkEL6lBSommVOp2zWybKLb3Gzc=\n"
+            + "  </certificate>\n"
+            + "  <value>\n"
+            + "    uKJ4W8BPCdVaIBe2ZiMxxk5L5vGBV9QwaOEGU80LgtA/gEqkiO2IMUBlQJFqvvhh6RSph5lWpLuv\n"
+            + "    /Xt7WBzDsZOcxXNffg2+pWNpbpwZdHohlwQEI1OqiVYVnfG4euAkzeWZZLsRUuAjHfcWVIzDoSoK\n"
+            + "    wC+gqdUQHBV+pWyn6PXVslS0JIldeegbiwF076M1D7ybeCABXoQelSZRHkx1szO8UnxSR3X7Cemu\n"
+            + "    p9De/7z9+WPPclqybINVIPy6Kvl8mHrGSlzawQRDKtoMrJa8bo93PookF8sbg5EoGapV0yNpMEiA\n"
+            + "    spq3DEcdXB6mGDGPnLbS2WXq4zjKopASRKkZvOMdgfS6NdUMDtKS1TsOrv2KKTkLnGYfvdAeWiMg\n"
+            + "    oFbuyYQ0mnDlLH1UW6anI8RxXn+wmdyZA+/ksapGvRmkvz0Mb997WzqNl7v7UTr0SU3Ws01hFsm6\n"
+            + "    lW++MsotkyfpR9mWB8/dqVNVShLmIlt7U/YFVfziYSrVdjcAdIlgJ6Ihxb92liQHOU+Qr1YDOmm1\n"
+            + "    JSnhlQVvFxWZG7hm5laNL6lqXz5VV6Gk5IeLtMb8kdHz3zj4ascdldapVPLJIa5741GNNgQNU0nH\n"
+            + "    FhAyKk0zN7PbL1/XGWPU+s5lai4HE6JM2CKA7jE7cYrdaDZxbba+9iWzQ4YEBDr5Z3OoloK5dvs=\n"
+            + "  </value>\n"
+            + "</signature>\n";
 
     public static byte[] getCertPath1Bytes() {
         try {
@@ -198,5 +247,13 @@ public final class TestData {
     public static byte[] getCertXmlWithSerial(long serial) {
         String xml = THM_CERT_XML_BEFORE_SERIAL + serial + THM_CERT_XML_AFTER_SERIAL;
         return xml.getBytes(StandardCharsets.UTF_8);
+    }
+
+    public static byte[] getCertXml() {
+        return getCertXmlWithSerial(DEFAULT_SERIAL);
+    }
+
+    public static byte[] getSigXml() {
+        return THM_SIG_XML.getBytes(StandardCharsets.UTF_8);
     }
 }

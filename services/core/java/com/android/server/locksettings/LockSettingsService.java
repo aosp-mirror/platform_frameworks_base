@@ -1983,6 +1983,14 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
+    public void initRecoveryServiceWithSigFile(@NonNull String rootCertificateAlias,
+            @NonNull byte[] recoveryServiceCertFile, @NonNull byte[] recoveryServiceSigFile)
+            throws RemoteException {
+        mRecoverableKeyStoreManager.initRecoveryServiceWithSigFile(rootCertificateAlias,
+                recoveryServiceCertFile, recoveryServiceSigFile);
+    }
+
+    @Override
     public KeyChainSnapshot getKeyChainSnapshot() throws RemoteException {
         return mRecoverableKeyStoreManager.getKeyChainSnapshot();
     }

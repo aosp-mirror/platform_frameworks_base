@@ -99,7 +99,11 @@ public class RecoveryController {
     public static final int ERROR_SESSION_EXPIRED = 24;
 
     /**
-     * Failed because the provided certificate was not a valid X509 certificate.
+     * Failed because the format of the provided certificate is incorrect, e.g., cannot be decoded
+     * properly or misses necessary fields.
+     *
+     * <p>Note that this is different from {@link #ERROR_INVALID_CERTIFICATE}, which implies the
+     * certificate has a correct format but cannot be validated.
      *
      * @hide
      */
@@ -121,6 +125,16 @@ public class RecoveryController {
      */
     public static final int ERROR_INVALID_KEY_FORMAT = 27;
 
+    /**
+     * Failed because the provided certificate cannot be validated, e.g., is expired or has invalid
+     * signatures.
+     *
+     * <p>Note that this is different from {@link #ERROR_BAD_CERTIFICATE_FORMAT}, which denotes
+     * incorrect certificate formats, e.g., due to wrong encoding or structure.
+     *
+     * @hide
+     */
+    public static final int ERROR_INVALID_CERTIFICATE = 28;
 
     private final ILockSettings mBinder;
     private final KeyStore mKeyStore;
@@ -149,23 +163,9 @@ public class RecoveryController {
     }
 
     /**
-     * Initializes key recovery service for the calling application. RecoveryController
-     * randomly chooses one of the keys from the list and keeps it to use for future key export
-     * operations. Collection of all keys in the list must be signed by the provided {@code
-     * rootCertificateAlias}, which must also be present in the list of root certificates
-     * preinstalled on the device. The random selection allows RecoveryController to select
-     * which of a set of remote recovery service devices will be used.
-     *
-     * <p>In addition, RecoveryController enforces a delay of three months between
-     * consecutive initialization attempts, to limit the ability of an attacker to often switch
-     * remote recovery devices and significantly increase number of recovery attempts.
-     *
-     * @param rootCertificateAlias alias of a root certificate preinstalled on the device
-     * @param signedPublicKeyList binary blob a list of X509 certificates and signature
-     * @throws CertificateException if the {@code signedPublicKeyList} is in a bad format.
-     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
-     *     service.
+     * @deprecated Use {@link #initRecoveryService(String, byte[], byte[])} instead.
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     public void initRecoveryService(
             @NonNull String rootCertificateAlias, @NonNull byte[] signedPublicKeyList)
@@ -175,7 +175,54 @@ public class RecoveryController {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
-            if (e.errorCode == ERROR_BAD_CERTIFICATE_FORMAT) {
+            if (e.errorCode == ERROR_BAD_CERTIFICATE_FORMAT
+                    || e.errorCode == ERROR_INVALID_CERTIFICATE) {
+                throw new CertificateException(e.getMessage());
+            }
+            throw wrapUnexpectedServiceSpecificException(e);
+        }
+    }
+
+    /**
+     * Initializes the recovery service for the calling application. The detailed steps should be:
+     * <ol>
+     *     <li>Parse {@code signatureFile} to get relevant information.
+     *     <li>Validate the signer's X509 certificate, contained in {@code signatureFile}, against
+     *         the root certificate pre-installed in the OS and chosen by {@code
+     *         rootCertificateAlias}.
+     *     <li>Verify the public-key signature, contained in {@code signatureFile}, and verify it
+     *         against the entire {@code certificateFile}.
+     *     <li>Parse {@code certificateFile} to get relevant information.
+     *     <li>Check the serial number, contained in {@code certificateFile}, and skip the following
+     *         steps if the serial number is not larger than the one previously stored.
+     *     <li>Randomly choose a X509 certificate from the endpoint X509 certificates, contained in
+     *         {@code certificateFile}, and validate it against the root certificate pre-installed
+     *         in the OS and chosen by {@code rootCertificateAlias}.
+     *     <li>Store the chosen X509 certificate and the serial in local database for later use.
+     * </ol>
+     *
+     * @param rootCertificateAlias the alias of a root certificate pre-installed in the OS
+     * @param certificateFile the binary content of the XML file containing a list of recovery
+     *     service X509 certificates, and other metadata including the serial number
+     * @param signatureFile the binary content of the XML file containing the public-key signature
+     *     of the entire certificate file, and a signer's X509 certificate
+     * @throws CertificateException if the given certificate files cannot be parsed or validated
+     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
+     *     service.
+     */
+    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
+    public void initRecoveryService(
+            @NonNull String rootCertificateAlias, @NonNull byte[] certificateFile,
+            @NonNull byte[] signatureFile)
+            throws CertificateException, InternalRecoveryServiceException {
+        try {
+            mBinder.initRecoveryServiceWithSigFile(
+                    rootCertificateAlias, certificateFile, signatureFile);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == ERROR_BAD_CERTIFICATE_FORMAT
+                    || e.errorCode == ERROR_INVALID_CERTIFICATE) {
                 throw new CertificateException(e.getMessage());
             }
             throw wrapUnexpectedServiceSpecificException(e);
