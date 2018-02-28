@@ -7863,6 +7863,7 @@ public final class Settings {
          * (0 = false, 1 = true)
          * @hide
          */
+        @SystemApi
         public static final String EUICC_PROVISIONED = "euicc_provisioned";
 
         /**
