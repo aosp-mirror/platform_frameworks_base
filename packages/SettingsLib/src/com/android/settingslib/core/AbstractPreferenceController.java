@@ -72,9 +72,9 @@ public abstract class AbstractPreferenceController {
 
 
     /**
-     * @return a String for the summary of the preference.
+     * @return a {@link CharSequence} for the summary of the preference.
      */
-    public String getSummary() {
+    public CharSequence getSummary() {
         return null;
     }
 }
