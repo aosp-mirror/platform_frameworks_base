@@ -23,6 +23,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -320,6 +321,30 @@ public class IpSecServiceParameterizedTest {
     }
 
     @Test
+    public void testReleaseOwnedSpi() throws Exception {
+        IpSecConfig ipSecConfig = new IpSecConfig();
+        addDefaultSpisAndRemoteAddrToIpSecConfig(ipSecConfig);
+        addAuthAndCryptToIpSecConfig(ipSecConfig);
+
+        IpSecTransformResponse createTransformResp =
+                mIpSecService.createTransform(ipSecConfig, new Binder());
+        IpSecService.UserRecord userRecord =
+                mIpSecService.mUserResourceTracker.getUserRecord(Os.getuid());
+        assertEquals(1, userRecord.mSpiQuotaTracker.mCurrent);
+        mIpSecService.releaseSecurityParameterIndex(ipSecConfig.getSpiResourceId());
+        verify(mMockNetd, times(0))
+                .ipSecDeleteSecurityAssociation(
+                        eq(createTransformResp.resourceId),
+                        anyString(),
+                        anyString(),
+                        eq(TEST_SPI),
+                        anyInt(),
+                        anyInt());
+        // quota is not released until the SPI is released by the Transform
+        assertEquals(1, userRecord.mSpiQuotaTracker.mCurrent);
+    }
+
+    @Test
     public void testDeleteTransform() throws Exception {
         IpSecConfig ipSecConfig = new IpSecConfig();
         addDefaultSpisAndRemoteAddrToIpSecConfig(ipSecConfig);
@@ -329,7 +354,7 @@ public class IpSecServiceParameterizedTest {
                 mIpSecService.createTransform(ipSecConfig, new Binder());
         mIpSecService.deleteTransform(createTransformResp.resourceId);
 
-        verify(mMockNetd)
+        verify(mMockNetd, times(1))
                 .ipSecDeleteSecurityAssociation(
                         eq(createTransformResp.resourceId),
                         anyString(),
@@ -342,6 +367,21 @@ public class IpSecServiceParameterizedTest {
         IpSecService.UserRecord userRecord =
                 mIpSecService.mUserResourceTracker.getUserRecord(Os.getuid());
         assertEquals(0, userRecord.mTransformQuotaTracker.mCurrent);
+        assertEquals(1, userRecord.mSpiQuotaTracker.mCurrent);
+
+        mIpSecService.releaseSecurityParameterIndex(ipSecConfig.getSpiResourceId());
+        // Verify that ipSecDeleteSa was not called when the SPI was released because the
+        // ownedByTransform property should prevent it; (note, the called count is cumulative).
+        verify(mMockNetd, times(1))
+                .ipSecDeleteSecurityAssociation(
+                        anyInt(),
+                        anyString(),
+                        anyString(),
+                        anyInt(),
+                        anyInt(),
+                        anyInt());
+        assertEquals(0, userRecord.mSpiQuotaTracker.mCurrent);
+
         try {
             userRecord.mTransformRecords.getRefcountedResourceOrThrow(
                     createTransformResp.resourceId);
