@@ -158,6 +158,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
     }
 
     private void positionChildAt(ActivityStack stack, int position) {
+        // TODO: Keep in sync with WindowContainer.positionChildAt(), once we change that to adjust
+        //       the position internally, also update the logic here
         mStacks.remove(stack);
         final int insertPosition = getTopInsertPosition(stack, position);
         mStacks.add(insertPosition, stack);
@@ -750,7 +752,15 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
             return;
         }
 
-        positionChildAt(mHomeStack, Math.max(0, mStacks.indexOf(behindStack) - 1));
+        // Note that positionChildAt will first remove the given stack before inserting into the
+        // list, so we need to adjust the insertion index to account for the removed index
+        // TODO: Remove this logic when WindowContainer.positionChildAt() is updated to adjust the
+        //       position internally
+        final int homeStackIndex = mStacks.indexOf(mHomeStack);
+        final int behindStackIndex = mStacks.indexOf(behindStack);
+        final int insertIndex = homeStackIndex <= behindStackIndex
+                ? behindStackIndex - 1 : behindStackIndex;
+        positionChildAt(mHomeStack, Math.max(0, insertIndex));
     }
 
     boolean isSleeping() {
