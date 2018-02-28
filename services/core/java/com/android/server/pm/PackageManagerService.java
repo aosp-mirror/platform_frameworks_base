@@ -176,6 +176,7 @@ import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.PackageParser.ParseFlags;
 import android.content.pm.PackageParser.ServiceIntentInfo;
+import android.content.pm.PackageParser.SigningDetails;
 import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.PackageStats;
 import android.content.pm.PackageUserState;
@@ -23317,6 +23318,39 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 int flagValues, int userId) {
             PackageManagerService.this.updatePermissionFlags(
                     permName, packageName, flagMask, flagValues, userId);
+        }
+
+        @Override
+        public boolean isDataRestoreSafe(byte[] restoringFromSigHash, String packageName) {
+            SigningDetails sd = getSigningDetails(packageName);
+            if (sd == null) {
+                return false;
+            }
+            return sd.hasSha256Certificate(restoringFromSigHash,
+                    SigningDetails.CertCapabilities.INSTALLED_DATA);
+        }
+
+        @Override
+        public boolean isDataRestoreSafe(Signature restoringFromSig, String packageName) {
+            SigningDetails sd = getSigningDetails(packageName);
+            if (sd == null) {
+                return false;
+            }
+            return sd.hasCertificate(restoringFromSig,
+                    SigningDetails.CertCapabilities.INSTALLED_DATA);
+        }
+
+        private SigningDetails getSigningDetails(String packageName) {
+            synchronized (mPackages) {
+                if (packageName == null) {
+                    return null;
+                }
+                PackageParser.Package p = mPackages.get(packageName);
+                if (p == null) {
+                    return null;
+                }
+                return p.mSigningDetails;
+            }
         }
 
         @Override

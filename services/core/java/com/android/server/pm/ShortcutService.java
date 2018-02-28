@@ -3125,7 +3125,8 @@ public class ShortcutService extends IShortcutService.Stub {
         try {
             return mIPackageManager.getPackageInfo(
                     packageName, PACKAGE_MATCH_FLAGS
-                            | (getSignatures ? PackageManager.GET_SIGNATURES : 0), userId);
+                            | (getSignatures ? PackageManager.GET_SIGNING_CERTIFICATES : 0),
+                    userId);
         } catch (RemoteException e) {
             // Shouldn't happen.
             Slog.wtf(TAG, "RemoteException", e);
