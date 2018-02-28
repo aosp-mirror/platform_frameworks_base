@@ -111,8 +111,6 @@ public class ActivityRecordTests extends ActivityTestsBase {
         assertEquals(mStack.onActivityRemovedFromStackInvocationCount(), 0);
     }
 
-    // TODO: b/71582913
-    @Ignore("b/71582913")
     @Test
     public void testPausingWhenVisibleFromStopped() throws Exception {
         final MutableBoolean pauseFound = new MutableBoolean(false);

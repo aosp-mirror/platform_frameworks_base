@@ -109,6 +109,7 @@ import android.app.ResultInfo;
 import android.app.WindowConfiguration.ActivityType;
 import android.app.WindowConfiguration.WindowingMode;
 import android.app.servertransaction.ActivityResultItem;
+import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.NewIntentItem;
 import android.app.servertransaction.WindowVisibilityItem;
 import android.app.servertransaction.DestroyActivityItem;
@@ -2609,6 +2610,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 }
 
                 try {
+                    final ClientTransaction transaction = ClientTransaction.obtain(next.app.thread,
+                            next.appToken);
                     // Deliver all pending results.
                     ArrayList<ResultInfo> a = next.results;
                     if (a != null) {
@@ -2616,15 +2619,13 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         if (!next.finishing && N > 0) {
                             if (DEBUG_RESULTS) Slog.v(TAG_RESULTS,
                                     "Delivering results to " + next + ": " + a);
-                            mService.mLifecycleManager.scheduleTransaction(next.app.thread,
-                                    next.appToken, ActivityResultItem.obtain(a));
+                            transaction.addCallback(ActivityResultItem.obtain(a));
                         }
                     }
 
                     if (next.newIntents != null) {
-                        mService.mLifecycleManager.scheduleTransaction(next.app.thread,
-                                next.appToken, NewIntentItem.obtain(next.newIntents,
-                                        false /* andPause */));
+                        transaction.addCallback(NewIntentItem.obtain(next.newIntents,
+                                false /* andPause */));
                     }
 
                     // Well the app will no longer be stopped.
@@ -2641,11 +2642,13 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     next.app.pendingUiClean = true;
                     next.app.forceProcessStateUpTo(mService.mTopProcessState);
                     next.clearOptionsLocked();
-                    mService.mLifecycleManager.scheduleTransaction(next.app.thread, next.appToken,
+
+                    transaction.setLifecycleStateRequest(
                             ResumeActivityItem.obtain(next.app.repProcState,
                                     mService.isNextTransitionForward())
                                     .setDescription(next.getLifecycleDescription(
                                             "resumeTopActivityInnerLocked")));
+                    mService.mLifecycleManager.scheduleTransaction(transaction);
 
                     if (DEBUG_STATES) Slog.d(TAG_STATES, "resumeTopActivityLocked: Resumed "
                             + next);
