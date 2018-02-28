@@ -290,6 +290,7 @@ public class QSFragment extends Fragment implements QS {
         // Let the views animate their contents correctly by giving them the necessary context.
         mHeader.setExpansion(mKeyguardShowing, expansion, panelTranslationY);
         mFooter.setExpansion(mKeyguardShowing ? 1 : expansion);
+        mQSPanel.getQsTileRevealController().setExpansion(expansion);
         mQSPanel.setTranslationY(translationScaleY * heightDiff);
         mQSDetail.setFullyExpanded(fullyExpanded);
 

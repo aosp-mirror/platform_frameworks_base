@@ -24,6 +24,7 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Map;
+import java.util.Set;
 
 public final class Prefs {
     private Prefs() {} // no instantation
@@ -87,6 +88,7 @@ public final class Prefs {
         String NUM_APPS_LAUNCHED = "NumAppsLaunched";
         String HAS_SEEN_RECENTS_ONBOARDING = "HasSeenRecentsOnboarding";
         String SEEN_RINGER_GUIDANCE_COUNT = "RingerGuidanceCount";
+        String QS_TILE_SPECS_REVEALED = "QsTileSpecsRevealed";
     }
 
     public static boolean getBoolean(Context context, @Key String key, boolean defaultValue) {
@@ -119,6 +121,15 @@ public final class Prefs {
 
     public static void putString(Context context, @Key String key, String value) {
         get(context).edit().putString(key, value).apply();
+    }
+
+    public static void putStringSet(Context context, @Key String key, Set<String> value) {
+        get(context).edit().putStringSet(key, value).apply();
+    }
+
+    public static Set<String> getStringSet(
+            Context context, @Key String key, Set<String> defaultValue) {
+        return get(context).getStringSet(key, defaultValue);
     }
 
     public static Map<String, ?> getAll(Context context) {
