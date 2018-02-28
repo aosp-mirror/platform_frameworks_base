@@ -2138,4 +2138,8 @@
     <!-- Option to grant the slice permission request on the screen [CHAR LIMIT=15] -->
     <string name="slice_permission_deny">Deny</string>
 
+    <!-- List of packages for which we don't want to show recents onboarding, add into overlay as needed. -->
+    <string-array name="recents_onboarding_blacklisted_packages" translatable="false">
+    </string-array>
+
 </resources>
