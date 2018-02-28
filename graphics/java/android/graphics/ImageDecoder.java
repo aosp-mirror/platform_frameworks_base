@@ -28,33 +28,31 @@ import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager.AssetInputStream;
 import android.content.res.Resources;
 import android.graphics.drawable.AnimatedImageDrawable;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
 import android.net.Uri;
-import android.util.Size;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.DisplayMetrics;
+import android.util.Size;
 import android.util.TypedValue;
 
-import libcore.io.IoUtils;
 import dalvik.system.CloseGuard;
 
-import java.nio.ByteBuffer;
+import libcore.io.IoUtils;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.ArrayIndexOutOfBoundsException;
-import java.lang.AutoCloseable;
-import java.lang.NullPointerException;
-import java.lang.RuntimeException;
 import java.lang.annotation.Retention;
-import static java.lang.annotation.RetentionPolicy.SOURCE;
+import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
  *  Class for decoding images as {@link Bitmap}s or {@link Drawable}s.
@@ -494,7 +492,7 @@ public final class ImageDecoder implements AutoCloseable {
     private int     mAllocator = ALLOCATOR_DEFAULT;
     private boolean mRequireUnpremultiplied = false;
     private boolean mMutable = false;
-    private boolean mPreferRamOverQuality = false;
+    private boolean mConserveMemory = false;
     private boolean mAsAlphaMask = false;
     private Rect    mCropRect;
     private Rect    mOutPaddingRect;
@@ -872,12 +870,16 @@ public final class ImageDecoder implements AutoCloseable {
      *  Specify whether to potentially save RAM at the expense of quality.
      *
      *  Setting this to {@code true} may result in a {@link Bitmap} with a
-     *  denser {@link Bitmap.Config}, depending on the image. For example, for
-     *  an opaque {@link Bitmap}, this may result in a {@link Bitmap.Config}
-     *  with no alpha information.
+     *  denser {@link Bitmap.Config}, depending on the image. For example, an
+     *  opaque {@link Bitmap} with 8 bits or precision for each of its red,
+     *  green and blue components would decode to
+     *  {@link Bitmap.Config#ARGB_8888} by default, but setting this to
+     *  {@code true} will result in decoding to {@link Bitmap.Config#RGB_565}.
+     *  This necessarily lowers the quality of the output, but saves half
+     *  the memory used.
      */
-    public void setPreferRamOverQuality(boolean preferRamOverQuality) {
-        mPreferRamOverQuality = preferRamOverQuality;
+    public void setConserveMemory(boolean conserveMemory) {
+        mConserveMemory = conserveMemory;
     }
 
     /**
@@ -958,7 +960,7 @@ public final class ImageDecoder implements AutoCloseable {
         return nDecodeBitmap(mNativePtr, partialImagePtr,
                 postProcessPtr, mDesiredWidth, mDesiredHeight, mCropRect,
                 mMutable, mAllocator, mRequireUnpremultiplied,
-                mPreferRamOverQuality, mAsAlphaMask);
+                mConserveMemory, mAsAlphaMask);
     }
 
     private void callHeaderDecoded(@Nullable OnHeaderDecodedListener listener,
@@ -1172,7 +1174,7 @@ public final class ImageDecoder implements AutoCloseable {
             int width, int height,
             @Nullable Rect cropRect, boolean mutable,
             int allocator, boolean requireUnpremul,
-            boolean preferRamOverQuality, boolean asAlphaMask)
+            boolean conserveMemory, boolean asAlphaMask)
         throws IOException;
     private static native Size nGetSampledSize(long nativePtr,
                                                int sampleSize);
