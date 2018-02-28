@@ -153,7 +153,7 @@ public class MediaBrowser2 extends MediaController2 {
      * @param rootHints hint for the root
      * @see BrowserCallback#onGetLibraryRootDone(MediaBrowser2, Bundle, String, Bundle)
      */
-    public void getLibraryRoot(Bundle rootHints) {
+    public void getLibraryRoot(@Nullable Bundle rootHints) {
         mProvider.getLibraryRoot_impl(rootHints);
     }
 
@@ -166,7 +166,7 @@ public class MediaBrowser2 extends MediaController2 {
      * @param parentId parent id
      * @param extras extra bundle
      */
-    public void subscribe(String parentId, @Nullable Bundle extras) {
+    public void subscribe(@NonNull String parentId, @Nullable Bundle extras) {
         mProvider.subscribe_impl(parentId, extras);
     }
 
@@ -179,7 +179,7 @@ public class MediaBrowser2 extends MediaController2 {
      *
      * @param parentId parent id
      */
-    public void unsubscribe(String parentId) {
+    public void unsubscribe(@NonNull String parentId) {
         mProvider.unsubscribe_impl(parentId);
     }
 
@@ -192,7 +192,8 @@ public class MediaBrowser2 extends MediaController2 {
      * @param pageSize page size. Should be greater or equal to {@code 1}
      * @param extras extra bundle
      */
-    public void getChildren(String parentId, int page, int pageSize, @Nullable Bundle extras) {
+    public void getChildren(@NonNull String parentId, int page, int pageSize,
+            @Nullable Bundle extras) {
         mProvider.getChildren_impl(parentId, page, pageSize, extras);
     }
 
@@ -202,7 +203,7 @@ public class MediaBrowser2 extends MediaController2 {
      *
      * @param mediaId media id for specifying the item
      */
-    public void getItem(String mediaId) {
+    public void getItem(@NonNull String mediaId) {
         mProvider.getItem_impl(mediaId);
     }
 

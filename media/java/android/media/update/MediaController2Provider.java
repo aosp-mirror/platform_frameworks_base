@@ -50,7 +50,7 @@ public interface MediaController2Provider extends TransportControlProvider {
 
     void prepareFromUri_impl(Uri uri, Bundle extras);
     void prepareFromSearch_impl(String query, Bundle extras);
-    void prepareMediaId_impl(String mediaId, Bundle extras);
+    void prepareFromMediaId_impl(String mediaId, Bundle extras);
     void playFromSearch_impl(String query, Bundle extras);
     void playFromUri_impl(Uri uri, Bundle extras);
     void playFromMediaId_impl(String mediaId, Bundle extras);

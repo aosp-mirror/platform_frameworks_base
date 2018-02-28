@@ -144,9 +144,9 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
          *
          * @param controller the controller for this event
          * @param playlist A new playlist set by the session.
-         * @see #onPositionChanged(long, long)
-         * @see #onBufferedPositionChanged(long)
-         * @see #onCurrentPlaylistItemChanged(MediaItem2)
+         * @see #onPositionChanged(MediaController2, long, long)
+         * @see #onBufferedPositionChanged(MediaController2, long)
+         * @see #onCurrentPlaylistItemChanged(MediaController2, MediaItem2)
          */
         public void onPlaylistChanged(@NonNull MediaController2 controller,
                 @NonNull List<MediaItem2> playlist) { }
@@ -216,9 +216,9 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
          *
          * @param controller the controller for this event
          * @param item new item
-         * @see #onPositionChanged(long, long)
-         * @see #onBufferedPositionChanged(long)
-         * @see #onCurrentPlaylistItemChanged(MediaItem2)
+         * @see #onPositionChanged(MediaController2, long, long)
+         * @see #onBufferedPositionChanged(MediaController2, long)
+         * @see #onCurrentPlaylistItemChanged(MediaController2, MediaItem2)
          */
         public void onCurrentPlaylistItemChanged(@NonNull MediaController2 controller,
                 @NonNull MediaItem2 item) { }
@@ -325,8 +325,8 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
     private final MediaController2Provider mProvider;
 
     /**
-     * Create a {@link MediaController2} from the {@link SessionToken2}. This connects to the session
-     * and may wake up the service if it's not available.
+     * Create a {@link MediaController2} from the {@link SessionToken2}.
+     * This connects to the session and may wake up the service if it's not available.
      *
      * @param context Context
      * @param token token to connect to
@@ -372,8 +372,7 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
     /**
      * @return token
      */
-    public @NonNull
-    SessionToken2 getSessionToken() {
+    public @NonNull SessionToken2 getSessionToken() {
         return mProvider.getSessionToken_impl();
     }
 
@@ -408,8 +407,8 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
      * Request that the player prepare its playback. In other words, other sessions can continue
      * to play during the preparation of this session. This method can be used to speed up the
      * start of the playback. Once the preparation is done, the session will change its playback
-     * state to {@link MediaPlayerBase#PLAYER_STATE_PAUSED}. Afterwards, {@link #play} can be called to
-     * start playback.
+     * state to {@link MediaPlayerBase#PLAYER_STATE_PAUSED}. Afterwards, {@link #play} can be called
+     * to start playback.
      */
     public void prepare() {
         mProvider.prepare_impl();
@@ -490,12 +489,9 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
 
     /**
      * Request that the player start playback for a specific search query.
-     * An empty or null query should be treated as a request to play any
-     * music.
      *
-     * @param query The search query.
-     * @param extras Optional extras that can include extra information
-     *               about the query.
+     * @param query The search query. Should not be an empty string.
+     * @param extras Optional extras that can include extra information about the query.
      */
     public void playFromSearch(@NonNull String query, @Nullable Bundle extras) {
         mProvider.playFromSearch_impl(query, extras);
@@ -525,21 +521,20 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
      *               to be prepared.
      */
     public void prepareFromMediaId(@NonNull String mediaId, @Nullable Bundle extras) {
-        mProvider.prepareMediaId_impl(mediaId, extras);
+        mProvider.prepareFromMediaId_impl(mediaId, extras);
     }
 
     /**
-     * Request that the player prepare playback for a specific search query. An empty or null
-     * query should be treated as a request to prepare any music. In other words, other sessions
-     * can continue to play during the preparation of this session. This method can be used to
-     * speed up the start of the playback. Once the preparation is done, the session will
-     * change its playback state to {@link MediaPlayerBase#PLAYER_STATE_PAUSED}. Afterwards,
+     * Request that the player prepare playback for a specific search query.
+     * In other words, other sessions can continue to play during the preparation of this session.
+     * This method can be used to speed up the start of the playback.
+     * Once the preparation is done, the session will change its playback state to
+     * {@link MediaPlayerBase#PLAYER_STATE_PAUSED}. Afterwards,
      * {@link #play} can be called to start playback. If the preparation is not needed,
      * {@link #playFromSearch} can be directly called without this method.
      *
-     * @param query The search query.
-     * @param extras Optional extras that can include extra information
-     *               about the query.
+     * @param query The search query. Should not be an empty string.
+     * @param extras Optional extras that can include extra information about the query.
      */
     public void prepareFromSearch(@NonNull String query, @Nullable Bundle extras) {
         mProvider.prepareFromSearch_impl(query, extras);
@@ -549,8 +544,8 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
      * Request that the player prepare playback for a specific {@link Uri}. In other words,
      * other sessions can continue to play during the preparation of this session. This method
      * can be used to speed up the start of the playback. Once the preparation is done, the
-     * session will change its playback state to {@link MediaPlayerBase#PLAYER_STATE_PAUSED}. Afterwards,
-     * {@link #play} can be called to start playback. If the preparation is not needed,
+     * session will change its playback state to {@link MediaPlayerBase#PLAYER_STATE_PAUSED}.
+     * Afterwards, {@link #play} can be called to start playback. If the preparation is not needed,
      * {@link #playFromUri} can be directly called without this method.
      *
      * @param uri The URI of the requested media.
@@ -708,7 +703,7 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
      * @param mediaId The id of the media
      * @param rating The rating to set
      */
-    public void setRating(String mediaId, Rating2 rating) {
+    public void setRating(@NonNull String mediaId, @NonNull Rating2 rating) {
         mProvider.setRating_impl(mediaId, rating);
     }
 
