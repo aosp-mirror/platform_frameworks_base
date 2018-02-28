@@ -39,7 +39,7 @@ public final class URLUtil {
     // "file:///android_res/drawable/bar.png". Use "drawable" to refer to
     // "drawable-hdpi" directory as well.
     static final String RESOURCE_BASE = "file:///android_res/";
-    static final String FILE_BASE = "file://";
+    static final String FILE_BASE = "file:";
     static final String PROXY_BASE = "file:///cookieless_proxy/";
     static final String CONTENT_BASE = "content:";
 
