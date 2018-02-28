@@ -1967,6 +1967,8 @@
   <java-symbol type="string" name="smv_process" />
   <java-symbol type="string" name="tethered_notification_message" />
   <java-symbol type="string" name="tethered_notification_title" />
+  <java-symbol type="string" name="disable_tether_notification_message" />
+  <java-symbol type="string" name="disable_tether_notification_title" />
   <java-symbol type="string" name="adb_debugging_notification_channel_tv" />
   <java-symbol type="string" name="usb_accessory_notification_title" />
   <java-symbol type="string" name="usb_mtp_notification_title" />
