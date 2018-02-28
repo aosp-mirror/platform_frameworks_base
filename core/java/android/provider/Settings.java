@@ -10516,6 +10516,8 @@ public final class Settings {
          * entity_list_default use ":" as delimiter for values. Ex:
          *
          * <pre>
+         * smart_linkify_enabled                    (boolean)
+         * system_textclassifier_enabled            (boolean)
          * model_dark_launch_enabled                (boolean)
          * smart_selection_enabled                  (boolean)
          * smart_text_share_enabled                 (boolean)

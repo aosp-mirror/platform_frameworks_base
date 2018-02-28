@@ -32,7 +32,9 @@ public class TextClassificationConstantsTest {
 
     @Test
     public void testLoadFromString() {
-        final String s = "model_dark_launch_enabled=true,"
+        final String s = "local_textclassifier_enabled=true,"
+                + "system_textclassifier_enabled=true,"
+                + "model_dark_launch_enabled=true,"
                 + "smart_selection_enabled=true,"
                 + "smart_text_share_enabled=true,"
                 + "smart_linkify_enabled=true,"
@@ -43,6 +45,10 @@ public class TextClassificationConstantsTest {
                 + "generate_links_log_sample_rate=13";
         final TextClassificationConstants constants =
                 TextClassificationConstants.loadFromString(s);
+        assertTrue("local_textclassifier_enabled",
+                constants.isLocalTextClassifierEnabled());
+        assertTrue("system_textclassifier_enabled",
+                constants.isSystemTextClassifierEnabled());
         assertTrue("model_dark_launch_enabled", constants.isModelDarkLaunchEnabled());
         assertTrue("smart_selection_enabled", constants.isSmartSelectionEnabled());
         assertTrue("smart_text_share_enabled", constants.isSmartTextShareEnabled());
@@ -60,7 +66,9 @@ public class TextClassificationConstantsTest {
 
     @Test
     public void testLoadFromString_differentValues() {
-        final String s = "model_dark_launch_enabled=false,"
+        final String s = "local_textclassifier_enabled=false,"
+                + "system_textclassifier_enabled=false,"
+                + "model_dark_launch_enabled=false,"
                 + "smart_selection_enabled=false,"
                 + "smart_text_share_enabled=false,"
                 + "smart_linkify_enabled=false,"
@@ -71,6 +79,10 @@ public class TextClassificationConstantsTest {
                 + "generate_links_log_sample_rate=5";
         final TextClassificationConstants constants =
                 TextClassificationConstants.loadFromString(s);
+        assertFalse("local_textclassifier_enabled",
+                constants.isLocalTextClassifierEnabled());
+        assertFalse("system_textclassifier_enabled",
+                constants.isSystemTextClassifierEnabled());
         assertFalse("model_dark_launch_enabled", constants.isModelDarkLaunchEnabled());
         assertFalse("smart_selection_enabled", constants.isSmartSelectionEnabled());
         assertFalse("smart_text_share_enabled", constants.isSmartTextShareEnabled());
