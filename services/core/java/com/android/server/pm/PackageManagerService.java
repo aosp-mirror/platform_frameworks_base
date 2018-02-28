@@ -6692,7 +6692,9 @@ public class PackageManagerService extends IPackageManager.Stub
             return result;
         }
         final PackageSetting ps = mSettings.mPackages.get(mInstantAppInstallerActivity.packageName);
-        if (ps == null) {
+        if (ps == null
+                || ps.getUserState().get(userId) == null
+                || !ps.getUserState().get(userId).isEnabled(mInstantAppInstallerActivity, 0)) {
             return result;
         }
         final ResolveInfo ephemeralInstaller = new ResolveInfo(mInstantAppInstallerInfo);
