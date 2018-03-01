@@ -34,7 +34,7 @@ import libcore.util.EmptyArray;
  */
 @SystemApi
 @Deprecated
-public class NanoAppInstanceInfo {
+public class NanoAppInstanceInfo implements Parcelable {
     private String mPublisher = "Unknown";
     private String mName = "Unknown";
 

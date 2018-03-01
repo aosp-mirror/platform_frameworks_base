@@ -1592,7 +1592,7 @@ package android.hardware.location {
     method public abstract void onMessageReceipt(int, int, android.hardware.location.ContextHubMessage);
   }
 
-  public deprecated class ContextHubMessage {
+  public deprecated class ContextHubMessage implements android.os.Parcelable {
     ctor public ContextHubMessage(int, int, byte[]);
     method public int describeContents();
     method public byte[] getData();
@@ -1723,7 +1723,7 @@ package android.hardware.location {
     field public static final android.os.Parcelable.Creator<android.hardware.location.MemoryRegion> CREATOR;
   }
 
-  public deprecated class NanoApp {
+  public deprecated class NanoApp implements android.os.Parcelable {
     ctor public NanoApp();
     ctor public deprecated NanoApp(int, byte[]);
     ctor public NanoApp(long, byte[]);
@@ -1771,7 +1771,7 @@ package android.hardware.location {
     field public static final android.os.Parcelable.Creator<android.hardware.location.NanoAppBinary> CREATOR;
   }
 
-  public deprecated class NanoAppFilter {
+  public deprecated class NanoAppFilter implements android.os.Parcelable {
     ctor public NanoAppFilter(long, int, int, long);
     method public int describeContents();
     method public boolean testMatch(android.hardware.location.NanoAppInstanceInfo);
@@ -1786,7 +1786,7 @@ package android.hardware.location {
     field public static final int VENDOR_ANY = -1; // 0xffffffff
   }
 
-  public deprecated class NanoAppInstanceInfo {
+  public deprecated class NanoAppInstanceInfo implements android.os.Parcelable {
     ctor public NanoAppInstanceInfo();
     method public int describeContents();
     method public long getAppId();
