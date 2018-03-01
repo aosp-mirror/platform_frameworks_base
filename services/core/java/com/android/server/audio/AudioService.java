@@ -7039,26 +7039,75 @@ public class AudioService extends IAudioService.Stub
         // TODO implement clearing mix attribute matching info in native audio policy
     }
 
-    public int setFocusPropertiesForPolicy(int duckingBehavior, IAudioPolicyCallback pcb) {
-        if (DEBUG_AP) Log.d(TAG, "setFocusPropertiesForPolicy() duck behavior=" + duckingBehavior
-                + " policy " +  pcb.asBinder());
-        // error handling
-        boolean hasPermissionForPolicy =
+    /**
+     * Checks whether caller has MODIFY_AUDIO_ROUTING permission, and the policy is registered.
+     * @param errorMsg log warning if permission check failed.
+     * @return null if the operation on the audio mixes should be cancelled.
+     */
+    @GuardedBy("mAudioPolicies")
+    private AudioPolicyProxy checkUpdateForPolicy(IAudioPolicyCallback pcb, String errorMsg) {
+        // permission check
+        final boolean hasPermissionForPolicy =
                 (PackageManager.PERMISSION_GRANTED == mContext.checkCallingPermission(
                         android.Manifest.permission.MODIFY_AUDIO_ROUTING));
         if (!hasPermissionForPolicy) {
-            Slog.w(TAG, "Cannot change audio policy ducking handling for pid " +
+            Slog.w(TAG, errorMsg + " for pid " +
                     + Binder.getCallingPid() + " / uid "
                     + Binder.getCallingUid() + ", need MODIFY_AUDIO_ROUTING");
-            return AudioManager.ERROR;
+            return null;
         }
+        // policy registered?
+        final AudioPolicyProxy app = mAudioPolicies.get(pcb.asBinder());
+        if (app == null) {
+            Slog.w(TAG, errorMsg + " for pid " +
+                    + Binder.getCallingPid() + " / uid "
+                    + Binder.getCallingUid() + ", unregistered policy");
+            return null;
+        }
+        return app;
+    }
 
+    public int addMixForPolicy(AudioPolicyConfig policyConfig, IAudioPolicyCallback pcb) {
+        if (DEBUG_AP) { Log.d(TAG, "addMixForPolicy for " + pcb.asBinder()
+                + " with config:" + policyConfig); }
         synchronized (mAudioPolicies) {
+            final AudioPolicyProxy app =
+                    checkUpdateForPolicy(pcb, "Cannot add AudioMix in audio policy");
+            if (app == null){
+                return AudioManager.ERROR;
+            }
+            app.addMixes(policyConfig.getMixes());
+        }
+        return AudioManager.SUCCESS;
+    }
+
+    public int removeMixForPolicy(AudioPolicyConfig policyConfig, IAudioPolicyCallback pcb) {
+        if (DEBUG_AP) { Log.d(TAG, "removeMixForPolicy for " + pcb.asBinder()
+                + " with config:" + policyConfig); }
+        synchronized (mAudioPolicies) {
+            final AudioPolicyProxy app =
+                    checkUpdateForPolicy(pcb, "Cannot add AudioMix in audio policy");
+            if (app == null) {
+                return AudioManager.ERROR;
+            }
+            app.removeMixes(policyConfig.getMixes());
+        }
+        return AudioManager.SUCCESS;
+    }
+
+    public int setFocusPropertiesForPolicy(int duckingBehavior, IAudioPolicyCallback pcb) {
+        if (DEBUG_AP) Log.d(TAG, "setFocusPropertiesForPolicy() duck behavior=" + duckingBehavior
+                + " policy " +  pcb.asBinder());
+        synchronized (mAudioPolicies) {
+            final AudioPolicyProxy app =
+                    checkUpdateForPolicy(pcb, "Cannot change audio policy focus properties");
+            if (app == null){
+                return AudioManager.ERROR;
+            }
             if (!mAudioPolicies.containsKey(pcb.asBinder())) {
                 Slog.e(TAG, "Cannot change audio policy focus properties, unregistered policy");
                 return AudioManager.ERROR;
             }
-            final AudioPolicyProxy app = mAudioPolicies.get(pcb.asBinder());
             if (duckingBehavior == AudioPolicy.FOCUS_POLICY_DUCKING_IN_POLICY) {
                 // is there already one policy managing ducking?
                 for (AudioPolicyProxy policy : mAudioPolicies.values()) {
@@ -7290,6 +7339,24 @@ public class AudioService extends IAudioService.Stub
             Binder.restoreCallingIdentity(identity);
         }
 
+        void addMixes(@NonNull ArrayList<AudioMix> mixes) {
+            // TODO optimize to not have to unregister the mixes already in place
+            synchronized (mMixes) {
+                AudioSystem.registerPolicyMixes(mMixes, false);
+                this.add(mixes);
+                AudioSystem.registerPolicyMixes(mMixes, true);
+            }
+        }
+
+        void removeMixes(@NonNull ArrayList<AudioMix> mixes) {
+            // TODO optimize to not have to unregister the mixes already in place
+            synchronized (mMixes) {
+                AudioSystem.registerPolicyMixes(mMixes, false);
+                this.remove(mixes);
+                AudioSystem.registerPolicyMixes(mMixes, true);
+            }
+        }
+
         void connectMixes() {
             final long identity = Binder.clearCallingIdentity();
             AudioSystem.registerPolicyMixes(mMixes, true);
@@ -7407,7 +7474,8 @@ public class AudioService extends IAudioService.Stub
     //======================
     // misc
     //======================
-    private HashMap<IBinder, AudioPolicyProxy> mAudioPolicies =
+    private final HashMap<IBinder, AudioPolicyProxy> mAudioPolicies =
             new HashMap<IBinder, AudioPolicyProxy>();
-    private int mAudioPolicyCounter = 0; // always accessed synchronized on mAudioPolicies
+    @GuardedBy("mAudioPolicies")
+    private int mAudioPolicyCounter = 0;
 }
