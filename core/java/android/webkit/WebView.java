@@ -1683,7 +1683,7 @@ public class WebView extends AbsoluteLayout
      * @param callback will be called on the UI thread with {@code true} if initialization is
      * successful, {@code false} otherwise.
      */
-    public static void startSafeBrowsing(Context context,
+    public static void startSafeBrowsing(@NonNull Context context,
             @Nullable ValueCallback<Boolean> callback) {
         getFactory().getStatics().initSafeBrowsing(context, callback);
     }
