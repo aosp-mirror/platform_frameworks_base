@@ -1531,6 +1531,11 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     void setPipVisibilityLw(boolean visible);
 
     /**
+     * Called by System UI to enable or disable haptic feedback on the navigation bar buttons.
+     */
+    void setNavBarVirtualKeyHapticFeedbackEnabledLw(boolean enabled);
+
+    /**
      * Specifies whether there is an on-screen navigation bar separate from the status bar.
      */
     public boolean hasNavigationBar();
