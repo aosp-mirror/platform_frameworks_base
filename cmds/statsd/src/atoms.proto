@@ -104,6 +104,7 @@ message Atom {
         KeyguardStateChanged keyguard_state_changed = 62;
         KeyguardBouncerStateChanged keyguard_bouncer_state_changed = 63;
         KeyguardBouncerPasswordEntered keyguard_bouncer_password_entered = 64;
+        AppDied app_died=65;
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 
@@ -1233,6 +1234,17 @@ message LmkKillOccurred {
 
     // SWAP
     optional int64 swap_in_bytes = 8;
+}
+
+/*
+ * Logs when the ActivityManagerService detects that an app died.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ */
+message AppDied {
+    // timestamp(elapsedRealtime) of record creation
+    optional uint64 timestamp_millis = 1;
 }
 
 //////////////////////////////////////////////////////////////////////
