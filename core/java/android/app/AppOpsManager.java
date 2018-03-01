@@ -174,6 +174,7 @@ public class AppOpsManager {
     /** @hide */
     public static final int OP_CAMERA = 26;
     /** @hide */
+    @TestApi
     public static final int OP_RECORD_AUDIO = 27;
     /** @hide */
     public static final int OP_PLAY_AUDIO = 28;
