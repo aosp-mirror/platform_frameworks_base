@@ -575,7 +575,7 @@ public class MmTelFeature extends ImsFeature {
      */
     public ImsUtImplBase getUt() {
         // Base Implementation - Should be overridden
-        return null;
+        return new ImsUtImplBase();
     }
 
     /**
@@ -584,7 +584,7 @@ public class MmTelFeature extends ImsFeature {
      */
     public ImsEcbmImplBase getEcbm() {
         // Base Implementation - Should be overridden
-        return null;
+        return new ImsEcbmImplBase();
     }
 
     /**
@@ -593,7 +593,7 @@ public class MmTelFeature extends ImsFeature {
      */
     public ImsMultiEndpointImplBase getMultiEndpoint() {
         // Base Implementation - Should be overridden
-        return null;
+        return new ImsMultiEndpointImplBase();
     }
 
     /**

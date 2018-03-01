@@ -5209,17 +5209,22 @@ package android.telephony.ims.stub {
   }
 
   public final class ImsFeatureConfiguration implements android.os.Parcelable {
-    ctor public ImsFeatureConfiguration();
     method public int describeContents();
-    method public int[] getServiceFeatures();
+    method public java.util.Set<android.telephony.ims.stub.ImsFeatureConfiguration.FeatureSlotPair> getServiceFeatures();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.telephony.ims.stub.ImsFeatureConfiguration> CREATOR;
   }
 
   public static class ImsFeatureConfiguration.Builder {
     ctor public ImsFeatureConfiguration.Builder();
-    method public android.telephony.ims.stub.ImsFeatureConfiguration.Builder addFeature(int);
+    method public android.telephony.ims.stub.ImsFeatureConfiguration.Builder addFeature(int, int);
     method public android.telephony.ims.stub.ImsFeatureConfiguration build();
+  }
+
+  public static final class ImsFeatureConfiguration.FeatureSlotPair {
+    ctor public ImsFeatureConfiguration.FeatureSlotPair(int, int);
+    field public final int featureType;
+    field public final int slotId;
   }
 
   public class ImsMultiEndpointImplBase {

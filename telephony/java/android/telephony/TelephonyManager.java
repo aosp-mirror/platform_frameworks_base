@@ -5125,6 +5125,23 @@ public class TelephonyManager {
     }
 
     /**
+     * @return true if the IMS resolver is busy resolving a binding and should not be considered
+     * available, false if the IMS resolver is idle.
+     * @hide
+     */
+    public boolean isResolvingImsBinding() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.isResolvingImsBinding();
+            }
+        } catch (RemoteException e) {
+            Rlog.e(TAG, "isResolvingImsBinding, RemoteException: " + e.getMessage());
+        }
+        return false;
+    }
+
+    /**
      * Set IMS registration state
      *
      * @param Registration state
