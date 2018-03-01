@@ -664,6 +664,7 @@ LOCAL_DROIDDOC_OPTIONS:= \
 		-toroot / \
 		-hdf android.whichdoc online \
 		-devsite \
+		-yamlV2 \
 		$(sample_groups) \
 		-hdf android.hasSamples true \
 		-samplesdir $(samples_dir)
