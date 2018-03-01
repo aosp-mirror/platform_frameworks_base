@@ -42,3 +42,24 @@ LOCAL_MODULE_PATH := $(TARGET_OUT_ETC)/permissions
 LOCAL_SRC_FILES := $(LOCAL_MODULE)
 
 include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := com.android.media.remotedisplay.stubs-gen
+LOCAL_MODULE_CLASS := JAVA_LIBRARIES
+LOCAL_SRC_FILES := $(call all-java-files-under,java)
+LOCAL_DROIDDOC_STUB_OUT_DIR := $(TARGET_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/com.android.media.remotedisplay.stubs_intermediates/src
+LOCAL_DROIDDOC_OPTIONS:= \
+    -hide 111 -hide 113 -hide 125 -hide 126 -hide 127 -hide 128 \
+    -stubpackages com.android.media.remotedisplay \
+    -nodocs
+LOCAL_UNINSTALLABLE_MODULE := true
+include $(BUILD_DROIDDOC)
+com_android_media_remotedisplay_gen_stamp := $(full_target)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := com.android.media.remotedisplay.stubs
+LOCAL_SDK_VERSION := current
+LOCAL_SOURCE_FILES_ALL_GENERATED := true
+LOCAL_ADDITIONAL_DEPENDENCIES := $(com_android_media_remotedisplay_gen_stamp)
+com_android_media_remotedisplay_gen_stamp :=
+include $(BUILD_STATIC_JAVA_LIBRARY)
