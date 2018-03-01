@@ -86,14 +86,9 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
 
     private View mActionsContainer;
     private View mDragHandle;
-    private final int mDragHandleExpandOffset;
 
     public QSFooterImpl(Context context, AttributeSet attrs) {
         super(context, attrs);
-
-        mDragHandleExpandOffset = getResources().
-                getDimensionPixelSize(R.dimen.qs_footer_drag_handle_offset);
-
     }
 
     @Override
@@ -171,7 +166,6 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
                 .addFloat(mDivider, "alpha", 0, 1)
                 .addFloat(mCarrierText, "alpha", 0, 0, 1)
                 .addFloat(mActionsContainer, "alpha", 0, 1)
-                .addFloat(mDragHandle, "translationY", mDragHandleExpandOffset, 0)
                 .addFloat(mDragHandle, "alpha", 1, 0, 0)
                 .setStartDelay(0.15f)
                 .build();
