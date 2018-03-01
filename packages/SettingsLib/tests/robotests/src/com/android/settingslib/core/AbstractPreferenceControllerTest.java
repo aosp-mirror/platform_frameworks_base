@@ -82,8 +82,17 @@ public class AbstractPreferenceControllerTest {
         assertThat(mPreference.isVisible()).isFalse();
     }
 
-    private class TestPrefController extends AbstractPreferenceController {
+    @Test
+    public void updateState_hasSummary_shouldSetSummary() {
+        mTestPrefController.updateState(mPreference);
+
+        assertThat(mPreference.getSummary()).isEqualTo(TestPrefController.TEST_SUMMARY);
+    }
+
+    private static class TestPrefController extends AbstractPreferenceController {
         private static final String KEY_PREF = "test_pref";
+        private static final CharSequence TEST_SUMMARY = "Test";
+
         public boolean isAvailable;
 
         public TestPrefController(Context context) {
@@ -103,6 +112,11 @@ public class AbstractPreferenceControllerTest {
         @Override
         public String getPreferenceKey() {
             return KEY_PREF;
+        }
+
+        @Override
+        public CharSequence getSummary() {
+            return TEST_SUMMARY;
         }
     }
 
