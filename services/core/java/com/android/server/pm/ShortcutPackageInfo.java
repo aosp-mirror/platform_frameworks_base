@@ -48,6 +48,7 @@ class ShortcutPackageInfo {
     private static final String ATTR_LAST_UPDATE_TIME = "last_udpate_time";
     private static final String ATTR_BACKUP_SOURCE_VERSION = "bk_src_version";
     private static final String ATTR_BACKUP_ALLOWED = "allow-backup";
+    private static final String ATTR_BACKUP_ALLOWED_INITIALIZED = "allow-backup-initialized";
     private static final String ATTR_BACKUP_SOURCE_BACKUP_ALLOWED = "bk_src_backup-allowed";
     private static final String ATTR_SHADOW = "shadow";
 
@@ -187,7 +188,11 @@ class ShortcutPackageInfo {
         mSigHashes = BackupUtils.hashSignatureArray(pi.signatures);
     }
 
-    public void saveToXml(XmlSerializer out, boolean forBackup) throws IOException {
+    public void saveToXml(ShortcutService s, XmlSerializer out, boolean forBackup)
+            throws IOException {
+        if (forBackup && !mBackupAllowedInitialized) {
+            s.wtf("Backup happened before mBackupAllowed is initialized.");
+        }
 
         out.startTag(null, TAG_ROOT);
 
@@ -195,6 +200,10 @@ class ShortcutPackageInfo {
         ShortcutService.writeAttr(out, ATTR_LAST_UPDATE_TIME, mLastUpdateTime);
         ShortcutService.writeAttr(out, ATTR_SHADOW, mIsShadow);
         ShortcutService.writeAttr(out, ATTR_BACKUP_ALLOWED, mBackupAllowed);
+
+        // We don't need to save this field (we don't even read it back), but it'll show up
+        // in the dumpsys in the backup / restore payload.
+        ShortcutService.writeAttr(out, ATTR_BACKUP_ALLOWED_INITIALIZED, mBackupAllowedInitialized);
 
         ShortcutService.writeAttr(out, ATTR_BACKUP_SOURCE_VERSION, mBackupSourceVersionCode);
         ShortcutService.writeAttr(out,

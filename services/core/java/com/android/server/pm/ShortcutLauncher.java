@@ -230,7 +230,7 @@ class ShortcutLauncher extends ShortcutPackageItem {
         out.startTag(null, TAG_ROOT);
         ShortcutService.writeAttr(out, ATTR_PACKAGE_NAME, getPackageName());
         ShortcutService.writeAttr(out, ATTR_LAUNCHER_USER_ID, getPackageUserId());
-        getPackageInfo().saveToXml(out, forBackup);
+        getPackageInfo().saveToXml(mShortcutUser.mService, out, forBackup);
 
         for (int i = 0; i < size; i++) {
             final PackageWithUser pu = mPinnedShortcuts.keyAt(i);
