@@ -822,9 +822,6 @@ public class WindowManagerService extends IWindowManager.Stub
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "openSurfaceTransaction");
             synchronized (mWindowMap) {
-                if (mRoot.mSurfaceTraceEnabled) {
-                    mRoot.mRemoteEventTrace.openSurfaceTransaction();
-                }
                 SurfaceControl.openTransaction();
             }
         } finally {
@@ -843,9 +840,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 try {
                     traceStateLocked(where);
                 } finally {
-                    if (mRoot.mSurfaceTraceEnabled) {
-                        mRoot.mRemoteEventTrace.closeSurfaceTransaction();
-                    }
                     SurfaceControl.closeTransaction();
                 }
             }
@@ -1587,30 +1581,6 @@ public class WindowManagerService extends IWindowManager.Stub
             return true;
         }
         return false;
-    }
-
-    @Override
-    public void enableSurfaceTrace(ParcelFileDescriptor pfd) {
-        final int callingUid = Binder.getCallingUid();
-        if (callingUid != SHELL_UID && callingUid != ROOT_UID) {
-            throw new SecurityException("Only shell can call enableSurfaceTrace");
-        }
-
-        synchronized (mWindowMap) {
-            mRoot.enableSurfaceTrace(pfd);
-        }
-    }
-
-    @Override
-    public void disableSurfaceTrace() {
-        final int callingUid = Binder.getCallingUid();
-        if (callingUid != SHELL_UID && callingUid != ROOT_UID &&
-            callingUid != SYSTEM_UID) {
-            throw new SecurityException("Only shell can call disableSurfaceTrace");
-        }
-        synchronized (mWindowMap) {
-            mRoot.disableSurfaceTrace();
-        }
     }
 
     /**

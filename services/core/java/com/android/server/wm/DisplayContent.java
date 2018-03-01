@@ -2607,18 +2607,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }, false /* traverseTopToBottom */);
     }
 
-    void enableSurfaceTrace(FileDescriptor fd) {
-        forAllWindows(w -> {
-            w.mWinAnimator.enableSurfaceTrace(fd);
-        }, true /* traverseTopToBottom */);
-    }
-
-    void disableSurfaceTrace() {
-        forAllWindows(w -> {
-            w.mWinAnimator.disableSurfaceTrace();
-        }, true /* traverseTopToBottom */);
-    }
-
     /**
      * Starts the Keyguard exit animation on all windows that don't belong to an app token.
      */

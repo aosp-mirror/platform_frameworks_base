@@ -1456,22 +1456,6 @@ class WindowStateAnimator {
                 DsDy * w.mVScale, false);
     }
 
-    void enableSurfaceTrace(FileDescriptor fd) {
-        if (mSurfaceController != null) {
-            mSurfaceController.installRemoteTrace(fd);
-        }
-    }
-
-    void disableSurfaceTrace() {
-        if (mSurfaceController != null) {
-            try {
-                mSurfaceController.removeRemoteTrace();
-            } catch (ClassCastException e) {
-                Slog.e(TAG, "Disable surface trace for " + this + " but its not enabled");
-            }
-        }
-    }
-
     /** The force-scaled state for a given window can persist past
      * the state for it's stack as the windows complete resizing
      * independently of one another.
