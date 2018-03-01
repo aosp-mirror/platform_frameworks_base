@@ -17,6 +17,8 @@
 package com.android.settingslib.development;
 
 import android.content.Context;
+import android.support.v7.preference.Preference;
+import android.support.v7.preference.PreferenceScreen;
 
 import com.android.settingslib.core.AbstractPreferenceController;
 
@@ -26,8 +28,9 @@ import com.android.settingslib.core.AbstractPreferenceController;
  * All Preference Controllers that are a part of the developer options page should inherit this
  * class.
  */
-public abstract class DeveloperOptionsPreferenceController extends
-        AbstractPreferenceController {
+public abstract class DeveloperOptionsPreferenceController extends AbstractPreferenceController {
+
+    protected Preference mPreference;
 
     public DeveloperOptionsPreferenceController(Context context) {
         super(context);
@@ -41,6 +44,12 @@ public abstract class DeveloperOptionsPreferenceController extends
     @Override
     public boolean isAvailable() {
         return true;
+    }
+
+    @Override
+    public void displayPreference(PreferenceScreen screen) {
+        super.displayPreference(screen);
+        mPreference = screen.findPreference(getPreferenceKey());
     }
 
     /**
@@ -65,12 +74,14 @@ public abstract class DeveloperOptionsPreferenceController extends
      * Called when developer options is enabled and the preference is available
      */
     protected void onDeveloperOptionsSwitchEnabled() {
+        mPreference.setEnabled(true);
     }
 
     /**
      * Called when developer options is disabled and the preference is available
      */
     protected void onDeveloperOptionsSwitchDisabled() {
+        mPreference.setEnabled(false);
     }
 
 }
