@@ -1229,34 +1229,68 @@ public final class NetworkCapabilities implements Parcelable {
 
     @Override
     public String toString() {
-        // TODO: enumerate bits for transports and capabilities instead of creating arrays.
-        // TODO: use a StringBuilder instead of string concatenation.
-        int[] types = getTransportTypes();
-        String transports = (types.length > 0) ? " Transports: " + transportNamesOf(types) : "";
-
-        types = getCapabilities();
-        String capabilities = (types.length > 0 ? " Capabilities: " : "");
-        for (int i = 0; i < types.length; ) {
-            capabilities += capabilityNameOf(types[i]);
-            if (++i < types.length) capabilities += "&";
+        final StringBuilder sb = new StringBuilder("[");
+        if (0 != mTransportTypes) {
+            sb.append(" Transports: ");
+            appendStringRepresentationOfBitMaskToStringBuilder(sb, mTransportTypes,
+                    NetworkCapabilities::transportNameOf, "|");
+        }
+        if (0 != mNetworkCapabilities) {
+            sb.append(" Capabilities: ");
+            appendStringRepresentationOfBitMaskToStringBuilder(sb, mNetworkCapabilities,
+                    NetworkCapabilities::capabilityNameOf, "&");
+        }
+        if (mLinkUpBandwidthKbps > 0) {
+            sb.append(" LinkUpBandwidth>=").append(mLinkUpBandwidthKbps).append("Kbps");
+        }
+        if (mLinkDownBandwidthKbps > 0) {
+            sb.append(" LinkDnBandwidth>=").append(mLinkDownBandwidthKbps).append("Kbps");
+        }
+        if (mNetworkSpecifier != null) {
+            sb.append(" Specifier: <").append(mNetworkSpecifier).append(">");
+        }
+        if (hasSignalStrength()) {
+            sb.append(" SignalStrength: ").append(mSignalStrength);
         }
 
-        String upBand = ((mLinkUpBandwidthKbps > 0) ? " LinkUpBandwidth>=" +
-                mLinkUpBandwidthKbps + "Kbps" : "");
-        String dnBand = ((mLinkDownBandwidthKbps > 0) ? " LinkDnBandwidth>=" +
-                mLinkDownBandwidthKbps + "Kbps" : "");
+        if (null != mUids) {
+            if ((1 == mUids.size()) && (mUids.valueAt(0).count() == 1)) {
+                sb.append(" Uid: ").append(mUids.valueAt(0).start);
+            } else {
+                sb.append(" Uids: <").append(mUids).append(">");
+            }
+        }
+        if (mEstablishingVpnAppUid != INVALID_UID) {
+            sb.append(" EstablishingAppUid: ").append(mEstablishingVpnAppUid);
+        }
 
-        String specifier = (mNetworkSpecifier == null ?
-                "" : " Specifier: <" + mNetworkSpecifier + ">");
+        sb.append("]");
+        return sb.toString();
+    }
 
-        String signalStrength = (hasSignalStrength() ? " SignalStrength: " + mSignalStrength : "");
 
-        String uids = (null != mUids ? " Uids: <" + mUids + ">" : "");
-
-        String establishingAppUid = " EstablishingAppUid: " + mEstablishingVpnAppUid;
-
-        return "[" + transports + capabilities + upBand + dnBand + specifier + signalStrength
-            + uids + establishingAppUid + "]";
+    private interface NameOf {
+        String nameOf(int value);
+    }
+    /**
+     * @hide
+     */
+    public static void appendStringRepresentationOfBitMaskToStringBuilder(StringBuilder sb,
+            long bitMask, NameOf nameFetcher, String separator) {
+        int bitPos = 0;
+        boolean firstElementAdded = false;
+        while (bitMask != 0) {
+            if ((bitMask & 1) != 0) {
+                if (firstElementAdded) {
+                    sb.append(separator);
+                } else {
+                    firstElementAdded = true;
+                }
+                sb.append(nameFetcher.nameOf(bitPos));
+            }
+            bitMask >>= 1;
+            ++bitPos;
+        }
     }
 
     /**
