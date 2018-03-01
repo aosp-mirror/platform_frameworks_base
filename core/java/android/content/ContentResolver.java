@@ -2102,7 +2102,23 @@ public abstract class ContentResolver {
         Preconditions.checkNotNull(uri, "uri");
         try {
             ActivityManager.getService().takePersistableUriPermission(
-                    ContentProvider.getUriWithoutUserId(uri), modeFlags, resolveUserId(uri));
+                    ContentProvider.getUriWithoutUserId(uri), modeFlags, /* toPackage= */ null,
+                    resolveUserId(uri));
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void takePersistableUriPermission(@NonNull String toPackage, @NonNull Uri uri,
+            @Intent.AccessUriMode int modeFlags) {
+        Preconditions.checkNotNull(toPackage, "toPackage");
+        Preconditions.checkNotNull(uri, "uri");
+        try {
+            ActivityManager.getService().takePersistableUriPermission(
+                    ContentProvider.getUriWithoutUserId(uri), modeFlags, toPackage,
+                    resolveUserId(uri));
         } catch (RemoteException e) {
         }
     }
@@ -2120,7 +2136,23 @@ public abstract class ContentResolver {
         Preconditions.checkNotNull(uri, "uri");
         try {
             ActivityManager.getService().releasePersistableUriPermission(
-                    ContentProvider.getUriWithoutUserId(uri), modeFlags, resolveUserId(uri));
+                    ContentProvider.getUriWithoutUserId(uri), modeFlags, /* toPackage= */ null,
+                    resolveUserId(uri));
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void releasePersistableUriPermission(@NonNull String toPackage, @NonNull Uri uri,
+            @Intent.AccessUriMode int modeFlags) {
+        Preconditions.checkNotNull(toPackage, "toPackage");
+        Preconditions.checkNotNull(uri, "uri");
+        try {
+            ActivityManager.getService().releasePersistableUriPermission(
+                    ContentProvider.getUriWithoutUserId(uri), modeFlags, toPackage,
+                    resolveUserId(uri));
         } catch (RemoteException e) {
         }
     }
