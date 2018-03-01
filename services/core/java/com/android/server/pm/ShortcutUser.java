@@ -23,7 +23,6 @@ import android.content.pm.ShortcutManager;
 import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 
@@ -62,6 +61,7 @@ class ShortcutUser {
     // Suffix "2" was added to force rescan all packages after the next OTA.
     private static final String ATTR_LAST_APP_SCAN_TIME = "last-app-scan-time2";
     private static final String ATTR_LAST_APP_SCAN_OS_FINGERPRINT = "last-app-scan-fp";
+    private static final String ATTR_RESTORE_SOURCE_FINGERPRINT = "restore-from-fp";
     private static final String KEY_USER_ID = "userId";
     private static final String KEY_LAUNCHERS = "launchers";
     private static final String KEY_PACKAGES = "packages";
@@ -128,6 +128,7 @@ class ShortcutUser {
     private long mLastAppScanTime;
 
     private String mLastAppScanOsFingerprint;
+    private String mRestoreFromOsFingerprint;
 
     public ShortcutUser(ShortcutService service, int userId) {
         mService = service;
@@ -340,8 +341,13 @@ class ShortcutUser {
                     mLastAppScanTime);
             ShortcutService.writeAttr(out, ATTR_LAST_APP_SCAN_OS_FINGERPRINT,
                     mLastAppScanOsFingerprint);
+            ShortcutService.writeAttr(out, ATTR_RESTORE_SOURCE_FINGERPRINT,
+                    mRestoreFromOsFingerprint);
 
             ShortcutService.writeTagValue(out, TAG_LAUNCHER, mLastKnownLauncher);
+        } else {
+            ShortcutService.writeAttr(out, ATTR_RESTORE_SOURCE_FINGERPRINT,
+                    mService.injectBuildFingerprint());
         }
 
         // Can't use forEachPackageItem due to the checked exceptions.
@@ -387,6 +393,8 @@ class ShortcutUser {
             ret.mLastAppScanTime = lastAppScanTime < currentTime ? lastAppScanTime : 0;
             ret.mLastAppScanOsFingerprint = ShortcutService.parseStringAttribute(parser,
                     ATTR_LAST_APP_SCAN_OS_FINGERPRINT);
+            ret.mRestoreFromOsFingerprint = ShortcutService.parseStringAttribute(parser,
+                    ATTR_RESTORE_SOURCE_FINGERPRINT);
             final int outerDepth = parser.getDepth();
             int type;
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -524,6 +532,8 @@ class ShortcutUser {
         restored.mLaunchers.clear();
         restored.mPackages.clear();
 
+        mRestoreFromOsFingerprint = restored.mRestoreFromOsFingerprint;
+
         Slog.i(TAG, "Restored: L=" + restoredLaunchers[0]
                 + " P=" + restoredPackages[0]
                 + " S=" + restoredShortcuts[0]);
@@ -539,12 +549,19 @@ class ShortcutUser {
             pw.print("  Last app scan: [");
             pw.print(mLastAppScanTime);
             pw.print("] ");
-            pw.print(ShortcutService.formatTime(mLastAppScanTime));
-            pw.print("  Last app scan FP: ");
-            pw.print(mLastAppScanOsFingerprint);
-            pw.println();
+            pw.println(ShortcutService.formatTime(mLastAppScanTime));
 
             prefix += prefix + "  ";
+
+            pw.print(prefix);
+            pw.print("Last app scan FP: ");
+            pw.println(mLastAppScanOsFingerprint);
+
+            pw.print(prefix);
+            pw.print("Restore from FP: ");
+            pw.print(mRestoreFromOsFingerprint);
+            pw.println();
+
 
             pw.print(prefix);
             pw.print("Cached launcher: ");

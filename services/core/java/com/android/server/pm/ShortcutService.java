@@ -3546,9 +3546,11 @@ public class ShortcutService extends IShortcutService.Stub {
             // Update the signatures for all packages.
             user.forAllPackageItems(spi -> spi.refreshPackageSignatureAndSave());
 
+            // Rescan all apps; this will also update the version codes and "allow-backup".
+            user.forAllPackages(pkg -> pkg.rescanPackageIfNeeded(
+                    /*isNewApp=*/ false, /*forceRescan=*/ true));
+
             // Set the version code for the launchers.
-            // We shouldn't do this for publisher packages, because we don't want to update the
-            // version code without rescanning the manifest.
             user.forAllLaunchers(launcher -> launcher.ensurePackageInfo());
 
             // Save to the filesystem.
@@ -3567,7 +3569,9 @@ public class ShortcutService extends IShortcutService.Stub {
                 Slog.w(TAG, "Backup failed.", e);
                 return null;
             }
-            return os.toByteArray();
+            byte[] payload = os.toByteArray();
+            mShortcutDumpFiles.save("backup-1-payload.txt", payload);
+            return payload;
         }
     }
 
@@ -3847,6 +3851,8 @@ public class ShortcutService extends IShortcutService.Stub {
                 pw.print(next);
                 pw.print("] ");
                 pw.print(formatTime(next));
+                pw.println();
+                pw.println();
 
                 pw.print("  Config:");
                 pw.print("    Max icon dim: ");
@@ -4242,7 +4248,6 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     // Injection point.
-    @VisibleForTesting
     String injectBuildFingerprint() {
         return Build.FINGERPRINT;
     }
