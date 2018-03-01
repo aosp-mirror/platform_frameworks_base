@@ -372,7 +372,7 @@ public class PhoneStateListener {
                         break;
                     case LISTEN_PHYSICAL_CHANNEL_CONFIGURATION:
                         PhoneStateListener.this.onPhysicalChannelConfigurationChanged(
-                            (List<PhysicalChannelConfig>)msg.obj);
+                                (List<PhysicalChannelConfig>)msg.obj);
                         break;
                 }
             }
@@ -699,6 +699,10 @@ public class PhoneStateListener {
 
         public void onCarrierNetworkChange(boolean active) {
             send(LISTEN_CARRIER_NETWORK_CHANGE, 0, 0, active);
+        }
+
+        public void onPhysicalChannelConfigurationChanged(List<PhysicalChannelConfig> configs) {
+            send(LISTEN_PHYSICAL_CHANNEL_CONFIGURATION, 0, 0, configs);
         }
     }
 
