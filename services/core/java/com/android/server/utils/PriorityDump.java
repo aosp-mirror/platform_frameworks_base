@@ -94,11 +94,7 @@ public class SpringfieldNuclearPowerPlant extends Binder {
  * <p>To run the unit tests:
  * <pre><code>
  *
- mmm -j32 frameworks/base/services/tests/servicestests/ && \
- adb install -r -g ${ANDROID_PRODUCT_OUT}/data/app/FrameworksServicesTests/FrameworksServicesTests.apk && \
- adb shell am instrument -e class "com.android.server.utils.PriorityDumpTest" \
- -w "com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner"
-
+ atest FrameworksServicesTests:PriorityDumpTest
  * </code></pre>
  *
  *
@@ -108,6 +104,9 @@ public final class PriorityDump {
 
     public static final String PRIORITY_ARG = "--dump-priority";
     public static final String PROTO_ARG = "--proto";
+    public static final String PRIORITY_ARG_CRITICAL = "CRITICAL";
+    public static final String PRIORITY_ARG_HIGH = "HIGH";
+    public static final String PRIORITY_ARG_NORMAL = "NORMAL";
 
     private PriorityDump() {
         throw new UnsupportedOperationException();
@@ -191,17 +190,19 @@ public final class PriorityDump {
      */
     private static @PriorityType int getPriorityType(String arg) {
         switch (arg) {
-            case "CRITICAL": {
+            case PRIORITY_ARG_CRITICAL: {
                 return PRIORITY_TYPE_CRITICAL;
             }
-            case "HIGH": {
+            case PRIORITY_ARG_HIGH: {
                 return PRIORITY_TYPE_HIGH;
             }
-            case "NORMAL": {
+            case PRIORITY_ARG_NORMAL: {
                 return PRIORITY_TYPE_NORMAL;
             }
+            default: {
+                return PRIORITY_TYPE_INVALID;
+            }
         }
-        return PRIORITY_TYPE_INVALID;
     }
 
     /**
@@ -238,7 +239,7 @@ public final class PriorityDump {
          * Dumps all sections.
          * <p>
          * This method is called when
-         * {@link PriorityDump#dump(PriorityDumper, FileDescriptor, PrintWriter, String[], boolean)}
+         * {@link PriorityDump#dump(PriorityDumper, FileDescriptor, PrintWriter, String[])}
          * is called without priority arguments. By default, it calls the 3 {@code dumpTYPE}
          * methods, so sub-classes just need to implement the priority types they support.
          */
