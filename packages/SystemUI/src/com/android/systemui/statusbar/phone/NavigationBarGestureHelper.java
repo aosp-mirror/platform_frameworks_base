@@ -43,6 +43,7 @@ import com.android.systemui.RecentsComponent;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.plugins.statusbar.phone.NavGesture.GestureHelper;
 import com.android.systemui.shared.recents.IOverviewProxy;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.tuner.TunerService;
 
@@ -149,7 +150,8 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
     }
 
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        if (mNavigationBarView.inScreenPinning() || mStatusBar.isKeyguardShowing()) {
+        if (ActivityManagerWrapper.getInstance().isScreenPinningActive()
+                || mStatusBar.isKeyguardShowing()) {
             return false;
         }
 
@@ -182,7 +184,8 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
     }
 
     public boolean onTouchEvent(MotionEvent event) {
-        if (mNavigationBarView.inScreenPinning() || mStatusBar.isKeyguardShowing()) {
+        if (ActivityManagerWrapper.getInstance().isScreenPinningActive()
+                || mStatusBar.isKeyguardShowing()) {
             return false;
         }
 

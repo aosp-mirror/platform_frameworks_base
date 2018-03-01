@@ -2188,7 +2188,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     private void readSystemFlags() {
         SystemServicesProxy ssp = Recents.getSystemServices();
         mTouchExplorationEnabled = ssp.isTouchExplorationEnabled();
-        mScreenPinningEnabled = ActivityManagerWrapper.getInstance().isLockToAppEnabled();
+        mScreenPinningEnabled = ActivityManagerWrapper.getInstance().isScreenPinningEnabled()
+                && !ActivityManagerWrapper.getInstance().isLockToAppActive();
     }
 
     private void updateStackActionButtonVisibility() {

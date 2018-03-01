@@ -21,8 +21,6 @@ import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_
 import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_HOME;
 import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_NONE;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.LayoutTransition;
 import android.animation.LayoutTransition.TransitionListener;
 import android.animation.ObjectAnimator;
@@ -30,7 +28,6 @@ import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.annotation.DrawableRes;
 import android.annotation.StyleRes;
-import android.app.ActivityManager;
 import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -41,7 +38,6 @@ import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
-import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.support.annotation.ColorInt;
 import android.util.AttributeSet;
@@ -60,7 +56,6 @@ import android.widget.FrameLayout;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.DockedStackExistsListener;
-import com.android.systemui.Interpolators;
 import com.android.systemui.OverviewProxyService;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
@@ -379,15 +374,20 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         return getRecentsButton().getVisibility() == View.VISIBLE;
     }
 
+    public boolean isOverviewEnabled() {
+        return (mDisabledFlags & View.STATUS_BAR_DISABLE_RECENT) == 0;
+    }
+
     public boolean isQuickStepSwipeUpEnabled() {
         return mOverviewProxyService.getProxy() != null
+                && isOverviewEnabled()
                 && ((mOverviewProxyService.getInteractionFlags()
                         & FLAG_DISABLE_SWIPE_UP) == 0);
     }
 
     public boolean isQuickScrubEnabled() {
         return SystemProperties.getBoolean("persist.quickstep.scrub.enabled", true)
-                && mOverviewProxyService.getProxy() != null && !isRecentsButtonVisible()
+                && mOverviewProxyService.getProxy() != null && isOverviewEnabled()
                 && ((mOverviewProxyService.getInteractionFlags()
                         & FLAG_DISABLE_QUICK_SCRUB) == 0);
     }
@@ -575,8 +575,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         boolean disableHome = ((disabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0);
 
         // Always disable recents when alternate car mode UI is active.
-        boolean disableRecent = mUseCarModeUi
-                || ((disabledFlags & View.STATUS_BAR_DISABLE_RECENT) != 0);
+        boolean disableRecent = mUseCarModeUi || !isOverviewEnabled();
 
         boolean disableBack = ((disabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0)
                 && ((mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) == 0);
@@ -584,17 +583,18 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         // When screen pinning, don't hide back and home when connected service or back and
         // recents buttons when disconnected from launcher service in screen pinning mode,
         // as they are used for exiting.
+        final boolean pinningActive = ActivityManagerWrapper.getInstance().isScreenPinningActive();
         if (mOverviewProxyService.getProxy() != null) {
             // Use interaction flags to show/hide navigation buttons but will be shown if required
             // to exit screen pinning.
             final int flags = mOverviewProxyService.getInteractionFlags();
             disableRecent |= (flags & FLAG_SHOW_OVERVIEW_BUTTON) == 0;
-            if (inScreenPinning()) {
+            if (pinningActive) {
                 disableBack = disableHome = false;
             } else {
                 disableBack |= (flags & FLAG_HIDE_BACK_BUTTON) != 0;
             }
-        } else if (inScreenPinning()) {
+        } else if (pinningActive) {
             disableBack = disableRecent = false;
         }
 
@@ -614,7 +614,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     }
 
     public boolean inScreenPinning() {
-        return ActivityManagerWrapper.getInstance().isLockToAppActive();
+        return ActivityManagerWrapper.getInstance().isScreenPinningActive();
     }
 
     public void setLayoutTransitionsEnabled(boolean enabled) {

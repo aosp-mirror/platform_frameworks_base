@@ -449,7 +449,7 @@ public class Recents extends SystemUI
         final int activityType = runningTask != null
                 ? runningTask.configuration.windowConfiguration.getActivityType()
                 : ACTIVITY_TYPE_UNDEFINED;
-        boolean screenPinningActive = ActivityManagerWrapper.getInstance().isLockToAppActive();
+        boolean screenPinningActive = ActivityManagerWrapper.getInstance().isScreenPinningActive();
         boolean isRunningTaskInHomeOrRecentsStack =
                 activityType == ACTIVITY_TYPE_HOME || activityType == ACTIVITY_TYPE_RECENTS;
         if (runningTask != null && !isRunningTaskInHomeOrRecentsStack && !screenPinningActive) {
