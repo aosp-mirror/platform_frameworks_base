@@ -79,6 +79,7 @@ import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_DISABL
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_DISABLE_SWIPE_UP;
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_HIDE_BACK_BUTTON;
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_SHOW_OVERVIEW_BUTTON;
+import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_OVERVIEW;
 
 public class NavigationBarView extends FrameLayout implements PluginListener<NavGesture> {
     final static boolean DEBUG = false;
@@ -106,6 +107,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private @NavigationBarCompat.HitTarget int mDownHitTarget = HIT_TARGET_NONE;
     private Rect mHomeButtonBounds = new Rect();
     private Rect mBackButtonBounds = new Rect();
+    private Rect mRecentsButtonBounds = new Rect();
     private int[] mTmpPosition = new int[2];
 
     private KeyButtonDrawable mBackIcon, mBackLandIcon, mBackAltIcon, mBackAltLandIcon;
@@ -306,6 +308,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                     mDownHitTarget = HIT_TARGET_BACK;
                 } else if (mHomeButtonBounds.contains(x, y)) {
                     mDownHitTarget = HIT_TARGET_HOME;
+                } else if (mRecentsButtonBounds.contains(x, y)) {
+                    mDownHitTarget = HIT_TARGET_OVERVIEW;
                 }
                 break;
         }
@@ -816,6 +820,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         super.onLayout(changed, left, top, right, bottom);
         updateButtonLocationOnScreen(getBackButton(), mBackButtonBounds);
         updateButtonLocationOnScreen(getHomeButton(), mHomeButtonBounds);
+        updateButtonLocationOnScreen(getRecentsButton(), mRecentsButtonBounds);
         mGestureHelper.onLayout(changed, left, top, right, bottom);
     }
 
