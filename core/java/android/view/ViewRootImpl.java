@@ -95,6 +95,7 @@ import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
+import android.view.autofill.AutofillManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
 
@@ -4779,6 +4780,21 @@ public final class ViewRootImpl implements ViewParent,
             final int action = event.getAction();
             if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_SCROLL) {
                 ensureTouchMode(event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN));
+            }
+
+            if (action == MotionEvent.ACTION_DOWN && mView instanceof ViewGroup) {
+                // Upon motion event within app window, close autofill ui.
+                ViewGroup decorView = (ViewGroup) mView;
+                if (decorView.getChildCount() > 0) {
+                    // We cannot use decorView's Context for querying AutofillManager: DecorView's
+                    // context is based on Application Context, it would allocate a different
+                    // AutofillManager instance.
+                    AutofillManager afm = (AutofillManager) decorView.getChildAt(0).getContext()
+                            .getSystemService(Context.AUTOFILL_MANAGER_SERVICE);
+                    if (afm != null) {
+                        afm.requestHideFillUi();
+                    }
+                }
             }
 
             if (action == MotionEvent.ACTION_DOWN && mAttachInfo.mTooltipHost != null) {
