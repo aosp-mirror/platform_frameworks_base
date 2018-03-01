@@ -495,10 +495,11 @@ class LockSettingsStorage {
         String path = getSynthenticPasswordStateFilePathForUser(userId, handle, name);
         File file = new File(path);
         if (file.exists()) {
-            try {
-                mContext.getSystemService(StorageManager.class).secdiscard(file.getAbsolutePath());
+            try (RandomAccessFile raf = new RandomAccessFile(path, "rws")) {
+                final int fileSize = (int) raf.length();
+                raf.write(new byte[fileSize]);
             } catch (Exception e) {
-                Slog.w(TAG, "Failed to secdiscard " + path, e);
+                Slog.w(TAG, "Failed to zeroize " + path, e);
             } finally {
                 file.delete();
             }

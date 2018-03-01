@@ -2583,17 +2583,6 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    @Override
-    public void secdiscard(String path) {
-        enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
-
-        try {
-            mVold.secdiscard(path);
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-        }
-    }
-
     class AppFuseMountScope extends AppFuseBridge.MountScope {
         boolean opened = false;
 
