@@ -4883,7 +4883,7 @@
     <!-- Title for the notification channel notifying user of settings system changes (i.e. Do Not Disturb has changed). [CHAR LIMIT=NONE] -->
     <string name="notification_channel_system_changes">System changes</string>
     <!-- Title of notification indicating do not disturb settings have changed when upgrading to P -->
-    <string name="zen_upgrade_notification_title">Do Not Disturb has changed</string>
+    <string name="zen_upgrade_notification_title">Do Not Disturb is hiding notifications to help you focus</string>
     <!-- Content of notification indicating users can tap on the notification to go to dnd behavior settings -->
-    <string name="zen_upgrade_notification_content">Tap to check your behavior settings for interruptions</string>
+    <string name="zen_upgrade_notification_content">This is a new feature from the latest system update. Tap to change.</string>
 </resources>

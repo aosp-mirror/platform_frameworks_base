@@ -22,6 +22,16 @@ import static android.app.NotificationManager.ACTION_NOTIFICATION_CHANNEL_GROUP_
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECTS_UNSET;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_OFF;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_ON;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_TELEVISION;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -60,8 +70,6 @@ import static android.service.notification.NotificationListenerService.REASON_SN
 import static android.service.notification.NotificationListenerService.REASON_TIMEOUT;
 import static android.service.notification.NotificationListenerService.REASON_UNAUTOBUNDLED;
 import static android.service.notification.NotificationListenerService.REASON_USER_STOPPED;
-import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_OFF;
-import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_ON;
 import static android.service.notification.NotificationListenerService.TRIM_FULL;
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -1342,6 +1350,7 @@ public class NotificationManagerService extends SystemService {
             @Override
             void onPolicyChanged() {
                 sendRegisteredOnlyBroadcast(NotificationManager.ACTION_NOTIFICATION_POLICY_CHANGED);
+                mRankingHandler.requestSort();
             }
         });
         mRankingHelper = new RankingHelper(getContext(),
@@ -1779,6 +1788,74 @@ public class NotificationManagerService extends SystemService {
                 userId == UserHandle.USER_ALL ? USER_SYSTEM
                         : userId,
                 UsageEvents.Event.NOTIFICATION_SEEN);
+    }
+
+    protected int calculateSuppressedVisualEffects(Policy incomingPolicy, Policy currPolicy,
+            int targetSdkVersion) {
+        if (incomingPolicy.suppressedVisualEffects == SUPPRESSED_EFFECTS_UNSET) {
+            return incomingPolicy.suppressedVisualEffects;
+        }
+        final int[] effectsIntroducedInP = {
+                SUPPRESSED_EFFECT_FULL_SCREEN_INTENT,
+                SUPPRESSED_EFFECT_LIGHTS,
+                SUPPRESSED_EFFECT_PEEK,
+                SUPPRESSED_EFFECT_STATUS_BAR,
+                SUPPRESSED_EFFECT_BADGE,
+                SUPPRESSED_EFFECT_AMBIENT,
+                SUPPRESSED_EFFECT_NOTIFICATION_LIST
+        };
+
+        int newSuppressedVisualEffects = incomingPolicy.suppressedVisualEffects;
+        if (targetSdkVersion <= Build.VERSION_CODES.O_MR1) {
+            // unset higher order bits introduced in P, maintain the user's higher order bits
+            for (int i = 0; i < effectsIntroducedInP.length ; i++) {
+                newSuppressedVisualEffects &= ~effectsIntroducedInP[i];
+                newSuppressedVisualEffects |=
+                        (currPolicy.suppressedVisualEffects & effectsIntroducedInP[i]);
+            }
+            // set higher order bits according to lower order bits
+            if ((newSuppressedVisualEffects & SUPPRESSED_EFFECT_SCREEN_OFF) != 0) {
+                newSuppressedVisualEffects |= SUPPRESSED_EFFECT_LIGHTS;
+                newSuppressedVisualEffects |= SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
+                newSuppressedVisualEffects |= SUPPRESSED_EFFECT_AMBIENT;
+            }
+            if ((newSuppressedVisualEffects & SUPPRESSED_EFFECT_SCREEN_ON) != 0) {
+                newSuppressedVisualEffects |= SUPPRESSED_EFFECT_PEEK;
+            }
+        } else {
+            boolean hasNewEffects = (newSuppressedVisualEffects
+                    - SUPPRESSED_EFFECT_SCREEN_ON - SUPPRESSED_EFFECT_SCREEN_OFF) > 0;
+            // if any of the new effects introduced in P are set
+            if (hasNewEffects) {
+                // clear out the deprecated effects
+                newSuppressedVisualEffects &= ~ (SUPPRESSED_EFFECT_SCREEN_ON
+                        | SUPPRESSED_EFFECT_SCREEN_OFF);
+
+                // set the deprecated effects according to the new more specific effects
+                if ((newSuppressedVisualEffects & Policy.SUPPRESSED_EFFECT_PEEK) != 0) {
+                    newSuppressedVisualEffects |= SUPPRESSED_EFFECT_SCREEN_ON;
+                }
+                if ((newSuppressedVisualEffects & Policy.SUPPRESSED_EFFECT_LIGHTS) != 0
+                        && (newSuppressedVisualEffects
+                        & Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT) != 0
+                        && (newSuppressedVisualEffects
+                        & Policy.SUPPRESSED_EFFECT_AMBIENT) != 0) {
+                    newSuppressedVisualEffects |= SUPPRESSED_EFFECT_SCREEN_OFF;
+                }
+            } else {
+                // set higher order bits according to lower order bits
+                if ((newSuppressedVisualEffects & SUPPRESSED_EFFECT_SCREEN_OFF) != 0) {
+                    newSuppressedVisualEffects |= SUPPRESSED_EFFECT_LIGHTS;
+                    newSuppressedVisualEffects |= SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
+                    newSuppressedVisualEffects |= SUPPRESSED_EFFECT_AMBIENT;
+                }
+                if ((newSuppressedVisualEffects & SUPPRESSED_EFFECT_SCREEN_ON) != 0) {
+                    newSuppressedVisualEffects |= SUPPRESSED_EFFECT_PEEK;
+                }
+            }
+        }
+
+        return newSuppressedVisualEffects;
     }
 
     /**
@@ -3063,10 +3140,9 @@ public class NotificationManagerService extends SystemService {
             try {
                 final ApplicationInfo applicationInfo = mPackageManager.getApplicationInfo(pkg,
                         0, UserHandle.getUserId(MY_UID));
+                Policy currPolicy = mZenModeHelper.getNotificationPolicy();
 
                 if (applicationInfo.targetSdkVersion <= Build.VERSION_CODES.O_MR1) {
-                    Policy currPolicy = mZenModeHelper.getNotificationPolicy();
-
                     int priorityCategories = policy.priorityCategories;
                     // ignore alarm and media values from new policy
                     priorityCategories &= ~Policy.PRIORITY_CATEGORY_ALARMS;
@@ -3084,11 +3160,12 @@ public class NotificationManagerService extends SystemService {
                             policy.priorityCallSenders, policy.priorityMessageSenders,
                             policy.suppressedVisualEffects);
                 }
+                int newVisualEffects = calculateSuppressedVisualEffects(
+                            policy, currPolicy, applicationInfo.targetSdkVersion);
+                policy = new Policy(policy.priorityCategories,
+                        policy.priorityCallSenders, policy.priorityMessageSenders,
+                        newVisualEffects);
 
-                Slog.i(TAG, "setNotificationPolicy pkg=" + pkg
-                        + " targetSdk=" + applicationInfo.targetSdkVersion
-                        + " policy="
-                        + Policy.priorityCategoriesToString(policy.priorityCategories));
                 mZenModeHelper.setNotificationPolicy(policy);
             } catch (RemoteException e) {
             } finally {
@@ -4465,8 +4542,7 @@ public class NotificationManagerService extends SystemService {
         // release the light
         boolean wasShowLights = mLights.remove(key);
         if (record.getLight() != null && aboveThreshold
-                && ((record.getSuppressedVisualEffects()
-                & NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_OFF) == 0)) {
+                && ((record.getSuppressedVisualEffects() & SUPPRESSED_EFFECT_LIGHTS) == 0)) {
             mLights.add(key);
             updateLightsLocked();
             if (mUseAttentionLight) {
@@ -4864,11 +4940,8 @@ public class NotificationManagerService extends SystemService {
     private void applyZenModeLocked(NotificationRecord record) {
         record.setIntercepted(mZenModeHelper.shouldIntercept(record));
         if (record.isIntercepted()) {
-            int suppressed = (mZenModeHelper.shouldSuppressWhenScreenOff()
-                    ? SUPPRESSED_EFFECT_SCREEN_OFF : 0)
-                    | (mZenModeHelper.shouldSuppressWhenScreenOn()
-                    ? SUPPRESSED_EFFECT_SCREEN_ON : 0);
-            record.setSuppressedVisualEffects(suppressed);
+            record.setSuppressedVisualEffects(
+                    mZenModeHelper.getNotificationPolicy().suppressedVisualEffects);
         } else {
             record.setSuppressedVisualEffects(0);
         }

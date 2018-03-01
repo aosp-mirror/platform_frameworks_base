@@ -1072,20 +1072,77 @@ public class NotificationManager {
          * @hide
          */
         public static final int SUPPRESSED_EFFECTS_UNSET = -1;
+
         /**
          * Whether notifications suppressed by DND should not interrupt visually (e.g. with
          * notification lights or by turning the screen on) when the screen is off.
+         *
+         * @deprecated use {@link #SUPPRESSED_EFFECT_FULL_SCREEN_INTENT} and
+         * {@link #SUPPRESSED_EFFECT_AMBIENT} and {@link #SUPPRESSED_EFFECT_LIGHTS} individually.
          */
+        @Deprecated
         public static final int SUPPRESSED_EFFECT_SCREEN_OFF = 1 << 0;
         /**
          * Whether notifications suppressed by DND should not interrupt visually when the screen
          * is on (e.g. by peeking onto the screen).
+         *
+         * @deprecated use {@link #SUPPRESSED_EFFECT_PEEK}.
          */
+        @Deprecated
         public static final int SUPPRESSED_EFFECT_SCREEN_ON = 1 << 1;
+
+        /**
+         * Whether {@link Notification#fullScreenIntent full screen intents} from
+         * notifications intercepted by DND are blocked.
+         */
+        public static final int SUPPRESSED_EFFECT_FULL_SCREEN_INTENT = 1 << 2;
+
+        /**
+         * Whether {@link NotificationChannel#shouldShowLights() notification lights} from
+         * notifications intercepted by DND are blocked.
+         */
+        public static final int SUPPRESSED_EFFECT_LIGHTS = 1 << 3;
+
+        /**
+         * Whether notifications intercepted by DND are prevented from peeking.
+         */
+        public static final int SUPPRESSED_EFFECT_PEEK = 1 << 4;
+
+        /**
+         * Whether notifications intercepted by DND are prevented from appearing in the status bar,
+         * on devices that support status bars.
+         */
+        public static final int SUPPRESSED_EFFECT_STATUS_BAR = 1 << 5;
+
+        /**
+         * Whether {@link NotificationChannel#canShowBadge() badges} from
+         * notifications intercepted by DND are blocked on devices that support badging.
+         */
+        public static final int SUPPRESSED_EFFECT_BADGE = 1 << 6;
+
+        /**
+         * Whether notification intercepted by DND are prevented from appearing on ambient displays
+         * on devices that support ambient display.
+         */
+        public static final int SUPPRESSED_EFFECT_AMBIENT = 1 << 7;
+
+        /**
+         * Whether notification intercepted by DND are prevented from appearing in notification
+         * list views like the notification shade or lockscreen on devices that support those
+         * views.
+         */
+        public static final int SUPPRESSED_EFFECT_NOTIFICATION_LIST = 1 << 8;
 
         private static final int[] ALL_SUPPRESSED_EFFECTS = {
                 SUPPRESSED_EFFECT_SCREEN_OFF,
                 SUPPRESSED_EFFECT_SCREEN_ON,
+                SUPPRESSED_EFFECT_FULL_SCREEN_INTENT,
+                SUPPRESSED_EFFECT_LIGHTS,
+                SUPPRESSED_EFFECT_PEEK,
+                SUPPRESSED_EFFECT_STATUS_BAR,
+                SUPPRESSED_EFFECT_BADGE,
+                SUPPRESSED_EFFECT_AMBIENT,
+                SUPPRESSED_EFFECT_NOTIFICATION_LIST
         };
 
         /**
@@ -1096,6 +1153,12 @@ public class NotificationManager {
 
         /**
          * Constructs a policy for Do Not Disturb priority mode behavior.
+         *
+         * <p>
+         *     Apps that target API levels below {@link Build.VERSION_CODES#P} cannot
+         *     change user-designated values to allow or disallow
+         *     {@link Policy#PRIORITY_CATEGORY_ALARMS}, {@link Policy#PRIORITY_CATEGORY_SYSTEM}, and
+         *     {@link Policy#PRIORITY_CATEGORY_MEDIA} from bypassing dnd.
          *
          * @param priorityCategories bitmask of categories of notifications that can bypass DND.
          * @param priorityCallSenders which callers can bypass DND.
@@ -1108,6 +1171,26 @@ public class NotificationManager {
 
         /**
          * Constructs a policy for Do Not Disturb priority mode behavior.
+         *
+         * <p>
+         *     Apps that target API levels below {@link Build.VERSION_CODES#P} cannot
+         *     change user-designated values to allow or disallow
+         *     {@link Policy#PRIORITY_CATEGORY_ALARMS}, {@link Policy#PRIORITY_CATEGORY_SYSTEM}, and
+         *     {@link Policy#PRIORITY_CATEGORY_MEDIA} from bypassing dnd.
+         * <p>
+         *     Additionally, apps that target API levels below {@link Build.VERSION_CODES#P} can
+         *     only modify the {@link #SUPPRESSED_EFFECT_SCREEN_ON} and
+         *     {@link #SUPPRESSED_EFFECT_SCREEN_OFF} bits of the suppressed visual effects field.
+         *     All other suppressed effects will be ignored and reconstituted from the screen on
+         *     and screen off values.
+         * <p>
+         *     Apps that target {@link Build.VERSION_CODES#P} or above can set any
+         *     suppressed visual effects. However, if any suppressed effects >
+         *     {@link #SUPPRESSED_EFFECT_SCREEN_ON} are set, {@link #SUPPRESSED_EFFECT_SCREEN_ON}
+         *     and {@link #SUPPRESSED_EFFECT_SCREEN_OFF} will be ignored and reconstituted from
+         *     the more specific suppressed visual effect bits. Apps should migrate to targeting
+         *     specific effects instead of the deprecated {@link #SUPPRESSED_EFFECT_SCREEN_ON} and
+         *     {@link #SUPPRESSED_EFFECT_SCREEN_OFF} effects.
          *
          * @param priorityCategories bitmask of categories of notifications that can bypass DND.
          * @param priorityCallSenders which callers can bypass DND.
@@ -1190,6 +1273,30 @@ public class NotificationManager {
             }
         }
 
+        /**
+         * @hide
+         */
+        public static int getAllSuppressedVisualEffects() {
+            int effects = 0;
+            for (int i = 0; i < ALL_SUPPRESSED_EFFECTS.length; i++) {
+                effects |= ALL_SUPPRESSED_EFFECTS[i];
+            }
+            return effects;
+        }
+
+        /**
+         * @hide
+         */
+        public static boolean areAllVisualEffectsSuppressed(int effects) {
+            for (int i = 0; i < ALL_SUPPRESSED_EFFECTS.length; i++) {
+                final int effect = ALL_SUPPRESSED_EFFECTS[i];
+                if ((effects & effect) == 0) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         public static String suppressedEffectsToString(int effects) {
             if (effects <= 0) return "";
             final StringBuilder sb = new StringBuilder();
@@ -1228,9 +1335,26 @@ public class NotificationManager {
 
         private static String effectToString(int effect) {
             switch (effect) {
-                case SUPPRESSED_EFFECT_SCREEN_OFF: return "SUPPRESSED_EFFECT_SCREEN_OFF";
-                case SUPPRESSED_EFFECT_SCREEN_ON: return "SUPPRESSED_EFFECT_SCREEN_ON";
-                case SUPPRESSED_EFFECTS_UNSET: return "SUPPRESSED_EFFECTS_UNSET";
+                case SUPPRESSED_EFFECT_FULL_SCREEN_INTENT:
+                    return "SUPPRESSED_EFFECT_FULL_SCREEN_INTENT";
+                case SUPPRESSED_EFFECT_LIGHTS:
+                    return "SUPPRESSED_EFFECT_LIGHTS";
+                case SUPPRESSED_EFFECT_PEEK:
+                    return "SUPPRESSED_EFFECT_PEEK";
+                case SUPPRESSED_EFFECT_STATUS_BAR:
+                    return "SUPPRESSED_EFFECT_STATUS_BAR";
+                case SUPPRESSED_EFFECT_BADGE:
+                    return "SUPPRESSED_EFFECT_BADGE";
+                case SUPPRESSED_EFFECT_AMBIENT:
+                    return "SUPPRESSED_EFFECT_AMBIENT";
+                case SUPPRESSED_EFFECT_NOTIFICATION_LIST:
+                    return "SUPPRESSED_EFFECT_NOTIFICATION_LIST";
+                case SUPPRESSED_EFFECT_SCREEN_OFF:
+                    return "SUPPRESSED_EFFECT_SCREEN_OFF";
+                case SUPPRESSED_EFFECT_SCREEN_ON:
+                    return "SUPPRESSED_EFFECT_SCREEN_ON";
+                case SUPPRESSED_EFFECTS_UNSET:
+                    return "SUPPRESSED_EFFECTS_UNSET";
                 default: return "UNKNOWN_" + effect;
             }
         }

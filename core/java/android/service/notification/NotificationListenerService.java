@@ -149,13 +149,19 @@ public abstract class NotificationListenerService extends Service {
     /**
      * Whether notification suppressed by DND should not interruption visually when the screen is
      * off.
+     *
+     * @deprecated Use the more specific visual effects in {@link NotificationManager.Policy}.
      */
+    @Deprecated
     public static final int SUPPRESSED_EFFECT_SCREEN_OFF =
             NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_OFF;
     /**
      * Whether notification suppressed by DND should not interruption visually when the screen is
      * on.
+     *
+     * @deprecated Use the more specific visual effects in {@link NotificationManager.Policy}.
      */
+    @Deprecated
     public static final int SUPPRESSED_EFFECT_SCREEN_ON =
             NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_ON;
 
@@ -1453,7 +1459,8 @@ public abstract class NotificationListenerService extends Service {
 
         /**
          * Returns the type(s) of visual effects that should be suppressed for this notification.
-         * See {@link #SUPPRESSED_EFFECT_SCREEN_OFF}, {@link #SUPPRESSED_EFFECT_SCREEN_ON}.
+         * See {@link NotificationManager.Policy}, e.g.
+         * {@link NotificationManager.Policy#SUPPRESSED_EFFECT_LIGHTS}.
          */
         public int getSuppressedVisualEffects() {
             return mSuppressedVisualEffects;

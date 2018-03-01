@@ -16,7 +16,10 @@
 
 package com.android.server.notification;
 
+import static android.provider.Settings.Global.ZEN_MODE_OFF;
+
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.media.AudioAttributes;
@@ -29,6 +32,8 @@ import android.service.notification.ZenModeConfig;
 import android.telecom.TelecomManager;
 import android.util.ArrayMap;
 import android.util.Slog;
+
+import com.android.internal.messages.nano.SystemMessageProto;
 
 import java.io.PrintWriter;
 import java.util.Date;
@@ -104,6 +109,16 @@ public class ZenModeFiltering {
     }
 
     public boolean shouldIntercept(int zen, ZenModeConfig config, NotificationRecord record) {
+        if (zen == ZEN_MODE_OFF) {
+            return false;
+        }
+        // Make an exception to policy for the notification saying that policy has changed
+        if (NotificationManager.Policy.areAllVisualEffectsSuppressed(config.suppressedVisualEffects)
+                && "android".equals(record.sbn.getPackageName())
+                && SystemMessageProto.SystemMessage.NOTE_ZEN_UPGRADE == record.sbn.getId()) {
+            ZenLog.traceNotIntercepted(record, "systemDndChangedNotification");
+            return false;
+        }
         switch (zen) {
             case Global.ZEN_MODE_NO_INTERRUPTIONS:
                 // #notevenalarms

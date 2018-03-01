@@ -17,6 +17,8 @@
 package com.android.server.notification;
 
 import static android.app.NotificationManager.IMPORTANCE_LOW;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -57,6 +59,8 @@ public class ZenModeExtractorTest extends UiServiceTestCase {
         assertFalse(r.isIntercepted());
 
         when(mZenModeHelper.shouldIntercept(any())).thenReturn(true);
+        when(mZenModeHelper.getNotificationPolicy()).thenReturn(
+                new NotificationManager.Policy(0,0,0));
 
         extractor.process(r);
 
@@ -70,7 +74,8 @@ public class ZenModeExtractorTest extends UiServiceTestCase {
         NotificationRecord r = generateRecord();
 
         when(mZenModeHelper.shouldIntercept(any())).thenReturn(false);
-        when(mZenModeHelper.shouldSuppressWhenScreenOff()).thenReturn(false);
+        when(mZenModeHelper.getNotificationPolicy()).thenReturn(
+                new NotificationManager.Policy(0,0,0));
 
         extractor.process(r);
 
@@ -84,13 +89,14 @@ public class ZenModeExtractorTest extends UiServiceTestCase {
         NotificationRecord r = generateRecord();
 
         when(mZenModeHelper.shouldIntercept(any())).thenReturn(true);
-        when(mZenModeHelper.shouldSuppressWhenScreenOff()).thenReturn(true);
-        when(mZenModeHelper.shouldSuppressWhenScreenOn()).thenReturn(true);
+        when(mZenModeHelper.getNotificationPolicy()).thenReturn(
+                new NotificationManager.Policy(0,0,0, SUPPRESSED_EFFECT_PEEK
+                        | SUPPRESSED_EFFECT_NOTIFICATION_LIST));
 
         extractor.process(r);
 
-        assertEquals(NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_OFF
-                | NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_ON,
+        assertEquals(NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK
+                | NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST,
                 r.getSuppressedVisualEffects());
     }
 

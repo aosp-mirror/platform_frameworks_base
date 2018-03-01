@@ -22,8 +22,19 @@ import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MAX;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_OFF;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_ON;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
+import static android.os.Build.VERSION_CODES.O_MR1;
+import static android.os.Build.VERSION_CODES.P;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -2529,5 +2540,126 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         verify(mAm, times(1)).revokeUriPermissionFromOwner(any(), eq(message1.getDataUri()),
                 anyInt(), anyInt());
+    }
+
+    @Test
+    public void testSetNotificationPolicy_preP_setOldFields() {
+        ZenModeHelper mZenModeHelper = mock(ZenModeHelper.class);
+        mService.mZenModeHelper = mZenModeHelper;
+        NotificationManager.Policy userPolicy =
+                new NotificationManager.Policy(0, 0, 0, SUPPRESSED_EFFECT_BADGE);
+        when(mZenModeHelper.getNotificationPolicy()).thenReturn(userPolicy);
+
+        NotificationManager.Policy appPolicy = new NotificationManager.Policy(0, 0, 0,
+                SUPPRESSED_EFFECT_SCREEN_ON | SUPPRESSED_EFFECT_SCREEN_OFF);
+
+        int expected = SUPPRESSED_EFFECT_BADGE
+                | SUPPRESSED_EFFECT_SCREEN_ON | SUPPRESSED_EFFECT_SCREEN_OFF
+                | SUPPRESSED_EFFECT_PEEK | SUPPRESSED_EFFECT_AMBIENT
+                | SUPPRESSED_EFFECT_LIGHTS | SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
+        int actual = mService.calculateSuppressedVisualEffects(appPolicy, userPolicy, O_MR1);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testSetNotificationPolicy_preP_setNewFields() {
+        ZenModeHelper mZenModeHelper = mock(ZenModeHelper.class);
+        mService.mZenModeHelper = mZenModeHelper;
+        NotificationManager.Policy userPolicy =
+                new NotificationManager.Policy(0, 0, 0, SUPPRESSED_EFFECT_BADGE);
+        when(mZenModeHelper.getNotificationPolicy()).thenReturn(userPolicy);
+
+        NotificationManager.Policy appPolicy = new NotificationManager.Policy(0, 0, 0,
+                SUPPRESSED_EFFECT_NOTIFICATION_LIST);
+
+        int expected = SUPPRESSED_EFFECT_BADGE;
+        int actual = mService.calculateSuppressedVisualEffects(appPolicy, userPolicy, O_MR1);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testSetNotificationPolicy_preP_setOldNewFields() {
+        ZenModeHelper mZenModeHelper = mock(ZenModeHelper.class);
+        mService.mZenModeHelper = mZenModeHelper;
+        NotificationManager.Policy userPolicy =
+                new NotificationManager.Policy(0, 0, 0, SUPPRESSED_EFFECT_BADGE);
+        when(mZenModeHelper.getNotificationPolicy()).thenReturn(userPolicy);
+
+        NotificationManager.Policy appPolicy = new NotificationManager.Policy(0, 0, 0,
+                SUPPRESSED_EFFECT_SCREEN_ON | SUPPRESSED_EFFECT_STATUS_BAR);
+
+        int expected =
+                SUPPRESSED_EFFECT_BADGE | SUPPRESSED_EFFECT_SCREEN_ON | SUPPRESSED_EFFECT_PEEK;
+        int actual = mService.calculateSuppressedVisualEffects(appPolicy, userPolicy, O_MR1);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testSetNotificationPolicy_P_setOldFields() {
+        ZenModeHelper mZenModeHelper = mock(ZenModeHelper.class);
+        mService.mZenModeHelper = mZenModeHelper;
+        NotificationManager.Policy userPolicy =
+                new NotificationManager.Policy(0, 0, 0, SUPPRESSED_EFFECT_BADGE);
+        when(mZenModeHelper.getNotificationPolicy()).thenReturn(userPolicy);
+
+        NotificationManager.Policy appPolicy = new NotificationManager.Policy(0, 0, 0,
+                SUPPRESSED_EFFECT_SCREEN_ON | SUPPRESSED_EFFECT_SCREEN_OFF);
+
+        int expected = SUPPRESSED_EFFECT_SCREEN_ON | SUPPRESSED_EFFECT_SCREEN_OFF
+                | SUPPRESSED_EFFECT_PEEK | SUPPRESSED_EFFECT_AMBIENT
+                | SUPPRESSED_EFFECT_LIGHTS | SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
+        int actual = mService.calculateSuppressedVisualEffects(appPolicy, userPolicy, P);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testSetNotificationPolicy_P_setNewFields() {
+        ZenModeHelper mZenModeHelper = mock(ZenModeHelper.class);
+        mService.mZenModeHelper = mZenModeHelper;
+        NotificationManager.Policy userPolicy =
+                new NotificationManager.Policy(0, 0, 0, SUPPRESSED_EFFECT_BADGE);
+        when(mZenModeHelper.getNotificationPolicy()).thenReturn(userPolicy);
+
+        NotificationManager.Policy appPolicy = new NotificationManager.Policy(0, 0, 0,
+                SUPPRESSED_EFFECT_NOTIFICATION_LIST | SUPPRESSED_EFFECT_AMBIENT
+                        | SUPPRESSED_EFFECT_LIGHTS | SUPPRESSED_EFFECT_FULL_SCREEN_INTENT);
+
+        int expected = SUPPRESSED_EFFECT_NOTIFICATION_LIST | SUPPRESSED_EFFECT_SCREEN_OFF
+                | SUPPRESSED_EFFECT_AMBIENT | SUPPRESSED_EFFECT_LIGHTS
+                | SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
+        int actual = mService.calculateSuppressedVisualEffects(appPolicy, userPolicy, P);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testSetNotificationPolicy_P_setOldNewFields() {
+        ZenModeHelper mZenModeHelper = mock(ZenModeHelper.class);
+        mService.mZenModeHelper = mZenModeHelper;
+        NotificationManager.Policy userPolicy =
+                new NotificationManager.Policy(0, 0, 0, SUPPRESSED_EFFECT_BADGE);
+        when(mZenModeHelper.getNotificationPolicy()).thenReturn(userPolicy);
+
+        NotificationManager.Policy appPolicy = new NotificationManager.Policy(0, 0, 0,
+                SUPPRESSED_EFFECT_SCREEN_ON | SUPPRESSED_EFFECT_STATUS_BAR);
+
+        int expected =  SUPPRESSED_EFFECT_STATUS_BAR;
+        int actual = mService.calculateSuppressedVisualEffects(appPolicy, userPolicy, P);
+
+        assertEquals(expected, actual);
+
+        appPolicy = new NotificationManager.Policy(0, 0, 0,
+                SUPPRESSED_EFFECT_SCREEN_ON | SUPPRESSED_EFFECT_AMBIENT
+                        | SUPPRESSED_EFFECT_LIGHTS | SUPPRESSED_EFFECT_FULL_SCREEN_INTENT);
+
+        expected =  SUPPRESSED_EFFECT_SCREEN_OFF | SUPPRESSED_EFFECT_AMBIENT
+                | SUPPRESSED_EFFECT_LIGHTS | SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
+        actual = mService.calculateSuppressedVisualEffects(appPolicy, userPolicy, P);
+
+        assertEquals(expected, actual);
     }
 }
