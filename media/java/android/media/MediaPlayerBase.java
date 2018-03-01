@@ -16,11 +16,9 @@
 
 package android.media;
 
-import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.media.MediaSession2.PlaylistParams;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
