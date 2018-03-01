@@ -471,7 +471,7 @@ setVideoSurface(JNIEnv *env, jobject thiz, jobject jsurface, jboolean mediaPlaye
     // This will fail if the media player has not been initialized yet. This
     // can be the case if setDisplay() on MediaPlayer2Impl.java has been called
     // before setDataSource(). The redundant call to setVideoSurfaceTexture()
-    // in prepare/prepareAsync covers for this case.
+    // in prepare/prepare covers for this case.
     mp->setVideoSurfaceTexture(new ANativeWindowWrapper(anw));
 }
 
@@ -536,7 +536,7 @@ android_media_MediaPlayer2_playNextDataSource(JNIEnv *env, jobject thiz, jlong s
 }
 
 static void
-android_media_MediaPlayer2_prepareAsync(JNIEnv *env, jobject thiz)
+android_media_MediaPlayer2_prepare(JNIEnv *env, jobject thiz)
 {
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
     if (mp == NULL ) {
@@ -1480,7 +1480,7 @@ static const JNINativeMethod gMethods[] = {
     {"_setVideoSurface",    "(Landroid/view/Surface;)V",        (void *)android_media_MediaPlayer2_setVideoSurface},
     {"getBufferingParams", "()Landroid/media/BufferingParams;", (void *)android_media_MediaPlayer2_getBufferingParams},
     {"setBufferingParams", "(Landroid/media/BufferingParams;)V", (void *)android_media_MediaPlayer2_setBufferingParams},
-    {"prepareAsync",        "()V",                              (void *)android_media_MediaPlayer2_prepareAsync},
+    {"prepare",            "()V",                              (void *)android_media_MediaPlayer2_prepare},
     {"_start",              "()V",                              (void *)android_media_MediaPlayer2_start},
     {"_stop",               "()V",                              (void *)android_media_MediaPlayer2_stop},
     {"getVideoWidth",       "()I",                              (void *)android_media_MediaPlayer2_getVideoWidth},
