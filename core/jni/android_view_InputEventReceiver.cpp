@@ -45,6 +45,7 @@ static struct {
 
     jmethodID dispatchInputEvent;
     jmethodID dispatchBatchedInputEventPending;
+    jmethodID dispatchMotionEventInfo;
 } gInputEventReceiverClassInfo;
 
 
@@ -76,6 +77,8 @@ private:
     bool mBatchedInputEventPending;
     int mFdEvents;
     Vector<Finish> mFinishQueue;
+    int mLastMotionEventType = -1;
+    int mLastTouchMoveNum = -1;
 
     void setFdEvents(int events);
 
@@ -234,9 +237,33 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
     bool skipCallbacks = false;
     for (;;) {
         uint32_t seq;
+        int motionEventType = -1;
+        int touchMoveNum = -1;
+        bool flag = false;
+
         InputEvent* inputEvent;
         status_t status = mInputConsumer.consume(&mInputEventFactory,
-                consumeBatches, frameTime, &seq, &inputEvent);
+                consumeBatches, frameTime, &seq, &inputEvent,
+                &motionEventType, &touchMoveNum, &flag);
+
+        if (!receiverObj.get()) {
+            receiverObj.reset(jniGetReferent(env, mReceiverWeakGlobal));
+            if (!receiverObj.get()) {
+                ALOGW("channel '%s' ~ Receiver object was finalized "
+                        "without being disposed.", getInputChannelName().c_str());
+                return DEAD_OBJECT;
+            }
+        }
+
+        if (flag && ((mLastMotionEventType != motionEventType) ||
+               (mLastTouchMoveNum != touchMoveNum))) {
+           env->CallVoidMethod(receiverObj.get(),
+               gInputEventReceiverClassInfo.dispatchMotionEventInfo, motionEventType, touchMoveNum);
+           mLastMotionEventType = motionEventType;
+           mLastTouchMoveNum = touchMoveNum;
+           flag = false;
+        }
+
         if (status) {
             if (status == WOULD_BLOCK) {
                 if (!skipCallbacks && !mBatchedInputEventPending
@@ -423,7 +450,8 @@ int register_android_view_InputEventReceiver(JNIEnv* env) {
             "dispatchInputEvent", "(ILandroid/view/InputEvent;)V");
     gInputEventReceiverClassInfo.dispatchBatchedInputEventPending = GetMethodIDOrDie(env,
             gInputEventReceiverClassInfo.clazz, "dispatchBatchedInputEventPending", "()V");
-
+    gInputEventReceiverClassInfo.dispatchMotionEventInfo = GetMethodIDOrDie(env,
+            gInputEventReceiverClassInfo.clazz, "dispatchMotionEventInfo", "(II)V");
     return res;
 }
 
