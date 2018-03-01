@@ -25,7 +25,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.media.AudioManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.ParcelUuid;
@@ -593,34 +592,6 @@ public final class BluetoothA2dp implements BluetoothProfile {
         } catch (RemoteException e) {
             Log.e(TAG, "Error talking to BT service in isAvrcpAbsoluteVolumeSupported()", e);
             return false;
-        } finally {
-            mServiceLock.readLock().unlock();
-        }
-    }
-
-    /**
-     * Tells remote device to adjust volume. Only if absolute volume is
-     * supported. Uses the following values:
-     * <ul>
-     * <li>{@link AudioManager#ADJUST_LOWER}</li>
-     * <li>{@link AudioManager#ADJUST_RAISE}</li>
-     * <li>{@link AudioManager#ADJUST_MUTE}</li>
-     * <li>{@link AudioManager#ADJUST_UNMUTE}</li>
-     * </ul>
-     *
-     * @param direction One of the supported adjust values.
-     * @hide
-     */
-    public void adjustAvrcpAbsoluteVolume(int direction) {
-        if (DBG) Log.d(TAG, "adjustAvrcpAbsoluteVolume");
-        try {
-            mServiceLock.readLock().lock();
-            if (mService != null && isEnabled()) {
-                mService.adjustAvrcpAbsoluteVolume(direction);
-            }
-            if (mService == null) Log.w(TAG, "Proxy not attached to service");
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error talking to BT service in adjustAvrcpAbsoluteVolume()", e);
         } finally {
             mServiceLock.readLock().unlock();
         }
