@@ -2464,6 +2464,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             decor.setSystemUiVisibility(
                     decor.getSystemUiVisibility() | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         }
+        if (a.hasValue(R.styleable.Window_windowLayoutInDisplayCutoutMode)) {
+            int mode = a.getInt(R.styleable.Window_windowLayoutInDisplayCutoutMode, -1);
+            if (mode < LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
+                    || mode > LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER) {
+                throw new UnsupportedOperationException("Unknown windowLayoutInDisplayCutoutMode: "
+                        + a.getString(R.styleable.Window_windowLayoutInDisplayCutoutMode));
+            }
+            params.layoutInDisplayCutoutMode = mode;
+        }
 
         if (mAlwaysReadCloseOnTouchAttr || getContext().getApplicationInfo().targetSdkVersion
                 >= android.os.Build.VERSION_CODES.HONEYCOMB) {

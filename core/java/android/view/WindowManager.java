@@ -2234,6 +2234,7 @@ public interface WindowManager extends ViewManager {
          * @see #LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
          * @see #LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
          * @see DisplayCutout
+         * @see android.R.attr#layoutInDisplayCutoutMode
          */
         @LayoutInDisplayCutoutMode
         public int layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
