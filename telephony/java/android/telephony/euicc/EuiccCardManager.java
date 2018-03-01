@@ -116,6 +116,9 @@ public class EuiccCardManager {
     /** Result code of an unknown error. */
     public static final int RESULT_UNKNOWN_ERROR = -1;
 
+    /** Result code when the eUICC card with the given card Id is not found. */
+    public static final int RESULT_EUICC_NOT_FOUND = -2;
+
     /**
      * Callback to receive the result of an eUICC card API.
      *
