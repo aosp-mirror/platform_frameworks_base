@@ -664,6 +664,10 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         while (getChildCount() > 0) {
             final ActivityStack stack = getChildAt(0);
             if (destroyContentOnRemoval) {
+                // Override the stack configuration to make it equal to the current applied one, so
+                // that we don't accidentally report configuration change to activities that are
+                // going to be finished.
+                stack.onOverrideConfigurationChanged(stack.getConfiguration());
                 mSupervisor.moveStackToDisplayLocked(stack.mStackId, DEFAULT_DISPLAY,
                         false /* onTop */);
                 stack.finishAllActivitiesLocked(true /* immediately */);
