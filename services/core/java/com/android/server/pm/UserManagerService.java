@@ -2584,9 +2584,6 @@ public class UserManagerService extends IUserManager.Stub {
             Log.w(LOG_TAG, "Cannot add user. Not enough space on disk.");
             return null;
         }
-        if (ActivityManager.isLowRamDeviceStatic()) {
-            return null;
-        }
         final boolean isGuest = (flags & UserInfo.FLAG_GUEST) != 0;
         final boolean isManagedProfile = (flags & UserInfo.FLAG_MANAGED_PROFILE) != 0;
         final boolean isRestricted = (flags & UserInfo.FLAG_RESTRICTED) != 0;

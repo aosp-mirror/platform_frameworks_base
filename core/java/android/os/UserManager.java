@@ -36,6 +36,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.UserInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -2611,8 +2612,13 @@ public class UserManager {
     public static int getMaxSupportedUsers() {
         // Don't allow multiple users on certain builds
         if (android.os.Build.ID.startsWith("JVP")) return 1;
-        // Svelte devices don't get multi-user.
-        if (ActivityManager.isLowRamDeviceStatic()) return 1;
+        if (ActivityManager.isLowRamDeviceStatic()) {
+            // Low-ram devices are Svelte. Most of the time they don't get multi-user.
+            if ((Resources.getSystem().getConfiguration().uiMode & Configuration.UI_MODE_TYPE_MASK)
+                    != Configuration.UI_MODE_TYPE_TELEVISION) {
+                return 1;
+            }
+        }
         return SystemProperties.getInt("fw.max_users",
                 Resources.getSystem().getInteger(R.integer.config_multiuserMaximumUsers));
     }
