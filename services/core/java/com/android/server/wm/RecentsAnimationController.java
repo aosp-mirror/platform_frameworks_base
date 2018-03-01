@@ -219,7 +219,7 @@ public class RecentsAnimationController {
     private void addAnimation(Task task) {
         if (DEBUG) Log.d(TAG, "addAnimation(" + task.getName() + ")");
         final SurfaceAnimator anim = new SurfaceAnimator(task, null /* animationFinishedCallback */,
-                mService.mAnimator::addAfterPrepareSurfacesRunnable, mService);
+                mService);
         final TaskAnimationAdapter taskAdapter = new TaskAnimationAdapter(task);
         anim.startAnimation(task.getPendingTransaction(), taskAdapter, false /* hidden */);
         task.commitPendingTransaction();
