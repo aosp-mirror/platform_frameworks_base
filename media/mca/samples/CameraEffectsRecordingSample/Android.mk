@@ -23,6 +23,7 @@ LOCAL_MODULE_TAGS := tests
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
 LOCAL_PACKAGE_NAME := CameraEffectsRecordingSample
+LOCAL_PRIVATE_PLATFORM_APIS := true
 
 LOCAL_PROGUARD_ENABLED := disabled
 

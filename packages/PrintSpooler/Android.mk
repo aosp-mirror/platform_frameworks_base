@@ -26,6 +26,7 @@ LOCAL_SRC_FILES += \
         src/com/android/printspooler/renderer/IPdfEditor.aidl
 
 LOCAL_PACKAGE_NAME := PrintSpooler
+LOCAL_PRIVATE_PLATFORM_APIS := true
 
 LOCAL_JNI_SHARED_LIBRARIES := libprintspooler_jni
 LOCAL_STATIC_JAVA_LIBRARIES := android-support-v4 android-support-v7-recyclerview
