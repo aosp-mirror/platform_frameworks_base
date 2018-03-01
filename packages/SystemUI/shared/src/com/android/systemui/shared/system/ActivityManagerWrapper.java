@@ -432,12 +432,4 @@ public class ActivityManagerWrapper {
             return false;
         }
     }
-
-    /**
-     * @return whether screen pinning is enabled.
-     * @deprecated See {@link #isScreenPinningEnabled}
-     */
-    public boolean isLockToAppEnabled() {
-        return isScreenPinningEnabled();
-    }
 }
