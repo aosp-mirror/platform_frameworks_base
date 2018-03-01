@@ -2694,7 +2694,6 @@ public class WindowManagerService extends IWindowManager.Stub
             IRecentsAnimationRunner recentsAnimationRunner,
             RecentsAnimationController.RecentsAnimationCallbacks callbacks, int displayId) {
         synchronized (mWindowMap) {
-            cancelRecentsAnimation();
             mRecentsAnimationController = new RecentsAnimationController(this,
                     recentsAnimationRunner, callbacks, displayId);
             mRecentsAnimationController.initialize();
@@ -2719,12 +2718,12 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void cancelRecentsAnimation() {
-        synchronized (mWindowMap) {
-            if (mRecentsAnimationController != null) {
-                // This call will call through to cleanupAnimation() below after the animation is
-                // canceled
-                mRecentsAnimationController.cancelAnimation();
-            }
+        // Note: Do not hold the WM lock, this will lock appropriately in the call which also
+        // calls through to AM/RecentsAnimation.onAnimationFinished()
+        if (mRecentsAnimationController != null) {
+            // This call will call through to cleanupAnimation() below after the animation is
+            // canceled
+            mRecentsAnimationController.cancelAnimation();
         }
     }
 
