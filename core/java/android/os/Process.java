@@ -140,6 +140,12 @@ public class Process {
     public static final int CAMERASERVER_UID = 1047;
 
     /**
+     * Defines the UID/GID for the tethering DNS resolver (currently dnsmasq).
+     * @hide
+     */
+    public static final int DNS_TETHER_UID = 1052;
+
+    /**
      * Defines the UID/GID for the WebView zygote process.
      * @hide
      */
