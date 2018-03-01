@@ -43,6 +43,14 @@ import java.util.Comparator;
  */
 public class PackageItemInfo {
     private static final float MAX_LABEL_SIZE_PX = 500f;
+
+    private static volatile boolean sForceSafeLabels = false;
+
+    /** {@hide} */
+    public static void setForceSafeLabels(boolean forceSafeLabels) {
+        sForceSafeLabels = forceSafeLabels;
+    }
+
     /**
      * Public name of this item. From the "android:name" attribute.
      */
@@ -128,7 +136,16 @@ public class PackageItemInfo {
      * @return Returns a CharSequence containing the item's label.  If the
      * item does not have a label, its name is returned.
      */
-    public CharSequence loadLabel(PackageManager pm) {
+    public @NonNull CharSequence loadLabel(@NonNull PackageManager pm) {
+        if (sForceSafeLabels) {
+            return loadSafeLabel(pm);
+        } else {
+            return loadUnsafeLabel(pm);
+        }
+    }
+
+    /** {@hide} */
+    public CharSequence loadUnsafeLabel(PackageManager pm) {
         if (nonLocalizedLabel != null) {
             return nonLocalizedLabel;
         }
@@ -163,7 +180,7 @@ public class PackageItemInfo {
     @SystemApi
     public @NonNull CharSequence loadSafeLabel(@NonNull PackageManager pm) {
         // loadLabel() always returns non-null
-        String label = loadLabel(pm).toString();
+        String label = loadUnsafeLabel(pm).toString();
         // strip HTML tags to avoid <br> and other tags overwriting original message
         String labelStr = Html.fromHtml(label).toString();
 

@@ -23,6 +23,7 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources.Theme;
@@ -331,6 +332,8 @@ public final class SystemServer {
 
             // The system server should never make non-oneway calls
             Binder.setWarnOnBlocking(true);
+            // The system server should always load safe labels
+            PackageItemInfo.setForceSafeLabels(true);
             // Deactivate SQLiteCompatibilityWalFlags until settings provider is initialized
             SQLiteCompatibilityWalFlags.init(null);
 
