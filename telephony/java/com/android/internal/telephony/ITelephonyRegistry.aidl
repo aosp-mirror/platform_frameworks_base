@@ -21,9 +21,9 @@ import android.net.LinkProperties;
 import android.net.NetworkCapabilities;
 import android.os.Bundle;
 import android.telephony.CellInfo;
+import android.telephony.PhysicalChannelConfig;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
-import android.telephony.CellInfo;
 import android.telephony.VoLteServiceState;
 import com.android.internal.telephony.IPhoneStateListener;
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
@@ -58,6 +58,9 @@ interface ITelephonyRegistry {
     void notifyCellLocationForSubscriber(in int subId, in Bundle cellLocation);
     void notifyOtaspChanged(in int otaspMode);
     void notifyCellInfo(in List<CellInfo> cellInfo);
+    void notifyPhysicalChannelConfiguration(in List<PhysicalChannelConfig> configs);
+    void notifyPhysicalChannelConfigurationForSubscriber(in int subId,
+            in List<PhysicalChannelConfig> configs);
     void notifyPreciseCallState(int ringingCallState, int foregroundCallState,
             int backgroundCallState);
     void notifyDisconnectCause(int disconnectCause, int preciseDisconnectCause);
