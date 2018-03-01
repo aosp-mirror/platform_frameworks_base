@@ -62,7 +62,7 @@ public abstract class InstantAppResolverService extends Service {
     @Deprecated
     public void onGetInstantAppResolveInfo(
             int digestPrefix[], String token, InstantAppResolutionCallback callback) {
-        throw new IllegalStateException("Must define");
+        throw new IllegalStateException("Must define onGetInstantAppResolveInfo");
     }
 
     /**
@@ -80,10 +80,26 @@ public abstract class InstantAppResolverService extends Service {
     }
 
     /**
-     * Called to retrieve resolve info for instant applications immediately.
+     * Called to retrieve resolve info for instant applications immediately. The response will be
+     * ignored if not provided within a reasonable time. {@link InstantAppResolveInfo}s provided
+     * in response to this method may be partial to request a second phase of resolution which will
+     * result in a subsequent call to
+     * {@link #onGetInstantAppIntentFilter(Intent, int[], String, InstantAppResolutionCallback)}
      *
-     * @param sanitizedIntent The sanitized {@link Intent} used for resolution.
+     *
+     * @param sanitizedIntent The sanitized {@link Intent} used for resolution. A sanitized Intent
+     *                        is an intent with potential PII removed from the original intent.
+     *                        Fields removed include extras and the host + path of the data, if
+     *                        defined.
      * @param hostDigestPrefix The hash prefix of the instant app's domain.
+     * @param token A unique identifier that will be provided in calls to
+     *              {@link #onGetInstantAppIntentFilter(Intent, int[], String,
+     *              InstantAppResolutionCallback)}
+     *              and provided to the installer via {@link Intent#EXTRA_INSTANT_APP_TOKEN} to
+     *              tie a single launch together.
+     * @param callback The {@link InstantAppResolutionCallback} to provide results to.
+     *
+     * @see InstantAppResolveInfo
      */
     public void onGetInstantAppResolveInfo(Intent sanitizedIntent, int[] hostDigestPrefix,
             String token, InstantAppResolutionCallback callback) {
@@ -96,12 +112,20 @@ public abstract class InstantAppResolverService extends Service {
     }
 
     /**
-     * Called to retrieve intent filters for instant applications from potentially expensive
-     * sources.
+     * Called to retrieve intent filters for potentially matching instant applications. Unlike
+     * {@link #onGetInstantAppResolveInfo(Intent, int[], String, InstantAppResolutionCallback)},
+     * the response may take as long as necessary to respond. All {@link InstantAppResolveInfo}s
+     * provided in response to this method must be completely populated.
      *
      * @param sanitizedIntent The sanitized {@link Intent} used for resolution.
      * @param hostDigestPrefix The hash prefix of the instant app's domain or null if no host is
      *                         defined.
+     * @param token A unique identifier that was provided in
+     *              {@link #onGetInstantAppResolveInfo(Intent, int[], String,
+     *              InstantAppResolutionCallback)}
+     *              and provided to the currently visible installer via
+     *              {@link Intent#EXTRA_INSTANT_APP_TOKEN}.
+     * @param callback The {@link InstantAppResolutionCallback} to provide results to
      */
     public void onGetInstantAppIntentFilter(Intent sanitizedIntent, int[] hostDigestPrefix,
             String token, InstantAppResolutionCallback callback) {
