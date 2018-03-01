@@ -3320,8 +3320,7 @@
          [CHAR LIMIT=NONE] -->
     <string name="alert_windows_notification_message">If you don’t want <xliff:g id="name" example="Google Maps">%s</xliff:g> to use this feature, tap to open settings and turn it off.</string>
     <!-- Notification action to turn-off app displaying on-top of other apps. [CHAR LIMIT=20] -->
-    <string name="alert_windows_notification_turn_off_action">TURN OFF</string>
-
+    <string name="alert_windows_notification_turn_off_action">Turn off</string>
 
     <!-- External media notification strings -->
     <skip />
