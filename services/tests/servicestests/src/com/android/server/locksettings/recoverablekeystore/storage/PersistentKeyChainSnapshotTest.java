@@ -27,7 +27,6 @@ import android.security.keystore.recovery.KeyChainProtectionParams;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -45,7 +44,6 @@ public class PersistentKeyChainSnapshotTest {
             .getBytes(StandardCharsets.UTF_8);
     private static final byte[] KEY_MATERIAL = "app_key_data".getBytes(StandardCharsets.UTF_8);
     private static final byte[] PUBLIC_KEY = "public_key_data".getBytes(StandardCharsets.UTF_8);
-    private static final byte[] ACCOUNT = "test_account".getBytes(StandardCharsets.UTF_8);
     private static final byte[] SALT = "salt".getBytes(StandardCharsets.UTF_8);
     private static final int SNAPSHOT_VERSION = 2;
     private static final int MAX_ATTEMPTS = 10;
@@ -130,7 +128,6 @@ public class PersistentKeyChainSnapshotTest {
         WrappedApplicationKey entry = new WrappedApplicationKey.Builder()
                 .setAlias(ALIAS)
                 .setEncryptedKeyMaterial(KEY_MATERIAL)
-                .setAccount(ACCOUNT)
                 .build();
         writer.writeKeyEntry(entry);
 
@@ -142,7 +139,6 @@ public class PersistentKeyChainSnapshotTest {
         WrappedApplicationKey copy = reader.readKeyEntry();
         assertThat(copy.getAlias()).isEqualTo(ALIAS);
         assertThat(copy.getEncryptedKeyMaterial()).isEqualTo(KEY_MATERIAL);
-        assertThat(copy.getAccount()).isEqualTo(ACCOUNT);
 
         assertThrows(
                 IOException.class,
@@ -194,7 +190,6 @@ public class PersistentKeyChainSnapshotTest {
         appKeysList.add(new WrappedApplicationKey.Builder()
                 .setAlias(ALIAS)
                 .setEncryptedKeyMaterial(KEY_MATERIAL)
-                .setAccount(ACCOUNT)
                 .build());
 
         KeyChainSnapshot snapshot =  new KeyChainSnapshot.Builder()
@@ -256,12 +251,10 @@ public class PersistentKeyChainSnapshotTest {
         appKeysList.add(new WrappedApplicationKey.Builder()
                 .setAlias(ALIAS)
                 .setEncryptedKeyMaterial(KEY_MATERIAL)
-                .setAccount(ACCOUNT)
                 .build());
         appKeysList.add(new WrappedApplicationKey.Builder()
                 .setAlias(ALIAS2)
                 .setEncryptedKeyMaterial(KEY_MATERIAL)
-                .setAccount(ACCOUNT)
                 .build());
 
 
