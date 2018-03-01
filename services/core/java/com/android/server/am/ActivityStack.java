@@ -2263,20 +2263,20 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // Protect against recursion.
             mStackSupervisor.inResumeTopActivity = true;
             result = resumeTopActivityInnerLocked(prev, options);
+
+            // When resuming the top activity, it may be necessary to pause the top activity (for
+            // example, returning to the lock screen. We suppress the normal pause logic in
+            // {@link #resumeTopActivityUncheckedLocked}, since the top activity is resumed at the
+            // end. We call the {@link ActivityStackSupervisor#checkReadyForSleepLocked} again here
+            // to ensure any necessary pause logic occurs. In the case where the Activity will be
+            // shown regardless of the lock screen, the call to
+            // {@link ActivityStackSupervisor#checkReadyForSleepLocked} is skipped.
+            final ActivityRecord next = topRunningActivityLocked(true /* focusableOnly */);
+            if (next == null || !next.canTurnScreenOn()) {
+                checkReadyForSleep();
+            }
         } finally {
             mStackSupervisor.inResumeTopActivity = false;
-        }
-
-        // When resuming the top activity, it may be necessary to pause the top activity (for
-        // example, returning to the lock screen. We suppress the normal pause logic in
-        // {@link #resumeTopActivityUncheckedLocked}, since the top activity is resumed at the end.
-        // We call the {@link ActivityStackSupervisor#checkReadyForSleepLocked} again here to ensure
-        // any necessary pause logic occurs. In the case where the Activity will be shown regardless
-        // of the lock screen, the call to {@link ActivityStackSupervisor#checkReadyForSleepLocked}
-        // is skipped.
-        final ActivityRecord next = topRunningActivityLocked(true /* focusableOnly */);
-        if (next == null || !next.canTurnScreenOn()) {
-            checkReadyForSleep();
         }
 
         return result;
