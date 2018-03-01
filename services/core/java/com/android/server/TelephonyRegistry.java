@@ -37,6 +37,7 @@ import android.telephony.CellLocation;
 import android.telephony.DisconnectCause;
 import android.telephony.LocationAccessPolicy;
 import android.telephony.PhoneStateListener;
+import android.telephony.PhysicalChannelConfig;
 import android.telephony.PreciseCallState;
 import android.telephony.PreciseDataConnectionState;
 import android.telephony.PreciseDisconnectCause;
@@ -178,6 +179,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private int mOtaspMode = TelephonyManager.OTASP_UNKNOWN;
 
     private ArrayList<List<CellInfo>> mCellInfo = null;
+
+    private ArrayList<List<PhysicalChannelConfig>> mPhysicalChannelConfigs;
 
     private VoLteServiceState mVoLteServiceState = new VoLteServiceState();
 
@@ -335,6 +338,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mDataConnectionLinkProperties = new LinkProperties[numPhones];
         mDataConnectionNetworkCapabilities = new NetworkCapabilities[numPhones];
         mCellInfo = new ArrayList<List<CellInfo>>();
+        mPhysicalChannelConfigs = new ArrayList<List<PhysicalChannelConfig>>();
         for (int i = 0; i < numPhones; i++) {
             mCallState[i] =  TelephonyManager.CALL_STATE_IDLE;
             mDataActivity[i] = TelephonyManager.DATA_ACTIVITY_NONE;
@@ -349,6 +353,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mCallForwarding[i] =  false;
             mCellLocation[i] = new Bundle();
             mCellInfo.add(i, null);
+            mPhysicalChannelConfigs.add(i, null);
             mConnectedApns[i] = new ArrayList<String>();
         }
 
@@ -655,6 +660,14 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     if ((events & PhoneStateListener.LISTEN_USER_MOBILE_DATA_STATE) != 0) {
                         try {
                             r.callback.onUserMobileDataStateChanged(mUserMobileDataState[phoneId]);
+                        } catch (RemoteException ex) {
+                            remove(r.binder);
+                        }
+                    }
+                    if ((events & PhoneStateListener.LISTEN_PHYSICAL_CHANNEL_CONFIGURATION) != 0) {
+                        try {
+                            r.callback.onPhysicalChannelConfigurationChanged(
+                                    mPhysicalChannelConfigs.get(phoneId));
                         } catch (RemoteException ex) {
                             remove(r.binder);
                         }
@@ -1010,6 +1023,45 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                                 log("notifyCellInfo: mCellInfo=" + cellInfo + " r=" + r);
                             }
                             r.callback.onCellInfoChanged(cellInfo);
+                        } catch (RemoteException ex) {
+                            mRemoveList.add(r.binder);
+                        }
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
+    public void notifyPhysicalChannelConfiguration(List<PhysicalChannelConfig> configs) {
+        notifyPhysicalChannelConfigurationForSubscriber(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID,
+                configs);
+    }
+
+    public void notifyPhysicalChannelConfigurationForSubscriber(int subId,
+            List<PhysicalChannelConfig> configs) {
+        if (!checkNotifyPermission("notifyPhysicalChannelConfiguration()")) {
+            return;
+        }
+
+        if (VDBG) {
+            log("notifyPhysicalChannelConfiguration: subId=" + subId + " configs=" + configs);
+        }
+
+        synchronized (mRecords) {
+            int phoneId = SubscriptionManager.getPhoneId(subId);
+            if (validatePhoneId(phoneId)) {
+                mPhysicalChannelConfigs.set(phoneId, configs);
+                for (Record r : mRecords) {
+                    if (r.matchPhoneStateListenerEvent(
+                            PhoneStateListener.LISTEN_PHYSICAL_CHANNEL_CONFIGURATION)
+                            && idMatch(r.subId, subId, phoneId)) {
+                        try {
+                            if (DBG_LOC) {
+                                log("notifyPhysicalChannelConfiguration: mPhysicalChannelConfigs="
+                                        + configs + " r=" + r);
+                            }
+                            r.callback.onPhysicalChannelConfigurationChanged(configs);
                         } catch (RemoteException ex) {
                             mRemoveList.add(r.binder);
                         }
