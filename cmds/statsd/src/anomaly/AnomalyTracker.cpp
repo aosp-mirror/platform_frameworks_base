@@ -193,7 +193,8 @@ void AnomalyTracker::declareAnomaly(const uint64_t& timestampNs, const MetricDim
 
     if (!mSubscriptions.empty()) {
         if (mAlert.has_id()) {
-            ALOGI("An anomaly (%lld) has occurred! Informing subscribers.", mAlert.id());
+            ALOGI("An anomaly (%lld) %s has occurred! Informing subscribers.", mAlert.id(),
+                  key.toString().c_str());
             informSubscribers(key);
         } else {
             ALOGI("An anomaly (with no id) has occurred! Not informing any subscribers.");
