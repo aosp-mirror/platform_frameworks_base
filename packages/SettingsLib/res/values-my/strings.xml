@@ -45,7 +45,7 @@
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s မှတစ်ဆင့် ရနိုင်သည်"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"အလွန်နှေး"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"နှေး"</string>
-    <string name="speed_label_okay" msgid="2331665440671174858">"အိုကေ"</string>
+    <string name="speed_label_okay" msgid="2331665440671174858">"OK"</string>
     <string name="speed_label_medium" msgid="3175763313268941953">"အတော်အသင့်"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"မြန်"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"အလွန်မြန်"</string>
