@@ -98,7 +98,7 @@ public class VibratorService extends IVibratorService.Stub
 
     private final Context mContext;
     private final PowerManager.WakeLock mWakeLock;
-    private final IAppOpsService mAppOpsService;
+    private final AppOpsManager mAppOps;
     private final IBatteryStats mBatteryStatsService;
     private PowerManagerInternal mPowerManagerInternal;
     private InputManager mIm;
@@ -265,8 +265,7 @@ public class VibratorService extends IVibratorService.Stub
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*vibrator*");
         mWakeLock.setReferenceCounted(true);
 
-        mAppOpsService =
-            IAppOpsService.Stub.asInterface(ServiceManager.getService(Context.APP_OPS_SERVICE));
+        mAppOps = mContext.getSystemService(AppOpsManager.class);
         mBatteryStatsService = IBatteryStats.Stub.asInterface(ServiceManager.getService(
                 BatteryStats.SERVICE_NAME));
 
@@ -721,17 +720,10 @@ public class VibratorService extends IVibratorService.Stub
     }
 
     private int getAppOpMode(Vibration vib) {
-        int mode;
-        try {
-            mode = mAppOpsService.checkAudioOperation(AppOpsManager.OP_VIBRATE,
-                    vib.usageHint, vib.uid, vib.opPkg);
-            if (mode == AppOpsManager.MODE_ALLOWED) {
-                mode = mAppOpsService.startOperation(AppOpsManager.getToken(mAppOpsService),
-                    AppOpsManager.OP_VIBRATE, vib.uid, vib.opPkg);
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to get appop mode for vibration!", e);
-            mode = AppOpsManager.MODE_IGNORED;
+        int mode = mAppOps.checkAudioOpNoThrow(AppOpsManager.OP_VIBRATE,
+                vib.usageHint, vib.uid, vib.opPkg);
+        if (mode == AppOpsManager.MODE_ALLOWED) {
+            mode = mAppOps.startOpNoThrow(AppOpsManager.OP_VIBRATE, vib.uid, vib.opPkg);
         }
         return mode;
     }
@@ -741,11 +733,8 @@ public class VibratorService extends IVibratorService.Stub
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "reportFinishVibrationLocked");
         try {
             if (mCurrentVibration != null) {
-                try {
-                    mAppOpsService.finishOperation(AppOpsManager.getToken(mAppOpsService),
-                            AppOpsManager.OP_VIBRATE, mCurrentVibration.uid,
-                            mCurrentVibration.opPkg);
-                } catch (RemoteException e) { }
+                mAppOps.finishOp(AppOpsManager.OP_VIBRATE, mCurrentVibration.uid,
+                        mCurrentVibration.opPkg);
                 unlinkVibration(mCurrentVibration);
                 mCurrentVibration = null;
             }

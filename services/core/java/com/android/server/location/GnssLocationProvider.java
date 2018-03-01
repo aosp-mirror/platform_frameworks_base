@@ -459,7 +459,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private final PendingIntent mWakeupIntent;
     private final PendingIntent mTimeoutIntent;
 
-    private final IAppOpsService mAppOpsService;
+    private final AppOpsManager mAppOps;
     private final IBatteryStats mBatteryStats;
 
     // Current list of underlying location clients.
@@ -782,8 +782,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
         mConnMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         // App ops service to keep track of who is accessing the GPS
-        mAppOpsService = IAppOpsService.Stub.asInterface(ServiceManager.getService(
-                Context.APP_OPS_SERVICE));
+        mAppOps = mContext.getSystemService(AppOpsManager.class);
 
         // Battery statistics service to be notified when GPS turns on or off
         mBatteryStats = IBatteryStats.Stub.asInterface(ServiceManager.getService(
@@ -1490,26 +1489,16 @@ public class GnssLocationProvider implements LocationProviderInterface {
             if (newChains != null) {
                 for (int i = 0; i < newChains.size(); ++i) {
                     final WorkChain newChain = newChains.get(i);
-                    try {
-                        mAppOpsService.startOperation(AppOpsManager.getToken(mAppOpsService),
-                                AppOpsManager.OP_GPS, newChain.getAttributionUid(),
-                                newChain.getAttributionTag());
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "RemoteException", e);
-                    }
+                    mAppOps.startOpNoThrow(AppOpsManager.OP_GPS, newChain.getAttributionUid(),
+                            newChain.getAttributionTag());
                 }
             }
 
             if (goneChains != null) {
                 for (int i = 0; i < goneChains.size(); i++) {
                     final WorkChain goneChain = goneChains.get(i);
-                    try {
-                        mAppOpsService.finishOperation(AppOpsManager.getToken(mAppOpsService),
-                                AppOpsManager.OP_GPS, goneChain.getAttributionUid(),
-                                goneChain.getAttributionTag());
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "RemoteException", e);
-                    }
+                    mAppOps.finishOp(AppOpsManager.OP_GPS, goneChain.getAttributionUid(),
+                            goneChain.getAttributionTag());
                 }
             }
 
@@ -1525,24 +1514,15 @@ public class GnssLocationProvider implements LocationProviderInterface {
             // Update sources that were not previously tracked.
             if (newWork != null) {
                 for (int i = 0; i < newWork.size(); i++) {
-                    try {
-                        mAppOpsService.startOperation(AppOpsManager.getToken(mAppOpsService),
-                                AppOpsManager.OP_GPS, newWork.get(i), newWork.getName(i));
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "RemoteException", e);
-                    }
+                    mAppOps.startOpNoThrow(AppOpsManager.OP_GPS,
+                            newWork.get(i), newWork.getName(i));
                 }
             }
 
             // Update sources that are no longer tracked.
             if (goneWork != null) {
                 for (int i = 0; i < goneWork.size(); i++) {
-                    try {
-                        mAppOpsService.finishOperation(AppOpsManager.getToken(mAppOpsService),
-                                AppOpsManager.OP_GPS, goneWork.get(i), goneWork.getName(i));
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "RemoteException", e);
-                    }
+                    mAppOps.finishOp(AppOpsManager.OP_GPS, goneWork.get(i), goneWork.getName(i));
                 }
             }
         }

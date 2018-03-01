@@ -26,7 +26,8 @@ interface IAppOpsService {
     // be kept in sync with frameworks/native/libs/binder/include/binder/IAppOpsService.h
     int checkOperation(int code, int uid, String packageName);
     int noteOperation(int code, int uid, String packageName);
-    int startOperation(IBinder token, int code, int uid, String packageName);
+    int startOperation(IBinder token, int code, int uid, String packageName,
+            boolean startIfModeDefault);
     void finishOperation(IBinder token, int code, int uid, String packageName);
     void startWatchingMode(int op, String packageName, IAppOpsCallback callback);
     void stopWatchingMode(IAppOpsCallback callback);
