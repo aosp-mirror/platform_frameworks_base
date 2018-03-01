@@ -475,6 +475,20 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 setClientHidden(!visible);
             }
 
+            if (!mService.mClosingApps.contains(this) && !mService.mOpeningApps.contains(this)) {
+                // The token is not closing nor opening, so even if there is an animation set, that
+                // doesn't mean that it goes through the normal app transition cycle so we have
+                // to inform the docked controller about visibility change.
+                // TODO(multi-display): notify docked divider on all displays where visibility was
+                // affected.
+                mService.getDefaultDisplayContentLocked().getDockedDividerController()
+                        .notifyAppVisibilityChanged();
+
+                // Take the screenshot before possibly hiding the WSA, otherwise the screenshot
+                // will not be taken.
+                mService.mTaskSnapshotController.notifyAppVisibilityChanged(this, visible);
+            }
+
             // If we are hidden but there is no delay needed we immediately
             // apply the Surface transaction so that the ActivityManager
             // can have some guarantee on the Surface state following
@@ -491,17 +505,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                     mChildren.get(i).mWinAnimator.hide("immediately hidden");
                 }
                 SurfaceControl.closeTransaction();
-            }
-
-            if (!mService.mClosingApps.contains(this) && !mService.mOpeningApps.contains(this)) {
-                // The token is not closing nor opening, so even if there is an animation set, that
-                // doesn't mean that it goes through the normal app transition cycle so we have
-                // to inform the docked controller about visibility change.
-                // TODO(multi-display): notify docked divider on all displays where visibility was
-                // affected.
-                mService.getDefaultDisplayContentLocked().getDockedDividerController()
-                        .notifyAppVisibilityChanged();
-                mService.mTaskSnapshotController.notifyAppVisibilityChanged(this, visible);
             }
         }
 
