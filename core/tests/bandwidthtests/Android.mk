@@ -25,6 +25,7 @@ LOCAL_SRC_FILES := \
 LOCAL_JAVA_LIBRARIES := android.test.runner org.apache.http.legacy
 LOCAL_STATIC_JAVA_LIBRARIES := junit legacy-android-test
 LOCAL_PACKAGE_NAME := BandwidthTests
+LOCAL_PRIVATE_PLATFORM_APIS := true
 
 include $(BUILD_PACKAGE)
 
