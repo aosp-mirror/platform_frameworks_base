@@ -360,6 +360,7 @@ package android.hardware.display {
   }
 
   public final class DisplayManager {
+    method public java.util.List<android.hardware.display.AmbientBrightnessDayStats> getAmbientBrightnessStats();
     method public java.util.List<android.hardware.display.BrightnessChangeEvent> getBrightnessEvents();
     method public android.graphics.Point getStableDisplaySize();
     method public void setBrightnessConfiguration(android.hardware.display.BrightnessConfiguration);
