@@ -976,8 +976,6 @@ Landroid/media/RemoteDisplay;->notifyDisplayConnected(Landroid/view/Surface;IIII
 Landroid/media/RemoteDisplay;->notifyDisplayDisconnected()V
 Landroid/media/RemoteDisplay;->notifyDisplayError(I)V
 Landroid/media/RingtoneManager;->getRingtone(Landroid/content/Context;Landroid/net/Uri;I)Landroid/media/Ringtone;
-Landroid/media/Ringtone;->setLooping(Z)V
-Landroid/media/Ringtone;->setVolume(F)V
 Landroid/media/session/MediaSessionLegacyHelper;->getHelper(Landroid/content/Context;)Landroid/media/session/MediaSessionLegacyHelper;
 Landroid/media/SubtitleController;->mHandler:Landroid/os/Handler;
 Landroid/media/ThumbnailUtils;->createImageThumbnail(Ljava/lang/String;I)Landroid/graphics/Bitmap;
