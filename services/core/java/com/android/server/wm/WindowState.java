@@ -141,7 +141,6 @@ import static com.android.server.wm.proto.WindowStateProto.REMOVED;
 import static com.android.server.wm.proto.WindowStateProto.REMOVE_ON_EXIT;
 import static com.android.server.wm.proto.WindowStateProto.REQUESTED_HEIGHT;
 import static com.android.server.wm.proto.WindowStateProto.REQUESTED_WIDTH;
-import static com.android.server.wm.proto.WindowStateProto.SHOWN_POSITION;
 import static com.android.server.wm.proto.WindowStateProto.STABLE_INSETS;
 import static com.android.server.wm.proto.WindowStateProto.STACK_ID;
 import static com.android.server.wm.proto.WindowStateProto.SURFACE_INSETS;
@@ -301,12 +300,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private final MergedConfiguration mLastReportedConfiguration = new MergedConfiguration();
 
     /**
-     * Actual position of the surface shown on-screen (may be modified by animation). These are
-     * in the screen's coordinate space (WITH the compatibility scale applied).
-     */
-    final Point mShownPosition = new Point();
-
-    /**
      * Insets that determine the actually visible area.  These are in the application's
      * coordinate space (without compatibility scale applied).
      */
@@ -464,10 +457,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     // to its window; if a wallpaper window: not used.
     int mWallpaperDisplayOffsetX = Integer.MIN_VALUE;
     int mWallpaperDisplayOffsetY = Integer.MIN_VALUE;
-
-    // Wallpaper windows: pixels offset based on above variables.
-    int mXOffset;
-    int mYOffset;
 
     /**
      * This is set after IWindowSession.relayout() has been called at
@@ -774,8 +763,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mRequestedHeight = 0;
         mLastRequestedWidth = 0;
         mLastRequestedHeight = 0;
-        mXOffset = 0;
-        mYOffset = 0;
         mLayer = 0;
         mInputWindowHandle = new InputWindowHandle(
                 mAppToken != null ? mAppToken.mInputApplicationHandle : null, this, c,
@@ -1138,11 +1125,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     public Rect getFrameLw() {
         return mFrame;
-    }
-
-    @Override
-    public Point getShownPositionLw() {
-        return mShownPosition;
     }
 
     @Override
@@ -3182,7 +3164,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mContentInsets.writeToProto(proto, CONTENT_INSETS);
         mAttrs.surfaceInsets.writeToProto(proto, SURFACE_INSETS);
         mSurfacePosition.writeToProto(proto, SURFACE_POSITION);
-        mShownPosition.writeToProto(proto, SHOWN_POSITION);
         mWinAnimator.writeToProto(proto, ANIMATOR);
         proto.write(ANIMATING_EXIT, mAnimatingExit);
         for (int i = 0; i < mChildren.size(); i++) {
@@ -3298,10 +3279,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             pw.print(prefix); pw.print("mRelayoutCalled="); pw.print(mRelayoutCalled);
                     pw.print(" mLayoutNeeded="); pw.println(mLayoutNeeded);
         }
-        if (mXOffset != 0 || mYOffset != 0) {
-            pw.print(prefix); pw.print("Offsets x="); pw.print(mXOffset);
-                    pw.print(" y="); pw.println(mYOffset);
-        }
         if (dumpAll) {
             pw.print(prefix); pw.print("mGivenContentInsets=");
                     mGivenContentInsets.printShortString(pw);
@@ -3320,7 +3297,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     pw.println(getLastReportedConfiguration());
         }
         pw.print(prefix); pw.print("mHasSurface="); pw.print(mHasSurface);
-                pw.print(" mShownPosition="); mShownPosition.printShortString(pw);
                 pw.print(" isReadyForDisplay()="); pw.print(isReadyForDisplay());
                 pw.print(" mWindowRemovalAllowed="); pw.println(mWindowRemovalAllowed);
         if (dumpAll) {
@@ -4241,9 +4217,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final int width = mFrame.width();
         final int height = mFrame.height();
 
-        // Compute the offset of the window in relation to the decor rect.
-        final int left = mXOffset + mFrame.left;
-        final int top = mYOffset + mFrame.top;
+        final int left = mFrame.left;
+        final int top = mFrame.top;
 
         // Initialize the decor rect to the entire frame.
         if (isDockedResizing()) {
@@ -4345,14 +4320,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // When we change the Surface size, in scenarios which may require changing
         // the surface position in sync with the resize, we use a preserved surface
         // so we can freeze it while waiting for the client to report draw on the newly
-        // sized surface.  Don't preserve surfaces if the insets change while animating the pinned
-        // stack since it can lead to issues if a new surface is created while calculating the
-        // scale for the animation using the source hint rect
-        // (see WindowStateAnimator#setSurfaceBoundariesLocked()).
-        if (isDragResizeChanged()
-                || (surfaceInsetsChanging() && !inPinnedWindowingMode())) {
-            mLastSurfaceInsets.set(mAttrs.surfaceInsets);
-
+        // sized surface. At the moment this logic is only in place for switching
+        // in and out of the big surface for split screen resize.
+        if (isDragResizeChanged()) {
             setDragResizing();
             // We can only change top level windows to the full-screen surface when
             // resizing (as we only have one full-screen surface). So there is no need
@@ -4437,8 +4407,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         float9[Matrix.MSKEW_Y] = mWinAnimator.mDtDx;
         float9[Matrix.MSKEW_X] = mWinAnimator.mDtDy;
         float9[Matrix.MSCALE_Y] = mWinAnimator.mDsDy;
-        int x = mSurfacePosition.x + mShownPosition.x;
-        int y = mSurfacePosition.y + mShownPosition.y;
+        int x = mSurfacePosition.x;
+        int y = mSurfacePosition.y;
 
         // If changed, also adjust transformFrameToSurfacePosition
         final WindowContainer parent = getParent();
@@ -4600,9 +4570,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         transformFrameToSurfacePosition(mFrame.left, mFrame.top, mSurfacePosition);
+
         if (!mSurfaceAnimator.hasLeash() && !mLastSurfacePosition.equals(mSurfacePosition)) {
             t.setPosition(mSurfaceControl, mSurfacePosition.x, mSurfacePosition.y);
             mLastSurfacePosition.set(mSurfacePosition.x, mSurfacePosition.y);
+            if (surfaceInsetsChanging() && mWinAnimator.hasSurface()) {
+                mLastSurfaceInsets.set(mAttrs.surfaceInsets);
+                t.deferTransactionUntil(mSurfaceControl,
+                        mWinAnimator.mSurfaceController.mSurfaceControl.getHandle(),
+                        mAttrs.frameNumber);
+            }
         }
     }
 
