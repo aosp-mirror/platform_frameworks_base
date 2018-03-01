@@ -47,7 +47,7 @@ import org.junit.Test;
  * Tests for the {@link ActivityStack} class.
  *
  * Build/Install/Run:
- *  atest ActivityStackTests
+ *  atest FrameworksServicesTests:com.android.server.am.ActivityStackTests
  */
 @SmallTest
 @Presubmit
@@ -423,6 +423,31 @@ public class ActivityStackTests extends ActivityTestsBase {
         assertTrue(display.getStackAboveHome() == fullscreenStack4);
         display.moveHomeStackBehindStack(fullscreenStack2);
         assertTrue(display.getStackAboveHome() == fullscreenStack2);
+    }
+
+    @Test
+    public void testSplitScreenMoveToFront() throws Exception {
+        final ActivityDisplay display = mService.mStackSupervisor.getDefaultDisplay();
+        final TestActivityStack splitScreenPrimary = createStackForShouldBeVisibleTest(display,
+                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final TestActivityStack splitScreenSecondary = createStackForShouldBeVisibleTest(display,
+                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final TestActivityStack assistantStack = createStackForShouldBeVisibleTest(display,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_ASSISTANT, true /* onTop */);
+
+        splitScreenPrimary.setIsTranslucent(false);
+        splitScreenSecondary.setIsTranslucent(false);
+        assistantStack.setIsTranslucent(false);
+
+        assertFalse(splitScreenPrimary.shouldBeVisible(null /* starting */));
+        assertFalse(splitScreenSecondary.shouldBeVisible(null /* starting */));
+        assertTrue(assistantStack.shouldBeVisible(null /* starting */));
+
+        splitScreenSecondary.moveToFront("testSplitScreenMoveToFront");
+
+        assertTrue(splitScreenPrimary.shouldBeVisible(null /* starting */));
+        assertTrue(splitScreenSecondary.shouldBeVisible(null /* starting */));
+        assertFalse(assistantStack.shouldBeVisible(null /* starting */));
     }
 
     private <T extends ActivityStack> T createStackForShouldBeVisibleTest(

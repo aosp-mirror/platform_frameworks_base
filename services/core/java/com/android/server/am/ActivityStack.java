@@ -989,13 +989,32 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             return;
         }
 
+        final ActivityDisplay display = getDisplay();
+
+        if (inSplitScreenSecondaryWindowingMode()) {
+            // If the stack is in split-screen seconardy mode, we need to make sure we move the
+            // primary split-screen stack forward in the case it is currently behind a fullscreen
+            // stack so both halves of the split-screen appear on-top and the fullscreen stack isn't
+            // cutting between them.
+            // TODO(b/70677280): This is a workaround until we can fix as part of b/70677280.
+            final ActivityStack topFullScreenStack =
+                    display.getTopStackInWindowingMode(WINDOWING_MODE_FULLSCREEN);
+            if (topFullScreenStack != null) {
+                final ActivityStack primarySplitScreenStack = display.getSplitScreenPrimaryStack();
+                if (display.getIndexOf(topFullScreenStack)
+                        > display.getIndexOf(primarySplitScreenStack)) {
+                    primarySplitScreenStack.moveToFront(reason + " splitScreenToTop");
+                }
+            }
+        }
+
         if (!isActivityTypeHome() && returnsToHomeStack()) {
             // Make sure the home stack is behind this stack since that is where we should return to
             // when this stack is no longer visible.
             mStackSupervisor.moveHomeStackToFront(reason + " returnToHome");
         }
 
-        getDisplay().positionChildAtTop(this);
+        display.positionChildAtTop(this);
         mStackSupervisor.setFocusStackUnchecked(reason, this);
         if (task != null) {
             insertTaskAtTop(task, null);
