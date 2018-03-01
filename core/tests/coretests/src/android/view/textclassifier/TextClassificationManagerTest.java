@@ -22,7 +22,9 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import android.content.Context;
 import android.os.LocaleList;
+import android.service.textclassifier.TextClassifierService;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -44,6 +46,7 @@ public class TextClassificationManagerTest {
     private static final LocaleList LOCALES = LocaleList.forLanguageTags("en-US");
     private static final String NO_TYPE = null;
 
+    private Context mContext;
     private TextClassificationManager mTcm;
     private TextClassifier mClassifier;
     private TextSelection.Options mSelectionOptions;
@@ -52,8 +55,8 @@ public class TextClassificationManagerTest {
 
     @Before
     public void setup() {
-        mTcm = InstrumentationRegistry.getTargetContext()
-                .getSystemService(TextClassificationManager.class);
+        mContext = InstrumentationRegistry.getTargetContext();
+        mTcm = mContext.getSystemService(TextClassificationManager.class);
         mTcm.setTextClassifier(null);
         mClassifier = mTcm.getTextClassifier();
         mSelectionOptions = new TextSelection.Options().setDefaultLocales(LOCALES);
@@ -280,6 +283,18 @@ public class TextClassificationManagerTest {
         TextClassifier classifier = mock(TextClassifier.class);
         mTcm.setTextClassifier(classifier);
         assertEquals(classifier, mTcm.getTextClassifier());
+    }
+
+    @Test
+    public void testGetLocalTextClassifier() {
+        assertTrue(mTcm.getTextClassifier(TextClassifier.LOCAL) instanceof TextClassifierImpl);
+    }
+
+    @Test
+    public void testGetSystemTextClassifier() {
+        assertTrue(
+                TextClassifierService.getServiceComponentName(mContext) == null
+                || mTcm.getTextClassifier(TextClassifier.SYSTEM) instanceof SystemTextClassifier);
     }
 
     private boolean isTextClassifierDisabled() {

@@ -16,6 +16,7 @@
 
 package android.view.textclassifier;
 
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -48,6 +49,16 @@ public interface TextClassifier {
 
     /** @hide */
     String DEFAULT_LOG_TAG = "androidtc";
+
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {LOCAL, SYSTEM})
+    @interface TextClassifierType {}  // TODO: Expose as system APIs.
+    /** Specifies a TextClassifier that runs locally in the app's process. @hide */
+    int LOCAL = 0;
+    /** Specifies a TextClassifier that runs in the system process and serves all apps. @hide */
+    int SYSTEM = 1;
 
     /** The TextClassifier failed to run. */
     String TYPE_UNKNOWN = "";
