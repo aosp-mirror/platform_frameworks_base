@@ -56,14 +56,14 @@
     <string name="bluetooth_connected" msgid="5427152882755735944">"Mit <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> verbunden"</string>
     <string name="bluetooth_pairing" msgid="1426882272690346242">"Verbindung wird hergestellt…"</string>
     <string name="bluetooth_connected_no_headset" msgid="616068069034994802">"Mit <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> verbunden (kein Telefon-Audio)"</string>
-    <string name="bluetooth_connected_no_a2dp" msgid="3736431800395923868">"Mit <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> verbunden (kein Media-Audio)"</string>
+    <string name="bluetooth_connected_no_a2dp" msgid="3736431800395923868">"Mit <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> verbunden (kein Medien-Audio)"</string>
     <string name="bluetooth_connected_no_map" msgid="3200033913678466453">"Mit <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> verbunden (kein Nachrichtenzugriff)"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2047403011284187056">"Mit <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> verbunden (weder Telefon- noch Media-Audio)"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2047403011284187056">"Mit <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> verbunden (weder Telefon- noch Medien-Audio)"</string>
     <string name="bluetooth_connected_battery_level" msgid="5162924691231307748">"Mit <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> verbunden, Akkustand bei <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"Mit <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> verbunden (kein Telefon-Audio), Akkustand bei <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Mit <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> verbunden (kein Media-Audio), Akkustand bei <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Mit <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> verbunden (weder Telefon- noch Media-Audio), Akkustand bei <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Media-Audio"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Mit <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> verbunden (kein Medien-Audio), Akkustand bei <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Mit <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> verbunden (weder Telefon- noch Medien-Audio), Akkustand bei <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Medien-Audio"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefonanrufe"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Dateiübertragung"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Eingabegerät"</string>
@@ -77,8 +77,8 @@
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD-Audio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="7999237886427812595">"Hörhilfe"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="7188282786730266159">"Mit Hörhilfe verbunden"</string>
-    <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Verbunden mit  Audiosystem von Medien"</string>
-    <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Verbunden mit Audiosystem des Telefons"</string>
+    <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Verbunden mit Medien-Audio"</string>
+    <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Verbunden mit Telefon-Audio"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Mit Dateiübertragungsserver verbunden"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"Mit Karte verbunden"</string>
     <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"Mit SAP verbunden"</string>
@@ -89,8 +89,8 @@
     <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"Für Internetzugriff verwenden"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Für Karte verwenden"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Für SIM-Zugriff verwenden"</string>
-    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Für Audiosystem von Medien verwenden"</string>
-    <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Für Audiosystem des Telefons verwenden"</string>
+    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Für Medien-Audio verwenden"</string>
+    <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Für Telefon-Audio verwenden"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Für Dateiübertragung verwenden"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Für Eingabe verwenden"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="908775281788309484">"Für Hörhilfe verwenden"</string>
@@ -220,7 +220,8 @@
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Privates DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Privaten DNS-Modus auswählen"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Aus"</string>
-    <string name="private_dns_mode_opportunistic" msgid="7608409735589131766">"Opportunistisch"</string>
+    <!-- no translation found for private_dns_mode_opportunistic (8314986739896927399) -->
+    <skip />
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Hostname des privaten DNS-Anbieters"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Hostname des DNS-Anbieters eingeben"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Optionen zur Zertifizierung für kabellose Übertragung anzeigen"</string>
@@ -356,22 +357,41 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Hierbei handelt es sich um eine experimentelle Funktion, die sich auf die Leistung auswirken kann."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Außer Kraft gesetzt von \"<xliff:g id="TITLE">%1$s</xliff:g>\""</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"Ca. <xliff:g id="TIME">%1$s</xliff:g> übrig"</string>
+    <!-- no translation found for power_discharging_duration (6655472132189365839) -->
+    <skip />
     <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Noch ca. <xliff:g id="TIME">%1$s</xliff:g>, basierend auf deiner Nutzung"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> bis zur vollständigen Aufladung"</string>
+    <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
+    <skip />
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Noch <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_discharge_by_enhanced (8788299408879961465) -->
+    <skip />
+    <!-- no translation found for power_discharge_by_only_enhanced (7692297898877104416) -->
+    <skip />
+    <!-- no translation found for power_discharge_by (6427074755635635749) -->
+    <skip />
+    <!-- no translation found for power_discharge_by_only (5888058889261108064) -->
+    <skip />
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Weniger als <xliff:g id="THRESHOLD">%1$s</xliff:g> verbleibend"</string>
-    <string name="power_remaining_less_than_duration" msgid="7967078125657859046">"<xliff:g id="LEVEL">%1$s</xliff:g> – weniger als <xliff:g id="THRESHOLD">%2$s</xliff:g> verbleibend"</string>
-    <string name="power_remaining_more_than_subtext" msgid="6846716609975752316">"<xliff:g id="LEVEL">%1$s</xliff:g> – mehr als <xliff:g id="TIME_REMAINING">%2$s</xliff:g> verbleibend"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="8884488700395194194">"mehr als <xliff:g id="TIME_REMAINING">%1$s</xliff:g> verbleibend"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="8168317165722752881">"Smartphone wird bald ausgeschaltet"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="5957064378548718872">"Tablet wird bald ausgeschaltet"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="9055596817716471373">"Gerät wird bald ausgeschaltet"</string>
-    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> – ungefähr noch <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">%1$s</xliff:g> – noch ca. <xliff:g id="TIME">%2$s</xliff:g>, basierend auf deiner Nutzung"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="7679005631124015335">"<xliff:g id="LEVEL">%1$s</xliff:g> – Smartphone wird bald ausgeschaltet"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="261050880878965621">"<xliff:g id="LEVEL">%1$s</xliff:g> – Tablet wird bald ausgeschaltet"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="2020049829798578618">"<xliff:g id="LEVEL">%1$s</xliff:g> – Gerät wird bald ausgeschaltet"</string>
+    <!-- no translation found for power_remaining_less_than_duration (5751885147712659423) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (3176771815132876675) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (8931654680569617380) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1181059207608751924) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2606370266981054691) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2918084807716859985) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (3090926004324573908) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (7466484148515796216) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (603933521600231649) -->
+    <skip />
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> bis zur vollständigen Aufladung"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> bis vollständig geladen"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Unbekannt"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Wird aufgeladen"</string>
