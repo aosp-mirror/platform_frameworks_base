@@ -33,7 +33,6 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
-import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -752,6 +751,8 @@ public class SearchManager
      *
      * <p>This function can be safely called at any time (even if no search is active.)
      *
+     * <p>{@link Configuration#UI_MODE_TYPE_TELEVISION} does not support this method.
+     *
      * @see #startSearch
      */
     public void stopSearch() {
@@ -802,6 +803,8 @@ public class SearchManager
     /**
      * Set or clear the callback that will be invoked whenever the search UI is dismissed.
      *
+     * <p>{@link Configuration#UI_MODE_TYPE_TELEVISION} does not support this method.
+     *
      * @param listener The {@link OnDismissListener} to use, or null.
      */
     public void setOnDismissListener(final OnDismissListener listener) {
@@ -810,6 +813,8 @@ public class SearchManager
 
     /**
      * Set or clear the callback that will be invoked whenever the search UI is canceled.
+     *
+     * <p>{@link Configuration#UI_MODE_TYPE_TELEVISION} does not support this method.
      *
      * @param listener The {@link OnCancelListener} to use, or null.
      */
