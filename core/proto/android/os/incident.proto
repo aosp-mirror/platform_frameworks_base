@@ -214,37 +214,37 @@ message IncidentProto {
         (section).args = "procstats --proto"
     ];
 
-    optional com.android.server.am.proto.ActivityStackSupervisorProto activities = 3012 [
+    optional com.android.server.am.proto.ActivityManagerServiceDumpActivitiesProto activities = 3012 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "activity --proto activities"
     ];
 
-    optional com.android.server.am.proto.BroadcastProto broadcasts = 3013 [
+    optional com.android.server.am.proto.ActivityManagerServiceDumpBroadcastsProto broadcasts = 3013 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "activity --proto broadcasts"
     ];
 
-    optional com.android.server.am.proto.ActiveServicesProto amservices = 3014 [
+    optional com.android.server.am.proto.ActivityManagerServiceDumpServicesProto amservices = 3014 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "activity --proto service"
     ];
 
-    optional com.android.server.am.proto.ProcessesProto amprocesses = 3015 [
+    optional com.android.server.am.proto.ActivityManagerServiceDumpProcessesProto amprocesses = 3015 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "activity --proto processes"
     ];
 
-    optional com.android.server.AlarmManagerServiceProto alarm = 3016 [
+    optional com.android.server.AlarmManagerServiceDumpProto alarm = 3016 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "alarm --proto"
     ];
 
-    optional com.android.server.wm.proto.WindowManagerServiceProto window = 3017 [
+    optional com.android.server.wm.proto.WindowManagerServiceDumpProto window = 3017 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "window --proto"
     ];
 
-    optional com.android.server.am.proto.MemInfoProto meminfo = 3018 [
+    optional com.android.server.am.proto.MemInfoDumpProto meminfo = 3018 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "meminfo -a --proto"
     ];

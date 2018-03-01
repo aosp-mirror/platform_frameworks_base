@@ -48,5 +48,5 @@ message WindowManagerTraceProto {
     /* where the trace originated */
     optional string where = 2;
 
-    optional WindowManagerServiceProto window_manager_service = 3;
+    optional WindowManagerServiceDumpProto window_manager_service = 3;
 }

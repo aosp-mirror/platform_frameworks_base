@@ -143,7 +143,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.org.conscrypt.OpenSSLSocketImpl;
 import com.android.org.conscrypt.TrustedCertificateStore;
-import com.android.server.am.proto.MemInfoProto;
+import com.android.server.am.proto.MemInfoDumpProto;
 
 import dalvik.system.BaseDexClassLoader;
 import dalvik.system.CloseGuard;
@@ -1251,55 +1251,62 @@ public final class ActivityThread extends ClientTransactionHandler {
             long parcelCount = Parcel.getGlobalAllocCount();
             SQLiteDebug.PagerStats stats = SQLiteDebug.getDatabaseInfo();
 
-            final long mToken = proto.start(MemInfoProto.AppData.PROCESS_MEMORY);
-            proto.write(MemInfoProto.ProcessMemory.PID, Process.myPid());
-            proto.write(MemInfoProto.ProcessMemory.PROCESS_NAME,
+            final long mToken = proto.start(MemInfoDumpProto.AppData.PROCESS_MEMORY);
+            proto.write(MemInfoDumpProto.ProcessMemory.PID, Process.myPid());
+            proto.write(MemInfoDumpProto.ProcessMemory.PROCESS_NAME,
                     (mBoundApplication != null) ? mBoundApplication.processName : "unknown");
             dumpMemInfoTable(proto, memInfo, dumpDalvik, dumpSummaryOnly,
                     nativeMax, nativeAllocated, nativeFree,
                     dalvikMax, dalvikAllocated, dalvikFree);
             proto.end(mToken);
 
-            final long oToken = proto.start(MemInfoProto.AppData.OBJECTS);
-            proto.write(MemInfoProto.AppData.ObjectStats.VIEW_INSTANCE_COUNT, viewInstanceCount);
-            proto.write(MemInfoProto.AppData.ObjectStats.VIEW_ROOT_INSTANCE_COUNT,
+            final long oToken = proto.start(MemInfoDumpProto.AppData.OBJECTS);
+            proto.write(MemInfoDumpProto.AppData.ObjectStats.VIEW_INSTANCE_COUNT,
+                    viewInstanceCount);
+            proto.write(MemInfoDumpProto.AppData.ObjectStats.VIEW_ROOT_INSTANCE_COUNT,
                     viewRootInstanceCount);
-            proto.write(MemInfoProto.AppData.ObjectStats.APP_CONTEXT_INSTANCE_COUNT,
+            proto.write(MemInfoDumpProto.AppData.ObjectStats.APP_CONTEXT_INSTANCE_COUNT,
                     appContextInstanceCount);
-            proto.write(MemInfoProto.AppData.ObjectStats.ACTIVITY_INSTANCE_COUNT,
+            proto.write(MemInfoDumpProto.AppData.ObjectStats.ACTIVITY_INSTANCE_COUNT,
                     activityInstanceCount);
-            proto.write(MemInfoProto.AppData.ObjectStats.GLOBAL_ASSET_COUNT, globalAssetCount);
-            proto.write(MemInfoProto.AppData.ObjectStats.GLOBAL_ASSET_MANAGER_COUNT,
+            proto.write(MemInfoDumpProto.AppData.ObjectStats.GLOBAL_ASSET_COUNT,
+                    globalAssetCount);
+            proto.write(MemInfoDumpProto.AppData.ObjectStats.GLOBAL_ASSET_MANAGER_COUNT,
                     globalAssetManagerCount);
-            proto.write(MemInfoProto.AppData.ObjectStats.LOCAL_BINDER_OBJECT_COUNT,
+            proto.write(MemInfoDumpProto.AppData.ObjectStats.LOCAL_BINDER_OBJECT_COUNT,
                     binderLocalObjectCount);
-            proto.write(MemInfoProto.AppData.ObjectStats.PROXY_BINDER_OBJECT_COUNT,
+            proto.write(MemInfoDumpProto.AppData.ObjectStats.PROXY_BINDER_OBJECT_COUNT,
                     binderProxyObjectCount);
-            proto.write(MemInfoProto.AppData.ObjectStats.PARCEL_MEMORY_KB, parcelSize / 1024);
-            proto.write(MemInfoProto.AppData.ObjectStats.PARCEL_COUNT, parcelCount);
-            proto.write(MemInfoProto.AppData.ObjectStats.BINDER_OBJECT_DEATH_COUNT,
+            proto.write(MemInfoDumpProto.AppData.ObjectStats.PARCEL_MEMORY_KB,
+                    parcelSize / 1024);
+            proto.write(MemInfoDumpProto.AppData.ObjectStats.PARCEL_COUNT, parcelCount);
+            proto.write(MemInfoDumpProto.AppData.ObjectStats.BINDER_OBJECT_DEATH_COUNT,
                     binderDeathObjectCount);
-            proto.write(MemInfoProto.AppData.ObjectStats.OPEN_SSL_SOCKET_COUNT, openSslSocketCount);
-            proto.write(MemInfoProto.AppData.ObjectStats.WEBVIEW_INSTANCE_COUNT,
+            proto.write(MemInfoDumpProto.AppData.ObjectStats.OPEN_SSL_SOCKET_COUNT,
+                    openSslSocketCount);
+            proto.write(MemInfoDumpProto.AppData.ObjectStats.WEBVIEW_INSTANCE_COUNT,
                     webviewInstanceCount);
             proto.end(oToken);
 
             // SQLite mem info
-            final long sToken = proto.start(MemInfoProto.AppData.SQL);
-            proto.write(MemInfoProto.AppData.SqlStats.MEMORY_USED_KB, stats.memoryUsed / 1024);
-            proto.write(MemInfoProto.AppData.SqlStats.PAGECACHE_OVERFLOW_KB,
+            final long sToken = proto.start(MemInfoDumpProto.AppData.SQL);
+            proto.write(MemInfoDumpProto.AppData.SqlStats.MEMORY_USED_KB,
+                    stats.memoryUsed / 1024);
+            proto.write(MemInfoDumpProto.AppData.SqlStats.PAGECACHE_OVERFLOW_KB,
                     stats.pageCacheOverflow / 1024);
-            proto.write(MemInfoProto.AppData.SqlStats.MALLOC_SIZE_KB, stats.largestMemAlloc / 1024);
+            proto.write(MemInfoDumpProto.AppData.SqlStats.MALLOC_SIZE_KB,
+                    stats.largestMemAlloc / 1024);
             int n = stats.dbStats.size();
             for (int i = 0; i < n; i++) {
                 DbStats dbStats = stats.dbStats.get(i);
 
-                final long dToken = proto.start(MemInfoProto.AppData.SqlStats.DATABASES);
-                proto.write(MemInfoProto.AppData.SqlStats.Database.NAME, dbStats.dbName);
-                proto.write(MemInfoProto.AppData.SqlStats.Database.PAGE_SIZE, dbStats.pageSize);
-                proto.write(MemInfoProto.AppData.SqlStats.Database.DB_SIZE, dbStats.dbSize);
-                proto.write(MemInfoProto.AppData.SqlStats.Database.LOOKASIDE_B, dbStats.lookaside);
-                proto.write(MemInfoProto.AppData.SqlStats.Database.CACHE, dbStats.cache);
+                final long dToken = proto.start(MemInfoDumpProto.AppData.SqlStats.DATABASES);
+                proto.write(MemInfoDumpProto.AppData.SqlStats.Database.NAME, dbStats.dbName);
+                proto.write(MemInfoDumpProto.AppData.SqlStats.Database.PAGE_SIZE, dbStats.pageSize);
+                proto.write(MemInfoDumpProto.AppData.SqlStats.Database.DB_SIZE, dbStats.dbSize);
+                proto.write(MemInfoDumpProto.AppData.SqlStats.Database.LOOKASIDE_B,
+                        dbStats.lookaside);
+                proto.write(MemInfoDumpProto.AppData.SqlStats.Database.CACHE, dbStats.cache);
                 proto.end(dToken);
             }
             proto.end(sToken);
@@ -1307,7 +1314,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             // Asset details.
             String assetAlloc = AssetManager.getAssetAllocations();
             if (assetAlloc != null) {
-                proto.write(MemInfoProto.AppData.ASSET_ALLOCATIONS, assetAlloc);
+                proto.write(MemInfoDumpProto.AppData.ASSET_ALLOCATIONS, assetAlloc);
             }
 
             // Unreachable native memory
@@ -1315,7 +1322,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                 int flags = mBoundApplication == null ? 0 : mBoundApplication.appInfo.flags;
                 boolean showContents = (flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0
                         || android.os.Build.IS_DEBUGGABLE;
-                proto.write(MemInfoProto.AppData.UNREACHABLE_MEMORY,
+                proto.write(MemInfoDumpProto.AppData.UNREACHABLE_MEMORY,
                         Debug.getUnreachableMemory(100, showContents));
             }
         }
@@ -2505,17 +2512,17 @@ public final class ActivityThread extends ClientTransactionHandler {
             boolean hasSwappedOutPss, int dirtySwap, int dirtySwapPss) {
         final long token = proto.start(fieldId);
 
-        proto.write(MemInfoProto.ProcessMemory.MemoryInfo.NAME, name);
-        proto.write(MemInfoProto.ProcessMemory.MemoryInfo.TOTAL_PSS_KB, pss);
-        proto.write(MemInfoProto.ProcessMemory.MemoryInfo.CLEAN_PSS_KB, cleanPss);
-        proto.write(MemInfoProto.ProcessMemory.MemoryInfo.SHARED_DIRTY_KB, sharedDirty);
-        proto.write(MemInfoProto.ProcessMemory.MemoryInfo.PRIVATE_DIRTY_KB, privateDirty);
-        proto.write(MemInfoProto.ProcessMemory.MemoryInfo.SHARED_CLEAN_KB, sharedClean);
-        proto.write(MemInfoProto.ProcessMemory.MemoryInfo.PRIVATE_CLEAN_KB, privateClean);
+        proto.write(MemInfoDumpProto.ProcessMemory.MemoryInfo.NAME, name);
+        proto.write(MemInfoDumpProto.ProcessMemory.MemoryInfo.TOTAL_PSS_KB, pss);
+        proto.write(MemInfoDumpProto.ProcessMemory.MemoryInfo.CLEAN_PSS_KB, cleanPss);
+        proto.write(MemInfoDumpProto.ProcessMemory.MemoryInfo.SHARED_DIRTY_KB, sharedDirty);
+        proto.write(MemInfoDumpProto.ProcessMemory.MemoryInfo.PRIVATE_DIRTY_KB, privateDirty);
+        proto.write(MemInfoDumpProto.ProcessMemory.MemoryInfo.SHARED_CLEAN_KB, sharedClean);
+        proto.write(MemInfoDumpProto.ProcessMemory.MemoryInfo.PRIVATE_CLEAN_KB, privateClean);
         if (hasSwappedOutPss) {
-            proto.write(MemInfoProto.ProcessMemory.MemoryInfo.DIRTY_SWAP_PSS_KB, dirtySwapPss);
+            proto.write(MemInfoDumpProto.ProcessMemory.MemoryInfo.DIRTY_SWAP_PSS_KB, dirtySwapPss);
         } else {
-            proto.write(MemInfoProto.ProcessMemory.MemoryInfo.DIRTY_SWAP_KB, dirtySwap);
+            proto.write(MemInfoDumpProto.ProcessMemory.MemoryInfo.DIRTY_SWAP_KB, dirtySwap);
         }
 
         proto.end(token);
@@ -2530,26 +2537,26 @@ public final class ActivityThread extends ClientTransactionHandler {
             long dalvikMax, long dalvikAllocated, long dalvikFree) {
 
         if (!dumpSummaryOnly) {
-            final long nhToken = proto.start(MemInfoProto.ProcessMemory.NATIVE_HEAP);
-            dumpMemoryInfo(proto, MemInfoProto.ProcessMemory.HeapInfo.MEM_INFO, "Native Heap",
+            final long nhToken = proto.start(MemInfoDumpProto.ProcessMemory.NATIVE_HEAP);
+            dumpMemoryInfo(proto, MemInfoDumpProto.ProcessMemory.HeapInfo.MEM_INFO, "Native Heap",
                     memInfo.nativePss, memInfo.nativeSwappablePss, memInfo.nativeSharedDirty,
                     memInfo.nativePrivateDirty, memInfo.nativeSharedClean,
                     memInfo.nativePrivateClean, memInfo.hasSwappedOutPss,
                     memInfo.nativeSwappedOut, memInfo.nativeSwappedOutPss);
-            proto.write(MemInfoProto.ProcessMemory.HeapInfo.HEAP_SIZE_KB, nativeMax);
-            proto.write(MemInfoProto.ProcessMemory.HeapInfo.HEAP_ALLOC_KB, nativeAllocated);
-            proto.write(MemInfoProto.ProcessMemory.HeapInfo.HEAP_FREE_KB, nativeFree);
+            proto.write(MemInfoDumpProto.ProcessMemory.HeapInfo.HEAP_SIZE_KB, nativeMax);
+            proto.write(MemInfoDumpProto.ProcessMemory.HeapInfo.HEAP_ALLOC_KB, nativeAllocated);
+            proto.write(MemInfoDumpProto.ProcessMemory.HeapInfo.HEAP_FREE_KB, nativeFree);
             proto.end(nhToken);
 
-            final long dvToken = proto.start(MemInfoProto.ProcessMemory.DALVIK_HEAP);
-            dumpMemoryInfo(proto, MemInfoProto.ProcessMemory.HeapInfo.MEM_INFO, "Dalvik Heap",
+            final long dvToken = proto.start(MemInfoDumpProto.ProcessMemory.DALVIK_HEAP);
+            dumpMemoryInfo(proto, MemInfoDumpProto.ProcessMemory.HeapInfo.MEM_INFO, "Dalvik Heap",
                     memInfo.dalvikPss, memInfo.dalvikSwappablePss, memInfo.dalvikSharedDirty,
                     memInfo.dalvikPrivateDirty, memInfo.dalvikSharedClean,
                     memInfo.dalvikPrivateClean, memInfo.hasSwappedOutPss,
                     memInfo.dalvikSwappedOut, memInfo.dalvikSwappedOutPss);
-            proto.write(MemInfoProto.ProcessMemory.HeapInfo.HEAP_SIZE_KB, dalvikMax);
-            proto.write(MemInfoProto.ProcessMemory.HeapInfo.HEAP_ALLOC_KB, dalvikAllocated);
-            proto.write(MemInfoProto.ProcessMemory.HeapInfo.HEAP_FREE_KB, dalvikFree);
+            proto.write(MemInfoDumpProto.ProcessMemory.HeapInfo.HEAP_SIZE_KB, dalvikMax);
+            proto.write(MemInfoDumpProto.ProcessMemory.HeapInfo.HEAP_ALLOC_KB, dalvikAllocated);
+            proto.write(MemInfoDumpProto.ProcessMemory.HeapInfo.HEAP_FREE_KB, dalvikFree);
             proto.end(dvToken);
 
             int otherPss = memInfo.otherPss;
@@ -2573,7 +2580,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                 if (myPss != 0 || mySharedDirty != 0 || myPrivateDirty != 0
                         || mySharedClean != 0 || myPrivateClean != 0
                         || (memInfo.hasSwappedOutPss ? mySwappedOutPss : mySwappedOut) != 0) {
-                    dumpMemoryInfo(proto, MemInfoProto.ProcessMemory.OTHER_HEAPS,
+                    dumpMemoryInfo(proto, MemInfoDumpProto.ProcessMemory.OTHER_HEAPS,
                             Debug.MemoryInfo.getOtherLabel(i),
                             myPss, mySwappablePss, mySharedDirty, myPrivateDirty,
                             mySharedClean, myPrivateClean,
@@ -2590,21 +2597,23 @@ public final class ActivityThread extends ClientTransactionHandler {
                 }
             }
 
-            dumpMemoryInfo(proto, MemInfoProto.ProcessMemory.UNKNOWN_HEAP, "Unknown",
+            dumpMemoryInfo(proto, MemInfoDumpProto.ProcessMemory.UNKNOWN_HEAP, "Unknown",
                     otherPss, otherSwappablePss,
                     otherSharedDirty, otherPrivateDirty, otherSharedClean, otherPrivateClean,
                     memInfo.hasSwappedOutPss, otherSwappedOut, otherSwappedOutPss);
-            final long tToken = proto.start(MemInfoProto.ProcessMemory.TOTAL_HEAP);
-            dumpMemoryInfo(proto, MemInfoProto.ProcessMemory.HeapInfo.MEM_INFO, "TOTAL",
+            final long tToken = proto.start(MemInfoDumpProto.ProcessMemory.TOTAL_HEAP);
+            dumpMemoryInfo(proto, MemInfoDumpProto.ProcessMemory.HeapInfo.MEM_INFO, "TOTAL",
                     memInfo.getTotalPss(), memInfo.getTotalSwappablePss(),
                     memInfo.getTotalSharedDirty(), memInfo.getTotalPrivateDirty(),
                     memInfo.getTotalSharedClean(), memInfo.getTotalPrivateClean(),
                     memInfo.hasSwappedOutPss, memInfo.getTotalSwappedOut(),
                     memInfo.getTotalSwappedOutPss());
-            proto.write(MemInfoProto.ProcessMemory.HeapInfo.HEAP_SIZE_KB, nativeMax + dalvikMax);
-            proto.write(MemInfoProto.ProcessMemory.HeapInfo.HEAP_ALLOC_KB,
+            proto.write(MemInfoDumpProto.ProcessMemory.HeapInfo.HEAP_SIZE_KB,
+                    nativeMax + dalvikMax);
+            proto.write(MemInfoDumpProto.ProcessMemory.HeapInfo.HEAP_ALLOC_KB,
                     nativeAllocated + dalvikAllocated);
-            proto.write(MemInfoProto.ProcessMemory.HeapInfo.HEAP_FREE_KB, nativeFree + dalvikFree);
+            proto.write(MemInfoDumpProto.ProcessMemory.HeapInfo.HEAP_FREE_KB,
+                    nativeFree + dalvikFree);
             proto.end(tToken);
 
             if (dumpDalvik) {
@@ -2622,7 +2631,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                     if (myPss != 0 || mySharedDirty != 0 || myPrivateDirty != 0
                             || mySharedClean != 0 || myPrivateClean != 0
                             || (memInfo.hasSwappedOutPss ? mySwappedOutPss : mySwappedOut) != 0) {
-                        dumpMemoryInfo(proto, MemInfoProto.ProcessMemory.DALVIK_DETAILS,
+                        dumpMemoryInfo(proto, MemInfoDumpProto.ProcessMemory.DALVIK_DETAILS,
                                 Debug.MemoryInfo.getOtherLabel(i),
                                 myPss, mySwappablePss, mySharedDirty, myPrivateDirty,
                                 mySharedClean, myPrivateClean,
@@ -2632,24 +2641,26 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
         }
 
-        final long asToken = proto.start(MemInfoProto.ProcessMemory.APP_SUMMARY);
-        proto.write(MemInfoProto.ProcessMemory.AppSummary.JAVA_HEAP_PSS_KB,
+        final long asToken = proto.start(MemInfoDumpProto.ProcessMemory.APP_SUMMARY);
+        proto.write(MemInfoDumpProto.ProcessMemory.AppSummary.JAVA_HEAP_PSS_KB,
                 memInfo.getSummaryJavaHeap());
-        proto.write(MemInfoProto.ProcessMemory.AppSummary.NATIVE_HEAP_PSS_KB,
+        proto.write(MemInfoDumpProto.ProcessMemory.AppSummary.NATIVE_HEAP_PSS_KB,
                 memInfo.getSummaryNativeHeap());
-        proto.write(MemInfoProto.ProcessMemory.AppSummary.CODE_PSS_KB, memInfo.getSummaryCode());
-        proto.write(MemInfoProto.ProcessMemory.AppSummary.STACK_PSS_KB, memInfo.getSummaryStack());
-        proto.write(MemInfoProto.ProcessMemory.AppSummary.GRAPHICS_PSS_KB,
+        proto.write(MemInfoDumpProto.ProcessMemory.AppSummary.CODE_PSS_KB,
+                memInfo.getSummaryCode());
+        proto.write(MemInfoDumpProto.ProcessMemory.AppSummary.STACK_PSS_KB,
+                memInfo.getSummaryStack());
+        proto.write(MemInfoDumpProto.ProcessMemory.AppSummary.GRAPHICS_PSS_KB,
                 memInfo.getSummaryGraphics());
-        proto.write(MemInfoProto.ProcessMemory.AppSummary.PRIVATE_OTHER_PSS_KB,
+        proto.write(MemInfoDumpProto.ProcessMemory.AppSummary.PRIVATE_OTHER_PSS_KB,
                 memInfo.getSummaryPrivateOther());
-        proto.write(MemInfoProto.ProcessMemory.AppSummary.SYSTEM_PSS_KB,
+        proto.write(MemInfoDumpProto.ProcessMemory.AppSummary.SYSTEM_PSS_KB,
                 memInfo.getSummarySystem());
         if (memInfo.hasSwappedOutPss) {
-            proto.write(MemInfoProto.ProcessMemory.AppSummary.TOTAL_SWAP_PSS,
+            proto.write(MemInfoDumpProto.ProcessMemory.AppSummary.TOTAL_SWAP_PSS,
                     memInfo.getSummaryTotalSwapPss());
         } else {
-            proto.write(MemInfoProto.ProcessMemory.AppSummary.TOTAL_SWAP_PSS,
+            proto.write(MemInfoDumpProto.ProcessMemory.AppSummary.TOTAL_SWAP_PSS,
                     memInfo.getSummaryTotalSwap());
         }
         proto.end(asToken);
