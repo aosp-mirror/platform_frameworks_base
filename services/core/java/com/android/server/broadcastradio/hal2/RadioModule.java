@@ -55,7 +55,7 @@ class RadioModule {
 
     public static @Nullable RadioModule tryLoadingModule(int idx, @NonNull String fqName) {
         try {
-            IBroadcastRadio service = IBroadcastRadio.getService();
+            IBroadcastRadio service = IBroadcastRadio.getService(fqName);
             if (service == null) return null;
 
             Mutable<AmFmRegionConfig> amfmConfig = new Mutable<>();

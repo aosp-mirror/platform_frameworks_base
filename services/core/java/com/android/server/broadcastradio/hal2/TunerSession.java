@@ -90,7 +90,8 @@ class TunerSession extends ITuner.Stub {
         if (ret == AudioSystem.AUDIO_STATUS_OK) {
             mIsAudioConnected = connected;
         } else {
-            Slog.e(TAG, "Failed to notify AudioService about new state: " + connected);
+            Slog.e(TAG, "Failed to notify AudioService about new state: "
+                    + connected + ", response was: " + ret);
         }
     }
 
