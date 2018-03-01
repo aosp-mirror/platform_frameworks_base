@@ -67,6 +67,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     private int mTouchSlop;
     private int mTouchDownX;
     private int mTouchDownY;
+    private boolean mIsPressed;
     private boolean mSupportsLongpress = true;
     private AudioManager mAudioManager;
     private boolean mGestureAborted;
@@ -79,7 +80,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
 
     private final Runnable mCheckLongPress = new Runnable() {
         public void run() {
-            if (isPressed()) {
+            if (mIsPressed) {
                 // Log.d("KeyButtonView", "longpressed: " + this);
                 if (isLongClickable()) {
                     // Just an old-fashioned ImageView
@@ -89,6 +90,12 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                     sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
                     sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
                     mLongClicked = true;
+                }
+
+                // Only when quick step is enabled, ripple will not be shown on touch down, then
+                // show the ripple on touch up or on long press
+                if (mLongClicked && mOverviewProxyService.getProxy() != null) {
+                    setPressed(true);
                 }
             }
         }
@@ -216,7 +223,6 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
             case MotionEvent.ACTION_DOWN:
                 mDownTime = SystemClock.uptimeMillis();
                 mLongClicked = false;
-                setPressed(true);
                 mTouchDownX = (int) ev.getX();
                 mTouchDownY = (int) ev.getY();
                 if (mCode != 0) {
@@ -225,6 +231,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                     // Provide the same haptic feedback that the system offers for virtual keys.
                     performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                 }
+                mIsPressed = true;
                 if (isProxyConnected) {
                     // Provide small vibration for quick step or immediate down feedback
                     AsyncTask.execute(() ->
@@ -232,6 +239,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                                     .get(VibrationEffect.EFFECT_TICK, false)));
                 } else {
                     playSoundEffect(SoundEffectConstants.CLICK);
+                    setPressed(mIsPressed);
                 }
                 removeCallbacks(mCheckLongPress);
                 postDelayed(mCheckLongPress, ViewConfiguration.getLongPressTimeout());
@@ -242,7 +250,12 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 boolean exceededTouchSlopX = Math.abs(x - mTouchDownX) > mTouchSlop;
                 boolean exceededTouchSlopY = Math.abs(y - mTouchDownY) > mTouchSlop;
                 if (exceededTouchSlopX || exceededTouchSlopY) {
-                    setPressed(false);
+                    // When quick step is enabled, prevent animating the ripple triggered by
+                    // setPressed and decide to run it on touch up
+                    mIsPressed = false;
+                    if (!isProxyConnected) {
+                        setPressed(mIsPressed);
+                    }
                     removeCallbacks(mCheckLongPress);
                 }
                 break;
@@ -254,10 +267,11 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 removeCallbacks(mCheckLongPress);
                 break;
             case MotionEvent.ACTION_UP:
-                final boolean doIt = isPressed() && !mLongClicked;
-                setPressed(false);
+                final boolean doIt = mIsPressed && !mLongClicked;
                 if (isProxyConnected) {
                     if (doIt) {
+                        // Animate the ripple in on touch up with setPressed and then out later
+                        setPressed(true);
                         performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                         playSoundEffect(SoundEffectConstants.CLICK);
                     }
@@ -266,6 +280,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                     // and it feels weird to sometimes get a release haptic and other times not.
                     performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY_RELEASE);
                 }
+                setPressed(false);
                 if (mCode != 0) {
                     if (doIt) {
                         // If there was a pending remote recents animation, then we need to
@@ -295,6 +310,12 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
         mAudioManager.playSoundEffect(soundConstant, ActivityManager.getCurrentUser());
     }
 
+    @Override
+    public void setPressed(boolean pressed) {
+        mIsPressed = pressed;
+        super.setPressed(pressed);
+    }
+
     public void sendEvent(int action, int flags) {
         sendEvent(action, flags, SystemClock.uptimeMillis());
     }
@@ -317,7 +338,6 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     @Override
     public void abortCurrentGesture() {
         setPressed(false);
-        mRipple.abortDelayedRipple();
         mGestureAborted = true;
     }
 
@@ -336,7 +356,6 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
 
     @Override
     public void setDelayTouchFeedback(boolean shouldDelay) {
-        mRipple.setDelayTouchFeedback(shouldDelay);
     }
 
     @Override
