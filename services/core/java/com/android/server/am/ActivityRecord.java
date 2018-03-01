@@ -230,6 +230,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     private static final String ATTR_COMPONENTSPECIFIED = "component_specified";
     static final String ACTIVITY_ICON_SUFFIX = "_activity_icon_";
 
+    private static final int MAX_STORED_STATE_TRANSITIONS = 5;
+
     final ActivityManagerService service; // owner
     final IApplicationToken.Stub appToken; // window manager token
     AppWindowContainerController mWindowContainerController;
@@ -366,6 +368,28 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     private final Configuration mTmpConfig = new Configuration();
     private final Rect mTmpBounds = new Rect();
 
+    private final ArrayList<StateTransition> mRecentTransitions = new ArrayList<>();
+
+    // TODO(b/71506345): Remove once issue has been resolved.
+    private static class StateTransition {
+        final long time;
+        final ActivityState prev;
+        final ActivityState state;
+        final String reason;
+
+        StateTransition(ActivityState prev, ActivityState state, String reason) {
+            time = System.currentTimeMillis();
+            this.prev = prev;
+            this.state = state;
+            this.reason = reason;
+        }
+
+        @Override
+        public String toString() {
+            return "[" + prev + "->" + state + ":" + reason + "@" + time + "]";
+        }
+    }
+
     private static String startingWindowStateToString(int state) {
         switch (state) {
             case STARTING_WINDOW_NOT_SHOWN:
@@ -380,9 +404,18 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     String getLifecycleDescription(String reason) {
+        StringBuilder transitionBuilder = new StringBuilder();
+
+        for (int i = 0, size = mRecentTransitions.size(); i < size; ++i) {
+            transitionBuilder.append(mRecentTransitions.get(i));
+            if (i + 1 < size) {
+                transitionBuilder.append(",");
+            }
+        }
+
         return "name= " + this + ", component=" + intent.getComponent().flattenToShortString()
                 + ", package=" + packageName + ", state=" + mState + ", reason=" + reason
-                + ", time=" + System.currentTimeMillis();
+                + ", time=" + System.currentTimeMillis() + " transitions=" + transitionBuilder;
     }
 
     void dump(PrintWriter pw, String prefix) {
@@ -1581,7 +1614,16 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     void setState(ActivityState state, String reason) {
         if (DEBUG_STATES) Slog.v(TAG_STATES, "State movement: " + this + " from:" + getState()
                         + " to:" + state + " reason:" + reason);
+        final ActivityState prev = mState;
         mState = state;
+
+        if (mState != prev) {
+            if (mRecentTransitions.size() == MAX_STORED_STATE_TRANSITIONS) {
+                mRecentTransitions.remove(0);
+            }
+
+            mRecentTransitions.add(new StateTransition(prev, state, reason));
+        }
     }
 
     ActivityState getState() {
