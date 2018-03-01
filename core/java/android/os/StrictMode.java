@@ -479,6 +479,8 @@ public final class StrictMode {
             /** Initialize a Builder from an existing ThreadPolicy. */
             public Builder(ThreadPolicy policy) {
                 mMask = policy.mask;
+                mListener = policy.mListener;
+                mExecutor = policy.mCallbackExecutor;
             }
 
             /**
