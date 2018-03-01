@@ -1185,24 +1185,13 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
     }
 
     /**
-     * Sets which type of audio focus will be requested during the playback, or configures playback
-     * to not request audio focus. Valid values for focus requests are
-     * {@link AudioManager#AUDIOFOCUS_GAIN}, {@link AudioManager#AUDIOFOCUS_GAIN_TRANSIENT},
-     * {@link AudioManager#AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK}, and
-     * {@link AudioManager#AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE}. Or use
-     * {@link AudioManager#AUDIOFOCUS_NONE} to express that audio focus should not be
-     * requested when playback starts. You can for instance use this when playing a silent animation
-     * through this class, and you don't want to affect other audio applications playing in the
-     * background.
+     * Set the {@link AudioFocusRequest} to obtain the audio focus
      *
-     * @param focusGain the type of audio focus gain that will be requested, or
-     *                  {@link AudioManager#AUDIOFOCUS_NONE} to disable the use audio focus during
-     *                  playback.
-     * @hide
+     * @param afr the full request parameters
      */
-    // TODO(jaewan): Revisit
-    public void setAudioFocusRequest(int focusGain) {
-        mProvider.setAudioFocusRequest_impl(focusGain);
+    public void setAudioFocusRequest(AudioFocusRequest afr) {
+        // TODO: implement this
+        // mProvider.setAudioFocusRequest_impl(focusGain);
     }
 
     /**
