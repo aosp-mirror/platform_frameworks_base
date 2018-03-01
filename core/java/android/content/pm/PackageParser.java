@@ -4694,6 +4694,7 @@ public class PackageParser {
         info.windowLayout = target.info.windowLayout;
         info.resizeMode = target.info.resizeMode;
         info.maxAspectRatio = target.info.maxAspectRatio;
+        info.requestedVrComponent = target.info.requestedVrComponent;
 
         info.encryptionAware = info.directBootAware = target.info.directBootAware;
 
