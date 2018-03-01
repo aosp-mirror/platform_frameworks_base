@@ -1613,6 +1613,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             writeStringAttribute(out, ATTR_VOLUME_UUID, params.volumeUuid);
             writeIntAttribute(out, ATTR_INSTALL_REASON, params.installReason);
 
+            writeGrantedRuntimePermissionsLocked(out, params.grantedRuntimePermissions);
+
             // Persist app icon if changed since last written
             File appIconFile = buildAppIconFile(sessionId, sessionsDir);
             if (params.appIcon == null && appIconFile.exists()) {
@@ -1632,8 +1634,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
                 params.appIconLastModified = appIconFile.lastModified();
             }
-
-            writeGrantedRuntimePermissionsLocked(out, params.grantedRuntimePermissions);
         }
 
         out.endTag(null, TAG_SESSION);
@@ -1711,8 +1711,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         params.referrerUri = readUriAttribute(in, ATTR_REFERRER_URI);
         params.abiOverride = readStringAttribute(in, ATTR_ABI_OVERRIDE);
         params.volumeUuid = readStringAttribute(in, ATTR_VOLUME_UUID);
-        params.grantedRuntimePermissions = readGrantedRuntimePermissions(in);
         params.installReason = readIntAttribute(in, ATTR_INSTALL_REASON);
+
+        params.grantedRuntimePermissions = readGrantedRuntimePermissions(in);
 
         final File appIconFile = buildAppIconFile(sessionId, sessionsDir);
         if (appIconFile.exists()) {
