@@ -1309,6 +1309,11 @@ public class AssistStructure implements Parcelable {
             if (domain == null) return;
 
             final Uri uri = Uri.parse(domain);
+            if (uri == null) {
+                // Cannot log domain because it could contain PII;
+                Log.w(TAG, "Failed to parse web domain");
+                return;
+            }
             mWebScheme = uri.getScheme();
             mWebDomain = uri.getHost();
         }
