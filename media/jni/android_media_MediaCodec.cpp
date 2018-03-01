@@ -1011,7 +1011,7 @@ static void android_media_MediaCodec_native_configure(
 
     sp<IDescrambler> descrambler;
     if (descramblerBinderObj != NULL) {
-        descrambler = JDescrambler::GetDescrambler(env, descramblerBinderObj);
+        descrambler = GetDescrambler(env, descramblerBinderObj);
     }
 
     err = codec->configure(format, bufferProducer, crypto, descrambler, flags);
