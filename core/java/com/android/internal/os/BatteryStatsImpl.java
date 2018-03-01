@@ -11597,7 +11597,7 @@ public class BatteryStatsImpl extends BatteryStats {
      * time at the highest power level.
      * @param activityInfo
      */
-    private void addModemTxPowerToHistory(final ModemActivityInfo activityInfo) {
+    private synchronized void addModemTxPowerToHistory(final ModemActivityInfo activityInfo) {
         if (activityInfo == null) {
             return;
         }
