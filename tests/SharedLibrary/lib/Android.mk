@@ -6,6 +6,7 @@ LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
 LOCAL_AAPT_FLAGS := --shared-lib
 LOCAL_PACKAGE_NAME := SharedLibrary
+LOCAL_SDK_VERSION := current
 
 LOCAL_EXPORT_PACKAGE_RESOURCES := true
 LOCAL_PRIVILEGED_MODULE := true

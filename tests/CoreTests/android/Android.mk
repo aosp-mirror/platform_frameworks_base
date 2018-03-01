@@ -10,5 +10,6 @@ LOCAL_JAVA_LIBRARIES := android.test.runner bouncycastle conscrypt org.apache.ht
 LOCAL_STATIC_JAVA_LIBRARIES := junit legacy-android-test
 
 LOCAL_PACKAGE_NAME := CoreTests
+LOCAL_PRIVATE_PLATFORM_APIS := true
 
 include $(BUILD_PACKAGE)

@@ -23,6 +23,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-test
 
 LOCAL_PACKAGE_NAME := MultiUserPerfTests
+LOCAL_PRIVATE_PLATFORM_APIS := true
 
 LOCAL_CERTIFICATE := platform
 

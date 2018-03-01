@@ -27,5 +27,6 @@ LOCAL_PRIVILEGED_MODULE := true
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_PACKAGE_NAME := VpnDialogs
+LOCAL_PRIVATE_PLATFORM_APIS := true
 
 include $(BUILD_PACKAGE)
