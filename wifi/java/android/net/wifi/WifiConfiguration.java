@@ -532,91 +532,6 @@ public class WifiConfiguration implements Parcelable {
     /** @hide **/
     public static int INVALID_RSSI = -127;
 
-    /**
-     * @hide
-     * A summary of the RSSI and Band status for that configuration
-     * This is used as a temporary value by the auto-join controller
-     */
-    public static final class Visibility {
-        public int rssi5;   // strongest 5GHz RSSI
-        public int rssi24;  // strongest 2.4GHz RSSI
-        public int num5;    // number of BSSIDs on 5GHz
-        public int num24;   // number of BSSIDs on 2.4GHz
-        public long age5;   // timestamp of the strongest 5GHz BSSID (last time it was seen)
-        public long age24;  // timestamp of the strongest 2.4GHz BSSID (last time it was seen)
-        public String BSSID24;
-        public String BSSID5;
-        public int score; // Debug only, indicate last score used for autojoin/cell-handover
-        public int currentNetworkBoost; // Debug only, indicate boost applied to RSSI if current
-        public int bandPreferenceBoost; // Debug only, indicate boost applied to RSSI if current
-        public int lastChoiceBoost; // Debug only, indicate last choice applied to this configuration
-        public String lastChoiceConfig; // Debug only, indicate last choice applied to this configuration
-
-        public Visibility() {
-            rssi5 = INVALID_RSSI;
-            rssi24 = INVALID_RSSI;
-        }
-
-        public Visibility(Visibility source) {
-            rssi5 = source.rssi5;
-            rssi24 = source.rssi24;
-            age24 = source.age24;
-            age5 = source.age5;
-            num24 = source.num24;
-            num5 = source.num5;
-            BSSID5 = source.BSSID5;
-            BSSID24 = source.BSSID24;
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder sbuf = new StringBuilder();
-            sbuf.append("[");
-            if (rssi24 > INVALID_RSSI) {
-                sbuf.append(Integer.toString(rssi24));
-                sbuf.append(",");
-                sbuf.append(Integer.toString(num24));
-                if (BSSID24 != null) sbuf.append(",").append(BSSID24);
-            }
-            sbuf.append("; ");
-            if (rssi5 > INVALID_RSSI) {
-                sbuf.append(Integer.toString(rssi5));
-                sbuf.append(",");
-                sbuf.append(Integer.toString(num5));
-                if (BSSID5 != null) sbuf.append(",").append(BSSID5);
-            }
-            if (score != 0) {
-                sbuf.append("; ").append(score);
-                sbuf.append(", ").append(currentNetworkBoost);
-                sbuf.append(", ").append(bandPreferenceBoost);
-                if (lastChoiceConfig != null) {
-                    sbuf.append(", ").append(lastChoiceBoost);
-                    sbuf.append(", ").append(lastChoiceConfig);
-                }
-            }
-            sbuf.append("]");
-            return sbuf.toString();
-        }
-    }
-
-    /** @hide
-     * Cache the visibility status of this configuration.
-     * Visibility can change at any time depending on scan results availability.
-     * Owner of the WifiConfiguration is responsible to set this field based on
-     * recent scan results.
-     ***/
-    public Visibility visibility;
-
-    /** @hide
-     * calculate and set Visibility for that configuration.
-     *
-     * age in milliseconds: we will consider only ScanResults that are more recent,
-     * i.e. younger.
-     ***/
-    public void setVisibility(Visibility status) {
-        visibility = status;
-    }
-
     // States for the userApproved field
     /**
      * @hide
@@ -2177,9 +2092,6 @@ public class WifiConfiguration implements Parcelable {
             meteredHint = source.meteredHint;
             meteredOverride = source.meteredOverride;
             useExternalScores = source.useExternalScores;
-            if (source.visibility != null) {
-                visibility = new Visibility(source.visibility);
-            }
 
             didSelfAdd = source.didSelfAdd;
             lastConnectUid = source.lastConnectUid;
