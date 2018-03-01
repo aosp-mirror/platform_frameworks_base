@@ -107,6 +107,7 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.view.textclassifier.TextClassification;
+import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextLinks;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.TextView.Drawables;
@@ -4024,7 +4025,7 @@ public class Editor {
 
         private void updateAssistMenuItems(Menu menu) {
             clearAssistMenuItems(menu);
-            if (!mTextView.isDeviceProvisioned()) {
+            if (!shouldEnableAssistMenuItems()) {
                 return;
             }
             final TextClassification textClassification =
@@ -4097,7 +4098,7 @@ public class Editor {
 
             final TextClassification textClassification =
                     getSelectionActionModeHelper().getTextClassification();
-            if (!mTextView.isDeviceProvisioned() || textClassification == null) {
+            if (!shouldEnableAssistMenuItems() || textClassification == null) {
                 // No textClassification result to handle the click. Eat the click.
                 return true;
             }
@@ -4116,6 +4117,12 @@ public class Editor {
             }
             // We tried our best.
             return true;
+        }
+
+        private boolean shouldEnableAssistMenuItems() {
+            return mTextView.isDeviceProvisioned()
+                && TextClassificationManager.getSettings(mTextView.getContext())
+                        .isSmartTextShareEnabled();
         }
 
         @Override

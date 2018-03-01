@@ -34,7 +34,6 @@ import android.os.UserManager;
 import android.provider.Browser;
 import android.provider.CalendarContract;
 import android.provider.ContactsContract;
-import android.provider.Settings;
 import android.view.textclassifier.logging.DefaultLogger;
 import android.view.textclassifier.logging.GenerateLinksLogger;
 import android.view.textclassifier.logging.Logger;
@@ -99,13 +98,13 @@ public final class TextClassifierImpl implements TextClassifier {
     @GuardedBy("mLoggerLock") // Do not access outside this lock.
     private Logger mLogger;  // Should never be null if mLoggerConfig.get() is not null.
 
-    private TextClassifierConstants mSettings;
+    private final TextClassificationConstants mSettings;
 
-    public TextClassifierImpl(Context context) {
+    public TextClassifierImpl(Context context, TextClassificationConstants settings) {
         mContext = Preconditions.checkNotNull(context);
         mFallback = TextClassifier.NO_OP;
-        mGenerateLinksLogger = new GenerateLinksLogger(
-                getSettings().getGenerateLinksLogSampleRate());
+        mSettings = Preconditions.checkNotNull(settings);
+        mGenerateLinksLogger = new GenerateLinksLogger(mSettings.getGenerateLinksLogSampleRate());
     }
 
     /** @inheritDoc */
@@ -117,7 +116,7 @@ public final class TextClassifierImpl implements TextClassifier {
         try {
             final int rangeLength = selectionEndIndex - selectionStartIndex;
             if (text.length() > 0
-                    && rangeLength <= getSettings().getSuggestSelectionMaxRangeLength()) {
+                    && rangeLength <= mSettings.getSuggestSelectionMaxRangeLength()) {
                 final LocaleList locales = (options == null) ? null : options.getDefaultLocales();
                 final String localesString = concatenateLocales(locales);
                 final Calendar refTime = Calendar.getInstance();
@@ -126,7 +125,7 @@ public final class TextClassifierImpl implements TextClassifier {
                 final String string = text.toString();
                 final int start;
                 final int end;
-                if (getSettings().isDarkLaunch() && !darkLaunchAllowed) {
+                if (mSettings.isModelDarkLaunchEnabled() && !darkLaunchAllowed) {
                     start = selectionStartIndex;
                     end = selectionEndIndex;
                 } else {
@@ -179,7 +178,7 @@ public final class TextClassifierImpl implements TextClassifier {
         Utils.validate(text, startIndex, endIndex, false /* allowInMainThread */);
         try {
             final int rangeLength = endIndex - startIndex;
-            if (text.length() > 0 && rangeLength <= getSettings().getClassifyTextMaxRangeLength()) {
+            if (text.length() > 0 && rangeLength <= mSettings.getClassifyTextMaxRangeLength()) {
                 final String string = text.toString();
                 final LocaleList locales = (options == null) ? null : options.getDefaultLocales();
                 final String localesString = concatenateLocales(locales);
@@ -214,7 +213,7 @@ public final class TextClassifierImpl implements TextClassifier {
         final String textString = text.toString();
         final TextLinks.Builder builder = new TextLinks.Builder(textString);
 
-        if (!getSettings().isSmartLinkifyEnabled()) {
+        if (!mSettings.isSmartLinkifyEnabled()) {
             return builder.build();
         }
 
@@ -226,7 +225,7 @@ public final class TextClassifierImpl implements TextClassifier {
                     options != null && options.getEntityConfig() != null
                             ? options.getEntityConfig().resolveEntityListModifications(
                                     getEntitiesForHints(options.getEntityConfig().getHints()))
-                            : getSettings().getEntityListDefault();
+                            : mSettings.getEntityListDefault();
             final TextClassifierImplNative nativeImpl =
                     getNative(defaultLocales);
             final TextClassifierImplNative.AnnotatedSpan[] annotations =
@@ -268,7 +267,7 @@ public final class TextClassifierImpl implements TextClassifier {
     /** @inheritDoc */
     @Override
     public int getMaxGenerateLinksTextLength() {
-        return getSettings().getGenerateLinksMaxTextLength();
+        return mSettings.getGenerateLinksMaxTextLength();
     }
 
     private Collection<String> getEntitiesForHints(Collection<String> hints) {
@@ -278,11 +277,11 @@ public final class TextClassifierImpl implements TextClassifier {
         // Use the default if there is no hint, or conflicting ones.
         final boolean useDefault = editable == notEditable;
         if (useDefault) {
-            return getSettings().getEntityListDefault();
+            return mSettings.getEntityListDefault();
         } else if (editable) {
-            return getSettings().getEntityListEditable();
+            return mSettings.getEntityListEditable();
         } else {  // notEditable
-            return getSettings().getEntityListNotEditable();
+            return mSettings.getEntityListNotEditable();
         }
     }
 
@@ -296,16 +295,6 @@ public final class TextClassifierImpl implements TextClassifier {
             }
             return mLogger;
         }
-    }
-
-    /** @hide */
-    @Override
-    public TextClassifierConstants getSettings() {
-        if (mSettings == null) {
-            mSettings = TextClassifierConstants.loadFromString(Settings.Global.getString(
-                    mContext.getContentResolver(), Settings.Global.TEXT_CLASSIFIER_CONSTANTS));
-        }
-        return mSettings;
     }
 
     private TextClassifierImplNative getNative(LocaleList localeList)

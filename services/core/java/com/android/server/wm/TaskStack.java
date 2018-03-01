@@ -751,8 +751,11 @@ public class TaskStack extends WindowContainer<Task> implements
     int getStackOutset() {
         if (inPinnedWindowingMode()) {
             final DisplayMetrics displayMetrics = getDisplayContent().getDisplayMetrics();
-            return mService.dipToPixel(PINNED_WINDOWING_MODE_ELEVATION_IN_DIP,
-                    displayMetrics);
+
+            // We multiply by two to match the client logic for converting view elevation
+            // to insets, as in {@link WindowManager.LayoutParams#setSurfaceInsets}
+            return (int)Math.ceil(mService.dipToPixel(PINNED_WINDOWING_MODE_ELEVATION_IN_DIP,
+                    displayMetrics) * 2);
         }
         return 0;
     }
@@ -824,6 +827,7 @@ public class TaskStack extends WindowContainer<Task> implements
         }
 
         updateDisplayInfo(bounds);
+        updateSurfaceBounds();
     }
 
     /**

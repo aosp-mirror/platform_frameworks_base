@@ -17,6 +17,7 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_PACKAGE_NAME := OverlayDeviceTests_AppOverlayTwo
+LOCAL_SDK_VERSION := current
 LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_CERTIFICATE := platform
 include $(BUILD_PACKAGE)

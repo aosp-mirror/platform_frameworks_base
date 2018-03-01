@@ -23,6 +23,7 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.os.Build;
 import android.service.notification.StatusBarNotification;
+import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.NotificationHeaderView;
@@ -1423,6 +1424,17 @@ public class NotificationContentView extends FrameLayout {
         return header;
     }
 
+    public void showAppOpsIcons(ArraySet<Integer> activeOps) {
+        if (mContractedChild != null && mContractedWrapper.getNotificationHeader() != null) {
+            mContractedWrapper.getNotificationHeader().showAppOpsIcons(activeOps);
+        }
+        if (mExpandedChild != null && mExpandedWrapper.getNotificationHeader() != null) {
+            mExpandedWrapper.getNotificationHeader().showAppOpsIcons(activeOps);
+        }
+        if (mHeadsUpChild != null && mHeadsUpWrapper.getNotificationHeader() != null) {
+            mHeadsUpWrapper.getNotificationHeader().showAppOpsIcons(activeOps);
+        }
+    }
 
     public NotificationHeaderView getContractedNotificationHeader() {
         if (mContractedChild != null) {

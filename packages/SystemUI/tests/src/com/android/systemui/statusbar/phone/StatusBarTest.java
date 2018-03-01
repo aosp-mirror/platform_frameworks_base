@@ -69,6 +69,7 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.statusbar.ActivatableNotificationView;
+import com.android.systemui.statusbar.AppOpsListener;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationData;
@@ -145,6 +146,7 @@ public class StatusBarTest extends SysuiTestCase {
         mDependency.injectTestDependency(VisualStabilityManager.class, mVisualStabilityManager);
         mDependency.injectTestDependency(NotificationListener.class, mNotificationListener);
         mDependency.injectTestDependency(KeyguardMonitor.class, mock(KeyguardMonitorImpl.class));
+        mDependency.injectTestDependency(AppOpsListener.class, mock(AppOpsListener.class));
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));
         mContext.addMockSystemService(FingerprintManager.class, mock(FingerprintManager.class));

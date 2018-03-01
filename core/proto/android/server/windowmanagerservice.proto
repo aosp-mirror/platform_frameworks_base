@@ -32,7 +32,7 @@ package com.android.server.wm.proto;
 
 option java_multiple_files = true;
 
-message WindowManagerServiceProto {
+message WindowManagerServiceDumpProto {
   option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
   optional WindowManagerPolicyProto policy = 1;
@@ -295,7 +295,6 @@ message WindowStateProto {
   optional bool animating_exit = 14;
   repeated WindowStateProto child_windows = 15;
   optional .android.graphics.RectProto surface_position = 16;
-  optional .android.graphics.RectProto shown_position = 17;
   optional int32 requested_width = 18;
   optional int32 requested_height = 19;
   optional int32 view_visibility = 20;

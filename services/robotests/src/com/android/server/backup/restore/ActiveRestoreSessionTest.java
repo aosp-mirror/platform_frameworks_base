@@ -39,6 +39,8 @@ import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IRestoreObserver;
 import android.app.backup.IRestoreSession;
 import android.app.backup.RestoreSet;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -65,7 +67,9 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowApplication;
+import org.robolectric.shadows.ShadowBinder;
 import org.robolectric.shadows.ShadowLooper;
+import org.robolectric.shadows.ShadowPackageManager;
 
 import java.util.ArrayDeque;
 
@@ -73,13 +77,15 @@ import java.util.ArrayDeque;
 @Config(
     manifest = Config.NONE,
     sdk = 26,
-    shadows = {ShadowEventLog.class, ShadowPerformUnifiedRestoreTask.class}
+    shadows = {ShadowEventLog.class, ShadowPerformUnifiedRestoreTask.class, ShadowBinder.class}
 )
 @SystemLoaderPackages({"com.android.server.backup"})
 @Presubmit
 public class ActiveRestoreSessionTest {
     private static final String PACKAGE_1 = "com.example.package1";
     private static final String PACKAGE_2 = "com.example.package2";
+    public static final long TOKEN_1 = 1L;
+    public static final long TOKEN_2 = 2L;
 
     @Mock private BackupManagerService mBackupManagerService;
     @Mock private TransportManager mTransportManager;
@@ -89,10 +95,9 @@ public class ActiveRestoreSessionTest {
     private ShadowApplication mShadowApplication;
     private PowerManager.WakeLock mWakeLock;
     private TransportData mTransport;
-    private long mToken1;
-    private long mToken2;
     private RestoreSet mRestoreSet1;
     private RestoreSet mRestoreSet2;
+    private ShadowPackageManager mShadowPackageManager;
 
     @Before
     public void setUp() throws Exception {
@@ -100,13 +105,13 @@ public class ActiveRestoreSessionTest {
 
         mTransport = backupTransport();
 
-        mToken1 = 1L;
-        mRestoreSet1 = new RestoreSet("name1", "device1", mToken1);
-        mToken2 = 2L;
-        mRestoreSet2 = new RestoreSet("name2", "device2", mToken2);
+        mRestoreSet1 = new RestoreSet("name1", "device1", TOKEN_1);
+        mRestoreSet2 = new RestoreSet("name2", "device2", TOKEN_2);
 
         Application application = RuntimeEnvironment.application;
         mShadowApplication = shadowOf(application);
+
+        mShadowPackageManager = shadowOf(application.getPackageManager());
 
         Looper backupLooper = startBackupThreadAndGetLooper();
         mShadowBackupLooper = shadowOf(backupLooper);
@@ -223,7 +228,7 @@ public class ActiveRestoreSessionTest {
         IRestoreSession restoreSession =
                 createActiveRestoreSessionWithRestoreSets(null, mTransport, mRestoreSet1);
 
-        int result = restoreSession.restoreAll(mToken1, mObserver, mMonitor);
+        int result = restoreSession.restoreAll(TOKEN_1, mObserver, mMonitor);
 
         mShadowBackupLooper.runToEndOfTasks();
         assertThat(result).isEqualTo(0);
@@ -245,11 +250,9 @@ public class ActiveRestoreSessionTest {
         setUpTransport(mTransport);
         IRestoreSession restoreSession = createActiveRestoreSession(null, mTransport);
 
-        int result = restoreSession.restoreAll(mToken1, mObserver, mMonitor);
+        int result = restoreSession.restoreAll(TOKEN_1, mObserver, mMonitor);
 
-        mShadowBackupLooper.runToEndOfTasks();
         assertThat(result).isEqualTo(-1);
-        assertThat(ShadowPerformUnifiedRestoreTask.getLastCreated()).isNull();
     }
 
     @Test
@@ -259,11 +262,9 @@ public class ActiveRestoreSessionTest {
         IRestoreSession restoreSession =
                 createActiveRestoreSessionWithRestoreSets(PACKAGE_1, mTransport, mRestoreSet1);
 
-        int result = restoreSession.restoreAll(mToken1, mObserver, mMonitor);
+        int result = restoreSession.restoreAll(TOKEN_1, mObserver, mMonitor);
 
-        mShadowBackupLooper.runToEndOfTasks();
         assertThat(result).isEqualTo(-1);
-        assertThat(ShadowPerformUnifiedRestoreTask.getLastCreated()).isNull();
     }
 
     @Test
@@ -277,7 +278,7 @@ public class ActiveRestoreSessionTest {
 
         expectThrows(
                 IllegalStateException.class,
-                () -> restoreSession.restoreAll(mToken1, mObserver, mMonitor));
+                () -> restoreSession.restoreAll(TOKEN_1, mObserver, mMonitor));
     }
 
     @Test
@@ -287,11 +288,9 @@ public class ActiveRestoreSessionTest {
         IRestoreSession restoreSession =
                 createActiveRestoreSessionWithRestoreSets(null, mTransport, mRestoreSet1);
 
-        int result = restoreSession.restoreAll(mToken1, mObserver, mMonitor);
+        int result = restoreSession.restoreAll(TOKEN_1, mObserver, mMonitor);
 
-        mShadowBackupLooper.runToEndOfTasks();
         assertThat(result).isEqualTo(-1);
-        assertThat(ShadowPerformUnifiedRestoreTask.getLastCreated()).isNull();
     }
 
     @Test
@@ -302,7 +301,7 @@ public class ActiveRestoreSessionTest {
         IRestoreSession restoreSession =
                 createActiveRestoreSessionWithRestoreSets(null, mTransport, mRestoreSet1);
 
-        int result = restoreSession.restoreAll(mToken1, mObserver, mMonitor);
+        int result = restoreSession.restoreAll(TOKEN_1, mObserver, mMonitor);
 
         mShadowBackupLooper.runToEndOfTasks();
         assertThat(result).isEqualTo(0);
@@ -318,7 +317,7 @@ public class ActiveRestoreSessionTest {
 
         int result =
                 restoreSession.restoreSome(
-                        mToken1, mObserver, mMonitor, new String[] {PACKAGE_1, PACKAGE_2});
+                        TOKEN_1, mObserver, mMonitor, new String[] {PACKAGE_1, PACKAGE_2});
 
         mShadowBackupLooper.runToEndOfTasks();
         assertThat(result).isEqualTo(0);
@@ -340,7 +339,7 @@ public class ActiveRestoreSessionTest {
                 createActiveRestoreSessionWithRestoreSets(null, mTransport, mRestoreSet1);
 
         restoreSession.restoreSome(
-                mToken1, mObserver, mMonitor, new String[] {PACKAGE_1, PACKAGE_2});
+                TOKEN_1, mObserver, mMonitor, new String[] {PACKAGE_1, PACKAGE_2});
 
         mShadowBackupLooper.runToEndOfTasks();
         assertThat(ShadowPerformUnifiedRestoreTask.getLastCreated().isFullSystemRestore()).isTrue();
@@ -353,7 +352,7 @@ public class ActiveRestoreSessionTest {
         IRestoreSession restoreSession =
                 createActiveRestoreSessionWithRestoreSets(null, mTransport, mRestoreSet1);
 
-        restoreSession.restoreSome(mToken1, mObserver, mMonitor, new String[] {PACKAGE_1});
+        restoreSession.restoreSome(TOKEN_1, mObserver, mMonitor, new String[] {PACKAGE_1});
 
         mShadowBackupLooper.runToEndOfTasks();
         ShadowPerformUnifiedRestoreTask shadowTask =
@@ -369,7 +368,7 @@ public class ActiveRestoreSessionTest {
         IRestoreSession restoreSession =
                 createActiveRestoreSessionWithRestoreSets(null, mTransport, mRestoreSet1);
 
-        restoreSession.restoreSome(mToken1, mObserver, mMonitor, new String[] {PACKAGE_1});
+        restoreSession.restoreSome(TOKEN_1, mObserver, mMonitor, new String[] {PACKAGE_1});
 
         mShadowBackupLooper.runToEndOfTasks();
         assertThat(ShadowPerformUnifiedRestoreTask.getLastCreated().isFullSystemRestore())
@@ -383,11 +382,9 @@ public class ActiveRestoreSessionTest {
         IRestoreSession restoreSession = createActiveRestoreSession(null, mTransport);
 
         int result =
-                restoreSession.restoreSome(mToken1, mObserver, mMonitor, new String[] {PACKAGE_1});
+                restoreSession.restoreSome(TOKEN_1, mObserver, mMonitor, new String[] {PACKAGE_1});
 
-        mShadowBackupLooper.runToEndOfTasks();
         assertThat(result).isEqualTo(-1);
-        assertThat(ShadowPerformUnifiedRestoreTask.getLastCreated()).isNull();
     }
 
     @Test
@@ -398,11 +395,9 @@ public class ActiveRestoreSessionTest {
                 createActiveRestoreSessionWithRestoreSets(PACKAGE_1, mTransport, mRestoreSet1);
 
         int result =
-                restoreSession.restoreSome(mToken1, mObserver, mMonitor, new String[] {PACKAGE_2});
+                restoreSession.restoreSome(TOKEN_1, mObserver, mMonitor, new String[] {PACKAGE_2});
 
-        mShadowBackupLooper.runToEndOfTasks();
         assertThat(result).isEqualTo(-1);
-        assertThat(ShadowPerformUnifiedRestoreTask.getLastCreated()).isNull();
     }
 
     @Test
@@ -418,7 +413,7 @@ public class ActiveRestoreSessionTest {
                 IllegalStateException.class,
                 () ->
                         restoreSession.restoreSome(
-                                mToken1, mObserver, mMonitor, new String[] {PACKAGE_1}));
+                                TOKEN_1, mObserver, mMonitor, new String[] {PACKAGE_1}));
     }
 
     @Test
@@ -429,11 +424,125 @@ public class ActiveRestoreSessionTest {
                 createActiveRestoreSessionWithRestoreSets(null, mTransport, mRestoreSet1);
 
         int result =
-                restoreSession.restoreSome(mToken1, mObserver, mMonitor, new String[] {PACKAGE_1});
+                restoreSession.restoreSome(TOKEN_1, mObserver, mMonitor, new String[] {PACKAGE_1});
+
+        assertThat(result).isEqualTo(-1);
+    }
+
+    @Test
+    public void testRestorePackage_whenCallerIsPackage() throws Exception {
+        // No need for BACKUP permission in this case
+        mShadowApplication.denyPermissions(android.Manifest.permission.BACKUP);
+        ShadowBinder.setCallingUid(1);
+        setUpPackage(PACKAGE_1, /* uid */ 1);
+        when(mBackupManagerService.getAvailableRestoreToken(PACKAGE_1)).thenReturn(TOKEN_1);
+        TransportMock transportMock = setUpTransport(mTransport);
+        IRestoreSession restoreSession = createActiveRestoreSession(PACKAGE_1, mTransport);
+
+        int result = restoreSession.restorePackage(PACKAGE_1, mObserver, mMonitor);
 
         mShadowBackupLooper.runToEndOfTasks();
+        assertThat(result).isEqualTo(0);
+        verify(mTransportManager)
+                .disposeOfTransportClient(eq(transportMock.transportClient), any());
+        assertThat(mWakeLock.isHeld()).isFalse();
+        assertThat(mBackupManagerService.isRestoreInProgress()).isFalse();
+        ShadowPerformUnifiedRestoreTask shadowTask =
+                ShadowPerformUnifiedRestoreTask.getLastCreated();
+        assertThat(shadowTask.isFullSystemRestore()).isFalse();
+        assertThat(shadowTask.getFilterSet()).isNull();
+        assertThat(shadowTask.getPackage().packageName).isEqualTo(PACKAGE_1);
+    }
+
+    @Test
+    public void testRestorePackage_whenPackageNullWhenCreated() throws Exception {
+        ShadowBinder.setCallingUid(1);
+        setUpPackage(PACKAGE_1, /* uid */ 1);
+        when(mBackupManagerService.getAvailableRestoreToken(PACKAGE_1)).thenReturn(TOKEN_1);
+        setUpTransport(mTransport);
+        IRestoreSession restoreSession = createActiveRestoreSession(null, mTransport);
+
+        int result = restoreSession.restorePackage(PACKAGE_1, mObserver, mMonitor);
+
+        mShadowBackupLooper.runToEndOfTasks();
+        assertThat(result).isEqualTo(0);
+    }
+
+    @Test
+    public void testRestorePackage_whenCallerIsNotPackageAndPermissionGranted() throws Exception {
+        mShadowApplication.grantPermissions(android.Manifest.permission.BACKUP);
+        ShadowBinder.setCallingUid(1);
+        setUpPackage(PACKAGE_1, /* uid */ 2);
+        when(mBackupManagerService.getAvailableRestoreToken(PACKAGE_1)).thenReturn(TOKEN_1);
+        setUpTransport(mTransport);
+        IRestoreSession restoreSession = createActiveRestoreSession(PACKAGE_1, mTransport);
+
+        int result = restoreSession.restorePackage(PACKAGE_1, mObserver, mMonitor);
+
+        mShadowBackupLooper.runToEndOfTasks();
+        assertThat(result).isEqualTo(0);
+    }
+
+    @Test
+    public void testRestorePackage_whenCallerIsNotPackageAndPermissionDenied() throws Exception {
+        mShadowApplication.denyPermissions(android.Manifest.permission.BACKUP);
+        ShadowBinder.setCallingUid(1);
+        setUpPackage(PACKAGE_1, /* uid */ 2);
+        when(mBackupManagerService.getAvailableRestoreToken(PACKAGE_1)).thenReturn(TOKEN_1);
+        setUpTransport(mTransport);
+        IRestoreSession restoreSession = createActiveRestoreSession(PACKAGE_1, mTransport);
+
+        expectThrows(
+                SecurityException.class,
+                () -> restoreSession.restorePackage(PACKAGE_1, mObserver, mMonitor));
+    }
+
+    @Test
+    public void testRestorePackage_whenPackageNotFound() throws Exception {
+        mShadowApplication.grantPermissions(android.Manifest.permission.BACKUP);
+        setUpPackage(PACKAGE_1, /* uid */ 1);
+        setUpTransport(mTransport);
+        IRestoreSession restoreSession = createActiveRestoreSession(null, mTransport);
+
+        int result = restoreSession.restorePackage(PACKAGE_2, mObserver, mMonitor);
+
         assertThat(result).isEqualTo(-1);
-        assertThat(ShadowPerformUnifiedRestoreTask.getLastCreated()).isNull();
+    }
+
+    @Test
+    public void testRestorePackage_whenSessionEnded() throws Exception {
+        ShadowBinder.setCallingUid(1);
+        setUpPackage(PACKAGE_1, /* uid */ 1);
+        setUpTransport(mTransport);
+        IRestoreSession restoreSession = createActiveRestoreSession(null, mTransport);
+        restoreSession.endRestoreSession();
+        mShadowBackupLooper.runToEndOfTasks();
+
+        expectThrows(
+                IllegalStateException.class,
+                () -> restoreSession.restorePackage(PACKAGE_1, mObserver, mMonitor));
+    }
+
+    @Test
+    public void testRestorePackage_whenTransportNotRegistered() throws Exception {
+        ShadowBinder.setCallingUid(1);
+        setUpPackage(PACKAGE_1, /* uid */ 1);
+        setUpTransport(mTransport.unregistered());
+        IRestoreSession restoreSession = createActiveRestoreSession(null, mTransport);
+
+        int result = restoreSession.restorePackage(PACKAGE_1, mObserver, mMonitor);
+
+        assertThat(result).isEqualTo(-1);
+    }
+
+    // TODO: Create a builder for PackageInfo/ApplicationInfo and unify usage with
+    //       TransportManagerTest
+    private void setUpPackage(String packageName, int uid) {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = packageName;
+        packageInfo.applicationInfo = new ApplicationInfo();
+        packageInfo.applicationInfo.uid = uid;
+        mShadowPackageManager.addPackage(packageInfo);
     }
 
     private IRestoreSession createActiveRestoreSession(

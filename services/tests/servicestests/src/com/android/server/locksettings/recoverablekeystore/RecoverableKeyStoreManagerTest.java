@@ -277,7 +277,7 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
-    public void initRecoveryService_succeeds() throws Exception {
+    public void initRecoveryService_succeedsWithCertFile() throws Exception {
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
         long certSerial = 1000L;
@@ -566,7 +566,31 @@ public class RecoverableKeyStoreManagerTest {
                                     TEST_SECRET)));
             fail("should have thrown");
         } catch (ServiceSpecificException e) {
-            assertThat(e.getMessage()).contains("CertPath is empty");
+            assertThat(e.getMessage()).contains("empty");
+        }
+    }
+
+    @Test
+    public void startRecoverySessionWithCertPath_throwsIfInvalidCertPath() throws Exception {
+        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+        CertPath shortCertPath = certFactory.generateCertPath(
+                TestData.CERT_PATH_1.getCertificates()
+                        .subList(0, TestData.CERT_PATH_1.getCertificates().size() - 1));
+        try {
+            mRecoverableKeyStoreManager.startRecoverySessionWithCertPath(
+                    TEST_SESSION_ID,
+                    RecoveryCertPath.createRecoveryCertPath(shortCertPath),
+                    TEST_VAULT_PARAMS,
+                    TEST_VAULT_CHALLENGE,
+                    ImmutableList.of(
+                            new KeyChainProtectionParams(
+                                    TYPE_LOCKSCREEN,
+                                    UI_FORMAT_PASSWORD,
+                                    KeyDerivationParams.createSha256Params(TEST_SALT),
+                                    TEST_SECRET)));
+            fail("should have thrown");
+        } catch (ServiceSpecificException e) {
+            // expected
         }
     }
 

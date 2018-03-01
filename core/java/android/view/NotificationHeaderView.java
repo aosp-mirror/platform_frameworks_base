@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.Nullable;
+import android.app.AppOpsManager;
 import android.app.Notification;
 import android.content.Context;
 import android.content.res.Resources;
@@ -25,6 +26,7 @@ import android.graphics.Canvas;
 import android.graphics.Outline;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
@@ -53,6 +55,10 @@ public class NotificationHeaderView extends ViewGroup {
     private ImageView mExpandButton;
     private CachingIconView mIcon;
     private View mProfileBadge;
+    private View mOverlayIcon;
+    private View mCameraIcon;
+    private View mMicIcon;
+    private View mAppOps;
     private int mIconColor;
     private int mOriginalNotificationColor;
     private boolean mExpanded;
@@ -108,6 +114,10 @@ public class NotificationHeaderView extends ViewGroup {
         mExpandButton = findViewById(com.android.internal.R.id.expand_button);
         mIcon = findViewById(com.android.internal.R.id.icon);
         mProfileBadge = findViewById(com.android.internal.R.id.profile_badge);
+        mCameraIcon = findViewById(com.android.internal.R.id.camera);
+        mMicIcon = findViewById(com.android.internal.R.id.mic);
+        mOverlayIcon = findViewById(com.android.internal.R.id.overlay);
+        mAppOps = findViewById(com.android.internal.R.id.app_ops);
     }
 
     @Override
@@ -195,6 +205,11 @@ public class NotificationHeaderView extends ViewGroup {
                 if (mShowWorkBadgeAtEnd) {
                     paddingEnd = mContentEndMargin;
                 }
+                layoutRight = end - paddingEnd;
+                end = layoutLeft = layoutRight - child.getMeasuredWidth();
+            }
+            if (child == mAppOps) {
+                int paddingEnd = mContentEndMargin;
                 layoutRight = end - paddingEnd;
                 end = layoutLeft = layoutRight - child.getMeasuredWidth();
             }
@@ -287,6 +302,22 @@ public class NotificationHeaderView extends ViewGroup {
     public void setExpanded(boolean expanded) {
         mExpanded = expanded;
         updateExpandButton();
+    }
+
+    /**
+     * Shows or hides 'app op in use' icons based on app usage.
+     */
+    public void showAppOpsIcons(ArraySet<Integer> appOps) {
+        if (mOverlayIcon == null || mCameraIcon == null || mMicIcon == null) {
+            return;
+        }
+
+        mOverlayIcon.setVisibility(appOps.contains(AppOpsManager.OP_SYSTEM_ALERT_WINDOW)
+                ? View.VISIBLE : View.GONE);
+        mCameraIcon.setVisibility(appOps.contains(AppOpsManager.OP_CAMERA)
+                ? View.VISIBLE : View.GONE);
+        mMicIcon.setVisibility(appOps.contains(AppOpsManager.OP_RECORD_AUDIO)
+                ? View.VISIBLE : View.GONE);
     }
 
     private void updateExpandButton() {

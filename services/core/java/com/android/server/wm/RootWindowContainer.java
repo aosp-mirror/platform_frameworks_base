@@ -29,9 +29,7 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Slog;
@@ -50,9 +48,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static android.app.AppOpsManager.MODE_ALLOWED;
-import static android.app.AppOpsManager.MODE_DEFAULT;
-import static android.app.AppOpsManager.OP_NONE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
@@ -68,8 +63,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_KEEP_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_POWER;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
@@ -129,13 +122,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
     private final ArrayList<TaskStack> mTmpStackList = new ArrayList();
     private final ArrayList<Integer> mTmpStackIds = new ArrayList<>();
-
-    // State for the RemoteSurfaceTrace system used in testing. If this is enabled SurfaceControl
-    // instances will be replaced with an instance that writes a binary representation of all
-    // commands to mSurfaceTraceFd.
-    boolean mSurfaceTraceEnabled;
-    ParcelFileDescriptor mSurfaceTraceFd;
-    RemoteEventTrace mRemoteEventTrace;
 
     final WallpaperController mWallpaperController;
 
@@ -427,12 +413,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
     void updateAppOpsState() {
         forAllWindows((w) -> {
-            if (w.mAppOp == OP_NONE) {
-                return;
-            }
-            final int mode = mService.mAppOps.noteOpNoThrow(w.mAppOp, w.getOwningUid(),
-                    w.getOwningPackage());
-            w.setAppOpVisibilityLw(mode == MODE_ALLOWED || mode == MODE_DEFAULT);
+            w.updateAppOpsState();
         }, false /* traverseTopToBottom */);
     }
 
@@ -1011,30 +992,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                 default:
                     break;
             }
-        }
-    }
-
-    void enableSurfaceTrace(ParcelFileDescriptor pfd) {
-        final FileDescriptor fd = pfd.getFileDescriptor();
-        if (mSurfaceTraceEnabled) {
-            disableSurfaceTrace();
-        }
-        mSurfaceTraceEnabled = true;
-        mRemoteEventTrace = new RemoteEventTrace(mService, fd);
-        mSurfaceTraceFd = pfd;
-        for (int displayNdx = mChildren.size() - 1; displayNdx >= 0; --displayNdx) {
-            final DisplayContent dc = mChildren.get(displayNdx);
-            dc.enableSurfaceTrace(fd);
-        }
-    }
-
-    void disableSurfaceTrace() {
-        mSurfaceTraceEnabled = false;
-        mRemoteEventTrace = null;
-        mSurfaceTraceFd = null;
-        for (int displayNdx = mChildren.size() - 1; displayNdx >= 0; --displayNdx) {
-            final DisplayContent dc = mChildren.get(displayNdx);
-            dc.disableSurfaceTrace();
         }
     }
 

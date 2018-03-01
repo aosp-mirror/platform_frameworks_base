@@ -211,9 +211,11 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     public final class ActiveCallback implements DeathRecipient {
         final IAppOpsActiveCallback mCallback;
+        final int mUid;
 
-        public ActiveCallback(IAppOpsActiveCallback callback) {
+        public ActiveCallback(IAppOpsActiveCallback callback, int uid) {
             mCallback = callback;
+            mUid = uid;
             try {
                 mCallback.asBinder().linkToDeath(this, 0);
             } catch (RemoteException e) {
@@ -230,24 +232,22 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    final ArrayMap<IBinder, ClientState> mClients = new ArrayMap<IBinder, ClientState>();
+    final ArrayMap<IBinder, ClientState> mClients = new ArrayMap<>();
 
     public final class ClientState extends Binder implements DeathRecipient {
+        final ArrayList<Op> mStartedOps = new ArrayList<>();
         final IBinder mAppToken;
         final int mPid;
-        final ArrayList<Op> mStartedOps;
 
         public ClientState(IBinder appToken) {
             mAppToken = appToken;
             mPid = Binder.getCallingPid();
-            if (appToken instanceof Binder) {
-                // For local clients, there is no reason to track them.
-                mStartedOps = null;
-            } else {
-                mStartedOps = new ArrayList<Op>();
+            // Watch only for remote processes dying
+            if (!(appToken instanceof Binder)) {
                 try {
                     mAppToken.linkToDeath(this, 0);
                 } catch (RemoteException e) {
+                    /* do nothing */
                 }
             }
         }
@@ -256,7 +256,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         public String toString() {
             return "ClientState{" +
                     "mAppToken=" + mAppToken +
-                    ", " + (mStartedOps != null ? ("pid=" + mPid) : "local") +
+                    ", " + "pid=" + mPid +
                     '}';
         }
 
@@ -264,7 +264,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         public void binderDied() {
             synchronized (AppOpsService.this) {
                 for (int i=mStartedOps.size()-1; i>=0; i--) {
-                    finishOperationLocked(mStartedOps.get(i));
+                    finishOperationLocked(mStartedOps.get(i), /*finishNested*/ true);
                 }
                 mClients.remove(mAppToken);
             }
@@ -395,6 +395,27 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (ops != null && uidState.pkgOps.isEmpty()
                     && getPackagesForUid(uid).length <= 0) {
                 mUidStates.remove(uid);
+            }
+
+            // Finish ops other packages started on behalf of the package.
+            final int clientCount = mClients.size();
+            for (int i = 0; i < clientCount; i++) {
+                final ClientState client = mClients.valueAt(i);
+                if (client.mStartedOps == null) {
+                    continue;
+                }
+                final int opCount = client.mStartedOps.size();
+                for (int j = opCount - 1; j >= 0; j--) {
+                    final Op op = client.mStartedOps.get(j);
+                    if (uid == op.uid && packageName.equals(op.packageName)) {
+                        finishOperationLocked(op, /*finishNested*/ true);
+                        client.mStartedOps.remove(j);
+                        if (op.nesting <= 0) {
+                            scheduleOpActiveChangedIfNeededLocked(op.op,
+                                    uid, packageName, false);
+                        }
+                    }
+                }
             }
 
             if (ops != null) {
@@ -1195,8 +1216,11 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public void startWatchingActive(int[] ops, IAppOpsActiveCallback callback) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.WATCH_APPOPS,
-                "startWatchingActive");
+        int watchedUid = -1;
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.WATCH_APPOPS)
+                != PackageManager.PERMISSION_GRANTED) {
+            watchedUid = Binder.getCallingUid();
+        }
         if (ops != null) {
             Preconditions.checkArrayElementsInRange(ops, 0,
                     AppOpsManager._NUM_OP - 1, "Invalid op code in: " + Arrays.toString(ops));
@@ -1210,7 +1234,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 callbacks = new SparseArray<>();
                 mActiveWatchers.put(callback.asBinder(), callbacks);
             }
-            final ActiveCallback activeCallback = new ActiveCallback(callback);
+            final ActiveCallback activeCallback = new ActiveCallback(callback, watchedUid);
             for (int op : ops) {
                 callbacks.put(op, activeCallback);
             }
@@ -1239,7 +1263,8 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     @Override
-    public int startOperation(IBinder token, int code, int uid, String packageName) {
+    public int startOperation(IBinder token, int code, int uid, String packageName,
+            boolean startIfModeDefault) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
         String resolvedPackageName = resolvePackageName(uid, packageName);
@@ -1265,7 +1290,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             // non-default) it takes over, otherwise use the per package policy.
             if (uidState.opModes != null && uidState.opModes.indexOfKey(switchCode) >= 0) {
                 final int uidMode = uidState.opModes.get(switchCode);
-                if (uidMode != AppOpsManager.MODE_ALLOWED) {
+                if (uidMode != AppOpsManager.MODE_ALLOWED
+                        && (!startIfModeDefault || uidMode != AppOpsManager.MODE_DEFAULT)) {
                     if (DEBUG) Slog.d(TAG, "noteOperation: reject #" + op.mode + " for code "
                             + switchCode + " (" + code + ") uid " + uid + " package "
                             + resolvedPackageName);
@@ -1274,7 +1300,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
             } else {
                 final Op switchOp = switchCode != code ? getOpLocked(ops, switchCode, true) : op;
-                if (switchOp.mode != AppOpsManager.MODE_ALLOWED) {
+                if (switchOp.mode != AppOpsManager.MODE_ALLOWED
+                        && (!startIfModeDefault || switchOp.mode != AppOpsManager.MODE_DEFAULT)) {
                     if (DEBUG) Slog.d(TAG, "startOperation: reject #" + op.mode + " for code "
                             + switchCode + " (" + code + ") uid " + uid + " package "
                             + resolvedPackageName);
@@ -1316,13 +1343,11 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (op == null) {
                 return;
             }
-            if (client.mStartedOps != null) {
-                if (!client.mStartedOps.remove(op)) {
-                    throw new IllegalStateException("Operation not started: uid" + op.uid
-                            + " pkg=" + op.packageName + " op=" + op.op);
-                }
+            if (!client.mStartedOps.remove(op)) {
+                throw new IllegalStateException("Operation not started: uid" + op.uid
+                        + " pkg=" + op.packageName + " op=" + op.op);
             }
-            finishOperationLocked(op);
+            finishOperationLocked(op, /*finishNested*/ false);
             if (op.nesting <= 0) {
                 scheduleOpActiveChangedIfNeededLocked(code, uid, packageName, false);
             }
@@ -1337,6 +1362,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             final SparseArray<ActiveCallback> callbacks = mActiveWatchers.valueAt(i);
             ActiveCallback callback = callbacks.get(code);
             if (callback != null) {
+                if (callback.mUid >= 0 && callback.mUid != uid) {
+                    continue;
+                }
                 if (dispatchedCallbacks == null) {
                     dispatchedCallbacks = new ArraySet<>();
                 }
@@ -1380,9 +1408,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         return AppOpsManager.permissionToOpCode(permission);
     }
 
-    void finishOperationLocked(Op op) {
-        if (op.nesting <= 1) {
-            if (op.nesting == 1) {
+    void finishOperationLocked(Op op, boolean finishNested) {
+        if (op.nesting <= 1 || finishNested) {
+            if (op.nesting == 1 || finishNested) {
                 op.duration = (int)(System.currentTimeMillis() - op.time);
                 op.time += op.duration;
             } else {
@@ -2420,7 +2448,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     pw.print("    "); pw.print(mClients.keyAt(i)); pw.println(":");
                     ClientState cs = mClients.valueAt(i);
                     pw.print("      "); pw.println(cs);
-                    if (cs.mStartedOps != null && cs.mStartedOps.size() > 0) {
+                    if (cs.mStartedOps.size() > 0) {
                         pw.println("      Started ops:");
                         for (int j=0; j<cs.mStartedOps.size(); j++) {
                             Op op = cs.mStartedOps.get(j);
@@ -2651,8 +2679,12 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public boolean isOperationActive(int code, int uid, String packageName) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.WATCH_APPOPS,
-                "isOperationActive");
+        if (Binder.getCallingUid() != uid) {
+            if (mContext.checkCallingOrSelfPermission(Manifest.permission.WATCH_APPOPS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+        }
         verifyIncomingOp(code);
         final String resolvedPackageName = resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
@@ -2661,8 +2693,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         synchronized (AppOpsService.this) {
             for (int i = mClients.size() - 1; i >= 0; i--) {
                 final ClientState client = mClients.valueAt(i);
-                if (client.mStartedOps == null) continue;
-
                 for (int j = client.mStartedOps.size() - 1; j >= 0; j--) {
                     final Op op = client.mStartedOps.get(j);
                     if (op.op == code && op.uid == uid) return true;

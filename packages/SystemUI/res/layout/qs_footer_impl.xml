@@ -43,40 +43,24 @@
         android:layout_gravity="center_vertical"
         android:gravity="end" >
 
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1" >
-            <!-- Add an extra 8dp margin before carrier text without shifting it right -->
-            <android.widget.Space
-                android:layout_width="8dp"
-                android:layout_height="match_parent" />
-
-            <com.android.keyguard.CarrierText
-                android:id="@+id/qs_carrier_text"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_vertical|start"
-                android:ellipsize="marquee"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="?android:attr/textColorPrimary"
-                android:textDirection="locale"
-                android:singleLine="true" />
-        </LinearLayout>
-
-        <View
-            android:id="@+id/qs_drag_handle_view"
-            android:layout_width="24dp"
-            android:layout_height="4dp"
-            android:layout_gravity="center"
-            android:background="@drawable/qs_footer_drag_handle" />
-
-        <com.android.keyguard.AlphaOptimizedLinearLayout
-            android:id="@+id/qs_footer_actions_container"
+        <com.android.keyguard.CarrierText
+            android:id="@+id/qs_carrier_text"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="32dp"
+            android:gravity="center_vertical|start"
+            android:ellipsize="marquee"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textDirection="locale"
+            android:singleLine="true" />
+
+        <com.android.keyguard.AlphaOptimizedLinearLayout
+            android:id="@+id/qs_footer_actions_container"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
             android:gravity="center_vertical|end" >
             <com.android.systemui.statusbar.phone.MultiUserSwitch
                 android:id="@+id/multi_user_switch"
@@ -138,5 +122,12 @@
             </com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
         </com.android.keyguard.AlphaOptimizedLinearLayout>
     </LinearLayout>
+
+    <View
+        android:id="@+id/qs_drag_handle_view"
+        android:layout_width="24dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center"
+        android:background="@drawable/qs_footer_drag_handle" />
 
 </com.android.systemui.qs.QSFooterImpl>

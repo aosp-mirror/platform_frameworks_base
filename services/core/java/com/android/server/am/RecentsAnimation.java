@@ -134,6 +134,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
 
             // Fetch all the surface controls and pass them to the client to get the animation
             // started
+            mWindowManager.cancelRecentsAnimation();
             mWindowManager.initializeRecentsAnimation(recentsAnimationRunner, this,
                     display.mDisplayId);
 

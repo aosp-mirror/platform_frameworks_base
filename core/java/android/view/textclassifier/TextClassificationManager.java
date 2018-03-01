@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.os.ServiceManager;
+import android.provider.Settings;
 import android.service.textclassifier.TextClassifierService;
 
 import com.android.internal.util.Preconditions;
@@ -38,12 +39,15 @@ public final class TextClassificationManager {
     private final Object mLock = new Object();
 
     private final Context mContext;
+    private final TextClassificationConstants mSettings;
     private TextClassifier mTextClassifier;
     private TextClassifier mSystemTextClassifier;
 
     /** @hide */
     public TextClassificationManager(Context context) {
         mContext = Preconditions.checkNotNull(context);
+        mSettings = TextClassificationConstants.loadFromString(Settings.Global.getString(
+                context.getContentResolver(), Settings.Global.TEXT_CLASSIFIER_CONSTANTS));
     }
 
     /**
@@ -56,14 +60,14 @@ public final class TextClassificationManager {
             if (mSystemTextClassifier == null && isSystemTextClassifierEnabled()) {
                 try {
                     Log.d(LOG_TAG, "Initialized SystemTextClassifier");
-                    mSystemTextClassifier = new SystemTextClassifier(mContext);
+                    mSystemTextClassifier = new SystemTextClassifier(mContext, mSettings);
                 } catch (ServiceManager.ServiceNotFoundException e) {
                     Log.e(LOG_TAG, "Could not initialize SystemTextClassifier", e);
                 }
             }
             if (mSystemTextClassifier == null) {
                 Log.d(LOG_TAG, "Using an in-process TextClassifier as the system default");
-                mSystemTextClassifier = new TextClassifierImpl(mContext);
+                mSystemTextClassifier = new TextClassifierImpl(mContext, mSettings);
             }
         }
         return mSystemTextClassifier;
@@ -78,7 +82,7 @@ public final class TextClassificationManager {
                 if (isSystemTextClassifierEnabled()) {
                     mTextClassifier = getSystemDefaultTextClassifier();
                 } else {
-                    mTextClassifier = new TextClassifierImpl(mContext);
+                    mTextClassifier = new TextClassifierImpl(mContext, mSettings);
                 }
             }
             return mTextClassifier;
@@ -99,5 +103,18 @@ public final class TextClassificationManager {
     private boolean isSystemTextClassifierEnabled() {
         return SYSTEM_TEXT_CLASSIFIER_ENABLED
                 && TextClassifierService.getServiceComponentName(mContext) != null;
+    }
+
+    /** @hide */
+    public static TextClassificationConstants getSettings(Context context) {
+        Preconditions.checkNotNull(context);
+        final TextClassificationManager tcm =
+                context.getSystemService(TextClassificationManager.class);
+        if (tcm != null) {
+            return tcm.mSettings;
+        } else {
+            return TextClassificationConstants.loadFromString(Settings.Global.getString(
+                    context.getContentResolver(), Settings.Global.TEXT_CLASSIFIER_CONSTANTS));
+        }
     }
 }

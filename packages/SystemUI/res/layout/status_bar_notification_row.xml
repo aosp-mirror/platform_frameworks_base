@@ -15,6 +15,7 @@
     limitations under the License.
 -->
 
+<!-- extends FrameLayout -->
 <com.android.systemui.statusbar.ExpandableNotificationRow
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -54,6 +55,7 @@
         android:paddingStart="8dp"
         />
 
+    <!-- TODO: remove -->
     <ImageButton
         android:id="@+id/helper"
         android:layout_width="48dp"
@@ -64,7 +66,7 @@
         android:tint="#FF0000"
         android:background="@drawable/ripple_drawable"
         android:visibility="visible"
-        />
+    />
 
     <ViewStub
         android:layout="@layout/notification_children_container"

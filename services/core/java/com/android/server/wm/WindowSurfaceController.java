@@ -110,20 +110,7 @@ class WindowSurfaceController {
                 .setMetadata(windowType, ownerUid);
         mSurfaceControl = b.build();
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-
-        if (mService.mRoot.mSurfaceTraceEnabled) {
-            installRemoteTrace(mService.mRoot.mSurfaceTraceFd.getFileDescriptor());
-        }
     }
-
-    void installRemoteTrace(FileDescriptor fd) {
-        mSurfaceControl = new RemoteSurfaceTrace(fd, mSurfaceControl, mAnimator.mWin);
-    }
-
-    void removeRemoteTrace() {
-        mSurfaceControl = new SurfaceControl(mSurfaceControl);
-    }
-
 
     private void logSurface(String msg, RuntimeException where) {
         String str = "  SURFACE " + msg + ": " + title;

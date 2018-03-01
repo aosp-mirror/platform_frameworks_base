@@ -74,7 +74,8 @@ StatsLogProcessor::StatsLogProcessor(const sp<UidMap>& uidMap,
       mAnomalyAlarmMonitor(anomalyAlarmMonitor),
       mPeriodicAlarmMonitor(periodicAlarmMonitor),
       mSendBroadcast(sendBroadcast),
-      mTimeBaseSec(timeBaseSec) {
+      mTimeBaseSec(timeBaseSec),
+      mLastLogTimestamp(0) {
     StatsPullerManager statsPullerManager;
     statsPullerManager.SetTimeBaseSec(mTimeBaseSec);
 }
@@ -144,9 +145,12 @@ void StatsLogProcessor::onIsolatedUidChangedEventLocked(const LogEvent& event) {
     }
 }
 
-// TODO: what if statsd service restarts? How do we know what logs are already processed before?
 void StatsLogProcessor::OnLogEvent(LogEvent* event) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
+    if (event->GetElapsedTimestampNs() < mLastLogTimestamp) {
+        return;
+    }
+    mLastLogTimestamp = event->GetElapsedTimestampNs();
     StatsdStats::getInstance().noteAtomLogged(
         event->GetTagId(), event->GetElapsedTimestampNs() / NS_PER_SEC);
 

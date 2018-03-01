@@ -485,7 +485,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mSafeMode;
     private final ArraySet<WindowState> mScreenDecorWindows = new ArraySet<>();
     WindowState mStatusBar = null;
-    int mStatusBarHeight;
+    private final int[] mStatusBarHeightForRotation = new int[4];
     WindowState mNavigationBar = null;
     boolean mHasNavigationBar = false;
     boolean mNavigationBarCanMove = false; // can the navigation bar ever move to the side?
@@ -2768,8 +2768,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         Context uiContext = getSystemUiContext();
         final Resources res = uiContext.getResources();
 
-        mStatusBarHeight =
-                res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
+        mStatusBarHeightForRotation[mPortraitRotation] =
+                mStatusBarHeightForRotation[mUpsideDownRotation] = res.getDimensionPixelSize(
+                                com.android.internal.R.dimen.status_bar_height_portrait);
+        mStatusBarHeightForRotation[mLandscapeRotation] =
+                mStatusBarHeightForRotation[mSeascapeRotation] = res.getDimensionPixelSize(
+                        com.android.internal.R.dimen.status_bar_height_landscape);
 
         // Height of the navigation bar when presented horizontally at bottom
         mNavigationBarHeightForRotationDefault[mPortraitRotation] =
@@ -2884,11 +2888,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // of the screen.
         // TODO(multi-display): Support status bars on secondary displays.
         if (displayId == DEFAULT_DISPLAY) {
-            int statusBarHeight = mStatusBarHeight;
+            int statusBarHeight = mStatusBarHeightForRotation[rotation];
             if (displayCutout != null) {
                 // If there is a cutout, it may already have accounted for some part of the status
                 // bar height.
-                statusBarHeight = Math.max(0, mStatusBarHeight - displayCutout.getSafeInsetTop());
+                statusBarHeight = Math.max(0, statusBarHeight - displayCutout.getSafeInsetTop());
             }
             return getNonDecorDisplayHeight(fullWidth, fullHeight, rotation, uiMode, displayId,
                     displayCutout) - statusBarHeight;
@@ -4649,7 +4653,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 displayFrames.mDisplayCutout);
 
         // For layout, the status bar is always at the top with our fixed height.
-        displayFrames.mStable.top = displayFrames.mUnrestricted.top + mStatusBarHeight;
+        displayFrames.mStable.top = displayFrames.mUnrestricted.top
+                + mStatusBarHeightForRotation[displayFrames.mRotation];
 
         boolean statusBarTransient = (sysui & View.STATUS_BAR_TRANSIENT) != 0;
         boolean statusBarTranslucent = (sysui
@@ -5642,9 +5647,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final int fl = PolicyControl.getWindowFlags(null,
                 mTopFullscreenOpaqueWindowState.getAttrs());
         if (localLOGV) {
-            Slog.d(TAG, "frame: " + mTopFullscreenOpaqueWindowState.getFrameLw()
-                    + " shown position: "
-                    + mTopFullscreenOpaqueWindowState.getShownPositionLw());
+            Slog.d(TAG, "frame: " + mTopFullscreenOpaqueWindowState.getFrameLw());
             Slog.d(TAG, "attr: " + mTopFullscreenOpaqueWindowState.getAttrs()
                     + " lp.flags=0x" + Integer.toHexString(fl));
         }
@@ -6938,7 +6941,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Navigation bar and status bar.
         getNonDecorInsetsLw(displayRotation, displayWidth, displayHeight, displayCutout, outInsets);
-        outInsets.top = Math.max(outInsets.top, mStatusBarHeight);
+        outInsets.top = Math.max(outInsets.top, mStatusBarHeightForRotation[displayRotation]);
     }
 
     @Override

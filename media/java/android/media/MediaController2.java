@@ -156,7 +156,7 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
          * @param updateTimeMs timestamp when the position information is sent from the session
          * @param positionMs position in millis
          */
-        public void onPositionUpdated(long updateTimeMs, long positionMs) { }
+        public void onPositionChanged(long updateTimeMs, long positionMs) { }
 
         /**
          * Called when playback speed is changed.
@@ -176,9 +176,9 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
          * Called when a error from
          *
          * @param errorCode error code
-         * @param extra extra information
+         * @param extras extra information
          */
-        public void onError(@ErrorCode int errorCode, int extra) { }
+        public void onError(@ErrorCode int errorCode, @Nullable Bundle extras) { }
 
         /**
          * Called when the player's current playing item is changed
@@ -371,7 +371,7 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
      * Request that the player prepare its playback. In other words, other sessions can continue
      * to play during the preparation of this session. This method can be used to speed up the
      * start of the playback. Once the preparation is done, the session will change its playback
-     * state to {@link MediaPlayerBase#STATE_PAUSED}. Afterwards, {@link #play} can be called to
+     * state to {@link MediaPlayerBase#PLAYER_STATE_PAUSED}. Afterwards, {@link #play} can be called to
      * start playback.
      */
     public void prepare() {
@@ -479,7 +479,7 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
      * Request that the player prepare playback for a specific media id. In other words, other
      * sessions can continue to play during the preparation of this session. This method can be
      * used to speed up the start of the playback. Once the preparation is done, the session
-     * will change its playback state to {@link MediaPlayerBase#STATE_PAUSED}. Afterwards,
+     * will change its playback state to {@link MediaPlayerBase#PLAYER_STATE_PAUSED}. Afterwards,
      * {@link #play} can be called to start playback. If the preparation is not needed,
      * {@link #playFromMediaId} can be directly called without this method.
      *
@@ -496,7 +496,7 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
      * query should be treated as a request to prepare any music. In other words, other sessions
      * can continue to play during the preparation of this session. This method can be used to
      * speed up the start of the playback. Once the preparation is done, the session will
-     * change its playback state to {@link MediaPlayerBase#STATE_PAUSED}. Afterwards,
+     * change its playback state to {@link MediaPlayerBase#PLAYER_STATE_PAUSED}. Afterwards,
      * {@link #play} can be called to start playback. If the preparation is not needed,
      * {@link #playFromSearch} can be directly called without this method.
      *
@@ -512,7 +512,7 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
      * Request that the player prepare playback for a specific {@link Uri}. In other words,
      * other sessions can continue to play during the preparation of this session. This method
      * can be used to speed up the start of the playback. Once the preparation is done, the
-     * session will change its playback state to {@link MediaPlayerBase#STATE_PAUSED}. Afterwards,
+     * session will change its playback state to {@link MediaPlayerBase#PLAYER_STATE_PAUSED}. Afterwards,
      * {@link #play} can be called to start playback. If the preparation is not needed,
      * {@link #playFromUri} can be directly called without this method.
      *
@@ -599,7 +599,7 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
     }
 
     /**
-     * Get the lastly cached position from {@link ControllerCallback#onPositionUpdated(long, long)}.
+     * Get the lastly cached position from {@link ControllerCallback#onPositionChanged(long, long)}.
      * <p>
      * This returns the calculated value of the position, based on the difference between the
      * update time and current time.
@@ -618,6 +618,13 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
      */
     public float getPlaybackSpeed() {
         return mProvider.getPlaybackSpeed_impl();
+    }
+
+    /**
+     * Set the playback speed.
+     */
+    public void setPlaybackSpeed(float speed) {
+        // TODO: implement this
     }
 
     /**
@@ -698,17 +705,24 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
     }
 
     /**
-     * Removes the media item at index in the play list.
+     * Removes the media item at index in the playlist.
      *<p>
-     * If index is same as the current index of the playlist, current playback
+     * If the item is the currently playing item of the playlist, current playback
      * will be stopped and playback moves to next source in the list.
-     *
-     * @throws IllegalArgumentException if the play list is null
-     * @throws IndexOutOfBoundsException if index is outside play list range
      */
     @Override
     public void removePlaylistItem(@NonNull MediaItem2 item) {
         mProvider.removePlaylistItem_impl(item);
+    }
+
+    /**
+     * Replace the media item at index in the playlist.
+     * @param index the index of the item to replace
+     * @param item the new item
+     */
+    @Override
+    public void replacePlaylistItem(int index, @NonNull MediaItem2 item) {
+        mProvider.replacePlaylistItem_impl(index, item);
     }
 
     /**

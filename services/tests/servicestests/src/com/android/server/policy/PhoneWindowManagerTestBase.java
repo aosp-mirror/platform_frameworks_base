@@ -77,7 +77,9 @@ public class PhoneWindowManagerTestBase {
     public void setUpBase() throws Exception {
         mContext = new TestContextWrapper(InstrumentationRegistry.getTargetContext());
         mContext.getResourceMocker().addOverride(
-                com.android.internal.R.dimen.status_bar_height, STATUS_BAR_HEIGHT);
+                com.android.internal.R.dimen.status_bar_height_portrait, STATUS_BAR_HEIGHT);
+        mContext.getResourceMocker().addOverride(
+                com.android.internal.R.dimen.status_bar_height_landscape, STATUS_BAR_HEIGHT);
         mContext.getResourceMocker().addOverride(
                 com.android.internal.R.dimen.navigation_bar_height, NAV_BAR_HEIGHT);
         mContext.getResourceMocker().addOverride(

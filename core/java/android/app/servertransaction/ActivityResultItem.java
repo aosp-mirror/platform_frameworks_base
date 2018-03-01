@@ -16,7 +16,7 @@
 
 package android.app.servertransaction;
 
-import static android.app.servertransaction.ActivityLifecycleItem.ON_PAUSE;
+import static android.app.servertransaction.ActivityLifecycleItem.ON_RESUME;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
 import android.app.ClientTransactionHandler;
@@ -38,8 +38,8 @@ public class ActivityResultItem extends ClientTransactionItem {
     private List<ResultInfo> mResultInfoList;
 
     @Override
-    public int getPreExecutionState() {
-        return ON_PAUSE;
+    public int getPostExecutionState() {
+        return ON_RESUME;
     }
 
     @Override

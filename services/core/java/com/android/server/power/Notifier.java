@@ -91,7 +91,7 @@ final class Notifier {
 
     private final Context mContext;
     private final IBatteryStats mBatteryStats;
-    private final IAppOpsService mAppOps;
+    private final AppOpsManager mAppOps;
     private final SuspendBlocker mSuspendBlocker;
     private final WindowManagerPolicy mPolicy;
     private final ActivityManagerInternal mActivityManagerInternal;
@@ -134,11 +134,10 @@ final class Notifier {
     private boolean mUserActivityPending;
 
     public Notifier(Looper looper, Context context, IBatteryStats batteryStats,
-            IAppOpsService appOps, SuspendBlocker suspendBlocker,
-            WindowManagerPolicy policy) {
+            SuspendBlocker suspendBlocker, WindowManagerPolicy policy) {
         mContext = context;
         mBatteryStats = batteryStats;
-        mAppOps = appOps;
+        mAppOps = mContext.getSystemService(AppOpsManager.class);
         mSuspendBlocker = suspendBlocker;
         mPolicy = policy;
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
@@ -194,8 +193,7 @@ final class Notifier {
                     mBatteryStats.noteStartWakelock(ownerUid, ownerPid, tag, historyTag,
                             monitorType, unimportantForLogging);
                     // XXX need to deal with disabled operations.
-                    mAppOps.startOperation(AppOpsManager.getToken(mAppOps),
-                            AppOpsManager.OP_WAKE_LOCK, ownerUid, packageName);
+                    mAppOps.startOpNoThrow(AppOpsManager.OP_WAKE_LOCK, ownerUid, packageName);
                 }
             } catch (RemoteException ex) {
                 // Ignore
@@ -295,8 +293,7 @@ final class Notifier {
                 } else {
                     mBatteryStats.noteStopWakelock(ownerUid, ownerPid, tag,
                             historyTag, monitorType);
-                    mAppOps.finishOperation(AppOpsManager.getToken(mAppOps),
-                            AppOpsManager.OP_WAKE_LOCK, ownerUid, packageName);
+                    mAppOps.finishOp(AppOpsManager.OP_WAKE_LOCK, ownerUid, packageName);
                 }
             } catch (RemoteException ex) {
                 // Ignore
@@ -539,12 +536,11 @@ final class Notifier {
         try {
             mBatteryStats.noteWakeUp(reason, reasonUid);
             if (opPackageName != null) {
-                mAppOps.noteOperation(AppOpsManager.OP_TURN_SCREEN_ON, opUid, opPackageName);
+                mAppOps.noteOpNoThrow(AppOpsManager.OP_TURN_SCREEN_ON, opUid, opPackageName);
             }
         } catch (RemoteException ex) {
             // Ignore
         }
-
     }
 
     /**

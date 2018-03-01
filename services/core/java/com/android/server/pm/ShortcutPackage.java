@@ -1348,7 +1348,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         ShortcutService.writeAttr(out, ATTR_NAME, getPackageName());
         ShortcutService.writeAttr(out, ATTR_CALL_COUNT, mApiCallCount);
         ShortcutService.writeAttr(out, ATTR_LAST_RESET, mLastResetTime);
-        getPackageInfo().saveToXml(out, forBackup);
+        getPackageInfo().saveToXml(mShortcutUser.mService, out, forBackup);
 
         for (int j = 0; j < size; j++) {
             saveShortcut(out, mShortcuts.valueAt(j), forBackup,

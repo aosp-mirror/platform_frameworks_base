@@ -18,8 +18,11 @@ package com.android.server.backup;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
 import android.util.Slog;
+
+import com.android.internal.util.ArrayUtils;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -30,9 +33,10 @@ import java.util.List;
 public class BackupUtils {
     private static final String TAG = "BackupUtils";
 
-    private static final boolean DEBUG = false; // STOPSHIP if true
+    private static final boolean DEBUG = false;
 
-    public static boolean signaturesMatch(ArrayList<byte[]> storedSigHashes, PackageInfo target) {
+    public static boolean signaturesMatch(ArrayList<byte[]> storedSigHashes, PackageInfo target,
+            PackageManagerInternal pmi) {
         if (target == null) {
             return false;
         }
@@ -47,48 +51,54 @@ public class BackupUtils {
             return true;
         }
 
-        // Allow unsigned apps, but not signed on one device and unsigned on the other
-        // !!! TODO: is this the right policy?
-        Signature[] deviceSigs = target.signatures;
-        if (DEBUG) Slog.v(TAG, "signaturesMatch(): stored=" + storedSigHashes
-                + " device=" + deviceSigs);
-        if ((storedSigHashes == null || storedSigHashes.size() == 0)
-                && (deviceSigs == null || deviceSigs.length == 0)) {
-            return true;
-        }
-        if (storedSigHashes == null || deviceSigs == null) {
+        // Don't allow unsigned apps on either end
+        if (ArrayUtils.isEmpty(storedSigHashes)) {
             return false;
         }
 
-        // !!! TODO: this demands that every stored signature match one
-        // that is present on device, and does not demand the converse.
-        // Is this this right policy?
-        final int nStored = storedSigHashes.size();
-        final int nDevice = deviceSigs.length;
-
-        // hash each on-device signature
-        ArrayList<byte[]> deviceHashes = new ArrayList<byte[]>(nDevice);
-        for (int i = 0; i < nDevice; i++) {
-            deviceHashes.add(hashSignature(deviceSigs[i]));
+        Signature[][] deviceHistorySigs = target.signingCertificateHistory;
+        if (ArrayUtils.isEmpty(deviceHistorySigs)) {
+            Slog.w(TAG, "signingCertificateHistory is empty, app was either unsigned or the flag" +
+                    " PackageManager#GET_SIGNING_CERTIFICATES was not specified");
+            return false;
         }
 
-        // now ensure that each stored sig (hash) matches an on-device sig (hash)
-        for (int n = 0; n < nStored; n++) {
-            boolean match = false;
-            final byte[] storedHash = storedSigHashes.get(n);
-            for (int i = 0; i < nDevice; i++) {
-                if (Arrays.equals(storedHash, deviceHashes.get(i))) {
-                    match = true;
-                    break;
+        if (DEBUG) {
+            Slog.v(TAG, "signaturesMatch(): stored=" + storedSigHashes
+                    + " device=" + deviceHistorySigs);
+        }
+
+        final int nStored = storedSigHashes.size();
+        if (nStored == 1) {
+            // if the app is only signed with one sig, it's possible it has rotated its key
+            // the checks with signing history are delegated to PackageManager
+            // TODO: address the case that app has declared restoreAnyVersion and is restoring
+            // from higher version to lower after having rotated the key (i.e. higher version has
+            // different sig than lower version that we want to restore to)
+            return pmi.isDataRestoreSafe(storedSigHashes.get(0), target.packageName);
+        } else {
+            // the app couldn't have rotated keys, since it was signed with multiple sigs - do
+            // a comprehensive 1-to-1 signatures check
+            // since app hasn't rotated key, we only need to check with deviceHistorySigs[0]
+            ArrayList<byte[]> deviceHashes = hashSignatureArray(deviceHistorySigs[0]);
+            int nDevice = deviceHashes.size();
+
+            // ensure that each stored sig matches an on-device sig
+            for (int i = 0; i < nStored; i++) {
+                boolean match = false;
+                for (int j = 0; j < nDevice; j++) {
+                    if (Arrays.equals(storedSigHashes.get(i), deviceHashes.get(j))) {
+                        match = true;
+                        break;
+                    }
+                }
+                if (!match) {
+                    return false;
                 }
             }
-            // match is false when no on-device sig matched one of the stored ones
-            if (!match) {
-                return false;
-            }
+            // we have found a match for all stored sigs
+            return true;
         }
-
-        return true;
     }
 
     public static byte[] hashSignature(byte[] signature) {

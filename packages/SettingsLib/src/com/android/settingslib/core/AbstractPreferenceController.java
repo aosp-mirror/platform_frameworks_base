@@ -37,7 +37,16 @@ public abstract class AbstractPreferenceController {
      * Updates the current status of preference (summary, switch state, etc)
      */
     public void updateState(Preference preference) {
-
+        if (preference == null) {
+            return;
+        }
+        final CharSequence summary = getSummary();
+        if (summary == null) {
+            // Default getSummary returns null. If subclass didn't override this, there is nothing
+            // we need to do.
+            return;
+        }
+        preference.setSummary(summary);
     }
 
     /**
@@ -72,9 +81,9 @@ public abstract class AbstractPreferenceController {
 
 
     /**
-     * @return a String for the summary of the preference.
+     * @return a {@link CharSequence} for the summary of the preference.
      */
-    public String getSummary() {
+    public CharSequence getSummary() {
         return null;
     }
 }

@@ -264,7 +264,7 @@ public class PhoneStatusBarView extends PanelBar {
         mScrimController.setPanelExpansion(scrimFraction);
     }
 
-    public void onDensityOrFontScaleChanged() {
+    public void updateResources() {
         ViewGroup.LayoutParams layoutParams = getLayoutParams();
         layoutParams.height = getResources().getDimensionPixelSize(
                 R.dimen.status_bar_height);

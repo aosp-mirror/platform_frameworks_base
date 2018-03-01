@@ -25,6 +25,7 @@ LOCAL_JAVA_LIBRARIES := android.test.runner android.test.base
 LOCAL_JACK_FLAGS := --multi-dex native
 
 LOCAL_PACKAGE_NAME := OsuTests
+LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_COMPATIBILITY_SUITE := device-tests
 
 LOCAL_INSTRUMENTATION_FOR := Osu2

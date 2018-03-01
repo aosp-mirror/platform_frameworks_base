@@ -19,6 +19,8 @@ package android.graphics;
 import static android.system.OsConstants.SEEK_CUR;
 import static android.system.OsConstants.SEEK_SET;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -28,32 +30,28 @@ import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager.AssetInputStream;
 import android.content.res.Resources;
 import android.graphics.drawable.AnimatedImageDrawable;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
 import android.net.Uri;
-import android.util.Size;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.DisplayMetrics;
+import android.util.Size;
 import android.util.TypedValue;
 
-import libcore.io.IoUtils;
 import dalvik.system.CloseGuard;
 
-import java.nio.ByteBuffer;
+import libcore.io.IoUtils;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.ArrayIndexOutOfBoundsException;
-import java.lang.AutoCloseable;
-import java.lang.NullPointerException;
-import java.lang.RuntimeException;
 import java.lang.annotation.Retention;
-import static java.lang.annotation.RetentionPolicy.SOURCE;
+import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -494,7 +492,7 @@ public final class ImageDecoder implements AutoCloseable {
     private int     mAllocator = ALLOCATOR_DEFAULT;
     private boolean mRequireUnpremultiplied = false;
     private boolean mMutable = false;
-    private boolean mPreferRamOverQuality = false;
+    private boolean mConserveMemory = false;
     private boolean mAsAlphaMask = false;
     private Rect    mCropRect;
     private Rect    mOutPaddingRect;
@@ -623,16 +621,18 @@ public final class ImageDecoder implements AutoCloseable {
     /**
      * Create a new {@link Source} from a {@link java.nio.ByteBuffer}.
      *
-     * <p>The returned {@link Source} effectively takes ownership of the
-     * {@link java.nio.ByteBuffer}; i.e. no other code should modify it after
-     * this call.</p>
+     * <p>Decoding will start from {@link java.nio.ByteBuffer#position()}. The
+     * position of {@code buffer} will not be affected.</p>
      *
-     * Decoding will start from {@link java.nio.ByteBuffer#position()}. The
-     * position after decoding is undefined.
+     * <p>Note: If this {@code Source} is passed to {@link #decodeDrawable}, and
+     * the encoded image is animated, the returned {@link AnimatedImageDrawable}
+     * will continue reading from the {@code buffer}, so its contents must not
+     * be modified, even after the {@code AnimatedImageDrawable} is returned.
+     * {@code buffer}'s contents should never be modified during decode.</p>
      */
     @NonNull
     public static Source createSource(@NonNull ByteBuffer buffer) {
-        return new ByteBufferSource(buffer);
+        return new ByteBufferSource(buffer.slice());
     }
 
     /**
@@ -692,8 +692,9 @@ public final class ImageDecoder implements AutoCloseable {
      *
      *  @param width must be greater than 0.
      *  @param height must be greater than 0.
+     *  @return this object for chaining.
      */
-    public void setResize(int width, int height) {
+    public ImageDecoder setResize(int width, int height) {
         if (width <= 0 || height <= 0) {
             throw new IllegalArgumentException("Dimensions must be positive! "
                     + "provided (" + width + ", " + height + ")");
@@ -701,6 +702,7 @@ public final class ImageDecoder implements AutoCloseable {
 
         mDesiredWidth = width;
         mDesiredHeight = height;
+        return this;
     }
 
     /**
@@ -710,10 +712,11 @@ public final class ImageDecoder implements AutoCloseable {
      *  {@link #getSampledSize} to {@link #setResize(int, int)}.</p>
      *
      *  @param sampleSize Sampling rate of the encoded image.
+     *  @return this object for chaining.
      */
-    public void setResize(int sampleSize) {
+    public ImageDecoder setResize(int sampleSize) {
         Size size = this.getSampledSize(sampleSize);
-        this.setResize(size.getWidth(), size.getHeight());
+        return this.setResize(size.getWidth(), size.getHeight());
     }
 
     private boolean requestedResize() {
@@ -769,18 +772,20 @@ public final class ImageDecoder implements AutoCloseable {
      *  This is ignored for animated drawables.
      *
      *  @param allocator Type of allocator to use.
+     *  @return this object for chaining.
      */
-    public void setAllocator(@Allocator int allocator) {
+    public ImageDecoder setAllocator(@Allocator int allocator) {
         if (allocator < ALLOCATOR_DEFAULT || allocator > ALLOCATOR_HARDWARE) {
             throw new IllegalArgumentException("invalid allocator " + allocator);
         }
         mAllocator = allocator;
+        return this;
     }
 
     /**
      *  Specify whether the {@link Bitmap} should have unpremultiplied pixels.
      *
-     *  By default, ImageDecoder will create a {@link Bitmap} with
+     *  <p>By default, ImageDecoder will create a {@link Bitmap} with
      *  premultiplied pixels, which is required for drawing with the
      *  {@link android.view.View} system (i.e. to a {@link Canvas}). Calling
      *  this method with a value of {@code true} will result in
@@ -788,9 +793,13 @@ public final class ImageDecoder implements AutoCloseable {
      *  pixels. See {@link Bitmap#isPremultiplied}. This is incompatible with
      *  {@link #decodeDrawable}; attempting to decode an unpremultiplied
      *  {@link Drawable} will throw an {@link java.lang.IllegalStateException}.
+     *  </p>
+     *
+     *  @return this object for chaining.
      */
-    public void setRequireUnpremultiplied(boolean requireUnpremultiplied) {
+    public ImageDecoder setRequireUnpremultiplied(boolean requireUnpremultiplied) {
         mRequireUnpremultiplied = requireUnpremultiplied;
+        return this;
     }
 
     /**
@@ -805,19 +814,25 @@ public final class ImageDecoder implements AutoCloseable {
      *  <p>For an animated image, the drawing commands drawn on the
      *  {@link Canvas} will be recorded immediately and then applied to each
      *  frame.</p>
+     *
+     *  @return this object for chaining.
      */
-    public void setPostProcessor(@Nullable PostProcessor p) {
+    public ImageDecoder setPostProcessor(@Nullable PostProcessor p) {
         mPostProcessor = p;
+        return this;
     }
 
     /**
      *  Set (replace) the {@link OnPartialImageListener} on this object.
      *
-     *  Will be called if there is an error in the input. Without one, a
-     *  partial {@link Bitmap} will be created.
+     *  <p>Will be called if there is an error in the input. Without one, an
+     *  error will result in an Exception being thrown.</p>
+     *
+     *  @return this object for chaining.
      */
-    public void setOnPartialImageListener(@Nullable OnPartialImageListener l) {
+    public ImageDecoder setOnPartialImageListener(@Nullable OnPartialImageListener l) {
         mOnPartialImageListener = l;
+        return this;
     }
 
     /**
@@ -831,9 +846,12 @@ public final class ImageDecoder implements AutoCloseable {
      *  <p>NOT intended as a replacement for
      *  {@link BitmapRegionDecoder#decodeRegion}. This supports all formats,
      *  but merely crops the output.</p>
+     *
+     *  @return this object for chaining.
      */
-    public void setCrop(@Nullable Rect subset) {
+    public ImageDecoder setCrop(@Nullable Rect subset) {
         mCropRect = subset;
+        return this;
     }
 
     /**
@@ -842,10 +860,13 @@ public final class ImageDecoder implements AutoCloseable {
      *  If the image is a nine patch, this Rect will be set to the padding
      *  rectangle during decode. Otherwise it will not be modified.
      *
+     *  @return this object for chaining.
+     *
      *  @hide
      */
-    public void setOutPaddingRect(@NonNull Rect outPadding) {
+    public ImageDecoder setOutPaddingRect(@NonNull Rect outPadding) {
         mOutPaddingRect = outPadding;
+        return this;
     }
 
     /**
@@ -863,21 +884,31 @@ public final class ImageDecoder implements AutoCloseable {
      *  which would require retrieving the Bitmap from the returned Drawable in
      *  order to modify. Attempting to decode a mutable {@link Drawable} will
      *  throw an {@link java.lang.IllegalStateException}.</p>
+     *
+     *  @return this object for chaining.
      */
-    public void setMutable(boolean mutable) {
+    public ImageDecoder setMutable(boolean mutable) {
         mMutable = mutable;
+        return this;
     }
 
     /**
      *  Specify whether to potentially save RAM at the expense of quality.
      *
-     *  Setting this to {@code true} may result in a {@link Bitmap} with a
-     *  denser {@link Bitmap.Config}, depending on the image. For example, for
-     *  an opaque {@link Bitmap}, this may result in a {@link Bitmap.Config}
-     *  with no alpha information.
+     *  <p>Setting this to {@code true} may result in a {@link Bitmap} with a
+     *  denser {@link Bitmap.Config}, depending on the image. For example, an
+     *  opaque {@link Bitmap} with 8 bits or precision for each of its red,
+     *  green and blue components would decode to
+     *  {@link Bitmap.Config#ARGB_8888} by default, but setting this to
+     *  {@code true} will result in decoding to {@link Bitmap.Config#RGB_565}.
+     *  This necessarily lowers the quality of the output, but saves half
+     *  the memory used.</p>
+     *
+     *  @return this object for chaining.
      */
-    public void setPreferRamOverQuality(boolean preferRamOverQuality) {
-        mPreferRamOverQuality = preferRamOverQuality;
+    public ImageDecoder setConserveMemory(boolean conserveMemory) {
+        mConserveMemory = conserveMemory;
+        return this;
     }
 
     /**
@@ -891,9 +922,12 @@ public final class ImageDecoder implements AutoCloseable {
      *  combine them will result in {@link #decodeDrawable}/
      *  {@link #decodeBitmap} throwing an
      *  {@link java.lang.IllegalStateException}.</p>
+     *
+     *  @return this object for chaining.
      */
-    public void setAsAlphaMask(boolean asAlphaMask) {
+    public ImageDecoder setAsAlphaMask(boolean asAlphaMask) {
         mAsAlphaMask = asAlphaMask;
+        return this;
     }
 
     @Override
@@ -958,7 +992,7 @@ public final class ImageDecoder implements AutoCloseable {
         return nDecodeBitmap(mNativePtr, partialImagePtr,
                 postProcessPtr, mDesiredWidth, mDesiredHeight, mCropRect,
                 mMutable, mAllocator, mRequireUnpremultiplied,
-                mPreferRamOverQuality, mAsAlphaMask);
+                mConserveMemory, mAsAlphaMask);
     }
 
     private void callHeaderDecoded(@Nullable OnHeaderDecodedListener listener,
@@ -1172,7 +1206,7 @@ public final class ImageDecoder implements AutoCloseable {
             int width, int height,
             @Nullable Rect cropRect, boolean mutable,
             int allocator, boolean requireUnpremul,
-            boolean preferRamOverQuality, boolean asAlphaMask)
+            boolean conserveMemory, boolean asAlphaMask)
         throws IOException;
     private static native Size nGetSampledSize(long nativePtr,
                                                int sampleSize);

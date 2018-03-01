@@ -31,6 +31,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
@@ -77,7 +78,7 @@ import java.util.List;
 public class NotificationEntryManager implements Dumpable, NotificationInflater.InflationCallback,
         ExpandableNotificationRow.ExpansionLogger, NotificationUpdateHandler,
         VisualStabilityManager.Callback {
-    private static final String TAG = "NotificationEntryManager";
+    private static final String TAG = "NotificationEntryMgr";
     protected static final boolean DEBUG = false;
     protected static final boolean ENABLE_HEADS_UP = true;
     protected static final String SETTING_HEADS_UP_TICKER = "ticker_gets_heads_up";
@@ -731,6 +732,14 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             addNotificationInternal(notification, ranking);
         } catch (InflationException e) {
             handleInflationException(notification, e);
+        }
+    }
+
+    public void updateNotificationsForAppOps(int appOp, int uid, String pkg, boolean showIcon) {
+        if (mForegroundServiceController.getStandardLayoutKey(
+                UserHandle.getUserId(uid), pkg) != null) {
+            mNotificationData.updateAppOp(appOp, uid, pkg, showIcon);
+            updateNotifications();
         }
     }
 

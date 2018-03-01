@@ -1735,6 +1735,20 @@ class UserController implements Handler.Callback {
         return mInjector.getUserManager().getUserIds();
     }
 
+    /**
+     * If {@code userId} is {@link UserHandle#USER_ALL}, then return an array with all running user
+     * IDs. Otherwise return an array whose only element is the given user id.
+     *
+     * It doesn't handle other special user IDs such as {@link UserHandle#USER_CURRENT}.
+     */
+    int[] expandUserId(int userId) {
+        if (userId != UserHandle.USER_ALL) {
+            return new int[] {userId};
+        } else {
+            return getUsers();
+        }
+    }
+
     boolean exists(int userId) {
         return mInjector.getUserManager().exists(userId);
     }

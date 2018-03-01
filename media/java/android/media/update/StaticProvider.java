@@ -30,7 +30,6 @@ import android.media.MediaLibraryService2.LibraryRoot;
 import android.media.MediaLibraryService2.MediaLibrarySession;
 import android.media.MediaLibraryService2.MediaLibrarySession.MediaLibrarySessionCallback;
 import android.media.MediaMetadata2;
-import android.media.MediaPlayerBase;
 import android.media.MediaSession2;
 import android.media.MediaSession2.CommandButton.Builder;
 import android.media.MediaSession2.PlaylistParams;
@@ -88,7 +87,7 @@ public interface StaticProvider {
     CommandButtonProvider.BuilderProvider createMediaSession2CommandButtonBuilder(Context context,
             MediaSession2.CommandButton.Builder builder);
     BuilderBaseProvider<MediaSession2, SessionCallback> createMediaSession2Builder(
-            Context context, MediaSession2.Builder instance, MediaPlayerBase player);
+            Context context, MediaSession2.Builder instance);
 
     MediaController2Provider createMediaController2(Context context, MediaController2 instance,
             SessionToken2 token, Executor executor, ControllerCallback callback);
@@ -104,8 +103,7 @@ public interface StaticProvider {
     BuilderBaseProvider<MediaLibrarySession, MediaLibrarySessionCallback>
         createMediaLibraryService2Builder(
             MediaLibraryService2 service, MediaLibrarySession.Builder instance,
-            MediaPlayerBase player, Executor callbackExecutor,
-            MediaLibrarySessionCallback callback);
+            Executor callbackExecutor, MediaLibrarySessionCallback callback);
     LibraryRootProvider createMediaLibraryService2LibraryRoot(Context context, LibraryRoot instance,
             String rootId, Bundle extras);
 

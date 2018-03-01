@@ -24,7 +24,6 @@ import static com.android.systemui.statusbar.phone.StatusBar.SYSTEM_DIALOG_REASO
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
-import android.app.KeyguardManager;
 import android.app.trust.TrustManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -34,7 +33,6 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask.Status;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.ArraySet;
@@ -385,8 +383,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     }
 
     public void toggleRecents(int growTarget) {
-        // Skip preloading if the task is locked
-        if (ActivityManagerWrapper.getInstance().isLockToAppActive()) {
+        if (ActivityManagerWrapper.getInstance().isScreenPinningActive()) {
             return;
         }
 
@@ -464,8 +461,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     }
 
     public void preloadRecents() {
-        // Skip preloading if the task is locked
-        if (ActivityManagerWrapper.getInstance().isLockToAppActive()) {
+        if (ActivityManagerWrapper.getInstance().isScreenPinningActive()) {
             return;
         }
 

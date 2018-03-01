@@ -22,6 +22,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_EIMS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_OEM_PAID;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.RESTRICTED_CAPABILITIES;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
@@ -250,6 +251,19 @@ public class NetworkCapabilitiesTest {
             .addCapability(NET_CAPABILITY_EIMS)
             .addCapability(NET_CAPABILITY_NOT_METERED);
         assertEqualsThroughMarshalling(netCap);
+    }
+
+    @Test
+    public void testOemPaid() {
+        NetworkCapabilities nc = new NetworkCapabilities();
+        nc.maybeMarkCapabilitiesRestricted();
+        assertFalse(nc.hasCapability(NET_CAPABILITY_OEM_PAID));
+        assertTrue(nc.hasCapability(NET_CAPABILITY_NOT_RESTRICTED));
+
+        nc.addCapability(NET_CAPABILITY_OEM_PAID);
+        nc.maybeMarkCapabilitiesRestricted();
+        assertTrue(nc.hasCapability(NET_CAPABILITY_OEM_PAID));
+        assertFalse(nc.hasCapability(NET_CAPABILITY_NOT_RESTRICTED));
     }
 
     private void assertEqualsThroughMarshalling(NetworkCapabilities netCap) {

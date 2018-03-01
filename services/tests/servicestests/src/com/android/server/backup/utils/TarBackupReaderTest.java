@@ -28,6 +28,9 @@ import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_VERSION_OF_BA
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -37,6 +40,7 @@ import android.app.backup.IBackupManagerMonitor;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
 import android.os.Bundle;
 import android.os.Process;
@@ -79,6 +83,7 @@ public class TarBackupReaderTest {
 
     @Mock private BytesReadListener mBytesReadListenerMock;
     @Mock private IBackupManagerMonitor mBackupManagerMonitorMock;
+    @Mock private PackageManagerInternal mMockPackageManagerInternal;
 
     private final PackageManagerStub mPackageManagerStub = new PackageManagerStub();
     private Context mContext;
@@ -139,7 +144,8 @@ public class TarBackupReaderTest {
         Signature[] signatures = tarBackupReader.readAppManifestAndReturnSignatures(
                 fileMetadata);
         RestorePolicy restorePolicy = tarBackupReader.chooseRestorePolicy(
-                mPackageManagerStub, false /* allowApks */, fileMetadata, signatures);
+                mPackageManagerStub, false /* allowApks */, fileMetadata, signatures,
+                mMockPackageManagerInternal);
 
         assertThat(restorePolicy).isEqualTo(RestorePolicy.IGNORE);
         assertThat(fileMetadata.packageName).isEqualTo(TEST_PACKAGE_NAME);
@@ -152,7 +158,8 @@ public class TarBackupReaderTest {
         signatures = tarBackupReader.readAppManifestAndReturnSignatures(
                 fileMetadata);
         restorePolicy = tarBackupReader.chooseRestorePolicy(
-                mPackageManagerStub, false /* allowApks */, fileMetadata, signatures);
+                mPackageManagerStub, false /* allowApks */, fileMetadata, signatures,
+                mMockPackageManagerInternal);
 
         assertThat(restorePolicy).isEqualTo(RestorePolicy.IGNORE);
         assertThat(fileMetadata.packageName).isEqualTo(TEST_PACKAGE_NAME);
@@ -214,7 +221,8 @@ public class TarBackupReaderTest {
                 mBytesReadListenerMock, mBackupManagerMonitorMock);
 
         RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
-                true /* allowApks */, new FileMetadata(), null /* signatures */);
+                true /* allowApks */, new FileMetadata(), null /* signatures */,
+                mMockPackageManagerInternal);
 
         assertThat(policy).isEqualTo(RestorePolicy.IGNORE);
         verifyZeroInteractions(mBackupManagerMonitorMock);
@@ -234,7 +242,8 @@ public class TarBackupReaderTest {
         PackageManagerStub.sPackageInfo = null;
 
         RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
-                true /* allowApks */, info, new Signature[0] /* signatures */);
+                true /* allowApks */, info, new Signature[0] /* signatures */,
+                mMockPackageManagerInternal);
 
         assertThat(policy).isEqualTo(RestorePolicy.ACCEPT_IF_APK);
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
@@ -258,7 +267,8 @@ public class TarBackupReaderTest {
         PackageManagerStub.sPackageInfo = null;
 
         RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
-                true /* allowApks */, info, new Signature[0] /* signatures */);
+                true /* allowApks */, info, new Signature[0] /* signatures */,
+                mMockPackageManagerInternal);
 
         assertThat(policy).isEqualTo(RestorePolicy.ACCEPT_IF_APK);
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
@@ -283,7 +293,8 @@ public class TarBackupReaderTest {
         PackageManagerStub.sPackageInfo = null;
 
         RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
-                false /* allowApks */, new FileMetadata(), new Signature[0] /* signatures */);
+                false /* allowApks */, new FileMetadata(), new Signature[0] /* signatures */,
+                mMockPackageManagerInternal);
 
         assertThat(policy).isEqualTo(RestorePolicy.IGNORE);
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
@@ -307,7 +318,8 @@ public class TarBackupReaderTest {
         PackageManagerStub.sPackageInfo = packageInfo;
 
         RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
-                false /* allowApks */, new FileMetadata(), new Signature[0] /* signatures */);
+                false /* allowApks */, new FileMetadata(), new Signature[0] /* signatures */,
+                mMockPackageManagerInternal);
 
         assertThat(policy).isEqualTo(RestorePolicy.IGNORE);
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
@@ -333,7 +345,8 @@ public class TarBackupReaderTest {
         PackageManagerStub.sPackageInfo = packageInfo;
 
         RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
-                false /* allowApks */, new FileMetadata(), new Signature[0] /* signatures */);
+                false /* allowApks */, new FileMetadata(), new Signature[0] /* signatures */,
+                mMockPackageManagerInternal);
 
         assertThat(policy).isEqualTo(RestorePolicy.IGNORE);
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
@@ -358,11 +371,11 @@ public class TarBackupReaderTest {
         packageInfo.applicationInfo.flags |= ApplicationInfo.FLAG_ALLOW_BACKUP;
         packageInfo.applicationInfo.uid = Process.FIRST_APPLICATION_UID;
         packageInfo.applicationInfo.backupAgentName = null;
-        packageInfo.signatures = new Signature[]{FAKE_SIGNATURE_2};
+        packageInfo.signingCertificateHistory = new Signature[][] {{FAKE_SIGNATURE_2}};
         PackageManagerStub.sPackageInfo = packageInfo;
 
         RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
-                false /* allowApks */, new FileMetadata(), signatures);
+                false /* allowApks */, new FileMetadata(), signatures, mMockPackageManagerInternal);
 
         assertThat(policy).isEqualTo(RestorePolicy.IGNORE);
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
@@ -383,16 +396,19 @@ public class TarBackupReaderTest {
         Signature[] signatures = new Signature[]{FAKE_SIGNATURE_1};
 
         PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = "test";
         packageInfo.applicationInfo = new ApplicationInfo();
         packageInfo.applicationInfo.flags |=
                 ApplicationInfo.FLAG_ALLOW_BACKUP | ApplicationInfo.FLAG_RESTORE_ANY_VERSION;
         packageInfo.applicationInfo.uid = Process.SYSTEM_UID;
         packageInfo.applicationInfo.backupAgentName = "backup.agent";
-        packageInfo.signatures = new Signature[]{FAKE_SIGNATURE_1};
+        packageInfo.signingCertificateHistory = new Signature[][] {{FAKE_SIGNATURE_1}};
         PackageManagerStub.sPackageInfo = packageInfo;
 
+        doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(FAKE_SIGNATURE_1,
+                packageInfo.packageName);
         RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
-                false /* allowApks */, new FileMetadata(), signatures);
+                false /* allowApks */, new FileMetadata(), signatures, mMockPackageManagerInternal);
 
         assertThat(policy).isEqualTo(RestorePolicy.ACCEPT);
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
@@ -412,16 +428,19 @@ public class TarBackupReaderTest {
         Signature[] signatures = new Signature[]{FAKE_SIGNATURE_1};
 
         PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = "test";
         packageInfo.applicationInfo = new ApplicationInfo();
         packageInfo.applicationInfo.flags |=
                 ApplicationInfo.FLAG_ALLOW_BACKUP | ApplicationInfo.FLAG_RESTORE_ANY_VERSION;
         packageInfo.applicationInfo.uid = Process.FIRST_APPLICATION_UID;
         packageInfo.applicationInfo.backupAgentName = null;
-        packageInfo.signatures = new Signature[]{FAKE_SIGNATURE_1};
+        packageInfo.signingCertificateHistory = new Signature[][] {{FAKE_SIGNATURE_1}};
         PackageManagerStub.sPackageInfo = packageInfo;
 
+        doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(FAKE_SIGNATURE_1,
+                packageInfo.packageName);
         RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
-                false /* allowApks */, new FileMetadata(), signatures);
+                false /* allowApks */, new FileMetadata(), signatures, mMockPackageManagerInternal);
 
         assertThat(policy).isEqualTo(RestorePolicy.ACCEPT);
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
@@ -444,17 +463,20 @@ public class TarBackupReaderTest {
         info.version = 1;
 
         PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = "test";
         packageInfo.applicationInfo = new ApplicationInfo();
         packageInfo.applicationInfo.flags |= ApplicationInfo.FLAG_ALLOW_BACKUP;
         packageInfo.applicationInfo.flags &= ~ApplicationInfo.FLAG_RESTORE_ANY_VERSION;
         packageInfo.applicationInfo.uid = Process.FIRST_APPLICATION_UID;
         packageInfo.applicationInfo.backupAgentName = null;
-        packageInfo.signatures = new Signature[]{FAKE_SIGNATURE_1};
+        packageInfo.signingCertificateHistory = new Signature[][] {{FAKE_SIGNATURE_1}};
         packageInfo.versionCode = 2;
         PackageManagerStub.sPackageInfo = packageInfo;
 
+        doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(FAKE_SIGNATURE_1,
+                packageInfo.packageName);
         RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
-                false /* allowApks */, info, signatures);
+                false /* allowApks */, info, signatures, mMockPackageManagerInternal);
 
         assertThat(policy).isEqualTo(RestorePolicy.ACCEPT);
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
@@ -479,17 +501,20 @@ public class TarBackupReaderTest {
         info.hasApk = true;
 
         PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = "test";
         packageInfo.applicationInfo = new ApplicationInfo();
         packageInfo.applicationInfo.flags |= ApplicationInfo.FLAG_ALLOW_BACKUP;
         packageInfo.applicationInfo.flags &= ~ApplicationInfo.FLAG_RESTORE_ANY_VERSION;
         packageInfo.applicationInfo.uid = Process.FIRST_APPLICATION_UID;
         packageInfo.applicationInfo.backupAgentName = null;
-        packageInfo.signatures = new Signature[]{FAKE_SIGNATURE_1};
+        packageInfo.signingCertificateHistory = new Signature[][] {{FAKE_SIGNATURE_1}};
         packageInfo.versionCode = 1;
         PackageManagerStub.sPackageInfo = packageInfo;
 
+        doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(FAKE_SIGNATURE_1,
+                packageInfo.packageName);
         RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
-                true /* allowApks */, info, signatures);
+                true /* allowApks */, info, signatures, mMockPackageManagerInternal);
 
         assertThat(policy).isEqualTo(RestorePolicy.ACCEPT_IF_APK);
         verifyNoMoreInteractions(mBackupManagerMonitorMock);
@@ -510,17 +535,20 @@ public class TarBackupReaderTest {
         info.version = 2;
 
         PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = "test";
         packageInfo.applicationInfo = new ApplicationInfo();
         packageInfo.applicationInfo.flags |= ApplicationInfo.FLAG_ALLOW_BACKUP;
         packageInfo.applicationInfo.flags &= ~ApplicationInfo.FLAG_RESTORE_ANY_VERSION;
         packageInfo.applicationInfo.uid = Process.FIRST_APPLICATION_UID;
         packageInfo.applicationInfo.backupAgentName = null;
-        packageInfo.signatures = new Signature[]{FAKE_SIGNATURE_1};
+        packageInfo.signingCertificateHistory = new Signature[][] {{FAKE_SIGNATURE_1}};
         packageInfo.versionCode = 1;
         PackageManagerStub.sPackageInfo = packageInfo;
 
+        doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(FAKE_SIGNATURE_1,
+                packageInfo.packageName);
         RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
-                false /* allowApks */, info, signatures);
+                false /* allowApks */, info, signatures, mMockPackageManagerInternal);
 
         assertThat(policy).isEqualTo(RestorePolicy.IGNORE);
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);

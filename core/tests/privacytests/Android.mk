@@ -12,6 +12,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := junit rappor-tests android-support-test
 
 LOCAL_JAVA_LIBRARIES := android.test.runner
 LOCAL_PACKAGE_NAME := FrameworksPrivacyLibraryTests
+LOCAL_PRIVATE_PLATFORM_APIS := true
 
 LOCAL_CERTIFICATE := platform
 LOCAL_COMPATIBILITY_SUITE := device-tests

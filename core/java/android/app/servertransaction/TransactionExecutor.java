@@ -24,6 +24,7 @@ import static android.app.servertransaction.ActivityLifecycleItem.ON_RESUME;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_START;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 import static android.app.servertransaction.ActivityLifecycleItem.UNDEFINED;
+import static android.app.servertransaction.TransactionExecutorHelper.lastCallbackRequestingState;
 
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
@@ -48,11 +49,7 @@ public class TransactionExecutor {
 
     private ClientTransactionHandler mTransactionHandler;
     private PendingTransactionActions mPendingActions = new PendingTransactionActions();
-
-    // Temp holder for lifecycle path.
-    // No direct transition between two states should take more than one complete cycle of 6 states.
-    @ActivityLifecycleItem.LifecycleState
-    private IntArray mLifecycleSequence = new IntArray(6);
+    private TransactionExecutorHelper mHelper = new TransactionExecutorHelper();
 
     /** Initialize an instance with transaction handler, that will execute all requested actions. */
     public TransactionExecutor(ClientTransactionHandler clientTransactionHandler) {
@@ -89,13 +86,25 @@ public class TransactionExecutor {
 
         final IBinder token = transaction.getActivityToken();
         ActivityClientRecord r = mTransactionHandler.getActivityClient(token);
+
+        // In case when post-execution state of the last callback matches the final state requested
+        // for the activity in this transaction, we won't do the last transition here and do it when
+        // moving to final state instead (because it may contain additional parameters from server).
+        final ActivityLifecycleItem finalStateRequest = transaction.getLifecycleStateRequest();
+        final int finalState = finalStateRequest != null ? finalStateRequest.getTargetState()
+                : UNDEFINED;
+        // Index of the last callback that requests some post-execution state.
+        final int lastCallbackRequestingState = lastCallbackRequestingState(transaction);
+
         final int size = callbacks.size();
         for (int i = 0; i < size; ++i) {
             final ClientTransactionItem item = callbacks.get(i);
             log("Resolving callback: " + item);
-            final int preExecutionState = item.getPreExecutionState();
-            if (preExecutionState != UNDEFINED) {
-                cycleToPath(r, preExecutionState);
+            final int postExecutionState = item.getPostExecutionState();
+            final int closestPreExecutionState = mHelper.getClosestPreExecutionState(r,
+                    item.getPostExecutionState());
+            if (closestPreExecutionState != UNDEFINED) {
+                cycleToPath(r, closestPreExecutionState);
             }
 
             item.execute(mTransactionHandler, token, mPendingActions);
@@ -105,9 +114,11 @@ public class TransactionExecutor {
                 r = mTransactionHandler.getActivityClient(token);
             }
 
-            final int postExecutionState = item.getPostExecutionState();
-            if (postExecutionState != UNDEFINED) {
-                cycleToPath(r, postExecutionState);
+            if (postExecutionState != UNDEFINED && r != null) {
+                // Skip the very last transition and perform it by explicit state request instead.
+                final boolean shouldExcludeLastTransition =
+                        i == lastCallbackRequestingState && finalState == postExecutionState;
+                cycleToPath(r, postExecutionState, shouldExcludeLastTransition);
             }
         }
     }
@@ -162,15 +173,15 @@ public class TransactionExecutor {
             boolean excludeLastState) {
         final int start = r.getLifecycleState();
         log("Cycle from: " + start + " to: " + finish + " excludeLastState:" + excludeLastState);
-        initLifecyclePath(start, finish, excludeLastState);
-        performLifecycleSequence(r);
+        final IntArray path = mHelper.getLifecyclePath(start, finish, excludeLastState);
+        performLifecycleSequence(r, path);
     }
 
     /** Transition the client through previously initialized state sequence. */
-    private void performLifecycleSequence(ActivityClientRecord r) {
-        final int size = mLifecycleSequence.size();
+    private void performLifecycleSequence(ActivityClientRecord r, IntArray path) {
+        final int size = path.size();
         for (int i = 0, state; i < size; i++) {
-            state = mLifecycleSequence.get(i);
+            state = path.get(i);
             log("Transitioning to state: " + state);
             switch (state) {
                 case ON_CREATE:
@@ -195,8 +206,7 @@ public class TransactionExecutor {
                 case ON_DESTROY:
                     mTransactionHandler.handleDestroyActivity(r.token, false /* finishing */,
                             0 /* configChanges */, false /* getNonConfigInstance */,
-                            "performLifecycleSequence. cycling to:"
-                                    + mLifecycleSequence.get(size - 1));
+                            "performLifecycleSequence. cycling to:" + path.get(size - 1));
                     break;
                 case ON_RESTART:
                     mTransactionHandler.performRestartActivity(r.token, false /* start */);
@@ -205,60 +215,6 @@ public class TransactionExecutor {
                     throw new IllegalArgumentException("Unexpected lifecycle state: " + state);
             }
         }
-    }
-
-    /**
-     * Calculate the path through main lifecycle states for an activity and fill
-     * @link #mLifecycleSequence} with values starting with the state that follows the initial
-     * state.
-     */
-    public void initLifecyclePath(int start, int finish, boolean excludeLastState) {
-        mLifecycleSequence.clear();
-        if (finish >= start) {
-            // just go there
-            for (int i = start + 1; i <= finish; i++) {
-                mLifecycleSequence.add(i);
-            }
-        } else { // finish < start, can't just cycle down
-            if (start == ON_PAUSE && finish == ON_RESUME) {
-                // Special case when we can just directly go to resumed state.
-                mLifecycleSequence.add(ON_RESUME);
-            } else if (start <= ON_STOP && finish >= ON_START) {
-                // Restart and go to required state.
-
-                // Go to stopped state first.
-                for (int i = start + 1; i <= ON_STOP; i++) {
-                    mLifecycleSequence.add(i);
-                }
-                // Restart
-                mLifecycleSequence.add(ON_RESTART);
-                // Go to required state
-                for (int i = ON_START; i <= finish; i++) {
-                    mLifecycleSequence.add(i);
-                }
-            } else {
-                // Relaunch and go to required state
-
-                // Go to destroyed state first.
-                for (int i = start + 1; i <= ON_DESTROY; i++) {
-                    mLifecycleSequence.add(i);
-                }
-                // Go to required state
-                for (int i = ON_CREATE; i <= finish; i++) {
-                    mLifecycleSequence.add(i);
-                }
-            }
-        }
-
-        // Remove last transition in case we want to perform it with some specific params.
-        if (excludeLastState && mLifecycleSequence.size() != 0) {
-            mLifecycleSequence.remove(mLifecycleSequence.size() - 1);
-        }
-    }
-
-    @VisibleForTesting
-    public int[] getLifecycleSequence() {
-        return mLifecycleSequence.toArray();
     }
 
     private static void log(String message) {

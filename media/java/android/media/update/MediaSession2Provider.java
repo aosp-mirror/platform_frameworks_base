@@ -16,11 +16,13 @@
 
 package android.media.update;
 
+import android.annotation.NonNull;
 import android.app.PendingIntent;
 import android.media.MediaItem2;
 import android.media.MediaMetadata2;
 import android.media.MediaPlayerBase;
-import android.media.MediaPlayerBase.EventCallback;
+import android.media.MediaPlayerBase.PlayerEventCallback;
+import android.media.MediaPlaylistController;
 import android.media.MediaSession2;
 import android.media.MediaSession2.Command;
 import android.media.MediaSession2.CommandButton;
@@ -42,8 +44,8 @@ import java.util.concurrent.Executor;
  */
 public interface MediaSession2Provider extends TransportControlProvider {
     void close_impl();
-    void setPlayer_impl(MediaPlayerBase player);
-    void setPlayer_impl(MediaPlayerBase player, VolumeProvider2 volumeProvider);
+    void setPlayer_impl(MediaPlayerBase player, MediaPlaylistController mplc,
+            VolumeProvider2 volumeProvider);
     MediaPlayerBase getPlayer_impl();
     SessionToken2 getToken_impl();
     List<ControllerInfo> getConnectedControllers_impl();
@@ -57,18 +59,19 @@ public interface MediaSession2Provider extends TransportControlProvider {
     void addPlaylistItem_impl(int index, MediaItem2 item);
     void removePlaylistItem_impl(MediaItem2 item);
     void editPlaylistItem_impl(MediaItem2 item);
+    void replacePlaylistItem_impl(int index, MediaItem2 item);
     List<MediaItem2> getPlaylist_impl();
     MediaItem2 getCurrentPlaylistItem_impl();
     void setPlaylistParams_impl(PlaylistParams params);
     PlaylistParams getPlaylistParams_impl();
-    void notifyError_impl(int errorCode, int extra);
-    void registerPlayerEventCallback_impl(Executor executor, EventCallback callback);
-    void unregisterPlayerEventCallback_impl(EventCallback callback);
+    void notifyError_impl(int errorCode, Bundle extras);
+    void registerPlayerEventCallback_impl(Executor executor, PlayerEventCallback callback);
+    void unregisterPlayerEventCallback_impl(PlayerEventCallback callback);
 
     interface CommandProvider {
         int getCommandCode_impl();
         String getCustomCommand_impl();
-        Bundle getExtra_impl();
+        Bundle getExtras_impl();
         Bundle toBundle_impl();
 
         boolean equals_impl(Object ob);
@@ -88,7 +91,7 @@ public interface MediaSession2Provider extends TransportControlProvider {
         Command getCommand_impl();
         int getIconResId_impl();
         String getDisplayName_impl();
-        Bundle getExtra_impl();
+        Bundle getExtras_impl();
         boolean isEnabled_impl();
 
         interface BuilderProvider {
@@ -96,7 +99,7 @@ public interface MediaSession2Provider extends TransportControlProvider {
             Builder setIconResId_impl(int resId);
             Builder setDisplayName_impl(String displayName);
             Builder setEnabled_impl(boolean enabled);
-            Builder setExtra_impl(Bundle extra);
+            Builder setExtras_impl(Bundle extras);
             CommandButton build_impl();
         }
     }
@@ -117,7 +120,8 @@ public interface MediaSession2Provider extends TransportControlProvider {
     }
 
     interface BuilderBaseProvider<T extends MediaSession2, C extends SessionCallback> {
-        void setVolumeProvider_impl(VolumeProvider2 volumeProvider);
+        void setPlayer_impl(MediaPlayerBase player, MediaPlaylistController mplc,
+                VolumeProvider2 volumeProvider);
         void setSessionActivity_impl(PendingIntent pi);
         void setId_impl(String id);
         void setSessionCallback_impl(Executor executor, C callback);

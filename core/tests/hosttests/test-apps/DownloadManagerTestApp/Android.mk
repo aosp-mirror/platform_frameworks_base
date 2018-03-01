@@ -24,6 +24,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := android-common mockwebserver junit
 LOCAL_JAVA_LIBRARIES := android.test.runner android.test.base
 
 LOCAL_PACKAGE_NAME := DownloadManagerTestApp
+LOCAL_PRIVATE_PLATFORM_APIS := true
 
 ifneq ($(TARGET_BUILD_VARIANT),user)
 # Need to run as system app to get access to Settings. This test won't work for user builds.

@@ -8,5 +8,6 @@ LOCAL_SRC_FILES := $(call all-subdir-java-files)
 LOCAL_STATIC_JAVA_LIBRARIES := android-support-test
 
 LOCAL_PACKAGE_NAME := MtpTests
+LOCAL_PRIVATE_PLATFORM_APIS := true
 
 include $(BUILD_PACKAGE)

@@ -759,8 +759,7 @@ public final class PowerManagerService extends SystemService
             // with the animations and other critical functions of the power manager.
             mBatteryStats = BatteryStatsService.getService();
             mNotifier = new Notifier(Looper.getMainLooper(), mContext, mBatteryStats,
-                    mAppOps, createSuspendBlockerLocked("PowerManagerService.Broadcasts"),
-                    mPolicy);
+                    createSuspendBlockerLocked("PowerManagerService.Broadcasts"), mPolicy);
 
             mWirelessChargerDetector = new WirelessChargerDetector(sensorManager,
                     createSuspendBlockerLocked("PowerManagerService.WirelessChargerDetector"),

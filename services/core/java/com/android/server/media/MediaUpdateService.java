@@ -16,27 +16,21 @@
 
 package com.android.server.media;
 
-import android.content.Context;
-import android.content.Intent;
-import android.media.IMediaResourceMonitor;
-import android.os.Binder;
-import android.os.UserHandle;
-import android.os.UserManager;
-import android.util.Log;
-import android.util.Slog;
-import com.android.server.SystemService;
-
 import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.media.IMediaExtractorUpdateService;
 import android.os.IBinder;
+import android.os.Handler;
 import android.os.PatternMatcher;
 import android.os.ServiceManager;
-import android.media.IMediaExtractorUpdateService;
-
-import java.lang.Exception;
+import android.os.UserHandle;
+import android.util.Log;
+import android.util.Slog;
+import com.android.server.SystemService;
 
 /** This class provides a system service that manages media framework updates. */
 public class MediaUpdateService extends SystemService {
@@ -46,9 +40,11 @@ public class MediaUpdateService extends SystemService {
     private static final String EXTRACTOR_UPDATE_SERVICE_NAME = "media.extractor.update";
 
     private IMediaExtractorUpdateService mMediaExtractorUpdateService;
+    final Handler mHandler;
 
     public MediaUpdateService(Context context) {
         super(context);
+        mHandler = new Handler();
     }
 
     @Override
@@ -77,7 +73,12 @@ public class MediaUpdateService extends SystemService {
         }
         if (binder != null) {
             mMediaExtractorUpdateService = IMediaExtractorUpdateService.Stub.asInterface(binder);
-            packageStateChanged();
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    packageStateChanged();
+                }
+            });
         } else {
             Slog.w(TAG, EXTRACTOR_UPDATE_SERVICE_NAME + " not found.");
         }

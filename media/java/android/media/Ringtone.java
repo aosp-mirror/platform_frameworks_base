@@ -40,7 +40,7 @@ import java.util.ArrayList;
  * <p>
  * For ways of retrieving {@link Ringtone} objects or to show a ringtone
  * picker, see {@link RingtoneManager}.
- * 
+ *
  * @see RingtoneManager
  */
 public class Ringtone {
@@ -97,7 +97,7 @@ public class Ringtone {
 
     /**
      * Sets the stream type where this ringtone will be played.
-     * 
+     *
      * @param streamType The stream, see {@link AudioManager}.
      * @deprecated use {@link #setAudioAttributes(AudioAttributes)}
      */
@@ -111,7 +111,7 @@ public class Ringtone {
 
     /**
      * Gets the stream type where this ringtone will be played.
-     * 
+     *
      * @return The stream type, see {@link AudioManager}.
      * @deprecated use of stream types is deprecated, see
      *     {@link #setAudioAttributes(AudioAttributes)}
@@ -146,9 +146,8 @@ public class Ringtone {
     }
 
     /**
-     * @hide
      * Sets the player to be looping or non-looping.
-     * @param looping whether to loop or not
+     * @param looping whether to loop or not.
      */
     public void setLooping(boolean looping) {
         synchronized (mPlaybackSettingsLock) {
@@ -158,7 +157,16 @@ public class Ringtone {
     }
 
     /**
-     * @hide
+     * Returns whether the looping mode was enabled on this player.
+     * @return true if this player loops when playing.
+     */
+    public boolean isLooping() {
+        synchronized (mPlaybackSettingsLock) {
+            return mIsLooping;
+        }
+    }
+
+    /**
      * Sets the volume on this player.
      * @param volume a raw scalar in range 0.0 to 1.0, where 0.0 mutes this player, and 1.0
      *   corresponds to no attenuation being applied.
@@ -169,6 +177,16 @@ public class Ringtone {
             if (volume > 1.0f) { volume = 1.0f; }
             mVolume = volume;
             applyPlaybackProperties_sync();
+        }
+    }
+
+    /**
+     * Returns the volume scalar set on this player.
+     * @return a value between 0.0f and 1.0f.
+     */
+    public float getVolume() {
+        synchronized (mPlaybackSettingsLock) {
+            return mVolume;
         }
     }
 
@@ -194,8 +212,8 @@ public class Ringtone {
     /**
      * Returns a human-presentable title for ringtone. Looks in media
      * content provider. If not in either, uses the filename
-     * 
-     * @param context A context used for querying. 
+     *
+     * @param context A context used for querying.
      */
     public String getTitle(Context context) {
         if (mTitle != null) return mTitle;
@@ -265,12 +283,11 @@ public class Ringtone {
 
         if (title == null) {
             title = context.getString(com.android.internal.R.string.ringtone_unknown);
-            
             if (title == null) {
                 title = "";
             }
         }
-        
+
         return title;
     }
 
@@ -395,7 +412,7 @@ public class Ringtone {
 
     /**
      * Whether this ringtone is currently playing.
-     * 
+     *
      * @return True if playing, false otherwise.
      */
     public boolean isPlaying() {

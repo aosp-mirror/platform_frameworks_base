@@ -314,6 +314,8 @@ public class SettingsBackupTest {
                     Settings.Global.NTP_SERVER,
                     Settings.Global.NTP_TIMEOUT,
                     Settings.Global.OTA_DISABLE_AUTOMATIC_UPDATE,
+                    Settings.Global.OFF_BODY_RADIOS_OFF_FOR_SMALL_BATTERY_ENABLED,
+                    Settings.Global.OFF_BODY_RADIOS_OFF_DELAY_MS,
                     Settings.Global.OVERLAY_DISPLAY_DEVICES,
                     Settings.Global.PAC_CHANGE_DELAY,
                     Settings.Global.PACKAGE_VERIFIER_DEFAULT_RESPONSE,

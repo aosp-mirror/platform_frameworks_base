@@ -48,6 +48,8 @@ public class NotificationTestHelper {
     private ExpandableNotificationRow mRow;
     private InflationException mException;
     private HeadsUpManager mHeadsUpManager;
+    protected static final String PKG = "com.android.systemui";
+    protected static final int UID = 1000;
 
     public NotificationTestHelper(Context context) {
         mContext = context;
@@ -55,7 +57,7 @@ public class NotificationTestHelper {
         mHeadsUpManager = new HeadsUpManagerPhone(mContext, null, mGroupManager, null, null);
     }
 
-    public ExpandableNotificationRow createRow() throws Exception {
+    public ExpandableNotificationRow createRow(String pkg, int uid) throws Exception {
         Notification publicVersion = new Notification.Builder(mContext).setSmallIcon(
                 R.drawable.ic_person)
                 .setCustomContentView(new RemoteViews(mContext.getPackageName(),
@@ -67,10 +69,19 @@ public class NotificationTestHelper {
                 .setContentText("Text")
                 .setPublicVersion(publicVersion)
                 .build();
-        return createRow(notification);
+        return createRow(notification, pkg, uid);
+    }
+
+    public ExpandableNotificationRow createRow() throws Exception {
+        return createRow(PKG, UID);
     }
 
     public ExpandableNotificationRow createRow(Notification notification) throws Exception {
+        return createRow(notification, PKG, UID);
+    }
+
+    public ExpandableNotificationRow createRow(Notification notification, String pkg, int uid)
+            throws Exception {
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
                 mContext.LAYOUT_INFLATER_SERVICE);
         mInstrumentation.runOnMainSync(() -> {
@@ -83,8 +94,7 @@ public class NotificationTestHelper {
         row.setHeadsUpManager(mHeadsUpManager);
         row.setAboveShelfChangedListener(aboveShelf -> {});
         UserHandle mUser = UserHandle.of(ActivityManager.getCurrentUser());
-        StatusBarNotification sbn = new StatusBarNotification("com.android.systemui",
-                "com.android.systemui", mId++, null, 1000,
+        StatusBarNotification sbn = new StatusBarNotification(pkg, pkg, mId++, null, uid,
                 2000, notification, mUser, null, System.currentTimeMillis());
         NotificationData.Entry entry = new NotificationData.Entry(sbn);
         entry.row = row;

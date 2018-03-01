@@ -19,7 +19,9 @@ package android.media;
 import java.nio.ByteBuffer;
 import java.lang.AutoCloseable;
 
+import android.annotation.Nullable;
 import android.graphics.Rect;
+import android.hardware.HardwareBuffer;
 
 /**
  * <p>A single complete image buffer to use with a media source such as a
@@ -182,6 +184,23 @@ public abstract class Image implements AutoCloseable {
      * </p>
      */
     public abstract long getTimestamp();
+
+    /**
+     * Get the {@link android.hardware.HardwareBuffer HardwareBuffer} handle of the input image
+     * intended for GPU and/or hardware access.
+     * <p>
+     * The returned {@link android.hardware.HardwareBuffer HardwareBuffer} shall not be used
+     * after  {@link Image#close Image.close()} has been called.
+     * </p>
+     * @return the HardwareBuffer associated with this Image or null if this Image doesn't support
+     * this feature (e.g. {@link android.media.ImageWriter ImageWriter} or
+     * {@link android.media.MediaCodec MediaCodec} don't).
+     */
+    @Nullable
+    public HardwareBuffer getHardwareBuffer() {
+        throwISEIfImageIsInvalid();
+        return null;
+    }
 
     /**
      * Set the timestamp associated with this frame.

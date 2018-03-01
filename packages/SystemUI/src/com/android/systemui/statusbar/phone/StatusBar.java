@@ -180,6 +180,7 @@ import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.stackdivider.WindowManagerProxy;
 import com.android.systemui.statusbar.ActivatableNotificationView;
+import com.android.systemui.statusbar.AppOpsListener;
 import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CrossFadeHelper;
@@ -405,6 +406,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected NotificationLogger mNotificationLogger;
     protected NotificationEntryManager mEntryManager;
     protected NotificationViewHierarchyManager mViewHierarchyManager;
+    protected AppOpsListener mAppOpsListener;
 
     /**
      * Helper that is responsible for showing the right toast when a disallowed activity operation
@@ -622,6 +624,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mMediaManager = Dependency.get(NotificationMediaManager.class);
         mEntryManager = Dependency.get(NotificationEntryManager.class);
         mViewHierarchyManager = Dependency.get(NotificationViewHierarchyManager.class);
+        mAppOpsListener = Dependency.get(AppOpsListener.class);
+        mAppOpsListener.setUpWithPresenter(this, mEntryManager);
 
         mColorExtractor = Dependency.get(SysuiColorExtractor.class);
         mColorExtractor.addOnColorsChangedListener(this);
@@ -813,6 +817,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mHeadsUpManager = new HeadsUpManagerPhone(context, mStatusBarWindow, mGroupManager, this,
                 mVisualStabilityManager);
+        Dependency.get(ConfigurationController.class).addCallback(mHeadsUpManager);
         mHeadsUpManager.addListener(this);
         mHeadsUpManager.addListener(mNotificationPanel);
         mHeadsUpManager.addListener(mGroupManager);
@@ -1069,7 +1074,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         // end old BaseStatusBar.onDensityOrFontScaleChanged().
         mScrimController.onDensityOrFontScaleChanged();
         // TODO: Remove this.
-        if (mStatusBarView != null) mStatusBarView.onDensityOrFontScaleChanged();
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.onDensityOrFontScaleChanged();
         }
@@ -3079,6 +3083,9 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         loadDimens();
 
+        if (mStatusBarView != null) {
+            mStatusBarView.updateResources();
+        }
         if (mNotificationPanel != null) {
             mNotificationPanel.updateResources();
         }
@@ -3293,6 +3300,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         Dependency.get(ActivityStarterDelegate.class).setActivityStarterImpl(null);
         mDeviceProvisionedController.removeCallback(mUserSetupObserver);
         Dependency.get(ConfigurationController.class).removeCallback(this);
+        mAppOpsListener.destroy();
     }
 
     private boolean mDemoModeAllowed;
@@ -4519,7 +4527,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             if (isScreenTurningOnOrOn()) {
                 if (DEBUG_CAMERA_LIFT) Slog.d(TAG, "Launching camera");
                 if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
-                    mStatusBarKeyguardViewManager.hideBouncer(false /* destroyView */);
+                    mStatusBarKeyguardViewManager.reset(true /* hide */);
                 }
                 mNotificationPanel.launchCamera(mDeviceInteractive /* animate */, source);
                 updateScrimController();

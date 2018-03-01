@@ -126,6 +126,7 @@ easier.
         <item name="progressBarStyleInverse">@style/Widget.DeviceDefault.ProgressBar.Inverse</item>
         <item name="progressBarStyleSmallInverse">@style/Widget.DeviceDefault.ProgressBar.Small.Inverse</item>
         <item name="progressBarStyleLargeInverse">@style/Widget.DeviceDefault.ProgressBar.Large.Inverse</item>
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
         <item name="seekBarStyle">@style/Widget.DeviceDefault.SeekBar</item>
         <item name="ratingBarStyle">@style/Widget.DeviceDefault.RatingBar</item>
         <item name="ratingBarStyleIndicator">@style/Widget.DeviceDefault.RatingBar.Indicator</item>
@@ -227,6 +228,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault} with no action bar and no status bar.  This theme
@@ -247,6 +251,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault} with no action bar and no status bar and
@@ -269,6 +276,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault} that has no title bar and translucent
@@ -290,6 +300,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- DeviceDefault theme for dialog windows and activities. This changes the window to be
@@ -319,6 +332,9 @@ easier.
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
         <item name="alertDialogTheme">@style/Theme.DeviceDefault.Dialog.Alert</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Dialog} that has a nice minimum width for a
@@ -339,6 +355,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Dialog} without an action bar -->
@@ -358,6 +377,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Dialog_NoActionBar} that has a nice minimum width
@@ -378,6 +400,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- Variant of Theme.DeviceDefault.Dialog that has a fixed size. -->
@@ -414,6 +439,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- DeviceDefault theme for a window without an action bar that will be displayed either
@@ -435,6 +463,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- DeviceDefault theme for a presentation window on a secondary display. -->
@@ -454,6 +485,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- DeviceDefault theme for panel windows. This removes all extraneous window
@@ -475,6 +509,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- DeviceDefault theme for windows that want to have the user's selected wallpaper appear
@@ -495,6 +532,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- DeviceDefault theme for windows that want to have the user's selected wallpaper appear
@@ -515,6 +555,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- DeviceDefault style for input methods, which is used by the
@@ -535,6 +578,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- DeviceDefault style for input methods, which is used by the
@@ -555,6 +601,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <style name="Theme.DeviceDefault.Dialog.Alert" parent="Theme.Material.Dialog.Alert">
@@ -575,6 +624,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <style name="Theme.DeviceDefault.SearchBar" parent="Theme.Material.SearchBar">
@@ -593,6 +645,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <style name="Theme.DeviceDefault.Dialog.NoFrame" parent="Theme.Material.Dialog.NoFrame">
@@ -611,6 +666,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault} with a light-colored style -->
@@ -689,6 +747,7 @@ easier.
         <item name="progressBarStyleInverse">@style/Widget.DeviceDefault.Light.ProgressBar.Inverse</item>
         <item name="progressBarStyleSmallInverse">@style/Widget.DeviceDefault.Light.ProgressBar.Small.Inverse</item>
         <item name="progressBarStyleLargeInverse">@style/Widget.DeviceDefault.Light.ProgressBar.Large.Inverse</item>
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
         <item name="seekBarStyle">@style/Widget.DeviceDefault.Light.SeekBar</item>
         <item name="ratingBarStyle">@style/Widget.DeviceDefault.Light.RatingBar</item>
         <item name="ratingBarStyleIndicator">@style/Widget.DeviceDefault.Light.RatingBar.Indicator</item>
@@ -785,6 +844,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Light} with no action bar -->
@@ -804,6 +866,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Light} with no action bar and no status bar.
@@ -824,6 +889,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Light} with no action bar and no status bar
@@ -846,6 +914,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Light} that has no title bar and translucent
@@ -867,6 +938,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- DeviceDefault light theme for dialog windows and activities. This changes the window to be
@@ -894,6 +968,9 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Light_Dialog} that has a nice minimum width for a
@@ -914,6 +991,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
      <!-- Variant of {@link #Theme_DeviceDefault_Light_Dialog} without an action bar -->
@@ -933,6 +1013,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Light_Dialog_NoActionBar} that has a nice minimum
@@ -953,6 +1036,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- Variant of Theme.DeviceDefault.Dialog that has a fixed size. -->
@@ -999,6 +1085,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- DeviceDefault light theme for a window without an action bar that will be displayed either
@@ -1020,6 +1109,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- DeviceDefault light theme for a presentation window on a secondary display. -->
@@ -1039,6 +1131,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- DeviceDefault light theme for panel windows. This removes all extraneous window
@@ -1060,6 +1155,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <style name="Theme.DeviceDefault.Light.Dialog.Alert" parent="Theme.Material.Light.Dialog.Alert">
@@ -1080,6 +1178,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <style name="Theme.DeviceDefault.Light.SearchBar" parent="Theme.Material.Light.SearchBar">
@@ -1098,6 +1199,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <style name="Theme.DeviceDefault.Light.Voice" parent="Theme.Material.Light.Voice">
@@ -1116,6 +1220,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- DeviceDefault theme for a window that should look like the Settings app.  -->
@@ -1147,6 +1254,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- @hide DeviceDefault theme for a window that should use Settings theme colors
@@ -1166,6 +1276,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <style name="Theme.DeviceDefault.QuickSettings.Dialog" parent="Theme.DeviceDefault.Light.Dialog">
@@ -1175,6 +1288,9 @@ easier.
         <item name="colorSecondary">@color/secondary_device_default_settings_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
         <item name="alertDialogTheme">@style/Theme.DeviceDefault.Light.Dialog.Alert</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Settings_Dark} with no action bar -->
@@ -1195,6 +1311,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <style name="Theme.DeviceDefault.Settings.Dialog" parent="Theme.Material.Settings.Dialog">
@@ -1214,6 +1333,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <style name="Theme.DeviceDefault.Settings.DialogWhenLarge" parent="Theme.Material.Settings.DialogWhenLarge">
@@ -1233,6 +1355,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <style name="Theme.DeviceDefault.Settings.Dialog.Alert" parent="Theme.Material.Settings.Dialog.Alert">
@@ -1252,6 +1377,9 @@ easier.
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <style name="Theme.DeviceDefault.Settings.Dialog.NoActionBar" parent="Theme.DeviceDefault.Light.Dialog.NoActionBar" />
@@ -1278,6 +1406,9 @@ easier.
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+
+        <!-- Progress bar attributes -->
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
     </style>
 
     <!-- DeviceDefault theme for the default system theme.  -->

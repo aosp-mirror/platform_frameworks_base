@@ -26,6 +26,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     ActivityManagerPerfTestsUtils
 
 LOCAL_PACKAGE_NAME := ActivityManagerPerfTests
+LOCAL_PRIVATE_PLATFORM_APIS := true
 
 LOCAL_MIN_SDK_VERSION := 25
 

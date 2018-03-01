@@ -40,16 +40,22 @@ option java_multiple_files = true;
 message ActivityManagerServiceProto {
   option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional ActivityStackSupervisorProto activities = 1;
+  optional ActivityManagerServiceDumpActivitiesProto activities = 1;
 
-  optional BroadcastProto broadcasts = 2;
+  optional ActivityManagerServiceDumpBroadcastsProto broadcasts = 2;
 
-  optional ActiveServicesProto services = 3;
+  optional ActivityManagerServiceDumpServicesProto services = 3;
 
-  optional ProcessesProto processes = 4;
+  optional ActivityManagerServiceDumpProcessesProto processes = 4;
 }
 
 // "dumpsys activity --proto activities"
+message ActivityManagerServiceDumpActivitiesProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+  optional ActivityStackSupervisorProto activity_stack_supervisor = 1;
+}
+
 message ActivityStackSupervisorProto {
   option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -121,7 +127,7 @@ message KeyguardControllerProto {
 }
 
 // "dumpsys activity --proto broadcasts"
-message BroadcastProto {
+message ActivityManagerServiceDumpBroadcastsProto {
   option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
   repeated ReceiverListProto  receiver_list = 1;
@@ -202,7 +208,7 @@ message BroadcastQueueProto {
   repeated BroadcastSummary historical_broadcasts_summary = 6;
 }
 
-message MemInfoProto {
+message MemInfoDumpProto {
   option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
   optional int64 uptime_duration_ms = 1;
@@ -406,6 +412,12 @@ message StickyBroadcastProto {
 }
 
 // "dumpsys activity --proto service"
+message ActivityManagerServiceDumpServicesProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+  optional ActiveServicesProto active_services = 1;
+}
+
 message ActiveServicesProto {
   option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -585,7 +597,7 @@ message IntentBindRecordProto {
 }
 
 // TODO: "dumpsys activity --proto processes"
-message ProcessesProto {
+message ActivityManagerServiceDumpProcessesProto {
   option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
   repeated ProcessRecordProto procs = 1;

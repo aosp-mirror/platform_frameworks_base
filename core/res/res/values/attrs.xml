@@ -1019,6 +1019,9 @@
         <!-- Corner radius of buttons. -->
         <attr name="buttonCornerRadius" format="dimension" />
 
+        <!-- Corner radius of progress bars. -->
+        <attr name="progressBarCornerRadius" format="dimension" />
+
         <!-- Style for the search query widget. -->
         <attr name="searchViewStyle" format="reference" />
 

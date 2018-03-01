@@ -10516,8 +10516,11 @@ public final class Settings {
          * entity_list_default use ":" as delimiter for values. Ex:
          *
          * <pre>
-         * smart_selection_dark_launch              (boolean)
-         * smart_selection_enabled_for_edit_text    (boolean)
+         * model_dark_launch_enabled                (boolean)
+         * smart_selection_enabled                  (boolean)
+         * smart_text_share_enabled                 (boolean)
+         * smart_linkify_enabled                    (boolean)
+         * smart_select_animation_enabled           (boolean)
          * suggest_selection_max_range_length       (int)
          * classify_text_max_range_length           (int)
          * generate_links_max_text_length           (int)
@@ -10530,7 +10533,7 @@ public final class Settings {
          * <p>
          * Type: string
          * @hide
-         * see also android.view.textclassifier.TextClassifierConstants
+         * see also android.view.textclassifier.TextClassificationConstants
          */
         public static final String TEXT_CLASSIFIER_CONSTANTS = "text_classifier_constants";
 
@@ -10588,6 +10591,23 @@ public final class Settings {
          */
         public static final String FORCED_APP_STANDBY_FOR_SMALL_BATTERY_ENABLED
                 = "forced_app_standby_for_small_battery_enabled";
+
+        /**
+         * Whether or not to enable the Off Body, Radios Off feature on small battery devices.
+         * Type: int (0 for false, 1 for true)
+         * Default: 0
+         * @hide
+         */
+        public static final String OFF_BODY_RADIOS_OFF_FOR_SMALL_BATTERY_ENABLED
+                = "off_body_radios_off_for_small_battery_enabled";
+
+        /**
+         * How long after the device goes off body to disable radios, in milliseconds.
+         * Type: long
+         * Default: 10 minutes
+         * @hide
+         */
+        public static final String OFF_BODY_RADIOS_OFF_DELAY_MS = "off_body_radios_off_delay_ms";
 
         /**
          * Whether or not to enable Time Only Mode for watch type devices.

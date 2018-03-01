@@ -16,10 +16,10 @@
 
 package android.media.update;
 
-import android.annotation.SystemApi;
+import android.media.SessionToken2;
 import android.media.session.MediaController;
 import android.util.AttributeSet;
-import android.view.View;
+import android.widget.MediaControlView2;
 
 /**
  * Interface for connecting the public API to an updatable implementation.
@@ -34,11 +34,19 @@ import android.view.View;
  *
  * @hide
  */
-// TODO @SystemApi
+// TODO: @SystemApi
 public interface MediaControlView2Provider extends ViewGroupProvider {
     void initialize(AttributeSet attrs, int defStyleAttr, int defStyleRes);
 
+    void setMediaSessionToken_impl(SessionToken2 token);
+    void setOnFullScreenListener_impl(MediaControlView2.OnFullScreenListener l);
+    /**
+     * @hide TODO: remove
+     */
     void setController_impl(MediaController controller);
+    /**
+     * @hide
+     */
     void setButtonVisibility_impl(int button, int visibility);
     void requestPlayButtonFocus_impl();
 }

@@ -33,11 +33,14 @@
 #include <android_runtime/android_hardware_HardwareBuffer.h>
 #include <grallocusage/GrallocUsageConversion.h>
 
+#include <private/android/AHardwareBufferHelpers.h>
+
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
 
 #include <stdint.h>
 #include <inttypes.h>
+#include <android/hardware_buffer_jni.h>
 
 #define ANDROID_MEDIA_IMAGEREADER_CTX_JNI_ID       "mNativeContext"
 #define ANDROID_MEDIA_SURFACEIMAGE_BUFFER_JNI_ID   "mNativeBuffer"
@@ -797,6 +800,14 @@ static jint Image_getFormat(JNIEnv* env, jobject thiz, jint readerFormat)
     }
 }
 
+static jobject Image_getHardwareBuffer(JNIEnv* env, jobject thiz) {
+    BufferItem* buffer = Image_getBufferItem(env, thiz);
+    AHardwareBuffer* b = AHardwareBuffer_from_GraphicBuffer(buffer->mGraphicBuffer.get());
+    // don't user the public AHardwareBuffer_toHardwareBuffer() because this would force us
+    // to link against libandroid.so
+    return android_hardware_HardwareBuffer_createFromAHardwareBuffer(env, b);
+}
+
 } // extern "C"
 
 // ----------------------------------------------------------------------------
@@ -814,10 +825,12 @@ static const JNINativeMethod gImageReaderMethods[] = {
 
 static const JNINativeMethod gImageMethods[] = {
     {"nativeCreatePlanes",      "(II)[Landroid/media/ImageReader$SurfaceImage$SurfacePlane;",
-                                                              (void*)Image_createSurfacePlanes },
-    {"nativeGetWidth",         "()I",                        (void*)Image_getWidth },
-    {"nativeGetHeight",        "()I",                        (void*)Image_getHeight },
-    {"nativeGetFormat",        "(I)I",                        (void*)Image_getFormat },
+                                                             (void*)Image_createSurfacePlanes },
+    {"nativeGetWidth",          "()I",                       (void*)Image_getWidth },
+    {"nativeGetHeight",         "()I",                       (void*)Image_getHeight },
+    {"nativeGetFormat",         "(I)I",                      (void*)Image_getFormat },
+    {"nativeGetHardwareBuffer", "()Landroid/hardware/HardwareBuffer;",
+                                                             (void*)Image_getHardwareBuffer },
 };
 
 int register_android_media_ImageReader(JNIEnv *env) {

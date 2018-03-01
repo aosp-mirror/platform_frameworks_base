@@ -106,6 +106,8 @@ private:
 
     const long mTimeBaseSec;
 
+    int64_t mLastLogTimestamp;
+
     long mLastPullerCacheClearTimeSec = 0;
 
     FRIEND_TEST(StatsLogProcessorTest, TestRateLimitByteSize);

@@ -12,6 +12,7 @@ package android.app {
   public class ActivityManager {
     method public void addOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener, int);
     method public int getPackageImportance(java.lang.String);
+    method public long getTotalRam();
     method public int getUidImportance(int);
     method public void removeOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener);
     method public void removeStacksInWindowingModes(int[]) throws java.lang.SecurityException;
@@ -47,7 +48,10 @@ package android.app {
 
   public class AppOpsManager {
     method public static java.lang.String[] getOpStrs();
+    method public boolean isOperationActive(int, int, java.lang.String);
     method public void setMode(int, int, java.lang.String, int);
+    method public void startWatchingActive(int[], android.app.AppOpsManager.OnOpActiveChangedListener);
+    method public void stopWatchingActive(android.app.AppOpsManager.OnOpActiveChangedListener);
     field public static final java.lang.String OPSTR_ACCEPT_HANDOVER = "android:accept_handover";
     field public static final java.lang.String OPSTR_ACCESS_NOTIFICATIONS = "android:access_notifications";
     field public static final java.lang.String OPSTR_ACTIVATE_VPN = "android:activate_vpn";
@@ -89,6 +93,12 @@ package android.app {
     field public static final java.lang.String OPSTR_WRITE_ICC_SMS = "android:write_icc_sms";
     field public static final java.lang.String OPSTR_WRITE_SMS = "android:write_sms";
     field public static final java.lang.String OPSTR_WRITE_WALLPAPER = "android:write_wallpaper";
+    field public static final int OP_RECORD_AUDIO = 27; // 0x1b
+    field public static final int OP_SYSTEM_ALERT_WINDOW = 24; // 0x18
+  }
+
+  public static abstract interface AppOpsManager.OnOpActiveChangedListener {
+    method public abstract void onOpActiveChanged(int, int, java.lang.String, boolean);
   }
 
   public final class NotificationChannelGroup implements android.os.Parcelable {
@@ -351,6 +361,7 @@ package android.hardware.display {
 
   public final class DisplayManager {
     method public java.util.List<android.hardware.display.BrightnessChangeEvent> getBrightnessEvents();
+    method public android.graphics.Point getStableDisplaySize();
     method public void setBrightnessConfiguration(android.hardware.display.BrightnessConfiguration);
   }
 
@@ -445,6 +456,10 @@ package android.net {
 }
 
 package android.os {
+
+  public static class Build.VERSION {
+    field public static final int RESOURCES_SDK_INT;
+  }
 
   public class IncidentManager {
     method public void reportIncident(android.os.IncidentReportArgs);

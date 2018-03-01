@@ -24,13 +24,18 @@ import android.content.Context;
 import com.android.settingslib.R;
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
 
+import java.time.Clock;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RuntimeEnvironment;
 
 import java.time.Duration;
+import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowSettings.ShadowSystem;
+import org.robolectric.shadows.ShadowSystemClock;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
 public class PowerUtilTest {
@@ -39,8 +44,12 @@ public class PowerUtilTest {
     public static final long SEVENTEEN_MIN_MILLIS = Duration.ofMinutes(17).toMillis();
     public static final long FIVE_MINUTES_MILLIS = Duration.ofMinutes(5).toMillis();
     public static final long TEN_MINUTES_MILLIS = Duration.ofMinutes(10).toMillis();
-    public static final long TWO_DAYS_MILLIS = Duration.ofDays(2).toMillis();
-    public static final String ONE_DAY_FORMATTED = "1 day";
+    public static final long THREE_DAYS_MILLIS = Duration.ofDays(3).toMillis();
+    public static final long THIRTY_HOURS_MILLIS = Duration.ofHours(30).toMillis();
+    public static final String TWO_DAYS_FORMATTED = "2 days";
+    public static final String THIRTY_HOURS_FORMATTED = "1d 6h";
+    public static final String NORMAL_CASE_EXPECTED_PREFIX = "Will last until about";
+    public static final String ENHANCED_SUFFIX = "based on your usage";
 
     private Context mContext;
 
@@ -51,6 +60,7 @@ public class PowerUtilTest {
     }
 
     @Test
+    @Config(shadows = {ShadowSystemClock.class})
     public void testGetBatteryRemainingStringFormatted_moreThanFifteenMinutes_withPercentage() {
         String info = PowerUtil.getBatteryRemainingStringFormatted(mContext,
                 SEVENTEEN_MIN_MILLIS,
@@ -62,15 +72,13 @@ public class PowerUtilTest {
                 false /* basedOnUsage */);
 
         // We only add special mention for the long string
-        assertThat(info).isEqualTo(mContext.getString(
-                R.string.power_discharging_duration_enhanced,
-                TEST_BATTERY_LEVEL_10,
-                FIFTEEN_MIN_FORMATTED));
+        assertThat(info).contains(NORMAL_CASE_EXPECTED_PREFIX);
+        assertThat(info).contains(ENHANCED_SUFFIX);
+        assertThat(info).contains("%");
         // shortened string should not have extra text
-        assertThat(info2).isEqualTo(mContext.getString(
-                R.string.power_discharging_duration,
-                TEST_BATTERY_LEVEL_10,
-                FIFTEEN_MIN_FORMATTED));
+        assertThat(info2).contains(NORMAL_CASE_EXPECTED_PREFIX);
+        assertThat(info2).doesNotContain(ENHANCED_SUFFIX);
+        assertThat(info2).contains("%");
     }
 
     @Test
@@ -84,14 +92,14 @@ public class PowerUtilTest {
                 null /* percentageString */,
                 false /* basedOnUsage */);
 
-        // We only add special mention for the long string
-        assertThat(info).isEqualTo(mContext.getString(
-                R.string.power_remaining_duration_only_enhanced,
-                FIFTEEN_MIN_FORMATTED));
+        // We only have % when it is provided
+        assertThat(info).contains(NORMAL_CASE_EXPECTED_PREFIX);
+        assertThat(info).contains(ENHANCED_SUFFIX);
+        assertThat(info).doesNotContain("%");
         // shortened string should not have extra text
-        assertThat(info2).isEqualTo(mContext.getString(
-                R.string.power_remaining_duration_only,
-                FIFTEEN_MIN_FORMATTED));
+        assertThat(info2).contains(NORMAL_CASE_EXPECTED_PREFIX);
+        assertThat(info2).doesNotContain(ENHANCED_SUFFIX);
+        assertThat(info2).doesNotContain("%");
     }
 
 
@@ -107,12 +115,9 @@ public class PowerUtilTest {
                 true /* basedOnUsage */);
 
         // additional battery percentage in this string
-        assertThat(info).isEqualTo(mContext.getString(
-                R.string.power_remaining_duration_shutdown_imminent,
-                TEST_BATTERY_LEVEL_10));
+        assertThat(info).isEqualTo("Phone may shutdown soon (10%)");
         // shortened string should not have percentage
-        assertThat(info2).isEqualTo(mContext.getString(
-                R.string.power_remaining_duration_only_shutdown_imminent));
+        assertThat(info2).isEqualTo("Phone may shutdown soon");
     }
 
     @Test
@@ -127,35 +132,42 @@ public class PowerUtilTest {
                 true /* basedOnUsage */);
 
         // shortened string should not have percentage
-        assertThat(info).isEqualTo(mContext.getString(
-                R.string.power_remaining_less_than_duration_only,
-                FIFTEEN_MIN_FORMATTED));
+        assertThat(info).isEqualTo("Less than 15m remaining");
         // Add percentage to string when provided
-        assertThat(info2).isEqualTo(mContext.getString(
-                R.string.power_remaining_less_than_duration,
-                TEST_BATTERY_LEVEL_10,
-                FIFTEEN_MIN_FORMATTED));
+        assertThat(info2).isEqualTo("Less than 15m remaining (10%)");
     }
 
     @Test
-    public void testGetBatteryRemainingStringFormatted_moreThanOneDay_usesCorrectString() {
+    public void testGetBatteryRemainingStringFormatted_betweenOneAndTwoDays_usesCorrectString() {
         String info = PowerUtil.getBatteryRemainingStringFormatted(mContext,
-                TWO_DAYS_MILLIS,
+                THIRTY_HOURS_MILLIS,
                 null /* percentageString */,
                 true /* basedOnUsage */);
         String info2 = PowerUtil.getBatteryRemainingStringFormatted(mContext,
-                TWO_DAYS_MILLIS,
+                THIRTY_HOURS_MILLIS,
+                TEST_BATTERY_LEVEL_10 /* percentageString */,
+                false /* basedOnUsage */);
+
+        // We only add special mention for the long string
+        assertThat(info).isEqualTo("About 1d 6h left based on your usage");
+        // shortened string should not have extra text
+        assertThat(info2).isEqualTo("About 1d 6h left (10%)");
+    }
+
+    @Test
+    public void testGetBatteryRemainingStringFormatted_moreThanTwoDays_usesCorrectString() {
+        String info = PowerUtil.getBatteryRemainingStringFormatted(mContext,
+                THREE_DAYS_MILLIS,
+                null /* percentageString */,
+                true /* basedOnUsage */);
+        String info2 = PowerUtil.getBatteryRemainingStringFormatted(mContext,
+                THREE_DAYS_MILLIS,
                 TEST_BATTERY_LEVEL_10 /* percentageString */,
                 true /* basedOnUsage */);
 
         // shortened string should not have percentage
-        assertThat(info).isEqualTo(mContext.getString(
-                R.string.power_remaining_only_more_than_subtext,
-                ONE_DAY_FORMATTED));
+        assertThat(info).isEqualTo("More than 2 days remaining");
         // Add percentage to string when provided
-        assertThat(info2).isEqualTo(mContext.getString(
-                R.string.power_remaining_more_than_subtext,
-                TEST_BATTERY_LEVEL_10,
-                ONE_DAY_FORMATTED));
+        assertThat(info2).isEqualTo("More than 2 days remaining (10%)");
     }
 }

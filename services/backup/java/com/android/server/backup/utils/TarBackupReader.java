@@ -50,6 +50,7 @@ import android.app.backup.IBackupManagerMonitor;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
 import android.os.Bundle;
 import android.os.Process;
@@ -385,7 +386,8 @@ public class TarBackupReader {
      * @return a restore policy constant.
      */
     public RestorePolicy chooseRestorePolicy(PackageManager packageManager,
-            boolean allowApks, FileMetadata info, Signature[] signatures) {
+            boolean allowApks, FileMetadata info, Signature[] signatures,
+            PackageManagerInternal pmi) {
         if (signatures == null) {
             return RestorePolicy.IGNORE;
         }
@@ -395,7 +397,7 @@ public class TarBackupReader {
         // Okay, got the manifest info we need...
         try {
             PackageInfo pkgInfo = packageManager.getPackageInfo(
-                    info.packageName, PackageManager.GET_SIGNATURES);
+                    info.packageName, PackageManager.GET_SIGNING_CERTIFICATES);
             // Fall through to IGNORE if the app explicitly disallows backup
             final int flags = pkgInfo.applicationInfo.flags;
             if ((flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0) {
@@ -411,7 +413,7 @@ public class TarBackupReader {
                     // such packages are signed with the platform cert instead of
                     // the app developer's cert, so they're different on every
                     // device.
-                    if (AppBackupUtils.signaturesMatch(signatures, pkgInfo)) {
+                    if (AppBackupUtils.signaturesMatch(signatures, pkgInfo, pmi)) {
                         if ((pkgInfo.applicationInfo.flags
                                 & ApplicationInfo.FLAG_RESTORE_ANY_VERSION) != 0) {
                             Slog.i(TAG, "Package has restoreAnyVersion; taking data");

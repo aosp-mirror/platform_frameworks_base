@@ -35,8 +35,8 @@
 #include <binder/Parcel.h>
 #include <binder/BpBinder.h>
 #include <binder/ProcessState.h>
+#include <cutils/atomic.h>
 #include <log/log.h>
-#include <utils/Atomic.h>
 #include <utils/KeyedVector.h>
 #include <utils/List.h>
 #include <utils/Log.h>

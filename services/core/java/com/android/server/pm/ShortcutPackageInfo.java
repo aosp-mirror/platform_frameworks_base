@@ -18,10 +18,12 @@ package com.android.server.pm;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ShortcutInfo;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.LocalServices;
 import com.android.server.backup.BackupUtils;
 
 import libcore.util.HexEncoding;
@@ -48,6 +50,7 @@ class ShortcutPackageInfo {
     private static final String ATTR_LAST_UPDATE_TIME = "last_udpate_time";
     private static final String ATTR_BACKUP_SOURCE_VERSION = "bk_src_version";
     private static final String ATTR_BACKUP_ALLOWED = "allow-backup";
+    private static final String ATTR_BACKUP_ALLOWED_INITIALIZED = "allow-backup-initialized";
     private static final String ATTR_BACKUP_SOURCE_BACKUP_ALLOWED = "bk_src_backup-allowed";
     private static final String ATTR_SHADOW = "shadow";
 
@@ -136,7 +139,8 @@ class ShortcutPackageInfo {
 
     //@DisabledReason
     public int canRestoreTo(ShortcutService s, PackageInfo currentPackage, boolean anyVersionOkay) {
-        if (!BackupUtils.signaturesMatch(mSigHashes, currentPackage)) {
+        PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
+        if (!BackupUtils.signaturesMatch(mSigHashes, currentPackage, pmi)) {
             Slog.w(TAG, "Can't restore: Package signature mismatch");
             return ShortcutInfo.DISABLED_REASON_SIGNATURE_MISMATCH;
         }
@@ -187,7 +191,11 @@ class ShortcutPackageInfo {
         mSigHashes = BackupUtils.hashSignatureArray(pi.signatures);
     }
 
-    public void saveToXml(XmlSerializer out, boolean forBackup) throws IOException {
+    public void saveToXml(ShortcutService s, XmlSerializer out, boolean forBackup)
+            throws IOException {
+        if (forBackup && !mBackupAllowedInitialized) {
+            s.wtf("Backup happened before mBackupAllowed is initialized.");
+        }
 
         out.startTag(null, TAG_ROOT);
 
@@ -195,6 +203,10 @@ class ShortcutPackageInfo {
         ShortcutService.writeAttr(out, ATTR_LAST_UPDATE_TIME, mLastUpdateTime);
         ShortcutService.writeAttr(out, ATTR_SHADOW, mIsShadow);
         ShortcutService.writeAttr(out, ATTR_BACKUP_ALLOWED, mBackupAllowed);
+
+        // We don't need to save this field (we don't even read it back), but it'll show up
+        // in the dumpsys in the backup / restore payload.
+        ShortcutService.writeAttr(out, ATTR_BACKUP_ALLOWED_INITIALIZED, mBackupAllowedInitialized);
 
         ShortcutService.writeAttr(out, ATTR_BACKUP_SOURCE_VERSION, mBackupSourceVersionCode);
         ShortcutService.writeAttr(out,

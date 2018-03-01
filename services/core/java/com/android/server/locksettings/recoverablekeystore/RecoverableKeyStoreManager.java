@@ -43,6 +43,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.HexDump;
+import com.android.server.locksettings.recoverablekeystore.certificate.CertUtils;
 import com.android.server.locksettings.recoverablekeystore.storage.ApplicationKeyStorage;
 import com.android.server.locksettings.recoverablekeystore.certificate.CertParsingException;
 import com.android.server.locksettings.recoverablekeystore.certificate.CertValidationException;
@@ -446,12 +447,14 @@ public class RecoverableKeyStoreManager {
                     "Failed decode the certificate path");
         }
 
-        // TODO: Validate the cert path according to the root of trust
-
-        if (certPath.getCertificates().isEmpty()) {
-            throw new ServiceSpecificException(ERROR_BAD_CERTIFICATE_FORMAT,
-                    "The given CertPath is empty");
+        try {
+            CertUtils.validateCertPath(TrustedRootCert.TRUSTED_ROOT_CERT, certPath);
+        } catch (CertValidationException e) {
+            Log.e(TAG, "Failed to validate the given cert path", e);
+            // TODO: Change this to ERROR_INVALID_CERTIFICATE once ag/3666620 is submitted
+            throw new ServiceSpecificException(ERROR_BAD_CERTIFICATE_FORMAT, e.getMessage());
         }
+
         byte[] verifierPublicKey = certPath.getCertificates().get(0).getPublicKey().getEncoded();
         if (verifierPublicKey == null) {
             Log.e(TAG, "Failed to encode verifierPublicKey");

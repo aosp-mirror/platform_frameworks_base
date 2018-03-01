@@ -34,8 +34,9 @@ import com.android.server.backup.internal.BackupHandler;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 
+/** Test utils for {@link BackupManagerService} and friends. */
 public class BackupManagerServiceTestUtils {
-    /** Sets up a basic mocks for {@link BackupManagerService} */
+    /** Sets up basic mocks for {@link BackupManagerService}. */
     public static void setUpBackupManagerServiceBasics(
             BackupManagerService backupManagerService,
             Context context,

@@ -169,10 +169,10 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     private TouchAnimator createFooterAnimator() {
         return new TouchAnimator.Builder()
                 .addFloat(mDivider, "alpha", 0, 1)
-                .addFloat(mCarrierText, "alpha", 0, 1)
+                .addFloat(mCarrierText, "alpha", 0, 0, 1)
                 .addFloat(mActionsContainer, "alpha", 0, 1)
                 .addFloat(mDragHandle, "translationY", mDragHandleExpandOffset, 0)
-                .addFloat(mDragHandle, "alpha", 1, 0)
+                .addFloat(mDragHandle, "alpha", 1, 0, 0)
                 .setStartDelay(0.15f)
                 .build();
     }

@@ -708,7 +708,8 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
     @VisibleForTesting
     boolean onHomeLongClick(View v) {
-        if (!mNavigationBarView.isRecentsButtonVisible() && mNavigationBarView.inScreenPinning()) {
+        if (!mNavigationBarView.isRecentsButtonVisible()
+                && ActivityManagerWrapper.getInstance().isScreenPinningActive()) {
             return onLongPressBackHome(v);
         }
         if (shouldDisableNavbarGestures()) {

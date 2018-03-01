@@ -25,6 +25,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := coretests-aidl
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
 LOCAL_PACKAGE_NAME := BstatsTestApp
+LOCAL_SDK_VERSION := current
 LOCAL_CERTIFICATE := platform
 LOCAL_DEX_PREOPT := false
 LOCAL_PROGUARD_ENABLED := disabled
