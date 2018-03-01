@@ -117,7 +117,10 @@ public class WifiTile extends QSTileImpl<SignalState> {
     protected void handleClick() {
         // Secondary clicks are header clicks, just toggle.
         mState.copyTo(mStateBeforeClick);
-        mController.setWifiEnabled(!mState.value);
+        boolean wifiEnabled = mState.value;
+        // Immediately enter transient state when turning on wifi.
+        refreshState(wifiEnabled ? null : ARG_SHOW_TRANSIENT_ENABLING);
+        mController.setWifiEnabled(!wifiEnabled);
     }
 
     @Override
@@ -141,11 +144,13 @@ public class WifiTile extends QSTileImpl<SignalState> {
     @Override
     protected void handleUpdateState(SignalState state, Object arg) {
         if (DEBUG) Log.d(TAG, "handleUpdateState arg=" + arg);
-        CallbackInfo cb = (CallbackInfo) arg;
-        if (cb == null) {
+        final CallbackInfo cb;
+        if (arg != null && arg instanceof CallbackInfo) {
+            cb = (CallbackInfo) arg;
+        } else {
             cb = mSignalCallback.mInfo;
         }
-
+        boolean transientEnabling = arg == ARG_SHOW_TRANSIENT_ENABLING;
         boolean wifiConnected = cb.enabled && (cb.wifiSignalIconId > 0) && (cb.enabledDesc != null);
         boolean wifiNotConnected = (cb.wifiSignalIconId > 0) && (cb.enabledDesc == null);
         boolean enabledChanging = state.value != cb.enabled;
@@ -158,14 +163,16 @@ public class WifiTile extends QSTileImpl<SignalState> {
             state.slash.rotation = 6;
         }
         state.slash.isSlashed = false;
+        boolean isTransient = transientEnabling || cb.isTransient;
+        state.secondaryLabel = getSecondaryLabel(isTransient);
         state.state = Tile.STATE_ACTIVE;
         state.dualTarget = true;
-        state.value = cb.enabled;
+        state.value = transientEnabling || cb.enabled;
         state.activityIn = cb.enabled && cb.activityIn;
         state.activityOut = cb.enabled && cb.activityOut;
         final StringBuffer minimalContentDescription = new StringBuffer();
         final Resources r = mContext.getResources();
-        if (cb.isTransient) {
+        if (isTransient) {
             state.icon = ResourceIcon.get(R.drawable.ic_signal_wifi_transient_animation);
             state.label = r.getString(R.string.quick_settings_wifi_label);
         } else if (!state.value) {
@@ -195,6 +202,12 @@ public class WifiTile extends QSTileImpl<SignalState> {
         state.dualLabelContentDescription = r.getString(
                 R.string.accessibility_quick_settings_open_settings, getTileLabel());
         state.expandedAccessibilityClassName = Switch.class.getName();
+    }
+
+    private CharSequence getSecondaryLabel(boolean isTransient) {
+        return isTransient
+                ? mContext.getString(R.string.quick_settings_wifi_secondary_label_transient)
+                : null;
     }
 
     @Override
@@ -276,8 +289,6 @@ public class WifiTile extends QSTileImpl<SignalState> {
             refreshState(mInfo);
         }
     }
-
-    ;
 
     protected class WifiDetailAdapter implements DetailAdapter,
             NetworkController.AccessPointController.AccessPointCallback, QSDetailItems.Callback {

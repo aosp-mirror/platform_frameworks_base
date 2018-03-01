@@ -21,7 +21,6 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.UserManager;
-
 import android.provider.Settings.Global;
 import android.service.quicksettings.Tile;
 import android.widget.Switch;
@@ -29,9 +28,9 @@ import android.widget.Switch;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.plugins.qs.QSTile.AirplaneBooleanState;
 import com.android.systemui.qs.GlobalSetting;
 import com.android.systemui.qs.QSHost;
-import com.android.systemui.plugins.qs.QSTile.AirplaneBooleanState;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.HotspotController;
 
@@ -96,10 +95,12 @@ public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
 
     @Override
     protected void handleClick() {
-        final boolean isEnabled = (Boolean) mState.value;
+        final boolean isEnabled = mState.value;
         if (!isEnabled && mAirplaneMode.getValue() != 0) {
             return;
         }
+        // Immediately enter transient enabling state when turning hotspot on.
+        refreshState(isEnabled ? null : ARG_SHOW_TRANSIENT_ENABLING);
         mController.setHotspotEnabled(!isEnabled);
     }
 
@@ -110,12 +111,13 @@ public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
 
     @Override
     protected void handleUpdateState(AirplaneBooleanState state, Object arg) {
+        final boolean transientEnabling = arg == ARG_SHOW_TRANSIENT_ENABLING;
         if (state.slash == null) {
             state.slash = new SlashState();
         }
 
         final int numConnectedDevices;
-        final boolean isTransient = mController.isHotspotTransient();
+        final boolean isTransient = transientEnabling || mController.isHotspotTransient();
 
         checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_CONFIG_TETHERING);
         if (arg instanceof CallbackInfo) {
@@ -123,7 +125,7 @@ public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
             state.value = info.enabled;
             numConnectedDevices = info.numConnectedDevices;
         } else {
-            state.value = mController.isHotspotEnabled();
+            state.value = transientEnabling || mController.isHotspotEnabled();
             numConnectedDevices = mController.getNumConnectedDevices();
         }
 
