@@ -3331,6 +3331,8 @@
     <dimen name="config_dialogCornerRadius">2dp</dimen>
     <!-- Corner radius of system buttons -->
     <dimen name="config_buttonCornerRadius">@dimen/control_corner_material</dimen>
+    <!-- Corner radius of system progress bars -->
+    <dimen name="config_progressBarCornerRadius">@dimen/progress_bar_corner_material</dimen>
     <!-- Controls whether system buttons use all caps for text -->
     <bool name="config_buttonTextAllCaps">true</bool>
     <!-- Name of the font family used for system surfaces where the font should use medium weight -->
