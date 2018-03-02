@@ -70,7 +70,6 @@ statsd_common_src := \
     src/subscriber/IncidentdReporter.cpp \
     src/subscriber/SubscriberReporter.cpp \
     src/HashableDimensionKey.cpp \
-    src/guardrail/MemoryLeakTrackUtil.cpp \
     src/guardrail/StatsdStats.cpp
 
 statsd_common_c_includes := \
@@ -103,8 +102,7 @@ statsd_common_shared_libraries := \
     android.hardware.health@2.0 \
     android.hardware.power@1.0 \
     android.hardware.power@1.1 \
-    android.hardware.thermal@1.0 \
-    libmemunreachable
+    android.hardware.thermal@1.0
 
 # =========
 # statsd
@@ -132,7 +130,7 @@ else
     LOCAL_CFLAGS += \
             -Os
 endif
-LOCAL_PROTOC_OPTIMIZE_TYPE := lite-static
+LOCAL_PROTOC_OPTIMIZE_TYPE := lite
 
 LOCAL_AIDL_INCLUDES := $(statsd_common_aidl_includes)
 LOCAL_C_INCLUDES += $(statsd_common_c_includes)

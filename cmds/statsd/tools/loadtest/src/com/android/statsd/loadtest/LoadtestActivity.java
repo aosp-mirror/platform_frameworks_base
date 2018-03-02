@@ -50,7 +50,7 @@ import android.widget.Toast;
 
 import com.android.os.StatsLog.ConfigMetricsReport;
 import com.android.os.StatsLog.ConfigMetricsReportList;
-import com.android.os.StatsLogCommon.StatsdStatsReport;
+import com.android.os.StatsLog.StatsdStatsReport;
 import com.android.internal.os.StatsdConfigProto.TimeUnit;
 
 import java.util.ArrayList;

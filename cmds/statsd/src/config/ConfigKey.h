@@ -18,8 +18,6 @@
 
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 
-#include <functional>
-#include <iostream>
 #include <string>
 
 namespace android {
@@ -27,7 +25,6 @@ namespace os {
 namespace statsd {
 
 using std::hash;
-using std::ostream;
 using std::string;
 
 /**
@@ -67,10 +64,6 @@ private:
     int64_t mId;
     int mUid;
 };
-
-inline ostream& operator<<(ostream& os, const ConfigKey& config) {
-    return os << config.ToString();
-}
 
 int64_t StrToInt64(const string& str);
 
