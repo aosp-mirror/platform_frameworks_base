@@ -3709,7 +3709,9 @@ public class DevicePolicyManager {
     public static final int KEYGUARD_DISABLE_FEATURES_NONE = 0;
 
     /**
-     * Disable all keyguard widgets. Has no effect.
+     * Disable all keyguard widgets. Has no effect starting from
+     * {@link android.os.Build.VERSION_CODES#LOLLIPOP} since keyguard widget is only supported
+     * on Android versions lower than 5.0.
      */
     public static final int KEYGUARD_DISABLE_WIDGETS_ALL = 1 << 0;
 
