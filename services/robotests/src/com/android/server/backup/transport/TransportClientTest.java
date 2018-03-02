@@ -26,16 +26,21 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
+import static org.robolectric.shadow.api.Shadow.extract;
 import static org.testng.Assert.expectThrows;
 
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
@@ -43,10 +48,9 @@ import android.util.Log;
 
 import com.android.internal.backup.IBackupTransport;
 import com.android.server.EventLogTags;
-import com.android.server.backup.TransportManager;
 import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderClasses;
 import com.android.server.testing.SystemLoaderPackages;
+import com.android.server.testing.shadows.FrameworkShadowLooper;
 import com.android.server.testing.shadows.ShadowCloseGuard;
 import com.android.server.testing.shadows.ShadowEventLog;
 import com.android.server.testing.shadows.ShadowSlog;
@@ -61,11 +65,19 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLog;
 import org.robolectric.shadows.ShadowLooper;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
+
 @RunWith(FrameworkRobolectricTestRunner.class)
 @Config(
     manifest = Config.NONE,
     sdk = 26,
-    shadows = {ShadowEventLog.class, ShadowCloseGuard.class, ShadowSlog.class}
+    shadows = {
+        ShadowEventLog.class,
+        ShadowCloseGuard.class,
+        ShadowSlog.class,
+        FrameworkShadowLooper.class
+    }
 )
 @SystemLoaderPackages({"com.android.server.backup"})
 @Presubmit
@@ -80,14 +92,16 @@ public class TransportClientTest {
     private ComponentName mTransportComponent;
     private String mTransportString;
     private Intent mBindIntent;
-    private ShadowLooper mShadowLooper;
+    private FrameworkShadowLooper mShadowMainLooper;
+    private ShadowLooper mShadowWorkerLooper;
+    private Handler mWorkerHandler;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         Looper mainLooper = Looper.getMainLooper();
-        mShadowLooper = shadowOf(mainLooper);
+        mShadowMainLooper = extract(mainLooper);
         mTransportComponent =
                 new ComponentName(PACKAGE_NAME, PACKAGE_NAME + ".transport.Transport");
         mTransportString = mTransportComponent.flattenToShortString();
@@ -107,6 +121,11 @@ public class TransportClientTest {
                         anyInt(),
                         any(UserHandle.class)))
                 .thenReturn(true);
+
+        HandlerThread workerThread = new HandlerThread("worker");
+        workerThread.start();
+        mShadowWorkerLooper = shadowOf(workerThread.getLooper());
+        mWorkerHandler = workerThread.getThreadHandler();
     }
 
     @Test
@@ -129,12 +148,11 @@ public class TransportClientTest {
     @Test
     public void testConnectAsync_callsListenerWhenConnected() throws Exception {
         mTransportClient.connectAsync(mTransportConnectionListener, "caller");
-
-        // Simulate framework connecting
         ServiceConnection connection = verifyBindServiceAsUserAndCaptureServiceConnection(mContext);
+
         connection.onServiceConnected(mTransportComponent, mTransportBinder);
 
-        mShadowLooper.runToEndOfTasks();
+        mShadowMainLooper.runToEndOfTasks();
         verify(mTransportConnectionListener)
                 .onTransportConnectionResult(any(IBackupTransport.class), eq(mTransportClient));
     }
@@ -148,8 +166,7 @@ public class TransportClientTest {
         mTransportClient.connectAsync(mTransportConnectionListener2, "caller2");
 
         connection.onServiceConnected(mTransportComponent, mTransportBinder);
-
-        mShadowLooper.runToEndOfTasks();
+        mShadowMainLooper.runToEndOfTasks();
         verify(mTransportConnectionListener)
                 .onTransportConnectionResult(any(IBackupTransport.class), eq(mTransportClient));
         verify(mTransportConnectionListener2)
@@ -164,7 +181,7 @@ public class TransportClientTest {
 
         mTransportClient.connectAsync(mTransportConnectionListener2, "caller2");
 
-        mShadowLooper.runToEndOfTasks();
+        mShadowMainLooper.runToEndOfTasks();
         verify(mTransportConnectionListener2)
                 .onTransportConnectionResult(any(IBackupTransport.class), eq(mTransportClient));
     }
@@ -180,7 +197,7 @@ public class TransportClientTest {
 
         mTransportClient.connectAsync(mTransportConnectionListener, "caller");
 
-        mShadowLooper.runToEndOfTasks();
+        mShadowMainLooper.runToEndOfTasks();
         verify(mTransportConnectionListener)
                 .onTransportConnectionResult(isNull(), eq(mTransportClient));
     }
@@ -233,11 +250,11 @@ public class TransportClientTest {
     @Test
     public void testConnectAsync_callsListenerIfBindingDies() throws Exception {
         mTransportClient.connectAsync(mTransportConnectionListener, "caller");
-
         ServiceConnection connection = verifyBindServiceAsUserAndCaptureServiceConnection(mContext);
+
         connection.onBindingDied(mTransportComponent);
 
-        mShadowLooper.runToEndOfTasks();
+        mShadowMainLooper.runToEndOfTasks();
         verify(mTransportConnectionListener)
                 .onTransportConnectionResult(isNull(), eq(mTransportClient));
     }
@@ -251,8 +268,7 @@ public class TransportClientTest {
         mTransportClient.connectAsync(mTransportConnectionListener2, "caller2");
 
         connection.onBindingDied(mTransportComponent);
-
-        mShadowLooper.runToEndOfTasks();
+        mShadowMainLooper.runToEndOfTasks();
         verify(mTransportConnectionListener)
                 .onTransportConnectionResult(isNull(), eq(mTransportClient));
         verify(mTransportConnectionListener2)
@@ -271,9 +287,9 @@ public class TransportClientTest {
     @Test
     public void testConnectAsync_afterOnServiceConnected_logsBoundAndConnectedTransitions() {
         ShadowEventLog.setUp();
-
         mTransportClient.connectAsync(mTransportConnectionListener, "caller1");
         ServiceConnection connection = verifyBindServiceAsUserAndCaptureServiceConnection(mContext);
+
         connection.onServiceConnected(mTransportComponent, mTransportBinder);
 
         assertEventLogged(EventLogTags.BACKUP_TRANSPORT_LIFECYCLE, mTransportString, 1);
@@ -283,13 +299,73 @@ public class TransportClientTest {
     @Test
     public void testConnectAsync_afterOnBindingDied_logsBoundAndUnboundTransitions() {
         ShadowEventLog.setUp();
-
         mTransportClient.connectAsync(mTransportConnectionListener, "caller1");
         ServiceConnection connection = verifyBindServiceAsUserAndCaptureServiceConnection(mContext);
+
         connection.onBindingDied(mTransportComponent);
 
         assertEventLogged(EventLogTags.BACKUP_TRANSPORT_LIFECYCLE, mTransportString, 1);
         assertEventLogged(EventLogTags.BACKUP_TRANSPORT_LIFECYCLE, mTransportString, 0);
+    }
+
+    @Test
+    public void testConnect_whenConnected_returnsTransport() throws Exception {
+        mTransportClient.connectAsync(mTransportConnectionListener, "caller1");
+        ServiceConnection connection = verifyBindServiceAsUserAndCaptureServiceConnection(mContext);
+        connection.onServiceConnected(mTransportComponent, mTransportBinder);
+
+        IBackupTransport transportBinder =
+                runInWorkerThread(() -> mTransportClient.connect("caller2"));
+
+        assertThat(transportBinder).isNotNull();
+    }
+
+    @Test
+    public void testConnect_afterOnServiceDisconnected_returnsNull() throws Exception {
+        mTransportClient.connectAsync(mTransportConnectionListener, "caller1");
+        ServiceConnection connection = verifyBindServiceAsUserAndCaptureServiceConnection(mContext);
+        connection.onServiceConnected(mTransportComponent, mTransportBinder);
+        connection.onServiceDisconnected(mTransportComponent);
+
+        IBackupTransport transportBinder =
+                runInWorkerThread(() -> mTransportClient.connect("caller2"));
+
+        assertThat(transportBinder).isNull();
+    }
+
+    @Test
+    public void testConnect_afterOnBindingDied_returnsNull() throws Exception {
+        mTransportClient.connectAsync(mTransportConnectionListener, "caller1");
+        ServiceConnection connection = verifyBindServiceAsUserAndCaptureServiceConnection(mContext);
+        connection.onBindingDied(mTransportComponent);
+
+        IBackupTransport transportBinder =
+                runInWorkerThread(() -> mTransportClient.connect("caller2"));
+
+        assertThat(transportBinder).isNull();
+    }
+
+    @Test
+    public void testConnect_callsThroughToConnectAsync() throws Exception {
+        // We can't mock bindServiceAsUser() instead of connectAsync() and call the listener inline
+        // because in our code in TransportClient we assume this is NOT run inline, such that the
+        // reentrant lock can't be acquired by the listener at the call-site of bindServiceAsUser(),
+        // which is what would happened if we mocked bindServiceAsUser() to call the listener
+        // inline.
+        TransportClient transportClient = spy(mTransportClient);
+        doAnswer(
+                        invocation -> {
+                            TransportConnectionListener listener = invocation.getArgument(0);
+                            listener.onTransportConnectionResult(mTransportBinder, transportClient);
+                            return null;
+                        })
+                .when(transportClient)
+                .connectAsync(any(), any());
+
+        IBackupTransport transportBinder =
+                runInWorkerThread(() -> transportClient.connect("caller"));
+
+        assertThat(transportBinder).isNotNull();
     }
 
     @Test
@@ -445,6 +521,19 @@ public class TransportClientTest {
         mTransportClient.finalize();
 
         assertThat(ShadowCloseGuard.hasReported()).isFalse();
+    }
+
+    @Nullable
+    private <T> T runInWorkerThread(Supplier<T> supplier) throws Exception {
+        CompletableFuture<T> future = new CompletableFuture<>();
+        mWorkerHandler.post(() -> future.complete(supplier.get()));
+        // Although we are using a separate looper, we are still calling runToEndOfTasks() in the
+        // main thread (Robolectric only *simulates* multi-thread). The only option left is to fool
+        // the caller.
+        mShadowMainLooper.setCurrentThread(false);
+        mShadowWorkerLooper.runToEndOfTasks();
+        mShadowMainLooper.reset();
+        return future.get();
     }
 
     private void assertEventLogged(int tag, Object... values) {
