@@ -1246,7 +1246,6 @@ public class LocationManager {
      *
      * @param enabled true to enable location. false to disable location
      * @param userHandle the user to set
-     * @return true if the value was set, false on database errors
      *
      * @hide
      */
