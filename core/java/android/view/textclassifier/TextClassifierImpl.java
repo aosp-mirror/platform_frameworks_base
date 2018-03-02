@@ -34,9 +34,6 @@ import android.os.UserManager;
 import android.provider.Browser;
 import android.provider.CalendarContract;
 import android.provider.ContactsContract;
-import android.view.textclassifier.logging.DefaultLogger;
-import android.view.textclassifier.logging.GenerateLinksLogger;
-import android.view.textclassifier.logging.Logger;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;

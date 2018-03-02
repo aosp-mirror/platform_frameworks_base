@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.view.textclassifier.logging;
+package android.view.textclassifier;
 
 import android.annotation.NonNull;
 import android.content.Context;
