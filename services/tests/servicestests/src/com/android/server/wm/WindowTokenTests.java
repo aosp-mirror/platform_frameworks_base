@@ -41,7 +41,7 @@ import static org.mockito.Mockito.mock;
  *  bit FrameworksServicesTests:com.android.server.wm.WindowTokenTests
  */
 @SmallTest
-@Flaky(bugId = 74078662)
+@FlakyTest(bugId = 74078662)
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class WindowTokenTests extends WindowTestsBase {

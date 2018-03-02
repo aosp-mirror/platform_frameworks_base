@@ -53,7 +53,7 @@ import static org.mockito.Mockito.verify;
  * atest FrameworksServicesTests:com.android.server.wm.WindowStateTests
  */
 @SmallTest
-@Flaky(bugId = 74078662)
+@FlakyTest(bugId = 74078662)
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class WindowStateTests extends WindowTestsBase {

@@ -22,6 +22,7 @@ import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
+import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.DisplayInfo;
@@ -44,6 +45,7 @@ import static org.junit.Assert.assertTrue;
  *  bit FrameworksServicesTests:com.android.server.wm.WindowConfigurationTests
  */
 @SmallTest
+@FlakyTest(bugId = 74078662)
 @Presubmit
 @org.junit.runner.RunWith(AndroidJUnit4.class)
 public class WindowConfigurationTests extends WindowTestsBase {

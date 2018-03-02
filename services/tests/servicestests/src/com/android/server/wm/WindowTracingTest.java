@@ -57,7 +57,7 @@ import java.nio.charset.StandardCharsets;
  *  bit FrameworksServicesTests:com.android.server.wm.WindowTracingTest
  */
 @SmallTest
-@Flaky(bugId = 74078662)
+@FlakyTest(bugId = 74078662)
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class WindowTracingTest extends WindowTestsBase {
