@@ -261,7 +261,7 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"hacer y administrar llamadas telefónicas"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensores corporales"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"acceder a datos de sensores de tus constantes vitales"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperar el contenido de la ventana"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Comprobar el contenido de la ventana"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecciona el contenido de una ventana con la que estés interactuando."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activar la exploración táctil"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Los elementos que tocas se dicen en voz alta y se puede explorar la pantalla mediante gestos."</string>

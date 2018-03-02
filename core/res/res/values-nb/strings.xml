@@ -1134,7 +1134,7 @@
     <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"IKKE NÅ"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Et nytt SIM-kort er satt inn"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Trykk for å konfigurere"</string>
-    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Stille klokken"</string>
+    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Oppgi tidspunkt"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Angi dato"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Lagre"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Ferdig"</string>
