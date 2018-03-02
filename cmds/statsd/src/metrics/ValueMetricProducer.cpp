@@ -129,6 +129,11 @@ void ValueMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eventT
     VLOG("Metric %lld onSlicedConditionMayChange", (long long)mMetricId);
 }
 
+void ValueMetricProducer::dropDataLocked(const uint64_t dropTimeNs) {
+    flushIfNeededLocked(dropTimeNs);
+    mPastBuckets.clear();
+}
+
 void ValueMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
                                              ProtoOutputStream* protoOutput) {
     VLOG("metric %lld dump report now...", (long long)mMetricId);

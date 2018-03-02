@@ -148,6 +148,15 @@ public:
         return mMetricId;
     }
 
+    // Let MetricProducer drop in-memory data to save memory.
+    // We still need to keep future data valid and anomaly tracking work, which means we will
+    // have to flush old data, informing anomaly trackers then safely drop old data.
+    // We still keep current bucket data for future metrics' validity.
+    void dropData(const uint64_t dropTimeNs) {
+        std::lock_guard<std::mutex> lock(mMutex);
+        dropDataLocked(dropTimeNs);
+    }
+
 protected:
     virtual void onConditionChangedLocked(const bool condition, const uint64_t eventTime) = 0;
     virtual void onSlicedConditionMayChangeLocked(const uint64_t eventTime) = 0;
@@ -178,6 +187,8 @@ protected:
     uint64_t getCurrentBucketEndTimeNs() {
         return mStartTimeNs + (mCurrentBucketNum + 1) * mBucketSizeNs;
     }
+
+    virtual void dropDataLocked(const uint64_t dropTimeNs) = 0;
 
     const int64_t mMetricId;
 

@@ -51,7 +51,8 @@ public:
     }
 
     MOCK_METHOD0(byteSize, size_t());
-    MOCK_METHOD2(onDumpReport, void(const uint64_t timeNs, ProtoOutputStream* output));
+
+    MOCK_METHOD1(dropData, void(const uint64_t dropTimeNs));
 };
 
 TEST(StatsLogProcessorTest, TestRateLimitByteSize) {
@@ -114,7 +115,7 @@ TEST(StatsLogProcessorTest, TestDropWhenByteSizeTooLarge) {
             .Times(1)
             .WillRepeatedly(Return(int(StatsdStats::kMaxMetricsBytesPerConfig * 1.2)));
 
-    EXPECT_CALL(mockMetricsManager, onDumpReport(_, _)).Times(1);
+    EXPECT_CALL(mockMetricsManager, dropData(_)).Times(1);
 
     // Expect to call the onDumpReport and skip the broadcast.
     p.flushIfNecessaryLocked(1, key, mockMetricsManager);

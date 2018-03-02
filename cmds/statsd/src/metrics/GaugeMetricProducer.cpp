@@ -353,6 +353,11 @@ void GaugeMetricProducer::updateCurrentSlicedBucketForAnomaly() {
     }
 }
 
+void GaugeMetricProducer::dropDataLocked(const uint64_t dropTimeNs) {
+    flushIfNeededLocked(dropTimeNs);
+    mPastBuckets.clear();
+}
+
 // When a new matched event comes in, we check if event falls into the current
 // bucket. If not, flush the old counter to past buckets and initialize the new
 // bucket.

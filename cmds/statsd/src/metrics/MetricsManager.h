@@ -73,6 +73,8 @@ public:
         return mLastReportTimeNs;
     };
 
+    virtual void dropData(const uint64_t dropTimeNs);
+
     // Config source owner can call onDumpReport() to get all the metrics collected.
     virtual void onDumpReport(const uint64_t dumpTimeNs,
                               android::util::ProtoOutputStream* protoOutput);
