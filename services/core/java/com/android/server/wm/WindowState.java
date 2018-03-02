@@ -2291,9 +2291,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
             mPowerManagerWrapper.wakeUp(SystemClock.uptimeMillis(),
                     "android.server.wm:TURN_ON");
-        }
-        if (mAppToken != null) {
-            mAppToken.setCanTurnScreenOn(false);
+
+            if (mAppToken != null) {
+                mAppToken.setCanTurnScreenOn(false);
+            }
         }
 
         // If we were already visible, skip rest of preparation.
