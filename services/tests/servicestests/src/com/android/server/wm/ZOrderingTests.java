@@ -35,6 +35,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
 
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
+import android.support.test.filters.FlakyTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
@@ -53,6 +54,7 @@ import java.util.LinkedList;
  *  bit FrameworksServicesTests:com.android.server.wm.ZOrderingTests
  */
 @SmallTest
+@Flaky(bugId = 74078662)
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class ZOrderingTests extends WindowTestsBase {
