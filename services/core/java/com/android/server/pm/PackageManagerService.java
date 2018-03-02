@@ -20873,6 +20873,16 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         reconcileApps(StorageManager.UUID_PRIVATE_INTERNAL);
 
         mPermissionManager.systemReady();
+
+        if (mInstantAppResolverConnection != null) {
+            mContext.registerReceiver(new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    mInstantAppResolverConnection.optimisticBind();
+                    mContext.unregisterReceiver(this);
+                }
+            }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
+        }
     }
 
     public void waitForAppDataPrepared() {
