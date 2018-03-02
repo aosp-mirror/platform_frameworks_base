@@ -89,7 +89,21 @@ public final class DisplayCutout {
 
     private final Rect mSafeInsets;
     private final Region mBounds;
-    private final Size mFrameSize;
+    private final Size mFrameSize;  // TODO: move frameSize, calculateRelativeTo, etc. into WM.
+
+    /**
+     * Creates a DisplayCutout instance.
+     *
+     * @param safeInsets the insets from each edge which avoid the display cutout as returned by
+     *                   {@link #getSafeInsetTop()} etc.
+     * @param bounds the bounds of the display cutout as returned by {@link #getBounds()}.
+     */
+    // TODO(b/73953958): @VisibleForTesting(visibility = PRIVATE)
+    public DisplayCutout(Rect safeInsets, Region bounds) {
+        this(safeInsets != null ? new Rect(safeInsets) : ZERO_RECT,
+                bounds != null ? Region.obtain(bounds) : Region.obtain(),
+                null /* frameSize */);
+    }
 
     /**
      * Creates a DisplayCutout instance.
@@ -114,28 +128,28 @@ public final class DisplayCutout {
         return mSafeInsets.equals(ZERO_RECT);
     }
 
-    /** Returns the inset from the top which avoids the display cutout. */
+    /** Returns the inset from the top which avoids the display cutout in pixels. */
     public int getSafeInsetTop() {
         return mSafeInsets.top;
     }
 
-    /** Returns the inset from the bottom which avoids the display cutout. */
+    /** Returns the inset from the bottom which avoids the display cutout in pixels. */
     public int getSafeInsetBottom() {
         return mSafeInsets.bottom;
     }
 
-    /** Returns the inset from the left which avoids the display cutout. */
+    /** Returns the inset from the left which avoids the display cutout in pixels. */
     public int getSafeInsetLeft() {
         return mSafeInsets.left;
     }
 
-    /** Returns the inset from the right which avoids the display cutout. */
+    /** Returns the inset from the right which avoids the display cutout in pixels. */
     public int getSafeInsetRight() {
         return mSafeInsets.right;
     }
 
     /**
-     * Returns the safe insets in a rect.
+     * Returns the safe insets in a rect in pixel units.
      *
      * @return a rect which is set to the safe insets.
      * @hide
@@ -148,7 +162,7 @@ public final class DisplayCutout {
      * Returns the bounding region of the cutout.
      *
      * @return the bounding region of the cutout. Coordinates are relative
-     *         to the top-left corner of the content view.
+     *         to the top-left corner of the content view and in pixel units.
      */
     public Region getBounds() {
         return Region.obtain(mBounds);
