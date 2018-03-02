@@ -1986,7 +1986,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         @Override
-        public void onDisconnected() {
+        public void onDisconnected(MediaController2 controller) {
             destroySession2Internal(mToken);
         }
     };

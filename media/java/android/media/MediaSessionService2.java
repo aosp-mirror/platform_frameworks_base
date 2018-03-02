@@ -85,7 +85,8 @@ import android.os.IBinder;
  * session service, the controller binds to the session service. {@link #onCreateSession(String)}
  * may be called after the {@link #onCreate} if the service hasn't created yet.
  * <p>
- * After the binding, session's {@link MediaSession2.SessionCallback#onConnect(ControllerInfo)}
+ * After the binding, session's {@link MediaSession2.SessionCallback#onConnect(MediaSession2, ControllerInfo)}
+ *
  * will be called to accept or reject connection request from a controller. If the connection is
  * rejected, the controller will unbind. If it's accepted, the controller will be available to use
  * and keep binding.
@@ -99,7 +100,7 @@ import android.os.IBinder;
  * <p>
  * Any app can bind to the session service with controller, but the controller can be used only if
  * the session service accepted the connection request through
- * {@link MediaSession2.SessionCallback#onConnect(ControllerInfo)}.
+ * {@link MediaSession2.SessionCallback#onConnect(MediaSession2, ControllerInfo)}.
  */
 public abstract class MediaSessionService2 extends Service {
     private final MediaSessionService2Provider mProvider;

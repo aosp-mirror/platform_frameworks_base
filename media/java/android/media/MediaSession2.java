@@ -24,7 +24,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayerBase.PlayerEventCallback;
-import android.media.MediaPlaylistController;
 import android.media.session.MediaSession;
 import android.media.session.MediaSession.Callback;
 import android.media.session.PlaybackState;
@@ -97,7 +96,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * Command code for {@link MediaController2#play()}.
      * <p>
      * Command would be sent directly to the player if the session doesn't reject the request
-     * through the {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     * through the {@link SessionCallback#onCommandRequest(MediaSession2, ControllerInfo, Command)}.
      */
     public static final int COMMAND_CODE_PLAYBACK_PLAY = 1;
 
@@ -105,7 +104,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * Command code for {@link MediaController2#pause()}.
      * <p>
      * Command would be sent directly to the player if the session doesn't reject the request
-     * through the {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     * through the {@link SessionCallback#onCommandRequest(MediaSession2, ControllerInfo, Command)}.
      */
     public static final int COMMAND_CODE_PLAYBACK_PAUSE = 2;
 
@@ -113,7 +112,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * Command code for {@link MediaController2#stop()}.
      * <p>
      * Command would be sent directly to the player if the session doesn't reject the request
-     * through the {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     * through the {@link SessionCallback#onCommandRequest(MediaSession2, ControllerInfo, Command)}.
      */
     public static final int COMMAND_CODE_PLAYBACK_STOP = 3;
 
@@ -121,7 +120,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * Command code for {@link MediaController2#skipToNext()}.
      * <p>
      * Command would be sent directly to the player if the session doesn't reject the request
-     * through the {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     * through the {@link SessionCallback#onCommandRequest(MediaSession2, ControllerInfo, Command)}.
      */
     public static final int COMMAND_CODE_PLAYBACK_SKIP_NEXT_ITEM = 4;
 
@@ -129,7 +128,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * Command code for {@link MediaController2#skipToPrevious()}.
      * <p>
      * Command would be sent directly to the player if the session doesn't reject the request
-     * through the {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     * through the {@link SessionCallback#onCommandRequest(MediaSession2, ControllerInfo, Command)}.
      */
     public static final int COMMAND_CODE_PLAYBACK_SKIP_PREV_ITEM = 5;
 
@@ -137,7 +136,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * Command code for {@link MediaController2#prepare()}.
      * <p>
      * Command would be sent directly to the player if the session doesn't reject the request
-     * through the {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     * through the {@link SessionCallback#onCommandRequest(MediaSession2, ControllerInfo, Command)}.
      */
     public static final int COMMAND_CODE_PLAYBACK_PREPARE = 6;
 
@@ -146,7 +145,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * <p>
      * This is transport control command. Command would be sent directly to the player if the
      * session doesn't reject the request through the
-     * {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     * {@link SessionCallback#onCommandRequest(MediaSession2, ControllerInfo, Command)}.
      */
     public static final int COMMAND_CODE_PLAYBACK_FAST_FORWARD = 7;
 
@@ -154,7 +153,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * Command code for {@link MediaController2#rewind()}.
      * <p>
      * Command would be sent directly to the player if the session doesn't reject the request
-     * through the {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     * through the {@link SessionCallback#onCommandRequest(MediaSession2, ControllerInfo, Command)}.
      */
     public static final int COMMAND_CODE_PLAYBACK_REWIND = 8;
 
@@ -162,14 +161,14 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * Command code for {@link MediaController2#seekTo(long)}.
      * <p>
      * Command would be sent directly to the player if the session doesn't reject the request
-     * through the {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     * through the {@link SessionCallback#onCommandRequest(MediaSession2, ControllerInfo, Command)}.
      */
     public static final int COMMAND_CODE_PLAYBACK_SEEK_TO = 9;
     /**
      * Command code for {@link MediaController2#skipToPlaylistItem(MediaItem2)}.
      * <p>
      * Command would be sent directly to the player if the session doesn't reject the request
-     * through the {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     * through the {@link SessionCallback#onCommandRequest(MediaSession2, ControllerInfo, Command)}.
      */
     public static final int COMMAND_CODE_PLAYBACK_SKIP_TO_PLAYLIST_ITEM = 10;
 
@@ -177,7 +176,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * Command code for {@link MediaController2#setPlaylistParams(PlaylistParams)}.
      * <p>
      * Command would be sent directly to the player if the session doesn't reject the request
-     * through the {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     * through the {@link SessionCallback#onCommandRequest(MediaSession2, ControllerInfo, Command)}.
      */
     public static final int COMMAND_CODE_PLAYBACK_SET_PLAYLIST_PARAMS = 11;
 
@@ -185,7 +184,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * Command code for {@link MediaController2#addPlaylistItem(int, MediaItem2)}.
      * <p>
      * Command would be sent directly to the player if the session doesn't reject the request
-     * through the {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     * through the {@link SessionCallback#onCommandRequest(MediaSession2, ControllerInfo, Command)}.
      */
     public static final int COMMAND_CODE_PLAYLIST_ADD = 12;
 
@@ -193,7 +192,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * Command code for {@link MediaController2#addPlaylistItem(int, MediaItem2)}.
      * <p>
      * Command would be sent directly to the player if the session doesn't reject the request
-     * through the {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     * through the {@link SessionCallback#onCommandRequest(MediaSession2, ControllerInfo, Command)}.
      */
     public static final int COMMAND_CODE_PLAYLIST_REMOVE = 13;
 
@@ -201,7 +200,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * Command code for {@link MediaController2#getPlaylist()}.
      * <p>
      * Command would be sent directly to the player if the session doesn't reject the request
-     * through the {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     * through the {@link SessionCallback#onCommandRequest(MediaSession2, ControllerInfo, Command)}.
      */
     public static final int COMMAND_CODE_PLAYLIST_GET = 14;
 
@@ -211,7 +210,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * <p>
      * Command would adjust the volume or sent to the volume provider directly if the session
      * doesn't reject the request through the
-     * {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     * {@link SessionCallback#onCommandRequest(MediaSession2, ControllerInfo, Command)}.
      */
     public static final int COMMAND_CODE_SET_VOLUME = 15;
 
@@ -483,13 +482,16 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
          * controller. By default it allows all connection requests and commands.
          * <p>
          * You can reject the connection by return {@code null}. In that case, controller receives
-         * {@link MediaController2.ControllerCallback#onDisconnected()} and cannot be usable.
+         * {@link MediaController2.ControllerCallback#onDisconnected(MediaController2)} and cannot
+         * be usable.
          *
+         * @param session the session for this event
          * @param controller controller information.
          * @return allowed commands. Can be {@code null} to reject coonnection.
          */
         // TODO(jaewan): Change return type. Once we do, null is for reject.
-        public @Nullable CommandGroup onConnect(@NonNull ControllerInfo controller) {
+        public @Nullable CommandGroup onConnect(@NonNull MediaSession2 session,
+                @NonNull ControllerInfo controller) {
             CommandGroup commands = new CommandGroup(mContext);
             commands.addAllPredefinedCommands();
             return commands;
@@ -498,14 +500,17 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
         /**
          * Called when a controller is disconnected
          *
+         * @param session the session for this event
          * @param controller controller information
          */
-        public void onDisconnected(@NonNull ControllerInfo controller) { }
+        public void onDisconnected(@NonNull MediaSession2 session,
+                @NonNull ControllerInfo controller) { }
 
         /**
          * Called when a controller sent a command that will be sent directly to the player. Return
          * {@code false} here to reject the request and stop sending command to the player.
          *
+         * @param session the session for this event
          * @param controller controller information.
          * @param command a command. This method will be called for every single command.
          * @return {@code true} if you want to accept incoming command. {@code false} otherwise.
@@ -525,8 +530,8 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
          * @see #COMMAND_CODE_PLAYLIST_GET
          * @see #COMMAND_CODE_SET_VOLUME
          */
-        public boolean onCommandRequest(@NonNull ControllerInfo controller,
-                @NonNull Command command) {
+        public boolean onCommandRequest(@NonNull MediaSession2 session,
+                @NonNull ControllerInfo controller, @NonNull Command command) {
             return true;
         }
 
@@ -539,37 +544,41 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
          * in order to provide possible rating style for controller. Controller will follow the
          * rating style.
          *
+         * @param session the session for this event
          * @param controller controller information
          * @param mediaId media id from the controller
          * @param rating new rating from the controller
          */
-        public void onSetRating(@NonNull ControllerInfo controller, @NonNull String mediaId,
-                @NonNull Rating2 rating) { }
+        public void onSetRating(@NonNull MediaSession2 session, @NonNull ControllerInfo controller,
+                @NonNull String mediaId, @NonNull Rating2 rating) { }
 
         /**
          * Called when a controller sent a custom command through
          * {@link MediaController2#sendCustomCommand(Command, Bundle, ResultReceiver)}.
          *
+         * @param session the session for this event
          * @param controller controller information
          * @param customCommand custom command.
          * @param args optional arguments
          * @param cb optional result receiver
          */
-        public void onCustomCommand(@NonNull ControllerInfo controller,
-                @NonNull Command customCommand, @Nullable Bundle args,
-                @Nullable ResultReceiver cb) { }
+        public void onCustomCommand(@NonNull MediaSession2 session,
+                @NonNull ControllerInfo controller, @NonNull Command customCommand,
+                @Nullable Bundle args, @Nullable ResultReceiver cb) { }
 
         /**
          * Called when a controller requested to play a specific mediaId through
          * {@link MediaController2#playFromMediaId(String, Bundle)}.
          *
+         * @param session the session for this event
          * @param controller controller information
          * @param mediaId media id
          * @param extras optional extra bundle
          * @see #COMMAND_CODE_PLAY_FROM_MEDIA_ID
          */
-        public void onPlayFromMediaId(@NonNull ControllerInfo controller,
-                @NonNull String mediaId, @Nullable Bundle extras) { }
+        public void onPlayFromMediaId(@NonNull MediaSession2 session,
+                @NonNull ControllerInfo controller, @NonNull String mediaId,
+                @Nullable Bundle extras) { }
 
         /**
          * Called when a controller requested to begin playback from a search query through
@@ -578,25 +587,29 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
          * An empty query indicates that the app may play any music. The implementation should
          * attempt to make a smart choice about what to play.
          *
+         * @param session the session for this event
          * @param controller controller information
          * @param query query string. Can be empty to indicate any suggested media
          * @param extras optional extra bundle
          * @see #COMMAND_CODE_PLAY_FROM_SEARCH
          */
-        public void onPlayFromSearch(@NonNull ControllerInfo controller,
-                @NonNull String query, @Nullable Bundle extras) { }
+        public void onPlayFromSearch(@NonNull MediaSession2 session,
+                @NonNull ControllerInfo controller, @NonNull String query,
+                @Nullable Bundle extras) { }
 
         /**
          * Called when a controller requested to play a specific media item represented by a URI
          * through {@link MediaController2#playFromUri(Uri, Bundle)}
          *
+         * @param session the session for this event
          * @param controller controller information
          * @param uri uri
          * @param extras optional extra bundle
          * @see #COMMAND_CODE_PLAY_FROM_URI
          */
-        public void onPlayFromUri(@NonNull ControllerInfo controller,
-                @NonNull Uri uri, @Nullable Bundle extras) { }
+        public void onPlayFromUri(@NonNull MediaSession2 session,
+                @NonNull ControllerInfo controller, @NonNull Uri uri,
+                @Nullable Bundle extras) { }
 
         /**
          * Called when a controller requested to prepare for playing a specific mediaId through
@@ -612,13 +625,15 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
          * Override {@link #onPlayFromMediaId} to handle requests for starting
          * playback without preparation.
          *
+         * @param session the session for this event
          * @param controller controller information
          * @param mediaId media id to prepare
          * @param extras optional extra bundle
          * @see #COMMAND_CODE_PREPARE_FROM_MEDIA_ID
          */
-        public void onPrepareFromMediaId(@NonNull ControllerInfo controller,
-                @NonNull String mediaId, @Nullable Bundle extras) { }
+        public void onPrepareFromMediaId(@NonNull MediaSession2 session,
+                @NonNull ControllerInfo controller, @NonNull String mediaId,
+                @Nullable Bundle extras) { }
 
         /**
          * Called when a controller requested to prepare playback from a search query through
@@ -634,13 +649,15 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
          * Override {@link #onPlayFromSearch} to handle requests for starting playback without
          * preparation.
          *
+         * @param session the session for this event
          * @param controller controller information
          * @param query query string. Can be empty to indicate any suggested media
          * @param extras optional extra bundle
          * @see #COMMAND_CODE_PREPARE_FROM_SEARCH
          */
-        public void onPrepareFromSearch(@NonNull ControllerInfo controller,
-                @NonNull String query, @Nullable Bundle extras) { }
+        public void onPrepareFromSearch(@NonNull MediaSession2 session,
+                @NonNull ControllerInfo controller, @NonNull String query,
+                @Nullable Bundle extras) { }
 
         /**
          * Called when a controller requested to prepare a specific media item represented by a URI
@@ -656,13 +673,14 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
          * Override {@link #onPlayFromUri} to handle requests for starting playback without
          * preparation.
          *
+         * @param session the session for this event
          * @param controller controller information
          * @param uri uri
          * @param extras optional extra bundle
          * @see #COMMAND_CODE_PREPARE_FROM_URI
          */
-        public void onPrepareFromUri(@NonNull ControllerInfo controller,
-                @NonNull Uri uri, @Nullable Bundle extras) { }
+        public void onPrepareFromUri(@NonNull MediaSession2 session,
+                @NonNull ControllerInfo controller, @NonNull Uri uri, @Nullable Bundle extras) { }
     };
 
     /**
@@ -1252,7 +1270,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      *      expanded row:   layout[5] layout[6] layout[7] layout[8] layout[9]
      *      main row:       layout[3] layout[1] layout[0] layout[2] layout[4]
      * <p>
-     * This API can be called in the {@link SessionCallback#onConnect(ControllerInfo)}.
+     * This API can be called in the {@link SessionCallback#onConnect(MediaSession2, ControllerInfo)}.
      *
      * @param controller controller to specify layout.
      * @param layout oredered list of layout.
