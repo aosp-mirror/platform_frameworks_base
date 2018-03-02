@@ -25,41 +25,48 @@
     android:baselineAligned="false"
     >
 
-    <com.android.systemui.statusbar.phone.MultiUserSwitch android:id="@+id/multi_user_switch"
-        android:layout_width="@dimen/multi_user_switch_width_keyguard"
+    <LinearLayout
+        android:id="@+id/status_icon_area"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
-        android:background="@drawable/ripple_drawable"
-        android:layout_marginEnd="@dimen/multi_user_switch_keyguard_margin">
-        <ImageView android:id="@+id/multi_user_avatar"
-            android:layout_width="@dimen/multi_user_avatar_keyguard_size"
-            android:layout_height="@dimen/multi_user_avatar_keyguard_size"
-            android:layout_gravity="center"
-            android:scaleType="centerInside"/>
-    </com.android.systemui.statusbar.phone.MultiUserSwitch>
-
-    <LinearLayout android:id="@+id/system_icons_super_container"
-        android:layout_width="wrap_content"
-        android:layout_height="@*android:dimen/quick_qs_total_height"
-        android:layout_toStartOf="@id/multi_user_switch"
-        android:layout_alignWithParentIfMissing="true"
-        android:layout_marginStart="@dimen/system_icons_super_container_margin_start"
-        android:paddingEnd="@dimen/system_icons_keyguard_padding_end">
+        android:gravity="center_vertical|end" >
         <FrameLayout android:id="@+id/system_icons_container"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="@dimen/status_bar_height"
-            android:layout_gravity="center_vertical"
-            >
+            android:layout_weight="1"
+            android:layout_marginStart="@dimen/system_icons_super_container_margin_start"
+            android:gravity="center_vertical|end"
+            android:paddingEnd="@dimen/system_icons_keyguard_padding_end" >
             <include layout="@layout/system_icons" />
         </FrameLayout>
+
+        <com.android.systemui.statusbar.phone.MultiUserSwitch android:id="@+id/multi_user_switch"
+            android:layout_width="@dimen/multi_user_switch_width_keyguard"
+            android:layout_height="match_parent"
+            android:background="@drawable/ripple_drawable"
+            android:layout_marginEnd="@dimen/multi_user_switch_keyguard_margin">
+            <ImageView android:id="@+id/multi_user_avatar"
+                android:layout_width="@dimen/multi_user_avatar_keyguard_size"
+                android:layout_height="@dimen/multi_user_avatar_keyguard_size"
+                android:layout_gravity="center"
+                android:scaleType="centerInside"/>
+        </com.android.systemui.statusbar.phone.MultiUserSwitch>
     </LinearLayout>
+
+    <Space
+        android:id="@+id/cutout_space_view"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:visibility="gone" />
 
     <com.android.keyguard.CarrierText
         android:id="@+id/keyguard_carrier_text"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginStart="@dimen/keyguard_carrier_text_margin"
-        android:layout_toStartOf="@id/system_icons_super_container"
+        android:layout_toStartOf="@id/system_icons_container"
         android:gravity="center_vertical"
         android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceSmall"
