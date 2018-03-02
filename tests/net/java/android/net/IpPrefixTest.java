@@ -223,14 +223,14 @@ public class IpPrefixTest {
     }
 
     @Test
-    public void testContains() {
+    public void testContainsInetAddress() {
         IpPrefix p = new IpPrefix("2001:db8:f00::ace:d00d/127");
         assertTrue(p.contains(Address("2001:db8:f00::ace:d00c")));
         assertTrue(p.contains(Address("2001:db8:f00::ace:d00d")));
         assertFalse(p.contains(Address("2001:db8:f00::ace:d00e")));
         assertFalse(p.contains(Address("2001:db8:f00::bad:d00d")));
         assertFalse(p.contains(Address("2001:4868:4860::8888")));
-        assertFalse(p.contains(null));
+        assertFalse(p.contains((InetAddress)null));
         assertFalse(p.contains(Address("8.8.8.8")));
 
         p = new IpPrefix("192.0.2.0/23");
@@ -248,6 +248,53 @@ public class IpPrefixTest {
         assertTrue(ipv4Default.contains(Address("255.255.255.255")));
         assertTrue(ipv4Default.contains(Address("192.0.2.1")));
         assertFalse(ipv4Default.contains(Address("2001:db8::f00")));
+    }
+
+    @Test
+    public void testContainsIpPrefix() {
+        assertTrue(new IpPrefix("0.0.0.0/0").containsPrefix(new IpPrefix("0.0.0.0/0")));
+        assertTrue(new IpPrefix("0.0.0.0/0").containsPrefix(new IpPrefix("1.2.3.4/0")));
+        assertTrue(new IpPrefix("0.0.0.0/0").containsPrefix(new IpPrefix("1.2.3.4/8")));
+        assertTrue(new IpPrefix("0.0.0.0/0").containsPrefix(new IpPrefix("1.2.3.4/24")));
+        assertTrue(new IpPrefix("0.0.0.0/0").containsPrefix(new IpPrefix("1.2.3.4/23")));
+
+        assertTrue(new IpPrefix("1.2.3.4/8").containsPrefix(new IpPrefix("1.2.3.4/8")));
+        assertTrue(new IpPrefix("1.2.3.4/8").containsPrefix(new IpPrefix("1.254.12.9/8")));
+        assertTrue(new IpPrefix("1.2.3.4/21").containsPrefix(new IpPrefix("1.2.3.4/21")));
+        assertTrue(new IpPrefix("1.2.3.4/32").containsPrefix(new IpPrefix("1.2.3.4/32")));
+
+        assertTrue(new IpPrefix("1.2.3.4/20").containsPrefix(new IpPrefix("1.2.3.0/24")));
+
+        assertFalse(new IpPrefix("1.2.3.4/32").containsPrefix(new IpPrefix("1.2.3.5/32")));
+        assertFalse(new IpPrefix("1.2.3.4/8").containsPrefix(new IpPrefix("2.2.3.4/8")));
+        assertFalse(new IpPrefix("0.0.0.0/16").containsPrefix(new IpPrefix("0.0.0.0/15")));
+        assertFalse(new IpPrefix("100.0.0.0/8").containsPrefix(new IpPrefix("99.0.0.0/8")));
+
+        assertTrue(new IpPrefix("::/0").containsPrefix(new IpPrefix("::/0")));
+        assertTrue(new IpPrefix("::/0").containsPrefix(new IpPrefix("2001:db8::f00/1")));
+        assertTrue(new IpPrefix("::/0").containsPrefix(new IpPrefix("3d8a:661:a0::770/8")));
+        assertTrue(new IpPrefix("::/0").containsPrefix(new IpPrefix("2001:db8::f00/8")));
+        assertTrue(new IpPrefix("::/0").containsPrefix(new IpPrefix("2001:db8::f00/64")));
+        assertTrue(new IpPrefix("::/0").containsPrefix(new IpPrefix("2001:db8::f00/113")));
+        assertTrue(new IpPrefix("::/0").containsPrefix(new IpPrefix("2001:db8::f00/128")));
+
+        assertTrue(new IpPrefix("2001:db8:f00::ace:d00d/64").containsPrefix(
+                new IpPrefix("2001:db8:f00::ace:d00d/64")));
+        assertTrue(new IpPrefix("2001:db8:f00::ace:d00d/64").containsPrefix(
+                new IpPrefix("2001:db8:f00::ace:d00d/120")));
+        assertFalse(new IpPrefix("2001:db8:f00::ace:d00d/64").containsPrefix(
+                new IpPrefix("2001:db8:f00::ace:d00d/32")));
+        assertFalse(new IpPrefix("2001:db8:f00::ace:d00d/64").containsPrefix(
+                new IpPrefix("2006:db8:f00::ace:d00d/96")));
+
+        assertTrue(new IpPrefix("2001:db8:f00::ace:d00d/128").containsPrefix(
+                new IpPrefix("2001:db8:f00::ace:d00d/128")));
+        assertTrue(new IpPrefix("2001:db8:f00::ace:d00d/100").containsPrefix(
+                new IpPrefix("2001:db8:f00::ace:ccaf/110")));
+
+        assertFalse(new IpPrefix("2001:db8:f00::ace:d00d/128").containsPrefix(
+                new IpPrefix("2001:db8:f00::ace:d00e/128")));
+        assertFalse(new IpPrefix("::/30").containsPrefix(new IpPrefix("::/29")));
     }
 
     @Test
