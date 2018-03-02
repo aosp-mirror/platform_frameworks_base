@@ -77,7 +77,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         mLightBarController = mock(LightBarController.class);
         mScrimBehind = new ScrimView(getContext());
         mScrimInFront = new ScrimView(getContext());
-        mHeadsUpScrim = mock(View.class);
+        mHeadsUpScrim = new View(getContext());
         mWakeLock = mock(WakeLock.class);
         mAlarmManager = mock(AlarmManager.class);
         mAlwaysOnEnabled = true;
@@ -384,6 +384,56 @@ public class ScrimControllerTest extends SysuiTestCase {
         testConservesNotificationDensity(3 /* count */, ScrimController.GRADIENT_SCRIM_ALPHA_BUSY);
     }
 
+    @Test
+    public void testHeadsUpScrimOpacity() {
+        mScrimController.setPanelExpansion(0f);
+        mScrimController.onHeadsUpPinned(null /* row */);
+        mScrimController.finishAnimationsImmediately();
+
+        Assert.assertNotEquals("Heads-up scrim should be visible", 0f,
+                mHeadsUpScrim.getAlpha(), 0.01f);
+
+        mScrimController.onHeadsUpUnPinned(null /* row */);
+        mScrimController.finishAnimationsImmediately();
+
+        Assert.assertEquals("Heads-up scrim should have disappeared", 0f,
+                mHeadsUpScrim.getAlpha(), 0.01f);
+    }
+
+    @Test
+    public void testHeadsUpScrimCounting() {
+        mScrimController.setPanelExpansion(0f);
+        mScrimController.onHeadsUpPinned(null /* row */);
+        mScrimController.onHeadsUpPinned(null /* row */);
+        mScrimController.onHeadsUpPinned(null /* row */);
+        mScrimController.finishAnimationsImmediately();
+
+        Assert.assertNotEquals("Heads-up scrim should be visible", 0f,
+                mHeadsUpScrim.getAlpha(), 0.01f);
+
+        mScrimController.onHeadsUpUnPinned(null /* row */);
+        mScrimController.finishAnimationsImmediately();
+
+        Assert.assertEquals("Heads-up scrim should only disappear when counter reaches 0", 1f,
+                mHeadsUpScrim.getAlpha(), 0.01f);
+
+        mScrimController.onHeadsUpUnPinned(null /* row */);
+        mScrimController.onHeadsUpUnPinned(null /* row */);
+        mScrimController.finishAnimationsImmediately();
+        Assert.assertEquals("Heads-up scrim should have disappeared", 0f,
+                mHeadsUpScrim.getAlpha(), 0.01f);
+    }
+
+    @Test
+    public void testNoHeadsUpScrimExpanded() {
+        mScrimController.setPanelExpansion(1f);
+        mScrimController.onHeadsUpPinned(null /* row */);
+        mScrimController.finishAnimationsImmediately();
+
+        Assert.assertEquals("Heads-up scrim should not be visible when shade is expanded", 0f,
+                mHeadsUpScrim.getAlpha(), 0.01f);
+    }
+
     /**
      * Conserves old notification density after leaving state and coming back.
      *
@@ -458,6 +508,7 @@ public class ScrimControllerTest extends SysuiTestCase {
             // Force finish all animations.
             endAnimation(mScrimBehind, TAG_KEY_ANIM);
             endAnimation(mScrimInFront, TAG_KEY_ANIM);
+            endAnimation(mHeadsUpScrim, TAG_KEY_ANIM);
 
             if (!animationFinished[0]) {
                 throw new IllegalStateException("Animation never finished");
@@ -470,7 +521,7 @@ public class ScrimControllerTest extends SysuiTestCase {
             return wasCancelled;
         }
 
-        private void endAnimation(ScrimView scrimView, int tag) {
+        private void endAnimation(View scrimView, int tag) {
             Animator animator = (Animator) scrimView.getTag(tag);
             if (animator != null) {
                 animator.end();
