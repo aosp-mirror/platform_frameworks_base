@@ -17,7 +17,6 @@
 package android.net;
 
 import android.annotation.IntDef;
-import android.annotation.SystemApi;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.os.Parcel;
 import android.os.Parcelable;
