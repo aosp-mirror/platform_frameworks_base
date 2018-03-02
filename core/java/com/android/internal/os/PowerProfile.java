@@ -104,7 +104,7 @@ public class PowerProfile {
     public static final String POWER_MODEM_CONTROLLER_OPERATING_VOLTAGE =
             "modem.controller.voltage";
 
-     /**
+    /**
      * Power consumption when GPS is on.
      */
     public static final String POWER_GPS_ON = "gps.on";
@@ -136,6 +136,10 @@ public class PowerProfile {
     @Deprecated
     public static final String POWER_BLUETOOTH_AT_CMD = "bluetooth.at";
 
+    /**
+     * Power consumption when screen is in doze/ambient/always-on mode, including backlight power.
+     */
+    public static final String POWER_AMBIENT_DISPLAY = "ambient.on";
 
     /**
      * Power consumption when screen is on, not including the backlight power.

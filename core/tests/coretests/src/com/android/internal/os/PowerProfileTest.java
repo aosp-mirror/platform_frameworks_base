@@ -53,6 +53,7 @@ public class PowerProfileTest extends TestCase {
         assertEquals(4, mProfile.getNumSpeedStepsInCpuCluster(1));
         assertEquals(60.0, mProfile.getAveragePowerForCpuCore(1, 3));
         assertEquals(3000.0, mProfile.getBatteryCapacity());
+        assertEquals(0.5, mProfile.getAveragePower(PowerProfile.POWER_AMBIENT_DISPLAY));
     }
 
 }
