@@ -6856,6 +6856,10 @@ public class PackageManagerService extends IPackageManager.Stub
                     resolveInfos.remove(i);
                     continue;
                 }
+                if (blockInstant && isInstantApp(info.activityInfo.packageName, userId)) {
+                    resolveInfos.remove(i);
+                    continue;
+                }
                 // requested activity is defined in a split that hasn't been installed yet.
                 // add the installer to the resolve list
                 if (DEBUG_INSTALL) {
@@ -6870,8 +6874,6 @@ public class PackageManagerService extends IPackageManager.Stub
                         info.activityInfo.packageName,
                         info.activityInfo.applicationInfo.versionCode,
                         info.activityInfo.splitName);
-                installerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
-                        | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
                 // add a non-generic filter
                 installerInfo.filter = new IntentFilter();
 
@@ -6881,11 +6883,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 installerInfo.resolvePackageName = info.getComponentInfo().packageName;
                 installerInfo.labelRes = info.resolveLabelResId();
                 installerInfo.icon = info.resolveIconResId();
-
-                // propagate priority/preferred order/default
-                installerInfo.priority = info.priority;
-                installerInfo.preferredOrder = info.preferredOrder;
-                installerInfo.isDefault = info.isDefault;
                 installerInfo.isInstantAppAvailable = true;
                 resolveInfos.set(i, installerInfo);
                 continue;
@@ -7623,10 +7620,6 @@ public class PackageManagerService extends IPackageManager.Stub
                             info.serviceInfo.packageName,
                             info.serviceInfo.applicationInfo.versionCode,
                             info.serviceInfo.splitName);
-                    // make sure this resolver is the default
-                    installerInfo.isDefault = true;
-                    installerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
-                            | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
                     // add a non-generic filter
                     installerInfo.filter = new IntentFilter();
                     // load resources from the correct package
@@ -7745,10 +7738,6 @@ public class PackageManagerService extends IPackageManager.Stub
                             info.providerInfo.packageName,
                             info.providerInfo.applicationInfo.versionCode,
                             info.providerInfo.splitName);
-                    // make sure this resolver is the default
-                    installerInfo.isDefault = true;
-                    installerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
-                            | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
                     // add a non-generic filter
                     installerInfo.filter = new IntentFilter();
                     // load resources from the correct package
