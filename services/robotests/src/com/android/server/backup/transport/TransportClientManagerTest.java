@@ -20,6 +20,7 @@ import static com.android.server.backup.TransportManager.SERVICE_ACTION_TRANSPOR
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -30,6 +31,7 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+
 import com.android.server.testing.FrameworkRobolectricTestRunner;
 import com.android.server.testing.SystemLoaderPackages;
 import org.junit.Before;
@@ -45,7 +47,6 @@ import org.robolectric.annotation.Config;
 @SystemLoaderPackages({"com.android.server.backup"})
 @Presubmit
 public class TransportClientManagerTest {
-
     private static final String PACKAGE_NAME = "random.package.name";
     private static final String CLASS_NAME = "random.package.name.transport.Transport";
 
@@ -72,14 +73,11 @@ public class TransportClientManagerTest {
     }
 
     @Test
-    public void testGetTransportClient_withExtras_createsTransportClientWithCorrectIntent() {
-        Bundle extras = new Bundle();
-        extras.putBoolean("random_extra", true);
-        mBindIntent.putExtras(extras);
-
+    public void testGetTransportClient() {
         TransportClient transportClient =
-                mTransportClientManager.getTransportClient(mTransportComponent, extras, "caller");
+                mTransportClientManager.getTransportClient(mTransportComponent, "caller");
 
+        // Connect to be able to extract the intent
         transportClient.connectAsync(mTransportConnectionListener, "caller");
         verify(mContext)
                 .bindServiceAsUser(
@@ -87,6 +85,35 @@ public class TransportClientManagerTest {
                         any(ServiceConnection.class),
                         anyInt(),
                         any(UserHandle.class));
+    }
+
+    @Test
+    public void testGetTransportClient_withExtras_createsTransportClientWithCorrectIntent() {
+        Bundle extras = new Bundle();
+        extras.putBoolean("random_extra", true);
+
+        TransportClient transportClient =
+                mTransportClientManager.getTransportClient(mTransportComponent, extras, "caller");
+
+        transportClient.connectAsync(mTransportConnectionListener, "caller");
+        mBindIntent.putExtras(extras);
+        verify(mContext)
+                .bindServiceAsUser(
+                        argThat(matchesIntentAndExtras(mBindIntent)),
+                        any(ServiceConnection.class),
+                        anyInt(),
+                        any(UserHandle.class));
+    }
+
+    @Test
+    public void testDisposeOfTransportClient() {
+        TransportClient transportClient =
+                spy(mTransportClientManager.getTransportClient(mTransportComponent, "caller"));
+
+        mTransportClientManager.disposeOfTransportClient(transportClient, "caller");
+
+        verify(transportClient).unbind(any());
+        verify(transportClient).markAsDisposed();
     }
 
     private ArgumentMatcher<Intent> matchesIntentAndExtras(Intent expectedIntent) {
