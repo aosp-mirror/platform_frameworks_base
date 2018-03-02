@@ -268,6 +268,8 @@ public:
 
     static bool runningInEmulator;
 
+    ANDROID_API static bool debuggingEnabled;
+
 private:
     static ProfileType sProfileType;
     static bool sDisableProfileBars;
