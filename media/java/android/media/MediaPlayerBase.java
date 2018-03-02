@@ -114,6 +114,11 @@ public abstract class MediaPlayerBase implements AutoCloseable {
     public abstract void pause();
 
     /**
+     * Resets the MediaPlayerBase to its uninitialized state.
+     */
+    public abstract void reset();
+
+    /**
      *
      */
     public abstract void skipToNext();
