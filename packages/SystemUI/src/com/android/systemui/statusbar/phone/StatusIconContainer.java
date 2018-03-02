@@ -69,10 +69,14 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        int widthSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.UNSPECIFIED);
+
         final int count = getChildCount();
         // Measure all children so that they report the correct width
         for (int i = 0; i < count; i++) {
-            measureChild(getChildAt(i), widthMeasureSpec, heightMeasureSpec);
+            measureChild(getChildAt(i), widthSpec, heightMeasureSpec);
         }
     }
 
@@ -99,7 +103,8 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         int childCount = getChildCount();
         // Underflow === don't show content until that index
         int firstUnderflowIndex = -1;
-        if (DEBUG) android.util.Log.d(TAG, "calculateIconTransitions: start=" + translationX);
+        if (DEBUG) android.util.Log.d(TAG, "calculateIconTransitions: start=" + translationX
+                + " width=" + width);
 
         //TODO: Dots
         for (int i = childCount - 1; i >= 0; i--) {
