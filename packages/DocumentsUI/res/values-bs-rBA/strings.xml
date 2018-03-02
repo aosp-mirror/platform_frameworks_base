@@ -107,7 +107,7 @@
     <string name="copy_failure_alert_content" msgid="4563147454522476183">"Nisu kopirani sljedeći fajlovi: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"Nisu premješteni sljedeći fajlovi: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="delete_failure_alert_content" msgid="892393767207938353">"Nisu izbrisani sljedeći fajlovi: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <string name="copy_converted_warning_content" msgid="5753861488218674361">"Ove datoteke su pretvorene u drugi format: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_converted_warning_content" msgid="5753861488218674361">"Ovi fajlovi su pretvoreni u drugi format: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> fajl je kopiran u međuspremnik.</item>
       <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> fajla su kopirana u međuspremnik.</item>
@@ -116,7 +116,7 @@
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Odabrani fajlovi se ne mogu zalijepiti na ovu lokaciju."</string>
     <string name="menu_rename" msgid="7678802479104285353">"Promijeni naziv"</string>
     <string name="rename_error" msgid="4203041674883412606">"Promjena naziva dokumenta nije uspjela"</string>
-    <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Neke od datoteka su pretvorene"</string>
+    <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Neki od fajlova su pretvoreni"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"Omogućiti <xliff:g id="APPNAME"><b>^1</b></xliff:g> pristup direktoriju <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> sa <xliff:g id="STORAGE"><i>^3</i></xliff:g>?"</string>
     <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"Odobriti aplikaciji <xliff:g id="APPNAME"><b>^1</b></xliff:g> pristup direktoriju <xliff:g id="DIRECTORY"><i>^2</i></xliff:g>?"</string>
     <string name="open_external_dialog_root_request" msgid="8899108702926347720">"Želite li odobriti aplikaciji <xliff:g id="APPNAME"><b>^1</b></xliff:g> pristup svojim podacima, uključujući fotografije i video zapise, na <xliff:g id="STORAGE"><i>^2</i></xliff:g> ?"</string>
