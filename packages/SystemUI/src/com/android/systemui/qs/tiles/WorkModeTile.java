@@ -83,7 +83,7 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
 
     @Override
     public CharSequence getTileLabel() {
-        return mContext.getString(R.string.quick_settings_work_mode_on_label);
+        return mContext.getString(R.string.quick_settings_work_mode_label);
     }
 
     @Override
