@@ -203,6 +203,39 @@ static bool VerifyResTableEntry(const ResTable_type* type, uint32_t entry_offset
   return true;
 }
 
+LoadedPackage::iterator::iterator(const LoadedPackage* lp, size_t ti, size_t ei)
+    : loadedPackage_(lp),
+      typeIndex_(ti),
+      entryIndex_(ei),
+      typeIndexEnd_(lp->resource_ids_.size() + 1) {
+  while (typeIndex_ < typeIndexEnd_ && loadedPackage_->resource_ids_[typeIndex_] == 0) {
+    typeIndex_++;
+  }
+}
+
+LoadedPackage::iterator& LoadedPackage::iterator::operator++() {
+  while (typeIndex_ < typeIndexEnd_) {
+    if (entryIndex_ + 1 < loadedPackage_->resource_ids_[typeIndex_]) {
+      entryIndex_++;
+      break;
+    }
+    entryIndex_ = 0;
+    typeIndex_++;
+    if (typeIndex_ < typeIndexEnd_ && loadedPackage_->resource_ids_[typeIndex_] != 0) {
+      break;
+    }
+  }
+  return *this;
+}
+
+uint32_t LoadedPackage::iterator::operator*() const {
+  if (typeIndex_ >= typeIndexEnd_) {
+    return 0;
+  }
+  return make_resid(loadedPackage_->package_id_, typeIndex_ + loadedPackage_->type_id_offset_,
+          entryIndex_);
+}
+
 const ResTable_entry* LoadedPackage::GetEntry(const ResTable_type* type_chunk,
                                               uint16_t entry_index) {
   uint32_t entry_offset = GetEntryOffset(type_chunk, entry_index);
@@ -488,6 +521,7 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
         std::unique_ptr<TypeSpecPtrBuilder>& builder_ptr = type_builder_map[type_spec->id - 1];
         if (builder_ptr == nullptr) {
           builder_ptr = util::make_unique<TypeSpecPtrBuilder>(type_spec, idmap_entry_header);
+          loaded_package->resource_ids_.set(type_spec->id, entry_count);
         } else {
           LOG(WARNING) << StringPrintf("RES_TABLE_TYPE_SPEC_TYPE already defined for ID %02x",
                                        type_spec->id);
