@@ -22,10 +22,12 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -124,6 +126,11 @@ public class KernelCpuProcReader {
                 }
                 fc.position(0);
             }
+        } catch (NoSuchFileException | FileNotFoundException e) {
+            // Happens when the kernel does not provide this file. Not a big issue. Just log it.
+            mErrors++;
+            Slog.w(TAG, "File not exist: " + mProc);
+            return null;
         } catch (IOException e) {
             mErrors++;
             Slog.e(TAG, "Error reading: " + mProc, e);
