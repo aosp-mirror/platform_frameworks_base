@@ -387,6 +387,7 @@ public class ConnectivityServiceTest {
                     mScore = 20;
                     break;
                 case TRANSPORT_VPN:
+                    mNetworkCapabilities.removeCapability(NET_CAPABILITY_NOT_VPN);
                     mScore = ConnectivityConstants.VPN_DEFAULT_SCORE;
                     break;
                 default:
@@ -3744,14 +3745,19 @@ public class ConnectivityServiceTest {
         final int uid = Process.myUid();
 
         final TestNetworkCallback genericNetworkCallback = new TestNetworkCallback();
+        final TestNetworkCallback genericNotVpnNetworkCallback = new TestNetworkCallback();
         final TestNetworkCallback wifiNetworkCallback = new TestNetworkCallback();
         final TestNetworkCallback vpnNetworkCallback = new TestNetworkCallback();
-        final NetworkRequest genericRequest = new NetworkRequest.Builder().build();
+        final NetworkRequest genericNotVpnRequest = new NetworkRequest.Builder().build();
+        final NetworkRequest genericRequest = new NetworkRequest.Builder()
+                .removeCapability(NET_CAPABILITY_NOT_VPN).build();
         final NetworkRequest wifiRequest = new NetworkRequest.Builder()
                 .addTransportType(TRANSPORT_WIFI).build();
         final NetworkRequest vpnNetworkRequest = new NetworkRequest.Builder()
+                .removeCapability(NET_CAPABILITY_NOT_VPN)
                 .addTransportType(TRANSPORT_VPN).build();
         mCm.registerNetworkCallback(genericRequest, genericNetworkCallback);
+        mCm.registerNetworkCallback(genericNotVpnRequest, genericNotVpnNetworkCallback);
         mCm.registerNetworkCallback(wifiRequest, wifiNetworkCallback);
         mCm.registerNetworkCallback(vpnNetworkRequest, vpnNetworkCallback);
 
@@ -3759,6 +3765,7 @@ public class ConnectivityServiceTest {
         mWiFiNetworkAgent.connect(false);
 
         genericNetworkCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+        genericNotVpnNetworkCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
         wifiNetworkCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
         vpnNetworkCallback.assertNoCallback();
 
@@ -3773,16 +3780,19 @@ public class ConnectivityServiceTest {
         vpnNetworkAgent.connect(false);
 
         genericNetworkCallback.expectAvailableCallbacksUnvalidated(vpnNetworkAgent);
+        genericNotVpnNetworkCallback.assertNoCallback();
         wifiNetworkCallback.assertNoCallback();
         vpnNetworkCallback.expectAvailableCallbacksUnvalidated(vpnNetworkAgent);
 
         genericNetworkCallback.expectCallback(CallbackState.NETWORK_CAPABILITIES, vpnNetworkAgent);
+        genericNotVpnNetworkCallback.assertNoCallback();
         vpnNetworkCallback.expectCapabilitiesLike(nc -> null == nc.getUids(), vpnNetworkAgent);
 
         ranges.clear();
         vpnNetworkAgent.setUids(ranges);
 
         genericNetworkCallback.expectCallback(CallbackState.LOST, vpnNetworkAgent);
+        genericNotVpnNetworkCallback.assertNoCallback();
         wifiNetworkCallback.assertNoCallback();
         vpnNetworkCallback.expectCallback(CallbackState.LOST, vpnNetworkAgent);
 
@@ -3790,18 +3800,21 @@ public class ConnectivityServiceTest {
         vpnNetworkAgent.setUids(ranges);
 
         genericNetworkCallback.expectAvailableCallbacksValidated(vpnNetworkAgent);
+        genericNotVpnNetworkCallback.assertNoCallback();
         wifiNetworkCallback.assertNoCallback();
         vpnNetworkCallback.expectAvailableCallbacksValidated(vpnNetworkAgent);
 
         mWiFiNetworkAgent.disconnect();
 
         genericNetworkCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+        genericNotVpnNetworkCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
         wifiNetworkCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
         vpnNetworkCallback.assertNoCallback();
 
         vpnNetworkAgent.disconnect();
 
         genericNetworkCallback.expectCallback(CallbackState.LOST, vpnNetworkAgent);
+        genericNotVpnNetworkCallback.assertNoCallback();
         wifiNetworkCallback.assertNoCallback();
         vpnNetworkCallback.expectCallback(CallbackState.LOST, vpnNetworkAgent);
 
