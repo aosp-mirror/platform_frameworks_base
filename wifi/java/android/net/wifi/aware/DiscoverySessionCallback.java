@@ -116,9 +116,12 @@ public class DiscoverySessionCallback {
      * Called when a discovery (publish or subscribe) operation results in a
      * service discovery. Called when a Subscribe service was configured with a range requirement
      * {@link SubscribeConfig.Builder#setMinDistanceMm(int)} and/or
-     * {@link SubscribeConfig.Builder#setMaxDistanceMm(int)}. A discovery will only be declared
-     * (i.e. this callback called) if the range of the publisher is within the specified distance
-     * constraints.
+     * {@link SubscribeConfig.Builder#setMaxDistanceMm(int)} and the Publish service was configured
+     * with {@link PublishConfig.Builder#setRangingEnabled(boolean)}.
+     * <p>
+     * If either Publisher or Subscriber does not enable Ranging, or if Ranging is temporarily
+     * disabled by the underlying device, service discovery proceeds without ranging and the
+     * {@link #onServiceDiscovered(PeerHandle, byte[], List)} is called.
      *
      * @param peerHandle An opaque handle to the peer matching our discovery operation.
      * @param serviceSpecificInfo The service specific information (arbitrary
