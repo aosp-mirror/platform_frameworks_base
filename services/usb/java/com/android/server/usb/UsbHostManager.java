@@ -329,40 +329,31 @@ public class UsbHostManager {
                 return false;
             }
 
-            UsbDescriptorParser parser = new UsbDescriptorParser(deviceAddress);
-            if (parser.parseDescriptors(descriptors)) {
-
-                UsbDevice newDevice = parser.toAndroidUsbDevice();
-                if (newDevice == null) {
-                    Slog.e(TAG, "Couldn't create UsbDevice object.");
-                    // Tracking
-                    addConnectionRecord(deviceAddress, ConnectionRecord.CONNECT_BADDEVICE,
-                            parser.getRawDescriptors());
-                } else {
-                    mDevices.put(deviceAddress, newDevice);
-
-                    // It is fine to call this only for the current user as all broadcasts are
-                    // sent to all profiles of the user and the dialogs should only show once.
-                    ComponentName usbDeviceConnectionHandler = getUsbDeviceConnectionHandler();
-                    if (usbDeviceConnectionHandler == null) {
-                        getCurrentUserSettings().deviceAttached(newDevice);
-                    } else {
-                        getCurrentUserSettings().deviceAttachedForFixedHandler(newDevice,
-                                usbDeviceConnectionHandler);
-                    }
-
-                    mUsbAlsaManager.usbDeviceAdded(deviceAddress, newDevice, parser);
-
-                    // Tracking
-                    addConnectionRecord(deviceAddress, ConnectionRecord.CONNECT,
-                            parser.getRawDescriptors());
-                }
-            } else {
-                Slog.e(TAG, "Error parsing USB device descriptors for " + deviceAddress);
+            UsbDescriptorParser parser = new UsbDescriptorParser(deviceAddress, descriptors);
+            UsbDevice newDevice = parser.toAndroidUsbDevice();
+            if (newDevice == null) {
+                Slog.e(TAG, "Couldn't create UsbDevice object.");
                 // Tracking
-                addConnectionRecord(deviceAddress, ConnectionRecord.CONNECT_BADPARSE,
+                addConnectionRecord(deviceAddress, ConnectionRecord.CONNECT_BADDEVICE,
                         parser.getRawDescriptors());
-                return false;
+            } else {
+                mDevices.put(deviceAddress, newDevice);
+
+                // It is fine to call this only for the current user as all broadcasts are
+                // sent to all profiles of the user and the dialogs should only show once.
+                ComponentName usbDeviceConnectionHandler = getUsbDeviceConnectionHandler();
+                if (usbDeviceConnectionHandler == null) {
+                    getCurrentUserSettings().deviceAttached(newDevice);
+                } else {
+                    getCurrentUserSettings().deviceAttachedForFixedHandler(newDevice,
+                            usbDeviceConnectionHandler);
+                }
+
+                mUsbAlsaManager.usbDeviceAdded(deviceAddress, newDevice, parser);
+
+                // Tracking
+                addConnectionRecord(deviceAddress, ConnectionRecord.CONNECT,
+                        parser.getRawDescriptors());
             }
         }
 

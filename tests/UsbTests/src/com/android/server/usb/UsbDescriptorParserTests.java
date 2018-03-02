@@ -61,10 +61,7 @@ public class UsbDescriptorParserTests {
         }
 
         // Testing same codepath as UsbHostManager.java:usbDeviceAdded
-        UsbDescriptorParser parser = new UsbDescriptorParser("test-usb-addr");
-        if (!parser.parseDescriptors(descriptors)) {
-            fail("failed to parse descriptors.");
-        }
+        UsbDescriptorParser parser = new UsbDescriptorParser("test-usb-addr", descriptors);
         return parser;
     }
 

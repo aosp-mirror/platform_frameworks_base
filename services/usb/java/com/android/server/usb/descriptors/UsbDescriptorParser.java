@@ -43,11 +43,6 @@ public final class UsbDescriptorParser {
     // Obtained from the first AudioClass Header descriptor.
     private int mACInterfacesSpec = UsbDeviceDescriptor.USBSPEC_1_0;
 
-    public UsbDescriptorParser(String deviceAddr) {
-        mDeviceAddr = deviceAddr;
-        mDescriptors = new ArrayList<UsbDescriptor>(DESCRIPTORS_ALLOC_SIZE);
-    }
-
     /**
      * Connect this parser to an existing set of already parsed descriptors.
      * This is useful for reporting.
@@ -214,7 +209,7 @@ public final class UsbDescriptorParser {
     /**
      * @hide
      */
-    public boolean parseDescriptors(byte[] descriptors) {
+    public void parseDescriptors(byte[] descriptors) {
         if (DEBUG) {
             Log.d(TAG, "parseDescriptors() - start");
         }
@@ -248,17 +243,6 @@ public final class UsbDescriptorParser {
         if (DEBUG) {
             Log.d(TAG, "parseDescriptors() - end " + mDescriptors.size() + " descriptors.");
         }
-        return true;
-    }
-
-    /**
-     * @hide
-     */
-    public boolean parseDevice() {
-        byte[] rawDescriptors = getRawDescriptors();
-
-        return rawDescriptors != null
-            ? parseDescriptors(rawDescriptors) : false;
     }
 
     public byte[] getRawDescriptors() {
