@@ -107,7 +107,7 @@ public class ZenModeHelper {
     @VisibleForTesting protected int mZenMode;
     private int mUser = UserHandle.USER_SYSTEM;
     @VisibleForTesting protected ZenModeConfig mConfig;
-    private AudioManagerInternal mAudioManager;
+    @VisibleForTesting protected AudioManagerInternal mAudioManager;
     protected PackageManager mPm;
     private long mSuppressedEffects;
 
@@ -886,7 +886,8 @@ public class ZenModeHelper {
                 exceptionPackages);
     }
 
-    private void applyZenToRingerMode() {
+    @VisibleForTesting
+    protected void applyZenToRingerMode() {
         if (mAudioManager == null) return;
         // force the ringer mode into compliance
         final int ringerModeInternal = mAudioManager.getRingerModeInternal();
@@ -901,15 +902,8 @@ public class ZenModeHelper {
                 break;
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
                 if (ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(mConfig)) {
-                    if (ringerModeInternal != AudioManager.RINGER_MODE_SILENT) {
-                        setPreviousRingerModeSetting(ringerModeInternal);
-                        newRingerModeInternal = AudioManager.RINGER_MODE_SILENT;
-                    }
-                } else {
-                    if (ringerModeInternal == AudioManager.RINGER_MODE_SILENT) {
-                        newRingerModeInternal = getPreviousRingerModeSetting();
-                        setPreviousRingerModeSetting(null);
-                    }
+                    setPreviousRingerModeSetting(ringerModeInternal);
+                    newRingerModeInternal = AudioManager.RINGER_MODE_SILENT;
                 }
                 break;
             case Global.ZEN_MODE_OFF:
@@ -1003,7 +997,8 @@ public class ZenModeHelper {
         }
     }
 
-    private final class RingerModeDelegate implements AudioManagerInternal.RingerModeDelegate {
+    @VisibleForTesting
+    protected final class RingerModeDelegate implements AudioManagerInternal.RingerModeDelegate {
         @Override
         public String toString() {
             return TAG;
@@ -1040,9 +1035,14 @@ public class ZenModeHelper {
                     }
                     break;
             }
+
             if (newZen != -1) {
                 setManualZenMode(newZen, null, "ringerModeInternal", null,
                         false /*setRingerMode*/);
+            } else if (mZenMode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
+                    && !ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(mConfig)) {
+                // in priority only with ringer not muted, save ringer mode changes
+                setPreviousRingerModeSetting(ringerModeNew);
             }
 
             if (isChange || newZen != -1 || ringerModeExternal != ringerModeExternalOut) {
