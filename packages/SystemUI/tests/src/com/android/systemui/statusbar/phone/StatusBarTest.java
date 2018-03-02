@@ -346,7 +346,7 @@ public class StatusBarTest extends SysuiTestCase {
     public void testShouldPeek_nonSuppressedGroupSummary() {
         when(mPowerManager.isScreenOn()).thenReturn(true);
         when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
-        when(mNotificationData.shouldSuppressScreenOn(any())).thenReturn(false);
+        when(mNotificationData.shouldSuppressStatusBar(any())).thenReturn(false);
         when(mNotificationData.shouldFilterOut(any())).thenReturn(false);
         when(mSystemServicesProxy.isDreaming()).thenReturn(false);
         when(mNotificationData.getImportance(any())).thenReturn(IMPORTANCE_HIGH);
@@ -367,7 +367,7 @@ public class StatusBarTest extends SysuiTestCase {
     public void testShouldPeek_suppressedGroupSummary() {
         when(mPowerManager.isScreenOn()).thenReturn(true);
         when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
-        when(mNotificationData.shouldSuppressScreenOn(any())).thenReturn(false);
+        when(mNotificationData.shouldSuppressStatusBar(any())).thenReturn(false);
         when(mNotificationData.shouldFilterOut(any())).thenReturn(false);
         when(mSystemServicesProxy.isDreaming()).thenReturn(false);
         when(mNotificationData.getImportance(any())).thenReturn(IMPORTANCE_HIGH);
@@ -385,16 +385,32 @@ public class StatusBarTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldPeek_suppressedScreenOn_dozing() {
+    public void testShouldPeek_suppressedPeek() {
         when(mPowerManager.isScreenOn()).thenReturn(true);
         when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
         when(mNotificationData.shouldFilterOut(any())).thenReturn(false);
         when(mSystemServicesProxy.isDreaming()).thenReturn(false);
         when(mNotificationData.getImportance(any())).thenReturn(IMPORTANCE_HIGH);
 
-        mStatusBar.mDozing = true;
-        when(mNotificationData.shouldSuppressScreenOn(any())).thenReturn(true);
-        when(mNotificationData.shouldSuppressScreenOff(any())).thenReturn(false);
+        when(mNotificationData.shouldSuppressPeek(any())).thenReturn(true);
+
+        Notification n = new Notification.Builder(getContext(), "a").build();
+        StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
+                UserHandle.of(0), null, 0);
+        NotificationData.Entry entry = new NotificationData.Entry(sbn);
+
+        assertFalse(mEntryManager.shouldPeek(entry, sbn));
+    }
+
+    @Test
+    public void testShouldPeek_noSuppressedPeek() {
+        when(mPowerManager.isScreenOn()).thenReturn(true);
+        when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
+        when(mNotificationData.shouldFilterOut(any())).thenReturn(false);
+        when(mSystemServicesProxy.isDreaming()).thenReturn(false);
+        when(mNotificationData.getImportance(any())).thenReturn(IMPORTANCE_HIGH);
+
+        when(mNotificationData.shouldSuppressPeek(any())).thenReturn(false);
 
         Notification n = new Notification.Builder(getContext(), "a").build();
         StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
@@ -403,63 +419,6 @@ public class StatusBarTest extends SysuiTestCase {
 
         assertTrue(mEntryManager.shouldPeek(entry, sbn));
     }
-
-    @Test
-    public void testShouldPeek_suppressedScreenOn_noDoze() {
-        when(mPowerManager.isScreenOn()).thenReturn(true);
-        when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
-        when(mNotificationData.shouldFilterOut(any())).thenReturn(false);
-        when(mSystemServicesProxy.isDreaming()).thenReturn(false);
-        when(mNotificationData.getImportance(any())).thenReturn(IMPORTANCE_HIGH);
-
-        mStatusBar.mDozing = false;
-        when(mNotificationData.shouldSuppressScreenOn(any())).thenReturn(true);
-        when(mNotificationData.shouldSuppressScreenOff(any())).thenReturn(false);
-
-        Notification n = new Notification.Builder(getContext(), "a").build();
-        StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
-                UserHandle.of(0), null, 0);
-        NotificationData.Entry entry = new NotificationData.Entry(sbn);
-        assertFalse(mEntryManager.shouldPeek(entry, sbn));
-    }
-    @Test
-    public void testShouldPeek_suppressedScreenOff_dozing() {
-        when(mPowerManager.isScreenOn()).thenReturn(true);
-        when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
-        when(mNotificationData.shouldFilterOut(any())).thenReturn(false);
-        when(mSystemServicesProxy.isDreaming()).thenReturn(false);
-        when(mNotificationData.getImportance(any())).thenReturn(IMPORTANCE_HIGH);
-
-        mStatusBar.mDozing = true;
-        when(mNotificationData.shouldSuppressScreenOn(any())).thenReturn(false);
-        when(mNotificationData.shouldSuppressScreenOff(any())).thenReturn(true);
-
-        Notification n = new Notification.Builder(getContext(), "a").build();
-        StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
-                UserHandle.of(0), null, 0);
-        NotificationData.Entry entry = new NotificationData.Entry(sbn);
-        assertFalse(mEntryManager.shouldPeek(entry, sbn));
-    }
-
-    @Test
-    public void testShouldPeek_suppressedScreenOff_noDoze() {
-        when(mPowerManager.isScreenOn()).thenReturn(true);
-        when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
-        when(mNotificationData.shouldFilterOut(any())).thenReturn(false);
-        when(mSystemServicesProxy.isDreaming()).thenReturn(false);
-        when(mNotificationData.getImportance(any())).thenReturn(IMPORTANCE_HIGH);
-
-        mStatusBar.mDozing = false;
-        when(mNotificationData.shouldSuppressScreenOn(any())).thenReturn(false);
-        when(mNotificationData.shouldSuppressScreenOff(any())).thenReturn(true);
-
-        Notification n = new Notification.Builder(getContext(), "a").build();
-        StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
-                UserHandle.of(0), null, 0);
-        NotificationData.Entry entry = new NotificationData.Entry(sbn);
-        assertTrue(mEntryManager.shouldPeek(entry, sbn));
-    }
-
 
     @Test
     public void testLogHidden() {
@@ -574,6 +533,7 @@ public class StatusBarTest extends SysuiTestCase {
     public void testFingerprintNotification_UpdatesScrims() {
         mStatusBar.mStatusBarWindowManager = mock(StatusBarWindowManager.class);
         mStatusBar.mDozeScrimController = mock(DozeScrimController.class);
+        mStatusBar.mNotificationIconAreaController = mock(NotificationIconAreaController.class);
         mStatusBar.notifyFpAuthModeChanged();
         verify(mScrimController).transitionTo(any(), any());
     }

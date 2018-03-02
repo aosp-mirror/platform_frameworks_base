@@ -4603,6 +4603,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mAmbientIndicationContainer instanceof DozeReceiver) {
             ((DozeReceiver) mAmbientIndicationContainer).setDozing(mDozing);
         }
+        mEntryManager.updateNotifications();
         updateDozingState();
         updateReportRejectedTouchVisibility();
         Trace.endSection();

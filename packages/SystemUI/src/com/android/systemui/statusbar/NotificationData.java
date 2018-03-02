@@ -16,6 +16,13 @@
 
 package com.android.systemui.statusbar;
 
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
+
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.Notification;
@@ -445,20 +452,47 @@ public class NotificationData {
         return Ranking.VISIBILITY_NO_OVERRIDE;
     }
 
-    public boolean shouldSuppressScreenOff(String key) {
+    public boolean shouldSuppressFullScreenIntent(String key) {
         if (mRankingMap != null) {
             getRanking(key, mTmpRanking);
             return (mTmpRanking.getSuppressedVisualEffects()
-                    & NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_OFF) != 0;
+                    & SUPPRESSED_EFFECT_FULL_SCREEN_INTENT) != 0;
         }
         return false;
     }
 
-    public boolean shouldSuppressScreenOn(String key) {
+    public boolean shouldSuppressPeek(String key) {
         if (mRankingMap != null) {
             getRanking(key, mTmpRanking);
             return (mTmpRanking.getSuppressedVisualEffects()
-                    & NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_ON) != 0;
+                    & SUPPRESSED_EFFECT_PEEK) != 0;
+        }
+        return false;
+    }
+
+    public boolean shouldSuppressStatusBar(String key) {
+        if (mRankingMap != null) {
+            getRanking(key, mTmpRanking);
+            return (mTmpRanking.getSuppressedVisualEffects()
+                    & SUPPRESSED_EFFECT_STATUS_BAR) != 0;
+        }
+        return false;
+    }
+
+    public boolean shouldSuppressAmbient(String key) {
+        if (mRankingMap != null) {
+            getRanking(key, mTmpRanking);
+            return (mTmpRanking.getSuppressedVisualEffects()
+                    & SUPPRESSED_EFFECT_AMBIENT) != 0;
+        }
+        return false;
+    }
+
+    public boolean shouldSuppressNotificationList(String key) {
+        if (mRankingMap != null) {
+            getRanking(key, mTmpRanking);
+            return (mTmpRanking.getSuppressedVisualEffects()
+                    & SUPPRESSED_EFFECT_NOTIFICATION_LIST) != 0;
         }
         return false;
     }
@@ -576,6 +610,14 @@ public class NotificationData {
             return true;
         }
 
+        if (mEnvironment.isDozing() && shouldSuppressAmbient(sbn.getKey())) {
+            return true;
+        }
+
+        if (!mEnvironment.isDozing() && shouldSuppressNotificationList(sbn.getKey())) {
+            return true;
+        }
+
         if (!StatusBar.ENABLE_CHILD_NOTIFICATIONS
                 && mGroupManager.isChildInGroupWithSummary(sbn)) {
             return true;
@@ -670,5 +712,9 @@ public class NotificationData {
         public boolean isNotificationForCurrentProfiles(StatusBarNotification sbn);
         public String getCurrentMediaNotificationKey();
         public NotificationGroupManager getGroupManager();
+        /**
+         * @return true iff the device is dozing
+         */
+        boolean isDozing();
     }
 }
