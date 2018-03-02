@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -38,10 +39,12 @@ import android.net.INetd;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
+import android.net.MacAddress;
 import android.net.RouteInfo;
-import android.net.ip.IpManager.Callback;
-import android.net.ip.IpManager.InitialConfiguration;
-import android.net.ip.IpManager.ProvisioningConfiguration;
+import android.net.ip.IpClient.Callback;
+import android.net.ip.IpClient.InitialConfiguration;
+import android.net.ip.IpClient.ProvisioningConfiguration;
+import android.net.util.InterfaceParams;
 import android.os.INetworkManagementService;
 import android.provider.Settings;
 import android.support.test.filters.SmallTest;
@@ -68,15 +71,19 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Tests for IpManager.
+ * Tests for IpClient.
  */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class IpManagerTest {
+public class IpClientTest {
     private static final int DEFAULT_AVOIDBADWIFI_CONFIG_VALUE = 1;
 
     private static final String VALID = "VALID";
     private static final String INVALID = "INVALID";
+    private static final String TEST_IFNAME = "test_wlan0";
+    private static final int TEST_IFINDEX = 1001;
+    // See RFC 7042#section-2.1.2 for EUI-48 documentation values.
+    private static final MacAddress TEST_MAC = MacAddress.fromString("00:00:5E:00:53:01");
 
     @Mock private Context mContext;
     @Mock private INetworkManagementService mNMService;
@@ -84,9 +91,11 @@ public class IpManagerTest {
     @Mock private Resources mResources;
     @Mock private Callback mCb;
     @Mock private AlarmManager mAlarm;
+    @Mock private IpClient.Dependencies mDependecies;
     private MockContentResolver mContentResolver;
 
-    BaseNetworkObserver mObserver;
+    private BaseNetworkObserver mObserver;
+    private InterfaceParams mIfParams;
 
     @Before
     public void setUp() throws Exception {
@@ -100,10 +109,23 @@ public class IpManagerTest {
         mContentResolver = new MockContentResolver();
         mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
+
+        mIfParams = null;
+
+        when(mDependecies.getNMS()).thenReturn(mNMService);
+        when(mDependecies.getNetd()).thenReturn(mNetd);
     }
 
-    private IpManager makeIpManager(String ifname) throws Exception {
-        final IpManager ipm = new IpManager(mContext, ifname, mCb, mNMService, mNetd);
+    private void setTestInterfaceParams(String ifname) {
+        mIfParams = (ifname != null)
+                ? new InterfaceParams(ifname, TEST_IFINDEX, TEST_MAC)
+                : null;
+        when(mDependecies.getInterfaceParams(anyString())).thenReturn(mIfParams);
+    }
+
+    private IpClient makeIpClient(String ifname) throws Exception {
+        setTestInterfaceParams(ifname);
+        final IpClient ipc = new IpClient(mContext, ifname, mCb, mDependecies);
         verify(mNMService, timeout(100).times(1)).disableIpv6(ifname);
         verify(mNMService, timeout(100).times(1)).clearInterfaceAddresses(ifname);
         ArgumentCaptor<BaseNetworkObserver> arg =
@@ -111,23 +133,54 @@ public class IpManagerTest {
         verify(mNMService, times(1)).registerObserver(arg.capture());
         mObserver = arg.getValue();
         reset(mNMService);
-        return ipm;
+        return ipc;
     }
 
     @Test
-    public void testNullCallbackDoesNotThrow() throws Exception {
-        final IpManager ipm = new IpManager(mContext, "lo", null, mNMService);
+    public void testNullInterfaceNameMostDefinitelyThrows() throws Exception {
+        setTestInterfaceParams(null);
+        try {
+            final IpClient ipc = new IpClient(mContext, null, mCb, mDependecies);
+            ipc.shutdown();
+            fail();
+        } catch (NullPointerException npe) {
+            // Phew; null interface names not allowed.
+        }
+    }
+
+    @Test
+    public void testNullCallbackMostDefinitelyThrows() throws Exception {
+        final String ifname = "lo";
+        setTestInterfaceParams(ifname);
+        try {
+            final IpClient ipc = new IpClient(mContext, ifname, null, mDependecies);
+            ipc.shutdown();
+            fail();
+        } catch (NullPointerException npe) {
+            // Phew; null callbacks not allowed.
+        }
     }
 
     @Test
     public void testInvalidInterfaceDoesNotThrow() throws Exception {
-        final IpManager ipm = new IpManager(mContext, "test_wlan0", mCb, mNMService);
+        setTestInterfaceParams(TEST_IFNAME);
+        final IpClient ipc = new IpClient(mContext, TEST_IFNAME, mCb, mDependecies);
+        ipc.shutdown();
+    }
+
+    @Test
+    public void testInterfaceNotFoundFailsImmediately() throws Exception {
+        setTestInterfaceParams(null);
+        final IpClient ipc = new IpClient(mContext, TEST_IFNAME, mCb, mDependecies);
+        ipc.startProvisioning(new IpClient.ProvisioningConfiguration());
+        verify(mCb, times(1)).onProvisioningFailure(any());
+        ipc.shutdown();
     }
 
     @Test
     public void testDefaultProvisioningConfiguration() throws Exception {
-        final String iface = "test_wlan0";
-        final IpManager ipm = makeIpManager(iface);
+        final String iface = TEST_IFNAME;
+        final IpClient ipc = makeIpClient(iface);
 
         ProvisioningConfiguration config = new ProvisioningConfiguration.Builder()
                 .withoutIPv4()
@@ -136,20 +189,20 @@ public class IpManagerTest {
                 .withoutIpReachabilityMonitor()
                 .build();
 
-        ipm.startProvisioning(config);
+        ipc.startProvisioning(config);
         verify(mCb, times(1)).setNeighborDiscoveryOffload(true);
         verify(mCb, timeout(100).times(1)).setFallbackMulticastFilter(false);
         verify(mCb, never()).onProvisioningFailure(any());
 
-        ipm.stop();
+        ipc.shutdown();
         verify(mNMService, timeout(100).times(1)).disableIpv6(iface);
         verify(mNMService, timeout(100).times(1)).clearInterfaceAddresses(iface);
     }
 
     @Test
     public void testProvisioningWithInitialConfiguration() throws Exception {
-        final String iface = "test_wlan0";
-        final IpManager ipm = makeIpManager(iface);
+        final String iface = TEST_IFNAME;
+        final IpClient ipc = makeIpClient(iface);
 
         String[] addresses = {
             "fe80::a4be:f92:e1f7:22d1/64",
@@ -164,7 +217,7 @@ public class IpManagerTest {
                 .withInitialConfiguration(conf(links(addresses), prefixes(prefixes), ips()))
                 .build();
 
-        ipm.startProvisioning(config);
+        ipc.startProvisioning(config);
         verify(mCb, times(1)).setNeighborDiscoveryOffload(true);
         verify(mCb, timeout(100).times(1)).setFallbackMulticastFilter(false);
         verify(mCb, never()).onProvisioningFailure(any());
@@ -190,7 +243,7 @@ public class IpManagerTest {
         want.setInterfaceName(iface);
         verify(mCb, timeout(100).times(1)).onProvisioningSuccess(eq(want));
 
-        ipm.stop();
+        ipc.shutdown();
         verify(mNMService, timeout(100).times(1)).disableIpv6(iface);
         verify(mNMService, timeout(100).times(1)).clearInterfaceAddresses(iface);
     }
@@ -228,7 +281,7 @@ public class IpManagerTest {
         };
 
         for (IsProvisionedTestCase testcase : testcases) {
-            if (IpManager.isProvisioned(testcase.lp, testcase.config) != testcase.isProvisioned) {
+            if (IpClient.isProvisioned(testcase.lp, testcase.config) != testcase.isProvisioned) {
                 fail(testcase.errorMessage());
             }
         }
@@ -424,11 +477,11 @@ public class IpManagerTest {
         List<String> list3 = Arrays.asList("bar", "baz");
         List<String> list4 = Arrays.asList("foo", "bar", "baz");
 
-        assertTrue(IpManager.all(list1, (x) -> false));
-        assertFalse(IpManager.all(list2, (x) -> false));
-        assertTrue(IpManager.all(list3, (x) -> true));
-        assertTrue(IpManager.all(list2, (x) -> x.charAt(0) == 'f'));
-        assertFalse(IpManager.all(list4, (x) -> x.charAt(0) == 'f'));
+        assertTrue(IpClient.all(list1, (x) -> false));
+        assertFalse(IpClient.all(list2, (x) -> false));
+        assertTrue(IpClient.all(list3, (x) -> true));
+        assertTrue(IpClient.all(list2, (x) -> x.charAt(0) == 'f'));
+        assertFalse(IpClient.all(list4, (x) -> x.charAt(0) == 'f'));
     }
 
     @Test
@@ -438,11 +491,11 @@ public class IpManagerTest {
         List<String> list3 = Arrays.asList("bar", "baz");
         List<String> list4 = Arrays.asList("foo", "bar", "baz");
 
-        assertFalse(IpManager.any(list1, (x) -> true));
-        assertTrue(IpManager.any(list2, (x) -> true));
-        assertTrue(IpManager.any(list2, (x) -> x.charAt(0) == 'f'));
-        assertFalse(IpManager.any(list3, (x) -> x.charAt(0) == 'f'));
-        assertTrue(IpManager.any(list4, (x) -> x.charAt(0) == 'f'));
+        assertFalse(IpClient.any(list1, (x) -> true));
+        assertTrue(IpClient.any(list2, (x) -> true));
+        assertTrue(IpClient.any(list2, (x) -> x.charAt(0) == 'f'));
+        assertFalse(IpClient.any(list3, (x) -> x.charAt(0) == 'f'));
+        assertTrue(IpClient.any(list4, (x) -> x.charAt(0) == 'f'));
     }
 
     @Test
@@ -451,9 +504,9 @@ public class IpManagerTest {
         List<String> list2 = Arrays.asList("foo");
         List<String> list3 = Arrays.asList("foo", "bar", "baz");
 
-        assertEquals(list1, IpManager.findAll(list1, (x) -> true));
-        assertEquals(list1, IpManager.findAll(list3, (x) -> false));
-        assertEquals(list3, IpManager.findAll(list3, (x) -> true));
-        assertEquals(list2, IpManager.findAll(list3, (x) -> x.charAt(0) == 'f'));
+        assertEquals(list1, IpClient.findAll(list1, (x) -> true));
+        assertEquals(list1, IpClient.findAll(list3, (x) -> false));
+        assertEquals(list3, IpClient.findAll(list3, (x) -> true));
+        assertEquals(list2, IpClient.findAll(list3, (x) -> x.charAt(0) == 'f'));
     }
 }
