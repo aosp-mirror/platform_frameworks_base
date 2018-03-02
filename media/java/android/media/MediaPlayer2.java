@@ -1339,6 +1339,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * this method, you will have to initialize it again by setting the
      * data source and calling prepare().
      */
+    @Override
     public abstract void reset();
 
     /**
