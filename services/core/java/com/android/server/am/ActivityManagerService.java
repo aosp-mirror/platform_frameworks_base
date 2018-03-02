@@ -705,6 +705,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     // Whether we should use SCHED_FIFO for UI and RenderThreads.
     private boolean mUseFifoUiScheduling = false;
 
+    private static final String SYSUI_COMPONENT_NAME = "com.android.systemui/.SystemUIService";
+
     BroadcastQueue mFgBroadcastQueue;
     BroadcastQueue mBgBroadcastQueue;
     // Convenient for easy iteration over the queues. Foreground is first
@@ -804,6 +806,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 boolean asProto) {
             if (asProto) return;
             doDump(fd, pw, new String[]{"activities"}, asProto);
+            doDump(fd, pw, new String[]{"service", SYSUI_COMPONENT_NAME}, asProto);
         }
 
         @Override

@@ -25,6 +25,8 @@ import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_TELEVISION;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
+import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.UserHandle.USER_ALL;
 import static android.os.UserHandle.USER_NULL;
 import static android.os.UserHandle.USER_SYSTEM;
@@ -64,6 +66,10 @@ import static android.service.notification.NotificationListenerService.TRIM_FULL
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
+
+import static com.android.server.utils.PriorityDump.PRIORITY_ARG;
+import static com.android.server.utils.PriorityDump.PRIORITY_ARG_CRITICAL;
+import static com.android.server.utils.PriorityDump.PRIORITY_ARG_NORMAL;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -1476,7 +1482,8 @@ public class NotificationManagerService extends SystemService {
         IntentFilter localeChangedFilter = new IntentFilter(Intent.ACTION_LOCALE_CHANGED);
         getContext().registerReceiver(mLocaleChangeReceiver, localeChangedFilter);
 
-        publishBinderService(Context.NOTIFICATION_SERVICE, mService);
+        publishBinderService(Context.NOTIFICATION_SERVICE, mService, /* allowIsolated= */ false,
+                DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_NORMAL);
         publishLocalService(NotificationManagerInternal.class, mInternalService);
     }
 
@@ -2896,6 +2903,8 @@ public class NotificationManagerService extends SystemService {
                 dumpJson(pw, filter);
             } else if (filter.proto) {
                 dumpProto(fd, filter);
+            } else if (filter.criticalPriority) {
+                dumpNotificationRecords(pw, filter);
             } else {
                 dumpImpl(pw, filter);
             }
@@ -3521,6 +3530,22 @@ public class NotificationManagerService extends SystemService {
         proto.flush();
     }
 
+    private void dumpNotificationRecords(PrintWriter pw, @NonNull DumpFilter filter) {
+        synchronized (mNotificationLock) {
+            int N;
+            N = mNotificationList.size();
+            if (N > 0) {
+                pw.println("  Notification List:");
+                for (int i = 0; i < N; i++) {
+                    final NotificationRecord nr = mNotificationList.get(i);
+                    if (filter.filtered && !filter.matches(nr.sbn)) continue;
+                    nr.dump(pw, "    ", getContext(), filter.redact);
+                }
+                pw.println("  ");
+            }
+        }
+    }
+
     void dumpImpl(PrintWriter pw, @NonNull DumpFilter filter) {
         pw.print("Current Notification Manager state");
         if (filter.filtered) {
@@ -3545,17 +3570,11 @@ public class NotificationManagerService extends SystemService {
 
         synchronized (mNotificationLock) {
             if (!zenOnly) {
-                N = mNotificationList.size();
-                if (N > 0) {
-                    pw.println("  Notification List:");
-                    for (int i=0; i<N; i++) {
-                        final NotificationRecord nr = mNotificationList.get(i);
-                        if (filter.filtered && !filter.matches(nr.sbn)) continue;
-                        nr.dump(pw, "    ", getContext(), filter.redact);
-                    }
-                    pw.println("  ");
+                // Priority filters are only set when called via bugreport. If set
+                // skip sections that are part of the critical section.
+                if (!filter.normalPriority) {
+                    dumpNotificationRecords(pw, filter);
                 }
-
                 if (!filter.filtered) {
                     N = mLights.size();
                     if (N > 0) {
@@ -6202,6 +6221,8 @@ public class NotificationManagerService extends SystemService {
         public boolean stats;
         public boolean redact = true;
         public boolean proto = false;
+        public boolean criticalPriority = false;
+        public boolean normalPriority = false;
 
         @NonNull
         public static DumpFilter parseFromArguments(String[] args) {
@@ -6232,6 +6253,21 @@ public class NotificationManagerService extends SystemService {
                         filter.since = Long.parseLong(args[ai]);
                     } else {
                         filter.since = 0;
+                    }
+                } else if (PRIORITY_ARG.equals(a)) {
+                    // Bugreport will call the service twice with priority arguments, first to dump
+                    // critical sections and then non critical ones. Set approriate filters
+                    // to generate the desired data.
+                    if (ai < args.length - 1) {
+                        ai++;
+                        switch (args[ai]) {
+                            case PRIORITY_ARG_CRITICAL:
+                                filter.criticalPriority = true;
+                                break;
+                            case PRIORITY_ARG_NORMAL:
+                                filter.normalPriority = true;
+                                break;
+                        }
                     }
                 }
             }
