@@ -99,7 +99,9 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
     // no matter whether this config is valid, log it in the stats.
     StatsdStats::getInstance().noteConfigReceived(key, mAllMetricProducers.size(),
                                                   mAllConditionTrackers.size(),
-                                                  mAllAtomMatchers.size(), 0, mConfigValid);
+                                                  mAllAtomMatchers.size(),
+                                                  mAllAnomalyTrackers.size(),
+                                                  mConfigValid);
 }
 
 MetricsManager::~MetricsManager() {
