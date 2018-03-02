@@ -101,6 +101,7 @@ cc_library_host_static {
         "io/ZipArchive.cpp",
         "link/AutoVersioner.cpp",
         "link/ManifestFixer.cpp",
+        "link/NoDefaultResourceRemover.cpp",
         "link/ProductFilter.cpp",
         "link/PrivateAttributeMover.cpp",
         "link/ReferenceLinker.cpp",

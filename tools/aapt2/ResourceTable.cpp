@@ -162,7 +162,7 @@ struct ConfigKey {
   const StringPiece& product;
 };
 
-bool ltConfigKeyRef(const std::unique_ptr<ResourceConfigValue>& lhs, const ConfigKey& rhs) {
+bool lt_config_key_ref(const std::unique_ptr<ResourceConfigValue>& lhs, const ConfigKey& rhs) {
   int cmp = lhs->config.compare(*rhs.config);
   if (cmp == 0) {
     cmp = StringPiece(lhs->product).compare(rhs.product);
@@ -172,8 +172,8 @@ bool ltConfigKeyRef(const std::unique_ptr<ResourceConfigValue>& lhs, const Confi
 
 ResourceConfigValue* ResourceEntry::FindValue(const ConfigDescription& config,
                                               const StringPiece& product) {
-  auto iter =
-      std::lower_bound(values.begin(), values.end(), ConfigKey{&config, product}, ltConfigKeyRef);
+  auto iter = std::lower_bound(values.begin(), values.end(), ConfigKey{&config, product},
+                               lt_config_key_ref);
   if (iter != values.end()) {
     ResourceConfigValue* value = iter->get();
     if (value->config == config && StringPiece(value->product) == product) {
@@ -185,8 +185,8 @@ ResourceConfigValue* ResourceEntry::FindValue(const ConfigDescription& config,
 
 ResourceConfigValue* ResourceEntry::FindOrCreateValue(const ConfigDescription& config,
                                                       const StringPiece& product) {
-  auto iter =
-      std::lower_bound(values.begin(), values.end(), ConfigKey{&config, product}, ltConfigKeyRef);
+  auto iter = std::lower_bound(values.begin(), values.end(), ConfigKey{&config, product},
+                               lt_config_key_ref);
   if (iter != values.end()) {
     ResourceConfigValue* value = iter->get();
     if (value->config == config && StringPiece(value->product) == product) {
@@ -220,15 +220,16 @@ std::vector<ResourceConfigValue*> ResourceEntry::FindAllValues(const ConfigDescr
   return results;
 }
 
-std::vector<ResourceConfigValue*> ResourceEntry::FindValuesIf(
-    const std::function<bool(ResourceConfigValue*)>& f) {
-  std::vector<ResourceConfigValue*> results;
-  for (auto& configValue : values) {
-    if (f(configValue.get())) {
-      results.push_back(configValue.get());
+bool ResourceEntry::HasDefaultValue() const {
+  const ConfigDescription& default_config = ConfigDescription::DefaultConfig();
+
+  // The default config should be at the top of the list, since the list is sorted.
+  for (auto& config_value : values) {
+    if (config_value->config == default_config) {
+      return true;
     }
   }
-  return results;
+  return false;
 }
 
 // The default handler for collisions.

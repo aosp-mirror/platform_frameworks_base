@@ -104,13 +104,26 @@ class ResourceEntry {
   explicit ResourceEntry(const android::StringPiece& name) : name(name.to_string()) {}
 
   ResourceConfigValue* FindValue(const ConfigDescription& config);
+
   ResourceConfigValue* FindValue(const ConfigDescription& config,
                                  const android::StringPiece& product);
+
   ResourceConfigValue* FindOrCreateValue(const ConfigDescription& config,
                                          const android::StringPiece& product);
   std::vector<ResourceConfigValue*> FindAllValues(const ConfigDescription& config);
-  std::vector<ResourceConfigValue*> FindValuesIf(
-      const std::function<bool(ResourceConfigValue*)>& f);
+
+  template <typename Func>
+  std::vector<ResourceConfigValue*> FindValuesIf(Func f) {
+    std::vector<ResourceConfigValue*> results;
+    for (auto& config_value : values) {
+      if (f(config_value.get())) {
+        results.push_back(config_value.get());
+      }
+    }
+    return results;
+  }
+
+  bool HasDefaultValue() const;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ResourceEntry);
