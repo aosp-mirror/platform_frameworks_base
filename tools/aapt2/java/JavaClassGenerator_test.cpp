@@ -438,4 +438,22 @@ TEST(JavaClassGeneratorTest, GenerateOnResourcesLoadedCallbackForSharedLibrary) 
   EXPECT_THAT(output, HasSubstr("com.boo.R.onResourcesLoaded"));
 }
 
+TEST(JavaClassGeneratorTest, OnlyGenerateRText) {
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .SetPackageId("android", 0x01)
+          .AddValue("android:attr/foo", ResourceId(0x01010000), util::make_unique<Attribute>())
+          .AddValue("android:styleable/hey.dude", ResourceId(0x01020000),
+                    test::StyleableBuilder()
+                        .AddItem("android:attr/foo", ResourceId(0x01010000))
+                        .Build())
+          .Build();
+
+  std::unique_ptr<IAaptContext> context =
+      test::ContextBuilder().SetPackageId(0x01).SetCompilationPackage("android").Build();
+  JavaClassGenerator generator(context.get(), table.get(), {});
+
+  ASSERT_TRUE(generator.Generate("android", nullptr));
+}
+
 }  // namespace aapt

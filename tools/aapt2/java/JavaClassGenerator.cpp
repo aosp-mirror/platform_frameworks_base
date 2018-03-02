@@ -347,7 +347,9 @@ void JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const Res
   }
 
   // Add the Styleable array to the Styleable class.
-  out_class_def->AddMember(std::move(array_def));
+  if (out_class_def != nullptr) {
+    out_class_def->AddMember(std::move(array_def));
+  }
 
   // Now we emit the indices into the array.
   for (size_t i = 0; i < attr_count; i++) {
@@ -578,7 +580,6 @@ bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate,
   if (out_r_txt != nullptr) {
     r_txt_printer = util::make_unique<Printer>(out_r_txt);
   }
-
   // Generate an onResourcesLoaded() callback if requested.
   if (out != nullptr && options_.rewrite_callback_options) {
     rewrite_method =

@@ -32,6 +32,14 @@ namespace android {
 // WARNING: When creating from std::basic_string<>, moving the original
 // std::basic_string<> will invalidate the data held in a BasicStringPiece<>.
 // BasicStringPiece<> should only be used transitively.
+//
+// NOTE: When creating an std::pair<StringPiece, T> using std::make_pair(),
+// passing an std::string will first copy the string, then create a StringPiece
+// on the copy, which is then immediately destroyed.
+// Instead, create a StringPiece explicitly:
+//
+// std::string my_string = "foo";
+// std::make_pair<StringPiece, T>(StringPiece(my_string), ...);
 template <typename TChar>
 class BasicStringPiece {
  public:
