@@ -11468,6 +11468,7 @@ public final class Settings {
          *
          * @hide
          */
+        @TestApi
         public static final String HIDDEN_API_BLACKLIST_EXEMPTIONS =
                 "hidden_api_blacklist_exemptions";
 
