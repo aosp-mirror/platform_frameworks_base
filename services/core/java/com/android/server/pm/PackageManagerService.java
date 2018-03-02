@@ -2591,6 +2591,10 @@ public class PackageManagerService extends IPackageManager.Stub
                     | SCAN_AS_SYSTEM
                     | SCAN_AS_PRIVILEGED,
                     0);
+            if (!mPackages.containsKey("android")) {
+                throw new IllegalStateException(
+                        "Failed to load frameworks package; check log for warnings");
+            }
 
             // Collected privileged system packages.
             final File privilegedAppDir = new File(Environment.getRootDirectory(), "priv-app");
