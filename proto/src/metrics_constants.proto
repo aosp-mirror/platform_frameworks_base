@@ -5379,6 +5379,46 @@ message MetricsEvent {
     // OS: P
     SETTINGS_TV_WIFI_ADD_KNOWN_CATEGORY = 1331;
 
+    // ACTION: DND Settings > What to block > full screen intents
+    //   SUBTYPE: false is allowed, true is blocked
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACTION_ZEN_BLOCK_FULL_SCREEN_INTENTS = 1332;
+
+    // ACTION: DND Settings > What to block
+    //   SUBTYPE: false is allowed, true is blocked
+    // OS: P
+    ACTION_ZEN_BLOCK_LIGHT = 1333;
+
+    // ACTION: DND Settings > What to block
+    //   SUBTYPE: false is allowed, true is blocked
+    // OS: P
+    ACTION_ZEN_BLOCK_PEEK = 1334;
+
+    // ACTION: DND Settings > What to block
+    //   SUBTYPE: false is allowed, true is blocked
+    // OS: P
+    ACTION_ZEN_BLOCK_STATUS = 1335;
+
+    // ACTION: DND Settings > What to block
+    //   SUBTYPE: false is allowed, true is blocked
+    // OS: P
+    ACTION_ZEN_BLOCK_BADGE = 1336;
+
+    // ACTION: DND Settings > What to block
+    //   SUBTYPE: false is allowed, true is blocked
+    // OS: P
+    ACTION_ZEN_BLOCK_AMBIENT = 1337;
+
+    // ACTION: DND Settings > What to block
+    //   SUBTYPE: false is allowed, true is blocked
+    // OS: P
+    ACTION_ZEN_BLOCK_NOTIFICATION_LIST = 1338;
+
+    // OPEN: DND Settings > What to block
+    // OS: P
+    ZEN_WHAT_TO_BLOCK = 1339;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
