@@ -65,10 +65,6 @@ class Visitor : public xml::PackageAwareVisitor {
     }
 
     const ResourceName& name = ref.value().name.value();
-
-    // Use an empty string for the compilation package because we don't want to default to
-    // the local package if the user specified name="style" or something. This should just
-    // be the default namespace.
     Maybe<xml::ExtractedPackage> maybe_pkg = TransformPackageAlias(name.package);
     if (!maybe_pkg) {
       context_->GetDiagnostics()->Error(DiagMessage(src)
@@ -83,8 +79,15 @@ class Visitor : public xml::PackageAwareVisitor {
     InlineDeclaration decl;
     decl.el = el;
     decl.attr_name = name.entry;
-    if (!pkg.package.empty()) {
-      decl.attr_namespace_uri = xml::BuildPackageNamespace(pkg.package, private_namespace);
+
+    // We need to differentiate between no-namespace defined, or the alias resolves to an empty
+    // package, which means we must use the res-auto schema.
+    if (!name.package.empty()) {
+      if (pkg.package.empty()) {
+        decl.attr_namespace_uri = xml::kSchemaAuto;
+      } else {
+        decl.attr_namespace_uri = xml::BuildPackageNamespace(pkg.package, private_namespace);
+      }
     }
 
     inline_declarations_.push_back(std::move(decl));

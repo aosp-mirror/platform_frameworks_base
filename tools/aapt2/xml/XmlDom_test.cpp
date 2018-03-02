@@ -154,6 +154,12 @@ class TestVisitor : public PackageAwareVisitor {
       EXPECT_THAT(TransformPackageAlias("two"), Eq(make_value(ExtractedPackage{"com.two", false})));
       EXPECT_THAT(TransformPackageAlias("three"),
                   Eq(make_value(ExtractedPackage{"com.three", false})));
+    } else if (el->name == "View4") {
+      EXPECT_THAT(TransformPackageAlias("one"), Eq(make_value(ExtractedPackage{"com.one", false})));
+      EXPECT_THAT(TransformPackageAlias("two"), Eq(make_value(ExtractedPackage{"com.two", false})));
+      EXPECT_THAT(TransformPackageAlias("three"),
+                  Eq(make_value(ExtractedPackage{"com.three", false})));
+      EXPECT_THAT(TransformPackageAlias("four"), Eq(make_value(ExtractedPackage{"", true})));
     }
   }
 };
@@ -162,7 +168,9 @@ TEST(XmlDomTest, PackageAwareXmlVisitor) {
   std::unique_ptr<XmlResource> doc = test::BuildXmlDom(R"(
       <View1 xmlns:one="http://schemas.android.com/apk/res/com.one">
         <View2 xmlns:two="http://schemas.android.com/apk/res/com.two">
-          <View3 xmlns:three="http://schemas.android.com/apk/res/com.three" />
+          <View3 xmlns:three="http://schemas.android.com/apk/res/com.three">
+            <View4 xmlns:four="http://schemas.android.com/apk/res-auto" />
+          </View3>
         </View2>
       </View1>)");
 
