@@ -57,22 +57,6 @@ public class MediaItem2 {
     private final MediaItem2Provider mProvider;
 
     /**
-     * Create a new media item.
-     *
-     * @param mediaId id of this item. It must be unique whithin this app
-     * @param metadata metadata with the media id.
-     * @param flags The flags for this item.
-     * @hide
-     */
-    // TODO(jaewan): Remove this
-    public MediaItem2(@NonNull Context context, @NonNull String mediaId,
-            @NonNull DataSourceDesc dsd, @Nullable MediaMetadata2 metadata,
-            @Flags int flags) {
-        mProvider = ApiLoader.getProvider(context).createMediaItem2(
-                context, this, mediaId, dsd, metadata, flags);
-    }
-
-    /**
      * Create a new media item
      * @hide
      */
@@ -159,13 +143,8 @@ public class MediaItem2 {
     /**
      * Build {@link MediaItem2}
      */
-    // TODO(jaewan): Move it to updatable
     public static final class Builder {
-        private Context mContext;
-        private @Flags int mFlags;
-        private String mMediaId;
-        private MediaMetadata2 mMetadata;
-        private DataSourceDesc mDataSourceDesc;
+        private final MediaItem2Provider.BuilderProvider mProvider;
 
         /**
          * Constructor for {@link Builder}
@@ -174,8 +153,8 @@ public class MediaItem2 {
          * @param flags
          */
         public Builder(@NonNull Context context, @Flags int flags) {
-            mContext = context;
-            mFlags = flags;
+            mProvider = ApiLoader.getProvider(context).createMediaItem2Builder(
+                    context, this, flags);
         }
 
         /**
@@ -192,8 +171,7 @@ public class MediaItem2 {
          * @return this instance for chaining
          */
         public Builder setMediaId(@Nullable String mediaId) {
-            mMediaId = mediaId;
-            return this;
+            return mProvider.setMediaId_impl(mediaId);
         }
 
         /**
@@ -208,19 +186,17 @@ public class MediaItem2 {
          * @return this instance for chaining
          */
         public Builder setMetadata(@Nullable MediaMetadata2 metadata) {
-            mMetadata = metadata;
-            return this;
+            return mProvider.setMetadata_impl(metadata);
         }
 
         /**
-         * Set the data source descriptor for this instance. {@code null} for unset.
+         * Set the data source descriptor for this instance. Should not be {@code null}.
          *
          * @param dataSourceDesc data source descriptor
          * @return this instance for chaining
          */
-        public Builder setDataSourceDesc(@Nullable DataSourceDesc dataSourceDesc) {
-            mDataSourceDesc = dataSourceDesc;
-            return this;
+        public Builder setDataSourceDesc(@NonNull DataSourceDesc dataSourceDesc) {
+            return mProvider.setDataSourceDesc_impl(dataSourceDesc);
         }
 
         /**
@@ -229,13 +205,7 @@ public class MediaItem2 {
          * @return a new {@link MediaItem2}.
          */
         public MediaItem2 build() {
-            String id = (mMetadata != null)
-                    ? mMetadata.getString(MediaMetadata2.METADATA_KEY_MEDIA_ID) : null;
-            if (id == null) {
-                //  TODO(jaewan): Double check if its sufficient (e.g. Use UUID instead?)
-                id = (mMediaId != null) ? mMediaId : toString();
-            }
-            return new MediaItem2(mContext, id, mDataSourceDesc, mMetadata, mFlags);
+            return mProvider.build_impl();
         }
     }
 }
