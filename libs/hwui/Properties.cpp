@@ -62,6 +62,7 @@ bool Properties::skpCaptureEnabled = false;
 bool Properties::enableRTAnimations = true;
 
 bool Properties::runningInEmulator = false;
+bool Properties::debuggingEnabled = false;
 
 static int property_get_int(const char* key, int defaultValue) {
     char buf[PROPERTY_VALUE_MAX] = {
@@ -134,8 +135,7 @@ bool Properties::load() {
 
     filterOutTestOverhead = property_get_bool(PROPERTY_FILTER_TEST_OVERHEAD, false);
 
-    skpCaptureEnabled = property_get_bool("ro.debuggable", false) &&
-                        property_get_bool(PROPERTY_CAPTURE_SKP_ENABLED, false);
+    skpCaptureEnabled = debuggingEnabled && property_get_bool(PROPERTY_CAPTURE_SKP_ENABLED, false);
 
     runningInEmulator = property_get_bool(PROPERTY_QEMU_KERNEL, false);
 
