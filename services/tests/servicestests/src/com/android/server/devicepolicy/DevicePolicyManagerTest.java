@@ -4694,6 +4694,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     public void testDisallowSharingIntoProfileSetRestriction() {
+        when(mServiceContext.resources.getString(R.string.config_managed_provisioning_package))
+                .thenReturn("com.android.managedprovisioning");
         Bundle restriction = new Bundle();
         restriction.putBoolean(UserManager.DISALLOW_SHARE_INTO_MANAGED_PROFILE, true);
 
@@ -4705,6 +4707,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     public void testDisallowSharingIntoProfileClearRestriction() {
+        when(mServiceContext.resources.getString(R.string.config_managed_provisioning_package))
+                .thenReturn("com.android.managedprovisioning");
         Bundle restriction = new Bundle();
         restriction.putBoolean(UserManager.DISALLOW_SHARE_INTO_MANAGED_PROFILE, true);
 
