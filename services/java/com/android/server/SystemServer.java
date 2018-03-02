@@ -206,6 +206,8 @@ public final class SystemServer {
             "com.google.android.clockwork.lefty.WearLeftyService";
     private static final String WEAR_TIME_SERVICE_CLASS =
             "com.google.android.clockwork.time.WearTimeService";
+    private static final String WEAR_GLOBAL_ACTIONS_SERVICE_CLASS =
+            "com.android.clockwork.globalactions.GlobalActionsService";
     private static final String ACCOUNT_SERVICE_CLASS =
             "com.android.server.accounts.AccountManagerService$Lifecycle";
     private static final String CONTENT_SERVICE_CLASS =
@@ -1547,6 +1549,10 @@ public final class SystemServer {
                 mSystemServiceManager.startService(WEAR_LEFTY_SERVICE_CLASS);
                 traceEnd();
             }
+
+            traceBeginAndSlog("StartWearGlobalActionsService");
+            mSystemServiceManager.startService(WEAR_GLOBAL_ACTIONS_SERVICE_CLASS);
+            traceEnd();
         }
 
         if (!disableSlices) {

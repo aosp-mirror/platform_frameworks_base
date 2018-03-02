@@ -539,6 +539,15 @@
     <!-- status message in phone options dialog for when airplane mode is off -->
     <string name="global_actions_airplane_mode_off_status">Airplane mode is OFF</string>
 
+    <!-- label for item that enables battery saver in phone options dialog -->
+    <string name="global_action_toggle_battery_saver">Battery saver</string>
+
+    <!-- status message in phone options dialog for when battery saver is enabled -->
+    <string name="global_action_battery_saver_on_status">Battery saver is OFF</string>
+
+    <!-- status message in phone options dialog for when battery saver is disabled -->
+    <string name="global_action_battery_saver_off_status">Battery saver is ON</string>
+
     <!-- label for item that launches settings in phone options dialog [CHAR LIMIT=15]-->
     <string name="global_action_settings">Settings</string>
 
