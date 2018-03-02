@@ -180,12 +180,14 @@ final class OverlayManagerSettings {
     List<OverlayInfo> getOverlaysForTarget(@NonNull final String targetPackageName,
             final int userId) {
         return selectWhereTarget(targetPackageName, userId)
+                .filter((i) -> !i.isStatic())
                 .map(SettingsItem::getOverlayInfo)
                 .collect(Collectors.toList());
     }
 
     ArrayMap<String, List<OverlayInfo>> getOverlaysForUser(final int userId) {
         return selectWhereUser(userId)
+                .filter((i) -> !i.isStatic())
                 .map(SettingsItem::getOverlayInfo)
                 .collect(Collectors.groupingBy(info -> info.targetPackageName, ArrayMap::new,
                         Collectors.toList()));

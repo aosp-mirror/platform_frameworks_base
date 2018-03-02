@@ -36,6 +36,10 @@ namespace lib_one = com::android::lib_one;
 namespace lib_two = com::android::lib_two;
 namespace libclient = com::android::libclient;
 
+using ::testing::Eq;
+using ::testing::NotNull;
+using ::testing::StrEq;
+
 namespace android {
 
 class AssetManager2Test : public ::testing::Test {
@@ -59,11 +63,14 @@ class AssetManager2Test : public ::testing::Test {
     libclient_assets_ = ApkAssets::Load(GetTestDataPath() + "/libclient/libclient.apk");
     ASSERT_NE(nullptr, libclient_assets_);
 
-    appaslib_assets_ = ApkAssets::Load(GetTestDataPath() + "/appaslib/appaslib.apk");
+    appaslib_assets_ = ApkAssets::LoadAsSharedLibrary(GetTestDataPath() + "/appaslib/appaslib.apk");
     ASSERT_NE(nullptr, appaslib_assets_);
 
     system_assets_ = ApkAssets::Load(GetTestDataPath() + "/system/system.apk", true /*system*/);
     ASSERT_NE(nullptr, system_assets_);
+
+    app_assets_ = ApkAssets::Load(GetTestDataPath() + "/app/app.apk");
+    ASSERT_THAT(app_assets_, NotNull());
   }
 
  protected:
@@ -75,6 +82,7 @@ class AssetManager2Test : public ::testing::Test {
   std::unique_ptr<const ApkAssets> libclient_assets_;
   std::unique_ptr<const ApkAssets> appaslib_assets_;
   std::unique_ptr<const ApkAssets> system_assets_;
+  std::unique_ptr<const ApkAssets> app_assets_;
 };
 
 TEST_F(AssetManager2Test, FindsResourceFromSingleApkAssets) {
@@ -226,6 +234,25 @@ TEST_F(AssetManager2Test, FindsBagResourceFromSingleApkAssets) {
 TEST_F(AssetManager2Test, FindsBagResourceFromMultipleApkAssets) {}
 
 TEST_F(AssetManager2Test, FindsBagResourceFromSharedLibrary) {
+  AssetManager2 assetmanager;
+
+  // libclient is built with lib_one and then lib_two in order.
+  // Reverse the order to test that proper package ID re-assignment is happening.
+  assetmanager.SetApkAssets(
+      {lib_two_assets_.get(), lib_one_assets_.get(), libclient_assets_.get()});
+
+  const ResolvedBag* bag = assetmanager.GetBag(fix_package_id(lib_one::R::style::Theme, 0x03));
+  ASSERT_NE(nullptr, bag);
+  ASSERT_GE(bag->entry_count, 2u);
+
+  // First two attributes come from lib_one.
+  EXPECT_EQ(1, bag->entries[0].cookie);
+  EXPECT_EQ(0x03, get_package_id(bag->entries[0].key));
+  EXPECT_EQ(1, bag->entries[1].cookie);
+  EXPECT_EQ(0x03, get_package_id(bag->entries[1].key));
+}
+
+TEST_F(AssetManager2Test, FindsStyleResourceWithParentFromSharedLibrary) {
   AssetManager2 assetmanager;
 
   // libclient is built with lib_one and then lib_two in order.
@@ -446,8 +473,68 @@ TEST_F(AssetManager2Test, GetResourceId) {
             assetmanager.GetResourceId("main", "layout", "com.android.basic"));
 }
 
-TEST_F(AssetManager2Test, OpensFileFromSingleApkAssets) {}
+TEST_F(AssetManager2Test, OpensFileFromSingleApkAssets) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets({system_assets_.get()});
 
-TEST_F(AssetManager2Test, OpensFileFromMultipleApkAssets) {}
+  std::unique_ptr<Asset> asset = assetmanager.Open("file.txt", Asset::ACCESS_BUFFER);
+  ASSERT_THAT(asset, NotNull());
+
+  const char* data = reinterpret_cast<const char*>(asset->getBuffer(false /*wordAligned*/));
+  ASSERT_THAT(data, NotNull());
+  EXPECT_THAT(std::string(data, asset->getLength()), StrEq("file\n"));
+}
+
+TEST_F(AssetManager2Test, OpensFileFromMultipleApkAssets) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets({system_assets_.get(), app_assets_.get()});
+
+  std::unique_ptr<Asset> asset = assetmanager.Open("file.txt", Asset::ACCESS_BUFFER);
+  ASSERT_THAT(asset, NotNull());
+
+  const char* data = reinterpret_cast<const char*>(asset->getBuffer(false /*wordAligned*/));
+  ASSERT_THAT(data, NotNull());
+  EXPECT_THAT(std::string(data, asset->getLength()), StrEq("app override file\n"));
+}
+
+TEST_F(AssetManager2Test, OpenDir) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets({system_assets_.get()});
+
+  std::unique_ptr<AssetDir> asset_dir = assetmanager.OpenDir("");
+  ASSERT_THAT(asset_dir, NotNull());
+  ASSERT_THAT(asset_dir->getFileCount(), Eq(2u));
+
+  EXPECT_THAT(asset_dir->getFileName(0), Eq(String8("file.txt")));
+  EXPECT_THAT(asset_dir->getFileType(0), Eq(FileType::kFileTypeRegular));
+
+  EXPECT_THAT(asset_dir->getFileName(1), Eq(String8("subdir")));
+  EXPECT_THAT(asset_dir->getFileType(1), Eq(FileType::kFileTypeDirectory));
+
+  asset_dir = assetmanager.OpenDir("subdir");
+  ASSERT_THAT(asset_dir, NotNull());
+  ASSERT_THAT(asset_dir->getFileCount(), Eq(1u));
+
+  EXPECT_THAT(asset_dir->getFileName(0), Eq(String8("subdir_file.txt")));
+  EXPECT_THAT(asset_dir->getFileType(0), Eq(FileType::kFileTypeRegular));
+}
+
+TEST_F(AssetManager2Test, OpenDirFromManyApks) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets({system_assets_.get(), app_assets_.get()});
+
+  std::unique_ptr<AssetDir> asset_dir = assetmanager.OpenDir("");
+  ASSERT_THAT(asset_dir, NotNull());
+  ASSERT_THAT(asset_dir->getFileCount(), Eq(3u));
+
+  EXPECT_THAT(asset_dir->getFileName(0), Eq(String8("app_file.txt")));
+  EXPECT_THAT(asset_dir->getFileType(0), Eq(FileType::kFileTypeRegular));
+
+  EXPECT_THAT(asset_dir->getFileName(1), Eq(String8("file.txt")));
+  EXPECT_THAT(asset_dir->getFileType(1), Eq(FileType::kFileTypeRegular));
+
+  EXPECT_THAT(asset_dir->getFileName(2), Eq(String8("subdir")));
+  EXPECT_THAT(asset_dir->getFileType(2), Eq(FileType::kFileTypeDirectory));
+}
 
 }  // namespace android
