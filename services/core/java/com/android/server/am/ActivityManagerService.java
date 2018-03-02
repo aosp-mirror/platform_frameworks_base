@@ -192,8 +192,7 @@ import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.am.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
-import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
-import static com.android.server.am.MemoryStatUtil.hasMemcg;
+import static com.android.server.am.MemoryStatUtil.readMemoryStatFromMemcg;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
@@ -5922,12 +5921,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         } else if (DEBUG_PROCESSES) {
             Slog.d(TAG_PROCESSES, "Received spurious death notification for thread "
                     + thread.asBinder());
-        }
-
-        // On the device which doesn't have Cgroup, log LmkStateChanged which is used as a signal
-        // for pulling memory stats of other running processes when this process died.
-        if (!hasMemcg()) {
-            StatsLog.write(StatsLog.APP_DIED, SystemClock.elapsedRealtime());
         }
     }
 
@@ -26146,7 +26139,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     final ProcessRecord r = mPidsSelfLocked.valueAt(i);
                     final int pid = r.pid;
                     final int uid = r.uid;
-                    final MemoryStat memoryStat = readMemoryStatFromFilesystem(uid, pid);
+                    final MemoryStat memoryStat = readMemoryStatFromMemcg(uid, pid);
                     if (memoryStat == null) {
                         continue;
                     }
