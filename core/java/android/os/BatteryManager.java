@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.content.Intent;
@@ -137,6 +138,23 @@ public class BatteryManager {
      * {@hide}
      */
     public static final String EXTRA_SEQUENCE = "seq";
+
+    /**
+     * Extra for {@link android.content.Intent#ACTION_BATTERY_LEVEL_CHANGED}:
+     * Contains list of Bundles representing battery events
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_EVENTS = "android.os.extra.EVENTS";
+
+    /**
+     * Extra for event in {@link android.content.Intent#ACTION_BATTERY_LEVEL_CHANGED}:
+     * Long value representing time when event occurred as returned by
+     * {@link android.os.SystemClock#elapsedRealtime()}
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_EVENT_TIMESTAMP = "android.os.extra.EVENT_TIMESTAMP";
 
     // values for "status" field in the ACTION_BATTERY_CHANGED Intent
     public static final int BATTERY_STATUS_UNKNOWN = Constants.BATTERY_STATUS_UNKNOWN;

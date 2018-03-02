@@ -2448,6 +2448,23 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_BATTERY_CHANGED = "android.intent.action.BATTERY_CHANGED";
+
+
+    /**
+     * Broadcast Action: Sent when the current battery level changes.
+     *
+     * It has {@link android.os.BatteryManager#EXTRA_EVENTS} that carries a list of {@link Bundle}
+     * instances representing individual battery level changes with associated
+     * extras from {@link #ACTION_BATTERY_CHANGED}.
+     *
+     * <p class="note">
+     * This broadcast requires {@link android.Manifest.permission#BATTERY_STATS} permission.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_BATTERY_LEVEL_CHANGED =
+            "android.intent.action.BATTERY_LEVEL_CHANGED";
     /**
      * Broadcast Action:  Indicates low battery condition on the device.
      * This broadcast corresponds to the "Low battery warning" system dialog.
