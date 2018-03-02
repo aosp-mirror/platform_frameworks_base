@@ -54,6 +54,7 @@ import java.util.LinkedList;
 public class UsbHostManager {
     private static final String TAG = UsbHostManager.class.getSimpleName();
     private static final boolean DEBUG = false;
+    private static final int LINUX_FOUNDATION_VID = 0x1d6b;
 
     private final Context mContext;
 
@@ -267,7 +268,6 @@ public class UsbHostManager {
     }
 
     private boolean isBlackListed(String deviceAddress) {
-        Slog.i(TAG, "isBlackListed(" + deviceAddress + ")");
         int count = mHostBlacklist.length;
         for (int i = 0; i < count; i++) {
             if (deviceAddress.startsWith(mHostBlacklist[i])) {
@@ -279,7 +279,6 @@ public class UsbHostManager {
 
     /* returns true if the USB device should not be accessible by applications */
     private boolean isBlackListed(int clazz, int subClass) {
-        Slog.i(TAG, "isBlackListed(" + clazz + ", " + subClass + ")");
         // blacklist hubs
         if (clazz == UsbConstants.USB_CLASS_HUB) return true;
 
@@ -302,6 +301,40 @@ public class UsbHostManager {
         }
     }
 
+    private void logUsbDevice(UsbDescriptorParser descriptorParser) {
+        int vid = 0;
+        int pid = 0;
+        String mfg = "<unknown>";
+        String product = "<unknown>";
+        String version = "<unknown>";
+        String serial = "<unknown>";
+
+        UsbDeviceDescriptor deviceDescriptor = descriptorParser.getDeviceDescriptor();
+        if (deviceDescriptor != null) {
+            vid = deviceDescriptor.getVendorID();
+            pid = deviceDescriptor.getProductID();
+            mfg = deviceDescriptor.getMfgString(descriptorParser);
+            product = deviceDescriptor.getProductString(descriptorParser);
+            version = deviceDescriptor.getDeviceReleaseString();
+            serial = deviceDescriptor.getSerialString(descriptorParser);
+        }
+
+        if (vid == LINUX_FOUNDATION_VID) {
+            return;  // don't care about OS-constructed virtual USB devices.
+        }
+        boolean hasAudio = descriptorParser.hasAudioInterface();
+        boolean hasHid = descriptorParser.hasHIDInterface();
+        boolean hasStorage = descriptorParser.hasStorageInterface();
+
+        String attachedString = "USB device attached: ";
+        attachedString += String.format("vidpid %04x:%04x", vid, pid);
+        attachedString += String.format(" mfg/product/ver/serial %s/%s/%s/%s",
+                                        mfg, product, version, serial);
+        attachedString += String.format(" hasAudio/HID/Storage: %b/%b/%b",
+                                        hasAudio, hasHid, hasStorage);
+        Slog.d(TAG, attachedString);
+    }
+
     /* Called from JNI in monitorUsbHostBus() to report new USB devices
        Returns true if successful, i.e. the USB Audio device descriptors are
        correctly parsed and the unique device is added to the audio device list.
@@ -313,10 +346,18 @@ public class UsbHostManager {
             Slog.d(TAG, "usbDeviceAdded(" + deviceAddress + ") - start");
         }
 
-        // check class/subclass first as it is more likely to be blacklisted
-        if (isBlackListed(deviceClass, deviceSubclass) || isBlackListed(deviceAddress)) {
+        if (isBlackListed(deviceAddress)) {
             if (DEBUG) {
-                Slog.d(TAG, "device is black listed");
+                Slog.d(TAG, "device address is black listed");
+            }
+            return false;
+        }
+        UsbDescriptorParser parser = new UsbDescriptorParser(deviceAddress, descriptors);
+        logUsbDevice(parser);
+
+        if (isBlackListed(deviceClass, deviceSubclass)) {
+            if (DEBUG) {
+                Slog.d(TAG, "device class is black listed");
             }
             return false;
         }
@@ -329,7 +370,6 @@ public class UsbHostManager {
                 return false;
             }
 
-            UsbDescriptorParser parser = new UsbDescriptorParser(deviceAddress, descriptors);
             UsbDevice newDevice = parser.toAndroidUsbDevice();
             if (newDevice == null) {
                 Slog.e(TAG, "Couldn't create UsbDevice object.");
@@ -338,6 +378,7 @@ public class UsbHostManager {
                         parser.getRawDescriptors());
             } else {
                 mDevices.put(deviceAddress, newDevice);
+                Slog.d(TAG, "Added device " + newDevice);
 
                 // It is fine to call this only for the current user as all broadcasts are
                 // sent to all profiles of the user and the dialogs should only show once.
@@ -367,18 +408,18 @@ public class UsbHostManager {
     /* Called from JNI in monitorUsbHostBus to report USB device removal */
     @SuppressWarnings("unused")
     private void usbDeviceRemoved(String deviceAddress) {
-        if (DEBUG) {
-            Slog.d(TAG, "usbDeviceRemoved(" + deviceAddress + ") - start");
-        }
         synchronized (mLock) {
             UsbDevice device = mDevices.remove(deviceAddress);
             if (device != null) {
+                Slog.d(TAG, "Removed device at " + deviceAddress + ": " + device.getProductName());
                 mUsbAlsaManager.usbDeviceRemoved(deviceAddress/*device*/);
                 mSettingsManager.usbDeviceRemoved(device);
                 getCurrentUserSettings().usbDeviceRemoved(device);
 
                 // Tracking
                 addConnectionRecord(deviceAddress, ConnectionRecord.DISCONNECT, null);
+            } else {
+                Slog.d(TAG, "Removed device at " + deviceAddress + " was already gone");
             }
         }
     }

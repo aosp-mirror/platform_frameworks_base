@@ -475,11 +475,29 @@ public final class UsbDescriptorParser {
     }
 
     /**
+     *@ hide
+     */
+    public boolean hasAudioInterface() {
+        ArrayList<UsbDescriptor> descriptors =
+                getInterfaceDescriptorsForClass(UsbDescriptor.CLASSID_AUDIO);
+        return !descriptors.isEmpty();
+    }
+
+    /**
      * @hide
      */
-    public boolean hasHIDDescriptor() {
+    public boolean hasHIDInterface() {
         ArrayList<UsbDescriptor> descriptors =
                 getInterfaceDescriptorsForClass(UsbDescriptor.CLASSID_HID);
+        return !descriptors.isEmpty();
+    }
+
+    /**
+     * @hide
+     */
+    public boolean hasStorageInterface() {
+        ArrayList<UsbDescriptor> descriptors =
+                getInterfaceDescriptorsForClass(UsbDescriptor.CLASSID_STORAGE);
         return !descriptors.isEmpty();
     }
 
@@ -524,7 +542,7 @@ public final class UsbDescriptorParser {
             probability += 0.75f;
         }
 
-        if (hasMic && hasHIDDescriptor()) {
+        if (hasMic && hasHIDInterface()) {
             probability += 0.25f;
         }
 
@@ -577,7 +595,7 @@ public final class UsbDescriptorParser {
             probability += 0.75f;
         }
 
-        if (hasSpeaker && hasHIDDescriptor()) {
+        if (hasSpeaker && hasHIDInterface()) {
             probability += 0.25f;
         }
 
