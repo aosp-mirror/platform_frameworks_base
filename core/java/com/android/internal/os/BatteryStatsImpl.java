@@ -7872,12 +7872,10 @@ public class BatteryStatsImpl extends BatteryStats {
                 return;
             }
             final int deferredCount = mJobsDeferredCount.getCountLocked(which);
-            final long averageLatency = deferredEventCount != 0
-                    ? mJobsFreshnessTimeMs.getCountLocked(which) / deferredEventCount
-                    : 0L;
+            final long totalLatency = mJobsFreshnessTimeMs.getCountLocked(which);
             sb.append(deferredEventCount); sb.append(',');
             sb.append(deferredCount); sb.append(',');
-            sb.append(averageLatency);
+            sb.append(totalLatency);
             for (int i = 0; i < JOB_FRESHNESS_BUCKETS.length; i++) {
                 if (mJobsFreshnessBuckets[i] == null) {
                     sb.append(",0");
@@ -7896,12 +7894,10 @@ public class BatteryStatsImpl extends BatteryStats {
                 return;
             }
             final int deferredCount = mJobsDeferredCount.getCountLocked(which);
-            final long averageLatency = deferredEventCount != 0
-                    ? mJobsFreshnessTimeMs.getCountLocked(which) / deferredEventCount
-                    : 0L;
+            final long totalLatency = mJobsFreshnessTimeMs.getCountLocked(which);
             sb.append("times="); sb.append(deferredEventCount); sb.append(", ");
             sb.append("count="); sb.append(deferredCount); sb.append(", ");
-            sb.append("avgLatency="); sb.append(averageLatency); sb.append(", ");
+            sb.append("totalLatencyMs="); sb.append(totalLatency); sb.append(", ");
             for (int i = 0; i < JOB_FRESHNESS_BUCKETS.length; i++) {
                 sb.append("<"); sb.append(JOB_FRESHNESS_BUCKETS[i]); sb.append("ms=");
                 if (mJobsFreshnessBuckets[i] == null) {
