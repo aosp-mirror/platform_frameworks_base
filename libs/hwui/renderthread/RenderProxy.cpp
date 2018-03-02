@@ -356,14 +356,21 @@ void RenderProxy::disableVsync() {
 void RenderProxy::repackVectorDrawableAtlas() {
     RenderThread& thread = RenderThread::getInstance();
     thread.queue().post([&thread]() {
-        thread.cacheManager().acquireVectorDrawableAtlas()->repackIfNeeded(thread.getGrContext());
+        // The context may be null if trimMemory executed, but then the atlas was deleted too.
+        if (thread.getGrContext() != nullptr) {
+            thread.cacheManager().acquireVectorDrawableAtlas()->repackIfNeeded(
+                    thread.getGrContext());
+        }
     });
 }
 
 void RenderProxy::releaseVDAtlasEntries() {
     RenderThread& thread = RenderThread::getInstance();
     thread.queue().post([&thread]() {
-        thread.cacheManager().acquireVectorDrawableAtlas()->delayedReleaseEntries();
+        // The context may be null if trimMemory executed, but then the atlas was deleted too.
+        if (thread.getGrContext() != nullptr) {
+            thread.cacheManager().acquireVectorDrawableAtlas()->delayedReleaseEntries();
+        }
     });
 }
 
