@@ -558,6 +558,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     static final String SYSTEM_DEBUGGABLE = "ro.debuggable";
 
+    // Maximum number of receivers an app can register.
+    private static final int MAX_RECEIVERS_ALLOWED_PER_APP = 1000;
+
     // Amount of time after a call to stopAppSwitches() during which we will
     // prevent further untrusted switches from happening.
     static final long APP_SWITCH_DELAY_TIME = 5*1000;
@@ -20542,6 +20545,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 rl = new ReceiverList(this, callerApp, callingPid, callingUid,
                         userId, receiver);
                 if (rl.app != null) {
+                    final int totalReceiversForApp = rl.app.receivers.size();
+                    if (totalReceiversForApp >= MAX_RECEIVERS_ALLOWED_PER_APP) {
+                        throw new IllegalStateException("Too many receivers, total of "
+                                + totalReceiversForApp + ", registered for pid: "
+                                + rl.pid + ", callerPackage: " + callerPackage);
+                    }
                     rl.app.receivers.add(rl);
                 } else {
                     try {
@@ -20570,11 +20579,18 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             BroadcastFilter bf = new BroadcastFilter(filter, rl, callerPackage,
                     permission, callingUid, userId, instantApp, visibleToInstantApps);
-            rl.add(bf);
-            if (!bf.debugCheck()) {
-                Slog.w(TAG, "==> For Dynamic broadcast");
+            if (rl.containsFilter(filter)) {
+                // STOPSHIP: To track if apps are doing this a lot for b/70677313. Change to Slog.w
+                Slog.wtf(TAG, "Receiver with filter " + filter
+                        + " already registered for pid " + rl.pid
+                        + ", callerPackage is " + callerPackage);
+            } else {
+                rl.add(bf);
+                if (!bf.debugCheck()) {
+                    Slog.w(TAG, "==> For Dynamic broadcast");
+                }
+                mReceiverResolver.addFilter(bf);
             }
-            mReceiverResolver.addFilter(bf);
 
             // Enqueue broadcasts for all existing stickies that match
             // this filter.

@@ -72,7 +72,7 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
         }
     }
 
-    private boolean filterEquals(IntentFilter f1, IntentFilter f2) {
+    public static boolean filterEquals(IntentFilter f1, IntentFilter f2) {
         int s1 = f1.countActions();
         int s2 = f2.countActions();
         if (s1 != s2) {
