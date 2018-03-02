@@ -1732,8 +1732,12 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             mStackSupervisor.mStoppingActivities.remove(this);
             mStackSupervisor.mGoingToSleepActivities.remove(this);
 
-            // If the activity is stopped or stopping, cycle to the paused state.
-            if (isState(STOPPED, STOPPING)) {
+            // If the activity is stopped or stopping, cycle to the paused state. We avoid doing
+            // this when there is an activity waiting to become translucent as the extra binder
+            // calls will lead to noticeable jank. A later call to
+            // ActivityStack#ensureActivitiesVisibleLocked will bring the activity to the proper
+            // paused state.
+            if (isState(STOPPED, STOPPING) && stack.mTranslucentActivityWaiting == null) {
                 // Capture reason before state change
                 final String reason = getLifecycleDescription("makeVisibleIfNeeded");
 
@@ -1747,7 +1751,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             }
         } catch (Exception e) {
             // Just skip on any failure; we'll make it visible when it next restarts.
-            Slog.w(TAG, "Exception thrown making visibile: " + intent.getComponent(), e);
+            Slog.w(TAG, "Exception thrown making visible: " + intent.getComponent(), e);
         }
         handleAlreadyVisible();
     }
