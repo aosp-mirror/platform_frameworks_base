@@ -109,18 +109,21 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     private boolean mBypassInterruptionPolicy;
     private final CloseGuard mGuard = CloseGuard.get();
 
-    private final Object mPlLock = new Object();
+    private final Object mSrcLock = new Object();
+    //--- guarded by |mSrcLock| start
+    private long mSrcIdGenerator = 0;
     private DataSourceDesc mCurrentDSD;
-    private long mCurrentSrcId = 0;
-    private List<DataSourceDesc> mPlaylist;
-    private long mNextSrcId = mCurrentSrcId + 1;
-    private int mPlNextIndex = -1;
-    private int mPlNextSourceState = NEXT_SOURCE_STATE_INIT;
-    private boolean mPlNextSourcePlayPending = false;
+    private long mCurrentSrcId = mSrcIdGenerator++;
+    private List<DataSourceDesc> mNextDSDs;
+    private long mNextSrcId = mSrcIdGenerator++;
+    private int mNextSourceState = NEXT_SOURCE_STATE_INIT;
+    private boolean mNextSourcePlayPending = false;
+    //--- guarded by |mSrcLock| end
 
     // Modular DRM
-    private UUID mDrmUUID;
     private final Object mDrmLock = new Object();
+    //--- guarded by |mDrmLock| start
+    private UUID mDrmUUID;
     private DrmInfoImpl mDrmInfoImpl;
     private MediaDrm mDrmObj;
     private byte[] mDrmSessionId;
@@ -130,6 +133,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     private boolean mDrmProvisioningInProgress;
     private boolean mPrepareDrmInProgress;
     private ProvisioningThread mDrmProvisioningThread;
+    //--- guarded by |mDrmLock| end
 
     /**
      * Default constructor.
@@ -277,12 +281,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * Gets the current player state.
      *
      * @return the current player state, one of the following:
-     * <ul>
-     * <li>{@link #PLAYER_STATE_IDLE}
-     * <li>{@link #PLAYER_STATE_PAUSED}
-     * <li>{@link #PLAYER_STATE_PLAYING}
-     * <li>{@link #PLAYER_STATE_ERROR}
-     * </ul>
      * @throws IllegalStateException if the internal player engine has not been
      * initialized or has been released.
      */
@@ -297,12 +295,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * During buffering, see {@link #getBufferedPosition()} for the quantifying the amount already
      * buffered.
      * @return the buffering state, one of the following:
-     * <ul>
-     * <li>{@link #BUFFERING_STATE_UNKNOWN}
-     * <li>{@link #BUFFERING_STATE_BUFFERING_AND_PLAYABLE}
-     * <li>{@link #BUFFERING_STATE_BUFFERING_AND_STARVED}
-     * <li>{@link #BUFFERING_STATE_BUFFERING_COMPLETE}
-     * </ul>
      * @throws IllegalStateException if the internal player engine has not been
      * initialized or has been released.
      */
@@ -353,10 +345,12 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     @Override
     public void setDataSource(@NonNull DataSourceDesc dsd) {
         Preconditions.checkNotNull(dsd, "the DataSourceDesc cannot be null");
-        synchronized (mPlLock) {
+        // TODO: setDataSource could update exist data source
+        synchronized (mSrcLock) {
             mCurrentDSD = dsd;
+            mCurrentSrcId = mSrcIdGenerator++;
             try {
-                handleDataSource(true /* isCurrent */, dsd);
+                handleDataSource(true /* isCurrent */, dsd, mCurrentSrcId);
             } catch (IOException e) {
             }
         }
@@ -374,7 +368,19 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     public void setNextDataSource(@NonNull DataSourceDesc dsd) {
         Preconditions.checkNotNull(dsd, "the DataSourceDesc cannot be null");
 
-        // TODO: save dsd in a list
+        synchronized (mSrcLock) {
+            mNextDSDs = new ArrayList<DataSourceDesc>(1);
+            mNextDSDs.add(dsd);
+            mNextSrcId = mSrcIdGenerator++;
+            mNextSourceState = NEXT_SOURCE_STATE_INIT;
+            mNextSourcePlayPending = false;
+        }
+        int state = getMediaPlayer2State();
+        if (state != MEDIAPLAYER2_STATE_IDLE) {
+            synchronized (mSrcLock) {
+                prepareNextDataSource_l();
+            }
+        }
     }
 
     /**
@@ -386,45 +392,33 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      */
     @Override
     public void setNextDataSources(@NonNull List<DataSourceDesc> dsds) {
-        // TODO: save the list.
-        /*
         if (dsds == null || dsds.size() == 0) {
             throw new IllegalArgumentException("data source list cannot be null or empty.");
         }
-        HashSet ids = new HashSet(pl.size());
-        for (DataSourceDesc dsd : pl) {
+        for (DataSourceDesc dsd : dsds) {
             if (dsd == null) {
-                throw new IllegalArgumentException("DataSourceDesc in playlist cannot be null.");
-            }
-            if (ids.add(dsd.getId()) == false) {
-                throw new IllegalArgumentException("DataSourceDesc Id in playlist should be unique.");
+                throw new IllegalArgumentException(
+                        "DataSourceDesc in the source list cannot be null.");
             }
         }
 
-        if (startIndex < 0) {
-            startIndex = 0;
-        } else if (startIndex >= pl.size()) {
-            startIndex = pl.size() - 1;
+        synchronized (mSrcLock) {
+            mNextDSDs = new ArrayList(dsds);
+            mNextSrcId = mSrcIdGenerator++;
+            mNextSourceState = NEXT_SOURCE_STATE_INIT;
+            mNextSourcePlayPending = false;
         }
-
-        synchronized (mPlLock) {
-            mPlaylist = Collections.synchronizedList(new ArrayList(pl));
-            handleDataSource(true, mPlaylist.get(startIndex));
-            // TODO: handle the preparation of next source in the playlist.
-            // It should be processed after current source is prepared.
-            mPlNextIndex = getNextIndex_l();
+        int state = getMediaPlayer2State();
+        if (state != MEDIAPLAYER2_STATE_IDLE) {
+            synchronized (mSrcLock) {
+                prepareNextDataSource_l();
+            }
         }
-        */
     }
 
-    /**
-     * Gets the current data source as described by a DataSourceDesc.
-     *
-     * @return the current DataSourceDesc
-     */
     @Override
     public @NonNull DataSourceDesc getCurrentDataSource() {
-        synchronized (mPlLock) {
+        synchronized (mSrcLock) {
             return mCurrentDSD;
         }
     }
@@ -701,20 +695,20 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     public void clearPendingCommands() {
     }
 
-    private void handleDataSource(boolean isCurrent, @NonNull DataSourceDesc dsd)
+    private void handleDataSource(boolean isCurrent, @NonNull DataSourceDesc dsd, long srcId)
             throws IOException {
         Preconditions.checkNotNull(dsd, "the DataSourceDesc cannot be null");
 
         switch (dsd.getType()) {
             case DataSourceDesc.TYPE_CALLBACK:
                 handleDataSource(isCurrent,
-                                 0,  // TODO: get mapped Id
+                                 srcId,
                                  dsd.getMedia2DataSource());
                 break;
 
             case DataSourceDesc.TYPE_FD:
                 handleDataSource(isCurrent,
-                                 0,  // TODO: get mapped Id
+                                 srcId,
                                  dsd.getFileDescriptor(),
                                  dsd.getFileDescriptorOffset(),
                                  dsd.getFileDescriptorLength());
@@ -722,7 +716,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
             case DataSourceDesc.TYPE_URI:
                 handleDataSource(isCurrent,
-                                 0,  // TODO: get mapped Id
+                                 srcId,
                                  dsd.getUriContext(),
                                  dsd.getUri(),
                                  dsd.getUriHeaders(),
@@ -899,16 +893,17 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     private native void nativeHandleDataSourceCallback(
             boolean isCurrent, long srcId, Media2DataSource dataSource);
 
-    // This function shall be called with |mPlLock| acquired.
+    // This function shall be called with |mSrcLock| acquired.
     private void prepareNextDataSource_l() {
-        if (mPlNextIndex < 0 || mPlNextSourceState != NEXT_SOURCE_STATE_INIT) {
+        if (mNextDSDs == null || mNextDSDs.isEmpty()
+                || mNextSourceState != NEXT_SOURCE_STATE_INIT) {
             // There is no next source or it's in preparing or prepared state.
             return;
         }
 
         try {
-            mPlNextSourceState = NEXT_SOURCE_STATE_PREPARING;
-            handleDataSource(false /* isCurrent */, mPlaylist.get(0));
+            mNextSourceState = NEXT_SOURCE_STATE_PREPARING;
+            handleDataSource(false /* isCurrent */, mNextDSDs.get(0), mNextSrcId);
         } catch (Exception e) {
             Message msg2 = mEventHandler.obtainMessage(
                     MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, MEDIA_ERROR_UNSUPPORTED, null);
@@ -922,18 +917,20 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         }
     }
 
-    // This function shall be called with |mPlLock| acquired.
+    // This function shall be called with |mSrcLock| acquired.
     private void playNextDataSource_l() {
-        if (mPlNextIndex < 0) {
+        if (mNextDSDs == null || mNextDSDs.isEmpty()) {
             return;
         }
 
-        if (mPlNextSourceState == NEXT_SOURCE_STATE_PREPARED) {
+        if (mNextSourceState == NEXT_SOURCE_STATE_PREPARED) {
             // Switch to next source only when it's in prepared state.
+            mCurrentDSD = mNextDSDs.get(0);
             mCurrentSrcId = mNextSrcId;
-            mNextSrcId = 0; // TODO; fix it
-            mPlNextSourceState = NEXT_SOURCE_STATE_INIT;
-            mPlNextSourcePlayPending = false;
+            mNextDSDs.remove(0);
+            mNextSrcId = mSrcIdGenerator++;  // make it different from mCurrentSrcId
+            mNextSourceState = NEXT_SOURCE_STATE_INIT;
+            mNextSourcePlayPending = false;
 
             long srcId = mCurrentSrcId;
             try {
@@ -951,10 +948,10 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
             // Wait for MEDIA2_INFO_STARTED_AS_NEXT to prepare next source.
         } else {
-            if (mPlNextSourceState == NEXT_SOURCE_STATE_INIT) {
+            if (mNextSourceState == NEXT_SOURCE_STATE_INIT) {
                 prepareNextDataSource_l();
             }
-            mPlNextSourcePlayPending = true;
+            mNextSourcePlayPending = true;
         }
     }
 
@@ -1245,25 +1242,12 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     @Override
     public native boolean isPlaying();
 
-    /**
-     * Gets the current MediaPlayer2 state.
-     *
-     * @return the current MediaPlayer2 state, one of the following:
-     * <ul>
-     * <li>{@link #MEDIAPLAYER2_STATE_IDLE}
-     * <li>{@link #MEDIAPLAYER2_STATE_PREPARED}
-     * <li>{@link #MEDIAPLAYER2_STATE_PAUSED}
-     * <li>{@link #MEDIAPLAYER2_STATE_PLAYING}
-     * <li>{@link #MEDIAPLAYER2_STATE_ERROR}
-     * </ul>
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized or has been released.
-     */
     @Override
     public @MediaPlayer2State int getMediaPlayer2State() {
-        // TODO: get state from native layer or cached value.
-        return MEDIAPLAYER2_STATE_IDLE;
+        return native_getMediaPlayer2State();
     }
+
+    private native int native_getMediaPlayer2State();
 
     /**
      * Gets the current buffering management params used by the source component.
@@ -2612,8 +2596,10 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             }
             final int what = msg.arg1;
             final int extra = msg.arg2;
+
             switch(msg.what) {
             case MEDIA_PREPARED:
+            {
                 try {
                     scanInternalSubtitleTracks();
                 } catch (RuntimeException e) {
@@ -2626,32 +2612,37 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 }
 
                 final DataSourceDesc dsd;
-                synchronized (mPlLock) {
+                synchronized (mSrcLock) {
                     Log.i(TAG, "MEDIA_PREPARED: srcId=" + srcId
                             + ", currentSrcId=" + mCurrentSrcId + ", nextSrcId=" + mNextSrcId);
                     if (srcId == mCurrentSrcId) {
-                        prepareNextDataSource_l();
                         dsd = mCurrentDSD;
-                    } else if (mPlNextIndex >= 0 && srcId == mNextSrcId) {
-                        mPlNextSourceState = NEXT_SOURCE_STATE_PREPARED;
-                        if (mPlNextSourcePlayPending) {
+                        prepareNextDataSource_l();
+                    } else if (mNextDSDs != null && !mNextDSDs.isEmpty()
+                            && srcId == mNextSrcId) {
+                        dsd = mNextDSDs.get(0);
+                        mNextSourceState = NEXT_SOURCE_STATE_PREPARED;
+                        if (mNextSourcePlayPending) {
                             playNextDataSource_l();
                         }
-                        dsd = mPlaylist.get(0);
                     } else {
                         dsd = null;
                     }
                 }
 
-                synchronized (mEventCbLock) {
-                    for (Pair<Executor, MediaPlayer2EventCallback> cb : mEventCallbackRecords) {
-                        cb.first.execute(() -> cb.second.onInfo(
-                                mMediaPlayer, dsd, MEDIA_INFO_PREPARED, 0));
+                if (dsd != null) {
+                    synchronized (mEventCbLock) {
+                        for (Pair<Executor, MediaPlayer2EventCallback> cb : mEventCallbackRecords) {
+                            cb.first.execute(() -> cb.second.onInfo(
+                                    mMediaPlayer, dsd, MEDIA_INFO_PREPARED, 0));
+                        }
                     }
                 }
                 return;
+            }
 
             case MEDIA_DRM_INFO:
+            {
                 if (msg.obj == null) {
                     Log.w(TAG, "MEDIA_DRM_INFO msg.obj=NULL");
                 } else if (msg.obj instanceof Parcel) {
@@ -2679,9 +2670,12 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                     Log.w(TAG, "MEDIA_DRM_INFO msg.obj of unexpected type " + msg.obj);
                 }
                 return;
+            }
 
             case MEDIA_PLAYBACK_COMPLETE:
-                synchronized (mPlLock) {
+            {
+                final DataSourceDesc dsd = mCurrentDSD;
+                synchronized (mSrcLock) {
                     if (srcId == mCurrentSrcId) {
                         Log.i(TAG, "MEDIA_PLAYBACK_COMPLETE: srcId=" + srcId
                                 + ", currentSrcId=" + mCurrentSrcId + ", nextSrcId=" + mNextSrcId);
@@ -2692,32 +2686,34 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 synchronized (mEventCbLock) {
                     for (Pair<Executor, MediaPlayer2EventCallback> cb : mEventCallbackRecords) {
                         cb.first.execute(() -> cb.second.onInfo(
-                                mMediaPlayer, mCurrentDSD, MEDIA_INFO_PLAYBACK_COMPLETE, 0));
+                                mMediaPlayer, dsd, MEDIA_INFO_PLAYBACK_COMPLETE, 0));
                     }
                 }
                 stayAwake(false);
                 return;
+            }
 
             case MEDIA_STOPPED:
-                {
-                    TimeProvider timeProvider = mTimeProvider;
-                    if (timeProvider != null) {
-                        timeProvider.onStopped();
-                    }
+            {
+                TimeProvider timeProvider = mTimeProvider;
+                if (timeProvider != null) {
+                    timeProvider.onStopped();
                 }
                 break;
+            }
 
             case MEDIA_STARTED:
             case MEDIA_PAUSED:
-                {
-                    TimeProvider timeProvider = mTimeProvider;
-                    if (timeProvider != null) {
-                        timeProvider.onPaused(msg.what == MEDIA_PAUSED);
-                    }
+            {
+                TimeProvider timeProvider = mTimeProvider;
+                if (timeProvider != null) {
+                    timeProvider.onPaused(msg.what == MEDIA_PAUSED);
                 }
                 break;
+            }
 
             case MEDIA_BUFFERING_UPDATE:
+            {
                 final int percent = msg.arg1;
                 synchronized (mEventCbLock) {
                     for (Pair<Executor, MediaPlayer2EventCallback> cb : mEventCallbackRecords) {
@@ -2726,26 +2722,30 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                     }
                 }
                 return;
+            }
 
             case MEDIA_SEEK_COMPLETE:
+            {
                 synchronized (mEventCbLock) {
                     for (Pair<Executor, MediaPlayer2EventCallback> cb : mEventCallbackRecords) {
                         cb.first.execute(() -> cb.second.onCallComplete(
                                 mMediaPlayer, mCurrentDSD, MEDIA_CALL_SEEK_TO, 0));
                     }
                 }
+            }
                 // fall through
 
             case MEDIA_SKIPPED:
-                {
-                    TimeProvider timeProvider = mTimeProvider;
-                    if (timeProvider != null) {
-                        timeProvider.onSeekComplete(mMediaPlayer);
-                    }
+            {
+                TimeProvider timeProvider = mTimeProvider;
+                if (timeProvider != null) {
+                    timeProvider.onSeekComplete(mMediaPlayer);
                 }
                 return;
+            }
 
             case MEDIA_SET_VIDEO_SIZE:
+            {
                 final int width = msg.arg1;
                 final int height = msg.arg2;
                 synchronized (mEventCbLock) {
@@ -2755,8 +2755,10 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                     }
                 }
                 return;
+            }
 
             case MEDIA_ERROR:
+            {
                 Log.e(TAG, "Error (" + msg.arg1 + "," + msg.arg2 + ")");
                 synchronized (mEventCbLock) {
                     for (Pair<Executor, MediaPlayer2EventCallback> cb : mEventCallbackRecords) {
@@ -2768,8 +2770,10 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 }
                 stayAwake(false);
                 return;
+            }
 
             case MEDIA_INFO:
+            {
                 switch (msg.arg1) {
                     case MEDIA_INFO_STARTED_AS_NEXT:
                         if (srcId == mCurrentSrcId) {
@@ -2817,15 +2821,19 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 }
                 // No real default action so far.
                 return;
+            }
 
             case MEDIA_NOTIFY_TIME:
-                    TimeProvider timeProvider = mTimeProvider;
-                    if (timeProvider != null) {
-                        timeProvider.onNotifyTime();
-                    }
+            {
+                TimeProvider timeProvider = mTimeProvider;
+                if (timeProvider != null) {
+                    timeProvider.onNotifyTime();
+                }
                 return;
+            }
 
             case MEDIA_TIMED_TEXT:
+            {
                 final TimedText text;
                 if (msg.obj instanceof Parcel) {
                     Parcel parcel = (Parcel)msg.obj;
@@ -2841,8 +2849,10 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                     }
                 }
                 return;
+            }
 
             case MEDIA_SUBTITLE_DATA:
+            {
                 OnSubtitleDataListener onSubtitleDataListener = mOnSubtitleDataListener;
                 if (onSubtitleDataListener == null) {
                     return;
@@ -2854,8 +2864,10 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                     onSubtitleDataListener.onSubtitleData(mMediaPlayer, data);
                 }
                 return;
+            }
 
             case MEDIA_META_DATA:
+            {
                 final TimedMetaData data;
                 if (msg.obj instanceof Parcel) {
                     Parcel parcel = (Parcel) msg.obj;
@@ -2872,11 +2884,15 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                     }
                 }
                 return;
+            }
 
             case MEDIA_NOP: // interface test message - ignore
+            {
                 break;
+            }
 
             case MEDIA_AUDIO_ROUTING_CHANGED:
+            {
                 AudioManager.resetAudioPortGeneration();
                 synchronized (mRoutingChangeListeners) {
                     for (NativeRoutingEventHandlerDelegate delegate
@@ -2885,10 +2901,13 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                     }
                 }
                 return;
+            }
 
             default:
+            {
                 Log.e(TAG, "Unknown message type " + msg.what);
                 return;
+            }
             }
         }
     }
@@ -3184,7 +3203,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
             try {
                 // only creating the DRM object to allow pre-openSession configuration
-                prepareDrm(uuid);
+                prepareDrm_createDrmStep(uuid);
             } catch (Exception e) {
                 Log.w(TAG, "prepareDrm(): Exception ", e);
                 mPrepareDrmInProgress = false;
