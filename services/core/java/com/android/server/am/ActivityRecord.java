@@ -1614,15 +1614,35 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     void setState(ActivityState state, String reason) {
         if (DEBUG_STATES) Slog.v(TAG_STATES, "State movement: " + this + " from:" + getState()
                         + " to:" + state + " reason:" + reason);
+
         final ActivityState prev = mState;
+        final boolean stateChanged = prev != state;
+
         mState = state;
 
-        if (mState != prev) {
+        if (stateChanged) {
             if (mRecentTransitions.size() == MAX_STORED_STATE_TRANSITIONS) {
                 mRecentTransitions.remove(0);
             }
 
             mRecentTransitions.add(new StateTransition(prev, state, reason));
+        }
+
+        if (stateChanged && isState(DESTROYING, DESTROYED)) {
+            makeFinishingLocked();
+
+            // When moving to the destroyed state, immediately destroy the activity in the
+            // associated stack. Most paths for finishing an activity will handle an activity's path
+            // to destroy through mechanisms such as ActivityStackSupervisor#mFinishingActivities.
+            // However, moving to the destroyed state directly (as in the case of an app dying) and
+            // marking it as finished will lead to cleanup steps that will prevent later handling
+            // from happening.
+            if (isState(DESTROYED)) {
+                final ActivityStack stack = getStack();
+                if (stack != null) {
+                    stack.activityDestroyedLocked(this, reason);
+                }
+            }
         }
     }
 
