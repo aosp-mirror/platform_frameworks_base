@@ -68,7 +68,7 @@
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"मनपर्दो PIN कोड निश्चित गर्नुहोस्"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM कार्ड अनलक गर्दै…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"४ देखि ८ वाट नम्बर भएको एउटा PIN टाइप गर्नुहोस्।"</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK कोड ८ वटा नम्बर वा सो भन्दा बढी हुनुपर्छ।"</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK कोड ८ वटा नम्बर वा सो भन्दा बढी हुनु पर्छ।"</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"PUK कोड पुन:प्रदान गर्नुहोस्। धेरै पुन:प्रयासहरूले SIMलाई स्थायी रूपमा निष्क्रिय गरिदिने छ।"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN कोडहरू मेल खाएन"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"निकै धेरै ढाँचा कोसिसहरू"</string>
