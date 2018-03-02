@@ -628,7 +628,8 @@ public final class MediaDrm implements AutoCloseable {
     }
 
     /**
-     * Open a new session with the MediaDrm object.  A session ID is returned.
+     * Open a new session with the MediaDrm object. A session ID is returned.
+     * By default, sessions are opened at the native security level of the device.
      *
      * @throws NotProvisionedException if provisioning is needed
      * @throws ResourceBusyException if required resources are in use
