@@ -694,7 +694,8 @@
     <string name="quick_settings_bluetooth_secondary_label_headset">Headset</string>
     <!-- QuickSettings: Bluetooth secondary label for an input/IO device being connected [CHAR LIMIT=20]-->
     <string name="quick_settings_bluetooth_secondary_label_input">Input</string>
-
+    <!-- QuickSettings: Bluetooth secondary label shown when bluetooth is being enabled [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_bluetooth_secondary_label_transient">Turning on&#8230;</string>
     <!-- QuickSettings: Brightness [CHAR LIMIT=NONE] -->
     <string name="quick_settings_brightness_label">Brightness</string>
     <!-- QuickSettings: Rotation Unlocked [CHAR LIMIT=NONE] -->
@@ -743,6 +744,8 @@
     <string name="quick_settings_wifi_on_label">Wi-Fi On</string>
     <!-- QuickSettings: Wifi detail panel, text when there are no items [CHAR LIMIT=NONE] -->
     <string name="quick_settings_wifi_detail_empty_text">No Wi-Fi networks available</string>
+    <!-- QuickSettings: Wifi secondary label shown when the wifi is being enabled [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_wifi_secondary_label_transient">Turning on&#8230;</string>
     <!-- QuickSettings: Cast title [CHAR LIMIT=NONE] -->
     <string name="quick_settings_cast_title">Cast</string>
     <!-- QuickSettings: Cast detail panel, status text when casting [CHAR LIMIT=NONE] -->
@@ -776,7 +779,7 @@
     <!-- QuickSettings: Hotspot. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_hotspot_label">Hotspot</string>
     <!-- QuickSettings: Hotspot. Secondary label shown when the hotspot is being enabled [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_hotspot_secondary_label_transient">Turning on...</string>
+    <string name="quick_settings_hotspot_secondary_label_transient">Turning on&#8230;</string>
     <!-- QuickSettings: Hotspot: Secondary label for how many devices are connected to the hotspot [CHAR LIMIT=NONE] -->
     <plurals name="quick_settings_hotspot_secondary_label_num_devices">
         <item quantity="one">%d device</item>

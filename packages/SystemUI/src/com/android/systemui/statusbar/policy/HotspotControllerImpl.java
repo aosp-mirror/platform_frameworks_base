@@ -140,7 +140,6 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
             if (DEBUG) Log.d(TAG, "Starting tethering");
             mConnectivityManager.startTethering(
                     ConnectivityManager.TETHERING_WIFI, false, callback);
-            fireHotspotChangedCallback(isHotspotEnabled());
         } else {
             mConnectivityManager.stopTethering(ConnectivityManager.TETHERING_WIFI);
         }

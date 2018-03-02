@@ -66,6 +66,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
     protected static final boolean DEBUG = Log.isLoggable("Tile", Log.DEBUG);
 
     private static final long DEFAULT_STALE_TIMEOUT = 10 * DateUtils.MINUTE_IN_MILLIS;
+    protected static final Object ARG_SHOW_TRANSIENT_ENABLING = new Object();
 
     protected final QSHost mHost;
     protected final Context mContext;
