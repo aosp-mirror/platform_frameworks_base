@@ -244,7 +244,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         mConfiguration = new Configuration();
         mConfiguration.updateFrom(context.getResources().getConfiguration());
-        updateIcons(context, Configuration.EMPTY, mConfiguration);
+        reloadNavIcons();
 
         mBarTransitions = new NavigationBarTransitions(this);
 
@@ -291,7 +291,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     public void onConnectionChanged(boolean isConnected) {
         updateSlippery();
-        setDisabledFlags(mDisabledFlags, true);
+        updateNavButtonIcons();
         setUpSwipeUpOnboarding(isConnected);
     }
 
@@ -403,6 +403,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 R.drawable.ic_sysbar_home_carmode, R.drawable.ic_sysbar_home_carmode);
     }
 
+    private void reloadNavIcons() {
+        updateIcons(mContext, Configuration.EMPTY, mConfiguration);
+    }
+
     private void updateIcons(Context ctx, Configuration oldConfig, Configuration newConfig) {
         if (oldConfig.orientation != newConfig.orientation
                 || oldConfig.densityDpi != newConfig.densityDpi) {
@@ -482,18 +486,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     @Override
     public void setLayoutDirection(int layoutDirection) {
-        // Reload all the icons
-        updateIcons(getContext(), Configuration.EMPTY, mConfiguration);
+        reloadNavIcons();
 
         super.setLayoutDirection(layoutDirection);
-    }
-
-    public void notifyScreenOn() {
-        setDisabledFlags(mDisabledFlags, true);
-    }
-
-    public void setNavigationIconHints(int hints) {
-        setNavigationIconHints(hints, false);
     }
 
     private KeyButtonDrawable getBackIconWithAlt(boolean carMode, boolean landscape) {
@@ -508,8 +503,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 : carMode ? mBackCarModeIcon : mBackIcon;
     }
 
-    public void setNavigationIconHints(int hints, boolean force) {
-        if (!force && hints == mNavigationIconHints) return;
+    public void setNavigationIconHints(int hints) {
+        if (hints == mNavigationIconHints) return;
         final boolean backAlt = (hints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
         if ((mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0 && !backAlt) {
             mTransitionListener.onBackAltCleared();
@@ -519,16 +514,32 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 "Navigation icon hints = " + hints,
                 500).show();
         }
-
         mNavigationIconHints = hints;
+        updateNavButtonIcons();
+    }
 
+    public void setDisabledFlags(int disabledFlags) {
+        if (mDisabledFlags == disabledFlags) return;
+
+        final boolean overviewEnabledBefore = isOverviewEnabled();
+        mDisabledFlags = disabledFlags;
+
+        // Update icons if overview was just enabled to ensure the correct icons are present
+        if (!overviewEnabledBefore && isOverviewEnabled()) {
+            reloadNavIcons();
+        }
+
+        updateNavButtonIcons();
+    }
+
+    public void updateNavButtonIcons() {
         // We have to replace or restore the back and home button icons when exiting or entering
         // carmode, respectively. Recents are not available in CarMode in nav bar so change
         // to recent icon is not required.
-        KeyButtonDrawable backIcon = (backAlt)
-                ? getBackIconWithAlt(mUseCarModeUi, mVertical)
-                : getBackIcon(mUseCarModeUi, mVertical);
-
+        KeyButtonDrawable backIcon
+                = ((mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0)
+                        ? getBackIconWithAlt(mUseCarModeUi, mVertical)
+                        : getBackIcon(mUseCarModeUi, mVertical);
         getBackButton().setImageDrawable(backIcon);
 
         updateRecentsIcon();
@@ -542,8 +553,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         // Update IME button visibility, a11y and rotate button always overrides the appearance
         final boolean showImeButton =
                 !mShowAccessibilityButton &&
-                !mShowRotateButton &&
-                ((hints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) != 0);
+                        !mShowRotateButton &&
+                        ((mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) != 0);
         getImeSwitchButton().setVisibility(showImeButton ? View.VISIBLE : View.INVISIBLE);
         getImeSwitchButton().setImageDrawable(mImeIcon);
 
@@ -558,26 +569,14 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         setAccessibilityButtonState(mShowAccessibilityButton, mLongClickableAccessibilityButton);
         getAccessibilityButton().setImageDrawable(mAccessibilityIcon);
 
-        setDisabledFlags(mDisabledFlags, true);
-
         mBarTransitions.reapplyDarkIntensity();
-    }
 
-    public void setDisabledFlags(int disabledFlags) {
-        setDisabledFlags(disabledFlags, false);
-    }
-
-    public void setDisabledFlags(int disabledFlags, boolean force) {
-        if (!force && mDisabledFlags == disabledFlags) return;
-
-        mDisabledFlags = disabledFlags;
-
-        boolean disableHome = ((disabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0);
+        boolean disableHome = ((mDisabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0);
 
         // Always disable recents when alternate car mode UI is active.
         boolean disableRecent = mUseCarModeUi || !isOverviewEnabled();
 
-        boolean disableBack = ((disabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0)
+        boolean disableBack = ((mDisabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0)
                 && ((mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) == 0);
 
         // When screen pinning, don't hide back and home when connected service or back and
@@ -670,7 +669,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     public void updateStates() {
         updateSlippery();
-        setDisabledFlags(mDisabledFlags, true);
+        updateNavButtonIcons();
     }
 
     private void updateSlippery() {
@@ -773,7 +772,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         }
 
         // Hide/restore other button visibility, if necessary
-        setNavigationIconHints(mNavigationIconHints, true);
+        updateNavButtonIcons();
     }
 
     public boolean isRotateButtonVisible() { return mShowRotateButton; }
@@ -802,8 +801,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     public void onOverviewProxyConnectionChanged(boolean isConnected) {
         updateStates();
         setUpSwipeUpOnboarding(isQuickStepSwipeUpEnabled());
-        updateIcons(getContext(), Configuration.EMPTY, mConfiguration);
-        setNavigationIconHints(mNavigationIconHints, true);
+        reloadNavIcons();
+        updateNavButtonIcons();
     }
 
     @Override
@@ -879,7 +878,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         // force the low profile & disabled states into compliance
         mBarTransitions.init();
-        setDisabledFlags(mDisabledFlags, true /* force */);
         setMenuVisibility(mShowMenu, true /* force */);
 
         if (DEBUG) {
@@ -892,7 +890,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             resolveLayoutDirection();
         }
         updateTaskSwitchHelper();
-        setNavigationIconHints(mNavigationIconHints, true);
+        updateNavButtonIcons();
 
         getHomeButton().setVertical(mVertical);
     }
@@ -937,7 +935,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         if (uiCarModeChanged || mConfiguration.densityDpi != newConfig.densityDpi
                 || mConfiguration.getLayoutDirection() != newConfig.getLayoutDirection()) {
             // If car mode or density changes, we need to reset the icons.
-            setNavigationIconHints(mNavigationIconHints, true);
+            updateNavButtonIcons();
         }
         mConfiguration.updateFrom(newConfig);
     }
