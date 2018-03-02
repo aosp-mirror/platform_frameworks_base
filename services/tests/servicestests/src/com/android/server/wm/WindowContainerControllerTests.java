@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import android.app.WindowConfiguration;
 import android.content.res.Configuration;
+import android.support.test.filters.FlakyTest;
 import org.junit.Test;
 
 import android.platform.test.annotations.Presubmit;
@@ -38,6 +39,7 @@ import static org.junit.Assert.assertTrue;
  */
 @SmallTest
 @Presubmit
+@FlakyTest(bugId = 74078662)
 @org.junit.runner.RunWith(AndroidJUnit4.class)
 public class WindowContainerControllerTests extends WindowTestsBase {
 

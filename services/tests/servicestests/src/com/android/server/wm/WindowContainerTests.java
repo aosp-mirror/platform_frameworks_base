@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import android.support.test.filters.FlakyTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -55,6 +56,7 @@ import static org.mockito.Mockito.verify;
  */
 @SmallTest
 @Presubmit
+@FlakyTest(bugId = 74078662)
 @RunWith(AndroidJUnit4.class)
 public class WindowContainerTests extends WindowTestsBase {
 

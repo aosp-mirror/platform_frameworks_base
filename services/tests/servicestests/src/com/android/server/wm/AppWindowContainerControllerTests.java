@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import android.support.test.filters.FlakyTest;
 import org.junit.Test;
 
 import android.platform.test.annotations.Presubmit;
@@ -45,6 +46,7 @@ import java.util.function.Consumer;
  */
 @SmallTest
 @Presubmit
+@FlakyTest(bugId = 74078662)
 @org.junit.runner.RunWith(AndroidJUnit4.class)
 public class AppWindowContainerControllerTests extends WindowTestsBase {
 
