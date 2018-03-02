@@ -34,7 +34,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_METRICS;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.MemoryStatUtil.MemoryStat;
-import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
+import static com.android.server.am.MemoryStatUtil.readMemoryStatFromMemcg;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -635,7 +635,7 @@ class ActivityMetricsLogger {
 
         final int pid = info.processRecord.pid;
         final int uid = info.applicationInfo.uid;
-        final MemoryStat memoryStat = readMemoryStatFromFilesystem(uid, pid);
+        final MemoryStat memoryStat = readMemoryStatFromMemcg(uid, pid);
         if (memoryStat == null) {
             if (DEBUG_METRICS) Slog.i(TAG, "logAppStartMemoryStateCapture memoryStat null");
             return;
