@@ -120,7 +120,7 @@ public final class CellIdentityGsm extends CellIdentity {
 
     /**
      * @return 3-digit Mobile Country Code, 0..999, Integer.MAX_VALUE if unknown
-     * @deprecated Use {@link #getMccStr} instead.
+     * @deprecated Use {@link #getMccString} instead.
      */
     @Deprecated
     public int getMcc() {
@@ -129,7 +129,7 @@ public final class CellIdentityGsm extends CellIdentity {
 
     /**
      * @return 2 or 3-digit Mobile Network Code, 0..999, Integer.MAX_VALUE if unknown
-     * @deprecated Use {@link #getMncStr} instead.
+     * @deprecated Use {@link #getMncString} instead.
      */
     @Deprecated
     public int getMnc() {
@@ -176,14 +176,14 @@ public final class CellIdentityGsm extends CellIdentity {
     /**
      * @return Mobile Country Code in string format, null if unknown
      */
-    public String getMccStr() {
+    public String getMccString() {
         return mMccStr;
     }
 
     /**
      * @return Mobile Network Code in string format, null if unknown
      */
-    public String getMncStr() {
+    public String getMncString() {
         return mMncStr;
     }
 
