@@ -1472,7 +1472,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         prev.shortComponentName, "userLeaving=" + userLeaving);
                 mService.updateUsageStats(prev, false);
 
-                mService.mLifecycleManager.scheduleTransaction(prev.app.thread, prev.appToken,
+                mService.getLifecycleManager().scheduleTransaction(prev.app.thread, prev.appToken,
                         PauseActivityItem.obtain(prev.finishing, userLeaving,
                                 prev.configChangeFlags, pauseImmediately).setDescription(
                                         prev.getLifecycleDescription("startPausingLocked")));
@@ -2109,7 +2109,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     if (r.app != null && r.app.thread != null) {
                         if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
                                 "Scheduling invisibility: " + r);
-                        mService.mLifecycleManager.scheduleTransaction(r.app.thread, r.appToken,
+                        mService.getLifecycleManager().scheduleTransaction(r.app.thread, r.appToken,
                                 WindowVisibilityItem.obtain(false /* showWindow */));
                     }
 
@@ -2661,13 +2661,12 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     next.app.pendingUiClean = true;
                     next.app.forceProcessStateUpTo(mService.mTopProcessState);
                     next.clearOptionsLocked();
-
                     transaction.setLifecycleStateRequest(
                             ResumeActivityItem.obtain(next.app.repProcState,
                                     mService.isNextTransitionForward())
                                     .setDescription(next.getLifecycleDescription(
                                             "resumeTopActivityInnerLocked")));
-                    mService.mLifecycleManager.scheduleTransaction(transaction);
+                    mService.getLifecycleManager().scheduleTransaction(transaction);
 
                     if (DEBUG_STATES) Slog.d(TAG_STATES, "resumeTopActivityLocked: Resumed "
                             + next);
@@ -3317,7 +3316,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 ArrayList<ResultInfo> list = new ArrayList<ResultInfo>();
                 list.add(new ResultInfo(resultWho, requestCode,
                         resultCode, data));
-                mService.mLifecycleManager.scheduleTransaction(r.app.thread, r.appToken,
+                mService.getLifecycleManager().scheduleTransaction(r.app.thread, r.appToken,
                         ActivityResultItem.obtain(list));
                 return;
             } catch (Exception e) {
@@ -3446,7 +3445,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 }
                 EventLogTags.writeAmStopActivity(
                         r.userId, System.identityHashCode(r), r.shortComponentName);
-                mService.mLifecycleManager.scheduleTransaction(r.app.thread, r.appToken,
+                mService.getLifecycleManager().scheduleTransaction(r.app.thread, r.appToken,
                         StopActivityItem.obtain(r.visible, r.configChangeFlags)
                                 .setDescription(r.getLifecycleDescription("stopActivityLocked")));
                 if (shouldSleepOrShutDownActivities()) {
@@ -3782,6 +3781,15 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
         final ActivityState prevState = r.getState();
         if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to FINISHING: " + r);
+
+        // We are already destroying / have already destroyed the activity. Do not continue to
+        // modify it. Note that we do not use ActivityRecord#finishing here as finishing is not
+        // indicative of destruction (though destruction is indicative of finishing) as finishing
+        // can be delayed below.
+        if (r.isState(DESTROYING, DESTROYED)) {
+            return null;
+        }
+
         r.setState(FINISHING, "finishCurrentActivityLocked");
         final boolean finishingActivityInNonFocusedStack
                 = r.getStack() != mStackSupervisor.getFocusedStack()
@@ -4232,6 +4240,13 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         if (DEBUG_SWITCH || DEBUG_CLEANUP) Slog.v(TAG_SWITCH,
                 "Removing activity from " + reason + ": token=" + r
                         + ", app=" + (r.app != null ? r.app.processName : "(null)"));
+
+        if (r.isState(DESTROYING, DESTROYED)) {
+            if (DEBUG_STATES) Slog.v(TAG_STATES, "activity " + r + " already finishing."
+                    + "skipping request with reason:" + reason);
+            return false;
+        }
+
         EventLog.writeEvent(EventLogTags.AM_DESTROY_ACTIVITY,
                 r.userId, System.identityHashCode(r),
                 r.getTask().taskId, r.shortComponentName, reason);
@@ -4265,7 +4280,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
             try {
                 if (DEBUG_SWITCH) Slog.i(TAG_SWITCH, "Destroying: " + r);
-                mService.mLifecycleManager.scheduleTransaction(r.app.thread, r.appToken,
+                mService.getLifecycleManager().scheduleTransaction(r.app.thread, r.appToken,
                         DestroyActivityItem.obtain(r.finishing, r.configChangeFlags)
                             .setDescription(
                                     r.getLifecycleDescription("destroyActivityLocked:" + reason)));

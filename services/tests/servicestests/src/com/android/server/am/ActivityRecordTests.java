@@ -24,6 +24,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYED;
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYING;
+import static com.android.server.am.ActivityStack.ActivityState.FINISHING;
 import static com.android.server.am.ActivityStack.ActivityState.INITIALIZING;
 import static com.android.server.am.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.am.ActivityStack.ActivityState.PAUSING;
@@ -228,5 +229,20 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mActivity.setState(DESTROYED, "testFinishingAfterDestroyed");
         assertTrue(mActivity.isState(DESTROYED));
         assertTrue(mActivity.finishing);
+    }
+
+    @Test
+    public void testSetInvalidState() throws Exception {
+        mActivity.setState(DESTROYED, "testInvalidState");
+
+        boolean exceptionEncountered = false;
+
+        try {
+            mActivity.setState(FINISHING, "testInvalidState");
+        } catch (IllegalArgumentException e) {
+            exceptionEncountered = true;
+        }
+
+        assertTrue(exceptionEncountered);
     }
 }

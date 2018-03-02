@@ -273,6 +273,8 @@ public class ActivityTestsBase {
      * {@link ActivityStackSupervisor}.
      */
     protected static class TestActivityManagerService extends ActivityManagerService {
+        private ClientLifecycleManager mLifecycleManager;
+
         TestActivityManagerService(Context context) {
             super(context);
             mSupportsMultiWindow = true;
@@ -281,6 +283,18 @@ public class ActivityTestsBase {
             mSupportsFreeformWindowManagement = true;
             mSupportsPictureInPicture = true;
             mWindowManager = WindowTestUtils.getMockWindowManagerService();
+        }
+
+        @Override
+        public ClientLifecycleManager getLifecycleManager() {
+            if (mLifecycleManager == null) {
+                return super.getLifecycleManager();
+            }
+            return mLifecycleManager;
+        }
+
+        void setLifecycleManager(ClientLifecycleManager manager) {
+            mLifecycleManager = manager;
         }
 
         @Override
