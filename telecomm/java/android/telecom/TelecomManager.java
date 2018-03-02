@@ -1786,8 +1786,25 @@ public class TelecomManager {
     }
 
     /**
-     * Called from the recipient side of a handover to indicate a desire to accept the handover
-     * of an ongoing call to another {@link ConnectionService} identified by
+     * Called by an app to indicate that it wishes to accept the handover of an ongoing call to a
+     * {@link PhoneAccountHandle} it defines.
+     * <p>
+     * A call handover is the process where an ongoing call is transferred from one app (i.e.
+     * {@link ConnectionService} to another app.  The user could, for example, choose to continue a
+     * mobile network call in a video calling app.  The mobile network call via the Telephony stack
+     * is referred to as the source of the handover, and the video calling app is referred to as the
+     * destination.
+     * <p>
+     * When considering a handover scenario the <em>initiating</em> device is where a user initiated
+     * the handover process (e.g. by calling {@link android.telecom.Call#handoverTo(
+     * PhoneAccountHandle, int, Bundle)}, and the other device is considered the <em>receiving</em>
+     * device.
+     * <p>
+     * For a full discussion of the handover process and the APIs involved, see
+     * {@link android.telecom.Call#handoverTo(PhoneAccountHandle, int, Bundle)}.
+     * <p>
+     * This method is called from the <em>receiving</em> side of a handover to indicate a desire to
+     * accept the handover of an ongoing call to another {@link ConnectionService} identified by
      * {@link PhoneAccountHandle} destAcct. For managed {@link ConnectionService}s, the specified
      * {@link PhoneAccountHandle} must have been registered with {@link #registerPhoneAccount} and
      * the user must have enabled the corresponding {@link PhoneAccount}.  This can be checked using
@@ -1811,7 +1828,8 @@ public class TelecomManager {
      * @param videoState Video state after the handover.
      * @param destAcct The {@link PhoneAccountHandle} registered to the calling package.
      */
-    public void acceptHandover(Uri srcAddr, int videoState, PhoneAccountHandle destAcct) {
+    public void acceptHandover(Uri srcAddr, @VideoProfile.VideoState int videoState,
+            PhoneAccountHandle destAcct) {
         try {
             if (isServiceConnected()) {
                 getTelecomService().acceptHandover(srcAddr, videoState, destAcct);
