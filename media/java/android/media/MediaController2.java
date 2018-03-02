@@ -139,13 +139,15 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
         /**
          * Called when the playlist is changed.
          * <p>
-         * When it's called, you should invalidate previous playback information such as position,
-         * player state, current item, etc.
+         * If the previously playing media item is gone, you should invalidate previous playback
+         * information and wait for later callbacks.
          *
          * @param controller the controller for this event
          * @param playlist A new playlist set by the session.
+         * @see #onPositionChanged(long, long)
+         * @see #onBufferedPositionChanged(long)
+         * @see #onCurrentPlaylistItemChanged(MediaItem2)
          */
-        // TODO(jaewan): Enhance doc
         public void onPlaylistChanged(@NonNull MediaController2 controller,
                 @NonNull List<MediaItem2> playlist) { }
 
@@ -156,7 +158,7 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
          * @param state latest playback state
          * @hide
          */
-        // TODo(jaewan): Remove
+        // TODO(jaewan): Remove (b/73971431)
         public void onPlaybackStateChanged(@NonNull MediaController2 controller,
                 @NonNull PlaybackState2 state) { }
 
@@ -208,9 +210,15 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
 
         /**
          * Called when the player's current playing item is changed
+         * <p>
+         * When it's called, you should invalidate previous playback information and wait for later
+         * callbacks.
          *
          * @param controller the controller for this event
          * @param item new item
+         * @see #onPositionChanged(long, long)
+         * @see #onBufferedPositionChanged(long)
+         * @see #onCurrentPlaylistItemChanged(MediaItem2)
          */
         public void onCurrentPlaylistItemChanged(@NonNull MediaController2 controller,
                 @NonNull MediaItem2 item) { }
@@ -325,7 +333,6 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
      * @param executor executor to run callbacks on.
      * @param callback controller callback to receive changes in
      */
-    // TODO(jaewan): Put @CallbackExecutor to the constructor.
     public MediaController2(@NonNull Context context, @NonNull SessionToken2 token,
             @NonNull @CallbackExecutor Executor executor, @NonNull ControllerCallback callback) {
         super();
@@ -656,7 +663,7 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
      * Set the playback speed.
      */
     public void setPlaybackSpeed(float speed) {
-        // TODO: implement this
+        // TODO(jaewan): implement this (b/74093080)
     }
 
     /**

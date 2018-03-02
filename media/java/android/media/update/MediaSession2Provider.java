@@ -44,9 +44,10 @@ import java.util.concurrent.Executor;
  */
 public interface MediaSession2Provider extends TransportControlProvider {
     void close_impl();
-    void setPlayer_impl(MediaPlayerBase player, MediaPlaylistController mplc,
+    void updatePlayer_impl(MediaPlayerBase player, MediaPlaylistController mplc,
             VolumeProvider2 volumeProvider);
     MediaPlayerBase getPlayer_impl();
+    VolumeProvider2 getVolumeProvider_impl();
     SessionToken2 getToken_impl();
     List<ControllerInfo> getConnectedControllers_impl();
     void setCustomLayout_impl(ControllerInfo controller, List<CommandButton> layout);
@@ -84,6 +85,7 @@ public interface MediaSession2Provider extends TransportControlProvider {
         void removeCommand_impl(Command command);
         boolean hasCommand_impl(Command command);
         boolean hasCommand_impl(int code);
+        List<Command> getCommands_impl();
         Bundle toBundle_impl();
     }
 
@@ -109,7 +111,8 @@ public interface MediaSession2Provider extends TransportControlProvider {
         int getUid_impl();
         boolean isTrusted_impl();
         int hashCode_impl();
-        boolean equals_impl(ControllerInfoProvider obj);
+        boolean equals_impl(Object obj);
+        String toString_impl();
     }
 
     interface PlaylistParamsProvider {

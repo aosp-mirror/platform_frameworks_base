@@ -37,7 +37,6 @@ import java.util.Set;
 //   - Don't implement Parcelable for updatable support.
 //   - Also support MediaDescription features. MediaDescription is deprecated instead because
 //     it was insufficient for controller to display media contents.
-// TODO(jaewan): Add @see for APIs from MediaDescription
 public final class MediaMetadata2 {
     /**
      * The metadata key for a {@link CharSequence} or {@link String} typed value to retrieve the

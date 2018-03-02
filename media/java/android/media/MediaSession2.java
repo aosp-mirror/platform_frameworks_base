@@ -81,10 +81,6 @@ import java.util.concurrent.Executor;
 public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
     private final MediaSession2Provider mProvider;
 
-    // TODO(jaewan): Should we define IntDef? Currently we don't have to allow subclass to add more.
-    // TODO(jaewan): Shouldn't we pull out?
-    // TODO(jaewan): Should we also protect getters not related with metadata?
-    //               Getters are getPlaybackState(), getSessionActivity(), getPlaylistParams()
     // Next ID: 23
     /**
      * Command code for the custom command which can be defined by string action in the
@@ -338,7 +334,6 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * If {@link #getCommandCode()} is {@link #COMMAND_CODE_CUSTOM}), it's custom command and
      * {@link #getCustomCommand()} shouldn't be {@code null}.
      */
-    // TODO(jaewan): Move this into the updatable.
     public static final class Command {
         private final CommandProvider mProvider;
 
@@ -434,8 +429,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
         }
 
         public List<Command> getCommands() {
-            // TODO: implement this
-            return null;
+            return mProvider.getCommands_impl();
         }
 
         /**
@@ -469,7 +463,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * If it's not set, the session will accept all controllers and all incoming commands by
      * default.
      */
-    // TODO(jaewan): Can we move this inside of the updatable for default implementation.
+    // TODO(jaewan): Move this to updatable for default implementation (b/74091963)
     public static abstract class SessionCallback {
         private final Context mContext;
 
@@ -489,7 +483,6 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
          * @param controller controller information.
          * @return allowed commands. Can be {@code null} to reject coonnection.
          */
-        // TODO(jaewan): Change return type. Once we do, null is for reject.
         public @Nullable CommandGroup onConnect(@NonNull MediaSession2 session,
                 @NonNull ControllerInfo controller) {
             CommandGroup commands = new CommandGroup(mContext);
@@ -716,7 +709,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
          * @param player a {@link MediaPlayerBase} that handles actual media playback in your app.
          */
         U setPlayer(@NonNull MediaPlayerBase player) {
-            // TODO: Change the provider properly
+            // TODO(jaewan): Change the provider properly (b/74093082)
             mProvider.setPlayer_impl(player, null, null);
             return (U) this;
         }
@@ -729,7 +722,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
          * {@code player.}
          */
         U setPlaylistController(@NonNull MediaPlaylistController mplc) {
-            // TODO: implement this
+            // TODO(jaewan): implement this (b/74093082)
             return (U) this;
         }
 
@@ -740,7 +733,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
          * @param volumeProvider The provider that will receive volume button events.
          */
         U setVolumeProvider(@NonNull VolumeProvider2 volumeProvider) {
-            // TODO: implement this
+            // TODO(jaewan): implement this (b/74093082)
             return (U) this;
         }
 
@@ -865,7 +858,6 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
         /**
          * @hide
          */
-        // TODO(jaewan): Also accept componentName to check notificaiton listener.
         public ControllerInfo(Context context, int uid, int pid, String packageName,
                 IInterface callback) {
             mProvider = ApiLoader.getProvider(context)
@@ -912,18 +904,12 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
 
         @Override
         public boolean equals(Object obj) {
-            if (!(obj instanceof ControllerInfo)) {
-                return false;
-            }
-            ControllerInfo other = (ControllerInfo) obj;
-            return mProvider.equals_impl(other.mProvider);
+            return mProvider.equals_impl(obj);
         }
 
         @Override
         public String toString() {
-            // TODO(jaewan): Move this to updatable.
-            return "ControllerInfo {pkg=" + getPackageName() + ", uid=" + getUid() + ", trusted="
-                    + isTrusted() + "}";
+            return mProvider.toString_impl();
         }
     }
 
@@ -1193,14 +1179,13 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      *
      * @param player a {@link MediaPlayerBase} that handles actual media playback in your app.
      * @param mplc a {@link MediaPlaylistController} that manages playlist of the
-     * {@code player.}
+     * {@code player}
      * @param volumeProvider The provider that will receive volume button events. If
      * {@code null}, system will adjust the appropriate stream volume for this session's player.
      */
     public void updatePlayer(@NonNull MediaPlayerBase player,
-            @Nullable MediaPlaylistController mplc, @NonNull VolumeProvider2 volumeProvider) {
-        // TODO: rename setPlayer_impl to updatePlayer_impl
-        mProvider.setPlayer_impl(player, mplc, volumeProvider);
+            @Nullable MediaPlaylistController mplc, @Nullable VolumeProvider2 volumeProvider) {
+        mProvider.updatePlayer_impl(player, mplc, volumeProvider);
     }
 
     @Override
@@ -1219,19 +1204,16 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
     /**
      * @return playlist controller
      */
-    public @Nullable
-    MediaPlaylistController getMediaPlaylistController() {
-        // TODO: implement this
+    public @Nullable MediaPlaylistController getMediaPlaylistController() {
+        // TODO(jaewan): implement this (b/74090741)
         return null;
     }
 
     /**
      * @return volume provider
      */
-    public @Nullable
-    VolumeProvider2 getVolumeProvider() {
-     // TODO: implement this
-        return null;
+    public @Nullable VolumeProvider2 getVolumeProvider() {
+        return mProvider.getVolumeProvider_impl();
     }
 
     /**
@@ -1252,7 +1234,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * @param afr the full request parameters
      */
     public void setAudioFocusRequest(AudioFocusRequest afr) {
-        // TODO: implement this
+        // TODO(jaewan): implement this (b/72529899)
         // mProvider.setAudioFocusRequest_impl(focusGain);
     }
 
@@ -1426,8 +1408,6 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      *
      * @throws IllegalArgumentException if the play list is null
      */
-    // TODO(jaewan): Remove with index was previously rejected by council (b/36524925)
-    // TODO(jaewan): Should we also add movePlaylistItem from index to index?
     public void removePlaylistItem(MediaItem2 item) {
         mProvider.removePlaylistItem_impl(item);
     }
@@ -1518,7 +1498,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * @throws IllegalArgumentException if executor or callback is {@code null}.
      * @hide
      */
-    // TODO(jaewan): Unhide or remove
+    // TODO(jaewan): Remove (b/74157064)
     public void registerPlayerEventCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull PlayerEventCallback callback) {
         mProvider.registerPlayerEventCallback_impl(executor, callback);
@@ -1531,7 +1511,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * @throws IllegalArgumentException if the callback is {@code null}.
      * @hide
      */
-    // TODO(jaewan): Unhide or remove
+    // TODO(jaewan): Remove (b/74157064)
     public void unregisterPlayerEventCallback(@NonNull PlayerEventCallback callback) {
         mProvider.unregisterPlayerEventCallback_impl(callback);
     }
@@ -1552,7 +1532,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * @return speed
      */
     public float getPlaybackSpeed() {
-        // TODO: implement this
+        // TODO(jaewan): implement this (b/74093080)
         return -1;
     }
 
@@ -1560,6 +1540,6 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * Set the playback speed.
      */
     public void setPlaybackSpeed(float speed) {
-        // TODO: implement this
+        // TODO(jaewan): implement this (b/74093080)
     }
 }

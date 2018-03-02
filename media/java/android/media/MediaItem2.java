@@ -70,7 +70,6 @@ public class MediaItem2 {
      * @return a new bundle instance
      */
     public Bundle toBundle() {
-        // TODO(jaewan): Fill here when we rebase.
         return mProvider.toBundle_impl();
     }
 
