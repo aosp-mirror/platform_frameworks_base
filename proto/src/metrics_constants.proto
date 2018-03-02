@@ -5348,6 +5348,27 @@ message MetricsEvent {
     // OS: P
     RECENT_LOCATION_REQUESTS_ALL = 1325;
 
+    // FIELD: The x-location of a swipe gesture, conveyed as percent of total width
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: P
+    FIELD_GESTURE_X_PERCENT = 1326;
+
+    // FIELD: The y-location of a swipe gesture, conveyed as percent of total width
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: P
+    FIELD_GESTURE_Y_PERCENT = 1327;
+
+    // ACTION: Expand the notification panel while unlocked
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: P
+    ACTION_PANEL_VIEW_EXPAND = 1328;
+
+
+    // FIELD: Rotation of the device
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: P
+    FIELD_DEVICE_ROTATION = 1329;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
