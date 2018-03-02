@@ -20,8 +20,6 @@
 #include "SimpleConditionTracker.h"
 #include "guardrail/StatsdStats.h"
 
-#include <log/logprint.h>
-
 namespace android {
 namespace os {
 namespace statsd {
@@ -108,10 +106,19 @@ bool SimpleConditionTracker::init(const vector<Predicate>& allConditionConfig,
     return mInitialized;
 }
 
-void print(const map<HashableDimensionKey, int>& conditions, const int64_t& id) {
-    VLOG("%lld DUMP:", (long long)id);
-    for (const auto& pair : conditions) {
+void SimpleConditionTracker::dumpState() {
+    VLOG("%lld DUMP:", (long long)mConditionId);
+    for (const auto& pair : mSlicedConditionState) {
         VLOG("\t%s : %d", pair.first.c_str(), pair.second);
+    }
+
+    VLOG("Changed to true keys: \n");
+    for (const auto& key : mLastChangedToTrueDimensions) {
+        VLOG("%s", key.toString().c_str());
+    }
+    VLOG("Changed to false keys: \n");
+    for (const auto& key : mLastChangedToFalseDimensions) {
+        VLOG("%s", key.toString().c_str());
     }
 }
 
@@ -122,6 +129,12 @@ void SimpleConditionTracker::handleStopAll(std::vector<ConditionState>& conditio
     conditionChangedCache[mIndex] =
             (mInitialValue == ConditionState::kFalse && mSlicedConditionState.empty()) ? false
                                                                                            : true;
+
+    for (const auto& cond : mSlicedConditionState) {
+        if (cond.second > 0) {
+            mLastChangedToFalseDimensions.insert(cond.first);
+        }
+    }
 
     // After StopAll, we know everything has stopped. From now on, default condition is false.
     mInitialValue = ConditionState::kFalse;
@@ -166,10 +179,12 @@ void SimpleConditionTracker::handleConditionEvent(const HashableDimensionKey& ou
         if (matchStart && mInitialValue != ConditionState::kTrue) {
             mSlicedConditionState.insert(std::make_pair(outputKey, 1));
             changed = true;
+            mLastChangedToTrueDimensions.insert(outputKey);
         } else if (mInitialValue != ConditionState::kFalse) {
             // it's a stop and we don't have history about it.
             // If the default condition is not false, it means this stop is valuable to us.
             mSlicedConditionState.insert(std::make_pair(outputKey, 0));
+            mLastChangedToFalseDimensions.insert(outputKey);
             changed = true;
         }
     } else {
@@ -179,6 +194,7 @@ void SimpleConditionTracker::handleConditionEvent(const HashableDimensionKey& ou
         newCondition = startedCount > 0 ? ConditionState::kTrue : ConditionState::kFalse;
         if (matchStart) {
             if (startedCount == 0) {
+                mLastChangedToTrueDimensions.insert(outputKey);
                 // This condition for this output key will change from false -> true
                 changed = true;
             }
@@ -202,6 +218,7 @@ void SimpleConditionTracker::handleConditionEvent(const HashableDimensionKey& ou
                 }
                 // if everything has stopped for this output key, condition true -> false;
                 if (startedCount == 0) {
+                    mLastChangedToFalseDimensions.insert(outputKey);
                     changed = true;
                 }
             }
@@ -216,7 +233,7 @@ void SimpleConditionTracker::handleConditionEvent(const HashableDimensionKey& ou
 
     // dump all dimensions for debugging
     if (DEBUG) {
-        print(mSlicedConditionState, mConditionId);
+        dumpState();
     }
 
     (*conditionChangedCache) = changed;
@@ -237,6 +254,8 @@ void SimpleConditionTracker::evaluateCondition(
             (long long)mConditionId, conditionCache[mIndex]);
         return;
     }
+    mLastChangedToTrueDimensions.clear();
+    mLastChangedToFalseDimensions.clear();
 
     if (mStopAllLogMatcherIndex >= 0 && mStopAllLogMatcherIndex < int(eventMatcherValues.size()) &&
         eventMatcherValues[mStopAllLogMatcherIndex] == MatchingState::kMatched) {
@@ -297,14 +316,14 @@ void SimpleConditionTracker::evaluateCondition(
         // A high level assumption is that a predicate is either sliced or unsliced. We will never
         // have both sliced and unsliced version of a predicate.
         for (const HashableDimensionKey& outputValue : outputValues) {
-            // For sliced conditions, the value in the cache is not used. We don't need to update
-            // the overall condition state.
-            ConditionState tempState = ConditionState::kUnknown;
+            ConditionState tempState;
             bool tempChanged = false;
             handleConditionEvent(outputValue, matchedState == 1, &tempState, &tempChanged);
             if (tempChanged) {
                 overallChanged = true;
             }
+            // ConditionState's | operator is overridden
+            overallState = overallState | tempState;
         }
     }
     conditionCache[mIndex] = overallState;

@@ -30,6 +30,7 @@ statsd_common_src := \
     src/condition/condition_util.cpp \
     src/condition/SimpleConditionTracker.cpp \
     src/condition/ConditionWizard.cpp \
+    src/condition/StateTracker.cpp \
     src/config/ConfigKey.cpp \
     src/config/ConfigListener.cpp \
     src/config/ConfigManager.cpp \
@@ -189,6 +190,7 @@ LOCAL_SRC_FILES := \
     tests/FieldValue_test.cpp \
     tests/condition/CombinationConditionTracker_test.cpp \
     tests/condition/SimpleConditionTracker_test.cpp \
+    tests/condition/StateTracker_test.cpp \
     tests/metrics/OringDurationTracker_test.cpp \
     tests/metrics/MaxDurationTracker_test.cpp \
     tests/metrics/CountMetricProducer_test.cpp \

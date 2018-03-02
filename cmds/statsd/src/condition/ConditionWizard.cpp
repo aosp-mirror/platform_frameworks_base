@@ -41,6 +41,16 @@ ConditionState ConditionWizard::getMetConditionDimension(
                                  *dimensionsKeySet);
 }
 
+const set<HashableDimensionKey>* ConditionWizard::getChangedToTrueDimensions(
+        const int index) const {
+    return mAllConditions[index]->getChangedToTrueDimensions(mAllConditions);
+}
+
+const set<HashableDimensionKey>* ConditionWizard::getChangedToFalseDimensions(
+        const int index) const {
+    return mAllConditions[index]->getChangedToFalseDimensions(mAllConditions);
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

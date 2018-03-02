@@ -111,6 +111,11 @@ public:
         return mSliced;
     }
 
+    virtual const std::set<HashableDimensionKey>* getChangedToTrueDimensions(
+            const std::vector<sp<ConditionTracker>>& allConditions) const = 0;
+    virtual const std::set<HashableDimensionKey>* getChangedToFalseDimensions(
+            const std::vector<sp<ConditionTracker>>& allConditions) const = 0;
+
 protected:
     const int64_t mConditionId;
 

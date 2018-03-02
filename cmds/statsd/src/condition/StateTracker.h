@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright 2018, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef SIMPLE_CONDITION_TRACKER_H
-#define SIMPLE_CONDITION_TRACKER_H
+#pragma once
 
 #include <gtest/gtest_prod.h>
 #include "ConditionTracker.h"
@@ -27,13 +25,14 @@ namespace android {
 namespace os {
 namespace statsd {
 
-class SimpleConditionTracker : public virtual ConditionTracker {
+class StateTracker : public virtual ConditionTracker {
 public:
-    SimpleConditionTracker(const ConfigKey& key, const int64_t& id, const int index,
-                           const SimplePredicate& simplePredicate,
-                           const std::unordered_map<int64_t, int>& trackerNameIndexMap);
+    StateTracker(const ConfigKey& key, const int64_t& id, const int index,
+                 const SimplePredicate& simplePredicate,
+                 const std::unordered_map<int64_t, int>& trackerNameIndexMap,
+                 const vector<Matcher> primaryKeys);
 
-    ~SimpleConditionTracker();
+    ~StateTracker();
 
     bool init(const std::vector<Predicate>& allConditionConfig,
               const std::vector<sp<ConditionTracker>>& allConditionTrackers,
@@ -46,12 +45,25 @@ public:
                            std::vector<ConditionState>& conditionCache,
                            std::vector<bool>& changedCache) override;
 
+    /**
+     * Note: dimensionFields will be ignored in StateTracker, because we demand metrics
+     * must take the entire dimension fields from StateTracker. This is to make implementation
+     * simple and efficient.
+     *
+     * For example: wakelock duration by uid process states:
+     *              dimension in condition must be {uid, process state}.
+     */
     void isConditionMet(const ConditionKey& conditionParameters,
                         const std::vector<sp<ConditionTracker>>& allConditions,
                         const vector<Matcher>& dimensionFields,
                         std::vector<ConditionState>& conditionCache,
                         std::unordered_set<HashableDimensionKey>& dimensionsKeySet) const override;
 
+    /**
+     * Note: dimensionFields will be ignored in StateTracker, because we demand metrics
+     * must take the entire dimension fields from StateTracker. This is to make implementation
+     * simple and efficient.
+     */
     ConditionState getMetConditionDimension(
             const std::vector<sp<ConditionTracker>>& allConditions,
             const vector<Matcher>& dimensionFields,
@@ -59,63 +71,40 @@ public:
 
     virtual const std::set<HashableDimensionKey>* getChangedToTrueDimensions(
             const std::vector<sp<ConditionTracker>>& allConditions) const {
-        if (mSliced) {
-            return &mLastChangedToTrueDimensions;
-        } else {
-            return nullptr;
-        }
+        return &mLastChangedToTrueDimensions;
     }
+
     virtual const std::set<HashableDimensionKey>* getChangedToFalseDimensions(
             const std::vector<sp<ConditionTracker>>& allConditions) const {
-        if (mSliced) {
-            return &mLastChangedToFalseDimensions;
-        } else {
-            return nullptr;
-        }
+        return &mLastChangedToFalseDimensions;
     }
 
 private:
     const ConfigKey mConfigKey;
+
     // The index of the LogEventMatcher which defines the start.
     int mStartLogMatcherIndex;
-
-    // The index of the LogEventMatcher which defines the end.
-    int mStopLogMatcherIndex;
-
-    // if the start end needs to be nested.
-    bool mCountNesting;
-
-    // The index of the LogEventMatcher which defines the stop all.
-    int mStopAllLogMatcherIndex;
-
-    ConditionState mInitialValue;
-
-    std::vector<Matcher> mOutputDimensions;
 
     std::set<HashableDimensionKey> mLastChangedToTrueDimensions;
     std::set<HashableDimensionKey> mLastChangedToFalseDimensions;
 
+    std::vector<Matcher> mOutputDimensions;
+    std::vector<Matcher> mPrimaryKeys;
+
+    ConditionState mInitialValue;
+
     int mDimensionTag;
-
-    std::map<HashableDimensionKey, int> mSlicedConditionState;
-
-    void handleStopAll(std::vector<ConditionState>& conditionCache,
-                       std::vector<bool>& changedCache);
-
-    void handleConditionEvent(const HashableDimensionKey& outputKey, bool matchStart,
-                              ConditionState* conditionCache, bool* changedCache);
-
-    bool hitGuardRail(const HashableDimensionKey& newKey);
 
     void dumpState();
 
-    FRIEND_TEST(SimpleConditionTrackerTest, TestSlicedCondition);
-    FRIEND_TEST(SimpleConditionTrackerTest, TestSlicedWithNoOutputDim);
-    FRIEND_TEST(SimpleConditionTrackerTest, TestStopAll);
+    bool hitGuardRail(const HashableDimensionKey& newKey);
+
+    // maps from [primary_key] to [primary_key, exclusive_state].
+    std::unordered_map<HashableDimensionKey, HashableDimensionKey> mSlicedState;
+
+    FRIEND_TEST(StateTrackerTest, TestStateChange);
 };
 
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
-
-#endif  // SIMPLE_CONDITION_TRACKER_H

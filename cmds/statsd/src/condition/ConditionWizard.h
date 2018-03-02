@@ -47,6 +47,10 @@ public:
             const int index, const vector<Matcher>& dimensionFields,
             std::unordered_set<HashableDimensionKey>* dimensionsKeySet) const;
 
+    virtual const std::set<HashableDimensionKey>* getChangedToTrueDimensions(const int index) const;
+    virtual const std::set<HashableDimensionKey>* getChangedToFalseDimensions(
+            const int index) const;
+
 private:
     std::vector<sp<ConditionTracker>> mAllConditions;
 };
