@@ -38,7 +38,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-@Flaky(bugId = 74078662)
+@FlakyTest(bugId = 74078662)
 @Presubmit
 public class RotationCacheTest {
 
