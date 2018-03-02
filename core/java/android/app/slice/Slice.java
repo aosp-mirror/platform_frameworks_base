@@ -65,7 +65,8 @@ public final class Slice implements Parcelable {
             HINT_TOGGLE,
             HINT_HORIZONTAL,
             HINT_PARTIAL,
-            HINT_SEE_MORE
+            HINT_SEE_MORE,
+            HINT_KEY_WORDS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SliceHint {}
@@ -148,6 +149,11 @@ public final class Slice implements Parcelable {
      * apps.
      */
     public static final String HINT_CALLER_NEEDED = "caller_needed";
+    /**
+     * A hint to indicate that the contents of this subslice represent a list of keywords
+     * related to the parent slice.
+     */
+    public static final String HINT_KEY_WORDS = "key_words";
     /**
      * Key to retrieve an extra added to an intent when a control is changed.
      */
