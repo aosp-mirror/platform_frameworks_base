@@ -57,6 +57,7 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkMisc;
+import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.net.UidRange;
 import android.net.Uri;
@@ -105,6 +106,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -113,6 +115,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -130,6 +133,24 @@ public class Vpn {
     // Length of time (in milliseconds) that an app hosting an always-on VPN is placed on
     // the device idle whitelist during service launch and VPN bootstrap.
     private static final long VPN_LAUNCH_IDLE_WHITELIST_DURATION_MS = 60 * 1000;
+
+    // Settings for how much of the address space should be routed so that Vpn considers
+    // "most" of the address space is routed. This is used to determine whether this Vpn
+    // should be marked with the INTERNET capability.
+    private static final long MOST_IPV4_ADDRESSES_COUNT;
+    private static final BigInteger MOST_IPV6_ADDRESSES_COUNT;
+    static {
+        // 85% of the address space must be routed for Vpn to consider this VPN to provide
+        // INTERNET access.
+        final int howManyPercentIsMost = 85;
+
+        final long twoPower32 = 1L << 32;
+        MOST_IPV4_ADDRESSES_COUNT = twoPower32 * howManyPercentIsMost / 100;
+        final BigInteger twoPower128 = BigInteger.ONE.shiftLeft(128);
+        MOST_IPV6_ADDRESSES_COUNT = twoPower128
+                .multiply(BigInteger.valueOf(howManyPercentIsMost))
+                .divide(BigInteger.valueOf(100));
+    }
 
     // TODO: create separate trackers for each unique VPN to support
     // automated reconnection
@@ -830,10 +851,39 @@ public class Vpn {
         return lp;
     }
 
+    /**
+     * Analyzes the passed LinkedProperties to figure out whether it routes to most of the IP space.
+     *
+     * This returns true if the passed LinkedProperties contains routes to either most of the IPv4
+     * space or to most of the IPv6 address space, where "most" is defined by the value of the
+     * MOST_IPV{4,6}_ADDRESSES_COUNT constants : if more than this number of addresses are matched
+     * by any of the routes, then it's decided that most of the space is routed.
+     * @hide
+     */
+    @VisibleForTesting
+    static boolean providesRoutesToMostDestinations(LinkProperties lp) {
+        final Comparator<IpPrefix> prefixLengthComparator = IpPrefix.lengthComparator();
+        TreeSet<IpPrefix> ipv4Prefixes = new TreeSet<>(prefixLengthComparator);
+        TreeSet<IpPrefix> ipv6Prefixes = new TreeSet<>(prefixLengthComparator);
+        for (final RouteInfo route : lp.getAllRoutes()) {
+            IpPrefix destination = route.getDestination();
+            if (destination.isIPv4()) {
+                ipv4Prefixes.add(destination);
+            } else {
+                ipv6Prefixes.add(destination);
+            }
+        }
+        if (NetworkUtils.routedIPv4AddressCount(ipv4Prefixes) > MOST_IPV4_ADDRESSES_COUNT) {
+            return true;
+        }
+        return NetworkUtils.routedIPv6AddressCount(ipv6Prefixes)
+                .compareTo(MOST_IPV6_ADDRESSES_COUNT) >= 0;
+    }
+
     private void agentConnect() {
         LinkProperties lp = makeLinkProperties();
 
-        if (lp.hasIPv4DefaultRoute() || lp.hasIPv6DefaultRoute()) {
+        if (providesRoutesToMostDestinations(lp)) {
             mNetworkCapabilities.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
         } else {
             mNetworkCapabilities.removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
