@@ -40,7 +40,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.transition.Scene;
 import android.transition.Transition;
 import android.transition.TransitionManager;
@@ -251,8 +250,6 @@ public abstract class Window {
      * The ID that the main layout in the XML layout file should have.
      */
     public static final int ID_ANDROID_CONTENT = com.android.internal.R.id.content;
-
-    private static final String PROPERTY_HARDWARE_UI = "persist.sys.ui.hw";
 
     /**
      * Flag for letting the theme drive the color of the window caption controls. Use with
@@ -758,8 +755,7 @@ public abstract class Window {
             boolean hardwareAccelerated) {
         mAppToken = appToken;
         mAppName = appName;
-        mHardwareAccelerated = hardwareAccelerated
-                || SystemProperties.getBoolean(PROPERTY_HARDWARE_UI, false);
+        mHardwareAccelerated = hardwareAccelerated;
         if (wm == null) {
             wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
         }

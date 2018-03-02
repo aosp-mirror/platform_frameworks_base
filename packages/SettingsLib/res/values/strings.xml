@@ -674,9 +674,9 @@
     <string name="show_screen_updates_summary">Flash entire window surfaces when they update</string>
 
     <!-- UI debug setting: show where window updates happen with GPU rendering? [CHAR LIMIT=25] -->
-    <string name="show_hw_screen_updates">Show GPU view updates</string>
+    <string name="show_hw_screen_updates">Show view updates</string>
     <!-- UI debug setting: show GPU rendering screen updates summary [CHAR LIMIT=50] -->
-    <string name="show_hw_screen_updates_summary">Flash views inside windows when drawn with the GPU</string>
+    <string name="show_hw_screen_updates_summary">Flash views inside windows when drawn</string>
 
     <!-- UI debug setting: show when hardware layers get updated [CHAR LIMIT=25] -->
     <string name="show_hw_layers_updates">Show hardware layers updates</string>
@@ -712,11 +712,6 @@
     <!-- UI debug setting: force right to left layout summary [CHAR LIMIT=100] -->
     <string name="force_rtl_layout_all_locales_summary">Force screen layout direction to RTL for all locales</string>
 
-    <!-- UI debug setting: force hardware acceleration to render apps [CHAR LIMIT=25] -->
-    <string name="force_hw_ui">Force GPU rendering</string>
-    <!-- UI debug setting: force hardware acceleration summary [CHAR LIMIT=50] -->
-    <string name="force_hw_ui_summary">Force use of GPU for 2d drawing</string>
-
     <!-- UI debug setting: force anti-aliasing to render apps [CHAR LIMIT=25] -->
     <string name="force_msaa">Force 4x MSAA</string>
     <!-- UI debug setting: force anti-aliasing summary [CHAR LIMIT=50] -->
@@ -726,7 +721,7 @@
     <string name="show_non_rect_clip">Debug non-rectangular clip operations</string>
 
     <!-- UI debug setting: profile time taken by hardware acceleration to render apps [CHAR LIMIT=25] -->
-    <string name="track_frame_time">Profile GPU rendering</string>
+    <string name="track_frame_time">Profile HWUI rendering</string>
 
     <!-- UI debug setting: enable gpu debug layers [CHAR LIMIT=25] -->
     <string name="enable_gpu_debug_layers">Enable GPU debug layers</string>
