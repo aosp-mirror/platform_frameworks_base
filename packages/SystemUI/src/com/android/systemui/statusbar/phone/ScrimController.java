@@ -71,10 +71,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     public static final long ANIMATION_DURATION = 220;
-    public static final Interpolator KEYGUARD_FADE_OUT_INTERPOLATOR
-            = new PathInterpolator(0f, 0, 0.7f, 1f);
-    public static final Interpolator KEYGUARD_FADE_OUT_INTERPOLATOR_LOCKED
-            = new PathInterpolator(0.3f, 0f, 0.8f, 1f);
 
     /**
      * When both scrims have 0 alpha.
@@ -143,7 +139,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     protected boolean mAnimateChange;
     private boolean mUpdatePending;
     private boolean mTracking;
-    private boolean mAnimateKeyguardFadingOut;
     protected long mAnimationDuration = -1;
     private long mAnimationDelay;
     private Runnable mOnAnimationFinished;
@@ -157,8 +152,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private int mPinnedHeadsUpCount;
     private float mTopHeadsUpDragAmount;
     private View mDraggedHeadsUpView;
-    private boolean mKeyguardFadingOutInProgress;
-    private ValueAnimator mKeyguardFadeoutAnimation;
     private int mScrimsVisibility;
     private final Consumer<Integer> mScrimVisibleListener;
     private boolean mBlankScreen;
@@ -267,10 +260,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         // Showing/hiding the keyguard means that scrim colors have to be switched, not necessary
         // to do the same when you're just showing the brightness mirror.
         mNeedsDrawableColorUpdate = state != ScrimState.BRIGHTNESS_MIRROR;
-
-        if (mKeyguardFadeoutAnimation != null) {
-            mKeyguardFadeoutAnimation.cancel();
-        }
 
         // The device might sleep if it's entering AOD, we need to make sure that
         // the animation plays properly until the last frame.
@@ -585,16 +574,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             updateScrimColor(scrim, alpha, tint);
             dispatchScrimsVisible();
         });
-        anim.setInterpolator(getInterpolator());
+        anim.setInterpolator(mInterpolator);
         anim.setStartDelay(mAnimationDelay);
         anim.setDuration(mAnimationDuration);
         anim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                if (mKeyguardFadingOutInProgress) {
-                    mKeyguardFadeoutAnimation = null;
-                    mKeyguardFadingOutInProgress = false;
-                }
                 onFinished();
 
                 scrim.setTag(TAG_KEY_ANIM, null);
@@ -606,10 +591,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
                 }
             }
         });
-        if (mAnimateKeyguardFadingOut) {
-            mKeyguardFadingOutInProgress = true;
-            mKeyguardFadeoutAnimation = anim;
-        }
 
         // Cache alpha values because we might want to update this animator in the future if
         // the user expands the panel while the animation is still running.
@@ -644,16 +625,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         }
     }
 
-    protected Interpolator getInterpolator() {
-        if (mAnimateKeyguardFadingOut && mKeyguardUpdateMonitor.needsSlowUnlockTransition()) {
-            return KEYGUARD_FADE_OUT_INTERPOLATOR_LOCKED;
-        } else if (mAnimateKeyguardFadingOut) {
-            return KEYGUARD_FADE_OUT_INTERPOLATOR;
-        } else {
-            return mInterpolator;
-        }
-    }
-
     @Override
     public boolean onPreDraw() {
         mScrimBehind.getViewTreeObserver().removeOnPreDrawListener(this);
@@ -662,9 +633,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             mCallback.onStart();
         }
         updateScrims();
-
-        // Make sure that we always call the listener even if we didn't start an animation.
-        endAnimateKeyguardFadingOut(false /* force */);
+        if (mOnAnimationFinished != null && !isAnimating(mScrimInFront)
+                && !isAnimating(mScrimBehind)) {
+            mOnAnimationFinished.run();
+            mOnAnimationFinished = null;
+        }
         return true;
     }
 
@@ -682,17 +655,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         if (mState == ScrimState.UNLOCKED) {
             mCurrentInFrontTint = Color.TRANSPARENT;
             mCurrentBehindTint = Color.TRANSPARENT;
-        }
-    }
-
-    private void endAnimateKeyguardFadingOut(boolean force) {
-        mAnimateKeyguardFadingOut = false;
-        if (force || (!isAnimating(mScrimInFront) && !isAnimating(mScrimBehind))) {
-            if (mOnAnimationFinished != null) {
-                mOnAnimationFinished.run();
-                mOnAnimationFinished = null;
-            }
-            mKeyguardFadingOutInProgress = false;
         }
     }
 
@@ -781,10 +743,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             mLightBarController.setScrimAlpha(alpha);
         }
 
-        final ScrimView scrimView = scrim instanceof  ScrimView ? (ScrimView) scrim : null;
         final boolean wantsAlphaUpdate = alpha != currentAlpha;
-        final boolean wantsTintUpdate = scrimView != null
-                && scrimView.getTint() != getCurrentScrimTint(scrimView);
+        final boolean wantsTintUpdate = scrim.getTint() != getCurrentScrimTint(scrim);
 
         if (wantsAlphaUpdate || wantsTintUpdate) {
             if (mAnimateChange) {
