@@ -1004,8 +1004,13 @@ public class CarrierConfigManager {
             "wfc_emergency_address_carrier_app_string";
 
     /**
-     * Boolean to decide whether to use #KEY_CARRIER_NAME_STRING from CarrierConfig app.
-     * @hide
+     * Unconditionally override the carrier name string using #KEY_CARRIER_NAME_STRING.
+     *
+     * If true, then the carrier display name will be #KEY_CARRIER_NAME_STRING, unconditionally.
+     *
+     * <p>If false, then the override will be performed conditionally and the
+     * #KEY_CARRIER_NAME_STRING will have the lowest-precedence; it will only be used in the event
+     * that the name string would otherwise be empty, allowing it to serve as a last-resort.
      */
     public static final String KEY_CARRIER_NAME_OVERRIDE_BOOL = "carrier_name_override_bool";
 
@@ -1013,7 +1018,6 @@ public class CarrierConfigManager {
      * String to identify carrier name in CarrierConfig app. This string overrides SPN if
      * #KEY_CARRIER_NAME_OVERRIDE_BOOL is true; otherwise, it will be used if its value is provided
      * and SPN is unavailable
-     * @hide
      */
     public static final String KEY_CARRIER_NAME_STRING = "carrier_name_string";
 
