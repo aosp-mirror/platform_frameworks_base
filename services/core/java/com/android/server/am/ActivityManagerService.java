@@ -7574,6 +7574,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             if (profilerInfo != null && profilerInfo.profileFd != null) {
                 profilerInfo.profileFd = profilerInfo.profileFd.dup();
+                if (TextUtils.equals(mProfileApp, processName) && mProfilerInfo != null) {
+                    clearProfilerLocked();
+                }
             }
 
             // We deprecated Build.SERIAL and it is not accessible to
@@ -7658,7 +7661,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                         mCoreSettingsObserver.getCoreSettingsLocked(),
                         buildSerial, isAutofillCompatEnabled);
             }
-
+            if (profilerInfo != null) {
+                profilerInfo.closeFd();
+                profilerInfo = null;
+            }
             checkTime(startTime, "attachApplicationLocked: immediately after bindApplication");
             updateLruProcessLocked(app, false, null);
             checkTime(startTime, "attachApplicationLocked: after updateLruProcessLocked");
