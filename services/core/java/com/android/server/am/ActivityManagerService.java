@@ -686,7 +686,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private final ActivityStartController mActivityStartController;
 
-    final ClientLifecycleManager mLifecycleManager;
+    private final ClientLifecycleManager mLifecycleManager;
 
     final TaskChangeNotificationController mTaskChangeNotificationController;
 
@@ -12308,6 +12308,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     ActivityStartController getActivityStartController() {
         return mActivityStartController;
+    }
+
+    ClientLifecycleManager getLifecycleManager() {
+        return mLifecycleManager;
     }
 
     PackageManagerInternal getPackageManagerInternalLocked() {

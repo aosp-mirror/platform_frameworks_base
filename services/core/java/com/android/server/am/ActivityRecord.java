@@ -665,7 +665,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                     "Reporting activity moved to display" + ", activityRecord=" + this
                             + ", displayId=" + displayId + ", config=" + config);
 
-            service.mLifecycleManager.scheduleTransaction(app.thread, appToken,
+            service.getLifecycleManager().scheduleTransaction(app.thread, appToken,
                     MoveToDisplayItem.obtain(displayId, config));
         } catch (RemoteException e) {
             // If process died, whatever.
@@ -683,7 +683,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             if (DEBUG_CONFIGURATION) Slog.v(TAG, "Sending new config to " + this + ", config: "
                     + config);
 
-            service.mLifecycleManager.scheduleTransaction(app.thread, appToken,
+            service.getLifecycleManager().scheduleTransaction(app.thread, appToken,
                     ActivityConfigurationChangeItem.obtain(config));
         } catch (RemoteException e) {
             // If process died, whatever.
@@ -710,7 +710,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     private void scheduleMultiWindowModeChanged(Configuration overrideConfig) {
         try {
-            service.mLifecycleManager.scheduleTransaction(app.thread, appToken,
+            service.getLifecycleManager().scheduleTransaction(app.thread, appToken,
                     MultiWindowModeChangeItem.obtain(mLastReportedMultiWindowMode,
                             overrideConfig));
         } catch (Exception e) {
@@ -738,7 +738,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     private void schedulePictureInPictureModeChanged(Configuration overrideConfig) {
         try {
-            service.mLifecycleManager.scheduleTransaction(app.thread, appToken,
+            service.getLifecycleManager().scheduleTransaction(app.thread, appToken,
                     PipModeChangeItem.obtain(mLastReportedPictureInPictureMode,
                             overrideConfig));
         } catch (Exception e) {
@@ -1428,7 +1428,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             try {
                 ArrayList<ReferrerIntent> ar = new ArrayList<>(1);
                 ar.add(rintent);
-                service.mLifecycleManager.scheduleTransaction(app.thread, appToken,
+                service.getLifecycleManager().scheduleTransaction(app.thread, appToken,
                         NewIntentItem.obtain(ar, mState == PAUSED));
                 unsent = false;
             } catch (RemoteException e) {
@@ -1615,20 +1615,30 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         if (DEBUG_STATES) Slog.v(TAG_STATES, "State movement: " + this + " from:" + getState()
                         + " to:" + state + " reason:" + reason);
 
+        if (state == mState) {
+            // No need to do anything if state doesn't change.
+            if (DEBUG_STATES) Slog.v(TAG_STATES, "State unchanged from:" + state);
+            return;
+        }
+
+        if (isState(DESTROYED) || (state != DESTROYED && isState(DESTROYING))) {
+            // We cannot move backwards from destroyed and destroying states.
+            throw new IllegalArgumentException("cannot move back states once destroying"
+                    + "current:" + mState + " requested:" + state);
+        }
+
         final ActivityState prev = mState;
-        final boolean stateChanged = prev != state;
+        mState = state;
+
+        if (mRecentTransitions.size() == MAX_STORED_STATE_TRANSITIONS) {
+            mRecentTransitions.remove(0);
+        }
+
+        mRecentTransitions.add(new StateTransition(prev, state, reason));
 
         mState = state;
 
-        if (stateChanged) {
-            if (mRecentTransitions.size() == MAX_STORED_STATE_TRANSITIONS) {
-                mRecentTransitions.remove(0);
-            }
-
-            mRecentTransitions.add(new StateTransition(prev, state, reason));
-        }
-
-        if (stateChanged && isState(DESTROYING, DESTROYED)) {
+        if (isState(DESTROYING, DESTROYED)) {
             makeFinishingLocked();
 
             // When moving to the destroyed state, immediately destroy the activity in the
@@ -1726,7 +1736,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             setVisible(true);
             sleeping = false;
             app.pendingUiClean = true;
-            service.mLifecycleManager.scheduleTransaction(app.thread, appToken,
+            service.getLifecycleManager().scheduleTransaction(app.thread, appToken,
                     WindowVisibilityItem.obtain(true /* showWindow */));
             // The activity may be waiting for stop, but that is no longer appropriate for it.
             mStackSupervisor.mStoppingActivities.remove(this);
@@ -1744,7 +1754,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 // An activity must be in the {@link PAUSING} state for the system to validate
                 // the move to {@link PAUSED}.
                 setState(PAUSING, "makeVisibleIfNeeded");
-                service.mLifecycleManager.scheduleTransaction(app.thread, appToken,
+                service.getLifecycleManager().scheduleTransaction(app.thread, appToken,
                         PauseActivityItem.obtain(finishing, false /* userLeaving */,
                                 configChangeFlags, false /* dontReport */)
                                 .setDescription(reason));
@@ -2712,7 +2722,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             final ClientTransaction transaction = ClientTransaction.obtain(app.thread, appToken);
             transaction.addCallback(callbackItem);
             transaction.setLifecycleStateRequest(lifecycleItem);
-            service.mLifecycleManager.scheduleTransaction(transaction);
+            service.getLifecycleManager().scheduleTransaction(transaction);
             // Note: don't need to call pauseIfSleepingLocked() here, because the caller will only
             // request resume if this activity is currently resumed, which implies we aren't
             // sleeping.
