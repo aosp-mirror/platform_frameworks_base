@@ -1734,7 +1734,7 @@
     <string name="time_picker_minute_label" msgid="5168864173796598399">"dakika"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"Saati ayarlayın"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"Geçerli bir saat girin"</string>
-    <string name="time_picker_prompt_label" msgid="7588093983899966783">"Zamanı yazın"</string>
+    <string name="time_picker_prompt_label" msgid="7588093983899966783">"Saati yazın"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Zaman girişi için metin girişi moduna geçin."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Zaman girişi için saat moduna geçin."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Otomatik doldurma seçenekleri"</string>

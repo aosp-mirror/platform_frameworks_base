@@ -863,7 +863,7 @@
     <string name="preposition_for_year" msgid="5040395640711867177">"年份：<xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"天"</string>
     <string name="days" msgid="4774547661021344602">"天"</string>
-    <string name="hour" msgid="2126771916426189481">"小时"</string>
+    <string name="hour" msgid="2126771916426189481">"点"</string>
     <string name="hours" msgid="894424005266852993">"小时"</string>
     <string name="minute" msgid="9148878657703769868">"分钟"</string>
     <string name="minutes" msgid="5646001005827034509">"分钟"</string>
@@ -1470,7 +1470,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"您已连续 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次画错解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐号解锁手机。\n\n请在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒后重试。"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"删除"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"要将音量调高到推荐水平以上吗？\n\n长时间保持高音量可能会损伤听力。"</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"要将音量调高到建议的音量以上吗？\n\n长时间保持高音量可能会损伤听力。"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"要使用无障碍快捷方式吗？"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"开启快捷方式后，同时按下两个音量按钮 3 秒钟即可启动所设定的无障碍功能。\n\n当前设定的无障碍功能：\n<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n如需更改设定的功能，请依次转到“设置”&gt;“无障碍”。"</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"关闭快捷方式"</string>
@@ -1730,7 +1730,7 @@
     <string name="app_category_productivity" msgid="3742083261781538852">"办公"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"设备存储空间"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB 调试"</string>
-    <string name="time_picker_hour_label" msgid="2979075098868106450">"小时"</string>
+    <string name="time_picker_hour_label" msgid="2979075098868106450">"点"</string>
     <string name="time_picker_minute_label" msgid="5168864173796598399">"分钟"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"设置时间"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"请输入有效的时间"</string>

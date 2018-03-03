@@ -1161,7 +1161,7 @@
     <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"IKKE NÅ"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Et nytt SIM-kort er satt inn"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Trykk for å konfigurere"</string>
-    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Stille klokken"</string>
+    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Oppgi tidspunkt"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Angi dato"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Lagre"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Ferdig"</string>
@@ -1732,9 +1732,9 @@
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB-feilsøking"</string>
     <string name="time_picker_hour_label" msgid="2979075098868106450">"time"</string>
     <string name="time_picker_minute_label" msgid="5168864173796598399">"minutt"</string>
-    <string name="time_picker_header_text" msgid="143536825321922567">"Still klokken"</string>
+    <string name="time_picker_header_text" msgid="143536825321922567">"Oppgi tidspunkt"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"Angi et gyldig klokkeslett"</string>
-    <string name="time_picker_prompt_label" msgid="7588093983899966783">"Skriv hva klokken er"</string>
+    <string name="time_picker_prompt_label" msgid="7588093983899966783">"Skriv inn tidspunktet"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Bytt til tekstinndatamodus for tidsinndata."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Bytt til klokkemodus for tidsinndata."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Alternativer for autofyll"</string>
