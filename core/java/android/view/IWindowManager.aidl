@@ -283,6 +283,11 @@ interface IWindowManager
      */
     oneway void setPipVisibility(boolean visible);
 
+   /**
+     * Called by System UI to enable or disable haptic feedback on the navigation bar buttons.
+     */
+    void setNavBarVirtualKeyHapticFeedbackEnabled(boolean enabled);
+
     /**
      * Device has a software navigation bar (separate from the status bar).
      */

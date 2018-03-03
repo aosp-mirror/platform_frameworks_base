@@ -637,6 +637,10 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
+    public void setNavBarVirtualKeyHapticFeedbackEnabledLw(boolean enabled) {
+    }
+
+    @Override
     public void onSystemUiStarted() {
     }
 

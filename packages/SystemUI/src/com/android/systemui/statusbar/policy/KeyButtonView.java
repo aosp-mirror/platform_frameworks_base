@@ -232,12 +232,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                     performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                 }
                 mIsPressed = true;
-                if (isProxyConnected) {
-                    // Provide small vibration for quick step or immediate down feedback
-                    AsyncTask.execute(() ->
-                            mVibrator.vibrate(VibrationEffect
-                                    .get(VibrationEffect.EFFECT_TICK, false)));
-                } else {
+                if (!isProxyConnected) {
                     playSoundEffect(SoundEffectConstants.CLICK);
                     setPressed(mIsPressed);
                 }
