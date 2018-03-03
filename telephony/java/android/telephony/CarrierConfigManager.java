@@ -1586,6 +1586,14 @@ public class CarrierConfigManager {
             "notify_international_call_on_wfc_bool";
 
     /**
+     * Flag specifying whether to show an alert dialog for video call charges.
+     * By default this value is {@code false}.
+     * @hide
+     */
+    public static final String KEY_SHOW_VIDEO_CALL_CHARGES_ALERT_DIALOG_BOOL =
+            "show_video_call_charges_alert_dialog_bool";
+
+    /**
      * An array containing custom call forwarding number prefixes that will be blocked while the
      * device is reporting that it is roaming. By default, there are no custom call
      * forwarding prefixes and none of these numbers will be filtered. If one or more entries are
@@ -2120,6 +2128,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_DISPLAY_VOICEMAIL_NUMBER_AS_DEFAULT_CALL_FORWARDING_NUMBER_BOOL,
                 false);
         sDefaults.putBoolean(KEY_NOTIFY_INTERNATIONAL_CALL_ON_WFC_BOOL, false);
+        sDefaults.putBoolean(KEY_SHOW_VIDEO_CALL_CHARGES_ALERT_DIALOG_BOOL, false);
         sDefaults.putStringArray(KEY_CALL_FORWARDING_BLOCKS_WHILE_ROAMING_STRING_ARRAY,
                 null);
         sDefaults.putInt(KEY_LTE_EARFCNS_RSRP_BOOST_INT, 0);
