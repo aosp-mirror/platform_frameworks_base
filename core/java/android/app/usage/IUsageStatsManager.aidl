@@ -32,6 +32,7 @@ interface IUsageStatsManager {
     ParceledListSlice queryConfigurationStats(int bucketType, long beginTime, long endTime,
             String callingPackage);
     UsageEvents queryEvents(long beginTime, long endTime, String callingPackage);
+    UsageEvents queryEventsForPackage(long beginTime, long endTime, String callingPackage);
     void setAppInactive(String packageName, boolean inactive, int userId);
     boolean isAppInactive(String packageName, int userId);
     void whitelistAppTemporarily(String packageName, long duration, int userId);

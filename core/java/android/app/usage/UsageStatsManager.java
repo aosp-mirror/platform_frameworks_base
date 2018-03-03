@@ -52,10 +52,13 @@ import java.util.Map;
  * </pre>
  * A request for data in the middle of a time interval will include that interval.
  * <p/>
- * <b>NOTE:</b> This API requires the permission android.permission.PACKAGE_USAGE_STATS.
- * However, declaring the permission implies intention to use the API and the user of the device
- * still needs to grant permission through the Settings application.
- * See {@link android.provider.Settings#ACTION_USAGE_ACCESS_SETTINGS}
+ * <b>NOTE:</b> Most methods on this API require the permission
+ * android.permission.PACKAGE_USAGE_STATS. However, declaring the permission implies intention to
+ * use the API and the user of the device still needs to grant permission through the Settings
+ * application.
+ * See {@link android.provider.Settings#ACTION_USAGE_ACCESS_SETTINGS}.
+ * Methods which only return the information for the calling package do not require this permission.
+ * E.g. {@link #getAppStandbyBucket()} and {@link #queryEventsForSelf(long, long)}.
  */
 @SystemService(Context.USAGE_STATS_SERVICE)
 public final class UsageStatsManager {
@@ -206,6 +209,8 @@ public final class UsageStatsManager {
      * 2014 - com.example.charlie
      * </pre>
      *
+     * <p> The caller must have {@link android.Manifest.permission#PACKAGE_USAGE_STATS} </p>
+     *
      * @param intervalType The time interval by which the stats are aggregated.
      * @param beginTime The inclusive beginning of the range of stats to include in the results.
      * @param endTime The exclusive end of the range of stats to include in the results.
@@ -235,6 +240,7 @@ public final class UsageStatsManager {
      * Gets the hardware configurations the device was in for the given time range, aggregated by
      * the specified interval. The results are ordered as in
      * {@link #queryUsageStats(int, long, long)}.
+     * <p> The caller must have {@link android.Manifest.permission#PACKAGE_USAGE_STATS} </p>
      *
      * @param intervalType The time interval by which the stats are aggregated.
      * @param beginTime The inclusive beginning of the range of stats to include in the results.
@@ -259,6 +265,7 @@ public final class UsageStatsManager {
     /**
      * Query for events in the given time range. Events are only kept by the system for a few
      * days.
+     * <p> The caller must have {@link android.Manifest.permission#PACKAGE_USAGE_STATS} </p>
      *
      * @param beginTime The inclusive beginning of the range of events to include in the results.
      * @param endTime The exclusive end of the range of events to include in the results.
@@ -278,9 +285,32 @@ public final class UsageStatsManager {
     }
 
     /**
+     * Like {@link #queryEvents(long, long)}, but only returns events for the calling package.
+     *
+     * @param beginTime The inclusive beginning of the range of events to include in the results.
+     * @param endTime The exclusive end of the range of events to include in the results.
+     * @return A {@link UsageEvents} object.
+     *
+     * @see #queryEvents(long, long)
+     */
+    public UsageEvents queryEventsForSelf(long beginTime, long endTime) {
+        try {
+            final UsageEvents events = mService.queryEventsForPackage(beginTime, endTime,
+                    mContext.getOpPackageName());
+            if (events != null) {
+                return events;
+            }
+        } catch (RemoteException e) {
+            // fallthrough
+        }
+        return sEmptyResults;
+    }
+
+    /**
      * A convenience method that queries for all stats in the given range (using the best interval
      * for that range), merges the resulting data, and keys it by package name.
      * See {@link #queryUsageStats(int, long, long)}.
+     * <p> The caller must have {@link android.Manifest.permission#PACKAGE_USAGE_STATS} </p>
      *
      * @param beginTime The inclusive beginning of the range of stats to include in the results.
      * @param endTime The exclusive end of the range of stats to include in the results.
