@@ -143,6 +143,9 @@ public class AccessibilityShortcutController {
         mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN),
                 false, co, UserHandle.USER_ALL);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN),
+                false, co, UserHandle.USER_ALL);
         setCurrentUser(mUserId);
     }
 
@@ -168,8 +171,12 @@ public class AccessibilityShortcutController {
         final ContentResolver cr = mContext.getContentResolver();
         final boolean enabled = Settings.Secure.getIntForUser(
                 cr, Settings.Secure.ACCESSIBILITY_SHORTCUT_ENABLED, 1, mUserId) == 1;
+        // Enable the shortcut from the lockscreen by default if the dialog has been shown
+        final int dialogAlreadyShown = Settings.Secure.getIntForUser(
+                cr, Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 0, mUserId);
         mEnabledOnLockScreen = Settings.Secure.getIntForUser(
-                cr, Settings.Secure.ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN, 0, mUserId) == 1;
+                cr, Settings.Secure.ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN,
+                dialogAlreadyShown, mUserId) == 1;
         mIsShortcutEnabled = enabled && haveValidService;
     }
 

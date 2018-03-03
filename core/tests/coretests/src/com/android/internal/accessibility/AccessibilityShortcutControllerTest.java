@@ -214,6 +214,20 @@ public class AccessibilityShortcutControllerTest {
     }
 
     @Test
+    public void testShortcutAvailable_onLockScreenAndLockScreenPreferenceUnset() {
+        // When the user hasn't specified a lock screen preference, we allow from the lock screen
+        // as long as the user has agreed to enable the shortcut
+        configureValidShortcutService();
+        configureShortcutEnabled(ENABLED_INCLUDING_LOCK_SCREEN);
+        Settings.Secure.putString(
+                mContentResolver, ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN, null);
+        Settings.Secure.putInt(mContentResolver, ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 0);
+        assertFalse(getController().isAccessibilityShortcutAvailable(true));
+        Settings.Secure.putInt(mContentResolver, ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 1);
+        assertTrue(getController().isAccessibilityShortcutAvailable(true));
+    }
+
+    @Test
     public void testShortcutAvailable_whenServiceIdBecomesNull_shouldReturnFalse() {
         configureShortcutEnabled(ENABLED_EXCEPT_LOCK_SCREEN);
         configureValidShortcutService();
