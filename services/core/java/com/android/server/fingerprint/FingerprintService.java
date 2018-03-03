@@ -941,9 +941,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
 
                         @Override
                         public void sendResult(Bundle data) throws RemoteException {
-                            if (mWakeLock.isHeld()) {
-                                mWakeLock.release();
-                            }
+                            releaseWakelock();
                         }
                     });
                 } catch (DeadObjectException e) {
@@ -951,6 +949,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                     mHandler.post(mRemoveCallbackRunnable);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Failed to invoke onLockoutReset: ", e);
+                    releaseWakelock();
                 }
             }
         }
@@ -958,9 +957,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         private final Runnable mRemoveCallbackRunnable = new Runnable() {
             @Override
             public void run() {
-                if (mWakeLock.isHeld()) {
-                    mWakeLock.release();
-                }
+                releaseWakelock();
                 removeLockoutResetCallback(FingerprintServiceLockoutResetMonitor.this);
             }
         };
@@ -969,6 +966,12 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         public void binderDied() {
             Slog.e(TAG, "Lockout reset callback binder died");
             mHandler.post(mRemoveCallbackRunnable);
+        }
+
+        private void releaseWakelock() {
+            if (mWakeLock.isHeld()) {
+                mWakeLock.release();
+            }
         }
     }
 
