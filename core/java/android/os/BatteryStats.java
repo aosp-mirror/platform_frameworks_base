@@ -294,8 +294,8 @@ public abstract class BatteryStats implements Parcelable {
     /**
      * jbd line is:
      * BATTERY_STATS_CHECKIN_VERSION, uid, which, "jbd",
-     * jobsDeferredEventCount, jobsDeferredCount, averageLatencyMillis,
-     * count at latency < 1 hr, count at latency < 2 hrs, count at latency < 6 hrs, beyond 6 hrs
+     * jobsDeferredEventCount, jobsDeferredCount, totalLatencyMillis,
+     * count at latency < 1 hr, count at latency 1 to 2 hrs, 2 to 4 hrs, 4 to 8 hrs, and past 8 hrs
      * <p>
      * @see #JOB_FRESHNESS_BUCKETS
      */
@@ -364,13 +364,14 @@ public abstract class BatteryStats implements Parcelable {
     /**
      * These are the thresholds for bucketing last time since a job was run for an app
      * that just moved to ACTIVE due to a launch. So if the last time a job ran was less
-     * than 30 minutes ago, then it's reasonably fresh, 2 hours ago, not so fresh and so
+     * than 1 hour ago, then it's reasonably fresh, 2 hours ago, not so fresh and so
      * on.
      */
     public static final long[] JOB_FRESHNESS_BUCKETS = {
             1 * 60 * 60 * 1000L,
             2 * 60 * 60 * 1000L,
-            6 * 60 * 60 * 1000L,
+            4 * 60 * 60 * 1000L,
+            8 * 60 * 60 * 1000L,
             Long.MAX_VALUE
     };
 
