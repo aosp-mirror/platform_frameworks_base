@@ -86,7 +86,7 @@ public final class CellIdentityTdscdma extends CellIdentity {
      * Get Mobile Country Code in string format
      * @return Mobile Country Code in string format, null if unknown
      */
-    public String getMccStr() {
+    public String getMccString() {
         return mMccStr;
     }
 
@@ -94,7 +94,7 @@ public final class CellIdentityTdscdma extends CellIdentity {
      * Get Mobile Network Code in string format
      * @return Mobile Network Code in string format, null if unknown
      */
-    public String getMncStr() {
+    public String getMncString() {
         return mMncStr;
     }
 
