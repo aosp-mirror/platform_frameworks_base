@@ -191,7 +191,7 @@
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Gaitu Wi-Fi sareetan saioa hasteko modu xehatua"</string>
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Behartu Wi-Fi konexiotik datuenera aldatzera"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Onartu beti ibiltaritzan Wi-Fi sareak bilatzea"</string>
-    <string name="mobile_data_always_on" msgid="8774857027458200434">"Datu mugikorrak beti aktibo"</string>
+    <string name="mobile_data_always_on" msgid="8774857027458200434">"Datu-konexioa beti aktibo"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Konexioa partekatzeko hardwarearen azelerazioa"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Erakutsi Bluetooth gailuak izenik gabe"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Desgaitu bolumen absolutua"</string>
