@@ -22,7 +22,6 @@ import android.annotation.NonNull;
 import android.inputmethodservice.AbstractInputMethodService;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.LocaleList;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
@@ -618,14 +617,6 @@ public class InputConnectionWrapper implements InputConnection {
             return false;
         }
         return result;
-    }
-
-    @AnyThread
-    public void reportLanguageHint(@NonNull LocaleList languageHint) {
-        try {
-            mIInputContext.reportLanguageHint(languageHint);
-        } catch (RemoteException e) {
-        }
     }
 
     @AnyThread

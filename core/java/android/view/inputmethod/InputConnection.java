@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.inputmethodservice.InputMethodService;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.LocaleList;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 
@@ -899,37 +898,4 @@ public interface InputConnection {
      */
     boolean commitContent(@NonNull InputContentInfo inputContentInfo, int flags,
             @Nullable Bundle opts);
-
-    /**
-     * Called by the input method to tell a hint about the locales of text to be committed.
-     *
-     * <p>This is just a hint for editor authors (and the system) to choose better options when
-     * they have to disambiguate languages, like editor authors can do for input methods with
-     * {@link EditorInfo#hintLocales}.</p>
-     *
-     * <p>The language hint provided by this callback should have higher priority than
-     * {@link InputMethodSubtype#getLanguageTag()}, which cannot be updated dynamically.</p>
-     *
-     * <p>Note that in general it is discouraged for input method to specify
-     * {@link android.text.style.LocaleSpan} when inputting text, mainly because of application
-     * compatibility concerns.</p>
-     * <ul>
-     *     <li>When an existing text that already has {@link android.text.style.LocaleSpan} is being
-     *     modified by both the input method and application, there is no reliable and easy way to
-     *     keep track of who modified {@link android.text.style.LocaleSpan}. For instance, if the
-     *     text was updated by JavaScript, it it highly likely that span information is completely
-     *     removed, while some input method attempts to preserve spans if possible.</li>
-     *     <li>There is no clear semantics regarding whether {@link android.text.style.LocaleSpan}
-     *     means a weak (ignorable) hint or a strong hint. This becomes more problematic when
-     *     multiple {@link android.text.style.LocaleSpan} instances are specified to the same
-     *     text region, especially when those spans are conflicting.</li>
-     * </ul>
-     * @param languageHint list of languages sorted by the priority and/or probability
-     */
-    default void reportLanguageHint(@NonNull LocaleList languageHint) {
-        // Intentionally empty.
-        //
-        // We need to have *some* default implementation for the source compatibility.
-        // See Bug 72127682 for details.
-    }
 }
