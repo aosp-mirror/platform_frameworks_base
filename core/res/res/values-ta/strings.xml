@@ -181,7 +181,8 @@
     <string name="network_logging_notification_title" msgid="6399790108123704477">"சாதனம் நிர்வகிக்கப்படுகிறது"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"உங்கள் நிறுவனம் இந்தச் சாதனத்தை நிர்வகிக்கும், அத்துடன் அது நெட்வொர்க் ட்ராஃபிக்கைக் கண்காணிக்கலாம். விவரங்களுக்கு, தட்டவும்."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"சாதனத் தரவு அழிக்கப்படும்"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"நிர்வாகிப் பயன்பாட்டைப் பயன்படுத்த முடியாது. இப்போது உங்கள் சாதனம் அழிக்கப்படும்.\n\nஏதேனும் கேள்விகள் இருப்பின், உங்கள் நிறுவனத்தின் நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
+    <!-- no translation found for factory_reset_message (9024647691106150160) -->
+    <skip />
     <string name="printing_disabled_by" msgid="8936832919072486965">"பிரிண்ட் செய்வதை <xliff:g id="OWNER_APP">%s</xliff:g> தடுத்துள்ளது."</string>
     <string name="me" msgid="6545696007631404292">"நான்"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"டேப்லெட் விருப்பங்கள்"</string>
@@ -305,7 +306,8 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"சைகைகளைச் செயல்படுத்துதல்"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"தட்டலாம், ஸ்வைப் செய்யலாம், பின்ச் செய்யலாம் மற்றும் பிற சைகைகளைச் செயல்படுத்தலாம்."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"கைரேகை சைகைகள்"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"சாதனத்தின் கைரேகை சென்சார் மேல் செய்யப்படும் சைகைகளைப் படமெடுக்க முடியும்."</string>
+    <!-- no translation found for capability_desc_canCaptureFingerprintGestures (4386487962402228670) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"நிலைப் பட்டியை முடக்குதல் அல்லது மாற்றுதல்"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"நிலைப் பட்டியை முடக்க அல்லது முறைமையில் ஐகான்களைச் சேர்க்க மற்றும் அகற்ற பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"நிலைப் பட்டியில் இருக்கும்"</string>
@@ -802,6 +804,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"வடிவம் மூலம் திறத்தல்."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"முகத்தால் திறத்தல்."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Pin மூலம் திறத்தல்."</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"சிம்மைத் திறக்கும் பின்."</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"சிம்மைத் திறக்கும் Puk."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"கடவுச்சொல் மூலம் திறத்தல்."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"வடிவப் பகுதி."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"ஸ்லைடு பகுதி."</string>
@@ -1085,18 +1089,12 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"பயன்பாடுகள் தொடங்கப்படுகின்றன."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"துவக்குதலை முடிக்கிறது."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> இயங்குகிறது"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"கேமிற்குச் செல்ல, தட்டவும்"</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"கேமைத் தேர்வுசெய்க"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"சிறந்த செயல்திறனுக்காக, இந்த கேம்களில் ஏதேனும் ஒன்றை மட்டுமே ஒரு நேரத்தில் திறக்கவும்."</string>
+    <string name="old_app_action" msgid="3044685170829526403">"<xliff:g id="OLD_APP">%1$s</xliff:g> பயன்பாட்டிற்குச் செல்"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"<xliff:g id="NEW_APP">%1$s</xliff:g> பயன்பாட்டைத் திற"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"சேமிக்கப்படாமலேயே <xliff:g id="OLD_APP">%1$s</xliff:g> மூடப்படும்"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"நினைவக வரம்பை <xliff:g id="PROC">%1$s</xliff:g> மீறியது"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"ஹீப் டம்ப் சேகரிக்கப்பட்டது; பகிர, தட்டவும்"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"ஹீப் டம்பைப் பகிரவா?"</string>
@@ -1204,7 +1202,8 @@
     <string name="sim_added_message" msgid="6599945301141050216">"மொபைல் நெட்வொர்க்கை அணுக உங்கள் சாதனத்தை மறுதொடக்கம் செய்யவும்."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"மீண்டும் தொடங்கு"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"மொபைல் சேவையை இயக்கு"</string>
-    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"உங்கள் புதிய சிம்மை இயக்க, தொலைத்தொடர்பு நிறுவனத்தின் பயன்பாட்டைப் பதிவிறக்கவும்"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"உங்கள் புதிய சிம்மை இயக்க, மொபைல் நிறுவனத்தின் பயன்பாட்டைப் பதிவிறக்கவும்"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"உங்கள் புதிய சிம்மை இயக்க, <xliff:g id="APP_NAME">%1$s</xliff:g> பயன்பாட்டைப் பதிவிறக்கவும்"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"பயன்பாட்டைப் பதிவிறக்கு"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"புதிய சிம் செருகப்பட்டது"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"அமைக்க, தட்டவும்"</string>
@@ -1419,22 +1418,21 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB டிரைவ்"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB சேமிப்பிடம்"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"திருத்து"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"தரவுப் பயன்பாடு குறித்த எச்சரிக்கை"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"தரவு உபயோகம், அமைப்புகளைப் பார்க்க, தட்டவும்."</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G தரவு வரம்பைக் கடந்தது"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G தரவு வரம்பைக் கடந்தது"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"டேட்டா உபயோக எச்சரிக்கை"</string>
+    <!-- no translation found for data_usage_warning_body (7340198905103751676) -->
+    <skip />
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"மொபைல் டேட்டா வரம்பை அடைந்தது"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"வைஃபை தரவு வரம்பைக் கடந்தது"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"மீதமுள்ள சுழற்சிக்கு தரவு இடைநிறுத்தப்பட்டது"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G தரவு வரம்பு கடந்தது"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G தரவு வரம்பு கடந்தது"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"மொபைல் டேட்டா வரம்பு கடந்தது"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"வைஃபை தரவு வரம்பு கடந்தது"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"குறிப்பிட்ட வரம்பைவிட <xliff:g id="SIZE">%s</xliff:g> கூடுதல்."</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"உங்கள் பில்லிங் சுழற்சியில் மீதமுள்ள நாட்களுக்கு டேட்டா நிறுத்திவைக்கப்பட்டுள்ளது"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"டேட்டா உபயோகம்: வரம்பைவிட அதிகம்"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"வைஃபை உபயோகம் வரம்பைவிட அதிகம்"</string>
+    <!-- no translation found for data_usage_limit_snoozed_body (1671222777207603301) -->
+    <skip />
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"பின்புல வரம்பு வரையறுக்கப்பட்டது"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"வரம்பை அகற்ற, தட்டவும்."</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"அதிகப்படியான டேட்டா உபயோகம்"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"உங்களின் டேட்டா உபயோகம் கடந்த சில நாட்களில் வழக்கத்தை விட அதிகரித்துள்ளது. உபயோகம் மற்றும் அமைப்புகளைப் பார்க்க, தட்டவும்."</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"மிகுதியான மொபைல் டேட்டா பயன்பாடு"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"உங்கள் ஆப்ஸ், வழக்கத்தைவிட அதிகமான டேட்டாவைப் பயன்படுத்தியுள்ளன"</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"வழக்கத்தைவிட அதிகமான டேட்டாவை, <xliff:g id="APP">%s</xliff:g> பயன்படுத்தியுள்ளது"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"பாதுகாப்பு சான்றிதழ்"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"இந்தச் சான்றிதழ் சரியானது."</string>
     <string name="issued_to" msgid="454239480274921032">"இதற்கு வழங்கப்பட்டது:"</string>

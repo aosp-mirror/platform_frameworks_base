@@ -181,7 +181,8 @@
     <string name="network_logging_notification_title" msgid="6399790108123704477">"관리되는 기기"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"조직에서 이 기기를 관리하며 네트워크 트래픽을 모니터링할 수도 있습니다. 자세한 내용을 보려면 탭하세요."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"기기가 삭제됩니다."</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"관리자 앱을 사용할 수 없습니다. 곧 기기가 삭제됩니다.\n\n궁금한 점이 있으면 조직의 관리자에게 문의하세요."</string>
+    <!-- no translation found for factory_reset_message (9024647691106150160) -->
+    <skip />
     <string name="printing_disabled_by" msgid="8936832919072486965">"<xliff:g id="OWNER_APP">%s</xliff:g>에 의해 사용 중지되었습니다."</string>
     <string name="me" msgid="6545696007631404292">"나"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"태블릿 옵션"</string>
@@ -305,7 +306,8 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"동작 실행"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"탭, 스와이프, 확대/축소 및 기타 동작을 실행할 수 있습니다."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"지문 동작"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"기기 지문 센서에서 동작을 캡처합니다."</string>
+    <!-- no translation found for capability_desc_canCaptureFingerprintGestures (4386487962402228670) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"상태 표시줄 사용 중지 또는 수정"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"앱이 상태 표시줄을 사용중지하거나 시스템 아이콘을 추가 및 제거할 수 있도록 허용합니다."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"상태 표시줄에 위치"</string>
@@ -802,6 +804,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"패턴을 사용하여 잠금해제합니다."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"얼굴 인식을 사용하여 잠금해제합니다."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"핀을 사용하여 잠금해제합니다."</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"SIM PIN 잠금 해제"</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"SIM PUK 잠금 해제"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"비밀번호를 사용하여 잠금해제합니다."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"패턴을 그리는 부분입니다."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"슬라이드하는 부분입니다."</string>
@@ -1085,18 +1089,12 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"앱을 시작하는 중입니다."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"부팅 완료"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> 실행 중"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"게임으로 돌아가려면 탭하세요."</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"게임 선택"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"성능 최적화를 위해 한 번에 하나의 게임만 열 수 있습니다."</string>
+    <string name="old_app_action" msgid="3044685170829526403">"<xliff:g id="OLD_APP">%1$s</xliff:g>(으)로 돌아가기"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"<xliff:g id="NEW_APP">%1$s</xliff:g> 열기"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g>이(가) 저장되지 않고 종료됩니다."</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g>에서 메모리 제한을 초과했습니다."</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"힙 덤프가 수집되었습니다. 공유하려면 탭하세요."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"힙 덤프를 공유할까요?"</string>
@@ -1204,6 +1202,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"다시 시작"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"모바일 서비스 활성화"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"이동통신사 앱을 다운로드하여 새로운 SIM 활성화"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱을 다운로드하여 새로운 앱을 활성화하세요."</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"앱 다운로드"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"새 SIM이 삽입됨"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"탭하여 설정"</string>
@@ -1418,22 +1417,21 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB 드라이브"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB 저장소"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"수정"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"데이터 사용 알림"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"사용량 및 설정을 보려면 탭하세요."</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G 데이터 한도에 도달함"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G 데이터 한도에 도달함"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"데이터 경고"</string>
+    <!-- no translation found for data_usage_warning_body (7340198905103751676) -->
+    <skip />
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"모바일 데이터 제한 도달"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi 데이터 한도에 도달함"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"나머지 주기 동안 데이터 일시중지됨"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G - 3G 데이터 제한 초과됨"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4GB의 데이터 제한 초과됨"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"모바일 데이터 제한 초과됨"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi 데이터 한도 초과됨"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> - 지정된 한도 초과"</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"남은 주기 동안 데이터가 일시중지되었습니다."</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"모바일 데이터 한도 초과"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"Wi-Fi 데이터 한도 초과"</string>
+    <!-- no translation found for data_usage_limit_snoozed_body (1671222777207603301) -->
+    <skip />
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"백그라운드 데이터 사용이 제한됨"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"제한을 삭제하려면 탭하세요."</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"데이터 사용량 많음"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"지난 며칠 동안의 데이터 사용량이 평소보다 많습니다. 사용량 및 설정을 보려면 탭하세요."</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"모바일 데이터 사용량 많음"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"앱에서 평소보다 데이터를 많이 사용했습니다."</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"<xliff:g id="APP">%s</xliff:g>에서 평소보다 데이터를 많이 사용했습니다."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"보안 인증서"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"유효한 인증서입니다."</string>
     <string name="issued_to" msgid="454239480274921032">"발급 대상:"</string>

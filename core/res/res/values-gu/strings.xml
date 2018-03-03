@@ -181,7 +181,8 @@
     <string name="network_logging_notification_title" msgid="6399790108123704477">"ઉપકરણ સંચાલિત છે"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"તમારી સંસ્થા આ ઉપકરણનું સંચાલન કરે છે અને નેટવર્ક ટ્રાફિફનું નિયમન કરી શકે છે. વિગતો માટે ટૅપ કરો."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"તમારું ઉપકરણ કાઢી નાખવામાં આવશે"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"આ વ્યવસ્થાપક ઍપ્લિકેશનનો ઉપયોગ કરી શકાશે નહીં. તમારું ઉપકરણ હવે કાઢી નાખવામાં આવશે.\n\nજો તમને પ્રશ્નો હોય, તો તમારી સંસ્થાના વ્યવસ્થાપકનો સંપર્ક કરો."</string>
+    <!-- no translation found for factory_reset_message (9024647691106150160) -->
+    <skip />
     <string name="printing_disabled_by" msgid="8936832919072486965">"<xliff:g id="OWNER_APP">%s</xliff:g> દ્વારા પ્રિન્ટ કરવાનું બંધ કરાયું છે."</string>
     <string name="me" msgid="6545696007631404292">"હું"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"ટેબ્લેટ વિકલ્પો"</string>
@@ -305,7 +306,8 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"હાવભાવ કરો"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"ટૅપ, સ્વાઇપ, પિંચ કરી અને અન્ય હાવભાવ કરી શકે છે."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"ફિંગરપ્રિન્ટ સંકેતો"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"ઉપકરણોનાં ફિંગરપ્રિન્ટ સેન્સર પર ભજવેલા સંકેતો કૅપ્ચર કરી શકે છે."</string>
+    <!-- no translation found for capability_desc_canCaptureFingerprintGestures (4386487962402228670) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"સ્ટેટસ બારને અક્ષમ કરો અથવા તેમાં ફેરફાર કરો"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"ઍપ્લિકેશનને સ્ટેટસ બાર અક્ષમ કરવાની અથવા સિસ્ટમ આયકન્સ ઉમેરવા અને દૂર કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"સ્ટેટસ બારમાં બતાવો"</string>
@@ -802,6 +804,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"પૅટર્ન અનલૉક."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"ફેસ અનલૉક"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"પિન અનલૉક."</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"પિનથી સિમને અનલૉક કરો."</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"Pukથી સિમને અનલૉક કરો."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"પાસવર્ડ અનલૉક કરો."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"પૅટર્ન ક્ષેત્ર."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"સ્લાઇડ ક્ષેત્ર."</string>
@@ -1085,18 +1089,12 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"ઍપ્લિકેશનો શરૂ કરી રહ્યાં છે."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"બૂટ સમાપ્ત કરી રહ્યાં છે."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> ચાલુ છે"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"ગેમ પર પાછા આવવા માટે ટૅપ કરો"</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"ગેમ પસંદ કરો"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"બહેતર કાર્યપ્રદર્શન માટે, આ ગેમમાંથી માત્ર એક વખતે એક જ ગેમ ખોલી શકાશે."</string>
+    <string name="old_app_action" msgid="3044685170829526403">"<xliff:g id="OLD_APP">%1$s</xliff:g> પર પાછા જાઓ"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"<xliff:g id="NEW_APP">%1$s</xliff:g> ખોલો"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> ફેરફારો સાચવ્યા વિના બંધ થશે"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> એ મેમરી સીમા વટાવી"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"હીપ ડમ્પ ભેગો કરવામાં આવ્યો છે; શેર કરવા માટે ટૅપ કરો"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"હીપ ડમ્પ શેર કરીએ?"</string>
@@ -1205,6 +1203,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"રિસ્ટાર્ટ કરો"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"મોબાઇલ સેવાને સક્રિય કરો"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"તમારું નવું સિમ સક્રિય કરવા માટે કૅરિઅર ઍપ ડાઉનલોડ કરો"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"તમારું નવું સિમ સક્રિય કરવા માટે <xliff:g id="APP_NAME">%1$s</xliff:g> ઍપ ડાઉનલોડ કરો"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"ઍપ ડાઉનલોડ કરો"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"નવું સિમ દાખલ કર્યું"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"તેને સેટ કરવા માટે ટૅપ કરો"</string>
@@ -1419,22 +1418,21 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB ડ્રાઇવ"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB સ્ટોરેજ"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"સંપાદિત કરો"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"ડેટા વપરાશ ચેતવણી"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"વપરાશ અને સેટિંગ્સ જોવા ટૅપ કરો."</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G ડેટા મર્યાદા પર પહોંચ્યાં"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G ડેટા મર્યાદા સુધી પહોંચ્યાં"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"ડેટા ચેતવણી"</string>
+    <!-- no translation found for data_usage_warning_body (7340198905103751676) -->
+    <skip />
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"મોબાઇલ ડેટાની મર્યાદા આવી ગઈ"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"વાઇ-ફાઇ ડેટા સીમા પર પહોંચ્યાં"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"બાકીના ચક્ર માટે ડેટા થોભાવ્યો"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G ડેટા મર્યાદા ઓળંગાઈ"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G ડેટા મર્યાદા ઓળંગાઈ"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"મોબાઇલ ડેટા મર્યાદા ઓળંગાઈ"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"વાઇ-ફાઇ ડેટા મર્યાદા ઓળંગાઈ"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"ઉલ્લેખિત મર્યાદાથી <xliff:g id="SIZE">%s</xliff:g> વધુ."</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"તમારા બાકીના ચક્ર માટે ડેટા થોભાવ્યો"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"મોબાઇલ ડેટાના મર્યાદાથી વધુ"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"વાઇ-ફાઇ ડેટાના મર્યાદાથી વધુ"</string>
+    <!-- no translation found for data_usage_limit_snoozed_body (1671222777207603301) -->
+    <skip />
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"બૅકગ્રાઉન્ડ ડેટા પ્રતિબંધિત"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"પ્રતિબંધ દૂર કરવા માટે ટૅપ કરો."</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"વધુ પડતો ડેટા વપરાશ"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"છેલ્લા થોડા દિવસ દરમ્યાનમાં તમારો ડેટા વપરાશ સામાન્ય કરતાં વધુ થયો છે. વપરાશ અને સેટિંગ જોવા માટે ટૅપ કરો."</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"ઉચ્ચ મોબાઇલ ડેટા વપરાશ"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"તમારા ઍપએ સામાન્ય કરતાં વધુ ડેટાનો વપરાશ કર્યો છે"</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"<xliff:g id="APP">%s</xliff:g>એ સામાન્ય કરતાં વધુ ડેટાનો વપરાશ કર્યો છે"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"સુરક્ષા પ્રમાણપત્ર"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"આ પ્રમાણપત્ર માન્ય છે."</string>
     <string name="issued_to" msgid="454239480274921032">"આને રજૂ:"</string>

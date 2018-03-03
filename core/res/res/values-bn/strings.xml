@@ -181,7 +181,8 @@
     <string name="network_logging_notification_title" msgid="6399790108123704477">"ডিভাইসটি পরিচালনা করা হচ্ছে"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"আপনার প্রতিষ্ঠান এই ডিভাইসটি পরিচালনা করে এবং এটির নেটওয়ার্ক ট্রাফিকের উপরে নজর রাখতে পারে। বিশদ বিবরণের জন্য ট্যাপ করুন।,"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"আপনার ডিভাইসটি মুছে ফেলা হবে"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"প্রশাসক অ্যাপটি ব্যবহার করা যাবে না। আপনার ডিভাইসে থাকা সবকিছু এখন মুছে ফেলা হবে।\n\nকোনও প্রশ্ন থাকলে আপনার প্রতিষ্ঠানের প্রশাসকের সাথে যোগাযোগ করুন।"</string>
+    <!-- no translation found for factory_reset_message (9024647691106150160) -->
+    <skip />
     <string name="printing_disabled_by" msgid="8936832919072486965">"<xliff:g id="OWNER_APP">%s</xliff:g> প্রিন্টিং বন্ধ রেখেছে।"</string>
     <string name="me" msgid="6545696007631404292">"আমাকে"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"ট্যাবলেট বিকল্পগুলি"</string>
@@ -305,7 +306,8 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"অঙ্গভঙ্গির কাজগুলি সম্পাদন করুন"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"আলতো চাপ দেওয়া, সোয়াইপ, পিঞ্চ করা এবং অন্যান্য ইঙ্গিতের কাজগুলি সম্পাদন করতে পারবেন৷"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"ফিঙ্গারপ্রিন্ট সেন্সরের উপর করা অঙ্গভঙ্গিগুলি"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"ডিভাইসের আঙ্গুলের ছাপের সেন্সরের উপর আঙ্গুলের ইঙ্গিত ক্যাপচার করতে পারে।"</string>
+    <!-- no translation found for capability_desc_canCaptureFingerprintGestures (4386487962402228670) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"স্ট্যাটাস বার নিষ্ক্রিয় অথবা সংশোধন করে"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"অ্যাপ্লিকেশনকে স্ট্যাটাস বার অক্ষম করতে এবং সিস্টেম আইকনগুলি সরাতে দেয়৷"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"স্থিতি দন্ডে থাকুন"</string>
@@ -802,6 +804,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"প্যাটার্ন দিয়ে আনলক৷"</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"মুখের সাহায্যে আনলক করুন৷"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"পিন দিয়ে আনলক৷"</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"সিম পিন আনলক।"</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"সিম পিইউকে আনলক।"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"পাসওয়ার্ড দিয়ে আনলক৷"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"প্যাটার্ন এলাকা৷"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"স্লাইড করার এলাকা৷"</string>
@@ -1085,18 +1089,12 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"অ্যাপ্লিকেশানগুলি শুরু করা হচ্ছে৷"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"চালু করা সম্পূর্ণ হচ্ছে৷"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> চলছে"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"গেমে ফিরে আসতে ট্যাপ করুন"</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"গেম বেছে নিন"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"বেশি ভাল পারফরম্যান্সের জন্য, এক সময়ে এই গেমগুলির যেকোনও একটি খোলা যেতে পারে।"</string>
+    <string name="old_app_action" msgid="3044685170829526403">"<xliff:g id="OLD_APP">%1$s</xliff:g> এ ফিরে যান"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"<xliff:g id="NEW_APP">%1$s</xliff:g> খুলুন"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"সেভ না করেই <xliff:g id="OLD_APP">%1$s</xliff:g> বন্ধ হবে"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> মেমরি সীমা অতিক্রম করেছে"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"অনেক ডেটা সংগ্রহ করা হয়েছে; শেয়ার করার জন্য ট্যাপ করুন"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"হিপ ডাম্প শেয়ার করবেন?"</string>
@@ -1205,6 +1203,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"রিস্টার্ট করুন"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"মোবাইল পরিষেবা চালু করুন"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"আপনার নতুন সিম কার্ড চালু করতে পরিষেবা প্রদানকারীর অ্যাপটি ডাউনলোড করুন"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"আপনার নতুন সিম কার্ড চালু করতে <xliff:g id="APP_NAME">%1$s</xliff:g> অ্যাপটি ডাউনলোড করুন"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"অ্যাপ ডাউনলোড করুন"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"নতুন সিম ঢোকানো হয়েছে"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"এটিকে সেট আপ করতে আলতো চাপুন"</string>
@@ -1419,22 +1418,21 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB ড্রাইভ"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB স্টোরেজ"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"সম্পাদনা করুন"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"ডেটা ব্যবহারের সতর্কতা"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"ব্যবহার এবং সেটিংস দেখতে আলতো চাপুন৷"</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G ডেটা সীমা ছাড়িয়েছে"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G ডেটা সীমা ছাড়িয়েছে"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"ডেটা সম্পর্কিত সতর্কতা"</string>
+    <!-- no translation found for data_usage_warning_body (7340198905103751676) -->
+    <skip />
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"মোবাইল ডেটার সীমায় পৌঁছে গেছেন"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"ওয়াই-ফাই ডেটা সীমা ছাড়িয়েছে"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"বাকি চক্রের জন্য ডেটা বিরামে গেছে"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G ডেটা সীমা ছাড়িয়ে গেছে"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G ডেটা সীমা ছাড়িয়ে গেছে"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"মোবাইল ডেটার সীমা ছাড়িয়ে গেছে"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"ওয়াই-ফাই ডেটার সীমা ছাড়িয়ে গেছে"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"নির্দিষ্ট সীমার থেকে <xliff:g id="SIZE">%s</xliff:g> বেশি৷"</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"আপনার বিলিং চক্রের বাকি দিনগুলির জন্য ডেটা বন্ধ করে দেওয়া হয়েছে"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"মোবাইল ডেটার সীমার চেয়ে বেশি"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"ওয়াই-ফাই ডেটার সীমার চেয়ে বেশি"</string>
+    <!-- no translation found for data_usage_limit_snoozed_body (1671222777207603301) -->
+    <skip />
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"পটভূমি ডেটা সীমিত করা আছে"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"সীমাবদ্ধতা সরাতে আলতো চাপুন৷"</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"বেশি ডেটা ব্যবহার হয়েছে"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"গত কয়েকদিনে আপনি স্বাভাবিকের থেকে বেশি ডেটা ব্যবহার করেছেন। ডেটার ব্যবহার দেখতে এবং সেটিংসে যেতে ট্যাপ করুন।"</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"খুব বেশি মোবাইল ডেটার ব্যবহার"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"আপনার অ্যাপগুলিতে স্বাভাবিকের চেয়ে বেশি ডেটা ব্যবহার হয়েছে"</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"<xliff:g id="APP">%s</xliff:g> অ্যাপে স্বাভাবিকের চেয়ে বেশি ডেটা ব্যবহার হয়েছে"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"নিরাপত্তার সার্টিফিকেট"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"শংসাপত্রটি বৈধ৷"</string>
     <string name="issued_to" msgid="454239480274921032">"এর জন্য ইস্যু করা হয়েছে:"</string>
@@ -1840,5 +1838,5 @@
     <string name="screenshot_edit" msgid="7867478911006447565">"এডিট করুন"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"সিস্টেমে হয়ে থাকা পরিবর্তন"</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\'বিরক্ত করবেন না\' মোডের সেটিং বদলে গেছে"</string>
-    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"বিজ্ঞপ্তির উপর ট্যাপ করে জানুন আপনি বাধার জন্য কোন সেটিংস সেট করেছেন"</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"বিজ্ঞপ্তির উপর ট্যাপ করে জানুন আপনি \'বিরক্ত করবেন না\'-র জন্য কোন সেটিংস সেট করেছেন"</string>
 </resources>

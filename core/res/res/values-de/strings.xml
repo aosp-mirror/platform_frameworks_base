@@ -181,7 +181,8 @@
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Dies ist ein verwaltetes Gerät"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Deine Organisation verwaltet dieses Gerät und überprüft unter Umständen den Netzwerkverkehr. Tippe hier, um weitere Informationen zu erhalten."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Die Daten auf deinem Gerät werden gelöscht."</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"Die Admin-App kann nicht verwendet werden. Die Daten auf deinem Gerät werden nun gelöscht.\n\nBitte wende dich an den Administrator deiner Organisation."</string>
+    <!-- no translation found for factory_reset_message (9024647691106150160) -->
+    <skip />
     <string name="printing_disabled_by" msgid="8936832919072486965">"Drucken wurde von <xliff:g id="OWNER_APP">%s</xliff:g> deaktiviert."</string>
     <string name="me" msgid="6545696007631404292">"Eigene"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Tablet-Optionen"</string>
@@ -305,7 +306,8 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Bewegungen möglich"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Tippen, Wischen, Zusammenziehen und andere Bewegungen möglich."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Bewegungen auf dem Fingerabdrucksensor"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Erfasst Bewegungen auf dem Fingerabdrucksensor des Geräts."</string>
+    <!-- no translation found for capability_desc_canCaptureFingerprintGestures (4386487962402228670) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"Statusleiste deaktivieren oder ändern"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Ermöglicht der App, die Statusleiste zu deaktivieren oder Systemsymbole hinzuzufügen oder zu entfernen"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"Statusleiste darstellen"</string>
@@ -802,6 +804,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Entsperrung mit Muster"</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Face Unlock"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Entsperrung mit PIN"</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"SIM durch PIN-Eingabe entsperren."</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"SIM durch PUK-Eingabe entsperren."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Entsperrung mit Passwort"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Bereich für Muster"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Bereich für Fingerbewegung"</string>
@@ -823,7 +827,7 @@
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Auf dieser Seite bleiben"</string>
     <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nMöchtest du diese Seite wirklich verlassen?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Bestätigen"</string>
-    <string name="double_tap_toast" msgid="4595046515400268881">"Tipp: Zum Vergrößern und Verkleinern zweimal tippen"</string>
+    <string name="double_tap_toast" msgid="4595046515400268881">"Tipp: Zum Vergrößern und Verkleinern doppeltippen"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"AutoFill"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"AutoFill konfig."</string>
     <string name="autofill_window_title" msgid="921006636895825007">"AutoFill"</string>
@@ -1085,18 +1089,12 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Apps werden gestartet..."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Start wird abgeschlossen..."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> läuft"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"Tippe, um zum Spiel zurückzukehren"</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"Spiel wählen"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"Damit eine optimale Leistung erreicht wird, kann nur eines dieser Spiele auf einmal geöffnet sein."</string>
+    <string name="old_app_action" msgid="3044685170829526403">"Zurück zu <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"<xliff:g id="NEW_APP">%1$s</xliff:g> öffnen"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> wird ohne Speichern geschlossen"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"Speicherlimit für \"<xliff:g id="PROC">%1$s</xliff:g>\" überschritten"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Heap-Dump wurde erfasst. Zum Teilen tippen"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Heap-Dump teilen?"</string>
@@ -1204,6 +1202,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"Neu starten"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Mobilfunkdienst aktivieren"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Mobilfunkanbieter-App herunterladen, um meine neue SIM-Karte zu aktivieren"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"<xliff:g id="APP_NAME">%1$s</xliff:g> herunterladen, um deine neue SIM-Karte zu aktivieren"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"App herunterladen"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Neue SIM-Karte eingelegt"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Zum Einrichten tippen"</string>
@@ -1418,22 +1417,21 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"USB-Speichergerät von <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB-Speicher"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Bearbeiten"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"Warnung zur Datennutzung"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"Für Nutzung und Einstellungen tippen."</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-/3G-Datenlimit erreicht"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G-Datenlimit erreicht"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"Warnlimit für mobile Daten"</string>
+    <!-- no translation found for data_usage_warning_body (7340198905103751676) -->
+    <skip />
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Limit für mobile Daten erreicht"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"WLAN-Datenlimit erreicht"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Daten für restl. Zeitraum deakt."</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-/3G-Datenlimit überschritten"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G-Datenlimit überschritten"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Mobildatenlimit überschritten"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"WLAN-Datenlimit überschritten"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> über dem vorgegebenen Limit"</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"Datennutzung für den Rest des Zyklus pausiert"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"Über deinem mobilen Datenlimit"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"Über deinem WLAN-Datenlimit"</string>
+    <!-- no translation found for data_usage_limit_snoozed_body (1671222777207603301) -->
+    <skip />
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Hintergrunddaten beschränkt"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"Zum Entfernen der Beschränkung tippen."</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"Hohe Datennutzung"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"Du hast in den letzten Tagen mehr Daten verbraucht als üblich. Tippe, um deine Datennutzung und deine Einstellungen anzuzeigen."</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"Hohe mobile Datennutzung"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"Deine Apps haben mehr Daten als üblich verbraucht"</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"<xliff:g id="APP">%s</xliff:g> hat mehr Daten als üblich verbraucht"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Sicherheitszertifikat"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Dies ist ein gültiges Zertifikat."</string>
     <string name="issued_to" msgid="454239480274921032">"Ausgestellt für:"</string>

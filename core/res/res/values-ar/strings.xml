@@ -189,7 +189,7 @@
     <string name="network_logging_notification_title" msgid="6399790108123704477">"تتم إدارة الجهاز"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"تدير مؤسستك هذا الجهاز ويمكنها مراقبة حركة بيانات الشبكة. يمكنك النقر للحصول على تفاصيل."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"سيتم محو بيانات جهازك."</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"تعذر استخدام تطبيق المشرف. سيتم محو بيانات جهازك الآن.\n\nإذا كانت لديك أسئلة، فاتصل بمشرف مؤسستك."</string>
+    <string name="factory_reset_message" msgid="9024647691106150160">"تعذّر استخدام تطبيق المشرف. سيتم محو بيانات جهازك الآن.\n\nإذا كانت لديك أسئلة، اتصل بمشرف مؤسستك."</string>
     <string name="printing_disabled_by" msgid="8936832919072486965">"تم تعطيل الطباعة بواسطة <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="me" msgid="6545696007631404292">"أنا"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"خيارات الجهاز اللوحي"</string>
@@ -317,7 +317,7 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"تنفيذ إيماءات"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"يمكن النقر والتمرير بسرعة والتصغير وتنفيذ إيماءات أخرى."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"إيماءات بصمات الإصبع"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"يمكن أن تلتقط الإيماءات التي تم تنفيذها على مستشعر بصمات الإصبع في الأجهزة."</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"يمكن أن تلتقط الإيماءات التي تم تنفيذها على مستشعر بصمات الإصبع في الجهاز."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"تعطيل شريط الحالة أو تعديله"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"للسماح للتطبيق بتعطيل شريط الحالة أو إضافة رموز نظام وإزالتها."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"العمل كشريط للحالة"</string>
@@ -814,6 +814,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"إلغاء القفل باستخدام النقش."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"تأمين الجهاز بالوجه."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"‏إلغاء القفل باستخدام رمز PIN."</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"‏إلغاء قفل رقم التعريف الشخصي لشريحة SIM."</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"‏إلغاء قفل مفتاح PUK لشريحة SIM."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"إلغاء القفل باستخدام كلمة المرور."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"منطقة النقش."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"منطقة التمرير."</string>
@@ -1165,18 +1167,12 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"بدء التطبيقات."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"جارٍ إعادة التشغيل."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> يعمل"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"انقر للعودة إلى اللعبة"</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"اختيار اللعبة"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"للحصول على أداء أفضل، يمكن فتح لعبة واحدة فقط من هذه الألعاب في كل مرة."</string>
+    <string name="old_app_action" msgid="3044685170829526403">"الرجوع إلى <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"فتح <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"سيتم إغلاق <xliff:g id="OLD_APP">%1$s</xliff:g> من دون حفظ"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"لقد تجاوزت <xliff:g id="PROC">%1$s</xliff:g> حد الذاكرة."</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"تم نسخ الذاكرة، انقر للمشاركة."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"هل تريد مشاركة نَسْخ الذاكرة؟"</string>
@@ -1292,6 +1288,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"إعادة التشغيل"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"تفعيل خدمة الجوّال"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"‏تنزيل تطبيق مشغل شبكة الجوّال لتفعيل شريحة SIM الجديدة"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"‏تنزيل تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> لتفعيل شريحة SIM الجديدة"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"تنزيل التطبيق"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"‏تم إدخال شريحة SIM جديدة."</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"انقر لإعداده."</string>
@@ -1510,22 +1507,19 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"‏محرك أقراص USB من <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"‏وحدة تخزين USB"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"تعديل"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"تنبيه استخدام البيانات"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"انقر لعرض الاستخدام والإعدادات."</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"‏تم بلوغ حد بيانات اتصال 2G-3G"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"‏تم بلوغ حد بيانات اتصال 4G"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"تحذيرات البيانات"</string>
+    <string name="data_usage_warning_body" msgid="7340198905103751676">"لقد استخدمت <xliff:g id="APP">%s</xliff:g> من البيانات."</string>
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"تم بلوغ حد بيانات الجوّال"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"‏تم بلوغ حد بيانات Wi-Fi"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"توقفت البيانات مؤقتًا لاستكمال الدورة"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"‏تم تجاوز حد بيانات شبكات 2G-3G"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"‏تم تجاوز حد بيانات 4G"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"تم تجاوز حد بيانات الجوّال"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"‏تم تجاوز حد بيانات شبكة Wi-Fi"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> فوق الحد المعين."</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"تم إيقاف البيانات مؤقتًا لبقية الدورة"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"تم تجاوز أقصى حد لبيانات الجوّال"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"‏تم تجاوز أقصى حد لبيانات Wi-Fi"</string>
+    <string name="data_usage_limit_snoozed_body" msgid="1671222777207603301">"تم تجاوز الحد الأقصى المسموح به الذي عيَّنته بمقدار <xliff:g id="SIZE">%s</xliff:g>."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"تم تقييد بيانات الخلفية"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"انقر لإزالة القيد."</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"معدل مرتفع لاستخدام البيانات"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"لقد تجاوز استخدامك للبيانات خلال الأيام القليلة الماضية المعدل المعتاد. انقر لعرض البيانات عن الاستخدام والإعدادات."</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"استخدام مرتفع لبيانات الجوّال"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"استخدمت تطبيقاتك بيانات أكثر من المعتاد"</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"استخدمَ تطبيق <xliff:g id="APP">%s</xliff:g> بيانات أكثر من المعتاد"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"شهادة الأمان"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"هذه الشهادة صالحة."</string>
     <string name="issued_to" msgid="454239480274921032">"إصدار لـ:"</string>

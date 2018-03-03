@@ -181,7 +181,8 @@
     <string name="network_logging_notification_title" msgid="6399790108123704477">"裝置受到管理"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"貴機構會管理這個裝置，且可能監控網路流量。輕觸即可瞭解詳情。"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"你的裝置資料將遭到清除"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"無法使用管理員應用程式，系統現在將清除你裝置中的資料。\n\n如有任何問題，請與貴機構的管理員聯絡。"</string>
+    <!-- no translation found for factory_reset_message (9024647691106150160) -->
+    <skip />
     <string name="printing_disabled_by" msgid="8936832919072486965">"「<xliff:g id="OWNER_APP">%s</xliff:g>」已停用列印功能。"</string>
     <string name="me" msgid="6545696007631404292">"我"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"平板電腦選項"</string>
@@ -305,7 +306,8 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"使用手勢"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"可使用輕觸、滑動和雙指撥動等手勢。"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"指紋手勢"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"可以擷取在裝置指紋感應器上執行的手勢。"</string>
+    <!-- no translation found for capability_desc_canCaptureFingerprintGestures (4386487962402228670) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"停用或變更狀態列"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"允許應用程式停用狀態列，並可新增或移除系統圖示。"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"以狀態列顯示"</string>
@@ -498,7 +500,7 @@
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"嘗試次數過多，請稍後再試。"</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"嘗試次數過多，指紋感應器已停用。"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"請再試一次。"</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"未註冊任何指紋。"</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"未登錄任何指紋。"</string>
     <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"這個裝置沒有指紋感應器"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"手指 <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
@@ -802,6 +804,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"圖案解鎖。"</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"人臉解鎖。"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"PIN 解鎖。"</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"SIM 卡 PIN 碼解鎖。"</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"SIM 卡 PUK 解鎖。"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"密碼解鎖。"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"圖案區域。"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"滑動區域。"</string>
@@ -1085,18 +1089,12 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"正在啟動應用程式。"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"啟動完成。"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> 執行中"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"輕觸即可返回遊戲"</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"選擇遊戲"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"為了提高效能，一次只能開啟其中一個遊戲。"</string>
+    <string name="old_app_action" msgid="3044685170829526403">"返回「<xliff:g id="OLD_APP">%1$s</xliff:g>」"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"開啟「<xliff:g id="NEW_APP">%1$s</xliff:g>」"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"「<xliff:g id="OLD_APP">%1$s</xliff:g>」將在不儲存的情況下關閉"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> 已超出記憶體上限"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"已取得記憶體快照資料；輕觸即可分享"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"分享記憶體快照資料？"</string>
@@ -1204,6 +1202,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"重新啟動"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"啟用行動服務"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"下載電信業者應用程式以啟用你的新 SIM 卡"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"下載「<xliff:g id="APP_NAME">%1$s</xliff:g>」應用程式以啟用你的新 SIM 卡"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"下載應用程式"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"已插入新的 SIM 卡"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"輕觸這裡即可進行設定"</string>
@@ -1418,22 +1417,21 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB 隨身碟"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB 儲存裝置"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"編輯"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"數據用量警告"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"輕觸即可查看用量和設定。"</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"已達到 2G-3G 數據流量上限"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"已達到 4G 數據流量上限"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"數據用量警告"</string>
+    <!-- no translation found for data_usage_warning_body (7340198905103751676) -->
+    <skip />
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"已達到行動數據用量上限"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"已達到 Wi-Fi 數據流量上限"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"已暫停使用數據連線，直到工作階段結束為止"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"已超過 2G-3G 數據上限"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"已超過 4G 數據上限"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"已超過行動數據上限"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"已超過 Wi-Fi 數據上限"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> 超過規定上限。"</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"已暫停使用數據連線，直到這個付款週期結束為止"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"已超過行動數據用量上限"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"已超過 Wi-Fi 數據用量上限"</string>
+    <!-- no translation found for data_usage_limit_snoozed_body (1671222777207603301) -->
+    <skip />
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"已限制背景資料"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"輕觸即可移除限制。"</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"大量數據用量"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"你過去幾天的數據用量比平常來得多。輕觸即可查看用量和設定。"</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"高行動數據用量"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"你的應用程式數據用量比平常多"</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"「<xliff:g id="APP">%s</xliff:g>」的數據用量比平常多"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"安全性憑證"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"憑證有效。"</string>
     <string name="issued_to" msgid="454239480274921032">"發佈至："</string>

@@ -185,7 +185,8 @@
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Zařízení je spravováno"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Toto zařízení je spravováno vaší organizací, která může sledovat síťový provoz. Podrobnosti zobrazíte klepnutím."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Zařízení bude vymazáno"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"Aplikaci pro správu nelze použít. Zařízení nyní bude vymazáno.\n\nV případě dotazů vám pomůže administrátor organizace."</string>
+    <!-- no translation found for factory_reset_message (9024647691106150160) -->
+    <skip />
     <string name="printing_disabled_by" msgid="8936832919072486965">"Aplikace <xliff:g id="OWNER_APP">%s</xliff:g> tisk zakazuje."</string>
     <string name="me" msgid="6545696007631404292">"Já"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Možnosti tabletu"</string>
@@ -311,7 +312,8 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Provádění gest"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Může provádět gesta klepnutí, přejetí, stažení prstů a další."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Gesta otiskem prstu"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Dokáže rozpoznat gesta zadaná na snímači otisků prstů."</string>
+    <!-- no translation found for capability_desc_canCaptureFingerprintGestures (4386487962402228670) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"zakázání či změny stavového řádku"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Umožňuje aplikaci zakázat stavový řádek nebo přidat či odebrat systémové ikony."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"vydávání se za stavový řádek"</string>
@@ -808,6 +810,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Odemknutí gestem."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Odemknutí obličejem."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Odemknutí kódem PIN."</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"Odemknutí SIM karty kódem PIN."</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"Odemknutí SIM karty kódem PUK."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Odemknutí heslem."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Oblast pro zadání bezpečnostního gesta."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Oblast pro přejetí prstem."</string>
@@ -1125,18 +1129,12 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Spouštění aplikací."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Dokončování inicializace."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"Běží aplikace <xliff:g id="APP">%1$s</xliff:g>"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"Klepnutím se vrátíte do hry"</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"Vyberte hru"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"Aby byl zajištěn lepší výkon, v jednu chvíli může být otevřena jen jedna taková hra."</string>
+    <string name="old_app_action" msgid="3044685170829526403">"Zpět do aplikace <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"Otevřít aplikaci <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"Aplikace <xliff:g id="OLD_APP">%1$s</xliff:g> se zavře bez uložení"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"Proces <xliff:g id="PROC">%1$s</xliff:g> překročil limit paměti"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Byl shromážděn výpis haldy, klepnutím jej můžete sdílet"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Sdílet výpis haldy?"</string>
@@ -1248,6 +1246,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"Restartovat"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Aktivovat mobilní službu"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Chcete-li aktivovat novou SIM kartu, stáhněte si aplikaci operátora"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"Chcete-li aktivovat novou SIM kartu, stáhněte si aplikaci <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Stáhnout aplikaci"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Byla vložena nová SIM karta"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Klepnutím zahájíte nastavení"</string>
@@ -1464,22 +1463,21 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"Jednotka USB <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Úložiště USB"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Upravit"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"Upozornění na používání dat"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"Klepnutím zobrazíte nastavení."</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Dosáhli jste limitu dat 2G–3G"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Dosáhli jste limitu dat 4G"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"Upozornění na data"</string>
+    <!-- no translation found for data_usage_warning_body (7340198905103751676) -->
+    <skip />
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Byl dosažen limit mobilních dat"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Dosáhli jste limitu dat Wi-Fi"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Data pro zbytek cyklu pozastavena"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Překročili jste limit dat 2G–3G"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Překročili jste limit dat 4G."</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Překročili jste limit mobilních dat."</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Datový limit Wi-Fi byl překročen"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> nad stanoveným limitem."</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"Data jsou po zbytek cyklu pozastavena"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"Byl překročen limit dat"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"Byl překročen limit Wi-Fi"</string>
+    <!-- no translation found for data_usage_limit_snoozed_body (1671222777207603301) -->
+    <skip />
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Data na pozadí jsou omezena"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"Klepnutím odstraníte omezení."</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"Velké využití dat"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"Za posledních několik dní máte větší využití dat než obvykle. Klepnutím zobrazíte využití a nastavení."</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"Vysoké využití mobilních dat"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"Vaše aplikace využily více dat, než je obvyklé"</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"Aplikace <xliff:g id="APP">%s</xliff:g> využila více dat, než je obvyklé"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Certifikát zabezpečení"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Tento certifikát je platný."</string>
     <string name="issued_to" msgid="454239480274921032">"Vydáno pro:"</string>

@@ -181,7 +181,8 @@
     <string name="network_logging_notification_title" msgid="6399790108123704477">"آلہ زیر انتظام ہے"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"آپ کی تنظیم اس آلے کا نظم کرتی ہے اور وہ نیٹ ورک ٹریفک کی نگرانی کر سکتی ہے۔ تفاصیل کیلئے تھپتھپائیں۔"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"آپ کا آلہ صاف کر دیا جائے گا"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"منتظم کی ایپ استعمال نہیں کی جا سکتی۔ آپ کا آلہ اب مٹا دیا جائے گا۔\n\nاگر آپ کے پاس سوالات ہیں، تو اپنی تنظیم کے منتظم سے رابطہ کریں۔"</string>
+    <!-- no translation found for factory_reset_message (9024647691106150160) -->
+    <skip />
     <string name="printing_disabled_by" msgid="8936832919072486965">"<xliff:g id="OWNER_APP">%s</xliff:g> نے پرنٹنگ کو غیر فعال کر دیا ہے۔"</string>
     <string name="me" msgid="6545696007631404292">"میں"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"ٹیبلیٹ کے اختیارات"</string>
@@ -305,7 +306,8 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"اشارے انجام دیں"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"تھپتھپانا، سوائپ کرنا، چٹکی بھرنا اور دیگر اشارے انجام دے سکتی ہے"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"فنگرپرنٹ کے اشارے"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"آلات کے فنگر پرنٹ سینسر پر کیے گئے اشاروں کو کیپچر کر سکتا ہے۔"</string>
+    <!-- no translation found for capability_desc_canCaptureFingerprintGestures (4386487962402228670) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"اسٹیٹس بار کو غیر فعال یا اس میں ترمیم کریں"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"ایپ کو اسٹیٹس بار غیر فعال کرنے یا سسٹم آئیکنز شامل کرنے اور ہٹانے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"بطور اسٹیٹس بار کام لیں"</string>
@@ -802,6 +804,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"پیٹرن کے ذریعے غیر مقفل کریں۔"</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"چہرے کے ذریعے غیر مقفل کریں۔"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"پن کے ذریعے غیر مقفل کریں۔"</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"‏Sim پن غیر مقفل۔"</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"‏Sim Puk غیر مقفل۔"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"پاس ورڈ کے ذریعہ غیر مقفل کریں۔"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"پیٹرن کا علاقہ۔"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"سلائیڈ کرنے کا علاقہ۔"</string>
@@ -1085,18 +1089,12 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"ایپس شروع ہو رہی ہیں۔"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"بوٹ مکمل ہو رہا ہے۔"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> چل رہی ہے"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"گیم پر واپس جانے کے لیے تھپتھپائیں"</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"گیم کا انتخاب کریں"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"بہتر کارکردگی کے لیے، ایک وقت میں ان گیمز میں سے صرف ایک ہی گیم کھولا جا سکتا ہے۔"</string>
+    <string name="old_app_action" msgid="3044685170829526403">"<xliff:g id="OLD_APP">%1$s</xliff:g> پر واپس جائیں"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"<xliff:g id="NEW_APP">%1$s</xliff:g> کھوليں"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> محفوظ کیے بغیر بند ہو جائے گی"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> میموری کی حد سے تجاوز کرگئی"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"ہیپ ڈمپ جمع ہو گیا ہے، اشتراک کرنے کیلئے تھپتھپائیں"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"ہیپ ڈمپ کا اشتراک کریں؟"</string>
@@ -1205,6 +1203,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"دوبارہ شروع کریں"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"موبائل سروس فعال کریں"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"‏اپنا نیا SIM فعال کرنے کیلئے کیریئر ایپ ڈاؤن لوڈ کریں"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"‏اپنا نیا SIM فعال کرنے کیلئے <xliff:g id="APP_NAME">%1$s</xliff:g> ایپ ڈاؤن لوڈ کریں"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"ایپ ڈاؤن لوڈ کریں"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"‏نئی SIM داخل ہو گئی"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"اسے سیٹ اپ کرنے کیلئے تھپتھپائیں"</string>
@@ -1419,22 +1418,21 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"‏<xliff:g id="MANUFACTURER">%s</xliff:g> USB ڈرائیو"</string>
     <string name="storage_usb" msgid="3017954059538517278">"‏USB اسٹوریج"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"ترمیم کریں"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"ڈیٹا کے استعمال کا الرٹ"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"استعمال اور ترتیبات دیکھنے کیلئے تھپتھپائیں۔"</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"‏2G-3G ڈیٹا کی حد کو پہنچ گیا"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"‏4G ڈیٹا کی حد کو پہنچ گیا"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"ڈیٹا وارننگ"</string>
+    <!-- no translation found for data_usage_warning_body (7340198905103751676) -->
+    <skip />
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"موبائل ڈیٹا کی حد کو پہنچ گیا"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"‏Wi-Fi ڈیٹا کی حد کو پہنچ گیا"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"باقی دور کیلئے ڈیٹا موقوف کر دیا"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"‏2G-3G ڈیٹا حد سے متجاوز ہو گیا"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"‏4G ڈیٹا حد سے متجاوز ہو گیا"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"موبائل ڈیٹا حد سے متجاوز ہو گیا"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"‏Wi-Fi ڈیٹا حد سے متجاوز ہو گیا"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> متعینہ حد سے زیادہ ہے۔"</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"آپ کے باقی دور کیلئے ڈیٹا موقوف کر دیا گیا ہے"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"آپ کے موبائل ڈیٹا کی حد سے زیادہ"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"‏آپ کے Wi-Fi ڈیٹا کی حد سے زیادہ"</string>
+    <!-- no translation found for data_usage_limit_snoozed_body (1671222777207603301) -->
+    <skip />
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"پس منظر ڈیٹا محدود ہے"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"حد بندی ہٹانے کیلئے تھپتھپائیں۔"</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"ڈیٹا کا زیادہ استعمال"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"پچھلے چند دنوں میں آپ کے ڈیٹا کا استعمال معمول سے زیادہ ہو گیا ہے۔ استعمال اور ترتیبات دیکھنے کیلئے تھپتھپائیں۔"</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"موبائل ڈیٹا کا زیادہ استعمال"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"آپ کی ایپس نے معمول سے زیادہ ڈیٹا استعمال کیا ہے"</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"<xliff:g id="APP">%s</xliff:g> نے معمول سے زیادہ ڈیٹا استعمال کیا ہے"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"سیکیورٹی سرٹیفیکیٹ"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"یہ سرٹیفکیٹ درست ہے۔"</string>
     <string name="issued_to" msgid="454239480274921032">"جاری کردہ بنام:"</string>

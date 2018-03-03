@@ -181,7 +181,8 @@
     <string name="network_logging_notification_title" msgid="6399790108123704477">"डिव्हाइस व्यवस्थापित केले आहे"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"आपली संस्था हे डिव्हाइस व्यवस्थापित करते आणि नेटवर्क रहदारीचे निरीक्षण करू शकते. तपशीलांसाठी टॅप करा."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"तुमचे डिव्हाइस मिटविले जाईल"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"हे प्रशासक अ‍ॅप वापरले जाऊ शकत नाही. तुमचे डिव्हाइस आता मिटवले जाईल.\n\nतुम्हाला प्रश्न असल्यास, तुमच्या संस्थेच्या प्रशासकाशी संपर्क साधा."</string>
+    <!-- no translation found for factory_reset_message (9024647691106150160) -->
+    <skip />
     <string name="printing_disabled_by" msgid="8936832919072486965">"<xliff:g id="OWNER_APP">%s</xliff:g> नी प्रिंट करणे बंद केले आहे."</string>
     <string name="me" msgid="6545696007631404292">"मी"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"टॅबलेट पर्याय"</string>
@@ -305,7 +306,8 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"जेश्चर करा"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"टॅप, स्वाइप, पिंच आणि इतर जेश्चर करू शकते."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"फिंगरप्रिंट जेश्चर"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"डिव्‍हाइसच्‍या फिंगरप्रिंट सेंसरवर केलेले जेश्चर कॅप्‍चर करू शकते."</string>
+    <!-- no translation found for capability_desc_canCaptureFingerprintGestures (4386487962402228670) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"स्टेटस बार अक्षम करा किंवा सुधारित करा"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"स्टेटस बार अक्षम करण्यासाठी किंवा सिस्टम चिन्हे जोडण्यासाठी आणि काढण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"स्टेटस बार होऊ द्या"</string>
@@ -802,6 +804,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"पॅटर्न अनलॉक."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"चेहरा अनलॉक."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"पिन अनलॉक."</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"सिम पिन अनलॉक करा"</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"सिम PUK अनलॉक करा"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"पासवर्ड अनलॉक."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"पॅटर्न क्षेत्र."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"स्लाइड क्षेत्र."</string>
@@ -1085,18 +1089,12 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"अॅप्स प्रारंभ करत आहे."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"बूट समाप्त होत आहे."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> चालत आहे"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"गेमवर परत जाण्यासाठी टॅप करा"</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"गेम निवडा"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"अधिक चांगल्या कामगिरीसाठी, एकावेळी यापैकी केवळ एक गेम चालू ठेवता येईल."</string>
+    <string name="old_app_action" msgid="3044685170829526403">"<xliff:g id="OLD_APP">%1$s</xliff:g> वर परत जा"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"<xliff:g id="NEW_APP">%1$s</xliff:g> उघडा"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> सेव्ह न करता बंद होईल"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> ने मेमेरी मर्यादा वाढविली"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"हीप डंप संकलित केला गेला आहे; सामायिक करण्यासाठी टॅप करा"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"हीप डंप सामायिक करायचे?"</string>
@@ -1205,6 +1203,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"रीस्टार्ट"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"मोबाइल सेवा अ‍ॅक्टिव्हेट करा"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"तुमचे नवीन सिम अ‍ॅक्टिव्हेट करण्यासाठी वाहकाचे अ‍ॅप डाउनलोड करा"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"तुमचे सिम अ‍ॅक्टिव्हेट करण्यासाठी <xliff:g id="APP_NAME">%1$s</xliff:g> अ‍ॅप डाउनलोड करा"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"अ‍ॅप डाउनलोड करा"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"नवीन सिम घाला"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"ते सेट करण्यासाठी टॅप करा"</string>
@@ -1419,22 +1418,21 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB ड्राइव्‍ह"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB स्टोरेज"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"संपादित करा"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"डेटा वापर सूचना"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"वापर आणि सेटिंग्ज पाहण्यासाठी टॅप करा."</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G डेटा मर्यादा गाठली"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G डेटा मर्यादा गाठली"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"डेटा चेतावणी"</string>
+    <!-- no translation found for data_usage_warning_body (7340198905103751676) -->
+    <skip />
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"मोबाइल डेटा मर्यादा गाठली"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"वाय-फाय डेटा मर्यादा गाठली"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"उर्वरित चक्रासाठी डेटास विराम दिला"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G डेटा मर्यादा ओलांडली"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G डेटा मर्यादा ओलांडली"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"मोबाईल डेटा मर्यादा ओलांडली"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"वाय-फाय डेटा मर्यादा ओलांडली"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"निर्दिष्ट केलेल्या मर्यादेबाहेर <xliff:g id="SIZE">%s</xliff:g>."</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"डेटा तुमच्या शिल्लक सायकलसाठी थांबवण्यात आला"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"तुमच्या मोबाइल डेटाच्या मर्यादेपेक्षा जास्त"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"तुमच्या वाय-फाय डेटाच्या मर्यादेबाहेर"</string>
+    <!-- no translation found for data_usage_limit_snoozed_body (1671222777207603301) -->
+    <skip />
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"पार्श्वभूमीवरील डेटा प्रतिबंधित केला"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"प्रतिबंध काढण्यासाठी टॅप करा."</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"डेटाचा जास्त वापर"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"तुमचा गेल्या काही दिवसांतला डेटाचा वापर हा नेहमीपेक्षा जास्त आहे. वापर आणि सेटिंग्ज पाहण्यासाठी टॅप करा."</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"मोबाइल डेटाचा उच्च वापर"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"तुमच्या अ‍ॅप्सनी नेहमीपेक्षा जास्त डेटा वापरला आहे"</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"<xliff:g id="APP">%s</xliff:g> ने नेहमीपेक्षा जास्त डेटा वपरला आहे"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"सुरक्षितता प्रमाणपत्र"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"हे प्रमाणपत्र वैध आहे."</string>
     <string name="issued_to" msgid="454239480274921032">"यावर जारी केले:"</string>
