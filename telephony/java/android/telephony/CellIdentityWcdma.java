@@ -206,6 +206,12 @@ public final class CellIdentityWcdma extends CellIdentity {
         return mUarfcn;
     }
 
+    /** @hide */
+    @Override
+    public int getChannelNumber() {
+        return mUarfcn;
+    }
+
     @Override
     public boolean equals(Object other) {
         if (this == other) {

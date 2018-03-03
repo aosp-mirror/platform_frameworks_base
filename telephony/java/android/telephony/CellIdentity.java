@@ -68,6 +68,9 @@ public abstract class CellIdentity implements Parcelable {
      */
     public static final int TYPE_TDSCDMA        = 5;
 
+    /** @hide */
+    public static final int INVALID_CHANNEL_NUMBER = -1;
+
     // Log tag
     /** @hide */
     protected final String mTag;
@@ -123,6 +126,16 @@ public abstract class CellIdentity implements Parcelable {
      * @return The type of the cell identity
      */
     public @Type int getType() { return mType; }
+
+    /**
+     * Returns the channel number of the cell identity.
+     *
+     * @hide
+     * @return The channel number, or {@link #INVALID_CHANNEL_NUMBER} if not implemented
+     */
+    public int getChannelNumber() {
+        return INVALID_CHANNEL_NUMBER;
+    }
 
     /**
      * Used by child classes for parceling.

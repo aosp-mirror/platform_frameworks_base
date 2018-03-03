@@ -203,6 +203,11 @@ public final class CellIdentityGsm extends CellIdentity {
         return mAlphaShort;
     }
 
+    /** @hide */
+    @Override
+    public int getChannelNumber() {
+        return mArfcn;
+    }
 
     /**
      * @deprecated Primary Scrambling Code is not applicable to GSM.

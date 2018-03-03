@@ -213,6 +213,12 @@ public final class CellIdentityLte extends CellIdentity {
         return mAlphaShort;
     }
 
+    /** @hide */
+    @Override
+    public int getChannelNumber() {
+        return mEarfcn;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(mMccStr, mMncStr, mCi, mPci, mTac, mAlphaLong, mAlphaShort);
