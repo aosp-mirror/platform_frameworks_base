@@ -83,7 +83,7 @@
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Установить как камеру (PTP)"</string>
     <string name="installer_cd_button_title" msgid="2312667578562201583">"Установить приложение"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Назад"</string>
-    <string name="accessibility_home" msgid="8217216074895377641">"Домой"</string>
+    <string name="accessibility_home" msgid="8217216074895377641">"Главный экран"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Меню"</string>
     <string name="accessibility_recent" msgid="5208608566793607626">"Обзор."</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"Поиск"</string>
