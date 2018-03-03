@@ -107,6 +107,11 @@ public class ScrimView extends View implements ConfigurationController.Configura
     }
 
     @Override
+    public void setBackground(Drawable background) {
+        Log.wtfStack(TAG, "ScrimView should never have a background.");
+    }
+
+    @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         int densityDpi = newConfig.densityDpi;
@@ -319,18 +324,6 @@ public class ScrimView extends View implements ConfigurationController.Configura
 
     public float getViewAlpha() {
         return mViewAlpha;
-    }
-
-    public void animateViewAlpha(float alpha, long durationOut, Interpolator interpolator) {
-        if (mAlphaAnimator != null) {
-            mAlphaAnimator.cancel();
-        }
-        mAlphaAnimator = ValueAnimator.ofFloat(getViewAlpha(), alpha);
-        mAlphaAnimator.addUpdateListener(mAlphaUpdateListener);
-        mAlphaAnimator.addListener(mClearAnimatorListener);
-        mAlphaAnimator.setInterpolator(interpolator);
-        mAlphaAnimator.setDuration(durationOut);
-        mAlphaAnimator.start();
     }
 
     public void setExcludedArea(Rect area) {
