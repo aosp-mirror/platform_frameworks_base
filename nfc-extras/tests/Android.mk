@@ -20,7 +20,7 @@ LOCAL_MODULE_TAGS := tests
 
 LOCAL_JAVA_LIBRARIES := \
     android.test.runner.stubs \
-    com.android.nfc_extras \
+    com.android.nfc_extras.stubs \
     android.test.base.stubs
 
 LOCAL_STATIC_JAVA_LIBRARIES := junit

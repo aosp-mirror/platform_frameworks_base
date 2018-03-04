@@ -3535,8 +3535,8 @@ public class Camera {
         /**
          * Gets the focal length (in millimeter) of the camera.
          *
-         * @return the focal length. This method will always return a valid
-         *         value.
+         * @return the focal length. Returns -1.0 when the device
+         *         doesn't report focal length information.
          */
         public float getFocalLength() {
             return Float.parseFloat(get(KEY_FOCAL_LENGTH));

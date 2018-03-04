@@ -46,7 +46,6 @@ import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.AnimatedVectorDrawable;
-import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
 import android.os.Binder;
 import android.os.Bundle;
@@ -88,6 +87,7 @@ import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
@@ -165,6 +165,8 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         public void onConnectionChanged(boolean isConnected) {
             mNavigationBarView.onOverviewProxyConnectionChanged(isConnected);
             updateScreenPinningGestures();
+            WindowManagerWrapper.getInstance()
+                    .setNavBarVirtualKeyHapticFeedbackEnabled(!isConnected);
         }
 
         @Override

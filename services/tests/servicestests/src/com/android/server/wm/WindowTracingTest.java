@@ -31,6 +31,7 @@ import android.content.Context;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
+import android.support.test.filters.FlakyTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.proto.ProtoOutputStream;
 
@@ -56,6 +57,7 @@ import java.nio.charset.StandardCharsets;
  *  bit FrameworksServicesTests:com.android.server.wm.WindowTracingTest
  */
 @SmallTest
+@FlakyTest(bugId = 74078662)
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class WindowTracingTest extends WindowTestsBase {

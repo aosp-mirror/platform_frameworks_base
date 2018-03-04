@@ -203,8 +203,6 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
             Slog.w(TAG, "Could not open snapshot profile for " + packageName + ":"
                     + snapshotProfile, e);
             postError(callback, packageName, ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
-        } finally {
-            IoUtils.closeQuietly(fd);
         }
     }
 
@@ -283,6 +281,8 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
             } catch (RemoteException e) {
                 Slog.w(TAG,
                         "Failed to call onSuccess after profile snapshot for " + packageName, e);
+            } finally {
+                IoUtils.closeQuietly(fd);
             }
         });
     }

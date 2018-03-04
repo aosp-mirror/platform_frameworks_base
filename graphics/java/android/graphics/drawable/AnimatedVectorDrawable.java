@@ -201,10 +201,10 @@ import dalvik.annotation.optimization.FastNative;
  *     android:drawable=&quot;@drawable/vectordrawable&quot; &gt;
  *     &lt;target
  *         android:name=&quot;rotationGroup&quot;
- *         android:animation=&quot;@anim/rotation&quot; /&gt;
+ *         android:animation=&quot;@animator/rotation&quot; /&gt;
  *     &lt;target
  *         android:name=&quot;v&quot;
- *         android:animation=&quot;@anim/path_morph&quot; /&gt;
+ *         android:animation=&quot;@animator/path_morph&quot; /&gt;
  * &lt;/animated-vector&gt;
  * </pre>
  * </li>

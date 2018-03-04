@@ -47,8 +47,8 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 import com.android.server.notification.NotificationDelegate;
+import com.android.server.policy.GlobalActionsProvider;
 import com.android.server.power.ShutdownThread;
-import com.android.server.statusbar.StatusBarManagerInternal.GlobalActionsListener;
 import com.android.server.wm.WindowManagerService;
 
 import java.io.FileDescriptor;
@@ -74,7 +74,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
 
     // for disabling the status bar
     private final ArrayList<DisableRecord> mDisableRecords = new ArrayList<DisableRecord>();
-    private GlobalActionsListener mGlobalActionListener;
+    private GlobalActionsProvider.GlobalActionsListener mGlobalActionListener;
     private IBinder mSysUiVisToken = new Binder();
     private int mDisabled1 = 0;
     private int mDisabled2 = 0;
@@ -162,6 +162,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         mWindowManager = windowManager;
 
         LocalServices.addService(StatusBarManagerInternal.class, mInternalService);
+        LocalServices.addService(GlobalActionsProvider.class, mGlobalActionsProvider);
     }
 
     /**
@@ -375,26 +376,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
 
         @Override
-        public boolean isGlobalActionsDisabled() {
-            return (mDisabled2 & DISABLE2_GLOBAL_ACTIONS) != 0;
-        }
-
-        @Override
-        public void setGlobalActionsListener(GlobalActionsListener listener) {
-            mGlobalActionListener = listener;
-            mGlobalActionListener.onStatusBarConnectedChanged(mBar != null);
-        }
-
-        @Override
-        public void showGlobalActions() {
-            if (mBar != null) {
-                try {
-                    mBar.showGlobalActionsMenu();
-                } catch (RemoteException ex) {}
-            }
-        }
-
-        @Override
         public void setTopAppHidesStatusBar(boolean hidesStatusBar) {
             if (mBar != null) {
                 try {
@@ -422,6 +403,28 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
             if (mBar != null){
                 try {
                     mBar.onProposedRotationChanged(rotation, isValid);
+                } catch (RemoteException ex) {}
+            }
+        }
+    };
+
+    private final GlobalActionsProvider mGlobalActionsProvider = new GlobalActionsProvider() {
+        @Override
+        public boolean isGlobalActionsDisabled() {
+            return (mDisabled2 & DISABLE2_GLOBAL_ACTIONS) != 0;
+        }
+
+        @Override
+        public void setGlobalActionsListener(GlobalActionsProvider.GlobalActionsListener listener) {
+            mGlobalActionListener = listener;
+            mGlobalActionListener.onGlobalActionsAvailableChanged(mBar != null);
+        }
+
+        @Override
+        public void showGlobalActions() {
+            if (mBar != null) {
+                try {
+                    mBar.showGlobalActionsMenu();
                 } catch (RemoteException ex) {}
             }
         }
@@ -892,7 +895,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     private void notifyBarAttachChanged() {
         mHandler.post(() -> {
             if (mGlobalActionListener == null) return;
-            mGlobalActionListener.onStatusBarConnectedChanged(mBar != null);
+            mGlobalActionListener.onGlobalActionsAvailableChanged(mBar != null);
         });
     }
 

@@ -17,11 +17,14 @@
 package com.android.server.am;
 
 import android.content.IIntentReceiver;
+import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.proto.ProtoOutputStream;
+
+import com.android.server.IntentResolver;
 import com.android.server.am.proto.ReceiverListProto;
 
 import java.io.PrintWriter;
@@ -65,6 +68,17 @@ final class ReceiverList extends ArrayList<BroadcastFilter>
     public void binderDied() {
         linkedToDeath = false;
         owner.unregisterReceiver(receiver);
+    }
+
+    public boolean containsFilter(IntentFilter filter) {
+        final int N = size();
+        for (int i = 0; i < N; i++) {
+            final BroadcastFilter f = get(i);
+            if (IntentResolver.filterEquals(f, filter)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     void writeToProto(ProtoOutputStream proto, long fieldId) {

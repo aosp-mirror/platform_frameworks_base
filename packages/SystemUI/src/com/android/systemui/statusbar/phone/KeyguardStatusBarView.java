@@ -26,10 +26,13 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.DisplayCutout;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -59,6 +62,10 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
 public class KeyguardStatusBarView extends RelativeLayout
         implements BatteryStateChangeCallback, OnUserInfoChangedListener, ConfigurationListener {
 
+    private static final int LAYOUT_NONE = 0;
+    private static final int LAYOUT_CUTOUT = 1;
+    private static final int LAYOUT_NO_CUTOUT = 2;
+
     private boolean mBatteryCharging;
     private boolean mKeyguardUserSwitcherShowing;
     private boolean mBatteryListening;
@@ -78,6 +85,10 @@ public class KeyguardStatusBarView extends RelativeLayout
     private View mSystemIconsContainer;
     private TintedIconManager mIconManager;
 
+    private View mCutoutSpace;
+    private ViewGroup mStatusIconArea;
+    private int mLayoutState = LAYOUT_NONE;
+
     public KeyguardStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -85,12 +96,13 @@ public class KeyguardStatusBarView extends RelativeLayout
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mSystemIconsSuperContainer = findViewById(R.id.system_icons_super_container);
         mSystemIconsContainer = findViewById(R.id.system_icons_container);
         mMultiUserSwitch = findViewById(R.id.multi_user_switch);
         mMultiUserAvatar = findViewById(R.id.multi_user_avatar);
         mCarrierLabel = findViewById(R.id.keyguard_carrier_text);
         mBatteryView = mSystemIconsContainer.findViewById(R.id.battery);
+        mCutoutSpace = findViewById(R.id.cutout_space_view);
+        mStatusIconArea = findViewById(R.id.status_icon_area);
 
         loadDimens();
         updateUserSwitcher();
@@ -106,6 +118,7 @@ public class KeyguardStatusBarView extends RelativeLayout
                 R.dimen.multi_user_avatar_keyguard_size);
         mMultiUserAvatar.setLayoutParams(lp);
 
+        // Multi-user switch
         lp = (MarginLayoutParams) mMultiUserSwitch.getLayoutParams();
         lp.width = getResources().getDimensionPixelSize(
                 R.dimen.multi_user_switch_width_keyguard);
@@ -113,21 +126,21 @@ public class KeyguardStatusBarView extends RelativeLayout
                 R.dimen.multi_user_switch_keyguard_margin));
         mMultiUserSwitch.setLayoutParams(lp);
 
-        lp = (MarginLayoutParams) mSystemIconsSuperContainer.getLayoutParams();
+        // System icons
+        lp = (MarginLayoutParams) mStatusIconArea.getLayoutParams();
         lp.height = getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.quick_qs_total_height);
-        lp.setMarginStart(getResources().getDimensionPixelSize(
-                R.dimen.system_icons_super_container_margin_start));
-        mSystemIconsSuperContainer.setLayoutParams(lp);
-        mSystemIconsSuperContainer.setPaddingRelative(mSystemIconsSuperContainer.getPaddingStart(),
-                mSystemIconsSuperContainer.getPaddingTop(),
-                getResources().getDimensionPixelSize(R.dimen.system_icons_keyguard_padding_end),
-                mSystemIconsSuperContainer.getPaddingBottom());
+                com.android.internal.R.dimen.status_bar_height);
 
         lp = (MarginLayoutParams) mSystemIconsContainer.getLayoutParams();
         lp.height = getResources().getDimensionPixelSize(
                 R.dimen.status_bar_height);
+        lp.setMarginStart(getResources().getDimensionPixelSize(
+                R.dimen.system_icons_super_container_margin_start));
         mSystemIconsContainer.setLayoutParams(lp);
+        mSystemIconsContainer.setPaddingRelative(mSystemIconsContainer.getPaddingStart(),
+                mSystemIconsContainer.getPaddingTop(),
+                getResources().getDimensionPixelSize(R.dimen.system_icons_keyguard_padding_end),
+                mSystemIconsContainer.getPaddingBottom());
 
         // Respect font size setting.
         mCarrierLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX,
@@ -153,13 +166,13 @@ public class KeyguardStatusBarView extends RelativeLayout
     }
 
     private void updateVisibilities() {
-        if (mMultiUserSwitch.getParent() != this && !mKeyguardUserSwitcherShowing) {
+        if (mMultiUserSwitch.getParent() != mStatusIconArea && !mKeyguardUserSwitcherShowing) {
             if (mMultiUserSwitch.getParent() != null) {
                 getOverlay().remove(mMultiUserSwitch);
             }
-            addView(mMultiUserSwitch, 0);
-        } else if (mMultiUserSwitch.getParent() == this && mKeyguardUserSwitcherShowing) {
-            removeView(mMultiUserSwitch);
+            mStatusIconArea.addView(mMultiUserSwitch, 0);
+        } else if (mMultiUserSwitch.getParent() == mStatusIconArea && mKeyguardUserSwitcherShowing) {
+            mStatusIconArea.removeView(mMultiUserSwitch);
         }
         if (mKeyguardUserSwitcher == null) {
             // If we have no keyguard switcher, the screen width is under 600dp. In this case,
@@ -175,8 +188,8 @@ public class KeyguardStatusBarView extends RelativeLayout
     }
 
     private void updateSystemIconsLayoutParams() {
-        RelativeLayout.LayoutParams lp =
-                (LayoutParams) mSystemIconsSuperContainer.getLayoutParams();
+        LinearLayout.LayoutParams lp =
+                (LinearLayout.LayoutParams) mSystemIconsContainer.getLayoutParams();
         // If the avatar icon is gone, we need to have some end margin to display the system icons
         // correctly.
         int baseMarginEnd = mMultiUserSwitch.getVisibility() == View.GONE
@@ -186,8 +199,86 @@ public class KeyguardStatusBarView extends RelativeLayout
                 baseMarginEnd;
         if (marginEnd != lp.getMarginEnd()) {
             lp.setMarginEnd(marginEnd);
-            mSystemIconsSuperContainer.setLayoutParams(lp);
+            mSystemIconsContainer.setLayoutParams(lp);
         }
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        updateLayoutConsideringCutout();
+        setSignalClusterLayoutWidth();
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    private void updateLayoutConsideringCutout() {
+        DisplayCutout dc = getRootWindowInsets().getDisplayCutout();
+        if (dc == null) {
+            updateLayoutParamsNoCutout();
+        } else {
+            updateLayoutParamsForCutout(dc);
+        }
+    }
+
+    private void updateLayoutParamsNoCutout() {
+        if (mLayoutState == LAYOUT_NO_CUTOUT) {
+            return;
+        }
+        mLayoutState = LAYOUT_NO_CUTOUT;
+
+        if (mCutoutSpace != null) {
+            mCutoutSpace.setVisibility(View.GONE);
+        }
+
+        RelativeLayout.LayoutParams lp = (LayoutParams) mCarrierLabel.getLayoutParams();
+        lp.addRule(RelativeLayout.START_OF, R.id.status_icon_area);
+
+        lp = (LayoutParams) mStatusIconArea.getLayoutParams();
+        lp.removeRule(RelativeLayout.RIGHT_OF);
+        lp.width = LayoutParams.WRAP_CONTENT;
+
+        LinearLayout.LayoutParams llp =
+                (LinearLayout.LayoutParams) mSystemIconsContainer.getLayoutParams();
+        llp.setMarginStart(getResources().getDimensionPixelSize(
+                R.dimen.system_icons_super_container_margin_start));
+    }
+
+    private void updateLayoutParamsForCutout(DisplayCutout dc) {
+        if (mLayoutState == LAYOUT_CUTOUT) {
+            return;
+        }
+        mLayoutState = LAYOUT_CUTOUT;
+
+        if (mCutoutSpace == null) {
+            updateLayoutParamsNoCutout();
+        }
+
+        mCutoutSpace.setVisibility(View.VISIBLE);
+        RelativeLayout.LayoutParams lp = (LayoutParams) mCutoutSpace.getLayoutParams();
+        lp.width = dc.getBoundingRect().width();
+        lp.height = dc.getBoundingRect().height();
+        lp.addRule(RelativeLayout.CENTER_IN_PARENT);
+
+        lp = (LayoutParams) mCarrierLabel.getLayoutParams();
+        lp.addRule(RelativeLayout.START_OF, R.id.cutout_space_view);
+
+        lp = (LayoutParams) mStatusIconArea.getLayoutParams();
+        lp.addRule(RelativeLayout.RIGHT_OF, R.id.cutout_space_view);
+        lp.width = LayoutParams.MATCH_PARENT;
+
+        LinearLayout.LayoutParams llp =
+                (LinearLayout.LayoutParams) mSystemIconsContainer.getLayoutParams();
+        llp.setMarginStart(0);
+    }
+
+    //TODO: Something is setting signal_cluster to MATCH_PARENT. Why?
+    private void setSignalClusterLayoutWidth() {
+        View signalCluster = findViewById(R.id.signal_cluster);
+        if (signalCluster == null) {
+            return;
+        }
+
+        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) signalCluster.getLayoutParams();
+        lp.width = LinearLayout.LayoutParams.WRAP_CONTENT;
     }
 
     public void setListening(boolean listening) {
@@ -265,20 +356,21 @@ public class KeyguardStatusBarView extends RelativeLayout
             animateNextLayoutChange();
         }
         updateVisibilities();
+        updateLayoutConsideringCutout();
         updateSystemIconsLayoutParams();
     }
 
     private void animateNextLayoutChange() {
-        final int systemIconsCurrentX = mSystemIconsSuperContainer.getLeft();
-        final boolean userSwitcherVisible = mMultiUserSwitch.getParent() == this;
+        final int systemIconsCurrentX = mSystemIconsContainer.getLeft();
+        final boolean userSwitcherVisible = mMultiUserSwitch.getParent() == mStatusIconArea;
         getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
                 getViewTreeObserver().removeOnPreDrawListener(this);
                 boolean userSwitcherHiding = userSwitcherVisible
-                        && mMultiUserSwitch.getParent() != KeyguardStatusBarView.this;
-                mSystemIconsSuperContainer.setX(systemIconsCurrentX);
-                mSystemIconsSuperContainer.animate()
+                        && mMultiUserSwitch.getParent() != mStatusIconArea;
+                mSystemIconsContainer.setX(systemIconsCurrentX);
+                mSystemIconsContainer.animate()
                         .translationX(0)
                         .setDuration(400)
                         .setStartDelay(userSwitcherHiding ? 300 : 0)
@@ -315,8 +407,8 @@ public class KeyguardStatusBarView extends RelativeLayout
     public void setVisibility(int visibility) {
         super.setVisibility(visibility);
         if (visibility != View.VISIBLE) {
-            mSystemIconsSuperContainer.animate().cancel();
-            mSystemIconsSuperContainer.setTranslationX(0);
+            mSystemIconsContainer.animate().cancel();
+            mSystemIconsContainer.setTranslationX(0);
             mMultiUserSwitch.animate().cancel();
             mMultiUserSwitch.setAlpha(1f);
         } else {

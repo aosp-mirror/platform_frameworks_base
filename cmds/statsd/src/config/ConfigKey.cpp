@@ -16,13 +16,9 @@
 
 #include "config/ConfigKey.h"
 
-#include <sstream>
-
 namespace android {
 namespace os {
 namespace statsd {
-
-using std::ostringstream;
 
 ConfigKey::ConfigKey() {
 }
@@ -37,9 +33,9 @@ ConfigKey::~ConfigKey() {
 }
 
 string ConfigKey::ToString() const {
-    ostringstream out;
-    out << '(' << mUid << ',' << mId << ')';
-    return out.str();
+    string s;
+    s += "(" + std::to_string(mUid) + " " + std::to_string(mId) + ")";
+    return s;
 }
 
 

@@ -150,8 +150,8 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
     }
 
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        if (ActivityManagerWrapper.getInstance().isScreenPinningActive()
-                || mStatusBar.isKeyguardShowing()) {
+        if (mNavigationBarView.inScreenPinning() || mStatusBar.isKeyguardShowing()
+                || !mStatusBar.isPresenterFullyCollapsed()) {
             return false;
         }
 
@@ -170,7 +170,7 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
             }
         }
         boolean handledByQuickscrub = mQuickScrubController.onInterceptTouchEvent(event);
-        if (mStatusBar.isPresenterFullyCollapsed() && !handledByQuickscrub) {
+        if (!handledByQuickscrub) {
             // Proxy motion events until we start intercepting for quickscrub
             proxyMotionEvents(event);
         }
@@ -184,18 +184,17 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
     }
 
     public boolean onTouchEvent(MotionEvent event) {
-        if (ActivityManagerWrapper.getInstance().isScreenPinningActive()
-                || mStatusBar.isKeyguardShowing()) {
+        if (mNavigationBarView.inScreenPinning() || mStatusBar.isKeyguardShowing()
+                || !mStatusBar.isPresenterFullyCollapsed()) {
             return false;
         }
 
         // The same down event was just sent on intercept and therefore can be ignored here
         boolean ignoreProxyDownEvent = event.getAction() == MotionEvent.ACTION_DOWN
                 && mOverviewProxyService.getProxy() != null;
-        boolean result = mStatusBar.isPresenterFullyCollapsed()
-                && (mQuickScrubController.onTouchEvent(event)
+        boolean result = mQuickScrubController.onTouchEvent(event)
                 || ignoreProxyDownEvent
-                || proxyMotionEvents(event));
+                || proxyMotionEvents(event);
         result |= mRecentsAnimationStarted;
         if (mDockWindowEnabled) {
             result |= handleDockWindowEvent(event);

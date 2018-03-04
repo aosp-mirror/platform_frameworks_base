@@ -58,6 +58,8 @@ import com.android.internal.R;
 import com.android.server.UiThread;
 import com.android.server.autofill.Helper;
 
+import static com.android.server.autofill.Helper.sVisibleDatasetsMaxCount;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -68,8 +70,6 @@ import java.util.stream.Collectors;
 
 final class FillUi {
     private static final String TAG = "FillUi";
-
-    private static final int VISIBLE_OPTIONS_MAX_COUNT = 3;
 
     private static final TypedValue sTempTypedValue = new TypedValue();
 
@@ -375,7 +375,7 @@ final class FillUi {
                     }
                     requestShowFillUi();
                 }
-                if (mAdapter.getCount() > VISIBLE_OPTIONS_MAX_COUNT) {
+                if (mAdapter.getCount() > sVisibleDatasetsMaxCount) {
                     mListView.setVerticalScrollBarEnabled(true);
                     mListView.onVisibilityAggregated(true);
                 } else {
@@ -475,7 +475,7 @@ final class FillUi {
                     changed = true;
                 }
                 // Update the width to fit only the first items up to max count
-                if (i < VISIBLE_OPTIONS_MAX_COUNT) {
+                if (i < sVisibleDatasetsMaxCount) {
                     final int clampedMeasuredHeight = Math.min(view.getMeasuredHeight(), maxSize.y);
                     final int newContentHeight = mContentHeight + clampedMeasuredHeight;
                     if (newContentHeight != mContentHeight) {

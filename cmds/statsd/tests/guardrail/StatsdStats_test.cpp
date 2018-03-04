@@ -277,21 +277,20 @@ TEST(StatsdStatsTest, TestTimestampThreshold) {
     EXPECT_TRUE(stats.mConfigStats.find(key) != stats.mConfigStats.end());
     const auto& configStats = stats.mConfigStats[key];
 
-    int maxCount = StatsdStats::kMaxTimestampCount;
-    EXPECT_EQ(maxCount, configStats.broadcast_sent_time_sec_size());
-    EXPECT_EQ(maxCount, configStats.data_drop_time_sec_size());
-    EXPECT_EQ(maxCount, configStats.dump_report_time_sec_size());
+    size_t maxCount = StatsdStats::kMaxTimestampCount;
+    EXPECT_EQ(maxCount, configStats->broadcast_sent_time_sec.size());
+    EXPECT_EQ(maxCount, configStats->data_drop_time_sec.size());
+    EXPECT_EQ(maxCount, configStats->dump_report_time_sec.size());
 
     // the oldest timestamp is the second timestamp in history
-    EXPECT_EQ(1, configStats.broadcast_sent_time_sec(0));
-    EXPECT_EQ(1, configStats.broadcast_sent_time_sec(0));
-    EXPECT_EQ(1, configStats.broadcast_sent_time_sec(0));
+    EXPECT_EQ(1, configStats->broadcast_sent_time_sec.front());
+    EXPECT_EQ(1, configStats->broadcast_sent_time_sec.front());
+    EXPECT_EQ(1, configStats->broadcast_sent_time_sec.front());
 
     // the last timestamp is the newest timestamp.
-    EXPECT_EQ(newTimestamp,
-              configStats.broadcast_sent_time_sec(StatsdStats::kMaxTimestampCount - 1));
-    EXPECT_EQ(newTimestamp, configStats.data_drop_time_sec(StatsdStats::kMaxTimestampCount - 1));
-    EXPECT_EQ(newTimestamp, configStats.dump_report_time_sec(StatsdStats::kMaxTimestampCount - 1));
+    EXPECT_EQ(newTimestamp, configStats->broadcast_sent_time_sec.back());
+    EXPECT_EQ(newTimestamp, configStats->data_drop_time_sec.back());
+    EXPECT_EQ(newTimestamp, configStats->dump_report_time_sec.back());
 }
 
 }  // namespace statsd

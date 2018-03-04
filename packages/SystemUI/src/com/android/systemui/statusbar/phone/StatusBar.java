@@ -2834,6 +2834,18 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mDisplayMetrics.density;
     }
 
+    float getDisplayWidth() {
+        return mDisplayMetrics.widthPixels;
+    }
+
+    float getDisplayHeight() {
+        return mDisplayMetrics.heightPixels;
+    }
+
+    int getRotation() {
+        return mDisplay.getRotation();
+    }
+
     public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned,
             boolean dismissShade) {
         startActivityDismissingKeyguard(intent, onlyProvisioned, dismissShade,
@@ -3528,7 +3540,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 .alpha(0f)
                 .setStartDelay(0)
                 .setDuration(FADE_KEYGUARD_DURATION_PULSING)
-                .setInterpolator(ScrimController.KEYGUARD_FADE_OUT_INTERPOLATOR)
+                .setInterpolator(Interpolators.ALPHA_OUT)
                 .withEndAction(()-> {
                     hideKeyguard();
                     mStatusBarKeyguardViewManager.onKeyguardFadedAway();

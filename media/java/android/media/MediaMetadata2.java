@@ -40,203 +40,347 @@ import java.util.Set;
 // TODO(jaewan): Add @see for APIs from MediaDescription
 public final class MediaMetadata2 {
     /**
-     * The title of the media.
+     * The metadata key for a {@link CharSequence} or {@link String} typed value to retrieve the
+     * information about the title of the media.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_TITLE = "android.media.metadata.TITLE";
 
     /**
-     * The artist of the media.
+     * The metadata key for a {@link CharSequence} or {@link String} typed value to retrieve the
+     * information about the artist of the media.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_ARTIST = "android.media.metadata.ARTIST";
 
     /**
-     * The duration of the media in ms. A negative duration indicates that the
-     * duration is unknown (or infinite).
+     * The metadata key for a {@link Long} typed value to retrieve the information about the
+     * duration of the media in ms. A negative duration indicates that the duration is unknown
+     * (or infinite).
+     *
+     * @see Builder#putLong(String, long)
+     * @see #getLong(String)
      */
     public static final String METADATA_KEY_DURATION = "android.media.metadata.DURATION";
 
     /**
-     * The album title for the media.
+     * The metadata key for a {@link CharSequence} or {@link String} typed value to retrieve the
+     * information about the album title for the media.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_ALBUM = "android.media.metadata.ALBUM";
 
     /**
-     * The author of the media.
+     * The metadata key for a {@link CharSequence} or {@link String} typed value to retrieve the
+     * information about the author of the media.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_AUTHOR = "android.media.metadata.AUTHOR";
 
     /**
-     * The writer of the media.
+     * The metadata key for a {@link CharSequence} or {@link String} typed value to retrieve the
+     * information about the writer of the media.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_WRITER = "android.media.metadata.WRITER";
 
     /**
-     * The composer of the media.
+     * The metadata key for a {@link CharSequence} or {@link String} typed value to retrieve the
+     * information about the composer of the media.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_COMPOSER = "android.media.metadata.COMPOSER";
 
     /**
-     * The compilation status of the media.
+     * The metadata key for a {@link CharSequence} or {@link String} typed value to retrieve the
+     * information about the compilation status of the media.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_COMPILATION = "android.media.metadata.COMPILATION";
 
     /**
-     * The date the media was created or published. The format is unspecified
-     * but RFC 3339 is recommended.
+     * The metadata key for a {@link CharSequence} or {@link String} typed value to retrieve the
+     * information about the date the media was created or published.
+     * The format is unspecified but RFC 3339 is recommended.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_DATE = "android.media.metadata.DATE";
 
     /**
-     * The year the media was created or published as a long.
+     * The metadata key for a {@link Long} typed value to retrieve the information about the year
+     * the media was created or published.
+     *
+     * @see Builder#putLong(String, long)
+     * @see #getLong(String)
      */
     public static final String METADATA_KEY_YEAR = "android.media.metadata.YEAR";
 
     /**
-     * The genre of the media.
+     * The metadata key for a {@link CharSequence} or {@link String} typed value to retrieve the
+     * information about the genre of the media.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_GENRE = "android.media.metadata.GENRE";
 
     /**
-     * The track number for the media.
+     * The metadata key for a {@link Long} typed value to retrieve the information about the
+     * track number for the media.
+     *
+     * @see Builder#putLong(String, long)
+     * @see #getLong(String)
      */
     public static final String METADATA_KEY_TRACK_NUMBER = "android.media.metadata.TRACK_NUMBER";
 
     /**
-     * The number of tracks in the media's original source.
+     * The metadata key for a {@link Long} typed value to retrieve the information about the
+     * number of tracks in the media's original source.
+     *
+     * @see Builder#putLong(String, long)
+     * @see #getLong(String)
      */
     public static final String METADATA_KEY_NUM_TRACKS = "android.media.metadata.NUM_TRACKS";
 
     /**
-     * The disc number for the media's original source.
+     * The metadata key for a {@link Long} typed value to retrieve the information about the
+     * disc number for the media's original source.
+     *
+     * @see Builder#putLong(String, long)
+     * @see #getLong(String)
      */
     public static final String METADATA_KEY_DISC_NUMBER = "android.media.metadata.DISC_NUMBER";
 
     /**
-     * The artist for the album of the media's original source.
+     * The metadata key for a {@link CharSequence} or {@link String} typed value to retrieve the
+     * information about the artist for the album of the media's original source.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_ALBUM_ARTIST = "android.media.metadata.ALBUM_ARTIST";
 
     /**
-     * The artwork for the media as a {@link Bitmap}.
+     * The metadata key for a {@link Bitmap} typed value to retrieve the information about the
+     * artwork for the media.
+     * The artwork should be relatively small and may be scaled down if it is too large.
+     * For higher resolution artwork, {@link #METADATA_KEY_ART_URI} should be used instead.
      *
-     * The artwork should be relatively small and may be scaled down
-     * if it is too large. For higher resolution artwork
-     * {@link #METADATA_KEY_ART_URI} should be used instead.
+     * @see Builder#putBitmap(String, Bitmap)
+     * @see #getBitmap(String)
      */
     public static final String METADATA_KEY_ART = "android.media.metadata.ART";
 
     /**
-     * The artwork for the media as a Uri style String.
+     * The metadata key for a {@link CharSequence} or {@link String} typed value to retrieve the
+     * information about Uri of the artwork for the media.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_ART_URI = "android.media.metadata.ART_URI";
 
     /**
-     * The artwork for the album of the media's original source as a
-     * {@link Bitmap}.
-     * The artwork should be relatively small and may be scaled down
-     * if it is too large. For higher resolution artwork
-     * {@link #METADATA_KEY_ALBUM_ART_URI} should be used instead.
+     * The metadata key for a {@link Bitmap} typed value to retrieve the information about the
+     * artwork for the album of the media's original source.
+     * The artwork should be relatively small and may be scaled down if it is too large.
+     * For higher resolution artwork, {@link #METADATA_KEY_ALBUM_ART_URI} should be used instead.
+     *
+     * @see Builder#putBitmap(String, Bitmap)
+     * @see #getBitmap(String)
      */
     public static final String METADATA_KEY_ALBUM_ART = "android.media.metadata.ALBUM_ART";
 
     /**
-     * The artwork for the album of the media's original source as a Uri style
-     * String.
+     * The metadata key for a {@link CharSequence} or {@link String} typed value to retrieve the
+     * information about the Uri of the artwork for the album of the media's original source.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_ALBUM_ART_URI = "android.media.metadata.ALBUM_ART_URI";
 
     /**
-     * The user's rating for the media.
+     * The metadata key for a {@link Rating2} typed value to retrieve the information about the
+     * user's rating for the media.
      *
-     * @see Rating
+     * @see Builder#putRating(String, Rating2)
+     * @see #getRating(String)
      */
     public static final String METADATA_KEY_USER_RATING = "android.media.metadata.USER_RATING";
 
     /**
-     * The overall rating for the media.
+     * The metadata key for a {@link Rating2} typed value to retrieve the information about the
+     * overall rating for the media.
      *
-     * @see Rating
+     * @see Builder#putRating(String, Rating2)
+     * @see #getRating(String)
      */
     public static final String METADATA_KEY_RATING = "android.media.metadata.RATING";
 
     /**
-     * A title that is suitable for display to the user. This will generally be
-     * the same as {@link #METADATA_KEY_TITLE} but may differ for some formats.
-     * When displaying media described by this metadata this should be preferred
-     * if present.
+     * The metadata key for a {@link CharSequence} or {@link String} typed value to retrieve the
+     * information about the title that is suitable for display to the user.
+     * It will generally be the same as {@link #METADATA_KEY_TITLE} but may differ for some formats.
+     * When displaying media described by this metadata, this should be preferred if present.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_DISPLAY_TITLE = "android.media.metadata.DISPLAY_TITLE";
 
     /**
-     * A subtitle that is suitable for display to the user. When displaying a
-     * second line for media described by this metadata this should be preferred
+     * The metadata key for a {@link CharSequence} or {@link String} typed value to retrieve the
+     * information about the subtitle that is suitable for display to the user.
+     * When displaying a second line for media described by this metadata, this should be preferred
      * to other fields if present.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_DISPLAY_SUBTITLE
             = "android.media.metadata.DISPLAY_SUBTITLE";
 
     /**
-     * A description that is suitable for display to the user. When displaying
-     * more information for media described by this metadata this should be
-     * preferred to other fields if present.
+     * The metadata key for a {@link CharSequence} or {@link String} typed value to retrieve the
+     * information about the description that is suitable for display to the user.
+     * When displaying more information for media described by this metadata,
+     * this should be preferred to other fields if present.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_DISPLAY_DESCRIPTION
             = "android.media.metadata.DISPLAY_DESCRIPTION";
 
     /**
-     * An icon or thumbnail that is suitable for display to the user. When
-     * displaying an icon for media described by this metadata this should be
-     * preferred to other fields if present. This must be a {@link Bitmap}.
+     * The metadata key for a {@link Bitmap} typed value to retrieve the information about the icon
+     * or thumbnail that is suitable for display to the user.
+     * When displaying an icon for media described by this metadata, this should be preferred to
+     * other fields if present.
+     * <p>
+     * The icon should be relatively small and may be scaled down if it is too large.
+     * For higher resolution artwork, {@link #METADATA_KEY_DISPLAY_ICON_URI} should be used instead.
      *
-     * The icon should be relatively small and may be scaled down
-     * if it is too large. For higher resolution artwork
-     * {@link #METADATA_KEY_DISPLAY_ICON_URI} should be used instead.
+     * @see Builder#putBitmap(String, Bitmap)
+     * @see #getBitmap(String)
      */
-    public static final String METADATA_KEY_DISPLAY_ICON
-            = "android.media.metadata.DISPLAY_ICON";
+    public static final String METADATA_KEY_DISPLAY_ICON = "android.media.metadata.DISPLAY_ICON";
 
     /**
-     * An icon or thumbnail that is suitable for display to the user. When
-     * displaying more information for media described by this metadata the
+     * The metadata key for a {@link CharSequence} or {@link String} typed value to retrieve the
+     * information about the Uri of icon or thumbnail that is suitable for display to the user.
+     * When displaying more information for media described by this metadata, the
      * display description should be preferred to other fields when present.
-     * This must be a Uri style String.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_DISPLAY_ICON_URI
             = "android.media.metadata.DISPLAY_ICON_URI";
 
     /**
-     * A String key for identifying the content. This value is specific to the
+     * The metadata key for a {@link CharSequence} or {@link String} typed value to retrieve the
+     * information about the media ID of the content. This value is specific to the
      * service providing the content. If used, this should be a persistent
      * unique key for the underlying content.  It may be used with
      * {@link MediaController2#playFromMediaId(String, Bundle)}
      * to initiate playback when provided by a {@link MediaBrowser2} connected to
      * the same app.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_MEDIA_ID = "android.media.metadata.MEDIA_ID";
 
     /**
-     * A Uri formatted String representing the content. This value is specific to the
-     * service providing the content. It may be used with
-     * {@link MediaController2#playFromUri(Uri, Bundle)}
-     * to initiate playback when provided by a {@link MediaBrowser2} connected to
-     * the same app.
+     * The metadata key for a {@link CharSequence} or {@link String} typed value to retrieve the
+     * information about the Uri of the content. This value is specific to the service providing the
+     * content. It may be used with {@link MediaController2#playFromUri(Uri, Bundle)}
+     * to initiate playback when provided by a {@link MediaBrowser2} connected to the same app.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_MEDIA_URI = "android.media.metadata.MEDIA_URI";
 
     /**
-     * The radio frequency in Float format if this metdata representing radio content.
+     * The metadata key for a {@link Float} typed value to retrieve the information about the
+     * radio frequency if this metadata represents radio content.
+     *
+     * @see Builder#putFloat(String, float)
+     * @see #getFloat(String)
      */
     public static final String METADATA_KEY_RADIO_FREQUENCY =
             "android.media.metadata.RADIO_FREQUENCY";
 
     /**
-     * The radio callsign in String format if this metdata representing radio content.
+     * The metadata key for a {@link CharSequence} or {@link String} typed value to retrieve the
+     * information about the radio callsign if this metadata represents radio content.
+     *
+     * @see Builder#putText(String, CharSequence)
+     * @see Builder#putString(String, String)
+     * @see #getText(String)
+     * @see #getString(String)
      */
     public static final String METADATA_KEY_RADIO_CALLSIGN =
             "android.media.metadata.RADIO_CALLSIGN";
 
     /**
-     * The bluetooth folder type of the media specified in the section 6.10.2.2 of the Bluetooth
+     * The metadata key for a {@link Long} typed value to retrieve the information about the
+     * bluetooth folder type of the media specified in the section 6.10.2.2 of the Bluetooth
      * AVRCP 1.5. It should be one of the following:
      * <ul>
      * <li>{@link #BT_FOLDER_TYPE_MIXED}</li>
@@ -247,6 +391,9 @@ public final class MediaMetadata2 {
      * <li>{@link #BT_FOLDER_TYPE_PLAYLISTS}</li>
      * <li>{@link #BT_FOLDER_TYPE_YEARS}</li>
      * </ul>
+     *
+     * @see Builder#putLong(String, long)
+     * @see #getLong(String)
      */
     public static final String METADATA_KEY_BT_FOLDER_TYPE
             = "android.media.metadata.BT_FOLDER_TYPE";
@@ -294,14 +441,19 @@ public final class MediaMetadata2 {
     public static final long BT_FOLDER_TYPE_YEARS = 6;
 
     /**
-     * Whether the media is an advertisement. A value of 0 indicates it is not an advertisement. A
-     * value of 1 or non-zero indicates it is an advertisement. If not specified, this value is set
-     * to 0 by default.
+     * The metadata key for a {@link Long} typed value to retrieve the information about whether
+     * the media is an advertisement. A value of 0 indicates it is not an advertisement.
+     * A value of 1 or non-zero indicates it is an advertisement.
+     * If not specified, this value is set to 0 by default.
+     *
+     * @see Builder#putLong(String, long)
+     * @see #getLong(String)
      */
     public static final String METADATA_KEY_ADVERTISEMENT = "android.media.metadata.ADVERTISEMENT";
 
     /**
-     * The download status of the media which will be used for later offline playback. It should be
+     * The metadata key for a {@link Long} typed value to retrieve the information about the
+     * download status of the media which will be used for later offline playback. It should be
      * one of the following:
      *
      * <ul>
@@ -309,6 +461,9 @@ public final class MediaMetadata2 {
      * <li>{@link #STATUS_DOWNLOADING}</li>
      * <li>{@link #STATUS_DOWNLOADED}</li>
      * </ul>
+     *
+     * @see Builder#putLong(String, long)
+     * @see #getLong(String)
      */
     public static final String METADATA_KEY_DOWNLOAD_STATUS =
             "android.media.metadata.DOWNLOAD_STATUS";
@@ -588,6 +743,7 @@ public final class MediaMetadata2 {
          * <li>{@link #METADATA_KEY_DISPLAY_SUBTITLE}</li>
          * <li>{@link #METADATA_KEY_DISPLAY_DESCRIPTION}</li>
          * <li>{@link #METADATA_KEY_DISPLAY_ICON_URI}</li>
+         * <li>{@link #METADATA_KEY_RADIO_CALLSIGN}</li>
          * </ul>
          *
          * @param key The key for referencing this value

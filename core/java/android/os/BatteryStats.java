@@ -294,8 +294,8 @@ public abstract class BatteryStats implements Parcelable {
     /**
      * jbd line is:
      * BATTERY_STATS_CHECKIN_VERSION, uid, which, "jbd",
-     * jobsDeferredEventCount, jobsDeferredCount, averageLatencyMillis,
-     * count at latency < 1 hr, count at latency < 2 hrs, count at latency < 6 hrs, beyond 6 hrs
+     * jobsDeferredEventCount, jobsDeferredCount, totalLatencyMillis,
+     * count at latency < 1 hr, count at latency 1 to 2 hrs, 2 to 4 hrs, 4 to 8 hrs, and past 8 hrs
      * <p>
      * @see #JOB_FRESHNESS_BUCKETS
      */
@@ -364,13 +364,14 @@ public abstract class BatteryStats implements Parcelable {
     /**
      * These are the thresholds for bucketing last time since a job was run for an app
      * that just moved to ACTIVE due to a launch. So if the last time a job ran was less
-     * than 30 minutes ago, then it's reasonably fresh, 2 hours ago, not so fresh and so
+     * than 1 hour ago, then it's reasonably fresh, 2 hours ago, not so fresh and so
      * on.
      */
     public static final long[] JOB_FRESHNESS_BUCKETS = {
             1 * 60 * 60 * 1000L,
             2 * 60 * 60 * 1000L,
-            6 * 60 * 60 * 1000L,
+            4 * 60 * 60 * 1000L,
+            8 * 60 * 60 * 1000L,
             Long.MAX_VALUE
     };
 
@@ -2269,27 +2270,27 @@ public abstract class BatteryStats implements Parcelable {
      */
     public abstract int getMobileRadioActiveUnknownCount(int which);
 
-    public static final int DATA_CONNECTION_NONE = 0;
-    public static final int DATA_CONNECTION_GPRS = 1;
-    public static final int DATA_CONNECTION_EDGE = 2;
-    public static final int DATA_CONNECTION_UMTS = 3;
-    public static final int DATA_CONNECTION_CDMA = 4;
-    public static final int DATA_CONNECTION_EVDO_0 = 5;
-    public static final int DATA_CONNECTION_EVDO_A = 6;
-    public static final int DATA_CONNECTION_1xRTT = 7;
-    public static final int DATA_CONNECTION_HSDPA = 8;
-    public static final int DATA_CONNECTION_HSUPA = 9;
-    public static final int DATA_CONNECTION_HSPA = 10;
-    public static final int DATA_CONNECTION_IDEN = 11;
-    public static final int DATA_CONNECTION_EVDO_B = 12;
-    public static final int DATA_CONNECTION_LTE = 13;
-    public static final int DATA_CONNECTION_EHRPD = 14;
-    public static final int DATA_CONNECTION_HSPAP = 15;
-    public static final int DATA_CONNECTION_GSM = 16;
-    public static final int DATA_CONNECTION_TD_SCDMA = 17;
-    public static final int DATA_CONNECTION_IWLAN = 18;
-    public static final int DATA_CONNECTION_LTE_CA = 19;
-    public static final int DATA_CONNECTION_OTHER = 20;
+    public static final int DATA_CONNECTION_NONE     = SystemProto.DataConnection.NONE;      // 0
+    public static final int DATA_CONNECTION_GPRS     = SystemProto.DataConnection.GPRS;      // 1
+    public static final int DATA_CONNECTION_EDGE     = SystemProto.DataConnection.EDGE;      // 2
+    public static final int DATA_CONNECTION_UMTS     = SystemProto.DataConnection.UMTS;      // 3
+    public static final int DATA_CONNECTION_CDMA     = SystemProto.DataConnection.CDMA;      // 4
+    public static final int DATA_CONNECTION_EVDO_0   = SystemProto.DataConnection.EVDO_0;    // 5
+    public static final int DATA_CONNECTION_EVDO_A   = SystemProto.DataConnection.EVDO_A;    // 6
+    public static final int DATA_CONNECTION_1xRTT    = SystemProto.DataConnection.ONE_X_RTT; // 7
+    public static final int DATA_CONNECTION_HSDPA    = SystemProto.DataConnection.HSDPA;     // 8
+    public static final int DATA_CONNECTION_HSUPA    = SystemProto.DataConnection.HSUPA;     // 9
+    public static final int DATA_CONNECTION_HSPA     = SystemProto.DataConnection.HSPA;      // 10
+    public static final int DATA_CONNECTION_IDEN     = SystemProto.DataConnection.IDEN;      // 11
+    public static final int DATA_CONNECTION_EVDO_B   = SystemProto.DataConnection.EVDO_B;    // 12
+    public static final int DATA_CONNECTION_LTE      = SystemProto.DataConnection.LTE;       // 13
+    public static final int DATA_CONNECTION_EHRPD    = SystemProto.DataConnection.EHRPD;     // 14
+    public static final int DATA_CONNECTION_HSPAP    = SystemProto.DataConnection.HSPAP;     // 15
+    public static final int DATA_CONNECTION_GSM      = SystemProto.DataConnection.GSM;       // 16
+    public static final int DATA_CONNECTION_TD_SCDMA = SystemProto.DataConnection.TD_SCDMA;  // 17
+    public static final int DATA_CONNECTION_IWLAN    = SystemProto.DataConnection.IWLAN;     // 18
+    public static final int DATA_CONNECTION_LTE_CA   = SystemProto.DataConnection.LTE_CA;    // 19
+    public static final int DATA_CONNECTION_OTHER    = SystemProto.DataConnection.OTHER;     // 20
 
     static final String[] DATA_CONNECTION_NAMES = {
         "none", "gprs", "edge", "umts", "cdma", "evdo_0", "evdo_A",

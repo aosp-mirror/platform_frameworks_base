@@ -135,10 +135,30 @@ public class AudioMixingRule {
         }
     }
 
+    private static boolean areCriteriaEquivalent(ArrayList<AudioMixMatchCriterion> cr1,
+            ArrayList<AudioMixMatchCriterion> cr2) {
+        if (cr1 == null || cr2 == null) return false;
+        if (cr1 == cr2) return true;
+        if (cr1.size() != cr2.size()) return false;
+        //TODO iterate over rules to check they contain the same criterion
+        return (cr1.hashCode() == cr2.hashCode());
+    }
+
     private final int mTargetMixType;
     int getTargetMixType() { return mTargetMixType; }
     private final ArrayList<AudioMixMatchCriterion> mCriteria;
     ArrayList<AudioMixMatchCriterion> getCriteria() { return mCriteria; }
+
+    /** @hide */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        final AudioMixingRule that = (AudioMixingRule) o;
+        return (this.mTargetMixType == that.mTargetMixType)
+                && (areCriteriaEquivalent(this.mCriteria, that.mCriteria));
+    }
 
     @Override
     public int hashCode() {

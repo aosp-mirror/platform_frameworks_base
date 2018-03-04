@@ -110,6 +110,8 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config,
                       std::unordered_map<int, std::vector<int>>& trackerToConditionMap,
                       std::set<int64_t> &noReportMetricIds);
 
+bool isStateTracker(const SimplePredicate& simplePredicate, std::vector<Matcher>* primaryKeys);
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

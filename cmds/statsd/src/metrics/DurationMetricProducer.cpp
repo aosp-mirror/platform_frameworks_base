@@ -221,6 +221,11 @@ void DurationMetricProducer::onConditionChangedLocked(const bool conditionMet,
     }
 }
 
+void DurationMetricProducer::dropDataLocked(const uint64_t dropTimeNs) {
+    flushIfNeededLocked(dropTimeNs);
+    mPastBuckets.clear();
+}
+
 void DurationMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
                                                 ProtoOutputStream* protoOutput) {
     flushIfNeededLocked(dumpTimeNs);

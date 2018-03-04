@@ -20,6 +20,7 @@ import static android.security.keystore.recovery.RecoveryController.ERROR_BAD_CE
 import static android.security.keystore.recovery.RecoveryController.ERROR_DECRYPTION_FAILED;
 import static android.security.keystore.recovery.RecoveryController.ERROR_INSECURE_USER;
 import static android.security.keystore.recovery.RecoveryController.ERROR_INVALID_KEY_FORMAT;
+import static android.security.keystore.recovery.RecoveryController.ERROR_INVALID_CERTIFICATE;
 import static android.security.keystore.recovery.RecoveryController.ERROR_NO_SNAPSHOT_PENDING;
 import static android.security.keystore.recovery.RecoveryController.ERROR_SERVICE_INTERNAL_ERROR;
 import static android.security.keystore.recovery.RecoveryController.ERROR_SESSION_EXPIRED;
@@ -44,6 +45,7 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.HexDump;
 import com.android.server.locksettings.recoverablekeystore.certificate.CertUtils;
+import com.android.server.locksettings.recoverablekeystore.certificate.SigXml;
 import com.android.server.locksettings.recoverablekeystore.storage.ApplicationKeyStorage;
 import com.android.server.locksettings.recoverablekeystore.certificate.CertParsingException;
 import com.android.server.locksettings.recoverablekeystore.certificate.CertValidationException;
@@ -160,14 +162,15 @@ public class RecoverableKeyStoreManager {
         }
     }
 
+    /**
+     * @deprecated Use {@link #initRecoveryServiceWithSigFile(String, byte[], byte[])} instead.
+     */
     public void initRecoveryService(
             @NonNull String rootCertificateAlias, @NonNull byte[] recoveryServiceCertFile)
             throws RemoteException {
         checkRecoverKeyStorePermission();
         int userId = UserHandle.getCallingUserId();
         int uid = Binder.getCallingUid();
-
-        // TODO: Check the public-key signature on the whole file before parsing it
 
         CertXml certXml;
         try {
@@ -204,7 +207,7 @@ public class RecoverableKeyStoreManager {
         } catch (CertValidationException e) {
             Log.e(TAG, "Invalid endpoint cert", e);
             throw new ServiceSpecificException(
-                    ERROR_BAD_CERTIFICATE_FORMAT, "Failed to validate certificate.");
+                    ERROR_INVALID_CERTIFICATE, "Failed to validate certificate.");
         }
         try {
             Log.d(TAG, "Saving the randomly chosen endpoint certificate to database");
@@ -217,6 +220,50 @@ public class RecoverableKeyStoreManager {
             throw new ServiceSpecificException(
                     ERROR_BAD_CERTIFICATE_FORMAT, "Failed to encode CertPath.");
         }
+    }
+
+    /**
+     * Initializes the recovery service with the two files {@code recoveryServiceCertFile} and
+     * {@code recoveryServiceSigFile}.
+     *
+     * @param rootCertificateAlias the alias for the root certificate that is used for validating
+     *     the recovery service certificates.
+     * @param recoveryServiceCertFile the content of the XML file containing a list of certificates
+     *     for the recovery service.
+     * @param recoveryServiceSigFile the content of the XML file containing the public-key signature
+     *     over the entire content of {@code recoveryServiceCertFile}.
+     */
+    public void initRecoveryServiceWithSigFile(
+            @NonNull String rootCertificateAlias, @NonNull byte[] recoveryServiceCertFile,
+            @NonNull byte[] recoveryServiceSigFile)
+            throws RemoteException {
+        if (recoveryServiceCertFile == null || recoveryServiceSigFile == null) {
+            Log.d(TAG, "The given cert or sig file is null");
+            throw new ServiceSpecificException(
+                    ERROR_BAD_CERTIFICATE_FORMAT, "The given cert or sig file is null.");
+        }
+
+        SigXml sigXml;
+        try {
+            sigXml = SigXml.parse(recoveryServiceSigFile);
+        } catch (CertParsingException e) {
+            Log.d(TAG, "Failed to parse the sig file: " + HexDump.toHexString(
+                    recoveryServiceSigFile));
+            throw new ServiceSpecificException(
+                    ERROR_BAD_CERTIFICATE_FORMAT, "Failed to parse the sig file.");
+        }
+
+        try {
+            sigXml.verifyFileSignature(TrustedRootCert.TRUSTED_ROOT_CERT, recoveryServiceCertFile);
+        } catch (CertValidationException e) {
+            Log.d(TAG, "The signature over the cert file is invalid."
+                    + " Cert: " + HexDump.toHexString(recoveryServiceCertFile)
+                    + " Sig: " + HexDump.toHexString(recoveryServiceSigFile));
+            throw new ServiceSpecificException(
+                    ERROR_INVALID_CERTIFICATE, "The signature over the cert file is invalid.");
+        }
+
+        initRecoveryService(rootCertificateAlias, recoveryServiceCertFile);
     }
 
     private PublicKey parseEcPublicKey(@NonNull byte[] bytes) throws ServiceSpecificException {
@@ -392,7 +439,7 @@ public class RecoverableKeyStoreManager {
         // verifierPublicKey; otherwise, the user secret may be decrypted by a key that is not owned
         // by the original recovery service.
         if (!publicKeysMatch(publicKey, vaultParams)) {
-            throw new ServiceSpecificException(ERROR_BAD_CERTIFICATE_FORMAT,
+            throw new ServiceSpecificException(ERROR_INVALID_CERTIFICATE,
                     "The public keys given in verifierPublicKey and vaultParams do not match.");
         }
 

@@ -61,6 +61,13 @@ public final class Helper {
      */
     static int sPartitionMaxCount = 10;
 
+    /**
+     * Maximum number of visible datasets in the dataset picker UI.
+     *
+     * <p>Can be modified using {@code cmd autofill set max_visible_datasets}.
+     */
+    public static int sVisibleDatasetsMaxCount = 3;
+
     private Helper() {
         throw new UnsupportedOperationException("contains static members only");
     }

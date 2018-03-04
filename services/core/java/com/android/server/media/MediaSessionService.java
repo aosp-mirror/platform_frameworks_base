@@ -92,6 +92,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.NoSuchElementException;
 
 /**
  * System implementation of MediaSessionManager
@@ -138,6 +139,8 @@ public class MediaSessionService extends SystemService implements Monitor {
     // TODO(jaewan): Support multi-user and managed profile.
     // TODO(jaewan): Make it priority list for handling volume/media key.
     private final Map<SessionToken2, MediaController2> mSessionRecords = new ArrayMap<>();
+
+    private final List<SessionTokensListenerRecord> mSessionTokensListeners = new ArrayList<>();
 
     public MediaSessionService(Context context) {
         super(context);
@@ -521,6 +524,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         synchronized (mLock) {
             // List to keep the session services that need be removed because they don't exist
             // in the 'services' above.
+            boolean notifySessionTokensUpdated = false;
             Set<SessionToken2> sessionTokensToRemove = new HashSet<>();
             for (SessionToken2 token : mSessionRecords.keySet()) {
                 if (token.getType() != TYPE_SESSION) {
@@ -553,11 +557,17 @@ public class MediaSessionService extends SystemService implements Monitor {
                 // sessionTokensToRemove.
                 if (!sessionTokensToRemove.remove(token)) {
                     // New session service is found.
-                    mSessionRecords.put(token, null);
+                    notifySessionTokensUpdated |= addSessionRecordLocked(token);
                 }
             }
             for (SessionToken2 token : sessionTokensToRemove) {
                 mSessionRecords.remove(token);
+                notifySessionTokensUpdated |= removeSessionRecordLocked(token);
+            }
+
+            if (notifySessionTokensUpdated) {
+                // TODO(jaewan): Pass proper user id to postSessionTokensUpdated(...)
+                postSessionTokensUpdated(UserHandle.USER_ALL);
             }
         }
         if (DEBUG) {
@@ -780,10 +790,14 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     void destroySession2Internal(SessionToken2 token) {
         synchronized (mLock) {
+            boolean notifySessionTokensUpdated = false;
             if (token.getType() == SessionToken2.TYPE_SESSION) {
-                mSessionRecords.remove(token);
+                notifySessionTokensUpdated |= removeSessionRecordLocked(token);
             } else {
-                mSessionRecords.put(token, null);
+                notifySessionTokensUpdated |= addSessionRecordLocked(token);
+            }
+            if (notifySessionTokensUpdated) {
+                postSessionTokensUpdated(UserHandle.getUserId(token.getUid()));
             }
         }
     }
@@ -1517,8 +1531,11 @@ public class MediaSessionService extends SystemService implements Monitor {
                     return false;
                 }
                 Context context = getContext();
-                mSessionRecords.put(token, new MediaController2(context, token,
-                        context.getMainExecutor(), new ControllerCallback(token)));
+                controller = new MediaController2(context, token, context.getMainExecutor(),
+                        new ControllerCallback(token));
+                if (addSessionRecordLocked(token, controller)) {
+                    postSessionTokensUpdated(UserHandle.getUserId(token.getUid()));
+                }
                 return true;
             }
         }
@@ -1571,16 +1588,37 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         // TODO(jaewan): Protect this API with permission
+        // TODO(jaewan): "userId != calling user" needs extra protection
         @Override
         public void addSessionTokensListener(ISessionTokensListener listener, int userId,
                 String packageName) {
-            // TODO(jaewan): Implement.
+            synchronized (mLock) {
+                final SessionTokensListenerRecord record =
+                        new SessionTokensListenerRecord(listener, userId);
+                try {
+                    listener.asBinder().linkToDeath(record, 0);
+                } catch (RemoteException e) {
+                }
+                mSessionTokensListeners.add(record);
+            }
         }
 
         // TODO(jaewan): Protect this API with permission
         @Override
         public void removeSessionTokensListener(ISessionTokensListener listener) {
-            // TODO(jaewan): Implement
+            synchronized (mLock) {
+                IBinder listenerBinder = listener.asBinder();
+                for (SessionTokensListenerRecord record : mSessionTokensListeners) {
+                    if (listenerBinder.equals(record.mListener.asBinder())) {
+                        try {
+                            listenerBinder.unlinkToDeath(record, 0);
+                        } catch (NoSuchElementException e) {
+                        }
+                        mSessionTokensListeners.remove(record);
+                        break;
+                    }
+                }
+            }
         }
 
         private int verifySessionsRequest(ComponentName componentName, int userId, final int pid,
@@ -1944,6 +1982,7 @@ public class MediaSessionService extends SystemService implements Monitor {
     final class MessageHandler extends Handler {
         private static final int MSG_SESSIONS_CHANGED = 1;
         private static final int MSG_VOLUME_INITIAL_DOWN = 2;
+        private static final int MSG_SESSIONS_TOKENS_CHANGED = 3;
         private final SparseArray<Integer> mIntegerCache = new SparseArray<>();
 
         @Override
@@ -1961,6 +2000,9 @@ public class MediaSessionService extends SystemService implements Monitor {
                             user.mInitialDownVolumeKeyEvent = null;
                         }
                     }
+                    break;
+                case MSG_SESSIONS_TOKENS_CHANGED:
+                    pushSessionTokensChanged((int) msg.obj);
                     break;
             }
         }
@@ -1986,8 +2028,78 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         @Override
-        public void onDisconnected() {
+        public void onDisconnected(MediaController2 controller) {
             destroySession2Internal(mToken);
         }
     };
+
+    private final class SessionTokensListenerRecord implements IBinder.DeathRecipient {
+        private final ISessionTokensListener mListener;
+        private final int mUserId;
+
+        public SessionTokensListenerRecord(ISessionTokensListener listener, int userId) {
+            mListener = listener;
+            mUserId = userId; // TODO should userId be mapped through mFullUserIds?
+        }
+
+        @Override
+        public void binderDied() {
+            synchronized (mLock) {
+                mSessionTokensListeners.remove(this);
+            }
+        }
+    }
+
+    private void postSessionTokensUpdated(int userId) {
+        mHandler.obtainMessage(MessageHandler.MSG_SESSIONS_TOKENS_CHANGED, userId).sendToTarget();
+    }
+
+    private void pushSessionTokensChanged(int userId) {
+        synchronized (mLock) {
+            List<Bundle> tokens = new ArrayList<>();
+            for (SessionToken2 token : mSessionRecords.keySet()) {
+                // TODO(jaewan): Remove the check for UserHandle.USER_ALL (shouldn't happen).
+                //               This happens when called form buildMediaSessionService2List(...).
+                if (UserHandle.getUserId(token.getUid()) == userId
+                        || UserHandle.USER_ALL == userId) {
+                    tokens.add(token.toBundle());
+                }
+            }
+
+            for (SessionTokensListenerRecord record : mSessionTokensListeners) {
+                // TODO should userId be mapped through mFullUserIds?
+                if (record.mUserId == userId || record.mUserId == UserHandle.USER_ALL) {
+                    try {
+                        record.mListener.onSessionTokensChanged(tokens);
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "Failed to notify session tokens changed", e);
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean addSessionRecordLocked(SessionToken2 token) {
+        return addSessionRecordLocked(token, null);
+    }
+
+    private boolean addSessionRecordLocked(SessionToken2 token, MediaController2 controller) {
+        if (mSessionRecords.containsKey(token) && mSessionRecords.get(token) == controller) {
+            // The key/value pair already exists, no need to update.
+            return false;
+        }
+
+        mSessionRecords.put(token, controller);
+        return true;
+    }
+
+    private boolean removeSessionRecordLocked(SessionToken2 token) {
+        if (!mSessionRecords.containsKey(token)) {
+            // The key is already removed, no need to remove.
+            return false;
+        }
+
+        mSessionRecords.remove(token);
+        return true;
+    }
 }

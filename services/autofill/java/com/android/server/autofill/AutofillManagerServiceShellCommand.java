@@ -77,11 +77,17 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
             pw.println("  get max_partitions");
             pw.println("    Gets the maximum number of partitions per session.");
             pw.println("");
+            pw.println("  get max_visible_datasets");
+            pw.println("    Gets the maximum number of visible datasets in the UI.");
+            pw.println("");
             pw.println("  set log_level [off | debug | verbose]");
             pw.println("    Sets the Autofill log level.");
             pw.println("");
             pw.println("  set max_partitions number");
             pw.println("    Sets the maximum number of partitions per session.");
+            pw.println("");
+            pw.println("  set max_visible_datasets number");
+            pw.println("    Sets the maximum number of visible datasets in the UI.");
             pw.println("");
             pw.println("  list sessions [--user USER_ID]");
             pw.println("    Lists all pending sessions.");
@@ -105,6 +111,8 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
                 return getLogLevel(pw);
             case "max_partitions":
                 return getMaxPartitions(pw);
+            case "max_visible_datasets":
+                return getMaxVisibileDatasets(pw);
             case "fc_score":
                 return getFieldClassificationScore(pw);
             default:
@@ -121,6 +129,8 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
                 return setLogLevel(pw);
             case "max_partitions":
                 return setMaxPartitions();
+            case "max_visible_datasets":
+                return setMaxVisibileDatasets();
             default:
                 pw.println("Invalid set: " + what);
                 return -1;
@@ -170,6 +180,16 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
 
     private int setMaxPartitions() {
         mService.setMaxPartitions(Integer.parseInt(getNextArgRequired()));
+        return 0;
+    }
+
+    private int getMaxVisibileDatasets(PrintWriter pw) {
+        pw.println(mService.getMaxVisibleDatasets());
+        return 0;
+    }
+
+    private int setMaxVisibileDatasets() {
+        mService.setMaxVisibleDatasets(Integer.parseInt(getNextArgRequired()));
         return 0;
     }
 

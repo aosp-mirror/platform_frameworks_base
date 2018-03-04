@@ -84,7 +84,7 @@ public final class CompanionDeviceManager {
         public abstract void onDeviceFound(IntentSender chooserLauncher);
 
         /**
-         * Called if there was an error looking for device(s), e.g. timeout
+         * Called if there was an error looking for device(s)
          *
          * @param error the cause of the error
          */

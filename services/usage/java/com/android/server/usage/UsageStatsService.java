@@ -465,6 +465,23 @@ public class UsageStatsService extends SystemService implements
         }
     }
 
+    /**
+     * Called by the Binder stub.
+     */
+    UsageEvents queryEventsForPackage(int userId, long beginTime, long endTime,
+            String packageName) {
+        synchronized (mLock) {
+            final long timeNow = checkAndGetTimeLocked();
+            if (!validRange(timeNow, beginTime, endTime)) {
+                return null;
+            }
+
+            final UserUsageStatsService service =
+                    getUserDataAndInitializeIfNeededLocked(userId, timeNow);
+            return service.queryEventsForPackage(beginTime, endTime, packageName);
+        }
+    }
+
     private static boolean validRange(long currentTime, long beginTime, long endTime) {
         return beginTime <= currentTime && beginTime < endTime;
     }
@@ -655,6 +672,26 @@ public class UsageStatsService extends SystemService implements
             try {
                 return UsageStatsService.this.queryEvents(userId, beginTime, endTime,
                         obfuscateInstantApps);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public UsageEvents queryEventsForPackage(long beginTime, long endTime,
+                String callingPackage) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingUserId = UserHandle.getUserId(callingUid);
+
+            if (mPackageManagerInternal.getPackageUid(callingPackage, PackageManager.MATCH_ANY_USER,
+                    callingUserId) != callingUid) {
+                throw new SecurityException("Calling uid " + callingPackage + " cannot query events"
+                        + "for package " + callingPackage);
+            }
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return UsageStatsService.this.queryEventsForPackage(callingUserId, beginTime,
+                        endTime, callingPackage);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

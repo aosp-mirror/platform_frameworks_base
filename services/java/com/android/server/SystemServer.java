@@ -23,6 +23,7 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources.Theme;
@@ -205,6 +206,8 @@ public final class SystemServer {
             "com.google.android.clockwork.lefty.WearLeftyService";
     private static final String WEAR_TIME_SERVICE_CLASS =
             "com.google.android.clockwork.time.WearTimeService";
+    private static final String WEAR_GLOBAL_ACTIONS_SERVICE_CLASS =
+            "com.android.clockwork.globalactions.GlobalActionsService";
     private static final String ACCOUNT_SERVICE_CLASS =
             "com.android.server.accounts.AccountManagerService$Lifecycle";
     private static final String CONTENT_SERVICE_CLASS =
@@ -331,6 +334,8 @@ public final class SystemServer {
 
             // The system server should never make non-oneway calls
             Binder.setWarnOnBlocking(true);
+            // The system server should always load safe labels
+            PackageItemInfo.setForceSafeLabels(true);
             // Deactivate SQLiteCompatibilityWalFlags until settings provider is initialized
             SQLiteCompatibilityWalFlags.init(null);
 
@@ -839,7 +844,8 @@ public final class SystemServer {
                     !mFirstBoot, mOnlyCore, new PhoneWindowManager());
             ServiceManager.addService(Context.WINDOW_SERVICE, wm, /* allowIsolated= */ false,
                     DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PROTO);
-            ServiceManager.addService(Context.INPUT_SERVICE, inputManager);
+            ServiceManager.addService(Context.INPUT_SERVICE, inputManager,
+                    /* allowIsolated= */ false, DUMP_FLAG_PRIORITY_CRITICAL);
             traceEnd();
 
             traceBeginAndSlog("SetWindowManagerService");
@@ -1543,6 +1549,10 @@ public final class SystemServer {
                 mSystemServiceManager.startService(WEAR_LEFTY_SERVICE_CLASS);
                 traceEnd();
             }
+
+            traceBeginAndSlog("StartWearGlobalActionsService");
+            mSystemServiceManager.startService(WEAR_GLOBAL_ACTIONS_SERVICE_CLASS);
+            traceEnd();
         }
 
         if (!disableSlices) {

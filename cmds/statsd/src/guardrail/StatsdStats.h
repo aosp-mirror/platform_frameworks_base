@@ -30,8 +30,49 @@ namespace android {
 namespace os {
 namespace statsd {
 
+struct ConfigStats {
+    int32_t uid;
+    int64_t id;
+    int32_t creation_time_sec;
+    int32_t deletion_time_sec = 0;
+    int32_t metric_count;
+    int32_t condition_count;
+    int32_t matcher_count;
+    int32_t alert_count;
+    bool is_valid;
+
+    std::list<int32_t> broadcast_sent_time_sec;
+    std::list<int32_t> data_drop_time_sec;
+    std::list<int32_t> dump_report_time_sec;
+
+    // Stores how many times a matcher have been matched. The map size is capped by kMaxConfigCount.
+    std::map<const int64_t, int> matcher_stats;
+
+    // Stores the number of output tuple of condition trackers when it's bigger than
+    // kDimensionKeySizeSoftLimit. When you see the number is kDimensionKeySizeHardLimit +1,
+    // it means some data has been dropped. The map size is capped by kMaxConfigCount.
+    std::map<const int64_t, int> condition_stats;
+
+    // Stores the number of output tuple of metric producers when it's bigger than
+    // kDimensionKeySizeSoftLimit. When you see the number is kDimensionKeySizeHardLimit +1,
+    // it means some data has been dropped. The map size is capped by kMaxConfigCount.
+    std::map<const int64_t, int> metric_stats;
+
+    // Stores the number of times an anomaly detection alert has been declared.
+    // The map size is capped by kMaxConfigCount.
+    std::map<const int64_t, int> alert_stats;
+};
+
+struct UidMapStats {
+    int32_t snapshots;
+    int32_t changes;
+    int32_t bytes_used;
+    int32_t dropped_snapshots;
+    int32_t dropped_changes;
+};
+
 // Keeps track of stats of statsd.
-// Single instance shared across the process. All methods are thread safe.
+// Single instance shared across the process. All public methods are thread safe.
 class StatsdStats {
 public:
     static StatsdStats& getInstance();
@@ -233,25 +274,15 @@ private:
     int32_t mStartTimeSec;
 
     // Track the number of dropped entries used by the uid map.
-    StatsdStatsReport_UidMapStats mUidMapStats;
+    UidMapStats mUidMapStats;
 
     // The stats about the configs that are still in use.
     // The map size is capped by kMaxConfigCount.
-    std::map<const ConfigKey, StatsdStatsReport_ConfigStats> mConfigStats;
+    std::map<const ConfigKey, std::shared_ptr<ConfigStats>> mConfigStats;
 
     // Stores the stats for the configs that are no longer in use.
     // The size of the vector is capped by kMaxIceBoxSize.
-    std::list<const StatsdStatsReport_ConfigStats> mIceBox;
-
-    // Stores the number of output tuple of condition trackers when it's bigger than
-    // kDimensionKeySizeSoftLimit. When you see the number is kDimensionKeySizeHardLimit +1,
-    // it means some data has been dropped. The map size is capped by kMaxConfigCount.
-    std::map<const ConfigKey, std::map<const int64_t, int>> mConditionStats;
-
-    // Stores the number of output tuple of metric producers when it's bigger than
-    // kDimensionKeySizeSoftLimit. When you see the number is kDimensionKeySizeHardLimit +1,
-    // it means some data has been dropped. The map size is capped by kMaxConfigCount.
-    std::map<const ConfigKey, std::map<const int64_t, int>> mMetricsStats;
+    std::list<const std::shared_ptr<ConfigStats>> mIceBox;
 
     // Stores the number of times a pushed atom is logged.
     // The size of the vector is the largest pushed atom id in atoms.proto + 1. Atoms
@@ -272,19 +303,10 @@ private:
     // Stores the number of times statsd registers the periodic alarm changes
     int mPeriodicAlarmRegisteredStats = 0;
 
-    // Stores the number of times an anomaly detection alert has been declared
-    // (per config, per alert name). The map size is capped by kMaxConfigCount.
-    std::map<const ConfigKey, std::map<const int64_t, int>> mAlertStats;
-
-    // Stores how many times a matcher have been matched. The map size is capped by kMaxConfigCount.
-    std::map<const ConfigKey, std::map<const int64_t, int>> mMatcherStats;
 
     void noteConfigRemovedInternalLocked(const ConfigKey& key);
 
     void resetInternalLocked();
-
-    void addSubStatsToConfigLocked(const ConfigKey& key,
-                                   StatsdStatsReport_ConfigStats& configStats);
 
     void noteDataDropped(const ConfigKey& key, int32_t timeSec);
 
@@ -292,7 +314,7 @@ private:
 
     void noteBroadcastSent(const ConfigKey& key, int32_t timeSec);
 
-    void addToIceBoxLocked(const StatsdStatsReport_ConfigStats& stats);
+    void addToIceBoxLocked(std::shared_ptr<ConfigStats>& stats);
 
     FRIEND_TEST(StatsdStatsTest, TestValidConfigAdd);
     FRIEND_TEST(StatsdStatsTest, TestInvalidConfigAdd);

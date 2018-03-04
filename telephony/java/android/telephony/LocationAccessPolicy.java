@@ -82,8 +82,7 @@ public final class LocationAccessPolicy {
                     .noteOpNoThrow(opCode, uid, pkgName) != AppOpsManager.MODE_ALLOWED) {
                 return false;
             }
-            if (!isLocationModeEnabled(context, UserHandle.getUserId(uid))
-                    && !isLegacyForeground(context, pkgName, uid)) {
+            if (!isLocationModeEnabled(context, UserHandle.getUserId(uid))) {
                 return false;
             }
             // If the user or profile is current, permission is granted.
@@ -99,35 +98,6 @@ public final class LocationAccessPolicy {
                 Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF, userId);
         return locationMode != Settings.Secure.LOCATION_MODE_OFF
                 && locationMode != Settings.Secure.LOCATION_MODE_SENSORS_ONLY;
-    }
-
-    private static boolean isLegacyForeground(@NonNull Context context, @NonNull String pkgName,
-            int uid) {
-        long token = Binder.clearCallingIdentity();
-        try {
-            return isLegacyVersion(context, pkgName) && isForegroundApp(context, uid);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
-    private static boolean isLegacyVersion(@NonNull Context context, @NonNull String pkgName) {
-        try {
-            if (context.getPackageManager().getApplicationInfo(pkgName, 0)
-                    .targetSdkVersion <= Build.VERSION_CODES.O) {
-                return true;
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            // In case of exception, assume known app (more strict checking)
-            // Note: This case will never happen since checkPackage is
-            // called to verify validity before checking app's version.
-        }
-        return false;
-    }
-
-    private static boolean isForegroundApp(@NonNull Context context, int uid) {
-        final ActivityManager am = context.getSystemService(ActivityManager.class);
-        return am.getUidImportance(uid) <= ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
     }
 
     private static boolean checkInteractAcrossUsersFull(@NonNull Context context) {

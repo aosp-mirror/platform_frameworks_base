@@ -5922,6 +5922,18 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    public void setNavBarVirtualKeyHapticFeedbackEnabled(boolean enabled) {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Caller does not hold permission "
+                    + android.Manifest.permission.STATUS_BAR);
+        }
+
+        synchronized (mWindowMap) {
+            mPolicy.setNavBarVirtualKeyHapticFeedbackEnabledLw(enabled);
+        }
+    }
+
     // TODO(multidisplay): StatusBar on multiple screens?
     private boolean updateStatusBarVisibilityLocked(int visibility) {
         if (mLastDispatchedSystemUiVisibility == visibility) {

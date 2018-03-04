@@ -25,6 +25,8 @@ import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_TELEVISION;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
+import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.UserHandle.USER_ALL;
 import static android.os.UserHandle.USER_NULL;
 import static android.os.UserHandle.USER_SYSTEM;
@@ -64,6 +66,10 @@ import static android.service.notification.NotificationListenerService.TRIM_FULL
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
+
+import static com.android.server.utils.PriorityDump.PRIORITY_ARG;
+import static com.android.server.utils.PriorityDump.PRIORITY_ARG_CRITICAL;
+import static com.android.server.utils.PriorityDump.PRIORITY_ARG_NORMAL;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -229,11 +235,12 @@ public class NotificationManagerService extends SystemService {
     static final float DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE = 5f;
 
     // message codes
-    static final int MESSAGE_TIMEOUT = 2;
+    static final int MESSAGE_DURATION_REACHED = 2;
     static final int MESSAGE_SAVE_POLICY_FILE = 3;
     static final int MESSAGE_SEND_RANKING_UPDATE = 4;
     static final int MESSAGE_LISTENER_HINTS_CHANGED = 5;
     static final int MESSAGE_LISTENER_NOTIFICATION_FILTER_CHANGED = 6;
+    static final int MESSAGE_FINISH_TOKEN_TIMEOUT = 7;
 
     // ranking thread messages
     private static final int MESSAGE_RECONSIDER_RANKING = 1000;
@@ -1476,7 +1483,8 @@ public class NotificationManagerService extends SystemService {
         IntentFilter localeChangedFilter = new IntentFilter(Intent.ACTION_LOCALE_CHANGED);
         getContext().registerReceiver(mLocaleChangeReceiver, localeChangedFilter);
 
-        publishBinderService(Context.NOTIFICATION_SERVICE, mService);
+        publishBinderService(Context.NOTIFICATION_SERVICE, mService, /* allowIsolated= */ false,
+                DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_NORMAL);
         publishLocalService(NotificationManagerInternal.class, mInternalService);
     }
 
@@ -1881,6 +1889,25 @@ public class NotificationManagerService extends SystemService {
                         cancelToastLocked(index);
                     } else {
                         Slog.w(TAG, "Toast already cancelled. pkg=" + pkg
+                                + " callback=" + callback);
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(callingId);
+                }
+            }
+        }
+
+        @Override
+        public void finishToken(String pkg, ITransientNotification callback) {
+            synchronized (mToastQueue) {
+                long callingId = Binder.clearCallingIdentity();
+                try {
+                    int index = indexOfToastLocked(pkg, callback);
+                    if (index >= 0) {
+                        ToastRecord record = mToastQueue.get(index);
+                        finishTokenLocked(record.token);
+                    } else {
+                        Slog.w(TAG, "Toast already killed. pkg=" + pkg
                                 + " callback=" + callback);
                     }
                 } finally {
@@ -2896,6 +2923,8 @@ public class NotificationManagerService extends SystemService {
                 dumpJson(pw, filter);
             } else if (filter.proto) {
                 dumpProto(fd, filter);
+            } else if (filter.criticalPriority) {
+                dumpNotificationRecords(pw, filter);
             } else {
                 dumpImpl(pw, filter);
             }
@@ -3521,6 +3550,22 @@ public class NotificationManagerService extends SystemService {
         proto.flush();
     }
 
+    private void dumpNotificationRecords(PrintWriter pw, @NonNull DumpFilter filter) {
+        synchronized (mNotificationLock) {
+            int N;
+            N = mNotificationList.size();
+            if (N > 0) {
+                pw.println("  Notification List:");
+                for (int i = 0; i < N; i++) {
+                    final NotificationRecord nr = mNotificationList.get(i);
+                    if (filter.filtered && !filter.matches(nr.sbn)) continue;
+                    nr.dump(pw, "    ", getContext(), filter.redact);
+                }
+                pw.println("  ");
+            }
+        }
+    }
+
     void dumpImpl(PrintWriter pw, @NonNull DumpFilter filter) {
         pw.print("Current Notification Manager state");
         if (filter.filtered) {
@@ -3545,17 +3590,11 @@ public class NotificationManagerService extends SystemService {
 
         synchronized (mNotificationLock) {
             if (!zenOnly) {
-                N = mNotificationList.size();
-                if (N > 0) {
-                    pw.println("  Notification List:");
-                    for (int i=0; i<N; i++) {
-                        final NotificationRecord nr = mNotificationList.get(i);
-                        if (filter.filtered && !filter.matches(nr.sbn)) continue;
-                        nr.dump(pw, "    ", getContext(), filter.redact);
-                    }
-                    pw.println("  ");
+                // Priority filters are only set when called via bugreport. If set
+                // skip sections that are part of the critical section.
+                if (!filter.normalPriority) {
+                    dumpNotificationRecords(pw, filter);
                 }
-
                 if (!filter.filtered) {
                     N = mLights.size();
                     if (N > 0) {
@@ -4578,7 +4617,7 @@ public class NotificationManagerService extends SystemService {
             if (DBG) Slog.d(TAG, "Show pkg=" + record.pkg + " callback=" + record.callback);
             try {
                 record.callback.show(record.token);
-                scheduleTimeoutLocked(record);
+                scheduleDurationReachedLocked(record);
                 return;
             } catch (RemoteException e) {
                 Slog.w(TAG, "Object died trying to show notification " + record.callback
@@ -4611,7 +4650,15 @@ public class NotificationManagerService extends SystemService {
         }
 
         ToastRecord lastToast = mToastQueue.remove(index);
-        mWindowManagerInternal.removeWindowToken(lastToast.token, true, DEFAULT_DISPLAY);
+
+        mWindowManagerInternal.removeWindowToken(lastToast.token, false /* removeWindows */,
+                DEFAULT_DISPLAY);
+        // We passed 'false' for 'removeWindows' so that the client has time to stop
+        // rendering (as hide above is a one-way message), otherwise we could crash
+        // a client which was actively using a surface made from the token. However
+        // we need to schedule a timeout to make sure the token is eventually killed
+        // one way or another.
+        scheduleKillTokenTimeout(lastToast.token);
 
         keepProcessAliveIfNeededLocked(record.pid);
         if (mToastQueue.size() > 0) {
@@ -4622,16 +4669,26 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
+    void finishTokenLocked(IBinder t) {
+        mHandler.removeCallbacksAndMessages(t);
+        // We pass 'true' for 'removeWindows' to let the WindowManager destroy any
+        // remaining surfaces as either the client has called finishToken indicating
+        // it has successfully removed the views, or the client has timed out
+        // at which point anything goes.
+        mWindowManagerInternal.removeWindowToken(t, true /* removeWindows */,
+                DEFAULT_DISPLAY);
+    }
+
     @GuardedBy("mToastQueue")
-    private void scheduleTimeoutLocked(ToastRecord r)
+    private void scheduleDurationReachedLocked(ToastRecord r)
     {
         mHandler.removeCallbacksAndMessages(r);
-        Message m = Message.obtain(mHandler, MESSAGE_TIMEOUT, r);
+        Message m = Message.obtain(mHandler, MESSAGE_DURATION_REACHED, r);
         long delay = r.duration == Toast.LENGTH_LONG ? LONG_DELAY : SHORT_DELAY;
         mHandler.sendMessageDelayed(m, delay);
     }
 
-    private void handleTimeout(ToastRecord record)
+    private void handleDurationReached(ToastRecord record)
     {
         if (DBG) Slog.d(TAG, "Timeout pkg=" + record.pkg + " callback=" + record.callback);
         synchronized (mToastQueue) {
@@ -4639,6 +4696,22 @@ public class NotificationManagerService extends SystemService {
             if (index >= 0) {
                 cancelToastLocked(index);
             }
+        }
+    }
+
+    @GuardedBy("mToastQueue")
+    private void scheduleKillTokenTimeout(IBinder token)
+    {
+        mHandler.removeCallbacksAndMessages(token);
+        Message m = Message.obtain(mHandler, MESSAGE_FINISH_TOKEN_TIMEOUT, token);
+        mHandler.sendMessageDelayed(m, 5);
+    }
+
+    private void handleKillTokenTimeout(IBinder token)
+    {
+        if (DBG) Slog.d(TAG, "Kill Token Timeout token=" + token);
+        synchronized (mToastQueue) {
+            finishTokenLocked(token);
         }
     }
 
@@ -4839,8 +4912,11 @@ public class NotificationManagerService extends SystemService {
         {
             switch (msg.what)
             {
-                case MESSAGE_TIMEOUT:
-                    handleTimeout((ToastRecord)msg.obj);
+                case MESSAGE_DURATION_REACHED:
+                    handleDurationReached((ToastRecord)msg.obj);
+                    break;
+                case MESSAGE_FINISH_TOKEN_TIMEOUT:
+                    handleKillTokenTimeout((IBinder)msg.obj);
                     break;
                 case MESSAGE_SAVE_POLICY_FILE:
                     handleSavePolicyFile();
@@ -6202,6 +6278,8 @@ public class NotificationManagerService extends SystemService {
         public boolean stats;
         public boolean redact = true;
         public boolean proto = false;
+        public boolean criticalPriority = false;
+        public boolean normalPriority = false;
 
         @NonNull
         public static DumpFilter parseFromArguments(String[] args) {
@@ -6232,6 +6310,21 @@ public class NotificationManagerService extends SystemService {
                         filter.since = Long.parseLong(args[ai]);
                     } else {
                         filter.since = 0;
+                    }
+                } else if (PRIORITY_ARG.equals(a)) {
+                    // Bugreport will call the service twice with priority arguments, first to dump
+                    // critical sections and then non critical ones. Set approriate filters
+                    // to generate the desired data.
+                    if (ai < args.length - 1) {
+                        ai++;
+                        switch (args[ai]) {
+                            case PRIORITY_ARG_CRITICAL:
+                                filter.criticalPriority = true;
+                                break;
+                            case PRIORITY_ARG_NORMAL:
+                                filter.normalPriority = true;
+                                break;
+                        }
                     }
                 }
             }

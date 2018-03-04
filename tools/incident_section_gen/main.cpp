@@ -203,6 +203,18 @@ static inline Destination getFieldDest(const FieldDescriptor* field) {
             getMessageDest(field->message_type(), fieldDest);
 }
 
+// Converts Destination to a string.
+static inline string getDestString(const Destination dest) {
+    switch (dest) {
+        case DEST_AUTOMATIC: return "AUTOMATIC";
+        case DEST_LOCAL: return "LOCAL";
+        case DEST_EXPLICIT: return "EXPLICIT";
+        // UNSET is considered EXPLICIT by default.
+        case DEST_UNSET: return "EXPLICIT";
+        default: return "UNKNOWN";
+    }
+}
+
 // Get Names ===========================================================================================
 static inline string getFieldName(const FieldDescriptor* field) {
     // replace . with double underscores to avoid name conflicts since fields use snake naming convention
@@ -218,7 +230,7 @@ static inline string getMessageName(const Descriptor* descriptor, const Destinat
 
 // IsDefault ============================================================================================
 // Returns true if a field is default. Default is defined as this field has same dest as its containing message.
-// For message fields, it only looks at its field tag and own default mesaage tag, doesn't recursively go deeper.
+// For message fields, it only looks at its field tag and own default message tag, doesn't recursively go deeper.
 static inline bool isDefaultField(const FieldDescriptor* field, const Destination containerDest) {
     Destination fieldDest = getFieldDest(field);
     if (field->type() != FieldDescriptor::TYPE_MESSAGE) {
@@ -503,11 +515,12 @@ static string replace_string(const string& str, const char replace, const char w
     return result;
 }
 
-static void generateCsv(Descriptor const* descriptor, const string& indent, set<string>* parents) {
+static void generateCsv(Descriptor const* descriptor, const string& indent, set<string>* parents, const Destination containerDest = DEST_UNSET) {
     DebugStringOptions options;
     options.include_comments = true;
     for (int i=0; i<descriptor->field_count(); i++) {
         const FieldDescriptor* field = descriptor->field(i);
+        const Destination fieldDest = getFieldDest(field);
         stringstream text;
         if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
             text << field->message_type()->name();
@@ -515,11 +528,18 @@ static void generateCsv(Descriptor const* descriptor, const string& indent, set<
             text << field->type_name();
         }
         text << " " << field->name();
+        text << " (PRIVACY=";
+        if (isDefaultField(field, containerDest)) {
+            text << getDestString(containerDest);
+        } else {
+            text << getDestString(fieldDest);
+        }
+        text << ")";
         printf("%s%s,\n", indent.c_str(), replace_string(text.str(), '\n', ' ').c_str());
         if (field->type() == FieldDescriptor::TYPE_MESSAGE &&
             parents->find(field->message_type()->full_name()) == parents->end()) {
             parents->insert(field->message_type()->full_name());
-            generateCsv(field->message_type(), indent + ",", parents);
+            generateCsv(field->message_type(), indent + ",", parents, fieldDest);
             parents->erase(field->message_type()->full_name());
         }
     }
@@ -548,7 +568,7 @@ int main(int argc, char const *argv[])
                 || field->number() == sectionId) {
                 set<string> parents;
                 printf("%s\n", field->name().c_str());
-                generateCsv(field->message_type(), "", &parents);
+                generateCsv(field->message_type(), "", &parents, getFieldDest(field));
                 break;
             }
         }

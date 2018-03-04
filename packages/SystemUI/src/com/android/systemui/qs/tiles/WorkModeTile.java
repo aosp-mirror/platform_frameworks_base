@@ -21,12 +21,11 @@ import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.qs.QSHost;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
+import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 
@@ -83,11 +82,15 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
 
     @Override
     public CharSequence getTileLabel() {
-        return mContext.getString(R.string.quick_settings_work_mode_on_label);
+        return mContext.getString(R.string.quick_settings_work_mode_label);
     }
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
+        if (!isAvailable()) {
+            onManagedProfileRemoved();
+        }
+
         if (state.slash == null) {
             state.slash = new SlashState();
         }
@@ -103,13 +106,12 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
             state.slash.isSlashed = false;
             state.contentDescription =  mContext.getString(
                     R.string.accessibility_quick_settings_work_mode_on);
-            state.label = mContext.getString(R.string.quick_settings_work_mode_on_label);
         } else {
             state.slash.isSlashed = true;
             state.contentDescription =  mContext.getString(
                     R.string.accessibility_quick_settings_work_mode_off);
-            state.label = mContext.getString(R.string.quick_settings_work_mode_off_label);
         }
+        state.label = mContext.getString(R.string.quick_settings_work_mode_label);
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
     }

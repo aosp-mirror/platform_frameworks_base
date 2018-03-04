@@ -85,6 +85,7 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
              * should return null if the client is not allowed to access this
              * information.
              *
+             * @param session the session for this event
              * @param controllerInfo information of the controller requesting access to browse media.
              * @param rootHints An optional bundle of service-specific arguments to send
              * to the media library service when connecting and retrieving the
@@ -95,8 +96,8 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
              * @see LibraryRoot#EXTRA_OFFLINE
              * @see LibraryRoot#EXTRA_SUGGESTED
              */
-            public @Nullable LibraryRoot onGetLibraryRoot(@NonNull ControllerInfo controllerInfo,
-                    @Nullable Bundle rootHints) {
+            public @Nullable LibraryRoot onGetLibraryRoot(@NonNull MediaLibrarySession session,
+                    @NonNull ControllerInfo controllerInfo, @Nullable Bundle rootHints) {
                 return null;
             }
 
@@ -105,11 +106,12 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
              * <p>
              * Return {@code null} for no result or error.
              *
+             * @param session the session for this event
              * @param mediaId item id to get media item.
              * @return a media item. {@code null} for no result or error.
              */
-            public @Nullable MediaItem2 onGetItem(@NonNull ControllerInfo controllerInfo,
-                    @NonNull String mediaId) {
+            public @Nullable MediaItem2 onGetItem(@NonNull MediaLibrarySession session,
+                    @NonNull ControllerInfo controllerInfo, @NonNull String mediaId) {
                 return null;
             }
 
@@ -118,14 +120,16 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
              * <p>
              * Return an empty list for no children, and return {@code null} for the error.
              *
+             * @param session the session for this event
              * @param parentId parent id to get children
              * @param page number of page
              * @param pageSize size of the page
              * @param extras extra bundle
              * @return list of children. Can be {@code null}.
              */
-            public @Nullable List<MediaItem2> onGetChildren(@NonNull ControllerInfo controller,
-                    @NonNull String parentId, int page, int pageSize, @Nullable Bundle extras) {
+            public @Nullable List<MediaItem2> onGetChildren(@NonNull MediaLibrarySession session,
+                    @NonNull ControllerInfo controller, @NonNull String parentId, int page,
+                    int pageSize, @Nullable Bundle extras) {
                 return null;
             }
 
@@ -136,32 +140,37 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
              * {@link MediaLibrarySession#notifyChildrenChanged(ControllerInfo, String, int, Bundle)}
              * when the parent is changed.
              *
+             * @param session the session for this event
              * @param controller controller
              * @param parentId parent id
              * @param extras extra bundle
              */
-            public void onSubscribe(@NonNull ControllerInfo controller, @NonNull String parentId,
+            public void onSubscribe(@NonNull MediaLibrarySession session,
+                    @NonNull ControllerInfo controller, @NonNull String parentId,
                     @Nullable Bundle extras) {
             }
 
             /**
              * Called when a controller unsubscribes to the parent.
              *
+             * @param session the session for this event
              * @param controller controller
              * @param parentId parent id
              */
-            public void onUnsubscribe(@NonNull ControllerInfo controller,
-                    @NonNull String parentId) {
+            public void onUnsubscribe(@NonNull MediaLibrarySession session,
+                    @NonNull ControllerInfo controller, @NonNull String parentId) {
             }
 
             /**
              * Called when a controller requests search.
              *
+             * @param session the session for this event
              * @param query The search query sent from the media browser. It contains keywords
              *              separated by space.
              * @param extras The bundle of service-specific arguments sent from the media browser.
              */
-            public void onSearch(@NonNull ControllerInfo controllerInfo, @NonNull String query,
+            public void onSearch(@NonNull MediaLibrarySession session,
+                    @NonNull ControllerInfo controllerInfo, @NonNull String query,
                     @Nullable Bundle extras) {
             }
 
@@ -171,17 +180,18 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
              * <p>
              * Return an empty list for no search result, and return {@code null} for the error.
              *
+             * @param session the session for this event
              * @param controllerInfo Information of the controller requesting the search result.
              * @param query The search query which was previously sent through
-             *              {@link #onSearch(ControllerInfo, String, Bundle)} call.
+             *              {@link #onSearch(MediaLibrarySession, ControllerInfo, String, Bundle)}.
              * @param page page number. Starts from {@code 1}.
              * @param pageSize page size. Should be greater or equal to {@code 1}.
              * @param extras The bundle of service-specific arguments sent from the media browser.
              * @return search result. {@code null} for error.
              */
             public @Nullable List<MediaItem2> onGetSearchResult(
-                    @NonNull ControllerInfo controllerInfo, @NonNull String query, int page,
-                    int pageSize, @Nullable Bundle extras) {
+                    @NonNull MediaLibrarySession session, @NonNull ControllerInfo controllerInfo,
+                    @NonNull String query, int page, int pageSize, @Nullable Bundle extras) {
                 return null;
             }
         }
@@ -335,8 +345,8 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          * supplied as a root hint for retrieving media items that are recently played.
          * If the media library service can provide such media items, the implementation must return
          * the key in the root hint when
-         * {@link MediaLibrarySessionCallback#onGetLibraryRoot(ControllerInfo, Bundle)} is called
-         * back.
+         * {@link MediaLibrarySessionCallback#onGetLibraryRoot(MediaLibrarySession, ControllerInfo, Bundle)}
+         * is called back.
          *
          * <p>The root hint may contain multiple keys.
          *
@@ -354,8 +364,8 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          * internet connection.
          * If the media library service can provide such media items, the implementation must return
          * the key in the root hint when
-         * {@link MediaLibrarySessionCallback#onGetLibraryRoot(ControllerInfo, Bundle)} is called
-         * back.
+         * {@link MediaLibrarySessionCallback#onGetLibraryRoot(MediaLibrarySession, ControllerInfo, Bundle)}
+         * is called back.
          *
          * <p>The root hint may contain multiple keys.
          *
@@ -374,8 +384,8 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          * suggestion.
          * If the media library service can provide such media items, the implementation must return
          * the key in the root hint when
-         * {@link MediaLibrarySessionCallback#onGetLibraryRoot(ControllerInfo, Bundle)} is called
-         * back.
+         * {@link MediaLibrarySessionCallback#onGetLibraryRoot(MediaLibrarySession, ControllerInfo, Bundle)}
+         * is called back.
          *
          * <p>The root hint may contain multiple keys.
          *

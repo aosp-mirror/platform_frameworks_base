@@ -353,8 +353,6 @@
     <dimen name="qs_footer_padding_start">16dp</dimen>
     <dimen name="qs_footer_padding_end">24dp</dimen>
     <dimen name="qs_footer_icon_size">16dp</dimen>
-    <!-- Difference between drag handle margin in QQS and expanded QS -->
-    <dimen name="qs_footer_drag_handle_offset">10dp</dimen>
 
     <dimen name="qs_notif_collapsed_space">64dp</dimen>
 

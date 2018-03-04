@@ -42,6 +42,7 @@ import android.util.Slog;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @hide
@@ -253,6 +254,89 @@ public class AudioPolicy {
             }
             return new AudioPolicy(new AudioPolicyConfig(mMixes), mContext, mLooper,
                     mFocusListener, mStatusListener, mIsFocusPolicy, mVolCb);
+        }
+    }
+
+    /**
+     * @hide
+     * Update the current configuration of the set of audio mixes by adding new ones, while
+     * keeping the policy registered.
+     * This method can only be called on a registered policy.
+     * @param mixes the list of {@link AudioMix} to add
+     * @return {@link AudioManager#SUCCESS} if the change was successful, {@link AudioManager#ERROR}
+     *    otherwise.
+     */
+    @SystemApi
+    public int attachMixes(@NonNull List<AudioMix> mixes) {
+        if (mixes == null) {
+            throw new IllegalArgumentException("Illegal null list of AudioMix");
+        }
+        synchronized (mLock) {
+            if (mStatus != POLICY_STATUS_REGISTERED) {
+                throw new IllegalStateException("Cannot alter unregistered AudioPolicy");
+            }
+            final ArrayList<AudioMix> zeMixes = new ArrayList<AudioMix>(mixes.size());
+            for (AudioMix mix : mixes) {
+                if (mix == null) {
+                    throw new IllegalArgumentException("Illegal null AudioMix in attachMixes");
+                } else {
+                    zeMixes.add(mix);
+                }
+            }
+            final AudioPolicyConfig cfg = new AudioPolicyConfig(zeMixes);
+            IAudioService service = getService();
+            try {
+                final int status = service.addMixForPolicy(cfg, this.cb());
+                if (status == AudioManager.SUCCESS) {
+                    mConfig.add(zeMixes);
+                }
+                return status;
+            } catch (RemoteException e) {
+                Log.e(TAG, "Dead object in attachMixes", e);
+                return AudioManager.ERROR;
+            }
+        }
+    }
+
+    /**
+     * @hide
+     * Update the current configuration of the set of audio mixes by removing some, while
+     * keeping the policy registered.
+     * This method can only be called on a registered policy.
+     * @param mixes the list of {@link AudioMix} to remove
+     * @return {@link AudioManager#SUCCESS} if the change was successful, {@link AudioManager#ERROR}
+     *    otherwise.
+     */
+    @SystemApi
+    public int detachMixes(@NonNull List<AudioMix> mixes) {
+        if (mixes == null) {
+            throw new IllegalArgumentException("Illegal null list of AudioMix");
+        }
+        synchronized (mLock) {
+            if (mStatus != POLICY_STATUS_REGISTERED) {
+                throw new IllegalStateException("Cannot alter unregistered AudioPolicy");
+            }
+            final ArrayList<AudioMix> zeMixes = new ArrayList<AudioMix>(mixes.size());
+            for (AudioMix mix : mixes) {
+                if (mix == null) {
+                    throw new IllegalArgumentException("Illegal null AudioMix in detachMixes");
+                    // TODO also check mix is currently contained in list of mixes
+                } else {
+                    zeMixes.add(mix);
+                }
+            }
+            final AudioPolicyConfig cfg = new AudioPolicyConfig(zeMixes);
+            IAudioService service = getService();
+            try {
+                final int status = service.removeMixForPolicy(cfg, this.cb());
+                if (status == AudioManager.SUCCESS) {
+                    mConfig.remove(zeMixes);
+                }
+                return status;
+            } catch (RemoteException e) {
+                Log.e(TAG, "Dead object in detachMixes", e);
+                return AudioManager.ERROR;
+            }
         }
     }
 

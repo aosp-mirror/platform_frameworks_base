@@ -220,7 +220,8 @@
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"खाजगी DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"खाजगी DNS मोड निवडा"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"बंद"</string>
-    <string name="private_dns_mode_opportunistic" msgid="7608409735589131766">"संधिसाधू"</string>
+    <!-- no translation found for private_dns_mode_opportunistic (8314986739896927399) -->
+    <skip />
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"खाजगी DNS पुरवठादार होस्ट नाव"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS पुरवठादाराचे होस्टनाव टाका"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"वायरलेस डिस्प्ले प्रमाणिकरणाचे पर्याय दाखवा"</string>
@@ -356,22 +357,41 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"हे वैशिष्‍ट्य प्रायोगिक आहे आणि कदाचित कार्यप्रदर्शन प्रभावित करू शकते."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> द्वारे अधिलिखित"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"सुमारे <xliff:g id="TIME">%1$s</xliff:g> शिल्‍लक"</string>
+    <!-- no translation found for power_discharging_duration (6655472132189365839) -->
+    <skip />
     <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"तुमच्या वापरानुसार अंदाजे <xliff:g id="TIME">%1$s</xliff:g> पुरेल इतकी बॅटरी शिल्लक आहे"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"पूर्णपणे चार्ज होण्यास <xliff:g id="TIME">%1$s</xliff:g> शिल्‍लक"</string>
+    <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
+    <skip />
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> शिल्लक"</string>
+    <!-- no translation found for power_discharge_by_enhanced (8788299408879961465) -->
+    <skip />
+    <!-- no translation found for power_discharge_by_only_enhanced (7692297898877104416) -->
+    <skip />
+    <!-- no translation found for power_discharge_by (6427074755635635749) -->
+    <skip />
+    <!-- no translation found for power_discharge_by_only (5888058889261108064) -->
+    <skip />
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"<xliff:g id="THRESHOLD">%1$s</xliff:g> पेक्षा कमी शिल्लक आहे"</string>
-    <string name="power_remaining_less_than_duration" msgid="7967078125657859046">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="THRESHOLD">%2$s</xliff:g> पेक्षा कमी शिल्लक आहे"</string>
-    <string name="power_remaining_more_than_subtext" msgid="6846716609975752316">"<xliff:g id="LEVEL">%1$s</xliff:g><xliff:g id="TIME_REMAINING">%2$s</xliff:g> पेक्षा जास्त शिल्लक आहे"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="8884488700395194194">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> पेक्षा जास्त शिल्लक आहे"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="8168317165722752881">"फोन लवकरच बंद होऊ शकतो"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="5957064378548718872">"टॅबलेट लवकरच बंद होऊ शकतो"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="9055596817716471373">"डिव्हाइस लवकरच बंद होऊ शकते"</string>
-    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - सुमारे <xliff:g id="TIME">%2$s</xliff:g> शिल्लक"</string>
-    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">%1$s</xliff:g> - तुमच्या वापरानुसार अंदाजे <xliff:g id="TIME">%2$s</xliff:g> पुरेल इतकी बॅटरी शिल्लक आहे"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="7679005631124015335">"<xliff:g id="LEVEL">%1$s</xliff:g> - फोन लवकरच बंद होऊ शकतो"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="261050880878965621">"<xliff:g id="LEVEL">%1$s</xliff:g> - टॅबलेट लवकरच बंद होऊ शकतो"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="2020049829798578618">"<xliff:g id="LEVEL">%1$s</xliff:g> - डिव्हाइस लवकरच बंद होऊ शकते"</string>
+    <!-- no translation found for power_remaining_less_than_duration (5751885147712659423) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (3176771815132876675) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (8931654680569617380) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1181059207608751924) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2606370266981054691) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2918084807716859985) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (3090926004324573908) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (7466484148515796216) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (603933521600231649) -->
+    <skip />
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"पूर्णपणे चार्ज होण्यास <xliff:g id="TIME">%1$s</xliff:g> शिल्‍लक"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - पूर्णपणे चार्ज होण्यात <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"चार्ज होत आहे"</string>

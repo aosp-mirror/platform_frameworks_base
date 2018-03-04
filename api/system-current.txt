@@ -1592,7 +1592,7 @@ package android.hardware.location {
     method public abstract void onMessageReceipt(int, int, android.hardware.location.ContextHubMessage);
   }
 
-  public deprecated class ContextHubMessage {
+  public deprecated class ContextHubMessage implements android.os.Parcelable {
     ctor public ContextHubMessage(int, int, byte[]);
     method public int describeContents();
     method public byte[] getData();
@@ -1723,7 +1723,7 @@ package android.hardware.location {
     field public static final android.os.Parcelable.Creator<android.hardware.location.MemoryRegion> CREATOR;
   }
 
-  public deprecated class NanoApp {
+  public deprecated class NanoApp implements android.os.Parcelable {
     ctor public NanoApp();
     ctor public deprecated NanoApp(int, byte[]);
     ctor public NanoApp(long, byte[]);
@@ -1771,7 +1771,7 @@ package android.hardware.location {
     field public static final android.os.Parcelable.Creator<android.hardware.location.NanoAppBinary> CREATOR;
   }
 
-  public deprecated class NanoAppFilter {
+  public deprecated class NanoAppFilter implements android.os.Parcelable {
     ctor public NanoAppFilter(long, int, int, long);
     method public int describeContents();
     method public boolean testMatch(android.hardware.location.NanoAppInstanceInfo);
@@ -1786,7 +1786,7 @@ package android.hardware.location {
     field public static final int VENDOR_ANY = -1; // 0xffffffff
   }
 
-  public deprecated class NanoAppInstanceInfo {
+  public deprecated class NanoAppInstanceInfo implements android.os.Parcelable {
     ctor public NanoAppInstanceInfo();
     method public int describeContents();
     method public long getAppId();
@@ -2649,8 +2649,10 @@ package android.media.audiopolicy {
   }
 
   public class AudioPolicy {
+    method public int attachMixes(java.util.List<android.media.audiopolicy.AudioMix>);
     method public android.media.AudioRecord createAudioRecordSink(android.media.audiopolicy.AudioMix) throws java.lang.IllegalArgumentException;
     method public android.media.AudioTrack createAudioTrackSource(android.media.audiopolicy.AudioMix) throws java.lang.IllegalArgumentException;
+    method public int detachMixes(java.util.List<android.media.audiopolicy.AudioMix>);
     method public int getFocusDuckingBehavior();
     method public int getStatus();
     method public int setFocusDuckingBehavior(int) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException;
@@ -4310,7 +4312,8 @@ package android.security.keystore.recovery {
     method public int[] getRecoverySecretTypes() throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public deprecated int getRecoveryStatus(java.lang.String, java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public int getRecoveryStatus(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
-    method public void initRecoveryService(java.lang.String, byte[]) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
+    method public deprecated void initRecoveryService(java.lang.String, byte[]) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
+    method public void initRecoveryService(java.lang.String, byte[], byte[]) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
     method public void recoverySecretAvailable(android.security.keystore.recovery.KeyChainProtectionParams) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public void removeKey(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public void setRecoverySecretTypes(int[]) throws android.security.keystore.recovery.InternalRecoveryServiceException;
@@ -5395,6 +5398,7 @@ package android.telephony.euicc {
     field public static final int RESET_OPTION_DELETE_FIELD_LOADED_TEST_PROFILES = 2; // 0x2
     field public static final int RESET_OPTION_DELETE_OPERATIONAL_PROFILES = 1; // 0x1
     field public static final int RESET_OPTION_RESET_DEFAULT_SMDP_ADDRESS = 4; // 0x4
+    field public static final int RESULT_EUICC_NOT_FOUND = -2; // 0xfffffffe
     field public static final int RESULT_OK = 0; // 0x0
     field public static final int RESULT_UNKNOWN_ERROR = -1; // 0xffffffff
   }

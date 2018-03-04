@@ -2025,7 +2025,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             final boolean italic = (style & Typeface.ITALIC) != 0;
             setTypeface(Typeface.create(typeface, weight, italic));
         } else {
-            setTypeface(Typeface.create(typeface, style));
+            setTypeface(typeface, style);
         }
     }
 
@@ -2111,7 +2111,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_typeface
      * @attr ref android.R.styleable#TextView_textStyle
      */
-    public void setTypeface(Typeface tf, int style) {
+    public void setTypeface(@Nullable Typeface tf, @Typeface.Style int style) {
         if (style > 0) {
             if (tf == null) {
                 tf = Typeface.defaultFromStyle(style);
@@ -3896,7 +3896,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_typeface
      * @attr ref android.R.styleable#TextView_textStyle
      */
-    public void setTypeface(Typeface tf) {
+    public void setTypeface(@Nullable Typeface tf) {
         if (mTextPaint.getTypeface() != tf) {
             mTextPaint.setTypeface(tf);
 

@@ -24,6 +24,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 
+import static com.android.server.am.ActivityStack.ActivityState.DESTROYED;
+import static com.android.server.am.ActivityStack.ActivityState.DESTROYING;
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 
 import static org.junit.Assert.assertEquals;
@@ -31,8 +33,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
-import android.content.ComponentName;
+import android.app.servertransaction.DestroyActivityItem;
 import android.content.pm.ActivityInfo;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
@@ -47,7 +54,7 @@ import org.junit.Test;
  * Tests for the {@link ActivityStack} class.
  *
  * Build/Install/Run:
- *  atest ActivityStackTests
+ *  atest FrameworksServicesTests:com.android.server.am.ActivityStackTests
  */
 @SmallTest
 @Presubmit
@@ -425,11 +432,58 @@ public class ActivityStackTests extends ActivityTestsBase {
         assertTrue(display.getStackAboveHome() == fullscreenStack2);
     }
 
+    @Test
+    public void testSplitScreenMoveToFront() throws Exception {
+        final ActivityDisplay display = mService.mStackSupervisor.getDefaultDisplay();
+        final TestActivityStack splitScreenPrimary = createStackForShouldBeVisibleTest(display,
+                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final TestActivityStack splitScreenSecondary = createStackForShouldBeVisibleTest(display,
+                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final TestActivityStack assistantStack = createStackForShouldBeVisibleTest(display,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_ASSISTANT, true /* onTop */);
+
+        splitScreenPrimary.setIsTranslucent(false);
+        splitScreenSecondary.setIsTranslucent(false);
+        assistantStack.setIsTranslucent(false);
+
+        assertFalse(splitScreenPrimary.shouldBeVisible(null /* starting */));
+        assertFalse(splitScreenSecondary.shouldBeVisible(null /* starting */));
+        assertTrue(assistantStack.shouldBeVisible(null /* starting */));
+
+        splitScreenSecondary.moveToFront("testSplitScreenMoveToFront");
+
+        assertTrue(splitScreenPrimary.shouldBeVisible(null /* starting */));
+        assertTrue(splitScreenSecondary.shouldBeVisible(null /* starting */));
+        assertFalse(assistantStack.shouldBeVisible(null /* starting */));
+    }
+
     private <T extends ActivityStack> T createStackForShouldBeVisibleTest(
             ActivityDisplay display, int windowingMode, int activityType, boolean onTop) {
         final T stack = display.createStack(windowingMode, activityType, onTop);
         final ActivityRecord r = new ActivityBuilder(mService).setUid(0).setStack(stack)
                 .setCreateTask(true).build();
         return stack;
+    }
+
+    @Test
+    public void testSuppressMultipleDestroy() throws Exception {
+        final ActivityRecord r = new ActivityBuilder(mService).setTask(mTask).build();
+        final ClientLifecycleManager lifecycleManager = mock(ClientLifecycleManager.class);
+        final ProcessRecord app = r.app;
+
+        // The mocked lifecycle manager must be set on the ActivityStackSupervisor's reference to
+        // the service rather than mService as mService is a spy and setting the value will not
+        // propagate as ActivityManagerService hands its own reference to the
+        // ActivityStackSupervisor during construction.
+        ((TestActivityManagerService) mSupervisor.mService).setLifecycleManager(lifecycleManager);
+
+        mStack.destroyActivityLocked(r, true, "first invocation");
+        verify(lifecycleManager, times(1)).scheduleTransaction(eq(app.thread),
+                eq(r.appToken), any(DestroyActivityItem.class));
+        assertTrue(r.isState(DESTROYED, DESTROYING));
+
+        mStack.destroyActivityLocked(r, true, "second invocation");
+        verify(lifecycleManager, times(1)).scheduleTransaction(eq(app.thread),
+                eq(r.appToken), any(DestroyActivityItem.class));
     }
 }

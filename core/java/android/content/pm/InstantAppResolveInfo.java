@@ -78,8 +78,7 @@ public final class InstantAppResolveInfo implements Parcelable {
     private final Bundle mExtras;
     /**
      * A flag that indicates that the resolver is aware that an app may match, but would prefer
-     * that the installer get the sanitized intent to decide. This should not be used for
-     * resolutions that include a host and will be ignored in such cases.
+     * that the installer get the sanitized intent to decide.
      */
     private final boolean mShouldLetInstallerDecide;
 
@@ -96,7 +95,21 @@ public final class InstantAppResolveInfo implements Parcelable {
         this(digest, packageName, filters, versionCode, extras, false);
     }
 
-    /** Constructor for intent-based InstantApp resolution results with extras. */
+    /** Constructor for intent-based InstantApp resolution results by hostname. */
+    public InstantAppResolveInfo(@NonNull String hostName, @Nullable String packageName,
+            @Nullable List<InstantAppIntentFilter> filters) {
+        this(new InstantAppDigest(hostName), packageName, filters, -1 /*versionCode*/,
+                null /* extras */);
+    }
+
+    /**
+     * Constructor that indicates that resolution could be delegated to the installer when the
+     * sanitized intent contains enough information to resolve completely.
+     */
+    public InstantAppResolveInfo(@Nullable Bundle extras) {
+        this(InstantAppDigest.UNDEFINED, null, null, -1, extras, true);
+    }
+
     private InstantAppResolveInfo(@NonNull InstantAppDigest digest, @Nullable String packageName,
             @Nullable List<InstantAppIntentFilter> filters, long versionCode,
             @Nullable Bundle extras, boolean shouldLetInstallerDecide) {
@@ -118,21 +131,6 @@ public final class InstantAppResolveInfo implements Parcelable {
         mShouldLetInstallerDecide = shouldLetInstallerDecide;
     }
 
-    /** Constructor for intent-based InstantApp resolution results by hostname. */
-    public InstantAppResolveInfo(@NonNull String hostName, @Nullable String packageName,
-            @Nullable List<InstantAppIntentFilter> filters) {
-        this(new InstantAppDigest(hostName), packageName, filters, -1 /*versionCode*/,
-                null /* extras */);
-    }
-
-    /**
-     * Constructor that creates a "let the installer decide" response with optional included
-     * extras.
-     */
-    public InstantAppResolveInfo(@Nullable Bundle extras) {
-        this(InstantAppDigest.UNDEFINED, null, null, -1, extras, true);
-    }
-
     InstantAppResolveInfo(Parcel in) {
         mShouldLetInstallerDecide = in.readBoolean();
         mExtras = in.readBundle();
@@ -150,7 +148,11 @@ public final class InstantAppResolveInfo implements Parcelable {
         }
     }
 
-    /** Returns true if the installer should be notified that it should query for packages. */
+    /**
+     * Returns true if the resolver is aware that an app may match, but would prefer
+     * that the installer get the sanitized intent to decide. This should not be true for
+     * resolutions that include a host and will be ignored in such cases.
+     */
     public boolean shouldLetInstallerDecide() {
         return mShouldLetInstallerDecide;
     }
@@ -231,6 +233,11 @@ public final class InstantAppResolveInfo implements Parcelable {
     @SystemApi
     public static final class InstantAppDigest implements Parcelable {
         static final int DIGEST_MASK = 0xfffff000;
+
+        /**
+         * A special instance that represents and undefined digest used for cases that a host was
+         * not provided or is irrelevant to the response.
+         */
         public static final InstantAppDigest UNDEFINED =
                 new InstantAppDigest(new byte[][]{}, new int[]{});
 

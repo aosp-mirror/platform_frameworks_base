@@ -79,10 +79,6 @@ public interface StatusBarManagerInternal {
 
     void setCurrentUser(int newUserId);
 
-    boolean isGlobalActionsDisabled();
-    void setGlobalActionsListener(GlobalActionsListener listener);
-    void showGlobalActions();
-
     /**
      * Set whether the top app currently hides the statusbar.
      *
@@ -98,23 +94,4 @@ public interface StatusBarManagerInternal {
      * @param rotation rotation suggestion
      */
     void onProposedRotationChanged(int rotation, boolean isValid);
-
-    public interface GlobalActionsListener {
-        /**
-         * Called when sysui starts and connects its status bar, or when the status bar binder
-         * dies indicating sysui is no longer alive.
-         */
-        void onStatusBarConnectedChanged(boolean connected);
-
-        /**
-         * Callback from sysui to notify system that global actions has been successfully shown.
-         */
-        void onGlobalActionsShown();
-
-        /**
-         * Callback from sysui to notify system that the user has dismissed global actions and
-         * it no longer needs to be displayed (even if sysui dies).
-         */
-        void onGlobalActionsDismissed();
-    }
 }

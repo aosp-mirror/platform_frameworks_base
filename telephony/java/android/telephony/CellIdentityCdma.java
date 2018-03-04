@@ -103,8 +103,12 @@ public final class CellIdentityCdma extends CellIdentity {
         mNetworkId = nid;
         mSystemId = sid;
         mBasestationId = bid;
-        mLongitude = lon;
-        mLatitude = lat;
+        if (!isNullIsland(lat, lon)) {
+            mLongitude = lon;
+            mLatitude = lat;
+        } else {
+            mLongitude = mLatitude = Integer.MAX_VALUE;
+        }
         mAlphaLong = alphal;
         mAlphaShort = alphas;
     }
@@ -116,6 +120,18 @@ public final class CellIdentityCdma extends CellIdentity {
 
     CellIdentityCdma copy() {
         return new CellIdentityCdma(this);
+    }
+
+    /**
+     * Take the latitude and longitude in 1/4 seconds and see if
+     * the reported location is on Null Island.
+     *
+     * @return whether the reported Lat/Long are for Null Island
+     *
+     * @hide
+     */
+    private boolean isNullIsland(int lat, int lon) {
+        return Math.abs(lat) <= 1 && Math.abs(lon) <= 1;
     }
 
     /**

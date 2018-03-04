@@ -33,7 +33,7 @@ import java.util.Arrays;
  */
 @SystemApi
 @Deprecated
-public class ContextHubMessage {
+public class ContextHubMessage implements Parcelable {
     private static final int DEBUG_LOG_NUM_BYTES = 16;
     private int mType;
     private int mVersion;

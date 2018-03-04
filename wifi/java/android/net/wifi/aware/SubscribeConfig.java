@@ -415,17 +415,23 @@ public final class SubscribeConfig implements Parcelable {
 
         /**
          * Configure the minimum distance to a discovered publisher at which to trigger a discovery
-         * notification. I.e. discovery will only be triggered if we've found a matching publisher
+         * notification. I.e. discovery will be triggered if we've found a matching publisher
          * (based on the other criteria in this configuration) <b>and</b> the distance to the
-         * publisher is > the value specified in this API.
+         * publisher is larger than the value specified in this API. Can be used in conjunction with
+         * {@link #setMaxDistanceMm(int)} to specify a geofence, i.e. discovery with min <
+         * distance < max.
          * <p>
-         * Can be used in conjunction with {@link #setMaxDistanceMm(int)} to specify a geo-fence,
-         * i.e. discovery with min < distance < max.
+         * For ranging to be used in discovery it must also be enabled on the publisher using
+         * {@link PublishConfig.Builder#setRangingEnabled(boolean)}. However, ranging may
+         * not be available or enabled on the publisher or may be temporarily disabled on either
+         * subscriber or publisher - in such cases discovery will proceed without ranging.
          * <p>
-         * If this API is called, the subscriber requires ranging. In such a case, the publisher
-         * peer must enable ranging using
-         * {@link PublishConfig.Builder#setRangingEnabled(boolean)}. Otherwise discovery will
-         * never be triggered.
+         * When ranging is enabled and available on both publisher and subscriber and a service
+         * is discovered based on geofence constraints the
+         * {@link DiscoverySessionCallback#onServiceDiscoveredWithinRange(PeerHandle, byte[], List, int)}
+         * is called, otherwise the
+         * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle, byte[], List)}
+         * is called.
          * <p>
          * The device must support Wi-Fi RTT for this feature to be used. Feature support is checked
          * as described in {@link android.net.wifi.rtt}.
@@ -444,17 +450,23 @@ public final class SubscribeConfig implements Parcelable {
 
         /**
          * Configure the maximum distance to a discovered publisher at which to trigger a discovery
-         * notification. I.e. discovery will only be triggered if we've found a matching publisher
+         * notification. I.e. discovery will be triggered if we've found a matching publisher
          * (based on the other criteria in this configuration) <b>and</b> the distance to the
-         * publisher is < the value specified in this API.
+         * publisher is smaller than the value specified in this API. Can be used in conjunction
+         * with {@link #setMinDistanceMm(int)} to specify a geofence, i.e. discovery with min <
+         * distance < max.
          * <p>
-         * Can be used in conjunction with {@link #setMinDistanceMm(int)} to specify a geo-fence,
-         * i.e. discovery with min < distance < max.
+         * For ranging to be used in discovery it must also be enabled on the publisher using
+         * {@link PublishConfig.Builder#setRangingEnabled(boolean)}. However, ranging may
+         * not be available or enabled on the publisher or may be temporarily disabled on either
+         * subscriber or publisher - in such cases discovery will proceed without ranging.
          * <p>
-         * If this API is called, the subscriber requires ranging. In such a case, the publisher
-         * peer must enable ranging using
-         * {@link PublishConfig.Builder#setRangingEnabled(boolean)}. Otherwise discovery will
-         * never be triggered.
+         * When ranging is enabled and available on both publisher and subscriber and a service
+         * is discovered based on geofence constraints the
+         * {@link DiscoverySessionCallback#onServiceDiscoveredWithinRange(PeerHandle, byte[], List, int)}
+         * is called, otherwise the
+         * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle, byte[], List)}
+         * is called.
          * <p>
          * The device must support Wi-Fi RTT for this feature to be used. Feature support is checked
          * as described in {@link android.net.wifi.rtt}.

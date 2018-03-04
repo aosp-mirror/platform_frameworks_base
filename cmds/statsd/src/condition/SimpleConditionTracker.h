@@ -57,6 +57,23 @@ public:
             const vector<Matcher>& dimensionFields,
             std::unordered_set<HashableDimensionKey>& dimensionsKeySet) const override;
 
+    virtual const std::set<HashableDimensionKey>* getChangedToTrueDimensions(
+            const std::vector<sp<ConditionTracker>>& allConditions) const {
+        if (mSliced) {
+            return &mLastChangedToTrueDimensions;
+        } else {
+            return nullptr;
+        }
+    }
+    virtual const std::set<HashableDimensionKey>* getChangedToFalseDimensions(
+            const std::vector<sp<ConditionTracker>>& allConditions) const {
+        if (mSliced) {
+            return &mLastChangedToFalseDimensions;
+        } else {
+            return nullptr;
+        }
+    }
+
 private:
     const ConfigKey mConfigKey;
     // The index of the LogEventMatcher which defines the start.
@@ -75,6 +92,9 @@ private:
 
     std::vector<Matcher> mOutputDimensions;
 
+    std::set<HashableDimensionKey> mLastChangedToTrueDimensions;
+    std::set<HashableDimensionKey> mLastChangedToFalseDimensions;
+
     int mDimensionTag;
 
     std::map<HashableDimensionKey, int> mSlicedConditionState;
@@ -86,6 +106,8 @@ private:
                               ConditionState* conditionCache, bool* changedCache);
 
     bool hitGuardRail(const HashableDimensionKey& newKey);
+
+    void dumpState();
 
     FRIEND_TEST(SimpleConditionTrackerTest, TestSlicedCondition);
     FRIEND_TEST(SimpleConditionTrackerTest, TestSlicedWithNoOutputDim);

@@ -347,7 +347,7 @@ public class BatterySaverController implements BatterySaverPolicyListener {
             Intent intent = new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGING)
                     .putExtra(PowerManager.EXTRA_POWER_SAVE_MODE, enabled)
                     .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-            mContext.sendBroadcast(intent);
+            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
 
             intent = new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);

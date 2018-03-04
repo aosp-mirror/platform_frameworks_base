@@ -84,6 +84,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.MemoryIntArray;
 import android.util.StatsLog;
+import android.view.textservice.TextServicesManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.widget.ILockSettings;
@@ -7970,6 +7971,10 @@ public final class Settings {
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_MODE);
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_PROVIDERS_ALLOWED);
             CLONE_TO_MANAGED_PROFILE.add(SELECTED_INPUT_METHOD_SUBTYPE);
+            if (TextServicesManager.DISABLE_PER_PROFILE_SPELL_CHECKER) {
+                CLONE_TO_MANAGED_PROFILE.add(SELECTED_SPELL_CHECKER);
+                CLONE_TO_MANAGED_PROFILE.add(SELECTED_SPELL_CHECKER_SUBTYPE);
+            }
         }
 
         /** @hide */
@@ -10516,6 +10521,8 @@ public final class Settings {
          * entity_list_default use ":" as delimiter for values. Ex:
          *
          * <pre>
+         * smart_linkify_enabled                    (boolean)
+         * system_textclassifier_enabled            (boolean)
          * model_dark_launch_enabled                (boolean)
          * smart_selection_enabled                  (boolean)
          * smart_text_share_enabled                 (boolean)
@@ -10608,6 +10615,15 @@ public final class Settings {
          * @hide
          */
         public static final String OFF_BODY_RADIOS_OFF_DELAY_MS = "off_body_radios_off_delay_ms";
+
+        /**
+         * Whether or not to turn on Wifi when proxy is disconnected.
+         * Type: int (0 for false, 1 for true)
+         * Default: 1
+         * @hide
+         */
+        public static final String WIFI_ON_WHEN_PROXY_DISCONNECTED
+                = "wifi_on_when_proxy_disconnected";
 
         /**
          * Whether or not to enable Time Only Mode for watch type devices.
@@ -11466,6 +11482,7 @@ public final class Settings {
          *
          * @hide
          */
+        @TestApi
         public static final String HIDDEN_API_BLACKLIST_EXEMPTIONS =
                 "hidden_api_blacklist_exemptions";
 

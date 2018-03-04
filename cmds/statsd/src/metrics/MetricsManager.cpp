@@ -173,6 +173,12 @@ void MetricsManager::dumpStates(FILE* out, bool verbose) {
     }
 }
 
+void MetricsManager::dropData(const uint64_t dropTimeNs) {
+    for (const auto& producer : mAllMetricProducers) {
+        producer->dropData(dropTimeNs);
+    }
+}
+
 void MetricsManager::onDumpReport(const uint64_t dumpTimeStampNs, ProtoOutputStream* protoOutput) {
     VLOG("=========================Metric Reports Start==========================");
     // one StatsLogReport per MetricProduer

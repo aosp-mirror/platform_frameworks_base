@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import android.platform.test.annotations.Presubmit;
+import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -52,6 +53,7 @@ import static org.mockito.Mockito.verify;
  * atest FrameworksServicesTests:com.android.server.wm.WindowStateTests
  */
 @SmallTest
+@FlakyTest(bugId = 74078662)
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class WindowStateTests extends WindowTestsBase {

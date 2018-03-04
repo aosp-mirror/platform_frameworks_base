@@ -21,6 +21,7 @@
 
 #include "../condition/CombinationConditionTracker.h"
 #include "../condition/SimpleConditionTracker.h"
+#include "../condition/StateTracker.h"
 #include "../external/StatsPullerManager.h"
 #include "../matchers/CombinationLogMatchingTracker.h"
 #include "../matchers/SimpleLogMatchingTracker.h"
@@ -31,6 +32,7 @@
 #include "../metrics/ValueMetricProducer.h"
 
 #include "stats_util.h"
+#include "statslog.h"
 
 using std::set;
 using std::string;
@@ -157,6 +159,49 @@ bool initLogTrackers(const StatsdConfig& config, const UidMap& uidMap,
     return true;
 }
 
+/**
+ * A StateTracker is built from a SimplePredicate which has only "start", and no "stop"
+ * or "stop_all". The start must be an atom matcher that matches a state atom. It must
+ * have dimension, the dimension must be the state atom's primary fields plus exclusive state
+ * field. For example, the StateTracker is used in tracking UidProcessState and ScreenState.
+ *
+ */
+bool isStateTracker(const SimplePredicate& simplePredicate, vector<Matcher>* primaryKeys) {
+    // 1. must not have "stop". must have "dimension"
+    if (!simplePredicate.has_stop() && simplePredicate.has_dimensions()) {
+        // TODO: need to check the start atom matcher too.
+        auto it = android::util::kStateAtomsFieldOptions.find(simplePredicate.dimensions().field());
+        // 2. must be based on a state atom.
+        if (it != android::util::kStateAtomsFieldOptions.end()) {
+            // 3. dimension must be primary fields + state field IN ORDER
+            size_t expectedDimensionCount = it->second.primaryFields.size() + 1;
+            vector<Matcher> dimensions;
+            translateFieldMatcher(simplePredicate.dimensions(), &dimensions);
+            if (dimensions.size() != expectedDimensionCount) {
+                return false;
+            }
+            // 3.1 check the primary fields first.
+            size_t index = 0;
+            for (const auto& field : it->second.primaryFields) {
+                Matcher matcher = getSimpleMatcher(it->first, field);
+                if (!(matcher == dimensions[index])) {
+                    return false;
+                }
+                primaryKeys->push_back(matcher);
+                index++;
+            }
+            Matcher stateFieldMatcher =
+                    getSimpleMatcher(it->first, it->second.exclusiveField);
+            // 3.2 last dimension should be the exclusive field.
+            if (!(dimensions.back() == stateFieldMatcher)) {
+                return false;
+            }
+            return true;
+        }
+    }
+    return false;
+}  // namespace statsd
+
 bool initConditions(const ConfigKey& key, const StatsdConfig& config,
                     const unordered_map<int64_t, int>& logTrackerMap,
                     unordered_map<int64_t, int>& conditionTrackerMap,
@@ -172,8 +217,16 @@ bool initConditions(const ConfigKey& key, const StatsdConfig& config,
         int index = allConditionTrackers.size();
         switch (condition.contents_case()) {
             case Predicate::ContentsCase::kSimplePredicate: {
-                allConditionTrackers.push_back(new SimpleConditionTracker(
-                        key, condition.id(), index, condition.simple_predicate(), logTrackerMap));
+                vector<Matcher> primaryKeys;
+                if (isStateTracker(condition.simple_predicate(), &primaryKeys)) {
+                    allConditionTrackers.push_back(new StateTracker(key, condition.id(), index,
+                                                                    condition.simple_predicate(),
+                                                                    logTrackerMap, primaryKeys));
+                } else {
+                    allConditionTrackers.push_back(new SimpleConditionTracker(
+                            key, condition.id(), index, condition.simple_predicate(),
+                            logTrackerMap));
+                }
                 break;
             }
             case Predicate::ContentsCase::kCombination: {

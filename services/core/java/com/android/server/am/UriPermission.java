@@ -124,10 +124,6 @@ final class UriPermission {
         updateModeFlags();
     }
 
-    boolean isNew() {
-        return persistedCreateTime == INVALID_TIME;
-    }
-
     void grantModes(int modeFlags, UriPermissionOwner owner) {
         final boolean persistable = (modeFlags & Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION) != 0;
         modeFlags &= (Intent.FLAG_GRANT_READ_URI_PERMISSION

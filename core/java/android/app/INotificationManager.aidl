@@ -45,6 +45,8 @@ interface INotificationManager
     void clearData(String pkg, int uid, boolean fromApp);
     void enqueueToast(String pkg, ITransientNotification callback, int duration);
     void cancelToast(String pkg, ITransientNotification callback);
+    void finishToken(String pkg, ITransientNotification callback);
+
     void enqueueNotificationWithTag(String pkg, String opPkg, String tag, int id,
             in Notification notification, int userId);
     void cancelNotificationWithTag(String pkg, String tag, int id, int userId);

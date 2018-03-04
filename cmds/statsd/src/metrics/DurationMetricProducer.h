@@ -74,6 +74,8 @@ private:
 
     void dumpStatesLocked(FILE* out, bool verbose) const override;
 
+    void dropDataLocked(const uint64_t dropTimeNs) override;
+
     // Util function to flush the old packet.
     void flushIfNeededLocked(const uint64_t& eventTime);
 

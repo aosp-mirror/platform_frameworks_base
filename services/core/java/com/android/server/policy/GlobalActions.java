@@ -20,33 +20,33 @@ import android.util.Slog;
 
 import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs;
-import com.android.server.statusbar.StatusBarManagerInternal;
-import com.android.server.statusbar.StatusBarManagerInternal.GlobalActionsListener;
+import com.android.server.policy.GlobalActionsProvider;
 
-class GlobalActions implements GlobalActionsListener {
+class GlobalActions implements GlobalActionsProvider.GlobalActionsListener {
 
     private static final String TAG = "GlobalActions";
     private static final boolean DEBUG = false;
 
     private final Context mContext;
-    private final StatusBarManagerInternal mStatusBarInternal;
+    private final GlobalActionsProvider mGlobalActionsProvider;
     private final Handler mHandler;
     private final WindowManagerFuncs mWindowManagerFuncs;
     private LegacyGlobalActions mLegacyGlobalActions;
     private boolean mKeyguardShowing;
     private boolean mDeviceProvisioned;
-    private boolean mStatusBarConnected;
+    private boolean mGlobalActionsAvailable;
     private boolean mShowing;
 
     public GlobalActions(Context context, WindowManagerFuncs windowManagerFuncs) {
         mContext = context;
         mHandler = new Handler();
         mWindowManagerFuncs = windowManagerFuncs;
-        mStatusBarInternal = LocalServices.getService(StatusBarManagerInternal.class);
 
-        // Some form factors do not have a status bar.
-        if (mStatusBarInternal != null) {
-            mStatusBarInternal.setGlobalActionsListener(this);
+        mGlobalActionsProvider = LocalServices.getService(GlobalActionsProvider.class);
+        if (mGlobalActionsProvider != null) {
+            mGlobalActionsProvider.setGlobalActionsListener(this);
+        } else {
+            Slog.i(TAG, "No GlobalActionsProvider found, defaulting to LegacyGlobalActions");
         }
     }
 
@@ -58,15 +58,15 @@ class GlobalActions implements GlobalActionsListener {
 
     public void showDialog(boolean keyguardShowing, boolean deviceProvisioned) {
         if (DEBUG) Slog.d(TAG, "showDialog " + keyguardShowing + " " + deviceProvisioned);
-        if (mStatusBarInternal != null && mStatusBarInternal.isGlobalActionsDisabled()) {
+        if (mGlobalActionsProvider != null && mGlobalActionsProvider.isGlobalActionsDisabled()) {
             return;
         }
         mKeyguardShowing = keyguardShowing;
         mDeviceProvisioned = deviceProvisioned;
         mShowing = true;
-        if (mStatusBarConnected) {
-            mStatusBarInternal.showGlobalActions();
+        if (mGlobalActionsAvailable) {
             mHandler.postDelayed(mShowTimeout, 5000);
+            mGlobalActionsProvider.showGlobalActions();
         } else {
             // SysUI isn't alive, show legacy menu.
             ensureLegacyCreated();
@@ -88,11 +88,12 @@ class GlobalActions implements GlobalActionsListener {
     }
 
     @Override
-    public void onStatusBarConnectedChanged(boolean connected) {
-        if (DEBUG) Slog.d(TAG, "onStatusBarConnectedChanged " + connected);
-        mStatusBarConnected = connected;
-        if (mShowing && !mStatusBarConnected) {
-            // Status bar died but we need to be showing global actions still, show the legacy.
+    public void onGlobalActionsAvailableChanged(boolean available) {
+        if (DEBUG) Slog.d(TAG, "onGlobalActionsAvailableChanged " + available);
+        mGlobalActionsAvailable = available;
+        if (mShowing && !mGlobalActionsAvailable) {
+            // Global actions provider died but we need to be showing global actions still, show the
+            // legacy global acrions provider.
             ensureLegacyCreated();
             mLegacyGlobalActions.showDialog(mKeyguardShowing, mDeviceProvisioned);
         }

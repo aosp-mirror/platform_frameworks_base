@@ -541,6 +541,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     volatile boolean mGoingToSleep;
     volatile boolean mRequestedOrGoingToSleep;
     volatile boolean mRecentsVisible;
+    volatile boolean mNavBarVirtualKeyHapticFeedbackEnabled;
     volatile boolean mPictureInPictureVisible;
     // Written by vr manager thread, only read in this class.
     volatile private boolean mPersistentVrModeEnabled;
@@ -4368,6 +4369,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
+    public void setNavBarVirtualKeyHapticFeedbackEnabledLw(boolean enabled) {
+        mNavBarVirtualKeyHapticFeedbackEnabled = enabled;
+    }
+
+    @Override
     public int adjustSystemUiVisibilityLw(int visibility) {
         mStatusBarController.adjustSystemUiVisibilityLw(mLastSystemUiFlags, visibility);
         mNavigationBarController.adjustSystemUiVisibilityLw(mLastSystemUiFlags, visibility);
@@ -5892,8 +5898,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return result;
         }
 
+        // Enable haptics if down and virtual key without multiple repetitions. If this is a hard
+        // virtual key such as a navigation bar button, only vibrate if flag is enabled.
+        final boolean isNavBarVirtKey = ((event.getFlags() & KeyEvent.FLAG_VIRTUAL_HARD_KEY) != 0);
         boolean useHapticFeedback = down
                 && (policyFlags & WindowManagerPolicy.FLAG_VIRTUAL) != 0
+                && (!isNavBarVirtKey || mNavBarVirtualKeyHapticFeedbackEnabled)
                 && event.getRepeatCount() == 0;
 
         // Handle special keys.

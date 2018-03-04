@@ -28,7 +28,7 @@ import android.os.Parcelable;
  */
 @SystemApi
 @Deprecated
-public class NanoAppFilter {
+public class NanoAppFilter implements Parcelable {
 
     private static final String TAG = "NanoAppFilter";
 

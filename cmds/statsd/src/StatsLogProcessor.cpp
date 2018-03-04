@@ -330,9 +330,7 @@ void StatsLogProcessor::flushIfNecessaryLocked(
     mLastByteSizeTimes[key] = timestampNs;
     if (totalBytes >
         StatsdStats::kMaxMetricsBytesPerConfig) {  // Too late. We need to start clearing data.
-        // TODO(b/70571383): By 12/15/2017 add API to drop data directly
-        ProtoOutputStream proto;
-        metricsManager.onDumpReport(timestampNs, &proto);
+        metricsManager.dropData(timestampNs);
         StatsdStats::getInstance().noteDataDropped(key);
         VLOG("StatsD had to toss out metrics for %s", key.ToString().c_str());
     } else if (totalBytes > .9 * StatsdStats::kMaxMetricsBytesPerConfig) {

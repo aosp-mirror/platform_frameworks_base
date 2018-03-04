@@ -80,6 +80,8 @@
         <value>60</value> <!-- 3000 MHz CPU speed -->
     </array>
 
+    <!-- Power used by display unit in ambient display mode, including back lighting-->
+    <item name="ambient.on">0.5</item>
     <!-- Additional power used when screen is turned on at minimum brightness -->
     <item name="screen.on">100</item>
     <!-- Additional power used when screen is at maximum brightness, compared to

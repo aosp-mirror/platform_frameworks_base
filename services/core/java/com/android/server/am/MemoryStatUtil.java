@@ -38,8 +38,12 @@ import java.util.regex.Pattern;
 final class MemoryStatUtil {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "MemoryStatUtil" : TAG_AM;
 
+    /** Path to check if device has memcg */
+    private static final String MEMCG_TEST_PATH = "/dev/memcg/apps/memory.stat";
     /** Path to memory stat file for logging app start memory state */
     private static final String MEMORY_STAT_FILE_FMT = "/dev/memcg/apps/uid_%d/pid_%d/memory.stat";
+    /** Path to procfs stat file for logging app start memory state */
+    private static final String PROC_STAT_FILE_FMT = "/proc/%d/stat";
 
     private static final Pattern PGFAULT = Pattern.compile("total_pgfault (\\d+)");
     private static final Pattern PGMAJFAULT = Pattern.compile("total_pgmajfault (\\d+)");
@@ -47,24 +51,57 @@ final class MemoryStatUtil {
     private static final Pattern CACHE_IN_BYTES = Pattern.compile("total_cache (\\d+)");
     private static final Pattern SWAP_IN_BYTES = Pattern.compile("total_swap (\\d+)");
 
+    private static final int PGFAULT_INDEX = 9;
+    private static final int PGMAJFAULT_INDEX = 11;
+    private static final int RSS_IN_BYTES_INDEX = 23;
+
+    /** True if device has memcg */
+    private static volatile Boolean sDeviceHasMemCg;
+
     private MemoryStatUtil() {}
 
     /**
+     * Reads memory stat for a process.
+     *
+     * Reads from memcg if available on device, else fallback to procfs.
+     * Returns null if no stats can be read.
+     */
+    @Nullable
+    static MemoryStat readMemoryStatFromFilesystem(int uid, int pid) {
+        return hasMemcg() ? readMemoryStatFromMemcg(uid, pid) : readMemoryStatFromProcfs(pid);
+    }
+
+    /**
      * Reads memory.stat of a process from memcg.
+     *
+     * Returns null if file is not found in memcg or if file has unrecognized contents.
      */
     @Nullable
     static MemoryStat readMemoryStatFromMemcg(int uid, int pid) {
-        final String memoryStatPath = String.format(Locale.US, MEMORY_STAT_FILE_FMT, uid, pid);
-        final File memoryStatFile = new File(memoryStatPath);
-        if (!memoryStatFile.exists()) {
-            if (DEBUG_METRICS) Slog.i(TAG, memoryStatPath + " not found");
+        final String path = String.format(Locale.US, MEMORY_STAT_FILE_FMT, uid, pid);
+        return parseMemoryStatFromMemcg(readFileContents(path));
+    }
+
+    /**
+     * Reads memory stat of a process from procfs.
+     *
+     * Returns null if file is not found in procfs or if file has unrecognized contents.
+     */
+    @Nullable
+    static MemoryStat readMemoryStatFromProcfs(int pid) {
+        final String path = String.format(Locale.US, PROC_STAT_FILE_FMT, pid);
+        return parseMemoryStatFromProcfs(readFileContents(path));
+    }
+
+    private static String readFileContents(String path) {
+        final File file = new File(path);
+        if (!file.exists()) {
+            if (DEBUG_METRICS) Slog.i(TAG, path + " not found");
             return null;
         }
 
         try {
-            final String memoryStatContents = FileUtils.readTextFile(
-                    memoryStatFile, 0 /* max */, null /* ellipsis */);
-            return parseMemoryStat(memoryStatContents);
+            return FileUtils.readTextFile(file, 0 /* max */, null /* ellipsis */);
         } catch (IOException e) {
             Slog.e(TAG, "Failed to read file:", e);
             return null;
@@ -76,12 +113,12 @@ final class MemoryStatUtil {
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     @Nullable
-    static MemoryStat parseMemoryStat(String memoryStatContents) {
-        MemoryStat memoryStat = new MemoryStat();
-        if (memoryStatContents == null) {
-            return memoryStat;
+    static MemoryStat parseMemoryStatFromMemcg(String memoryStatContents) {
+        if (memoryStatContents == null || memoryStatContents.isEmpty()) {
+            return null;
         }
 
+        final MemoryStat memoryStat = new MemoryStat();
         Matcher m;
         m = PGFAULT.matcher(memoryStatContents);
         memoryStat.pgfault = m.find() ? Long.valueOf(m.group(1)) : 0;
@@ -94,6 +131,40 @@ final class MemoryStatUtil {
         m = SWAP_IN_BYTES.matcher(memoryStatContents);
         memoryStat.swapInBytes = m.find() ? Long.valueOf(m.group(1)) : 0;
         return memoryStat;
+    }
+
+    /**
+     * Parses relevant statistics out from the contents of a /proc/pid/stat file in procfs.
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    @Nullable
+    static MemoryStat parseMemoryStatFromProcfs(String procStatContents) {
+        if (procStatContents == null || procStatContents.isEmpty()) {
+            return null;
+        }
+
+        final String[] splits = procStatContents.split(" ");
+        if (splits.length < 24) {
+            return null;
+        }
+
+        final MemoryStat memoryStat = new MemoryStat();
+        memoryStat.pgfault = Long.valueOf(splits[PGFAULT_INDEX]);
+        memoryStat.pgmajfault = Long.valueOf(splits[PGMAJFAULT_INDEX]);
+        memoryStat.rssInBytes = Long.valueOf(splits[RSS_IN_BYTES_INDEX]);
+        return memoryStat;
+    }
+
+    /**
+     * Checks if memcg is available on device.
+     *
+     * Touches the filesystem to do the check.
+     */
+    static boolean hasMemcg() {
+        if (sDeviceHasMemCg == null) {
+            sDeviceHasMemCg = (new File(MEMCG_TEST_PATH)).exists();
+        }
+        return sDeviceHasMemCg;
     }
 
     static final class MemoryStat {

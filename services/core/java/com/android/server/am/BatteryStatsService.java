@@ -1041,7 +1041,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             return;
         }
 
-        mStats.updateBluetoothStateLocked(info);
+        synchronized (mStats) {
+            mStats.updateBluetoothStateLocked(info);
+        }
     }
 
     @Override

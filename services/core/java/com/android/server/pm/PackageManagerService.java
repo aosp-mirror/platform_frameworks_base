@@ -2981,6 +2981,9 @@ public class PackageManagerService extends IPackageManager.Stub
                         }
                     }
                 }
+                // Adjust seInfo to ensure apps which share a sharedUserId are placed in the same
+                // SELinux domain.
+                setting.fixSeInfoLocked();
             }
 
             // Now that we know all the packages we are keeping,
@@ -6853,6 +6856,10 @@ public class PackageManagerService extends IPackageManager.Stub
                     resolveInfos.remove(i);
                     continue;
                 }
+                if (blockInstant && isInstantApp(info.activityInfo.packageName, userId)) {
+                    resolveInfos.remove(i);
+                    continue;
+                }
                 // requested activity is defined in a split that hasn't been installed yet.
                 // add the installer to the resolve list
                 if (DEBUG_INSTALL) {
@@ -6867,8 +6874,6 @@ public class PackageManagerService extends IPackageManager.Stub
                         info.activityInfo.packageName,
                         info.activityInfo.applicationInfo.versionCode,
                         info.activityInfo.splitName);
-                installerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
-                        | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
                 // add a non-generic filter
                 installerInfo.filter = new IntentFilter();
 
@@ -6878,11 +6883,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 installerInfo.resolvePackageName = info.getComponentInfo().packageName;
                 installerInfo.labelRes = info.resolveLabelResId();
                 installerInfo.icon = info.resolveIconResId();
-
-                // propagate priority/preferred order/default
-                installerInfo.priority = info.priority;
-                installerInfo.preferredOrder = info.preferredOrder;
-                installerInfo.isDefault = info.isDefault;
                 installerInfo.isInstantAppAvailable = true;
                 resolveInfos.set(i, installerInfo);
                 continue;
@@ -7620,10 +7620,6 @@ public class PackageManagerService extends IPackageManager.Stub
                             info.serviceInfo.packageName,
                             info.serviceInfo.applicationInfo.versionCode,
                             info.serviceInfo.splitName);
-                    // make sure this resolver is the default
-                    installerInfo.isDefault = true;
-                    installerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
-                            | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
                     // add a non-generic filter
                     installerInfo.filter = new IntentFilter();
                     // load resources from the correct package
@@ -7742,10 +7738,6 @@ public class PackageManagerService extends IPackageManager.Stub
                             info.providerInfo.packageName,
                             info.providerInfo.applicationInfo.versionCode,
                             info.providerInfo.splitName);
-                    // make sure this resolver is the default
-                    installerInfo.isDefault = true;
-                    installerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
-                            | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
                     // add a non-generic filter
                     installerInfo.filter = new IntentFilter();
                     // load resources from the correct package
@@ -10381,20 +10373,24 @@ public class PackageManagerService extends IPackageManager.Stub
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
         }
 
-        // SELinux sandboxes become more restrictive as targetSdkVersion increases.
-        // To ensure that apps with sharedUserId are placed in the same selinux domain
-        // without breaking any assumptions about access, put them into the least
-        // restrictive targetSdkVersion=25 domain.
-        // TODO(b/72290969): Base this on the actual targetSdkVersion(s) of the apps within the
-        // sharedUserSetting, instead of defaulting to the least restrictive domain.
-        final int targetSdk = (sharedUserSetting != null) ? 25
-                : pkg.applicationInfo.targetSdkVersion;
+        // Apps which share a sharedUserId must be placed in the same selinux domain. If this
+        // package is the first app installed as this shared user, set seInfoTargetSdkVersion to its
+        // targetSdkVersion. These are later adjusted in PackageManagerService's constructor to be
+        // the lowest targetSdkVersion of all apps within the shared user, which corresponds to the
+        // least restrictive selinux domain.
+        // NOTE: As new packages are installed / updated, the shared user's seinfoTargetSdkVersion
+        // will NOT be modified until next boot, even if a lower targetSdkVersion is used. This
+        // ensures that all packages continue to run in the same selinux domain.
+        final int targetSdkVersion =
+            ((sharedUserSetting != null) && (sharedUserSetting.packages.size() != 0)) ?
+            sharedUserSetting.seInfoTargetSdkVersion : pkg.applicationInfo.targetSdkVersion;
         // TODO(b/71593002): isPrivileged for sharedUser and appInfo should never be out of sync.
         // They currently can be if the sharedUser apps are signed with the platform key.
         final boolean isPrivileged = (sharedUserSetting != null) ?
             sharedUserSetting.isPrivileged() | pkg.isPrivileged() : pkg.isPrivileged();
 
-        SELinuxMMAC.assignSeInfoValue(pkg, isPrivileged, targetSdk);
+        pkg.applicationInfo.seInfo = SELinuxMMAC.getSeInfo(pkg, isPrivileged,
+                pkg.applicationInfo.targetSandboxVersion, targetSdkVersion);
 
         pkg.mExtras = pkgSetting;
         pkg.applicationInfo.processName = fixProcessName(
@@ -20873,6 +20869,16 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         reconcileApps(StorageManager.UUID_PRIVATE_INTERNAL);
 
         mPermissionManager.systemReady();
+
+        if (mInstantAppResolverConnection != null) {
+            mContext.registerReceiver(new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    mInstantAppResolverConnection.optimisticBind();
+                    mContext.unregisterReceiver(this);
+                }
+            }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
+        }
     }
 
     public void waitForAppDataPrepared() {

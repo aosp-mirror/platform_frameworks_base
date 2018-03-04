@@ -75,6 +75,10 @@ EventMetricProducer::~EventMetricProducer() {
     VLOG("~EventMetricProducer() called");
 }
 
+void EventMetricProducer::dropDataLocked(const uint64_t dropTimeNs) {
+    mProto->clear();
+}
+
 void EventMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eventTime) {
 }
 

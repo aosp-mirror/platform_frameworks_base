@@ -17,8 +17,6 @@
 #define DEBUG false  // STOPSHIP if true
 #include "logd/LogEvent.h"
 
-#include <sstream>
-
 #include "stats_log_util.h"
 
 namespace android {
@@ -27,7 +25,6 @@ namespace statsd {
 
 using namespace android::util;
 using android::util::ProtoOutputStream;
-using std::ostringstream;
 using std::string;
 using std::vector;
 
@@ -381,16 +378,15 @@ float LogEvent::GetFloat(size_t key, status_t* err) const {
 }
 
 string LogEvent::ToString() const {
-    ostringstream result;
-    result << "{ " << mLogdTimestampNs << " "  << mElapsedTimestampNs << " (" << mTagId << ")";
+    string result;
+    result += StringPrintf("{ %lld %lld (%d)", (long long)mLogdTimestampNs,
+                           (long long)mElapsedTimestampNs, mTagId);
     for (const auto& value : mValues) {
-        result << StringPrintf("%#x", value.mField.getField());
-        result << "->";
-        result << value.mValue.toString();
-        result << " ";
+        result +=
+                StringPrintf("%#x", value.mField.getField()) + "->" + value.mValue.toString() + " ";
     }
-    result << " }";
-    return result.str();
+    result += " }";
+    return result;
 }
 
 void LogEvent::ToProto(ProtoOutputStream& protoOutput) const {

@@ -192,7 +192,8 @@ import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.am.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
-import static com.android.server.am.MemoryStatUtil.readMemoryStatFromMemcg;
+import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
+import static com.android.server.am.MemoryStatUtil.hasMemcg;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
@@ -558,6 +559,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     static final String SYSTEM_DEBUGGABLE = "ro.debuggable";
 
+    // Maximum number of receivers an app can register.
+    private static final int MAX_RECEIVERS_ALLOWED_PER_APP = 1000;
+
     // Amount of time after a call to stopAppSwitches() during which we will
     // prevent further untrusted switches from happening.
     static final long APP_SWITCH_DELAY_TIME = 5*1000;
@@ -682,7 +686,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private final ActivityStartController mActivityStartController;
 
-    final ClientLifecycleManager mLifecycleManager;
+    private final ClientLifecycleManager mLifecycleManager;
 
     final TaskChangeNotificationController mTaskChangeNotificationController;
 
@@ -704,6 +708,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     // Whether we should use SCHED_FIFO for UI and RenderThreads.
     private boolean mUseFifoUiScheduling = false;
+
+    private static final String SYSUI_COMPONENT_NAME = "com.android.systemui/.SystemUIService";
 
     BroadcastQueue mFgBroadcastQueue;
     BroadcastQueue mBgBroadcastQueue;
@@ -804,6 +810,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 boolean asProto) {
             if (asProto) return;
             doDump(fd, pw, new String[]{"activities"}, asProto);
+            doDump(fd, pw, new String[]{"service", SYSUI_COMPONENT_NAME}, asProto);
         }
 
         @Override
@@ -5919,6 +5926,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             Slog.d(TAG_PROCESSES, "Received spurious death notification for thread "
                     + thread.asBinder());
         }
+
+        // On the device which doesn't have Cgroup, log LmkStateChanged which is used as a signal
+        // for pulling memory stats of other running processes when this process died.
+        if (!hasMemcg()) {
+            StatsLog.write(StatsLog.APP_DIED, SystemClock.elapsedRealtime());
+        }
     }
 
     /**
@@ -10149,92 +10162,33 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
-     * Updates (grants or revokes) a persitable URI permission.
-     *
-     * @param uri URI to be granted or revoked.
-     * @param prefix if {@code false}, permission apply to this specific URI; if {@code true}, it
-     * applies to all URIs that are prefixed by this URI.
-     * @param packageName target package.
-     * @param grant if {@code true} a new permission will be granted, otherwise an existing
-     * permission will be revoked.
-     * @param userId user handle
-     *
-     * @return whether or not the requested succeeded.
-     *
-     * @deprecated TODO(b/72055774): caller should use takePersistableUriPermission() or
-     * releasePersistableUriPermission() instead, but such change will be made in a separate CL
-     * so it can be easily reverted if it breaks existing functionality.
-     */
-    @Deprecated // STOPSHIP if not removed
-    @Override
-    public boolean updatePersistableUriPermission(Uri uri, boolean prefix, String packageName,
-            boolean grant, int userId) {
-        enforceCallingPermission(android.Manifest.permission.GET_APP_GRANTED_URI_PERMISSIONS,
-                "updatePersistableUriPermission");
-        final int uid = mPackageManagerInt.getPackageUid(packageName, 0, userId);
-
-        final GrantUri grantUri = new GrantUri(userId, uri, prefix);
-
-        boolean persistChanged = false;
-        synchronized (this) {
-            if (grant) { // Grant
-                final String authority = uri.getAuthority();
-                final ProviderInfo pi = getProviderInfoLocked(authority, userId, 0);
-                if (pi == null) {
-                    Slog.w(TAG, "No content provider found for authority " + authority);
-                    return false;
-                }
-                final UriPermission permission = findOrCreateUriPermissionLocked(pi.packageName,
-                        packageName, uid, grantUri);
-                if (permission.isNew()) {
-                    final int modeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
-                    permission.initPersistedModes(modeFlags, System.currentTimeMillis());
-                    persistChanged = true;
-                } else {
-                    // Caller should not try to grant permission that is already granted.
-                    Slog.w(TAG_URI_PERMISSION,
-                            "permission already granted for " + grantUri.toSafeString());
-                    return false;
-                }
-                persistChanged |= maybePrunePersistedUriGrantsLocked(uid);
-            } else { // Revoke
-                final UriPermission permission = findUriPermissionLocked(uid, grantUri);
-                if (permission == null) {
-                    // Caller should not try to revoke permission that is not granted.
-                    Slog.v(TAG_URI_PERMISSION, "no permission for " + grantUri.toSafeString());
-                    return false;
-                } else {
-                    permission.modeFlags = 0;
-                    removeUriPermissionIfNeededLocked(permission);
-                    persistChanged = true;
-                }
-            }
-            if (persistChanged) {
-                schedulePersistUriGrants();
-            }
-        }
-        return true;
-    }
-
-    /**
      * @param uri This uri must NOT contain an embedded userId.
+     * @param toPackage Name of package whose uri is being granted to (if {@code null}, uses
+     * calling uid)
      * @param userId The userId in which the uri is to be resolved.
      */
     @Override
-    public void takePersistableUriPermission(Uri uri, final int modeFlags, int userId) {
-        enforceNotIsolatedCaller("takePersistableUriPermission");
+    public void takePersistableUriPermission(Uri uri, final int modeFlags,
+            @Nullable String toPackage, int userId) {
+        final int uid;
+        if (toPackage != null) {
+            enforceCallingPermission(android.Manifest.permission.FORCE_PERSISTABLE_URI_PERMISSIONS,
+                    "takePersistableUriPermission");
+            uid = mPackageManagerInt.getPackageUid(toPackage, 0, userId);
+        } else {
+            enforceNotIsolatedCaller("takePersistableUriPermission");
+            uid = Binder.getCallingUid();
+        }
 
         Preconditions.checkFlagsArgument(modeFlags,
                 Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
         synchronized (this) {
-            final int callingUid = Binder.getCallingUid();
             boolean persistChanged = false;
             GrantUri grantUri = new GrantUri(userId, uri, false);
 
-            UriPermission exactPerm = findUriPermissionLocked(callingUid, grantUri);
-            UriPermission prefixPerm = findUriPermissionLocked(callingUid,
+            UriPermission exactPerm = findUriPermissionLocked(uid, grantUri);
+            UriPermission prefixPerm = findUriPermissionLocked(uid,
                     new GrantUri(userId, uri, true));
 
             final boolean exactValid = (exactPerm != null)
@@ -10244,7 +10198,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             if (!(exactValid || prefixValid)) {
                 throw new SecurityException("No persistable permission grants found for UID "
-                        + callingUid + " and Uri " + grantUri.toSafeString());
+                        + uid + " and Uri " + grantUri.toSafeString());
             }
 
             if (exactValid) {
@@ -10254,7 +10208,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 persistChanged |= prefixPerm.takePersistableModes(modeFlags);
             }
 
-            persistChanged |= maybePrunePersistedUriGrantsLocked(callingUid);
+            persistChanged |= maybePrunePersistedUriGrantsLocked(uid);
 
             if (persistChanged) {
                 schedulePersistUriGrants();
@@ -10264,25 +10218,36 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     /**
      * @param uri This uri must NOT contain an embedded userId.
+     * @param toPackage Name of the target package whose uri is being released (if {@code null},
+     * uses calling uid)
      * @param userId The userId in which the uri is to be resolved.
      */
     @Override
-    public void releasePersistableUriPermission(Uri uri, final int modeFlags, int userId) {
-        enforceNotIsolatedCaller("releasePersistableUriPermission");
+    public void releasePersistableUriPermission(Uri uri, final int modeFlags,
+            @Nullable String toPackage, int userId) {
+
+        final int uid;
+        if (toPackage != null) {
+            enforceCallingPermission(android.Manifest.permission.FORCE_PERSISTABLE_URI_PERMISSIONS,
+                    "releasePersistableUriPermission");
+            uid = mPackageManagerInt.getPackageUid(toPackage, 0, userId);
+        } else {
+            enforceNotIsolatedCaller("releasePersistableUriPermission");
+            uid = Binder.getCallingUid();
+        }
 
         Preconditions.checkFlagsArgument(modeFlags,
                 Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
         synchronized (this) {
-            final int callingUid = Binder.getCallingUid();
             boolean persistChanged = false;
 
-            UriPermission exactPerm = findUriPermissionLocked(callingUid,
+            UriPermission exactPerm = findUriPermissionLocked(uid,
                     new GrantUri(userId, uri, false));
-            UriPermission prefixPerm = findUriPermissionLocked(callingUid,
+            UriPermission prefixPerm = findUriPermissionLocked(uid,
                     new GrantUri(userId, uri, true));
-            if (exactPerm == null && prefixPerm == null) {
-                throw new SecurityException("No permission grants found for UID " + callingUid
+            if (exactPerm == null && prefixPerm == null && toPackage == null) {
+                throw new SecurityException("No permission grants found for UID " + uid
                         + " and Uri " + uri.toSafeString());
             }
 
@@ -12343,6 +12308,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     ActivityStartController getActivityStartController() {
         return mActivityStartController;
+    }
+
+    ClientLifecycleManager getLifecycleManager() {
+        return mLifecycleManager;
     }
 
     PackageManagerInternal getPackageManagerInternalLocked() {
@@ -20587,6 +20556,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 rl = new ReceiverList(this, callerApp, callingPid, callingUid,
                         userId, receiver);
                 if (rl.app != null) {
+                    final int totalReceiversForApp = rl.app.receivers.size();
+                    if (totalReceiversForApp >= MAX_RECEIVERS_ALLOWED_PER_APP) {
+                        throw new IllegalStateException("Too many receivers, total of "
+                                + totalReceiversForApp + ", registered for pid: "
+                                + rl.pid + ", callerPackage: " + callerPackage);
+                    }
                     rl.app.receivers.add(rl);
                 } else {
                     try {
@@ -20615,11 +20590,18 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             BroadcastFilter bf = new BroadcastFilter(filter, rl, callerPackage,
                     permission, callingUid, userId, instantApp, visibleToInstantApps);
-            rl.add(bf);
-            if (!bf.debugCheck()) {
-                Slog.w(TAG, "==> For Dynamic broadcast");
+            if (rl.containsFilter(filter)) {
+                // STOPSHIP: To track if apps are doing this a lot for b/70677313. Change to Slog.w
+                Slog.wtf(TAG, "Receiver with filter " + filter
+                        + " already registered for pid " + rl.pid
+                        + ", callerPackage is " + callerPackage);
+            } else {
+                rl.add(bf);
+                if (!bf.debugCheck()) {
+                    Slog.w(TAG, "==> For Dynamic broadcast");
+                }
+                mReceiverResolver.addFilter(bf);
             }
-            mReceiverResolver.addFilter(bf);
 
             // Enqueue broadcasts for all existing stickies that match
             // this filter.
@@ -26184,7 +26166,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     final ProcessRecord r = mPidsSelfLocked.valueAt(i);
                     final int pid = r.pid;
                     final int uid = r.uid;
-                    final MemoryStat memoryStat = readMemoryStatFromMemcg(uid, pid);
+                    final MemoryStat memoryStat = readMemoryStatFromFilesystem(uid, pid);
                     if (memoryStat == null) {
                         continue;
                     }

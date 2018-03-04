@@ -55,6 +55,7 @@
 #include "java/ProguardRules.h"
 #include "link/Linkers.h"
 #include "link/ManifestFixer.h"
+#include "link/NoDefaultResourceRemover.h"
 #include "link/ReferenceLinker.h"
 #include "link/TableMerger.h"
 #include "link/XmlCompatVersioner.h"
@@ -1783,6 +1784,14 @@ class LinkCommand {
       }
       context_->GetExternalSymbols()->SetDelegate(
           util::make_unique<FeatureSplitSymbolTableDelegate>(context_));
+    }
+
+    // Before we process anything, remove the resources whose default values don't exist.
+    // We want to force any references to these to fail the build.
+    if (!NoDefaultResourceRemover{}.Consume(context_, &final_table_)) {
+      context_->GetDiagnostics()->Error(DiagMessage()
+                                        << "failed removing resources with no defaults");
+      return 1;
     }
 
     ReferenceLinker linker;

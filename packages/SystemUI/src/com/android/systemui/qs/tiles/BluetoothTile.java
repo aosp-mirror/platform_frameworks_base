@@ -90,6 +90,8 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
     protected void handleClick() {
         // Secondary clicks are header clicks, just toggle.
         final boolean isEnabled = mState.value;
+        // Immediately enter transient enabling state when turning bluetooth on.
+        refreshState(isEnabled ? null : ARG_SHOW_TRANSIENT_ENABLING);
         mController.setBluetoothEnabled(!isEnabled);
     }
 
@@ -118,9 +120,10 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
-        final boolean enabled = mController.isBluetoothEnabled();
+        final boolean transientEnabling = arg == ARG_SHOW_TRANSIENT_ENABLING;
+        final boolean enabled = transientEnabling || mController.isBluetoothEnabled();
         final boolean connected = mController.isBluetoothConnected();
-        state.isTransient = mController.isBluetoothConnecting()
+        state.isTransient = transientEnabling || mController.isBluetoothConnecting()
                 || mController.getBluetoothState() == BluetoothAdapter.STATE_TURNING_ON;
         state.dualTarget = true;
         state.value = enabled;
@@ -129,7 +132,6 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
         }
         state.slash.isSlashed = !enabled;
         state.label = mContext.getString(R.string.quick_settings_bluetooth_label);
-
         if (enabled) {
             if (connected) {
                 state.icon = new BluetoothConnectedTileIcon();
@@ -155,8 +157,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
             state.state = Tile.STATE_INACTIVE;
         }
 
-        state.secondaryLabel = getSecondaryLabel(enabled, connected);
-
+        state.secondaryLabel = getSecondaryLabel(enabled, connected, state.isTransient);
         state.dualLabelContentDescription = mContext.getResources().getString(
                 R.string.accessibility_quick_settings_open_settings, getTileLabel());
         state.expandedAccessibilityClassName = Switch.class.getName();
@@ -169,9 +170,13 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
      *
      * @param enabled whether bluetooth is enabled
      * @param connected whether there's a device connected via bluetooth
+     * @param isTransient whether bluetooth is currently in a transient state turning on
      */
     @Nullable
-    private String getSecondaryLabel(boolean enabled, boolean connected) {
+    private String getSecondaryLabel(boolean enabled, boolean connected, boolean isTransient) {
+        if (isTransient) {
+            return mContext.getString(R.string.quick_settings_bluetooth_secondary_label_transient);
+        }
         final CachedBluetoothDevice lastDevice = mController.getLastDevice();
 
         if (enabled && connected && lastDevice != null) {

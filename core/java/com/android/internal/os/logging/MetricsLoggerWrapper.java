@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.util.Pair;
 import android.util.StatsLog;
+import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -103,13 +104,27 @@ public class MetricsLoggerWrapper {
                 StatsLog.PICTURE_IN_PICTURE_STATE_CHANGED__STATE__EXPANDED_TO_FULL_SCREEN);
     }
 
-    public static void logAppOverlayEnter(int uid, String packageName, boolean usingAlertWindow) {
-        StatsLog.write(StatsLog.OVERLAY_STATE_CHANGED, uid, packageName, usingAlertWindow,
-                StatsLog.OVERLAY_STATE_CHANGED__STATE__ENTERED);
+    public static void logAppOverlayEnter(int uid, String packageName, boolean changed, int type, boolean usingAlertWindow) {
+        if (changed) {
+            if (type != LayoutParams.TYPE_APPLICATION_OVERLAY) {
+                StatsLog.write(StatsLog.OVERLAY_STATE_CHANGED, uid, packageName, true,
+                        StatsLog.OVERLAY_STATE_CHANGED__STATE__ENTERED);
+            } else if (!usingAlertWindow){
+                StatsLog.write(StatsLog.OVERLAY_STATE_CHANGED, uid, packageName, false,
+                        StatsLog.OVERLAY_STATE_CHANGED__STATE__ENTERED);
+            }
+        }
     }
 
-    public static void logAppOverlayExit(int uid, String packageName, boolean usingAlertWindow) {
-        StatsLog.write(StatsLog.OVERLAY_STATE_CHANGED, uid, packageName, usingAlertWindow,
-                StatsLog.OVERLAY_STATE_CHANGED__STATE__EXITED);
+    public static void logAppOverlayExit(int uid, String packageName, boolean changed, int type, boolean usingAlertWindow) {
+        if (changed) {
+            if (type != LayoutParams.TYPE_APPLICATION_OVERLAY) {
+                StatsLog.write(StatsLog.OVERLAY_STATE_CHANGED, uid, packageName, true,
+                        StatsLog.OVERLAY_STATE_CHANGED__STATE__EXITED);
+            } else if (!usingAlertWindow){
+                StatsLog.write(StatsLog.OVERLAY_STATE_CHANGED, uid, packageName, false,
+                        StatsLog.OVERLAY_STATE_CHANGED__STATE__EXITED);
+            }
+        }
     }
 }

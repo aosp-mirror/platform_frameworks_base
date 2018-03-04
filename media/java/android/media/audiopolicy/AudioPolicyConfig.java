@@ -16,6 +16,7 @@
 
 package android.media.audiopolicy;
 
+import android.annotation.NonNull;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioPatch;
@@ -23,6 +24,8 @@ import android.media.audiopolicy.AudioMixingRule.AudioMixMatchCriterion;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
+
+import com.android.internal.annotations.GuardedBy;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -35,10 +38,15 @@ public class AudioPolicyConfig implements Parcelable {
 
     private static final String TAG = "AudioPolicyConfig";
 
-    protected ArrayList<AudioMix> mMixes;
+    protected final ArrayList<AudioMix> mMixes;
     protected int mDuckingPolicy = AudioPolicy.FOCUS_POLICY_DUCKING_IN_APP;
 
     private String mRegistrationId = null;
+
+    /** counter for the mixes that are / have been in the list of AudioMix
+     *  e.g. register 4 mixes (counter is 3), remove 1 (counter is 3), add 1 (counter is 4)
+     */
+    private int mMixCounter = 0;
 
     protected AudioPolicyConfig(AudioPolicyConfig conf) {
         mMixes = conf.mMixes;
@@ -201,20 +209,39 @@ public class AudioPolicyConfig implements Parcelable {
             return;
         }
         mRegistrationId = regId == null ? "" : regId;
-        int mixIndex = 0;
         for (AudioMix mix : mMixes) {
-            if (!mRegistrationId.isEmpty()) {
-                if ((mix.getRouteFlags() & AudioMix.ROUTE_FLAG_LOOP_BACK) ==
-                        AudioMix.ROUTE_FLAG_LOOP_BACK) {
-                    mix.setRegistration(mRegistrationId + "mix" + mixTypeId(mix.getMixType()) + ":"
-                            + mixIndex++);
-                } else if ((mix.getRouteFlags() & AudioMix.ROUTE_FLAG_RENDER) ==
-                        AudioMix.ROUTE_FLAG_RENDER) {
-                    mix.setRegistration(mix.mDeviceAddress);
-                }
-            } else {
-                mix.setRegistration("");
+            setMixRegistration(mix);
+        }
+    }
+
+    private void setMixRegistration(@NonNull final AudioMix mix) {
+        if (!mRegistrationId.isEmpty()) {
+            if ((mix.getRouteFlags() & AudioMix.ROUTE_FLAG_LOOP_BACK) ==
+                    AudioMix.ROUTE_FLAG_LOOP_BACK) {
+                mix.setRegistration(mRegistrationId + "mix" + mixTypeId(mix.getMixType()) + ":"
+                        + mMixCounter);
+            } else if ((mix.getRouteFlags() & AudioMix.ROUTE_FLAG_RENDER) ==
+                    AudioMix.ROUTE_FLAG_RENDER) {
+                mix.setRegistration(mix.mDeviceAddress);
             }
+        } else {
+            mix.setRegistration("");
+        }
+        mMixCounter++;
+    }
+
+    @GuardedBy("mMixes")
+    protected void add(@NonNull ArrayList<AudioMix> mixes) {
+        for (AudioMix mix : mixes) {
+            setMixRegistration(mix);
+            mMixes.add(mix);
+        }
+    }
+
+    @GuardedBy("mMixes")
+    protected void remove(@NonNull ArrayList<AudioMix> mixes) {
+        for (AudioMix mix : mixes) {
+            mMixes.remove(mix);
         }
     }
 

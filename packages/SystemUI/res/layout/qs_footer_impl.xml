@@ -127,7 +127,8 @@
         android:id="@+id/qs_drag_handle_view"
         android:layout_width="24dp"
         android:layout_height="4dp"
-        android:layout_gravity="center"
+        android:layout_marginBottom="16dp"
+        android:layout_gravity="center_horizontal|bottom"
         android:background="@drawable/qs_footer_drag_handle" />
 
 </com.android.systemui.qs.QSFooterImpl>

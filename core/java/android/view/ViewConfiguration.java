@@ -303,6 +303,7 @@ public class ViewConfiguration {
     private final long mGlobalActionsKeyTimeout;
     private final float mVerticalScrollFactor;
     private final float mHorizontalScrollFactor;
+    private final boolean mShowMenuShortcutsWhenKeyboardPresent;
 
     private boolean sHasPermanentMenuKey;
     private boolean sHasPermanentMenuKeySet;
@@ -335,6 +336,7 @@ public class ViewConfiguration {
         mGlobalActionsKeyTimeout = GLOBAL_ACTIONS_KEY_TIMEOUT;
         mHorizontalScrollFactor = HORIZONTAL_SCROLL_FACTOR;
         mVerticalScrollFactor = VERTICAL_SCROLL_FACTOR;
+        mShowMenuShortcutsWhenKeyboardPresent = false;
     }
 
     /**
@@ -428,6 +430,10 @@ public class ViewConfiguration {
                 com.android.internal.R.dimen.config_horizontalScrollFactor);
         mVerticalScrollFactor = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.config_verticalScrollFactor);
+
+        mShowMenuShortcutsWhenKeyboardPresent = res.getBoolean(
+            com.android.internal.R.bool.config_showMenuShortcutsWhenKeyboardPresent);
+
     }
 
     /**
@@ -907,6 +913,15 @@ public class ViewConfiguration {
      */
     public boolean hasPermanentMenuKey() {
         return sHasPermanentMenuKey;
+    }
+
+    /**
+     * Check if shortcuts should be displayed in menus.
+     *
+     * @return {@code True} if shortcuts should be displayed in menus.
+     */
+    public boolean shouldShowMenuShortcutsWhenKeyboardPresent() {
+        return mShowMenuShortcutsWhenKeyboardPresent;
     }
 
     /**

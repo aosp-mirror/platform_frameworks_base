@@ -16,10 +16,8 @@
 
 package android.view.inputmethod;
 
-import android.annotation.NonNull;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.LocaleList;
 import android.view.KeyEvent;
 
 /**
@@ -304,14 +302,5 @@ public class InputConnectionWrapper implements InputConnection {
     @Override
     public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
         return mTarget.commitContent(inputContentInfo, flags, opts);
-    }
-
-    /**
-     * {@inheritDoc}
-     * @throws NullPointerException if the target is {@code null}.
-     */
-    @Override
-    public void reportLanguageHint(@NonNull LocaleList languageHint) {
-        mTarget.reportLanguageHint(languageHint);
     }
 }

@@ -30,6 +30,8 @@ import java.util.StringJoiner;
  * This is encoded as a key=value list, separated by commas. Ex:
  *
  * <pre>
+ * smart_linkify_enabled                    (boolean)
+ * system_textclassifier_enabled            (boolean)
  * model_dark_launch_enabled                (boolean)
  * smart_selection_enabled                  (boolean)
  * smart_text_share_enabled                 (boolean)
@@ -58,6 +60,10 @@ public final class TextClassificationConstants {
 
     private static final String LOG_TAG = "TextClassificationConstants";
 
+    private static final String LOCAL_TEXT_CLASSIFIER_ENABLED =
+            "local_textclassifier_enabled";
+    private static final String SYSTEM_TEXT_CLASSIFIER_ENABLED =
+            "system_textclassifier_enabled";
     private static final String MODEL_DARK_LAUNCH_ENABLED =
             "model_dark_launch_enabled";
     private static final String SMART_SELECTION_ENABLED =
@@ -83,6 +89,8 @@ public final class TextClassificationConstants {
     private static final String ENTITY_LIST_EDITABLE =
             "entity_list_editable";
 
+    private static final boolean LOCAL_TEXT_CLASSIFIER_ENABLED_DEFAULT = true;
+    private static final boolean SYSTEM_TEXT_CLASSIFIER_ENABLED_DEFAULT = true;
     private static final boolean MODEL_DARK_LAUNCH_ENABLED_DEFAULT = false;
     private static final boolean SMART_SELECTION_ENABLED_DEFAULT = true;
     private static final boolean SMART_TEXT_SHARE_ENABLED_DEFAULT = true;
@@ -102,6 +110,8 @@ public final class TextClassificationConstants {
             .add(TextClassifier.TYPE_DATE_TIME)
             .add(TextClassifier.TYPE_FLIGHT_NUMBER).toString();
 
+    private final boolean mSystemTextClassifierEnabled;
+    private final boolean mLocalTextClassifierEnabled;
     private final boolean mModelDarkLaunchEnabled;
     private final boolean mSmartSelectionEnabled;
     private final boolean mSmartTextShareEnabled;
@@ -123,6 +133,12 @@ public final class TextClassificationConstants {
             // Failed to parse the settings string, log this and move on with defaults.
             Slog.e(LOG_TAG, "Bad TextClassifier settings: " + settings);
         }
+        mSystemTextClassifierEnabled = parser.getBoolean(
+                SYSTEM_TEXT_CLASSIFIER_ENABLED,
+                SYSTEM_TEXT_CLASSIFIER_ENABLED_DEFAULT);
+        mLocalTextClassifierEnabled = parser.getBoolean(
+                LOCAL_TEXT_CLASSIFIER_ENABLED,
+                LOCAL_TEXT_CLASSIFIER_ENABLED_DEFAULT);
         mModelDarkLaunchEnabled = parser.getBoolean(
                 MODEL_DARK_LAUNCH_ENABLED,
                 MODEL_DARK_LAUNCH_ENABLED_DEFAULT);
@@ -130,8 +146,8 @@ public final class TextClassificationConstants {
                 SMART_SELECTION_ENABLED,
                 SMART_SELECTION_ENABLED_DEFAULT);
         mSmartTextShareEnabled = parser.getBoolean(
-            SMART_TEXT_SHARE_ENABLED,
-            SMART_TEXT_SHARE_ENABLED_DEFAULT);
+                SMART_TEXT_SHARE_ENABLED,
+                SMART_TEXT_SHARE_ENABLED_DEFAULT);
         mSmartLinkifyEnabled = parser.getBoolean(
                 SMART_LINKIFY_ENABLED,
                 SMART_LINKIFY_ENABLED_DEFAULT);
@@ -164,6 +180,14 @@ public final class TextClassificationConstants {
     /** Load from a settings string. */
     public static TextClassificationConstants loadFromString(String settings) {
         return new TextClassificationConstants(settings);
+    }
+
+    public boolean isLocalTextClassifierEnabled() {
+        return mLocalTextClassifierEnabled;
+    }
+
+    public boolean isSystemTextClassifierEnabled() {
+        return mSystemTextClassifierEnabled;
     }
 
     public boolean isModelDarkLaunchEnabled() {

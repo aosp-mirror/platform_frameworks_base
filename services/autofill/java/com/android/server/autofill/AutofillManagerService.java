@@ -22,6 +22,7 @@ import static android.content.Context.AUTOFILL_MANAGER_SERVICE;
 import static com.android.server.autofill.Helper.bundleToString;
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sPartitionMaxCount;
+import static com.android.server.autofill.Helper.sVisibleDatasetsMaxCount;
 import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
@@ -459,6 +460,24 @@ public final class AutofillManagerService extends SystemService {
         Slog.i(TAG, "setMaxPartitions(): " + max);
         synchronized (mLock) {
             sPartitionMaxCount = max;
+        }
+    }
+
+    // Called by Shell command.
+    public int getMaxVisibleDatasets() {
+        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+
+        synchronized (mLock) {
+            return sVisibleDatasetsMaxCount;
+        }
+    }
+
+    // Called by Shell command.
+    public void setMaxVisibleDatasets(int max) {
+        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        Slog.i(TAG, "setMaxVisibleDatasets(): " + max);
+        synchronized (mLock) {
+            sVisibleDatasetsMaxCount = max;
         }
     }
 
@@ -1009,6 +1028,7 @@ public final class AutofillManagerService extends SystemService {
                     pw.print("Verbose mode: "); pw.println(sVerbose);
                     pw.print("Disabled users: "); pw.println(mDisabledUsers);
                     pw.print("Max partitions per session: "); pw.println(sPartitionMaxCount);
+                    pw.print("Max visible datasets: "); pw.println(sVisibleDatasetsMaxCount);
                     pw.println("User data constraints: "); UserData.dumpConstraints(prefix, pw);
                     final int size = mServicesCache.size();
                     pw.print("Cached services: ");

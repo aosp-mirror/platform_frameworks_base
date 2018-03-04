@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -37,7 +38,12 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.media.AudioAttributes;
+import android.media.AudioManager;
+import android.media.AudioManagerInternal;
+import android.media.VolumePolicy;
 import android.provider.Settings;
+import android.provider.Settings.Global;
+import android.service.notification.ZenModeConfig;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -240,5 +246,120 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         verify(mZenModeHelperSpy, never()).createZenUpgradeNotification();
         verify(mNotificationManager, never()).notify(eq(ZenModeHelper.TAG),
                 eq(SystemMessage.NOTE_ZEN_UPGRADE), any());
+    }
+
+    @Test
+    public void testZenSetInternalRinger_AllPriorityNotificationSoundsMuted() {
+        AudioManagerInternal mAudioManager = mock(AudioManagerInternal.class);
+        mZenModeHelperSpy.mAudioManager = mAudioManager;
+        Global.putString(mContext.getContentResolver(), Global.ZEN_MODE_RINGER_LEVEL,
+                Integer.toString(AudioManager.RINGER_MODE_NORMAL));
+
+        // 1. Current ringer is normal
+        when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
+        // Set zen to priority-only with all notification sounds muted (so ringer will be muted)
+        mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelperSpy.mConfig.allowReminders = false;
+        mZenModeHelperSpy.mConfig.allowCalls = false;
+        mZenModeHelperSpy.mConfig.allowMessages = false;
+        mZenModeHelperSpy.mConfig.allowEvents = false;
+        mZenModeHelperSpy.mConfig.allowRepeatCallers= false;
+
+        // 2. apply priority only zen - verify ringer is set to silent
+        mZenModeHelperSpy.applyZenToRingerMode();
+        verify(mAudioManager, atLeastOnce()).setRingerModeInternal(AudioManager.RINGER_MODE_SILENT,
+                mZenModeHelperSpy.TAG);
+
+        // 3. apply zen off - verify zen is set to prevoius ringer (normal)
+        when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_SILENT);
+        mZenModeHelperSpy.mZenMode = Global.ZEN_MODE_OFF;
+        mZenModeHelperSpy.applyZenToRingerMode();
+        verify(mAudioManager, atLeastOnce()).setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
+                mZenModeHelperSpy.TAG);
+    }
+
+    @Test
+    public void testZenSetInternalRinger_NotAllPriorityNotificationSoundsMuted_StartNormal() {
+        AudioManagerInternal mAudioManager = mock(AudioManagerInternal.class);
+        mZenModeHelperSpy.mAudioManager = mAudioManager;
+        Global.putString(mContext.getContentResolver(), Global.ZEN_MODE_RINGER_LEVEL,
+                Integer.toString(AudioManager.RINGER_MODE_NORMAL));
+
+        // 1. Current ringer is normal
+        when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
+        mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelperSpy.mConfig.allowReminders = true;
+
+        // 2. apply priority only zen - verify ringer is normal
+        mZenModeHelperSpy.applyZenToRingerMode();
+        verify(mAudioManager, atLeastOnce()).setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
+                mZenModeHelperSpy.TAG);
+
+        // 3.  apply zen off - verify ringer remains normal
+        when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
+        mZenModeHelperSpy.mZenMode = Global.ZEN_MODE_OFF;
+        mZenModeHelperSpy.applyZenToRingerMode();
+        verify(mAudioManager, atLeastOnce()).setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
+                mZenModeHelperSpy.TAG);
+    }
+
+    @Test
+    public void testZenSetInternalRinger_NotAllPriorityNotificationSoundsMuted_StartSilent() {
+        AudioManagerInternal mAudioManager = mock(AudioManagerInternal.class);
+        mZenModeHelperSpy.mAudioManager = mAudioManager;
+        Global.putString(mContext.getContentResolver(), Global.ZEN_MODE_RINGER_LEVEL,
+                Integer.toString(AudioManager.RINGER_MODE_SILENT));
+
+        // 1. Current ringer is silent
+        when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_SILENT);
+        mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelperSpy.mConfig.allowReminders = true;
+
+        // 2. apply priority only zen - verify ringer is silent
+        mZenModeHelperSpy.applyZenToRingerMode();
+        verify(mAudioManager, atLeastOnce()).setRingerModeInternal(AudioManager.RINGER_MODE_SILENT,
+                mZenModeHelperSpy.TAG);
+
+        // 3. apply zen-off - verify ringer is still silent
+        when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_SILENT);
+        mZenModeHelperSpy.mZenMode = Global.ZEN_MODE_OFF;
+        mZenModeHelperSpy.applyZenToRingerMode();
+        verify(mAudioManager, atLeastOnce()).setRingerModeInternal(AudioManager.RINGER_MODE_SILENT,
+                mZenModeHelperSpy.TAG);
+    }
+
+    @Test
+    public void testZenSetInternalRinger_NotAllPriorityNotificationSoundsMuted_RingerChanges() {
+        AudioManagerInternal mAudioManager = mock(AudioManagerInternal.class);
+        mZenModeHelperSpy.mAudioManager = mAudioManager;
+        Global.putString(mContext.getContentResolver(), Global.ZEN_MODE_RINGER_LEVEL,
+                Integer.toString(AudioManager.RINGER_MODE_NORMAL));
+
+        // 1. Current ringer is normal
+        when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
+        // Set zen to priority-only with all notification sounds muted (so ringer will be muted)
+        mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelperSpy.mConfig.allowReminders = true;
+
+        // 2. apply priority only zen - verify zen will still be normal
+        mZenModeHelperSpy.applyZenToRingerMode();
+        verify(mAudioManager, atLeastOnce()).setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
+                mZenModeHelperSpy.TAG);
+
+        // 3. change ringer from normal to silent, verify previous ringer set to new rigner (silent)
+        ZenModeHelper.RingerModeDelegate ringerModeDelegate =
+                mZenModeHelperSpy.new RingerModeDelegate();
+        ringerModeDelegate.onSetRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
+                AudioManager.RINGER_MODE_SILENT, "test", AudioManager.RINGER_MODE_NORMAL,
+                VolumePolicy.DEFAULT);
+        assertEquals(AudioManager.RINGER_MODE_SILENT, Global.getInt(mContext.getContentResolver(),
+                Global.ZEN_MODE_RINGER_LEVEL, AudioManager.RINGER_MODE_NORMAL));
+
+        // 4.  apply zen off - verify ringer still silenced
+        when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_SILENT);
+        mZenModeHelperSpy.mZenMode = Global.ZEN_MODE_OFF;
+        mZenModeHelperSpy.applyZenToRingerMode();
+        verify(mAudioManager, atLeastOnce()).setRingerModeInternal(AudioManager.RINGER_MODE_SILENT,
+                mZenModeHelperSpy.TAG);
     }
 }
