@@ -487,7 +487,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         private FakeHandler mHandler;
         private boolean mAnimationCancelled;
 
-        public SynchronousScrimController(LightBarController lightBarController,
+        SynchronousScrimController(LightBarController lightBarController,
                 ScrimView scrimBehind, ScrimView scrimInFront, View headsUpScrim,
                 Consumer<Integer> scrimVisibleListener, DozeParameters dozeParameters,
                 AlarmManager alarmManager) {
@@ -496,7 +496,7 @@ public class ScrimControllerTest extends SysuiTestCase {
             mHandler = new FakeHandler(Looper.myLooper());
         }
 
-        public void finishAnimationsImmediately() {
+        void finishAnimationsImmediately() {
             boolean[] animationFinished = {false};
             setOnAnimationFinished(()-> animationFinished[0] = true);
 
@@ -515,7 +515,7 @@ public class ScrimControllerTest extends SysuiTestCase {
             }
         }
 
-        public boolean wasAnimationJustCancelled() {
+        boolean wasAnimationJustCancelled() {
             final boolean wasCancelled = mAnimationCancelled;
             mAnimationCancelled = false;
             return wasCancelled;
