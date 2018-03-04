@@ -192,6 +192,12 @@ public class DnsManager {
 
     public void setDnsConfigurationForNetwork(
             int netId, LinkProperties lp, boolean isDefaultNetwork) {
+        final String[] assignedServers = NetworkUtils.makeStrings(lp.getDnsServers());
+        final String[] domainStrs = getDomainStrings(lp.getDomains());
+
+        updateParametersSettings();
+        final int[] params = { mSampleValidity, mSuccessThreshold, mMinSamples, mMaxSamples };
+
         // We only use the PrivateDnsConfig data pushed to this class instance
         // from ConnectivityService because it works in coordination with
         // NetworkMonitor to decide which networks need validation and runs the
@@ -204,23 +210,20 @@ public class DnsManager {
         final boolean useTls = (privateDnsCfg != null) && privateDnsCfg.useTls;
         final boolean strictMode = (privateDnsCfg != null) && privateDnsCfg.inStrictMode();
         final String tlsHostname = strictMode ? privateDnsCfg.hostname : "";
-
-        final String[] serverStrs = NetworkUtils.makeStrings(
-                strictMode ? Arrays.stream(privateDnsCfg.ips)
-                                   .filter((ip) -> lp.isReachable(ip))
-                                   .collect(Collectors.toList())
-                           : lp.getDnsServers());
-        final String[] domainStrs = getDomainStrings(lp.getDomains());
-
-        updateParametersSettings();
-        final int[] params = { mSampleValidity, mSuccessThreshold, mMinSamples, mMaxSamples };
+        final String[] tlsServers =
+                strictMode ? NetworkUtils.makeStrings(
+                        Arrays.stream(privateDnsCfg.ips)
+                              .filter((ip) -> lp.isReachable(ip))
+                              .collect(Collectors.toList()))
+                : useTls ? assignedServers  // Opportunistic
+                : new String[0];            // Off
 
         Slog.d(TAG, String.format("setDnsConfigurationForNetwork(%d, %s, %s, %s, %s, %s)",
-                netId, Arrays.toString(serverStrs), Arrays.toString(domainStrs),
-                Arrays.toString(params), useTls, tlsHostname));
+                netId, Arrays.toString(assignedServers), Arrays.toString(domainStrs),
+                Arrays.toString(params), tlsHostname, Arrays.toString(tlsServers)));
         try {
             mNMS.setDnsConfigurationForNetwork(
-                    netId, serverStrs, domainStrs, params, useTls, tlsHostname);
+                    netId, assignedServers, domainStrs, params, tlsHostname, tlsServers);
         } catch (Exception e) {
             Slog.e(TAG, "Error setting DNS configuration: " + e);
             return;
