@@ -219,7 +219,7 @@ public final class LoadedApk {
     }
 
     private AppComponentFactory createAppFactory(ApplicationInfo appInfo, ClassLoader cl) {
-        if (appInfo.appComponentFactory != null) {
+        if (appInfo.appComponentFactory != null && cl != null) {
             try {
                 return (AppComponentFactory) cl.loadClass(appInfo.appComponentFactory)
                         .newInstance();
@@ -613,6 +613,7 @@ public final class LoadedApk {
             } else {
                 mClassLoader = ClassLoader.getSystemClassLoader();
             }
+            mAppComponentFactory = createAppFactory(mApplicationInfo, mClassLoader);
 
             return;
         }
@@ -687,6 +688,7 @@ public final class LoadedApk {
                         librarySearchPath, libraryPermittedPath, mBaseClassLoader,
                         null /* classLoaderName */);
                 StrictMode.setThreadPolicy(oldPolicy);
+                mAppComponentFactory = createAppFactory(mApplicationInfo, mClassLoader);
             }
 
             return;
@@ -714,6 +716,7 @@ public final class LoadedApk {
                     mApplicationInfo.targetSdkVersion, isBundledApp, librarySearchPath,
                     libraryPermittedPath, mBaseClassLoader,
                     mApplicationInfo.classLoaderName);
+            mAppComponentFactory = createAppFactory(mApplicationInfo, mClassLoader);
 
             StrictMode.setThreadPolicy(oldPolicy);
             // Setup the class loader paths for profiling.
