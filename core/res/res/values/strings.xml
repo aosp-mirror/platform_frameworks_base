@@ -2932,19 +2932,25 @@
     <string name="smv_process">The process <xliff:g id="process">%1$s</xliff:g> has
       has violated its self-enforced StrictMode policy.</string>
 
-    <!-- [CHAR LIMIT=40] Title of dialog that is shown when performing a system upgrade. -->
-    <string name="android_upgrading_title">Android is upgrading\u2026</string>
+    <!-- [CHAR LIMIT=40] Title of dialog that is shown when performing a system update. -->
+    <string name="android_upgrading_title" product="default">Phone is updating\u2026</string>
+    <!-- [CHAR LIMIT=40] Title of dialog that is shown when performing a system update. -->
+    <string name="android_upgrading_title" product="tablet">Tablet is updating\u2026</string>
+    <!-- [CHAR LIMIT=40] Title of dialog that is shown when performing a system update. -->
+    <string name="android_upgrading_title" product="device">Device is updating\u2026</string>
 
     <!-- [CHAR LIMIT=40] Title of dialog that is shown when system is starting. -->
-    <string name="android_start_title">Android is starting\u2026</string>
+    <string name="android_start_title" product="default">Phone is starting\u2026</string>
+    <!-- [CHAR LIMIT=40] Title of dialog that is shown when system is starting. -->
+    <string name="android_start_title" product="tablet">Tablet is starting\u2026</string>
+    <!-- [CHAR LIMIT=40] Title of dialog that is shown when system is starting. -->
+    <string name="android_start_title" product="device">Device is starting\u2026</string>
 
     <!-- [CHAR LIMIT=NONE] Message shown in upgrading dialog when doing an fstrim. -->
     <string name="android_upgrading_fstrim">Optimizing storage.</string>
 
-    <!-- [CHAR LIMIT=40] Title of notification that is shown when finishing a system upgrade. -->
-    <string name="android_upgrading_notification_title">Finishing Android update\u2026</string>
-    <!-- [CHAR LIMIT=200] Body of notification that is shown when performing a system upgrade. -->
-    <string name="android_upgrading_notification_body">Some apps may not work properly until the upgrade finishes</string>
+    <!-- [CHAR LIMIT=40] Title of notification that is shown when finishing a system update. -->
+    <string name="android_upgrading_notification_title" product="default">Finishing system update\u2026</string>
 
     <!-- [CHAR LIMIT=40] Toast that is shown when an app is still upgrading. -->
     <string name="app_upgrading_toast"><xliff:g id="application">%1$s</xliff:g> is upgrading\u2026</string>
