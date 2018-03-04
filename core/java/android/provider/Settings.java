@@ -10617,6 +10617,15 @@ public final class Settings {
         public static final String OFF_BODY_RADIOS_OFF_DELAY_MS = "off_body_radios_off_delay_ms";
 
         /**
+         * Whether or not to turn on Wifi when proxy is disconnected.
+         * Type: int (0 for false, 1 for true)
+         * Default: 1
+         * @hide
+         */
+        public static final String WIFI_ON_WHEN_PROXY_DISCONNECTED
+                = "wifi_on_when_proxy_disconnected";
+
+        /**
          * Whether or not to enable Time Only Mode for watch type devices.
          * Type: int (0 for false, 1 for true)
          * Default: 0
