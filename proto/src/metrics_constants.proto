@@ -5369,6 +5369,16 @@ message MetricsEvent {
     // OS: P
     FIELD_DEVICE_ROTATION = 1329;
 
+    // OPEN: TV Settings > Inputs > Input Options
+    // CATEGORY: SETTINGS
+    // OS: P
+    SETTINGS_TV_INPUT_OPTIONS_CATEGORY = 1330;
+
+    // OPEN: TV Settings > Network & Internet > Add known WIFI network
+    // CATEGORY: SETTINGS
+    // OS: P
+    SETTINGS_TV_WIFI_ADD_KNOWN_CATEGORY = 1331;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
