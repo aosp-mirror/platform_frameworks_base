@@ -80,25 +80,27 @@ public class SntpClient {
      *
      * @param host host name of the server.
      * @param timeout network timeout in milliseconds.
+     * @param network network over which to send the request.
      * @return true if the transaction was successful.
      */
-    public boolean requestTime(String host, int timeout) {
+    public boolean requestTime(String host, int timeout, Network network) {
         InetAddress address = null;
         try {
-            address = InetAddress.getByName(host);
+            address = network.getByName(host);
         } catch (Exception e) {
             EventLogTags.writeNtpFailure(host, e.toString());
             if (DBG) Log.d(TAG, "request time failed: " + e);
             return false;
         }
-        return requestTime(address, NTP_PORT, timeout);
+        return requestTime(address, NTP_PORT, timeout, network);
     }
 
-    public boolean requestTime(InetAddress address, int port, int timeout) {
+    public boolean requestTime(InetAddress address, int port, int timeout, Network network) {
         DatagramSocket socket = null;
         final int oldTag = TrafficStats.getAndSetThreadStatsTag(TrafficStats.TAG_SYSTEM_NTP);
         try {
             socket = new DatagramSocket();
+            network.bindSocket(socket);
             socket.setSoTimeout(timeout);
             byte[] buffer = new byte[NTP_PACKET_SIZE];
             DatagramPacket request = new DatagramPacket(buffer, buffer.length, address, port);
@@ -166,6 +168,12 @@ public class SntpClient {
         }
 
         return true;
+    }
+
+    @Deprecated
+    public boolean requestTime(String host, int timeout) {
+        Log.w(TAG, "Shame on you for calling the hidden API requestTime()!");
+        return false;
     }
 
     /**
