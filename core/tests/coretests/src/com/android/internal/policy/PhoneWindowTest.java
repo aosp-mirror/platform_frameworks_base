@@ -19,6 +19,7 @@ package com.android.internal.policy;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -74,12 +75,12 @@ public final class PhoneWindowTest {
     }
 
     @Test
-    public void layoutInDisplayCutoutMode_always() throws Exception {
-        createPhoneWindowWithTheme(R.style.LayoutInDisplayCutoutModeAlways);
+    public void layoutInDisplayCutoutMode_shortEdges() throws Exception {
+        createPhoneWindowWithTheme(R.style.LayoutInDisplayCutoutModeShortEdges);
         installDecor();
 
         assertThat(mPhoneWindow.getAttributes().layoutInDisplayCutoutMode,
-                is(LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS));
+                is(LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES));
     }
 
     @Test

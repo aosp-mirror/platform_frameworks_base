@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.ScreenDecorations.DisplayCutoutView.boundsFromDirection;
+
 import android.annotation.ColorInt;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -27,6 +29,7 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.DisplayCutout;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -42,6 +45,7 @@ import com.android.systemui.BatteryMeterView;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.ScreenDecorations;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.statusbar.phone.StatusBarIconController.IconManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
@@ -252,10 +256,13 @@ public class KeyguardStatusBarView extends RelativeLayout
             updateLayoutParamsNoCutout();
         }
 
+        Rect bounds = new Rect();
+        boundsFromDirection(dc, Gravity.TOP, bounds);
+
         mCutoutSpace.setVisibility(View.VISIBLE);
         RelativeLayout.LayoutParams lp = (LayoutParams) mCutoutSpace.getLayoutParams();
-        lp.width = dc.getBoundingRect().width();
-        lp.height = dc.getBoundingRect().height();
+        lp.width = bounds.width();
+        lp.height = bounds.height();
         lp.addRule(RelativeLayout.CENTER_IN_PARENT);
 
         lp = (LayoutParams) mCarrierLabel.getLayoutParams();
