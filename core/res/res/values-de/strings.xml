@@ -773,7 +773,7 @@
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Auf dieser Seite bleiben"</string>
     <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nMöchtest du diese Seite wirklich verlassen?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Bestätigen"</string>
-    <string name="double_tap_toast" msgid="4595046515400268881">"Tipp: Zum Vergrößern und Verkleinern zweimal tippen"</string>
+    <string name="double_tap_toast" msgid="4595046515400268881">"Tipp: Zum Vergrößern und Verkleinern doppeltippen"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"AutoFill"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"AutoFill konfig."</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
