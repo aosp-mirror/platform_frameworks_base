@@ -25,6 +25,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.SystemProperties;
 import android.service.quicksettings.Tile;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -176,6 +177,9 @@ public class CellularTile extends QSTileImpl<SignalState> {
         final String signalContentDesc = cb.enabled && (cb.mobileSignalIconId > 0)
                 ? cb.signalContentDescription
                 : r.getString(R.string.accessibility_no_signal);
+        boolean mobileDataEnabled = mDataController.isMobileDataSupported()
+                && mDataController.isMobileDataEnabled();
+        state.value = mobileDataEnabled;
         if (cb.noSim) {
             state.contentDescription = state.label;
         } else {
@@ -192,11 +196,31 @@ public class CellularTile extends QSTileImpl<SignalState> {
             state.icon = new SignalIcon(cb.mobileSignalIconId);
         }
 
-        if (cb.airplaneModeEnabled | cb.noSim) {
+        if (cb.noSim) {
             state.state = Tile.STATE_UNAVAILABLE;
-        } else {
+            state.secondaryLabel = r.getString(R.string.keyguard_missing_sim_message_short);
+        } else if (cb.airplaneModeEnabled) {
+            state.state = Tile.STATE_UNAVAILABLE;
+            state.secondaryLabel = r.getString(R.string.status_bar_airplane);
+        } else if (mobileDataEnabled) {
             state.state = Tile.STATE_ACTIVE;
+            state.secondaryLabel = getMobileDataDescription(cb);
+        } else {
+            state.state = Tile.STATE_INACTIVE;
+            state.secondaryLabel = r.getString(R.string.cell_data_off);
         }
+    }
+
+    private CharSequence getMobileDataDescription(CallbackInfo cb) {
+        if (cb.roaming && !TextUtils.isEmpty(cb.dataContentDescription)) {
+            String roaming = mContext.getString(R.string.data_connection_roaming);
+            String dataDescription = cb.dataContentDescription;
+            return mContext.getString(R.string.mobile_data_text_format, roaming, dataDescription);
+        }
+        if (cb.roaming) {
+            return mContext.getString(R.string.data_connection_roaming);
+        }
+        return cb.dataContentDescription;
     }
 
     @Override

@@ -84,8 +84,7 @@ public class WifiSignalController extends
         boolean ssidPresent = wifiVisible && mCurrentState.ssid != null;
         String contentDescription = getStringIfExists(getContentDescription());
         if (mCurrentState.inetCondition == 0) {
-            contentDescription +=
-                    ("," + mContext.getString(R.string.accessibility_quick_settings_no_internet));
+            contentDescription += ("," + mContext.getString(R.string.data_connection_no_internet));
         }
 
         IconState statusIcon = new IconState(wifiVisible, getCurrentIconId(), contentDescription);
