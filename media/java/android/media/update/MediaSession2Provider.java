@@ -17,6 +17,7 @@
 package android.media.update;
 
 import android.app.PendingIntent;
+import android.media.AudioFocusRequest;
 import android.media.MediaItem2;
 import android.media.MediaMetadata2;
 import android.media.MediaPlayerBase;
@@ -50,7 +51,7 @@ public interface MediaSession2Provider extends TransportControlProvider {
     SessionToken2 getToken_impl();
     List<ControllerInfo> getConnectedControllers_impl();
     void setCustomLayout_impl(ControllerInfo controller, List<CommandButton> layout);
-    void setAudioFocusRequest_impl(int focusGain);
+    void setAudioFocusRequest_impl(AudioFocusRequest afr);
     void setAllowedCommands_impl(ControllerInfo controller, CommandGroup commands);
     void sendCustomCommand_impl(ControllerInfo controller, Command command, Bundle args,
             ResultReceiver receiver);

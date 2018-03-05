@@ -490,7 +490,7 @@ public class MediaSession2 implements AutoCloseable {
          * @return a new Command instance from the Bundle
          * @hide
          */
-        public static Command fromBundle(@NonNull Context context, Bundle command) {
+        public static Command fromBundle(@NonNull Context context, @NonNull Bundle command) {
             return ApiLoader.getProvider(context).fromBundle_MediaSession2Command(context, command);
         }
     }
@@ -501,17 +501,17 @@ public class MediaSession2 implements AutoCloseable {
     public static final class CommandGroup {
         private final CommandGroupProvider mProvider;
 
-        public CommandGroup(Context context) {
+        public CommandGroup(@NonNull Context context) {
             mProvider = ApiLoader.getProvider(context)
                     .createMediaSession2CommandGroup(context, this, null);
         }
 
-        public CommandGroup(Context context, CommandGroup others) {
+        public CommandGroup(@NonNull Context context, @Nullable CommandGroup others) {
             mProvider = ApiLoader.getProvider(context)
                     .createMediaSession2CommandGroup(context, this, others);
         }
 
-        public void addCommand(Command command) {
+        public void addCommand(@NonNull Command command) {
             mProvider.addCommand_impl(command);
         }
 
@@ -519,11 +519,11 @@ public class MediaSession2 implements AutoCloseable {
             mProvider.addAllPredefinedCommands_impl();
         }
 
-        public void removeCommand(Command command) {
+        public void removeCommand(@NonNull Command command) {
             mProvider.removeCommand_impl(command);
         }
 
-        public boolean hasCommand(Command command) {
+        public boolean hasCommand(@NonNull Command command) {
             return mProvider.hasCommand_impl(command);
         }
 
@@ -531,14 +531,14 @@ public class MediaSession2 implements AutoCloseable {
             return mProvider.hasCommand_impl(code);
         }
 
-        public List<Command> getCommands() {
+        public @NonNull List<Command> getCommands() {
             return mProvider.getCommands_impl();
         }
 
         /**
          * @hide
          */
-        public CommandGroupProvider getProvider() {
+        public @NonNull CommandGroupProvider getProvider() {
             return mProvider;
         }
 
@@ -546,7 +546,7 @@ public class MediaSession2 implements AutoCloseable {
          * @return new bundle from the CommandGroup
          * @hide
          */
-        public Bundle toBundle() {
+        public @NonNull Bundle toBundle() {
             return mProvider.toBundle_impl();
         }
 
@@ -570,7 +570,10 @@ public class MediaSession2 implements AutoCloseable {
     public static abstract class SessionCallback {
         private final Context mContext;
 
-        public SessionCallback(Context context) {
+        public SessionCallback(@NonNull Context context) {
+            if (context == null) {
+                throw new IllegalArgumentException("context shouldn't be null");
+            }
             mContext = context;
         }
 
@@ -584,7 +587,7 @@ public class MediaSession2 implements AutoCloseable {
          *
          * @param session the session for this event
          * @param controller controller information.
-         * @return allowed commands. Can be {@code null} to reject coonnection.
+         * @return allowed commands. Can be {@code null} to reject connection.
          */
         public @Nullable CommandGroup onConnect(@NonNull MediaSession2 session,
                 @NonNull ControllerInfo controller) {
@@ -907,7 +910,7 @@ public class MediaSession2 implements AutoCloseable {
          *
          * @param player a {@link MediaPlayerBase} that handles actual media playback in your app.
          */
-        U setPlayer(@NonNull MediaPlayerBase player) {
+        @NonNull U setPlayer(@NonNull MediaPlayerBase player) {
             mProvider.setPlayer_impl(player);
             return (U) this;
         }
@@ -931,7 +934,7 @@ public class MediaSession2 implements AutoCloseable {
          *
          * @param volumeProvider The provider that will receive volume button events.
          */
-        U setVolumeProvider(@NonNull VolumeProvider2 volumeProvider) {
+        @NonNull U setVolumeProvider(@Nullable VolumeProvider2 volumeProvider) {
             mProvider.setVolumeProvider_impl(volumeProvider);
             return (U) this;
         }
@@ -943,7 +946,7 @@ public class MediaSession2 implements AutoCloseable {
          *
          * @param pi The intent to launch to show UI for this session.
          */
-        U setSessionActivity(@Nullable PendingIntent pi) {
+        @NonNull U setSessionActivity(@Nullable PendingIntent pi) {
             mProvider.setSessionActivity_impl(pi);
             return (U) this;
         }
@@ -958,7 +961,7 @@ public class MediaSession2 implements AutoCloseable {
          * @throws IllegalArgumentException if id is {@code null}
          * @return
          */
-        U setId(@NonNull String id) {
+        @NonNull U setId(@NonNull String id) {
             mProvider.setId_impl(id);
             return (U) this;
         }
@@ -970,7 +973,7 @@ public class MediaSession2 implements AutoCloseable {
          * @param callback session callback.
          * @return
          */
-        U setSessionCallback(@NonNull @CallbackExecutor Executor executor,
+        @NonNull U setSessionCallback(@NonNull @CallbackExecutor Executor executor,
                 @NonNull C callback) {
             mProvider.setSessionCallback_impl(executor, callback);
             return (U) this;
@@ -983,7 +986,7 @@ public class MediaSession2 implements AutoCloseable {
          * @throws IllegalStateException if the session with the same id is already exists for the
          *      package.
          */
-        T build() {
+        @NonNull T build() {
             return mProvider.build_impl();
         }
     }
@@ -1003,7 +1006,7 @@ public class MediaSession2 implements AutoCloseable {
         }
 
         @Override
-        public Builder setPlayer(@NonNull MediaPlayerBase player) {
+        public @NonNull Builder setPlayer(@NonNull MediaPlayerBase player) {
             return super.setPlayer(player);
         }
 
@@ -1013,28 +1016,28 @@ public class MediaSession2 implements AutoCloseable {
         }
 
         @Override
-        public Builder setVolumeProvider(@NonNull VolumeProvider2 volumeProvider) {
+        public @NonNull Builder setVolumeProvider(@Nullable VolumeProvider2 volumeProvider) {
             return super.setVolumeProvider(volumeProvider);
         }
 
         @Override
-        public Builder setSessionActivity(@Nullable PendingIntent pi) {
+        public @NonNull Builder setSessionActivity(@Nullable PendingIntent pi) {
             return super.setSessionActivity(pi);
         }
 
         @Override
-        public Builder setId(@NonNull String id) {
+        public @NonNull Builder setId(@NonNull String id) {
             return super.setId(id);
         }
 
         @Override
-        public Builder setSessionCallback(@NonNull Executor executor,
+        public @NonNull Builder setSessionCallback(@NonNull Executor executor,
                 @Nullable SessionCallback callback) {
             return super.setSessionCallback(executor, callback);
         }
 
         @Override
-        public MediaSession2 build() {
+        public @NonNull MediaSession2 build() {
             return super.build();
         }
     }
@@ -1048,8 +1051,8 @@ public class MediaSession2 implements AutoCloseable {
         /**
          * @hide
          */
-        public ControllerInfo(Context context, int uid, int pid, String packageName,
-                IInterface callback) {
+        public ControllerInfo(@NonNull Context context, int uid, int pid,
+                @NonNull String packageName, @NonNull IInterface callback) {
             mProvider = ApiLoader.getProvider(context)
                     .createMediaSession2ControllerInfo(
                             context, this, uid, pid, packageName, callback);
@@ -1058,7 +1061,7 @@ public class MediaSession2 implements AutoCloseable {
         /**
          * @return package name of the controller
          */
-        public String getPackageName() {
+        public @NonNull String getPackageName() {
             return mProvider.getPackageName_impl();
         }
 
@@ -1083,7 +1086,7 @@ public class MediaSession2 implements AutoCloseable {
         /**
          * @hide
          */
-        public ControllerInfoProvider getProvider() {
+        public @NonNull ControllerInfoProvider getProvider() {
             return mProvider;
         }
 
@@ -1169,7 +1172,7 @@ public class MediaSession2 implements AutoCloseable {
         /**
          * @hide
          */
-        public CommandButtonProvider getProvider() {
+        public @NonNull CommandButtonProvider getProvider() {
             return mProvider;
         }
 
@@ -1184,27 +1187,27 @@ public class MediaSession2 implements AutoCloseable {
                         .createMediaSession2CommandButtonBuilder(context, this);
             }
 
-            public Builder setCommand(Command command) {
+            public @NonNull Builder setCommand(@Nullable Command command) {
                 return mProvider.setCommand_impl(command);
             }
 
-            public Builder setIconResId(int resId) {
+            public @NonNull Builder setIconResId(int resId) {
                 return mProvider.setIconResId_impl(resId);
             }
 
-            public Builder setDisplayName(String displayName) {
+            public @NonNull Builder setDisplayName(@Nullable String displayName) {
                 return mProvider.setDisplayName_impl(displayName);
             }
 
-            public Builder setEnabled(boolean enabled) {
+            public @NonNull Builder setEnabled(boolean enabled) {
                 return mProvider.setEnabled_impl(enabled);
             }
 
-            public Builder setExtras(Bundle extras) {
+            public @NonNull Builder setExtras(@Nullable Bundle extras) {
                 return mProvider.setExtras_impl(extras);
             }
 
-            public CommandButton build() {
+            public @NonNull CommandButton build() {
                 return mProvider.build_impl();
             }
         }
@@ -1363,7 +1366,7 @@ public class MediaSession2 implements AutoCloseable {
     /**
      * @hide
      */
-    public MediaSession2Provider getProvider() {
+    public @NonNull MediaSession2Provider getProvider() {
         return mProvider;
     }
 
@@ -1429,7 +1432,7 @@ public class MediaSession2 implements AutoCloseable {
      *
      * @param afr the full request parameters
      */
-    public void setAudioFocusRequest(AudioFocusRequest afr) {
+    public void setAudioFocusRequest(@Nullable AudioFocusRequest afr) {
         // TODO(jaewan): implement this (b/72529899)
         // mProvider.setAudioFocusRequest_impl(focusGain);
     }
@@ -1742,7 +1745,7 @@ public class MediaSession2 implements AutoCloseable {
      * @throws IllegalArgumentException if the play list is null
      * @throws NullPointerException if index is outside play list range
      */
-    public void skipToPlaylistItem(MediaItem2 item) {
+    public void skipToPlaylistItem(@NonNull MediaItem2 item) {
         mProvider.skipToPlaylistItem_impl(item);
     }
 
@@ -1782,7 +1785,7 @@ public class MediaSession2 implements AutoCloseable {
      *
      * @throws IllegalArgumentException if the play list is null
      */
-    public void removePlaylistItem(MediaItem2 item) {
+    public void removePlaylistItem(@NonNull MediaItem2 item) {
         mProvider.removePlaylistItem_impl(item);
     }
 

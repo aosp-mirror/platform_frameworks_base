@@ -16,6 +16,7 @@
 
 package android.media.update;
 
+import android.annotation.NonNull;
 import android.content.res.Resources;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -33,7 +34,10 @@ public final class ApiLoader {
 
     private ApiLoader() { }
 
-    public static StaticProvider getProvider(Context context) {
+    public static StaticProvider getProvider(@NonNull Context context) {
+        if (context == null) {
+            throw new IllegalArgumentException("context shouldn't be null");
+        }
         try {
             return (StaticProvider) getMediaLibraryImpl(context);
         } catch (PackageManager.NameNotFoundException | ReflectiveOperationException e) {

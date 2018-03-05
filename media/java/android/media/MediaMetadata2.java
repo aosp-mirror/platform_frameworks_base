@@ -562,7 +562,7 @@ public final class MediaMetadata2 {
      * @param key The key the value is stored under
      * @return a CharSequence value, or null
      */
-    public @Nullable CharSequence getText(@TextKey String key) {
+    public @Nullable CharSequence getText(@NonNull @TextKey String key) {
         return mProvider.getText_impl(key);
     }
 
@@ -611,7 +611,7 @@ public final class MediaMetadata2 {
      * @param key The key the value is stored under
      * @return A {@link Rating2} or {@code null}
      */
-    public @Nullable Rating2 getRating(@RatingKey String key) {
+    public @Nullable Rating2 getRating(@NonNull @RatingKey String key) {
         return mProvider.getRating_impl(key);
     }
 
@@ -622,7 +622,7 @@ public final class MediaMetadata2 {
      * @param key The key the value is stored under
      * @return A {@link Bitmap} or null
      */
-    public Bitmap getBitmap(@BitmapKey String key) {
+    public @Nullable Bitmap getBitmap(@NonNull @BitmapKey String key) {
         return mProvider.getBitmap_impl(key);
     }
 
@@ -749,7 +749,8 @@ public final class MediaMetadata2 {
          * @param value The CharSequence value to store
          * @return The Builder to allow chaining
          */
-        public @NonNull Builder putText(@TextKey String key, @Nullable CharSequence value) {
+        public @NonNull Builder putText(@NonNull @TextKey String key,
+                @Nullable CharSequence value) {
             return mProvider.putText_impl(key, value);
         }
 
@@ -780,7 +781,8 @@ public final class MediaMetadata2 {
          * @param value The String value to store
          * @return The Builder to allow chaining
          */
-        public @NonNull Builder putString(@TextKey String key, @Nullable String value) {
+        public @NonNull Builder putString(@NonNull @TextKey String key,
+                @Nullable String value) {
             return mProvider.putString_impl(key, value);
         }
 
