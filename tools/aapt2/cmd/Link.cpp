@@ -2151,6 +2151,8 @@ int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
                         &options.manifest_fixer_options.rename_instrumentation_target_package)
           .OptionalFlagList("-0", "File extensions not to compress.",
                             &options.extensions_to_not_compress)
+          .OptionalSwitch("--no-compress", "Do not compress any resources.",
+                            &options.do_not_compress_anything)
           .OptionalSwitch("--warn-manifest-validation",
                           "Treat manifest validation errors as warnings.",
                           &options.manifest_fixer_options.warn_validation)
