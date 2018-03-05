@@ -26,6 +26,7 @@ import android.metrics.LogMaker;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.ArrayMap;
+import android.view.textclassifier.GenerateLinksLogger;
 import android.view.textclassifier.TextClassifier;
 import android.view.textclassifier.TextLinks;
 
