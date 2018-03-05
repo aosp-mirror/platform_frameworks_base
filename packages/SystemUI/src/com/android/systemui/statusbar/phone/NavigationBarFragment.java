@@ -113,7 +113,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     private static final String EXTRA_DISABLE_STATE = "disabled_state";
 
     private final static int BUTTON_FADE_IN_OUT_DURATION_MS = 100;
-    private final static int ROTATE_BUTTON_LOOP_DURATION_MS = 2000;
+    private final static int NAVBAR_HIDDEN_PENDING_ICON_TIMEOUT_MS = 20000;
 
     private static final int NUM_ACCEPTED_ROTATION_SUGGESTIONS_FOR_INTRODUCTION = 3;
 
@@ -152,11 +152,14 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     public boolean mHomeBlockedThisTouch;
 
     private int mLastRotationSuggestion;
+    private boolean mPendingRotationSuggestion;
     private boolean mHoveringRotationSuggestion;
     private RotationLockController mRotationLockController;
     private TaskStackListenerImpl mTaskStackListener;
 
     private final Runnable mRemoveRotationProposal = () -> setRotateSuggestionButtonState(false);
+    private final Runnable mCancelPendingRotationProposal =
+            () -> mPendingRotationSuggestion = false;
     private Animator mRotateHideAnimator;
     private ViewRippler mViewRippler = new ViewRippler();
 
@@ -365,6 +368,11 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
                 && mNavigationBarWindowState != state) {
             mNavigationBarWindowState = state;
             if (DEBUG_WINDOW_STATE) Log.d(TAG, "Navigation bar " + windowStateToString(state));
+
+            // If the navbar is visible, show the rotate button if there's a pending suggestion
+            if (state == WINDOW_STATE_SHOWING && mPendingRotationSuggestion) {
+                showAndLogRotationSuggestion();
+            }
         }
     }
 
@@ -373,38 +381,51 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         // This method will be called on rotation suggestion changes even if the proposed rotation
         // is not valid for the top app. Use invalid rotation choices as a signal to remove the
         // rotate button if shown.
-
         if (!isValid) {
             setRotateSuggestionButtonState(false);
             return;
         }
 
+        // If window rotation matches suggested rotation, remove any current suggestions
         final int winRotation = mWindowManager.getDefaultDisplay().getRotation();
         if (rotation == winRotation) {
-            // Use this as a signal to remove any current suggestions
-            getView().getHandler().removeCallbacks(mRemoveRotationProposal);
+            getView().removeCallbacks(mRemoveRotationProposal);
             setRotateSuggestionButtonState(false);
-        } else {
-            mLastRotationSuggestion = rotation; // Remember rotation for click
-
-            // Update the icon style to change animation parameters
-            if (mNavigationBarView != null) {
-                final boolean rotationCCW = isRotationAnimationCCW(winRotation, rotation);
-                int style;
-                if (winRotation == Surface.ROTATION_0 || winRotation == Surface.ROTATION_180) {
-                    style = rotationCCW ? R.style.RotateButtonCCWStart90 :
-                            R.style.RotateButtonCWStart90;
-                } else { // 90 or 270
-                    style = rotationCCW ? R.style.RotateButtonCCWStart0 :
-                            R.style.RotateButtonCWStart0;
-                }
-                mNavigationBarView.updateRotateSuggestionButtonStyle(style, true);
-            }
-
-            setRotateSuggestionButtonState(true);
-            rescheduleRotationTimeout(false);
-            mMetricsLogger.visible(MetricsEvent.ROTATION_SUGGESTION_SHOWN);
+            return;
         }
+
+        // Prepare to show the navbar icon by updating the icon style to change anim params
+        mLastRotationSuggestion = rotation; // Remember rotation for click
+        if (mNavigationBarView != null) {
+            final boolean rotationCCW = isRotationAnimationCCW(winRotation, rotation);
+            int style;
+            if (winRotation == Surface.ROTATION_0 || winRotation == Surface.ROTATION_180) {
+                style = rotationCCW ? R.style.RotateButtonCCWStart90 :
+                        R.style.RotateButtonCWStart90;
+            } else { // 90 or 270
+                style = rotationCCW ? R.style.RotateButtonCCWStart0 :
+                        R.style.RotateButtonCWStart0;
+            }
+            mNavigationBarView.updateRotateSuggestionButtonStyle(style, true);
+        }
+
+        if (mNavigationBarWindowState != WINDOW_STATE_SHOWING) {
+            // If the navbar isn't shown, flag the rotate icon to be shown should the navbar become
+            // visible given some time limit.
+            mPendingRotationSuggestion = true;
+            getView().removeCallbacks(mCancelPendingRotationProposal);
+            getView().postDelayed(mCancelPendingRotationProposal,
+                    NAVBAR_HIDDEN_PENDING_ICON_TIMEOUT_MS);
+
+        } else { // The navbar is visible so show the icon right away
+            showAndLogRotationSuggestion();
+        }
+    }
+
+    private void showAndLogRotationSuggestion() {
+        setRotateSuggestionButtonState(true);
+        rescheduleRotationTimeout(false);
+        mMetricsLogger.visible(MetricsEvent.ROTATION_SUGGESTION_SHOWN);
     }
 
     private boolean isRotationAnimationCCW(int from, int to) {
@@ -453,6 +474,11 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
             animIcon = (AnimatedVectorDrawable) kbd.getDrawable(0);
         }
 
+        // Clear any pending suggestion flag as it has either been nullified or is being shown
+        mPendingRotationSuggestion = false;
+        getView().removeCallbacks(mCancelPendingRotationProposal);
+
+        // Handle the visibility change and animation
         if (visible) { // Appear and change (cannot force)
             // Stop and clear any currently running hide animations
             if (mRotateHideAnimator != null && mRotateHideAnimator.isRunning()) {
@@ -516,9 +542,8 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
             if (!mNavigationBarView.isRotateButtonVisible()) return;
         }
 
-        Handler h = getView().getHandler();
-        h.removeCallbacks(mRemoveRotationProposal); // Stop any pending removal
-        h.postDelayed(mRemoveRotationProposal,
+        getView().removeCallbacks(mRemoveRotationProposal); // Stop any pending removal
+        getView().postDelayed(mRemoveRotationProposal,
                 computeRotationProposalTimeout()); // Schedule timeout
     }
 
