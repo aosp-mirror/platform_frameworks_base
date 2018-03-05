@@ -1470,7 +1470,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%1$d</xliff:g> gange. Efter <xliff:g id="NUMBER_1">%2$d</xliff:g> yderligere mislykkede forsøg til vil du blive bedt om at låse din telefon op ved hjælp af en e-mailkonto.\n\n Prøv igen om <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunder."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Fjern"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Vil du skrue højere op end det anbefalede lydstyrkeniveau?\n\nDu kan skade hørelsen ved at lytte til meget højt musik over længere tid."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Vil du skrue højere op end det anbefalede lydstyrkeniveau?\n\nDu kan skade hørelsen ved at lytte til meget høj musik over længere tid."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"Vil du bruge genvejen til Hjælpefunktioner?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Når genvejen er slået til, kan du starte en hjælpefunktion ved at trykke på begge lydstyrkeknapper i tre sekunder.\n\n Nuværende hjælpefunktion:\n<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Du kan skifte funktion i Indstillinger &gt; Hjælpefunktioner."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Deaktiver genvej"</string>

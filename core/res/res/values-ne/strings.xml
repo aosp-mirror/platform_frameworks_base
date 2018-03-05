@@ -227,7 +227,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"हवाइजहाज मोड"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"हवाइजहाज मोड खुला छ"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"हवाइजहाज मोड बन्द छ"</string>
-    <string name="global_action_settings" msgid="1756531602592545966">"सेटिङ्हरू"</string>
+    <string name="global_action_settings" msgid="1756531602592545966">"सेटिङहरू"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"सहायता दिनुहोस्"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"आवाज सहायता"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"अब बन्द गर्नुहोस्"</string>
@@ -376,13 +376,13 @@
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"अधिक स्थान प्रदायक आदेशहरू पहुँच गर्नुहोस्"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"अनुप्रयोगलाई अतिरिक्त स्थान प्रदायक आदेशहरू पहुँच गर्न अनुमति दिन्छ। यो अनुप्रयोगलाई GPS वा अन्य स्थान स्रोतहरूको संचालन साथै हस्तक्षेप गर्न अनुमति दिन सक्छ।"</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"सटीक स्थान पहुँच गराउनुहोस् (GPS तथा नेटवर्कमा आधारित)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"यस अनुप्रयोगले सेलका टावर र Wi-Fi नेटवर्कहरू जस्ता GPS वा नेटवर्कको स्थानका स्रोतहरूको आधारमा तपाईंको स्थान बारे जानकारी प्राप्त गर्न सक्छ। यो अनुप्रयोग ती स्रोतहरूको प्रयोग गर्न सक्षम होस् भन्नका खातिर यी स्थान सम्बन्धी सेवाहरूलाई अनिवार्य रूपमा सक्रिय पार्नुपर्छ र यी तपाईंको फोनमा उपलब्ध हुनुपर्छ। यसले ब्याट्रीको खपत बढाउन सक्छ।"</string>
+    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"यस अनुप्रयोगले सेलका टावर र Wi-Fi नेटवर्कहरू जस्ता GPS वा नेटवर्कको स्थानका स्रोतहरूको आधारमा तपाईंको स्थान बारे जानकारी प्राप्त गर्न सक्छ। यो अनुप्रयोग ती स्रोतहरूको प्रयोग गर्न सक्षम होस् भन्नका खातिर यी स्थान सम्बन्धी सेवाहरूलाई अनिवार्य रूपमा सक्रिय पार्नुपर्छ र यी तपाईंको फोनमा उपलब्ध हुनु पर्छ। यसले ब्याट्रीको खपत बढाउन सक्छ।"</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"अनुमानित स्थान पहुँच गराउनुहोस् (नेटवर्कमा आधारित)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"यस अनुप्रयोगले सेलका टावर र Wi-Fi नेटवर्कहरू जस्ता नेटवर्कका स्रोतहरूको आधारमा तपाईंको स्थान बारे जानकारी प्राप्त गर्न सक्छ। यो अनुप्रयोग ती स्रोतहरूको प्रयोग गर्न सक्षम होस् भन्नका खातिर यी स्थान सम्बन्धी सेवाहरूलाई अनिवार्य रूपमा सक्रिय पार्नुपर्छ र यी तपाईंको ट्याब्लेटमा उपलब्ध हुनुपर्छ।"</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"यस अनुप्रयोगले सेलका टावर र Wi-Fi नेटवर्कहरू जस्ता नेटवर्कका स्रोतहरूको आधारमा तपाईंको स्थान बारे जानकारी प्राप्त गर्न सक्छ। यो अनुप्रयोग ती स्रोतहरूको प्रयोग गर्न सक्षम होस् भन्नका खातिर यी स्थान सम्बन्धी सेवाहरूलाई अनिवार्य रूपमा सक्रिय पार्नुपर्छ र यी तपाईंको TV मा उपलब्ध हुनुपर्छ।"</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"यस अनुप्रयोगले सेलका टावर र Wi-Fi नेटवर्कहरू जस्ता नेटवर्कका स्रोतहरूको आधारमा तपाईंको स्थान बारे जानकारी प्राप्त गर्न सक्छ। यो अनुप्रयोग ती स्रोतहरूको प्रयोग गर्न सक्षम होस् भन्नका खातिर यी स्थान सम्बन्धी सेवाहरूलाई अनिवार्य रूपमा सक्रिय पार्नुपर्छ र यी तपाईंको फोनमा उपलब्ध हुनुपर्छ।"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"यस अनुप्रयोगले सेलका टावर र Wi-Fi नेटवर्कहरू जस्ता नेटवर्कका स्रोतहरूको आधारमा तपाईंको स्थान बारे जानकारी प्राप्त गर्न सक्छ। यो अनुप्रयोग ती स्रोतहरूको प्रयोग गर्न सक्षम होस् भन्नका खातिर यी स्थान सम्बन्धी सेवाहरूलाई अनिवार्य रूपमा सक्रिय पार्नुपर्छ र यी तपाईंको ट्याब्लेटमा उपलब्ध हुनु पर्छ।"</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"यस अनुप्रयोगले सेलका टावर र Wi-Fi नेटवर्कहरू जस्ता नेटवर्कका स्रोतहरूको आधारमा तपाईंको स्थान बारे जानकारी प्राप्त गर्न सक्छ। यो अनुप्रयोग ती स्रोतहरूको प्रयोग गर्न सक्षम होस् भन्नका खातिर यी स्थान सम्बन्धी सेवाहरूलाई अनिवार्य रूपमा सक्रिय पार्नुपर्छ र यी तपाईंको TV मा उपलब्ध हुनु पर्छ।"</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"यस अनुप्रयोगले सेलका टावर र Wi-Fi नेटवर्कहरू जस्ता नेटवर्कका स्रोतहरूको आधारमा तपाईंको स्थान बारे जानकारी प्राप्त गर्न सक्छ। यो अनुप्रयोग ती स्रोतहरूको प्रयोग गर्न सक्षम होस् भन्नका खातिर यी स्थान सम्बन्धी सेवाहरूलाई अनिवार्य रूपमा सक्रिय पार्नुपर्छ र यी तपाईंको फोनमा उपलब्ध हुनु पर्छ।"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"तपाईँका अडियो सेटिङहरू परिवर्तन गर्नुहोस्"</string>
-    <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"अनुप्रयोगलाई ग्लोबल अडियो सेटिङ्हरू परिमार्जन गर्न अनुमति दिन्छ, जस्तै आवाजको मात्रा र आउटपुटको लागि कुन स्पिकर प्रयोग गर्ने।"</string>
+    <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"अनुप्रयोगलाई ग्लोबल अडियो सेटिङहरू परिमार्जन गर्न अनुमति दिन्छ, जस्तै आवाजको मात्रा र आउटपुटको लागि कुन स्पिकर प्रयोग गर्ने।"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"अडियो रेकर्ड गर्नुहोस्"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"यस अनुप्रयोगले जुनसुकै समय माइक्रोफोनको प्रयोग गरी अडियो रेकर्ड गर्न सक्छ।"</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"SIM मा आदेशहरू पठाउन दिनुहोस्"</string>
@@ -563,7 +563,7 @@
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"उपकरण विश्वव्यापी प्रोक्सी मिलाउनुहोस्"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"नीति सक्षम हुँदा प्रयोग गरिनको लागि यन्त्र ग्लोवल प्रोक्सी सेट गर्नुहोस्। केवल यन्त्र मालिकले ग्लोवल प्रोक्सी सेट गर्न सक्नुहुन्छ।"</string>
     <string name="policylab_expirePassword" msgid="5610055012328825874">"स्क्रिन लक पासवर्ड म्याद समाप्ति सेट गर्नुहोस्"</string>
-    <string name="policydesc_expirePassword" msgid="5367525762204416046">"स्क्रिन लक पासवर्ड, PIN, वा ढाँचा परिवर्तन कसरी बारम्बार परिवर्तन हुनुपर्छ परिवर्तन गर्नुहोस्।"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"स्क्रिन लक पासवर्ड, PIN, वा ढाँचा परिवर्तन कसरी बारम्बार परिवर्तन हुनु पर्छ परिवर्तन गर्नुहोस्।"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"भण्डारण इन्क्रिप्सन मिलाउनुहोस्"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"भण्डार गरिएको डेटा इन्क्रिप्ट हुनु आवश्यक छ।"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"क्यामेरालाई असक्षम गराउनुहोस्"</string>
@@ -988,7 +988,7 @@
     <!-- no translation found for whichApplicationNamed (8260158865936942783) -->
     <skip />
     <string name="whichApplicationLabel" msgid="7425855495383818784">"पूर्ण कारबाही"</string>
-    <string name="whichViewApplication" msgid="3272778576700572102">"साथमा खोल्नुहोस्"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"निम्नमार्फत खोल्नुहोस्"</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for whichViewApplicationNamed (2286418824011249620) -->
     <skip />
@@ -1409,7 +1409,7 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"ब्राउजर सुरु गर्ने हो?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"कल स्वीकार गर्नुहुन्छ?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"सधैँ"</string>
-    <string name="activity_resolver_use_once" msgid="2404644797149173758">"एउटा मात्र"</string>
+    <string name="activity_resolver_use_once" msgid="2404644797149173758">"एक पटक मात्र"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s  कार्य प्रोफाइल समर्थन गर्दैन"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"ट्याब्लेट"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"TV"</string>
@@ -1727,7 +1727,7 @@
     <string name="conference_call" msgid="3751093130790472426">"सम्मेलन कल"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"उपकरणको वर्णन"</string>
     <string name="app_category_game" msgid="5431836943981492993">"खेलहरू"</string>
-    <string name="app_category_audio" msgid="1659853108734301647">"संगीत तथा अडियो"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"सङ्गीत तथा अडियो"</string>
     <string name="app_category_video" msgid="2728726078629384196">"चलचित्र तथा भिडियो"</string>
     <string name="app_category_image" msgid="4867854544519846048">"तस्बिर तथा छविहरू"</string>
     <string name="app_category_social" msgid="5842783057834965912">"सामाजिक तथा सञ्चार"</string>

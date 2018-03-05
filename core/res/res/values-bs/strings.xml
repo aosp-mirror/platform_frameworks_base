@@ -540,8 +540,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Dozvoljava vlasniku povezivanje s interfejsom najvišeg nivoa u servisu za poruke operatera. Nije potrebno za obične aplikacije."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"povezivanje na usluge operatera"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Omogućava vlasniku povezivanje sa uslugama operatera. Obično nije potrebno za obične aplikacije."</string>
-    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"pristup opciji Ne ometaj"</string>
-    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Omogućava aplikaciji da čita i upisuje konfiguraciju opcije Ne ometaj."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"pristup načinu rada Ne ometaj"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Omogućava aplikaciji da čita i upisuje konfiguraciju načina rada Ne ometaj."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Postavljanje pravila za lozinke"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrolira dužinu i znakove koji su dozvoljeni u lozinkama za zaključavanje ekrana i PIN-ovima."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Prati pokušaje otključavanja ekrana"</string>
@@ -1687,12 +1687,12 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (sljedeći alarm)"</string>
-    <string name="zen_mode_forever" msgid="1916263162129197274">"Dok ne isključite opciju Ne ometaj"</string>
-    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Dok ne isključite opciju Ne ometaj"</string>
+    <string name="zen_mode_forever" msgid="1916263162129197274">"Dok ne isključite način rada Ne ometaj"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Dok ne isključite način rada Ne ometaj"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Skupi"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Ne ometaj"</string>
-    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Odmor"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Prestanak rada"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Radni dan uvečer"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Vikend"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Događaj"</string>

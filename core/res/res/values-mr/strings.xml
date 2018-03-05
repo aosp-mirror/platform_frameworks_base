@@ -396,7 +396,7 @@
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS कॉल सेवा अॅक्सेस करा"</string>
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"आपल्‍या हस्तक्षेपाशिवाय अ‍ॅपला कॉल करण्‍यासाठी IMS सेवा वापरण्याची अनुमती देते."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"फोन स्थिती आणि ओळख वाचा"</string>
-    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"डिव्हाइस च्या फोन वैशिष्ट्यांवर अॅक्सेस करण्यास अॅपला अनुमती देते. ही परवानगी कॉल अॅक्टिव्हेट असला किंवा नसला तरीही, फोन नंबर आणि डिव्हाइस आयडी आणि कॉलद्वारे कनेक्ट केलेला रीमोट नंबर निर्धारित करण्यासाठी अॅपला अनुमती देते."</string>
+    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"डिव्हाइस च्या फोन वैशिष्ट्यांवर अॅक्सेस करण्यास अॅपला अनुमती देते. ही परवानगी कॉल अॅक्टिव्हेट असला किंवा नसला तरीही, फोन नंबर आणि डिव्हाइस आयडी आणि कॉलद्वारे कनेक्ट केलेला रिमोट नंबर निर्धारित करण्यासाठी अॅपला अनुमती देते."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"प्रणालीच्या माध्यमातून कॉल रूट करा"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"कॉल करण्याचा अनुभव सुधारण्यासाठी अॅपला त्याचे कॉल प्रणालीच्या माध्यमातून रूट करू देते."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"फोन नंबर वाचा"</string>
@@ -1755,7 +1755,7 @@
     <string name="autofill_save_type_address" msgid="4936707762193009542">"पत्ता"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"क्रेडिट कार्ड"</string>
     <string name="autofill_save_type_username" msgid="239040540379769562">"वापरकर्तानाव"</string>
-    <string name="autofill_save_type_email_address" msgid="5752949432129262174">"ईमेल पत्ता"</string>
+    <string name="autofill_save_type_email_address" msgid="5752949432129262174">"ईमेल अॅड्रेस"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"शांत रहा आणि जवळपास निवारा शोधा."</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"किनारपट्टीचे प्रदेश आणि नदीकाठची क्षेत्रे त्वरित रिकामी करून उंच मैदानासारख्या अधिक सुरक्षित ठिकाणी जा."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"शांत रहा आणि जवळपास निवारा शोधा."</string>

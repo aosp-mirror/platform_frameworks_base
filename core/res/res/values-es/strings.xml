@@ -275,7 +275,7 @@
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"hacer y administrar llamadas telefónicas"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensores corporales"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"acceder a datos de sensores de tus constantes vitales"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperar el contenido de la ventana"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Comprobar el contenido de la ventana"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecciona el contenido de una ventana con la que estés interactuando."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activar la exploración táctil"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Los elementos que tocas se dicen en voz alta y se puede explorar la pantalla mediante gestos."</string>
@@ -1470,7 +1470,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Has fallado <xliff:g id="NUMBER_0">%1$d</xliff:g> veces al dibujar el patrón de desbloqueo. Si fallas otras <xliff:g id="NUMBER_1">%2$d</xliff:g> veces, deberás usar una cuenta de correo electrónico para desbloquear el teléfono.\n\n Inténtalo de nuevo en <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Quitar"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"¿Quieres subir el volumen por encima del nivel recomendado?\n\nEscuchar sonidos a alto volumen durante largos períodos de tiempo puede dañar tus oídos."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"¿Quieres subir el volumen por encima del nivel recomendado?\n\nEscuchar sonidos fuertes durante mucho tiempo puede dañar los oídos."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"¿Utilizar acceso directo de accesibilidad?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Si el acceso directo está activado, pulsa los dos botones de volumen durante tres segundos para iniciar una función de accesibilidad.\n\n Función de accesibilidad actual:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Puedes cambiar la función en Ajustes &gt; Accesibilidad."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Desactivar acceso directo"</string>

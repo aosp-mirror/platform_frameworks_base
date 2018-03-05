@@ -286,7 +286,7 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Perform gestures"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Can tap, swipe, pinch and perform other gestures."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Fingerprint gestures"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Can capture gestures performed on the devices fingerprint sensor."</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Can capture gestures performed on the device\'s fingerprint sensor."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"disable or modify status bar"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Allows the app to disable the status bar or add and remove system icons."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"be the status bar"</string>

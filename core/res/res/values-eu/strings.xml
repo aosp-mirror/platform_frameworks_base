@@ -85,7 +85,7 @@
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alertak"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Dei-desbideratzea"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Larrialdi-deiak soilik jasotzeko modua"</string>
-    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Datu mugikorren egoera"</string>
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Datu-konexioaren egoera"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS mezuak"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Erantzungailuko mezuak"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi bidezko deiak"</string>
@@ -1108,7 +1108,7 @@
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> Internetera konektatzeko gauza ez denean, <xliff:g id="NEW_NETWORK">%1$s</xliff:g> erabiltzen du gailuak. Agian kostuak ordaindu beharko dituzu."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> erabiltzen ari zinen, baina <xliff:g id="NEW_NETWORK">%2$s</xliff:g> erabiltzen ari zara orain"</string>
   <string-array name="network_switch_type_name">
-    <item msgid="3979506840912951943">"datu mugikorrak"</item>
+    <item msgid="3979506840912951943">"datu-konexioa"</item>
     <item msgid="75483255295529161">"Wi-Fi"</item>
     <item msgid="6862614801537202646">"Bluetooth"</item>
     <item msgid="5447331121797802871">"Ethernet"</item>
@@ -1377,7 +1377,7 @@
     <string name="data_usage_limit_body" msgid="291731708279614081">"Datuen erab. etenda zikloa amaitu arte"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G datu-muga gainditu da"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G datu-muga gainditu da"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Datu mugikorren muga gainditu da"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Datu-konexioaren muga gainditu da"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi datuen muga gainditu da"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"Zehaztutako muga baino <xliff:g id="SIZE">%s</xliff:g> gehiago."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Atzeko planoko datuak murriztuta"</string>

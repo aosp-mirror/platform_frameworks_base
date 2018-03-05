@@ -1409,7 +1409,7 @@
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"Հեռուստացույց"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Հեռախոս"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Ականջակալներ"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Համակցված բարձրախոսներ"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Դոկ-կայանի բարձրախոսներ"</string>
     <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Համակարգ"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-ի աուդիո ֆայլ"</string>

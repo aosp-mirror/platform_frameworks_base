@@ -863,7 +863,7 @@
     <string name="preposition_for_year" msgid="5040395640711867177">"vuonna <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"päivä"</string>
     <string name="days" msgid="4774547661021344602">"päivää"</string>
-    <string name="hour" msgid="2126771916426189481">"tunti"</string>
+    <string name="hour" msgid="2126771916426189481">"tunnit"</string>
     <string name="hours" msgid="894424005266852993">"tuntia"</string>
     <string name="minute" msgid="9148878657703769868">"min"</string>
     <string name="minutes" msgid="5646001005827034509">"min"</string>
@@ -1730,7 +1730,7 @@
     <string name="app_category_productivity" msgid="3742083261781538852">"Tuottavuus"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"Laitteen tallennustila"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB-vianetsintä"</string>
-    <string name="time_picker_hour_label" msgid="2979075098868106450">"tunti"</string>
+    <string name="time_picker_hour_label" msgid="2979075098868106450">"tunnit"</string>
     <string name="time_picker_minute_label" msgid="5168864173796598399">"minuutit"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"Aseta aika"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"Anna kelvollinen aika."</string>
