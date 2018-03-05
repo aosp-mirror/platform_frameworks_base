@@ -33,7 +33,7 @@ import java.lang.annotation.RetentionPolicy;
  * the current playback position and extra.
  * @hide
  */
-// TODO(jaewan): Remove this.
+// TODO(jaewan): Remove this (b/73971431)
 public final class PlaybackState2 {
     // Similar to the PlaybackState with following changes
     //    - Not implement Parcelable and added from/toBundle()
@@ -76,7 +76,6 @@ public final class PlaybackState2 {
     //    - Removed actions and custom actions.
     //    - Removed error string
     //    - Repeat mode / shuffle mode is now in the PlaylistParams
-    // TODO(jaewan): Replace states from MediaPlayer2
     /**
      * @hide
      */

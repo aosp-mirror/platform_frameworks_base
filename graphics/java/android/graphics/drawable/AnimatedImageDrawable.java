@@ -77,6 +77,7 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
 
         int[] mThemeAttrs = null;
         boolean mAutoMirrored = false;
+        int mRepeatCount = REPEAT_UNDEFINED;
     }
 
     private State mState;
@@ -86,33 +87,87 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
     private ColorFilter mColorFilter;
 
     /**
-     *  Pass this to {@link #setLoopCount} to loop infinitely.
+     *  Pass this to {@link #setRepeatCount} to repeat infinitely.
      *
      *  <p>{@link Animatable2.AnimationCallback#onAnimationEnd} will never be
      *  called unless there is an error.</p>
      */
-    public static final int LOOP_INFINITE = -1;
+    public static final int REPEAT_INFINITE = -1;
+
+    /** @removed
+     * @deprecated Replaced with REPEAT_INFINITE to match other APIs.
+     */
+    @java.lang.Deprecated
+    public static final int LOOP_INFINITE = REPEAT_INFINITE;
+
+    private static final int REPEAT_UNDEFINED = -2;
 
     /**
-     *  Specify the number of times to loop the animation.
+     *  Specify the number of times to repeat the animation.
      *
-     *  <p>By default, the loop count in the encoded data is respected.</p>
+     *  <p>By default, the repeat count in the encoded data is respected. If set
+     *  to {@link #REPEAT_INFINITE}, the animation will repeat as long as it is
+     *  displayed. If the value is {@code 0}, the animation will play once.</p>
+     *
+     *  <p>This call replaces the current repeat count. If the encoded data
+     *  specified a repeat count of {@code 2} (meaning that
+     *  {@link #getRepeatCount()} returns {@code 2}, the animation will play
+     *  three times. Calling {@code setRepeatCount(1)} will result in playing only
+     *  twice and {@link #getRepeatCount()} returning {@code 1}.</p>
+     *
+     *  <p>If the animation is already playing, the iterations that have already
+     *  occurred count towards the new count. If the animation has already
+     *  repeated the appropriate number of times (or more), it will finish its
+     *  current iteration and then stop.</p>
      */
-    public void setLoopCount(int loopCount) {
-        if (mState.mNativePtr == 0) {
-            throw new IllegalStateException("called setLoopCount on empty AnimatedImageDrawable");
+    public void setRepeatCount(@IntRange(from = REPEAT_INFINITE) int repeatCount) {
+        if (repeatCount < REPEAT_INFINITE) {
+            throw new IllegalArgumentException("invalid value passed to setRepeatCount"
+                    + repeatCount);
         }
-        nSetLoopCount(mState.mNativePtr, loopCount);
+        if (mState.mRepeatCount != repeatCount) {
+            mState.mRepeatCount = repeatCount;
+            if (mState.mNativePtr != 0) {
+                nSetRepeatCount(mState.mNativePtr, repeatCount);
+            }
+        }
+    }
+
+    /** @removed
+     * @deprecated Replaced with setRepeatCount to match other APIs.
+     */
+    @java.lang.Deprecated
+    public void setLoopCount(int loopCount) {
+        setRepeatCount(loopCount);
     }
 
     /**
-     * Retrieve the number of times the animation will loop.
+     *  Retrieve the number of times the animation will repeat.
+     *
+     *  <p>By default, the repeat count in the encoded data is respected. If the
+     *  value is {@link #REPEAT_INFINITE}, the animation will repeat as long as
+     *  it is displayed. If the value is {@code 0}, it will play once.</p>
+     *
+     *  <p>Calling {@link #setRepeatCount} will make future calls to this method
+     *  return the value passed to {@link #setRepeatCount}.</p>
      */
-    public int getLoopCount() {
+    public int getRepeatCount() {
         if (mState.mNativePtr == 0) {
-            throw new IllegalStateException("called getLoopCount on empty AnimatedImageDrawable");
+            throw new IllegalStateException("called getRepeatCount on empty AnimatedImageDrawable");
         }
-        return nGetLoopCount(mState.mNativePtr);
+        if (mState.mRepeatCount == REPEAT_UNDEFINED) {
+            mState.mRepeatCount = nGetRepeatCount(mState.mNativePtr);
+
+        }
+        return mState.mRepeatCount;
+    }
+
+    /** @removed
+     * @deprecated Replaced with getRepeatCount to match other APIs.
+     */
+    @java.lang.Deprecated
+    public int getLoopCount(int loopCount) {
+        return getRepeatCount();
     }
 
     /**
@@ -176,12 +231,18 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
                         ": <animated-image> did not decode animated");
             }
 
+            // This may have previously been set without a src if we were waiting for a
+            // theme.
+            final int repeatCount = mState.mRepeatCount;
             // Transfer the state of other to this one. other will be discarded.
             AnimatedImageDrawable other = (AnimatedImageDrawable) drawable;
             mState = other.mState;
             other.mState = null;
             mIntrinsicWidth =  other.mIntrinsicWidth;
             mIntrinsicHeight = other.mIntrinsicHeight;
+            if (repeatCount != REPEAT_UNDEFINED) {
+                this.setRepeatCount(repeatCount);
+            }
         }
 
         mState.mThemeAttrs = a.extractThemeAttrs();
@@ -193,6 +254,12 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
 
         mState.mAutoMirrored = a.getBoolean(
                 R.styleable.AnimatedImageDrawable_autoMirrored, oldState.mAutoMirrored);
+
+        int repeatCount = a.getInt(
+                R.styleable.AnimatedImageDrawable_repeatCount, REPEAT_UNDEFINED);
+        if (repeatCount != REPEAT_UNDEFINED) {
+            this.setRepeatCount(repeatCount);
+        }
     }
 
     /**
@@ -271,7 +338,7 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
     }
 
     @Override
-    public void setAlpha(@IntRange(from=0,to=255) int alpha) {
+    public void setAlpha(@IntRange(from = 0, to = 255) int alpha) {
         if (alpha < 0 || alpha > 255) {
             throw new IllegalArgumentException("Alpha must be between 0 and"
                    + " 255! provided " + alpha);
@@ -508,9 +575,9 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
     @FastNative
     private static native boolean nStop(long nativePtr);
     @FastNative
-    private static native int nGetLoopCount(long nativePtr);
+    private static native int nGetRepeatCount(long nativePtr);
     @FastNative
-    private static native void nSetLoopCount(long nativePtr, int loopCount);
+    private static native void nSetRepeatCount(long nativePtr, int repeatCount);
     // Pass the drawable down to native so it can call onAnimationEnd.
     private static native void nSetOnAnimationEndListener(long nativePtr,
             @Nullable AnimatedImageDrawable drawable);
