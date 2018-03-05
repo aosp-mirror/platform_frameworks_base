@@ -18,12 +18,10 @@ package com.android.server.pm;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.ShortcutInfo;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.LocalServices;
 import com.android.server.backup.BackupUtils;
 
 import libcore.util.HexEncoding;
@@ -139,8 +137,7 @@ class ShortcutPackageInfo {
 
     //@DisabledReason
     public int canRestoreTo(ShortcutService s, PackageInfo currentPackage, boolean anyVersionOkay) {
-        PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
-        if (!BackupUtils.signaturesMatch(mSigHashes, currentPackage, pmi)) {
+        if (!BackupUtils.signaturesMatch(mSigHashes, currentPackage)) {
             Slog.w(TAG, "Can't restore: Package signature mismatch");
             return ShortcutInfo.DISABLED_REASON_SIGNATURE_MISMATCH;
         }
