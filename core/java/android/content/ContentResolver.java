@@ -2143,21 +2143,6 @@ public abstract class ContentResolver {
     }
 
     /**
-     * @hide
-     */
-    public void releasePersistableUriPermission(@NonNull String toPackage, @NonNull Uri uri,
-            @Intent.AccessUriMode int modeFlags) {
-        Preconditions.checkNotNull(toPackage, "toPackage");
-        Preconditions.checkNotNull(uri, "uri");
-        try {
-            ActivityManager.getService().releasePersistableUriPermission(
-                    ContentProvider.getUriWithoutUserId(uri), modeFlags, toPackage,
-                    resolveUserId(uri));
-        } catch (RemoteException e) {
-        }
-    }
-
-    /**
      * Return list of all URI permission grants that have been persisted by the
      * calling app. That is, the returned permissions have been granted
      * <em>to</em> the calling app. Only persistable grants taken with
