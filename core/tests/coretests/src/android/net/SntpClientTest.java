@@ -16,7 +16,8 @@
 
 package android.net;
 
-import android.net.SntpClient;
+import android.content.Context;
+import android.test.AndroidTestCase;
 import android.util.Log;
 import libcore.util.HexEncoding;
 
@@ -26,10 +27,9 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.Arrays;
-import junit.framework.TestCase;
 
 
-public class SntpClientTest extends TestCase {
+public class SntpClientTest extends AndroidTestCase {
     private static final String TAG = "SntpClientTest";
 
     private static final int ORIGINATE_TIME_OFFSET = 24;
@@ -61,20 +61,29 @@ public class SntpClientTest extends TestCase {
     private final SntpTestServer mServer = new SntpTestServer();
     private final SntpClient mClient = new SntpClient();
 
+    private Network mNetwork;
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        ConnectivityManager mCM = getContext().getSystemService(ConnectivityManager.class);
+        mNetwork = mCM.getActiveNetwork();
+    }
+
     public void testBasicWorkingSntpClientQuery() throws Exception {
         mServer.setServerReply(HexEncoding.decode(WORKING_VERSION4.toCharArray(), false));
-        assertTrue(mClient.requestTime(mServer.getAddress(), mServer.getPort(), 500));
+        assertTrue(mClient.requestTime(mServer.getAddress(), mServer.getPort(), 500, mNetwork));
         assertEquals(1, mServer.numRequestsReceived());
         assertEquals(1, mServer.numRepliesSent());
     }
 
     public void testDnsResolutionFailure() throws Exception {
-        assertFalse(mClient.requestTime("ntp.server.doesnotexist.example", 5000));
+        assertFalse(mClient.requestTime("ntp.server.doesnotexist.example", 5000, mNetwork));
     }
 
     public void testTimeoutFailure() throws Exception {
         mServer.clearServerReply();
-        assertFalse(mClient.requestTime(mServer.getAddress(), mServer.getPort(), 500));
+        assertFalse(mClient.requestTime(mServer.getAddress(), mServer.getPort(), 500, mNetwork));
         assertEquals(1, mServer.numRequestsReceived());
         assertEquals(0, mServer.numRepliesSent());
     }
@@ -83,7 +92,7 @@ public class SntpClientTest extends TestCase {
         final byte[] reply = HexEncoding.decode(WORKING_VERSION4.toCharArray(), false);
         reply[0] |= (byte) 0xc0;
         mServer.setServerReply(reply);
-        assertFalse(mClient.requestTime(mServer.getAddress(), mServer.getPort(), 500));
+        assertFalse(mClient.requestTime(mServer.getAddress(), mServer.getPort(), 500, mNetwork));
         assertEquals(1, mServer.numRequestsReceived());
         assertEquals(1, mServer.numRepliesSent());
     }
@@ -95,7 +104,8 @@ public class SntpClientTest extends TestCase {
             reply[0] &= (byte) 0xf8;
             reply[0] |= (byte) i;
             mServer.setServerReply(reply);
-            final boolean rval = mClient.requestTime(mServer.getAddress(), mServer.getPort(), 500);
+            final boolean rval = mClient.requestTime(mServer.getAddress(), mServer.getPort(), 500,
+                    mNetwork);
             switch (i) {
                 case NTP_MODE_SERVER:
                 case NTP_MODE_BROADCAST:
@@ -119,7 +129,8 @@ public class SntpClientTest extends TestCase {
             final String logMsg = "stratum: " + i;
             reply[1] = (byte) i;
             mServer.setServerReply(reply);
-            final boolean rval = mClient.requestTime(mServer.getAddress(), mServer.getPort(), 500);
+            final boolean rval = mClient.requestTime(mServer.getAddress(), mServer.getPort(), 500,
+                    mNetwork);
             if (STRATUM_MIN <= i && i <= STRATUM_MAX) {
                 assertTrue(logMsg, rval);
             } else {
@@ -134,7 +145,7 @@ public class SntpClientTest extends TestCase {
         final byte[] reply = HexEncoding.decode(WORKING_VERSION4.toCharArray(), false);
         Arrays.fill(reply, TRANSMIT_TIME_OFFSET, TRANSMIT_TIME_OFFSET + 8, (byte) 0x00);
         mServer.setServerReply(reply);
-        assertFalse(mClient.requestTime(mServer.getAddress(), mServer.getPort(), 500));
+        assertFalse(mClient.requestTime(mServer.getAddress(), mServer.getPort(), 500, mNetwork));
         assertEquals(1, mServer.numRequestsReceived());
         assertEquals(1, mServer.numRepliesSent());
     }
