@@ -3364,7 +3364,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     /**
      * Update AMS states when an activity is resumed. This should only be called by
-     * {@link ActivityStack#setResumedActivityLocked} when an activity is resumed.
+     * {@link ActivityStack#onActivityStateChanged(ActivityRecord, ActivityState, String)} when an
+     * activity is resumed.
      */
     @GuardedBy("this")
     void setResumedActivityUncheckLocked(ActivityRecord r, String reason) {
