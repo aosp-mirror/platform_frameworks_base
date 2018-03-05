@@ -488,6 +488,8 @@ void SetThreadName(const char* thread_name) {
   if (errno != 0) {
     ALOGW("Unable to set the name of current thread to '%s': %s", buf, strerror(errno));
   }
+  // Update base::logging default tag.
+  android::base::SetDefaultTag(buf);
 }
 
 // The list of open zygote file descriptors.
@@ -685,10 +687,10 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 
     // Make it easier to debug audit logs by setting the main thread's name to the
     // nice name rather than "app_process".
-    if (se_info_c_str == NULL && is_system_server) {
+    if (se_name_c_str == NULL && is_system_server) {
       se_name_c_str = "system_server";
     }
-    if (se_info_c_str != NULL) {
+    if (se_name_c_str != NULL) {
       SetThreadName(se_name_c_str);
     }
 
