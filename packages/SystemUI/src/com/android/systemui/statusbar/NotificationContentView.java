@@ -1196,7 +1196,9 @@ public class NotificationContentView extends FrameLayout {
             return;
         }
 
-        boolean enableSmartReplies = mSmartReplyConstants.isEnabled();
+        boolean enableSmartReplies = (mSmartReplyConstants.isEnabled()
+                && (!mSmartReplyConstants.requiresTargetingP()
+                    || entry.targetSdk >= Build.VERSION_CODES.P));
 
         boolean hasRemoteInput = false;
         RemoteInput remoteInputWithChoices = null;

@@ -33,13 +33,16 @@ public final class SmartReplyConstants extends ContentObserver {
     private static final String TAG = "SmartReplyConstants";
 
     private static final String KEY_ENABLED = "enabled";
+    private static final String KEY_REQUIRES_TARGETING_P = "requires_targeting_p";
     private static final String KEY_MAX_SQUEEZE_REMEASURE_ATTEMPTS =
             "max_squeeze_remeasure_attempts";
 
     private final boolean mDefaultEnabled;
+    private final boolean mDefaultRequiresP;
     private final int mDefaultMaxSqueezeRemeasureAttempts;
 
     private boolean mEnabled;
+    private boolean mRequiresTargetingP;
     private int mMaxSqueezeRemeasureAttempts;
 
     private final Context mContext;
@@ -52,6 +55,8 @@ public final class SmartReplyConstants extends ContentObserver {
         final Resources resources = mContext.getResources();
         mDefaultEnabled = resources.getBoolean(
                 R.bool.config_smart_replies_in_notifications_enabled);
+        mDefaultRequiresP = resources.getBoolean(
+                R.bool.config_smart_replies_in_notifications_requires_targeting_p);
         mDefaultMaxSqueezeRemeasureAttempts = resources.getInteger(
                 R.integer.config_smart_replies_in_notifications_max_squeeze_remeasure_attempts);
 
@@ -75,6 +80,7 @@ public final class SmartReplyConstants extends ContentObserver {
                 Log.e(TAG, "Bad smart reply constants", e);
             }
             mEnabled = mParser.getBoolean(KEY_ENABLED, mDefaultEnabled);
+            mRequiresTargetingP = mParser.getBoolean(KEY_REQUIRES_TARGETING_P, mDefaultRequiresP);
             mMaxSqueezeRemeasureAttempts = mParser.getInt(
                     KEY_MAX_SQUEEZE_REMEASURE_ATTEMPTS, mDefaultMaxSqueezeRemeasureAttempts);
         }
@@ -83,6 +89,14 @@ public final class SmartReplyConstants extends ContentObserver {
     /** Returns whether smart replies in notifications are enabled. */
     public boolean isEnabled() {
         return mEnabled;
+    }
+
+    /**
+     * Returns whether smart replies in notifications should be disabled when the app targets a
+     * version of Android older than P.
+     */
+    public boolean requiresTargetingP() {
+        return mRequiresTargetingP;
     }
 
     /**

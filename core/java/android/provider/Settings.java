@@ -12225,6 +12225,7 @@ public final class Settings {
          *
          * <pre>
          * enabled                         (boolean)
+         * requires_targeting_p            (boolean)
          * max_squeeze_remeasure_attempts  (int)
          * </pre>
          * @see com.android.systemui.statusbar.policy.SmartReplyConstants
