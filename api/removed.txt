@@ -173,6 +173,16 @@ package android.graphics {
 
 }
 
+package android.graphics.drawable {
+
+  public class AnimatedImageDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Animatable2 {
+    method public deprecated int getLoopCount(int);
+    method public deprecated void setLoopCount(int);
+    field public static final deprecated int LOOP_INFINITE = -1; // 0xffffffff
+  }
+
+}
+
 package android.hardware {
 
   public final class HardwareBuffer implements java.lang.AutoCloseable android.os.Parcelable {
