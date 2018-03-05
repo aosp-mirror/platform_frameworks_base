@@ -30,7 +30,6 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.Session;
 import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -38,7 +37,6 @@ import android.os.Process;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.server.LocalServices;
 import com.android.server.backup.FileMetadata;
 import com.android.server.backup.restore.RestoreDeleteObserver;
 import com.android.server.backup.restore.RestorePolicy;
@@ -144,8 +142,9 @@ public class RestoreUtils {
                     uninstall = true;
                 } else {
                     try {
-                        PackageInfo pkg = packageManager.getPackageInfo(info.packageName,
-                                PackageManager.GET_SIGNING_CERTIFICATES);
+                        PackageInfo pkg = packageManager.getPackageInfo(
+                                info.packageName,
+                                PackageManager.GET_SIGNATURES);
                         if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_BACKUP)
                                 == 0) {
                             Slog.w(TAG, "Restore stream contains apk of package "
@@ -155,9 +154,7 @@ public class RestoreUtils {
                         } else {
                             // So far so good -- do the signatures match the manifest?
                             Signature[] sigs = manifestSignatures.get(info.packageName);
-                            PackageManagerInternal pmi = LocalServices.getService(
-                                    PackageManagerInternal.class);
-                            if (AppBackupUtils.signaturesMatch(sigs, pkg, pmi)) {
+                            if (AppBackupUtils.signaturesMatch(sigs, pkg)) {
                                 // If this is a system-uid app without a declared backup agent,
                                 // don't restore any of the file data.
                                 if ((pkg.applicationInfo.uid < Process.FIRST_APPLICATION_UID)
