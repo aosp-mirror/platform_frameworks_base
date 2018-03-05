@@ -84,6 +84,7 @@ class WindowTestsBase {
     WindowState mChildAppWindowAbove;
     WindowState mChildAppWindowBelow;
     HashSet<WindowState> mCommonWindows;
+    WallpaperController mWallpaperController;
 
     @Mock
     static WindowState.PowerManagerWrapper mPowerManagerWrapper;
@@ -104,6 +105,8 @@ class WindowTestsBase {
 
         sWm = TestWindowManagerPolicy.getWindowManagerService(context);
         beforeCreateDisplay();
+
+        mWallpaperController = new WallpaperController(sWm);
 
         context.getDisplay().getDisplayInfo(mDisplayInfo);
         mDisplayContent = createNewDisplay();
@@ -288,7 +291,7 @@ class WindowTestsBase {
         final int displayId = sNextDisplayId++;
         final Display display = new Display(DisplayManagerGlobal.getInstance(), displayId,
                 mDisplayInfo, DEFAULT_DISPLAY_ADJUSTMENTS);
-        return new DisplayContent(display, sWm, new WallpaperController(sWm),
+        return new DisplayContent(display, sWm, mWallpaperController,
                 mock(DisplayWindowController.class));
     }
 
