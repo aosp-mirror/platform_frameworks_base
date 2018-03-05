@@ -759,26 +759,31 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
          * Called when the player is <i>prepared</i>, i.e. it is ready to play the content
          * referenced by the given data source.
          * @param session the session for this event
+         * @param mpb the player for this event
          * @param item the media item for which buffering is happening
          */
-        public void onMediaPrepared(@NonNull MediaSession2 session, @NonNull MediaItem2 item) { }
+        public void onMediaPrepared(@NonNull MediaSession2 session, @NonNull MediaPlayerBase mpb,
+                @NonNull MediaItem2 item) { }
 
         /**
          * Called to indicate that the state of the player has changed.
          * See {@link MediaPlayerBase#getPlayerState()} for polling the player state.
          * @param session the session for this event
+         * @param mpb the player for this event
          * @param state the new state of the player.
          */
-        public void onPlayerStateChanged(@NonNull MediaSession2 session, @PlayerState int state) { }
+        public void onPlayerStateChanged(@NonNull MediaSession2 session,
+                @NonNull MediaPlayerBase mpb, @PlayerState int state) { }
 
         /**
          * Called to report buffering events for a data source.
          * @param session the session for this event
+         * @param mpb the player for this event
          * @param item the media item for which buffering is happening.
          * @param state the new buffering state.
          */
         public void onBufferingStateChanged(@NonNull MediaSession2 session,
-                @NonNull MediaItem2 item, @BuffState int state) { }
+                @NonNull MediaPlayerBase mpb, @NonNull MediaItem2 item, @BuffState int state) { }
     };
 
     /**
