@@ -23,14 +23,8 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.database.ContentObserver;
-import android.os.AsyncTask;
-import android.os.Handler;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.os.VibrationEffect;
-import android.os.Vibrator;
-import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.InputDevice;
@@ -51,10 +45,10 @@ import com.android.systemui.doze.DozeLog;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.VibratorHelper;
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.function.BiConsumer;
 
 public abstract class PanelView extends FrameLayout {
     public static final boolean DEBUG = PanelBar.DEBUG;
@@ -69,6 +63,7 @@ public abstract class PanelView extends FrameLayout {
     private boolean mVibrateOnOpening;
     protected boolean mLaunchingNotification;
     private int mFixedDuration = NO_FIXED_DURATION;
+    private BiConsumer<Float, Boolean> mExpansionListener;
 
     private final void logf(String fmt, Object... args) {
         Log.v(TAG, (mViewName != null ? (mViewName + ": ") : "") + String.format(fmt, args));
@@ -326,7 +321,8 @@ public abstract class PanelView extends FrameLayout {
                     cancelPeek();
                     onTrackingStarted();
                 }
-                if (isFullyCollapsed() && !mHeadsUpManager.hasPinnedHeadsUp()) {
+                if (isFullyCollapsed() && !mHeadsUpManager.hasPinnedHeadsUp()
+                        && !mStatusBar.isBouncerShowing()) {
                     startOpening(event);
                 }
                 break;
@@ -490,7 +486,8 @@ public abstract class PanelView extends FrameLayout {
             if (mUpdateFlingOnLayout) {
                 mUpdateFlingVelocity = vel;
             }
-        } else if (mPanelClosedOnDown && !mHeadsUpManager.hasPinnedHeadsUp() && !mTracking) {
+        } else if (mPanelClosedOnDown && !mHeadsUpManager.hasPinnedHeadsUp() && !mTracking
+                && !mStatusBar.isBouncerShowing()) {
             long timePassed = SystemClock.uptimeMillis() - mDownTime;
             if (timePassed < ViewConfiguration.getLongPressTimeout()) {
                 // Lets show the user that he can actually expand the panel
@@ -499,7 +496,7 @@ public abstract class PanelView extends FrameLayout {
                 // We need to collapse the panel since we peeked to the small height.
                 postOnAnimation(mPostCollapseRunnable);
             }
-        } else {
+        } else if (!mStatusBar.isBouncerShowing()) {
             boolean expands = onEmptySpaceClick(mInitialTouchX);
             onTrackingStopped(expands);
         }
@@ -1099,6 +1096,10 @@ public abstract class PanelView extends FrameLayout {
         mStatusBar.onUnlockHintStarted();
     }
 
+    public boolean isUnlockHintRunning() {
+        return mHintAnimationRunning;
+    }
+
     /**
      * Phase 1: Move everything upwards.
      */
@@ -1190,6 +1191,13 @@ public abstract class PanelView extends FrameLayout {
         mBar.panelExpansionChanged(mExpandedFraction, mExpandedFraction > 0f
                 || mPeekAnimator != null || mInstantExpanding || isPanelVisibleBecauseOfHeadsUp()
                 || mTracking || mHeightAnimator != null);
+        if (mExpansionListener != null) {
+            mExpansionListener.accept(mExpandedFraction, mTracking);
+        }
+    }
+
+    public void setExpansionListener(BiConsumer<Float, Boolean> consumer) {
+        mExpansionListener = consumer;
     }
 
     protected abstract boolean isPanelVisibleBecauseOfHeadsUp();
