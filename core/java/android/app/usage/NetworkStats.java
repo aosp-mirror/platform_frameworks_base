@@ -24,7 +24,6 @@ import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.net.TrafficStats;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.util.IntArray;
 import android.util.Log;
 
@@ -98,9 +97,8 @@ public final class NetworkStats implements AutoCloseable {
 
     /** @hide */
     NetworkStats(Context context, NetworkTemplate template, int flags, long startTimestamp,
-            long endTimestamp) throws RemoteException, SecurityException {
-        final INetworkStatsService statsService = INetworkStatsService.Stub.asInterface(
-                ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
+            long endTimestamp, INetworkStatsService statsService)
+            throws RemoteException, SecurityException {
         // Open network stats session
         mSession = statsService.openSessionForUsageStats(flags, context.getOpPackageName());
         mCloseGuard.open("close");
