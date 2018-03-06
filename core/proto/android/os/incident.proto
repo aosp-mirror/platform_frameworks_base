@@ -263,4 +263,7 @@ message IncidentProto {
         (section).type = SECTION_DUMPSYS,
         (section).args = "usb --proto"
     ];
+
+    // Reserved for OEMs.
+    extensions 50000 to 100000;
 }
