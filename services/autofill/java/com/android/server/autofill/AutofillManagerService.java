@@ -565,16 +565,19 @@ public final class AutofillManagerService extends SystemService {
         }
     }
 
-    private @Nullable Set<String> getWhitelistedCompatModePackages() {
-        final String compatPackagesSetting = Settings.Global.getString(
+    private String getWhitelistedCompatModePackagesFromSettings() {
+        return Settings.Global.getString(
                 mContext.getContentResolver(),
                 Settings.Global.AUTOFILL_COMPAT_ALLOWED_PACKAGES);
+    }
+
+    private @Nullable Set<String> getWhitelistedCompatModePackages() {
+        final String compatPackagesSetting = getWhitelistedCompatModePackagesFromSettings();
         if (TextUtils.isEmpty(compatPackagesSetting)) {
             return null;
         }
         final Set<String> compatPackages = new ArraySet<>();
-        final SimpleStringSplitter splitter = new SimpleStringSplitter(
-                COMPAT_PACKAGE_DELIMITER);
+        final SimpleStringSplitter splitter = new SimpleStringSplitter(COMPAT_PACKAGE_DELIMITER);
         splitter.setString(compatPackagesSetting);
         while (splitter.hasNext()) {
             compatPackages.add(splitter.next());
@@ -1045,6 +1048,8 @@ public final class AutofillManagerService extends SystemService {
                     mUi.dump(pw);
                     pw.print("Autofill Compat State: ");
                     pw.println(mAutofillCompatState.mUserSpecs);
+                    pw.print(prefix); pw.print("from settings: ");
+                    pw.println(getWhitelistedCompatModePackagesFromSettings());
                 }
                 if (showHistory) {
                     pw.println(); pw.println("Requests history:"); pw.println();
