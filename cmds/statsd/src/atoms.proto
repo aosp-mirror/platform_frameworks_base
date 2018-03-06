@@ -1396,7 +1396,7 @@ message CpuTimePerFreq {
  * Note that isolated process uid time should be attributed to host uids.
  */
 message CpuTimePerUid {
-    optional uint64 uid = 1;
+    optional int32 uid = 1;
     optional uint64 user_time_millis = 2;
     optional uint64 sys_time_millis = 3;
 }
@@ -1407,8 +1407,8 @@ message CpuTimePerUid {
  * For each uid, we order the time by descending frequencies.
  */
 message CpuTimePerUidFreq {
-    optional uint64 uid = 1;
-    optional uint64 freq_idx = 2;
+    optional int32 uid = 1;
+    optional uint32 freq_index = 2;
     optional uint64 time_millis = 3;
 }
 
@@ -1541,10 +1541,8 @@ message SystemUptime {
  * The file contains a monotonically increasing count of time for a single boot.
  */
 message CpuActiveTime {
-    optional uint64 uid = 1;
-    optional uint32 cluster_number = 2;
-    optional uint64 idx = 3;
-    optional uint64 time_millis = 4;
+    optional int32 uid = 1;
+    optional uint64 time_millis = 2;
 }
 
 /**
@@ -1557,8 +1555,8 @@ message CpuActiveTime {
  * The file contains a monotonically increasing count of time for a single boot.
  */
 message CpuClusterTime {
-    optional uint64 uid = 1;
-    optional uint64 idx = 2;
+    optional int32 uid = 1;
+    optional int32 cluster_index = 2;
     optional uint64 time_millis = 3;
 }
 
