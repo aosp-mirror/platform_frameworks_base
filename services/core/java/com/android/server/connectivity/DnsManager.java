@@ -187,7 +187,7 @@ public class DnsManager {
         Slog.w(TAG, "updatePrivateDns(" + network + ", " + cfg + ")");
         return (cfg != null)
                 ? mPrivateDnsMap.put(network.netId, cfg)
-                : mPrivateDnsMap.remove(network);
+                : mPrivateDnsMap.remove(network.netId);
     }
 
     public void setDnsConfigurationForNetwork(
