@@ -43,6 +43,7 @@ import com.android.internal.util.Preconditions;
  */
 final class StandardMenuPopup extends MenuPopup implements OnDismissListener, OnItemClickListener,
         MenuPresenter, OnKeyListener {
+    private static final int ITEM_LAYOUT = com.android.internal.R.layout.popup_menu_item_layout;
 
     private final Context mContext;
 
@@ -116,7 +117,7 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
         mMenu = menu;
         mOverflowOnly = overflowOnly;
         final LayoutInflater inflater = LayoutInflater.from(context);
-        mAdapter = new MenuAdapter(menu, inflater, mOverflowOnly);
+        mAdapter = new MenuAdapter(menu, inflater, mOverflowOnly, ITEM_LAYOUT);
         mPopupStyleAttr = popupStyleAttr;
         mPopupStyleRes = popupStyleRes;
 
