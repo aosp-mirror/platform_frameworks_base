@@ -194,7 +194,7 @@ public:
 private:
     Table* mTable;
     std::string mPreviousField;
-    stack<long long> mTokens;
+    stack<uint64_t> mTokens;
     map<std::string, Message*> mSubMessages;
 };
 

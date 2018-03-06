@@ -66,7 +66,7 @@ ProcrankParser::Parse(const int in, const int out) const
             continue;
         }
 
-        long long token = proto.start(ProcrankProto::PROCESSES);
+        uint64_t token = proto.start(ProcrankProto::PROCESSES);
         for (int i=0; i<(int)record.size(); i++) {
             if (!table.insertField(&proto, header[i], record[i])) {
                 fprintf(stderr, "[%s]Line %d has bad value %s of %s\n",
@@ -77,22 +77,22 @@ ProcrankParser::Parse(const int in, const int out) const
     }
 
     // add summary
-    long long token = proto.start(ProcrankProto::SUMMARY);
+    uint64_t token = proto.start(ProcrankProto::SUMMARY);
     if (!total.empty()) {
         record = parseRecord(total);
-        long long token = proto.start(ProcrankProto::Summary::TOTAL);
+        uint64_t token = proto.start(ProcrankProto::Summary::TOTAL);
         for (int i=(int)record.size(); i>0; i--) {
             table.insertField(&proto, header[header.size() - i].c_str(), record[record.size() - i].c_str());
         }
         proto.end(token);
     }
     if (!zram.empty()) {
-        long long token = proto.start(ProcrankProto::Summary::ZRAM);
+        uint64_t token = proto.start(ProcrankProto::Summary::ZRAM);
         proto.write(ProcrankProto::Summary::Zram::RAW_TEXT, zram);
         proto.end(token);
     }
     if (!ram.empty()) {
-        long long token = proto.start(ProcrankProto::Summary::RAM);
+        uint64_t token = proto.start(ProcrankProto::Summary::RAM);
         proto.write(ProcrankProto::Summary::Ram::RAW_TEXT, ram);
         proto.end(token);
     }

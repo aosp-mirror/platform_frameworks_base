@@ -70,7 +70,7 @@ void writeDimensionToProtoHelper(const std::vector<FieldValue>& dims, size_t* in
         }
 
         if (depth == valueDepth && valuePrefix == prefix) {
-            long long token = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
+            uint64_t token = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
                                                  DIMENSIONS_VALUE_TUPLE_VALUE);
             protoOutput->write(FIELD_TYPE_INT32 | DIMENSIONS_VALUE_FIELD, fieldNum);
             switch (dim.mValue.getType()) {
@@ -99,10 +99,10 @@ void writeDimensionToProtoHelper(const std::vector<FieldValue>& dims, size_t* in
             (*index)++;
         } else if (valueDepth > depth && valuePrefix == prefix) {
             // Writing the sub tree
-            long long dimensionToken = protoOutput->start(
+            uint64_t dimensionToken = protoOutput->start(
                     FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | DIMENSIONS_VALUE_TUPLE_VALUE);
             protoOutput->write(FIELD_TYPE_INT32 | DIMENSIONS_VALUE_FIELD, fieldNum);
-            long long tupleToken =
+            uint64_t tupleToken =
                     protoOutput->start(FIELD_TYPE_MESSAGE | DIMENSIONS_VALUE_VALUE_TUPLE);
             writeDimensionToProtoHelper(dims, index, valueDepth, dim.mField.getPrefix(valueDepth),
                                         protoOutput);
@@ -123,7 +123,7 @@ void writeDimensionToProto(const HashableDimensionKey& dimension, ProtoOutputStr
     }
     protoOutput->write(FIELD_TYPE_INT32 | DIMENSIONS_VALUE_FIELD,
                        dimension.getValues()[0].mField.getTag());
-    long long topToken = protoOutput->start(FIELD_TYPE_MESSAGE | DIMENSIONS_VALUE_VALUE_TUPLE);
+    uint64_t topToken = protoOutput->start(FIELD_TYPE_MESSAGE | DIMENSIONS_VALUE_VALUE_TUPLE);
     size_t index = 0;
     writeDimensionToProtoHelper(dimension.getValues(), &index, 0, 0, protoOutput);
     protoOutput->end(topToken);
@@ -189,7 +189,7 @@ void writeFieldValueTreeToStreamHelper(const std::vector<FieldValue>& dims, size
             (*index)++;
         } else if (valueDepth > depth && valuePrefix == prefix) {
             // Writing the sub tree
-            long long msg_token = 0;
+            uint64_t msg_token = 0ULL;
             if (valueDepth == depth + 2) {
                 msg_token =
                         protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | fieldNum);
@@ -212,7 +212,7 @@ void writeFieldValueTreeToStreamHelper(const std::vector<FieldValue>& dims, size
 
 void writeFieldValueTreeToStream(int tagId, const std::vector<FieldValue>& values,
                                  util::ProtoOutputStream* protoOutput) {
-    long long atomToken = protoOutput->start(FIELD_TYPE_MESSAGE | tagId);
+    uint64_t atomToken = protoOutput->start(FIELD_TYPE_MESSAGE | tagId);
 
     size_t index = 0;
     writeFieldValueTreeToStreamHelper(values, &index, 0, 0, protoOutput);
@@ -257,7 +257,7 @@ int64_t TimeUnitToBucketSizeInMillis(TimeUnit unit) {
 
 void writePullerStatsToStream(const std::pair<int, StatsdStats::PulledAtomStats>& pair,
                               util::ProtoOutputStream* protoOutput) {
-    long long token = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_PULLED_ATOM_STATS |
+    uint64_t token = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_PULLED_ATOM_STATS |
                                          FIELD_COUNT_REPEATED);
     protoOutput->write(FIELD_TYPE_INT32 | FIELD_ID_PULL_ATOM_ID, (int32_t)pair.first);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_TOTAL_PULL, (long long)pair.second.totalPull);

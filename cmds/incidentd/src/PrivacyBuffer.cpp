@@ -91,7 +91,7 @@ status_t PrivacyBuffer::stripField(const Privacy* parentPolicy, const PrivacySpe
     // current field is message type and its sub-fields have extra privacy policies
     uint32_t msgSize = mData.readRawVarint();
     size_t start = mData.rp()->pos();
-    long long token = mProto.start(encode_field_id(policy));
+    uint64_t token = mProto.start(encode_field_id(policy));
     while (mData.rp()->pos() - start != msgSize) {
         status_t err = stripField(policy, spec, depth + 1);
         if (err != NO_ERROR) return err;
