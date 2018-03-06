@@ -292,7 +292,9 @@ public class MtpDatabase implements AutoCloseable {
         mCloseGuard.close();
         if (mClosed.compareAndSet(false, true)) {
             mMediaScanner.close();
-            mMediaProvider.close();
+            if (mMediaProvider != null) {
+                mMediaProvider.close();
+            }
             native_finalize();
         }
     }
