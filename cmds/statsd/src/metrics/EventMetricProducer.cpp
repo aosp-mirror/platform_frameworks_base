@@ -131,7 +131,7 @@ void EventMetricProducer::onMatchedLogEventInternalLocked(
         return;
     }
 
-    long long wrapperToken =
+    uint64_t wrapperToken =
             mProto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DATA);
     const bool truncateTimestamp =
         android::util::kNotTruncatingTimestampAtomWhiteList.find(event.GetTagId()) ==
@@ -148,7 +148,7 @@ void EventMetricProducer::onMatchedLogEventInternalLocked(
             (long long)getWallClockNs());
     }
 
-    long long eventToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_ATOMS);
+    uint64_t eventToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_ATOMS);
     event.ToProto(*mProto);
     mProto->end(eventToken);
     mProto->end(wrapperToken);
