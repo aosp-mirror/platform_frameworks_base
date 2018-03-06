@@ -23,6 +23,7 @@ import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.messages.nano.SystemMessageProto;
@@ -174,9 +175,9 @@ public class ForegroundServiceControllerImpl
 
     @Override
     public boolean isSystemAlertNotification(StatusBarNotification sbn) {
-        // TODO: tag system alert notifications so they can be suppressed if app's notification
-        // is tagged
-        return false;
+        return sbn.getPackageName().equals("android")
+                && sbn.getTag() != null
+                && sbn.getTag().contains("AlertWindowNotification");
     }
 
     /**
