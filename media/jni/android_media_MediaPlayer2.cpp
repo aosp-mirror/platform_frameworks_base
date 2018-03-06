@@ -1490,7 +1490,7 @@ static const JNINativeMethod gMethods[] = {
     {"_setVideoSurface",    "(Landroid/view/Surface;)V",        (void *)android_media_MediaPlayer2_setVideoSurface},
     {"getBufferingParams", "()Landroid/media/BufferingParams;", (void *)android_media_MediaPlayer2_getBufferingParams},
     {"setBufferingParams", "(Landroid/media/BufferingParams;)V", (void *)android_media_MediaPlayer2_setBufferingParams},
-    {"prepare",            "()V",                              (void *)android_media_MediaPlayer2_prepare},
+    {"_prepare",            "()V",                              (void *)android_media_MediaPlayer2_prepare},
     {"_start",              "()V",                              (void *)android_media_MediaPlayer2_start},
     {"_stop",               "()V",                              (void *)android_media_MediaPlayer2_stop},
     {"native_getMediaPlayer2State", "()I",                      (void *)android_media_MediaPlayer2_getMediaPlayer2State},

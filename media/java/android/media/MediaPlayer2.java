@@ -22,17 +22,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
-import android.media.MediaDrm;
-import android.media.MediaFormat;
-import android.media.MediaPlayer2Impl;
-import android.media.MediaPlayerBase;
-import android.media.MediaTimeProvider;
-import android.media.PlaybackParams;
-import android.media.SubtitleController;
-import android.media.SubtitleController.Anchor;
-import android.media.SubtitleData;
-import android.media.SubtitleTrack.RenderingWidget;
-import android.media.SyncParams;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Parcel;
@@ -43,14 +32,13 @@ import android.view.SurfaceHolder;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.AutoCloseable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.concurrent.Executor;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Executor;
 
 
 /**
@@ -2019,12 +2007,12 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
     public static final int MEDIA_CALL_DESELECT_TRACK = 2;
 
     /** The player just completed a call {@code loopCurrent}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback.CallComplete
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
      */
     public static final int MEDIA_CALL_LOOP_CURRENT = 3;
 
     /** The player just completed a call {@code pause}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback.CallComplete
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
      */
     public static final int MEDIA_CALL_PAUSE = 4;
 
