@@ -6,8 +6,7 @@
     <string name="action_do_not_use_network" msgid="4577366536956516683">"এই নেটৱৰ্কটো ব্যৱহাৰ নকৰিব"</string>
     <!-- no translation found for action_bar_label (917235635415966620) -->
     <skip />
-    <!-- no translation found for action_bar_title (5645564790486983117) -->
-    <skip />
+    <string name="action_bar_title" msgid="5645564790486983117">"%1$st ছাইন ইন কৰক"</string>
     <!-- no translation found for ssl_error_warning (6653188881418638872) -->
     <skip />
     <!-- no translation found for ssl_error_example (647898534624078900) -->
