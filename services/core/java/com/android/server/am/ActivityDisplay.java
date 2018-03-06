@@ -106,21 +106,21 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
 
     private DisplayWindowController mWindowContainerController;
 
+    @VisibleForTesting
     ActivityDisplay(ActivityStackSupervisor supervisor, int displayId) {
+        this(supervisor, supervisor.mDisplayManager.getDisplay(displayId));
+    }
+
+    ActivityDisplay(ActivityStackSupervisor supervisor, Display display) {
         mSupervisor = supervisor;
-        mDisplayId = displayId;
-        final Display display = supervisor.mDisplayManager.getDisplay(displayId);
-        if (display == null) {
-            throw new IllegalStateException("Display does not exist displayId=" + displayId);
-        }
+        mDisplayId = display.getDisplayId();
         mDisplay = display;
         mWindowContainerController = createWindowContainerController();
-
         updateBounds();
     }
 
     protected DisplayWindowController createWindowContainerController() {
-        return new DisplayWindowController(mDisplayId, this);
+        return new DisplayWindowController(mDisplay, this);
     }
 
     void updateBounds() {
