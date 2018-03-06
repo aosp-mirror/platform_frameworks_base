@@ -362,7 +362,7 @@ public class KeyguardStatusView extends GridLayout {
 
     public void setPulsing(boolean pulsing) {
         mPulsing = pulsing;
-        mKeyguardSlice.setVisibility(pulsing ? INVISIBLE : VISIBLE);
+        mKeyguardSlice.setHideContent(pulsing);
         onSliceContentChanged(mKeyguardSlice.hasHeader());
         updateDozeVisibleViews();
     }
