@@ -25,7 +25,6 @@ import android.app.backup.BackupTransport;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
 import android.os.Process;
 import android.util.Slog;
@@ -38,9 +37,6 @@ import com.android.server.backup.transport.TransportClient;
  * Utility methods wrapping operations on ApplicationInfo and PackageInfo.
  */
 public class AppBackupUtils {
-
-    private static final boolean DEBUG = false;
-
     /**
      * Returns whether app is eligible for backup.
      *
@@ -92,8 +88,7 @@ public class AppBackupUtils {
     public static boolean appIsRunningAndEligibleForBackupWithTransport(
             @Nullable TransportClient transportClient, String packageName, PackageManager pm) {
         try {
-            PackageInfo packageInfo = pm.getPackageInfo(packageName,
-                    PackageManager.GET_SIGNING_CERTIFICATES);
+            PackageInfo packageInfo = pm.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
             ApplicationInfo applicationInfo = packageInfo.applicationInfo;
             if (!appIsEligibleForBackup(applicationInfo, pm)
                     || appIsStopped(applicationInfo)
@@ -170,18 +165,12 @@ public class AppBackupUtils {
      *
      * <ul>
      *   <li>Source and target have at least one signature each
-     *   <li>Target contains all signatures in source, and nothing more
+     *   <li>Target contains all signatures in source
      * </ul>
-     *
-     * or if both source and target have exactly one signature, and they don't match, we check
-     * if the app was ever signed with source signature (i.e. app has rotated key)
-     * Note: key rotation is only supported for apps ever signed with one key, and those apps will
-     * not be allowed to be signed by more certificates in the future
      *
      * Note that if {@param target} is null we return false.
      */
-    public static boolean signaturesMatch(Signature[] storedSigs, PackageInfo target,
-            PackageManagerInternal pmi) {
+    public static boolean signaturesMatch(Signature[] storedSigs, PackageInfo target) {
         if (target == null) {
             return false;
         }
@@ -198,52 +187,33 @@ public class AppBackupUtils {
             return true;
         }
 
+        Signature[] deviceSigs = target.signatures;
+        if (MORE_DEBUG) {
+            Slog.v(TAG, "signaturesMatch(): stored=" + storedSigs + " device=" + deviceSigs);
+        }
+
         // Don't allow unsigned apps on either end
-        if (ArrayUtils.isEmpty(storedSigs)) {
+        if (ArrayUtils.isEmpty(storedSigs) || ArrayUtils.isEmpty(deviceSigs)) {
             return false;
         }
 
-        Signature[][] deviceHistorySigs = target.signingCertificateHistory;
-        if (ArrayUtils.isEmpty(deviceHistorySigs)) {
-            Slog.w(TAG, "signingCertificateHistory is empty, app was either unsigned or the flag" +
-                    " PackageManager#GET_SIGNING_CERTIFICATES was not specified");
-            return false;
-        }
+        // Signatures can be added over time, so the target-device apk needs to contain all the
+        // source-device apk signatures, but not necessarily the other way around.
+        int nStored = storedSigs.length;
+        int nDevice = deviceSigs.length;
 
-        if (DEBUG) {
-            Slog.v(TAG, "signaturesMatch(): stored=" + storedSigs + " device=" + deviceHistorySigs);
-        }
-
-        final int nStored = storedSigs.length;
-        if (nStored == 1) {
-            // if the app is only signed with one sig, it's possible it has rotated its key
-            // (the checks with signing history are delegated to PackageManager)
-            // TODO: address the case that app has declared restoreAnyVersion and is restoring
-            // from higher version to lower after having rotated the key (i.e. higher version has
-            // different sig than lower version that we want to restore to)
-            return pmi.isDataRestoreSafe(storedSigs[0], target.packageName);
-        } else {
-            // the app couldn't have rotated keys, since it was signed with multiple sigs - do
-            // a comprehensive 1-to-1 signatures check
-            // since app hasn't rotated key, we only need to check with deviceHistorySigs[0]
-            Signature[] deviceSigs = deviceHistorySigs[0];
-            int nDevice = deviceSigs.length;
-
-            // ensure that each stored sig matches an on-device sig
-            for (int i = 0; i < nStored; i++) {
-                boolean match = false;
-                for (int j = 0; j < nDevice; j++) {
-                    if (storedSigs[i].equals(deviceSigs[j])) {
-                        match = true;
-                        break;
-                    }
-                }
-                if (!match) {
-                    return false;
+        for (int i = 0; i < nStored; i++) {
+            boolean match = false;
+            for (int j = 0; j < nDevice; j++) {
+                if (storedSigs[i].equals(deviceSigs[j])) {
+                    match = true;
+                    break;
                 }
             }
-            // we have found a match for all stored sigs
-            return true;
+            if (!match) {
+                return false;
+            }
         }
+        return true;
     }
 }
