@@ -162,6 +162,11 @@ public class AudioMix {
     }
 
     /** @hide */
+    public boolean isAffectingUsage(int usage) {
+        return mRule.isAffectingUsage(usage);
+    }
+
+    /** @hide */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

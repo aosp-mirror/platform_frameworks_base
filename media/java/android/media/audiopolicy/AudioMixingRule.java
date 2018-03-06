@@ -135,6 +135,17 @@ public class AudioMixingRule {
         }
     }
 
+    boolean isAffectingUsage(int usage) {
+        for (AudioMixMatchCriterion criterion : mCriteria) {
+            if ((criterion.mRule & RULE_MATCH_ATTRIBUTE_USAGE) != 0
+                    && criterion.mAttr != null
+                    && criterion.mAttr.getUsage() == usage) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static boolean areCriteriaEquivalent(ArrayList<AudioMixMatchCriterion> cr1,
             ArrayList<AudioMixMatchCriterion> cr2) {
         if (cr1 == null || cr2 == null) return false;

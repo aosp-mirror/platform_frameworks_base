@@ -141,6 +141,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -5615,7 +5616,9 @@ public class AudioService extends IAudioService.Stub
             }
             // ignore condition on device being actually used for music when in communication
             // because music routing is altered in this case.
-            if (((device == musicDevice) || isInCommunication()) && (device == devices)) {
+            // also checks whether media routing if affected by a dynamic policy
+            if (((device == musicDevice) || isInCommunication()) && (device == devices)
+                    && !hasMediaDynamicPolicy()) {
                 mAudioHandler.removeMessages(MSG_BROADCAST_AUDIO_BECOMING_NOISY);
                 sendMsg(mAudioHandler,
                         MSG_BROADCAST_AUDIO_BECOMING_NOISY,
@@ -5639,6 +5642,24 @@ public class AudioService extends IAudioService.Stub
             }
         }
         return delay;
+    }
+
+    /**
+     * @return true if there is currently a registered dynamic mixing policy that affects media
+     */
+    private boolean hasMediaDynamicPolicy() {
+        synchronized (mAudioPolicies) {
+            if (mAudioPolicies.isEmpty()) {
+                return false;
+            }
+            final Collection<AudioPolicyProxy> appColl = mAudioPolicies.values();
+            for (AudioPolicyProxy app : appColl) {
+                if (app.hasMixAffectingUsage(AudioAttributes.USAGE_MEDIA)) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     private void updateAudioRoutes(int device, int state)
@@ -7337,6 +7358,15 @@ public class AudioService extends IAudioService.Stub
             final long identity = Binder.clearCallingIdentity();
             AudioSystem.registerPolicyMixes(mMixes, false);
             Binder.restoreCallingIdentity(identity);
+        }
+
+        boolean hasMixAffectingUsage(int usage) {
+            for (AudioMix mix : mMixes) {
+                if (mix.isAffectingUsage(usage)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         void addMixes(@NonNull ArrayList<AudioMix> mixes) {
