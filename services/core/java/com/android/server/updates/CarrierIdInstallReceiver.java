@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.provider.Telephony;
-import android.util.Log;
 
 public class CarrierIdInstallReceiver extends ConfigUpdateInstallReceiver {
 
@@ -33,7 +32,7 @@ public class CarrierIdInstallReceiver extends ConfigUpdateInstallReceiver {
     @Override
     protected void postInstall(Context context, Intent intent) {
         ContentResolver resolver = context.getContentResolver();
-        resolver.update(Uri.withAppendedPath(Telephony.CarrierIdentification.All.CONTENT_URI,
+        resolver.update(Uri.withAppendedPath(Telephony.CarrierId.All.CONTENT_URI,
                 "update_db"), new ContentValues(), null, null);
     }
 }
