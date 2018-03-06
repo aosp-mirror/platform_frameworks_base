@@ -37,6 +37,8 @@ import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 /**
  * Provides access to network usage history and statistics. Usage data is collected in
  * discrete bins of time called 'Buckets'. See {@link NetworkStats.Bucket} for details.
@@ -107,9 +109,15 @@ public class NetworkStatsManager {
      * {@hide}
      */
     public NetworkStatsManager(Context context) throws ServiceNotFoundException {
+        this(context, INetworkStatsService.Stub.asInterface(
+                ServiceManager.getServiceOrThrow(Context.NETWORK_STATS_SERVICE)));
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    public NetworkStatsManager(Context context, INetworkStatsService service) {
         mContext = context;
-        mService = INetworkStatsService.Stub.asInterface(
-                ServiceManager.getServiceOrThrow(Context.NETWORK_STATS_SERVICE));
+        mService = service;
         setPollOnOpen(true);
     }
 
@@ -135,7 +143,8 @@ public class NetworkStatsManager {
     public Bucket querySummaryForDevice(NetworkTemplate template,
             long startTime, long endTime) throws SecurityException, RemoteException {
         Bucket bucket = null;
-        NetworkStats stats = new NetworkStats(mContext, template, mFlags, startTime, endTime);
+        NetworkStats stats = new NetworkStats(mContext, template, mFlags, startTime, endTime,
+                mService);
         bucket = stats.getDeviceSummaryForNetwork();
 
         stats.close();
@@ -208,7 +217,7 @@ public class NetworkStatsManager {
         }
 
         NetworkStats stats;
-        stats = new NetworkStats(mContext, template, mFlags, startTime, endTime);
+        stats = new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
         stats.startSummaryEnumeration();
 
         stats.close();
@@ -245,7 +254,7 @@ public class NetworkStatsManager {
         }
 
         NetworkStats result;
-        result = new NetworkStats(mContext, template, mFlags, startTime, endTime);
+        result = new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
         result.startSummaryEnumeration();
 
         return result;
@@ -295,7 +304,7 @@ public class NetworkStatsManager {
 
         NetworkStats result;
         try {
-            result = new NetworkStats(mContext, template, mFlags, startTime, endTime);
+            result = new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
             result.startHistoryEnumeration(uid, tag);
         } catch (RemoteException e) {
             Log.e(TAG, "Error while querying stats for uid=" + uid + " tag=" + tag, e);
@@ -341,7 +350,7 @@ public class NetworkStatsManager {
         }
 
         NetworkStats result;
-        result = new NetworkStats(mContext, template, mFlags, startTime, endTime);
+        result = new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
         result.startUserUidEnumeration();
         return result;
     }
@@ -451,19 +460,20 @@ public class NetworkStatsManager {
     }
 
     private static NetworkTemplate createTemplate(int networkType, String subscriberId) {
-        NetworkTemplate template = null;
+        final NetworkTemplate template;
         switch (networkType) {
-            case ConnectivityManager.TYPE_MOBILE: {
-                template = NetworkTemplate.buildTemplateMobileAll(subscriberId);
-                } break;
-            case ConnectivityManager.TYPE_WIFI: {
+            case ConnectivityManager.TYPE_MOBILE:
+                template = subscriberId == null
+                        ? NetworkTemplate.buildTemplateMobileWildcard()
+                        : NetworkTemplate.buildTemplateMobileAll(subscriberId);
+                break;
+            case ConnectivityManager.TYPE_WIFI:
                 template = NetworkTemplate.buildTemplateWifiWildcard();
-                } break;
-            default: {
+                break;
+            default:
                 throw new IllegalArgumentException("Cannot create template for network type "
                         + networkType + ", subscriberId '"
                         + NetworkIdentity.scrubSubscriberId(subscriberId) + "'.");
-            }
         }
         return template;
     }
