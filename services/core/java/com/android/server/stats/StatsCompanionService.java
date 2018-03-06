@@ -68,6 +68,7 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
@@ -176,6 +177,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     @Override
     public void sendSubscriberBroadcast(IBinder intentSenderBinder, long configUid, long configKey,
                                         long subscriptionId, long subscriptionRuleId,
+                                        String[] cookies,
                                         StatsDimensionsValue dimensionsValue) {
         enforceCallingPermission();
         IntentSender intentSender = new IntentSender(intentSenderBinder);
@@ -185,10 +187,17 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 .putExtra(StatsManager.EXTRA_STATS_SUBSCRIPTION_ID, subscriptionId)
                 .putExtra(StatsManager.EXTRA_STATS_SUBSCRIPTION_RULE_ID, subscriptionRuleId)
                 .putExtra(StatsManager.EXTRA_STATS_DIMENSIONS_VALUE, dimensionsValue);
+
+        ArrayList<String> cookieList = new ArrayList<>(cookies.length);
+        for (String cookie : cookies) { cookieList.add(cookie); }
+        intent.putStringArrayListExtra(
+                StatsManager.EXTRA_STATS_BROADCAST_SUBSCRIBER_COOKIES, cookieList);
+
         if (DEBUG) {
-            Slog.d(TAG, String.format("Statsd sendSubscriberBroadcast with params {%d %d %d %d %s}",
-                    configUid, configKey, subscriptionId,
-                    subscriptionRuleId, dimensionsValue));
+            Slog.d(TAG, String.format(
+                    "Statsd sendSubscriberBroadcast with params {%d %d %d %d %s %s}",
+                    configUid, configKey, subscriptionId, subscriptionRuleId,
+                    Arrays.toString(cookies), dimensionsValue));
         }
         try {
             intentSender.sendIntent(mContext, CODE_SUBSCRIBER_BROADCAST, intent, null, null);
