@@ -52,6 +52,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IBinder.DeathRecipient;
 import android.os.Parcelable;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
@@ -87,7 +88,6 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.os.HandlerCaller;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.autofill.ui.PendingUi;
@@ -157,6 +157,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     @GuardedBy("mLock")
     private IAutoFillManagerClient mClient;
+
+    @GuardedBy("mLock")
+    private DeathRecipient mClientVulture;
 
     private final RemoteFillService mRemoteFillService;
 
@@ -509,7 +512,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mWtfHistory = wtfHistory;
         mComponentName = componentName;
         mCompatMode = compatMode;
-        mClient = IAutoFillManagerClient.Stub.asInterface(client);
+        setClientLocked(client);
 
         mMetricsLogger.write(newLogMaker(MetricsEvent.AUTOFILL_SESSION_STARTED)
                 .addTaggedData(MetricsEvent.FIELD_FLAGS, flags));
@@ -539,10 +542,41 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 return;
             }
             mActivityToken = newActivity;
-            mClient = IAutoFillManagerClient.Stub.asInterface(newClient);
+            setClientLocked(newClient);
 
             // The tracked id are not persisted in the client, hence update them
             updateTrackedIdsLocked();
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void setClientLocked(@NonNull IBinder client) {
+        unlinkClientVultureLocked();
+        mClient = IAutoFillManagerClient.Stub.asInterface(client);
+        mClientVulture = () -> {
+            Slog.d(TAG, "handling death of " + mActivityToken + " when saving=" + mIsSaving);
+            synchronized (mLock) {
+                if (mIsSaving) {
+                    mUi.hideFillUi(this);
+                } else {
+                    mUi.destroyAll(mPendingSaveUi, this, false);
+                }
+            }
+        };
+        try {
+            mClient.asBinder().linkToDeath(mClientVulture, 0);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "could not set binder death listener on autofill client: " + e);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void unlinkClientVultureLocked() {
+        if (mClient != null && mClientVulture != null) {
+            final boolean unlinked = mClient.asBinder().unlinkToDeath(mClientVulture, 0);
+            if (!unlinked) {
+                Slog.w(TAG, "unlinking vulture from death failed for " + mActivityToken);
+            }
         }
     }
 
@@ -2443,6 +2477,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if (mDestroyed) {
             return null;
         }
+        unlinkClientVultureLocked();
         mUi.destroyAll(mPendingSaveUi, this, true);
         mUi.clearCallback(this);
         mDestroyed = true;

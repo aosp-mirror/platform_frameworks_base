@@ -35,16 +35,16 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
-import android.os.Process;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
-import android.util.ArrayMap;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.widget.VideoView;
@@ -63,10 +63,7 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.Runnable;
 import java.lang.ref.WeakReference;
-import java.net.CookieHandler;
-import java.net.CookieManager;
 import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -74,15 +71,15 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
-import java.util.Collections;
-import java.util.concurrent.Executor;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
+import java.util.concurrent.Executor;
 
 
 /**
@@ -135,6 +132,14 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     private ProvisioningThread mDrmProvisioningThread;
     //--- guarded by |mDrmLock| end
 
+    private HandlerThread mHandlerThread;
+    private final Handler mTaskHandler;
+    private final Object mTaskLock = new Object();
+    @GuardedBy("mTaskLock")
+    private final List<Task> mPendingTasks = new LinkedList<>();
+    @GuardedBy("mTaskLock")
+    private Task mCurrentTask;
+
     /**
      * Default constructor.
      * <p>When done with the MediaPlayer2Impl, you should call  {@link #close()},
@@ -150,6 +155,11 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         } else {
             mEventHandler = null;
         }
+
+        mHandlerThread = new HandlerThread("MediaPlayer2TaskThread");
+        mHandlerThread.start();
+        looper = mHandlerThread.getLooper();
+        mTaskHandler = new Handler(looper);
 
         mTimeProvider = new TimeProvider(this);
         mOpenSubtitleSources = new Vector<InputStream>();
@@ -201,8 +211,18 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      */
     @Override
     public void play() {
-        stayAwake(true);
-        _start();
+        synchronized (mTaskLock) {
+            mPendingTasks.add(new Task(MEDIA_CALL_PLAY, false) {
+                @Override
+                int process() {
+                    stayAwake(true);
+                    _start();
+                    // TODO: define public constants for return value (status).
+                    return 0;
+                }
+            });
+            processPendingTask_l();
+        }
     }
 
     private native void _start() throws IllegalStateException;
@@ -218,7 +238,21 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * @throws IllegalStateException if it is called in an invalid state
      */
     @Override
-    public native void prepare();
+    public void prepare() {
+        synchronized (mTaskLock) {
+            mPendingTasks.add(new Task(MEDIA_CALL_PREPARE, true) {
+                @Override
+                int process() {
+                    _prepare();
+                    // TODO: define public constants for return value (status).
+                    return 0;
+                }
+            });
+            processPendingTask_l();
+        }
+    }
+
+    public native void _prepare();
 
     /**
      * Pauses playback. Call play() to resume.
@@ -693,6 +727,18 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      */
     @Override
     public void clearPendingCommands() {
+    }
+
+    @GuardedBy("mTaskLock")
+    private void processPendingTask_l() {
+        if (mCurrentTask != null) {
+            return;
+        }
+        if (!mPendingTasks.isEmpty()) {
+            Task task = mPendingTasks.remove(0);
+            mCurrentTask = task;
+            mTaskHandler.post(task);
+        }
     }
 
     private void handleDataSource(boolean isCurrent, @NonNull DataSourceDesc dsd, long srcId)
@@ -2525,6 +2571,10 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         synchronized (mEventCbLock) {
             mEventCallbackRecords.clear();
         }
+        if (mHandlerThread != null) {
+            mHandlerThread.quitSafely();
+            mHandlerThread = null;
+        }
         if (mTimeProvider != null) {
             mTimeProvider.close();
             mTimeProvider = null;
@@ -2636,6 +2686,13 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                             cb.first.execute(() -> cb.second.onInfo(
                                     mMediaPlayer, dsd, MEDIA_INFO_PREPARED, 0));
                         }
+                    }
+                }
+                synchronized (mTaskLock) {
+                    if (mCurrentTask.mMediaCallType == MEDIA_CALL_PREPARE
+                            && mCurrentTask.mNeedToWaitForEventToComplete) {
+                        mCurrentTask = null;
+                        processPendingTask_l();
                     }
                 }
                 return;
@@ -4506,4 +4563,38 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             }
         }
     }
+
+    private abstract class Task implements Runnable {
+        private final int mMediaCallType;
+        private final boolean mNeedToWaitForEventToComplete;
+
+        public Task (int mediaCallType, boolean needToWaitForEventToComplete) {
+            mMediaCallType = mediaCallType;
+            mNeedToWaitForEventToComplete = needToWaitForEventToComplete;
+        }
+
+        abstract int process();
+
+        @Override
+        public void run() {
+            int status = process();
+
+            if (!mNeedToWaitForEventToComplete) {
+                final DataSourceDesc dsd;
+                synchronized (mSrcLock) {
+                    dsd = mCurrentDSD;
+                }
+                synchronized (mEventCbLock) {
+                    for (Pair<Executor, MediaPlayer2EventCallback> cb : mEventCallbackRecords) {
+                        cb.first.execute(() -> cb.second.onCallComplete(
+                                MediaPlayer2Impl.this, dsd, mMediaCallType, status));
+                    }
+                }
+                synchronized (mTaskLock) {
+                    mCurrentTask = null;
+                    processPendingTask_l();
+                }
+            }
+        }
+    };
 }

@@ -5379,6 +5379,72 @@ message MetricsEvent {
     // OS: P
     SETTINGS_TV_WIFI_ADD_KNOWN_CATEGORY = 1331;
 
+    // ACTION: DND Settings > What to block > full screen intents
+    //   SUBTYPE: false is allowed, true is blocked
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    ACTION_ZEN_BLOCK_FULL_SCREEN_INTENTS = 1332;
+
+    // ACTION: DND Settings > What to block
+    //   SUBTYPE: false is allowed, true is blocked
+    // OS: P
+    ACTION_ZEN_BLOCK_LIGHT = 1333;
+
+    // ACTION: DND Settings > What to block
+    //   SUBTYPE: false is allowed, true is blocked
+    // OS: P
+    ACTION_ZEN_BLOCK_PEEK = 1334;
+
+    // ACTION: DND Settings > What to block
+    //   SUBTYPE: false is allowed, true is blocked
+    // OS: P
+    ACTION_ZEN_BLOCK_STATUS = 1335;
+
+    // ACTION: DND Settings > What to block
+    //   SUBTYPE: false is allowed, true is blocked
+    // OS: P
+    ACTION_ZEN_BLOCK_BADGE = 1336;
+
+    // ACTION: DND Settings > What to block
+    //   SUBTYPE: false is allowed, true is blocked
+    // OS: P
+    ACTION_ZEN_BLOCK_AMBIENT = 1337;
+
+    // ACTION: DND Settings > What to block
+    //   SUBTYPE: false is allowed, true is blocked
+    // OS: P
+    ACTION_ZEN_BLOCK_NOTIFICATION_LIST = 1338;
+
+    // OPEN: DND Settings > What to block
+    // OS: P
+    ZEN_WHAT_TO_BLOCK = 1339;
+
+    // ACTION: DND Settings > Priority only allows > System toggle
+    // SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_ALLOW_SYSTEM = 1340;
+
+    // OPEN: Settings > Sounds > Do Not Disturb > Duration
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_DURATION_DIALOG = 1341;
+
+    // OPEN: Settings > Sound & notification > Do Not Disturb > Duration -> Time Option (ie: for one hour)
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_DURATION_TIME = 1342;
+
+    // OPEN: Settings > Sound & notification > Do Not Disturb > Duration -> Until you turn off
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_DURATION_FOREVER = 1343;
+
+    // OPEN: Settings > Sound & notification > Do Not Disturb > Duration -> Ask every time
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_DURATION_PROMPT = 1344;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

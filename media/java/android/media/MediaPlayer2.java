@@ -22,17 +22,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
-import android.media.MediaDrm;
-import android.media.MediaFormat;
-import android.media.MediaPlayer2Impl;
-import android.media.MediaPlayerBase;
-import android.media.MediaTimeProvider;
-import android.media.PlaybackParams;
-import android.media.SubtitleController;
-import android.media.SubtitleController.Anchor;
-import android.media.SubtitleData;
-import android.media.SubtitleTrack.RenderingWidget;
-import android.media.SyncParams;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Parcel;
@@ -43,14 +32,13 @@ import android.view.SurfaceHolder;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.AutoCloseable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.concurrent.Executor;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Executor;
 
 
 /**
@@ -142,22 +130,21 @@ import java.util.UUID;
  *         the internal player engine.</li>
  *         <li>IllegalStateException is
  *         thrown to prevent programming errors such as calling
- *         {@link #prepare()}, {@link #setDataSource(DataSourceDesc)}, or
- *         {@code setPlaylist} methods in an invalid state. </li>
+ *         {@link #prepare()}, {@link #setDataSource(DataSourceDesc)}
+ *         methods in an invalid state. </li>
  *         </ul>
  *         </li>
  *     <li>Calling
- *         {@link #setDataSource(DataSourceDesc)}, or
- *         {@code setPlaylist} transfers a
+ *         {@link #setDataSource(DataSourceDesc)} transfers a
  *         MediaPlayer2 object in the <em>Idle</em> state to the
  *         <em>Initialized</em> state.
  *         <ul>
  *         <li>An IllegalStateException is thrown if
- *         setDataSource() or setPlaylist() is called in any other state.</li>
+ *         setDataSource() is called in any other state.</li>
  *         <li>It is good programming
  *         practice to always look out for <code>IllegalArgumentException</code>
  *         and <code>IOException</code> that may be thrown from
- *         <code>setDataSource</code> and <code>setPlaylist</code> methods.</li>
+ *         <code>setDataSource</code>.</li>
  *         </ul>
  *         </li>
  *     <li>A MediaPlayer2 object must first enter the <em>Prepared</em> state
@@ -270,7 +257,7 @@ import java.util.UUID;
  * <tr><td>attachAuxEffect </p></td>
  *     <td>{Initialized, Prepared, Started, Paused, Stopped, PlaybackCompleted} </p></td>
  *     <td>{Idle, Error} </p></td>
- *     <td>This method must be called after setDataSource or setPlaylist.
+ *     <td>This method must be called after setDataSource.
  *     Calling it does not change the object state. </p></td></tr>
  * <tr><td>getAudioSessionId </p></td>
  *     <td>any </p></td>
@@ -350,7 +337,7 @@ import java.util.UUID;
  *     <td>{Initialized, Prepared, Started, Paused, Stopped, PlaybackCompleted,
  *          Error} </p></td>
  *     <td>This method must be called in idle state as the audio session ID must be known before
- *         calling setDataSource or setPlaylist. Calling it does not change the object
+ *         calling setDataSource. Calling it does not change the object
  *         state. </p></td></tr>
  * <tr><td>setAudioStreamType (deprecated)</p></td>
  *     <td>{Idle, Initialized, Stopped, Prepared, Started, Paused,
@@ -364,13 +351,6 @@ import java.util.UUID;
  *     <td>{} </p></td>
  *     <td>Calling this method does not change the object state. </p></td></tr>
  * <tr><td>setDataSource </p></td>
- *     <td>{Idle} </p></td>
- *     <td>{Initialized, Prepared, Started, Paused, Stopped, PlaybackCompleted,
- *          Error} </p></td>
- *     <td>Successful invoke of this method in a valid state transfers the
- *         object to the <em>Initialized</em> state. Calling this method in an
- *         invalid state throws an IllegalStateException.</p></td></tr>
- * <tr><td>setPlaylist </p></td>
  *     <td>{Idle} </p></td>
  *     <td>{Initialized, Prepared, Started, Paused, Stopped, PlaybackCompleted,
  *          Error} </p></td>
@@ -512,6 +492,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * This class implements the Java {@code AutoCloseable} interface and
      * may be used with try-with-resources.
      */
+    // This is a synchronous call.
     @Override
     public abstract void close();
 
@@ -523,6 +504,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * prepared, the player will prepare the source and play.
      *
      */
+    // This is an asynchronous call.
     @Override
     public abstract void play();
 
@@ -533,18 +515,21 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * call prepare().
      *
      */
+    // This is an asynchronous call.
     @Override
     public abstract void prepare();
 
     /**
      * Pauses playback. Call play() to resume.
      */
+    // This is an asynchronous call.
     @Override
     public abstract void pause();
 
     /**
      * Tries to play next data source if applicable.
      */
+    // This is an asynchronous call.
     @Override
     public abstract void skipToNext();
 
@@ -554,6 +539,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      *
      * @param msec the offset in milliseconds from the start to seek to
      */
+    // This is an asynchronous call.
     @Override
     public void seekTo(long msec) {
         seekTo(msec, SEEK_PREVIOUS_SYNC /* mode */);
@@ -612,6 +598,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * for the audio attributes to become effective thereafter.
      * @param attributes a non-null set of audio attributes
      */
+    // This is an asynchronous call.
     @Override
     public abstract void setAudioAttributes(@NonNull AudioAttributes attributes);
 
@@ -627,6 +614,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      *
      * @param dsd the descriptor of data source you want to play
      */
+    // This is an asynchronous call.
     @Override
     public abstract void setDataSource(@NonNull DataSourceDesc dsd);
 
@@ -636,6 +624,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      *
      * @param dsd the descriptor of data source you want to play after current one
      */
+    // This is an asynchronous call.
     @Override
     public abstract void setNextDataSource(@NonNull DataSourceDesc dsd);
 
@@ -644,6 +633,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      *
      * @param dsds the list of data sources you want to play after current one
      */
+    // This is an asynchronous call.
     @Override
     public abstract void setNextDataSources(@NonNull List<DataSourceDesc> dsds);
 
@@ -659,6 +649,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * Configures the player to loop on the current data source.
      * @param loop true if the current data source is meant to loop.
      */
+    // This is an asynchronous call.
     @Override
     public abstract void loopCurrent(boolean loop);
 
@@ -671,6 +662,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * by the player, see {@link #getPlaybackSpeed()}.
      * @param speed the desired playback speed
      */
+    // This is an asynchronous call.
     @Override
     public abstract void setPlaybackSpeed(float speed);
 
@@ -704,6 +696,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * gain. See {@link #getMaxPlayerVolume()} for the volume range supported by this player.
      * @param volume a value between 0.0f and {@link #getMaxPlayerVolume()}.
      */
+    // This is an asynchronous call.
     @Override
     public abstract void setPlayerVolume(float volume);
 
@@ -728,6 +721,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * @param e the {@link Executor} to be used for the events.
      * @param cb the callback to receive the events.
      */
+    // This is a synchronous call.
     @Override
     public abstract void registerPlayerEventCallback(@NonNull Executor e,
             @NonNull PlayerEventCallback cb);
@@ -736,6 +730,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * Removes a previously registered callback for player events
      * @param cb the callback to remove
      */
+    // This is a synchronous call.
     @Override
     public abstract void unregisterPlayerEventCallback(@NonNull PlayerEventCallback cb);
 
@@ -758,7 +753,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * Invoke a generic method on the native player using opaque
      * parcels for the request and reply. Both payloads' format is a
      * convention between the java caller and the native player.
-     * Must be called after setDataSource or setPlaylist to make sure a native player
+     * Must be called after setDataSource to make sure a native player
      * exists. On failure, a RuntimeException is thrown.
      *
      * @param request Parcel with the data for the extension. The
@@ -781,6 +776,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * @param label An application specific Object used to help to identify the completeness
      * of a batch of commands.
      */
+    // This is an asynchronous call.
     public void notifyWhenCommandLabelReached(Object label) { }
 
     /**
@@ -819,6 +815,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * @throws IllegalStateException if the internal player engine has not been
      * initialized or has been released.
      */
+    // This is an asynchronous call.
     public abstract void setSurface(Surface surface);
 
     /* Do not change these video scaling mode values below without updating
@@ -867,6 +864,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
     /**
      * Discards all pending commands.
      */
+    // This is a synchronous call.
     public abstract void clearPendingCommands();
 
     /**
@@ -890,6 +888,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * @return true if succesful, false if the specified {@link AudioDeviceInfo} is non-null and
      * does not correspond to a valid audio device.
      */
+    // This is an asynchronous call.
     @Override
     public abstract boolean setPreferredDevice(AudioDeviceInfo deviceInfo);
 
@@ -917,6 +916,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * @param handler  Specifies the {@link Handler} object for the thread on which to execute
      * the callback. If <code>null</code>, the handler on the main looper will be used.
      */
+    // This is a synchronous call.
     @Override
     public abstract void addOnRoutingChangedListener(AudioRouting.OnRoutingChangedListener listener,
             Handler handler);
@@ -927,6 +927,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * @param listener The previously added {@link AudioRouting.OnRoutingChangedListener} interface
      * to remove.
      */
+    // This is a synchronous call.
     @Override
     public abstract void removeOnRoutingChangedListener(AudioRouting.OnRoutingChangedListener listener);
 
@@ -1082,6 +1083,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * @throws IllegalArgumentException if params is invalid or not supported.
      * @hide
      */
+    // This is an asynchronous call.
     public void setBufferingParams(@NonNull BufferingParams params) { }
 
     /**
@@ -1164,6 +1166,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      *
      * @param params the playback params.
      */
+    // This is an asynchronous call.
     public abstract void setPlaybackParams(@NonNull PlaybackParams params);
 
     /**
@@ -1179,6 +1182,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      *
      * @param params the A/V sync params to apply
      */
+    // This is an asynchronous call.
     public abstract void setSyncParams(@NonNull SyncParams params);
 
     /**
@@ -1267,6 +1271,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * {@link #SEEK_CLOSEST} often has larger performance overhead compared
      * to the other options if there is no sync frame located at msec.
      */
+    // This is an asynchronous call.
     public abstract void seekTo(long msec, @SeekMode int mode);
 
     /**
@@ -1339,6 +1344,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * this method, you will have to initialize it again by setting the
      * data source and calling prepare().
      */
+    // This is a synchronous call.
     @Override
     public abstract void reset();
 
@@ -1377,6 +1383,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * by calling this method.
      * This method must be called before one of the overloaded <code> setDataSource </code> methods.
      */
+    // This is an asynchronous call.
     public abstract void setAudioSessionId(int sessionId);
 
     /**
@@ -1401,6 +1408,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * methods.
      * @param effectId system wide unique id of the effect to attach
      */
+    // This is an asynchronous call.
     public abstract void attachAuxEffect(int effectId);
 
 
@@ -1416,6 +1424,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * 0 < x <= R -> level = 10^(72*(x-R)/20/R)
      * @param level send level scalar
      */
+    // This is an asynchronous call.
     public abstract void setAuxEffectSendLevel(float level);
 
     /**
@@ -1630,6 +1639,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      *
      * @see android.media.MediaPlayer2#getTrackInfo
      */
+    // This is an asynchronous call.
     public abstract void selectTrack(int index);
 
     /**
@@ -1646,6 +1656,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      *
      * @see android.media.MediaPlayer2#getTrackInfo
      */
+    // This is an asynchronous call.
     public abstract void deselectTrack(int index);
 
     /** @hide */
@@ -1766,8 +1777,6 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
          * <li>{@link #MEDIA_CALL_PAUSE}
          * <li>{@link #MEDIA_CALL_PLAY}
          * <li>{@link #MEDIA_CALL_PREPARE}
-         * <li>{@link #MEDIA_CALL_PREPARE_DRM}
-         * <li>{@link #MEDIA_CALL_PROVIDE_DRM_KEY_RESPONSE}
          * <li>{@link #MEDIA_CALL_RELEASE_DRM}
          * <li>{@link #MEDIA_CALL_RESTORE_DRM_KEYS}
          * <li>{@link #MEDIA_CALL_SEEK_TO}
@@ -1776,8 +1785,6 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
          * <li>{@link #MEDIA_CALL_SET_AUDIO_SESSION_ID}
          * <li>{@link #MEDIA_CALL_SET_AUX_EFFECT_SEND_LEVEL}
          * <li>{@link #MEDIA_CALL_SET_DATA_SOURCE}
-         * <li>{@link #MEDIA_CALL_SET_DRM_CONFIG_HELPER}
-         * <li>{@link #MEDIA_CALL_SET_DRM_PROPERTY_STRING}
          * <li>{@link #MEDIA_CALL_SET_NEXT_DATA_SOURCE}
          * <li>{@link #MEDIA_CALL_SET_NEXT_DATA_SOURCES}
          * <li>{@link #MEDIA_CALL_SET_PLAYBACK_PARAMS}
@@ -1816,12 +1823,14 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * @param eventCallback the callback that will be run
      * @param executor the executor through which the callback should be invoked
      */
+    // This is a synchronous call.
     public abstract void setMediaPlayer2EventCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull MediaPlayer2EventCallback eventCallback);
 
     /**
      * Clears the {@link MediaPlayer2EventCallback}.
      */
+    // This is a synchronous call.
     public abstract void clearMediaPlayer2EventCallback();
 
     /**
@@ -1842,6 +1851,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      *
      * @hide
      */
+    // This is a synchronous call.
     public void setOnSubtitleDataListener(OnSubtitleDataListener listener) { }
 
 
@@ -2008,135 +2018,127 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
     public static final int MEDIA_INFO_SUBTITLE_TIMED_OUT = 902;
 
     //--------------------------------------------------------------------------
-    /** The player just completed a call {@code attachAuxEffect}.
+    /** The player just completed a call {@link #attachAuxEffect}.
      * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
      */
     public static final int MEDIA_CALL_ATTACH_AUX_EFFECT = 1;
 
-    /** The player just completed a call {@code deselectTrack}.
+    /** The player just completed a call {@link #deselectTrack}.
      * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
      */
     public static final int MEDIA_CALL_DESELECT_TRACK = 2;
 
-    /** The player just completed a call {@code loopCurrent}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback.CallComplete
+    /** The player just completed a call {@link #loopCurrent}.
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
      */
     public static final int MEDIA_CALL_LOOP_CURRENT = 3;
 
-    /** The player just completed a call {@code pause}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback.CallComplete
+    /** The player just completed a call {@link #pause}.
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
      */
     public static final int MEDIA_CALL_PAUSE = 4;
 
-    /** The player just completed a call {@code play}.
+    /** The player just completed a call {@link #play}.
      * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
      */
     public static final int MEDIA_CALL_PLAY = 5;
 
-    /** The player just completed a call {@code prepare}.
+    /** The player just completed a call {@link #prepare}.
      * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
      */
     public static final int MEDIA_CALL_PREPARE = 6;
 
-    /** The player just completed a call {@code prepareDrm}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
-     */
-    public static final int MEDIA_CALL_PREPARE_DRM = 7;
-
-    /** The player just completed a call {@code provideDrmKeyResponse}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
-     */
-    public static final int MEDIA_CALL_PROVIDE_DRM_KEY_RESPONSE = 8;
-
-    /** The player just completed a call {@code releaseDrm}.
+    /** The player just completed a call {@link #releaseDrm}.
      * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
      */
     public static final int MEDIA_CALL_RELEASE_DRM = 12;
 
-    /** The player just completed a call {@code restoreDrmKeys}.
+    /** The player just completed a call {@link #restoreDrmKeys}.
      * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
      */
     public static final int MEDIA_CALL_RESTORE_DRM_KEYS = 13;
 
-    /** The player just completed a call {@code seekTo}.
+    /** The player just completed a call {@link #seekTo}.
      * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
      */
     public static final int MEDIA_CALL_SEEK_TO = 14;
 
-    /** The player just completed a call {@code selectTrack}.
+    /** The player just completed a call {@link #selectTrack}.
      * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
      */
     public static final int MEDIA_CALL_SELECT_TRACK = 15;
 
-    /** The player just completed a call {@code setAudioAttributes}.
+    /** The player just completed a call {@link #setAudioAttributes}.
      * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
      */
     public static final int MEDIA_CALL_SET_AUDIO_ATTRIBUTES = 16;
 
-    /** The player just completed a call {@code setAudioSessionId}.
+    /** The player just completed a call {@link #setAudioSessionId}.
      * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
      */
     public static final int MEDIA_CALL_SET_AUDIO_SESSION_ID = 17;
 
-    /** The player just completed a call {@code setAuxEffectSendLevel}.
+    /** The player just completed a call {@link #setAuxEffectSendLevel}.
      * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
      */
     public static final int MEDIA_CALL_SET_AUX_EFFECT_SEND_LEVEL = 18;
 
-    /** The player just completed a call {@code setDataSource}.
+    /** The player just completed a call {@link #setDataSource}.
      * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
      */
     public static final int MEDIA_CALL_SET_DATA_SOURCE = 19;
 
-    /** The player just completed a call {@code setOnDrmConfigHelper}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
-     */
-    public static final int MEDIA_CALL_SET_DRM_CONFIG_HELPER = 20;
-
-    /** The player just completed a call {@code setDrmPropertyString}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
-     */
-    public static final int MEDIA_CALL_SET_DRM_PROPERTY_STRING = 21;
-
-    /** The player just completed a call {@code setNextDataSource}.
+    /** The player just completed a call {@link #setNextDataSource}.
      * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
      */
     public static final int MEDIA_CALL_SET_NEXT_DATA_SOURCE = 22;
 
-    /** The player just completed a call {@code setNextDataSources}.
+    /** The player just completed a call {@link #setNextDataSources}.
      * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
      */
     public static final int MEDIA_CALL_SET_NEXT_DATA_SOURCES = 23;
 
-    /** The player just completed a call {@code setPlaybackParams}.
+    /** The player just completed a call {@link #setPlaybackParams}.
      * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
      */
     public static final int MEDIA_CALL_SET_PLAYBACK_PARAMS = 24;
 
-    /** The player just completed a call {@code setPlaybackSpeed}.
+    /** The player just completed a call {@link #setPlaybackSpeed}.
      * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
      */
     public static final int MEDIA_CALL_SET_PLAYBACK_SPEED = 25;
 
-    /** The player just completed a call {@code setPlayerVolume}.
+    /** The player just completed a call {@link #setPlayerVolume}.
      * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
      */
     public static final int MEDIA_CALL_SET_PLAYER_VOLUME = 26;
 
-    /** The player just completed a call {@code setSurface}.
+    /** The player just completed a call {@link #setSurface}.
      * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
      */
     public static final int MEDIA_CALL_SET_SURFACE = 27;
 
-    /** The player just completed a call {@code setSyncParams}.
+    /** The player just completed a call {@link #setSyncParams}.
      * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
      */
     public static final int MEDIA_CALL_SET_SYNC_PARAMS = 28;
 
-    /** The player just completed a call {@code skipToNext}.
+    /** The player just completed a call {@link #skipToNext}.
      * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
      */
     public static final int MEDIA_CALL_SKIP_TO_NEXT = 29;
+
+    /** The player just completed a call {@link #setBufferingParams}.
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
+     * @hide
+     */
+    public static final int MEDIA_CALL_SET_BUFFERING_PARAMS = 1001;
+
+    /** The player just completed a call {@link #setPreferredDevice}.
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
+     * @hide
+     */
+    public static final int MEDIA_CALL_SET_PREFERRED_DEVICE = 1002;
 
 
     // Modular DRM begin
@@ -2148,8 +2150,8 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * 'securityLevel', which has to be set after DRM scheme creation but
      * before the DRM session is opened.
      *
-     * The only allowed DRM calls in this listener are {@code getDrmPropertyString}
-     * and {@code setDrmPropertyString}.
+     * The only allowed DRM calls in this listener are {@link #getDrmPropertyString}
+     * and {@link #setDrmPropertyString}.
      */
     public interface OnDrmConfigHelper
     {
@@ -2170,6 +2172,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      *
      * @param listener the callback that will be run
      */
+    // This is a synchronous call.
     public abstract void setOnDrmConfigHelper(OnDrmConfigHelper listener);
 
     /**
@@ -2188,7 +2191,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
         public void onDrmInfo(MediaPlayer2 mp, DataSourceDesc dsd, DrmInfo drmInfo) { }
 
         /**
-         * Called to notify the client that {@code prepareDrm} is finished and ready for
+         * Called to notify the client that {@link #prepareDrm} is finished and ready for
          * key request/response.
          *
          * @param mp the {@code MediaPlayer2} associated with this callback
@@ -2208,12 +2211,14 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * @param eventCallback the callback that will be run
      * @param executor the executor through which the callback should be invoked
      */
+    // This is a synchronous call.
     public abstract void setDrmEventCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull DrmEventCallback eventCallback);
 
     /**
      * Clears the {@link DrmEventCallback}.
      */
+    // This is a synchronous call.
     public abstract void clearDrmEventCallback();
 
     /**
@@ -2260,10 +2265,10 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
     /**
      * Prepares the DRM for the current source
      * <p>
-     * If {@code OnDrmConfigHelper} is registered, it will be called during
+     * If {@link OnDrmConfigHelper} is registered, it will be called during
      * preparation to allow configuration of the DRM properties before opening the
      * DRM session. Note that the callback is called synchronously in the thread that called
-     * {@code prepareDrm}. It should be used only for a series of {@code getDrmPropertyString}
+     * {@link #prepareDrm}. It should be used only for a series of {@code getDrmPropertyString}
      * and {@code setDrmPropertyString} calls and refrain from any lengthy operation.
      * <p>
      * If the device has not been provisioned before, this call also provisions the device
@@ -2293,6 +2298,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * @throws ProvisioningServerErrorException   if provisioning is required but failed due to
      *                                            the request denied by the provisioning server
      */
+    // This is a synchronous call.
     public abstract void prepareDrm(@NonNull UUID uuid)
             throws UnsupportedSchemeException, ResourceBusyException,
                    ProvisioningNetworkErrorException, ProvisioningServerErrorException;
@@ -2306,6 +2312,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      *
      * @throws NoDrmSchemeException if there is no active DRM session to release
      */
+    // This is an asynchronous call.
     public abstract void releaseDrm() throws NoDrmSchemeException;
 
     /**
@@ -2371,6 +2378,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * @throws DeniedByServerException if the response indicates that the
      * server rejected the request
      */
+    // This is a synchronous call.
     public abstract byte[] provideDrmKeyResponse(
             @Nullable byte[] keySetId, @NonNull byte[] response)
             throws NoDrmSchemeException, DeniedByServerException;
@@ -2381,6 +2389,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      *
      * @param keySetId identifies the saved key set to restore
      */
+    // This is an asynchronous call.
     public abstract void restoreDrmKeys(@NonNull byte[] keySetId)
             throws NoDrmSchemeException;
 
@@ -2408,6 +2417,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * {@link MediaDrm#PROPERTY_VENDOR}, {@link MediaDrm#PROPERTY_VERSION},
      * {@link MediaDrm#PROPERTY_DESCRIPTION}, {@link MediaDrm#PROPERTY_ALGORITHMS}
      */
+    // This is a synchronous call.
     public abstract void setDrmPropertyString(
             @NonNull @MediaDrm.StringProperty String propertyName, @NonNull String value)
             throws NoDrmSchemeException;

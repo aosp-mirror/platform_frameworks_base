@@ -540,6 +540,8 @@ public class IpClient extends StateMachine {
     // TODO: Revert this hack once IpClient and Nat464Xlat work in concert.
     private static final String CLAT_PREFIX = "v4-";
 
+    private static final int IMMEDIATE_FAILURE_DURATION = 0;
+
     private final State mStoppedState = new StoppedState();
     private final State mStoppingState = new StoppingState();
     private final State mStartedState = new StartedState();
@@ -551,6 +553,7 @@ public class IpClient extends StateMachine {
     private final String mClatInterfaceName;
     @VisibleForTesting
     protected final Callback mCallback;
+    private final Dependencies mDependencies;
     private final CountDownLatch mShutdownLatch;
     private final INetworkManagementService mNwService;
     private final NetlinkTracker mNetlinkTracker;
@@ -579,10 +582,23 @@ public class IpClient extends StateMachine {
     private boolean mMulticastFiltering;
     private long mStartTimeMillis;
 
+    public static class Dependencies {
+        public INetworkManagementService getNMS() {
+            return INetworkManagementService.Stub.asInterface(
+                    ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE));
+        }
+
+        public INetd getNetd() {
+            return NetdService.getInstance();
+        }
+
+        public InterfaceParams getInterfaceParams(String ifname) {
+            return InterfaceParams.getByName(ifname);
+        }
+    }
+
     public IpClient(Context context, String ifName, Callback callback) {
-        this(context, ifName, callback, INetworkManagementService.Stub.asInterface(
-                ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE)),
-                NetdService.getInstance());
+        this(context, ifName, callback, new Dependencies());
     }
 
     /**
@@ -591,27 +607,35 @@ public class IpClient extends StateMachine {
      */
     public IpClient(Context context, String ifName, Callback callback,
             INetworkManagementService nwService) {
-        this(context, ifName, callback, nwService, NetdService.getInstance());
+        this(context, ifName, callback, new Dependencies() {
+            @Override
+            public INetworkManagementService getNMS() { return nwService; }
+        });
     }
 
     @VisibleForTesting
-    IpClient(Context context, String ifName, Callback callback,
-            INetworkManagementService nwService, INetd netd) {
+    IpClient(Context context, String ifName, Callback callback, Dependencies deps) {
         super(IpClient.class.getSimpleName() + "." + ifName);
+        Preconditions.checkNotNull(ifName);
+        Preconditions.checkNotNull(callback);
+
         mTag = getName();
 
         mContext = context;
         mInterfaceName = ifName;
         mClatInterfaceName = CLAT_PREFIX + ifName;
         mCallback = new LoggingCallbackWrapper(callback);
+        mDependencies = deps;
         mShutdownLatch = new CountDownLatch(1);
-        mNwService = nwService;
+        mNwService = deps.getNMS();
 
         mLog = new SharedLog(MAX_LOG_RECORDS, mTag);
         mConnectivityPacketLog = new LocalLog(MAX_PACKET_RECORDS);
         mMsgStateLogger = new MessageHandlingLogger();
 
-        mInterfaceCtrl = new InterfaceController(mInterfaceName, mNwService, netd, mLog);
+        // TODO: Consider creating, constructing, and passing in some kind of
+        // InterfaceController.Dependencies class.
+        mInterfaceCtrl = new InterfaceController(mInterfaceName, mNwService, deps.getNetd(), mLog);
 
         mNetlinkTracker = new NetlinkTracker(
                 mInterfaceName,
@@ -742,11 +766,11 @@ public class IpClient extends StateMachine {
             return;
         }
 
-        mInterfaceParams = InterfaceParams.getByName(mInterfaceName);
+        mInterfaceParams = mDependencies.getInterfaceParams(mInterfaceName);
         if (mInterfaceParams == null) {
             logError("Failed to find InterfaceParams for " + mInterfaceName);
-            // TODO: call doImmediateProvisioningFailure() with an error code
-            // indicating something like "interface not ready".
+            doImmediateProvisioningFailure(IpManagerEvent.ERROR_INTERFACE_NOT_FOUND);
+            return;
         }
 
         mCallback.setNeighborDiscoveryOffload(true);
@@ -930,8 +954,11 @@ public class IpClient extends StateMachine {
     }
 
     private void recordMetric(final int type) {
-        if (mStartTimeMillis <= 0) { Log.wtf(mTag, "Start time undefined!"); }
-        final long duration = SystemClock.elapsedRealtime() - mStartTimeMillis;
+        // We may record error metrics prior to starting.
+        // Map this to IMMEDIATE_FAILURE_DURATION.
+        final long duration = (mStartTimeMillis > 0)
+                ? (SystemClock.elapsedRealtime() - mStartTimeMillis)
+                : IMMEDIATE_FAILURE_DURATION;
         mMetricsLog.log(mInterfaceName, new IpManagerEvent(type, duration));
     }
 

@@ -179,7 +179,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
                         / (float) iconDrawable.getIntrinsicHeight() * mIconSize);
                 iconDrawable.setBounds(0, 0, Math.max(width, 1), mIconSize);
             }
-            button.setCompoundDrawablesRelative(iconDrawable, null, null, null);
+            button.setCompoundDrawables(iconDrawable, null, null, null);
             button.setOnClickListener(this);
         }
 
@@ -337,6 +337,28 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
             setMaxWidth(KeyguardSliceView.this.getWidth() / 2);
             setMaxLines(1);
             setEllipsize(TruncateAt.END);
+        }
+
+        @Override
+        public void setTextColor(int color) {
+            super.setTextColor(color);
+            updateDrawableColors();
+        }
+
+        @Override
+        public void setCompoundDrawables(Drawable left, Drawable top, Drawable right,
+                Drawable bottom) {
+            super.setCompoundDrawables(left, top, right, bottom);
+            updateDrawableColors();
+        }
+
+        private void updateDrawableColors() {
+            final int color = getCurrentTextColor();
+            for (Drawable drawable : getCompoundDrawables()) {
+                if (drawable != null) {
+                    drawable.setTint(color);
+                }
+            }
         }
     }
 }
