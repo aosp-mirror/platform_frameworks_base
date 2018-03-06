@@ -347,7 +347,6 @@ applications that come with the platform
     <privapp-permissions package="com.android.systemui">
         <permission name="android.permission.BATTERY_STATS"/>
         <permission name="android.permission.BIND_APPWIDGET"/>
-        <permission name="android.permission.BIND_SLICE" />
         <permission name="android.permission.BLUETOOTH_PRIVILEGED"/>
         <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"/>
         <permission name="android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST"/>
