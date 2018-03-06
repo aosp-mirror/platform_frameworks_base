@@ -1456,6 +1456,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     + "already in the process of turning the screen on.");
             return;
         }
+        Slog.d(TAG, "powerPress: eventTime=" + eventTime + " interactive=" + interactive
+                + " count=" + count + " beganFromNonInteractive=" + mBeganFromNonInteractive +
+                " mShortPressOnPowerBehavior=" + mShortPressOnPowerBehavior);
 
         if (count == 2) {
             powerMultiPressAction(eventTime, interactive, mDoublePressOnPowerBehavior);
