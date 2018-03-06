@@ -117,7 +117,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private KeyButtonDrawable mImeIcon;
     private KeyButtonDrawable mMenuIcon;
     private KeyButtonDrawable mAccessibilityIcon;
-    private KeyButtonDrawable mRotateSuggestionIcon;
+    private TintedKeyButtonDrawable mRotateSuggestionIcon;
 
     private GestureHelper mGestureHelper;
     private DeadZone mDeadZone;
@@ -475,7 +475,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 darkContext.getDrawable(darkIcon));
     }
 
-    private KeyButtonDrawable getDrawable(Context ctx, @DrawableRes int icon,
+    private TintedKeyButtonDrawable getDrawable(Context ctx, @DrawableRes int icon,
             @ColorInt int lightColor, @ColorInt int darkColor) {
         return TintedKeyButtonDrawable.create(ctx.getDrawable(icon), lightColor, darkColor);
     }
@@ -746,8 +746,15 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         Context rotateContext = new ContextThemeWrapper(ctx, style);
 
         // Recreate the icon and set it if needed
+        TintedKeyButtonDrawable priorIcon = mRotateSuggestionIcon;
         mRotateSuggestionIcon = getDrawable(rotateContext, R.drawable.ic_sysbar_rotate_button,
                 lightColor, darkColor);
+
+        // Apply any prior set dark intensity
+        if (priorIcon != null && priorIcon.isDarkIntensitySet()) {
+            mRotateSuggestionIcon.setDarkIntensity(priorIcon.getDarkIntensity());
+        }
+
         if (setIcon) getRotateSuggestionButton().setImageDrawable(mRotateSuggestionIcon);
     }
 
