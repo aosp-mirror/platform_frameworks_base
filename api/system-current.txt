@@ -99,6 +99,7 @@ package android {
     field public static final java.lang.String MANAGE_CARRIER_OEM_UNLOCK_STATE = "android.permission.MANAGE_CARRIER_OEM_UNLOCK_STATE";
     field public static final java.lang.String MANAGE_CA_CERTIFICATES = "android.permission.MANAGE_CA_CERTIFICATES";
     field public static final java.lang.String MANAGE_DEVICE_ADMINS = "android.permission.MANAGE_DEVICE_ADMINS";
+    field public static final java.lang.String MANAGE_SOUND_TRIGGER = "android.permission.MANAGE_SOUND_TRIGGER";
     field public static final java.lang.String MANAGE_SUBSCRIPTION_PLANS = "android.permission.MANAGE_SUBSCRIPTION_PLANS";
     field public static final java.lang.String MANAGE_USB = "android.permission.MANAGE_USB";
     field public static final java.lang.String MANAGE_USERS = "android.permission.MANAGE_USERS";
@@ -2215,6 +2216,21 @@ package android.hardware.radio {
     method public void onProgramListChanged();
     method public void onTrafficAnnouncement(boolean);
     method public void onTuneFailed(int, android.hardware.radio.ProgramSelector);
+  }
+
+}
+
+package android.hardware.soundtrigger {
+
+  public class SoundTrigger {
+    field public static final int STATUS_OK = 0; // 0x0
+  }
+
+  public static class SoundTrigger.RecognitionEvent {
+    method public android.media.AudioFormat getCaptureFormat();
+    method public int getCaptureSession();
+    method public byte[] getData();
+    method public boolean isCaptureAvailable();
   }
 
 }
