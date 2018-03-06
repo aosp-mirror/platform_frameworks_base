@@ -782,13 +782,13 @@ public class ZenModeHelper {
     }
 
     private void setPreviousRingerModeSetting(Integer previousRingerLevel) {
-        Slog.d("beverlyt", "setPreviousRingerMode=" + previousRingerLevel);
         Global.putString(
                 mContext.getContentResolver(), Global.ZEN_MODE_RINGER_LEVEL,
                 previousRingerLevel == null ? null : Integer.toString(previousRingerLevel));
     }
 
-    private boolean evaluateZenMode(String reason, boolean setRingerMode) {
+    @VisibleForTesting
+    protected boolean evaluateZenMode(String reason, boolean setRingerMode) {
         if (DEBUG) Log.d(TAG, "evaluateZenMode");
         final int zenBefore = mZenMode;
         final int zen = computeZenMode();
@@ -796,7 +796,7 @@ public class ZenModeHelper {
         mZenMode = zen;
         setZenModeSetting(mZenMode);
         updateRingerModeAffectedStreams();
-        if (setRingerMode) {
+        if (setRingerMode && zen != zenBefore) {
             applyZenToRingerMode();
         }
         applyRestrictions();
@@ -813,8 +813,8 @@ public class ZenModeHelper {
     }
 
     private int computeZenMode() {
+        if (mConfig == null) return Global.ZEN_MODE_OFF;
         synchronized (mConfig) {
-            if (mConfig == null) return Global.ZEN_MODE_OFF;
             if (mConfig.manualRule != null) return mConfig.manualRule.zenMode;
             int zen = Global.ZEN_MODE_OFF;
             for (ZenRule automaticRule : mConfig.automaticRules.values()) {
@@ -1018,6 +1018,13 @@ public class ZenModeHelper {
 
             int ringerModeExternalOut = ringerModeNew;
 
+            if (mZenMode == Global.ZEN_MODE_OFF
+                    || (mZenMode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
+                    && !ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(mConfig))) {
+                // in priority only with ringer not muted, save ringer mode changes
+                // in dnd off, save ringer mode changes
+                setPreviousRingerModeSetting(ringerModeNew);
+            }
             int newZen = -1;
             switch (ringerModeNew) {
                 case AudioManager.RINGER_MODE_SILENT:
@@ -1046,12 +1053,7 @@ public class ZenModeHelper {
             if (newZen != -1) {
                 setManualZenMode(newZen, null, "ringerModeInternal", null,
                         false /*setRingerMode*/);
-            } else if (mZenMode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
-                    && !ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(mConfig)) {
-                // in priority only with ringer not muted, save ringer mode changes
-                setPreviousRingerModeSetting(ringerModeNew);
             }
-
             if (isChange || newZen != -1 || ringerModeExternal != ringerModeExternalOut) {
                 ZenLog.traceSetRingerModeInternal(ringerModeOld, ringerModeNew, caller,
                         ringerModeExternal, ringerModeExternalOut);
