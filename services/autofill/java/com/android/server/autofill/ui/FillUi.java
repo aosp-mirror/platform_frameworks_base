@@ -415,10 +415,15 @@ final class FillUi {
         applyNewFilterText();
     }
 
-    public void destroy() {
+    public void destroy(boolean notifyClient) {
         throwIfDestroyed();
+        if (mWindow != null) {
+            mWindow.hide(false);
+        }
         mCallback.onDestroy();
-        mCallback.requestHideFillUi();
+        if (notifyClient) {
+            mCallback.requestHideFillUi();
+        }
         mDestroyed = true;
     }
 
@@ -644,6 +649,10 @@ final class FillUi {
          * Hides the window.
          */
         void hide() {
+            hide(true);
+        }
+
+        void hide(boolean destroyCallbackOnError) {
             try {
                 if (mShowing) {
                     mWm.removeView(mContentView);
@@ -654,7 +663,9 @@ final class FillUi {
                 // happen - since show() and hide() are always called in the UIThread - but if it
                 // does, it should not crash the system.
                 Slog.e(TAG, "Exception hiding window ", e);
-                mCallback.onDestroy();
+                if (destroyCallbackOnError) {
+                    mCallback.onDestroy();
+                }
             } finally {
                 mOverlayControl.showOverlays();
             }
