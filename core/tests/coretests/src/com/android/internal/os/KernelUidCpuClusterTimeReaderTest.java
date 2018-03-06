@@ -114,6 +114,34 @@ public class KernelUidCpuClusterTimeReaderTest {
     }
 
     @Test
+    public void testReadAbsolute() throws Exception {
+        VerifiableCallback cb = new VerifiableCallback();
+        final int cores = 6;
+        final int[] clusters = {2, 4};
+        final int[] uids = {1, 22, 333, 4444, 5555};
+
+        // Verify return absolute value
+        final long[][] times = increaseTime(new long[uids.length][cores]);
+        when(mProcReader.readBytes()).thenReturn(getUidTimesBytes(uids, clusters, times));
+        mReader.readAbsolute(cb);
+        for (int i = 0; i < uids.length; i++) {
+            cb.verify(uids[i], getTotal(clusters, times[i]));
+        }
+        cb.verifyNoMoreInteractions();
+
+        // Verify that a second call should return the same absolute value
+        cb.clear();
+        Mockito.reset(mProcReader);
+        final long[][] times1 = increaseTime(times);
+        when(mProcReader.readBytes()).thenReturn(getUidTimesBytes(uids, clusters, times1));
+        mReader.readAbsolute(cb);
+        for (int i = 0; i < uids.length; i++) {
+            cb.verify(uids[i], getTotal(clusters, times1[i]));
+        }
+        cb.verifyNoMoreInteractions();
+    }
+
+    @Test
     public void testReadDelta_malformedData() throws Exception {
         final int cores = 6;
         final int[] clusters = {2, 4};

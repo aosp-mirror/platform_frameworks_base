@@ -61,12 +61,17 @@ import android.util.StatsLog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.os.KernelCpuSpeedReader;
+import com.android.internal.os.KernelUidCpuTimeReader;
+import com.android.internal.os.KernelUidCpuClusterTimeReader;
+import com.android.internal.os.KernelUidCpuActiveTimeReader;
+import com.android.internal.os.KernelUidCpuFreqTimeReader;
 import com.android.internal.os.KernelWakelockReader;
 import com.android.internal.os.KernelWakelockStats;
 import com.android.internal.os.PowerProfile;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -106,7 +111,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private final ShutdownEventReceiver mShutdownEventReceiver;
     private final KernelWakelockReader mKernelWakelockReader = new KernelWakelockReader();
     private final KernelWakelockStats mTmpWakelockStats = new KernelWakelockStats();
-    private final KernelCpuSpeedReader[] mKernelCpuSpeedReaders;
     private IWifiManager mWifiManager = null;
     private TelephonyManager mTelephony = null;
     private final StatFs mStatFsData = new StatFs(Environment.getDataDirectory().getAbsolutePath());
@@ -114,6 +118,15 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             new StatFs(Environment.getRootDirectory().getAbsolutePath());
     private final StatFs mStatFsTemp =
             new StatFs(Environment.getDownloadCacheDirectory().getAbsolutePath());
+
+    private KernelUidCpuTimeReader mKernelUidCpuTimeReader = new KernelUidCpuTimeReader();
+    private KernelCpuSpeedReader[] mKernelCpuSpeedReaders;
+    private KernelUidCpuFreqTimeReader mKernelUidCpuFreqTimeReader =
+            new KernelUidCpuFreqTimeReader();
+    private KernelUidCpuActiveTimeReader mKernelUidCpuActiveTimeReader =
+            new KernelUidCpuActiveTimeReader();
+    private KernelUidCpuClusterTimeReader mKernelUidCpuClusterTimeReader =
+            new KernelUidCpuClusterTimeReader();
 
     public StatsCompanionService(Context context) {
         super();
@@ -159,6 +172,13 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     numSpeedSteps);
             firstCpuOfCluster += powerProfile.getNumCoresInCpuCluster(i);
         }
+        // use default throttling in
+        // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
+        mKernelUidCpuFreqTimeReader.setThrottleInterval(0);
+        long[] freqs = mKernelUidCpuFreqTimeReader.readFreqs(powerProfile);
+        mKernelUidCpuFreqTimeReader.setReadBinary(true);
+        mKernelUidCpuClusterTimeReader.setThrottleInterval(0);
+        mKernelUidCpuActiveTimeReader.setThrottleInterval(0);
     }
 
     @Override
@@ -676,6 +696,53 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
+    private void pullKernelUidCpuTime(int tagId, List<StatsLogEventWrapper> pulledData) {
+        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
+        mKernelUidCpuTimeReader.readAbsolute((uid, userTimeUs, systemTimeUs) -> {
+            StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 3);
+            e.writeInt(uid);
+            e.writeLong(userTimeUs);
+            e.writeLong(systemTimeUs);
+            pulledData.add(e);
+        });
+    }
+
+    private void pullKernelUidCpuFreqTime(int tagId, List<StatsLogEventWrapper> pulledData) {
+        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
+        mKernelUidCpuFreqTimeReader.readAbsolute((uid, cpuFreqTimeMs) -> {
+            for (int freqIndex = 0; freqIndex < cpuFreqTimeMs.length; ++freqIndex) {
+                StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 3);
+                e.writeInt(uid);
+                e.writeInt(freqIndex);
+                e.writeLong(cpuFreqTimeMs[freqIndex]);
+                pulledData.add(e);
+            }
+        });
+    }
+
+    private void pullKernelUidCpuClusterTime(int tagId, List<StatsLogEventWrapper> pulledData) {
+        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
+        mKernelUidCpuClusterTimeReader.readAbsolute((uid, cpuClusterTimesMs) -> {
+            for (int i = 0; i < cpuClusterTimesMs.length; i++) {
+                StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 3);
+                e.writeInt(uid);
+                e.writeInt(i);
+                e.writeLong(cpuClusterTimesMs[i]);
+                pulledData.add(e);
+            }
+        });
+    }
+
+    private void pullKernelUidCpuActiveTime(int tagId, List<StatsLogEventWrapper> pulledData) {
+        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
+        mKernelUidCpuActiveTimeReader.readAbsolute((uid, cpuActiveTimesMs) -> {
+            StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 2);
+            e.writeInt(uid);
+            e.writeLong((long)cpuActiveTimesMs);
+            pulledData.add(e);
+        });
+    }
+
     private void pullWifiActivityEnergyInfo(int tagId, List<StatsLogEventWrapper> pulledData) {
         long token = Binder.clearCallingIdentity();
         if (mWifiManager == null) {
@@ -826,6 +893,22 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.CPU_TIME_PER_FREQ: {
                 pullCpuTimePerFreq(tagId, ret);
+                break;
+            }
+            case StatsLog.CPU_TIME_PER_UID: {
+                pullKernelUidCpuTime(tagId, ret);
+                break;
+            }
+            case StatsLog.CPU_TIME_PER_UID_FREQ: {
+                pullKernelUidCpuFreqTime(tagId, ret);
+                break;
+            }
+            case StatsLog.CPU_CLUSTER_TIME: {
+                pullKernelUidCpuClusterTime(tagId, ret);
+                break;
+            }
+            case StatsLog.CPU_ACTIVE_TIME: {
+                pullKernelUidCpuActiveTime(tagId, ret);
                 break;
             }
             case StatsLog.WIFI_ACTIVITY_ENERGY_INFO: {
