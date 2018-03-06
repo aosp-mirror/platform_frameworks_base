@@ -2865,7 +2865,7 @@ public class DevicePolicyManager {
      * false if the profile has empty password as a separate challenge.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @throws SecurityException if {@code admin} is not a profile owner.
+     * @throws SecurityException if {@code admin} is not a profile owner of a managed profile.
      * @see UserManager#DISALLOW_UNIFIED_PASSWORD
      */
     public boolean isUsingUnifiedPassword(@NonNull ComponentName admin) {
