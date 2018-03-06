@@ -144,6 +144,13 @@ public final class WallpaperColors implements Parcelable {
      * @param bitmap Source where to extract from.
      */
     public static WallpaperColors fromBitmap(@NonNull Bitmap bitmap) {
+        return fromBitmap(bitmap, false /* computeHints */);
+    }
+
+    /**
+     * @hide
+     */
+    public static WallpaperColors fromBitmap(@NonNull Bitmap bitmap, boolean computeHints) {
         if (bitmap == null) {
             throw new IllegalArgumentException("Bitmap can't be null");
         }
@@ -193,7 +200,7 @@ public final class WallpaperColors implements Parcelable {
             }
         }
 
-        int hints = calculateDarkHints(bitmap);
+        int hints = computeHints ? calculateDarkHints(bitmap) : 0;
 
         if (shouldRecycle) {
             bitmap.recycle();
