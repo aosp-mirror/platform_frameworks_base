@@ -16,10 +16,10 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
+import com.android.settingslib.graph.SignalDrawable;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ScalingDrawableWrapper;
-import com.android.systemui.statusbar.phone.SignalDrawable;
 import com.android.systemui.statusbar.policy.BluetoothController;
 
 import static com.android.systemui.statusbar.phone.StatusBar.DEBUG;
