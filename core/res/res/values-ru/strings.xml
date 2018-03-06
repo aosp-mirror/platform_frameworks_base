@@ -185,7 +185,8 @@
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Это управляемое устройство"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Ваша организация управляет этим устройством и может отслеживать сетевой трафик. Подробнее…"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Все данные с устройства будут удалены"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"Невозможно использовать приложение для администрирования. С устройства будут удалены все данные.\n\nЕсли у вас возникли вопросы, обратитесь к администратору."</string>
+    <!-- no translation found for factory_reset_message (9024647691106150160) -->
+    <skip />
     <string name="printing_disabled_by" msgid="8936832919072486965">"Функция печати отключена приложением \"<xliff:g id="OWNER_APP">%s</xliff:g>\""</string>
     <string name="me" msgid="6545696007631404292">"Я"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Настройки планшетного ПК"</string>
@@ -310,8 +311,9 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Управлять позиционированием и размером изображения на экране."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Жесты"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Может выполнять жесты нажатия, пролистывания, масштабирования и т. д."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Жесты для отпечатков пальцев"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Сохраняет жесты, выполненные на сканере отпечатков пальцев."</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Регистрировать жесты на сканере отпечатков пальцев"</string>
+    <!-- no translation found for capability_desc_canCaptureFingerprintGestures (4386487962402228670) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"Отключение/изменение строки состояния"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Приложение сможет отключать строку состояния, а также добавлять и удалять системные значки."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"Замена строки состояния"</string>
@@ -808,6 +810,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Графический ключ"</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Фейсконтроль"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"PIN-код"</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"Разблокировка PIN-кода SIM-карты."</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"Разблокировка PUK-кода SIM-карты."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Пароль"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Область ввода графического ключа"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Область слайдера"</string>
@@ -1125,18 +1129,12 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Запуск приложений."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Окончание загрузки..."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"Приложение <xliff:g id="APP">%1$s</xliff:g> запущено"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"Нажмите, чтобы вернуться в игру."</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"Выберите игру"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"Чтобы не снижалась производительность, не открывайте больше одной игры."</string>
+    <string name="old_app_action" msgid="3044685170829526403">"Вернуться к приложению \"<xliff:g id="OLD_APP">%1$s</xliff:g>\""</string>
+    <string name="new_app_action" msgid="6694851182870774403">"Открыть приложение \"<xliff:g id="NEW_APP">%1$s</xliff:g>\""</string>
+    <string name="new_app_description" msgid="5894852887817332322">"Приложение \"<xliff:g id="OLD_APP">%1$s</xliff:g>\" будет закрыто без сохранения."</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"Объем памяти процесса \"<xliff:g id="PROC">%1$s</xliff:g>\" превышен"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Создан дамп кучи. Нажмите, чтобы отправить его."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Отправить дамп кучи?"</string>
@@ -1248,6 +1246,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"Перезапустить"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Включить мобильную связь"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Скачайте приложение оператора, чтобы активировать новую SIM-карту"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"Чтобы активировать новую SIM-карту, скачайте приложение <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Скачать приложение"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Установлена новая SIM-карта"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Нажмите, чтобы настроить."</string>
@@ -1464,22 +1463,21 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"USB-накопитель <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB-накопитель"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Изменить"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"Лимит на передачу данных"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"Нажмите, чтобы проверить трафик и настройки."</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Достигнут лимит трафика 2G/3G"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Достигнут лимит трафика 4G"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"Предупреждение"</string>
+    <!-- no translation found for data_usage_warning_body (7340198905103751676) -->
+    <skip />
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Достигнут лимит моб. трафика"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Достигнут лимит трафика Wi-Fi"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Передача данных приостановлена"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Превышен лимита трафика 2G и 3G"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Превышен лимит на трафик 4G"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Превышен лимит на моб. трафик"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Превышен лимит трафика Wi-Fi"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"Лимит превышен на <xliff:g id="SIZE">%s</xliff:g>."</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"Передача данных приостановлена до конца цикла."</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"Превышен лимит моб. трафика"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"Превышен лимит трафика Wi-Fi"</string>
+    <!-- no translation found for data_usage_limit_snoozed_body (1671222777207603301) -->
+    <skip />
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Фон. режим ограничен"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"Нажмите, чтобы отменить ограничение."</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"Израсходовано много трафика"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"За последние несколько дней было использовано больше трафика, чем обычно. Нажмите, чтобы проверить его расход и настройки."</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"Высокое потребление трафика"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"В ваших приложениях было передано больше трафика, чем обычно."</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"В приложении \"<xliff:g id="APP">%s</xliff:g>\" было передано больше трафика, чем обычно."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Сертификат безопасности"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Этот сертификат действителен."</string>
     <string name="issued_to" msgid="454239480274921032">"Кому выдан:"</string>

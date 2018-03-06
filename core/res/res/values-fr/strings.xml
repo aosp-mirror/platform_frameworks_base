@@ -181,7 +181,8 @@
     <string name="network_logging_notification_title" msgid="6399790108123704477">"L\'appareil est géré"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Votre organisation gère cet appareil et peut surveiller le trafic réseau. Appuyez ici pour obtenir plus d\'informations."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Les données de votre appareil vont être effacées"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"Impossible d\'utiliser l\'application d\'administration. Les données de votre appareil vont maintenant être effacées.\n\nSi vous avez des questions, contactez l\'administrateur de votre organisation."</string>
+    <!-- no translation found for factory_reset_message (9024647691106150160) -->
+    <skip />
     <string name="printing_disabled_by" msgid="8936832919072486965">"Impression désactivée par <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="me" msgid="6545696007631404292">"Moi"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Options de la tablette"</string>
@@ -305,7 +306,8 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Effectuer des gestes"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Permet d\'appuyer sur l\'écran, de le balayer, de le pincer et d\'effectuer d\'autres gestes."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Gestes avec l\'empreinte digitale"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Peut enregistrer des gestes effectués sur le lecteur d\'empreinte digitale de l\'appareil."</string>
+    <!-- no translation found for capability_desc_canCaptureFingerprintGestures (4386487962402228670) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"Désactivation ou modification de la barre d\'état"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Permet à l\'application de désactiver la barre d\'état, ou d\'ajouter et de supprimer des icônes système."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"remplacer la barre d\'état"</string>
@@ -802,6 +804,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Déverrouillage par schéma"</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Déverrouillage par reconnaissance faciale"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Déverrouillage par code PIN"</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"Déverrouillage de la carte SIM à l\'aide d\'un code."</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"Déverrouillage de la carte SIM à l\'aide d\'une clé PUK."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Déverrouillage par mot de passe"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Zone du schéma"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Zone où faire glisser votre doigt sur l\'écran"</string>
@@ -1085,18 +1089,12 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Lancement des applications…"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Finalisation de la mise à jour."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> en cours d\'exécution"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"Appuyez pour revenir au jeu"</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"Choisir un jeu"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"Pour des performances optimales, un seul de ces jeux peut être ouvert à la fois."</string>
+    <string name="old_app_action" msgid="3044685170829526403">"Revenir à <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"Ouvrir <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> va se fermer sans enregistrer les données"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"Le processus \"<xliff:g id="PROC">%1$s</xliff:g>\" a dépassé la limite de mémoire"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Une empreinte de la mémoire a bien été générée. Appuyez pour partager."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Partager l\'empreinte de la mémoire ?"</string>
@@ -1204,6 +1202,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"Redémarrer"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Activer le service de données mobiles"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Téléchargez l\'application de l\'opérateur pour activer votre nouvelle carte SIM"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"Téléchargez l\'application <xliff:g id="APP_NAME">%1$s</xliff:g> pour activer votre nouvelle carte SIM"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Télécharger l\'application"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Nouvelle carte SIM insérée"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Appuyez ici pour effectuer la configuration."</string>
@@ -1418,22 +1417,21 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"Clé USB <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Mémoire de stockage USB"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Modifier"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"Alerte de consommation des données"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"Appuyez pour conso/paramètres."</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Limite de données 2G-3G atteinte"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Limite de données 4G atteinte"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"Avertissement de consommation de données"</string>
+    <!-- no translation found for data_usage_warning_body (7340198905103751676) -->
+    <skip />
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Limite données mobiles atteinte"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Limite données Wi-Fi atteinte"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Données suspendues jusqu\'à la fin du cycle"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Quota de données 2G-3G dépassé"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Quota de données 4G dépassé"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Quota utilisation données dépassé"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Quota de données Wi-Fi dépassé"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> au-delà de la limite spécifiée."</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"Données suspendues jusqu\'à la fin du cycle"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"Limite données mobiles dépassée"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"Limite de données Wi-Fi dépassée"</string>
+    <!-- no translation found for data_usage_limit_snoozed_body (1671222777207603301) -->
+    <skip />
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Données en arrière-plan limitées"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"Appuyez pour suppr. restriction."</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"Consommation données importante"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"Consommation de données supérieure à la normale au cours des derniers jours. Appuyez pour afficher consommation et paramètres."</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"Conso données mobiles élevée"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"Vos applications ont utilisé plus de données que d\'habitude"</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"<xliff:g id="APP">%s</xliff:g> a utilisé plus de données que d\'habitude"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Certificat de sécurité"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Ce certificat est valide."</string>
     <string name="issued_to" msgid="454239480274921032">"Délivré à :"</string>

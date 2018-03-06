@@ -181,7 +181,8 @@
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Некој управува со уредот"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Вашата организација управува со уредов и можно е да го следи сообраќајот на мрежата. Допрете за детали."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Уредот ќе се избрише"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"Апликацијата на администраторот не може да се користи. Вашиот уред сега ќе се избрише.\n\nАко имате прашања, контактирајте со администраторот на вашата организација."</string>
+    <!-- no translation found for factory_reset_message (9024647691106150160) -->
+    <skip />
     <string name="printing_disabled_by" msgid="8936832919072486965">"Печатењето е оневозможено од <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="me" msgid="6545696007631404292">"Јас"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Опции на таблет"</string>
@@ -305,7 +306,8 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Користете движења"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Може да допрете, повлечете, штипнете и да користите други движења."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Движења за отпечатоци"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Може да сними движења што се направени на сензорот за отпечатоци на уредите."</string>
+    <!-- no translation found for capability_desc_canCaptureFingerprintGestures (4386487962402228670) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"оневозможи или измени статусна лента"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Дозволува апликацијата да ја оневозможи статусната лента или да додава или отстранува системски икони."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"да стане статусна лента"</string>
@@ -802,6 +804,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Отклучување со шема."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Отклучување со лик."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Отклучување со пин."</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"Отклучување со PIN на SIM."</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"Отклучување со PUK на SIM."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Отклучување со лозинка."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Област за шема."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Област за лизгање."</string>
@@ -1085,18 +1089,12 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Се стартуваат апликациите."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Подигањето завршува."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> работи"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"Допрете за да се вратите во играта"</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"Избор на игра"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"За подобра изведба, само една од игриве може да биде отворена."</string>
+    <string name="old_app_action" msgid="3044685170829526403">"Врати се назад во <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"Отвори ја <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> ќе се затвори без да се зачува"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> го надмина ограничувањето на меморијата"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Сликата од меморијата е собрана. Допрете за споделување"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Сподели слика од меморија?"</string>
@@ -1205,6 +1203,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"Рестартирај"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Активирајте мобилна услуга"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Преземете ја апликацијата на операторот за да ја активирате новата SIM-картичка"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"Преземете ја апликацијата <xliff:g id="APP_NAME">%1$s</xliff:g> за да ја активирате новата SIM-картичка"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Преземете апликација"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Вметната е нова SIM-картичка"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Допрете за да поставите"</string>
@@ -1421,22 +1420,21 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB-меморија"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB меморија"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Измени"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"Известување за потрошен сообраќај"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"Допрете за употреба и поставки."</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Постигна лимит за 2G-3G податоци"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Постигнат лимит за 4G податоци"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"Предупредување за интернет"</string>
+    <!-- no translation found for data_usage_warning_body (7340198905103751676) -->
+    <skip />
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Достигнат лимит за моб. интернет"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Постигна лимит за Wi-Fi податоци"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Паузирано до крај на циклус"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Надминат лимит од 2G-3G податоци"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Надминат лимит од 4G податоци"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Надминат лимит на подат. од моб."</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Надминат лимит на Wi-Fi податоци"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> над назначената граница."</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"Интернетот е паузиран за остатокот од циклусот"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"Надминат мобилен интернет"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"Надминат интернет преку Wi-Fi"</string>
+    <!-- no translation found for data_usage_limit_snoozed_body (1671222777207603301) -->
+    <skip />
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Подат. од заднина се ограничени"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"Допрете за да се отст. огранич."</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"Голема потрошувачка на сообраќај"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"Потрошениот сообраќај во изминативе неколку дена е поголем од нормално. Допрете за да ги видите сообраќајот и поставките."</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"Големо трошење мобилен интернет"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"Апликациите потрошија повеќе интернет од вообичаено"</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"<xliff:g id="APP">%s</xliff:g> потроши повеќе интернет од вообичаено"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Сертификат за безбедност"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Овој сертификат е важечки."</string>
     <string name="issued_to" msgid="454239480274921032">"Издадено на:"</string>

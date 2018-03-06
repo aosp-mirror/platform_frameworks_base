@@ -181,7 +181,8 @@
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Pajisja është e menaxhuar"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Organizata jote e menaxhon këtë pajisje dhe mund të monitorojë trafikun e rrjetit. Trokit për detaje."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Pajisja do të spastrohet"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"Aplikacioni i administratorit nuk mund të përdoret. Pajisja jote tani do të fshihet.\n\nNëse ke pyetje, kontakto me administratorin e organizatës."</string>
+    <!-- no translation found for factory_reset_message (9024647691106150160) -->
+    <skip />
     <string name="printing_disabled_by" msgid="8936832919072486965">"Printimi është çaktivizuar nga <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="me" msgid="6545696007631404292">"Unë"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Opsionet e tabletit"</string>
@@ -305,7 +306,8 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Kryen gjeste"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Mund të trokasë, rrëshqasë, bashkojë gishtat dhe kryejë gjeste të tjera."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Gjestet e gjurmës së gishtit"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Mund të kapë gjestet e kryera në sensorin e gjurmës së gishtit të pajisjeve."</string>
+    <!-- no translation found for capability_desc_canCaptureFingerprintGestures (4386487962402228670) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"çaktivizo ose modifiko shiritin e statusit"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Lejon aplikacionin të çaktivizojë shiritin e statusit dhe të heqë ikonat e sistemit."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"të bëhet shiriti i statusit"</string>
@@ -802,6 +804,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Shkyçje me motiv."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Shkyçje me fytyrë."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Shkyçje me PIN."</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"Shkyçja e kartës SIM me kodin PIN"</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"Shkyçja e kartës SIM me kodin PUK"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Shkyçja e fjalëkalimit."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Zona e motivit."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Zonën e rrëshqitjes."</string>
@@ -1085,18 +1089,12 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Aplikacionet e fillimit."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Po përfundon nisjen."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> është në punë"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"Trokit për t\'u kthyer te loja"</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"Zgjidh një lojë"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"Për një cilësi më të mirë funksionimi, vetëm një nga këto lojëra mund të hapet në të njëjtën kohë."</string>
+    <string name="old_app_action" msgid="3044685170829526403">"Kthehu prapa te <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"Hap <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> do të mbyllet pa u ruajtur"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> e ka kaluar kufirin e memories"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Stiva e skedarëve fiktivë është mbledhur; trokit për t\'i ndarë"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Të ndahet stiva e skedarëve fiktivë?"</string>
@@ -1205,6 +1203,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"Rifillo"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Aktivizo shërbimin celular"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Shkarko aplikacionin e operatorit celular për të aktivizuar kartën e re SIM"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"Shkarko aplikacionin <xliff:g id="APP_NAME">%1$s</xliff:g> për të aktivizuar kartën tënde të re SIM"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Shkarko aplikacionin"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Është futur kartë e re SIM"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Trokit për ta konfiguruar"</string>
@@ -1419,22 +1418,21 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"USB-ja nga <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Hapësira ruajtëse e USB-së"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Redakto"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"Sinjalizimi i të dhënave"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"Trokit për të parë përdorimin dhe cilësimet."</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Kufiri i të dhënave 2G-3G u arrit"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Kufiri i të dhënave 4G u arrit"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"Paralajmërim për të dhënat"</string>
+    <!-- no translation found for data_usage_warning_body (7340198905103751676) -->
+    <skip />
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"U arrit kufiri i të dhënave"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"U arrit kufiri i të dhënave Wi-Fi"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Të dhënat u ndaluan për pjesën e mbetur të ciklit"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Kufiri i të dhënave 2G-3G u tejkalua"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Kufiri i të dhënave 4G u tejkalua"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Kufiri i të dhënave celulare u tejkalua"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Kufiri i të dhënave Wi-Fi u tejkalua"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> mbi kufirin e përcaktuar."</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"Të dhënat u ndërprenë për pjesën e mbetur të ciklit"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"Mbi kufirin e të dhënave celulare"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"Mbi kufirin e të dhënave të Wi-Fi"</string>
+    <!-- no translation found for data_usage_limit_snoozed_body (1671222777207603301) -->
+    <skip />
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Të dhënat e sfondit janë të kufizuara"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"Trokit për të hequr kufizimin."</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"Përdorim i madh të dhënash"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"Përdorimi i të dhënave të tua gjatë ditëve të fundit është më i madh se normalisht. Trokit për të parë përdorimin dhe cilësimet."</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"Përdorim i lartë i të dhënave celulare"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"Aplikacionet e tua kanë përdorur më shumë të dhëna se zakonisht"</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"<xliff:g id="APP">%s</xliff:g> ka përdorur më shumë të dhëna se zakonisht"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Certifikatë sigurie"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Certifikata është e vlefshme."</string>
     <string name="issued_to" msgid="454239480274921032">"Lëshuar për:"</string>

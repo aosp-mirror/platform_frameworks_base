@@ -179,7 +179,8 @@
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Kifaa kinadhibitiwa"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Shirika lako linadhibiti kifaa hiki na huenda likafuatilia shughuli kwenye mtandao. Gusa ili upate maelezo zaidi."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Data iliyomo kwenye kifaa chako itafutwa"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"Huwezi kutumia programu ya msimamizi. Sasa data iliyo kwenye kifaa chako itafutwa.\n\nIkiwa una maswali yoyote, wasiliana na msimamizi wa shirika lako."</string>
+    <!-- no translation found for factory_reset_message (9024647691106150160) -->
+    <skip />
     <string name="printing_disabled_by" msgid="8936832919072486965">"Kipengele cha kuchapisha kimezimwa na <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="me" msgid="6545696007631404292">"Mimi"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Chaguo za kompyuta ndogo"</string>
@@ -303,7 +304,8 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Tekeleza ishara"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Unaweza kugonga, kutelezesha kidole, kubana na kutekeleza ishara zingine."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Ishara za alama ya kidole"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Inaweza kurekodi ishara zinazotekelezwa kwenye kitambua alama ya kidole."</string>
+    <!-- no translation found for capability_desc_canCaptureFingerprintGestures (4386487962402228670) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"zima au rekebisha mwambaa hali"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Inaruhusu programu kulemaza upau wa hali au kuongeza na kutoa aikoni za mfumo."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"kuwa sehemu ya arifa"</string>
@@ -800,6 +802,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Kufungua kwa ruwaza."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Kufungua kwa uso."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Kufungua kwa PIN."</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"Kufungua Pin ya Sim."</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"Kufungua Puk ya Sim."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Kufungua kwa nenosiri."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Eneo la ruwaza."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Eneo la slaidi."</string>
@@ -1083,18 +1087,12 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Programu zinaanza"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Inamaliza kuwasha."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> inaendelea"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"Gusa ili urudi kwenye mchezo"</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"Chagua mchezo"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"Kwa utendaji bora, unaweza kufungua mojawapo ya michezo hii pekee kwa wakati mmoja."</string>
+    <string name="old_app_action" msgid="3044685170829526403">"Rudi kwenye <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"Fungua <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> itajifunga bila kuhifadhi mabadiliko"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> imezidi kiwango cha hifadhi kinachotakikana"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Imezidi kikomo cha hifadhi; gusa ili uishiriki"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Ungependa kushiriki picha ya binafsi?"</string>
@@ -1202,6 +1200,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"Anza upya"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Washa huduma ya simu za mkononi"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Pakua programu ya mtoa huduma ili uwashe SIM yako mpya"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"Pakua programu ya <xliff:g id="APP_NAME">%1$s</xliff:g> ili utumie SIM yako mpya"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Pakua programu"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"SIM mpya imewekwa"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Gusa ili uiweke"</string>
@@ -1416,22 +1415,21 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"Hifadhi ya USB iliyotengenezwa na <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Hifadhi ya USB"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Badilisha"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"Tahadhari ya matumizi ya data"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"Gusa ili uangalie matumizi na mipangilio."</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Kikomo data ya 2G-3G kimefikiwa"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Kikomo cha data ya 4G kimefikiwa"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"Onyo kuhusu data"</string>
+    <!-- no translation found for data_usage_warning_body (7340198905103751676) -->
+    <skip />
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Umefikisha kipimo cha juu cha data"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Kikomo data ya Wi-Fi kimefikiwa"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Matumizi ya data yamesitishwa kwa kipindi kilichosalia"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Kikomo cha data ya 2G-3G kimezidishwa"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Kikomo cha data cha 4G kimezidishwa"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Umepitisha kiwango cha data ulichoweka"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Taarifa za Wi-fi zimevuka kiwanga"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> juu ya kikomo kilichobainishwa."</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"Imesitisha data kwa kipindi kilichosalia"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"Umepitisha upeo wa data ya mtandao wa simu"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"Umepitisha upeo wa data ya Wi-Fi"</string>
+    <!-- no translation found for data_usage_limit_snoozed_body (1671222777207603301) -->
+    <skip />
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Data ya mandhari nyuma imezuiwa"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"Gusa ili uondoe kizuizi."</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"Matumizi ya data nyingi"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"Umetumia data nyingi mno katika siku chache zilizopita. Gusa ili uangalie matumizi na mipangilio."</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"Matumizi ya juu ya data ya simu"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"Programu zako zimetumia data nyingi zaidi ya kawaida"</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"<xliff:g id="APP">%s</xliff:g> imetumia data nyingi zaidi ya kawaida"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Cheti cha usalama"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Cheti hiki ni halali."</string>
     <string name="issued_to" msgid="454239480274921032">"Kimetolewa kwa:"</string>

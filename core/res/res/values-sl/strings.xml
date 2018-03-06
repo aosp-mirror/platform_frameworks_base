@@ -185,7 +185,8 @@
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Naprava je upravljana"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Vaša organizacija upravlja to napravo in lahko nadzira omrežni promet. Dotaknite se za podrobnosti."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Podatki v napravi bodo izbrisani"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"Skrbniške aplikacije ni mogoče uporabljati. Podatki v napravi bodo izbrisani.\n\nČe imate vprašanja, se obrnite na skrbnika organizacije."</string>
+    <!-- no translation found for factory_reset_message (9024647691106150160) -->
+    <skip />
     <string name="printing_disabled_by" msgid="8936832919072486965">"Tiskanje je onemogočil pravilnik <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="me" msgid="6545696007631404292">"Jaz"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Možnosti tabličnega računalnika"</string>
@@ -311,7 +312,8 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Izvajanje potez"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Mogoče je izvajanje dotikov, vlečenja, primikanja in razmikanja prstov ter drugih potez."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Poteze po tipalu prstnih odtisov"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Prepoznava poteze, narejene po tipalu prstnih odtisov naprave."</string>
+    <!-- no translation found for capability_desc_canCaptureFingerprintGestures (4386487962402228670) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"onemogočanje ali spreminjanje vrstice stanja"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Aplikacijam omogoča onemogočenje vrstice stanja ali dodajanje in odstranjevanje ikon sistema."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"postane vrstica stanja"</string>
@@ -808,6 +810,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Odklepanje z vzorcem."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Odklepanje z obrazom."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Odklepanje s kodo PIN."</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"Odklepanje kartice SIM s kodo PIN"</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"Odklepanje kartice SIM s kodo PUK"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Odklepanje z geslom."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Območje vzorca."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Območje podrsanja."</string>
@@ -1125,18 +1129,12 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Zagon aplikacij."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Dokončevanje zagona."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> se izvaja"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"Dotaknite se za vrnitev v igro"</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"Izberite igro"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"Za večjo učinkovitost delovanja je lahko hkrati odprta samo ena od teh iger."</string>
+    <string name="old_app_action" msgid="3044685170829526403">"Nazaj v aplikacijo <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"Odpri <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"Aplikacija <xliff:g id="OLD_APP">%1$s</xliff:g> se bo zaprla brez shranjevanja"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"Proces <xliff:g id="PROC">%1$s</xliff:g> je presegel omejitev pomnilnika"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Izvoz kopice je zbran; dotaknite se za deljenje z drugimi"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Deljenje izvoza kopice z drugimi?"</string>
@@ -1248,6 +1246,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"Vnovičen zagon"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Aktivirajte mobilno storitev"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Prenesite aplikacijo operaterja, da boste lahko aktivirali novo kartico SIM"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"Prenesite aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>, da boste lahko aktivirali novo kartico SIM"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Prenos aplikacije"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Nova kartica SIM je vstavljena"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Dotaknite se za nastavitev"</string>
@@ -1464,22 +1463,21 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"Pogon USB <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Pomnilnik USB"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Uredi"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"Opozorilo o preneseni količini podatkov"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"Dot. se za ogled upor. in nast."</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Dosežena pod. omejitev za 2G/3G"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Dosežena pod. omejitev za 4G"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"Opozorilo o prenosu podatkov"</string>
+    <!-- no translation found for data_usage_warning_body (7340198905103751676) -->
+    <skip />
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Omej. pren. mob. pod. dosežena"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Dosežena pod. omejitev za Wi-Fi"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Prenos pod. ust. do konca cikla"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Omejit. za podat. 2G-3G presež."</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Omejitev za podat. 4G presež."</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Omej. za pod. v mob. n. presež."</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Presež. omej. za podatke Wi-Fi"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"Velikost <xliff:g id="SIZE">%s</xliff:g> presega omejitev"</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"Prenos podatkov je zaustavljen do konca obračunskega obdobja"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"Prek omejitve mobilnih podatkov"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"Prek omejitve podatkov Wi-Fi"</string>
+    <!-- no translation found for data_usage_limit_snoozed_body (1671222777207603301) -->
+    <skip />
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Podatki v ozadju so omejeni"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"Dotaknite se za odstr. omejitve."</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"Velika prenesena količina podatkov"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"Prenesena količina podatkov v zadnjih nekaj dneh je večja kot običajno. Dotaknite se za ogled uporabe in nastavitev."</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"Visoka poraba mobilnih podatkov"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"Vaše aplikacije so porabile več podatkov kot običajno"</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"Aplikacija <xliff:g id="APP">%s</xliff:g> je porabila več podatkov kot običajno"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Varnostno potrdilo"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"To potrdilo je veljavno."</string>
     <string name="issued_to" msgid="454239480274921032">"Izdano za:"</string>

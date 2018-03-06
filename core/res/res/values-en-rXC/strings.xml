@@ -181,7 +181,7 @@
     <string name="network_logging_notification_title" msgid="6399790108123704477">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‎‏‏‎‏‎‎‎‎‏‎‎‏‏‏‏‏‎‎‏‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‎‎‎‏‎‏‏‎‏‎‏‏‎‎‏‎‎‏‏‏‎‏‎Device is managed‎‏‎‎‏‎"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‎‎‎‎‎‏‏‎‏‎‏‎‏‎‏‏‎‎‎‏‎‏‎‎‎‎‏‎‎‏‏‎‎‎‏‏‎‎‎‎‎‎‎‎‎‏‎‎‎‎‎‏‎‏‎‏‎‎Your organization manages this device and may monitor network traffic. Tap for details.‎‏‎‎‏‎"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‏‏‎‏‎‎‎‎‏‏‎‏‎‎‎‎‏‏‏‏‏‏‏‎‏‏‏‏‏‏‎‎‎‎‏‏‏‏‎‎‎‏‎‎‎‏‏‎‏‏‎‎‎‏‎‎‏‏‎Your device will be erased‎‏‎‎‏‎"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‎‏‎‏‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‏‏‏‎‎‎‏‎‎‎‎‏‏‏‎‎‎‎‏‎‎‎‏‏‏‏‎‎‏‏‏‎‎‏‎‎‏‎The admin app can\'t be used. Your device will now be erased.‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎If you have questions, contact your organizations admin.‎‏‎‎‏‎"</string>
+    <string name="factory_reset_message" msgid="9024647691106150160">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‏‎‎‏‏‏‏‎‏‏‏‏‏‏‏‎‏‎‏‎‎‎‎‏‎‏‎‏‎‏‎‏‏‎‏‏‎‏‏‏‎‎‏‏‎‎‏‏‏‎‎‎‏‎‎‎‎‎The admin app can\'t be used. Your device will now be erased.‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎If you have questions, contact your organization\'s admin.‎‏‎‎‏‎"</string>
     <string name="printing_disabled_by" msgid="8936832919072486965">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‎‎‎‎‎‎‏‏‎‎‎‎‎‎‎‏‎‎‎‏‏‎‎‎‎‏‏‎‎‎‏‏‎‎‏‎‏‎‏‎‏‎‎‏‏‎‏‏‎‎‎‏‏‎‏‎‏‎Printing disabled by ‎‏‎‎‏‏‎<xliff:g id="OWNER_APP">%s</xliff:g>‎‏‎‎‏‏‏‎.‎‏‎‎‏‎"</string>
     <string name="me" msgid="6545696007631404292">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‎‏‏‎‏‎‏‏‎‏‏‏‏‏‎‏‏‏‏‎‏‎‏‏‎‏‎‎‏‏‏‏‎‏‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‎‎‎‎‏‎‎‎Me‎‏‎‎‏‎"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‏‎‏‎‎‏‎‏‏‏‎‎‏‎‏‏‏‏‏‏‎‏‎‏‏‏‏‎‎‏‎‎‎‏‏‎‎‎‏‏‎‎‏‏‎‎‏‎‏‎‏‎‏‎‎‏‎‏‎Tablet options‎‏‎‎‏‎"</string>
@@ -305,7 +305,7 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‎‏‏‏‏‎‏‎‏‏‎‎‎‎‏‏‏‎‏‎‎‏‏‏‎‎‎‎‎‎‏‏‏‎‏‎‎‏‏‏‎‏‏‏‏‏‏‏‏‏‏‎‏‏‏‏‎‎Perform gestures‎‏‎‎‏‎"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‏‎‎‏‎‎‎‏‎‏‎‏‎‎‎‏‏‎‏‎‎‏‏‏‎‏‎‎‏‏‏‏‎‏‏‎‎‏‏‏‎‎‏‏‏‎‎‏‎‎‎‎‎‎‎‎‏‎Can tap, swipe, pinch, and perform other gestures.‎‏‎‎‏‎"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‏‏‏‎‎‏‎‎‎‎‎‎‎‏‎‏‏‎‏‏‏‎‏‏‎‏‏‎‎‎‏‏‏‏‎‎‏‏‏‏‎‏‎‎‏‏‎‏‏‎‏‎‎‎‏‏‏‎‎Fingerprint gestures‎‏‎‎‏‎"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‏‎‏‎‎‎‏‏‏‏‏‏‎‎‎‏‎‏‎‎‏‎‏‎‎‏‎‏‏‏‏‏‏‎‎‎‎‎‏‏‎‏‎‏‏‏‎‎‎‎‎‏‎‏‎‎‏‎‎Can capture gestures performed on the devices fingerprint sensor.‎‏‎‎‏‎"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‎‏‏‎‏‏‏‏‏‏‏‏‎‏‏‏‏‏‎‎‎‏‏‏‏‏‎‏‎‏‎‏‎‏‎‎‎‎‎‏‏‎‎‎‎‏‎‎‏‏‎‏‏‏‏‏‎‎Can capture gestures performed on the device\'s fingerprint sensor.‎‏‎‎‏‎"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‎‏‏‏‎‏‏‏‏‎‎‏‎‏‎‎‏‎‏‏‎‎‏‏‎‎‎‎‎‏‏‏‎‎‎‎‏‎‎‎‎‏‏‏‏‎‎‎‏‏‏‏‎‎‏‏‏‎disable or modify status bar‎‏‎‎‏‎"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‏‎‎‎‎‏‏‎‏‏‏‏‏‎‏‏‏‎‏‎‎‎‏‎‎‎‎‏‏‏‎‎‎‎‎‎‎‎‎‎‏‏‏‏‎‎‎‎‎‏‎‎‏‏‏‏‏‎Allows the app to disable the status bar or add and remove system icons.‎‏‎‎‏‎"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‎‏‏‏‏‏‏‎‎‎‏‎‏‏‏‎‏‎‏‎‏‎‎‏‎‎‎‏‏‎‎‎‏‎‎‎‎‏‏‏‏‏‎‏‎‎‏‏‎‎‎‏‎‏‎‎‎‎be the status bar‎‏‎‎‏‎"</string>
@@ -802,6 +802,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‎‏‎‏‏‎‎‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‎‎‏‎‎‏‎‏‏‏‎‎‏‎‎‏‏‏‎‏‏‎‎‎‎‎‎‎‎‎‏‎‏‎‎‎Pattern unlock.‎‏‎‎‏‎"</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‎‏‏‎‏‏‎‏‎‎‏‏‎‏‏‎‎‏‏‏‏‎‎‏‏‎‎‏‏‏‎‏‏‎‎‏‎‏‎‏‏‎‏‏‎‎‎‏‎‏‎‎‎‎‏‏‏‎Face unlock.‎‏‎‎‏‎"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‎‎‏‎‎‎‏‏‎‎‎‎‏‎‏‏‏‎‏‎‏‎‏‏‏‏‏‎‏‏‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‏‎‏‏‏‎‎‏‏‎‎Pin unlock.‎‏‎‎‏‎"</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‎‏‏‏‏‏‎‏‎‎‏‎‎‎‎‏‎‏‎‎‏‏‏‏‏‏‏‎‏‎‎‎‎‎‎‏‏‎‏‎‏‎‎‏‎‏‎‏‎‎‎‎‎‎‎‏‏‎Sim Pin unlock.‎‏‎‎‏‎"</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‎‎‏‏‎‎‎‏‎‎‎‏‏‎‏‎‎‏‎‏‎‎‏‎‎‏‏‏‏‏‏‎‏‎‏‎‎‎‎‎‎‏‎‏‏‏‏‎‎‏‎‎‎‏‏‎‏‎Sim Puk unlock.‎‏‎‎‏‎"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‎‏‎‎‎‎‏‎‏‏‏‎‏‎‏‏‏‎‎‎‏‎‏‎‎‏‎‏‏‏‎‎‎‎‎‏‎‏‏‎‏‎‎‎‎‎‏‏‏‏‏‎‏‎‎‎‏‎Password unlock.‎‏‎‎‏‎"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‎‏‎‎‏‎‏‎‎‎‏‏‏‎‏‎‎‎‏‏‏‏‎‎‎‎‏‎‎‎‏‏‎‏‏‏‏‏‏‏‏‏‎‏‏‎‎‎‎‏‏‎‏‎‎‎‎‎Pattern area.‎‏‎‎‏‎"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‏‎‏‏‏‏‎‏‏‎‏‎‎‏‏‏‎‏‏‏‏‎‏‏‏‏‏‎‏‎‏‏‎‎‎‏‎‏‏‏‎‏‎‏‎‏‎‎‏‎‎‎‏‏‎‎‎‎Slide area.‎‏‎‎‏‎"</string>
@@ -1085,18 +1087,12 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‎‎‏‎‏‎‏‏‏‏‎‏‏‎‏‏‎‎‎‏‏‎‏‎‏‎‏‎‏‏‎‎‏‏‏‏‎‎‏‎Starting apps.‎‏‎‎‏‎"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‏‏‎‎‎‎‎‏‎‏‏‏‏‎‏‎‎‎‏‏‎‎‏‏‎‎‏‎‏‏‎‎‏‎‎‏‎‏‏‎‏‎‏‎‎‏‏‏‏‎‎‏‏‏‏‎‏‎Finishing boot.‎‏‎‎‏‎"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎‏‏‏‎‏‏‏‏‎‎‏‎‎‎‏‏‎‎‏‎‏‏‏‎‏‏‎‏‏‏‎‏‏‎‎‎‎‎‏‎‎‏‏‏‏‏‎‏‏‎‎‎‏‎‎‏‏‎<xliff:g id="APP">%1$s</xliff:g>‎‏‎‎‏‏‏‎ running‎‏‎‎‏‎"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‏‏‏‏‏‏‏‏‎‎‎‏‏‎‏‎‏‎‎‎‏‎‏‏‎‎‎‏‏‏‎‏‎‏‎‎‏‏‎‏‎‏‏‏‏‎‏‏‎‏‎‎‎‏‏‎‎‏‎Tap to return to game‎‏‎‎‏‎"</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‎‏‎‏‏‎‎‎‏‎‎‎‎‎‏‎‎‏‎‏‏‎‎‎‎‏‎‎‎‏‎‎‏‎‏‎‎‏‎‎‎‎‎‎‎‏‏‎‎‏‏‏‎‎‏‏‏‎‎Choose game‎‏‎‎‏‎"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‏‏‏‏‏‎‏‏‎‏‏‏‎‏‎‎‎‏‏‎‎‏‎‏‎‎‏‏‎‎‎‏‎‎‏‎‎‏‏‎‎‎‎‏‏‎‎‎‏‎‎‎‎‏‎‏‎‎For better performance, only one of these games can be open at a time.‎‏‎‎‏‎"</string>
+    <string name="old_app_action" msgid="3044685170829526403">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‎‎‏‎‎‎‎‎‎‏‏‏‎‎‏‎‏‎‎‎‎‏‎‎‎‎‎‎‎‏‏‎‎‎‎‏‏‎‎‎‏‏‎‎‎‎‏‎‏‏‎‎‎‎‎‏‏‎Go back to ‎‏‎‎‏‏‎<xliff:g id="OLD_APP">%1$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‎‏‏‏‎‏‎‎‎‏‏‏‎‎‎‏‏‏‎‏‎‏‏‏‎‎‎‎‏‎‎‏‏‎‎‎‏‏‏‎‏‏‏‎‎‎‎‏‎‏‎‎‎‎‎‏‏‎Open ‎‏‎‎‏‏‎<xliff:g id="NEW_APP">%1$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‎‏‏‏‎‎‏‏‏‎‏‎‏‏‏‎‎‏‎‏‏‏‏‎‎‎‎‎‎‏‏‏‎‏‏‎‎‎‏‎‎‏‏‎‏‎‎‏‏‎‎‏‏‎‎‎‏‎‎‎‏‎‎‏‏‎<xliff:g id="OLD_APP">%1$s</xliff:g>‎‏‎‎‏‏‏‎ will close without saving‎‏‎‎‏‎"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‎‎‏‎‏‎‏‎‏‏‎‏‎‎‏‏‏‏‏‎‏‎‎‎‏‎‎‎‏‎‏‎‏‎‏‏‏‏‎‎‎‏‏‎‏‏‎‎‏‏‏‎‏‏‏‏‎‎‎‏‎‎‏‏‎<xliff:g id="PROC">%1$s</xliff:g>‎‏‎‎‏‏‏‎ exceeded memory limit‎‏‎‎‏‎"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‏‏‏‎‎‎‏‏‎‏‎‏‎‏‎‏‎‏‎‏‎‎‎‎‎‎‏‎‎‎‎‎‎‎‏‏‎‏‎‎‏‎‏‎‏‏‎‏‎‎‎‏‎‏‎‏‎‎Heap dump has been collected; tap to share‎‏‎‎‏‎"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‎‏‎‏‏‎‎‎‏‎‎‎‏‎‎‏‏‎‏‎‏‏‏‏‏‎‎‏‏‏‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‏‎‏‎‎‎‏‎‏‏‎‎‏‎Share heap dump?‎‏‎‎‏‎"</string>
@@ -1204,6 +1200,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‎‏‏‎‎‎‏‎‎‏‎‏‎‏‏‏‎‎‏‏‏‎‏‎‎‏‏‎‏‎‎‎‏‏‏‎‎‎‎‏‎‏‎‏‎‎‏‎‎‏‎‏‎‏‏‎‏‏‎Restart‎‏‎‎‏‎"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‏‏‎‏‎‏‏‎‏‎‏‏‎‎‏‏‎‎‏‏‏‏‏‎‎‏‎‎‏‏‎‎‎‎‎‎‎‎‎‎‎‎‎‏‎‎‏‎‏‏‏‏‏‎‎‎‎‎Activate mobile service‎‏‎‎‏‎"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‏‎‎‏‏‏‎‎‎‏‏‏‎‎‏‏‎‏‎‎‎‎‏‎‏‏‎‎‏‏‎‏‏‎‏‎‏‎‏‏‎‏‏‏‏‏‏‏‏‎‎‏‎‎‎‎‎‏‎Download the carrier app to activate your new SIM‎‏‎‎‏‎"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‎‎‏‎‎‏‏‎‏‎‏‏‎‏‎‏‏‏‎‎‎‎‏‎‎‏‎‎‎‎‏‎‎‏‏‎‎‎‏‏‎‏‏‎‏‏‏‎‎‎‎‎‎‎‏‎‎‏‎Download the ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ app to activate your new SIM‎‏‎‎‏‎"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‎‏‏‏‏‎‎‎‎‏‏‎‏‎‏‎‎‎‎‏‏‏‎‏‏‎‏‎‎‏‎‎‎‎‎‏‎‎‎‏‎‎‏‎‏‏‎‏‏‎‎‏‏‎‎‎‏‎Download app‎‏‎‎‏‎"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‏‏‏‎‏‎‎‎‎‎‏‏‏‏‏‎‎‎‎‏‎‏‎‏‎‏‏‏‏‏‎‏‏‏‎‎‏‏‎‎‏‎‏‎‏‏‎‏‎‎‏‏‏‏‏‎‏‎New SIM inserted‎‏‎‎‏‎"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‏‏‎‏‏‎‏‏‏‎‏‏‎‎‏‏‏‎‎‏‏‏‏‎‏‎‎‎‏‎‏‎‎‏‏‎‎‎‏‎‎‎‏‏‎‎‏‎‎‏‎‏‏‎‎‎‏‎Tap to set it up‎‏‎‎‏‎"</string>
@@ -1418,22 +1415,19 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‎‎‏‏‏‏‎‎‎‎‏‎‎‎‎‎‎‎‏‎‏‎‎‏‎‎‎‎‏‏‎‏‎‎‎‏‏‎‎‎‏‏‎‎‎‎‏‏‎‎‏‎‏‎‎‎‏‎‎‏‎‎‏‏‎<xliff:g id="MANUFACTURER">%s</xliff:g>‎‏‎‎‏‏‏‎ USB drive‎‏‎‎‏‎"</string>
     <string name="storage_usb" msgid="3017954059538517278">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‎‏‏‏‏‎‎‎‎‏‏‏‏‎‏‏‎‏‎‎‏‏‏‎‏‎‎‎‏‏‎‎‏‏‎‎‏‏‏‏‎‏‏‏‎‎‏‏‎‏‎‎‎‏‏‏‏‎‎USB storage‎‏‎‎‏‎"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‎‎‎‎‏‎‎‏‎‏‏‏‏‎‏‏‎‎‎‎‎‏‎‎‏‎‏‏‎‎‏‎‏‎‎‏‎‏‏‏‏‏‎‎‎‏‏‏‏‎‏‎‏‏‎‎‏‎Edit‎‏‎‎‏‎"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‎‎‎‏‏‏‏‏‎‎‏‏‎‎‎‏‏‏‎‎‏‎‏‎‎‎‎‎‏‏‎‎‏‎‎‎‏‏‏‏‎‏‏‎‏‎‏‎‏‎‏‎‎‎‏‎‏‎Data usage alert‎‏‎‎‏‎"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‎‎‏‏‎‏‏‏‏‏‎‎‎‏‎‎‎‎‏‎‏‎‏‎‏‎‏‏‎‏‎‎‎‏‎‎‎‏‏‎‏‏‏‎‎‎‏‎‎‏‎‏‎‎‏‏‏‎Tap to view usage and settings.‎‏‎‎‏‎"</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‎‏‎‎‎‎‏‏‏‎‎‏‏‏‏‏‎‏‏‎‏‏‎‏‏‏‎‎‎‏‏‎‏‎‎‏‎‎‏‎‏‏‏‏‎‏‏‎‏‎‏‎‎‎‎‏‏‎2G-3G data limit reached‎‏‎‎‏‎"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‏‏‏‏‏‏‎‎‎‎‏‏‏‏‎‎‎‏‎‎‏‏‎‏‏‎‏‎‏‏‎‎‎‏‏‎‏‎‏‏‎‏‏‎‏‏‎‏‎‏‏‎‎‏‎‎‎‎4G data limit reached‎‏‎‎‏‎"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‎‎‎‏‏‎‏‎‎‎‎‎‎‏‏‎‎‏‎‎‏‏‏‎‏‏‎‎‏‏‎‎‎‎‎‏‎‏‎‏‎‏‎‏‏‎‎‎‎‎‏‎‎‎‏‎‏‎Data warning‎‏‎‎‏‎"</string>
+    <string name="data_usage_warning_body" msgid="7340198905103751676">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‎‏‏‏‎‏‏‏‎‏‏‎‏‎‎‎‎‎‎‎‎‎‎‎‏‏‏‎‎‏‏‏‏‏‎‏‏‎‏‎‏‏‏‎‎‏‏‎‎‏‏‏‏‏‏‏‎‎‎You\'ve used ‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>‎‏‎‎‏‏‏‎ of data‎‏‎‎‏‎"</string>
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‏‎‎‎‎‏‏‎‏‏‎‏‏‎‏‎‏‎‎‎‎‎‎‎‎‎‎‎‏‎‎‏‏‏‎‏‏‏‎‏‎‎‎‎‎‏‎‎‏‎‏‏‏‎‎‎‎‎Mobile data limit reached‎‏‎‎‏‎"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‎‎‏‎‎‎‏‎‎‏‏‎‏‏‎‎‎‎‏‎‎‏‏‏‎‎‎‎‎‎‎‏‏‏‏‎‏‏‏‏‎‎‏‏‎‎‎‎‏‎‏‏‏‎‎‏‎‎‎Wi-Fi data limit reached‎‏‎‎‏‎"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‎‎‎‎‎‎‏‏‎‎‎‏‏‏‎‎‎‎‎‏‏‏‎‎‎‏‎‏‏‎‏‎‎‏‏‎‏‏‏‎‎‏‎‏‏‎‏‎‏‎‏‎‎‎‎‎‎‏‎Data paused for rest of cycle‎‏‎‎‏‎"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‎‎‎‎‎‎‎‏‎‏‏‏‎‎‏‏‎‎‎‏‎‏‎‏‏‏‎‏‎‎‏‏‏‎‏‏‏‏‎2G-3G data limit exceeded‎‏‎‎‏‎"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‏‎‏‎‏‏‎‏‏‎‏‎‎‏‏‎‎‏‏‏‏‏‏‎‎‎‎‏‎‎‏‏‎‏‎‎‎‎‎‏‏‎‏‏‏‏‎‏‎‎‏‎‎‏‏‏‏‎4G data limit exceeded‎‏‎‎‏‎"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‏‏‏‏‎‎‎‎‎‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‎‎‏‎‎‏‏‎‏‏‎‎‏‎‏‏‏‏‎‏‎‏‎‏‎‏‎‎‏‎‎‎‎Mobile data limit exceeded‎‏‎‎‏‎"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‎‏‎‏‎‏‏‎‎‎‎‏‏‎‏‎‏‎‏‎‏‏‎‏‎‏‏‏‏‏‏‎‏‏‏‎‏‏‏‎‏‏‏‎‏‏‎‏‏‎‎‏‏‏‎‏‏‎‎Wi-Fi data limit exceeded‎‏‎‎‏‎"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎‏‎‎‎‏‏‎‎‎‏‎‏‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‎‏‎‏‏‎‎‎‏‎‏‎‏‏‎‎‎‎‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎<xliff:g id="SIZE">%s</xliff:g>‎‏‎‎‏‏‏‎ over specified limit.‎‏‎‎‏‎"</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‎‎‎‏‎‏‏‎‏‏‏‏‏‎‏‏‎‏‏‏‎‏‏‎‏‎‎‏‎‏‏‏‏‏‏‎‏‎‎‎‎‎‏‏‎‎‎‏‏‏‏‎‏‎‏‏‎‏‎Data paused for the rest of your cycle‎‏‎‎‏‎"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‎‎‎‎‎‎‎‎‏‏‎‎‎‏‎‏‎‏‏‎‎‎‏‎‎‏‏‏‏‏‎‎‏‎‏‏‎‎‏‎‏‎‏‎‏‏‎‎‏‏‎‎‎‎‎‏‎‎‎Over your mobile data limit‎‏‎‎‏‎"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‏‎‎‏‏‏‏‎‎‎‎‏‏‎‏‏‏‏‎‏‎‎‏‎‏‏‎‏‎‎‏‎‏‎‏‏‏‎‏‏‏‏‏‏‏‏‏‎‏‏‏‏‏‏‏‎‎‎Over your Wi-Fi data limit‎‏‎‎‏‎"</string>
+    <string name="data_usage_limit_snoozed_body" msgid="1671222777207603301">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‏‎‎‏‏‎‎‎‏‎‏‏‎‎‎‎‎‎‏‎‎‎‎‏‎‏‏‏‎‏‎‎‎‎‎‎‎‎‎‎‎‎‏‎‎‎‎‎‎‎‏‏‎‎‏‎‏‎You\'ve gone ‎‏‎‎‏‏‎<xliff:g id="SIZE">%s</xliff:g>‎‏‎‎‏‏‏‎ over your set limit‎‏‎‎‏‎"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‏‎‏‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‎‎‎‎‎‎‏‏‏‏‎‏‏‏‎‏‏‏‏‎‎‎‎‎‎‏‏‎‎‏‎‎‎‏‏‏‏‎‏‎‎Background data restricted‎‏‎‎‏‎"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‏‎‏‎‎‎‎‏‎‏‎‏‎‎‏‏‎‎‏‏‏‏‏‎‏‎‏‏‎‏‎‏‎‏‎‏‏‏‏‎‏‏‎‎‏‏‏‎‏‎‎‏‏‎‎‏‏‎‎Tap to remove restriction.‎‏‎‎‏‎"</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‏‏‎‎‎‏‏‏‏‎‏‏‎‏‎‎‎‎‏‎‏‎‏‎‎‎‎‎‎‏‎‏‏‏‏‏‎‏‏‎‎‎‏‎‏‏‏‏‎‎‏‎‎‎‏‏‏‎Large data usage‎‏‎‎‏‎"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‏‎‏‏‏‎‏‏‏‎‏‎‏‎‏‎‎‎‎‎‏‏‎‏‎‏‎‏‏‎‎‎‏‎‏‎‏‎‏‏‏‏‏‎Your data usage over the last few days is larger than normal. Tap to view usage and settings.‎‏‎‎‏‎"</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‎‏‎‎‎‏‏‏‎‏‏‎‏‎‏‏‏‏‎‏‎‏‎‏‎‎‏‎‎‎‏‏‏‎‎‏‏‏‏‎‎‏‏‎‏‏‎‎‏‎‏‎‎‏‎‎‏‏‎High mobile data usage‎‏‎‎‏‎"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‏‏‎‏‏‏‎‏‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‏‎‎‎‏‏‎‎‎‎‏‏‏‏‎‎‏‎‎‎‎‏‎‏‏‏‏‏‎‏‏‎‏‏‎Your apps have used more data than usual‎‏‎‎‏‎"</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‏‎‏‏‏‎‎‏‎‎‏‏‎‏‏‏‎‎‏‏‎‎‎‏‏‎‎‎‎‏‎‎‏‏‎‏‏‎‏‎‏‏‎‏‏‏‏‎‎‎‏‏‎‏‎‎‎‎‎‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>‎‏‎‎‏‏‏‎ has used more data than usual‎‏‎‎‏‎"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‎‎‏‎‏‏‎‎‎‎‏‎‎‏‏‏‏‎‏‎‏‎‏‎‎‏‎‎‏‎‏‎‎‎‏‏‎‎‎‎‎‎‏‎‎‏‎‏‎‏‎‎‎‎‏‏‏‎Security certificate‎‏‎‎‏‎"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‎‏‎‏‏‏‎‎‎‎‎‏‏‎‏‎‎‏‏‎‎‎‎‏‏‏‏‎‎‏‎‎‎‏‏‏‏‎‎‏‎‎‎‏‏‎‎‎‏‏‎‎‏‏‏‎‏‎This certificate is valid.‎‏‎‎‏‎"</string>
     <string name="issued_to" msgid="454239480274921032">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‏‎‎‏‎‎‏‏‎‏‏‏‎‎‏‎‎‎‎‏‏‎‎‏‏‎‏‎‎‏‎‎‎‎‏‎‏‏‏‏‏‎‏‎‏‎‎‏‏‎‎‏‎‎‏‎‎‎‎Issued to:‎‏‎‎‏‎"</string>

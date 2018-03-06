@@ -181,7 +181,8 @@
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Enheten administreres"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Organisasjonen din kontrollerer denne enheten og kan overvåke nettverkstrafikk. Trykk for å få mer informasjon."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Enheten blir slettet"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"Administratorappen kan ikke brukes. Enheten din blir nå tømt.\n\nTa kontakt med administratoren for organisasjonen din hvis du har spørsmål."</string>
+    <!-- no translation found for factory_reset_message (9024647691106150160) -->
+    <skip />
     <string name="printing_disabled_by" msgid="8936832919072486965">"<xliff:g id="OWNER_APP">%s</xliff:g> har slått av utskrift."</string>
     <string name="me" msgid="6545696007631404292">"Meg"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Innstillinger for nettbrettet"</string>
@@ -305,7 +306,8 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Gjøre bevegelser"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Kan trykke, sveipe, klype og gjøre andre bevegelser."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Bevegelser på fingeravtrykkssensor"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Kan fange inn bevegelser som utføres på enhetens fingeravtrykkssensor."</string>
+    <!-- no translation found for capability_desc_canCaptureFingerprintGestures (4386487962402228670) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"deaktivere eller endre statusfeltet"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Lar appen deaktivere statusfeltet eller legge til og fjerne systemikoner."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"vise appen i statusfeltet"</string>
@@ -802,6 +804,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Mønsteropplåsning."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Ansiktsopplåsning."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"PIN-opplåsning."</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"PIN-opplåsing for SIM-kort."</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"PUK-opplåsing for SIM-kort."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Passordopplåsning."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Mønsterområde."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Dra-felt."</string>
@@ -1085,18 +1089,12 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Starter apper."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Ferdigstiller oppstart."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> kjører"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"Trykk for å gå tilbake til spillet"</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"Velg et spill"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"For å oppnå bedre ytelse kan bare ett av disse spillene være åpne om gangen."</string>
+    <string name="old_app_action" msgid="3044685170829526403">"Gå tilbake til <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"Åpne <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> lukkes uten å lagre"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> er over minnegrensen"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Minnedumpen («heap dump») er samlet inn – trykk for å dele"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Vil du dele minnedumpen («heap dump»)?"</string>
@@ -1204,10 +1202,11 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"Start på nytt"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Aktiver mobiltjeneste"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Last ned operatørappen for å aktivere det nye SIM-kortet ditt"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"Last ned <xliff:g id="APP_NAME">%1$s</xliff:g>-appen for å aktivere det nye SIM-kortet ditt"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Last ned appen"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Et nytt SIM-kort er satt inn"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Trykk for å konfigurere"</string>
-    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Stille klokken"</string>
+    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Oppgi tidspunkt"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Angi dato"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Lagre"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Ferdig"</string>
@@ -1418,22 +1417,21 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB-stasjon"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB-lagring"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Endre"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"Varsel om databruk"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"Trykk for å se bruken og innstillingene."</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Datagrensen for 2G-3G er nådd"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Datagrensen for 4G er nådd"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"Varsel om databruk"</string>
+    <!-- no translation found for data_usage_warning_body (7340198905103751676) -->
+    <skip />
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Grensen for mobildata er nådd"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Datagrensen for Wi-Fi er nådd"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Data er på pause resten av sykl."</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Grense på 2G-3G data overskredet"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Grensen på 4G data er overskredet"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Grensen for mobildatabruk er overskredet"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi-datagrense overskredet"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> over angitt grense."</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"Data er på pause i resten av syklusen"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"Over grensen for mobildata"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"Over grensen din for Wi-Fi-data"</string>
+    <!-- no translation found for data_usage_limit_snoozed_body (1671222777207603301) -->
+    <skip />
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Bakgrunnsdata er begrenset"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"Trykk for å fjerne begrensningen."</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"Høy databruk"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"Databruken din de siste dagene er høyere enn vanlig. Trykk for å se bruken og innstillingene."</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"Høy bruk av mobildata"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"Appene dine har brukt mer data enn vanlig"</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"<xliff:g id="APP">%s</xliff:g> har brukt mer data enn vanlig"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Sikkerhetssertifikat"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Sertifikatet er gyldig."</string>
     <string name="issued_to" msgid="454239480274921032">"Utstedt til:"</string>
@@ -1791,9 +1789,9 @@
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB-feilsøking"</string>
     <string name="time_picker_hour_label" msgid="2979075098868106450">"time"</string>
     <string name="time_picker_minute_label" msgid="5168864173796598399">"minutt"</string>
-    <string name="time_picker_header_text" msgid="143536825321922567">"Still klokken"</string>
+    <string name="time_picker_header_text" msgid="143536825321922567">"Oppgi tidspunkt"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"Angi et gyldig klokkeslett"</string>
-    <string name="time_picker_prompt_label" msgid="7588093983899966783">"Skriv hva klokken er"</string>
+    <string name="time_picker_prompt_label" msgid="7588093983899966783">"Skriv inn tidspunktet"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Bytt til tekstinndatamodus for tidsinndata."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Bytt til klokkemodus for tidsinndata."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Alternativer for autofyll"</string>
