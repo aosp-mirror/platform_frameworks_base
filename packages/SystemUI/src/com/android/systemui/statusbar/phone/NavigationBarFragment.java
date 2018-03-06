@@ -665,7 +665,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     }
 
     private void notifyNavigationBarScreenOn() {
-        mNavigationBarView.notifyScreenOn();
+        mNavigationBarView.updateNavButtonIcons();
     }
 
     private void prepareNavigationBarView() {
@@ -813,7 +813,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
                 if ((time - mLastLockToAppLongPress) < LOCK_TO_APP_GESTURE_TOLERENCE) {
                     activityManager.stopSystemLockTaskMode();
                     // When exiting refresh disabled flags.
-                    mNavigationBarView.setDisabledFlags(mDisabledFlags1, true);
+                    mNavigationBarView.updateNavButtonIcons();
                     return true;
                 } else if (v.getId() == btnId1) {
                     ButtonDispatcher button = btnId2 == R.id.recent_apps
@@ -835,7 +835,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
                     // should stop lock task.
                     activityManager.stopSystemLockTaskMode();
                     // When exiting refresh disabled flags.
-                    mNavigationBarView.setDisabledFlags(mDisabledFlags1, true);
+                    mNavigationBarView.updateNavButtonIcons();
                     return true;
                 } else if (v.getId() == btnId2) {
                     return btnId2 == R.id.recent_apps
