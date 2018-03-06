@@ -203,6 +203,10 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private PreciseDataConnectionState mPreciseDataConnectionState =
                 new PreciseDataConnectionState();
 
+    static final int ENFORCE_COARSE_LOCATION_PERMISSION_MASK =
+            PhoneStateListener.LISTEN_CELL_LOCATION
+                    | PhoneStateListener.LISTEN_CELL_INFO;
+
     static final int ENFORCE_PHONE_STATE_PERMISSION_MASK =
                 PhoneStateListener.LISTEN_CALL_FORWARDING_INDICATOR |
                 PhoneStateListener.LISTEN_MESSAGE_WAITING_INDICATOR |
@@ -1721,16 +1725,13 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     private boolean checkListenerPermission(int events, String callingPackage, String message) {
-        if ((events & PhoneStateListener.LISTEN_CELL_LOCATION) != 0) {
+        if ((events & ENFORCE_COARSE_LOCATION_PERMISSION_MASK) != 0) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.ACCESS_COARSE_LOCATION, null);
-
-        }
-
-        if ((events & PhoneStateListener.LISTEN_CELL_INFO) != 0) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.ACCESS_COARSE_LOCATION, null);
-
+            if (mAppOps.noteOp(AppOpsManager.OP_COARSE_LOCATION, Binder.getCallingUid(),
+                    callingPackage) != AppOpsManager.MODE_ALLOWED) {
+                return false;
+            }
         }
 
         if ((events & ENFORCE_PHONE_STATE_PERMISSION_MASK) != 0) {
