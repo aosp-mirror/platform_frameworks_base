@@ -268,10 +268,12 @@ interface INetworkManagementService
     NetworkStats getNetworkStatsDetail();
 
     /**
-     * Return detailed network statistics for the requested UID,
+     * Return detailed network statistics for the requested UID and interfaces,
      * including interface and tag details.
+     * @param uid UID to obtain statistics for, or {@link NetworkStats#UID_ALL}.
+     * @param ifaces Interfaces to obtain statistics for, or {@link NetworkStats#INTERFACES_ALL}.
      */
-    NetworkStats getNetworkStatsUidDetail(int uid);
+    NetworkStats getNetworkStatsUidDetail(int uid, in String[] ifaces);
 
     /**
      * Return summary of network statistics all tethering interfaces.
