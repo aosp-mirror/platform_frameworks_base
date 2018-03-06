@@ -3089,7 +3089,7 @@
     <!-- Notification action name for connecting to the network specified in the notification body. -->
     <string name="wifi_available_action_connect">Connect</string>
     <!-- Notification action name for opening the wifi picker, showing the user all the nearby networks. -->
-    <string name="wifi_available_action_all_networks">All Networks</string>
+    <string name="wifi_available_action_all_networks">All networks</string>
 
     <!--Notification title for Wi-Fi Wake onboarding. This is displayed the first time a user disables Wi-Fi with the feature enabled. -->
     <string name="wifi_wakeup_onboarding_title">Wi\u2011Fi will turn on automatically</string>
