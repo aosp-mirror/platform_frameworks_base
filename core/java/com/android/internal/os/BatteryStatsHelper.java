@@ -136,6 +136,7 @@ public class BatteryStatsHelper {
     PowerCalculator mCameraPowerCalculator;
     PowerCalculator mFlashlightPowerCalculator;
     PowerCalculator mMemoryPowerCalculator;
+    PowerCalculator mMediaPowerCalculator;
 
     boolean mHasWifiPowerReporting = false;
     boolean mHasBluetoothPowerReporting = false;
@@ -424,6 +425,11 @@ public class BatteryStatsHelper {
         }
         mFlashlightPowerCalculator.reset();
 
+        if (mMediaPowerCalculator == null) {
+            mMediaPowerCalculator = new MediaPowerCalculator(mPowerProfile);
+        }
+        mMediaPowerCalculator.reset();
+
         mStatsType = statsType;
         mRawUptimeUs = rawUptimeUs;
         mRawRealtimeUs = rawRealtimeUs;
@@ -560,6 +566,7 @@ public class BatteryStatsHelper {
             mCameraPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs, mStatsType);
             mFlashlightPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs,
                     mStatsType);
+            mMediaPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs, mStatsType);
 
             final double totalPower = app.sumPower();
             if (DEBUG && totalPower != 0) {
