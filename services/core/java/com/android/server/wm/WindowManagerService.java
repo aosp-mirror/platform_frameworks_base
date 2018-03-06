@@ -28,8 +28,6 @@ import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER
 import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.EXTRA_USER_HANDLE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.os.Process.ROOT_UID;
-import static android.os.Process.SHELL_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.myPid;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
@@ -1106,7 +1104,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public int addWindow(Session session, IWindow client, int seq,
-            LayoutParams attrs, int viewVisibility, int displayId,
+            LayoutParams attrs, int viewVisibility, int displayId, Rect outFrame,
             Rect outContentInsets, Rect outStableInsets, Rect outOutsets,
             DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel) {
         int[] appOp = new int[1];
@@ -1447,8 +1445,8 @@ public class WindowManagerService extends IWindowManager.Stub
             } else {
                 taskBounds = null;
             }
-            if (mPolicy.getInsetHintLw(win.mAttrs, taskBounds, displayFrames, outContentInsets,
-                    outStableInsets, outOutsets, outDisplayCutout)) {
+            if (mPolicy.getLayoutHintLw(win.mAttrs, taskBounds, displayFrames, outFrame,
+                    outContentInsets, outStableInsets, outOutsets, outDisplayCutout)) {
                 res |= WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_NAV_BAR;
             }
 
