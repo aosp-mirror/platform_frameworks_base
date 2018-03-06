@@ -153,8 +153,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     static final boolean LOGV = false;
 
     private static final int MSG_PERFORM_POLL = 1;
-    private static final int MSG_UPDATE_IFACES = 2;
-    private static final int MSG_REGISTER_GLOBAL_ALERT = 3;
+    private static final int MSG_REGISTER_GLOBAL_ALERT = 2;
 
     /** Flags to control detail level of poll event. */
     private static final int FLAG_PERSIST_NETWORK = 0x1;
@@ -1531,10 +1530,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 case MSG_PERFORM_POLL: {
                     final int flags = msg.arg1;
                     mService.performPoll(flags);
-                    return true;
-                }
-                case MSG_UPDATE_IFACES: {
-                    mService.updateIfaces(null);
                     return true;
                 }
                 case MSG_REGISTER_GLOBAL_ALERT: {
