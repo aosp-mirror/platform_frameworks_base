@@ -1,7 +1,6 @@
 package com.android.settingslib;
 
 import android.annotation.ColorInt;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -142,7 +141,7 @@ public class Utils {
     public static Drawable getUserIcon(Context context, UserManager um, UserInfo user) {
         final int iconSize = UserIconDrawable.getSizeForList(context);
         if (user.isManagedProfile()) {
-            Drawable drawable =  UserIconDrawable.getManagedUserBadgeDrawable(context);
+            Drawable drawable =  UserIconDrawable.getManagedUserDrawable(context);
             drawable.setBounds(0, 0, iconSize, iconSize);
             return drawable;
         }
