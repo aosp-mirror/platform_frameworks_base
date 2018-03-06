@@ -6655,6 +6655,7 @@ package android.webkit {
     method public abstract android.os.Handler getHandler(android.os.Handler);
     method public abstract void onActivityResult(int, int, android.content.Intent);
     method public abstract void onAttachedToWindow();
+    method public default boolean onCheckIsTextEditor();
     method public abstract void onConfigurationChanged(android.content.res.Configuration);
     method public abstract android.view.inputmethod.InputConnection onCreateInputConnection(android.view.inputmethod.EditorInfo);
     method public abstract void onDetachedFromWindow();
