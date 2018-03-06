@@ -23,6 +23,7 @@ import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.makeBundle;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.set;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -76,6 +77,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.UserManagerInternal;
 import android.test.InstrumentationTestCase;
 import android.test.mock.MockContext;
 import android.util.ArrayMap;
@@ -90,8 +92,6 @@ import com.android.server.pm.ShortcutUser.PackageWithUser;
 
 import org.junit.Assert;
 import org.mockito.ArgumentCaptor;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -111,7 +111,6 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected static final String TAG = "ShortcutManagerTest";
@@ -604,6 +603,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected PackageManager mMockPackageManager;
     protected PackageManagerInternal mMockPackageManagerInternal;
     protected UserManager mMockUserManager;
+    protected UserManagerInternal mMockUserManagerInternal;
     protected UsageStatsManagerInternal mMockUsageStatsManagerInternal;
     protected ActivityManagerInternal mMockActivityManagerInternal;
 
@@ -742,6 +742,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         mMockPackageManager = mock(PackageManager.class);
         mMockPackageManagerInternal = mock(PackageManagerInternal.class);
         mMockUserManager = mock(UserManager.class);
+        mMockUserManagerInternal = mock(UserManagerInternal.class);
         mMockUsageStatsManagerInternal = mock(UsageStatsManagerInternal.class);
         mMockActivityManagerInternal = mock(ActivityManagerInternal.class);
 
@@ -751,6 +752,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         LocalServices.addService(UsageStatsManagerInternal.class, mMockUsageStatsManagerInternal);
         LocalServices.removeServiceForTest(ActivityManagerInternal.class);
         LocalServices.addService(ActivityManagerInternal.class, mMockActivityManagerInternal);
+        LocalServices.removeServiceForTest(UserManagerInternal.class);
+        LocalServices.addService(UserManagerInternal.class, mMockUserManagerInternal);
 
         // Prepare injection values.
 
@@ -782,50 +785,54 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         deleteAllSavedFiles();
 
         // Set up users.
-        when(mMockUserManager.getUserInfo(anyInt())).thenAnswer(new AnswerWithSystemCheck<>(
-                inv -> mUserInfos.get((Integer) inv.getArguments()[0])));
-
         mUserInfos.put(USER_0, USER_INFO_0);
         mUserInfos.put(USER_10, USER_INFO_10);
         mUserInfos.put(USER_11, USER_INFO_11);
         mUserInfos.put(USER_P0, USER_INFO_P0);
         mUserInfos.put(USER_P1, USER_INFO_P1);
 
-        // Set up isUserRunning and isUserUnlocked.
-        when(mMockUserManager.isUserRunning(anyInt())).thenAnswer(new AnswerWithSystemCheck<>(
-                        inv -> b(mRunningUsers.get((Integer) inv.getArguments()[0]))));
-
-        when(mMockUserManager.isUserUnlocked(anyInt()))
-                .thenAnswer(new AnswerWithSystemCheck<>(inv -> {
+        when(mMockUserManagerInternal.isUserUnlockingOrUnlocked(anyInt()))
+                .thenAnswer(inv -> {
                     final int userId = (Integer) inv.getArguments()[0];
                     return b(mRunningUsers.get(userId)) && b(mUnlockedUsers.get(userId));
-                }));
-        // isUserUnlockingOrUnlocked() return the same value as isUserUnlocked().
-        when(mMockUserManager.isUserUnlockingOrUnlocked(anyInt()))
-                .thenAnswer(new AnswerWithSystemCheck<>(inv -> {
-                    final int userId = (Integer) inv.getArguments()[0];
-                    return b(mRunningUsers.get(userId)) && b(mUnlockedUsers.get(userId));
-                }));
-
-        when(mMockUserManager.getProfileParent(anyInt()))
-                .thenAnswer(new AnswerWithSystemCheck<>(inv -> {
+        });
+        when(mMockUserManagerInternal.getProfileParentId(anyInt()))
+                .thenAnswer(inv -> {
                     final int userId = (Integer) inv.getArguments()[0];
                     final UserInfo ui = mUserInfos.get(userId);
                     assertNotNull(ui);
                     if (ui.profileGroupId == UserInfo.NO_PROFILE_GROUP_ID) {
-                        return null;
+                        return userId;
                     }
                     final UserInfo parent = mUserInfos.get(ui.profileGroupId);
                     assertNotNull(parent);
-                    return parent;
-                }));
-        when(mMockUserManager.isManagedProfile(anyInt()))
-                .thenAnswer(new AnswerWithSystemCheck<>(inv -> {
-                    final int userId = (Integer) inv.getArguments()[0];
-                    final UserInfo ui = mUserInfos.get(userId);
-                    assertNotNull(ui);
-                    return ui.isManagedProfile();
-                }));
+                    return parent.id;
+                });
+
+        when(mMockUserManagerInternal.isProfileAccessible(anyInt(), anyInt(), anyString(),
+                anyBoolean())).thenAnswer(inv -> {
+                    final int callingUserId = (Integer) inv.getArguments()[0];
+                    final int targetUserId = (Integer) inv.getArguments()[1];
+                    if (targetUserId == callingUserId) {
+                        return true;
+                    }
+                    final UserInfo callingUserInfo = mUserInfos.get(callingUserId);
+                    final UserInfo targetUserInfo = mUserInfos.get(targetUserId);
+                    if (callingUserInfo == null || callingUserInfo.isManagedProfile()
+                            || targetUserInfo == null || !targetUserInfo.isEnabled()) {
+                        return false;
+                    }
+                    if (targetUserInfo.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID
+                            && targetUserInfo.profileGroupId == callingUserInfo.profileGroupId) {
+                        return true;
+                    }
+                    final boolean isExternal = (Boolean) inv.getArguments()[3];
+                    if (!isExternal) {
+                        return false;
+                    }
+                    throw new SecurityException(inv.getArguments()[2] + " for unrelated profile "
+                            + targetUserId);
+                });
 
         when(mMockActivityManagerInternal.getUidProcessState(anyInt())).thenReturn(
                 ActivityManager.PROCESS_STATE_CACHED_EMPTY);
@@ -858,24 +865,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     private static boolean b(Boolean value) {
         return (value != null && value);
-    }
-
-    /**
-     * Returns a boolean but also checks if the current UID is SYSTEM_UID.
-     */
-    protected class AnswerWithSystemCheck<T> implements Answer<T> {
-        private final Function<InvocationOnMock, T> mChecker;
-
-        public AnswerWithSystemCheck(Function<InvocationOnMock, T> checker) {
-            mChecker = checker;
-        }
-
-        @Override
-        public T answer(InvocationOnMock invocation) throws Throwable {
-            assertEquals("Must be called on SYSTEM UID.",
-                    Process.SYSTEM_UID, mInjectedCallingUid);
-            return mChecker.apply(invocation);
-        }
     }
 
     protected void setUpAppResources() throws Exception {
