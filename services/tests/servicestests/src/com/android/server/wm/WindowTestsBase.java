@@ -198,12 +198,17 @@ class WindowTestsBase {
             return new WindowTestUtils.TestWindowToken(type, dc);
         }
 
-        final TaskStack stack =
-                createStackControllerOnStackOnDisplay(windowingMode, activityType, dc).mContainer;
+        return createAppWindowToken(dc, windowingMode, activityType);
+    }
+
+    AppWindowToken createAppWindowToken(DisplayContent dc, int windowingMode, int activityType) {
+        final TaskStack stack = createStackControllerOnStackOnDisplay(windowingMode, activityType,
+                dc).mContainer;
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        final WindowTestUtils.TestAppWindowToken token = new WindowTestUtils.TestAppWindowToken(dc);
-        task.addChild(token, 0);
-        return token;
+        final WindowTestUtils.TestAppWindowToken appWindowToken =
+                new WindowTestUtils.TestAppWindowToken(mDisplayContent);
+        task.addChild(appWindowToken, 0);
+        return appWindowToken;
     }
 
     WindowState createWindow(WindowState parent, int type, String name) {
