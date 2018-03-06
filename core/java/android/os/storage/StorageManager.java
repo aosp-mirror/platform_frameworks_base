@@ -50,7 +50,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -1317,15 +1316,6 @@ public class StorageManager {
     public void destroyUserStorage(String volumeUuid, int userId, int flags) {
         try {
             mStorageManager.destroyUserStorage(volumeUuid, userId, flags);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /** {@hide} */
-    public void secdiscard(String path) {
-        try {
-            mStorageManager.secdiscard(path);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
