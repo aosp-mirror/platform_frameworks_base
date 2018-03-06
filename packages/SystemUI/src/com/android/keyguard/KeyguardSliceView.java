@@ -72,6 +72,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     private int mIconSize;
     private Consumer<Boolean> mListener;
     private boolean mHasHeader;
+    private boolean mHideContent;
 
     public KeyguardSliceView(Context context) {
         this(context, null, 0);
@@ -192,12 +193,16 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
             }
         }
 
-        final int visibility = mHasHeader || subItemsCount > 0 ? VISIBLE : GONE;
+        updateVisibility();
+        mListener.accept(mHasHeader);
+    }
+
+    private void updateVisibility() {
+        final boolean hasContent = mHasHeader || mRow.getChildCount() > 0;
+        final int visibility = hasContent && !mHideContent ? VISIBLE : GONE;
         if (visibility != getVisibility()) {
             setVisibility(visibility);
         }
-
-        mListener.accept(mHasHeader);
     }
 
     /**
@@ -319,6 +324,11 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     void setTextColor(@ColorInt int textColor) {
         mTextColor = textColor;
         updateTextColors();
+    }
+
+    public void setHideContent(boolean hideContent) {
+        mHideContent = hideContent;
+        updateVisibility();
     }
 
     /**
