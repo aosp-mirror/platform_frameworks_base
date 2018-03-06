@@ -134,24 +134,6 @@ public class MediaControlView2 extends ViewGroupHelper<MediaControlView2Provider
      */
     public static final int BUTTON_SETTINGS = 11;
 
-    /**
-     * String for receiving command to show subtitle from MediaSession. Can be checked by
-     * implementing {@link android.media.session.MediaSession.Callback#onCommand}
-     * @hide
-     */
-    public static final String COMMAND_SHOW_SUBTITLE = "showSubtitle";
-    /**
-     * String for receiving command to hide subtitle from MediaSession. Can be checked by
-     * implementing {@link android.media.session.MediaSession.Callback#onCommand}
-     * @hide
-     */
-    public static final String COMMAND_HIDE_SUBTITLE = "hideSubtitle";
-
-    /**
-     * @hide TODO: remove once the implementation is revised
-     */
-    public static final String COMMAND_SET_FULLSCREEN = "setFullscreen";
-
     public MediaControlView2(@NonNull Context context) {
         this(context, null);
     }
