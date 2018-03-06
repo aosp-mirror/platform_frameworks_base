@@ -735,7 +735,7 @@ status_t LogSection::BlockingCall(int pipeWriteFd) const {
             lastTimestamp.tv_nsec = msg.entry_v1.nsec;
 
             // format a BinaryLogEntry
-            long long token = proto.start(LogProto::BINARY_LOGS);
+            uint64_t token = proto.start(LogProto::BINARY_LOGS);
             proto.write(BinaryLogEntry::SEC, msg.entry_v1.sec);
             proto.write(BinaryLogEntry::NANOSEC, msg.entry_v1.nsec);
             proto.write(BinaryLogEntry::UID, (int)msg.entry_v4.uid);
@@ -745,7 +745,7 @@ status_t LogSection::BlockingCall(int pipeWriteFd) const {
                         get4LE(reinterpret_cast<uint8_t const*>(msg.msg())));
             do {
                 elem = android_log_read_next(context);
-                long long elemToken = proto.start(BinaryLogEntry::ELEMS);
+                uint64_t elemToken = proto.start(BinaryLogEntry::ELEMS);
                 switch (elem.type) {
                     case EVENT_TYPE_INT:
                         proto.write(BinaryLogEntry::Elem::TYPE,
@@ -797,7 +797,7 @@ status_t LogSection::BlockingCall(int pipeWriteFd) const {
             lastTimestamp.tv_nsec = entry.tv_nsec;
 
             // format a TextLogEntry
-            long long token = proto.start(LogProto::TEXT_LOGS);
+            uint64_t token = proto.start(LogProto::TEXT_LOGS);
             proto.write(TextLogEntry::SEC, (long long)entry.tv_sec);
             proto.write(TextLogEntry::NANOSEC, (long long)entry.tv_nsec);
             proto.write(TextLogEntry::PRIORITY, (int)entry.priority);

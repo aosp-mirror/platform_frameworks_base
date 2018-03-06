@@ -25,7 +25,7 @@ namespace android {
 namespace util {
 
 /**
- * Position of the field type in a (long long) fieldId.
+ * Position of the field type in a 64-bits fieldId.
  */
 const uint64_t FIELD_TYPE_SHIFT = 32;
 
@@ -106,8 +106,8 @@ public:
      * Returns a token of this write session.
      * Must call end(token) when finish write this sub-message.
      */
-    long long start(uint64_t fieldId);
-    void end(long long token);
+    uint64_t start(uint64_t fieldId);
+    void end(uint64_t token);
 
     /**
      * Returns how many bytes are buffered in ProtoOutputStream.
@@ -139,7 +139,7 @@ private:
     bool mCompact;
     int mDepth;
     int mObjectId;
-    long long mExpectedObjectToken;
+    uint64_t mExpectedObjectToken;
 
     inline void writeDoubleImpl(uint32_t id, double val);
     inline void writeFloatImpl(uint32_t id, float val);

@@ -71,7 +71,7 @@ status_t PsParser::Parse(const int in, const int out) const {
             continue;
         }
 
-        long long token = proto.start(PsProto::PROCESSES);
+        uint64_t token = proto.start(PsProto::PROCESSES);
         for (int i=0; i<(int)record.size(); i++) {
             if (!table.insertField(&proto, header[i], record[i])) {
                 fprintf(stderr, "[%s]Line %d has bad value %s of %s\n",
