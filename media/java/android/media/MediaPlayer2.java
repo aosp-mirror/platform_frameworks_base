@@ -214,7 +214,8 @@ import java.util.concurrent.Executor;
  *         call returns right away, the actual seek operation may take a while to
  *         finish, especially for audio/video being streamed. When the actual
  *         seek operation completes, the internal player engine calls a user
- *         supplied MediaPlayer2EventCallback.onCallComplete() with {@link #MEDIA_CALL_SEEK_TO}
+ *         supplied MediaPlayer2EventCallback.onCallCompleted() with
+ *         {@link #CALL_COMPLETED_SEEK_TO}
  *         if an MediaPlayer2EventCallback has been registered beforehand via
  *         {@link #setMediaPlayer2EventCallback(Executor, MediaPlayer2EventCallback)}.</li>
  *         <li>Please
@@ -819,7 +820,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * of a batch of commands.
      */
     // This is an asynchronous call.
-    public void notifyWhenCommandLabelReached(Object label) { }
+    public void notifyWhenCommandLabelReached(@NonNull Object label) { }
 
     /**
      * Sets the {@link SurfaceHolder} to use for displaying the video
@@ -1051,6 +1052,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
     /**
      * MediaPlayer2 has not been prepared or just has been reset.
      * In this state, MediaPlayer2 doesn't fetch data.
+     * @hide
      */
     public static final int MEDIAPLAYER2_STATE_IDLE = 1;
 
@@ -1058,29 +1060,33 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * MediaPlayer2 has been just prepared.
      * In this state, MediaPlayer2 just fetches data from media source,
      * but doesn't actively render data.
+     * @hide
      */
     public static final int MEDIAPLAYER2_STATE_PREPARED = 2;
 
     /**
      * MediaPlayer2 is paused.
      * In this state, MediaPlayer2 doesn't actively render data.
+     * @hide
      */
     public static final int MEDIAPLAYER2_STATE_PAUSED = 3;
 
     /**
      * MediaPlayer2 is actively playing back data.
+     * @hide
      */
     public static final int MEDIAPLAYER2_STATE_PLAYING = 4;
 
     /**
      * MediaPlayer2 has hit some fatal error and cannot continue playback.
+     * @hide
      */
     public static final int MEDIAPLAYER2_STATE_ERROR = 5;
 
     /**
      * @hide
      */
-    @IntDef({
+    @IntDef(flag = false, prefix = "MEDIAPLAYER2_STATE", value = {
         MEDIAPLAYER2_STATE_IDLE,
         MEDIAPLAYER2_STATE_PREPARED,
         MEDIAPLAYER2_STATE_PAUSED,
@@ -1093,6 +1099,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * Gets the current MediaPlayer2 state.
      *
      * @return the current MediaPlayer2 state.
+     * @hide
      */
     public abstract @MediaPlayer2State int getMediaPlayer2State();
 
@@ -1170,8 +1177,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
     public static final int PLAYBACK_RATE_AUDIO_MODE_DEFAULT = 0;
 
     /** @hide */
-    @IntDef(
-        value = {
+    @IntDef(flag = false, prefix = "PLAYBACK_RATE_AUDIO_MODE", value = {
             PLAYBACK_RATE_AUDIO_MODE_DEFAULT,
             PLAYBACK_RATE_AUDIO_MODE_STRETCH,
             PLAYBACK_RATE_AUDIO_MODE_RESAMPLE,
@@ -1276,8 +1282,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
     public static final int SEEK_CLOSEST          = 0x03;
 
     /** @hide */
-    @IntDef(
-        value = {
+    @IntDef(flag = false, prefix = "SEEK", value = {
             SEEK_PREVIOUS_SYNC,
             SEEK_NEXT_SYNC,
             SEEK_CLOSEST_SYNC,
@@ -1302,16 +1307,6 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      * If msec is negative, time position zero will be used.
      * If msec is larger than duration, duration will be used.
      * @param mode the mode indicating where exactly to seek to.
-     * Use {@link #SEEK_PREVIOUS_SYNC} if one wants to seek to a sync frame
-     * that has a timestamp earlier than or the same as msec. Use
-     * {@link #SEEK_NEXT_SYNC} if one wants to seek to a sync frame
-     * that has a timestamp later than or the same as msec. Use
-     * {@link #SEEK_CLOSEST_SYNC} if one wants to seek to a sync frame
-     * that has a timestamp closest to or the same as msec. Use
-     * {@link #SEEK_CLOSEST} if one wants to seek to a frame that may
-     * or may not be a sync frame but is closest to or the same as msec.
-     * {@link #SEEK_CLOSEST} often has larger performance overhead compared
-     * to the other options if there is no sync frame located at msec.
      */
     // This is an asynchronous call.
     public abstract void seekTo(long msec, @SeekMode int mode);
@@ -1753,28 +1748,20 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
          * @param dsd the DataSourceDesc of this data source
          * @param data the timed metadata sample associated with this event
          */
-        public void onTimedMetaDataAvailable(MediaPlayer2 mp, DataSourceDesc dsd, TimedMetaData data) { }
+        public void onTimedMetaDataAvailable(
+                MediaPlayer2 mp, DataSourceDesc dsd, TimedMetaData data) { }
 
         /**
          * Called to indicate an error.
          *
          * @param mp the MediaPlayer2 the error pertains to
          * @param dsd the DataSourceDesc of this data source
-         * @param what the type of error that has occurred:
-         * <ul>
-         * <li>{@link #MEDIA_ERROR_UNKNOWN}
-         * </ul>
+         * @param what the type of error that has occurred.
          * @param extra an extra code, specific to the error. Typically
          * implementation dependent.
-         * <ul>
-         * <li>{@link #MEDIA_ERROR_IO}
-         * <li>{@link #MEDIA_ERROR_MALFORMED}
-         * <li>{@link #MEDIA_ERROR_UNSUPPORTED}
-         * <li>{@link #MEDIA_ERROR_TIMED_OUT}
-         * <li><code>MEDIA_ERROR_SYSTEM (-2147483648)</code> - low-level system error.
-         * </ul>
          */
-        public void onError(MediaPlayer2 mp, DataSourceDesc dsd, int what, int extra) { }
+        public void onError(
+                MediaPlayer2 mp, DataSourceDesc dsd, @MediaError int what, int extra) { }
 
         /**
          * Called to indicate an info or a warning.
@@ -1782,29 +1769,10 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
          * @param mp the MediaPlayer2 the info pertains to.
          * @param dsd the DataSourceDesc of this data source
          * @param what the type of info or warning.
-         * <ul>
-         * <li>{@link #MEDIA_INFO_UNKNOWN}
-         * <li>{@link #MEDIA_INFO_STARTED_AS_NEXT}
-         * <li>{@link #MEDIA_INFO_VIDEO_RENDERING_START}
-         * <li>{@link #MEDIA_INFO_AUDIO_RENDERING_START}
-         * <li>{@link #MEDIA_INFO_PLAYBACK_COMPLETE}
-         * <li>{@link #MEDIA_INFO_PLAYLIST_END}
-         * <li>{@link #MEDIA_INFO_PREPARED}
-         * <li>{@link #MEDIA_INFO_VIDEO_TRACK_LAGGING}
-         * <li>{@link #MEDIA_INFO_BUFFERING_START}
-         * <li>{@link #MEDIA_INFO_BUFFERING_END}
-         * <li><code>MEDIA_INFO_NETWORK_BANDWIDTH (703)</code> -
-         *     bandwidth information is available (as <code>extra</code> kbps)
-         * <li>{@link #MEDIA_INFO_BAD_INTERLEAVING}
-         * <li>{@link #MEDIA_INFO_NOT_SEEKABLE}
-         * <li>{@link #MEDIA_INFO_METADATA_UPDATE}
-         * <li>{@link #MEDIA_INFO_UNSUPPORTED_SUBTITLE}
-         * <li>{@link #MEDIA_INFO_SUBTITLE_TIMED_OUT}
-         * </ul>
          * @param extra an extra code, specific to the info. Typically
          * implementation dependent.
          */
-        public void onInfo(MediaPlayer2 mp, DataSourceDesc dsd, int what, int extra) { }
+        public void onInfo(MediaPlayer2 mp, DataSourceDesc dsd, @MediaInfo int what, int extra) { }
 
         /**
          * Called to acknowledge an API call.
@@ -1812,33 +1780,11 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
          * @param mp the MediaPlayer2 the call was made on.
          * @param dsd the DataSourceDesc of this data source
          * @param what the enum for the API call.
-         * <ul>
-         * <li>{@link #MEDIA_CALL_ATTACH_AUX_EFFECT}
-         * <li>{@link #MEDIA_CALL_DESELECT_TRACK}
-         * <li>{@link #MEDIA_CALL_LOOP_CURRENT}
-         * <li>{@link #MEDIA_CALL_PAUSE}
-         * <li>{@link #MEDIA_CALL_PLAY}
-         * <li>{@link #MEDIA_CALL_PREPARE}
-         * <li>{@link #MEDIA_CALL_RELEASE_DRM}
-         * <li>{@link #MEDIA_CALL_RESTORE_DRM_KEYS}
-         * <li>{@link #MEDIA_CALL_SEEK_TO}
-         * <li>{@link #MEDIA_CALL_SELECT_TRACK}
-         * <li>{@link #MEDIA_CALL_SET_AUDIO_ATTRIBUTES}
-         * <li>{@link #MEDIA_CALL_SET_AUDIO_SESSION_ID}
-         * <li>{@link #MEDIA_CALL_SET_AUX_EFFECT_SEND_LEVEL}
-         * <li>{@link #MEDIA_CALL_SET_DATA_SOURCE}
-         * <li>{@link #MEDIA_CALL_SET_NEXT_DATA_SOURCE}
-         * <li>{@link #MEDIA_CALL_SET_NEXT_DATA_SOURCES}
-         * <li>{@link #MEDIA_CALL_SET_PLAYBACK_PARAMS}
-         * <li>{@link #MEDIA_CALL_SET_PLAYBACK_SPEED}
-         * <li>{@link #MEDIA_CALL_SET_PLAYER_VOLUME}
-         * <li>{@link #MEDIA_CALL_SET_SURFACE}
-         * <li>{@link #MEDIA_CALL_SET_SYNC_PARAMS}
-         * <li>{@link #MEDIA_CALL_SKIP_TO_NEXT}
-         * </ul>
          * @param status the returned status code for the call.
          */
-        public void onCallComplete(MediaPlayer2 mp, DataSourceDesc dsd, int what, int status) { }
+        public void onCallCompleted(
+                MediaPlayer2 mp, DataSourceDesc dsd, @CallCompleted int what,
+                @CallStatus int status) { }
 
         /**
          * Called to indicate media clock has changed.
@@ -1847,7 +1793,8 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
          * @param dsd the DataSourceDesc of this data source
          * @param timestamp the new media clock.
          */
-        public void onMediaTimeChanged(MediaPlayer2 mp, DataSourceDesc dsd, MediaTimestamp timestamp) { }
+        public void onMediaTimeChanged(
+                MediaPlayer2 mp, DataSourceDesc dsd, MediaTimestamp timestamp) { }
 
         /**
          * Called to indicate {@link #notifyWhenCommandLabelReached(Object)} has been processed.
@@ -1856,7 +1803,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
          * @param label the application specific Object given by
          *        {@link #notifyWhenCommandLabelReached(Object)}.
          */
-        public void onCommandLabelReached(MediaPlayer2 mp, Object label) { }
+        public void onCommandLabelReached(MediaPlayer2 mp, @NonNull Object label) { }
     }
 
     /**
@@ -1929,6 +1876,20 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      */
     public static final int MEDIA_ERROR_SYSTEM = -2147483648;
 
+    /**
+     * @hide
+     */
+    @IntDef(flag = false, prefix = "MEDIA_ERROR", value = {
+            MEDIA_ERROR_UNKNOWN,
+            MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK,
+            MEDIA_ERROR_IO,
+            MEDIA_ERROR_MALFORMED,
+            MEDIA_ERROR_UNSUPPORTED,
+            MEDIA_ERROR_TIMED_OUT,
+            MEDIA_ERROR_SYSTEM
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MediaError {}
 
     /* Do not change these values without updating their counterparts
      * in include/media/mediaplayer2.h!
@@ -2059,129 +2020,246 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
      */
     public static final int MEDIA_INFO_SUBTITLE_TIMED_OUT = 902;
 
+    /**
+     * @hide
+     */
+    @IntDef(flag = false, prefix = "MEDIA_INFO", value = {
+            MEDIA_INFO_UNKNOWN,
+            MEDIA_INFO_STARTED_AS_NEXT,
+            MEDIA_INFO_VIDEO_RENDERING_START,
+            MEDIA_INFO_AUDIO_RENDERING_START,
+            MEDIA_INFO_PLAYBACK_COMPLETE,
+            MEDIA_INFO_PLAYLIST_END,
+            MEDIA_INFO_PREPARED,
+            MEDIA_INFO_VIDEO_TRACK_LAGGING,
+            MEDIA_INFO_BUFFERING_START,
+            MEDIA_INFO_BUFFERING_END,
+            MEDIA_INFO_NETWORK_BANDWIDTH,
+            MEDIA_INFO_BUFFERING_UPDATE,
+            MEDIA_INFO_BAD_INTERLEAVING,
+            MEDIA_INFO_NOT_SEEKABLE,
+            MEDIA_INFO_METADATA_UPDATE,
+            MEDIA_INFO_EXTERNAL_METADATA_UPDATE,
+            MEDIA_INFO_AUDIO_NOT_PLAYING,
+            MEDIA_INFO_VIDEO_NOT_PLAYING,
+            MEDIA_INFO_TIMED_TEXT_ERROR,
+            MEDIA_INFO_UNSUPPORTED_SUBTITLE,
+            MEDIA_INFO_SUBTITLE_TIMED_OUT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MediaInfo {}
+
     //--------------------------------------------------------------------------
     /** The player just completed a call {@link #attachAuxEffect}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
      */
-    public static final int MEDIA_CALL_ATTACH_AUX_EFFECT = 1;
+    public static final int CALL_COMPLETED_ATTACH_AUX_EFFECT = 1;
 
     /** The player just completed a call {@link #deselectTrack}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
      */
-    public static final int MEDIA_CALL_DESELECT_TRACK = 2;
+    public static final int CALL_COMPLETED_DESELECT_TRACK = 2;
 
     /** The player just completed a call {@link #loopCurrent}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
      */
-    public static final int MEDIA_CALL_LOOP_CURRENT = 3;
+    public static final int CALL_COMPLETED_LOOP_CURRENT = 3;
 
     /** The player just completed a call {@link #pause}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
      */
-    public static final int MEDIA_CALL_PAUSE = 4;
+    public static final int CALL_COMPLETED_PAUSE = 4;
 
     /** The player just completed a call {@link #play}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
      */
-    public static final int MEDIA_CALL_PLAY = 5;
+    public static final int CALL_COMPLETED_PLAY = 5;
 
     /** The player just completed a call {@link #prepare}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
      */
-    public static final int MEDIA_CALL_PREPARE = 6;
+    public static final int CALL_COMPLETED_PREPARE = 6;
 
     /** The player just completed a call {@link #releaseDrm}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
      */
-    public static final int MEDIA_CALL_RELEASE_DRM = 12;
+    public static final int CALL_COMPLETED_RELEASE_DRM = 12;
 
     /** The player just completed a call {@link #restoreDrmKeys}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
      */
-    public static final int MEDIA_CALL_RESTORE_DRM_KEYS = 13;
+    public static final int CALL_COMPLETED_RESTORE_DRM_KEYS = 13;
 
     /** The player just completed a call {@link #seekTo}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
      */
-    public static final int MEDIA_CALL_SEEK_TO = 14;
+    public static final int CALL_COMPLETED_SEEK_TO = 14;
 
     /** The player just completed a call {@link #selectTrack}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
      */
-    public static final int MEDIA_CALL_SELECT_TRACK = 15;
+    public static final int CALL_COMPLETED_SELECT_TRACK = 15;
 
     /** The player just completed a call {@link #setAudioAttributes}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
      */
-    public static final int MEDIA_CALL_SET_AUDIO_ATTRIBUTES = 16;
+    public static final int CALL_COMPLETED_SET_AUDIO_ATTRIBUTES = 16;
 
     /** The player just completed a call {@link #setAudioSessionId}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
      */
-    public static final int MEDIA_CALL_SET_AUDIO_SESSION_ID = 17;
+    public static final int CALL_COMPLETED_SET_AUDIO_SESSION_ID = 17;
 
     /** The player just completed a call {@link #setAuxEffectSendLevel}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
      */
-    public static final int MEDIA_CALL_SET_AUX_EFFECT_SEND_LEVEL = 18;
+    public static final int CALL_COMPLETED_SET_AUX_EFFECT_SEND_LEVEL = 18;
 
     /** The player just completed a call {@link #setDataSource}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
      */
-    public static final int MEDIA_CALL_SET_DATA_SOURCE = 19;
+    public static final int CALL_COMPLETED_SET_DATA_SOURCE = 19;
 
     /** The player just completed a call {@link #setNextDataSource}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
      */
-    public static final int MEDIA_CALL_SET_NEXT_DATA_SOURCE = 22;
+    public static final int CALL_COMPLETED_SET_NEXT_DATA_SOURCE = 22;
 
     /** The player just completed a call {@link #setNextDataSources}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
      */
-    public static final int MEDIA_CALL_SET_NEXT_DATA_SOURCES = 23;
+    public static final int CALL_COMPLETED_SET_NEXT_DATA_SOURCES = 23;
 
     /** The player just completed a call {@link #setPlaybackParams}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
      */
-    public static final int MEDIA_CALL_SET_PLAYBACK_PARAMS = 24;
+    public static final int CALL_COMPLETED_SET_PLAYBACK_PARAMS = 24;
 
     /** The player just completed a call {@link #setPlaybackSpeed}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
      */
-    public static final int MEDIA_CALL_SET_PLAYBACK_SPEED = 25;
+    public static final int CALL_COMPLETED_SET_PLAYBACK_SPEED = 25;
 
     /** The player just completed a call {@link #setPlayerVolume}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
      */
-    public static final int MEDIA_CALL_SET_PLAYER_VOLUME = 26;
+    public static final int CALL_COMPLETED_SET_PLAYER_VOLUME = 26;
 
     /** The player just completed a call {@link #setSurface}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
      */
-    public static final int MEDIA_CALL_SET_SURFACE = 27;
+    public static final int CALL_COMPLETED_SET_SURFACE = 27;
 
     /** The player just completed a call {@link #setSyncParams}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
      */
-    public static final int MEDIA_CALL_SET_SYNC_PARAMS = 28;
+    public static final int CALL_COMPLETED_SET_SYNC_PARAMS = 28;
 
     /** The player just completed a call {@link #skipToNext}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
      */
-    public static final int MEDIA_CALL_SKIP_TO_NEXT = 29;
+    public static final int CALL_COMPLETED_SKIP_TO_NEXT = 29;
 
     /** The player just completed a call {@link #setBufferingParams}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
      * @hide
      */
-    public static final int MEDIA_CALL_SET_BUFFERING_PARAMS = 1001;
+    public static final int CALL_COMPLETED_SET_BUFFERING_PARAMS = 1001;
 
-    /** The player just completed a call {@link #setPreferredDevice}.
-     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallComplete
+    /** The player just completed a call {@code setVideoScalingMode}.
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
      * @hide
      */
-    public static final int MEDIA_CALL_SET_PREFERRED_DEVICE = 1002;
+    public static final int CALL_COMPLETED_SET_VIDEO_SCALING_MODE = 1002;
 
+    /** The player just completed a call {@code notifyWhenCommandLabelReached}.
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCommandLabelReached
+     * @hide
+     */
+    public static final int CALL_COMPLETED_NOTIFY_WHEN_COMMAND_LABEL_REACHED = 1003;
+
+    /**
+     * @hide
+     */
+    @IntDef(flag = false, prefix = "CALL_COMPLETED", value = {
+            CALL_COMPLETED_ATTACH_AUX_EFFECT,
+            CALL_COMPLETED_DESELECT_TRACK,
+            CALL_COMPLETED_LOOP_CURRENT,
+            CALL_COMPLETED_PAUSE,
+            CALL_COMPLETED_PLAY,
+            CALL_COMPLETED_PREPARE,
+            CALL_COMPLETED_RELEASE_DRM,
+            CALL_COMPLETED_RESTORE_DRM_KEYS,
+            CALL_COMPLETED_SEEK_TO,
+            CALL_COMPLETED_SELECT_TRACK,
+            CALL_COMPLETED_SET_AUDIO_ATTRIBUTES,
+            CALL_COMPLETED_SET_AUDIO_SESSION_ID,
+            CALL_COMPLETED_SET_AUX_EFFECT_SEND_LEVEL,
+            CALL_COMPLETED_SET_DATA_SOURCE,
+            CALL_COMPLETED_SET_NEXT_DATA_SOURCE,
+            CALL_COMPLETED_SET_NEXT_DATA_SOURCES,
+            CALL_COMPLETED_SET_PLAYBACK_PARAMS,
+            CALL_COMPLETED_SET_PLAYBACK_SPEED,
+            CALL_COMPLETED_SET_PLAYER_VOLUME,
+            CALL_COMPLETED_SET_SURFACE,
+            CALL_COMPLETED_SET_SYNC_PARAMS,
+            CALL_COMPLETED_SKIP_TO_NEXT,
+            CALL_COMPLETED_SET_BUFFERING_PARAMS,
+            CALL_COMPLETED_SET_VIDEO_SCALING_MODE,
+            CALL_COMPLETED_NOTIFY_WHEN_COMMAND_LABEL_REACHED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CallCompleted {}
+
+    /** Status code represents that call is completed without an error.
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     */
+    public static final int CALL_STATUS_NO_ERROR = 0;
+
+    /** Status code represents that call is ended with an unknown error.
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     */
+    public static final int CALL_STATUS_ERROR_UNKNOWN = Integer.MIN_VALUE;
+
+    /** Status code represents that the player is not in valid state for the operation.
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     */
+    public static final int CALL_STATUS_INVALID_OPERATION = 1;
+
+    /** Status code represents that the argument is illegal.
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     */
+    public static final int CALL_STATUS_BAD_VALUE = 2;
+
+    /** Status code represents that the operation is not allowed.
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     */
+    public static final int CALL_STATUS_PERMISSION_DENIED = 3;
+
+    /** Status code represents a file or network related operation error.
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     */
+    public static final int CALL_STATUS_ERROR_IO = 4;
+
+    /** Status code represents that DRM operation is called before preparing a DRM scheme through
+     *  {@link #prepareDrm}.
+     * @see android.media.MediaPlayer2.MediaPlayer2EventCallback#onCallCompleted
+     */
+    public static final int CALL_STATUS_NO_DRM_SCHEME = 5;
+
+    /**
+     * @hide
+     */
+    @IntDef(flag = false, prefix = "CALL_STATUS", value = {
+            CALL_STATUS_NO_ERROR,
+            CALL_STATUS_ERROR_UNKNOWN,
+            CALL_STATUS_INVALID_OPERATION,
+            CALL_STATUS_BAD_VALUE,
+            CALL_STATUS_PERMISSION_DENIED,
+            CALL_STATUS_ERROR_IO,
+            CALL_STATUS_NO_DRM_SCHEME})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CallStatus {}
 
     // Modular DRM begin
 
@@ -2238,13 +2316,10 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
          *
          * @param mp the {@code MediaPlayer2} associated with this callback
          * @param dsd the DataSourceDesc of this data source
-         * @param status the result of DRM preparation which can be
-         * {@link #PREPARE_DRM_STATUS_SUCCESS},
-         * {@link #PREPARE_DRM_STATUS_PROVISIONING_NETWORK_ERROR},
-         * {@link #PREPARE_DRM_STATUS_PROVISIONING_SERVER_ERROR}, or
-         * {@link #PREPARE_DRM_STATUS_PREPARATION_ERROR}.
+         * @param status the result of DRM preparation.
          */
-        public void onDrmPrepared(MediaPlayer2 mp, DataSourceDesc dsd, @PrepareDrmStatusCode int status) { }
+        public void onDrmPrepared(
+                MediaPlayer2 mp, DataSourceDesc dsd, @PrepareDrmStatusCode int status) { }
     }
 
     /**
@@ -2288,7 +2363,7 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
 
 
     /** @hide */
-    @IntDef({
+    @IntDef(flag = false, prefix = "PREPARE_DRM_STATUS", value = {
         PREPARE_DRM_STATUS_SUCCESS,
         PREPARE_DRM_STATUS_PROVISIONING_NETWORK_ERROR,
         PREPARE_DRM_STATUS_PROVISIONING_SERVER_ERROR,
