@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -65,6 +66,8 @@ public class RecentsOnboarding {
     private static final long SHOW_HIDE_DURATION_MS = 300;
     // Don't show the onboarding until the user has launched this number of apps.
     private static final int SHOW_ON_APP_LAUNCH = 2;
+    // After explicitly dismissing, show again after launching this number of apps.
+    private static final int SHOW_ON_APP_LAUNCH_AFTER_DISMISS = 5;
 
     private final Context mContext;
     private final WindowManager mWindowManager;
@@ -84,6 +87,9 @@ public class RecentsOnboarding {
     private boolean mTaskListenerRegistered;
     private boolean mLayoutAttachedToWindow;
     private boolean mBackgroundIsLight;
+    private int mLastTaskId;
+    private boolean mHasDismissed;
+    private int mNumAppsLaunchedSinceDismiss;
 
     private final SysUiTaskStackChangeListener mTaskListener = new SysUiTaskStackChangeListener() {
         @Override
@@ -94,14 +100,26 @@ public class RecentsOnboarding {
                 hide(true);
                 return;
             }
+            if (info.id == mLastTaskId) {
+                // We only count launches that go to a new task.
+                return;
+            }
             int activityType = info.configuration.windowConfiguration.getActivityType();
-            int numAppsLaunched = Prefs.getInt(mContext, Prefs.Key.NUM_APPS_LAUNCHED, 0);
             if (activityType == ACTIVITY_TYPE_STANDARD) {
+                mLastTaskId = info.id;
+                int numAppsLaunched = mHasDismissed ? mNumAppsLaunchedSinceDismiss
+                        : Prefs.getInt(mContext, Prefs.Key.NUM_APPS_LAUNCHED, 0);
+                int showOnAppLaunch = mHasDismissed ? SHOW_ON_APP_LAUNCH_AFTER_DISMISS
+                        : SHOW_ON_APP_LAUNCH;
                 numAppsLaunched++;
-                if (numAppsLaunched >= SHOW_ON_APP_LAUNCH) {
+                if (numAppsLaunched >= showOnAppLaunch) {
                     show();
                 } else {
-                    Prefs.putInt(mContext, Prefs.Key.NUM_APPS_LAUNCHED, numAppsLaunched);
+                    if (mHasDismissed) {
+                        mNumAppsLaunchedSinceDismiss = numAppsLaunched;
+                    } else {
+                        Prefs.putInt(mContext, Prefs.Key.NUM_APPS_LAUNCHED, numAppsLaunched);
+                    }
                 }
             } else {
                 hide(false);
@@ -115,6 +133,7 @@ public class RecentsOnboarding {
         public void onViewAttachedToWindow(View view) {
             if (view == mLayout) {
                 mLayoutAttachedToWindow = true;
+                mHasDismissed = false;
             }
         }
 
@@ -149,7 +168,11 @@ public class RecentsOnboarding {
 
         mLayout.addOnAttachStateChangeListener(mOnAttachStateChangeListener);
         mLayout.setBackground(mBackgroundDrawable);
-        mDismissView.setOnClickListener(v -> hide(true));
+        mDismissView.setOnClickListener(v -> {
+            hide(true);
+            mHasDismissed = true;
+            mNumAppsLaunchedSinceDismiss = 0;
+        });
 
         if (RESET_PREFS_FOR_DEBUG) {
             Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_RECENTS_ONBOARDING, false);
@@ -180,6 +203,8 @@ public class RecentsOnboarding {
             ActivityManagerWrapper.getInstance().unregisterTaskStackListener(mTaskListener);
             mTaskListenerRegistered = false;
         }
+        mHasDismissed = false;
+        mNumAppsLaunchedSinceDismiss = 0;
         hide(false);
     }
 
