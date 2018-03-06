@@ -440,7 +440,7 @@ void
 Message::startSession(ProtoOutputStream* proto, const string& name)
 {
     uint64_t fieldId = mTable->mFields[name];
-    long long token = proto->start(fieldId);
+    uint64_t token = proto->start(fieldId);
     mPreviousField = name;
     mTokens.push(token);
 }
