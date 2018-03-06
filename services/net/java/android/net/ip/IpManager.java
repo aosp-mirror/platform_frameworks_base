@@ -144,20 +144,7 @@ public class IpManager extends IpClient {
     }
 
     public IpManager(Context context, String ifName, Callback callback) {
-        this(context, ifName, callback, INetworkManagementService.Stub.asInterface(
-                ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE)),
-                NetdService.getInstance());
-    }
-
-    public IpManager(Context context, String ifName, Callback callback,
-            INetworkManagementService nwService) {
-        this(context, ifName, callback, nwService, NetdService.getInstance());
-    }
-
-    @VisibleForTesting
-    public IpManager(Context context, String ifName, Callback callback,
-            INetworkManagementService nwService, INetd netd) {
-        super(context, ifName, callback, nwService, netd);
+        super(context, ifName, callback);
     }
 
     public void startProvisioning(ProvisioningConfiguration req) {
