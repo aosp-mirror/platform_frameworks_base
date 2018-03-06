@@ -345,6 +345,7 @@ Landroid/app/StatusBarManager;->expandSettingsPanel()V
 Landroid/app/StatusBarManager;->getService()Lcom/android/internal/statusbar/IStatusBarService;
 Landroid/app/TimePickerDialog;->mTimePicker:Landroid/widget/TimePicker;
 Landroid/app/trust/ITrustManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
+Landroid/app/usage/UsageStatsManager;->getAppStandbyBucket(Ljava/lang/String;)I
 Landroid/app/usage/UsageStatsManager;->getAppStandbyBuckets()Ljava/util/Map;
 Landroid/app/usage/UsageStatsManager;->mService:Landroid/app/usage/IUsageStatsManager;
 Landroid/app/usage/UsageStatsManager;->setAppStandbyBuckets(Ljava/util/Map;)V
@@ -957,6 +958,8 @@ Landroid/media/RemoteDisplay;->notifyDisplayDisconnected()V
 Landroid/media/RemoteDisplay;->notifyDisplayError(I)V
 Landroid/media/RingtoneManager;->getRingtone(Landroid/content/Context;Landroid/net/Uri;I)Landroid/media/Ringtone;
 Landroid/media/session/MediaSessionLegacyHelper;->getHelper(Landroid/content/Context;)Landroid/media/session/MediaSessionLegacyHelper;
+Landroid/media/soundtrigger/SoundTriggerManager;->stopRecognition(Ljava/util/UUID;)I
+Landroid/media/soundtrigger/SoundTriggerManager;->unloadSoundModel(Ljava/util/UUID;)I
 Landroid/media/SubtitleController;->mHandler:Landroid/os/Handler;
 Landroid/media/ThumbnailUtils;->createImageThumbnail(Ljava/lang/String;I)Landroid/graphics/Bitmap;
 Landroid/media/ToneGenerator;->mNativeContext:J
@@ -1231,6 +1234,7 @@ Landroid/os/Handler;->getIMessenger()Landroid/os/IMessenger;
 Landroid/os/Handler;->hasCallbacks(Ljava/lang/Runnable;)Z
 Landroid/os/Handler;->mCallback:Landroid/os/Handler$Callback;
 Landroid/os/Handler;->mMessenger:Landroid/os/IMessenger;
+Landroid/os/HwBlob;-><init>(I)V
 Landroid/os/HwParcel;-><init>(Z)V
 Landroid/os/IPermissionController$Stub;->asInterface(Landroid/os/IBinder;)Landroid/os/IPermissionController;
 Landroid/os/IPermissionController$Stub$Proxy;->checkPermission(Ljava/lang/String;II)Z
@@ -1387,12 +1391,14 @@ Landroid/os/UserManager;->isUserUnlocked(I)Z
 Landroid/os/VintfObject;->report()[Ljava/lang/String;
 Landroid/os/WorkSource;->add(ILjava/lang/String;)Z
 Landroid/os/WorkSource;->add(I)Z
+Landroid/os/WorkSource;->createWorkChain()Landroid/os/WorkSource$WorkChain;
 Landroid/os/WorkSource;->get(I)I
 Landroid/os/WorkSource;->getName(I)Ljava/lang/String;
 Landroid/os/WorkSource;->mNames:[Ljava/lang/String;
 Landroid/os/WorkSource;->mNum:I
 Landroid/os/WorkSource;->mUids:[I
 Landroid/os/WorkSource;->size()I
+Landroid/os/WorkSource$WorkChain;->addNode(ILjava/lang/String;)Landroid/os/WorkSource$WorkChain;
 Landroid/preference/DialogPreference;->mBuilder:Landroid/app/AlertDialog$Builder;
 Landroid/preference/DialogPreference;->mDialogIcon:Landroid/graphics/drawable/Drawable;
 Landroid/preference/DialogPreference;->mDialog:Landroid/app/Dialog;
@@ -1472,6 +1478,11 @@ Landroid/R$styleable;->TextAppearance:[I
 Landroid/R$styleable;->TextAppearance_textColor:I
 Landroid/R$styleable;->TextAppearance_textSize:I
 Landroid/security/KeyStore;->getInstance()Landroid/security/KeyStore;
+Landroid/security/keystore/RecoveryController;->getInstance()Landroid/security/keystore/RecoveryController;
+Landroid/security/keystore/RecoveryController;->initRecoveryService(Ljava/lang/String;[B)V
+Landroid/security/keystore/RecoveryController;->setRecoverySecretTypes([I)V
+Landroid/security/keystore/RecoveryController;->setServerParams([B)V
+Landroid/security/keystore/RecoveryController;->setSnapshotCreatedPendingIntent(Landroid/app/PendingIntent;)V
 Landroid/security/net/config/RootTrustManager;->checkServerTrusted([Ljava/security/cert/X509Certificate;Ljava/lang/String;Ljava/lang/String;)Ljava/util/List;
 Landroid/service/media/IMediaBrowserServiceCallbacks;->onConnectFailed()V
 Landroid/service/media/IMediaBrowserServiceCallbacks;->onConnect(Ljava/lang/String;Landroid/media/session/MediaSession$Token;Landroid/os/Bundle;)V
@@ -1654,6 +1665,11 @@ Landroid/util/DisplayMetrics;->noncompatHeightPixels:I
 Landroid/util/DisplayMetrics;->noncompatWidthPixels:I
 Landroid/util/EventLog$Event;-><init>([B)V
 Landroid/util/Log;->wtf(ILjava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;ZZ)I
+Landroid/util/NtpTrustedTime;->forceRefresh()Z
+Landroid/util/NtpTrustedTime;->getCachedNtpTime()J
+Landroid/util/NtpTrustedTime;->getCachedNtpTimeReference()J
+Landroid/util/NtpTrustedTime;->getInstance(Landroid/content/Context;)Landroid/util/NtpTrustedTime;
+Landroid/util/NtpTrustedTime;->hasCache()Z
 Landroid/util/Pools$SynchronizedPool;->acquire()Ljava/lang/Object;
 Landroid/util/Rational;->readObject(Ljava/io/ObjectInputStream;)V
 Landroid/util/Singleton;->mInstance:Ljava/lang/Object;
@@ -2397,8 +2413,8 @@ Lcom/android/org/conscrypt/AbstractConscryptSocket;->getHostname()Ljava/lang/Str
 Lcom/android/org/conscrypt/AbstractConscryptSocket;->getHostnameOrIP()Ljava/lang/String;
 Lcom/android/org/conscrypt/AbstractConscryptSocket;->getNpnSelectedProtocol()[B
 Lcom/android/org/conscrypt/AbstractConscryptSocket;->getSoWriteTimeout()I
-Lcom/android/org/conscrypt/AbstractConscryptSocket;->setAlpnProtocols([Ljava/lang/String;)V
 Lcom/android/org/conscrypt/AbstractConscryptSocket;->setAlpnProtocols([B)V
+Lcom/android/org/conscrypt/AbstractConscryptSocket;->setAlpnProtocols([Ljava/lang/String;)V
 Lcom/android/org/conscrypt/AbstractConscryptSocket;->setApplicationProtocols([Ljava/lang/String;)V
 Lcom/android/org/conscrypt/AbstractConscryptSocket;->setChannelIdEnabled(Z)V
 Lcom/android/org/conscrypt/AbstractConscryptSocket;->setChannelIdPrivateKey(Ljava/security/PrivateKey;)V
@@ -2419,8 +2435,8 @@ Lcom/android/org/conscrypt/OpenSSLSocketImpl;->getHostname()Ljava/lang/String;
 Lcom/android/org/conscrypt/OpenSSLSocketImpl;->getHostnameOrIP()Ljava/lang/String;
 Lcom/android/org/conscrypt/OpenSSLSocketImpl;->getNpnSelectedProtocol()[B
 Lcom/android/org/conscrypt/OpenSSLSocketImpl;->getSoWriteTimeout()I
-Lcom/android/org/conscrypt/OpenSSLSocketImpl;->setAlpnProtocols([Ljava/lang/String;)V
 Lcom/android/org/conscrypt/OpenSSLSocketImpl;->setAlpnProtocols([B)V
+Lcom/android/org/conscrypt/OpenSSLSocketImpl;->setAlpnProtocols([Ljava/lang/String;)V
 Lcom/android/org/conscrypt/OpenSSLSocketImpl;->setChannelIdEnabled(Z)V
 Lcom/android/org/conscrypt/OpenSSLSocketImpl;->setChannelIdPrivateKey(Ljava/security/PrivateKey;)V
 Lcom/android/org/conscrypt/OpenSSLSocketImpl;->setHandshakeTimeout(I)V
