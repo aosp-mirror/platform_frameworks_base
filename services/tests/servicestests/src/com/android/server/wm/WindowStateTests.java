@@ -27,6 +27,8 @@ import android.support.test.runner.AndroidJUnit4;
 
 import java.util.LinkedList;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
@@ -36,6 +38,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 
 import static org.junit.Assert.assertEquals;
@@ -44,6 +47,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
@@ -218,6 +222,60 @@ public class WindowStateTests extends WindowTestsBase {
     public void testPrepareWindowToDisplayDuringRelayout() throws Exception {
         testPrepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
         testPrepareWindowToDisplayDuringRelayout(true /*wasVisible*/);
+
+        // Call prepareWindowToDisplayDuringRelayout for a window without FLAG_TURN_SCREEN_ON
+        // before calling prepareWindowToDisplayDuringRelayout for windows with flag in the same
+        // appWindowToken.
+        final AppWindowToken appWindowToken = createAppWindowToken(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        final WindowState first = createWindow(null, TYPE_APPLICATION, appWindowToken, "first");
+        final WindowState second = createWindow(null, TYPE_APPLICATION, appWindowToken, "second");
+        second.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
+
+        reset(mPowerManagerWrapper);
+        first.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
+        verify(mPowerManagerWrapper, never()).wakeUp(anyLong(), anyString());
+        assertTrue(appWindowToken.canTurnScreenOn());
+
+        reset(mPowerManagerWrapper);
+        second.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
+        verify(mPowerManagerWrapper).wakeUp(anyLong(), anyString());
+        assertFalse(appWindowToken.canTurnScreenOn());
+
+        // Call prepareWindowToDisplayDuringRelayout for two window that have FLAG_TURN_SCREEN_ON
+        // from the same appWindowToken. Only one should trigger the wakeup.
+        appWindowToken.setCanTurnScreenOn(true);
+        first.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
+        second.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
+
+        reset(mPowerManagerWrapper);
+        first.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
+        verify(mPowerManagerWrapper).wakeUp(anyLong(), anyString());
+        assertFalse(appWindowToken.canTurnScreenOn());
+
+        reset(mPowerManagerWrapper);
+        second.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
+        verify(mPowerManagerWrapper, never()).wakeUp(anyLong(), anyString());
+        assertFalse(appWindowToken.canTurnScreenOn());
+
+        // Call prepareWindowToDisplayDuringRelayout for a windows that are not children of an
+        // appWindowToken. Both windows have the FLAG_TURNS_SCREEN_ON so both should call wakeup
+        final WindowToken windowToken = new WindowTestUtils.TestWindowToken(FIRST_SUB_WINDOW,
+                mDisplayContent);
+        final WindowState firstWindow = createWindow(null, TYPE_APPLICATION, windowToken,
+                "firstWindow");
+        final WindowState secondWindow = createWindow(null, TYPE_APPLICATION, windowToken,
+                "secondWindow");
+        firstWindow.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
+        secondWindow.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
+
+        reset(mPowerManagerWrapper);
+        firstWindow.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
+        verify(mPowerManagerWrapper).wakeUp(anyLong(), anyString());
+
+        reset(mPowerManagerWrapper);
+        secondWindow.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
+        verify(mPowerManagerWrapper).wakeUp(anyLong(), anyString());
     }
 
     @Test
