@@ -1188,6 +1188,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             if (category != CATEGORY_UNDEFINED) {
                 pw.println(prefix + "category=" + category);
             }
+            pw.println("isAllowedToUseHiddenApi=" + isAllowedToUseHiddenApi());
         }
         super.dumpBack(pw, prefix);
     }
@@ -1604,8 +1605,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public boolean isAllowedToUseHiddenApi() {
         boolean whitelisted =
                 SystemConfig.getInstance().getHiddenApiWhitelistedApps().contains(packageName);
-        return isSystemApp() || // TODO get rid of this once the whitelist has been populated
-                (whitelisted && (isSystemApp() || isUpdatedSystemApp()));
+        return whitelisted && (isSystemApp() || isUpdatedSystemApp());
     }
 
     /**
