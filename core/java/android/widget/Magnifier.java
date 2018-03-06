@@ -74,6 +74,8 @@ public final class Magnifier {
     private final int mWindowWidth;
     // The height of the window containing the magnifier.
     private final int mWindowHeight;
+    // The zoom applied to the view region copied to the magnifier window.
+    private final float mZoom;
     // The width of the bitmaps where the magnifier content is copied.
     private final int mBitmapWidth;
     // The height of the bitmaps where the magnifier content is copied.
@@ -110,10 +112,10 @@ public final class Magnifier {
                 com.android.internal.R.dimen.magnifier_height);
         mWindowElevation = context.getResources().getDimension(
                 com.android.internal.R.dimen.magnifier_elevation);
-        final float zoomScale = context.getResources().getFloat(
+        mZoom = context.getResources().getFloat(
                 com.android.internal.R.dimen.magnifier_zoom_scale);
-        mBitmapWidth = Math.round(mWindowWidth / zoomScale);
-        mBitmapHeight = Math.round(mWindowHeight / zoomScale);
+        mBitmapWidth = Math.round(mWindowWidth / mZoom);
+        mBitmapHeight = Math.round(mWindowHeight / mZoom);
         // The view's surface coordinates will not be updated until the magnifier is first shown.
         mViewCoordinatesInSurface = new int[2];
     }
@@ -186,21 +188,6 @@ public final class Magnifier {
         }
     }
 
-    @Nullable
-    private Surface getValidViewSurface() {
-        // TODO: deduplicate this against the first part of #performPixelCopy
-        final Surface surface;
-        if (mView instanceof SurfaceView) {
-            surface = ((SurfaceView) mView).getHolder().getSurface();
-        } else if (mView.getViewRootImpl() != null) {
-            surface = mView.getViewRootImpl().mSurface;
-        } else {
-            surface = null;
-        }
-
-        return (surface != null && surface.isValid()) ? surface : null;
-    }
-
     /**
      * Dismisses the magnifier from the screen. Calling this on a dismissed magnifier is a no-op.
      */
@@ -223,6 +210,44 @@ public final class Magnifier {
             performPixelCopy(mPrevStartCoordsInSurface.x, mPrevStartCoordsInSurface.y,
                     false /* update window position */);
         }
+    }
+
+    /**
+     * @return The width of the magnifier window, in pixels.
+     */
+    public int getWidth() {
+        return mWindowWidth;
+    }
+
+    /**
+     * @return The height of the magnifier window, in pixels.
+     */
+    public int getHeight() {
+        return mWindowHeight;
+    }
+
+    /**
+     * @return The zoom applied to the magnified view region copied to the magnifier window.
+     * If the zoom is x and the magnifier window size is (width, height), the original size
+     * of the content copied in the magnifier will be (width / x, height / x).
+     */
+    public float getZoom() {
+        return mZoom;
+    }
+
+    @Nullable
+    private Surface getValidViewSurface() {
+        // TODO: deduplicate this against the first part of #performPixelCopy
+        final Surface surface;
+        if (mView instanceof SurfaceView) {
+            surface = ((SurfaceView) mView).getHolder().getSurface();
+        } else if (mView.getViewRootImpl() != null) {
+            surface = mView.getViewRootImpl().mSurface;
+        } else {
+            surface = null;
+        }
+
+        return (surface != null && surface.isValid()) ? surface : null;
     }
 
     private void configureCoordinates(final float xPosInView, final float yPosInView) {
@@ -594,7 +619,7 @@ public final class Magnifier {
             return null;
         }
         synchronized (mWindow.mLock) {
-            return mWindow.mBitmap;
+            return Bitmap.createScaledBitmap(mWindow.mBitmap, mWindowWidth, mWindowHeight, true);
         }
     }
 
