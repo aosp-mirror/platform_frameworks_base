@@ -709,8 +709,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
          * @param player a {@link MediaPlayerBase} that handles actual media playback in your app.
          */
         U setPlayer(@NonNull MediaPlayerBase player) {
-            // TODO(jaewan): Change the provider properly (b/74093082)
-            mProvider.setPlayer_impl(player, null, null);
+            mProvider.setPlayer_impl(player);
             return (U) this;
         }
 
@@ -722,7 +721,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
          * {@code player.}
          */
         U setPlaylistController(@NonNull MediaPlaylistController mplc) {
-            // TODO(jaewan): implement this (b/74093082)
+            mProvider.setPlaylistController_impl(mplc);
             return (U) this;
         }
 
@@ -733,7 +732,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
          * @param volumeProvider The provider that will receive volume button events.
          */
         U setVolumeProvider(@NonNull VolumeProvider2 volumeProvider) {
-            // TODO(jaewan): implement this (b/74093082)
+            mProvider.setVolumeProvider_impl(volumeProvider);
             return (U) this;
         }
 
@@ -805,25 +804,16 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
 
         @Override
         public Builder setPlayer(@NonNull MediaPlayerBase player) {
-            if (player == null) {
-                throw new IllegalArgumentException("Illegal null MediaPlayerBase");
-            }
             return super.setPlayer(player);
         }
 
         @Override
         public Builder setPlaylistController(@NonNull MediaPlaylistController mplc) {
-            if (mplc == null) {
-                throw new IllegalArgumentException("Illegal null MediaPlaylistController");
-            }
             return super.setPlaylistController(mplc);
         }
 
         @Override
         public Builder setVolumeProvider(@NonNull VolumeProvider2 volumeProvider) {
-            if (volumeProvider == null) {
-                throw new IllegalArgumentException("Illegal null VolumeProvider2");
-            }
             return super.setVolumeProvider(volumeProvider);
         }
 
