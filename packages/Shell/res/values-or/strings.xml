@@ -23,12 +23,9 @@
     <skip />
     <!-- no translation found for bugreport_finished_title (4429132808670114081) -->
     <skip />
-    <!-- no translation found for bugreport_updating_title (4423539949559634214) -->
-    <skip />
-    <!-- no translation found for bugreport_updating_wait (3322151947853929470) -->
-    <skip />
-    <!-- no translation found for bugreport_finished_text (1223616207145252689) -->
-    <skip />
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"ବଗ୍‍ ରିପୋର୍ଟରେ ବିବରଣୀ ଯୋଡ଼ାଯାଉଛି"</string>
+    <string name="bugreport_updating_wait" msgid="3322151947853929470">"ଦୟାକରି ଅପେକ୍ଷା କରନ୍ତୁ…"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"ଅଳ୍ପ ସମୟ ମଧ୍ୟରେ ଫୋନ୍‌ରେ ବଗ୍‍ ରିପୋର୍ଟ ଦେଖାଯିବ"</string>
     <!-- no translation found for bugreport_finished_text (5758325479058638893) -->
     <skip />
     <!-- no translation found for bugreport_finished_text (8353769438382138847) -->
@@ -44,30 +41,22 @@
     <!-- no translation found for bugreport_confirm_dont_repeat (6179945398364357318) -->
     <skip />
     <string name="bugreport_storage_title" msgid="5332488144740527109">"ବଗ୍ ରିପୋର୍ଟ"</string>
-    <!-- no translation found for bugreport_unreadable_text (586517851044535486) -->
-    <skip />
-    <!-- no translation found for bugreport_add_details_to_zip_failed (1302931926486712371) -->
-    <skip />
-    <!-- no translation found for bugreport_unnamed (2800582406842092709) -->
-    <skip />
-    <!-- no translation found for bugreport_info_action (2158204228510576227) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_action (8677781721940614995) -->
-    <skip />
+    <string name="bugreport_unreadable_text" msgid="586517851044535486">"ବଗ୍‍ ରିପୋର୍ଟ ଫାଇଲ୍‍ ପଢ଼ାଯାଇପାରିଲା ନାହିଁ"</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"ଜିପ୍‍ ଫାଇଲରେ ବଗ୍‍ ରିପୋର୍ଟ ବିବରଣୀ ଯୋଡ଼ାଯାଇପାରିଲା ନାହିଁ"</string>
+    <string name="bugreport_unnamed" msgid="2800582406842092709">"ବେନାମୀ"</string>
+    <string name="bugreport_info_action" msgid="2158204228510576227">"ବିବରଣୀ"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"ସ୍କ୍ରୀନ୍‌ଶଟ୍‌"</string>
     <!-- no translation found for bugreport_screenshot_taken (5684211273096253120) -->
     <skip />
-    <!-- no translation found for bugreport_screenshot_failed (5853049140806834601) -->
-    <skip />
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"ସ୍କ୍ରୀନ୍‍ଶଟ୍‍ ନିଆଯାଇପାରିଲା ନାହିଁ।"</string>
     <!-- no translation found for bugreport_info_dialog_title (1355948594292983332) -->
     <skip />
-    <!-- no translation found for bugreport_info_name (4414036021935139527) -->
-    <skip />
+    <string name="bugreport_info_name" msgid="4414036021935139527">"ଫାଇଲ୍ ନାମ"</string>
     <!-- no translation found for bugreport_info_title (2306030793918239804) -->
     <skip />
     <!-- no translation found for bugreport_info_description (5072835127481627722) -->
     <skip />
     <!-- no translation found for save (4781509040564835759) -->
     <skip />
-    <!-- no translation found for bugreport_intent_chooser_title (7605709494790894076) -->
-    <skip />
+    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"ବଗ୍‍ ରିପୋର୍ଟ ଶେୟାର୍‍ କରନ୍ତୁ"</string>
 </resources>
