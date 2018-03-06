@@ -103,6 +103,9 @@ public final class NotificationRecord {
     // is this notification currently being intercepted by Zen Mode?
     private boolean mIntercept;
 
+    // is this notification hidden since the app pkg is suspended?
+    private boolean mHidden;
+
     // The timestamp used for ranking.
     private long mRankingTimeMs;
 
@@ -353,6 +356,7 @@ public final class NotificationRecord {
         mPackagePriority = previous.mPackagePriority;
         mPackageVisibility = previous.mPackageVisibility;
         mIntercept = previous.mIntercept;
+        mHidden = previous.mHidden;
         mRankingTimeMs = calculateRankingTimeMs(previous.getRankingTimeMs());
         mCreationTimeMs = previous.mCreationTimeMs;
         mVisibleSinceMs = previous.mVisibleSinceMs;
@@ -498,6 +502,7 @@ public final class NotificationRecord {
                 + NotificationListenerService.Ranking.importanceToString(mImportance));
         pw.println(prefix + "mImportanceExplanation=" + mImportanceExplanation);
         pw.println(prefix + "mIntercept=" + mIntercept);
+        pw.println(prefix + "mHidden==" + mHidden);
         pw.println(prefix + "mGlobalSortKey=" + mGlobalSortKey);
         pw.println(prefix + "mRankingTimeMs=" + mRankingTimeMs);
         pw.println(prefix + "mCreationTimeMs=" + mCreationTimeMs);
@@ -701,6 +706,15 @@ public final class NotificationRecord {
     public boolean isIntercepted() {
         return mIntercept;
     }
+
+    public void setHidden(boolean hidden) {
+        mHidden = hidden;
+    }
+
+    public boolean isHidden() {
+        return mHidden;
+    }
+
 
     public void setSuppressedVisualEffects(int effects) {
         mSuppressedVisualEffects = effects;

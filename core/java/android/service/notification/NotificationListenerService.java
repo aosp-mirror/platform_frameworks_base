@@ -1418,6 +1418,7 @@ public abstract class NotificationListenerService extends Service {
         private ArrayList<SnoozeCriterion> mSnoozeCriteria;
         private boolean mShowBadge;
         private @UserSentiment int mUserSentiment = USER_SENTIMENT_NEUTRAL;
+        private boolean mHidden;
 
         public Ranking() {}
 
@@ -1557,6 +1558,16 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /**
+         * Returns whether the app that posted this notification is suspended, so this notification
+         * should be hidden.
+         *
+         * @return true if the notification should be hidden, false otherwise.
+         */
+        public boolean isSuspended() {
+            return mHidden;
+        }
+
+        /**
          * @hide
          */
         @VisibleForTesting
@@ -1565,7 +1576,7 @@ public abstract class NotificationListenerService extends Service {
                 CharSequence explanation, String overrideGroupKey,
                 NotificationChannel channel, ArrayList<String> overridePeople,
                 ArrayList<SnoozeCriterion> snoozeCriteria, boolean showBadge,
-                int userSentiment) {
+                int userSentiment, boolean hidden) {
             mKey = key;
             mRank = rank;
             mIsAmbient = importance < NotificationManager.IMPORTANCE_LOW;
@@ -1580,6 +1591,7 @@ public abstract class NotificationListenerService extends Service {
             mSnoozeCriteria = snoozeCriteria;
             mShowBadge = showBadge;
             mUserSentiment = userSentiment;
+            mHidden = hidden;
         }
 
         /**
@@ -1628,6 +1640,7 @@ public abstract class NotificationListenerService extends Service {
         private ArrayMap<String, ArrayList<SnoozeCriterion>> mSnoozeCriteria;
         private ArrayMap<String, Boolean> mShowBadge;
         private ArrayMap<String, Integer> mUserSentiment;
+        private ArrayMap<String, Boolean> mHidden;
 
         private RankingMap(NotificationRankingUpdate rankingUpdate) {
             mRankingUpdate = rankingUpdate;
@@ -1656,7 +1669,7 @@ public abstract class NotificationListenerService extends Service {
                     getVisibilityOverride(key), getSuppressedVisualEffects(key),
                     getImportance(key), getImportanceExplanation(key), getOverrideGroupKey(key),
                     getChannel(key), getOverridePeople(key), getSnoozeCriteria(key),
-                    getShowBadge(key), getUserSentiment(key));
+                    getShowBadge(key), getUserSentiment(key), getHidden(key));
             return rank >= 0;
         }
 
@@ -1784,6 +1797,16 @@ public abstract class NotificationListenerService extends Service {
                     ? Ranking.USER_SENTIMENT_NEUTRAL : userSentiment.intValue();
         }
 
+        private boolean getHidden(String key) {
+            synchronized (this) {
+                if (mHidden == null) {
+                    buildHiddenLocked();
+                }
+            }
+            Boolean hidden = mHidden.get(key);
+            return hidden == null ? false : hidden.booleanValue();
+        }
+
         // Locked by 'this'
         private void buildRanksLocked() {
             String[] orderedKeys = mRankingUpdate.getOrderedKeys();
@@ -1889,6 +1912,15 @@ public abstract class NotificationListenerService extends Service {
             mUserSentiment = new ArrayMap<>(userSentiment.size());
             for (String key : userSentiment.keySet()) {
                 mUserSentiment.put(key, userSentiment.getInt(key));
+            }
+        }
+
+        // Locked by 'this'
+        private void buildHiddenLocked() {
+            Bundle hidden = mRankingUpdate.getHidden();
+            mHidden = new ArrayMap<>(hidden.size());
+            for (String key : hidden.keySet()) {
+                mHidden.put(key, hidden.getBoolean(key));
             }
         }
 
