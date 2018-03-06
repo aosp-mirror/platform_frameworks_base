@@ -67,7 +67,7 @@ public final class SliceItem implements Parcelable {
             FORMAT_IMAGE,
             FORMAT_ACTION,
             FORMAT_INT,
-            FORMAT_TIMESTAMP,
+            FORMAT_LONG,
             FORMAT_REMOTE_INPUT,
             FORMAT_BUNDLE,
     })
@@ -98,9 +98,14 @@ public final class SliceItem implements Parcelable {
      */
     public static final String FORMAT_INT = "int";
     /**
-     * A {@link SliceItem} that contains a timestamp.
+     * A {@link SliceItem} that contains a long.
      */
-    public static final String FORMAT_TIMESTAMP = "timestamp";
+    public static final String FORMAT_LONG = "long";
+    /**
+     * @deprecated TO BE REMOVED
+     */
+    @Deprecated
+    public static final String FORMAT_TIMESTAMP = FORMAT_LONG;
     /**
      * A {@link SliceItem} that contains a {@link RemoteInput}.
      */
@@ -118,6 +123,14 @@ public final class SliceItem implements Parcelable {
     private final String mFormat;
     private final String mSubType;
     private final Object mObj;
+
+    /**
+     * @hide
+     */
+    public SliceItem(Object obj, @SliceType String format, String subType,
+            List<String> hints) {
+        this(obj, format, subType, hints.toArray(new String[hints.size()]));
+    }
 
     /**
      * @hide
