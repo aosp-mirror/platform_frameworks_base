@@ -165,7 +165,7 @@
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Mobile data on"</string>
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"Mobile data off"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth tethering"</string>
-    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Aeroplane mode"</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Airplane mode."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN on."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"No SIM card."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Carrier network changing."</string>
@@ -203,10 +203,10 @@
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"Wi-Fi turned on."</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Mobile <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Battery <xliff:g id="STATE">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"Aeroplane mode off."</string>
-    <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Aeroplane mode on."</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Aeroplane mode turned off."</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Aeroplane mode turned on."</string>
+    <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"Airplane mode off."</string>
+    <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Airplane mode on."</string>
+    <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Airplane mode off."</string>
+    <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Airplane mode turned on."</string>
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"\'Do not disturb\' on, priority only."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Do not disturb on, total silence."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Do not disturb on, alarms only."</string>
@@ -286,6 +286,8 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Headset"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Input"</string>
+    <!-- no translation found for quick_settings_bluetooth_secondary_label_transient (4551281899312150640) -->
+    <skip />
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Brightness"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Auto-rotate"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Auto-rotate screen"</string>
@@ -310,7 +312,8 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi Off"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi On"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"No Wi-Fi networks available"</string>
-    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"Alarm"</string>
+    <!-- no translation found for quick_settings_wifi_secondary_label_transient (7748206246119760554) -->
+    <skip />
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Casting"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Unnamed device"</string>
@@ -327,7 +330,8 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"Connecting..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Tethering"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
-    <string name="quick_settings_hotspot_secondary_label_transient" msgid="7161046712706277215">"Turning on..."</string>
+    <!-- no translation found for quick_settings_hotspot_secondary_label_transient (8010579363691405477) -->
+    <skip />
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
       <item quantity="other">%d devices</item>
       <item quantity="one">%d device</item>
@@ -341,8 +345,8 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> used"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> limit"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> warning"</string>
-    <string name="quick_settings_work_mode_on_label" msgid="3421274215098764735">"Work profile"</string>
-    <string name="quick_settings_work_mode_off_label" msgid="8856918707867192186">"Notifications &amp; apps are off"</string>
+    <!-- no translation found for quick_settings_work_mode_label (7608026833638817218) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Night Light"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"On at sunset"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Until sunrise"</string>
@@ -395,9 +399,9 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Total\nsilence"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Priority\nonly"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Alarms\nonly"</string>
-    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Charging (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> until full)"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Charging rapidly (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> until full)"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Charging slowly (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> until full)"</string>
+    <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Charging (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> until full)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Charging rapidly (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> until full)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Charging slowly (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> until full)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Switch user"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Switch user, current user <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Current user <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -535,12 +539,9 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Tap to set to vibrate."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Tap to mute."</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s volume controls"</string>
-    <!-- no translation found for volume_dialog_ringer_guidance_vibrate (8902050240801159042) -->
-    <skip />
-    <!-- no translation found for volume_dialog_ringer_guidance_silent (2128975224280276122) -->
-    <skip />
-    <!-- no translation found for volume_dialog_ringer_guidance_ring (6144469689490528338) -->
-    <skip />
+    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"Calls and notifications will vibrate"</string>
+    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Calls and notifications will be muted"</string>
+    <string name="volume_dialog_ringer_guidance_ring" msgid="6144469689490528338">"Calls and notifications will ring"</string>
     <string name="output_title" msgid="5355078100792942802">"Media output"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Phone call output"</string>
     <string name="output_none_found" msgid="5544982839808921091">"No devices found"</string>
@@ -560,7 +561,7 @@
     <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"Alarm"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"Work profile"</string>
-    <string name="status_bar_airplane" msgid="7057575501472249002">"Aeroplane mode"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"Airplane mode"</string>
     <string name="add_tile" msgid="2995389510240786221">"Add tile"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Broadcast Tile"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"You won\'t hear your next alarm <xliff:g id="WHEN">%1$s</xliff:g> unless you turn this off before then"</string>
