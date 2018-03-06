@@ -220,8 +220,7 @@
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"DNS particular"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Selecione o modo DNS particular"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Desativado"</string>
-    <!-- no translation found for private_dns_mode_opportunistic (8314986739896927399) -->
-    <skip />
+    <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Automático"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Nome do host do provedor de DNS particular"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Informe o nome do host do provedor de DNS"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Mostrar opções de certificação de Display sem fio"</string>
@@ -357,39 +356,24 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Este recurso é experimental e pode afetar o desempenho."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Substituído por <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"Cerca de <xliff:g id="TIME">%1$s</xliff:g> restante(s)"</string>
-    <!-- no translation found for power_discharging_duration (6655472132189365839) -->
-    <skip />
+    <string name="power_discharging_duration" msgid="6655472132189365839">"Cerca de <xliff:g id="TIME">%1$s</xliff:g> restante(s) (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Cerca de <xliff:g id="TIME">%1$s</xliff:g> restante(s) com base no seu uso"</string>
-    <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
-    <skip />
+    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"Cerca de <xliff:g id="TIME">%1$s</xliff:g> restante(s) com base no seu uso (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> restante(s)"</string>
-    <!-- no translation found for power_discharge_by_enhanced (8788299408879961465) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only_enhanced (7692297898877104416) -->
-    <skip />
-    <!-- no translation found for power_discharge_by (6427074755635635749) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only (5888058889261108064) -->
-    <skip />
+    <string name="power_discharge_by_enhanced" msgid="8788299408879961465">"Com base no seu uso, ela durará até aproximadamente <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="7692297898877104416">"Com base no seu uso, ela durará até aproximadamente <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by" msgid="6427074755635635749">"Durará até aproximadamente <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="5888058889261108064">"Durará até aproximadamente <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Menos de <xliff:g id="THRESHOLD">%1$s</xliff:g> restante(s)"</string>
-    <!-- no translation found for power_remaining_less_than_duration (5751885147712659423) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (3176771815132876675) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (8931654680569617380) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1181059207608751924) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2606370266981054691) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2918084807716859985) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (3090926004324573908) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (7466484148515796216) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (603933521600231649) -->
-    <skip />
+    <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Menos de <xliff:g id="THRESHOLD">%1$s</xliff:g> restante(s) (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Mais de <xliff:g id="TIME_REMAINING">%1$s</xliff:g> restante(s) (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="8931654680569617380">"Mais de <xliff:g id="TIME_REMAINING">%1$s</xliff:g> restante(s)"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="1181059207608751924">"O smartphone pode ser desligado em breve"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="2606370266981054691">"O tablet pode ser desligado em breve"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="2918084807716859985">"O dispositivo pode ser desligado em breve"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="3090926004324573908">"O smartphone pode ser desligado em breve (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"O tablet pode ser desligado em breve (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"O dispositivo pode ser desligado em breve (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> restante(s) até a carga completa"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> até a carga completa"</string>
