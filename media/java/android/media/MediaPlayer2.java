@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -461,6 +462,47 @@ public abstract class MediaPlayer2 extends MediaPlayerBase
     public static final MediaPlayer2 create() {
         // TODO: load MediaUpdate APK
         return new MediaPlayer2Impl();
+    }
+
+    private static final String[] decodeMediaPlayer2Uri(String location) {
+        Uri uri = Uri.parse(location);
+        if (!"mediaplayer2".equals(uri.getScheme())) {
+            return new String[] {location};
+        }
+
+        List<String> uris = uri.getQueryParameters("uri");
+        if (uris.isEmpty()) {
+            return new String[] {location};
+        }
+
+        List<String> keys = uri.getQueryParameters("key");
+        List<String> values = uri.getQueryParameters("value");
+        if (keys.size() != values.size()) {
+            return new String[] {uris.get(0)};
+        }
+
+        List<String> ls = new ArrayList();
+        ls.add(uris.get(0));
+        for (int i = 0; i < keys.size() ; i++) {
+            ls.add(keys.get(i));
+            ls.add(values.get(i));
+        }
+
+        return ls.toArray(new String[ls.size()]);
+    }
+
+    private static final String encodeMediaPlayer2Uri(String uri, String[] keys, String[] values) {
+        Uri.Builder builder = new Uri.Builder();
+        builder.scheme("mediaplayer2").path("/").appendQueryParameter("uri", uri);
+        if (keys == null || values == null || keys.length != values.length) {
+            return builder.build().toString();
+        }
+        for (int i = 0; i < keys.length ; i++) {
+            builder
+                .appendQueryParameter("key", keys[i])
+                .appendQueryParameter("value", values[i]);
+        }
+        return builder.build().toString();
     }
 
     /**
