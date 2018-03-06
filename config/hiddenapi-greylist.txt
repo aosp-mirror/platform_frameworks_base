@@ -462,8 +462,6 @@ Landroid/hardware/input/IInputManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/hardware/input/IInputManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/hardware/input/IInputManager;
 Landroid/hardware/input/IInputManager$Stub;->TRANSACTION_injectInputEvent:I
 Landroid/hardware/input/IInputManager;->injectInputEvent(Landroid/view/InputEvent;I)Z
-Landroid/hardware/location/IActivityRecognitionHardwareClient$Stub;-><init>()V
-Landroid/hardware/location/IActivityRecognitionHardwareClient;->onAvailabilityChanged(ZLandroid/hardware/location/IActivityRecognitionHardware;)V
 Landroid/hardware/location/IContextHubService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/hardware/location/IContextHubService;
 Landroid/hardware/usb/IUsbManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/hardware/usb/IUsbManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/hardware/usb/IUsbManager;

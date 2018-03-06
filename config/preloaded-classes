@@ -1405,10 +1405,7 @@ android.hardware.input.InputManager
 android.hardware.input.InputManager$InputDeviceListener
 android.hardware.input.InputManager$InputDeviceListenerDelegate
 android.hardware.input.InputManager$InputDevicesChangedListener
-android.hardware.location.ActivityRecognitionHardware
 android.hardware.location.ContextHubManager
-android.hardware.location.IActivityRecognitionHardware
-android.hardware.location.IActivityRecognitionHardware$Stub
 android.hardware.radio.RadioManager
 android.hardware.soundtrigger.SoundTrigger
 android.hardware.soundtrigger.SoundTrigger$ConfidenceLevel
