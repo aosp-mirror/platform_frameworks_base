@@ -37,6 +37,7 @@ import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 
 import com.android.internal.app.UnlaunchableAppActivity;
+import com.android.internal.app.HarmfulAppWarningActivity;
 import com.android.server.LocalServices;
 import com.android.server.pm.PackageManagerService;
 
@@ -161,6 +162,20 @@ public class ActivityStartInterceptorTest {
 
         // THEN the returned intent is the quiet mode intent
         assertTrue(CONFIRM_CREDENTIALS_INTENT.filterEquals(mInterceptor.mIntent));
+    }
+
+    @Test
+    public void testHarmfulAppWarning() {
+        // GIVEN the package we're about to launch has a harmful app warning set
+        when(mPackageManager.getHarmfulAppWarning(TEST_PACKAGE_NAME, TEST_USER_ID))
+                .thenReturn("This app is bad");
+
+        // THEN calling intercept returns true
+        assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
+
+        // THEN the returned intent is the harmful app warning intent
+        assertTrue(mInterceptor.mIntent.getComponent().getClassName().equals(
+                HarmfulAppWarningActivity.class.getName()));
     }
 
     @Test
