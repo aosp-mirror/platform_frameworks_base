@@ -116,6 +116,14 @@ public final class UsageEvents implements Parcelable {
         @SystemApi
         public static final int STANDBY_BUCKET_CHANGED = 11;
 
+        /**
+         * An event type denoting that an app posted an interruptive notification. Visual and
+         * audible interruptions are included.
+         * @hide
+         */
+        @SystemApi
+        public static final int NOTIFICATION_INTERRUPTION = 12;
+
         /** @hide */
         public static final int FLAG_IS_PACKAGE_INSTANT_APP = 1 << 0;
 
@@ -188,6 +196,14 @@ public final class UsageEvents implements Parcelable {
          */
         public int mBucketAndReason;
 
+        /**
+         * The id of the {@link android.app.NotificationChannel} to which an interruptive
+         * notification was posted.
+         * Only present for {@link #NOTIFICATION_INTERRUPTION} event types.
+         * {@hide}
+         */
+        public String mNotificationChannelId;
+
         /** @hide */
         @EventFlags
         public int mFlags;
@@ -208,6 +224,7 @@ public final class UsageEvents implements Parcelable {
             mContentAnnotations = orig.mContentAnnotations;
             mFlags = orig.mFlags;
             mBucketAndReason = orig.mBucketAndReason;
+            mNotificationChannelId = orig.mNotificationChannelId;
         }
 
         /**
@@ -283,6 +300,16 @@ public final class UsageEvents implements Parcelable {
          */
         public int getStandbyReason() {
             return mBucketAndReason & 0x0000FFFF;
+        }
+
+        /**
+         * Returns the ID of the {@link android.app.NotificationChannel} for this event if the
+         * event is of type {@link #NOTIFICATION_INTERRUPTION}, otherwise it returns null;
+         * @hide
+         */
+        @SystemApi
+        public String getNotificationChannelId() {
+            return mNotificationChannelId;
         }
 
         /** @hide */
@@ -444,6 +471,9 @@ public final class UsageEvents implements Parcelable {
             case Event.STANDBY_BUCKET_CHANGED:
                 p.writeInt(event.mBucketAndReason);
                 break;
+            case Event.NOTIFICATION_INTERRUPTION:
+                p.writeString(event.mNotificationChannelId);
+                break;
         }
     }
 
@@ -473,6 +503,7 @@ public final class UsageEvents implements Parcelable {
         eventOut.mAction = null;
         eventOut.mContentType = null;
         eventOut.mContentAnnotations = null;
+        eventOut.mNotificationChannelId = null;
 
         switch (eventOut.mEventType) {
             case Event.CONFIGURATION_CHANGE:
@@ -489,6 +520,9 @@ public final class UsageEvents implements Parcelable {
                 break;
             case Event.STANDBY_BUCKET_CHANGED:
                 eventOut.mBucketAndReason = p.readInt();
+                break;
+            case Event.NOTIFICATION_INTERRUPTION:
+                eventOut.mNotificationChannelId = p.readString();
                 break;
         }
     }

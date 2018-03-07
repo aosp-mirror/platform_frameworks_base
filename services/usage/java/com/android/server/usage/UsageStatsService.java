@@ -990,6 +990,25 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
+        public void reportInterruptiveNotification(String packageName, String channelId,
+                int userId) {
+            if (packageName == null || channelId == null) {
+                Slog.w(TAG, "Event reported without a package name or a channel ID");
+                return;
+            }
+
+            UsageEvents.Event event = new UsageEvents.Event();
+            event.mPackage = packageName.intern();
+            event.mNotificationChannelId = channelId.intern();
+
+            // This will later be converted to system time.
+            event.mTimeStamp = SystemClock.elapsedRealtime();
+
+            event.mEventType = Event.NOTIFICATION_INTERRUPTION;
+            mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
+        }
+
+        @Override
         public void reportShortcutUsage(String packageName, String shortcutId, int userId) {
             if (packageName == null || shortcutId == null) {
                 Slog.w(TAG, "Event reported without a package name or a shortcut ID");
