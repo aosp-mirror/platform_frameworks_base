@@ -276,8 +276,8 @@ CachedGlyphInfo* Font::getCachedGlyph(const SkPaint* paint, glyph_t textUnit, bo
             SkSurfaceProps surfaceProps(0, kUnknown_SkPixelGeometry);
             SkAutoGlyphCacheNoGamma autoCache(*paint, &surfaceProps,
                                               &mDescription.mLookupTransform);
-            const SkGlyph& skiaGlyph = GET_METRICS(autoCache.getCache(), textUnit);
-            updateGlyphCache(paint, skiaGlyph, autoCache.getCache(), cachedGlyph, precaching);
+            const SkGlyph& skiaGlyph = GET_METRICS(autoCache.get(), textUnit);
+            updateGlyphCache(paint, skiaGlyph, autoCache.get(), cachedGlyph, precaching);
         }
     } else {
         cachedGlyph = cacheGlyph(paint, textUnit, precaching);
@@ -464,11 +464,11 @@ CachedGlyphInfo* Font::cacheGlyph(const SkPaint* paint, glyph_t glyph, bool prec
 
     SkSurfaceProps surfaceProps(0, kUnknown_SkPixelGeometry);
     SkAutoGlyphCacheNoGamma autoCache(*paint, &surfaceProps, &mDescription.mLookupTransform);
-    const SkGlyph& skiaGlyph = GET_METRICS(autoCache.getCache(), glyph);
+    const SkGlyph& skiaGlyph = GET_METRICS(autoCache.get(), glyph);
     newGlyph->mIsValid = false;
     newGlyph->mGlyphIndex = skiaGlyph.fID;
 
-    updateGlyphCache(paint, skiaGlyph, autoCache.getCache(), newGlyph, precaching);
+    updateGlyphCache(paint, skiaGlyph, autoCache.get(), newGlyph, precaching);
 
     return newGlyph;
 }
