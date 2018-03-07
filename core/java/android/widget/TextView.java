@@ -11499,12 +11499,27 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @return Whether or not we're attempting to start the action mode.
      * @hide
      */
-    public boolean requestActionMode(@NonNull TextLinks.TextLink link) {
+    public boolean requestActionMode(@NonNull TextLinks.TextLinkSpan clickedSpan) {
+        Preconditions.checkNotNull(clickedSpan);
+        final TextLinks.TextLink link = clickedSpan.getTextLink();
         Preconditions.checkNotNull(link);
         createEditorIfNeeded();
-        mEditor.startLinkActionModeAsync(link);
+
+        if (!(mText instanceof Spanned)) {
+            return false;
+        }
+
+        final int start = ((Spanned) mText).getSpanStart(clickedSpan);
+        final int end = ((Spanned) mText).getSpanEnd(clickedSpan);
+
+        if (start < 0 || end < 1) {
+            return false;
+        }
+
+        mEditor.startLinkActionModeAsync(start, end);
         return true;
     }
+
     /**
      * @hide
      */

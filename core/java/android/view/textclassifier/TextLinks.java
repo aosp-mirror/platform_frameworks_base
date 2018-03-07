@@ -505,7 +505,7 @@ public final class TextLinks implements Parcelable {
         public void onClick(View widget) {
             if (widget instanceof TextView) {
                 final TextView textView = (TextView) widget;
-                textView.requestActionMode(mTextLink);
+                textView.requestActionMode(this);
             }
         }
 

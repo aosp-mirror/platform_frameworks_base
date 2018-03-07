@@ -108,7 +108,6 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassificationManager;
-import android.view.textclassifier.TextLinks;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.TextView.Drawables;
 import android.widget.TextView.OnEditorActionListener;
@@ -2118,13 +2117,12 @@ public class Editor {
         getSelectionActionModeHelper().startSelectionActionModeAsync(adjustSelection);
     }
 
-    void startLinkActionModeAsync(TextLinks.TextLink link) {
-        Preconditions.checkNotNull(link);
+    void startLinkActionModeAsync(int start, int end) {
         if (!(mTextView.getText() instanceof Spannable)) {
             return;
         }
         stopTextActionMode();
-        getSelectionActionModeHelper().startLinkActionModeAsync(link);
+        getSelectionActionModeHelper().startLinkActionModeAsync(start, end);
     }
 
     /**
