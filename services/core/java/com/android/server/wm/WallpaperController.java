@@ -27,12 +27,16 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.WALLPAPER_DRAW_PENDING_TIMEOUT;
 
+import android.graphics.Bitmap;
+import android.graphics.GraphicBuffer;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
@@ -41,6 +45,7 @@ import android.os.SystemClock;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.view.DisplayInfo;
+import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 
@@ -94,6 +99,12 @@ class WallpaperController {
     private static final int WALLPAPER_DRAW_PENDING = 1;
     private static final int WALLPAPER_DRAW_TIMEOUT = 2;
     private int mWallpaperDrawState = WALLPAPER_DRAW_NORMAL;
+
+    /**
+     * Temporary storage for taking a screenshot of the wallpaper.
+     * @see #screenshotWallpaperLocked()
+     */
+    private WindowState mTmpTopWallpaper;
 
     private final FindWallpaperTargetResult mFindResults = new FindWallpaperTargetResult();
 
@@ -677,6 +688,58 @@ class WallpaperController {
 
     void removeWallpaperToken(WallpaperWindowToken token) {
         mWallpaperTokens.remove(token);
+    }
+
+    /**
+     * Take a screenshot of the wallpaper if it's visible.
+     *
+     * @return Bitmap of the wallpaper
+     */
+    Bitmap screenshotWallpaperLocked() {
+        if (!mService.mPolicy.isScreenOn()) {
+            if (DEBUG_SCREENSHOT) {
+                Slog.i(TAG_WM, "Attempted to take screenshot while display was off.");
+            }
+            return null;
+        }
+
+        final WindowState wallpaperWindowState = getTopVisibleWallpaper();
+        if (wallpaperWindowState == null) {
+            if (DEBUG_SCREENSHOT) {
+                Slog.i(TAG_WM, "No visible wallpaper to screenshot");
+            }
+            return null;
+        }
+
+        final Rect bounds = wallpaperWindowState.getBounds();
+        bounds.offsetTo(0, 0);
+
+        GraphicBuffer wallpaperBuffer = SurfaceControl.captureLayers(
+                wallpaperWindowState.getSurfaceControl().getHandle(), bounds, 1 /* frameScale */);
+
+        if (wallpaperBuffer == null) {
+            Slog.w(TAG_WM, "Failed to screenshot wallpaper");
+            return null;
+        }
+        return Bitmap.createHardwareBitmap(wallpaperBuffer);
+    }
+
+    private WindowState getTopVisibleWallpaper() {
+        mTmpTopWallpaper = null;
+
+        for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
+            final WallpaperWindowToken token = mWallpaperTokens.get(curTokenNdx);
+            token.forAllWindows(w -> {
+                final WindowStateAnimator winAnim = w.mWinAnimator;
+                if (winAnim != null && winAnim.getShown() && winAnim.mLastAlpha > 0f) {
+                    mTmpTopWallpaper = w;
+                    return true;
+                }
+                return false;
+            }, true /* traverseTopToBottom */);
+        }
+
+        return mTmpTopWallpaper;
     }
 
     void dump(PrintWriter pw, String prefix) {
