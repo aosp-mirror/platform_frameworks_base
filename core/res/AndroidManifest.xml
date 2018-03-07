@@ -3827,6 +3827,15 @@
     <permission android:name="android.permission.INSTANT_APP_FOREGROUND_SERVICE"
         android:protectionLevel="signature|development|instant|appop" />
 
+    <!-- Allows a regular application to use {@link android.app.Service#startForeground
+         Service.startForeground}.
+         <p>Protection level: normal
+    -->
+    <permission android:name="android.permission.FOREGROUND_SERVICE"
+        android:description="@string/permdesc_foregroundService"
+        android:label="@string/permlab_foregroundService"
+        android:protectionLevel="normal|instant" />
+
     <!-- @SystemApi Allows to access all app shortcuts.
          @hide -->
     <permission android:name="android.permission.ACCESS_SHORTCUTS"
