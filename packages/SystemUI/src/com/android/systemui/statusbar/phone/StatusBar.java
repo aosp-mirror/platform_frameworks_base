@@ -1589,8 +1589,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         Drawable artworkDrawable = null;
         if (mediaMetadata != null) {
-            Bitmap artworkBitmap = null;
-            artworkBitmap = mediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ART);
+            Bitmap artworkBitmap = mediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ART);
             if (artworkBitmap == null) {
                 artworkBitmap = mediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
                 // might still be null
@@ -1633,6 +1632,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mBackdrop.setAlpha(1f);
                 }
                 mStatusBarWindowManager.setBackdropShowing(true);
+                mColorExtractor.setMediaBackdropVisible(true);
                 metaDataChanged = true;
                 if (DEBUG_MEDIA) {
                     Log.v(TAG, "DEBUG_MEDIA: Fading in album artwork");
@@ -1684,6 +1684,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 if (DEBUG_MEDIA) {
                     Log.v(TAG, "DEBUG_MEDIA: Fading out album artwork");
                 }
+                mColorExtractor.setMediaBackdropVisible(false);
                 boolean cannotAnimateDoze = mDozing && !ScrimState.AOD.getAnimateChange();
                 if (mFingerprintUnlockController.getMode()
                         == FingerprintUnlockController.MODE_WAKE_AND_UNLOCK_PULSING
