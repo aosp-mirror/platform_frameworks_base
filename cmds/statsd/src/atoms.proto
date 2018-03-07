@@ -105,6 +105,7 @@ message Atom {
         KeyguardBouncerStateChanged keyguard_bouncer_state_changed = 63;
         KeyguardBouncerPasswordEntered keyguard_bouncer_password_entered = 64;
         AppDied app_died=65;
+        ResourceConfigurationChanged resource_configuration_changed = 66;
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 
@@ -808,6 +809,98 @@ message KeyguardBouncerPasswordEntered {
         SUCCESS = 2;
     }
     optional BouncerResult result = 1;
+}
+
+/*
+ * Logs changes to the configuration of the device. The configuration is defined
+ * in frameworks/base/core/java/android/content/res/Configuration.java
+ * More documentation is at https://d.android.com/reference/android/content/res/Configuration.html
+ * Please go there to interpret the possible values each field can be.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ */
+message ResourceConfigurationChanged {
+    // Bit mask of color capabilities of the screen.
+    // Contains information about the color gamut and hdr mode of the screen.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#colorMode
+    optional int32 colorMode = 1;
+
+    // The target screen density being rendered to.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#densityDpi
+    optional int32 densityDpi = 2;
+
+    // Current user preference for the scaling factor for fonts,
+    // relative to the base density scaling.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#fontScale
+    optional float fontScale = 3;
+
+    // Flag indicating whether the hard keyboard is hidden.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#hardKeyboardHidden
+    optional int32 hardKeyboardHidden = 4;
+
+    // The type of keyboard attached to the device.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#keyboard
+    optional int32 keyboard = 5;
+
+    // Flag indicating whether any keyboard is available. Takes soft keyboards into account.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#keyboardHidden
+    optional int32 keyboardHideen = 6;
+
+    // IMSI MCC (Mobile Country Code), corresponding to mcc resource qualifier.
+    // 0 if undefined.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#mcc
+    optional int32 mcc = 7;
+
+    // IMSI MNC (Mobile Network Code), corresponding to mnc resource qualifier.
+    // 0 if undefined. Note: the actual MNC may be 0, to check for this use the
+    // MNC_ZERO symbol defined in Configuration.java.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#mnc
+    optional int32 mnc = 8;
+
+    // The kind of navigation available on the device.
+    // See: https://developer.android.com/reference/android/content/res/Configuration.html#navigation
+    optional int32 navigation = 9;
+
+    // Flag indicating whether the navigation is available.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#navigationHidden
+    optional int32 navigationHidden = 10;
+
+    // Overall orientation of the screen.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#orientation
+    optional int32 orientation = 11;
+
+    // The current height of the available screen space, in dp units.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#screenHeightDp
+    optional int32 screenHeightDp = 12;
+
+    // Bit mask of overall layout of the screen.
+    // Contains information about screen size, whether the screen is wider/taller
+    // than normal, whether the screen layout is right-tl-left or left-to-right,
+    // and whether the screen has a rounded shape.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#screenLayout
+    optional int32 screenLayout = 13;
+
+    // Current width of the available screen space, in dp units.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#screenWidthDp
+    optional int32 screenWidthDp = 14;
+
+    // The smallest screen size an application will see in normal operation.
+    // This is the smallest value of both screenWidthDp and screenHeightDp
+    // in portrait and landscape.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#smallestScreenWidthDp
+    optional int32 smallestScreenWidthDp = 15;
+
+    // The type of touch screen attached to the device.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#touchscreen
+    optional int32 touchscreen = 16;
+
+    // Bit mask of the ui mode.
+    // Contains information about the overall ui mode of the device.
+    // Eg: NORMAL, DESK, CAR, TELEVISION, WATCH, VR_HEADSET
+    // Also contains information about whether the device is in night mode.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#uiMode
+    optional int32 uiMode = 17;
 }
 
 /**
