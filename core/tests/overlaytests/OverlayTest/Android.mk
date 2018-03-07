@@ -5,6 +5,8 @@ LOCAL_MODULE_TAGS := tests
 
 LOCAL_PACKAGE_NAME := OverlayTest
 
+LOCAL_PRIVATE_PLATFORM_APIS := true
+
 LOCAL_DEX_PREOPT := false
 
 LOCAL_JAVA_LIBRARIES += legacy-test
