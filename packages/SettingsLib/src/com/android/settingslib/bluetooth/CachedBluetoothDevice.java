@@ -27,6 +27,7 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 import android.bluetooth.BluetoothAdapter;
+import android.support.annotation.VisibleForTesting;
 
 import com.android.settingslib.R;
 
@@ -461,12 +462,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     /**
-     * Set the device status as active or non-active per Bluetooth profile.
+     * Update the device status as active or non-active per Bluetooth profile.
      *
      * @param isActive true if the device is active
      * @param bluetoothProfile the Bluetooth profile
      */
-    public void setActiveDevice(boolean isActive, int bluetoothProfile) {
+    public void onActiveDeviceChanged(boolean isActive, int bluetoothProfile) {
         boolean changed = false;
         switch (bluetoothProfile) {
         case BluetoothProfile.A2DP:
@@ -478,13 +479,33 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             mIsActiveDeviceHeadset = isActive;
             break;
         default:
-            Log.w(TAG, "setActiveDevice: unknown profile " + bluetoothProfile +
+            Log.w(TAG, "onActiveDeviceChanged: unknown profile " + bluetoothProfile +
                     " isActive " + isActive);
             break;
         }
         if (changed) {
             dispatchAttributesChanged();
         }
+    }
+
+    /**
+     * Get the device status as active or non-active per Bluetooth profile.
+     *
+     * @param bluetoothProfile the Bluetooth profile
+     * @return true if the device is active
+     */
+    @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+    public boolean isActiveDevice(int bluetoothProfile) {
+        switch (bluetoothProfile) {
+            case BluetoothProfile.A2DP:
+                return mIsActiveDeviceA2dp;
+            case BluetoothProfile.HEADSET:
+                return mIsActiveDeviceHeadset;
+            default:
+                Log.w(TAG, "getActiveDevice: unknown profile " + bluetoothProfile);
+                break;
+        }
+        return false;
     }
 
     void setRssi(short rssi) {
