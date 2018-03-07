@@ -52,6 +52,7 @@ interface ISessionManager {
     void setOnMediaKeyListener(in IOnMediaKeyListener listener);
 
     // MediaSession2
+    boolean isTrusted(int uid, String packageName);
     boolean createSession2(in Bundle sessionToken);
     void destroySession2(in Bundle sessionToken);
     List<Bundle> getSessionTokens(boolean activeSessionOnly, boolean sessionServiceOnly);

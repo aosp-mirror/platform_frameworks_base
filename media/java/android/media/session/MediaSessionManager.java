@@ -340,6 +340,25 @@ public final class MediaSessionManager {
     }
 
     /**
+     * Returns whether the api
+     *
+     * @param uid uid of the app
+     * @param packageName packageName
+     * @hide
+     */
+    public boolean isTrusted(int uid, @NonNull String packageName) {
+        if (packageName == null) {
+            return false;
+        }
+        try {
+            return mService.isTrusted(uid, packageName);
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Cannot communicate with the service.", e);
+        }
+        return false;
+    }
+
+    /**
      * Called when a {@link MediaSession2} is created.
      * @hide
      */
