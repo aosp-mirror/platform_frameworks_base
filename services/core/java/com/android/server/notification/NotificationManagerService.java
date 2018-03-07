@@ -1294,7 +1294,8 @@ public class NotificationManagerService extends SystemService {
             NotificationAssistants notificationAssistants, ConditionProviders conditionProviders,
             ICompanionDeviceManager companionManager, SnoozeHelper snoozeHelper,
             NotificationUsageStats usageStats, AtomicFile policyFile,
-            ActivityManager activityManager, GroupHelper groupHelper, IActivityManager am) {
+            ActivityManager activityManager, GroupHelper groupHelper, IActivityManager am,
+            UsageStatsManagerInternal appUsageStats) {
         Resources resources = getContext().getResources();
         mMaxPackageEnqueueRate = Settings.Global.getFloat(getContext().getContentResolver(),
                 Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE,
@@ -1307,7 +1308,7 @@ public class NotificationManagerService extends SystemService {
         mPackageManagerClient = packageManagerClient;
         mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
         mVibrator = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
-        mAppUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
+        mAppUsageStats = appUsageStats;
         mAlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
         mCompanionManager = companionManager;
         mActivityManager = activityManager;
@@ -1449,7 +1450,8 @@ public class NotificationManagerService extends SystemService {
                 null, snoozeHelper, new NotificationUsageStats(getContext()),
                 new AtomicFile(new File(systemDir, "notification_policy.xml"), "notification-policy"),
                 (ActivityManager) getContext().getSystemService(Context.ACTIVITY_SERVICE),
-                getGroupHelper(), ActivityManager.getService());
+                getGroupHelper(), ActivityManager.getService(),
+                LocalServices.getService(UsageStatsManagerInternal.class));
 
         // register for various Intents
         IntentFilter filter = new IntentFilter();
@@ -4300,6 +4302,7 @@ public class NotificationManagerService extends SystemService {
                     if (index < 0) {
                         mNotificationList.add(r);
                         mUsageStats.registerPostedByApp(r);
+                        r.setInterruptive(true);
                     } else {
                         old = mNotificationList.get(index);
                         mNotificationList.set(index, r);
@@ -4310,6 +4313,7 @@ public class NotificationManagerService extends SystemService {
                         // revoke uri permissions for changed uris
                         revokeUriPermissions(r, old);
                         r.isUpdate = true;
+                        r.setInterruptive(isVisuallyInterruptive(old, r));
                     }
 
                     mNotificationsByKey.put(n.getKey(), r);
@@ -4373,6 +4377,52 @@ public class NotificationManagerService extends SystemService {
                 }
             }
         }
+    }
+
+    /**
+     * If the notification differs enough visually, consider it a new interruptive notification.
+     */
+    @GuardedBy("mNotificationLock")
+    @VisibleForTesting
+    protected boolean isVisuallyInterruptive(NotificationRecord old, NotificationRecord r) {
+        Notification oldN = old.sbn.getNotification();
+        Notification newN = r.sbn.getNotification();
+        if (oldN.extras == null || newN.extras == null) {
+            return false;
+        }
+        if (!Objects.equals(oldN.extras.get(Notification.EXTRA_TITLE),
+                newN.extras.get(Notification.EXTRA_TITLE))) {
+            return true;
+        }
+        if (!Objects.equals(oldN.extras.get(Notification.EXTRA_TEXT),
+                newN.extras.get(Notification.EXTRA_TEXT))) {
+            return true;
+        }
+        if (oldN.extras.containsKey(Notification.EXTRA_PROGRESS) && newN.hasCompletedProgress()) {
+            return true;
+        }
+        // Actions
+        if (Notification.areActionsVisiblyDifferent(oldN, newN)) {
+            return true;
+        }
+
+        try {
+            Notification.Builder oldB = Notification.Builder.recoverBuilder(getContext(), oldN);
+            Notification.Builder newB = Notification.Builder.recoverBuilder(getContext(), newN);
+
+            // Style based comparisons
+            if (Notification.areStyledNotificationsVisiblyDifferent(oldB, newB)) {
+                return true;
+            }
+
+            // Remote views
+            if (Notification.areRemoteViewsChanged(oldB, newB)) {
+                return true;
+            }
+        } catch (Exception e) {
+            Slog.w(TAG, "error recovering builder", e);
+        }
+        return false;
     }
 
     /**
