@@ -246,6 +246,7 @@ Landroid/app/Dialog;->mOwnerActivity:Landroid/app/Activity;
 Landroid/app/Dialog;->mShowMessage:Landroid/os/Message;
 Landroid/app/DownloadManager$Request;->mUri:Landroid/net/Uri;
 Landroid/app/FragmentManagerImpl;->mAdded:Ljava/util/ArrayList;
+Landroid/app/FragmentManagerImpl;->noteStateNotSaved()V
 Landroid/app/Fragment;->mChildFragmentManager:Landroid/app/FragmentManagerImpl;
 Landroid/app/Fragment;->mWho:Ljava/lang/String;
 Landroid/app/IActivityManager;->bindService(Landroid/app/IApplicationThread;Landroid/os/IBinder;Landroid/content/Intent;Ljava/lang/String;Landroid/app/IServiceConnection;ILjava/lang/String;I)I
@@ -576,6 +577,7 @@ Landroid/content/res/ResourcesKey;->mSplitResDirs:[Ljava/lang/String;
 Landroid/content/res/Resources;->loadXmlResourceParser(ILjava/lang/String;)Landroid/content/res/XmlResourceParser;
 Landroid/content/res/Resources;->loadXmlResourceParser(Ljava/lang/String;IILjava/lang/String;)Landroid/content/res/XmlResourceParser;
 Landroid/content/res/Resources;->mResourcesImpl:Landroid/content/res/ResourcesImpl;
+Landroid/content/res/Resources;->mSystem:Landroid/content/res/Resources;
 Landroid/content/res/Resources;->mTmpValue:Landroid/util/TypedValue;
 Landroid/content/res/Resources;->mTypedArrayPool:Landroid/util/Pools$SynchronizedPool;
 Landroid/content/res/Resources;->setCompatibilityInfo(Landroid/content/res/CompatibilityInfo;)V
@@ -1279,6 +1281,7 @@ Landroid/os/Handler;->mCallback:Landroid/os/Handler$Callback;
 Landroid/os/Handler;->mMessenger:Landroid/os/IMessenger;
 Landroid/os/HwBlob;-><init>(I)V
 Landroid/os/HwParcel;-><init>(Z)V
+Landroid/os/HwRemoteBinder;-><init>()V
 Landroid/os/IBatteryPropertiesRegistrar$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/os/IPermissionController$Stub;->asInterface(Landroid/os/IBinder;)Landroid/os/IPermissionController;
 Landroid/os/IPermissionController$Stub$Proxy;->checkPermission(Ljava/lang/String;II)Z
