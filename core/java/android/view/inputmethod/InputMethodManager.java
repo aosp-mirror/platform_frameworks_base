@@ -1812,9 +1812,9 @@ public final class InputMethodManager {
      * when it was started, which allows it to perform this operation on
      * itself.
      * @param id The unique identifier for the new input method to be switched to.
-     * @deprecated Use {@link InputMethodService#setInputMethod(String)} instead. This method
-     * was intended for IME developers who should be accessing APIs through the service. APIs in
-     * this class are intended for app developers interacting with the IME.
+     * @deprecated Use {@link InputMethodService#switchInputMethod(String)}
+     * instead. This method was intended for IME developers who should be accessing APIs through
+     * the service. APIs in this class are intended for app developers interacting with the IME.
      */
     @Deprecated
     public void setInputMethod(IBinder token, String id) {
@@ -1841,7 +1841,7 @@ public final class InputMethodManager {
      * @param id The unique identifier for the new input method to be switched to.
      * @param subtype The new subtype of the new input method to be switched to.
      * @deprecated Use
-     * {@link InputMethodService#setInputMethodAndSubtype(String, InputMethodSubtype)}
+     * {@link InputMethodService#switchInputMethod(String, InputMethodSubtype)}
      * instead. This method was intended for IME developers who should be accessing APIs through
      * the service. APIs in this class are intended for app developers interacting with the IME.
      */
@@ -2317,22 +2317,22 @@ public final class InputMethodManager {
      * which allows it to perform this operation on itself.
      * @return true if the current input method and subtype was successfully switched to the last
      * used input method and subtype.
-     * @deprecated Use {@link InputMethodService#switchToLastInputMethod()} instead. This method
+     * @deprecated Use {@link InputMethodService#switchToPreviousInputMethod()} instead. This method
      * was intended for IME developers who should be accessing APIs through the service. APIs in
      * this class are intended for app developers interacting with the IME.
      */
     @Deprecated
     public boolean switchToLastInputMethod(IBinder imeToken) {
-        return switchToLastInputMethodInternal(imeToken);
+        return switchToPreviousInputMethodInternal(imeToken);
     }
 
     /**
      * @hide
      */
-    public boolean switchToLastInputMethodInternal(IBinder imeToken) {
+    public boolean switchToPreviousInputMethodInternal(IBinder imeToken) {
         synchronized (mH) {
             try {
-                return mService.switchToLastInputMethod(imeToken);
+                return mService.switchToPreviousInputMethod(imeToken);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

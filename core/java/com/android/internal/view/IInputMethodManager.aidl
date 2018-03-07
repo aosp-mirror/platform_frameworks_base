@@ -80,7 +80,7 @@ interface IInputMethodManager {
     boolean notifySuggestionPicked(in SuggestionSpan span, String originalString, int index);
     InputMethodSubtype getCurrentInputMethodSubtype();
     boolean setCurrentInputMethodSubtype(in InputMethodSubtype subtype);
-    boolean switchToLastInputMethod(in IBinder token);
+    boolean switchToPreviousInputMethod(in IBinder token);
     boolean switchToNextInputMethod(in IBinder token, boolean onlyCurrentIme);
     boolean shouldOfferSwitchingToNextInputMethod(in IBinder token);
     void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
