@@ -20,9 +20,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.media.MediaSession2.PlaylistParams;
-import android.media.MediaSession2.PlaylistParams.RepeatMode;
-import android.media.MediaSession2.PlaylistParams.ShuffleMode;
+import android.content.Context;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -30,15 +28,16 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
- * Controller interface for playlist management.
+ * MediaPlaylistAgent is the abstract class an application needs to derive from to pass an object
+ * to a MediaSession2 that will override default playlist handling behaviors. It contains a set of
+ * notify methods to signal MediaSession2 that playlist-related state has changed.
+ * <p>
  * Playlists are composed of one or multiple {@link MediaItem2} instances, which combine metadata
  * and data sources (as {@link DataSourceDesc})
  * Used by {@link MediaSession2} and {@link MediaController2}.
  */
- // This class only includes methods that contain {@link MediaItem2}.
- // Note that setPlaylist() isn't added on purpose because it's considered session-specific.
-
-public interface MediaPlaylistController {
+// This class only includes methods that contain {@link MediaItem2}.
+public abstract class MediaPlaylistAgent {
     /**
      * @hide
      */
@@ -50,24 +49,24 @@ public interface MediaPlaylistController {
     /**
      * Playback will be stopped at the end of the playing media list.
      */
-    int REPEAT_MODE_NONE = 0;
+    public static final int REPEAT_MODE_NONE = 0;
 
     /**
      * Playback of the current playing media item will be repeated.
      */
-    int REPEAT_MODE_ONE = 1;
+    public static final int REPEAT_MODE_ONE = 1;
 
     /**
      * Playing media list will be repeated.
      */
-    int REPEAT_MODE_ALL = 2;
+    public static final int REPEAT_MODE_ALL = 2;
 
     /**
      * Playback of the playing media group will be repeated.
      * A group is a logical block of media items which is specified in the section 5.7 of the
      * Bluetooth AVRCP 1.6. An example of a group is the playlist.
      */
-    int REPEAT_MODE_GROUP = 3;
+    public static final int REPEAT_MODE_GROUP = 3;
 
     /**
      * @hide
@@ -79,21 +78,28 @@ public interface MediaPlaylistController {
     /**
      * Media list will be played in order.
      */
-    int SHUFFLE_MODE_NONE = 0;
+    public static final int SHUFFLE_MODE_NONE = 0;
 
     /**
      * Media list will be played in shuffled order.
      */
-    int SHUFFLE_MODE_ALL = 1;
+    public static final int SHUFFLE_MODE_ALL = 1;
 
     /**
      * Media group will be played in shuffled order.
      * A group is a logical block of media items which is specified in the section 5.7 of the
      * Bluetooth AVRCP 1.6. An example of a group is the playlist.
      */
-    int SHUFFLE_MODE_GROUP = 2;
+    public static final int SHUFFLE_MODE_GROUP = 2;
 
-    abstract class PlaylistEventCallback {
+    private MediaPlayerBase mPlayer;
+
+    /**
+     * A callback class to receive notifications for events on the media player. See
+     * {@link MediaPlaylistAgent#registerPlaylistEventCallback(Executor, PlaylistEventCallback)}
+     * to register this callback.
+     */
+    public static abstract class PlaylistEventCallback {
         /**
          * Called when a playlist is changed.
          *
@@ -101,20 +107,20 @@ public interface MediaPlaylistController {
          * @param list new playlist
          * @param metadata new metadata
          */
-        public void onPlaylistChanged(@NonNull MediaPlaylistController mplc,
+        public void onPlaylistChanged(@NonNull MediaPlaylistAgent mplc,
                 @NonNull List<MediaItem2> list, @Nullable MediaMetadata2 metadata) { }
 
         /**
-         * Called when a playlist is changed.
+         * Called when a playlist metadata is changed.
          *
          * @param mplc playlist controller for this event
          * @param metadata new metadata
          */
-        public void onPlaylistMetadataChanged(@NonNull MediaPlaylistController mplc,
+        public void onPlaylistMetadataChanged(@NonNull MediaPlaylistAgent mplc,
                 @Nullable MediaMetadata2 metadata) { }
 
         /**
-         * Called when a playlist is changed.
+         * Called when the shuffle mode is changed.
          *
          * @param mplc playlist controller for this event
          * @param shuffleMode repeat mode
@@ -122,11 +128,11 @@ public interface MediaPlaylistController {
          * @see #SHUFFLE_MODE_ALL
          * @see #SHUFFLE_MODE_GROUP
          */
-        public void onShuffleModeChanged(@NonNull MediaPlaylistController mplc,
+        public void onShuffleModeChanged(@NonNull MediaPlaylistAgent mplc,
                 @ShuffleMode int shuffleMode) { }
 
         /**
-         * Called when a playlist is changed.
+         * Called when the repeat mode is changed.
          *
          * @param mplc playlist controller for this event
          * @param repeatMode repeat mode
@@ -135,20 +141,27 @@ public interface MediaPlaylistController {
          * @see #REPEAT_MODE_ALL
          * @see #REPEAT_MODE_GROUP
          */
-        public void onRepeatModeChanged(@NonNull MediaPlaylistController mplc,
+        public void onRepeatModeChanged(@NonNull MediaPlaylistAgent mplc,
                 @RepeatMode int repeatMode) { }
+    }
+
+    public MediaPlaylistAgent(Context context) {
+        // FYI, Need to have a context in the constructor for making this class be updatable
+        // TODO(jaewan) : implement this
     }
 
     /**
      * Register {@link PlaylistEventCallback} to listen changes in the underlying
-     * {@link MediaPlaylistController}, regardless of the change in the controller.
+     * {@link MediaPlaylistAgent}, regardless of the change in the controller.
      *
      * @param executor a callback Executor
      * @param callback a PlaylistEventCallback
      * @throws IllegalArgumentException if executor or callback is {@code null}.
      */
-    void registerPlaylistControllerCallback(@NonNull @CallbackExecutor Executor executor,
-            @NonNull PlaylistEventCallback callback);
+    public final void registerPlaylistEventCallback(
+            @NonNull @CallbackExecutor Executor executor, @NonNull PlaylistEventCallback callback) {
+        // TODO(jaewan): implement this
+    }
 
     /**
      * Unregister the previously registered {@link PlaylistEventCallback}.
@@ -156,14 +169,36 @@ public interface MediaPlaylistController {
      * @param callback the callback to be removed
      * @throws IllegalArgumentException if the callback is {@code null}.
      */
-    void unregisterPlaylistControllerCallback(@NonNull PlaylistEventCallback callback);
+    public final void unregisterPlaylistEventCallback(
+            @NonNull PlaylistEventCallback callback) {
+        // TODO(jaewan): implement this
+    }
+
+    public final void notifyPlaylistChanged() {
+        // TODO(jaewan): implement this
+    }
+
+    public final void notifyPlaylistMetadataChanged() {
+        // TODO(jaewan): implement this
+    }
+
+    public final void notifyShuffleModeChanged() {
+        // TODO(jaewan): implement this
+    }
+
+    public final void notifyRepeatModeChanged() {
+        // TODO(jaewan): implement this
+    }
 
     /**
      * Returns the playlist
      *
      * @return playlist, or null if none is set.
      */
-    @Nullable List<MediaItem2> getPlaylist();
+    public @Nullable List<MediaItem2> getPlaylist() {
+        // TODO(jaewan): implement this
+        return null;
+    }
 
     /**
      * Sets the playlist.
@@ -171,21 +206,28 @@ public interface MediaPlaylistController {
      * @param list playlist
      * @param metadata metadata of the playlist
      */
-    void setPlaylist(@NonNull List<MediaItem2> list, @Nullable MediaMetadata2 metadata);
+    public void setPlaylist(@NonNull List<MediaItem2> list, @Nullable MediaMetadata2 metadata) {
+        // TODO(jaewan): implement this
+    }
 
     /**
      * Returns the playlist metadata
      *
      * @return metadata metadata of the playlist, or null if none is set
      */
-    @Nullable MediaMetadata2 getPlaylistMetadata();
+    public @Nullable MediaMetadata2 getPlaylistMetadata() {
+        // TODO(jaewan): implement this
+        return null;
+    }
 
     /**
      * Updates the playlist metadata
      *
      * @param metadata metadata of the playlist
      */
-    void updatePlaylistMetadata(@Nullable MediaMetadata2 metadata);
+    public void updatePlaylistMetadata(@Nullable MediaMetadata2 metadata) {
+        // TODO(jaewan): implement this
+    }
 
     /**
      * Adds the media item to the playlist at the index
@@ -193,14 +235,18 @@ public interface MediaPlaylistController {
      * @param index index
      * @param item media item to add
      */
-    void addPlaylistItem(int index, @NonNull MediaItem2 item);
+    public void addPlaylistItem(int index, @NonNull MediaItem2 item) {
+        // TODO(jaewan): implement this
+    }
 
     /**
      * Removes the media item from the playlist
      *
      * @param item media item to remove
      */
-    void removePlaylistItem(@NonNull MediaItem2 item);
+    public void removePlaylistItem(@NonNull MediaItem2 item) {
+        // TODO(jaewan): implement this
+    }
 
     /**
      * Replaces the media item with the .
@@ -210,14 +256,26 @@ public interface MediaPlaylistController {
      * @param index index
      * @param item
      */
-    void replacePlaylistItem(int index, @NonNull MediaItem2 item);
+    public void replacePlaylistItem(int index, @NonNull MediaItem2 item) {
+        // TODO(jaewan): implement this
+    }
 
     /**
      * Skips to the the media item, and plays from it.
      *
      * @param item media item to start playing from
      */
-    void skipToPlaylistItem(@NonNull MediaItem2 item);
+    public void skipToPlaylistItem(@NonNull MediaItem2 item) {
+        // TODO(jaewan): implement this
+    }
+
+    public void skipToPreviousItem() {
+        // TODO(jaewan): implement this
+    }
+
+    public void skipToNextItem() {
+        // TODO(jaewan): implement this
+    }
 
     /**
      * Get repeat mode
@@ -228,7 +286,10 @@ public interface MediaPlaylistController {
      * @see #REPEAT_MODE_ALL
      * @see #REPEAT_MODE_GROUP
      */
-    @RepeatMode int getRepeatMode();
+    public @RepeatMode int getRepeatMode() {
+        // TODO(jaewan): implement this
+        return REPEAT_MODE_NONE;
+    }
 
     /**
      * Set repeat mode
@@ -239,7 +300,9 @@ public interface MediaPlaylistController {
      * @see #REPEAT_MODE_ALL
      * @see #REPEAT_MODE_GROUP
      */
-    void setRepeatMode(@RepeatMode int repeatMode);
+    public void setRepeatMode(@RepeatMode int repeatMode) {
+        // TODO(jaewan): implement this
+    }
 
     /**
      * Get shuffle mode
@@ -249,7 +312,10 @@ public interface MediaPlaylistController {
      * @see #SHUFFLE_MODE_ALL
      * @see #SHUFFLE_MODE_GROUP
      */
-    @ShuffleMode int getShuffleMode();
+    public @ShuffleMode int getShuffleMode() {
+        // TODO(jaewan): implement this
+        return SHUFFLE_MODE_NONE;
+    }
 
     /**
      * Set shuffle mode
@@ -259,5 +325,7 @@ public interface MediaPlaylistController {
      * @see #SHUFFLE_MODE_ALL
      * @see #SHUFFLE_MODE_GROUP
      */
-    void setShuffleMode(@ShuffleMode int shuffleMode);
+    public void setShuffleMode(@ShuffleMode int shuffleMode) {
+        // TODO(jaewan): implement this
+    }
 }

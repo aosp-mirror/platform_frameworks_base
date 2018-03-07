@@ -16,13 +16,12 @@
 
 package android.media.update;
 
-import android.annotation.NonNull;
 import android.app.PendingIntent;
 import android.media.MediaItem2;
 import android.media.MediaMetadata2;
 import android.media.MediaPlayerBase;
 import android.media.MediaPlayerBase.PlayerEventCallback;
-import android.media.MediaPlaylistController;
+import android.media.MediaPlaylistAgent;
 import android.media.MediaSession2;
 import android.media.MediaSession2.Command;
 import android.media.MediaSession2.CommandButton;
@@ -44,7 +43,7 @@ import java.util.concurrent.Executor;
  */
 public interface MediaSession2Provider extends TransportControlProvider {
     void close_impl();
-    void updatePlayer_impl(MediaPlayerBase player, MediaPlaylistController mplc,
+    void updatePlayer_impl(MediaPlayerBase player, MediaPlaylistAgent mplc,
             VolumeProvider2 volumeProvider);
     MediaPlayerBase getPlayer_impl();
     VolumeProvider2 getVolumeProvider_impl();
@@ -124,7 +123,7 @@ public interface MediaSession2Provider extends TransportControlProvider {
 
     interface BuilderBaseProvider<T extends MediaSession2, C extends SessionCallback> {
         void setPlayer_impl(MediaPlayerBase player);
-        void setPlaylistController_impl(MediaPlaylistController mplc);
+        void setPlaylistController_impl(MediaPlaylistAgent mplc);
         void setVolumeProvider_impl(VolumeProvider2 volumeProvider);
         void setSessionActivity_impl(PendingIntent pi);
         void setId_impl(String id);
