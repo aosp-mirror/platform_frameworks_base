@@ -4655,16 +4655,23 @@ public class Editor {
 
             final int trigger = getMagnifierHandleTrigger();
             final int offset;
+            final int otherHandleOffset;
             switch (trigger) {
-                case MagnifierHandleTrigger.INSERTION: // Fall through.
+                case MagnifierHandleTrigger.INSERTION:
+                    offset = mTextView.getSelectionStart();
+                    otherHandleOffset = -1;
+                    break;
                 case MagnifierHandleTrigger.SELECTION_START:
                     offset = mTextView.getSelectionStart();
+                    otherHandleOffset = mTextView.getSelectionEnd();
                     break;
                 case MagnifierHandleTrigger.SELECTION_END:
                     offset = mTextView.getSelectionEnd();
+                    otherHandleOffset = mTextView.getSelectionStart();
                     break;
                 default:
                     offset = -1;
+                    otherHandleOffset = -1;
                     break;
             }
 
@@ -4674,22 +4681,38 @@ public class Editor {
 
             final Layout layout = mTextView.getLayout();
             final int lineNumber = layout.getLineForOffset(offset);
+            // Compute whether the selection handles are currently on the same line, and,
+            // in this particular case, whether the selected text is right to left.
+            final boolean sameLineSelection = otherHandleOffset != -1
+                    && lineNumber == layout.getLineForOffset(otherHandleOffset);
+            final boolean rtl = sameLineSelection
+                    && (offset < otherHandleOffset)
+                        != (getHorizontal(mTextView.getLayout(), offset)
+                            < getHorizontal(mTextView.getLayout(), otherHandleOffset));
 
-            // Horizontally move the magnifier smoothly but clamp inside the current line.
+            // Horizontally move the magnifier smoothly, clamp inside the current line / selection.
             final int[] textViewLocationOnScreen = new int[2];
             mTextView.getLocationOnScreen(textViewLocationOnScreen);
             final float touchXInView = event.getRawX() - textViewLocationOnScreen[0];
-            final float lineLeft = mTextView.getLayout().getLineLeft(lineNumber)
-                    + mTextView.getTotalPaddingLeft() - mTextView.getScrollX();
-            final float lineRight = mTextView.getLayout().getLineRight(lineNumber)
-                    + mTextView.getTotalPaddingLeft() - mTextView.getScrollX();
+            float leftBound = mTextView.getTotalPaddingLeft() - mTextView.getScrollX();
+            float rightBound = mTextView.getTotalPaddingLeft() - mTextView.getScrollX();
+            if (sameLineSelection && ((trigger == MagnifierHandleTrigger.SELECTION_END) ^ rtl)) {
+                leftBound += getHorizontal(mTextView.getLayout(), otherHandleOffset);
+            } else {
+                leftBound += mTextView.getLayout().getLineLeft(lineNumber);
+            }
+            if (sameLineSelection && ((trigger == MagnifierHandleTrigger.SELECTION_START) ^ rtl)) {
+                rightBound += getHorizontal(mTextView.getLayout(), otherHandleOffset);
+            } else {
+                rightBound += mTextView.getLayout().getLineRight(lineNumber);
+            }
             final float contentWidth = Math.round(mMagnifier.getWidth() / mMagnifier.getZoom());
-            if (touchXInView < lineLeft - contentWidth / 2
-                    || touchXInView > lineRight + contentWidth / 2) {
-                // The touch is too out of the bounds of the current line, so hide the magnifier.
+            if (touchXInView < leftBound - contentWidth / 2
+                    || touchXInView > rightBound + contentWidth / 2) {
+                // The touch is too far from the current line / selection, so hide the magnifier.
                 return false;
             }
-            showPosInView.x = Math.max(lineLeft, Math.min(lineRight, touchXInView));
+            showPosInView.x = Math.max(leftBound, Math.min(rightBound, touchXInView));
 
             // Vertically snap to middle of current line.
             showPosInView.y = (mTextView.getLayout().getLineTop(lineNumber)
