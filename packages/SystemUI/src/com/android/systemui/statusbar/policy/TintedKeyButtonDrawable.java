@@ -30,6 +30,9 @@ public class TintedKeyButtonDrawable extends KeyButtonDrawable {
     private final int mLightColor;
     private final int mDarkColor;
 
+    public static final float DARK_INTENSITY_NOT_SET = -1f;
+    private float mDarkIntensity = DARK_INTENSITY_NOT_SET;
+
     public static TintedKeyButtonDrawable create(Drawable drawable, @ColorInt int lightColor,
             @ColorInt int darkColor) {
         return new TintedKeyButtonDrawable(new Drawable[] { drawable }, lightColor, darkColor);
@@ -39,11 +42,13 @@ public class TintedKeyButtonDrawable extends KeyButtonDrawable {
         super(drawables);
         mLightColor = lightColor;
         mDarkColor = darkColor;
+        setDarkIntensity(0f); // Set initial coloration
     }
 
     @Override
     public void setDarkIntensity(float intensity) {
         // Duplicate intensity scaling from KeyButtonDrawable
+        mDarkIntensity = intensity;
         int intermediateColor = ColorUtils.compositeColors(
                 setAlphaFloat(mDarkColor, intensity),
                 setAlphaFloat(mLightColor,1f - intensity));
@@ -52,6 +57,16 @@ public class TintedKeyButtonDrawable extends KeyButtonDrawable {
     }
 
     private int setAlphaFloat(int color, float alpha) {
-        return ColorUtils.setAlphaComponent(color, (int) (alpha * 255f));
+        // Ensure alpha is clamped [0-255] or ColorUtils will crash
+        final int alphaInt = alpha > 1f ? 255 : (alpha < 0f ? 0 : ((int) alpha*255));
+        return ColorUtils.setAlphaComponent(color, alphaInt);
+    }
+
+    public boolean isDarkIntensitySet() {
+        return mDarkIntensity == DARK_INTENSITY_NOT_SET;
+    }
+
+    public float getDarkIntensity() {
+        return mDarkIntensity;
     }
 }
