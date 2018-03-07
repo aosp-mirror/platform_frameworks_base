@@ -4241,14 +4241,20 @@ public abstract class PackageManager {
             @ResolveInfoFlags int flags);
 
     /**
-     * Find a single content provider by its base path name.
+     * Find a single content provider by its authority.
+     * <p>
+     * Example:<p>
+     * <pre>
+     * Uri uri = Uri.parse("content://com.example.app.provider/table1");
+     * ProviderInfo info = packageManager.resolveContentProvider(uri.getAuthority(), flags);
+     * </pre>
      *
-     * @param name The name of the provider to find.
+     * @param authority The authority of the provider to find.
      * @param flags Additional option flags to modify the data returned.
      * @return A {@link ProviderInfo} object containing information about the
      *         provider. If a provider was not found, returns null.
      */
-    public abstract ProviderInfo resolveContentProvider(String name,
+    public abstract ProviderInfo resolveContentProvider(String authority,
             @ComponentInfoFlags int flags);
 
     /**
