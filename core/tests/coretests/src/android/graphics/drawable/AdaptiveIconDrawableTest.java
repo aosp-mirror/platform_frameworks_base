@@ -1,15 +1,11 @@
 package android.graphics.drawable;
 
-import static org.junit.Assert.assertTrue;
-
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Outline;
-import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Path.Direction;
 import android.graphics.Rect;
@@ -19,10 +15,12 @@ import android.support.test.filters.LargeTest;
 import android.test.AndroidTestCase;
 import android.util.Log;
 import android.util.PathParser;
+
+import org.junit.Test;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Arrays;
-import org.junit.Test;
 
 @LargeTest
 public class AdaptiveIconDrawableTest extends AndroidTestCase {
@@ -171,6 +169,28 @@ public class AdaptiveIconDrawableTest extends AndroidTestCase {
         Outline outline = new Outline();
         mIconDrawable.getOutline(outline);
         assertTrue("outline path should be convex", outline.mPath.isConvex());
+    }
+
+    @Test
+    public void testSetAlpha() throws Exception {
+        mIconDrawable = new AdaptiveIconDrawable(mBackgroundDrawable, mForegroundDrawable);
+        mIconDrawable.setBounds(0, 0, 100, 100);
+
+        Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+
+        mIconDrawable.draw(canvas);
+        assertEquals(255, Color.alpha(bitmap.getPixel(50, 50)));
+
+        mIconDrawable.setAlpha(200);
+        bitmap.eraseColor(Color.TRANSPARENT);
+        mIconDrawable.draw(canvas);
+        assertEquals(200, Color.alpha(bitmap.getPixel(50, 50)));
+
+        mIconDrawable.setAlpha(100);
+        bitmap.eraseColor(Color.TRANSPARENT);
+        mIconDrawable.draw(canvas);
+        assertEquals(100, Color.alpha(bitmap.getPixel(50, 50)));
     }
 
     //
