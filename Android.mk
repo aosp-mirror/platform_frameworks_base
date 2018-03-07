@@ -164,6 +164,8 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -knowntags ./frameworks/base/docs/knowntags.txt \
     -knowntags ./libcore/known_oj_tags.txt \
     -manifest ./frameworks/base/core/res/AndroidManifest.xml \
+    -hidePackage com.android.internal \
+    -hidePackage com.android.internal.util \
     -hidePackage com.android.okhttp \
     -hidePackage com.android.org.conscrypt \
     -hidePackage com.android.server \
