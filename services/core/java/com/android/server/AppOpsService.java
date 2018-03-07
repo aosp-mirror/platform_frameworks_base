@@ -610,7 +610,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public void setUidMode(int code, int uid, int mode) {
         if (Binder.getCallingPid() != Process.myPid()) {
-            mContext.enforcePermission(android.Manifest.permission.UPDATE_APP_OPS_STATS,
+            mContext.enforcePermission(android.Manifest.permission.MANAGE_APP_OPS_MODES,
                     Binder.getCallingPid(), Binder.getCallingUid(), null);
         }
         verifyIncomingOp(code);
@@ -714,7 +714,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public void setMode(int code, int uid, String packageName, int mode) {
         if (Binder.getCallingPid() != Process.myPid()) {
-            mContext.enforcePermission(android.Manifest.permission.UPDATE_APP_OPS_STATS,
+            mContext.enforcePermission(android.Manifest.permission.MANAGE_APP_OPS_MODES,
                     Binder.getCallingPid(), Binder.getCallingUid(), null);
         }
         verifyIncomingOp(code);
@@ -832,7 +832,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     public void resetAllModes(int reqUserId, String reqPackageName) {
         final int callingPid = Binder.getCallingPid();
         final int callingUid = Binder.getCallingUid();
-        mContext.enforcePermission(android.Manifest.permission.UPDATE_APP_OPS_STATS,
+        mContext.enforcePermission(android.Manifest.permission.MANAGE_APP_OPS_MODES,
                 callingPid, callingUid, null);
         reqUserId = ActivityManager.handleIncomingUser(callingPid, callingUid, reqUserId,
                 true, true, "resetAllModes", null);
@@ -1087,6 +1087,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             String[] exceptionPackages) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
+        mContext.enforcePermission(android.Manifest.permission.MANAGE_APP_OPS_MODES,
+                Binder.getCallingPid(), Binder.getCallingUid(), null);
         synchronized (this) {
             SparseArray<Restriction> usageRestrictions = mAudioRestrictions.get(code);
             if (usageRestrictions == null) {
@@ -2330,7 +2332,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
                 case "write-settings": {
                     shell.mInternal.mContext.enforcePermission(
-                            android.Manifest.permission.UPDATE_APP_OPS_STATS,
+                            android.Manifest.permission.MANAGE_APP_OPS_MODES,
                             Binder.getCallingPid(), Binder.getCallingUid(), null);
                     long token = Binder.clearCallingIdentity();
                     try {
@@ -2346,7 +2348,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
                 case "read-settings": {
                     shell.mInternal.mContext.enforcePermission(
-                            android.Manifest.permission.UPDATE_APP_OPS_STATS,
+                            android.Manifest.permission.MANAGE_APP_OPS_MODES,
                             Binder.getCallingPid(), Binder.getCallingUid(), null);
                     long token = Binder.clearCallingIdentity();
                     try {
