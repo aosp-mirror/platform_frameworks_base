@@ -31,6 +31,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DEC
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
@@ -278,22 +279,70 @@ public class PhoneWindowManagerLayoutTest extends PhoneWindowManagerTestBase {
     }
 
     @Test
-    public void insetHint_screenDecorWindow() {
+    public void layoutHint_screenDecorWindow() {
         addDisplayCutout();
         mAppWindow.attrs.privateFlags |= PRIVATE_FLAG_IS_SCREEN_DECOR;
 
         mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
 
+        final Rect frame = new Rect();
         final Rect content = new Rect();
         final Rect stable = new Rect();
         final Rect outsets = new Rect();
         final DisplayCutout.ParcelableWrapper cutout = new DisplayCutout.ParcelableWrapper();
-        mPolicy.getInsetHintLw(mAppWindow.attrs, null /* taskBounds */, mFrames, content,
+        mPolicy.getLayoutHintLw(mAppWindow.attrs, null /* taskBounds */, mFrames, frame, content,
                 stable, outsets, cutout);
 
+        assertThat(frame, equalTo(mFrames.mUnrestricted));
         assertThat(content, equalTo(new Rect()));
         assertThat(stable, equalTo(new Rect()));
         assertThat(outsets, equalTo(new Rect()));
         assertThat(cutout.get(), equalTo(DisplayCutout.NO_CUTOUT));
+    }
+
+    @Test
+    public void layoutHint_appWindow() {
+        // Initialize DisplayFrames
+        mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+
+        final Rect outFrame = new Rect();
+        final Rect outContentInsets = new Rect();
+        final Rect outStableInsets = new Rect();
+        final Rect outOutsets = new Rect();
+        final DisplayCutout.ParcelableWrapper outDisplayCutout =
+                new DisplayCutout.ParcelableWrapper();
+
+        mPolicy.getLayoutHintLw(mAppWindow.attrs, null, mFrames, outFrame, outContentInsets,
+                outStableInsets, outOutsets, outDisplayCutout);
+
+        assertThat(outFrame, is(mFrames.mUnrestricted));
+        assertThat(outContentInsets, is(new Rect(0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT)));
+        assertThat(outStableInsets, is(new Rect(0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT)));
+        assertThat(outOutsets, is(new Rect()));
+        assertThat(outDisplayCutout, is(new DisplayCutout.ParcelableWrapper()));
+    }
+
+    @Test
+    public void layoutHint_appWindowInTask() {
+        // Initialize DisplayFrames
+        mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+
+        final Rect taskBounds = new Rect(100, 100, 200, 200);
+
+        final Rect outFrame = new Rect();
+        final Rect outContentInsets = new Rect();
+        final Rect outStableInsets = new Rect();
+        final Rect outOutsets = new Rect();
+        final DisplayCutout.ParcelableWrapper outDisplayCutout =
+                new DisplayCutout.ParcelableWrapper();
+
+        mPolicy.getLayoutHintLw(mAppWindow.attrs, taskBounds, mFrames, outFrame, outContentInsets,
+                outStableInsets, outOutsets, outDisplayCutout);
+
+        assertThat(outFrame, is(taskBounds));
+        assertThat(outContentInsets, is(new Rect()));
+        assertThat(outStableInsets, is(new Rect()));
+        assertThat(outOutsets, is(new Rect()));
+        assertThat(outDisplayCutout, is(new DisplayCutout.ParcelableWrapper()));
     }
 }

@@ -753,7 +753,7 @@ public final class ViewRootImpl implements ViewParent,
                     mAttachInfo.mRecomputeGlobalAttributes = true;
                     collectViewAttributes();
                     res = mWindowSession.addToDisplay(mWindow, mSeq, mWindowAttributes,
-                            getHostVisibility(), mDisplay.getDisplayId(),
+                            getHostVisibility(), mDisplay.getDisplayId(), mWinFrame,
                             mAttachInfo.mContentInsets, mAttachInfo.mStableInsets,
                             mAttachInfo.mOutsets, mAttachInfo.mDisplayCutout, mInputChannel);
                 } catch (RemoteException e) {
@@ -1711,8 +1711,8 @@ public final class ViewRootImpl implements ViewParent,
                 desiredWindowWidth = size.x;
                 desiredWindowHeight = size.y;
             } else {
-                desiredWindowWidth = dipToPx(config.screenWidthDp);
-                desiredWindowHeight = dipToPx(config.screenHeightDp);
+                desiredWindowWidth = mWinFrame.width();
+                desiredWindowHeight = mWinFrame.height();
             }
 
             // We used to use the following condition to choose 32 bits drawing caches:
