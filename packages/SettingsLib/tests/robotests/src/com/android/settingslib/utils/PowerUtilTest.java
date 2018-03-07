@@ -21,35 +21,31 @@ import static org.mockito.Mockito.spy;
 
 import android.content.Context;
 
-import com.android.settingslib.R;
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
 
-import java.time.Clock;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RuntimeEnvironment;
 
 import java.time.Duration;
-import org.robolectric.annotation.Config;
-import org.robolectric.shadows.ShadowSettings.ShadowSystem;
-import org.robolectric.shadows.ShadowSystemClock;
+import java.util.regex.Pattern;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
 public class PowerUtilTest {
     public static final String TEST_BATTERY_LEVEL_10 = "10%";
-    public static final String FIFTEEN_MIN_FORMATTED = "15m";
     public static final long SEVENTEEN_MIN_MILLIS = Duration.ofMinutes(17).toMillis();
     public static final long FIVE_MINUTES_MILLIS = Duration.ofMinutes(5).toMillis();
     public static final long TEN_MINUTES_MILLIS = Duration.ofMinutes(10).toMillis();
     public static final long THREE_DAYS_MILLIS = Duration.ofDays(3).toMillis();
     public static final long THIRTY_HOURS_MILLIS = Duration.ofHours(30).toMillis();
-    public static final String TWO_DAYS_FORMATTED = "2 days";
-    public static final String THIRTY_HOURS_FORMATTED = "1d 6h";
     public static final String NORMAL_CASE_EXPECTED_PREFIX = "Will last until about";
-    public static final String ENHANCED_SUFFIX = "based on your usage";
+    public static final String ENHANCED_SUFFIX = " based on your usage";
+    // matches a time (ex: '1:15 PM', '2 AM')
+    public static final String TIME_OF_DAY_REGEX = " (\\d)+:?(\\d)* (AM)|(PM)";
+    // matches a percentage with parenthesis (ex: '(10%)')
+    public static final String PERCENTAGE_REGEX = " \\(\\d?\\d%\\)";
 
     private Context mContext;
 
@@ -60,7 +56,6 @@ public class PowerUtilTest {
     }
 
     @Test
-    @Config(shadows = {ShadowSystemClock.class})
     public void testGetBatteryRemainingStringFormatted_moreThanFifteenMinutes_withPercentage() {
         String info = PowerUtil.getBatteryRemainingStringFormatted(mContext,
                 SEVENTEEN_MIN_MILLIS,
@@ -72,13 +67,18 @@ public class PowerUtilTest {
                 false /* basedOnUsage */);
 
         // We only add special mention for the long string
-        assertThat(info).contains(NORMAL_CASE_EXPECTED_PREFIX);
-        assertThat(info).contains(ENHANCED_SUFFIX);
-        assertThat(info).contains("%");
+        // ex: Will last about 1:15 PM based on your usage (10%)
+        assertThat(info).containsMatch(Pattern.compile(
+                NORMAL_CASE_EXPECTED_PREFIX
+                        + TIME_OF_DAY_REGEX
+                        + ENHANCED_SUFFIX
+                        + PERCENTAGE_REGEX));
         // shortened string should not have extra text
-        assertThat(info2).contains(NORMAL_CASE_EXPECTED_PREFIX);
-        assertThat(info2).doesNotContain(ENHANCED_SUFFIX);
-        assertThat(info2).contains("%");
+        // ex: Will last about 1:15 PM (10%)
+        assertThat(info2).containsMatch(Pattern.compile(
+                NORMAL_CASE_EXPECTED_PREFIX
+                        + TIME_OF_DAY_REGEX
+                        + PERCENTAGE_REGEX));
     }
 
     @Test
@@ -93,13 +93,18 @@ public class PowerUtilTest {
                 false /* basedOnUsage */);
 
         // We only have % when it is provided
-        assertThat(info).contains(NORMAL_CASE_EXPECTED_PREFIX);
-        assertThat(info).contains(ENHANCED_SUFFIX);
-        assertThat(info).doesNotContain("%");
+        // ex: Will last about 1:15 PM based on your usage
+        assertThat(info).containsMatch(Pattern.compile(
+                NORMAL_CASE_EXPECTED_PREFIX
+                        + TIME_OF_DAY_REGEX
+                        + ENHANCED_SUFFIX
+                        + "(" + PERCENTAGE_REGEX + "){0}")); // no percentage
         // shortened string should not have extra text
-        assertThat(info2).contains(NORMAL_CASE_EXPECTED_PREFIX);
-        assertThat(info2).doesNotContain(ENHANCED_SUFFIX);
-        assertThat(info2).doesNotContain("%");
+        // ex: Will last about 1:15 PM
+        assertThat(info2).containsMatch(Pattern.compile(
+                NORMAL_CASE_EXPECTED_PREFIX
+                        + TIME_OF_DAY_REGEX
+                        + "(" + PERCENTAGE_REGEX + "){0}")); // no percentage
     }
 
 
