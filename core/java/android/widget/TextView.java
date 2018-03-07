@@ -4141,6 +4141,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public void setTextMetricsParams(@NonNull PrecomputedText.Params params) {
         mTextPaint.set(params.getTextPaint());
+        mUserSetTextScaleX = true;
         mTextDir = params.getTextDirection();
         mBreakStrategy = params.getBreakStrategy();
         mHyphenationFrequency = params.getHyphenationFrequency();
@@ -5528,9 +5529,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * {@link android.text.Editable.Factory} to create final or intermediate
      * {@link Editable Editables}.
      *
+     * If the passed text is a {@link PrecomputedText} but the parameters used to create the
+     * PrecomputedText mismatches with this TextView, IllegalArgumentException is thrown. To ensure
+     * the parameters match, you can call {@link TextView#setTextMetricsParams} before calling this.
+     *
      * @param text text to be displayed
      *
      * @attr ref android.R.styleable#TextView_text
+     * @throws IllegalArgumentException if the passed text is a {@link PrecomputedText} but the
+     *                                  parameters used to create the PrecomputedText mismatches
+     *                                  with this TextView.
      */
     @android.view.RemotableViewMethod
     public final void setText(CharSequence text) {
@@ -5644,7 +5652,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (imm != null) imm.restartInput(this);
         } else if (type == BufferType.SPANNABLE || mMovement != null) {
             text = mSpannableFactory.newSpannable(text);
-        } else if (!(text instanceof PrecomputedText || text instanceof CharWrapper)) {
+        } else if (text instanceof PrecomputedText) {
+            PrecomputedText precomputed = (PrecomputedText) text;
+            if (mTextDir == null) {
+                mTextDir = getTextDirectionHeuristic();
+            }
+            if (!precomputed.getParams().isSameTextMetricsInternal(
+                    getPaint(), mTextDir, mBreakStrategy, mHyphenationFrequency)) {
+                throw new IllegalArgumentException(
+                        "PrecomputedText's Parameters don't match the parameters of this TextView."
+                        + "Consider using setTextMetricsParams(precomputedText.getParams()) "
+                        + "to override the settings of this TextView: "
+                        + "PrecomputedText: " + precomputed.getParams()
+                        + "TextView: " + getTextMetricsParams());
+            }
+        } else if (!(text instanceof CharWrapper)) {
             text = TextUtils.stringOrSpannedString(text);
         }
 
