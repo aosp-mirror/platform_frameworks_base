@@ -213,6 +213,12 @@ static void AnimatedImageDrawable_nMarkInvisible(JNIEnv* env, jobject /*clazz*/,
     drawable->markInvisible();
 }
 
+static void AnimatedImageDrawable_nSetMirrored(JNIEnv* env, jobject /*clazz*/, jlong nativePtr,
+                                               jboolean mirrored) {
+    auto* drawable = reinterpret_cast<AnimatedImageDrawable*>(nativePtr);
+    drawable->setStagingMirrored(mirrored);
+}
+
 static const JNINativeMethod gAnimatedImageDrawableMethods[] = {
     { "nCreate",             "(JLandroid/graphics/ImageDecoder;IILandroid/graphics/Rect;)J", (void*) AnimatedImageDrawable_nCreate },
     { "nGetNativeFinalizer", "()J",                                                          (void*) AnimatedImageDrawable_nGetNativeFinalizer },
@@ -228,6 +234,7 @@ static const JNINativeMethod gAnimatedImageDrawableMethods[] = {
     { "nSetOnAnimationEndListener", "(JLandroid/graphics/drawable/AnimatedImageDrawable;)V", (void*) AnimatedImageDrawable_nSetOnAnimationEndListener },
     { "nNativeByteSize",     "(J)J",                                                         (void*) AnimatedImageDrawable_nNativeByteSize },
     { "nMarkInvisible",      "(J)V",                                                         (void*) AnimatedImageDrawable_nMarkInvisible },
+    { "nSetMirrored",        "(JZ)V",                                                        (void*) AnimatedImageDrawable_nSetMirrored },
 };
 
 int register_android_graphics_drawable_AnimatedImageDrawable(JNIEnv* env) {
