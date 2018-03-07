@@ -590,21 +590,21 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_VIRTUAL_PRELOAD = 1 << 16;
 
     /**
-     * Value for {@linl #privateFlags}: whether this app is pre-installed on the
+     * Value for {@link #privateFlags}: whether this app is pre-installed on the
      * OEM partition of the system image.
      * @hide
      */
     public static final int PRIVATE_FLAG_OEM = 1 << 17;
 
     /**
-     * Value for {@linl #privateFlags}: whether this app is pre-installed on the
+     * Value for {@link #privateFlags}: whether this app is pre-installed on the
      * vendor partition of the system image.
      * @hide
      */
     public static final int PRIVATE_FLAG_VENDOR = 1 << 18;
 
     /**
-     * Value for {@linl #privateFlags}: whether this app is pre-installed on the
+     * Value for {@link #privateFlags}: whether this app is pre-installed on the
      * product partition of the system image.
      * @hide
      */
