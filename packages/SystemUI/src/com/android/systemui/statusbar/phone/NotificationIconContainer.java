@@ -525,7 +525,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             return 0;
         }
 
-        int partialOverflowAmount = (MAX_DOTS - mNumDots) * (mStaticDotRadius * 2 + mDotPadding);
+        int partialOverflowAmount = (MAX_DOTS - mNumDots) * (mStaticDotDiameter + mDotPadding);
 
         int adjustedWidth = getFinalTranslationX() + partialOverflowAmount;
         // In case we actually give too much padding...
@@ -542,7 +542,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             return 0;
         }
 
-        int collapsedPadding = (int) ((1.0f + OVERFLOW_EARLY_AMOUNT) * getIconSize());
+        int collapsedPadding = mIconSize + 2 * (mStaticDotDiameter + mDotPadding);
 
         if (collapsedPadding + getFinalTranslationX() > getWidth()) {
             collapsedPadding = getWidth() - getFinalTranslationX();
