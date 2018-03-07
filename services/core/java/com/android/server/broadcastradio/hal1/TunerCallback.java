@@ -47,6 +47,7 @@ class TunerCallback implements ITunerCallback {
     @NonNull private final ITunerCallback mClientCallback;
 
     private final AtomicReference<ProgramList.Filter> mProgramListFilter = new AtomicReference<>();
+    private boolean mInitialConfigurationDone = false;
 
     TunerCallback(@NonNull Tuner tuner, @NonNull ITunerCallback clientCallback, int halRev) {
         mTuner = tuner;
@@ -95,6 +96,10 @@ class TunerCallback implements ITunerCallback {
         mProgramListFilter.set(null);
     }
 
+    boolean isInitialConfigurationDone() {
+        return mInitialConfigurationDone;
+    }
+
     @Override
     public void onError(int status) {
         dispatch(() -> mClientCallback.onError(status));
@@ -107,6 +112,7 @@ class TunerCallback implements ITunerCallback {
 
     @Override
     public void onConfigurationChanged(RadioManager.BandConfig config) {
+        mInitialConfigurationDone = true;
         dispatch(() -> mClientCallback.onConfigurationChanged(config));
     }
 
