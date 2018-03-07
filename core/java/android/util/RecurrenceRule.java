@@ -99,6 +99,7 @@ public class RecurrenceRule implements Parcelable {
                 start = convertZonedDateTime(BackupUtils.readString(in));
                 end = convertZonedDateTime(BackupUtils.readString(in));
                 period = convertPeriod(BackupUtils.readString(in));
+                break;
             default:
                 throw new ProtocolException("Unknown version " + version);
         }
