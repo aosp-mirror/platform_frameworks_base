@@ -485,4 +485,10 @@
     <!-- Smart replies in notifications: Maximum number of times SmartReplyView will try to find a
          better (narrower) line-break for a double-line smart reply button. -->
     <integer name="config_smart_replies_in_notifications_max_squeeze_remeasure_attempts">3</integer>
+
+    <!-- Screenshot editing default activity.  Must handle ACTION_EDIT image/png intents.
+         Blank sends the user to the Chooser first.
+         This name is in the ComponentName flattened format (package/class)  -->
+    <string name="config_screenshotEditor" translatable="false"></string>
+
 </resources>

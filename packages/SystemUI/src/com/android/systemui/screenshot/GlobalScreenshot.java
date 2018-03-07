@@ -32,6 +32,7 @@ import android.app.Notification.BigPictureStyle;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -57,6 +58,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -321,6 +323,17 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                     R.drawable.ic_screenshot_edit,
                     r.getString(com.android.internal.R.string.screenshot_edit), editAction);
             mNotificationBuilder.addAction(editActionBuilder.build());
+
+
+            // Create a delete action for the notification
+            PendingIntent deleteAction = PendingIntent.getBroadcast(context, 0,
+                    new Intent(context, GlobalScreenshot.DeleteScreenshotReceiver.class)
+                            .putExtra(GlobalScreenshot.SCREENSHOT_URI_ID, uri.toString()),
+                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT);
+            Notification.Action.Builder deleteActionBuilder = new Notification.Action.Builder(
+                    R.drawable.ic_screenshot_delete,
+                    r.getString(com.android.internal.R.string.delete), deleteAction);
+            mNotificationBuilder.addAction(deleteActionBuilder.build());
 
             mParams.imageUri = uri;
             mParams.image = null;
@@ -895,17 +908,29 @@ class GlobalScreenshot {
             } catch (RemoteException e) {
             }
 
-            Intent sharingIntent = intent.getParcelableExtra(SHARING_INTENT);
-            PendingIntent chooseAction = PendingIntent.getBroadcast(context, 0,
-                    new Intent(context, GlobalScreenshot.TargetChosenReceiver.class),
-                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT);
-            Intent chooserIntent = Intent.createChooser(sharingIntent, null,
-                    chooseAction.getIntentSender())
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            Intent actionIntent = intent.getParcelableExtra(SHARING_INTENT);
+
+            // If this is an edit & default editor exists, route straight there.
+            String editorPackage = context.getResources().getString(R.string.config_screenshotEditor);
+            if (actionIntent.getAction() == Intent.ACTION_EDIT &&
+                    editorPackage != null && editorPackage.length() > 0) {
+                actionIntent.setComponent(ComponentName.unflattenFromString(editorPackage));
+                final NotificationManager nm =
+                        (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                nm.cancel(SystemMessage.NOTE_GLOBAL_SCREENSHOT);
+            } else {
+                PendingIntent chooseAction = PendingIntent.getBroadcast(context, 0,
+                        new Intent(context, GlobalScreenshot.TargetChosenReceiver.class),
+                        PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT);
+                actionIntent = Intent.createChooser(actionIntent, null,
+                        chooseAction.getIntentSender())
+                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            }
 
             ActivityOptions opts = ActivityOptions.makeBasic();
             opts.setDisallowEnterPictureInPictureWhileLaunching(true);
-            context.startActivityAsUser(chooserIntent, opts.toBundle(), UserHandle.CURRENT);
+
+            context.startActivityAsUser(actionIntent, opts.toBundle(), UserHandle.CURRENT);
         }
     }
 
