@@ -10375,6 +10375,17 @@ public final class Settings {
         public static final String SYS_UIDCPUPOWER = "sys_uidcpupower";
 
         /**
+        * traced global setting. This controls weather the deamons: traced and
+        * traced_probes run. This links the sys.traced system property.
+        * The following values are supported:
+        * 0 -> traced and traced_probes are disabled
+        * 1 -> traced and traced_probes are enabled
+        * Any other value defaults to disabled.
+        * @hide
+        */
+        public static final String SYS_TRACED = "sys_traced";
+
+        /**
          * An integer to reduce the FPS by this factor. Only for experiments. Need to reboot the
          * device for this setting to take full effect.
          *
