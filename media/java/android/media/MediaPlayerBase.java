@@ -278,7 +278,7 @@ public abstract class MediaPlayerBase implements AutoCloseable {
      */
     public static abstract class PlayerEventCallback {
         /**
-         * Called when the player's curretn data source has changed.
+         * Called when the player's current data source has changed.
          * @param mpb the player whose data source changed.
          * @param dsd the new current data source.
          */
