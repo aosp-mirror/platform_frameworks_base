@@ -369,6 +369,17 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testOverlayPredicate() {
+        StatusBarNotification sbn_user1_app1 = makeMockSBN(USERID_ONE, "com.example.app1",
+                5000, "monkeys", Notification.FLAG_AUTO_CANCEL);
+        StatusBarNotification sbn_user1_overlay = makeMockSBN(USERID_ONE, "android",
+                0, "AlertWindowNotification", Notification.FLAG_NO_CLEAR);
+
+        assertTrue(fsc.isSystemAlertNotification(sbn_user1_overlay));
+        assertFalse(fsc.isSystemAlertNotification(sbn_user1_app1));
+    }
+
+    @Test
     public void testStdLayoutBasic() {
         final String PKG1 = "com.example.app0";
 
@@ -439,7 +450,7 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
         when(sbn.getNotification()).thenReturn(n);
         when(sbn.getId()).thenReturn(id);
         when(sbn.getPackageName()).thenReturn(pkg);
-        when(sbn.getTag()).thenReturn(null);
+        when(sbn.getTag()).thenReturn(tag);
         when(sbn.getUserId()).thenReturn(userid);
         when(sbn.getUser()).thenReturn(new UserHandle(userid));
         when(sbn.getKey()).thenReturn("MOCK:"+userid+"|"+pkg+"|"+id+"|"+tag);
