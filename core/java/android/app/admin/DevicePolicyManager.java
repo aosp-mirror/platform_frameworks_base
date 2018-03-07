@@ -3734,8 +3734,10 @@ public class DevicePolicyManager {
     public static final int KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS = 1 << 3;
 
     /**
-     * Ignore trust agent state on secure keyguard screens
-     * (e.g. PIN/Pattern/Password).
+     * Disable trust agents on secure keyguard screens (e.g. PIN/Pattern/Password).
+     * By setting this flag alone, all trust agents are disabled. If the admin then wants to
+     * whitelist specific features of some trust agent, {@link #setTrustAgentConfiguration} can be
+     * used in conjuction to set trust-agent-specific configurations.
      */
     public static final int KEYGUARD_DISABLE_TRUST_AGENTS = 1 << 4;
 
@@ -5796,10 +5798,19 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Sets a list of configuration features to enable for a TrustAgent component. This is meant to
+     * Sets a list of configuration features to enable for a trust agent component. This is meant to
      * be used in conjunction with {@link #KEYGUARD_DISABLE_TRUST_AGENTS}, which disables all trust
      * agents but those enabled by this function call. If flag
      * {@link #KEYGUARD_DISABLE_TRUST_AGENTS} is not set, then this call has no effect.
+     * <p>
+     * For any specific trust agent, whether it is disabled or not depends on the aggregated state
+     * of each admin's {@link #KEYGUARD_DISABLE_TRUST_AGENTS} setting and its trust agent
+     * configuration as set by this function call. In particular: if any admin sets
+     * {@link #KEYGUARD_DISABLE_TRUST_AGENTS} and does not additionally set any
+     * trust agent configuration, the trust agent is disabled completely. Otherwise, the trust agent
+     * will receive the list of configurations from all admins who set
+     * {@link #KEYGUARD_DISABLE_TRUST_AGENTS} and aggregate the configurations to determine its
+     * behavior. The exact meaning of aggregation is trust-agent-specific.
      * <p>
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_DISABLE_KEYGUARD_FEATURES} to be able to call this method;
@@ -5810,17 +5821,10 @@ public class DevicePolicyManager {
      * the parent profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param target Component name of the agent to be enabled.
-     * @param configuration TrustAgent-specific feature bundle. If null for any admin, agent will be
-     *            strictly disabled according to the state of the
-     *            {@link #KEYGUARD_DISABLE_TRUST_AGENTS} flag.
-     *            <p>
-     *            If {@link #KEYGUARD_DISABLE_TRUST_AGENTS} is set and options is not null for all
-     *            admins, then it's up to the TrustAgent itself to aggregate the values from all
-     *            device admins.
-     *            <p>
-     *            Consult documentation for the specific TrustAgent to determine legal options
-     *            parameters.
+     * @param target Component name of the agent to be configured.
+     * @param configuration Trust-agent-specific feature configuration bundle. Please consult
+     *        documentation of the specific trust agent to determine the interpretation of this
+     *        bundle.
      * @throws SecurityException if {@code admin} is not an active administrator or does not use
      *             {@link DeviceAdminInfo#USES_POLICY_DISABLE_KEYGUARD_FEATURES}
      */
