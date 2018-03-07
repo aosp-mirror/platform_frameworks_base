@@ -879,42 +879,76 @@ public final class Call {
         /**
          * @hide
          */
-        @IntDef({HANDOVER_FAILURE_DEST_APP_REJECTED, HANDOVER_FAILURE_DEST_NOT_SUPPORTED,
-                HANDOVER_FAILURE_DEST_INVALID_PERM, HANDOVER_FAILURE_DEST_USER_REJECTED,
-                HANDOVER_FAILURE_ONGOING_EMERG_CALL})
+        @IntDef(prefix = { "HANDOVER_" },
+                value = {HANDOVER_FAILURE_DEST_APP_REJECTED, HANDOVER_FAILURE_NOT_SUPPORTED,
+                HANDOVER_FAILURE_USER_REJECTED, HANDOVER_FAILURE_ONGOING_EMERG_CALL,
+                HANDOVER_FAILURE_UNKNOWN})
         @Retention(RetentionPolicy.SOURCE)
         public @interface HandoverFailureErrors {}
 
         /**
          * Handover failure reason returned via {@link #onHandoverFailed(Call, int)} when the app
-         * to handover the call rejects handover.
+         * to handover the call to rejects the handover request.
+         * <p>
+         * Will be returned when {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} is called
+         * and the destination {@link PhoneAccountHandle}'s {@link ConnectionService} returns a
+         * {@code null} {@link Connection} from
+         * {@link ConnectionService#onCreateOutgoingHandoverConnection(PhoneAccountHandle,
+         * ConnectionRequest)}.
+         * <p>
+         * For more information on call handovers, see
+         * {@link #handoverTo(PhoneAccountHandle, int, Bundle)}.
          */
         public static final int HANDOVER_FAILURE_DEST_APP_REJECTED = 1;
 
         /**
-         * Handover failure reason returned via {@link #onHandoverFailed(Call, int)} when there is
-         * an error associated with unsupported handover.
+         * Handover failure reason returned via {@link #onHandoverFailed(Call, int)} when a handover
+         * is initiated but the source or destination app does not support handover.
+         * <p>
+         * Will be returned when a handover is requested via
+         * {@link #handoverTo(PhoneAccountHandle, int, Bundle)} and the destination
+         * {@link PhoneAccountHandle} does not declare
+         * {@link PhoneAccount#EXTRA_SUPPORTS_HANDOVER_TO}.  May also be returned when a handover is
+         * requested at the {@link PhoneAccountHandle} for the current call (i.e. the source call's
+         * {@link Details#getAccountHandle()}) does not declare
+         * {@link PhoneAccount#EXTRA_SUPPORTS_HANDOVER_FROM}.
+         * <p>
+         * For more information on call handovers, see
+         * {@link #handoverTo(PhoneAccountHandle, int, Bundle)}.
          */
-        public static final int HANDOVER_FAILURE_DEST_NOT_SUPPORTED = 2;
+        public static final int HANDOVER_FAILURE_NOT_SUPPORTED = 2;
 
         /**
-         * Handover failure reason returned via {@link #onHandoverFailed(Call, int)} when there
-         * are some permission errors associated with APIs doing handover.
+         * Handover failure reason returned via {@link #onHandoverFailed(Call, int)} when the remote
+         * user rejects the handover request.
+         * <p>
+         * For more information on call handovers, see
+         * {@link #handoverTo(PhoneAccountHandle, int, Bundle)}.
          */
-        public static final int HANDOVER_FAILURE_DEST_INVALID_PERM = 3;
-
-        /**
-         * Handover failure reason returned via {@link #onHandoverFailed(Call, int)} when user
-         * rejects handover.
-         */
-        public static final int HANDOVER_FAILURE_DEST_USER_REJECTED = 4;
+        public static final int HANDOVER_FAILURE_USER_REJECTED = 3;
 
         /**
          * Handover failure reason returned via {@link #onHandoverFailed(Call, int)} when there
          * is ongoing emergency call.
+         * <p>
+         * This error code is returned when {@link #handoverTo(PhoneAccountHandle, int, Bundle)} is
+         * called on an emergency call, or if any other call is an emergency call.
+         * <p>
+         * Handovers are not permitted while there are ongoing emergency calls.
+         * <p>
+         * For more information on call handovers, see
+         * {@link #handoverTo(PhoneAccountHandle, int, Bundle)}.
          */
-        public static final int HANDOVER_FAILURE_ONGOING_EMERG_CALL = 5;
+        public static final int HANDOVER_FAILURE_ONGOING_EMERG_CALL = 4;
 
+        /**
+         * Handover failure reason returned via {@link #onHandoverFailed(Call, int)} when a handover
+         * fails for an unknown reason.
+         * <p>
+         * For more information on call handovers, see
+         * {@link #handoverTo(PhoneAccountHandle, int, Bundle)}.
+         */
+        public static final int HANDOVER_FAILURE_UNKNOWN = 5;
 
         /**
          * Invoked when the state of this {@code Call} has changed. See {@link #getState()}.
@@ -1055,6 +1089,10 @@ public final class Call {
         /**
          * Invoked when Call handover from one {@link PhoneAccount} to other {@link PhoneAccount}
          * has completed successfully.
+         * <p>
+         * For a full discussion of the handover process and the APIs involved, see
+         * {@link android.telecom.Call#handoverTo(PhoneAccountHandle, int, Bundle)}.
+         *
          * @param call The call which had initiated handover.
          */
         public void onHandoverComplete(Call call) {}
@@ -1062,8 +1100,12 @@ public final class Call {
         /**
          * Invoked when Call handover from one {@link PhoneAccount} to other {@link PhoneAccount}
          * has failed.
+         * <p>
+         * For a full discussion of the handover process and the APIs involved, see
+         * {@link android.telecom.Call#handoverTo(PhoneAccountHandle, int, Bundle)}.
+         *
          * @param call The call which had initiated handover.
-         * @param failureReason Error reason for failure
+         * @param failureReason Error reason for failure.
          */
         public void onHandoverFailed(Call call, @HandoverFailureErrors int failureReason) {}
     }
@@ -1260,7 +1302,7 @@ public final class Call {
      * Instructs this {@link #STATE_RINGING} {@code Call} to answer.
      * @param videoState The video state in which to answer the call.
      */
-    public void answer(int videoState) {
+    public void answer(@VideoProfile.VideoState int videoState) {
         mInCallAdapter.answerCall(mTelecomCallId, videoState);
     }
 
@@ -1474,16 +1516,65 @@ public final class Call {
      * by {@code toHandle}.  The videoState specified indicates the desired video state after the
      * handover.
      * <p>
-     * A handover request is initiated by the user from one app to indicate a desire
-     * to handover a call to another.
+     * A call handover is the process where an ongoing call is transferred from one app (i.e.
+     * {@link ConnectionService} to another app.  The user could, for example, choose to continue a
+     * mobile network call in a video calling app.  The mobile network call via the Telephony stack
+     * is referred to as the source of the handover, and the video calling app is referred to as the
+     * destination.
+     * <p>
+     * When considering a handover scenario the device this method is called on is considered the
+     * <em>initiating</em> device (since the user initiates the handover from this device), and the
+     * other device is considered the <em>receiving</em> device.
+     * <p>
+     * When this method is called on the <em>initiating</em> device, the Telecom framework will bind
+     * to the {@link ConnectionService} defined by the {@code toHandle} {@link PhoneAccountHandle}
+     * and invoke
+     * {@link ConnectionService#onCreateOutgoingHandoverConnection(PhoneAccountHandle,
+     * ConnectionRequest)} to inform the destination app that a request has been made to handover a
+     * call to it.  The app returns an instance of {@link Connection} to represent the handover call
+     * At this point the app should display UI to indicate to the user that a call
+     * handover is in process.
+     * <p>
+     * The destination app is responsible for communicating the handover request from the
+     * <em>initiating</em> device to the <em>receiving</em> device.
+     * <p>
+     * When the app on the <em>receiving</em> device receives the handover request, it calls
+     * {@link TelecomManager#acceptHandover(Uri, int, PhoneAccountHandle)} to continue the handover
+     * process from the <em>initiating</em> device to the <em>receiving</em> device.  At this point
+     * the destination app on the <em>receiving</em> device should show UI to allow the user to
+     * choose whether they want to continue their call in the destination app.
+     * <p>
+     * When the destination app on the <em>receiving</em> device calls
+     * {@link TelecomManager#acceptHandover(Uri, int, PhoneAccountHandle)}, Telecom will bind to its
+     * {@link ConnectionService} and call
+     * {@link ConnectionService#onCreateIncomingHandoverConnection(PhoneAccountHandle,
+     * ConnectionRequest)} to inform it of the handover request.  The app returns an instance of
+     * {@link Connection} to represent the handover call.
+     * <p>
+     * If the user of the <em>receiving</em> device accepts the handover, the app calls
+     * {@link Connection#setActive()} to complete the handover process; Telecom will disconnect the
+     * original call.  If the user rejects the handover, the app calls
+     * {@link Connection#setDisconnected(DisconnectCause)} and specifies a {@link DisconnectCause}
+     * of {@link DisconnectCause#CANCELED} to indicate that the handover has been cancelled.
+     * <p>
+     * Telecom will only allow handovers from {@link PhoneAccount}s which declare
+     * {@link PhoneAccount#EXTRA_SUPPORTS_HANDOVER_FROM}.  Similarly, the {@link PhoneAccount}
+     * specified by {@code toHandle} must declare {@link PhoneAccount#EXTRA_SUPPORTS_HANDOVER_TO}.
+     * <p>
+     * Errors in the handover process are reported to the {@link InCallService} via
+     * {@link Callback#onHandoverFailed(Call, int)}.  Errors in the handover process are reported to
+     * the involved {@link ConnectionService}s via
+     * {@link ConnectionService#onHandoverFailed(ConnectionRequest, int)}.
      *
      * @param toHandle {@link PhoneAccountHandle} of the {@link ConnectionService} to handover
      *                 this call to.
-     * @param videoState Indicates the video state desired after the handover.
+     * @param videoState Indicates the video state desired after the handover (see the
+     *               {@code STATE_*} constants defined in {@link VideoProfile}).
      * @param extras Bundle containing extra information to be passed to the
      *               {@link ConnectionService}
      */
-    public void handoverTo(PhoneAccountHandle toHandle, int videoState, Bundle extras) {
+    public void handoverTo(PhoneAccountHandle toHandle, @VideoProfile.VideoState int videoState,
+            Bundle extras) {
         mInCallAdapter.handoverTo(mTelecomCallId, toHandle, videoState, extras);
     }
 
