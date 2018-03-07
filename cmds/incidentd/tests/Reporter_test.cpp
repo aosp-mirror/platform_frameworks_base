@@ -191,7 +191,7 @@ TEST_F(ReporterTest, ReportMetadata) {
     reporter->batch.add(r);
 
     ASSERT_EQ(Reporter::REPORT_FINISHED, reporter->runReport(&size));
-    auto metadata = reporter->batch.metadata();
+    IncidentMetadata metadata = reporter->batch.metadata();
     EXPECT_EQ(IncidentMetadata_Destination_EXPLICIT, metadata.dest());
     EXPECT_EQ(1, metadata.request_size());
     EXPECT_TRUE(metadata.use_dropbox());

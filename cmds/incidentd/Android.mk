@@ -41,20 +41,16 @@ else
     LOCAL_CFLAGS += \
             -Os
 endif
-
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/src
 
 LOCAL_SHARED_LIBRARIES := \
         libbase \
         libbinder \
-        libcutils \
         libdebuggerd_client \
         libdumputils \
         libincident \
         liblog \
-        libprotobuf-cpp-lite \
         libprotoutil \
-        libselinux \
         libservices \
         libutils
 
@@ -122,14 +118,12 @@ LOCAL_STATIC_LIBRARIES := \
 LOCAL_SHARED_LIBRARIES := \
     libbase \
     libbinder \
-    libcutils \
     libdebuggerd_client \
     libdumputils \
     libincident \
     liblog \
     libprotobuf-cpp-lite \
     libprotoutil \
-    libselinux \
     libservices \
     libutils \
 

@@ -34,7 +34,7 @@ using namespace android::util;
  */
 class PrivacyBuffer {
 public:
-    PrivacyBuffer(const Privacy* policy, EncodedBuffer::iterator& data);
+    PrivacyBuffer(const Privacy* policy, EncodedBuffer::iterator data);
     ~PrivacyBuffer();
 
     /**
@@ -60,7 +60,7 @@ public:
 
 private:
     const Privacy* mPolicy;
-    EncodedBuffer::iterator& mData;
+    EncodedBuffer::iterator mData;
 
     ProtoOutputStream mProto;
     size_t mSize;

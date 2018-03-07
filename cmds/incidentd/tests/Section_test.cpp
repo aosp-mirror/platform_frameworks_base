@@ -48,6 +48,15 @@ class SectionTest : public Test {
 public:
     virtual void SetUp() override { ASSERT_NE(tf.fd, -1); }
 
+    void printDebugString(std::string s) {
+        fprintf(stderr, "size: %zu\n", s.length());
+        for (size_t i = 0; i < s.length(); i++) {
+            char c = s[i];
+            fprintf(stderr, "\\x%x", c);
+        }
+        fprintf(stderr, "\n");
+    }
+
 protected:
     TemporaryFile tf;
     ReportRequestSet requests;
@@ -103,14 +112,18 @@ TEST_F(SectionTest, HeaderSection) {
 
 TEST_F(SectionTest, MetadataSection) {
     MetadataSection ms;
+    const std::string testFile = kTestDataPath + "metadata.txt";
+    std::string expect;
+    ASSERT_TRUE(ReadFileToString(testFile, &expect));
 
     requests.setMainFd(STDOUT_FILENO);
+    requests.setMainDest(android::os::DEST_LOCAL);
     requests.sectionStats(1)->set_success(true);
 
     CaptureStdout();
     ASSERT_EQ(NO_ERROR, ms.Execute(&requests));
-    EXPECT_THAT(GetCapturedStdout(), StrEq("\x12\b(\x1"
-                                           "2\x4\b\x1\x10\x1"));
+    // Notice message_lite.h ParseFromString doesn't work so we just match the bytes directly.
+    EXPECT_THAT(GetCapturedStdout(), StrEq(expect));
 }
 
 TEST_F(SectionTest, FileSection) {
