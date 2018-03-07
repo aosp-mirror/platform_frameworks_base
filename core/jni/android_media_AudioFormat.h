@@ -78,7 +78,7 @@ static inline audio_format_t audioFormatToNative(int audioFormat)
     case ENCODING_AAC_ELD:
         return AUDIO_FORMAT_AAC_ELD;
     case ENCODING_AAC_XHE:
-        return AUDIO_FORMAT_AAC; // FIXME temporary value, needs addition of xHE-AAC
+        return AUDIO_FORMAT_AAC_XHE;
     case ENCODING_AC4:
         return AUDIO_FORMAT_AC4;
     // case ENCODING_E_AC3_JOC:  // FIXME Not defined on the native side yet
