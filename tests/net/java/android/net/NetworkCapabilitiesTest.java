@@ -324,28 +324,26 @@ public class NetworkCapabilitiesTest {
 
     @Test
     public void testEqualsNetCapabilities() {
-        int CAPABILITY = NET_CAPABILITY_MMS;  // An arbitrary not mutable capability.
-
         NetworkCapabilities nc1 = new NetworkCapabilities();
         NetworkCapabilities nc2 = new NetworkCapabilities();
         assertTrue(nc1.equalsNetCapabilities(nc2));
         assertEquals(nc1, nc2);
 
-        nc1.addCapability(CAPABILITY);
+        nc1.addCapability(NET_CAPABILITY_MMS);
         assertFalse(nc1.equalsNetCapabilities(nc2));
         assertNotEquals(nc1, nc2);
-        nc2.addCapability(CAPABILITY);
+        nc2.addCapability(NET_CAPABILITY_MMS);
         assertTrue(nc1.equalsNetCapabilities(nc2));
         assertEquals(nc1, nc2);
 
-        nc1.addUnwantedCapability(CAPABILITY);
+        nc1.addUnwantedCapability(NET_CAPABILITY_INTERNET);
         assertFalse(nc1.equalsNetCapabilities(nc2));
-        nc2.addUnwantedCapability(CAPABILITY);
+        nc2.addUnwantedCapability(NET_CAPABILITY_INTERNET);
         assertTrue(nc1.equalsNetCapabilities(nc2));
 
-        nc1.removeCapability(CAPABILITY);
+        nc1.removeCapability(NET_CAPABILITY_INTERNET);
         assertFalse(nc1.equalsNetCapabilities(nc2));
-        nc2.removeCapability(CAPABILITY);
+        nc2.removeCapability(NET_CAPABILITY_INTERNET);
         assertTrue(nc1.equalsNetCapabilities(nc2));
     }
 
