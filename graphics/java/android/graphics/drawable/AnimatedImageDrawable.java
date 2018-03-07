@@ -34,6 +34,7 @@ import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.View;
 
 import com.android.internal.R;
 
@@ -389,8 +390,22 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
     public void setAutoMirrored(boolean mirrored) {
         if (mState.mAutoMirrored != mirrored) {
             mState.mAutoMirrored = mirrored;
-            invalidateSelf();
+            if (getLayoutDirection() == View.LAYOUT_DIRECTION_RTL && mState.mNativePtr != 0) {
+                nSetMirrored(mState.mNativePtr, mirrored);
+                invalidateSelf();
+            }
         }
+    }
+
+    @Override
+    public boolean onLayoutDirectionChanged(int layoutDirection) {
+        if (!mState.mAutoMirrored || mState.mNativePtr == 0) {
+            return false;
+        }
+
+        final boolean mirror = layoutDirection == View.LAYOUT_DIRECTION_RTL;
+        nSetMirrored(mState.mNativePtr, mirror);
+        return true;
     }
 
     @Override
@@ -585,4 +600,6 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
     private static native long nNativeByteSize(long nativePtr);
     @FastNative
     private static native void nMarkInvisible(long nativePtr);
+    @FastNative
+    private static native void nSetMirrored(long nativePtr, boolean mirror);
 }
