@@ -18,6 +18,7 @@ import static android.content.ContentProvider.maybeAddUserId;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -28,7 +29,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
-import android.app.slice.ISliceListener;
 import android.app.slice.SliceSpec;
 import android.content.pm.PackageManagerInternal;
 import android.net.Uri;
@@ -71,7 +71,7 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
 
         mService = spy(new SliceManagerService(mContext, TestableLooper.get(this).getLooper()));
         mCreatedSliceState = mock(PinnedSliceState.class);
-        doReturn(mCreatedSliceState).when(mService).createPinnedSlice(eq(TEST_URI));
+        doReturn(mCreatedSliceState).when(mService).createPinnedSlice(eq(TEST_URI), anyString());
     }
 
     @After
@@ -85,7 +85,7 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
 
         mService.pinSlice("pkg", TEST_URI, EMPTY_SPECS, mToken);
         mService.pinSlice("pkg", TEST_URI, EMPTY_SPECS, mToken);
-        verify(mService, times(1)).createPinnedSlice(eq(TEST_URI));
+        verify(mService, times(1)).createPinnedSlice(eq(TEST_URI), eq("pkg"));
     }
 
     @Test
