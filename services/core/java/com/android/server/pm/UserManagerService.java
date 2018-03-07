@@ -31,6 +31,7 @@ import android.app.IActivityManager;
 import android.app.IStopUserCallback;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -71,6 +72,7 @@ import android.os.UserManager.EnforcingUser;
 import android.os.UserManagerInternal;
 import android.os.UserManagerInternal.UserRestrictionsListener;
 import android.os.storage.StorageManager;
+import android.provider.Settings;
 import android.security.GateKeeper;
 import android.service.gatekeeper.IGateKeeperService;
 import android.util.AtomicFile;
@@ -3970,6 +3972,13 @@ public class UserManagerService extends IUserManager.Stub {
                 }
                 return profileParent.id;
             }
+        }
+
+        @Override
+        public boolean isSettingRestrictedForUser(String setting, @UserIdInt int userId,
+                String value, int callingUid) {
+            return UserRestrictionsUtils.isSettingRestrictedForUser(mContext, setting, userId,
+                    value, callingUid);
         }
     }
 
