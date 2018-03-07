@@ -123,6 +123,17 @@ public class KernelUidCpuActiveTimeReader extends
         }
     }
 
+    public void readAbsolute(Callback cb) {
+        synchronized (mProcReader) {
+            readDelta(null);
+            int total = mLastUidCpuActiveTimeMs.size();
+            for (int i = 0; i < total; i ++){
+                int uid = mLastUidCpuActiveTimeMs.keyAt(i);
+                cb.onUidCpuActiveTime(uid, mLastUidCpuActiveTimeMs.get(uid).longValue());
+            }
+        }
+    }
+
     public void removeUid(int uid) {
         mLastUidCpuActiveTimeMs.delete(uid);
     }

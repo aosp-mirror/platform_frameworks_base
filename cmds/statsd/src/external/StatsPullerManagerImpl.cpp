@@ -21,10 +21,6 @@
 #include <cutils/log.h>
 #include <algorithm>
 #include <climits>
-#include "CpuTimePerUidFreqPuller.h"
-#include "CpuTimePerUidPuller.h"
-#include "KernelUidCpuActiveTimeReader.h"
-#include "KernelUidCpuClusterTimeReader.h"
 #include "ResourceHealthManagerPuller.h"
 #include "ResourceThermalManagerPuller.h"
 #include "StatsCompanionServicePuller.h"
@@ -51,27 +47,19 @@ namespace statsd {
 const std::map<int, PullAtomInfo> StatsPullerManagerImpl::kAllPullAtomInfo = {
         // wifi_bytes_transfer
         {android::util::WIFI_BYTES_TRANSFER,
-         {{2, 3, 4, 5},
-          {},
-          1,
+         {{2, 3, 4, 5}, {}, 1,
           new StatsCompanionServicePuller(android::util::WIFI_BYTES_TRANSFER)}},
         // wifi_bytes_transfer_by_fg_bg
         {android::util::WIFI_BYTES_TRANSFER_BY_FG_BG,
-         {{3, 4, 5, 6},
-          {2},
-          1,
+         {{3, 4, 5, 6}, {2}, 1,
           new StatsCompanionServicePuller(android::util::WIFI_BYTES_TRANSFER_BY_FG_BG)}},
         // mobile_bytes_transfer
         {android::util::MOBILE_BYTES_TRANSFER,
-         {{2, 3, 4, 5},
-          {},
-          1,
+         {{2, 3, 4, 5}, {}, 1,
           new StatsCompanionServicePuller(android::util::MOBILE_BYTES_TRANSFER)}},
         // mobile_bytes_transfer_by_fg_bg
         {android::util::MOBILE_BYTES_TRANSFER_BY_FG_BG,
-         {{3, 4, 5, 6},
-          {2},
-          1,
+         {{3, 4, 5, 6}, {2}, 1,
           new StatsCompanionServicePuller(android::util::MOBILE_BYTES_TRANSFER_BY_FG_BG)}},
         // bluetooth_bytes_transfer
         {android::util::BLUETOOTH_BYTES_TRANSFER,
@@ -80,14 +68,26 @@ const std::map<int, PullAtomInfo> StatsPullerManagerImpl::kAllPullAtomInfo = {
         {android::util::KERNEL_WAKELOCK,
          {{}, {}, 1, new StatsCompanionServicePuller(android::util::KERNEL_WAKELOCK)}},
         // subsystem_sleep_state
-        {android::util::SUBSYSTEM_SLEEP_STATE, {{}, {}, 1, new SubsystemSleepStatePuller()}},
+        {android::util::SUBSYSTEM_SLEEP_STATE,
+         {{}, {}, 1, new SubsystemSleepStatePuller()}},
         // cpu_time_per_freq
         {android::util::CPU_TIME_PER_FREQ,
          {{3}, {2}, 1, new StatsCompanionServicePuller(android::util::CPU_TIME_PER_FREQ)}},
         // cpu_time_per_uid
-        {android::util::CPU_TIME_PER_UID, {{2, 3}, {}, 1, new CpuTimePerUidPuller()}},
+        {android::util::CPU_TIME_PER_UID,
+         {{2, 3}, {}, 1, new StatsCompanionServicePuller(android::util::CPU_TIME_PER_UID)}},
         // cpu_time_per_uid_freq
-        {android::util::CPU_TIME_PER_UID_FREQ, {{3}, {2}, 1, new CpuTimePerUidFreqPuller()}},
+        // the throttling is 3sec, handled in frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
+        {android::util::CPU_TIME_PER_UID_FREQ,
+         {{4}, {2,3}, 0, new StatsCompanionServicePuller(android::util::CPU_TIME_PER_UID_FREQ)}},
+        // cpu_active_time
+        // the throttling is 3sec, handled in frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
+        {android::util::CPU_ACTIVE_TIME,
+         {{2}, {}, 0, new StatsCompanionServicePuller(android::util::CPU_ACTIVE_TIME)}},
+        // cpu_cluster_time
+        // the throttling is 3sec, handled in frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
+        {android::util::CPU_CLUSTER_TIME,
+         {{3}, {2}, 0, new StatsCompanionServicePuller(android::util::CPU_CLUSTER_TIME)}},
         // wifi_activity_energy_info
         {android::util::WIFI_ACTIVITY_ENERGY_INFO,
          {{}, {}, 1, new StatsCompanionServicePuller(android::util::WIFI_ACTIVITY_ENERGY_INFO)}},
@@ -103,10 +103,6 @@ const std::map<int, PullAtomInfo> StatsPullerManagerImpl::kAllPullAtomInfo = {
         // system_uptime
         {android::util::SYSTEM_UPTIME,
          {{}, {}, 1, new StatsCompanionServicePuller(android::util::SYSTEM_UPTIME)}},
-        // cpu_active_time
-        {android::util::CPU_ACTIVE_TIME, {{3}, {2}, 1, new KernelUidCpuActiveTimeReader()}},
-        // cpu_cluster_time
-        {android::util::CPU_CLUSTER_TIME, {{3}, {2}, 1, new KernelUidCpuClusterTimeReader()}},
         // disk_space
         {android::util::DISK_SPACE,
          {{}, {}, 1, new StatsCompanionServicePuller(android::util::DISK_SPACE)}},
@@ -118,7 +114,10 @@ const std::map<int, PullAtomInfo> StatsPullerManagerImpl::kAllPullAtomInfo = {
          {{}, {}, 1, new ResourceHealthManagerPuller(android::util::FULL_BATTERY_CAPACITY)}},
         // process_memory_state
         {android::util::PROCESS_MEMORY_STATE,
-         {{4,5,6,7,8}, {2,3}, 0, new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_STATE)}},
+         {{4,5,6,7,8},
+          {2,3},
+          0,
+          new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_STATE)}},
         // temperature
         {android::util::TEMPERATURE, {{}, {}, 1, new ResourceThermalManagerPuller()}}};
 

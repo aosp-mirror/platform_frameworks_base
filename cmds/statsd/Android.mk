@@ -40,10 +40,6 @@ statsd_common_src := \
     src/external/SubsystemSleepStatePuller.cpp \
     src/external/ResourceHealthManagerPuller.cpp \
     src/external/ResourceThermalManagerPuller.cpp \
-    src/external/CpuTimePerUidPuller.cpp \
-    src/external/CpuTimePerUidFreqPuller.cpp \
-    src/external/KernelUidCpuActiveTimeReader.cpp \
-    src/external/KernelUidCpuClusterTimeReader.cpp \
     src/external/StatsPullerManagerImpl.cpp \
     src/external/puller_util.cpp \
     src/logd/LogEvent.cpp \
