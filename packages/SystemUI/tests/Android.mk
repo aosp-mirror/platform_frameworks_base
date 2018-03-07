@@ -26,6 +26,7 @@ LOCAL_PROTOC_FLAGS := -I$(LOCAL_PATH)/..
 LOCAL_PROTO_JAVA_OUTPUT_PARAMS := optional_field_style=accessors
 
 LOCAL_PACKAGE_NAME := SystemUITests
+LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_COMPATIBILITY_SUITE := device-tests
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src) \
