@@ -648,6 +648,9 @@ public final class SelectionActionModeHelper {
      * Part selection of a word e.g. "or" is counted as selecting the
      * entire word i.e. equivalent to "York", and each special character is counted as a word, e.g.
      * "," is at [2, 3). Whitespaces are ignored.
+     *
+     * NOTE that the definition of a word is defined by the TextClassifier's Logger's token
+     * iterator.
      */
     private static final class SelectionMetricsLogger {
 

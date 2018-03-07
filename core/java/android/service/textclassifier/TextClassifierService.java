@@ -33,6 +33,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.Slog;
+import android.view.textclassifier.SelectionEvent;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassifier;
 import android.view.textclassifier.TextLinks;
@@ -170,6 +171,12 @@ public abstract class TextClassifierService extends Service {
                         }
                     });
         }
+
+        /** {@inheritDoc} */
+        @Override
+        public void onSelectionEvent(SelectionEvent event) throws RemoteException {
+            TextClassifierService.this.onSelectionEvent(event);
+        }
     };
 
     @Nullable
@@ -235,6 +242,15 @@ public abstract class TextClassifierService extends Service {
             @Nullable TextLinks.Options options,
             @NonNull CancellationSignal cancellationSignal,
             @NonNull Callback<TextLinks> callback);
+
+    /**
+     * Writes the selection event.
+     * This is called when a selection event occurs. e.g. user changed selection; or smart selection
+     * happened.
+     *
+     * <p>The default implementation ignores the event.
+     */
+    public void onSelectionEvent(@NonNull SelectionEvent event) {}
 
     /**
      * Callbacks for TextClassifierService results.
