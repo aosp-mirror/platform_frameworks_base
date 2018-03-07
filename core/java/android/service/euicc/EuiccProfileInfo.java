@@ -441,7 +441,7 @@ public final class EuiccProfileInfo implements Parcelable {
                 + ", state="
                 + mState
                 + ", CarrierIdentifier="
-                + mCarrierIdentifier.toString()
+                + mCarrierIdentifier
                 + ", policyRules="
                 + mPolicyRules
                 + ", accessRules="
