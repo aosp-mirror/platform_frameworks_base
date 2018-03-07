@@ -3294,4 +3294,6 @@
   <java-symbol type="string" name="zen_upgrade_notification_title" />
   <java-symbol type="string" name="zen_upgrade_notification_content" />
 
+  <java-symbol type="string" name="config_managed_provisioning_package" />
+
 </resources>
