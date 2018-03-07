@@ -160,6 +160,7 @@ import com.android.internal.os.IDropBoxManagerService;
 import com.android.internal.policy.PhoneLayoutInflater;
 
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Manages all of the system services that can be returned by {@link Context#getSystemService}.
@@ -992,6 +993,10 @@ final class SystemServiceRegistry {
         return new Object[sServiceCacheSize];
     }
 
+    public static AtomicInteger[] createServiceInitializationStateArray() {
+        return new AtomicInteger[sServiceCacheSize];
+    }
+
     /**
      * Gets a system service from a given context.
      */
@@ -1040,19 +1045,95 @@ final class SystemServiceRegistry {
         @SuppressWarnings("unchecked")
         public final T getService(ContextImpl ctx) {
             final Object[] cache = ctx.mServiceCache;
+
+            // Fast path. If it's already cached, just return it.
+            Object service = cache[mCacheIndex];
+            if (service != null) {
+                return (T) service;
+            }
+
+            // Slow path.
+            final AtomicInteger[] gates = ctx.mServiceInitializationStateArray;
+            final AtomicInteger gate;
+
             synchronized (cache) {
-                // Fetch or create the service.
-                Object service = cache[mCacheIndex];
-                if (service == null) {
+                // See if it's cached or not again, with the lock held this time.
+                service = cache[mCacheIndex];
+                if (service != null) {
+                    return (T) service;
+                }
+
+                // Not initialized yet. Create an atomic boolean to control which thread should
+                // instantiate the service.
+                if (gates[mCacheIndex] != null) {
+                    gate = gates[mCacheIndex];
+                } else {
+                    gate = new AtomicInteger(ContextImpl.STATE_UNINITIALIZED);
+                    gates[mCacheIndex] = gate;
+                }
+            }
+
+            // Not cached yet.
+            //
+            // Note multiple threads can reach here for the same service on the same context
+            // concurrently.
+            //
+            // Now we're going to instantiate the service, but do so without the cache held;
+            // otherwise it could deadlock. (b/71882178)
+            //
+            // However we still don't want to instantiate the same service multiple times, so
+            // use the atomic integer to ensure only one thread will call createService().
+
+            if (gate.compareAndSet(
+                    ContextImpl.STATE_UNINITIALIZED, ContextImpl.STATE_INITIALIZING)) {
+                try {
+                    // This thread is the first one to get here. Instantiate the service
+                    // *without* the cache lock held.
                     try {
                         service = createService(ctx);
-                        cache[mCacheIndex] = service;
+
+                        synchronized (cache) {
+                            cache[mCacheIndex] = service;
+                        }
                     } catch (ServiceNotFoundException e) {
                         onServiceNotFound(e);
                     }
+                } finally {
+                    // Tell the all other threads that the cache is ready now.
+                    // (But it's still be null in case of ServiceNotFoundException.)
+                    synchronized (gate) {
+                        gate.set(ContextImpl.STATE_READY);
+                        gate.notifyAll();
+                    }
                 }
-                return (T)service;
+                return (T) service;
             }
+            // Other threads will wait on the gate lock.
+            synchronized (gate) {
+                boolean interrupted = false;
+
+                // Note: We check whether "state == STATE_READY", not
+                // "cache[mCacheIndex] != null", because "cache[mCacheIndex] == null"
+                // is still a valid outcome in the ServiceNotFoundException case.
+                while (gate.get() != ContextImpl.STATE_READY) {
+                    try {
+                        gate.wait();
+                    } catch (InterruptedException e) {
+                        Log.w(TAG,  "getService() interrupted");
+                        interrupted = true;
+                    }
+                }
+                if (interrupted) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            // Now the first thread has initialized it.
+            // It may still be null if ServiceNotFoundException was thrown, but that shouldn't
+            // happen, so we'll just return null here in that case.
+            synchronized (cache) {
+                service = cache[mCacheIndex];
+            }
+            return (T) service;
         }
 
         public abstract T createService(ContextImpl ctx) throws ServiceNotFoundException;
