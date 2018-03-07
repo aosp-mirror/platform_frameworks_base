@@ -2237,6 +2237,22 @@ public class AssistStructure implements Parcelable {
         return mWindowNodes.get(index);
     }
 
+    // TODO(b/35708678): temporary method that disable one-way warning flag on binder.
+    /** @hide */
+    public void ensureDataForAutofill() {
+        if (mHaveData) {
+            return;
+        }
+        mHaveData = true;
+        Binder.allowBlocking(mReceiveChannel);
+        try {
+            ParcelTransferReader reader = new ParcelTransferReader(mReceiveChannel);
+            reader.go();
+        } finally {
+            Binder.defaultBlocking(mReceiveChannel);
+        }
+    }
+
     /** @hide */
     public void ensureData() {
         if (mHaveData) {
