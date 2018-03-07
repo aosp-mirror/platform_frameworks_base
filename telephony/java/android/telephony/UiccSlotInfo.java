@@ -60,6 +60,7 @@ public class UiccSlotInfo implements Parcelable {
     private final String mCardId;
     private final @CardStateInfo int mCardStateInfo;
     private final int mLogicalSlotIdx;
+    private final boolean mIsExtendedApduSupported;
 
     public static final Creator<UiccSlotInfo> CREATOR = new Creator<UiccSlotInfo>() {
         @Override
@@ -79,6 +80,7 @@ public class UiccSlotInfo implements Parcelable {
         mCardId = in.readString();
         mCardStateInfo = in.readInt();
         mLogicalSlotIdx = in.readInt();
+        mIsExtendedApduSupported = in.readByte() != 0;
     }
 
     @Override
@@ -88,6 +90,7 @@ public class UiccSlotInfo implements Parcelable {
         dest.writeString(mCardId);
         dest.writeInt(mCardStateInfo);
         dest.writeInt(mLogicalSlotIdx);
+        dest.writeByte((byte) (mIsExtendedApduSupported ? 1 : 0));
     }
 
     @Override
@@ -96,12 +99,13 @@ public class UiccSlotInfo implements Parcelable {
     }
 
     public UiccSlotInfo(boolean isActive, boolean isEuicc, String cardId,
-            @CardStateInfo int cardStateInfo, int logicalSlotIdx) {
+            @CardStateInfo int cardStateInfo, int logicalSlotIdx, boolean isExtendedApduSupported) {
         this.mIsActive = isActive;
         this.mIsEuicc = isEuicc;
         this.mCardId = cardId;
         this.mCardStateInfo = cardStateInfo;
         this.mLogicalSlotIdx = logicalSlotIdx;
+        this.mIsExtendedApduSupported = isExtendedApduSupported;
     }
 
     public boolean getIsActive() {
@@ -125,6 +129,13 @@ public class UiccSlotInfo implements Parcelable {
         return mLogicalSlotIdx;
     }
 
+    /**
+     * @return {@code true} if this slot supports extended APDU from ATR, {@code false} otherwise.
+     */
+    public boolean getIsExtendedApduSupported() {
+        return mIsExtendedApduSupported;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -139,7 +150,8 @@ public class UiccSlotInfo implements Parcelable {
                 && (mIsEuicc == that.mIsEuicc)
                 && (mCardId == that.mCardId)
                 && (mCardStateInfo == that.mCardStateInfo)
-                && (mLogicalSlotIdx == that.mLogicalSlotIdx);
+                && (mLogicalSlotIdx == that.mLogicalSlotIdx)
+                && (mIsExtendedApduSupported == that.mIsExtendedApduSupported);
     }
 
     @Override
@@ -150,6 +162,7 @@ public class UiccSlotInfo implements Parcelable {
         result = 31 * result + Objects.hashCode(mCardId);
         result = 31 * result + mCardStateInfo;
         result = 31 * result + mLogicalSlotIdx;
+        result = 31 * result + (mIsExtendedApduSupported ? 1 : 0);
         return result;
     }
 
@@ -165,6 +178,8 @@ public class UiccSlotInfo implements Parcelable {
                 + mCardStateInfo
                 + ", phoneId="
                 + mLogicalSlotIdx
+                + ", mIsExtendedApduSupported="
+                + mIsExtendedApduSupported
                 + ")";
     }
 }

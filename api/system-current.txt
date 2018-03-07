@@ -5242,12 +5242,13 @@ package android.telephony {
   }
 
   public class UiccSlotInfo implements android.os.Parcelable {
-    ctor public UiccSlotInfo(boolean, boolean, java.lang.String, int, int);
+    ctor public UiccSlotInfo(boolean, boolean, java.lang.String, int, int, boolean);
     method public int describeContents();
     method public java.lang.String getCardId();
     method public int getCardStateInfo();
     method public boolean getIsActive();
     method public boolean getIsEuicc();
+    method public boolean getIsExtendedApduSupported();
     method public int getLogicalSlotIdx();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CARD_STATE_INFO_ABSENT = 1; // 0x1
