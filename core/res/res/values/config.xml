@@ -2513,9 +2513,8 @@
         <item>restart</item>
         <item>lockdown</item>
         <item>logout</item>
-        <item>screenshot</item>
         <item>bugreport</item>
-        <item>users</item>
+        <item>screenshot</item>
     </string-array>
 
     <!-- Number of milliseconds to hold a wake lock to ensure that drawing is fully
