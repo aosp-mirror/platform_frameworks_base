@@ -34,25 +34,21 @@ public class DisplayWindowController
 
     private final int mDisplayId;
 
-    public DisplayWindowController(int displayId, WindowContainerListener listener) {
+    public DisplayWindowController(Display display, WindowContainerListener listener) {
         super(listener, WindowManagerService.getInstance());
-        mDisplayId = displayId;
+        mDisplayId = display.getDisplayId();
 
         synchronized (mWindowMap) {
-            final Display display = mService.mDisplayManager.getDisplay(displayId);
-            if (display != null) {
-                final long callingIdentity = Binder.clearCallingIdentity();
-                try {
-                    mRoot.createDisplayContent(display, this /* controller */);
-                } finally {
-                    Binder.restoreCallingIdentity(callingIdentity);
-                }
+            final long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                mRoot.createDisplayContent(display, this /* controller */);
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
             }
 
             if (mContainer == null) {
-                throw new IllegalArgumentException("Trying to add displayId=" + displayId
-                        + " display=" + display
-                        + " dc=" + mRoot.getDisplayContent(displayId));
+                throw new IllegalArgumentException("Trying to add display=" + display
+                        + " dc=" + mRoot.getDisplayContent(mDisplayId));
             }
         }
     }
