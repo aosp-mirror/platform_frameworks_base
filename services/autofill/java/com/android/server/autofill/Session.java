@@ -251,7 +251,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 // change AssistStructure so it provides a "one-way" writeToParcel() method that
                 // sends all the data
                 try {
-                    structure.ensureData();
+                    structure.ensureDataForAutofill();
                 } catch (RuntimeException e) {
                     wtf(e, "Exception lazy loading assist structure for %s: %s",
                             structure.getActivityComponent(), e);
