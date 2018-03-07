@@ -2041,6 +2041,10 @@ public abstract class ConnectionService extends Service {
      * Call to inform Telecom that your {@link ConnectionService} has released call resources (e.g
      * microphone, camera).
      *
+     * <p>
+     * The {@link ConnectionService} will be disconnected when it failed to call this method within
+     * 5 seconds after {@link #onConnectionServiceFocusLost()} is called.
+     *
      * @see ConnectionService#onConnectionServiceFocusLost()
      */
     public final void connectionServiceFocusReleased() {
