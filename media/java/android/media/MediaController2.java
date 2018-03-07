@@ -147,7 +147,9 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
          * @see #onPositionChanged(MediaController2, long, long)
          * @see #onBufferedPositionChanged(MediaController2, long)
          * @see #onCurrentPlaylistItemChanged(MediaController2, MediaItem2)
+         * @hide
          */
+        // TODO(jaewan): Remove (b/74174728)
         public void onPlaylistChanged(@NonNull MediaController2 controller,
                 @NonNull List<MediaItem2> playlist) { }
 
@@ -228,7 +230,9 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
          *
          * @param controller the controller for this event
          * @param params The new play list parameters.
+         * @hide
          */
+        // TODO(jaewan): Remove (b/74116823)
         public void onPlaylistParamsChanged(@NonNull MediaController2 controller,
                 @NonNull PlaylistParams params) { }
     }
@@ -440,24 +444,14 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
     }
 
     /**
-     * Sets the index of current DataSourceDesc in the play list to be played.
-     *
-     * @param item the index of DataSourceDesc in the play list you want to play
-     * @throws IllegalArgumentException if the play list is null
-     * @throws NullPointerException if index is outside play list range
-     */
-    @Override
-    public void skipToPlaylistItem(@NonNull MediaItem2 item) {
-        mProvider.skipToPlaylistItem_impl(item);
-    }
-
-    /**
      * Sets the {@link PlaylistParams} for the current play list. Repeat/shuffle mode and metadata
      * for the list can be set by calling this method.
      *
      * @param params A {@link PlaylistParams} object to set.
      * @throws IllegalArgumentException if given {@param param} is null.
+     * @hide
      */
+    // TODO(jaewan): Remove (b/74116823)
     public void setPlaylistParams(@NonNull PlaylistParams params) {
         mProvider.setPlaylistParams_impl(params);
     }
@@ -672,17 +666,6 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
     }
 
     /**
-     * Get the lastly cached current item from
-     * {@link ControllerCallback#onCurrentPlaylistItemChanged(MediaController2, MediaItem2)}.
-     *
-     * @return index of the current item
-     */
-    @Override
-    public MediaItem2 getCurrentPlaylistItem() {
-        return mProvider.getCurrentPlaylistItem_impl();
-    }
-
-    /**
      * Get the current playback info for this session.
      *
      * @return The current playback info or null.
@@ -720,6 +703,35 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
     }
 
     /**
+     * Register {@link MediaPlaylistController.PlaylistEventCallback} to listen changes in the
+     * underlying {@link MediaPlaylistController}, regardless of the change in the controller.
+     * <p>
+     * Registered callbacks will be also called when the controller is changed.
+     *
+     * @param executor a callback Executor
+     * @param callback a PlaylistEventCallback
+     * @throws IllegalArgumentException if executor or callback is {@code null}.
+     */
+    @Override
+    public void registerPlaylistControllerCallback(@NonNull @CallbackExecutor Executor executor,
+            @NonNull PlaylistEventCallback callback) {
+        // TODO(jaewan): Implement (b/74169681)
+        //mProvider.registerPlaylistControllerCallback_impl(executor, callback);
+    }
+
+    /**
+     * Unregister the previously registered {@link MediaPlaylistController.PlaylistEventCallback}.
+     *
+     * @param callback the callback to be removed
+     * @throws IllegalArgumentException if the callback is {@code null}.
+     */
+    @Override
+    public void unregisterPlaylistControllerCallback(@NonNull PlaylistEventCallback callback) {
+        // TODO(jaewan): Implement (b/74169681)
+        //mProvider.unregisterPlaylistControllerCallback_impl(callback);
+    }
+
+    /**
      * Return playlist from the session.
      *
      * @return playlist. Can be {@code null} if the controller doesn't have enough permission.
@@ -729,13 +741,48 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
         return mProvider.getPlaylist_impl();
     }
 
+
+    @Override
+    public void setPlaylist(@NonNull List<MediaItem2> list, @Nullable MediaMetadata2 metadata) {
+        // TODO(jaewan): Implement (b/74174649)
+    }
+
+    @Override
+    public void updatePlaylistMetadata(@Nullable MediaMetadata2 metadata) {
+        // TODO(jaewan): Implement (b/74174649)
+    }
+
+    @Override
+    public @Nullable MediaMetadata2 getPlaylistMetadata() {
+        // TODO(jaewan): Implement (b/74174649)
+        return null;
+    }
+
     /**
      * Returns the {@link PlaylistParams} for the current play list.
      * Can return {@code null} if the controller doesn't have enough permission, or if the session
      * has not set the parameters.
+     * @hide
      */
+    // TODO(jaewan): Remove (b/74116823)
     public @Nullable PlaylistParams getPlaylistParams() {
         return mProvider.getPlaylistParams_impl();
+    }
+
+    /**
+     * Inserts the media item to the play list at position index.
+     * <p>
+     * This will not change the currently playing media item.
+     * If index is less than or equal to the current index of the play list,
+     * the current index of the play list will be incremented correspondingly.
+     *
+     * @param index the index you want to add
+     * @param item the media item you want to add
+     * @throws IndexOutOfBoundsException if index is outside play list range
+     */
+    @Override
+    public void addPlaylistItem(int index, @NonNull MediaItem2 item) {
+        mProvider.addPlaylistItem_impl(index, item);
     }
 
     /**
@@ -760,18 +807,47 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
     }
 
     /**
-     * Inserts the media item to the play list at position index.
-     * <p>
-     * This will not change the currently playing media item.
-     * If index is less than or equal to the current index of the play list,
-     * the current index of the play list will be incremented correspondingly.
+     * Get the lastly cached current item from
+     * {@link ControllerCallback#onCurrentPlaylistItemChanged(MediaController2, MediaItem2)}.
      *
-     * @param index the index you want to add
-     * @param item the media item you want to add
-     * @throws IndexOutOfBoundsException if index is outside play list range
+     * @return index of the current item
      */
     @Override
-    public void addPlaylistItem(int index, @NonNull MediaItem2 item) {
-        mProvider.addPlaylistItem_impl(index, item);
+    public MediaItem2 getCurrentPlaylistItem() {
+        return mProvider.getCurrentPlaylistItem_impl();
+    }
+
+    /**
+     * Sets the index of current DataSourceDesc in the play list to be played.
+     *
+     * @param item the index of DataSourceDesc in the play list you want to play
+     * @throws IllegalArgumentException if the play list is null
+     * @throws NullPointerException if index is outside play list range
+     */
+    @Override
+    public void skipToPlaylistItem(@NonNull MediaItem2 item) {
+        mProvider.skipToPlaylistItem_impl(item);
+    }
+
+    @Override
+    public @RepeatMode int getRepeatMode() {
+        // TODO(jaewan): Implement (b/74118768)
+        return 0;
+    }
+
+    @Override
+    public void setRepeatMode(int repeatMode) {
+        // TODO(jaewan): Implement (b/74118768)
+    }
+
+    @Override
+    public @ShuffleMode int getShuffleMode() {
+        // TODO(jaewan): Implement (b/74118768)
+        return 0;
+    }
+
+    @Override
+    public void setShuffleMode(int shuffleMode) {
+        // TODO(jaewan): Implement (b/74118768)
     }
 }
