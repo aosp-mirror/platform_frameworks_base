@@ -41,7 +41,7 @@ EventLogTagsParser::Parse(const int in, const int out) const
             continue;
         }
 
-        long long token = proto.start(EventLogTagMapProto::EVENT_LOG_TAGS);
+        uint64_t token = proto.start(EventLogTagMapProto::EVENT_LOG_TAGS);
         proto.write(EventLogTag::TAG_NUMBER, toInt(tagNumber));
         proto.write(EventLogTag::TAG_NAME, tagName);
 
@@ -52,7 +52,7 @@ EventLogTagsParser::Parse(const int in, const int out) const
                 // If the parts doesn't contains pipe, then skips it.
                 continue;
             }
-            long long descriptorToken = proto.start(EventLogTag::VALUE_DESCRIPTORS);
+            uint64_t descriptorToken = proto.start(EventLogTag::VALUE_DESCRIPTORS);
             proto.write(EventLogTag::ValueDescriptor::NAME, valueDescriptor[0]);
             proto.write(EventLogTag::ValueDescriptor::TYPE, toInt(valueDescriptor[1]));
             if (valueDescriptor.size() == 3) {

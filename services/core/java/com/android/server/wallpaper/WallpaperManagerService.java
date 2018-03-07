@@ -458,7 +458,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         if (cropFile != null) {
             Bitmap bitmap = BitmapFactory.decodeFile(cropFile);
             if (bitmap != null) {
-                colors = WallpaperColors.fromBitmap(bitmap);
+                colors = WallpaperColors.fromBitmap(bitmap, true /* computeHints */);
                 bitmap.recycle();
             }
         }

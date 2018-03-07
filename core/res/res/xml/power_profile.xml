@@ -36,8 +36,8 @@
   <item name="wifi.on">0.1</item>  <!-- ~3mA -->
   <item name="wifi.active">0.1</item>  <!-- WIFI data transfer, ~200mA -->
   <item name="wifi.scan">0.1</item>  <!-- WIFI network scanning, ~100mA -->
-  <item name="dsp.audio">0.1</item> <!-- ~10mA -->
-  <item name="dsp.video">0.1</item> <!-- ~50mA -->
+  <item name="audio">0.1</item> <!-- ~10mA -->
+  <item name="video">0.1</item> <!-- ~50mA -->
   <item name="camera.flashlight">0.1</item> <!-- Avg. power for camera flash, ~160mA -->
   <item name="camera.avg">0.1</item> <!-- Avg. power use of camera in standard usecases, ~550mA -->
   <item name="gps.on">0.1</item> <!-- ~50mA -->

@@ -19,6 +19,7 @@ package com.android.server.media;
 import static android.media.SessionToken2.TYPE_SESSION;
 
 import android.app.ActivityManager;
+import android.app.AppGlobals;
 import android.app.INotificationManager;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
@@ -30,6 +31,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
@@ -117,12 +119,13 @@ public class MediaSessionService extends SystemService implements Monitor {
     private final MessageHandler mHandler = new MessageHandler();
     private final PowerManager.WakeLock mMediaEventWakeLock;
     private final int mLongPressTimeout;
+    private final INotificationManager mNotificationManager;
+    private final IPackageManager mPackageManager;
 
     private KeyguardManager mKeyguardManager;
     private IAudioService mAudioService;
     private ContentResolver mContentResolver;
     private SettingsObserver mSettingsObserver;
-    private INotificationManager mNotificationManager;
     private boolean mHasFeatureLeanback;
 
     // The FullUserRecord of the current users. (i.e. The foreground user that isn't a profile)
@@ -150,6 +153,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         mLongPressTimeout = ViewConfiguration.getLongPressTimeout();
         mNotificationManager = INotificationManager.Stub.asInterface(
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+        mPackageManager = AppGlobals.getPackageManager();
     }
 
     @Override
@@ -1491,6 +1495,59 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
                 mAudioPlayerStateMonitor.dump(getContext(), pw, "");
             }
+        }
+
+        /**
+         * Returns if the controller's package is trusted (i.e. has either MEDIA_CONTENT_CONTROL
+         * permission or an enabled notification listener)
+         *
+         * @param uid uid of the controller app
+         * @param packageName package name of the controller app
+         */
+        @Override
+        public boolean isTrusted(int uid, String packageName) throws RemoteException {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                int userId = UserHandle.getUserId(uid);
+                // Sanity check whether uid and packageName matches
+                if (uid != mPackageManager.getPackageUid(packageName, 0, userId)) {
+                    throw new IllegalArgumentException("uid=" + uid + " and packageName="
+                            + packageName + " doesn't match");
+                }
+
+                // Check if it's system server or has MEDIA_CONTENT_CONTROL.
+                // Note that system server doesn't have MEDIA_CONTENT_CONTROL, so we need extra
+                // check here.
+                if (uid == Process.SYSTEM_UID || mPackageManager.checkPermission(
+                        android.Manifest.permission.MEDIA_CONTENT_CONTROL, packageName, uid)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    return true;
+                }
+                if (DEBUG) {
+                    Log.d(TAG, packageName + " (uid=" + uid + ") hasn't granted"
+                            + " MEDIA_CONTENT_CONTROL");
+                }
+
+                // TODO(jaewan): Add hasEnabledNotificationListener(String pkgName) for
+                //               optimization (Post-P)
+                final List<ComponentName> enabledNotificationListeners =
+                        mNotificationManager.getEnabledNotificationListeners(userId);
+                if (enabledNotificationListeners != null) {
+                    for (int i = 0; i < enabledNotificationListeners.size(); i++) {
+                        if (TextUtils.equals(packageName,
+                                enabledNotificationListeners.get(i).getPackageName())) {
+                            return true;
+                        }
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+            if (DEBUG) {
+                Log.d(TAG, packageName + " (uid=" + uid + ") doesn't have an enabled notification"
+                        + " listener");
+            }
+            return false;
         }
 
         /**

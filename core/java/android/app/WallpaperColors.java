@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -107,6 +108,11 @@ public final class WallpaperColors implements Parcelable {
      * @param drawable Source where to extract from.
      */
     public static WallpaperColors fromDrawable(Drawable drawable) {
+        if (drawable == null) {
+            throw new IllegalArgumentException("Drawable cannot be null");
+        }
+
+        Rect initialBounds = drawable.copyBounds();
         int width = drawable.getIntrinsicWidth();
         int height = drawable.getIntrinsicHeight();
 
@@ -126,6 +132,7 @@ public final class WallpaperColors implements Parcelable {
         final WallpaperColors colors = WallpaperColors.fromBitmap(bitmap);
         bitmap.recycle();
 
+        drawable.setBounds(initialBounds);
         return colors;
     }
 
@@ -137,6 +144,13 @@ public final class WallpaperColors implements Parcelable {
      * @param bitmap Source where to extract from.
      */
     public static WallpaperColors fromBitmap(@NonNull Bitmap bitmap) {
+        return fromBitmap(bitmap, false /* computeHints */);
+    }
+
+    /**
+     * @hide
+     */
+    public static WallpaperColors fromBitmap(@NonNull Bitmap bitmap, boolean computeHints) {
         if (bitmap == null) {
             throw new IllegalArgumentException("Bitmap can't be null");
         }
@@ -186,7 +200,7 @@ public final class WallpaperColors implements Parcelable {
             }
         }
 
-        int hints = calculateDarkHints(bitmap);
+        int hints = computeHints ? calculateDarkHints(bitmap) : 0;
 
         if (shouldRecycle) {
             bitmap.recycle();

@@ -186,4 +186,24 @@ public abstract class UserManagerInternal {
      * @return the array of user ids.
      */
     public abstract int[] getUserIds();
+
+    /**
+     * Checks if the {@code callingUserId} and {@code targetUserId} are same or in same group
+     * and that the {@code callingUserId} is not a managed profile and
+     * {@code targetUserId} is enabled.
+     *
+     * @return TRUE if the {@code callingUserId} can access {@code targetUserId}. FALSE
+     * otherwise
+     *
+     * @throws SecurityException if the calling user and {@code targetUser} are not in the same
+     * group and {@code throwSecurityException} is true, otherwise if will simply return false.
+     */
+    public abstract boolean isProfileAccessible(int callingUserId, int targetUserId,
+            String debugMsg, boolean throwSecurityException);
+
+    /**
+     * If {@code userId} is of a managed profile, return the parent user ID. Otherwise return
+     * itself.
+     */
+    public abstract int getProfileParentId(int userId);
 }

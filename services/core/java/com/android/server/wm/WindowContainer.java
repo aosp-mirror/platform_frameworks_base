@@ -1142,11 +1142,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     @Override
     public void onAnimationLeashCreated(Transaction t, SurfaceControl leash) {
+        mLastLayer = -1;
         reassignLayer(t);
     }
 
     @Override
     public void onAnimationLeashDestroyed(Transaction t) {
+        mLastLayer = -1;
         reassignLayer(t);
     }
 

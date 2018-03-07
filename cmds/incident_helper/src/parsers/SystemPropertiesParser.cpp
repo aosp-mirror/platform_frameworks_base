@@ -207,7 +207,7 @@ SystemPropertiesParser::Parse(const int in, const int out) const
     sysProp.endSession(&proto);
 
     for (auto it = extras.begin(); it != extras.end(); it++) {
-        long long token = proto.start(SystemPropertiesProto::EXTRA_PROPERTIES);
+        uint64_t token = proto.start(SystemPropertiesProto::EXTRA_PROPERTIES);
         proto.write(SystemPropertiesProto::Property::NAME, it->first);
         proto.write(SystemPropertiesProto::Property::VALUE, it->second);
         proto.end(token);

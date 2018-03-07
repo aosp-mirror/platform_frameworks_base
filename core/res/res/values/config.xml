@@ -3362,4 +3362,6 @@
         <item>"wifi"</item>
     </string-array>
 
+    <!-- Package name for ManagedProvisioning which is responsible for provisioning work profiles. -->
+    <string name="config_managed_provisioning_package" translatable="false">com.android.managedprovisioning</string>
 </resources>

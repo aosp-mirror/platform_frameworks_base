@@ -103,8 +103,7 @@
     <string name="camera_label" msgid="7261107956054836961">"abrir câmera"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Selecionar novo layout da tarefa"</string>
     <string name="cancel" msgid="6442560571259935130">"Cancelar"</string>
-    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
-    <skip />
+    <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Toque no sensor de impressão digital"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Ícone de impressão digital"</string>
     <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"Ícone do app"</string>
     <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Área da mensagem de ajuda"</string>
@@ -276,8 +275,7 @@
     <string name="dessert_case" msgid="1295161776223959221">"Mostruário de sobremesas"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Protetor de tela"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
-    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
-    <skip />
+    <string name="quick_settings_header_onboarding_text" msgid="7872508260264044734">"Toque nos ícones e mantenha-os pressionados para ver mais opções"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Não perturbe"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Somente prioridade"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Somente alarmes"</string>
@@ -290,6 +288,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Áudio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Fone de ouvido"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Entrada"</string>
+    <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"Ativando…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Brilho"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Girar automaticamente"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Girar tela automaticamente"</string>
@@ -314,7 +313,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi desligado"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi ativado"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Nenhuma rede Wi-Fi disponível"</string>
-    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"Alarme"</string>
+    <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"Ativando…"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Transmitir"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Transmitindo"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Dispositivo sem nome"</string>
@@ -331,7 +330,7 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"Conectando..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Tethering"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Ponto de acesso"</string>
-    <string name="quick_settings_hotspot_secondary_label_transient" msgid="7161046712706277215">"Ativando…"</string>
+    <string name="quick_settings_hotspot_secondary_label_transient" msgid="8010579363691405477">"Ativando…"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
       <item quantity="one">%d dispositivo</item>
       <item quantity="other">%d dispositivos</item>
@@ -345,8 +344,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"Usados: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Limite: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Aviso de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="quick_settings_work_mode_on_label" msgid="3421274215098764735">"Perfil de trabalho"</string>
-    <string name="quick_settings_work_mode_off_label" msgid="8856918707867192186">"As notificações e os apps estão desativados"</string>
+    <string name="quick_settings_work_mode_label" msgid="7608026833638817218">"Perfil de trabalho"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Modo noturno"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Ativ. ao pôr do sol"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Até o nascer do sol"</string>
@@ -399,9 +397,9 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Silêncio\ntotal"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Somente\nprioridade"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Somente\nalarmes"</string>
-    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Carregando (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> até concluir)"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Carregando rapidamente (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> para conclusão)"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Carregando lentamente (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> para conclusão)"</string>
+    <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carregando (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> até a conclusão)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carga rápida (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> até a conclusão)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carga lenta (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> até a conclusão)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Trocar usuário"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Alternar usuário. Usuário atual <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Usuário atual <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -539,6 +537,9 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Toque para configurar para vibrar."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Toque para silenciar."</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"Controles de volume %s"</string>
+    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"Chamadas e notificações farão o dispositivo vibrar"</string>
+    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Chamadas e notificações ficarão silenciadas"</string>
+    <string name="volume_dialog_ringer_guidance_ring" msgid="6144469689490528338">"Chamadas e notificações emitirão um toque"</string>
     <string name="output_title" msgid="5355078100792942802">"Saída de mídia"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Saída de chamada telefônica"</string>
     <string name="output_none_found" msgid="5544982839808921091">"Nenhum dispositivo foi encontrado"</string>

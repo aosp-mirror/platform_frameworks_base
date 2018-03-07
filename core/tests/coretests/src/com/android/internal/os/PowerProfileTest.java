@@ -54,6 +54,8 @@ public class PowerProfileTest extends TestCase {
         assertEquals(60.0, mProfile.getAveragePowerForCpuCore(1, 3));
         assertEquals(3000.0, mProfile.getBatteryCapacity());
         assertEquals(0.5, mProfile.getAveragePower(PowerProfile.POWER_AMBIENT_DISPLAY));
+        assertEquals(100.0, mProfile.getAveragePower(PowerProfile.POWER_AUDIO));
+        assertEquals(150.0, mProfile.getAveragePower(PowerProfile.POWER_VIDEO));
     }
 
 }
