@@ -213,12 +213,6 @@ public interface MediaPlaylistController {
     void replacePlaylistItem(int index, @NonNull MediaItem2 item);
 
     /**
-     * Returns the current media item.
-     * @return the current media item, or null if none is set, or none available to play.
-     */
-    MediaItem2 getCurrentPlaylistItem();
-
-    /**
      * Skips to the the media item, and plays from it.
      *
      * @param item media item to start playing from

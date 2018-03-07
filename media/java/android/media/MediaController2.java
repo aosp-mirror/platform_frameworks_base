@@ -146,7 +146,7 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
          * @param playlist A new playlist set by the session.
          * @see #onPositionChanged(MediaController2, long, long)
          * @see #onBufferedPositionChanged(MediaController2, long)
-         * @see #onCurrentPlaylistItemChanged(MediaController2, MediaItem2)
+         * @see #onCurrentMediaItemChanged(MediaController2, MediaItem2)
          * @hide
          */
         // TODO(jaewan): Remove (b/74174728)
@@ -211,7 +211,7 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
                 @Nullable Bundle extras) { }
 
         /**
-         * Called when the player's current playing item is changed
+         * Called when the player's currently playing item is changed
          * <p>
          * When it's called, you should invalidate previous playback information and wait for later
          * callbacks.
@@ -220,9 +220,8 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
          * @param item new item
          * @see #onPositionChanged(MediaController2, long, long)
          * @see #onBufferedPositionChanged(MediaController2, long)
-         * @see #onCurrentPlaylistItemChanged(MediaController2, MediaItem2)
          */
-        public void onCurrentPlaylistItemChanged(@NonNull MediaController2 controller,
+        public void onCurrentMediaItemChanged(@NonNull MediaController2 controller,
                 @NonNull MediaItem2 item) { }
 
         /**
@@ -808,12 +807,12 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
 
     /**
      * Get the lastly cached current item from
-     * {@link ControllerCallback#onCurrentPlaylistItemChanged(MediaController2, MediaItem2)}.
+     * {@link ControllerCallback#onCurrentMediaItemChanged(MediaController2, MediaItem2)}.
      *
      * @return index of the current item
      */
-    @Override
-    public MediaItem2 getCurrentPlaylistItem() {
+    public MediaItem2 getCurrentMediaItem() {
+        // TODO(jaewan): Rename provider API
         return mProvider.getCurrentPlaylistItem_impl();
     }
 
