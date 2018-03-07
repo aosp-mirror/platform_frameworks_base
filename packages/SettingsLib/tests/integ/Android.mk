@@ -25,6 +25,7 @@ LOCAL_JAVA_LIBRARIES := android.test.runner telephony-common android.test.base
 LOCAL_JACK_FLAGS := --multi-dex native
 
 LOCAL_PACKAGE_NAME := SettingsLibTests
+LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_COMPATIBILITY_SUITE := device-tests
 
 LOCAL_USE_AAPT2 := true
