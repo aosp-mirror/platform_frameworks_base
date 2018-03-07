@@ -80,7 +80,7 @@ import java.util.concurrent.Executor;
  *
  * @see MediaSessionService2
  */
-public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
+public class MediaSession2 implements AutoCloseable {
     private final MediaSession2Provider mProvider;
 
     /**
@@ -114,7 +114,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
     public static final int COMMAND_CODE_PLAYBACK_STOP = 3;
 
     /**
-     * Command code for {@link MediaController2#skipToNext()}.
+     * Command code for {@link MediaController2#skipToNextItem()}.
      * <p>
      * Command would be sent directly to the player if the session doesn't reject the request
      * through the {@link SessionCallback#onCommandRequest(MediaSession2, ControllerInfo, Command)}.
@@ -122,7 +122,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
     public static final int COMMAND_CODE_PLAYBACK_SKIP_NEXT_ITEM = 4;
 
     /**
-     * Command code for {@link MediaController2#skipToPrevious()}.
+     * Command code for {@link MediaController2#skipToPreviousItem()}.
      * <p>
      * Command would be sent directly to the player if the session doesn't reject the request
      * through the {@link SessionCallback#onCommandRequest(MediaSession2, ControllerInfo, Command)}.
@@ -406,6 +406,29 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * Error code when the session needs user's manual intervention.
      */
     public static final int ERROR_CODE_SETUP_REQUIRED = 12;
+
+    /**
+     * Interface definition of a callback to be invoked when a {@link MediaItem2} in the playlist
+     * didn't have a {@link DataSourceDesc} but it's needed now for preparing or playing it.
+     *
+     * #see #setOnDataSourceMissingHelper
+     */
+    public interface OnDataSourceMissingHelper {
+        /**
+         * Called when a {@link MediaItem2} in the playlist didn't have a {@link DataSourceDesc}
+         * but it's needed now for preparing or playing it.
+         * <p>
+         * Returned data source descriptor will be sent to the player directly to prepare or play
+         * the contents.
+         *
+         * @param session the session for this event
+         * @param item media item from the controller
+         * @return a data source descriptor if the media item. Can be {@code null} if the content
+         *        isn't available.
+         */
+        @Nullable DataSourceDesc onDataSourceMissing(@NonNull MediaSession2 session,
+                @NonNull MediaItem2 item);
+    }
 
     /**
      * Define a command that a {@link MediaController2} can send to a {@link MediaSession2}.
@@ -756,6 +779,19 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
                 @NonNull ControllerInfo controller, @NonNull Uri uri, @Nullable Bundle extras) { }
 
         /**
+         * Called when the player's current playing item is changed
+         * <p>
+         * When it's called, you should invalidate previous playback information and wait for later
+         * callbacks.
+         *
+         * @param session the controller for this event
+         * @param mpb the player for this event
+         * @param item new item
+         */
+        public void onCurrentMediaItemChanged(@NonNull MediaSession2 session,
+                @NonNull MediaPlayerBase mpb, @NonNull MediaItem2 item) { }
+
+        /**
          * Called when the player is <i>prepared</i>, i.e. it is ready to play the content
          * referenced by the given data source.
          * @param session the session for this event
@@ -777,6 +813,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
 
         /**
          * Called to report buffering events for a data source.
+         *
          * @param session the session for this event
          * @param mpb the player for this event
          * @param item the media item for which buffering is happening.
@@ -784,7 +821,58 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
          */
         public void onBufferingStateChanged(@NonNull MediaSession2 session,
                 @NonNull MediaPlayerBase mpb, @NonNull MediaItem2 item, @BuffState int state) { }
-    };
+
+        /**
+         * Called when a playlist is changed.
+         *
+         * @param session the session for this event
+         * @param mplc playlist controller for this event
+         * @param list new playlist
+         * @param metadata new metadata
+         */
+        public void onPlaylistChanged(@NonNull MediaSession2 session,
+                @NonNull MediaPlaylistAgent mplc, @NonNull List<MediaItem2> list,
+                @Nullable MediaMetadata2 metadata) { }
+
+        /**
+         * Called when a playlist metadata is changed.
+         *
+         * @param session the session for this event
+         * @param mplc playlist controller for this event
+         * @param metadata new metadata
+         */
+        public void onPlaylistMetadataChanged(@NonNull MediaSession2 session,
+                @NonNull MediaPlaylistAgent mplc, @Nullable MediaMetadata2 metadata) { }
+
+        /**
+         * Called when the shuffle mode is changed.
+         *
+         * @param session the session for this event
+         * @param mplc playlist controller for this event
+         * @param shuffleMode repeat mode
+         * @see MediaPlaylistAgent#SHUFFLE_MODE_NONE
+         * @see MediaPlaylistAgent#SHUFFLE_MODE_ALL
+         * @see MediaPlaylistAgent#SHUFFLE_MODE_GROUP
+         */
+        public void onShuffleModeChanged(@NonNull MediaSession2 session,
+                @NonNull MediaPlaylistAgent mplc,
+                @MediaPlaylistAgent.ShuffleMode int shuffleMode) { }
+
+        /**
+         * Called when the repeat mode is changed.
+         *
+         * @param session the session for this event
+         * @param mplc playlist controller for this event
+         * @param repeatMode repeat mode
+         * @see MediaPlaylistAgent#REPEAT_MODE_NONE
+         * @see MediaPlaylistAgent#REPEAT_MODE_ONE
+         * @see MediaPlaylistAgent#REPEAT_MODE_ALL
+         * @see MediaPlaylistAgent#REPEAT_MODE_GROUP
+         */
+        public void onRepeatModeChanged(@NonNull MediaSession2 session,
+                @NonNull MediaPlaylistAgent mplc,
+                @MediaPlaylistAgent.RepeatMode int repeatMode) { }
+    }
 
     /**
      * Base builder class for MediaSession2 and its subclass. Any change in this class should be
@@ -824,13 +912,14 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
         }
 
         /**
-         * Set the {@link MediaPlaylistController} for this session to manages playlist of the
+         * Set the {@link MediaPlaylistAgent} for this session to manages playlist of the
          * underlying {@link MediaPlayerBase player}.
          *
-         * @param mplc a {@link MediaPlaylistController} that manages playlist of the
+         * @param mplc a {@link MediaPlaylistAgent} that manages playlist of the
          * {@code player.}
          */
-        U setPlaylistController(@NonNull MediaPlaylistController mplc) {
+        U setPlaylistAgent(@NonNull MediaPlaylistAgent mplc) {
+            // TODO(jaewan): fix this
             mProvider.setPlaylistController_impl(mplc);
             return (U) this;
         }
@@ -918,8 +1007,8 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
         }
 
         @Override
-        public Builder setPlaylistController(@NonNull MediaPlaylistController mplc) {
-            return super.setPlaylistController(mplc);
+        public Builder setPlaylistAgent(@NonNull MediaPlaylistAgent mplc) {
+            return super.setPlaylistAgent(mplc);
         }
 
         @Override
@@ -1280,13 +1369,13 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * player on the {@link Handler} where the session is created on.
      *
      * @param player a {@link MediaPlayerBase} that handles actual media playback in your app.
-     * @param mplc a {@link MediaPlaylistController} that manages playlist of the
+     * @param mplc a {@link MediaPlaylistAgent} that manages playlist of the
      * {@code player}
      * @param volumeProvider The provider that will receive volume button events. If
      * {@code null}, system will adjust the appropriate stream volume for this session's player.
      */
     public void updatePlayer(@NonNull MediaPlayerBase player,
-            @Nullable MediaPlaylistController mplc, @Nullable VolumeProvider2 volumeProvider) {
+            @Nullable MediaPlaylistAgent mplc, @Nullable VolumeProvider2 volumeProvider) {
         mProvider.updatePlayer_impl(player, mplc, volumeProvider);
     }
 
@@ -1298,15 +1387,16 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
     /**
      * @return player
      */
-    public @Nullable
+    public @NonNull
     MediaPlayerBase getPlayer() {
         return mProvider.getPlayer_impl();
     }
 
     /**
-     * @return playlist controller
+     * @return playlist manager
      */
-    public @Nullable MediaPlaylistController getMediaPlaylistController() {
+    public @Nullable
+    MediaPlaylistAgent getPlaylistAgent() {
         // TODO(jaewan): implement this (b/74090741)
         return null;
     }
@@ -1357,7 +1447,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * This API can be called in the {@link SessionCallback#onConnect(MediaSession2, ControllerInfo)}.
      *
      * @param controller controller to specify layout.
-     * @param layout oredered list of layout.
+     * @param layout ordered list of layout.
      */
     public void setCustomLayout(@NonNull ControllerInfo controller,
             @NonNull List<CommandButton> layout) {
@@ -1417,14 +1507,6 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      */
     public void stop() {
         mProvider.stop_impl();
-    }
-
-    public void skipToPrevious() {
-        mProvider.skipToPrevious_impl();
-    }
-
-    public void skipToNext() {
-        mProvider.skipToNext_impl();
     }
 
     /**
@@ -1509,7 +1591,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
     }
 
     /**
-     * Register {@link EventCallback} to listen changes in the underlying
+     * Register {@link PlayerEventCallback} to listen changes in the underlying
      * {@link MediaPlayerBase}, regardless of the change in the underlying player.
      * <p>
      * Registered callbacks will be also called when the underlying player is changed.
@@ -1526,7 +1608,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
     }
 
     /**
-     * Unregister the previously registered {@link EventCallback}.
+     * Unregister the previously registered {@link PlayerEventCallback}.
      *
      * @param callback the callback to be removed
      * @throws IllegalArgumentException if the callback is {@code null}.
@@ -1565,32 +1647,43 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
     }
 
     /**
-     * Register {@link MediaPlaylistController.PlaylistEventCallback} to listen changes in the
-     * underlying {@link MediaPlaylistController}, regardless of the change in the controller.
+     * Sets the data source missing helper. Helper will be used to provide default implementation of
+     * {@link MediaPlaylistAgent} when it isn't set by developer.
      * <p>
-     * Registered callbacks will be also called when the controller is changed.
+     * Default implementation of the {@link MediaPlaylistAgent} will call helper when a
+     * {@link MediaItem2} in the playlist doesn't have a {@link DataSourceDesc}. This may happen
+     * when
+     * <ul>
+     *      <li>{@link MediaItem2} specified by {@link #setPlaylist(List, MediaMetadata2)} doesn't
+     *          have {@link DataSourceDesc}</li>
+     *      <li>{@link MediaController2#addPlaylistItem(int, MediaItem2)} is called and accepted
+     *          by {@link SessionCallback#onCommandRequest(MediaSession2, ControllerInfo, Command)}.
+     *          In that case, an item would be added automatically without the data source.</li>
+     * </ul>
+     * <p>
+     * If it's not set, playback wouldn't happen for the item without data source descriptor.
+     * <p>
+     * The helper will be run on the executor that you've specified by the
+     * {@link Builder#setSessionCallback(Executor, SessionCallback)}.
      *
-     * @param executor a callback Executor
-     * @param callback a PlaylistEventCallback
-     * @throws IllegalArgumentException if executor or callback is {@code null}.
+     * @param helper a data source misisng helper.
+     * @throws IllegalStateException when the helper is set when the playlist controller is set
+     * @see #setPlaylist(List, MediaMetadata2)
+     * @see SessionCallback#onCommandRequest(MediaSession2, ControllerInfo, Command)
+     * @see #COMMAND_CODE_PLAYLIST_ADD_ITEM
+     * @see #COMMAND_CODE_PLAYLIST_REPLACE_ITEM
      */
-    @Override
-    public void registerPlaylistControllerCallback(@NonNull @CallbackExecutor Executor executor,
-            @NonNull PlaylistEventCallback callback) {
-        // TODO(jaewan): Implement (b/74169681)
-        //mProvider.registerPlaylistControllerCallback_impl(executor, callback);
+    public void setOnDataSourceMissingHelper(@NonNull OnDataSourceMissingHelper helper) {
+        // TODO(jaewan): Implement (b/74090741)
     }
 
     /**
-     * Unregister the previously registered {@link MediaPlaylistController.PlaylistEventCallback}.
+     * Clears the data source missing helper.
      *
-     * @param callback the callback to be removed
-     * @throws IllegalArgumentException if the callback is {@code null}.
+     * @see #setOnDataSourceMissingHelper(OnDataSourceMissingHelper)
      */
-    @Override
-    public void unregisterPlaylistControllerCallback(@NonNull PlaylistEventCallback callback) {
-        // TODO(jaewan): Implement (b/74169681)
-        //mProvider.unregisterPlaylistControllerCallback_impl(callback);
+    public void clearOnDataSourceMissingHelper() {
+        // TODO(jaewan): Implement (b/74090741)
     }
 
     /**
@@ -1598,7 +1691,6 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      *
      * @return playlist
      */
-    @Override
     public List<MediaItem2> getPlaylist() {
         return mProvider.getPlaylist_impl();
     }
@@ -1615,7 +1707,16 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
         mProvider.setPlaylist_impl(playlist);
     }
 
-    @Override
+    /**
+     * Set a list of {@link MediaItem2} as the current play list.
+     * <p>
+     * You may specify a {@link MediaItem2} without {@link DataSourceDesc}. However, in that case,
+     * you should set {@link OnDataSourceMissingHelper} for player to prepare.
+     *
+     * @param list A list of {@link MediaItem2} objects to set as a play list.
+     * @throws IllegalArgumentException if given {@param playlist} is null.
+     * @see #setOnDataSourceMissingHelper
+     */
     public void setPlaylist(@NonNull List<MediaItem2> list, @Nullable MediaMetadata2 metadata) {
         // TODO(jaewan): Implement (b/74174649)
     }
@@ -1631,7 +1732,16 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
         mProvider.skipToPlaylistItem_impl(item);
     }
 
-    @Override
+    public void skipToPreviousItem() {
+        // TODO(jaewan): fix this
+        mProvider.skipToPrevious_impl();
+    }
+
+    public void skipToNextItem() {
+        // TODO(jaewan): fix this
+        mProvider.skipToNext_impl();
+    }
+
     public MediaMetadata2 getPlaylistMetadata() {
         // TODO(jaewan): Implement (b/74174649)
         return null;
@@ -1648,7 +1758,6 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * @param item the media item you want to add
      * @throws IndexOutOfBoundsException if index is outside play list range
      */
-    @Override
     public void addPlaylistItem(int index, @NonNull MediaItem2 item) {
         mProvider.addPlaylistItem_impl(index, item);
     }
@@ -1670,7 +1779,6 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * @param index the index of the item to replace
      * @param item the new item
      */
-    @Override
     public void replacePlaylistItem(int index, @NonNull MediaItem2 item) {
         mProvider.replacePlaylistItem_impl(index, item);
     }
@@ -1680,34 +1788,29 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      *
      * @return currently playing media item
      */
-    @Override
-    public MediaItem2 getCurrentPlaylistItem() {
+    public MediaItem2 getCurrentMediaItem() {
+        // TODO(jaewan): Rename provider API
         return mProvider.getCurrentPlaylistItem_impl();
     }
 
-    @Override
     public void updatePlaylistMetadata(@Nullable MediaMetadata2 metadata) {
         // TODO(jaewan): Implement (b/74174649)
     }
 
-    @Override
     public int getRepeatMode() {
         // TODO(jaewan): Implement (b/74118768)
         return 0;
     }
 
-    @Override
     public void setRepeatMode(int repeatMode) {
         // TODO(jaewan): Implement (b/74118768)
     }
 
-    @Override
     public int getShuffleMode() {
         // TODO(jaewan): Implement (b/74118768)
         return 0;
     }
 
-    @Override
     public void setShuffleMode(int shuffleMode) {
         // TODO(jaewan): Implement (b/74118768)
     }
