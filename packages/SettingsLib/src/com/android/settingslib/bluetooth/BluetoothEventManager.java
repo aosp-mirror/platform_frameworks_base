@@ -444,6 +444,7 @@ public class BluetoothEventManager {
 
     private void dispatchActiveDeviceChanged(CachedBluetoothDevice activeDevice,
                                              int bluetoothProfile) {
+        mDeviceManager.onActiveDeviceChanged(activeDevice, bluetoothProfile);
         synchronized (mCallbacks) {
             for (BluetoothCallback callback : mCallbacks) {
                 callback.onActiveDeviceChanged(activeDevice, bluetoothProfile);
