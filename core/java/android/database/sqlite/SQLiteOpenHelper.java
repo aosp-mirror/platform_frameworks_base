@@ -197,6 +197,8 @@ public abstract class SQLiteOpenHelper {
                 }
                 mOpenParamsBuilder.setWriteAheadLoggingEnabled(enabled);
             }
+            // Compatibility WAL is disabled if an app disables or enables WAL
+            mOpenParamsBuilder.addOpenFlags(SQLiteDatabase.DISABLE_COMPATIBILITY_WAL);
         }
     }
 
