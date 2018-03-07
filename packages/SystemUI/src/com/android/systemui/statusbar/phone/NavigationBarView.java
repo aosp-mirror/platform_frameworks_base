@@ -289,16 +289,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         notifyVerticalChangedListener(mVertical);
     }
 
-    public void setRecentsAnimationStarted(boolean started) {
+    public void onQuickStepStarted() {
         if (mRecentsOnboarding != null) {
-            mRecentsOnboarding.onRecentsAnimationStarted();
+            mRecentsOnboarding.onQuickStepStarted();
         }
-    }
-
-    public void onConnectionChanged(boolean isConnected) {
-        updateSlippery();
-        updateNavButtonIcons();
-        setUpSwipeUpOnboarding(isConnected);
     }
 
     @Override
@@ -672,6 +666,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             WindowManager wm = (WindowManager)getContext().getSystemService(Context.WINDOW_SERVICE);
             wm.updateViewLayout((View) getParent(), lp);
         }
+    }
+
+    public void onNavigationButtonLongPress(View v) {
+        mGestureHelper.onNavigationButtonLongPress(v);
     }
 
     public void onPanelExpandedChange(boolean expanded) {
