@@ -763,15 +763,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public String[] resourceDirs;
 
     /**
-     * String retrieved from the seinfo tag found in selinux policy. This value
-     * can be overridden with a value set through the mac_permissions.xml policy
-     * construct. This value is useful in setting an SELinux security context on
-     * the process as well as its data directory. The String default is being used
-     * here to represent a catchall label when no policy matches.
+     * String retrieved from the seinfo tag found in selinux policy. This value can be set through
+     * the mac_permissions.xml policy construct. This value is used for setting an SELinux security
+     * context on the process as well as its data directory.
      *
      * {@hide}
      */
-    public String seInfo = "default";
+    public String seInfo;
 
     /**
      * The seinfo tag generated per-user. This value may change based upon the

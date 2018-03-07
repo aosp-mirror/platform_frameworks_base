@@ -39,6 +39,10 @@ public final class SharedUserSetting extends SettingBase {
     int uidFlags;
     int uidPrivateFlags;
 
+    // The lowest targetSdkVersion of all apps in the sharedUserSetting, used to assign seinfo so
+    // that all apps within the sharedUser run in the same selinux context.
+    int seInfoTargetSdkVersion;
+
     final ArraySet<PackageSetting> packages = new ArraySet<PackageSetting>();
 
     final PackageSignatures signatures = new PackageSignatures();
@@ -84,6 +88,11 @@ public final class SharedUserSetting extends SettingBase {
     }
 
     void addPackage(PackageSetting packageSetting) {
+        // If this is the first package added to this shared user, temporarily (until next boot) use
+        // its targetSdkVersion when assigning seInfo for the shared user.
+        if ((packages.size() == 0) && (packageSetting.pkg != null)) {
+            seInfoTargetSdkVersion = packageSetting.pkg.applicationInfo.targetSdkVersion;
+        }
         if (packages.add(packageSetting)) {
             setFlags(this.pkgFlags | packageSetting.pkgFlags);
             setPrivateFlags(this.pkgPrivateFlags | packageSetting.pkgPrivateFlags);
@@ -107,4 +116,26 @@ public final class SharedUserSetting extends SettingBase {
     public boolean isPrivileged() {
         return (this.pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
     }
+
+    /**
+     * Determine the targetSdkVersion for a sharedUser and update pkg.applicationInfo.seInfo
+     * to ensure that all apps within the sharedUser share an SELinux domain. Use the lowest
+     * targetSdkVersion of all apps within the shared user, which corresponds to the least
+     * restrictive selinux domain.
+     */
+    public void fixSeInfoLocked() {
+        final List<PackageParser.Package> pkgList = getPackages();
+
+        for (PackageParser.Package pkg : pkgList) {
+            if (pkg.applicationInfo.targetSdkVersion < seInfoTargetSdkVersion) {
+                seInfoTargetSdkVersion = pkg.applicationInfo.targetSdkVersion;
+            }
+        }
+        for (PackageParser.Package pkg : pkgList) {
+            final boolean isPrivileged = isPrivileged() | pkg.isPrivileged();
+            pkg.applicationInfo.seInfo = SELinuxMMAC.getSeInfo(pkg, isPrivileged,
+                pkg.applicationInfo.targetSandboxVersion, seInfoTargetSdkVersion);
+        }
+    }
+
 }
