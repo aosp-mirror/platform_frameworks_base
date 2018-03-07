@@ -332,8 +332,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private static final String ATTR_APPLICATION_RESTRICTIONS_MANAGER
             = "application-restrictions-manager";
 
-    private static final String MANAGED_PROVISIONING_PKG = "com.android.managedprovisioning";
-
     // Comprehensive list of delegations.
     private static final String DELEGATIONS[] = {
         DELEGATION_CERT_INSTALL,
@@ -766,7 +764,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 // Notify ManagedProvisioning to update the built-in cross profile intent filters.
                 Intent intent = new Intent(
                         DevicePolicyManager.ACTION_DATA_SHARING_RESTRICTION_CHANGED);
-                intent.setPackage(MANAGED_PROVISIONING_PKG);
+                intent.setPackage(getManagedProvisioningPackage(mContext));
                 intent.putExtra(Intent.EXTRA_USER_ID, userId);
                 intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
                 mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
@@ -8957,7 +8955,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .putExtra(
                         DevicePolicyManager.EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED,
                         leaveAllSystemAppsEnabled)
-                .setPackage(MANAGED_PROVISIONING_PKG)
+                .setPackage(getManagedProvisioningPackage(mContext))
                 .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
 
@@ -11591,7 +11589,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (profileOwner == null) {
             return false;
         }
-        
+
         final Set<String> userAffiliationIds = getUserData(userId).mAffiliationIds;
         final Set<String> deviceAffiliationIds =
                 getUserData(UserHandle.USER_SYSTEM).mAffiliationIds;
@@ -13092,5 +13090,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     metrics.nonLetter, metrics.numeric, metrics.upperCase, metrics.lowerCase,
                     metrics.symbols);
         }
+    }
+
+    private static String getManagedProvisioningPackage(Context context) {
+        return context.getResources().getString(R.string.config_managed_provisioning_package);
     }
 }
