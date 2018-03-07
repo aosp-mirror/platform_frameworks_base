@@ -41,8 +41,8 @@ interface IWindowSession {
             in int viewVisibility, out Rect outContentInsets, out Rect outStableInsets,
             out InputChannel outInputChannel);
     int addToDisplay(IWindow window, int seq, in WindowManager.LayoutParams attrs,
-            in int viewVisibility, in int layerStackId, out Rect outContentInsets,
-            out Rect outStableInsets, out Rect outOutsets,
+            in int viewVisibility, in int layerStackId, out Rect outFrame,
+            out Rect outContentInsets, out Rect outStableInsets, out Rect outOutsets,
             out DisplayCutout.ParcelableWrapper displayCutout, out InputChannel outInputChannel);
     int addWithoutInputChannel(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             in int viewVisibility, out Rect outContentInsets, out Rect outStableInsets);
