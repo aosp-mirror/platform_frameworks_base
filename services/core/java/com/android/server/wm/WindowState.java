@@ -2284,13 +2284,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // interactive, the value may persist until the next animation, which could potentially
         // be occurring while turning off the screen. This would lead to the screen incorrectly
         // turning back on.
-        if (hasTurnScreenOnFlag && allowTheaterMode && canTurnScreenOn
-                && !mPowerManagerWrapper.isInteractive()) {
-            if (DEBUG_VISIBILITY || DEBUG_POWER) {
-                Slog.v(TAG, "Relayout window turning screen on: " + this);
+        if (hasTurnScreenOnFlag) {
+            if (allowTheaterMode && canTurnScreenOn && !mPowerManagerWrapper.isInteractive()) {
+                if (DEBUG_VISIBILITY || DEBUG_POWER) {
+                    Slog.v(TAG, "Relayout window turning screen on: " + this);
+                }
+                mPowerManagerWrapper.wakeUp(SystemClock.uptimeMillis(),
+                        "android.server.wm:TURN_ON");
             }
-            mPowerManagerWrapper.wakeUp(SystemClock.uptimeMillis(),
-                    "android.server.wm:TURN_ON");
 
             if (mAppToken != null) {
                 mAppToken.setCanTurnScreenOn(false);
