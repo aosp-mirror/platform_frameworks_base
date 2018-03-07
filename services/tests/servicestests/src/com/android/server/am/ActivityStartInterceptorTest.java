@@ -33,10 +33,12 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.UserInfo;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 
 import com.android.internal.app.UnlaunchableAppActivity;
 import com.android.server.LocalServices;
+import com.android.server.pm.PackageManagerService;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -49,6 +51,7 @@ import org.mockito.MockitoAnnotations;
  * Build/Install/Run:
  *  bit FrameworksServicesTests:com.android.server.am.ActivityStartInterceptorTest
  */
+@Presubmit
 @SmallTest
 public class ActivityStartInterceptorTest {
     private static final int TEST_USER_ID = 1;
@@ -78,6 +81,8 @@ public class ActivityStartInterceptorTest {
     private UserController mUserController;
     @Mock
     private KeyguardManager mKeyguardManager;
+    @Mock
+    private PackageManagerService mPackageManager;
 
     private ActivityStartInterceptor mInterceptor;
     private ActivityInfo mAInfo = new ActivityInfo();
@@ -110,6 +115,11 @@ public class ActivityStartInterceptorTest {
         when(mKeyguardManager.createConfirmDeviceCredentialIntent(
                 nullable(CharSequence.class), nullable(CharSequence.class), eq(TEST_USER_ID))).
                 thenReturn(CONFIRM_CREDENTIALS_INTENT);
+
+        // Mock PackageManager
+        when(mService.getPackageManager()).thenReturn(mPackageManager);
+        when(mPackageManager.getHarmfulAppWarning(TEST_PACKAGE_NAME, TEST_USER_ID))
+                .thenReturn(null);
 
         // Initialise activity info
         mAInfo.packageName = TEST_PACKAGE_NAME;
