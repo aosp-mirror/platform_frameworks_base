@@ -28,8 +28,6 @@ import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER
 import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.EXTRA_USER_HANDLE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.os.Process.ROOT_UID;
-import static android.os.Process.SHELL_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.myPid;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
@@ -3607,14 +3605,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public Bitmap screenshotWallpaper() {
-        if (!checkCallingPermission(READ_FRAME_BUFFER,
-                "screenshotWallpaper()")) {
+        if (!checkCallingPermission(READ_FRAME_BUFFER, "screenshotWallpaper()")) {
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
         }
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "screenshotWallpaper");
-            return screenshotApplications(DEFAULT_DISPLAY, Bitmap.Config.ARGB_8888,
-                    true /* wallpaperOnly */);
+            synchronized (mWindowMap) {
+                return mRoot.mWallpaperController.screenshotWallpaperLocked();
+            }
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
@@ -3627,14 +3625,25 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     @Override
     public boolean requestAssistScreenshot(final IAssistDataReceiver receiver) {
-        if (!checkCallingPermission(READ_FRAME_BUFFER,
-                "requestAssistScreenshot()")) {
+        if (!checkCallingPermission(READ_FRAME_BUFFER, "requestAssistScreenshot()")) {
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
         }
 
+        final Bitmap bm;
+        synchronized (mWindowMap) {
+            final DisplayContent displayContent = mRoot.getDisplayContent(DEFAULT_DISPLAY);
+            if (displayContent == null) {
+                if (DEBUG_SCREENSHOT) {
+                    Slog.i(TAG_WM, "Screenshot returning null. No Display for displayId="
+                            + DEFAULT_DISPLAY);
+                }
+                bm = null;
+            } else {
+                bm = displayContent.screenshotDisplayLocked(Bitmap.Config.ARGB_8888);
+            }
+        }
+
         FgThread.getHandler().post(() -> {
-            Bitmap bm = screenshotApplications(DEFAULT_DISPLAY, Bitmap.Config.ARGB_8888,
-                    false /* wallpaperOnly */);
             try {
                 receiver.onHandleAssistScreenshot(bm);
             } catch (RemoteException e) {
@@ -3661,28 +3670,6 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             mTaskSnapshotController.removeObsoleteTaskFiles(persistentTaskIds, runningUserIds);
         }
-    }
-
-    /**
-     * Takes a snapshot of the screen.  In landscape mode this grabs the whole screen.
-     * In portrait mode, it grabs the full screenshot.
-     *
-     * @param displayId the Display to take a screenshot of.
-     * @param config of the output bitmap
-     * @param wallpaperOnly true if only the wallpaper layer should be included in the screenshot
-     */
-    private Bitmap screenshotApplications(int displayId, Bitmap.Config config,
-            boolean wallpaperOnly) {
-        final DisplayContent displayContent;
-        synchronized(mWindowMap) {
-            displayContent = mRoot.getDisplayContent(displayId);
-            if (displayContent == null) {
-                if (DEBUG_SCREENSHOT) Slog.i(TAG_WM, "Screenshot returning null. No Display for "
-                        + "displayId=" + displayId);
-                return null;
-            }
-        }
-        return displayContent.screenshotDisplay(config, wallpaperOnly);
     }
 
     /**
