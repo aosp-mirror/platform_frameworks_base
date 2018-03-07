@@ -2311,7 +2311,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * transaction have called {@link #startPostponedEnterTransition()}.
      * <p>
      * This method should be called before being added to the FragmentTransaction or
-     * in {@link #onCreate(Bundle), {@link #onAttach(Context)}, or
+     * in {@link #onCreate(Bundle)}, {@link #onAttach(Context)}, or
      * {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}}.
      * {@link #startPostponedEnterTransition()} must be called to allow the Fragment to
      * start the transitions.
