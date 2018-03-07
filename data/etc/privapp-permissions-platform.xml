@@ -322,6 +322,8 @@ applications that come with the platform
         <permission name="android.permission.SET_ANIMATION_SCALE"/>
         <permission name="android.permission.SET_DEBUG_APP"/>
         <permission name="android.permission.SET_PROCESS_LIMIT"/>
+        <permission name="android.permission.SET_TIME"/>
+        <permission name="android.permission.SET_TIME_ZONE"/>
         <permission name="android.permission.SIGNAL_PERSISTENT_PROCESSES"/>
         <permission name="android.permission.STOP_APP_SWITCHES"/>
         <permission name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME"/>
