@@ -779,6 +779,19 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
                 @NonNull ControllerInfo controller, @NonNull Uri uri, @Nullable Bundle extras) { }
 
         /**
+         * Called when the player's current playing item is changed
+         * <p>
+         * When it's called, you should invalidate previous playback information and wait for later
+         * callbacks.
+         *
+         * @param session the controller for this event
+         * @param mpb the player for this event
+         * @param item new item
+         */
+        public void onCurrentMediaItemChanged(@NonNull MediaSession2 session,
+                @NonNull MediaPlayerBase mpb, @NonNull MediaItem2 item) { }
+
+        /**
          * Called when the player is <i>prepared</i>, i.e. it is ready to play the content
          * referenced by the given data source.
          * @param session the session for this event
@@ -1753,8 +1766,8 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      *
      * @return currently playing media item
      */
-    @Override
-    public MediaItem2 getCurrentPlaylistItem() {
+    public MediaItem2 getCurrentMediaItem() {
+        // TODO(jaewan): Rename provider API
         return mProvider.getCurrentPlaylistItem_impl();
     }
 
