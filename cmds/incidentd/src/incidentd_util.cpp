@@ -80,6 +80,7 @@ pid_t fork_execute_cmd(const char* cmd, char* const argv[], Fpipe* input, Fpipe*
     close(output->writeFd());
     return pid;
 }
+
 // ================================================================================
 const char** varargs(const char* first, va_list rest) {
     va_list copied_rest;
@@ -100,4 +101,12 @@ const char** varargs(const char* first, va_list rest) {
     }
     ret[numOfArgs] = NULL;
     return ret;
+}
+
+// ================================================================================
+const uint64_t NANOS_PER_SEC = 1000000000;
+uint64_t Nanotime() {
+    timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return static_cast<uint64_t>(ts.tv_sec * NANOS_PER_SEC + ts.tv_nsec);
 }

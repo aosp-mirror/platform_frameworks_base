@@ -87,6 +87,35 @@ status_t FdBuffer::read(int fd, int64_t timeout) {
     return NO_ERROR;
 }
 
+status_t FdBuffer::readFully(int fd) {
+    mStartTime = uptimeMillis();
+
+    while (true) {
+        if (mBuffer.size() >= MAX_BUFFER_COUNT * BUFFER_SIZE) {
+            // Don't let it get too big.
+            mTruncated = true;
+            VLOG("Truncating data");
+            break;
+        }
+        if (mBuffer.writeBuffer() == NULL) return NO_MEMORY;
+
+        ssize_t amt =
+                TEMP_FAILURE_RETRY(::read(fd, mBuffer.writeBuffer(), mBuffer.currentToWrite()));
+        if (amt < 0) {
+            VLOG("Fail to read %d: %s", fd, strerror(errno));
+            return -errno;
+        } else if (amt == 0) {
+            VLOG("Done reading %zu bytes", mBuffer.size());
+            // We're done.
+            break;
+        }
+        mBuffer.wp()->move(amt);
+    }
+
+    mFinishTime = uptimeMillis();
+    return NO_ERROR;
+}
+
 status_t FdBuffer::readProcessedDataInStream(int fd, int toFd, int fromFd, int64_t timeoutMs,
                                              const bool isSysfs) {
     struct pollfd pfds[] = {

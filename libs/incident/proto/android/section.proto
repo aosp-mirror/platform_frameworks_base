@@ -43,6 +43,9 @@ enum SectionType {
 
     // incidentd read file and gzip the data in bytes field
     SECTION_GZIP = 5;
+
+    // incidentd calls tombstoned for annotated field
+    SECTION_TOMBSTONE = 6;
 }
 
 message SectionFlags {

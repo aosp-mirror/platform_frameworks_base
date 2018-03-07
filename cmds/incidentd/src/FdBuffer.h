@@ -41,6 +41,12 @@ public:
     status_t read(int fd, int64_t timeoutMs);
 
     /**
+     * Read the data until we hit eof.
+     * Returns NO_ERROR if there were no errors.
+     */
+    status_t readFully(int fd);
+
+    /**
      * Read processed results by streaming data to a parsing process, e.g. incident helper.
      * The parsing process provides IO fds which are 'toFd' and 'fromFd'. The function
      * reads original data in 'fd' and writes to parsing process through 'toFd', then it reads
