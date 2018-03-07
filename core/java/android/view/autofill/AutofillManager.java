@@ -986,6 +986,7 @@ public final class AutofillManager {
      * @param virtualId id identifying the virtual child inside the parent view.
      */
     public void notifyViewExited(@NonNull View view, int virtualId) {
+        if (sVerbose) Log.v(TAG, "notifyViewExited(" + view.getAutofillId() + ", " + virtualId);
         if (!hasAutofillFeature()) {
             return;
         }
@@ -2190,6 +2191,7 @@ public final class AutofillManager {
         public int getRelevantEventTypes(int relevantEventTypes) {
             return relevantEventTypes | AccessibilityEvent.TYPE_VIEW_FOCUSED
                     | AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED
+                    | AccessibilityEvent.TYPE_VIEW_CLICKED
                     | AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED;
         }
 
@@ -2245,6 +2247,12 @@ public final class AutofillManager {
                                 && mFocusedNodeId == event.getSourceNodeId()) {
                             notifyValueChanged(event.getWindowId(), event.getSourceNodeId());
                         }
+                    }
+                } break;
+
+                case AccessibilityEvent.TYPE_VIEW_CLICKED: {
+                    synchronized (mLock) {
+                        notifyViewClicked(event.getWindowId(), event.getSourceNodeId());
                     }
                 } break;
 
@@ -2317,6 +2325,22 @@ public final class AutofillManager {
             }
             AutofillManager.this.notifyValueChanged(view, virtualId,
                     AutofillValue.forText(node.getText()));
+        }
+
+        private void notifyViewClicked(int windowId, long nodeId) {
+            final int virtualId = AccessibilityNodeInfo.getVirtualDescendantId(nodeId);
+            if (!isVirtualNode(virtualId)) {
+                return;
+            }
+            final View view = findViewByAccessibilityId(windowId, nodeId);
+            if (view == null) {
+                return;
+            }
+            final AccessibilityNodeInfo node = findVirtualNodeByAccessibilityId(view, virtualId);
+            if (node == null) {
+                return;
+            }
+            AutofillManager.this.notifyViewClicked(view, virtualId);
         }
 
         @GuardedBy("mLock")
