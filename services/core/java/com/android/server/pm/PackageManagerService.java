@@ -4092,8 +4092,15 @@ public class PackageManagerService extends IPackageManager.Stub
             return false;
         }
         if (callerIsInstantApp) {
-            // request for a specific component; if it hasn't been explicitly exposed, filter
+            // request for a specific component; if it hasn't been explicitly exposed through
+            // property or instrumentation target, filter
             if (component != null) {
+                final PackageParser.Instrumentation instrumentation =
+                        mInstrumentation.get(component);
+                if (instrumentation != null
+                        && isCallerSameApp(instrumentation.info.targetPackage, callingUid)) {
+                    return false;
+                }
                 return !isComponentVisibleToInstantApp(component, componentType);
             }
             // request for application; if no components have been explicitly exposed, filter
