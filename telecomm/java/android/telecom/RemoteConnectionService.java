@@ -93,6 +93,10 @@ final class RemoteConnectionService {
                     // failure on the providing end, so immediately mark it destroyed
                     connection.setDestroyed();
                 }
+                connection.setStatusHints(parcel.getStatusHints());
+                connection.setIsVoipAudioMode(parcel.getIsVoipAudioMode());
+                connection.setRingbackRequested(parcel.isRingbackRequested());
+                connection.putExtras(parcel.getExtras());
             }
         }
 
