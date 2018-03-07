@@ -21,6 +21,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.media.MediaPlaylistAgent.RepeatMode;
+import android.media.MediaPlaylistAgent.ShuffleMode;
 import android.media.MediaSession2.Command;
 import android.media.MediaSession2.CommandButton;
 import android.media.MediaSession2.CommandGroup;
@@ -65,7 +67,7 @@ import java.util.concurrent.Executor;
  * @see MediaSession2
  * @see MediaSessionService2
  */
-public class MediaController2 implements AutoCloseable, MediaPlaylistController {
+public class MediaController2 implements AutoCloseable {
     /**
      * Interface for listening to change in activeness of the {@link MediaSession2}.  It's
      * active if and only if it has set a player.
@@ -223,6 +225,57 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
          */
         public void onCurrentMediaItemChanged(@NonNull MediaController2 controller,
                 @NonNull MediaItem2 item) { }
+
+        /**
+         * Called when a playlist is changed.
+         *
+         * @param controller the controller for this event
+         * @param mplc playlist controller for this event
+         * @param list new playlist
+         * @param metadata new metadata
+         */
+        public void onPlaylistChanged(@NonNull MediaController2 controller,
+                @NonNull MediaPlaylistAgent mplc, @NonNull List<MediaItem2> list,
+                @Nullable MediaMetadata2 metadata) { }
+
+        /**
+         * Called when a playlist metadata is changed.
+         *
+         * @param controller the controller for this event
+         * @param mplc playlist controller for this event
+         * @param metadata new metadata
+         */
+        public void onPlaylistMetadataChanged(@NonNull MediaController2 controller,
+                @NonNull MediaPlaylistAgent mplc, @Nullable MediaMetadata2 metadata) { }
+
+        /**
+         * Called when the shuffle mode is changed.
+         *
+         * @param controller the controller for this event
+         * @param mplc playlist controller for this event
+         * @param shuffleMode repeat mode
+         * @see MediaPlaylistAgent#SHUFFLE_MODE_NONE
+         * @see MediaPlaylistAgent#SHUFFLE_MODE_ALL
+         * @see MediaPlaylistAgent#SHUFFLE_MODE_GROUP
+         */
+        public void onShuffleModeChanged(@NonNull MediaController2 controller,
+                @NonNull MediaPlaylistAgent mplc,
+                @MediaPlaylistAgent.ShuffleMode int shuffleMode) { }
+
+        /**
+         * Called when the repeat mode is changed.
+         *
+         * @param controller the controller for this event
+         * @param mplc playlist controller for this event
+         * @param repeatMode repeat mode
+         * @see MediaPlaylistAgent#REPEAT_MODE_NONE
+         * @see MediaPlaylistAgent#REPEAT_MODE_ONE
+         * @see MediaPlaylistAgent#REPEAT_MODE_ALL
+         * @see MediaPlaylistAgent#REPEAT_MODE_GROUP
+         */
+        public void onRepeatModeChanged(@NonNull MediaController2 controller,
+                @NonNull MediaPlaylistAgent mplc,
+                @MediaPlaylistAgent.RepeatMode int repeatMode) { }
 
         /**
          * Called when the playlist parameters are changed.
@@ -396,14 +449,6 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
 
     public void stop() {
         mProvider.stop_impl();
-    }
-
-    public void skipToPrevious() {
-        mProvider.skipToPrevious_impl();
-    }
-
-    public void skipToNext() {
-        mProvider.skipToNext_impl();
     }
 
     /**
@@ -702,56 +747,38 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
     }
 
     /**
-     * Register {@link MediaPlaylistController.PlaylistEventCallback} to listen changes in the
-     * underlying {@link MediaPlaylistController}, regardless of the change in the controller.
-     * <p>
-     * Registered callbacks will be also called when the controller is changed.
-     *
-     * @param executor a callback Executor
-     * @param callback a PlaylistEventCallback
-     * @throws IllegalArgumentException if executor or callback is {@code null}.
-     */
-    @Override
-    public void registerPlaylistControllerCallback(@NonNull @CallbackExecutor Executor executor,
-            @NonNull PlaylistEventCallback callback) {
-        // TODO(jaewan): Implement (b/74169681)
-        //mProvider.registerPlaylistControllerCallback_impl(executor, callback);
-    }
-
-    /**
-     * Unregister the previously registered {@link MediaPlaylistController.PlaylistEventCallback}.
-     *
-     * @param callback the callback to be removed
-     * @throws IllegalArgumentException if the callback is {@code null}.
-     */
-    @Override
-    public void unregisterPlaylistControllerCallback(@NonNull PlaylistEventCallback callback) {
-        // TODO(jaewan): Implement (b/74169681)
-        //mProvider.unregisterPlaylistControllerCallback_impl(callback);
-    }
-
-    /**
      * Return playlist from the session.
      *
      * @return playlist. Can be {@code null} if the controller doesn't have enough permission.
      */
-    @Override
     public @Nullable List<MediaItem2> getPlaylist() {
         return mProvider.getPlaylist_impl();
     }
 
-
-    @Override
+    /**
+     * Sets the playlist.
+     *
+     * @param list playlist
+     * @param metadata metadata of the playlist
+     */
     public void setPlaylist(@NonNull List<MediaItem2> list, @Nullable MediaMetadata2 metadata) {
         // TODO(jaewan): Implement (b/74174649)
     }
 
-    @Override
+    /**
+     * Updates the playlist metadata
+     *
+     * @param metadata metadata of the playlist
+     */
     public void updatePlaylistMetadata(@Nullable MediaMetadata2 metadata) {
         // TODO(jaewan): Implement (b/74174649)
     }
 
-    @Override
+    /**
+     * Returns the playlist metadata
+     *
+     * @return metadata metadata of the playlist, or null if none is set
+     */
     public @Nullable MediaMetadata2 getPlaylistMetadata() {
         // TODO(jaewan): Implement (b/74174649)
         return null;
@@ -779,7 +806,6 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
      * @param item the media item you want to add
      * @throws IndexOutOfBoundsException if index is outside play list range
      */
-    @Override
     public void addPlaylistItem(int index, @NonNull MediaItem2 item) {
         mProvider.addPlaylistItem_impl(index, item);
     }
@@ -790,7 +816,6 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
      * If the item is the currently playing item of the playlist, current playback
      * will be stopped and playback moves to next source in the list.
      */
-    @Override
     public void removePlaylistItem(@NonNull MediaItem2 item) {
         mProvider.removePlaylistItem_impl(item);
     }
@@ -800,7 +825,6 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
      * @param index the index of the item to replace
      * @param item the new item
      */
-    @Override
     public void replacePlaylistItem(int index, @NonNull MediaItem2 item) {
         mProvider.replacePlaylistItem_impl(index, item);
     }
@@ -823,30 +847,35 @@ public class MediaController2 implements AutoCloseable, MediaPlaylistController 
      * @throws IllegalArgumentException if the play list is null
      * @throws NullPointerException if index is outside play list range
      */
-    @Override
     public void skipToPlaylistItem(@NonNull MediaItem2 item) {
         mProvider.skipToPlaylistItem_impl(item);
     }
 
-    @Override
+    public void skipToPreviousItem() {
+        // TODO(jaewan): fix this
+        mProvider.skipToPrevious_impl();
+    }
+
+    public void skipToNextItem() {
+        // TODO(jaewan): fix this
+        mProvider.skipToNext_impl();
+    }
+
     public @RepeatMode int getRepeatMode() {
         // TODO(jaewan): Implement (b/74118768)
         return 0;
     }
 
-    @Override
-    public void setRepeatMode(int repeatMode) {
+    public void setRepeatMode(@RepeatMode int repeatMode) {
         // TODO(jaewan): Implement (b/74118768)
     }
 
-    @Override
     public @ShuffleMode int getShuffleMode() {
         // TODO(jaewan): Implement (b/74118768)
         return 0;
     }
 
-    @Override
-    public void setShuffleMode(int shuffleMode) {
+    public void setShuffleMode(@ShuffleMode int shuffleMode) {
         // TODO(jaewan): Implement (b/74118768)
     }
 }
