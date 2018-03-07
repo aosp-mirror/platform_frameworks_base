@@ -19,7 +19,6 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.media.AudioAttributesProto;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -206,19 +205,26 @@ public final class AudioAttributes implements Parcelable {
     /**
      * @hide
      * Denotes a usage for alarms,
-     * will be muted when the Zen mode doesn't allow alarms
+     * will be muted when the Zen mode priority doesn't allow alarms or in Alarms Only Mode
      * @see #SUPPRESSIBLE_USAGES
      */
     public final static int SUPPRESSIBLE_ALARM = 4;
     /**
      * @hide
-     * Denotes a usage for all other sounds not caught in SUPPRESSIBLE_NOTIFICATION,
-     * SUPPRESSIBLE_CALL,SUPPRESSIBLE_NEVER or SUPPRESSIBLE_ALARM.
-     * This includes media, system, game, navigation, the assistant, and more.
-     * These will be muted when the Zen mode doesn't allow media/system/other.
+     * Denotes a usage for media, game, assistant, and navigation
+     * will be muted when the Zen priority mode doesn't allow media
      * @see #SUPPRESSIBLE_USAGES
      */
-    public final static int SUPPRESSIBLE_MEDIA_SYSTEM_OTHER = 5;
+    public final static int SUPPRESSIBLE_MEDIA = 5;
+    /**
+     * @hide
+     * Denotes a usage for all other sounds not caught in SUPPRESSIBLE_NOTIFICATION,
+     * SUPPRESSIBLE_CALL,SUPPRESSIBLE_NEVER, SUPPRESSIBLE_ALARM or SUPPRESSIBLE_MEDIA.
+     * This includes system, sonification and unknown sounds.
+     * These will be muted when the Zen priority mode doesn't allow sytem sounds
+     * @see #SUPPRESSIBLE_USAGES
+     */
+    public final static int SUPPRESSIBLE_SYSTEM = 6;
 
     /**
      * @hide
@@ -239,13 +245,13 @@ public final class AudioAttributes implements Parcelable {
         SUPPRESSIBLE_USAGES.put(USAGE_ASSISTANCE_ACCESSIBILITY,          SUPPRESSIBLE_NEVER);
         SUPPRESSIBLE_USAGES.put(USAGE_VOICE_COMMUNICATION,               SUPPRESSIBLE_NEVER);
         SUPPRESSIBLE_USAGES.put(USAGE_ALARM,                             SUPPRESSIBLE_ALARM);
-        SUPPRESSIBLE_USAGES.put(USAGE_MEDIA,                             SUPPRESSIBLE_MEDIA_SYSTEM_OTHER);
-        SUPPRESSIBLE_USAGES.put(USAGE_ASSISTANCE_SONIFICATION,           SUPPRESSIBLE_MEDIA_SYSTEM_OTHER);
-        SUPPRESSIBLE_USAGES.put(USAGE_ASSISTANCE_NAVIGATION_GUIDANCE,    SUPPRESSIBLE_MEDIA_SYSTEM_OTHER);
-        SUPPRESSIBLE_USAGES.put(USAGE_GAME,                              SUPPRESSIBLE_MEDIA_SYSTEM_OTHER);
-        SUPPRESSIBLE_USAGES.put(USAGE_VOICE_COMMUNICATION_SIGNALLING,    SUPPRESSIBLE_MEDIA_SYSTEM_OTHER);
-        SUPPRESSIBLE_USAGES.put(USAGE_ASSISTANT,                         SUPPRESSIBLE_MEDIA_SYSTEM_OTHER);
-        SUPPRESSIBLE_USAGES.put(USAGE_UNKNOWN,                           SUPPRESSIBLE_MEDIA_SYSTEM_OTHER);
+        SUPPRESSIBLE_USAGES.put(USAGE_MEDIA,                             SUPPRESSIBLE_MEDIA);
+        SUPPRESSIBLE_USAGES.put(USAGE_ASSISTANCE_NAVIGATION_GUIDANCE,    SUPPRESSIBLE_MEDIA);
+        SUPPRESSIBLE_USAGES.put(USAGE_GAME,                              SUPPRESSIBLE_MEDIA);
+        SUPPRESSIBLE_USAGES.put(USAGE_ASSISTANT,                         SUPPRESSIBLE_MEDIA);
+        SUPPRESSIBLE_USAGES.put(USAGE_VOICE_COMMUNICATION_SIGNALLING,    SUPPRESSIBLE_SYSTEM);
+        SUPPRESSIBLE_USAGES.put(USAGE_ASSISTANCE_SONIFICATION,           SUPPRESSIBLE_SYSTEM);
+        SUPPRESSIBLE_USAGES.put(USAGE_UNKNOWN,                           SUPPRESSIBLE_SYSTEM);
     }
 
     /**

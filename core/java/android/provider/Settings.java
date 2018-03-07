@@ -3132,7 +3132,7 @@ public final class Settings {
         public static final String ALWAYS_FINISH_ACTIVITIES = Global.ALWAYS_FINISH_ACTIVITIES;
 
         /**
-         * Determines which streams are affected by ringer mode changes. The
+         * Determines which streams are affected by ringer and zen mode changes. The
          * stream type's bit should be set to 1 if it should be muted when going
          * into an inaudible ringer mode.
          */
