@@ -37,6 +37,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
@@ -4643,10 +4644,14 @@ public class Editor {
             return 0;
         }
 
-        protected final void showMagnifier(@NonNull final MotionEvent event) {
-            if (mMagnifier == null) {
-                return;
-            }
+        /**
+         * Computes the position where the magnifier should be shown, relative to
+         * {@code mTextView}, and writes them to {@code showPosInView}. Also decides
+         * whether the magnifier should be shown or dismissed after this touch event.
+         * @return Whether the magnifier should be shown at the computed coordinates or dismissed.
+         */
+        private boolean obtainMagnifierShowCoordinates(@NonNull final MotionEvent event,
+                final PointF showPosInView) {
 
             final int trigger = getMagnifierHandleTrigger();
             final int offset;
@@ -4664,26 +4669,52 @@ public class Editor {
             }
 
             if (offset == -1) {
-                dismissMagnifier();
+                return false;
             }
 
             final Layout layout = mTextView.getLayout();
             final int lineNumber = layout.getLineForOffset(offset);
-            // Horizontally move the magnifier smoothly.
+
+            // Horizontally move the magnifier smoothly but clamp inside the current line.
             final int[] textViewLocationOnScreen = new int[2];
             mTextView.getLocationOnScreen(textViewLocationOnScreen);
-            final float xPosInView = event.getRawX() - textViewLocationOnScreen[0];
+            final float touchXInView = event.getRawX() - textViewLocationOnScreen[0];
+            final float lineLeft = mTextView.getLayout().getLineLeft(lineNumber)
+                    + mTextView.getTotalPaddingLeft() - mTextView.getScrollX();
+            final float lineRight = mTextView.getLayout().getLineRight(lineNumber)
+                    + mTextView.getTotalPaddingLeft() - mTextView.getScrollX();
+            final float contentWidth = Math.round(mMagnifier.getWidth() / mMagnifier.getZoom());
+            if (touchXInView < lineLeft - contentWidth / 2
+                    || touchXInView > lineRight + contentWidth / 2) {
+                // The touch is too out of the bounds of the current line, so hide the magnifier.
+                return false;
+            }
+            showPosInView.x = Math.max(lineLeft, Math.min(lineRight, touchXInView));
+
             // Vertically snap to middle of current line.
-            final float yPosInView = (mTextView.getLayout().getLineTop(lineNumber)
+            showPosInView.y = (mTextView.getLayout().getLineTop(lineNumber)
                     + mTextView.getLayout().getLineBottom(lineNumber)) / 2.0f
                     + mTextView.getTotalPaddingTop() - mTextView.getScrollY();
 
-            // Make the cursor visible and stop blinking.
-            mRenderCursorRegardlessTiming = true;
-            mTextView.invalidateCursorPath();
-            suspendBlink();
+            return true;
+        }
 
-            mMagnifier.show(xPosInView, yPosInView);
+        protected final void updateMagnifier(@NonNull final MotionEvent event) {
+            if (mMagnifier == null) {
+                return;
+            }
+
+            final PointF showPosInView = new PointF();
+            final boolean shouldShow = obtainMagnifierShowCoordinates(event, showPosInView);
+            if (shouldShow) {
+                // Make the cursor visible and stop blinking.
+                mRenderCursorRegardlessTiming = true;
+                mTextView.invalidateCursorPath();
+                suspendBlink();
+                mMagnifier.show(showPosInView.x, showPosInView.y);
+            } else {
+                dismissMagnifier();
+            }
         }
 
         protected final void dismissMagnifier() {
@@ -4872,11 +4903,11 @@ public class Editor {
                 case MotionEvent.ACTION_DOWN:
                     mDownPositionX = ev.getRawX();
                     mDownPositionY = ev.getRawY();
-                    showMagnifier(ev);
+                    updateMagnifier(ev);
                     break;
 
                 case MotionEvent.ACTION_MOVE:
-                    showMagnifier(ev);
+                    updateMagnifier(ev);
                     break;
 
                 case MotionEvent.ACTION_UP:
@@ -5230,11 +5261,11 @@ public class Editor {
                     // re-engages the handle.
                     mTouchWordDelta = 0.0f;
                     mPrevX = UNSET_X_VALUE;
-                    showMagnifier(event);
+                    updateMagnifier(event);
                     break;
 
                 case MotionEvent.ACTION_MOVE:
-                    showMagnifier(event);
+                    updateMagnifier(event);
                     break;
 
                 case MotionEvent.ACTION_UP:
