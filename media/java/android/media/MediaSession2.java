@@ -408,6 +408,29 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
     public static final int ERROR_CODE_SETUP_REQUIRED = 12;
 
     /**
+     * Interface definition of a callback to be invoked when a {@link MediaItem2} in the playlist
+     * didn't have a {@link DataSourceDesc} but it's needed now for preparing or playing it.
+     *
+     * #see #setOnDataSourceMissingHelper
+     */
+    public interface OnDataSourceMissingHelper {
+        /**
+         * Called when a {@link MediaItem2} in the playlist didn't have a {@link DataSourceDesc}
+         * but it's needed now for preparing or playing it.
+         * <p>
+         * Returned data source descriptor will be sent to the player directly to prepare or play
+         * the contents.
+         *
+         * @param session the session for this event
+         * @param item media item from the controller
+         * @return a data source descriptor if the media item. Can be {@code null} if the content
+         *        isn't available.
+         */
+        @Nullable DataSourceDesc onDataSourceMissing(@NonNull MediaSession2 session,
+                @NonNull MediaItem2 item);
+    }
+
+    /**
      * Define a command that a {@link MediaController2} can send to a {@link MediaSession2}.
      * <p>
      * If {@link #getCommandCode()} isn't {@link #COMMAND_CODE_CUSTOM}), it's predefined command.
@@ -1357,7 +1380,7 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
      * This API can be called in the {@link SessionCallback#onConnect(MediaSession2, ControllerInfo)}.
      *
      * @param controller controller to specify layout.
-     * @param layout oredered list of layout.
+     * @param layout ordered list of layout.
      */
     public void setCustomLayout(@NonNull ControllerInfo controller,
             @NonNull List<CommandButton> layout) {
@@ -1565,6 +1588,46 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
     }
 
     /**
+     * Sets the data source missing helper. Helper will be used to provide default implementation of
+     * {@link MediaPlaylistController} when it isn't set by developer.
+     * <p>
+     * Default implementation of the {@link MediaPlaylistController} will call helper when a
+     * {@link MediaItem2} in the playlist doesn't have a {@link DataSourceDesc}. This may happen
+     * when
+     * <ul>
+     *      <li>{@link MediaItem2} specified by {@link #setPlaylist(List, MediaMetadata2)} doesn't
+     *          have {@link DataSourceDesc}</li>
+     *      <li>{@link MediaController2#addPlaylistItem(int, MediaItem2)} is called and accepted
+     *          by {@link SessionCallback#onCommandRequest(MediaSession2, ControllerInfo, Command)}.
+     *          In that case, an item would be added automatically without the data source.</li>
+     * </ul>
+     * <p>
+     * If it's not set, playback wouldn't happen for the item without data source descriptor.
+     * <p>
+     * The helper will be run on the executor that you've specified by the
+     * {@link Builder#setSessionCallback(Executor, SessionCallback)}.
+     *
+     * @param helper a data source misisng helper.
+     * @throws IllegalStateException when the helper is set when the playlist controller is set
+     * @see #setPlaylist(List, MediaMetadata2)
+     * @see SessionCallback#onCommandRequest(MediaSession2, ControllerInfo, Command)
+     * @see #COMMAND_CODE_PLAYLIST_ADD_ITEM
+     * @see #COMMAND_CODE_PLAYLIST_REPLACE_ITEM
+     */
+    public void setOnDataSourceMissingHelper(@NonNull OnDataSourceMissingHelper helper) {
+        // TODO(jaewan): Implement (b/74090741)
+    }
+
+    /**
+     * Clears the data source missing helper.
+     *
+     * @see #setOnDataSourceMissingHelper(OnDataSourceMissingHelper)
+     */
+    public void clearOnDataSourceMissingHelper() {
+        // TODO(jaewan): Implement (b/74090741)
+    }
+
+    /**
      * Register {@link MediaPlaylistController.PlaylistEventCallback} to listen changes in the
      * underlying {@link MediaPlaylistController}, regardless of the change in the controller.
      * <p>
@@ -1615,6 +1678,16 @@ public class MediaSession2 implements AutoCloseable, MediaPlaylistController {
         mProvider.setPlaylist_impl(playlist);
     }
 
+    /**
+     * Set a list of {@link MediaItem2} as the current play list.
+     * <p>
+     * You may specify a {@link MediaItem2} without {@link DataSourceDesc}. However, in that case,
+     * you should set {@link OnDataSourceMissingHelper} for player to prepare.
+     *
+     * @param list A list of {@link MediaItem2} objects to set as a play list.
+     * @throws IllegalArgumentException if given {@param playlist} is null.
+     * @see #setOnDataSourceMissingHelper
+     */
     @Override
     public void setPlaylist(@NonNull List<MediaItem2> list, @Nullable MediaMetadata2 metadata) {
         // TODO(jaewan): Implement (b/74174649)
