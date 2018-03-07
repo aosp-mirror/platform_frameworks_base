@@ -16,7 +16,6 @@
 
 package android.media;
 
-import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -2099,27 +2098,7 @@ public class AudioManager {
      */
     private boolean querySoundEffectsEnabled(int user) {
         return Settings.System.getIntForUser(getContext().getContentResolver(),
-                Settings.System.SOUND_EFFECTS_ENABLED, 0, user) != 0
-                && !areSystemSoundsZenModeBlocked(getContext());
-    }
-
-    private boolean areSystemSoundsZenModeBlocked(Context context) {
-        int zenMode = Settings.Global.getInt(context.getContentResolver(),
-                Settings.Global.ZEN_MODE, 0);
-
-        switch (zenMode) {
-            case Settings.Global.ZEN_MODE_NO_INTERRUPTIONS:
-            case Settings.Global.ZEN_MODE_ALARMS:
-                return true;
-            case Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
-                final NotificationManager noMan = (NotificationManager) context
-                        .getSystemService(Context.NOTIFICATION_SERVICE);
-                return (noMan.getNotificationPolicy().priorityCategories
-                        & NotificationManager.Policy.PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER) == 0;
-            case Settings.Global.ZEN_MODE_OFF:
-            default:
-                return false;
-        }
+                Settings.System.SOUND_EFFECTS_ENABLED, 0, user) != 0;
     }
 
     /**

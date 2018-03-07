@@ -124,7 +124,6 @@ import android.os.IDeviceIdleController;
 import android.os.IInterface;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -3053,8 +3052,9 @@ public class NotificationManagerService extends SystemService {
         /**
          * Sets the notification policy.  Apps that target API levels below
          * {@link android.os.Build.VERSION_CODES#P} cannot change user-designated values to
-         * allow or disallow {@link Policy#PRIORITY_CATEGORY_ALARMS} and
-         * {@link Policy#PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER} from bypassing dnd
+         * allow or disallow {@link Policy#PRIORITY_CATEGORY_ALARMS},
+         * {@link Policy#PRIORITY_CATEGORY_SYSTEM} and
+         * {@link Policy#PRIORITY_CATEGORY_MEDIA} from bypassing dnd
          */
         @Override
         public void setNotificationPolicy(String pkg, Policy policy) {
@@ -3070,16 +3070,25 @@ public class NotificationManagerService extends SystemService {
                     int priorityCategories = policy.priorityCategories;
                     // ignore alarm and media values from new policy
                     priorityCategories &= ~Policy.PRIORITY_CATEGORY_ALARMS;
-                    priorityCategories &= ~Policy.PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER;
+                    priorityCategories &= ~Policy.PRIORITY_CATEGORY_MEDIA;
+                    priorityCategories &= ~Policy.PRIORITY_CATEGORY_SYSTEM;
                     // use user-designated values
-                    priorityCategories |= currPolicy.PRIORITY_CATEGORY_ALARMS;
-                    priorityCategories |= currPolicy.PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER;
+                    priorityCategories |= currPolicy.priorityCategories
+                            & Policy.PRIORITY_CATEGORY_ALARMS;
+                    priorityCategories |= currPolicy.priorityCategories
+                            & Policy.PRIORITY_CATEGORY_MEDIA;
+                    priorityCategories |= currPolicy.priorityCategories
+                            & Policy.PRIORITY_CATEGORY_SYSTEM;
 
                     policy = new Policy(priorityCategories,
                             policy.priorityCallSenders, policy.priorityMessageSenders,
                             policy.suppressedVisualEffects);
                 }
 
+                Slog.i(TAG, "setNotificationPolicy pkg=" + pkg
+                        + " targetSdk=" + applicationInfo.targetSdkVersion
+                        + " policy="
+                        + Policy.priorityCategoriesToString(policy.priorityCategories));
                 mZenModeHelper.setNotificationPolicy(policy);
             } catch (RemoteException e) {
             } finally {
