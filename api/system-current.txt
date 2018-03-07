@@ -6653,6 +6653,7 @@ package android.webkit {
     method public abstract android.view.View findFocus(android.view.View);
     method public abstract android.view.accessibility.AccessibilityNodeProvider getAccessibilityNodeProvider();
     method public abstract android.os.Handler getHandler(android.os.Handler);
+    method public default boolean isVisibleToUserForAutofill(int);
     method public abstract void onActivityResult(int, int, android.content.Intent);
     method public abstract void onAttachedToWindow();
     method public abstract void onConfigurationChanged(android.content.res.Configuration);
