@@ -34,6 +34,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkStats;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.BatteryStats;
 import android.os.Bundle;
 import android.os.Handler;
@@ -73,6 +74,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -5220,21 +5222,35 @@ public class TelephonyManager {
      * <p>
      * Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges()
      *
      * @param request Contains all the RAT with bands/channels that need to be scanned.
+     * @param executor The executor through which the callback should be invoked.
      * @param callback Returns network scan results or errors.
      * @return A NetworkScan obj which contains a callback which can be used to stop the scan.
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public NetworkScan requestNetworkScan(
-            NetworkScanRequest request, TelephonyScanManager.NetworkScanCallback callback) {
+            NetworkScanRequest request, Executor executor,
+            TelephonyScanManager.NetworkScanCallback callback) {
         synchronized (this) {
             if (mTelephonyScanManager == null) {
                 mTelephonyScanManager = new TelephonyScanManager();
             }
         }
-        return mTelephonyScanManager.requestNetworkScan(getSubId(), request, callback);
+        return mTelephonyScanManager.requestNetworkScan(getSubId(), request, executor, callback);
+    }
+
+    /**
+     * @deprecated
+     * Use {@link
+     * #requestNetworkScan(NetworkScanRequest, Executor, TelephonyScanManager.NetworkScanCallback)}
+     */
+    @Deprecated
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public NetworkScan requestNetworkScan(
+        NetworkScanRequest request, TelephonyScanManager.NetworkScanCallback callback) {
+        return requestNetworkScan(request, AsyncTask.THREAD_POOL_EXECUTOR, callback);
     }
 
     /**
