@@ -135,23 +135,23 @@ void GaugeMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
     }
 
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
-    long long protoToken = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_GAUGE_METRICS);
+    uint64_t protoToken = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_GAUGE_METRICS);
 
     for (const auto& pair : mPastBuckets) {
         const MetricDimensionKey& dimensionKey = pair.first;
 
         VLOG("  dimension key %s", dimensionKey.c_str());
-        long long wrapperToken =
+        uint64_t wrapperToken =
                 protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DATA);
 
         // First fill dimension.
-        long long dimensionToken = protoOutput->start(
+        uint64_t dimensionToken = protoOutput->start(
                 FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_WHAT);
         writeDimensionToProto(dimensionKey.getDimensionKeyInWhat(), protoOutput);
         protoOutput->end(dimensionToken);
 
         if (dimensionKey.hasDimensionKeyInCondition()) {
-            long long dimensionInConditionToken = protoOutput->start(
+            uint64_t dimensionInConditionToken = protoOutput->start(
                     FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_CONDITION);
             writeDimensionToProto(dimensionKey.getDimensionKeyInCondition(), protoOutput);
             protoOutput->end(dimensionInConditionToken);
@@ -159,7 +159,7 @@ void GaugeMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
 
         // Then fill bucket_info (GaugeBucketInfo).
         for (const auto& bucket : pair.second) {
-            long long bucketInfoToken = protoOutput->start(
+            uint64_t bucketInfoToken = protoOutput->start(
                     FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_BUCKET_INFO);
             protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_START_BUCKET_ELAPSED_NANOS,
                                (long long)bucket.mBucketStartNs);
@@ -167,7 +167,7 @@ void GaugeMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
                                (long long)bucket.mBucketEndNs);
 
             if (!bucket.mGaugeAtoms.empty()) {
-                long long atomsToken =
+                uint64_t atomsToken =
                     protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_ATOM);
                 for (const auto& atom : bucket.mGaugeAtoms) {
                     writeFieldValueTreeToStream(mTagId, *(atom.mFields), protoOutput);

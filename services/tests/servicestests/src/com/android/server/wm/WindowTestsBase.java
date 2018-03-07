@@ -84,6 +84,7 @@ class WindowTestsBase {
     WindowState mChildAppWindowAbove;
     WindowState mChildAppWindowBelow;
     HashSet<WindowState> mCommonWindows;
+    WallpaperController mWallpaperController;
 
     @Mock
     static WindowState.PowerManagerWrapper mPowerManagerWrapper;
@@ -104,6 +105,8 @@ class WindowTestsBase {
 
         sWm = TestWindowManagerPolicy.getWindowManagerService(context);
         beforeCreateDisplay();
+
+        mWallpaperController = new WallpaperController(sWm);
 
         context.getDisplay().getDisplayInfo(mDisplayInfo);
         mDisplayContent = createNewDisplay();
@@ -198,12 +201,17 @@ class WindowTestsBase {
             return new WindowTestUtils.TestWindowToken(type, dc);
         }
 
-        final TaskStack stack =
-                createStackControllerOnStackOnDisplay(windowingMode, activityType, dc).mContainer;
+        return createAppWindowToken(dc, windowingMode, activityType);
+    }
+
+    AppWindowToken createAppWindowToken(DisplayContent dc, int windowingMode, int activityType) {
+        final TaskStack stack = createStackControllerOnStackOnDisplay(windowingMode, activityType,
+                dc).mContainer;
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        final WindowTestUtils.TestAppWindowToken token = new WindowTestUtils.TestAppWindowToken(dc);
-        task.addChild(token, 0);
-        return token;
+        final WindowTestUtils.TestAppWindowToken appWindowToken =
+                new WindowTestUtils.TestAppWindowToken(mDisplayContent);
+        task.addChild(appWindowToken, 0);
+        return appWindowToken;
     }
 
     WindowState createWindow(WindowState parent, int type, String name) {
@@ -288,7 +296,7 @@ class WindowTestsBase {
         final int displayId = sNextDisplayId++;
         final Display display = new Display(DisplayManagerGlobal.getInstance(), displayId,
                 mDisplayInfo, DEFAULT_DISPLAY_ADJUSTMENTS);
-        return new DisplayContent(display, sWm, new WallpaperController(sWm),
+        return new DisplayContent(display, sWm, mWallpaperController,
                 mock(DisplayWindowController.class));
     }
 

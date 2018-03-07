@@ -3028,7 +3028,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 155;
+            private static final int SETTINGS_VERSION = 156;
 
             private final int mUserId;
 
@@ -3672,6 +3672,28 @@ public class SettingsProvider extends ContentProvider {
                     }
                     currentVersion = 155;
                 }
+
+                if (currentVersion == 155) {
+                    // Version 155: Set the default value for CHARGING_STARTED_SOUND.
+                    final SettingsState globalSettings = getGlobalSettingsLocked();
+                    final String oldValue = globalSettings.getSettingLocked(
+                            Global.CHARGING_STARTED_SOUND).getValue();
+                    final String oldDefault = getContext().getResources().getString(
+                            R.string.def_wireless_charging_started_sound);
+                    if (TextUtils.equals(null, oldValue)
+                            || TextUtils.equals(oldValue, oldDefault)) {
+                        final String defaultValue = getContext().getResources().getString(
+                                R.string.def_charging_started_sound);
+                        if (!TextUtils.isEmpty(defaultValue)) {
+                            globalSettings.insertSettingLocked(
+                                    Settings.Global.CHARGING_STARTED_SOUND, defaultValue,
+                                    null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+
+                    }
+                    currentVersion = 156;
+                }
+
 
                 // vXXX: Add new settings above this point.
 

@@ -198,7 +198,7 @@ import java.util.function.Consumer;
         ContextHubClientBroker broker = null;
         int id = mNextHostEndpointId;
         for (int i = 0; i <= MAX_CLIENT_ID; i++) {
-            if (!mHostEndPointIdToClientMap.containsKey(id)) {
+            if (!mHostEndPointIdToClientMap.containsKey((short)id)) {
                 broker = new ContextHubClientBroker(
                         mContext, mContextHubProxy, this, contextHubId, (short)id, clientCallback);
                 mHostEndPointIdToClientMap.put((short)id, broker);

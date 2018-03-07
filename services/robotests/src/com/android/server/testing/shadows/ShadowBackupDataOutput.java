@@ -40,6 +40,7 @@ public class ShadowBackupDataOutput {
     @Implementation
     public void __constructor__(FileDescriptor fd, long quota, int transportFlags) {
         try {
+            // This writes 4 bytes
             mOutput = new ObjectOutputStream(new FileOutputStream(fd));
         } catch (IOException e) {
             throw new AssertionError(e);

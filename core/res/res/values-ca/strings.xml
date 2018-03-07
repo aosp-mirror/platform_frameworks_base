@@ -181,7 +181,8 @@
     <string name="network_logging_notification_title" msgid="6399790108123704477">"El dispositiu està gestionat"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"La teva organització gestiona aquest dispositiu i és possible que supervisi el trànsit de xarxa. Toca per obtenir més informació."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"El contingut del dispositiu s\'esborrarà"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"No es pot utilitzar l\'aplicació d\'administració. S\'esborraran les dades del dispositiu.\n\nSi tens cap dubte, contacta amb l\'administrador de la teva organització."</string>
+    <!-- no translation found for factory_reset_message (9024647691106150160) -->
+    <skip />
     <string name="printing_disabled_by" msgid="8936832919072486965">"<xliff:g id="OWNER_APP">%s</xliff:g> ha desactivat la impressió."</string>
     <string name="me" msgid="6545696007631404292">"Mi"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Opcions de la tauleta"</string>
@@ -305,7 +306,8 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Utilitza gestos"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Permet tocar, lliscar, pinçar i fer altres gestos."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Gestos al sensor d\'empremtes digitals"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Captura gestos realitzats en el sensor d\'empremtes digitals del dispositiu."</string>
+    <!-- no translation found for capability_desc_canCaptureFingerprintGestures (4386487962402228670) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"desactivar o modificar la barra d\'estat"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Permet que l\'aplicació desactivi la barra d\'estat o afegeixi i elimini icones del sistema."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"aparèixer a la barra d\'estat"</string>
@@ -802,6 +804,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Desbloqueig mitjançant patró"</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Desbloqueig facial"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Desbloqueig mitjançant PIN"</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"Desbloqueja la SIM amb el PIN."</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"Desbloqueja la SIM amb el PUK."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Desbloqueig mitjançant contrasenya"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Àrea de patró"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Àrea per lliscar"</string>
@@ -1085,18 +1089,12 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"S\'estan iniciant les aplicacions."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"S\'està finalitzant l\'actualització."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> s\'està executant"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"Toca per tornar al joc"</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"Tria el joc"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"Per obtenir un millor rendiment, només hi pot haver un d\'aquests jocs obert."</string>
+    <string name="old_app_action" msgid="3044685170829526403">"Torna a <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"Obre <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> es tancarà sense desar els canvis"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> ha superat el límit de memòria"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"S\'ha recopilat un procés \"heap dump\"; toca per compartir-lo"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Vols compartir el \"heap dump\"?"</string>
@@ -1204,6 +1202,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"Reinicia"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Activa el servei mòbil"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Baixa l\'aplicació de l\'operador de telefonia mòbil per activar la targeta SIM nova"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"Baixa l\'aplicació <xliff:g id="APP_NAME">%1$s</xliff:g> per activar la targeta SIM nova"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Baixa l\'aplicació"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"S\'ha inserit una SIM nova"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Toca per configurar-la"</string>
@@ -1418,22 +1417,21 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"Unitat USB de: <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Emmagatzematge USB"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Edita"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"Alerta d\'ús de dades"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"Toca per veure l\'ús i la configuració."</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Límit de dades 2G-3G assolit"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Límit de dades 4G assolit"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"Advertiment de dades"</string>
+    <!-- no translation found for data_usage_warning_body (7340198905103751676) -->
+    <skip />
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Límit de dades mòbils assolit"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Límit de dades Wi-Fi assolit"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Dades resta del cicle aturades"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"S\'ha superat el límit de dades 2G-3G"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"S\'ha superat el límit de dades 4G"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"S\'ha superat el límit de dades mòbils"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"S\'ha superat el límit de dades Wi-Fi"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> per sobre del límit especif."</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"Les dades s\'han posat en pausa per a la resta del cicle"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"Límit de dades mòbils superat"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"Límit de dades Wi-Fi superat"</string>
+    <!-- no translation found for data_usage_limit_snoozed_body (1671222777207603301) -->
+    <skip />
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Dades en segon pla restringides"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"Toca per suprimir la restricció."</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"Ús de dades excessiu"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"L\'ús de dades dels últims dies és superior a l\'habitual. Toca per veure\'n l\'ús i la configuració."</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"Ús de dades mòbils elevat"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"Les teves aplicacions han utilitzat més dades del que és habitual"</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"<xliff:g id="APP">%s</xliff:g> ha utilitzat més dades del que és habitual"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Certificat de seguretat"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Aquest certificat és vàlid."</string>
     <string name="issued_to" msgid="454239480274921032">"Emès per a:"</string>

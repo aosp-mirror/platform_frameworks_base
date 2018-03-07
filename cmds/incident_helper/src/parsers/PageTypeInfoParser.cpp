@@ -64,7 +64,7 @@ PageTypeInfoParser::Parse(const int in, const int out) const
 
         record_t record = parseRecord(line, COMMA_DELIMITER);
         if (migrateTypeSession && record.size() == 3) {
-            long long token = proto.start(PageTypeInfoProto::MIGRATE_TYPES);
+            uint64_t token = proto.start(PageTypeInfoProto::MIGRATE_TYPES);
             // expect part 0 starts with "Node"
             if (stripPrefix(&record[0], "Node")) {
                 proto.write(PageTypeInfoProto::MigrateType::NODE, toInt(record[0]));
@@ -93,7 +93,7 @@ PageTypeInfoParser::Parse(const int in, const int out) const
 
             proto.end(token);
         } else if (!blockHeader.empty() && record.size() == 2) {
-            long long token = proto.start(PageTypeInfoProto::BLOCKS);
+            uint64_t token = proto.start(PageTypeInfoProto::BLOCKS);
             if (stripPrefix(&record[0], "Node")) {
                 proto.write(PageTypeInfoProto::Block::NODE, toInt(record[0]));
             } else return BAD_VALUE;

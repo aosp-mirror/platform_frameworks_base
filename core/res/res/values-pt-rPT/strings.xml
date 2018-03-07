@@ -181,7 +181,8 @@
     <string name="network_logging_notification_title" msgid="6399790108123704477">"O dispositivo é gerido"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"A sua entidade gere este dispositivo e pode monitorizar o tráfego de rede. Toque para obter mais detalhes."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"O seu dispositivo será apagado"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"Não é possível utilizar a aplicação de administração. O seu dispositivo será agora apagado.\n\nSe tiver questões, contacte o gestor da entidade."</string>
+    <!-- no translation found for factory_reset_message (9024647691106150160) -->
+    <skip />
     <string name="printing_disabled_by" msgid="8936832919072486965">"Impressão desativada por <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="me" msgid="6545696007631404292">"Eu"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Opções do tablet"</string>
@@ -305,7 +306,8 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Realizar gestos"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"É possível tocar, deslizar rapidamente, juntar os dedos e realizar outros gestos"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Gestos de impressão digital"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Pode capturar gestos realizados no sensor de impressões digitais do dispositivo."</string>
+    <!-- no translation found for capability_desc_canCaptureFingerprintGestures (4386487962402228670) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"desativar ou modificar barra de estado"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Permite à aplicação desativar a barra de estado ou adicionar e remover ícones do sistema."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"ser apresentada na barra de estado"</string>
@@ -802,6 +804,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Desbloqueio através de sequência."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Desbloqueio através do rosto."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Desbloqueio através de PIN."</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"Desbloqueio do SIM através de PIN."</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"Desbloqueio do PUK do SIM."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Desbloqueio através de palavra-passe."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Área da sequência."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Área de deslize."</string>
@@ -1085,18 +1089,12 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"A iniciar aplicações"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"A concluir o arranque."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> em execução"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"Toque para regressar ao jogo."</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"Selecionar jogo"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"Para um melhor desempenho, só pode abrir um destes jogos de cada vez."</string>
+    <string name="old_app_action" msgid="3044685170829526403">"Regressar à aplicação <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"Abrir a aplicação <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"A aplicação <xliff:g id="OLD_APP">%1$s</xliff:g> vai fechar sem guardar."</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> excedeu o limite da memória"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Foi recolhida a captura da área dinâmica para dados. Toque para partilhar."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Pretende partilhar a captura da área dinâmica para dados?"</string>
@@ -1204,6 +1202,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"Reiniciar"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Ativar o serviço móvel"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Transfira a aplicação do operador para ativar o seu novo SIM."</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"Transfira a aplicação <xliff:g id="APP_NAME">%1$s</xliff:g> para ativar o novo SIM."</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Transferir aplicação"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Novo SIM inserido"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Toque para configurar"</string>
@@ -1418,22 +1417,21 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"Unidade USB <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Armazenamento USB"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Editar"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"Alerta de utilização de dados"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"Toque para ver a utilização e definições"</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Limite de dados 2G/3G atingido"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Limite de dados 4G atingido"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"Aviso de dados"</string>
+    <!-- no translation found for data_usage_warning_body (7340198905103751676) -->
+    <skip />
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Limite de dados móveis atingido"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Limite de dados Wi-Fi atingido"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Dados parados no resto do ciclo"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Limite de dados 2G-3G excedido"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Limite de dados 4G excedido"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Limite de dados móveis excedido"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Limite de dados Wi-Fi excedido"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> acima do limite especificado."</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"Dados em pausa no resto do ciclo."</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"Acima do limite de dados móveis"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"Acima do limite de dados Wi-Fi"</string>
+    <!-- no translation found for data_usage_limit_snoozed_body (1671222777207603301) -->
+    <skip />
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Dados em seg. plano restringidos"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"Toque para remover a restrição."</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"Elevada utilização de dados"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"A sua utilização de dados ao longo dos últimos dias é superior ao normal. Toque para ver a utilização e as definições."</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"Utilização elevada de dados móveis"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"As suas aplicações utilizaram mais dados do que o habitual."</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"A aplicação <xliff:g id="APP">%s</xliff:g> utilizou mais dados do que o habitual."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Certificado de segurança"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Este certificado é válido."</string>
     <string name="issued_to" msgid="454239480274921032">"Emitido para:"</string>

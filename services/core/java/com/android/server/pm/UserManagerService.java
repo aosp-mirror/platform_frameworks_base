@@ -781,14 +781,7 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public int getProfileParentId(int userHandle) {
         checkManageUsersPermission("get the profile parent");
-        synchronized (mUsersLock) {
-            UserInfo profileParent = getProfileParentLU(userHandle);
-            if (profileParent == null) {
-                return userHandle;
-            }
-
-            return profileParent.id;
-        }
+        return mLocalService.getProfileParentId(userHandle);
     }
 
     private UserInfo getProfileParentLU(int userHandle) {
@@ -3927,6 +3920,56 @@ public class UserManagerService extends IUserManager.Stub {
         @Override
         public boolean exists(int userId) {
             return getUserInfoNoChecks(userId) != null;
+        }
+
+        @Override
+        public boolean isProfileAccessible(int callingUserId, int targetUserId, String debugMsg,
+                boolean throwSecurityException) {
+            if (targetUserId == callingUserId) {
+                return true;
+            }
+            synchronized (mUsersLock) {
+                UserInfo callingUserInfo = getUserInfoLU(callingUserId);
+                if (callingUserInfo == null || callingUserInfo.isManagedProfile()) {
+                    if (throwSecurityException) {
+                        throw new SecurityException(
+                                debugMsg + " for another profile "
+                                        + targetUserId + " from " + callingUserId);
+                    }
+                }
+
+                UserInfo targetUserInfo = getUserInfoLU(targetUserId);
+                if (targetUserInfo == null || !targetUserInfo.isEnabled()) {
+                    // Do not throw any exception here as this could happen due to race conditions
+                    // between the system updating its state and the client getting notified.
+                    if (throwSecurityException) {
+                        Slog.w(LOG_TAG, debugMsg + " for disabled profile "
+                                + targetUserId + " from " + callingUserId);
+                    }
+                    return false;
+                }
+
+                if (targetUserInfo.profileGroupId == UserInfo.NO_PROFILE_GROUP_ID ||
+                        targetUserInfo.profileGroupId != callingUserInfo.profileGroupId) {
+                    if (throwSecurityException) {
+                        throw new SecurityException(
+                                debugMsg + " for unrelated profile " + targetUserId);
+                    }
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        @Override
+        public int getProfileParentId(int userId) {
+            synchronized (mUsersLock) {
+                UserInfo profileParent = getProfileParentLU(userId);
+                if (profileParent == null) {
+                    return userId;
+                }
+                return profileParent.id;
+            }
         }
     }
 

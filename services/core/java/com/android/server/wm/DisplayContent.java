@@ -137,7 +137,6 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
-import android.util.MutableBoolean;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
@@ -156,7 +155,6 @@ import com.android.internal.view.IInputMethodClient;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.utils.RotationCache;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -2960,83 +2958,55 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * In portrait mode, it grabs the full screenshot.
      *
      * @param config of the output bitmap
-     * @param wallpaperOnly true if only the wallpaper layer should be included in the screenshot
      */
-    Bitmap screenshotDisplay(Bitmap.Config config, boolean wallpaperOnly) {
-        synchronized (mService.mWindowMap) {
-            if (!mService.mPolicy.isScreenOn()) {
-                if (DEBUG_SCREENSHOT) {
-                    Slog.i(TAG_WM, "Attempted to take screenshot while display was off.");
-                }
-                return null;
+    Bitmap screenshotDisplayLocked(Bitmap.Config config) {
+        if (!mService.mPolicy.isScreenOn()) {
+            if (DEBUG_SCREENSHOT) {
+                Slog.i(TAG_WM, "Attempted to take screenshot while display was off.");
             }
-
-            if (wallpaperOnly && !shouldScreenshotWallpaper()) {
-                return null;
-            }
-
-            int dw = mDisplayInfo.logicalWidth;
-            int dh = mDisplayInfo.logicalHeight;
-
-            if (dw <= 0 || dh <= 0) {
-                return null;
-            }
-
-            final Rect frame = new Rect(0, 0, dw, dh);
-
-            // The screenshot API does not apply the current screen rotation.
-            int rot = mDisplay.getRotation();
-
-            if (rot == ROTATION_90 || rot == ROTATION_270) {
-                rot = (rot == ROTATION_90) ? ROTATION_270 : ROTATION_90;
-            }
-
-            // SurfaceFlinger is not aware of orientation, so convert our logical
-            // crop to SurfaceFlinger's portrait orientation.
-            convertCropForSurfaceFlinger(frame, rot, dw, dh);
-
-            final ScreenRotationAnimation screenRotationAnimation =
-                    mService.mAnimator.getScreenRotationAnimationLocked(DEFAULT_DISPLAY);
-            final boolean inRotation = screenRotationAnimation != null &&
-                    screenRotationAnimation.isAnimating();
-            if (DEBUG_SCREENSHOT && inRotation) Slog.v(TAG_WM, "Taking screenshot while rotating");
-
-            // TODO(b/68392460): We should screenshot Task controls directly
-            // but it's difficult at the moment as the Task doesn't have the
-            // correct size set.
-            final Bitmap bitmap = SurfaceControl.screenshot(frame, dw, dh, 0, 1, inRotation, rot);
-            if (bitmap == null) {
-                Slog.w(TAG_WM, "Failed to take screenshot");
-                return null;
-            }
-
-            // Create a copy of the screenshot that is immutable and backed in ashmem.
-            // This greatly reduces the overhead of passing the bitmap between processes.
-            final Bitmap ret = bitmap.createAshmemBitmap(config);
-            bitmap.recycle();
-            return ret;
+            return null;
         }
-    }
 
-    private boolean shouldScreenshotWallpaper() {
-        MutableBoolean screenshotReady = new MutableBoolean(false);
+        int dw = mDisplayInfo.logicalWidth;
+        int dh = mDisplayInfo.logicalHeight;
 
-        forAllWindows(w -> {
-            if (!w.mIsWallpaper) {
-                return false;
-            }
+        if (dw <= 0 || dh <= 0) {
+            return null;
+        }
 
-            // Found the wallpaper window
-            final WindowStateAnimator winAnim = w.mWinAnimator;
+        final Rect frame = new Rect(0, 0, dw, dh);
 
-            if (winAnim.getShown() && winAnim.mLastAlpha > 0f) {
-                screenshotReady.value = true;
-            }
+        // The screenshot API does not apply the current screen rotation.
+        int rot = mDisplay.getRotation();
 
-            return true;
-        }, true /* traverseTopToBottom */);
+        if (rot == ROTATION_90 || rot == ROTATION_270) {
+            rot = (rot == ROTATION_90) ? ROTATION_270 : ROTATION_90;
+        }
 
-        return screenshotReady.value;
+        // SurfaceFlinger is not aware of orientation, so convert our logical
+        // crop to SurfaceFlinger's portrait orientation.
+        convertCropForSurfaceFlinger(frame, rot, dw, dh);
+
+        final ScreenRotationAnimation screenRotationAnimation =
+                mService.mAnimator.getScreenRotationAnimationLocked(DEFAULT_DISPLAY);
+        final boolean inRotation = screenRotationAnimation != null &&
+                screenRotationAnimation.isAnimating();
+        if (DEBUG_SCREENSHOT && inRotation) Slog.v(TAG_WM, "Taking screenshot while rotating");
+
+        // TODO(b/68392460): We should screenshot Task controls directly
+        // but it's difficult at the moment as the Task doesn't have the
+        // correct size set.
+        final Bitmap bitmap = SurfaceControl.screenshot(frame, dw, dh, 0, 1, inRotation, rot);
+        if (bitmap == null) {
+            Slog.w(TAG_WM, "Failed to take screenshot");
+            return null;
+        }
+
+        // Create a copy of the screenshot that is immutable and backed in ashmem.
+        // This greatly reduces the overhead of passing the bitmap between processes.
+        final Bitmap ret = bitmap.createAshmemBitmap(config);
+        bitmap.recycle();
+        return ret;
     }
 
     // TODO: Can this use createRotationMatrix()?

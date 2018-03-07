@@ -181,7 +181,8 @@
     <string name="network_logging_notification_title" msgid="6399790108123704477">"设备为受管理设备"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"贵单位会管理该设备，且可能会监控网络流量。点按即可了解详情。"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"系统将清空您的设备"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"相关管理应用无法使用，系统现在将清空您的设备。\n\n如有疑问，请与您所在单位的管理员联系。"</string>
+    <!-- no translation found for factory_reset_message (9024647691106150160) -->
+    <skip />
     <string name="printing_disabled_by" msgid="8936832919072486965">"“<xliff:g id="OWNER_APP">%s</xliff:g>”已停用打印功能。"</string>
     <string name="me" msgid="6545696007631404292">"我"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"平板电脑选项"</string>
@@ -305,7 +306,8 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"执行手势"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"可执行点按、滑动、双指张合等手势。"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"指纹手势"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"可以捕获在设备指纹传感器上执行的手势。"</string>
+    <!-- no translation found for capability_desc_canCaptureFingerprintGestures (4386487962402228670) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"停用或修改状态栏"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"允许应用停用状态栏或者增删系统图标。"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"用作状态栏"</string>
@@ -802,6 +804,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"图案解锁。"</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"人脸解锁。"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"PIN码解锁。"</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"SIM 卡 PIN 码解锁。"</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"SIM 卡 PUK 码解锁。"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"密码解锁。"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"图案区域。"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"滑动区域。"</string>
@@ -1085,18 +1089,12 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"正在启动应用。"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"即将完成启动。"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g>正在运行"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"点按即可返回游戏"</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"选择游戏"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"为了提升性能，一次只能打开其中一个游戏。"</string>
+    <string name="old_app_action" msgid="3044685170829526403">"返回<xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"打开<xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g>将会在不保存的情况下关闭"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g>占用的内存已超出限制"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"已收集堆转储数据；点按即可共享"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"要共享堆转储数据吗？"</string>
@@ -1204,6 +1202,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"重新启动"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"激活移动网络服务"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"下载运营商应用即可激活您的新 SIM 卡"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"下载<xliff:g id="APP_NAME">%1$s</xliff:g>应用即可激活您的新 SIM 卡"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"下载应用"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"已插入新 SIM 卡"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"点按即可进行设置"</string>
@@ -1418,22 +1417,21 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> U 盘"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB存储器"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"修改"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"流量消耗提醒"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"点按即可查看使用情况和设置。"</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"已达到2G-3G流量上限"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"已达到4G流量上限"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"数据流量警告"</string>
+    <!-- no translation found for data_usage_warning_body (7340198905103751676) -->
+    <skip />
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"已达到移动数据流量上限"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"已达到WLAN流量上限"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"已暂停本周期剩余时间的流量使用"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"已超出 2G-3G 数据流量限制"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"已超出 4G 数据使用上限"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"已超出移动数据流量上限"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"超出了WLAN数据流量上限"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"超出规定上限 <xliff:g id="SIZE">%s</xliff:g>。"</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"已暂停使用数据网络连接，直到这个周期结束为止"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"已超出移动数据流量上限"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"已超出 WLAN 数据流量上限"</string>
+    <!-- no translation found for data_usage_limit_snoozed_body (1671222777207603301) -->
+    <skip />
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"后台流量受限制"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"点按即可取消限制。"</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"流量消耗较多"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"您过去几天的流量消耗超出了正常消耗量。点按即可查看流量消耗情况和设置。"</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"移动数据用量较多"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"您的应用使用的数据流量比平时多"</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"<xliff:g id="APP">%s</xliff:g>使用的数据流量比平时多"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"安全证书"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"该证书有效。"</string>
     <string name="issued_to" msgid="454239480274921032">"颁发给："</string>

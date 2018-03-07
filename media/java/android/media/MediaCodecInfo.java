@@ -829,14 +829,24 @@ public final class MediaCodecInfo {
 
         /** @hide */
         public CodecCapabilities dup() {
-            return new CodecCapabilities(
-                // clone writable arrays
-                Arrays.copyOf(profileLevels, profileLevels.length),
-                Arrays.copyOf(colorFormats, colorFormats.length),
-                isEncoder(),
-                mFlagsVerified,
-                mDefaultFormat,
-                mCapabilitiesInfo);
+            CodecCapabilities caps = new CodecCapabilities();
+
+            // profileLevels and colorFormats may be modified by client.
+            caps.profileLevels = Arrays.copyOf(profileLevels, profileLevels.length);
+            caps.colorFormats = Arrays.copyOf(colorFormats, colorFormats.length);
+
+            caps.mMime = mMime;
+            caps.mMaxSupportedInstances = mMaxSupportedInstances;
+            caps.mFlagsRequired = mFlagsRequired;
+            caps.mFlagsSupported = mFlagsSupported;
+            caps.mFlagsVerified = mFlagsVerified;
+            caps.mAudioCaps = mAudioCaps;
+            caps.mVideoCaps = mVideoCaps;
+            caps.mEncoderCaps = mEncoderCaps;
+            caps.mDefaultFormat = mDefaultFormat;
+            caps.mCapabilitiesInfo = mCapabilitiesInfo;
+
+            return caps;
         }
 
         /**
@@ -898,13 +908,13 @@ public final class MediaCodecInfo {
 
             if (mMime.toLowerCase().startsWith("audio/")) {
                 mAudioCaps = AudioCapabilities.create(info, this);
-                mAudioCaps.setDefaultFormat(mDefaultFormat);
+                mAudioCaps.getDefaultFormat(mDefaultFormat);
             } else if (mMime.toLowerCase().startsWith("video/")) {
                 mVideoCaps = VideoCapabilities.create(info, this);
             }
             if (encoder) {
                 mEncoderCaps = EncoderCapabilities.create(info, this);
-                mEncoderCaps.setDefaultFormat(mDefaultFormat);
+                mEncoderCaps.getDefaultFormat(mDefaultFormat);
             }
 
             final Map<String, Object> global = MediaCodecList.getGlobalSettings();
@@ -990,8 +1000,7 @@ public final class MediaCodecInfo {
             return caps;
         }
 
-        /** @hide */
-        public void init(MediaFormat info, CodecCapabilities parent) {
+        private void init(MediaFormat info, CodecCapabilities parent) {
             mParent = parent;
             initWithPlatformLimits();
             applyLevelLimits();
@@ -1171,7 +1180,7 @@ public final class MediaCodecInfo {
         }
 
         /** @hide */
-        public void setDefaultFormat(MediaFormat format) {
+        public void getDefaultFormat(MediaFormat format) {
             // report settings that have only a single choice
             if (mBitrateRange.getLower().equals(mBitrateRange.getUpper())) {
                 format.setInteger(MediaFormat.KEY_BIT_RATE, mBitrateRange.getLower());
@@ -1585,8 +1594,7 @@ public final class MediaCodecInfo {
             return caps;
         }
 
-        /** @hide */
-        public void init(MediaFormat info, CodecCapabilities parent) {
+        private void init(MediaFormat info, CodecCapabilities parent) {
             mParent = parent;
             initWithPlatformLimits();
             applyLevelLimits();
@@ -2707,8 +2715,7 @@ public final class MediaCodecInfo {
             return caps;
         }
 
-        /** @hide */
-        public void init(MediaFormat info, CodecCapabilities parent) {
+        private void init(MediaFormat info, CodecCapabilities parent) {
             // no support for complexity or quality yet
             mParent = parent;
             mComplexityRange = Range.create(0, 0);
@@ -2789,7 +2796,7 @@ public final class MediaCodecInfo {
         }
 
         /** @hide */
-        public void setDefaultFormat(MediaFormat format) {
+        public void getDefaultFormat(MediaFormat format) {
             // don't list trivial quality/complexity as default for now
             if (!mQualityRange.getUpper().equals(mQualityRange.getLower())
                     && mDefaultQuality != null) {

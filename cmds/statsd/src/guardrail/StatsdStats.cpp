@@ -455,7 +455,7 @@ void StatsdStats::dumpStats(FILE* out) const {
 }
 
 void addConfigStatsToProto(const ConfigStats& configStats, ProtoOutputStream* proto) {
-    long long token =
+    uint64_t token =
             proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_CONFIG_STATS);
     proto->write(FIELD_TYPE_INT32 | FIELD_ID_CONFIG_STATS_UID, configStats.uid);
     proto->write(FIELD_TYPE_INT64 | FIELD_ID_CONFIG_STATS_ID, (long long)configStats.id);
@@ -487,7 +487,7 @@ void addConfigStatsToProto(const ConfigStats& configStats, ProtoOutputStream* pr
     }
 
     for (const auto& pair : configStats.matcher_stats) {
-        long long tmpToken = proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
+        uint64_t tmpToken = proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
                                           FIELD_ID_CONFIG_STATS_MATCHER_STATS);
         proto->write(FIELD_TYPE_INT64 | FIELD_ID_MATCHER_STATS_ID, (long long)pair.first);
         proto->write(FIELD_TYPE_INT32 | FIELD_ID_MATCHER_STATS_COUNT, pair.second);
@@ -495,7 +495,7 @@ void addConfigStatsToProto(const ConfigStats& configStats, ProtoOutputStream* pr
     }
 
     for (const auto& pair : configStats.condition_stats) {
-        long long tmpToken = proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
+        uint64_t tmpToken = proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
                                           FIELD_ID_CONFIG_STATS_CONDITION_STATS);
         proto->write(FIELD_TYPE_INT64 | FIELD_ID_CONDITION_STATS_ID, (long long)pair.first);
         proto->write(FIELD_TYPE_INT32 | FIELD_ID_CONDITION_STATS_COUNT, pair.second);
@@ -503,7 +503,7 @@ void addConfigStatsToProto(const ConfigStats& configStats, ProtoOutputStream* pr
     }
 
     for (const auto& pair : configStats.metric_stats) {
-        long long tmpToken = proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
+        uint64_t tmpToken = proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
                                           FIELD_ID_CONFIG_STATS_METRIC_STATS);
         proto->write(FIELD_TYPE_INT64 | FIELD_ID_METRIC_STATS_ID, (long long)pair.first);
         proto->write(FIELD_TYPE_INT32 | FIELD_ID_METRIC_STATS_COUNT, pair.second);
@@ -511,7 +511,7 @@ void addConfigStatsToProto(const ConfigStats& configStats, ProtoOutputStream* pr
     }
 
     for (const auto& pair : configStats.alert_stats) {
-        long long tmpToken = proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
+        uint64_t tmpToken = proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
                                           FIELD_ID_CONFIG_STATS_ALERT_STATS);
         proto->write(FIELD_TYPE_INT64 | FIELD_ID_ALERT_STATS_ID, (long long)pair.first);
         proto->write(FIELD_TYPE_INT32 | FIELD_ID_ALERT_STATS_COUNT, pair.second);
@@ -539,7 +539,7 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
     const size_t atomCounts = mPushedAtomStats.size();
     for (size_t i = 2; i < atomCounts; i++) {
         if (mPushedAtomStats[i] > 0) {
-            long long token =
+            uint64_t token =
                     proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_ATOM_STATS | FIELD_COUNT_REPEATED);
             proto.write(FIELD_TYPE_INT32 | FIELD_ID_ATOM_STATS_TAG, (int32_t)i);
             proto.write(FIELD_TYPE_INT32 | FIELD_ID_ATOM_STATS_COUNT, mPushedAtomStats[i]);
@@ -552,20 +552,20 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
     }
 
     if (mAnomalyAlarmRegisteredStats > 0) {
-        long long token = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_ANOMALY_ALARM_STATS);
+        uint64_t token = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_ANOMALY_ALARM_STATS);
         proto.write(FIELD_TYPE_INT32 | FIELD_ID_ANOMALY_ALARMS_REGISTERED,
                     mAnomalyAlarmRegisteredStats);
         proto.end(token);
     }
 
     if (mPeriodicAlarmRegisteredStats > 0) {
-        long long token = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_SUBSCRIBER_ALARM_STATS);
+        uint64_t token = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_SUBSCRIBER_ALARM_STATS);
         proto.write(FIELD_TYPE_INT32 | FIELD_ID_SUBSCRIBER_ALARMS_REGISTERED,
                     mPeriodicAlarmRegisteredStats);
         proto.end(token);
     }
 
-    long long uidMapToken = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_UIDMAP_STATS);
+    uint64_t uidMapToken = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_UIDMAP_STATS);
     proto.write(FIELD_TYPE_INT32 | FIELD_ID_UID_MAP_SNAPSHOTS, mUidMapStats.snapshots);
     proto.write(FIELD_TYPE_INT32 | FIELD_ID_UID_MAP_CHANGES, mUidMapStats.changes);
     proto.write(FIELD_TYPE_INT32 | FIELD_ID_UID_MAP_BYTES_USED, mUidMapStats.bytes_used);
@@ -575,7 +575,7 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
     proto.end(uidMapToken);
 
     for (const auto& error : mLoggerErrors) {
-        long long token = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_LOGGER_ERROR_STATS |
+        uint64_t token = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_LOGGER_ERROR_STATS |
                                       FIELD_COUNT_REPEATED);
         proto.write(FIELD_TYPE_INT32 | FIELD_ID_LOGGER_STATS_TIME, error.first);
         proto.write(FIELD_TYPE_INT32 | FIELD_ID_LOGGER_STATS_ERROR_CODE, error.second);

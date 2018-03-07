@@ -181,7 +181,8 @@
     <string name="network_logging_notification_title" msgid="6399790108123704477">"උපාංගය කළමනාකරණය කෙරේ"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"ඔබගේ ආයතනය මෙම උපාංගය කළමනාකරණය කරන අතර එය ජාල තදබදය නිරීක්ෂණය කළ හැක. විස්තර සඳහා තට්ටු කරන්න."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"ඔබගේ උපාංගය මකා දැමෙනු ඇත"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"පරිපාලක යෙදුම භාවිතා කළ නොහැක. ඔබගේ උපාංගය දැන් මකා දමනු ඇත.\n\nඔබට ප්‍රශ්න තිබේ නම්, ඔබගේ සංවිධානයේ පරිපාලකව අමතන්න."</string>
+    <!-- no translation found for factory_reset_message (9024647691106150160) -->
+    <skip />
     <string name="printing_disabled_by" msgid="8936832919072486965">"<xliff:g id="OWNER_APP">%s</xliff:g> විසින් මුද්‍රණය කිරීම අබල කර ඇත."</string>
     <string name="me" msgid="6545696007631404292">"මම"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"ටැබ්ලට විකල්ප"</string>
@@ -305,7 +306,8 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"අභින සිදු කරන්න"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"තට්ටු කිරීමට, ස්වයිප් කිරීමට, පින්ච් කිරීමට, සහ වෙනත් අභින සිදු කිරීමට හැකිය."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"ඇඟිලි සලකුණු ඉංගිත"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"උපාංග ඇඟිලි සලකුණු සංවේදකය මත සිදු කරන ඉංගිත ග්‍රහණය කළ හැකිය."</string>
+    <!-- no translation found for capability_desc_canCaptureFingerprintGestures (4386487962402228670) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"තත්ව තීරුව අබල කරන්න හෝ වෙනස් කරන්න"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"තත්ව තීරුව අක්‍රිය කිරීමට හෝ පද්ධති නිරූපක එකතු හෝ ඉවත් කිරීමට යෙදුමට අවසර දේ."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"තත්ත්ව තීරුව බවට පත්වීම"</string>
@@ -804,6 +806,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"රටා අගුළු ඇරීම."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"මුහුණ භාවිතයෙන් අඟුළු හැරීම."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"PIN අගුළු ඇරීම."</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"Sim Pin අගුලු දැමීම."</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"Sim Puk අගුලු දැමීම."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"මුරපද අගුළු ඇරීම."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"රටා ප්‍රදේශය."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"සර්පණ ප්‍රදේශය."</string>
@@ -1087,18 +1091,12 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"යෙදුම් ආරම්භ කරමින්."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"ඇරඹුම අවසාන කරමින්."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> ධාවනය වෙමින්"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"ක්‍රීඩාව වෙත ආපසු යාමට තට්ටු කරන්න"</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"ක්‍රීඩාව තෝරන්න"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"වඩාත් හොඳ ක්‍රියාකාරීත්වයකට, වරකට මෙම ක්‍රීඩා එකක් පමණක් විවෘත කළ හැකිය."</string>
+    <string name="old_app_action" msgid="3044685170829526403">"<xliff:g id="OLD_APP">%1$s</xliff:g> වෙත අාපසු යන්න"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"<xliff:g id="NEW_APP">%1$s</xliff:g> විවෘත කරන්න"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"සුරැකීමෙන් තොරව <xliff:g id="OLD_APP">%1$s</xliff:g> වැසෙනු ඇත"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> මතකයේ සීමාව ඉක්මවා ඇත"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"ඉවත දැමීම් ගොඩ රැස් කර ඇත. බෙදා ගැනීමට තට්ටු කරන්න"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"සංච නික්ෂේපය බෙදාගන්න ද?"</string>
@@ -1206,6 +1204,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"යළි අරඹන්න"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"ජංගම සේවාව සක්‍රිය කරන්න"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"ඔබගේ නව SIM කාඩ්පත සක්‍රිය කිරීමට වාහක යෙදුම බාගන්න"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"ඔබේ නව SIM එක භාවිත කිරීමට <xliff:g id="APP_NAME">%1$s</xliff:g> යෙදුම බාගන්න"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"යෙදුම බාගන්න"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"නව SIM ඇතුළු කරන්න"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"එය පිහිටුවීමට තට්ටු කරන්න"</string>
@@ -1420,22 +1419,21 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB ධාවකය"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB ආචයනය"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"සංස්කරණය"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"දත්ත භාවිතය ගැන ඇඟවීම"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"භාවිතය සහ සැකසීම් බැලීමට තට්ටු කරන්න."</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G දත්ත සීමාවට ළඟාවී ඇත"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G දත්ත සීමාවට ළඟාවී ඇත"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"දත්ත අනතුරු ඇඟවීම"</string>
+    <!-- no translation found for data_usage_warning_body (7340198905103751676) -->
+    <skip />
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"ජංගම දත්ත සීමාවට ළඟාවී ඇත"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi දත්ත සීමාවට ළඟාවී ඇත"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"විරාම චක්‍රය සඳහා දත්ත විරාමය කරන ලදි"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G දත්ත සීමාව ඉක්මවන ලදි"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G දත්ත සීමාව ඉක්මවා යන ලදි"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"ජංගම දත්ත සීමාව ඉක්මවා යන ලදි"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi දත්ත සීමාව ඉක්මවා යන ලදි"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"සඳහන් කළ සීමාවට වඩා <xliff:g id="SIZE">%s</xliff:g> වැඩිය."</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"ඔබේ චක්‍රයේ ඉතිරි කාලය සඳහා දත්ත විිරාම කරන ලදී"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"ජංගම දත්ත සීමාව ඉක්මවා ඇත"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"ඔබේ Wi-Fi දත්ත සීමාව ඉක්මවා ඇත"</string>
+    <!-- no translation found for data_usage_limit_snoozed_body (1671222777207603301) -->
+    <skip />
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"පසුබිම් දත්ත සිමා කරන ලදි"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"සීමා කිරීම ඉවත් කිරීමට තට්ටු කරන්න."</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"විශාල දත්ත භාවිතය"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"පසුගිය දින කිහිපය පුරා ඔබගේ දත්ත භාවිතය සාමාන්‍යයට වඩා වැඩිය. භාවිතය සහ සැකසීම් බැලීම සඳහා තට්ටු කරන්න."</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"ඉහළ ජංගම දත්ත භාවිතය"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"යෙදුම සාමාන්‍ය ප්‍රමාණයට වඩා වැඩිපුර දත්ත භාවිත කර ඇත"</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"<xliff:g id="APP">%s</xliff:g> සාමාන්‍ය ප්‍රමාණයට වඩා වැඩිපුර දත්ත භාවිත කර ඇත"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"ආරක්‍ෂිත සහතිකය"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"මෙම සහතිකය වලංගුයි."</string>
     <string name="issued_to" msgid="454239480274921032">"ලබාදුන්නේ:"</string>

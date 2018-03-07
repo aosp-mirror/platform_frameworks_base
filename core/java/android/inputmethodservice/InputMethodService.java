@@ -1075,33 +1075,14 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     /**
-     * Force switch to a new input method component. This can only be called
-     * from an application or a service which has a token of the currently active input method.
-     * @param id The unique identifier for the new input method to be switched to.
-     */
-    public void setInputMethod(String id) {
-        mImm.setInputMethodInternal(mToken, id);
-    }
-
-    /**
-     * Force switch to a new input method and subtype. This can only be called
-     * from an application or a service which has a token of the currently active input method.
-     * @param id The unique identifier for the new input method to be switched to.
-     * @param subtype The new subtype of the new input method to be switched to.
-     */
-    public void setInputMethodAndSubtype(String id, InputMethodSubtype subtype) {
-        mImm.setInputMethodAndSubtypeInternal(mToken, id, subtype);
-    }
-
-    /**
      * Force switch to the last used input method and subtype. If the last input method didn't have
      * any subtypes, the framework will simply switch to the last input method with no subtype
      * specified.
      * @return true if the current input method and subtype was successfully switched to the last
      * used input method and subtype.
      */
-    public boolean switchToLastInputMethod() {
-        return mImm.switchToLastInputMethodInternal(mToken);
+    public boolean switchToPreviousInputMethod() {
+        return mImm.switchToPreviousInputMethodInternal(mToken);
     }
 
     /**
@@ -1455,10 +1436,22 @@ public class InputMethodService extends AbstractInputMethodService {
      * input method will be destroyed, and the requested one started on the
      * current input field.
      * 
-     * @param id Unique identifier of the new input method ot start.
+     * @param id Unique identifier of the new input method to start.
      */
     public void switchInputMethod(String id) {
         mImm.setInputMethodInternal(mToken, id);
+    }
+
+    /**
+     * Force switch to a new input method, as identified by {@code id}.  This
+     * input method will be destroyed, and the requested one started on the
+     * current input field.
+     *
+     * @param id Unique identifier of the new input method to start.
+     * @param subtype The new subtype of the new input method to be switched to.
+     */
+    public void switchInputMethod(String id, InputMethodSubtype subtype) {
+        mImm.setInputMethodAndSubtypeInternal(mToken, id, subtype);
     }
 
     public void setExtractView(View view) {

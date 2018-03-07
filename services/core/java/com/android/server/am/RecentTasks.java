@@ -19,6 +19,7 @@ package com.android.server.am;
 import static android.app.ActivityManager.FLAG_AND_UNLOCKED;
 import static android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE;
 import static android.app.ActivityManager.RECENT_WITH_EXCLUDED;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
@@ -1099,13 +1100,22 @@ class RecentTasks {
                 + " sessionDuration=" + mActiveTasksSessionDurationMs
                 + " inactiveDuration=" + task.getInactiveDuration()
                 + " activityType=" + task.getActivityType()
-                + " windowingMode=" + task.getWindowingMode());
+                + " windowingMode=" + task.getWindowingMode()
+                + " intentFlags=" + task.getBaseIntent().getFlags());
 
-        // Ignore certain activity types completely
         switch (task.getActivityType()) {
             case ACTIVITY_TYPE_HOME:
             case ACTIVITY_TYPE_RECENTS:
+                // Ignore certain activity types completely
                 return false;
+            case ACTIVITY_TYPE_ASSISTANT:
+                // Ignore assistant that chose to be excluded from Recents, even if it's a top
+                // task.
+                if ((task.getBaseIntent().getFlags()
+                        & Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                        == Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) {
+                    return false;
+                }
         }
 
         // Ignore certain windowing modes

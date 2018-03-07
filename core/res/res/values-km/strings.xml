@@ -181,7 +181,8 @@
     <string name="network_logging_notification_title" msgid="6399790108123704477">"ឧបករណ៍ស្ថិតក្រោមការគ្រប់គ្រង"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"ស្ថាប័នរបស់អ្នកគ្រប់គ្រងឧបករណ៍នេះ ហើយអាចនឹងតាមដានចរាចរណ៍បណ្តាញ។ ចុចដើម្បីទទួលបានព័ត៌មានលម្អិត។"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"ឧបករណ៍របស់អ្នកនឹងត្រូវបានលុប"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"​មិនអាច​ប្រើ​កម្មវិធី​អ្នកគ្រប់គ្រង​បានទេ។ ឧបករណ៍​របស់អ្នក​នឹងត្រូវ​បានលុប​ឥឡូវនេះ។\n\nប្រសិនបើ​អ្នកមាន​សំណួរ សូមទាក់ទង​ទៅអ្នក​គ្រប់គ្រង​ស្ថាប័ន​របស់​អ្នក។"</string>
+    <!-- no translation found for factory_reset_message (9024647691106150160) -->
+    <skip />
     <string name="printing_disabled_by" msgid="8936832919072486965">"ការបោះពុម្ព​ត្រូវបាន​បិទ​ដោយ <xliff:g id="OWNER_APP">%s</xliff:g> ។"</string>
     <string name="me" msgid="6545696007631404292">"ខ្ញុំ"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"ជម្រើស​កុំព្យូទ័រ​បន្ទះ"</string>
@@ -305,7 +306,8 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"ធ្វើកាយវិការ"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"អាចប៉ះ អូស ច្បិច និងធ្វើកាយវិការផ្សេងទៀត"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"ចលនា​ស្នាមម្រាមដៃ"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"អាចថត​ចលនា​ដែលមាន​សកម្មភាព​នៅលើ​ឧបករណ៍​ចាប់​ស្នាម​ម្រាមដៃ​របស់ឧបករណ៍។"</string>
+    <!-- no translation found for capability_desc_canCaptureFingerprintGestures (4386487962402228670) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"បិទ ឬ​កែ​របារ​ស្ថានភាព"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"ឲ្យ​កម្មវិធី​បិទ​របារ​ស្ថានភាព ឬ​បន្ថែម និង​លុប​រូប​តំណាង​ប្រព័ន្ធ។"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"ធ្វើជារបារស្ថានភាព"</string>
@@ -802,6 +804,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"លំនាំ​ដោះ​សោ​។"</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"ដោះ​សោ​តាម​​ទម្រង់​មុខ។"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"កូដ PIN ដោះ​សោ។"</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"ដោះ​កូដ Pin របស់​សីុម។"</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"ដោះ​កូដ Puk របស់​សីុម។"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"ពាក្យ​សម្ងាត់​ដោះ​សោ​។"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"ផ្ទៃ​លំនាំ។"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"ផ្ទៃ​រុញ។"</string>
@@ -1087,18 +1091,12 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"ចាប់ផ្ដើម​កម្មវិធី។"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"បញ្ចប់​ការ​ចាប់ផ្ដើម។"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> កំពុង​ដំណើរការ"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"ចុច​ដើម្បី​ត្រឡប់​ទៅ​ហ្គេមវិញ"</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"ជ្រើសរើស​ហ្គេម"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"ដើម្បី​ធ្វើឱ្យ​ប្រតិបត្តិការ​ប្រសើរជាងមុន អ្នក​អាចបើក​ហ្គេម​​បាន​​ម្តង​មួយ​តែប៉ុណ្ណោះ។"</string>
+    <string name="old_app_action" msgid="3044685170829526403">"ត្រឡប់​ទៅ <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"បើក <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> នឹង​បិទ​ដោយ​មិន​រក្សាទុក"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> លើសពីកម្រិតកំណត់មេម៉ូរី"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Heap dump ត្រូវបានប្រមូល សូមប៉ះដើម្បីចែករំលែក"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"ចែករំលែក heap dump?"</string>
@@ -1206,6 +1204,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"ចាប់ផ្ដើម​ឡើងវិញ"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"បើក​ដំណើរការ​សេវាកម្ម​ទូរសព្ទ​ចល័ត"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"ទាញយក​កម្មវិធី​ក្រុមហ៊ុន​សេវា​ទូរសព្ទ ដើម្បី​បើក​ដំណើរការ​សីុមថ្មី​របស់អ្នក"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"ទាញយក​កម្មវិធី <xliff:g id="APP_NAME">%1$s</xliff:g> ដើម្បី​បើកដំណើរការ​សីុមថ្មី​របស់អ្នក"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"ទាញយក​កម្មវិធី"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"ស៊ីមកាតថ្មីត្រូវបានស៊កចូល"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"ប៉ះដើម្បីដំឡើង"</string>
@@ -1420,22 +1419,21 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"ឧបករណ៍ផ្ទុក USB <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"ឧបករណ៍​ផ្ទុក​យូអេសប៊ី"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"កែសម្រួល​"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"ការព្រមានអំពីការប្រើទិន្នន័យ"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"ប៉ះដើម្បីមើលការប្រើប្រាស់ និងការកំណត់"</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"បាន​ដល់​ដែន​កំណត់​ទិន្នន័យ 2G-3G"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"បាន​ដល់​ដែន​កំណត់​ទិន្នន័យ 4G"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"ការព្រមានពីការប្រើទិន្នន័យ"</string>
+    <!-- no translation found for data_usage_warning_body (7340198905103751676) -->
+    <skip />
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"បានឈានដល់ចំនួនកម្រិតនៃទិន្នន័យទូរសព្ទចល័តហើយ"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"បានដល់ដែន​កំណត់ទិន្នន័យវ៉ាយហ្វាយ"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"ផ្អាកទិន្នន័យសម្រាប់រយៈពេលនៅសល់"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"លើស​ដែន​កំណត់​ទិន្នន័យ 2G​-3G"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"បាន​លើស​ដែន​កំណត់​ទិន្នន័យ 4G"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"បាន​លើស​ដែន​កំណត់​ទិន្នន័យ​ចល័ត"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"លើស​ដែន​កំណត់​ទិន្នន័យ​វ៉ាយហ្វាយ"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> លើ​ដែន​កំណត់​បាន​បញ្ជាក់។"</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"ទិន្នន័យ​បានផ្អាកសម្រាប់​ផ្នែកដែលនៅ​សល់នៃ​វដ្តរបស់អ្នក"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"លើសកម្រិតកំណត់​ទិន្នន័យ​ទូរសព្ទ​របស់អ្នក"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"លើស​កម្រិត​កំណត់​ទិន្នន័យ Wi-Fi របស់អ្នក"</string>
+    <!-- no translation found for data_usage_limit_snoozed_body (1671222777207603301) -->
+    <skip />
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"បាន​ដាក់​កម្រិត​ទិន្នន័យ​ផ្ទៃ​ខាង​ក្រោយ"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"ប៉ះដើម្បីយកការរឹតបន្តឹងចេញ"</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"ការប្រើ​ទិន្នន័យ​ច្រើន"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"ការប្រើ​ទិន្នន័យ​របស់អ្នក​ក្នុងរយៈពេល​ពីរបី​ថ្ងៃ​ចុងក្រោយ​គឺច្រើន​ជាង​ធម្មតា។ សូមចុចដើម្បី​មើល​ការប្រើប្រាស់ និង​ការកំណត់។"</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"ការប្រើទិន្នន័យ​ទូរសព្ទ​ចល័តច្រើន"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"កម្មវិធី​របស់អ្នក​បានប្រើ​ទិន្នន័យ​ច្រើនជាង​ធម្មតា"</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"<xliff:g id="APP">%s</xliff:g> បានប្រើ​ទិន្នន័យ​ច្រើនជាង​ធម្មតា"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"វិញ្ញាបនបត្រ​សុវត្ថិភាព"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"វិញ្ញាបនបត្រ​នេះ​​​​ត្រឹមត្រូវ​។"</string>
     <string name="issued_to" msgid="454239480274921032">"បាន​ចេញ​ឲ្យ​៖"</string>
@@ -1839,10 +1837,7 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"បាន​រកឃើញ​កម្មវិធី​ដែលបង្ក​គ្រោះថ្នាក់"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> ចង់​បង្ហាញ​ស្ថិតិ​ប្រើប្រាស់​របស់ <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"កែសម្រួល"</string>
-    <!-- no translation found for notification_channel_system_changes (5072715579030948646) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_title (3799603322910377294) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_content (6603123479476554768) -->
-    <skip />
+    <string name="notification_channel_system_changes" msgid="5072715579030948646">"ការផ្លាស់ប្ដូរ​ប្រព័ន្ធ"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"មុខងារ​កុំ​រំខាន​ត្រូវ​បាន​ប្ដូរ"</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"ចុច​ដើម្បី​ពិនិត្យ​ការកំណត់​សកម្មភាព​របស់អ្នក​ដើម្បី​រក​មើល​ការរំខាន"</string>
 </resources>

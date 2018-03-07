@@ -3042,7 +3042,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public boolean switchToLastInputMethod(IBinder token) {
+    public boolean switchToPreviousInputMethod(IBinder token) {
         if (!calledFromValidUser()) {
             return false;
         }

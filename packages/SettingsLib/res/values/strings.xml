@@ -758,10 +758,9 @@
     <string name="app_process_limit_title">Background process limit</string>
 
     <!-- UI debug setting: show all ANRs? [CHAR LIMIT=25] -->
-    <string name="show_all_anrs">Show all ANRs</string>
-    <!-- UI debug setting: show all ANRs summary [CHAR LIMIT=50] -->
-    <string name="show_all_anrs_summary">Show App Not Responding dialog
-        for background apps</string>
+    <string name="show_all_anrs">Show background ANRs</string>
+    <!-- UI debug setting: show all ANRs summary [CHAR LIMIT=100] -->
+    <string name="show_all_anrs_summary">Display App Not Responding dialog for background apps</string>
 
     <!-- UI debug setting: show all ANRs? [CHAR LIMIT=25] -->
     <string name="show_notification_channel_warnings">Show notification channel warnings</string>

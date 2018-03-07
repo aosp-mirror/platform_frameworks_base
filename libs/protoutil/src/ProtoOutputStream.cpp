@@ -28,7 +28,7 @@ ProtoOutputStream::ProtoOutputStream()
          mCompact(false),
          mDepth(0),
          mObjectId(0),
-         mExpectedObjectToken(0LL)
+         mExpectedObjectToken(0ULL)
 {
 }
 
@@ -45,7 +45,7 @@ ProtoOutputStream::clear()
     mCompact = false;
     mDepth = 0;
     mObjectId = 0;
-    mExpectedObjectToken = 0LL;
+    mExpectedObjectToken = 0ULL;
 }
 
 bool
@@ -222,37 +222,37 @@ ProtoOutputStream::write(uint64_t fieldId, const char* val, size_t size)
  *                  because of the overflow, and only the tokens are compared.
  *  Bits  0-31 - offset of the first size field in the buffer.
  */
-long long
+uint64_t
 makeToken(int tagSize, bool repeated, int depth, int objectId, int sizePos) {
-    return ((0x07L & (long long)tagSize) << 61)
+    return ((0x07L & (uint64_t)tagSize) << 61)
             | (repeated ? (1LL << 60) : 0)
-            | (0x01ffL & (long long)depth) << 51
-            | (0x07ffffL & (long long)objectId) << 32
-            | (0x0ffffffffL & (long long)sizePos);
+            | (0x01ffL & (uint64_t)depth) << 51
+            | (0x07ffffL & (uint64_t)objectId) << 32
+            | (0x0ffffffffL & (uint64_t)sizePos);
 }
 
 /**
  * Get the encoded tag size from the token.
  */
-static int getTagSizeFromToken(long long token) {
+static int getTagSizeFromToken(uint64_t token) {
     return (int)(0x7 & (token >> 61));
 }
 
 /**
  * Get the nesting depth of startObject calls from the token.
  */
-static int getDepthFromToken(long long token) {
+static int getDepthFromToken(uint64_t token) {
     return (int)(0x01ff & (token >> 51));
 }
 
 /**
  * Get the location of the childRawSize (the first 32 bit size field) in this object.
  */
-static int getSizePosFromToken(long long token) {
+static int getSizePosFromToken(uint64_t token) {
     return (int)token;
 }
 
-long long
+uint64_t
 ProtoOutputStream::start(uint64_t fieldId)
 {
     if ((fieldId & FIELD_TYPE_MASK) != FIELD_TYPE_MESSAGE) {
@@ -275,10 +275,10 @@ ProtoOutputStream::start(uint64_t fieldId)
 }
 
 void
-ProtoOutputStream::end(long long token)
+ProtoOutputStream::end(uint64_t token)
 {
     if (token != mExpectedObjectToken) {
-        ALOGE("Unexpected token: 0x%llx, should be 0x%llx", token, mExpectedObjectToken);
+        ALOGE("Unexpected token: 0x%llx, should be 0x%llx", (long long)token, (long long)mExpectedObjectToken);
         return;
     }
 

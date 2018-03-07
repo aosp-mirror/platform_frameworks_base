@@ -28,7 +28,7 @@ static void writeSuffixLine(ProtoOutputStream* proto, uint64_t fieldId,
         const int count, const char* names[], const uint64_t ids[])
 {
     record_t record = parseRecord(line, delimiter);
-    long long token = proto->start(fieldId);
+    uint64_t token = proto->start(fieldId);
     for (int i=0; i<(int)record.size(); i++) {
         for (int j=0; j<count; j++) {
             if (stripSuffix(&record[i], names[j], true)) {
@@ -138,7 +138,7 @@ CpuInfoParser::Parse(const int in, const int out) const
             continue;
         }
 
-        long long token = proto.start(CpuInfoProto::TASKS);
+        uint64_t token = proto.start(CpuInfoProto::TASKS);
         for (int i=0; i<(int)record.size(); i++) {
             if (!table.insertField(&proto, header[i], record[i])) {
                 fprintf(stderr, "[%s]Line %d fails to insert field %s with value %s\n",

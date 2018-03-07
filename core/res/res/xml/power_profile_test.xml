@@ -96,8 +96,11 @@
          minute. -->
     <item name="camera.avg">600</item>
 
-    <!-- Additional power used when audio decoding/encoding via DSP -->
-    <item name="dsp.audio">100</item>
+    <!-- Additional power used by the audio hardware, probably due to DSP -->
+    <item name="audio">100.0</item>
+
+    <!-- Additional power used by the video hardware, probably due to DSP -->
+    <item name="video">150.0</item> <!-- ~50mA -->
 
     <!-- Additional power used when GPS is acquiring a signal -->
     <item name="gps.on">10</item>

@@ -8973,6 +8973,20 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * This can be called with or without the global lock held.
      */
+    void enforcePermission(String permission, int pid, int uid, String func) {
+        if (checkPermission(permission, pid, uid) == PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        String msg = "Permission Denial: " + func + " from pid=" + pid + ", uid=" + uid
+                + " requires " + permission;
+        Slog.w(TAG, msg);
+        throw new SecurityException(msg);
+    }
+
+    /**
+     * This can be called with or without the global lock held.
+     */
     void enforceCallerIsRecentsOrHasPermission(String permission, String func) {
         if (!mRecentTasks.isCallerRecents(Binder.getCallingUid())) {
             enforceCallingPermission(permission, func);
@@ -20591,8 +20605,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             BroadcastFilter bf = new BroadcastFilter(filter, rl, callerPackage,
                     permission, callingUid, userId, instantApp, visibleToInstantApps);
             if (rl.containsFilter(filter)) {
-                // STOPSHIP: To track if apps are doing this a lot for b/70677313. Change to Slog.w
-                Slog.wtf(TAG, "Receiver with filter " + filter
+                Slog.w(TAG, "Receiver with filter " + filter
                         + " already registered for pid " + rl.pid
                         + ", callerPackage is " + callerPackage);
             } else {
@@ -22171,6 +22184,25 @@ public class ActivityManagerService extends IActivityManager.Stub
                 "Updating global configuration to: " + values);
 
         EventLog.writeEvent(EventLogTags.CONFIGURATION_CHANGED, changes);
+        StatsLog.write(StatsLog.RESOURCE_CONFIGURATION_CHANGED,
+                values.colorMode,
+                values.densityDpi,
+                values.fontScale,
+                values.hardKeyboardHidden,
+                values.keyboard,
+                values.keyboardHidden,
+                values.mcc,
+                values.mnc,
+                values.navigation,
+                values.navigationHidden,
+                values.orientation,
+                values.screenHeightDp,
+                values.screenLayout,
+                values.screenWidthDp,
+                values.smallestScreenWidthDp,
+                values.touchscreen,
+                values.uiMode);
+
 
         if (!initLocale && !values.getLocales().isEmpty() && values.userSetLocale) {
             final LocaleList locales = values.getLocales();

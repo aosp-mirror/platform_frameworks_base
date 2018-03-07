@@ -39,7 +39,6 @@ import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassificationConstants;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassifier;
-import android.view.textclassifier.TextLinks;
 import android.view.textclassifier.TextSelection;
 import android.widget.Editor.SelectionModifierCursorController;
 
@@ -133,17 +132,13 @@ public final class SelectionActionModeHelper {
     /**
      * Starts Link ActionMode.
      */
-    public void startLinkActionModeAsync(TextLinks.TextLink textLink) {
-        mSelectionTracker.onOriginalSelection(
-                getText(mTextView),
-                mTextView.getSelectionStart(),
-                mTextView.getSelectionEnd(),
-                true /*isLink*/);
+    public void startLinkActionModeAsync(int start, int end) {
+        mSelectionTracker.onOriginalSelection(getText(mTextView), start, end, true /*isLink*/);
         cancelAsyncTask();
         if (skipTextClassification()) {
             startLinkActionMode(null);
         } else {
-            resetTextClassificationHelper(textLink.getStart(), textLink.getEnd());
+            resetTextClassificationHelper(start, end);
             mTextClassificationAsyncTask = new TextClassificationAsyncTask(
                     mTextView,
                     mTextClassificationHelper.getTimeoutDuration(),
@@ -244,14 +239,14 @@ public final class SelectionActionModeHelper {
             @Editor.TextActionMode int actionMode, @Nullable SelectionResult result) {
         final CharSequence text = getText(mTextView);
         if (result != null && text instanceof Spannable
-                && (mTextView.isTextSelectable()
-                    || mTextView.isTextEditable()
-                    || actionMode == Editor.TextActionMode.TEXT_LINK)) {
+                && (mTextView.isTextSelectable() || mTextView.isTextEditable())) {
             // Do not change the selection if TextClassifier should be dark launched.
             if (!mTextClassificationSettings.isModelDarkLaunchEnabled()) {
                 Selection.setSelection((Spannable) text, result.mStart, result.mEnd);
                 mTextView.invalidate();
             }
+            mTextClassification = result.mClassification;
+        } else if (actionMode == Editor.TextActionMode.TEXT_LINK) {
             mTextClassification = result.mClassification;
         } else {
             mTextClassification = null;

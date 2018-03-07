@@ -181,7 +181,8 @@
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Apparaat wordt beheerd"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Dit apparaat wordt beheerd door je organisatie. Het netwerkverkeer kan worden bijgehouden. Tik voor meer informatie."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Je apparaat wordt gewist"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"De beheer-app kan niet worden gebruikt. Je apparaat wordt nu gewist.\n\nNeem contact op met de beheerder van je organisatie als je vragen hebt."</string>
+    <!-- no translation found for factory_reset_message (9024647691106150160) -->
+    <skip />
     <string name="printing_disabled_by" msgid="8936832919072486965">"Afdrukken uitgeschakeld door <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="me" msgid="6545696007631404292">"Ik"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Tabletopties"</string>
@@ -305,7 +306,8 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Gebaren uitvoeren"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Kan tikken, vegen, samenknijpen en andere gebaren uitvoeren."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Vingerafdrukgebaren"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Kan gebaren registreren die op de vingerafdruksensor van het apparaat worden getekend."</string>
+    <!-- no translation found for capability_desc_canCaptureFingerprintGestures (4386487962402228670) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"statusbalk uitschakelen of wijzigen"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Hiermee kan de app de statusbalk uitschakelen of systeempictogrammen toevoegen en verwijderen."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"de statusbalk zijn"</string>
@@ -802,6 +804,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Ontgrendeling via patroon."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Ontgrendelen via gezichtsherkenning"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Ontgrendeling via pincode."</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"Pincode-ontgrendeling voor simkaart."</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"Pukcode-ontgrendeling voor simkaart."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Ontgrendeling via wachtwoord."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Tekengebied voor patroon."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Schuifgebied."</string>
@@ -1085,18 +1089,12 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Apps starten."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Opstarten afronden."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> wordt uitgevoerd"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"Tik om terug te keren naar de game"</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"Game kiezen"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"Met het oog op de prestaties kun je slechts een van deze games tegelijkertijd openen."</string>
+    <string name="old_app_action" msgid="3044685170829526403">"Ga terug naar <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"<xliff:g id="NEW_APP">%1$s</xliff:g> openen"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> wordt gesloten zonder op te slaan"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> heeft geheugenlimiet overschreden"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Heap dump is verzameld. Tik om te delen."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Heap dump delen?"</string>
@@ -1204,6 +1202,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"Opnieuw starten"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Mobiele service activeren"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Download de provider-app om je nieuwe simkaart te activeren"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"Download de <xliff:g id="APP_NAME">%1$s</xliff:g>-app om je nieuwe simkaart te activeren"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"App downloaden"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Nieuwe simkaart geplaatst"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Tik om dit in te stellen"</string>
@@ -1418,22 +1417,21 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB-drive"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB-opslag"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Bewerken"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"Melding voor datagebruik"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"Tik voor gebruik en instellingen"</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Gegevenslimiet van 2G-3G bereikt"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Gegevenslimiet van 4G bereikt"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"Datawaarschuwing"</string>
+    <!-- no translation found for data_usage_warning_body (7340198905103751676) -->
+    <skip />
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Mobiele datalimiet bereikt"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wifi-gegevenslimiet bereikt"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Gegev. onderbr. voor rest cyclus"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Gegevenslimiet 2G-3G overschreden"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Gegevenslimiet 4G overschreden"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Mobiele datalimiet overschreden"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wifi-datalimiet overschreden"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> meer dan limiet."</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"Data onderbroken voor de rest van de factureringscyclus"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"Mobiele datalimiet overschreden"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"Wifi-datalimiet overschreden"</string>
+    <!-- no translation found for data_usage_limit_snoozed_body (1671222777207603301) -->
+    <skip />
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Achtergrondgegevens beperkt"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"Tik om beperking te verwijderen."</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"Hoog datagebruik"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"Je datagebruik in de afgelopen dagen is hoger dan normaal. Tik om gebruik en instellingen weer te geven."</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"Intensief mobiel datagebruik"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"Je apps hebben meer data verbruikt dan normaal"</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"<xliff:g id="APP">%s</xliff:g> heeft meer data verbruikt dan normaal"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Beveiligingscertificaat"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Dit certificaat is geldig."</string>
     <string name="issued_to" msgid="454239480274921032">"Uitgegeven voor:"</string>
