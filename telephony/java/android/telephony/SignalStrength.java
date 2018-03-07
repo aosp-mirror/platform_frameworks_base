@@ -156,6 +156,7 @@ public class SignalStrength implements Parcelable {
         mTdScdmaRscp = INVALID;
         mWcdmaSignalStrength = 99;
         mWcdmaRscp = INVALID;
+        mWcdmaRscpAsu = 255;
         mLteRsrpBoost = 0;
         mIsGsm = gsmFlag;
         mUseOnlyRsrpForLteLevel = false;
@@ -378,7 +379,7 @@ public class SignalStrength implements Parcelable {
         // but are reported in ASU which is 0 through 96, so we do the conversion here
         mWcdmaRscpAsu =
                 ((mWcdmaRscpAsu - 120 >= MIN_WCDMA_RSCP) && (mWcdmaRscpAsu - 120 <= MAX_WCDMA_RSCP))
-                ? mWcdmaRscpAsu : INVALID;
+                ? mWcdmaRscpAsu : 255;
         mWcdmaRscp = ((mWcdmaRscp >= MIN_WCDMA_RSCP) && (mWcdmaRscp <= MAX_WCDMA_RSCP))
                 ? mWcdmaRscp : INVALID;
 
