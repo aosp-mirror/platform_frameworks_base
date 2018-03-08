@@ -42,6 +42,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseIntArray;
+import android.util.SparseLongArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.google.android.collect.Lists;
@@ -120,8 +121,6 @@ public class LockPatternUtils {
 
     @Deprecated
     public final static String LOCKOUT_PERMANENT_KEY = "lockscreen.lockedoutpermanently";
-    public final static String LOCKOUT_ATTEMPT_DEADLINE = "lockscreen.lockoutattemptdeadline";
-    public final static String LOCKOUT_ATTEMPT_TIMEOUT_MS = "lockscreen.lockoutattempttimeoutmss";
     public final static String PATTERN_EVER_CHOSEN_KEY = "lockscreen.patterneverchosen";
     public final static String PASSWORD_TYPE_KEY = "lockscreen.password_type";
     @Deprecated
@@ -164,6 +163,7 @@ public class LockPatternUtils {
     private ILockSettings mLockSettingsService;
     private UserManager mUserManager;
     private final Handler mHandler;
+    private final SparseLongArray mLockoutDeadlines = new SparseLongArray();
 
     /**
      * Use {@link TrustManager#isTrustUsuallyManaged(int)}.
@@ -1237,8 +1237,7 @@ public class LockPatternUtils {
             // enforces the deadline. Since we cannot store settings for the FRP user, don't.
             return deadline;
         }
-        setLong(LOCKOUT_ATTEMPT_DEADLINE, deadline, userId);
-        setLong(LOCKOUT_ATTEMPT_TIMEOUT_MS, timeoutMs, userId);
+        mLockoutDeadlines.put(userId, deadline);
         return deadline;
     }
 
@@ -1248,22 +1247,13 @@ public class LockPatternUtils {
      *   enter a pattern.
      */
     public long getLockoutAttemptDeadline(int userId) {
-        long deadline = getLong(LOCKOUT_ATTEMPT_DEADLINE, 0L, userId);
-        final long timeoutMs = getLong(LOCKOUT_ATTEMPT_TIMEOUT_MS, 0L, userId);
+        final long deadline = mLockoutDeadlines.get(userId, 0L);
         final long now = SystemClock.elapsedRealtime();
         if (deadline < now && deadline != 0) {
             // timeout expired
-            setLong(LOCKOUT_ATTEMPT_DEADLINE, 0, userId);
-            setLong(LOCKOUT_ATTEMPT_TIMEOUT_MS, 0, userId);
+            mLockoutDeadlines.put(userId, 0);
             return 0L;
         }
-
-        if (deadline > (now + timeoutMs)) {
-            // device was rebooted, set new deadline
-            deadline = now + timeoutMs;
-            setLong(LOCKOUT_ATTEMPT_DEADLINE, deadline, userId);
-        }
-
         return deadline;
     }
 
