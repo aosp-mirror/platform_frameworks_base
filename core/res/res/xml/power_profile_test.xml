@@ -24,9 +24,6 @@
          sample values, not meant to reflect any real device.
     -->
 
-    <!-- Nothing -->
-    <item name="none">0</item>
-
     <!-- This is the battery capacity in mAh -->
     <item name="battery.capacity">3000</item>
 
