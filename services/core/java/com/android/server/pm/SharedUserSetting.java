@@ -105,7 +105,7 @@ public final class SharedUserSetting extends SettingBase {
         }
         final ArrayList<PackageParser.Package> pkgList = new ArrayList<>(packages.size());
         for (PackageSetting ps : packages) {
-            if (ps == null) {
+            if ((ps == null) || (ps.pkg == null)) {
                 continue;
             }
             pkgList.add(ps.pkg);
