@@ -347,6 +347,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     private final Rect mTmpRect2 = new Rect();
     private final ActivityOptions mTmpOptions = ActivityOptions.makeBasic();
 
+    /** List for processing through a set of activities */
+    private final ArrayList<ActivityRecord> mTmpActivities = new ArrayList<>();
+
     /** Run all ActivityStacks through this */
     protected final ActivityStackSupervisor mStackSupervisor;
 
@@ -4405,11 +4408,15 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 "Removing app " + app + " from history with " + i + " entries");
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                final ActivityRecord r = activities.get(activityNdx);
-                --i;
+            mTmpActivities.clear();
+            mTmpActivities.addAll(activities);
+
+            while (!mTmpActivities.isEmpty()) {
+                final int targetIndex = mTmpActivities.size() - 1;
+                final ActivityRecord r = mTmpActivities.remove(targetIndex);
                 if (DEBUG_CLEANUP) Slog.v(TAG_CLEANUP,
-                        "Record #" + i + " " + r + ": app=" + r.app);
+                        "Record #" + targetIndex + " " + r + ": app=" + r.app);
+
                 if (r.app == app) {
                     if (r.visible) {
                         hasVisibleActivities = true;
@@ -4827,9 +4834,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         ComponentName homeActivity = null;
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
-            int numActivities = activities.size();
-            for (int activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
-                ActivityRecord r = activities.get(activityNdx);
+            mTmpActivities.clear();
+            mTmpActivities.addAll(activities);
+
+            while (!mTmpActivities.isEmpty()) {
+                ActivityRecord r = mTmpActivities.remove(0);
                 final boolean sameComponent =
                         (r.packageName.equals(packageName) && (filterByClasses == null
                                 || filterByClasses.contains(r.realActivity.getClassName())))
@@ -4862,12 +4871,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         r.app = null;
                     }
                     lastTask = r.getTask();
-                    if (finishActivityLocked(r, Activity.RESULT_CANCELED, null, "force-stop",
-                            true)) {
-                        // r has been deleted from mActivities, accommodate.
-                        --numActivities;
-                        --activityNdx;
-                    }
+                    finishActivityLocked(r, Activity.RESULT_CANCELED, null, "force-stop",
+                            true);
                 }
             }
         }

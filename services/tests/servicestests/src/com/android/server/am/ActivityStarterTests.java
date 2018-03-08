@@ -197,11 +197,6 @@ public class ActivityStarterTests extends ActivityTestsBase {
         final ActivityInfo aInfo = containsConditions(preconditions, PRECONDITION_NO_ACTIVITY_INFO)
                 ?  null : new ActivityInfo();
 
-        if (aInfo != null) {
-            aInfo.applicationInfo = new ApplicationInfo();
-            aInfo.applicationInfo.packageName = ActivityBuilder.DEFAULT_PACKAGE;
-        }
-
         IVoiceInteractionSession voiceSession =
                 containsConditions(preconditions, PRECONDITION_SOURCE_VOICE_SESSION)
                 ? mock(IVoiceInteractionSession.class) : null;
@@ -209,6 +204,11 @@ public class ActivityStarterTests extends ActivityTestsBase {
         // Create source token
         final ActivityBuilder builder = new ActivityBuilder(service).setTask(
                 new TaskBuilder(service.mStackSupervisor).setVoiceSession(voiceSession).build());
+
+        if (aInfo != null) {
+            aInfo.applicationInfo = new ApplicationInfo();
+            aInfo.applicationInfo.packageName = builder.getDefaultComponentPackageName();
+        }
 
         // Offset uid by one from {@link ActivityInfo} to simulate different uids.
         if (containsConditions(preconditions, PRECONDITION_DIFFERENT_UID)) {
