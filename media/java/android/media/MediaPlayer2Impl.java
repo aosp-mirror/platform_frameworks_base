@@ -311,26 +311,34 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         return 0;
     }
 
-    /**
-     * Gets the current player state.
-     *
-     * @return the current player state, one of the following:
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized or has been released.
-     */
     @Override
     public @PlayerState int getPlayerState() {
-        // TODO: use cached state or call native function.
-        return PLAYER_STATE_IDLE;
+        int mediaplayer2State = getMediaPlayer2State();
+        int playerState;
+        switch (mediaplayer2State) {
+            case MEDIAPLAYER2_STATE_IDLE:
+                playerState = PLAYER_STATE_IDLE;
+                break;
+            case MEDIAPLAYER2_STATE_PREPARED:
+            case MEDIAPLAYER2_STATE_PAUSED:
+                playerState = PLAYER_STATE_PAUSED;
+                break;
+            case MEDIAPLAYER2_STATE_PLAYING:
+                playerState = PLAYER_STATE_PLAYING;
+                break;
+            case MEDIAPLAYER2_STATE_ERROR:
+            default:
+                playerState = PLAYER_STATE_ERROR;
+                break;
+        }
+
+        return playerState;
     }
 
     /**
      * Gets the current buffering state of the player.
      * During buffering, see {@link #getBufferedPosition()} for the quantifying the amount already
      * buffered.
-     * @return the buffering state, one of the following:
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized or has been released.
      */
     @Override
     public @BuffState int getBufferingState() {
