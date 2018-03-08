@@ -1379,6 +1379,10 @@
             android:theme="@style/Theme">
         </activity>
 
+        <activity android:name="android.app.activity.ActivityThreadTest$TestActivity"
+            android:exported="true">
+        </activity>
+
         <activity
             android:name="android.os.TestVrActivity"
             android:enableVrMode="com.android.frameworks.coretests/android.os.TestVrActivity$TestVrListenerService">
