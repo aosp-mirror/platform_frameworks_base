@@ -427,6 +427,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 KeyEvent.KEYCODE_CALCULATOR, Intent.CATEGORY_APP_CALCULATOR);
     }
 
+    private static final int USER_ACTIVITY_NOTIFICATION_DELAY = 200;
+
     /** Amount of time (in milliseconds) to wait for windows drawn before powering on. */
     static final int WAITING_FOR_DRAWN_TIMEOUT = 1000;
 
@@ -674,6 +676,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private boolean mPendingKeyguardOccluded;
     private boolean mKeyguardOccludedChanged;
+    private boolean mNotifyUserActivity;
 
     boolean mShowingDream;
     private boolean mLastShowingDream;
@@ -831,6 +834,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_LAUNCH_ASSIST = 26;
     private static final int MSG_LAUNCH_ASSIST_LONG_PRESS = 27;
     private static final int MSG_POWER_VERY_LONG_PRESS = 28;
+    private static final int MSG_NOTIFY_USER_ACTIVITY = 29;
 
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS = 0;
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION = 1;
@@ -931,6 +935,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_HANDLE_ALL_APPS:
                     launchAllAppsAction();
+                    break;
+                case MSG_NOTIFY_USER_ACTIVITY:
+                    removeMessages(MSG_NOTIFY_USER_ACTIVITY);
+                    Intent intent = new Intent(ACTION_USER_ACTIVITY_NOTIFICATION);
+                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                    mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
+                            android.Manifest.permission.USER_ACTIVITY);
                     break;
             }
         }
@@ -7495,6 +7506,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mHandler.sendEmptyMessage(MSG_HIDE_BOOT_MESSAGE);
     }
 
+    @Override
+    public void requestUserActivityNotification() {
+        if (!mNotifyUserActivity && !mHandler.hasMessages(MSG_NOTIFY_USER_ACTIVITY)) {
+            mNotifyUserActivity = true;
+        }
+    }
+
     /** {@inheritDoc} */
     @Override
     public void userActivity() {
@@ -7515,6 +7533,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mHandler.removeCallbacks(mScreenLockTimeout);
                 mHandler.postDelayed(mScreenLockTimeout, mLockScreenTimeout);
             }
+        }
+
+        if (mAwake && mNotifyUserActivity) {
+            mHandler.sendEmptyMessageDelayed(MSG_NOTIFY_USER_ACTIVITY,
+                    USER_ACTIVITY_NOTIFICATION_DELAY);
+            mNotifyUserActivity = false;
         }
     }
 
