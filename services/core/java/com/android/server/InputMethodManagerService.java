@@ -92,7 +92,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
-import android.hardware.input.InputManagerInternal;
 import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
 import android.os.Binder;
@@ -2490,16 +2489,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    private void notifyInputMethodSubtypeChanged(final int userId,
-            @Nullable final InputMethodInfo inputMethodInfo,
-            @Nullable final InputMethodSubtype subtype) {
-        final InputManagerInternal inputManagerInternal =
-                LocalServices.getService(InputManagerInternal.class);
-        if (inputManagerInternal != null) {
-            inputManagerInternal.onInputMethodSubtypeChanged(userId, inputMethodInfo, subtype);
-        }
-    }
-
     /* package */ void setInputMethodLocked(String id, int subtypeId) {
         InputMethodInfo info = mMethodMap.get(id);
         if (info == null) {
@@ -2534,10 +2523,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         mCurMethod.changeInputMethodSubtype(newSubtype);
                     } catch (RemoteException e) {
                         Slog.w(TAG, "Failed to call changeInputMethodSubtype");
-                        return;
                     }
                 }
-                notifyInputMethodSubtypeChanged(mSettings.getCurrentUserId(), info, newSubtype);
             }
             return;
         }
@@ -2563,9 +2550,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
-
-        notifyInputMethodSubtypeChanged(mSettings.getCurrentUserId(), info,
-                getCurrentInputMethodSubtypeLocked());
     }
 
     @Override
