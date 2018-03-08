@@ -54,6 +54,7 @@ public class BatteryMeterDrawableBase extends Drawable {
     private int mLevel = -1;
     private boolean mCharging;
     private boolean mPowerSaveEnabled;
+    private boolean mPowerSaveAsColorError = true;
     private boolean mShowPercent;
 
     private static final boolean SINGLE_DIGIT_PERCENT = false;
@@ -150,7 +151,8 @@ public class BatteryMeterDrawableBase extends Drawable {
         mBoltPaint.setColor(Utils.getDefaultColor(mContext, R.color.batterymeter_bolt_color));
         mBoltPoints = loadPoints(res, R.array.batterymeter_bolt_points);
 
-        mPlusPaint = new Paint(mBoltPaint);
+        mPlusPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mPlusPaint.setColor(Utils.getDefaultColor(mContext, R.color.batterymeter_plus_color));
         mPlusPoints = loadPoints(res, R.array.batterymeter_plus_points);
 
         mIntrinsicWidth = context.getResources().getDimensionPixelSize(R.dimen.battery_width);
@@ -193,6 +195,10 @@ public class BatteryMeterDrawableBase extends Drawable {
     public void setPowerSave(boolean val) {
         mPowerSaveEnabled = val;
         postInvalidate();
+    }
+
+    protected void setPowerSaveAsColorError(boolean asError) {
+        mPowerSaveAsColorError = asError;
     }
 
     // an approximation of View.postInvalidate()
@@ -254,10 +260,6 @@ public class BatteryMeterDrawableBase extends Drawable {
     }
 
     private int getColorForLevel(int percent) {
-        // If we are in power save mode, always use the normal color.
-        if (mPowerSaveEnabled) {
-            return mIconTint;
-        }
         int thresh, color = 0;
         for (int i = 0; i < mColors.length; i += 2) {
             thresh = mColors[i];
@@ -279,7 +281,6 @@ public class BatteryMeterDrawableBase extends Drawable {
         mIconTint = fillColor;
         mFramePaint.setColor(backgroundColor);
         mBoltPaint.setColor(fillColor);
-        mPlusPaint.setColor(fillColor);
         mChargeColor = fillColor;
         invalidateSelf();
     }
@@ -392,14 +393,16 @@ public class BatteryMeterDrawableBase extends Drawable {
                         mPlusFrame.top + mPlusPoints[1] * mPlusFrame.height());
             }
 
-            float boltPct = (mPlusFrame.bottom - levelTop) / (mPlusFrame.bottom - mPlusFrame.top);
-            boltPct = Math.min(Math.max(boltPct, 0), 1);
-            if (boltPct <= BOLT_LEVEL_THRESHOLD) {
-                // draw the bolt if opaque
+            float fillPct = (mPlusFrame.bottom - levelTop) / (mPlusFrame.bottom - mPlusFrame.top);
+            fillPct = Math.min(Math.max(fillPct, 0), 1);
+            if (fillPct <= BOLT_LEVEL_THRESHOLD) {
+                // draw the plus if opaque
                 c.drawPath(mPlusPath, mPlusPaint);
             } else {
-                // otherwise cut the bolt out of the overall shape
                 mShapePath.op(mPlusPath, Path.Op.DIFFERENCE);
+                if (mPowerSaveAsColorError) {
+                    c.drawPath(mPlusPath, mPlusPaint);
+                }
             }
         }
 

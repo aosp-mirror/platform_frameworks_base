@@ -129,6 +129,7 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
             super.setBatteryLevel(MAX_BATTERY);
             setPowerSave(true);
             setCharging(false);
+            setPowerSaveAsColorError(false);
         }
 
         @Override
