@@ -16,6 +16,10 @@
 
 package com.android.systemui.statusbar;
 
+import static android.app.AppOpsManager.OP_CAMERA;
+import static android.app.AppOpsManager.OP_RECORD_AUDIO;
+import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
+
 import static junit.framework.Assert.assertNotNull;
 
 import static org.junit.Assert.assertEquals;
@@ -34,14 +38,17 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.util.ArraySet;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -58,6 +65,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoRule;
 import org.mockito.junit.MockitoJUnit;
@@ -162,6 +170,81 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
 
         verify(guts).closeControls(anyBoolean(), anyBoolean(), anyInt(), anyInt(), anyBoolean());
         verify(row, times(2)).setGutsView(any());
+    }
+
+    @Test
+    public void testAppOpsSettingsIntent_camera() {
+        ArraySet<Integer> ops = new ArraySet<>();
+        ops.add(OP_CAMERA);
+        mGutsManager.startAppOpsSettingsActivity("", 0, ops, null);
+        ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
+        verify(mPresenter, times(1)).startNotificationGutsIntent(captor.capture(), anyInt(), any());
+        assertEquals(Intent.ACTION_MANAGE_APP_PERMISSIONS, captor.getValue().getAction());
+    }
+
+    @Test
+    public void testAppOpsSettingsIntent_mic() {
+        ArraySet<Integer> ops = new ArraySet<>();
+        ops.add(OP_RECORD_AUDIO);
+        mGutsManager.startAppOpsSettingsActivity("", 0, ops, null);
+        ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
+        verify(mPresenter, times(1)).startNotificationGutsIntent(captor.capture(), anyInt(), any());
+        assertEquals(Intent.ACTION_MANAGE_APP_PERMISSIONS, captor.getValue().getAction());
+    }
+
+    @Test
+    public void testAppOpsSettingsIntent_camera_mic() {
+        ArraySet<Integer> ops = new ArraySet<>();
+        ops.add(OP_CAMERA);
+        ops.add(OP_RECORD_AUDIO);
+        mGutsManager.startAppOpsSettingsActivity("", 0, ops, null);
+        ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
+        verify(mPresenter, times(1)).startNotificationGutsIntent(captor.capture(), anyInt(), any());
+        assertEquals(Intent.ACTION_MANAGE_APP_PERMISSIONS, captor.getValue().getAction());
+    }
+
+    @Test
+    public void testAppOpsSettingsIntent_overlay() {
+        ArraySet<Integer> ops = new ArraySet<>();
+        ops.add(OP_SYSTEM_ALERT_WINDOW);
+        mGutsManager.startAppOpsSettingsActivity("", 0, ops, null);
+        ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
+        verify(mPresenter, times(1)).startNotificationGutsIntent(captor.capture(), anyInt(), any());
+        assertEquals(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, captor.getValue().getAction());
+    }
+
+    @Test
+    public void testAppOpsSettingsIntent_camera_mic_overlay() {
+        ArraySet<Integer> ops = new ArraySet<>();
+        ops.add(OP_CAMERA);
+        ops.add(OP_RECORD_AUDIO);
+        ops.add(OP_SYSTEM_ALERT_WINDOW);
+        mGutsManager.startAppOpsSettingsActivity("", 0, ops, null);
+        ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
+        verify(mPresenter, times(1)).startNotificationGutsIntent(captor.capture(), anyInt(), any());
+        assertEquals(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, captor.getValue().getAction());
+    }
+
+    @Test
+    public void testAppOpsSettingsIntent_camera_overlay() {
+        ArraySet<Integer> ops = new ArraySet<>();
+        ops.add(OP_CAMERA);
+        ops.add(OP_SYSTEM_ALERT_WINDOW);
+        mGutsManager.startAppOpsSettingsActivity("", 0, ops, null);
+        ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
+        verify(mPresenter, times(1)).startNotificationGutsIntent(captor.capture(), anyInt(), any());
+        assertEquals(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, captor.getValue().getAction());
+    }
+
+    @Test
+    public void testAppOpsSettingsIntent_mic_overlay() {
+        ArraySet<Integer> ops = new ArraySet<>();
+        ops.add(OP_RECORD_AUDIO);
+        ops.add(OP_SYSTEM_ALERT_WINDOW);
+        mGutsManager.startAppOpsSettingsActivity("", 0, ops, null);
+        ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
+        verify(mPresenter, times(1)).startNotificationGutsIntent(captor.capture(), anyInt(), any());
+        assertEquals(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, captor.getValue().getAction());
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

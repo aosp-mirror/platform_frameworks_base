@@ -124,6 +124,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     protected boolean mUseHeadsUp = false;
     protected boolean mDisableNotificationAlerts;
     protected NotificationListContainer mListContainer;
+    private ExpandableNotificationRow.OnAppOpsClickListener mOnAppOpsClickListener;
 
     private final class NotificationClicker implements View.OnClickListener {
 
@@ -271,6 +272,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         mDeviceProvisionedController.addCallback(mDeviceProvisionedListener);
 
         mHeadsUpObserver.onChange(true); // set up
+        mOnAppOpsClickListener = mGutsManager::openGuts;
     }
 
     public NotificationData getNotificationData() {
@@ -360,6 +362,8 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         if (ENABLE_REMOTE_INPUT) {
             row.setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS);
         }
+
+        row.setAppOpsOnClickListener(mOnAppOpsClickListener);
 
         mCallback.onBindRow(entry, pmUser, sbn, row);
     }
@@ -622,7 +626,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         }
     }
 
-    private void updateNotification(NotificationData.Entry entry, PackageManager pmUser,
+    protected void updateNotification(NotificationData.Entry entry, PackageManager pmUser,
             StatusBarNotification sbn, ExpandableNotificationRow row) {
         row.setNeedsRedaction(mLockscreenUserManager.needsRedaction(entry));
         boolean isLowPriority = mNotificationData.isAmbient(sbn.getKey());
