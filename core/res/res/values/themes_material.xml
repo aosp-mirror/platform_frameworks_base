@@ -403,6 +403,7 @@ please see themes_device_defaults.xml.
         <item name="colorControlHighlight">@color/ripple_material_dark</item>
         <item name="colorButtonNormal">@color/btn_default_material_dark</item>
         <item name="colorSwitchThumbNormal">@color/switch_thumb_material_dark</item>
+        <item name="colorProgressBackgroundNormal">?attr/colorControlNormal</item>
 
         <!-- Tooltip popup properties -->
         <item name="tooltipForegroundColor">@color/foreground_material_light</item>
@@ -777,6 +778,7 @@ please see themes_device_defaults.xml.
         <item name="colorControlHighlight">@color/ripple_material_light</item>
         <item name="colorButtonNormal">@color/btn_default_material_light</item>
         <item name="colorSwitchThumbNormal">@color/switch_thumb_material_light</item>
+        <item name="colorProgressBackgroundNormal">?attr/colorControlNormal</item>
 
         <!-- Tooltip popup properties -->
         <item name="tooltipForegroundColor">@color/foreground_material_dark</item>
@@ -837,6 +839,7 @@ please see themes_device_defaults.xml.
         <item name="colorControlHighlight">@color/ripple_material_light</item>
         <item name="colorButtonNormal">@color/btn_default_material_light</item>
         <item name="colorSwitchThumbNormal">@color/switch_thumb_material_light</item>
+        <item name="colorProgressBackgroundNormal">?attr/colorControlNormal</item>
     </style>
 
     <!-- Theme overlay that replaces colors with their dark versions but preserves
@@ -870,6 +873,7 @@ please see themes_device_defaults.xml.
         <item name="colorControlHighlight">@color/ripple_material_dark</item>
         <item name="colorButtonNormal">@color/btn_default_material_dark</item>
         <item name="colorSwitchThumbNormal">@color/switch_thumb_material_dark</item>
+        <item name="colorProgressBackgroundNormal">?attr/colorControlNormal</item>
     </style>
 
     <!-- Theme overlay that replaces the normal control color, which by default is the same as the
