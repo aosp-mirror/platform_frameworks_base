@@ -17,7 +17,6 @@
 package android.hardware.input;
 
 import android.annotation.IntDef;
-import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
@@ -709,16 +708,14 @@ public final class InputManager {
      *
      * @param identifier The identifier for the input device.
      * @param inputMethodInfo The input method.
-     * @param inputMethodSubtype The input method subtype. {@code null} if this input method does
-     * not support any subtype.
+     * @param inputMethodSubtype The input method subtype.
      *
      * @return The associated {@link KeyboardLayout}, or null if one has not been set.
      *
      * @hide
      */
-    @Nullable
     public KeyboardLayout getKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
-            InputMethodInfo inputMethodInfo, @Nullable InputMethodSubtype inputMethodSubtype) {
+            InputMethodInfo inputMethodInfo, InputMethodSubtype inputMethodSubtype) {
         try {
             return mIm.getKeyboardLayoutForInputDevice(
                     identifier, inputMethodInfo, inputMethodSubtype);
@@ -733,13 +730,13 @@ public final class InputManager {
      * @param identifier The identifier for the input device.
      * @param inputMethodInfo The input method with which to associate the keyboard layout.
      * @param inputMethodSubtype The input method subtype which which to associate the keyboard
-     * layout. {@code null} if this input method does not support any subtype.
+     *                           layout.
      * @param keyboardLayoutDescriptor The descriptor of the keyboard layout to set
      *
      * @hide
      */
     public void setKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
-            InputMethodInfo inputMethodInfo, @Nullable InputMethodSubtype inputMethodSubtype,
+            InputMethodInfo inputMethodInfo, InputMethodSubtype inputMethodSubtype,
             String keyboardLayoutDescriptor) {
         try {
             mIm.setKeyboardLayoutForInputDevice(identifier, inputMethodInfo,

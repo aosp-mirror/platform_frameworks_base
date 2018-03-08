@@ -1408,8 +1408,8 @@ public class InputManagerService extends IInputManager.Stub
         if (keyboardLayoutDescriptor == null) {
             throw new IllegalArgumentException("keyboardLayoutDescriptor must not be null");
         }
-        if (imeInfo == null) {
-            throw new IllegalArgumentException("imeInfo must not be null");
+        if (imeInfo == null || imeSubtype == null) {
+            throw new IllegalArgumentException("imeInfo and imeSubtype must not be null");
         }
         InputMethodSubtypeHandle handle = new InputMethodSubtypeHandle(imeInfo, imeSubtype);
         setKeyboardLayoutForInputDeviceInner(identifier, handle, keyboardLayoutDescriptor);
