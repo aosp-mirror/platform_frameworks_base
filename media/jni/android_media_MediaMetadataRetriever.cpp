@@ -25,6 +25,7 @@
 #include <media/IMediaHTTPService.h>
 #include <media/mediametadataretriever.h>
 #include <media/mediascanner.h>
+#include <nativehelper/ScopedLocalRef.h>
 #include <private/media/VideoFrame.h>
 
 #include "jni.h"
@@ -45,6 +46,12 @@ struct fields_t {
     jmethodID createScaledBitmapMethod;
     jclass configClazz;  // Must be a global ref
     jmethodID createConfigMethod;
+    jclass bitmapParamsClazz; // Must be a global ref
+    jfieldID inPreferredConfig;
+    jfieldID outActualConfig;
+    jclass arrayListClazz; // Must be a global ref
+    jmethodID arrayListInit;
+    jmethodID arrayListAdd;
 };
 
 static fields_t fields;
@@ -254,16 +261,18 @@ static void rotate(T *dst, const T *src, size_t width, size_t height, int angle)
 }
 
 static jobject getBitmapFromVideoFrame(
-        JNIEnv *env, VideoFrame *videoFrame, jint dst_width, jint dst_height) {
+        JNIEnv *env, VideoFrame *videoFrame, jint dst_width, jint dst_height,
+        SkColorType outColorType) {
     ALOGV("getBitmapFromVideoFrame: dimension = %dx%d and bytes = %d",
             videoFrame->mDisplayWidth,
             videoFrame->mDisplayHeight,
             videoFrame->mSize);
 
-    jobject config = env->CallStaticObjectMethod(
-                        fields.configClazz,
-                        fields.createConfigMethod,
-                        GraphicsJNI::colorTypeToLegacyBitmapConfig(kRGB_565_SkColorType));
+    ScopedLocalRef<jobject> config(env,
+            env->CallStaticObjectMethod(
+                    fields.configClazz,
+                    fields.createConfigMethod,
+                    GraphicsJNI::colorTypeToLegacyBitmapConfig(outColorType)));
 
     uint32_t width, height, displayWidth, displayHeight;
     bool swapWidthAndHeight = false;
@@ -285,7 +294,7 @@ static jobject getBitmapFromVideoFrame(
                             fields.createBitmapMethod,
                             width,
                             height,
-                            config);
+                            config.get());
     if (jBitmap == NULL) {
         if (env->ExceptionCheck()) {
             env->ExceptionClear();
@@ -297,11 +306,19 @@ static jobject getBitmapFromVideoFrame(
     SkBitmap bitmap;
     GraphicsJNI::getSkBitmap(env, jBitmap, &bitmap);
 
-    rotate((uint16_t*)bitmap.getPixels(),
-           (uint16_t*)((char*)videoFrame + sizeof(VideoFrame)),
-           videoFrame->mWidth,
-           videoFrame->mHeight,
-           videoFrame->mRotationAngle);
+    if (outColorType == kRGB_565_SkColorType) {
+        rotate((uint16_t*)bitmap.getPixels(),
+               (uint16_t*)((char*)videoFrame + sizeof(VideoFrame)),
+               videoFrame->mWidth,
+               videoFrame->mHeight,
+               videoFrame->mRotationAngle);
+    } else {
+        rotate((uint32_t*)bitmap.getPixels(),
+               (uint32_t*)((char*)videoFrame + sizeof(VideoFrame)),
+               videoFrame->mWidth,
+               videoFrame->mHeight,
+               videoFrame->mRotationAngle);
+    }
 
     if (dst_width <= 0 || dst_height <= 0) {
         dst_width = displayWidth;
@@ -323,10 +340,44 @@ static jobject getBitmapFromVideoFrame(
                                 dst_width,
                                 dst_height,
                                 true);
+
+        env->DeleteLocalRef(jBitmap);
         return scaledBitmap;
     }
 
     return jBitmap;
+}
+
+static int getColorFormat(JNIEnv *env, jobject options) {
+    if (options == NULL) {
+        return HAL_PIXEL_FORMAT_RGBA_8888;
+    }
+
+    ScopedLocalRef<jobject> inConfig(env, env->GetObjectField(options, fields.inPreferredConfig));
+    SkColorType prefColorType = GraphicsJNI::getNativeBitmapColorType(env, inConfig.get());
+
+    if (prefColorType == kRGB_565_SkColorType) {
+        return HAL_PIXEL_FORMAT_RGB_565;
+    }
+    return HAL_PIXEL_FORMAT_RGBA_8888;
+}
+
+static SkColorType setOutColorType(JNIEnv *env, int colorFormat, jobject options) {
+    SkColorType outColorType = kN32_SkColorType;
+    if (colorFormat == HAL_PIXEL_FORMAT_RGB_565) {
+        outColorType = kRGB_565_SkColorType;
+    }
+
+    if (options != NULL) {
+        ScopedLocalRef<jobject> config(env,
+                env->CallStaticObjectMethod(
+                        fields.configClazz,
+                        fields.createConfigMethod,
+                        GraphicsJNI::colorTypeToLegacyBitmapConfig(outColorType)));
+
+        env->SetObjectField(options, fields.outActualConfig, config.get());
+    }
+    return outColorType;
 }
 
 static jobject android_media_MediaMetadataRetriever_getFrameAtTime(
@@ -351,11 +402,11 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(
         return NULL;
     }
 
-    return getBitmapFromVideoFrame(env, videoFrame, dst_width, dst_height);
+    return getBitmapFromVideoFrame(env, videoFrame, dst_width, dst_height, kRGB_565_SkColorType);
 }
 
 static jobject android_media_MediaMetadataRetriever_getImageAtIndex(
-        JNIEnv *env, jobject thiz, jint index)
+        JNIEnv *env, jobject thiz, jint index, jobject params)
 {
     ALOGV("getImageAtIndex: index %d", index);
     sp<MediaMetadataRetriever> retriever = getRetriever(env, thiz);
@@ -364,9 +415,11 @@ static jobject android_media_MediaMetadataRetriever_getImageAtIndex(
         return NULL;
     }
 
+    int colorFormat = getColorFormat(env, params);
+
     // Call native method to retrieve an image
     VideoFrame *videoFrame = NULL;
-    sp<IMemory> frameMemory = retriever->getImageAtIndex(index);
+    sp<IMemory> frameMemory = retriever->getImageAtIndex(index, colorFormat);
     if (frameMemory != 0) {  // cast the shared structure to a VideoFrame object
         videoFrame = static_cast<VideoFrame *>(frameMemory->pointer());
     }
@@ -375,11 +428,13 @@ static jobject android_media_MediaMetadataRetriever_getImageAtIndex(
         return NULL;
     }
 
-    return getBitmapFromVideoFrame(env, videoFrame, -1, -1);
+    SkColorType outColorType = setOutColorType(env, colorFormat, params);
+
+    return getBitmapFromVideoFrame(env, videoFrame, -1, -1, outColorType);
 }
 
-static jobjectArray android_media_MediaMetadataRetriever_getFrameAtIndex(
-        JNIEnv *env, jobject thiz, jint frameIndex, jint numFrames)
+static jobject android_media_MediaMetadataRetriever_getFrameAtIndex(
+        JNIEnv *env, jobject thiz, jint frameIndex, jint numFrames, jobject params)
 {
     ALOGV("getFrameAtIndex: frameIndex %d, numFrames %d", frameIndex, numFrames);
     sp<MediaMetadataRetriever> retriever = getRetriever(env, thiz);
@@ -389,20 +444,22 @@ static jobjectArray android_media_MediaMetadataRetriever_getFrameAtIndex(
         return NULL;
     }
 
+    int colorFormat = getColorFormat(env, params);
+
     std::vector<sp<IMemory> > frames;
-    status_t err = retriever->getFrameAtIndex(&frames, frameIndex, numFrames);
+    status_t err = retriever->getFrameAtIndex(&frames, frameIndex, numFrames, colorFormat);
     if (err != OK || frames.size() == 0) {
         ALOGE("failed to get frames from retriever, err=%d, size=%zu",
                 err, frames.size());
         return NULL;
     }
-
-    jobjectArray bitmapArrayObj = env->NewObjectArray(
-            frames.size(), fields.bitmapClazz, NULL);
-    if (bitmapArrayObj == NULL) {
-        ALOGE("can't create bitmap array object");
+    jobject arrayList = env->NewObject(fields.arrayListClazz, fields.arrayListInit);
+    if (arrayList == NULL) {
+        ALOGE("can't create bitmap array list object");
         return NULL;
     }
+
+    SkColorType outColorType = setOutColorType(env, colorFormat, params);
 
     for (size_t i = 0; i < frames.size(); i++) {
         if (frames[i] == NULL || frames[i]->pointer() == NULL) {
@@ -410,10 +467,11 @@ static jobjectArray android_media_MediaMetadataRetriever_getFrameAtIndex(
             continue;
         }
         VideoFrame *videoFrame = static_cast<VideoFrame *>(frames[i]->pointer());
-        jobject bitmapObj = getBitmapFromVideoFrame(env, videoFrame, -1, -1);
-        env->SetObjectArrayElement(bitmapArrayObj, i, bitmapObj);
+        jobject bitmapObj = getBitmapFromVideoFrame(env, videoFrame, -1, -1, outColorType);
+        env->CallBooleanMethod(arrayList, fields.arrayListAdd, bitmapObj);
+        env->DeleteLocalRef(bitmapObj);
     }
-    return bitmapArrayObj;
+    return arrayList;
 }
 
 static jbyteArray android_media_MediaMetadataRetriever_getEmbeddedPicture(
@@ -488,21 +546,21 @@ static void android_media_MediaMetadataRetriever_native_finalize(JNIEnv *env, jo
 // first time an instance of this class is used.
 static void android_media_MediaMetadataRetriever_native_init(JNIEnv *env)
 {
-    jclass clazz = env->FindClass(kClassPathName);
-    if (clazz == NULL) {
+    ScopedLocalRef<jclass> clazz(env, env->FindClass(kClassPathName));
+    if (clazz.get() == NULL) {
         return;
     }
 
-    fields.context = env->GetFieldID(clazz, "mNativeContext", "J");
+    fields.context = env->GetFieldID(clazz.get(), "mNativeContext", "J");
     if (fields.context == NULL) {
         return;
     }
 
-    jclass bitmapClazz = env->FindClass("android/graphics/Bitmap");
-    if (bitmapClazz == NULL) {
+    clazz.reset(env->FindClass("android/graphics/Bitmap"));
+    if (clazz.get() == NULL) {
         return;
     }
-    fields.bitmapClazz = (jclass) env->NewGlobalRef(bitmapClazz);
+    fields.bitmapClazz = (jclass) env->NewGlobalRef(clazz.get());
     if (fields.bitmapClazz == NULL) {
         return;
     }
@@ -521,11 +579,11 @@ static void android_media_MediaMetadataRetriever_native_init(JNIEnv *env)
         return;
     }
 
-    jclass configClazz = env->FindClass("android/graphics/Bitmap$Config");
-    if (configClazz == NULL) {
+    clazz.reset(env->FindClass("android/graphics/Bitmap$Config"));
+    if (clazz.get() == NULL) {
         return;
     }
-    fields.configClazz = (jclass) env->NewGlobalRef(configClazz);
+    fields.configClazz = (jclass) env->NewGlobalRef(clazz.get());
     if (fields.configClazz == NULL) {
         return;
     }
@@ -533,6 +591,42 @@ static void android_media_MediaMetadataRetriever_native_init(JNIEnv *env)
             env->GetStaticMethodID(fields.configClazz, "nativeToConfig",
                     "(I)Landroid/graphics/Bitmap$Config;");
     if (fields.createConfigMethod == NULL) {
+        return;
+    }
+
+    clazz.reset(env->FindClass("android/media/MediaMetadataRetriever$BitmapParams"));
+    if (clazz.get() == NULL) {
+        return;
+    }
+    fields.bitmapParamsClazz = (jclass) env->NewGlobalRef(clazz.get());
+    if (fields.bitmapParamsClazz == NULL) {
+        return;
+    }
+    fields.inPreferredConfig = env->GetFieldID(fields.bitmapParamsClazz,
+            "inPreferredConfig", "Landroid/graphics/Bitmap$Config;");
+    if (fields.inPreferredConfig == NULL) {
+        return;
+    }
+    fields.outActualConfig = env->GetFieldID(fields.bitmapParamsClazz,
+            "outActualConfig", "Landroid/graphics/Bitmap$Config;");
+    if (fields.outActualConfig == NULL) {
+        return;
+    }
+
+    clazz.reset(env->FindClass("java/util/ArrayList"));
+    if (clazz.get() == NULL) {
+        return;
+    }
+    fields.arrayListClazz = (jclass) env->NewGlobalRef(clazz.get());
+    if (fields.arrayListClazz == NULL) {
+        return;
+    }
+    fields.arrayListInit = env->GetMethodID(clazz.get(), "<init>", "()V");
+    if (fields.arrayListInit == NULL) {
+        return;
+    }
+    fields.arrayListAdd = env->GetMethodID(clazz.get(), "add", "(Ljava/lang/Object;)Z");
+    if (fields.arrayListAdd == NULL) {
         return;
     }
 }
@@ -556,17 +650,36 @@ static const JNINativeMethod nativeMethods[] = {
             (void *)android_media_MediaMetadataRetriever_setDataSourceAndHeaders
         },
 
-        {"setDataSource",   "(Ljava/io/FileDescriptor;JJ)V", (void *)android_media_MediaMetadataRetriever_setDataSourceFD},
-        {"_setDataSource",   "(Landroid/media/MediaDataSource;)V", (void *)android_media_MediaMetadataRetriever_setDataSourceCallback},
-        {"_getFrameAtTime", "(JIII)Landroid/graphics/Bitmap;", (void *)android_media_MediaMetadataRetriever_getFrameAtTime},
-        {"_getImageAtIndex", "(I)Landroid/graphics/Bitmap;", (void *)android_media_MediaMetadataRetriever_getImageAtIndex},
-        {"_getFrameAtIndex", "(II)[Landroid/graphics/Bitmap;", (void *)android_media_MediaMetadataRetriever_getFrameAtIndex},
-        {"extractMetadata", "(I)Ljava/lang/String;", (void *)android_media_MediaMetadataRetriever_extractMetadata},
-        {"getEmbeddedPicture", "(I)[B", (void *)android_media_MediaMetadataRetriever_getEmbeddedPicture},
-        {"release",         "()V", (void *)android_media_MediaMetadataRetriever_release},
-        {"native_finalize", "()V", (void *)android_media_MediaMetadataRetriever_native_finalize},
-        {"native_setup",    "()V", (void *)android_media_MediaMetadataRetriever_native_setup},
-        {"native_init",     "()V", (void *)android_media_MediaMetadataRetriever_native_init},
+        {"setDataSource",   "(Ljava/io/FileDescriptor;JJ)V",
+                (void *)android_media_MediaMetadataRetriever_setDataSourceFD},
+        {"_setDataSource",   "(Landroid/media/MediaDataSource;)V",
+                (void *)android_media_MediaMetadataRetriever_setDataSourceCallback},
+        {"_getFrameAtTime", "(JIII)Landroid/graphics/Bitmap;",
+                (void *)android_media_MediaMetadataRetriever_getFrameAtTime},
+        {
+            "_getImageAtIndex",
+            "(ILandroid/media/MediaMetadataRetriever$BitmapParams;)Landroid/graphics/Bitmap;",
+            (void *)android_media_MediaMetadataRetriever_getImageAtIndex
+        },
+
+        {
+            "_getFrameAtIndex",
+            "(IILandroid/media/MediaMetadataRetriever$BitmapParams;)Ljava/util/List;",
+            (void *)android_media_MediaMetadataRetriever_getFrameAtIndex
+        },
+
+        {"extractMetadata", "(I)Ljava/lang/String;",
+                (void *)android_media_MediaMetadataRetriever_extractMetadata},
+        {"getEmbeddedPicture", "(I)[B",
+                (void *)android_media_MediaMetadataRetriever_getEmbeddedPicture},
+        {"release",         "()V",
+                (void *)android_media_MediaMetadataRetriever_release},
+        {"native_finalize", "()V",
+                (void *)android_media_MediaMetadataRetriever_native_finalize},
+        {"native_setup",    "()V",
+                (void *)android_media_MediaMetadataRetriever_native_setup},
+        {"native_init",     "()V",
+                (void *)android_media_MediaMetadataRetriever_native_init},
 };
 
 // This function only registers the native methods, and is called from
