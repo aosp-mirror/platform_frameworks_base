@@ -103,56 +103,56 @@ public abstract class MediaPlaylistAgent {
         /**
          * Called when a playlist is changed.
          *
-         * @param mplc playlist controller for this event
+         * @param playlistAgent playlist agent for this event
          * @param list new playlist
          * @param metadata new metadata
          */
-        public void onPlaylistChanged(@NonNull MediaPlaylistAgent mplc,
+        public void onPlaylistChanged(@NonNull MediaPlaylistAgent playlistAgent,
                 @NonNull List<MediaItem2> list, @Nullable MediaMetadata2 metadata) { }
 
         /**
          * Called when a playlist metadata is changed.
          *
-         * @param mplc playlist controller for this event
+         * @param playlistAgent playlist agent for this event
          * @param metadata new metadata
          */
-        public void onPlaylistMetadataChanged(@NonNull MediaPlaylistAgent mplc,
+        public void onPlaylistMetadataChanged(@NonNull MediaPlaylistAgent playlistAgent,
                 @Nullable MediaMetadata2 metadata) { }
 
         /**
          * Called when the shuffle mode is changed.
          *
-         * @param mplc playlist controller for this event
+         * @param playlistAgent playlist agent for this event
          * @param shuffleMode repeat mode
          * @see #SHUFFLE_MODE_NONE
          * @see #SHUFFLE_MODE_ALL
          * @see #SHUFFLE_MODE_GROUP
          */
-        public void onShuffleModeChanged(@NonNull MediaPlaylistAgent mplc,
+        public void onShuffleModeChanged(@NonNull MediaPlaylistAgent playlistAgent,
                 @ShuffleMode int shuffleMode) { }
 
         /**
          * Called when the repeat mode is changed.
          *
-         * @param mplc playlist controller for this event
+         * @param playlistAgent playlist agent for this event
          * @param repeatMode repeat mode
          * @see #REPEAT_MODE_NONE
          * @see #REPEAT_MODE_ONE
          * @see #REPEAT_MODE_ALL
          * @see #REPEAT_MODE_GROUP
          */
-        public void onRepeatModeChanged(@NonNull MediaPlaylistAgent mplc,
+        public void onRepeatModeChanged(@NonNull MediaPlaylistAgent playlistAgent,
                 @RepeatMode int repeatMode) { }
     }
 
-    public MediaPlaylistAgent(Context context) {
+    public MediaPlaylistAgent(@NonNull Context context) {
         // FYI, Need to have a context in the constructor for making this class be updatable
-        // TODO(jaewan) : implement this
+        // TODO(jaewan) : implement this (b/74090741)
     }
 
     /**
      * Register {@link PlaylistEventCallback} to listen changes in the underlying
-     * {@link MediaPlaylistAgent}, regardless of the change in the controller.
+     * {@link MediaPlaylistAgent}.
      *
      * @param executor a callback Executor
      * @param callback a PlaylistEventCallback
@@ -160,7 +160,7 @@ public abstract class MediaPlaylistAgent {
      */
     public final void registerPlaylistEventCallback(
             @NonNull @CallbackExecutor Executor executor, @NonNull PlaylistEventCallback callback) {
-        // TODO(jaewan): implement this
+        // TODO(jaewan): implement this (b/74090741)
     }
 
     /**
@@ -171,23 +171,23 @@ public abstract class MediaPlaylistAgent {
      */
     public final void unregisterPlaylistEventCallback(
             @NonNull PlaylistEventCallback callback) {
-        // TODO(jaewan): implement this
+        // TODO(jaewan): implement this (b/74090741)
     }
 
     public final void notifyPlaylistChanged() {
-        // TODO(jaewan): implement this
+        // TODO(jaewan): implement this (b/74090741)
     }
 
     public final void notifyPlaylistMetadataChanged() {
-        // TODO(jaewan): implement this
+        // TODO(jaewan): implement this (b/74090741)
     }
 
     public final void notifyShuffleModeChanged() {
-        // TODO(jaewan): implement this
+        // TODO(jaewan): implement this (b/74090741)
     }
 
     public final void notifyRepeatModeChanged() {
-        // TODO(jaewan): implement this
+        // TODO(jaewan): implement this (b/74090741)
     }
 
     /**
@@ -196,7 +196,7 @@ public abstract class MediaPlaylistAgent {
      * @return playlist, or null if none is set.
      */
     public @Nullable List<MediaItem2> getPlaylist() {
-        // TODO(jaewan): implement this
+        // TODO(jaewan): implement this (b/74090741)
         return null;
     }
 
@@ -207,7 +207,7 @@ public abstract class MediaPlaylistAgent {
      * @param metadata metadata of the playlist
      */
     public void setPlaylist(@NonNull List<MediaItem2> list, @Nullable MediaMetadata2 metadata) {
-        // TODO(jaewan): implement this
+        // TODO(jaewan): implement this (b/74090741)
     }
 
     /**
@@ -216,7 +216,7 @@ public abstract class MediaPlaylistAgent {
      * @return metadata metadata of the playlist, or null if none is set
      */
     public @Nullable MediaMetadata2 getPlaylistMetadata() {
-        // TODO(jaewan): implement this
+        // TODO(jaewan): implement this (b/74090741)
         return null;
     }
 
@@ -226,7 +226,7 @@ public abstract class MediaPlaylistAgent {
      * @param metadata metadata of the playlist
      */
     public void updatePlaylistMetadata(@Nullable MediaMetadata2 metadata) {
-        // TODO(jaewan): implement this
+        // TODO(jaewan): implement this (b/74090741)
     }
 
     /**
@@ -236,7 +236,7 @@ public abstract class MediaPlaylistAgent {
      * @param item media item to add
      */
     public void addPlaylistItem(int index, @NonNull MediaItem2 item) {
-        // TODO(jaewan): implement this
+        // TODO(jaewan): implement this (b/74090741)
     }
 
     /**
@@ -245,19 +245,18 @@ public abstract class MediaPlaylistAgent {
      * @param item media item to remove
      */
     public void removePlaylistItem(@NonNull MediaItem2 item) {
-        // TODO(jaewan): implement this
+        // TODO(jaewan): implement this (b/74090741)
     }
 
     /**
-     * Replaces the media item with the .
-     * <p>
-     * This can be used to update metadata of a MediaItem.
+     * Replace the media item at index in the playlist. This can be also used to update metadata of
+     * an item.
      *
-     * @param index index
-     * @param item
+     * @param index the index of the item to replace
+     * @param item the new item
      */
     public void replacePlaylistItem(int index, @NonNull MediaItem2 item) {
-        // TODO(jaewan): implement this
+        // TODO(jaewan): implement this (b/74090741)
     }
 
     /**
@@ -266,15 +265,15 @@ public abstract class MediaPlaylistAgent {
      * @param item media item to start playing from
      */
     public void skipToPlaylistItem(@NonNull MediaItem2 item) {
-        // TODO(jaewan): implement this
+        // TODO(jaewan): implement this (b/74090741)
     }
 
     public void skipToPreviousItem() {
-        // TODO(jaewan): implement this
+        // TODO(jaewan): implement this (b/74090741)
     }
 
     public void skipToNextItem() {
-        // TODO(jaewan): implement this
+        // TODO(jaewan): implement this (b/74090741)
     }
 
     /**
@@ -287,7 +286,7 @@ public abstract class MediaPlaylistAgent {
      * @see #REPEAT_MODE_GROUP
      */
     public @RepeatMode int getRepeatMode() {
-        // TODO(jaewan): implement this
+        // TODO(jaewan): implement this (b/74090741)
         return REPEAT_MODE_NONE;
     }
 
@@ -301,7 +300,7 @@ public abstract class MediaPlaylistAgent {
      * @see #REPEAT_MODE_GROUP
      */
     public void setRepeatMode(@RepeatMode int repeatMode) {
-        // TODO(jaewan): implement this
+        // TODO(jaewan): implement this (b/74090741)
     }
 
     /**
@@ -313,7 +312,7 @@ public abstract class MediaPlaylistAgent {
      * @see #SHUFFLE_MODE_GROUP
      */
     public @ShuffleMode int getShuffleMode() {
-        // TODO(jaewan): implement this
+        // TODO(jaewan): implement this (b/74090741)
         return SHUFFLE_MODE_NONE;
     }
 
@@ -326,6 +325,6 @@ public abstract class MediaPlaylistAgent {
      * @see #SHUFFLE_MODE_GROUP
      */
     public void setShuffleMode(@ShuffleMode int shuffleMode) {
-        // TODO(jaewan): implement this
+        // TODO(jaewan): implement this (b/74090741)
     }
 }
