@@ -42,7 +42,11 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -257,7 +261,7 @@ public final class SystemUpdatePolicyTest {
     @Test
     public void testInstallationOptionWithoutFreeze() {
         // Also duplicated at com.google.android.gts.deviceowner.SystemUpdatePolicyTest
-        final long millis_2018_01_01 = TimeUnit.SECONDS.toMillis(1514764800);
+        final long millis_2018_01_01 = toMillis(2018, 1, 1);
 
         SystemUpdatePolicy p = SystemUpdatePolicy.createAutomaticInstallPolicy();
         assertInstallationOption(SystemUpdatePolicy.TYPE_INSTALL_AUTOMATIC, Long.MAX_VALUE,
@@ -294,11 +298,11 @@ public final class SystemUpdatePolicyTest {
 
     @Test
     public void testInstallationOptionWithFreeze() throws Exception {
-        final long millis_2016_02_29 = TimeUnit.SECONDS.toMillis(1456704000);
-        final long millis_2017_01_31 = TimeUnit.SECONDS.toMillis(1485820800);
-        final long millis_2017_02_28 = TimeUnit.SECONDS.toMillis(1488240000);
-        final long millis_2018_01_01 = TimeUnit.SECONDS.toMillis(1514764800);
-        final long millis_2018_08_01 = TimeUnit.SECONDS.toMillis(1533081600);
+        final long millis_2016_02_29 = toMillis(2016, 2, 29);
+        final long millis_2017_01_31 = toMillis(2017, 1, 31);
+        final long millis_2017_02_28 = toMillis(2017, 2, 28);
+        final long millis_2018_01_01 = toMillis(2018, 1, 1);
+        final long millis_2018_08_01 = toMillis(2018, 8, 1);
 
         SystemUpdatePolicy p = SystemUpdatePolicy.createAutomaticInstallPolicy();
         setFreezePeriods(p, "01-01", "01-31");
@@ -313,12 +317,12 @@ public final class SystemUpdatePolicyTest {
 
         // Freeze period contains leap day Feb 29
         p = SystemUpdatePolicy.createPostponeInstallPolicy();
-        setFreezePeriods(p, "02-01", "03-15");
-        // Freezed until 3/31, note 2016 is a leap year
-        assertInstallationOption(SystemUpdatePolicy.TYPE_PAUSE, TimeUnit.DAYS.toMillis(16),
+        setFreezePeriods(p, "02-01", "03-05");
+        // Freezed until 3/5, note 2016 is a leap year
+        assertInstallationOption(SystemUpdatePolicy.TYPE_PAUSE, TimeUnit.DAYS.toMillis(6),
                 millis_2016_02_29, p);
-        // Freezed until 3/31, note 2017 is not a leap year
-        assertInstallationOption(SystemUpdatePolicy.TYPE_PAUSE, TimeUnit.DAYS.toMillis(16),
+        // Freezed until 3/5, note 2017 is not a leap year
+        assertInstallationOption(SystemUpdatePolicy.TYPE_PAUSE, TimeUnit.DAYS.toMillis(6),
                 millis_2017_02_28, p);
         // Next freeze is 2018/2/1
         assertInstallationOption(SystemUpdatePolicy.TYPE_POSTPONE, TimeUnit.DAYS.toMillis(31),
@@ -333,12 +337,12 @@ public final class SystemUpdatePolicyTest {
         assertInstallationOption(
                 SystemUpdatePolicy.TYPE_INSTALL_AUTOMATIC, TimeUnit.DAYS.toMillis(1),
                 millis_2017_02_28, p);
-        setFreezePeriods(p, "02-28", "03-15");
+        setFreezePeriods(p, "02-28", "03-05");
         assertInstallationOption(
-                SystemUpdatePolicy.TYPE_PAUSE, TimeUnit.DAYS.toMillis(16),
+                SystemUpdatePolicy.TYPE_PAUSE, TimeUnit.DAYS.toMillis(6),
                 millis_2016_02_29, p);
         assertInstallationOption(
-                SystemUpdatePolicy.TYPE_PAUSE, TimeUnit.DAYS.toMillis(16),
+                SystemUpdatePolicy.TYPE_PAUSE, TimeUnit.DAYS.toMillis(6),
                 millis_2017_02_28, p);
 
         // Freeze period end on or right after leap day
@@ -382,10 +386,10 @@ public final class SystemUpdatePolicyTest {
 
         // Two freeze periods
         p = SystemUpdatePolicy.createAutomaticInstallPolicy();
-        setFreezePeriods(p, "05-01", "06-01", "12-01", "01-31");
-        // automatic policy for August, September, November and December
+        setFreezePeriods(p, "05-01", "06-01", "11-01", "01-29");
+        // automatic policy for July, August, September and October
         assertInstallationOption(
-                SystemUpdatePolicy.TYPE_INSTALL_AUTOMATIC, TimeUnit.DAYS.toMillis(122),
+                SystemUpdatePolicy.TYPE_INSTALL_AUTOMATIC, TimeUnit.DAYS.toMillis(92),
                 millis_2018_08_01, p);
     }
 
@@ -509,5 +513,10 @@ public final class SystemUpdatePolicyTest {
         } else {
             return result;
         }
+    }
+
+    private long toMillis(int year, int month, int day) {
+        return LocalDateTime.of(year, month, day, 0, 0, 0).atZone(ZoneId.systemDefault())
+                .toInstant().toEpochMilli();
     }
 }
