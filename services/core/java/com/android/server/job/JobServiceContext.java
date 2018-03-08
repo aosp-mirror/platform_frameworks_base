@@ -268,10 +268,14 @@ public final class JobServiceContext implements ServiceConnection {
             } catch (RemoteException e) {
                 // Whatever.
             }
+            final String jobPackage = job.getSourcePackageName();
+            final int jobUserId = job.getSourceUserId();
             UsageStatsManagerInternal usageStats =
                     LocalServices.getService(UsageStatsManagerInternal.class);
-            usageStats.setLastJobRunTime(job.getSourcePackageName(), job.getSourceUserId(),
-                    mExecutionStartTimeElapsed);
+            usageStats.setLastJobRunTime(jobPackage, jobUserId, mExecutionStartTimeElapsed);
+            JobSchedulerInternal jobScheduler =
+                    LocalServices.getService(JobSchedulerInternal.class);
+            jobScheduler.noteJobStart(jobPackage, jobUserId);
             mAvailable = false;
             mStoppedReason = null;
             mStoppedTime = 0;

@@ -48,6 +48,11 @@ public interface JobSchedulerInternal {
     public long baseHeartbeatForApp(String packageName, @UserIdInt int userId, int appBucket);
 
     /**
+     * Tell the scheduler when a JobServiceContext starts running a job in an app
+     */
+    void noteJobStart(String packageName, int userId);
+
+    /**
      * Returns a list of pending jobs scheduled by the system service.
      */
     List<JobInfo> getSystemScheduledPendingJobs();
