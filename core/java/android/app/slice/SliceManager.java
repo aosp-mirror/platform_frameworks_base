@@ -38,6 +38,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
@@ -47,6 +48,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Class to handle interactions with {@link Slice}s.
@@ -140,13 +142,21 @@ public class SliceManager {
      * @see Intent#ACTION_ASSIST
      * @see Intent#CATEGORY_HOME
      */
-    public void pinSlice(@NonNull Uri uri, @NonNull List<SliceSpec> specs) {
+    public void pinSlice(@NonNull Uri uri, @NonNull Set<SliceSpec> specs) {
         try {
             mService.pinSlice(mContext.getPackageName(), uri,
                     specs.toArray(new SliceSpec[specs.size()]), mToken);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * @deprecated TO BE REMOVED
+     */
+    @Deprecated
+    public void pinSlice(@NonNull Uri uri, @NonNull List<SliceSpec> specs) {
+        pinSlice(uri, new ArraySet<>(specs));
     }
 
     /**
@@ -189,9 +199,10 @@ public class SliceManager {
      * into account all clients and returns only specs supported by all.
      * @see SliceSpec
      */
-    public @NonNull List<SliceSpec> getPinnedSpecs(Uri uri) {
+    public @NonNull Set<SliceSpec> getPinnedSpecs(Uri uri) {
         try {
-            return Arrays.asList(mService.getPinnedSpecs(uri, mContext.getPackageName()));
+            return new ArraySet<>(Arrays.asList(mService.getPinnedSpecs(uri,
+                    mContext.getPackageName())));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -240,7 +251,7 @@ public class SliceManager {
      * @return The Slice provided by the app or null if none is given.
      * @see Slice
      */
-    public @Nullable Slice bindSlice(@NonNull Uri uri, @NonNull List<SliceSpec> supportedSpecs) {
+    public @Nullable Slice bindSlice(@NonNull Uri uri, @NonNull Set<SliceSpec> supportedSpecs) {
         Preconditions.checkNotNull(uri, "uri");
         ContentResolver resolver = mContext.getContentResolver();
         try (ContentProviderClient provider = resolver.acquireContentProviderClient(uri)) {
@@ -262,6 +273,14 @@ public class SliceManager {
             // Manager will kill this process shortly anyway.
             return null;
         }
+    }
+
+    /**
+     * @deprecated TO BE REMOVED
+     */
+    @Deprecated
+    public @Nullable Slice bindSlice(@NonNull Uri uri, @NonNull List<SliceSpec> supportedSpecs) {
+        return bindSlice(uri, new ArraySet<>(supportedSpecs));
     }
 
     /**
@@ -351,7 +370,7 @@ public class SliceManager {
      * @see Intent
      */
     public @Nullable Slice bindSlice(@NonNull Intent intent,
-            @NonNull List<SliceSpec> supportedSpecs) {
+            @NonNull Set<SliceSpec> supportedSpecs) {
         Preconditions.checkNotNull(intent, "intent");
         Preconditions.checkArgument(intent.getComponent() != null || intent.getPackage() != null
                 || intent.getData() != null,
