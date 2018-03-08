@@ -117,6 +117,26 @@ public class TextViewPrecomputedTextPerfTest {
     }
 
     @Test
+    public void testNewLayout_RandomText_Selectable() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        BoringLayout.Metrics metrics = new BoringLayout.Metrics();
+        while (state.keepRunning()) {
+            state.pauseTiming();
+            final CharSequence text = mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT);
+            final TextView textView = new TextView(getContext());
+            textView.setTextIsSelectable(true);
+            textView.setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED);
+            textView.setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL);
+            textView.setText(text);
+            Canvas.freeTextLayoutCaches();
+            state.resumeTiming();
+
+            textView.makeNewLayout(TEXT_WIDTH, TEXT_WIDTH, UNKNOWN_BORING, UNKNOWN_BORING,
+                TEXT_WIDTH, false);
+        }
+    }
+
+    @Test
     public void testNewLayout_PrecomputedText() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         BoringLayout.Metrics metrics = new BoringLayout.Metrics();
@@ -179,6 +199,24 @@ public class TextViewPrecomputedTextPerfTest {
     }
 
     @Test
+    public void testSetText_RandomText_Selectable() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        BoringLayout.Metrics metrics = new BoringLayout.Metrics();
+        while (state.keepRunning()) {
+            state.pauseTiming();
+            final CharSequence text = mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT);
+            final TextView textView = new TextView(getContext());
+            textView.setTextIsSelectable(true);
+            textView.setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED);
+            textView.setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL);
+            Canvas.freeTextLayoutCaches();
+            state.resumeTiming();
+
+            textView.setText(text);
+        }
+    }
+
+    @Test
     public void testSetText_PrecomputedText() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         BoringLayout.Metrics metrics = new BoringLayout.Metrics();
@@ -222,8 +260,8 @@ public class TextViewPrecomputedTextPerfTest {
     @Test
     public void testOnMeasure_RandomText() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        int width = MeasureSpec.makeMeasureSpec(MeasureSpec.AT_MOST, TEXT_WIDTH);
-        int height = MeasureSpec.makeMeasureSpec(MeasureSpec.UNSPECIFIED, 0);
+        int width = MeasureSpec.makeMeasureSpec(TEXT_WIDTH, MeasureSpec.AT_MOST);
+        int height = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
         while (state.keepRunning()) {
             state.pauseTiming();
             final CharSequence text = mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT);
@@ -240,10 +278,31 @@ public class TextViewPrecomputedTextPerfTest {
     }
 
     @Test
+    public void testOnMeasure_RandomText_Selectable() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        int width = MeasureSpec.makeMeasureSpec(TEXT_WIDTH, MeasureSpec.AT_MOST);
+        int height = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+        while (state.keepRunning()) {
+            state.pauseTiming();
+            final CharSequence text = mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT);
+            final TestableTextView textView = new TestableTextView(getContext());
+            textView.setTextIsSelectable(true);
+            textView.setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED);
+            textView.setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL);
+            textView.setText(text);
+            textView.nullLayouts();
+            Canvas.freeTextLayoutCaches();
+            state.resumeTiming();
+
+            textView.onMeasure(width, height);
+        }
+    }
+
+    @Test
     public void testOnMeasure_PrecomputedText() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        int width = MeasureSpec.makeMeasureSpec(MeasureSpec.AT_MOST, TEXT_WIDTH);
-        int height = MeasureSpec.makeMeasureSpec(MeasureSpec.UNSPECIFIED, 0);
+        int width = MeasureSpec.makeMeasureSpec(TEXT_WIDTH, MeasureSpec.AT_MOST);
+        int height = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
         while (state.keepRunning()) {
             state.pauseTiming();
             final PrecomputedText.Params params = new PrecomputedText.Params.Builder(PAINT)
@@ -265,8 +324,8 @@ public class TextViewPrecomputedTextPerfTest {
     @Test
     public void testOnMeasure_PrecomputedText_Selectable() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        int width = MeasureSpec.makeMeasureSpec(MeasureSpec.AT_MOST, TEXT_WIDTH);
-        int height = MeasureSpec.makeMeasureSpec(MeasureSpec.UNSPECIFIED, 0);
+        int width = MeasureSpec.makeMeasureSpec(TEXT_WIDTH, MeasureSpec.AT_MOST);
+        int height = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
         while (state.keepRunning()) {
             state.pauseTiming();
             final PrecomputedText.Params params = new PrecomputedText.Params.Builder(PAINT)
@@ -289,8 +348,8 @@ public class TextViewPrecomputedTextPerfTest {
     @Test
     public void testOnDraw_RandomText() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        int width = MeasureSpec.makeMeasureSpec(MeasureSpec.AT_MOST, TEXT_WIDTH);
-        int height = MeasureSpec.makeMeasureSpec(MeasureSpec.UNSPECIFIED, 0);
+        int width = MeasureSpec.makeMeasureSpec(TEXT_WIDTH, MeasureSpec.AT_MOST);
+        int height = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
         final RenderNode node = RenderNode.create("benchmark", null);
         while (state.keepRunning()) {
             state.pauseTiming();
@@ -299,8 +358,34 @@ public class TextViewPrecomputedTextPerfTest {
             textView.setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED);
             textView.setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL);
             textView.setText(text);
+            textView.measure(width, height);
+            textView.layout(0, 0, textView.getMeasuredWidth(), textView.getMeasuredHeight());
+            final DisplayListCanvas c = node.start(
+                textView.getMeasuredWidth(), textView.getMeasuredHeight());
             textView.nullLayouts();
-            textView.onMeasure(width, height);
+            Canvas.freeTextLayoutCaches();
+            state.resumeTiming();
+
+            textView.onDraw(c);
+        }
+    }
+
+    @Test
+    public void testOnDraw_RandomText_Selectable() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        int width = MeasureSpec.makeMeasureSpec(TEXT_WIDTH, MeasureSpec.AT_MOST);
+        int height = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+        final RenderNode node = RenderNode.create("benchmark", null);
+        while (state.keepRunning()) {
+            state.pauseTiming();
+            final CharSequence text = mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT);
+            final TestableTextView textView = new TestableTextView(getContext());
+            textView.setTextIsSelectable(true);
+            textView.setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED);
+            textView.setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL);
+            textView.setText(text);
+            textView.measure(width, height);
+            textView.layout(0, 0, textView.getMeasuredWidth(), textView.getMeasuredHeight());
             final DisplayListCanvas c = node.start(
                 textView.getMeasuredWidth(), textView.getMeasuredHeight());
             textView.nullLayouts();
@@ -314,8 +399,8 @@ public class TextViewPrecomputedTextPerfTest {
     @Test
     public void testOnDraw_PrecomputedText() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        int width = MeasureSpec.makeMeasureSpec(MeasureSpec.AT_MOST, TEXT_WIDTH);
-        int height = MeasureSpec.makeMeasureSpec(MeasureSpec.UNSPECIFIED, 0);
+        int width = MeasureSpec.makeMeasureSpec(TEXT_WIDTH, MeasureSpec.AT_MOST);
+        int height = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
         final RenderNode node = RenderNode.create("benchmark", null);
         while (state.keepRunning()) {
             state.pauseTiming();
@@ -327,8 +412,8 @@ public class TextViewPrecomputedTextPerfTest {
             final TestableTextView textView = new TestableTextView(getContext());
             textView.setTextMetricsParams(params);
             textView.setText(text);
-            textView.nullLayouts();
-            textView.onMeasure(width, height);
+            textView.measure(width, height);
+            textView.layout(0, 0, textView.getMeasuredWidth(), textView.getMeasuredHeight());
             final DisplayListCanvas c = node.start(
                 textView.getMeasuredWidth(), textView.getMeasuredHeight());
             textView.nullLayouts();
@@ -356,8 +441,8 @@ public class TextViewPrecomputedTextPerfTest {
             textView.setTextIsSelectable(true);
             textView.setTextMetricsParams(params);
             textView.setText(text);
-            textView.nullLayouts();
-            textView.onMeasure(width, height);
+            textView.measure(width, height);
+            textView.layout(0, 0, textView.getMeasuredWidth(), textView.getMeasuredHeight());
             final DisplayListCanvas c = node.start(
                 textView.getMeasuredWidth(), textView.getMeasuredHeight());
             textView.nullLayouts();
