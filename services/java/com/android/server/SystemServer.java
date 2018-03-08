@@ -261,6 +261,8 @@ public final class SystemServer {
     private boolean mOnlyCore;
     private boolean mFirstBoot;
     private final boolean mRuntimeRestart;
+    private final long mRuntimeStartElapsedTime;
+    private final long mRuntimeStartUptime;
 
     private static final String START_SENSOR_SERVICE = "StartSensorService";
     private static final String START_HIDL_SERVICES = "StartHidlServices";
@@ -292,6 +294,9 @@ public final class SystemServer {
         mFactoryTestMode = FactoryTest.getMode();
         // Remember if it's runtime restart(when sys.boot_completed is already set) or reboot
         mRuntimeRestart = "1".equals(SystemProperties.get("sys.boot_completed"));
+
+        mRuntimeStartElapsedTime = SystemClock.elapsedRealtime();
+        mRuntimeStartUptime = SystemClock.uptimeMillis();
     }
 
     private void run() {
@@ -402,7 +407,8 @@ public final class SystemServer {
 
             // Create the system service manager.
             mSystemServiceManager = new SystemServiceManager(mSystemContext);
-            mSystemServiceManager.setRuntimeRestarted(mRuntimeRestart);
+            mSystemServiceManager.setStartInfo(mRuntimeRestart,
+                    mRuntimeStartElapsedTime, mRuntimeStartUptime);
             LocalServices.addService(SystemServiceManager.class, mSystemServiceManager);
             // Prepare the thread pool for init tasks that can be parallelized
             SystemServerInitThreadPool.get();

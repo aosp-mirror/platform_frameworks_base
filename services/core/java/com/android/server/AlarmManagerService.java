@@ -1868,6 +1868,7 @@ class AlarmManagerService extends SystemService {
 
             final long nowRTC = System.currentTimeMillis();
             final long nowELAPSED = SystemClock.elapsedRealtime();
+            final long nowUPTIME = SystemClock.uptimeMillis();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
             pw.print("  nowRTC="); pw.print(nowRTC);
@@ -1883,6 +1884,25 @@ class AlarmManagerService extends SystemService {
             pw.print("  mLastTickSet="); pw.println(sdf.format(new Date(mLastTickSet)));
             pw.print("  mLastTickAdded="); pw.println(sdf.format(new Date(mLastTickAdded)));
             pw.print("  mLastTickRemoved="); pw.println(sdf.format(new Date(mLastTickRemoved)));
+
+            SystemServiceManager ssm = LocalServices.getService(SystemServiceManager.class);
+            if (ssm != null) {
+                pw.println();
+                pw.print("  RuntimeStarted=");
+                pw.print(sdf.format(
+                        new Date(nowRTC - nowELAPSED + ssm.getRuntimeStartElapsedTime())));
+                if (ssm.isRuntimeRestarted()) {
+                    pw.print("  (Runtime restarted)");
+                }
+                pw.println();
+                pw.print("  Runtime uptime (elapsed): ");
+                TimeUtils.formatDuration(nowELAPSED, ssm.getRuntimeStartElapsedTime(), pw);
+                pw.println();
+                pw.print("  Runtime uptime (uptime): ");
+                TimeUtils.formatDuration(nowUPTIME, ssm.getRuntimeStartUptime(), pw);
+                pw.println();
+            }
+
             pw.println();
             if (!mInteractive) {
                 pw.print("  Time since non-interactive: ");
