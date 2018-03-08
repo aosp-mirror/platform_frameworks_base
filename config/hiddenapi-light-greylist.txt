@@ -781,7 +781,6 @@ Landroid/location/Country;->getCountryIso()Ljava/lang/String;
 Landroid/location/Country;->getSource()I
 Landroid/location/GeocoderParams;->getClientPackage()Ljava/lang/String;
 Landroid/location/GeocoderParams;->getLocale()Ljava/util/Locale;
-Landroid/location/IFusedProvider$Stub;-><init>()V
 Landroid/location/IGeocodeProvider$Stub;-><init>()V
 Landroid/location/IGeofenceProvider$Stub;-><init>()V
 Landroid/location/ILocationManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/location/ILocationManager;
