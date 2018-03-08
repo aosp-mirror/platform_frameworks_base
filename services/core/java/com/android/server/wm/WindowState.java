@@ -2610,7 +2610,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 setAppOpVisibilityLw(false);
             }
         } else {
-            final int mode = mService.mAppOps.startOpNoThrow(mAppOp, uid, packageName);
+            final int mode = mService.mAppOps.startOpNoThrow(mAppOp, uid, packageName, true);
             if (mode == MODE_ALLOWED || mode == MODE_DEFAULT) {
                 setAppOpVisibilityLw(true);
             }
