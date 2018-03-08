@@ -24,6 +24,8 @@ import android.util.Log;
 
 import dalvik.annotation.optimization.CriticalNative;
 
+import libcore.util.NativeAllocationRegistry;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -38,6 +40,14 @@ public class FontFamily {
 
     private static String TAG = "FontFamily";
 
+    private static final NativeAllocationRegistry sBuilderRegistry = new NativeAllocationRegistry(
+            FontFamily.class.getClassLoader(), nGetBuilderReleaseFunc(), 64);
+
+    private @Nullable Runnable mNativeBuilderCleaner;
+
+    private static final NativeAllocationRegistry sFamilyRegistry = new NativeAllocationRegistry(
+            FontFamily.class.getClassLoader(), nGetFamilyReleaseFunc(), 64);
+
     /**
      * @hide
      */
@@ -48,6 +58,7 @@ public class FontFamily {
 
     public FontFamily() {
         mBuilderPtr = nInitBuilder(null, 0);
+        mNativeBuilderCleaner = sBuilderRegistry.registerNativeAllocation(this, mBuilderPtr);
     }
 
     public FontFamily(@Nullable String[] langs, int variant) {
@@ -60,6 +71,7 @@ public class FontFamily {
             langsString = TextUtils.join(",", langs);
         }
         mBuilderPtr = nInitBuilder(langsString, variant);
+        mNativeBuilderCleaner = sBuilderRegistry.registerNativeAllocation(this, mBuilderPtr);
     }
 
     /**
@@ -73,7 +85,11 @@ public class FontFamily {
             throw new IllegalStateException("This FontFamily is already frozen");
         }
         mNativePtr = nCreateFamily(mBuilderPtr);
+        mNativeBuilderCleaner.run();
         mBuilderPtr = 0;
+        if (mNativePtr != 0) {
+            sFamilyRegistry.registerNativeAllocation(this, mNativePtr);
+        }
         return mNativePtr != 0;
     }
 
@@ -81,22 +97,8 @@ public class FontFamily {
         if (mBuilderPtr == 0) {
             throw new IllegalStateException("This FontFamily is already frozen or abandoned");
         }
-        nAbort(mBuilderPtr);
+        mNativeBuilderCleaner.run();
         mBuilderPtr = 0;
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            if (mNativePtr != 0) {
-                nUnrefFamily(mNativePtr);
-            }
-            if (mBuilderPtr != 0) {
-                nAbort(mBuilderPtr);
-            }
-        } finally {
-            super.finalize();
-        }
     }
 
     public boolean addFont(String path, int ttcIndex, FontVariationAxis[] axes, int weight,
@@ -171,10 +173,10 @@ public class FontFamily {
     private static native long nCreateFamily(long mBuilderPtr);
 
     @CriticalNative
-    private static native void nAbort(long mBuilderPtr);
+    private static native long nGetBuilderReleaseFunc();
 
     @CriticalNative
-    private static native void nUnrefFamily(long nativePtr);
+    private static native long nGetFamilyReleaseFunc();
     // By passing -1 to weigth argument, the weight value is resolved by OS/2 table in the font.
     // By passing -1 to italic argument, the italic value is resolved by OS/2 table in the font.
     private static native boolean nAddFont(long builderPtr, ByteBuffer font, int ttcIndex,
