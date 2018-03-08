@@ -748,7 +748,14 @@ public class MediaController2 implements AutoCloseable {
     }
 
     /**
-     * Return playlist from the session.
+     * Returns the cached playlist from
+     * {@link ControllerCallback#onPlaylistChanged(MediaController2, MediaPlaylistAgent, List,
+     * MediaMetadata2)}.
+     * <p>
+     * This list may differ with the list that was specified with
+     * {@link #setPlaylist(List, MediaMetadata2)} depending on the {@link MediaPlaylistAgent}
+     * implementation. Use media items returned here for other playlist agent APIs such as
+     * {@link MediaPlaylistAgent#skipToPlaylistItem(MediaItem2)}.
      *
      * @return playlist. Can be {@code null} if the controller doesn't have enough permission.
      */
@@ -758,12 +765,19 @@ public class MediaController2 implements AutoCloseable {
 
     /**
      * Sets the playlist.
+     * <p>
+     * Even when the playlist is successfully set, use the playlist returned from
+     * {@link #getPlaylist()} for playlist APIs such as {@link #skipToPlaylistItem(MediaItem2)}.
+     * Otherwise the session in the remote process can't distinguish between media items.
      *
      * @param list playlist
      * @param metadata metadata of the playlist
+     * @see #getPlaylist()
+     * @see ControllerCallback#onPlaylistChanged(
+     *      MediaController2, MediaPlaylistAgent, List, MediaMetadata2)
      */
     public void setPlaylist(@NonNull List<MediaItem2> list, @Nullable MediaMetadata2 metadata) {
-        // TODO(jaewan): Implement (b/74174649)
+        mProvider.setPlaylist_impl(list, metadata);
     }
 
     /**

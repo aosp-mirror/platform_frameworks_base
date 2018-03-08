@@ -21,6 +21,7 @@ import android.app.PendingIntent;
 import android.media.AudioAttributes;
 import android.media.MediaController2.PlaybackInfo;
 import android.media.MediaItem2;
+import android.media.MediaMetadata2;
 import android.media.MediaSession2.Command;
 import android.media.MediaSession2.PlaylistParams;
 import android.media.PlaybackState2;
@@ -58,6 +59,7 @@ public interface MediaController2Provider extends TransportControlProvider {
     void setRating_impl(String mediaId, Rating2 rating);
     void sendCustomCommand_impl(Command command, Bundle args, ResultReceiver cb);
     List<MediaItem2> getPlaylist_impl();
+    void setPlaylist_impl(List<MediaItem2> list, MediaMetadata2 metadata);
 
     void addPlaylistItem_impl(int index, MediaItem2 item);
     void replacePlaylistItem_impl(int index, MediaItem2 item);
