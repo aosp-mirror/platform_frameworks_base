@@ -176,6 +176,7 @@ public class MediaControlView2 extends ViewGroupHelper<MediaControlView2Provider
      * @hide TODO: remove once the implementation is revised
      */
     public void setController(MediaController controller) {
+        mProvider.setController_impl(controller);
     }
 
     /**
