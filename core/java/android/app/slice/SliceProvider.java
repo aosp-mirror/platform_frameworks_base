@@ -65,8 +65,8 @@ import java.util.concurrent.CountDownLatch;
  * <pre class="prettyprint">
  * {@literal
  * <provider
- *     android:name="com.android.mypkg.MySliceProvider"
- *     android:authorities="com.android.mypkg" />}
+ *     android:name="com.example.mypkg.MySliceProvider"
+ *     android:authorities="com.example.mypkg" />}
  * </pre>
  * <p>
  * Slices can be identified by a Uri or by an Intent. To link an Intent with a slice, the provider
@@ -77,10 +77,10 @@ import java.util.concurrent.CountDownLatch;
  * <pre class="prettyprint">
  * {@literal
  * <provider
- *     android:name="com.android.mypkg.MySliceProvider"
- *     android:authorities="com.android.mypkg">
+ *     android:name="com.example.mypkg.MySliceProvider"
+ *     android:authorities="com.example.mypkg">
  *     <intent-filter>
- *         <action android:name="android.intent.action.MY_SLICE_INTENT" />
+ *         <action android:name="com.example.mypkg.intent.action.MY_SLICE_INTENT" />
  *     </intent-filter>
  * </provider>}
  * </pre>
