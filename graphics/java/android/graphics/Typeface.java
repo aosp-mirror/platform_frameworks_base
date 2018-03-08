@@ -42,6 +42,10 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
+import dalvik.annotation.optimization.CriticalNative;
+
+import libcore.util.NativeAllocationRegistry;
+
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
@@ -70,6 +74,9 @@ import java.util.Map;
 public class Typeface {
 
     private static String TAG = "Typeface";
+
+    private static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
+            Typeface.class.getClassLoader(), nativeGetReleaseFunc(), 64);
 
     /** The default NORMAL typeface object */
     public static final Typeface DEFAULT;
@@ -911,6 +918,7 @@ public class Typeface {
         }
 
         native_instance = ni;
+        sRegistry.registerNativeAllocation(this, native_instance);
         mStyle = nativeGetStyle(ni);
         mWeight = nativeGetWeight(ni);
     }
@@ -1120,16 +1128,6 @@ public class Typeface {
     }
 
     @Override
-    protected void finalize() throws Throwable {
-        try {
-            nativeUnref(native_instance);
-            native_instance = 0;  // Other finalizers can still call us.
-        } finally {
-            super.finalize();
-        }
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -1173,10 +1171,18 @@ public class Typeface {
     private static native long nativeCreateFromTypefaceWithVariation(
             long native_instance, List<FontVariationAxis> axes);
     private static native long nativeCreateWeightAlias(long native_instance, int weight);
-    private static native void nativeUnref(long native_instance);
-    private static native int  nativeGetStyle(long native_instance);
-    private static native int  nativeGetWeight(long native_instance);
     private static native long nativeCreateFromArray(long[] familyArray, int weight, int italic);
-    private static native void nativeSetDefault(long native_instance);
     private static native int[] nativeGetSupportedAxes(long native_instance);
+
+    @CriticalNative
+    private static native void nativeSetDefault(long nativePtr);
+
+    @CriticalNative
+    private static native int  nativeGetStyle(long nativePtr);
+
+    @CriticalNative
+    private static native int  nativeGetWeight(long nativePtr);
+
+    @CriticalNative
+    private static native long nativeGetReleaseFunc();
 }
