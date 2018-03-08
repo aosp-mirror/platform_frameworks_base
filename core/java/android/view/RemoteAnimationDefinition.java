@@ -70,6 +70,16 @@ public class RemoteAnimationDefinition implements Parcelable {
         mTransitionAnimationMap = in.readSparseArray(null /* loader */);
     }
 
+    /**
+     * To be called by system_server to keep track which pid is running the remote animations inside
+     * this definition.
+     */
+    public void setCallingPid(int pid) {
+        for (int i = mTransitionAnimationMap.size() - 1; i >= 0; i--) {
+            mTransitionAnimationMap.valueAt(i).setCallingPid(pid);
+        }
+    }
+
     @Override
     public int describeContents() {
         return 0;
