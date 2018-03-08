@@ -104,6 +104,30 @@ public class KernelUidCpuActiveTimeReaderTest {
     }
 
     @Test
+    public void testReadAbsolute() throws Exception {
+        final int cores = 8;
+        final int[] uids = {1, 22, 333, 4444, 5555};
+
+        final long[][] times = increaseTime(new long[uids.length][cores]);
+        when(mProcReader.readBytes()).thenReturn(getUidTimesBytes(uids, times));
+        mReader.readAbsolute(mCallback);
+        for (int i = 0; i < uids.length; i++) {
+            verify(mCallback).onUidCpuActiveTime(uids[i], getTotal(times[i]));
+        }
+        verifyNoMoreInteractions(mCallback);
+
+        // Verify that a second call still returns absolute values
+        Mockito.reset(mCallback);
+        final long[][] times1 = increaseTime(times);
+        when(mProcReader.readBytes()).thenReturn(getUidTimesBytes(uids, times1));
+        mReader.readAbsolute(mCallback);
+        for (int i = 0; i < uids.length; i++) {
+            verify(mCallback).onUidCpuActiveTime(uids[i], getTotal(times1[i]));
+        }
+        verifyNoMoreInteractions(mCallback);
+    }
+
+    @Test
     public void testReadDelta_malformedData() throws Exception {
         final int cores = 8;
         final int[] uids = {1, 22, 333, 4444, 5555};

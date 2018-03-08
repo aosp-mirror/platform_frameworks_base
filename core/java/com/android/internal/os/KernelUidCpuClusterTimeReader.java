@@ -65,6 +65,7 @@ public class KernelUidCpuClusterTimeReader extends
 
     private double[] mCurTime; // Reuse to avoid GC.
     private long[] mDeltaTime; // Reuse to avoid GC.
+    private long[] mCurTimeRounded; // Reuse to avoid GC.
 
     public interface Callback extends KernelUidCpuTimeReaderBase.Callback {
         /**
@@ -137,6 +138,21 @@ public class KernelUidCpuClusterTimeReader extends
         }
     }
 
+    public void readAbsolute(Callback cb) {
+        synchronized (mProcReader) {
+            readDelta(null);
+            int total = mLastUidPolicyTimeMs.size();
+            for (int i = 0; i < total; i ++){
+                int uid = mLastUidPolicyTimeMs.keyAt(i);
+                double[] lastTimes = mLastUidPolicyTimeMs.get(uid);
+                for (int j = 0; j < mNumClusters; j++) {
+                    mCurTimeRounded[j] = (long) lastTimes[j];
+                }
+                cb.onUidCpuPolicyTime(uid, mCurTimeRounded);
+            }
+        }
+    }
+
     private void processUid(IntBuffer buf, @Nullable Callback cb) {
         int uid = buf.get();
         double[] lastTimes = mLastUidPolicyTimeMs.get(uid);
@@ -189,6 +205,7 @@ public class KernelUidCpuClusterTimeReader extends
         mNumCoresOnCluster = numCoresOnCluster;
         mCurTime = new double[numClusters];
         mDeltaTime = new long[numClusters];
+        mCurTimeRounded = new long[numClusters];
         return true;
     }
 

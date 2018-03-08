@@ -135,6 +135,30 @@ public class KernelUidCpuTimeReader extends
     }
 
     /**
+     * Reads the proc file, calling into the callback with raw absolute value of time for each UID.
+     * @param callback The callback to invoke for each line of the proc file.
+     */
+    public void readAbsolute(Callback callback) {
+        final int oldMask = StrictMode.allowThreadDiskReadsMask();
+        try (BufferedReader reader = new BufferedReader(new FileReader(sProcFile))) {
+            TextUtils.SimpleStringSplitter splitter = new TextUtils.SimpleStringSplitter(' ');
+            String line;
+            while ((line = reader.readLine()) != null) {
+                splitter.setString(line);
+                final String uidStr = splitter.next();
+                final int uid = Integer.parseInt(uidStr.substring(0, uidStr.length() - 1), 10);
+                final long userTimeUs = Long.parseLong(splitter.next(), 10);
+                final long systemTimeUs = Long.parseLong(splitter.next(), 10);
+                callback.onUidCpuTime(uid, userTimeUs, systemTimeUs);
+            }
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to read uid_cputime: " + e.getMessage());
+        } finally {
+            StrictMode.setThreadPolicyMask(oldMask);
+        }
+    }
+
+    /**
      * Removes the UID from the kernel module and from internal accounting data. Only
      * {@link BatteryStatsImpl} and its child processes should call this, as the change on Kernel is
      * visible system wide.
