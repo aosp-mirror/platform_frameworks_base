@@ -1789,7 +1789,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         long token = Binder.clearCallingIdentity();
         try {
             return LocationAccessPolicy.canAccessCellLocation(mContext,
-                    r.callingPackage, r.callerUid, r.callerPid);
+                    r.callingPackage, r.callerUid, r.callerPid,
+                    /*throwOnDeniedPermission*/ false);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
