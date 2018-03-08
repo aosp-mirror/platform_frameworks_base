@@ -152,6 +152,11 @@ package android.graphics {
     method public deprecated boolean clipRegion(android.graphics.Region);
   }
 
+  public final class ImageDecoder implements java.lang.AutoCloseable {
+    method public deprecated boolean getAsAlphaMask();
+    method public deprecated android.graphics.ImageDecoder setAsAlphaMask(boolean);
+  }
+
   public deprecated class LayerRasterizer extends android.graphics.Rasterizer {
     ctor public LayerRasterizer();
     method public void addLayer(android.graphics.Paint, float, float);
