@@ -103,7 +103,7 @@ private:
  */
 class WorkerThreadSection : public Section {
 public:
-    WorkerThreadSection(int id);
+    WorkerThreadSection(int id, const int64_t timeoutMs = REMOTE_CALL_TIMEOUT_MS);
     virtual ~WorkerThreadSection();
 
     virtual status_t Execute(ReportRequestSet* requests) const;
@@ -159,6 +159,20 @@ public:
 private:
     log_id_t mLogID;
     bool mBinary;
+};
+
+/**
+ * Section that gets data from tombstoned.
+ */
+class TombstoneSection : public WorkerThreadSection {
+public:
+    TombstoneSection(int id, const char* type, const int64_t timeoutMs = 30000 /* 30 seconds */);
+    virtual ~TombstoneSection();
+
+    virtual status_t BlockingCall(int pipeWriteFd) const;
+
+private:
+    std::string mType;
 };
 
 #endif  // SECTIONS_H

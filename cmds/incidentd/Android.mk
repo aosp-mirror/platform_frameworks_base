@@ -15,8 +15,10 @@
 LOCAL_PATH:= $(call my-dir)
 
 # proto files used in incidentd to generate cppstream proto headers.
-PROTO_FILES:= frameworks/base/core/proto/android/util/log.proto \
-        frameworks/base/core/proto/android/os/data.proto
+PROTO_FILES:= \
+        frameworks/base/core/proto/android/os/backtrace.proto \
+        frameworks/base/core/proto/android/os/data.proto \
+        frameworks/base/core/proto/android/util/log.proto
 
 # ========= #
 # incidentd #
@@ -46,6 +48,8 @@ LOCAL_SHARED_LIBRARIES := \
         libbase \
         libbinder \
         libcutils \
+        libdebuggerd_client \
+        libdumputils \
         libincident \
         liblog \
         libprotobuf-cpp-lite \
@@ -119,6 +123,8 @@ LOCAL_SHARED_LIBRARIES := \
     libbase \
     libbinder \
     libcutils \
+    libdebuggerd_client \
+    libdumputils \
     libincident \
     liblog \
     libprotobuf-cpp-lite \

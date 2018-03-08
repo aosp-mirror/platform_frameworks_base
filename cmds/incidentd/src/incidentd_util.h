@@ -60,4 +60,9 @@ pid_t fork_execute_cmd(const char* cmd, char* const argv[], Fpipe* input, Fpipe*
  */
 const char** varargs(const char* first, va_list rest);
 
+/**
+ * Returns the current monotonic clock time in nanoseconds.
+ */
+uint64_t Nanotime();
+
 #endif  // INCIDENTD_UTIL_H

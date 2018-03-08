@@ -17,6 +17,7 @@
 syntax = "proto2";
 option java_multiple_files = true;
 
+import "frameworks/base/core/proto/android/os/backtrace.proto";
 import "frameworks/base/core/proto/android/os/batterytype.proto";
 import "frameworks/base/core/proto/android/os/cpufreq.proto";
 import "frameworks/base/core/proto/android/os/cpuinfo.proto";
@@ -113,6 +114,22 @@ message IncidentProto {
     optional android.util.LogProto kernel_logs = 1108 [
         (section).type = SECTION_LOG,
         (section).args = "LOG_ID_KERNEL"
+    ];
+
+    // Stack dumps
+    optional android.os.BackTraceProto native_traces = 1200 [
+        (section).type = SECTION_TOMBSTONE,
+        (section).args = "native"
+    ];
+
+    optional android.os.BackTraceProto hal_traces = 1201 [
+        (section).type = SECTION_TOMBSTONE,
+        (section).args = "hal"
+    ];
+
+    optional android.os.BackTraceProto java_traces = 1202 [
+        (section).type = SECTION_TOMBSTONE,
+        (section).args = "java"
     ];
 
     // Linux services
