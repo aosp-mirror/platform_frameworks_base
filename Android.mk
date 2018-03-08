@@ -333,8 +333,6 @@ LOCAL_DROIDDOC_OPTIONS:=\
 		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
 		-referenceonly \
 		-api $(INTERNAL_PLATFORM_API_FILE) \
-		-privateApi $(INTERNAL_PLATFORM_PRIVATE_API_FILE) \
-		-privateDexApi $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE) \
 		-removedApi $(INTERNAL_PLATFORM_REMOVED_API_FILE) \
 		-nodocs
 
@@ -345,8 +343,7 @@ LOCAL_UNINSTALLABLE_MODULE := true
 include $(BUILD_DROIDDOC)
 
 $(full_target): .KATI_IMPLICIT_OUTPUTS := $(INTERNAL_PLATFORM_API_FILE) \
-                                          $(INTERNAL_PLATFORM_PRIVATE_API_FILE) \
-                                          $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)
+                                          $(INTERNAL_PLATFORM_REMOVED_API_FILE)
 $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_API_FILE))
 
 # ====  the system api stubs ===================================
@@ -371,8 +368,6 @@ LOCAL_DROIDDOC_OPTIONS:=\
 		-referenceonly \
 		-showAnnotation android.annotation.SystemApi \
 		-api $(INTERNAL_PLATFORM_SYSTEM_API_FILE) \
-		-privateApi $(INTERNAL_PLATFORM_SYSTEM_PRIVATE_API_FILE) \
-		-privateDexApi $(INTERNAL_PLATFORM_SYSTEM_PRIVATE_DEX_API_FILE) \
 		-removedApi $(INTERNAL_PLATFORM_SYSTEM_REMOVED_API_FILE) \
 		-exactApi $(INTERNAL_PLATFORM_SYSTEM_EXACT_API_FILE) \
 		-nodocs
@@ -384,8 +379,8 @@ LOCAL_UNINSTALLABLE_MODULE := true
 include $(BUILD_DROIDDOC)
 
 $(full_target): .KATI_IMPLICIT_OUTPUTS := $(INTERNAL_PLATFORM_SYSTEM_API_FILE) \
-                                          $(INTERNAL_PLATFORM_SYSTEM_PRIVATE_API_FILE) \
-                                          $(INTERNAL_PLATFORM_SYSTEM_PRIVATE_DEX_API_FILE)
+                                          $(INTERNAL_PLATFORM_SYSTEM_REMOVED_API_FILE) \
+                                          $(INTERNAL_PLATFORM_SYSTEM_EXACT_API_FILE)
 $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_SYSTEM_API_FILE))
 
 # ====  the test api stubs ===================================
@@ -421,8 +416,42 @@ LOCAL_UNINSTALLABLE_MODULE := true
 
 include $(BUILD_DROIDDOC)
 
-$(INTERNAL_PLATFORM_TEST_API_FILE): $(full_target)
+$(full_target): .KATI_IMPLICIT_OUTPUTS := $(INTERNAL_PLATFORM_TEST_API_FILE) \
+                                          $(INTERNAL_PLATFORM_TEST_REMOVED_API_FILE) \
+                                          $(INTERNAL_PLATFORM_TEST_EXACT_API_FILE)
 $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_TEST_API_FILE))
+
+# ====  the complete hidden api list ===================================
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:=$(framework_docs_LOCAL_API_CHECK_SRC_FILES)
+LOCAL_GENERATED_SOURCES:=$(framework_docs_LOCAL_GENERATED_SOURCES)
+LOCAL_SRCJARS:=$(framework_docs_LOCAL_SRCJARS)
+LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES)
+LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
+LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
+LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
+LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR)
+LOCAL_ADDITIONAL_DEPENDENCIES:=$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES)
+
+LOCAL_MODULE := hidden-api-list
+
+LOCAL_DROIDDOC_OPTIONS:=\
+		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
+		-referenceonly \
+		-showUnannotated \
+		-showAnnotation android.annotation.SystemApi \
+		-showAnnotation android.annotation.TestApi \
+		-privateDexApi $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE) \
+		-nodocs
+
+LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=external/doclava/res/assets/templates-sdk
+
+LOCAL_UNINSTALLABLE_MODULE := true
+
+include $(BUILD_DROIDDOC)
+
+$(full_target): .KATI_IMPLICIT_OUTPUTS := $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)
 
 # ====  check javadoc comments but don't generate docs ========
 include $(CLEAR_VARS)
