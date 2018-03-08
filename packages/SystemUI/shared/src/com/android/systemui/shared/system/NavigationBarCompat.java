@@ -22,12 +22,13 @@ import java.lang.annotation.RetentionPolicy;
 
 public class NavigationBarCompat {
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({HIT_TARGET_NONE, HIT_TARGET_BACK, HIT_TARGET_HOME})
+    @IntDef({HIT_TARGET_NONE, HIT_TARGET_BACK, HIT_TARGET_HOME, HIT_TARGET_OVERVIEW})
     public @interface HitTarget{}
 
     public static final int HIT_TARGET_NONE = 0;
     public static final int HIT_TARGET_BACK = 1;
     public static final int HIT_TARGET_HOME = 2;
+    public static final int HIT_TARGET_OVERVIEW = 3;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({FLAG_DISABLE_SWIPE_UP,
