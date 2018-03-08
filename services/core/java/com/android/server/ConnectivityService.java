@@ -1705,6 +1705,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             ni != null ? ni.getState().toString() : "?");
                 } catch (RemoteException e) {
                 }
+                intent.addFlags(Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
             }
             try {
                 mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL, options);
