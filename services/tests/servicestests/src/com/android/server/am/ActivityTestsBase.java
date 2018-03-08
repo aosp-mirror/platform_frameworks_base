@@ -67,6 +67,12 @@ public class ActivityTestsBase {
     private final Context mContext = InstrumentationRegistry.getContext();
     private HandlerThread mHandlerThread;
 
+    // Default package name
+    static final String DEFAULT_COMPONENT_PACKAGE_NAME = "com.foo";
+
+    // Default base activity name
+    private static final String DEFAULT_COMPONENT_CLASS_NAME = ".BarActivity";
+
     @Before
     public void setUp() throws Exception {
         if (!sOneTimeSetupDone) {
@@ -106,11 +112,7 @@ public class ActivityTestsBase {
         // An id appended to the end of the component name to make it unique
         private static int sCurrentActivityId = 0;
 
-        // Default package name
-        static final String DEFAULT_PACKAGE = "com.foo";
 
-        // Default base activity name
-        private static final String DEFAULT_BASE_ACTIVITY_NAME = ".BarActivity";
 
         private final ActivityManagerService mService;
 
@@ -149,11 +151,15 @@ public class ActivityTestsBase {
             return this;
         }
 
+        String getDefaultComponentPackageName() {
+            return DEFAULT_COMPONENT_PACKAGE_NAME;
+        }
+
         ActivityRecord build() {
             if (mComponent == null) {
                 final int id = sCurrentActivityId++;
-                mComponent = ComponentName.createRelative(DEFAULT_PACKAGE,
-                        DEFAULT_BASE_ACTIVITY_NAME + id);
+                mComponent = ComponentName.createRelative(DEFAULT_COMPONENT_PACKAGE_NAME,
+                        DEFAULT_COMPONENT_CLASS_NAME + id);
             }
 
             if (mCreateTask) {
@@ -191,6 +197,9 @@ public class ActivityTestsBase {
      * Builder for creating new tasks.
      */
     protected static class TaskBuilder {
+        // Default package name
+        static final String DEFAULT_PACKAGE = "com.bar";
+
         private final ActivityStackSupervisor mSupervisor;
 
         private ComponentName mComponent;
@@ -252,6 +261,11 @@ public class ActivityTestsBase {
             aInfo.applicationInfo.packageName = mPackage;
 
             Intent intent = new Intent();
+            if (mComponent == null) {
+                mComponent = ComponentName.createRelative(DEFAULT_COMPONENT_PACKAGE_NAME,
+                        DEFAULT_COMPONENT_CLASS_NAME);
+            }
+
             intent.setComponent(mComponent);
             intent.setFlags(mFlags);
 
@@ -312,6 +326,8 @@ public class ActivityTestsBase {
             doNothing().when(supervisor).ensureActivitiesVisibleLocked(any(), anyInt(), anyBoolean());
             // Do not schedule idle timeouts
             doNothing().when(supervisor).scheduleIdleTimeoutLocked(any());
+            // unit test version does not handle launch wake lock
+            doNothing().when(supervisor).acquireLaunchWakelock();
 
             supervisor.initialize();
 

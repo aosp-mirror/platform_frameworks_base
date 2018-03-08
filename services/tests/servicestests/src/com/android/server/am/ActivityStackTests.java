@@ -486,4 +486,45 @@ public class ActivityStackTests extends ActivityTestsBase {
         verify(lifecycleManager, times(1)).scheduleTransaction(eq(app.thread),
                 eq(r.appToken), any(DestroyActivityItem.class));
     }
+
+    @Test
+    public void testFinishDisabledPackageActivities() throws Exception {
+        final ActivityRecord firstActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        final ActivityRecord secondActivity = new ActivityBuilder(mService).setTask(mTask).build();
+
+        // Making the second activity a task overlay without an app means it will be removed from
+        // the task's activities as well once first activity is removed.
+        secondActivity.mTaskOverlay = true;
+        secondActivity.app = null;
+
+        assertEquals(mTask.mActivities.size(), 2);
+
+        mStack.finishDisabledPackageActivitiesLocked(firstActivity.packageName, null,
+                true /* doit */, true /* evenPersistent */, UserHandle.USER_ALL);
+
+        assertTrue(mTask.mActivities.isEmpty());
+        assertTrue(mStack.getAllTasks().isEmpty());
+    }
+
+    @Test
+    public void testHandleAppDied() throws Exception {
+        final ActivityRecord firstActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        final ActivityRecord secondActivity = new ActivityBuilder(mService).setTask(mTask).build();
+
+        // Making the first activity a task overlay means it will be removed from the task's
+        // activities as well once second activity is removed as handleAppDied processes the
+        // activity list in reverse.
+        firstActivity.mTaskOverlay = true;
+        firstActivity.app = null;
+
+        // second activity will be immediately removed as it has no state.
+        secondActivity.haveState = false;
+
+        assertEquals(mTask.mActivities.size(), 2);
+
+        mStack.handleAppDiedLocked(secondActivity.app);
+
+        assertTrue(mTask.mActivities.isEmpty());
+        assertTrue(mStack.getAllTasks().isEmpty());
+    }
 }

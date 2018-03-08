@@ -2002,7 +2002,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         } else if (intent != null) {
             sb.append(" I=");
             sb.append(intent.getComponent().flattenToShortString());
-        } else if (affinityIntent != null) {
+        } else if (affinityIntent != null && affinityIntent.getComponent() != null) {
             sb.append(" aI=");
             sb.append(affinityIntent.getComponent().flattenToShortString());
         } else {
