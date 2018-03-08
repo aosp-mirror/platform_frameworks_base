@@ -318,6 +318,7 @@ class TaskSnapshotPersister {
             proto.insetTop = mSnapshot.getContentInsets().top;
             proto.insetRight = mSnapshot.getContentInsets().right;
             proto.insetBottom = mSnapshot.getContentInsets().bottom;
+            proto.isRealSnapshot = mSnapshot.isRealSnapshot();
             final byte[] bytes = TaskSnapshotProto.toByteArray(proto);
             final File file = getProtoFile(mTaskId, mUserId);
             final AtomicFile atomicFile = new AtomicFile(file);
