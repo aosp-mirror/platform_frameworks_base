@@ -32,6 +32,12 @@ public class BaseNetdEventCallback extends INetdEventCallback.Stub {
     }
 
     @Override
+    public void onPrivateDnsValidationEvent(int netId, String ipAddress,
+            String hostname, boolean validated) {
+        // default no-op
+    }
+
+    @Override
     public void onConnectEvent(String ipAddr, int port, long timestamp, int uid) {
         // default no-op
     }
