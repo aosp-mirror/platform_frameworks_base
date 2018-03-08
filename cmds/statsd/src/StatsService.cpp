@@ -55,18 +55,22 @@ constexpr const char* kPermissionDump = "android.permission.DUMP";
 class CompanionDeathRecipient : public IBinder::DeathRecipient {
 public:
     CompanionDeathRecipient(const sp<AlarmMonitor>& anomalyAlarmMonitor,
-                            const sp<AlarmMonitor>& periodicAlarmMonitor) :
-                                mAnomalyAlarmMonitor(anomalyAlarmMonitor),
-                                mPeriodicAlarmMonitor(periodicAlarmMonitor)  {}
+                            const sp<AlarmMonitor>& periodicAlarmMonitor,
+                            const sp<StatsLogProcessor>& processor)
+        : mAnomalyAlarmMonitor(anomalyAlarmMonitor),
+          mPeriodicAlarmMonitor(periodicAlarmMonitor),
+          mProcessor(processor) {}
     virtual void binderDied(const wp<IBinder>& who);
 
 private:
-   sp<AlarmMonitor> mAnomalyAlarmMonitor;
-   sp<AlarmMonitor> mPeriodicAlarmMonitor;
+    sp<AlarmMonitor> mAnomalyAlarmMonitor;
+    sp<AlarmMonitor> mPeriodicAlarmMonitor;
+    sp<StatsLogProcessor> mProcessor;
 };
 
 void CompanionDeathRecipient::binderDied(const wp<IBinder>& who) {
     ALOGW("statscompanion service died");
+    mProcessor->WriteDataToDisk();
     mAnomalyAlarmMonitor->setStatsCompanionService(nullptr);
     mPeriodicAlarmMonitor->setStatsCompanionService(nullptr);
     SubscriberReporter::getInstance().setStatsCompanionService(nullptr);
@@ -817,8 +821,9 @@ Status StatsService::statsCompanionReady() {
                 "statscompanion unavailable despite it contacting statsd!");
     }
     VLOG("StatsService::statsCompanionReady linking to statsCompanion.");
-    IInterface::asBinder(statsCompanion)->linkToDeath(
-            new CompanionDeathRecipient(mAnomalyAlarmMonitor, mPeriodicAlarmMonitor));
+    IInterface::asBinder(statsCompanion)
+        ->linkToDeath(new CompanionDeathRecipient(
+            mAnomalyAlarmMonitor, mPeriodicAlarmMonitor, mProcessor));
     mAnomalyAlarmMonitor->setStatsCompanionService(statsCompanion);
     mPeriodicAlarmMonitor->setStatsCompanionService(statsCompanion);
     SubscriberReporter::getInstance().setStatsCompanionService(statsCompanion);
