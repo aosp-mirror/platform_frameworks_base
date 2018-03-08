@@ -2117,8 +2117,15 @@ package android.hardware.radio {
     field public static final java.lang.String METADATA_KEY_ART = "android.hardware.radio.metadata.ART";
     field public static final java.lang.String METADATA_KEY_ARTIST = "android.hardware.radio.metadata.ARTIST";
     field public static final java.lang.String METADATA_KEY_CLOCK = "android.hardware.radio.metadata.CLOCK";
+    field public static final java.lang.String METADATA_KEY_DAB_COMPONENT_NAME = "android.hardware.radio.metadata.DAB_COMPONENT_NAME";
+    field public static final java.lang.String METADATA_KEY_DAB_COMPONENT_NAME_SHORT = "android.hardware.radio.metadata.DAB_COMPONENT_NAME_SHORT";
+    field public static final java.lang.String METADATA_KEY_DAB_ENSEMBLE_NAME = "android.hardware.radio.metadata.DAB_ENSEMBLE_NAME";
+    field public static final java.lang.String METADATA_KEY_DAB_ENSEMBLE_NAME_SHORT = "android.hardware.radio.metadata.DAB_ENSEMBLE_NAME_SHORT";
+    field public static final java.lang.String METADATA_KEY_DAB_SERVICE_NAME = "android.hardware.radio.metadata.DAB_SERVICE_NAME";
+    field public static final java.lang.String METADATA_KEY_DAB_SERVICE_NAME_SHORT = "android.hardware.radio.metadata.DAB_SERVICE_NAME_SHORT";
     field public static final java.lang.String METADATA_KEY_GENRE = "android.hardware.radio.metadata.GENRE";
     field public static final java.lang.String METADATA_KEY_ICON = "android.hardware.radio.metadata.ICON";
+    field public static final java.lang.String METADATA_KEY_PROGRAM_NAME = "android.hardware.radio.metadata.PROGRAM_NAME";
     field public static final java.lang.String METADATA_KEY_RBDS_PTY = "android.hardware.radio.metadata.RBDS_PTY";
     field public static final java.lang.String METADATA_KEY_RDS_PI = "android.hardware.radio.metadata.RDS_PI";
     field public static final java.lang.String METADATA_KEY_RDS_PS = "android.hardware.radio.metadata.RDS_PS";
@@ -4693,6 +4700,7 @@ package android.service.textclassifier {
     method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract void onClassifyText(java.lang.CharSequence, int, int, android.view.textclassifier.TextClassification.Options, android.os.CancellationSignal, android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextClassification>);
     method public abstract void onGenerateLinks(java.lang.CharSequence, android.view.textclassifier.TextLinks.Options, android.os.CancellationSignal, android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextLinks>);
+    method public void onSelectionEvent(android.view.textclassifier.SelectionEvent);
     method public abstract void onSuggestSelection(java.lang.CharSequence, int, int, android.view.textclassifier.TextSelection.Options, android.os.CancellationSignal, android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextSelection>);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.textclassifier.TextClassifierService";
   }
@@ -4988,7 +4996,6 @@ package android.telecom {
 package android.telephony {
 
   public static final class AccessNetworkConstants.TransportType {
-    ctor public AccessNetworkConstants.TransportType();
     field public static final int WLAN = 2; // 0x2
     field public static final int WWAN = 1; // 0x1
   }

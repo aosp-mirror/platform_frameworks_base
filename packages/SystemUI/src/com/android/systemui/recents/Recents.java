@@ -51,6 +51,7 @@ import com.android.systemui.EventLogTags;
 import com.android.systemui.OverviewProxyService;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
+import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.SystemUI;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.ConfigurationChangedEvent;
@@ -252,10 +253,13 @@ public class Recents extends SystemUI
             return;
         }
 
-        if (mOverviewProxyService.getProxy() != null) {
-            // TODO: Proxy to Launcher
-            if (!triggeredFromAltTab) {
+        IOverviewProxy overviewProxy = mOverviewProxyService.getProxy();
+        if (overviewProxy != null) {
+            try {
+                overviewProxy.onOverviewShown(triggeredFromAltTab);
                 return;
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to send overview show event to launcher.", e);
             }
         }
 
@@ -294,10 +298,13 @@ public class Recents extends SystemUI
             return;
         }
 
-        if (mOverviewProxyService.getProxy() != null) {
-            // TODO: Proxy to Launcher
-            if (!triggeredFromAltTab) {
+        IOverviewProxy overviewProxy = mOverviewProxyService.getProxy();
+        if (overviewProxy != null) {
+            try {
+                overviewProxy.onOverviewHidden(triggeredFromAltTab, triggeredFromHomeKey);
                 return;
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to send overview hide event to launcher.", e);
             }
         }
 
@@ -332,9 +339,15 @@ public class Recents extends SystemUI
             return;
         }
 
-        if (mOverviewProxyService.getProxy() != null) {
-            // TODO: Proxy to Launcher
-            return;
+        // If connected to launcher service, let it handle the toggle logic
+        IOverviewProxy overviewProxy = mOverviewProxyService.getProxy();
+        if (overviewProxy != null) {
+            try {
+                overviewProxy.onOverviewToggle();
+                return;
+            } catch (RemoteException e) {
+                Log.e(TAG, "Cannot send toggle recents through proxy service.", e);
+            }
         }
 
         int growTarget = getComponent(Divider.class).getView().growsRecents();

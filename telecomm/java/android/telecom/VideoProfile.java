@@ -62,6 +62,7 @@ public class VideoProfile implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(
             flag = true,
+            prefix = { "STATE_" },
             value = {STATE_AUDIO_ONLY, STATE_TX_ENABLED, STATE_RX_ENABLED, STATE_BIDIRECTIONAL,
                     STATE_PAUSED})
     public @interface VideoState {}

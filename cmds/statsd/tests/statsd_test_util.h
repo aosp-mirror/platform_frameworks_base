@@ -28,6 +28,15 @@ namespace statsd {
 // Create AtomMatcher proto to simply match a specific atom type.
 AtomMatcher CreateSimpleAtomMatcher(const string& name, int atomId);
 
+// Create AtomMatcher proto for scheduled job state changed.
+AtomMatcher CreateScheduledJobStateChangedAtomMatcher();
+
+// Create AtomMatcher proto for starting a scheduled job.
+AtomMatcher CreateStartScheduledJobAtomMatcher();
+
+// Create AtomMatcher proto for a scheduled job is done.
+AtomMatcher CreateFinishScheduledJobAtomMatcher();
+
 // Create AtomMatcher proto for screen brightness state changed.
 AtomMatcher CreateScreenBrightnessChangedAtomMatcher();
 
@@ -73,6 +82,9 @@ Predicate CreateScreenIsOnPredicate();
 // Create Predicate proto for screen is off.
 Predicate CreateScreenIsOffPredicate();
 
+// Create Predicate proto for a running scheduled job.
+Predicate CreateScheduledJobPredicate();
+
 // Create Predicate proto for battery saver mode.
 Predicate CreateBatterySaverModePredicate();
 
@@ -106,6 +118,16 @@ std::unique_ptr<LogEvent> CreateScreenStateChangedEvent(
 // Create log event for screen brightness state changed.
 std::unique_ptr<LogEvent> CreateScreenBrightnessChangedEvent(
    int level, uint64_t timestampNs);
+
+// Create log event when scheduled job starts.
+std::unique_ptr<LogEvent> CreateStartScheduledJobEvent(
+    const std::vector<AttributionNodeInternal>& attributions,
+    const string& name, uint64_t timestampNs);
+
+// Create log event when scheduled job finishes.
+std::unique_ptr<LogEvent> CreateFinishScheduledJobEvent(
+    const std::vector<AttributionNodeInternal>& attributions,
+    const string& name, uint64_t timestampNs);
 
 // Create log event when battery saver starts.
 std::unique_ptr<LogEvent> CreateBatterySaverOnEvent(uint64_t timestampNs);

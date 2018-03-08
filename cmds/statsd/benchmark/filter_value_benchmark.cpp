@@ -18,6 +18,7 @@
 #include "FieldValue.h"
 #include "HashableDimensionKey.h"
 #include "logd/LogEvent.h"
+#include "stats_log_util.h"
 
 namespace android {
 namespace os {
@@ -25,17 +26,29 @@ namespace statsd {
 
 using std::vector;
 
+static void createLogEventAndMatcher(LogEvent* event, FieldMatcher *field_matcher) {
+    AttributionNodeInternal node;
+    node.set_uid(100);
+    node.set_tag("LOCATION");
+
+    std::vector<AttributionNodeInternal> nodes = {node, node};
+    event->write(nodes);
+    event->write(3.2f);
+    event->write("LOCATION");
+    event->write((int64_t)990);
+    event->init();
+
+    field_matcher->set_field(1);
+    auto child = field_matcher->add_child();
+    child->set_field(1);
+    child->set_position(FIRST);
+    child->add_child()->set_field(1);
+}
+
 static void BM_FilterValue(benchmark::State& state) {
     LogEvent event(1, 100000);
-    event.write(3.2f);
-    event.write("LOCATION");
-    event.write((int64_t)990);
-    event.init();
-
     FieldMatcher field_matcher;
-    field_matcher.set_field(1);
-    field_matcher.add_child()->set_field(2);
-    field_matcher.add_child()->set_field(3);
+    createLogEventAndMatcher(&event, &field_matcher);
 
     std::vector<Matcher> matchers;
     translateFieldMatcher(field_matcher, &matchers);
@@ -47,6 +60,22 @@ static void BM_FilterValue(benchmark::State& state) {
 }
 
 BENCHMARK(BM_FilterValue);
+
+static void BM_FilterValue2(benchmark::State& state) {
+    LogEvent event(1, 100000);
+    FieldMatcher field_matcher;
+    createLogEventAndMatcher(&event, &field_matcher);
+
+    std::vector<Matcher> matchers;
+    translateFieldMatcher(field_matcher, &matchers);
+
+    while (state.KeepRunning()) {
+        HashableDimensionKey output;
+        filterValues(matchers, event.getValues(), &output);
+    }
+}
+
+BENCHMARK(BM_FilterValue2);
 
 }  //  namespace statsd
 }  //  namespace os

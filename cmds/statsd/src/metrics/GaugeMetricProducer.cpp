@@ -83,6 +83,7 @@ GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric
     // TODO: use UidMap if uid->pkg_name is required
     if (metric.has_dimensions_in_what()) {
         translateFieldMatcher(metric.dimensions_in_what(), &mDimensionsInWhat);
+        mContainANYPositionInDimensionsInWhat = HasPositionANY(metric.dimensions_in_what());
     }
 
     if (metric.has_dimensions_in_condition()) {
@@ -140,7 +141,7 @@ void GaugeMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
     for (const auto& pair : mPastBuckets) {
         const MetricDimensionKey& dimensionKey = pair.first;
 
-        VLOG("  dimension key %s", dimensionKey.c_str());
+        VLOG("  dimension key %s", dimensionKey.toString().c_str());
         uint64_t wrapperToken =
                 protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DATA);
 
@@ -283,7 +284,7 @@ bool GaugeMetricProducer::hitGuardRailLocked(const MetricDimensionKey& newKey) {
         // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
         if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
             ALOGE("GaugeMetric %lld dropping data for dimension key %s",
-                (long long)mMetricId, newKey.c_str());
+                (long long)mMetricId, newKey.toString().c_str());
             return true;
         }
     }
@@ -398,7 +399,8 @@ void GaugeMetricProducer::flushCurrentBucketLocked(const uint64_t& eventTimeNs) 
         info.mGaugeAtoms = slice.second;
         auto& bucketList = mPastBuckets[slice.first];
         bucketList.push_back(info);
-        VLOG("gauge metric %lld, dump key value: %s", (long long)mMetricId, slice.first.c_str());
+        VLOG("gauge metric %lld, dump key value: %s", (long long)mMetricId,
+             slice.first.toString().c_str());
     }
 
     // If we have anomaly trackers, we need to update the partial bucket values.

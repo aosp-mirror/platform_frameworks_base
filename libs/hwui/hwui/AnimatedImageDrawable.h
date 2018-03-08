@@ -55,9 +55,12 @@ public:
      */
     bool isDirty();
 
-    int getStagingAlpha() const { return mStagingAlpha; }
-    void setStagingAlpha(int alpha) { mStagingAlpha = alpha; }
-    void setStagingColorFilter(sk_sp<SkColorFilter> filter) { mStagingColorFilter = filter; }
+    int getStagingAlpha() const { return mStagingProperties.mAlpha; }
+    void setStagingAlpha(int alpha) { mStagingProperties.mAlpha = alpha; }
+    void setStagingColorFilter(sk_sp<SkColorFilter> filter) {
+        mStagingProperties.mColorFilter = filter;
+    }
+    void setStagingMirrored(bool mirrored) { mStagingProperties.mMirrored = mirrored; }
     void syncProperties();
 
     virtual SkRect onGetBounds() override { return mSkAnimatedImage->getBounds(); }
@@ -131,11 +134,18 @@ private:
     // Locked when mSkAnimatedImage is being updated or drawn.
     std::mutex mImageLock;
 
-    int mStagingAlpha = SK_AlphaOPAQUE;
-    sk_sp<SkColorFilter> mStagingColorFilter;
+    struct Properties {
+        int mAlpha = SK_AlphaOPAQUE;
+        sk_sp<SkColorFilter> mColorFilter;
+        bool mMirrored = false;
 
-    int mAlpha = SK_AlphaOPAQUE;
-    sk_sp<SkColorFilter> mColorFilter;
+        Properties() = default;
+        Properties(Properties&) = default;
+        Properties& operator=(Properties&) = default;
+    };
+
+    Properties mStagingProperties;
+    Properties mProperties;
 
     std::unique_ptr<OnAnimationEndListener> mEndListener;
 };

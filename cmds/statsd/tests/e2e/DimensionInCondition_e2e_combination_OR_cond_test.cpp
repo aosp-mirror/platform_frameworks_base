@@ -28,7 +28,7 @@ namespace statsd {
 
 namespace {
 
-StatsdConfig CreateCountMetricWithNoLinkConfig() {
+StatsdConfig CreateCountMetric_NoLink_CombinationCondition_Config() {
     StatsdConfig config;
     auto screenBrightnessChangeAtomMatcher = CreateScreenBrightnessChangedAtomMatcher();
     *config.add_atom_matcher() = screenBrightnessChangeAtomMatcher;
@@ -67,9 +67,9 @@ StatsdConfig CreateCountMetricWithNoLinkConfig() {
 
 }  // namespace
 
-TEST(DimensionInConditionE2eTest, TestCountMetricNoLink) {
+TEST(DimensionInConditionE2eTest, TestCreateCountMetric_NoLink_OR_CombinationCondition) {
     ConfigKey cfgKey;
-    auto config = CreateCountMetricWithNoLinkConfig();
+    auto config = CreateCountMetric_NoLink_CombinationCondition_Config();
     int64_t bucketStartTimeNs = 10000000000;
     int64_t bucketSizeNs =
             TimeUnitToBucketSizeInMillis(config.count_metric(0).bucket()) * 1000000LL;
@@ -227,7 +227,7 @@ TEST(DimensionInConditionE2eTest, TestCountMetricNoLink) {
 
 namespace {
 
-StatsdConfig CreateCountMetricWithLinkConfig() {
+StatsdConfig CreateCountMetric_Link_CombinationCondition() {
     StatsdConfig config;
     auto appCrashMatcher = CreateProcessCrashAtomMatcher();
     *config.add_atom_matcher() = appCrashMatcher;
@@ -274,9 +274,9 @@ StatsdConfig CreateCountMetricWithLinkConfig() {
 
 }  // namespace
 
-TEST(DimensionInConditionE2eTest, TestCountMetricWithLink) {
+TEST(DimensionInConditionE2eTest, TestCreateCountMetric_Link_OR_CombinationCondition) {
     ConfigKey cfgKey;
-    auto config = CreateCountMetricWithLinkConfig();
+    auto config = CreateCountMetric_Link_CombinationCondition();
     int64_t bucketStartTimeNs = 10000000000;
     int64_t bucketSizeNs =
             TimeUnitToBucketSizeInMillis(config.count_metric(0).bucket()) * 1000000LL;
@@ -413,7 +413,8 @@ TEST(DimensionInConditionE2eTest, TestCountMetricWithLink) {
 
 namespace {
 
-StatsdConfig CreateDurationMetricConfigNoLink(DurationMetric::AggregationType aggregationType) {
+StatsdConfig CreateDurationMetricConfig_NoLink_CombinationCondition(
+        DurationMetric::AggregationType aggregationType) {
     StatsdConfig config;
     *config.add_atom_matcher() = CreateBatterySaverModeStartAtomMatcher();
     *config.add_atom_matcher() = CreateBatterySaverModeStopAtomMatcher();
@@ -445,6 +446,7 @@ StatsdConfig CreateDurationMetricConfigNoLink(DurationMetric::AggregationType ag
     metric->set_id(StringToId("BatterySaverModeDurationMetric"));
     metric->set_what(inBatterySaverModePredicate.id());
     metric->set_condition(combinationPredicate->id());
+    metric->set_aggregation_type(aggregationType);
     *metric->mutable_dimensions_in_condition() = CreateAttributionUidAndTagDimensions(
             android::util::SYNC_STATE_CHANGED, {Position::FIRST});
     return config;
@@ -452,10 +454,10 @@ StatsdConfig CreateDurationMetricConfigNoLink(DurationMetric::AggregationType ag
 
 }  // namespace
 
-TEST(DimensionInConditionE2eTest, TestDurationMetricNoLink) {
-    for (auto aggregationType : {DurationMetric::SUM, DurationMetric::MAX_SPARSE}) {
+TEST(DimensionInConditionE2eTest, TestDurationMetric_NoLink_OR_CombinationCondition) {
+    for (auto aggregationType : { DurationMetric::MAX_SPARSE}) { // DurationMetric::SUM,
         ConfigKey cfgKey;
-        auto config = CreateDurationMetricConfigNoLink(aggregationType);
+        auto config = CreateDurationMetricConfig_NoLink_CombinationCondition(aggregationType);
         int64_t bucketStartTimeNs = 10000000000;
         int64_t bucketSizeNs =
                 TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
@@ -529,43 +531,77 @@ TEST(DimensionInConditionE2eTest, TestDurationMetricNoLink) {
         auto data = metrics.data(0);
         EXPECT_FALSE(data.dimensions_in_what().has_field());
         EXPECT_FALSE(data.dimensions_in_condition().has_field());
-        EXPECT_EQ(data.bucket_info_size(), 2);
-        EXPECT_EQ(data.bucket_info(0).duration_nanos(), 9);
-        EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
-        EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
-        EXPECT_EQ(data.bucket_info(1).duration_nanos(), 30);
-        EXPECT_EQ(data.bucket_info(1).start_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
-        EXPECT_EQ(data.bucket_info(1).end_bucket_elapsed_nanos(), bucketStartTimeNs + 2 * bucketSizeNs);
+        if (aggregationType == DurationMetric::SUM) {
+            EXPECT_EQ(data.bucket_info_size(), 2);
+            EXPECT_EQ(data.bucket_info(0).duration_nanos(), 9);
+            EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
+            EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(),
+                      bucketStartTimeNs + bucketSizeNs);
+            EXPECT_EQ(data.bucket_info(1).duration_nanos(), 30);
+            EXPECT_EQ(data.bucket_info(1).start_bucket_elapsed_nanos(),
+                      bucketStartTimeNs + bucketSizeNs);
+            EXPECT_EQ(data.bucket_info(1).end_bucket_elapsed_nanos(),
+                      bucketStartTimeNs + 2 * bucketSizeNs);
+        } else {
+            EXPECT_EQ(data.bucket_info_size(), 2);
+            EXPECT_EQ(data.bucket_info(0).duration_nanos(), 9);
+            EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
+            EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(),
+                      bucketStartTimeNs + bucketSizeNs);
+            EXPECT_EQ(data.bucket_info(1).duration_nanos(), 30);
+            EXPECT_EQ(data.bucket_info(1).start_bucket_elapsed_nanos(),
+                      bucketStartTimeNs + bucketSizeNs);
+            EXPECT_EQ(data.bucket_info(1).end_bucket_elapsed_nanos(),
+                      bucketStartTimeNs + 2 * bucketSizeNs);
+        }
 
         data = metrics.data(1);
         EXPECT_FALSE(data.dimensions_in_what().has_field());
         ValidateAttributionUidAndTagDimension(data.dimensions_in_condition(),
                                               android::util::SYNC_STATE_CHANGED, 111, "App1");
         EXPECT_EQ(data.bucket_info_size(), 2);
-        EXPECT_EQ(data.bucket_info(0).duration_nanos(), 500 - 201 + bucketSizeNs - 600);
+
+        if (aggregationType == DurationMetric::SUM) {
+            EXPECT_EQ(data.bucket_info(0).duration_nanos(), 500 - 201 + bucketSizeNs - 600);
+            EXPECT_EQ(data.bucket_info(1).duration_nanos(), 300);
+        } else {
+            EXPECT_EQ(data.bucket_info(0).duration_nanos(), 500 - 201);
+            EXPECT_EQ(data.bucket_info(1).duration_nanos(), bucketSizeNs - 300);
+        }
         EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
-        EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
-        EXPECT_EQ(data.bucket_info(1).duration_nanos(), 300);
-        EXPECT_EQ(data.bucket_info(1).start_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
-        EXPECT_EQ(data.bucket_info(1).end_bucket_elapsed_nanos(), bucketStartTimeNs + 2 * bucketSizeNs);
+        EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(),
+                  bucketStartTimeNs + bucketSizeNs);
+        EXPECT_EQ(data.bucket_info(1).start_bucket_elapsed_nanos(),
+                  bucketStartTimeNs + bucketSizeNs);
+        EXPECT_EQ(data.bucket_info(1).end_bucket_elapsed_nanos(),
+                  bucketStartTimeNs + 2 * bucketSizeNs);
 
         data = metrics.data(2);
         EXPECT_FALSE(data.dimensions_in_what().has_field());
         ValidateAttributionUidAndTagDimension(data.dimensions_in_condition(),
                                               android::util::SYNC_STATE_CHANGED, 333, "App2");
         EXPECT_EQ(data.bucket_info_size(), 2);
-        EXPECT_EQ(data.bucket_info(0).duration_nanos(), 500 - 401 + bucketSizeNs - 600);
+        if (aggregationType == DurationMetric::SUM) {
+            EXPECT_EQ(data.bucket_info(0).duration_nanos(), 500 - 401 + bucketSizeNs - 600);
+            EXPECT_EQ(data.bucket_info(1).duration_nanos(), 700);
+        } else {
+            EXPECT_EQ(data.bucket_info(0).duration_nanos(), 500 - 401);
+            EXPECT_EQ(data.bucket_info(1).duration_nanos(), bucketSizeNs + 700 - 600);
+        }
         EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
-        EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
-        EXPECT_EQ(data.bucket_info(1).duration_nanos(), 700);
-        EXPECT_EQ(data.bucket_info(1).start_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
-        EXPECT_EQ(data.bucket_info(1).end_bucket_elapsed_nanos(), bucketStartTimeNs + 2 * bucketSizeNs);
+        EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(),
+                  bucketStartTimeNs + bucketSizeNs);
+        EXPECT_EQ(data.bucket_info(1).start_bucket_elapsed_nanos(),
+                  bucketStartTimeNs + bucketSizeNs);
+        EXPECT_EQ(data.bucket_info(1).end_bucket_elapsed_nanos(),
+                  bucketStartTimeNs + 2 * bucketSizeNs);
     }
 }
 
 namespace {
 
-StatsdConfig CreateDurationMetricConfigWithLink(DurationMetric::AggregationType aggregationType) {
+StatsdConfig CreateDurationMetricConfig_Link_CombinationCondition(
+        DurationMetric::AggregationType aggregationType) {
     StatsdConfig config;
     *config.add_atom_matcher() = CreateMoveToBackgroundAtomMatcher();
     *config.add_atom_matcher() = CreateMoveToForegroundAtomMatcher();
@@ -599,6 +635,7 @@ StatsdConfig CreateDurationMetricConfigWithLink(DurationMetric::AggregationType 
     metric->set_id(StringToId("AppInBackgroundMetric"));
     metric->set_what(isInBackgroundPredicate.id());
     metric->set_condition(combinationPredicate->id());
+    metric->set_aggregation_type(aggregationType);
     *metric->mutable_dimensions_in_what() =
             CreateDimensions(android::util::ACTIVITY_FOREGROUND_STATE_CHANGED, {1 /* uid field */});
     *metric->mutable_dimensions_in_condition() = CreateAttributionUidAndTagDimensions(
@@ -617,10 +654,10 @@ StatsdConfig CreateDurationMetricConfigWithLink(DurationMetric::AggregationType 
 
 }  // namespace
 
-TEST(DimensionInConditionE2eTest, TestDurationMetricWithLink) {
+TEST(DimensionInConditionE2eTest, TestDurationMetric_Link_OR_CombinationCondition) {
     for (auto aggregationType : {DurationMetric::SUM, DurationMetric::MAX_SPARSE}) {
         ConfigKey cfgKey;
-        auto config = CreateDurationMetricConfigWithLink(aggregationType);
+        auto config = CreateDurationMetricConfig_Link_CombinationCondition(aggregationType);
         int64_t bucketStartTimeNs = 10000000000;
         int64_t bucketSizeNs =
                 TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
@@ -701,26 +738,50 @@ TEST(DimensionInConditionE2eTest, TestDurationMetricWithLink) {
         EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).value_int(), 111);
         ValidateAttributionUidAndTagDimension(data.dimensions_in_condition(),
                                               android::util::SYNC_STATE_CHANGED, 111, "App1");
-        EXPECT_EQ(data.bucket_info_size(), 2);
-        EXPECT_EQ(data.bucket_info(0).duration_nanos(), bucketSizeNs - 201);
-        EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
-        EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
-        EXPECT_EQ(data.bucket_info(1).duration_nanos(), 100);
-        EXPECT_EQ(data.bucket_info(1).start_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
-        EXPECT_EQ(data.bucket_info(1).end_bucket_elapsed_nanos(), bucketStartTimeNs + 2 * bucketSizeNs);
+        if (aggregationType == DurationMetric::SUM) {
+            EXPECT_EQ(data.bucket_info_size(), 2);
+            EXPECT_EQ(data.bucket_info(0).duration_nanos(), bucketSizeNs - 201);
+            EXPECT_EQ(data.bucket_info(1).duration_nanos(), 100);
+            EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
+            EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(),
+                      bucketStartTimeNs + bucketSizeNs);
+            EXPECT_EQ(data.bucket_info(1).start_bucket_elapsed_nanos(),
+                      bucketStartTimeNs + bucketSizeNs);
+            EXPECT_EQ(data.bucket_info(1).end_bucket_elapsed_nanos(),
+                      bucketStartTimeNs + 2 * bucketSizeNs);
+        } else {
+            EXPECT_EQ(data.bucket_info_size(), 1);
+            EXPECT_EQ(data.bucket_info(0).duration_nanos(), bucketSizeNs + 100 - 201);
+            EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(),
+                      bucketStartTimeNs + bucketSizeNs);
+            EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(),
+                      bucketStartTimeNs + 2 * bucketSizeNs);
+        }
 
         data = metrics.data(2);
         EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1);
         EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).value_int(), 333);
         ValidateAttributionUidAndTagDimension(data.dimensions_in_condition(),
                                               android::util::SYNC_STATE_CHANGED, 333, "App2");
-        EXPECT_EQ(data.bucket_info_size(), 2);
-        EXPECT_EQ(data.bucket_info(0).duration_nanos(), bucketSizeNs - 401);
-        EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
-        EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
-        EXPECT_EQ(data.bucket_info(1).duration_nanos(), 700);
-        EXPECT_EQ(data.bucket_info(1).start_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
-        EXPECT_EQ(data.bucket_info(1).end_bucket_elapsed_nanos(), bucketStartTimeNs + 2 * bucketSizeNs);
+        if (aggregationType == DurationMetric::SUM) {
+            EXPECT_EQ(data.bucket_info_size(), 2);
+            EXPECT_EQ(data.bucket_info(0).duration_nanos(), bucketSizeNs - 401);
+            EXPECT_EQ(data.bucket_info(1).duration_nanos(), 700);
+            EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
+            EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(),
+                      bucketStartTimeNs + bucketSizeNs);
+            EXPECT_EQ(data.bucket_info(1).start_bucket_elapsed_nanos(),
+                      bucketStartTimeNs + bucketSizeNs);
+            EXPECT_EQ(data.bucket_info(1).end_bucket_elapsed_nanos(),
+                      bucketStartTimeNs + 2 * bucketSizeNs);
+        } else {
+            EXPECT_EQ(data.bucket_info_size(), 1);
+            EXPECT_EQ(data.bucket_info(0).duration_nanos(), bucketSizeNs + 299);
+            EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(),
+                      bucketStartTimeNs + bucketSizeNs);
+            EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(),
+                      bucketStartTimeNs + 2 * bucketSizeNs);
+        }
     }
 }
 

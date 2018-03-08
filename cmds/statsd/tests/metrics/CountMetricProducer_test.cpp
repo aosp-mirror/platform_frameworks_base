@@ -175,9 +175,9 @@ TEST(CountMetricProducerTest, TestEventsWithSlicedCondition) {
         {getMockedDimensionKey(conditionTagId, 2, "222")};
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
-    EXPECT_CALL(*wizard, query(_, key1, _, _)).WillOnce(Return(ConditionState::kFalse));
+    EXPECT_CALL(*wizard, query(_, key1, _, _, _, _)).WillOnce(Return(ConditionState::kFalse));
 
-    EXPECT_CALL(*wizard, query(_, key2, _, _)).WillOnce(Return(ConditionState::kTrue));
+    EXPECT_CALL(*wizard, query(_, key2, _, _, _, _)).WillOnce(Return(ConditionState::kTrue));
 
     CountMetricProducer countProducer(kConfigKey, metric, 1 /*condition tracker index*/, wizard,
                                       bucketStartTimeNs);

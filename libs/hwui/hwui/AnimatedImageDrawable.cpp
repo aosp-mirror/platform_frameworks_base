@@ -32,8 +32,7 @@ AnimatedImageDrawable::AnimatedImageDrawable(sk_sp<SkAnimatedImage> animatedImag
 }
 
 void AnimatedImageDrawable::syncProperties() {
-    mAlpha = mStagingAlpha;
-    mColorFilter = mStagingColorFilter;
+    mProperties = mStagingProperties;
 }
 
 bool AnimatedImageDrawable::start() {
@@ -115,11 +114,17 @@ AnimatedImageDrawable::Snapshot AnimatedImageDrawable::reset() {
 // Only called on the RenderThread.
 void AnimatedImageDrawable::onDraw(SkCanvas* canvas) {
     SkTLazy<SkPaint> lazyPaint;
-    if (mAlpha != SK_AlphaOPAQUE || mColorFilter.get()) {
+    SkAutoCanvasRestore acr(canvas, false);
+    if (mProperties.mAlpha != SK_AlphaOPAQUE || mProperties.mColorFilter.get()) {
         lazyPaint.init();
-        lazyPaint.get()->setAlpha(mAlpha);
-        lazyPaint.get()->setColorFilter(mColorFilter);
+        lazyPaint.get()->setAlpha(mProperties.mAlpha);
+        lazyPaint.get()->setColorFilter(mProperties.mColorFilter);
         lazyPaint.get()->setFilterQuality(kLow_SkFilterQuality);
+    }
+    if (mProperties.mMirrored) {
+        canvas->save();
+        canvas->translate(mSkAnimatedImage->getBounds().width(), 0);
+        canvas->scale(-1, 1);
     }
 
     mDidDraw = true;
@@ -131,7 +136,6 @@ void AnimatedImageDrawable::onDraw(SkCanvas* canvas) {
     if (drawDirectly) {
         // The image is not animating, and never was. Draw directly from
         // mSkAnimatedImage.
-        SkAutoCanvasRestore acr(canvas, false);
         if (lazyPaint.isValid()) {
             canvas->saveLayer(mSkAnimatedImage->getBounds(), lazyPaint.get());
         }
@@ -190,11 +194,16 @@ void AnimatedImageDrawable::onDraw(SkCanvas* canvas) {
 
 double AnimatedImageDrawable::drawStaging(SkCanvas* canvas) {
     SkAutoCanvasRestore acr(canvas, false);
-    if (mStagingAlpha != SK_AlphaOPAQUE || mStagingColorFilter.get()) {
+    if (mStagingProperties.mAlpha != SK_AlphaOPAQUE || mStagingProperties.mColorFilter.get()) {
         SkPaint paint;
-        paint.setAlpha(mStagingAlpha);
-        paint.setColorFilter(mStagingColorFilter);
+        paint.setAlpha(mStagingProperties.mAlpha);
+        paint.setColorFilter(mStagingProperties.mColorFilter);
         canvas->saveLayer(mSkAnimatedImage->getBounds(), &paint);
+    }
+    if (mStagingProperties.mMirrored) {
+        canvas->save();
+        canvas->translate(mSkAnimatedImage->getBounds().width(), 0);
+        canvas->scale(-1, 1);
     }
 
     if (!mRunning) {

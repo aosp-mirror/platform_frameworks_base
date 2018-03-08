@@ -336,11 +336,16 @@ struct FieldValue {
     Value mValue;
 };
 
+bool HasPositionANY(const FieldMatcher& matcher);
+
 bool isAttributionUidField(const FieldValue& value);
 
 void translateFieldMatcher(const FieldMatcher& matcher, std::vector<Matcher>* output);
 
 bool isAttributionUidField(const Field& field, const Value& value);
+
+bool equalDimensions(const std::vector<Matcher>& dimension_a,
+                     const std::vector<Matcher>& dimension_b);
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

@@ -7980,6 +7980,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private void onProvideVirtualStructureCompat(ViewStructure structure, boolean forAutofill) {
         final AccessibilityNodeProvider provider = getAccessibilityNodeProvider();
         if (provider != null) {
+            if (android.view.autofill.Helper.sVerbose && forAutofill) {
+                Log.v(VIEW_LOG_TAG, "onProvideVirtualStructureCompat() for " + this);
+            }
+
             final AccessibilityNodeInfo info = createAccessibilityNodeInfo();
             structure.setChildCount(1);
             final ViewStructure root = structure.newChild(0);

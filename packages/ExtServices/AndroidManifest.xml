@@ -35,9 +35,8 @@
         </service>
 
         <service android:name=".resolver.LRResolverRankerService"
-                 android:permission="android.permission.BIND_RESOLVER_RANKER_SERVICE"
-                 android:priority="-1" >
-            <intent-filter>
+                 android:permission="android.permission.BIND_RESOLVER_RANKER_SERVICE">
+            <intent-filter android:priority="-1">
                 <action android:name="android.service.resolver.ResolverRankerService" />
             </intent-filter>
         </service>

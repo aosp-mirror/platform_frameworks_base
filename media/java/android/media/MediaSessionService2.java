@@ -173,10 +173,12 @@ public abstract class MediaSessionService2 extends Service {
     /**
      * Get instance of the {@link MediaSession2} that you've previously created with the
      * {@link #onCreateSession} for this service.
+     * <p>
+     * This may be {@code null} before the {@link #onCreate()} is finished.
      *
      * @return created session
      */
-    public final MediaSession2 getSession() {
+    public final @Nullable MediaSession2 getSession() {
         return mProvider.getSession_impl();
     }
 

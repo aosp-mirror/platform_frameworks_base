@@ -32,6 +32,7 @@ public:
                          int conditionIndex, const std::vector<Matcher>& dimensionInCondition,
                          bool nesting, uint64_t currentBucketStartNs, uint64_t currentBucketNum,
                          uint64_t startTimeNs, uint64_t bucketSizeNs, bool conditionSliced,
+                         bool fullLink,
                          const std::vector<sp<DurationAnomalyTracker>>& anomalyTrackers);
 
     OringDurationTracker(const OringDurationTracker& tracker) = default;

@@ -75,10 +75,10 @@ void makeWakeLockEvent(
     event->init();
 }
 
-std::map<int64_t, std::vector<HashableDimensionKey>> getWakeLockQueryKey(
+std::map<int64_t, HashableDimensionKey> getWakeLockQueryKey(
     const Position position,
     const std::vector<int> &uids, const string& conditionName) {
-    std::map<int64_t, std::vector<HashableDimensionKey>> outputKeyMap;
+    std::map<int64_t, HashableDimensionKey> outputKeyMap;
     std::vector<int> uid_indexes;
     int pos[] = {1, 1, 1};
     int depth = 2;
@@ -104,7 +104,7 @@ std::map<int64_t, std::vector<HashableDimensionKey>> getWakeLockQueryKey(
         Value value((int32_t)uids[idx]);
         HashableDimensionKey dim;
         dim.addValue(FieldValue(field, value));
-        outputKeyMap[StringToId(conditionName)].push_back(dim);
+        outputKeyMap[StringToId(conditionName)] = dim;
     }
     return outputKeyMap;
 }
@@ -122,6 +122,7 @@ TEST(SimpleConditionTrackerTest, TestNonSlicedCondition) {
 
     SimpleConditionTracker conditionTracker(kConfigKey, StringToId("SCREEN_IS_ON"), 0 /*tracker index*/,
                                             simplePredicate, trackerNameIndexMap);
+    EXPECT_FALSE(conditionTracker.isSliced());
 
     LogEvent event(1 /*tagId*/, 0 /*timestamp*/);
 
@@ -193,6 +194,7 @@ TEST(SimpleConditionTrackerTest, TestNonSlicedCondition) {
 }
 
 TEST(SimpleConditionTrackerTest, TestNonSlicedConditionNestCounting) {
+    std::vector<sp<ConditionTracker>> allConditions;
     SimplePredicate simplePredicate;
     simplePredicate.set_start(StringToId("SCREEN_TURNED_ON"));
     simplePredicate.set_stop(StringToId("SCREEN_TURNED_OFF"));
@@ -205,6 +207,7 @@ TEST(SimpleConditionTrackerTest, TestNonSlicedConditionNestCounting) {
     SimpleConditionTracker conditionTracker(kConfigKey, StringToId("SCREEN_IS_ON"),
                                             0 /*condition tracker index*/, simplePredicate,
                                             trackerNameIndexMap);
+    EXPECT_FALSE(conditionTracker.isSliced());
 
     LogEvent event(1 /*tagId*/, 0 /*timestamp*/);
 
@@ -257,14 +260,14 @@ TEST(SimpleConditionTrackerTest, TestNonSlicedConditionNestCounting) {
 
     conditionTracker.evaluateCondition(event, matcherState, allPredicates, conditionCache,
                                        changedCache);
-    // result should still be true
     EXPECT_EQ(ConditionState::kFalse, conditionCache[0]);
     EXPECT_TRUE(changedCache[0]);
 }
 
 TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
+    std::vector<sp<ConditionTracker>> allConditions;
     for (Position position :
-            { Position::ANY, Position::FIRST, Position::LAST}) {
+            { Position::FIRST, Position::LAST}) {
         vector<Matcher> dimensionInCondition;
         std::unordered_set<HashableDimensionKey> dimensionKeys;
 
@@ -281,6 +284,7 @@ TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
         SimpleConditionTracker conditionTracker(kConfigKey, StringToId(conditionName),
                                                 0 /*condition tracker index*/, simplePredicate,
                                                 trackerNameIndexMap);
+
         std::vector<int> uids = {111, 222, 333};
 
         LogEvent event(1 /*tagId*/, 0 /*timestamp*/);
@@ -305,12 +309,20 @@ TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
             EXPECT_EQ(uids.size(), conditionTracker.mSlicedConditionState.size());
         }
         EXPECT_TRUE(changedCache[0]);
+        if (position == Position::FIRST ||
+            position == Position::LAST) {
+            EXPECT_EQ(conditionTracker.getChangedToTrueDimensions(allConditions)->size(), 1u);
+            EXPECT_TRUE(conditionTracker.getChangedToFalseDimensions(allConditions)->empty());
+        } else {
+            EXPECT_EQ(conditionTracker.getChangedToTrueDimensions(allConditions)->size(), uids.size());
+        }
 
         // Now test query
         const auto queryKey = getWakeLockQueryKey(position, uids, conditionName);
         conditionCache[0] = ConditionState::kNotEvaluated;
 
         conditionTracker.isConditionMet(queryKey, allPredicates, dimensionInCondition,
+                                        false, false,
                                         conditionCache, dimensionKeys);
         EXPECT_EQ(ConditionState::kTrue, conditionCache[0]);
 
@@ -331,6 +343,9 @@ TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
         } else {
             EXPECT_EQ(uids.size(), conditionTracker.mSlicedConditionState.size());
         }
+        EXPECT_TRUE(conditionTracker.getChangedToTrueDimensions(allConditions)->empty());
+        EXPECT_TRUE(conditionTracker.getChangedToFalseDimensions(allConditions)->empty());
+
 
         // wake lock 1 release
         LogEvent event3(1 /*tagId*/, 0 /*timestamp*/);
@@ -350,6 +365,8 @@ TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
         } else {
             EXPECT_EQ(uids.size(), conditionTracker.mSlicedConditionState.size());
         }
+        EXPECT_TRUE(conditionTracker.getChangedToTrueDimensions(allConditions)->empty());
+        EXPECT_TRUE(conditionTracker.getChangedToFalseDimensions(allConditions)->empty());
 
         LogEvent event4(1 /*tagId*/, 0 /*timestamp*/);
         makeWakeLockEvent(&event4, uids, "wl2", 0);  // now release it.
@@ -362,18 +379,26 @@ TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
                                            changedCache);
         EXPECT_EQ(0UL, conditionTracker.mSlicedConditionState.size());
         EXPECT_TRUE(changedCache[0]);
+        if (position == Position::FIRST ||
+            position == Position::LAST) {
+            EXPECT_EQ(conditionTracker.getChangedToFalseDimensions(allConditions)->size(), 1u);
+            EXPECT_TRUE(conditionTracker.getChangedToTrueDimensions(allConditions)->empty());
+        } else {
+            EXPECT_EQ(conditionTracker.getChangedToFalseDimensions(allConditions)->size(), uids.size());
+        }
 
         // query again
         conditionCache[0] = ConditionState::kNotEvaluated;
         conditionTracker.isConditionMet(queryKey, allPredicates, dimensionInCondition,
+                                        false, false,
                                         conditionCache, dimensionKeys);
         EXPECT_EQ(ConditionState::kFalse, conditionCache[0]);
-
     }
 
 }
 
 TEST(SimpleConditionTrackerTest, TestSlicedWithNoOutputDim) {
+    std::vector<sp<ConditionTracker>> allConditions;
     vector<Matcher> dimensionInCondition;
     std::unordered_set<HashableDimensionKey> dimensionKeys;
 
@@ -390,6 +415,8 @@ TEST(SimpleConditionTrackerTest, TestSlicedWithNoOutputDim) {
     SimpleConditionTracker conditionTracker(kConfigKey, StringToId(conditionName),
                                             0 /*condition tracker index*/, simplePredicate,
                                             trackerNameIndexMap);
+
+    EXPECT_FALSE(conditionTracker.isSliced());
 
     std::vector<int> uid_list1 = {111, 1111, 11111};
     string uid1_wl1 = "wl1_1";
@@ -419,6 +446,7 @@ TEST(SimpleConditionTrackerTest, TestSlicedWithNoOutputDim) {
     conditionCache[0] = ConditionState::kNotEvaluated;
 
     conditionTracker.isConditionMet(queryKey, allPredicates, dimensionInCondition,
+                                    true, true,
                                     conditionCache, dimensionKeys);
     EXPECT_EQ(ConditionState::kTrue, conditionCache[0]);
 
@@ -463,13 +491,15 @@ TEST(SimpleConditionTrackerTest, TestSlicedWithNoOutputDim) {
     conditionCache[0] = ConditionState::kNotEvaluated;
     dimensionKeys.clear();
     conditionTracker.isConditionMet(queryKey, allPredicates, dimensionInCondition,
+                                    true, true,
                                     conditionCache, dimensionKeys);
     EXPECT_EQ(ConditionState::kFalse, conditionCache[0]);
 }
 
 TEST(SimpleConditionTrackerTest, TestStopAll) {
+    std::vector<sp<ConditionTracker>> allConditions;
     for (Position position :
-            {Position::ANY, Position::FIRST, Position::LAST}) {
+            { Position::FIRST, Position::LAST }) {
         vector<Matcher> dimensionInCondition;
         std::unordered_set<HashableDimensionKey> dimensionKeys;
         SimplePredicate simplePredicate = getWakeLockHeldCondition(
@@ -510,12 +540,23 @@ TEST(SimpleConditionTrackerTest, TestStopAll) {
             EXPECT_EQ(uid_list1.size(), conditionTracker.mSlicedConditionState.size());
         }
         EXPECT_TRUE(changedCache[0]);
+        {
+            if (position == Position::FIRST ||
+                position == Position::LAST) {
+                EXPECT_EQ(1UL, conditionTracker.getChangedToTrueDimensions(allConditions)->size());
+                EXPECT_TRUE(conditionTracker.getChangedToFalseDimensions(allConditions)->empty());
+            } else {
+                EXPECT_EQ(uid_list1.size(), conditionTracker.getChangedToTrueDimensions(allConditions)->size());
+                EXPECT_TRUE(conditionTracker.getChangedToFalseDimensions(allConditions)->empty());
+            }
+        }
 
         // Now test query
         const auto queryKey = getWakeLockQueryKey(position, uid_list1, conditionName);
         conditionCache[0] = ConditionState::kNotEvaluated;
 
         conditionTracker.isConditionMet(queryKey, allPredicates, dimensionInCondition,
+                                        false, false,
                                         conditionCache, dimensionKeys);
         EXPECT_EQ(ConditionState::kTrue, conditionCache[0]);
 
@@ -538,11 +579,23 @@ TEST(SimpleConditionTrackerTest, TestStopAll) {
                       conditionTracker.mSlicedConditionState.size());
         }
         EXPECT_TRUE(changedCache[0]);
+        {
+            if (position == Position::FIRST ||
+                position == Position::LAST) {
+                EXPECT_EQ(1UL, conditionTracker.getChangedToTrueDimensions(allConditions)->size());
+                EXPECT_TRUE(conditionTracker.getChangedToFalseDimensions(allConditions)->empty());
+            } else {
+                EXPECT_EQ(uid_list2.size(), conditionTracker.getChangedToTrueDimensions(allConditions)->size());
+                EXPECT_TRUE(conditionTracker.getChangedToFalseDimensions(allConditions)->empty());
+            }
+        }
+
 
         // TEST QUERY
         const auto queryKey2 = getWakeLockQueryKey(position, uid_list2, conditionName);
         conditionCache[0] = ConditionState::kNotEvaluated;
         conditionTracker.isConditionMet(queryKey, allPredicates, dimensionInCondition,
+                                        false, false,
                                         conditionCache, dimensionKeys);
 
         EXPECT_EQ(ConditionState::kTrue, conditionCache[0]);
@@ -561,11 +614,22 @@ TEST(SimpleConditionTrackerTest, TestStopAll) {
                                            changedCache);
         EXPECT_TRUE(changedCache[0]);
         EXPECT_EQ(0UL, conditionTracker.mSlicedConditionState.size());
+        {
+            if (position == Position::FIRST || position == Position::LAST) {
+                EXPECT_EQ(2UL, conditionTracker.getChangedToFalseDimensions(allConditions)->size());
+                EXPECT_TRUE(conditionTracker.getChangedToTrueDimensions(allConditions)->empty());
+            } else {
+                EXPECT_EQ(uid_list1.size() + uid_list2.size(),
+                          conditionTracker.getChangedToFalseDimensions(allConditions)->size());
+                EXPECT_TRUE(conditionTracker.getChangedToTrueDimensions(allConditions)->empty());
+            }
+        }
 
         // TEST QUERY
         const auto queryKey3 = getWakeLockQueryKey(position, uid_list1, conditionName);
         conditionCache[0] = ConditionState::kNotEvaluated;
         conditionTracker.isConditionMet(queryKey, allPredicates, dimensionInCondition,
+                                        false, false,
                                         conditionCache, dimensionKeys);
         EXPECT_EQ(ConditionState::kFalse, conditionCache[0]);
 
@@ -573,6 +637,7 @@ TEST(SimpleConditionTrackerTest, TestStopAll) {
         const auto queryKey4 = getWakeLockQueryKey(position, uid_list2, conditionName);
         conditionCache[0] = ConditionState::kNotEvaluated;
         conditionTracker.isConditionMet(queryKey, allPredicates, dimensionInCondition,
+                                        false, false,
                                         conditionCache, dimensionKeys);
         EXPECT_EQ(ConditionState::kFalse, conditionCache[0]);
     }

@@ -315,7 +315,12 @@ public final class SQLiteConnectionPool implements Closeable {
                 }
             }
 
-            if (mConfiguration.openFlags != configuration.openFlags) {
+            // We should do in-place switching when transitioning from compatibility WAL
+            // to rollback journal. Otherwise transient connection state will be lost
+            boolean onlyCompatWalChanged = (mConfiguration.openFlags ^ configuration.openFlags)
+                    == SQLiteDatabase.DISABLE_COMPATIBILITY_WAL;
+
+            if (!onlyCompatWalChanged && mConfiguration.openFlags != configuration.openFlags) {
                 // If we are changing open flags and WAL mode at the same time, then
                 // we have no choice but to close the primary connection beforehand
                 // because there can only be one connection open when we change WAL mode.

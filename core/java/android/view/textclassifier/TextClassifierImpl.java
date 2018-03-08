@@ -18,6 +18,7 @@ package android.view.textclassifier;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.WorkerThread;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.ContentUris;
@@ -42,7 +43,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.ref.WeakReference;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -78,7 +78,6 @@ public final class TextClassifierImpl implements TextClassifier {
 
     private final Context mContext;
     private final TextClassifier mFallback;
-
     private final GenerateLinksLogger mGenerateLinksLogger;
 
     private final Object mLock = new Object();
@@ -91,9 +90,9 @@ public final class TextClassifierImpl implements TextClassifier {
 
     private final Object mLoggerLock = new Object();
     @GuardedBy("mLoggerLock") // Do not access outside this lock.
-    private WeakReference<Logger.Config> mLoggerConfig = new WeakReference<>(null);
+    private Logger.Config mLoggerConfig;
     @GuardedBy("mLoggerLock") // Do not access outside this lock.
-    private Logger mLogger;  // Should never be null if mLoggerConfig.get() is not null.
+    private Logger mLogger;
 
     private final TextClassificationConstants mSettings;
 
@@ -106,6 +105,7 @@ public final class TextClassifierImpl implements TextClassifier {
 
     /** @inheritDoc */
     @Override
+    @WorkerThread
     public TextSelection suggestSelection(
             @NonNull CharSequence text, int selectionStartIndex, int selectionEndIndex,
             @Nullable TextSelection.Options options) {
@@ -169,6 +169,7 @@ public final class TextClassifierImpl implements TextClassifier {
 
     /** @inheritDoc */
     @Override
+    @WorkerThread
     public TextClassification classifyText(
             @NonNull CharSequence text, int startIndex, int endIndex,
             @Nullable TextClassification.Options options) {
@@ -204,6 +205,7 @@ public final class TextClassifierImpl implements TextClassifier {
 
     /** @inheritDoc */
     @Override
+    @WorkerThread
     public TextLinks generateLinks(
             @NonNull CharSequence text, @Nullable TextLinks.Options options) {
         Utils.validate(text, getMaxGenerateLinksTextLength(), false /* allowInMainThread */);
@@ -282,16 +284,17 @@ public final class TextClassifierImpl implements TextClassifier {
         }
     }
 
+    /** @inheritDoc */
     @Override
     public Logger getLogger(@NonNull Logger.Config config) {
         Preconditions.checkNotNull(config);
         synchronized (mLoggerLock) {
-            if (mLoggerConfig.get() == null || !mLoggerConfig.get().equals(config)) {
-                mLoggerConfig = new WeakReference<>(config);
+            if (mLogger == null || !config.equals(mLoggerConfig)) {
+                mLoggerConfig = config;
                 mLogger = new DefaultLogger(config);
             }
-            return mLogger;
         }
+        return mLogger;
     }
 
     private TextClassifierImplNative getNative(LocaleList localeList)

@@ -32,7 +32,7 @@ const MetricDimensionKey DEFAULT_METRIC_DIMENSION_KEY = MetricDimensionKey();
 // Minimum bucket size in seconds
 const long kMinBucketSizeSec = 5 * 60;
 
-typedef std::map<int64_t, std::vector<HashableDimensionKey>> ConditionKey;
+typedef std::map<int64_t, HashableDimensionKey> ConditionKey;
 
 typedef std::unordered_map<MetricDimensionKey, int64_t> DimToValMap;
 

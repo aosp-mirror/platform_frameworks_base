@@ -94,10 +94,7 @@ public abstract class Logger {
     }
 
     /**
-     * Writes the selection event.
-     *
-     * <p><strong>NOTE: </strong>This method is designed for subclasses.
-     * Apps should not call it directly.
+     * Writes the selection event to a log.
      */
     public abstract void writeEvent(@NonNull SelectionEvent event);
 

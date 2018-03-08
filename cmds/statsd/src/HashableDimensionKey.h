@@ -65,10 +65,6 @@ public:
 
     std::string toString() const;
 
-    inline const char* c_str() const {
-        return toString().c_str();
-    }
-
     bool operator==(const HashableDimensionKey& that) const;
 
     bool operator<(const HashableDimensionKey& that) const;
@@ -104,6 +100,10 @@ class MetricDimensionKey {
         return mDimensionKeyInCondition;
     }
 
+    inline void setDimensionKeyInCondition(const HashableDimensionKey& key) {
+        mDimensionKeyInCondition = key;
+    }
+
     bool hasDimensionKeyInCondition() const {
         return mDimensionKeyInCondition.getValues().size() > 0;
     }
@@ -112,9 +112,6 @@ class MetricDimensionKey {
 
     bool operator<(const MetricDimensionKey& that) const;
 
-    inline const char* c_str() const {
-        return toString().c_str();
-    }
   private:
       HashableDimensionKey mDimensionKeyInWhat;
       HashableDimensionKey mDimensionKeyInCondition;
@@ -134,6 +131,9 @@ android::hash_t hashDimension(const HashableDimensionKey& key);
  */
 bool filterValues(const std::vector<Matcher>& matcherFields, const std::vector<FieldValue>& values,
                   std::vector<HashableDimensionKey>* output);
+// This function is used when there is at most one output dimension key. (no ANY matcher)
+bool filterValues(const std::vector<Matcher>& matcherFields, const std::vector<FieldValue>& values,
+                  HashableDimensionKey* output);
 
 /**
  * Filter the values from FieldValues using the matchers.
@@ -146,7 +146,7 @@ void filterGaugeValues(const std::vector<Matcher>& matchers, const std::vector<F
 
 void getDimensionForCondition(const std::vector<FieldValue>& eventValues,
                               const Metric2Condition& links,
-                              std::vector<HashableDimensionKey>* conditionDimension);
+                              HashableDimensionKey* conditionDimension);
 
 }  // namespace statsd
 }  // namespace os

@@ -98,6 +98,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
                 }, TRANSFORMING_VIEW_TITLE);
         resolveHeaderViews();
         updateInvertHelper();
+        addAppOpsOnClickListener(row);
     }
 
     @Override
@@ -119,6 +120,10 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         mNotificationHeader = mView.findViewById(com.android.internal.R.id.notification_header);
         mNotificationHeader.setShowExpandButtonAtEnd(mShowExpandButtonAtEnd);
         getDozer().setColor(mColor);
+    }
+
+    private void addAppOpsOnClickListener(ExpandableNotificationRow row) {
+        mNotificationHeader.setAppOpsOnClickListener(row.getAppOpsOnClickListener());
     }
 
     private int resolveColor(ImageView icon) {

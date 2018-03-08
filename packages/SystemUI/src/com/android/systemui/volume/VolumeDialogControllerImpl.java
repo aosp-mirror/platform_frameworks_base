@@ -521,18 +521,23 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         boolean disallowAlarms = (policy.priorityCategories & NotificationManager.Policy
                 .PRIORITY_CATEGORY_ALARMS) == 0;
         boolean disallowMedia = (policy.priorityCategories & NotificationManager.Policy
-                .PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER) == 0;
+                .PRIORITY_CATEGORY_MEDIA) == 0;
+        boolean disallowSystem = (policy.priorityCategories & NotificationManager.Policy
+                .PRIORITY_CATEGORY_SYSTEM) == 0;
         boolean disallowRinger = ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(policy);
-        if (mState.disallowAlarms == disallowAlarms && mState.disallowMedia == disallowMedia
-                && mState.disallowRinger == disallowRinger) {
+        if (mState.disallowAlarms == disallowAlarms
+                && mState.disallowMedia == disallowMedia
+                && mState.disallowRinger == disallowRinger
+                && mState.disallowSystem == disallowSystem) {
             return false;
         }
         mState.disallowAlarms = disallowAlarms;
         mState.disallowMedia = disallowMedia;
+        mState.disallowSystem = disallowSystem;
         mState.disallowRinger = disallowRinger;
         Events.writeEvent(mContext, Events.EVENT_ZEN_CONFIG_CHANGED, "disallowAlarms=" +
-                disallowAlarms + " disallowMedia=" + disallowMedia + " disallowRinger=" +
-                disallowRinger);
+                disallowAlarms + " disallowMedia=" + disallowMedia + " disallowSystem=" +
+                disallowSystem + " disallowRinger=" + disallowRinger);
         return true;
     }
 

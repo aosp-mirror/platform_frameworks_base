@@ -205,6 +205,29 @@ bool Value::operator<(const Value& that) const {
     }
 }
 
+bool equalDimensions(const std::vector<Matcher>& dimension_a,
+                     const std::vector<Matcher>& dimension_b) {
+    bool eq = dimension_a.size() == dimension_b.size();
+    for (size_t i = 0; eq && i < dimension_a.size(); ++i) {
+        if (dimension_b[i] != dimension_a[i]) {
+            eq = false;
+        }
+    }
+    return eq;
+}
+
+bool HasPositionANY(const FieldMatcher& matcher) {
+    if (matcher.has_position() && matcher.position() == Position::ANY) {
+        return true;
+    }
+    for (const auto& child : matcher.child()) {
+        if (HasPositionANY(child)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

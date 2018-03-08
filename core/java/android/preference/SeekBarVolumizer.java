@@ -90,7 +90,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
 
     private NotificationManager.Policy mNotificationPolicy;
     private boolean mAllowAlarms;
-    private boolean mAllowMediaSystem;
+    private boolean mAllowMedia;
     private boolean mAllowRinger;
 
     public SeekBarVolumizer(Context context, int streamType, Uri defaultUri, Callback callback) {
@@ -100,8 +100,8 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
         mNotificationPolicy = mNotificationManager.getNotificationPolicy();
         mAllowAlarms = (mNotificationPolicy.priorityCategories & NotificationManager.Policy
                 .PRIORITY_CATEGORY_ALARMS) != 0;
-        mAllowMediaSystem = (mNotificationPolicy.priorityCategories & NotificationManager.Policy
-                .PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER) != 0;
+        mAllowMedia = (mNotificationPolicy.priorityCategories & NotificationManager.Policy
+                .PRIORITY_CATEGORY_MEDIA) != 0;
         mAllowRinger = !ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(
                 mNotificationPolicy);
         mStreamType = streamType;
@@ -139,8 +139,8 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
         return stream == AudioManager.STREAM_ALARM;
     }
 
-    private static boolean isMediaOrSystemStream(int stream) {
-        return stream == AudioManager.STREAM_MUSIC || stream == AudioManager.STREAM_SYSTEM;
+    private static boolean isMediaStream(int stream) {
+        return stream == AudioManager.STREAM_MUSIC;
     }
 
     public void setSeekBar(SeekBar seekBar) {
@@ -159,7 +159,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
                 || mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS
                 || (mZenMode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
                     && ((!mAllowAlarms && isAlarmsStream(mStreamType))
-                        || (!mAllowMediaSystem && isMediaOrSystemStream(mStreamType))
+                        || (!mAllowMedia && isMediaStream(mStreamType))
                         || (!mAllowRinger && isNotificationOrRing(mStreamType))));
     }
 
@@ -454,8 +454,8 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
                 mNotificationPolicy = mNotificationManager.getNotificationPolicy();
                 mAllowAlarms = (mNotificationPolicy.priorityCategories & NotificationManager.Policy
                         .PRIORITY_CATEGORY_ALARMS) != 0;
-                mAllowMediaSystem = (mNotificationPolicy.priorityCategories
-                        & NotificationManager.Policy.PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER) != 0;
+                mAllowMedia = (mNotificationPolicy.priorityCategories
+                        & NotificationManager.Policy.PRIORITY_CATEGORY_MEDIA) != 0;
                 mAllowRinger = !ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(
                         mNotificationPolicy);
                 updateSlider();

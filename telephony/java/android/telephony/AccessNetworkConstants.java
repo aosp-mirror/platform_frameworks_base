@@ -30,6 +30,9 @@ public final class AccessNetworkConstants {
         public static final int EUTRAN = 3;
         public static final int CDMA2000 = 4;
         public static final int IWLAN = 5;
+
+        /** @hide */
+        private AccessNetworkType() {};
     }
 
     /**
@@ -42,6 +45,9 @@ public final class AccessNetworkConstants {
         public static final int WWAN = 1;
         /** Wireless Local Area Networks (i.e. Wifi) */
         public static final int WLAN = 2;
+
+        /** @hide */
+        private TransportType() {};
     }
 
     /**
@@ -63,6 +69,9 @@ public final class AccessNetworkConstants {
         public static final int BAND_DCS1800 = 12;
         public static final int BAND_PCS1900 = 13;
         public static final int BAND_ER900 = 14;
+
+        /** @hide */
+        private GeranBand() {};
     }
 
     /**
@@ -92,6 +101,9 @@ public final class AccessNetworkConstants {
         /** band 23, 24 are reserved */
         public static final int BAND_25 = 25;
         public static final int BAND_26 = 26;
+
+        /** @hide */
+        private UtranBand() {};
     }
 
     /**
@@ -147,6 +159,9 @@ public final class AccessNetworkConstants {
         public static final int BAND_66 = 66;
         public static final int BAND_68 = 68;
         public static final int BAND_70 = 70;
+
+        /** @hide */
+        private EutranBand() {};
     }
 
     /**
@@ -179,5 +194,11 @@ public final class AccessNetworkConstants {
         public static final int BAND_19 = 20;
         public static final int BAND_20 = 21;
         public static final int BAND_21 = 22;
+
+        /** @hide */
+        private CdmaBands() {};
     }
+
+    /** @hide */
+    private AccessNetworkConstants() {};
 }
