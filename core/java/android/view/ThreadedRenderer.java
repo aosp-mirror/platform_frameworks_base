@@ -1068,11 +1068,15 @@ public final class ThreadedRenderer {
             mInitialized = true;
             mAppContext = context.getApplicationContext();
 
-            nSetDebuggingEnabled(
-                    (mAppContext.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0
-                    || Build.IS_DEBUGGABLE);
             initSched(renderProxy);
-            initGraphicsStats();
+
+            if (mAppContext != null) {
+                final boolean appDebuggable =
+                        (mAppContext.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)
+                        != 0;
+                nSetDebuggingEnabled(appDebuggable || Build.IS_DEBUGGABLE);
+                initGraphicsStats();
+            }
         }
 
         private void initSched(long renderProxy) {
