@@ -1755,7 +1755,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     void showGlobalActionsInternal() {
-        sendCloseSystemWindows(SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS);
         if (mGlobalActions == null) {
             mGlobalActions = new GlobalActions(mContext, mWindowManagerFuncs);
         }
