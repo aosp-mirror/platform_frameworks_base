@@ -877,9 +877,8 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         public View getView(int position, View convertView, ViewGroup parent) {
             Action action = getItem(position);
             View view = action.create(mContext, convertView, parent, LayoutInflater.from(mContext));
-            // Power off, restart, logout (if present) and lockdown (if present) should be in white
-            // background. Set the division based on which buttons are currently being displayed.
-            if (position == 2 + (mHasLogoutButton ? 1 : 0) + (mHasLockdownButton ? 1 : 0)) {
+            // Everything but screenshot, the last item, gets white background.
+            if (position == getCount() - 1) {
                 HardwareUiLayout.get(parent).setDivisionView(view);
             }
             return view;
