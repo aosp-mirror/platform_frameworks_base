@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-#pragma once
+syntax = "proto2";
+package android.os;
 
-#include <utils/String16.h>
-#include "StatsPuller.h"
+option java_multiple_files = true;
 
-namespace android {
-namespace os {
-namespace statsd {
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
-class KernelUidCpuActiveTimeReader : public StatsPuller {
- public:
-    KernelUidCpuActiveTimeReader();
-    bool PullInternal(vector<std::shared_ptr<LogEvent>>* data) override;
-};
+message BackTraceProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-}  // namespace statsd
-}  // namespace os
-}  // namespace android
+    message Stack {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 pid = 1;
+        optional string dump = 2;
+        // Time it took to dump the stacktrace.
+        optional int64 dump_duration_ns = 3;
+    }
+    repeated Stack traces = 1;
+}

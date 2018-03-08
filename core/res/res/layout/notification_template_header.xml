@@ -129,8 +129,9 @@
 
     <LinearLayout
         android:id="@+id/app_ops"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_width="wrap_content"
+        android:layout_marginStart="6dp"
         android:orientation="horizontal" >
         <ImageButton
             android:id="@+id/camera"
@@ -139,7 +140,6 @@
             android:src="@drawable/ic_camera"
             android:tint="@color/notification_secondary_text_color_light"
             android:background="?android:selectableItemBackgroundBorderless"
-            android:layout_marginStart="6dp"
             android:visibility="gone"
             />
         <ImageButton

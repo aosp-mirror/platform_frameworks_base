@@ -7289,16 +7289,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * If this view is a visually distinct portion of a window, for example the content view of
-     * a fragment that is replaced, it is considered a pane for accessibility purposes. In order
-     * for accessibility services to understand the views role, and to announce its title as
-     * appropriate, such views should have pane titles.
+     * Visually distinct portion of a window with window-like semantics are considered panes for
+     * accessibility purposes. One example is the content view of a fragment that is replaced.
+     * In order for accessibility services to understand a pane's window-like behavior, panes
+     * should have descriptive titles. Views with pane titles produce {@link AccessibilityEvent}s
+     * when they appear, disappear, or change title.
      *
-     * @param accessibilityPaneTitle The pane's title.
+     * @param accessibilityPaneTitle The pane's title. Setting to {@code null} indicates that this
+     *                               View is not a pane.
      *
      * {@see AccessibilityNodeInfo#setPaneTitle(CharSequence)}
      */
-    public void setAccessibilityPaneTitle(CharSequence accessibilityPaneTitle) {
+    public void setAccessibilityPaneTitle(@Nullable CharSequence accessibilityPaneTitle) {
         if (!TextUtils.equals(accessibilityPaneTitle, mAccessibilityPaneTitle)) {
             mAccessibilityPaneTitle = accessibilityPaneTitle;
             notifyViewAccessibilityStateChangedIfNeeded(
@@ -7313,7 +7315,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * {@see #setAccessibilityPaneTitle}.
      */
-    public CharSequence getAccessibilityPaneTitle() {
+    @Nullable public CharSequence getAccessibilityPaneTitle() {
         return mAccessibilityPaneTitle;
     }
 
@@ -7978,6 +7980,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private void onProvideVirtualStructureCompat(ViewStructure structure, boolean forAutofill) {
         final AccessibilityNodeProvider provider = getAccessibilityNodeProvider();
         if (provider != null) {
+            if (android.view.autofill.Helper.sVerbose && forAutofill) {
+                Log.v(VIEW_LOG_TAG, "onProvideVirtualStructureCompat() for " + this);
+            }
+
             final AccessibilityNodeInfo info = createAccessibilityNodeInfo();
             structure.setChildCount(1);
             final ViewStructure root = structure.newChild(0);

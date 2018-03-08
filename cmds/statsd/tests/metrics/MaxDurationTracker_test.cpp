@@ -42,14 +42,13 @@ const ConfigKey kConfigKey(0, 12345);
 const int TagId = 1;
 
 const HashableDimensionKey eventKey = getMockedDimensionKey(TagId, 0, "1");
-const std::vector<HashableDimensionKey> conditionKey = {getMockedDimensionKey(TagId, 4, "1")};
+const HashableDimensionKey conditionKey = getMockedDimensionKey(TagId, 4, "1");
 const HashableDimensionKey key1 = getMockedDimensionKey(TagId, 1, "1");
 const HashableDimensionKey key2 = getMockedDimensionKey(TagId, 1, "2");
 const uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
 TEST(MaxDurationTrackerTest, TestSimpleMaxDuration) {
     const MetricDimensionKey eventKey = getMockedMetricDimensionKey(TagId, 0, "1");
-    const std::vector<HashableDimensionKey> conditionKey = {getMockedDimensionKey(TagId, 4, "1")};
     const HashableDimensionKey key1 = getMockedDimensionKey(TagId, 1, "1");
     const HashableDimensionKey key2 = getMockedDimensionKey(TagId, 1, "2");
 
@@ -66,7 +65,7 @@ TEST(MaxDurationTrackerTest, TestSimpleMaxDuration) {
     int64_t metricId = 1;
     MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, -1, dimensionInCondition,
                                false, bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
-                               false, {});
+                               false, false, {});
 
     tracker.noteStart(key1, true, bucketStartTimeNs, ConditionKey());
     // Event starts again. This would not change anything as it already starts.
@@ -86,7 +85,6 @@ TEST(MaxDurationTrackerTest, TestSimpleMaxDuration) {
 
 TEST(MaxDurationTrackerTest, TestStopAll) {
     const MetricDimensionKey eventKey = getMockedMetricDimensionKey(TagId, 0, "1");
-    const std::vector<HashableDimensionKey> conditionKey = {getMockedDimensionKey(TagId, 4, "1")};
     const HashableDimensionKey key1 = getMockedDimensionKey(TagId, 1, "1");
     const HashableDimensionKey key2 = getMockedDimensionKey(TagId, 1, "2");
 
@@ -103,7 +101,7 @@ TEST(MaxDurationTrackerTest, TestStopAll) {
     int64_t metricId = 1;
     MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, -1, dimensionInCondition,
                                false, bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
-                               false, {});
+                               false, false, {});
 
     tracker.noteStart(key1, true, bucketStartTimeNs + 1, ConditionKey());
 
@@ -124,7 +122,6 @@ TEST(MaxDurationTrackerTest, TestStopAll) {
 
 TEST(MaxDurationTrackerTest, TestCrossBucketBoundary) {
     const MetricDimensionKey eventKey = getMockedMetricDimensionKey(TagId, 0, "1");
-    const std::vector<HashableDimensionKey> conditionKey = {getMockedDimensionKey(TagId, 4, "1")};
     const HashableDimensionKey key1 = getMockedDimensionKey(TagId, 1, "1");
     const HashableDimensionKey key2 = getMockedDimensionKey(TagId, 1, "2");
     vector<Matcher> dimensionInCondition;
@@ -140,7 +137,7 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary) {
     int64_t metricId = 1;
     MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, -1, dimensionInCondition,
                                false, bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
-                               false, {});
+                               false, false, {});
 
     // The event starts.
     tracker.noteStart(DEFAULT_DIMENSION_KEY, true, bucketStartTimeNs + 1, ConditionKey());
@@ -166,7 +163,6 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary) {
 
 TEST(MaxDurationTrackerTest, TestCrossBucketBoundary_nested) {
     const MetricDimensionKey eventKey = getMockedMetricDimensionKey(TagId, 0, "1");
-    const std::vector<HashableDimensionKey> conditionKey = {getMockedDimensionKey(TagId, 4, "1")};
     const HashableDimensionKey key1 = getMockedDimensionKey(TagId, 1, "1");
     const HashableDimensionKey key2 = getMockedDimensionKey(TagId, 1, "2");
     vector<Matcher> dimensionInCondition;
@@ -182,7 +178,7 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary_nested) {
     int64_t metricId = 1;
     MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, -1, dimensionInCondition,
                                true, bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
-                               false, {});
+                               false, false, {});
 
     // 2 starts
     tracker.noteStart(DEFAULT_DIMENSION_KEY, true, bucketStartTimeNs + 1, ConditionKey());
@@ -204,14 +200,14 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary_nested) {
 }
 
 TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition) {
-    const std::vector<HashableDimensionKey> conditionKey = {key1};
+    const HashableDimensionKey conditionDimKey = key1;
 
     vector<Matcher> dimensionInCondition;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     ConditionKey conditionKey1;
     MetricDimensionKey eventKey = getMockedMetricDimensionKey(TagId, 1, "1");
-    conditionKey1[StringToId("APP_BACKGROUND")] = conditionKey;
+    conditionKey1[StringToId("APP_BACKGROUND")] = conditionDimKey;
 
     /**
     Start in first bucket, stop in second bucket. Condition turns on and off in the first bucket
@@ -229,7 +225,7 @@ TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition) {
     int64_t metricId = 1;
     MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, dimensionInCondition,
                                false, bucketStartTimeNs, 0, bucketStartTimeNs, bucketSizeNs, true,
-                               {});
+                               false, {});
     EXPECT_TRUE(tracker.mAnomalyTrackers.empty());
 
     tracker.noteStart(key1, false, eventStartTimeNs, conditionKey1);
@@ -250,8 +246,6 @@ TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition) {
 }
 
 TEST(MaxDurationTrackerTest, TestAnomalyDetection) {
-    const std::vector<HashableDimensionKey> conditionKey = {getMockedDimensionKey(TagId, 4, "1")};
-
     vector<Matcher> dimensionInCondition;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
@@ -281,7 +275,7 @@ TEST(MaxDurationTrackerTest, TestAnomalyDetection) {
         new DurationAnomalyTracker(alert, kConfigKey, alarmMonitor);
     MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, dimensionInCondition,
                                false, bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
-                               true, {anomalyTracker});
+                               true, false, {anomalyTracker});
 
     tracker.noteStart(key1, true, eventStartTimeNs, conditionKey1);
     sp<const InternalAlarm> alarm = anomalyTracker->mAlarms.begin()->second;
@@ -301,8 +295,6 @@ TEST(MaxDurationTrackerTest, TestAnomalyDetection) {
 // This tests that we correctly compute the predicted time of an anomaly assuming that the current
 // state continues forward as-is.
 TEST(MaxDurationTrackerTest, TestAnomalyPredictedTimestamp) {
-    const std::vector<HashableDimensionKey> conditionKey = {getMockedDimensionKey(TagId, 4, "1")};
-
     vector<Matcher> dimensionInCondition;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
@@ -310,7 +302,7 @@ TEST(MaxDurationTrackerTest, TestAnomalyPredictedTimestamp) {
     MetricDimensionKey eventKey = getMockedMetricDimensionKey(TagId, 2, "maps");
     conditionKey1[StringToId("APP_BACKGROUND")] = conditionKey;
     ConditionKey conditionKey2;
-    conditionKey2[StringToId("APP_BACKGROUND")] = {getMockedDimensionKey(TagId, 4, "2")};
+    conditionKey2[StringToId("APP_BACKGROUND")] = getMockedDimensionKey(TagId, 4, "2");
 
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
 
@@ -343,7 +335,7 @@ TEST(MaxDurationTrackerTest, TestAnomalyPredictedTimestamp) {
         new DurationAnomalyTracker(alert, kConfigKey, alarmMonitor);
     MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, dimensionInCondition,
                                false, bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
-                               true, {anomalyTracker});
+                               true, false, {anomalyTracker});
 
     tracker.noteStart(key1, false, eventStartTimeNs, conditionKey1);
     tracker.noteConditionChanged(key1, true, conditionStarts1);
@@ -360,8 +352,6 @@ TEST(MaxDurationTrackerTest, TestAnomalyPredictedTimestamp) {
 // Suppose A starts, then B starts, and then A stops. We still need to set an anomaly based on the
 // elapsed duration of B.
 TEST(MaxDurationTrackerTest, TestAnomalyPredictedTimestamp_UpdatedOnStop) {
-    const std::vector<HashableDimensionKey> conditionKey = {getMockedDimensionKey(TagId, 4, "1")};
-
     vector<Matcher> dimensionInCondition;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
@@ -369,7 +359,7 @@ TEST(MaxDurationTrackerTest, TestAnomalyPredictedTimestamp_UpdatedOnStop) {
     MetricDimensionKey eventKey = getMockedMetricDimensionKey(TagId, 2, "maps");
     conditionKey1[StringToId("APP_BACKGROUND")] = conditionKey;
     ConditionKey conditionKey2;
-    conditionKey2[StringToId("APP_BACKGROUND")] = {getMockedDimensionKey(TagId, 4, "2")};
+    conditionKey2[StringToId("APP_BACKGROUND")] = getMockedDimensionKey(TagId, 4, "2");
 
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
 
@@ -399,7 +389,7 @@ TEST(MaxDurationTrackerTest, TestAnomalyPredictedTimestamp_UpdatedOnStop) {
         new DurationAnomalyTracker(alert, kConfigKey, alarmMonitor);
     MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, dimensionInCondition,
                                false, bucketStartTimeNs, bucketNum, bucketStartTimeNs, bucketSizeNs,
-                               true, {anomalyTracker});
+                               true, false, {anomalyTracker});
 
     tracker.noteStart(key1, true, eventStartTimeNs1, conditionKey1);
     tracker.noteStart(key2, true, eventStartTimeNs2, conditionKey2);

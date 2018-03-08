@@ -79,6 +79,7 @@ import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_DISABL
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_DISABLE_SWIPE_UP;
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_HIDE_BACK_BUTTON;
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_SHOW_OVERVIEW_BUTTON;
+import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_OVERVIEW;
 
 public class NavigationBarView extends FrameLayout implements PluginListener<NavGesture> {
     final static boolean DEBUG = false;
@@ -106,6 +107,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private @NavigationBarCompat.HitTarget int mDownHitTarget = HIT_TARGET_NONE;
     private Rect mHomeButtonBounds = new Rect();
     private Rect mBackButtonBounds = new Rect();
+    private Rect mRecentsButtonBounds = new Rect();
     private int[] mTmpPosition = new int[2];
 
     private KeyButtonDrawable mBackIcon, mBackLandIcon, mBackAltIcon, mBackAltLandIcon;
@@ -117,7 +119,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private KeyButtonDrawable mImeIcon;
     private KeyButtonDrawable mMenuIcon;
     private KeyButtonDrawable mAccessibilityIcon;
-    private KeyButtonDrawable mRotateSuggestionIcon;
+    private TintedKeyButtonDrawable mRotateSuggestionIcon;
 
     private GestureHelper mGestureHelper;
     private DeadZone mDeadZone;
@@ -306,6 +308,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                     mDownHitTarget = HIT_TARGET_BACK;
                 } else if (mHomeButtonBounds.contains(x, y)) {
                     mDownHitTarget = HIT_TARGET_HOME;
+                } else if (mRecentsButtonBounds.contains(x, y)) {
+                    mDownHitTarget = HIT_TARGET_OVERVIEW;
                 }
                 break;
         }
@@ -479,7 +483,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 darkContext.getDrawable(darkIcon));
     }
 
-    private KeyButtonDrawable getDrawable(Context ctx, @DrawableRes int icon,
+    private TintedKeyButtonDrawable getDrawable(Context ctx, @DrawableRes int icon,
             @ColorInt int lightColor, @ColorInt int darkColor) {
         return TintedKeyButtonDrawable.create(ctx.getDrawable(icon), lightColor, darkColor);
     }
@@ -745,8 +749,15 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         Context rotateContext = new ContextThemeWrapper(ctx, style);
 
         // Recreate the icon and set it if needed
+        TintedKeyButtonDrawable priorIcon = mRotateSuggestionIcon;
         mRotateSuggestionIcon = getDrawable(rotateContext, R.drawable.ic_sysbar_rotate_button,
                 lightColor, darkColor);
+
+        // Apply any prior set dark intensity
+        if (priorIcon != null && priorIcon.isDarkIntensitySet()) {
+            mRotateSuggestionIcon.setDarkIntensity(priorIcon.getDarkIntensity());
+        }
+
         if (setIcon) getRotateSuggestionButton().setImageDrawable(mRotateSuggestionIcon);
     }
 
@@ -816,6 +827,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         super.onLayout(changed, left, top, right, bottom);
         updateButtonLocationOnScreen(getBackButton(), mBackButtonBounds);
         updateButtonLocationOnScreen(getHomeButton(), mHomeButtonBounds);
+        updateButtonLocationOnScreen(getRecentsButton(), mRecentsButtonBounds);
         mGestureHelper.onLayout(changed, left, top, right, bottom);
     }
 

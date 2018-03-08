@@ -92,6 +92,7 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicInteger;
 
 class ReceiverRestrictedContext extends ContextWrapper {
     ReceiverRestrictedContext(Context base) {
@@ -207,6 +208,17 @@ class ContextImpl extends Context {
 
     // The system service cache for the system services that are cached per-ContextImpl.
     final Object[] mServiceCache = SystemServiceRegistry.createServiceCache();
+
+    static final int STATE_UNINITIALIZED = 0;
+    static final int STATE_INITIALIZING = 1;
+    static final int STATE_READY = 2;
+
+    /**
+     * Initialization state for each service. Any of {@link #STATE_UNINITIALIZED},
+     * {@link #STATE_INITIALIZING} or {@link #STATE_READY},
+     */
+    final AtomicInteger[] mServiceInitializationStateArray =
+            SystemServiceRegistry.createServiceInitializationStateArray();
 
     static ContextImpl getImpl(Context context) {
         Context nextContext;

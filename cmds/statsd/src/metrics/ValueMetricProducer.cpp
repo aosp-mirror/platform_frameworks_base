@@ -80,6 +80,7 @@ ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric
     mBucketSizeNs = bucketSizeMills * 1000000;
     if (metric.has_dimensions_in_what()) {
         translateFieldMatcher(metric.dimensions_in_what(), &mDimensionsInWhat);
+        mContainANYPositionInDimensionsInWhat = HasPositionANY(metric.dimensions_in_what());
     }
 
     if (metric.has_dimensions_in_condition()) {
@@ -146,7 +147,7 @@ void ValueMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
 
     for (const auto& pair : mPastBuckets) {
         const MetricDimensionKey& dimensionKey = pair.first;
-        VLOG("  dimension key %s", dimensionKey.c_str());
+        VLOG("  dimension key %s", dimensionKey.toString().c_str());
         uint64_t wrapperToken =
                 protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DATA);
 
@@ -254,7 +255,7 @@ bool ValueMetricProducer::hitGuardRailLocked(const MetricDimensionKey& newKey) {
         // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
         if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
             ALOGE("ValueMetric %lld dropping data for dimension key %s",
-                (long long)mMetricId, newKey.c_str());
+                (long long)mMetricId, newKey.toString().c_str());
             return true;
         }
     }

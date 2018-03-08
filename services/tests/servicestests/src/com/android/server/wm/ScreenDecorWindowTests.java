@@ -47,7 +47,6 @@ import android.media.ImageReader;
 import android.os.Handler;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.Pair;
@@ -77,7 +76,6 @@ import java.util.function.BooleanSupplier;
 // TODO: Test non-Activity windows.
 @SmallTest
 @Presubmit
-@FlakyTest(bugId = 68957554)
 @RunWith(AndroidJUnit4.class)
 public class ScreenDecorWindowTests {
 

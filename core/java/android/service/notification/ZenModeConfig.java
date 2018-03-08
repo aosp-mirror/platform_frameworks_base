@@ -85,7 +85,8 @@ public class ZenModeConfig implements Parcelable {
 
     // Default allow categories set in readXml() from default_zen_mode_config.xml, fallback values:
     private static final boolean DEFAULT_ALLOW_ALARMS = true;
-    private static final boolean DEFAULT_ALLOW_MEDIA_SYSTEM_OTHER = true;
+    private static final boolean DEFAULT_ALLOW_MEDIA = true;
+    private static final boolean DEFAULT_ALLOW_SYSTEM = false;
     private static final boolean DEFAULT_ALLOW_CALLS = false;
     private static final boolean DEFAULT_ALLOW_MESSAGES = false;
     private static final boolean DEFAULT_ALLOW_REMINDERS = false;
@@ -94,13 +95,14 @@ public class ZenModeConfig implements Parcelable {
     private static final boolean DEFAULT_ALLOW_SCREEN_OFF = true;
     private static final boolean DEFAULT_ALLOW_SCREEN_ON = true;
 
-    public static final int XML_VERSION = 3;
+    public static final int XML_VERSION = 4;
     public static final String ZEN_TAG = "zen";
     private static final String ZEN_ATT_VERSION = "version";
     private static final String ZEN_ATT_USER = "user";
     private static final String ALLOW_TAG = "allow";
     private static final String ALLOW_ATT_ALARMS = "alarms";
-    private static final String ALLOW_ATT_MEDIA_SYSTEM_OTHER = "media_system_other";
+    private static final String ALLOW_ATT_MEDIA = "media";
+    private static final String ALLOW_ATT_SYSTEM = "system";
     private static final String ALLOW_ATT_CALLS = "calls";
     private static final String ALLOW_ATT_REPEAT_CALLERS = "repeatCallers";
     private static final String ALLOW_ATT_MESSAGES = "messages";
@@ -134,7 +136,8 @@ public class ZenModeConfig implements Parcelable {
     private static final String RULE_ATT_ENABLER = "enabler";
 
     public boolean allowAlarms = DEFAULT_ALLOW_ALARMS;
-    public boolean allowMediaSystemOther = DEFAULT_ALLOW_MEDIA_SYSTEM_OTHER;
+    public boolean allowMedia = DEFAULT_ALLOW_MEDIA;
+    public boolean allowSystem = DEFAULT_ALLOW_SYSTEM;
     public boolean allowCalls = DEFAULT_ALLOW_CALLS;
     public boolean allowRepeatCallers = DEFAULT_ALLOW_REPEAT_CALLERS;
     public boolean allowMessages = DEFAULT_ALLOW_MESSAGES;
@@ -175,7 +178,8 @@ public class ZenModeConfig implements Parcelable {
         allowWhenScreenOff = source.readInt() == 1;
         allowWhenScreenOn = source.readInt() == 1;
         allowAlarms = source.readInt() == 1;
-        allowMediaSystemOther = source.readInt() == 1;
+        allowMedia = source.readInt() == 1;
+        allowSystem = source.readInt() == 1;
     }
 
     @Override
@@ -206,7 +210,8 @@ public class ZenModeConfig implements Parcelable {
         dest.writeInt(allowWhenScreenOff ? 1 : 0);
         dest.writeInt(allowWhenScreenOn ? 1 : 0);
         dest.writeInt(allowAlarms ? 1 : 0);
-        dest.writeInt(allowMediaSystemOther ? 1 : 0);
+        dest.writeInt(allowMedia ? 1 : 0);
+        dest.writeInt(allowSystem ? 1 : 0);
     }
 
     @Override
@@ -214,7 +219,8 @@ public class ZenModeConfig implements Parcelable {
         return new StringBuilder(ZenModeConfig.class.getSimpleName()).append('[')
                 .append("user=").append(user)
                 .append(",allowAlarms=").append(allowAlarms)
-                .append(",allowMediaSystemOther=").append(allowMediaSystemOther)
+                .append(",allowMedia=").append(allowMedia)
+                .append(",allowSystem=").append(allowSystem)
                 .append(",allowReminders=").append(allowReminders)
                 .append(",allowEvents=").append(allowEvents)
                 .append(",allowCalls=").append(allowCalls)
@@ -240,8 +246,11 @@ public class ZenModeConfig implements Parcelable {
         if (allowAlarms != to.allowAlarms) {
             d.addLine("allowAlarms", allowAlarms, to.allowAlarms);
         }
-        if (allowMediaSystemOther != to.allowMediaSystemOther) {
-            d.addLine("allowMediaSystemOther", allowMediaSystemOther, to.allowMediaSystemOther);
+        if (allowMedia != to.allowMedia) {
+            d.addLine("allowMedia", allowMedia, to.allowMedia);
+        }
+        if (allowSystem != to.allowSystem) {
+            d.addLine("allowSystem", allowSystem, to.allowSystem);
         }
         if (allowCalls != to.allowCalls) {
             d.addLine("allowCalls", allowCalls, to.allowCalls);
@@ -361,7 +370,8 @@ public class ZenModeConfig implements Parcelable {
         if (o == this) return true;
         final ZenModeConfig other = (ZenModeConfig) o;
         return other.allowAlarms == allowAlarms
-                && other.allowMediaSystemOther == allowMediaSystemOther
+                && other.allowMedia == allowMedia
+                && other.allowSystem == allowSystem
                 && other.allowCalls == allowCalls
                 && other.allowRepeatCallers == allowRepeatCallers
                 && other.allowMessages == allowMessages
@@ -378,7 +388,7 @@ public class ZenModeConfig implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(allowAlarms, allowMediaSystemOther, allowCalls,
+        return Objects.hash(allowAlarms, allowMedia, allowSystem, allowCalls,
                 allowRepeatCallers, allowMessages,
                 allowCallsFrom, allowMessagesFrom, allowReminders, allowEvents,
                 allowWhenScreenOff, allowWhenScreenOn, user, automaticRules, manualRule);
@@ -469,8 +479,9 @@ public class ZenModeConfig implements Parcelable {
                     rt.allowWhenScreenOn =
                             safeBoolean(parser, ALLOW_ATT_SCREEN_ON, DEFAULT_ALLOW_SCREEN_ON);
                     rt.allowAlarms = safeBoolean(parser, ALLOW_ATT_ALARMS, DEFAULT_ALLOW_ALARMS);
-                    rt.allowMediaSystemOther = safeBoolean(parser, ALLOW_ATT_MEDIA_SYSTEM_OTHER,
-                            DEFAULT_ALLOW_MEDIA_SYSTEM_OTHER);
+                    rt.allowMedia = safeBoolean(parser, ALLOW_ATT_MEDIA,
+                            DEFAULT_ALLOW_MEDIA);
+                    rt.allowSystem = safeBoolean(parser, ALLOW_ATT_SYSTEM, DEFAULT_ALLOW_SYSTEM);
                 } else if (MANUAL_TAG.equals(tag)) {
                     rt.manualRule = readRuleXml(parser);
                 } else if (AUTOMATIC_TAG.equals(tag)) {
@@ -502,7 +513,8 @@ public class ZenModeConfig implements Parcelable {
         out.attribute(null, ALLOW_ATT_SCREEN_OFF, Boolean.toString(allowWhenScreenOff));
         out.attribute(null, ALLOW_ATT_SCREEN_ON, Boolean.toString(allowWhenScreenOn));
         out.attribute(null, ALLOW_ATT_ALARMS, Boolean.toString(allowAlarms));
-        out.attribute(null, ALLOW_ATT_MEDIA_SYSTEM_OTHER, Boolean.toString(allowMediaSystemOther));
+        out.attribute(null, ALLOW_ATT_MEDIA, Boolean.toString(allowMedia));
+        out.attribute(null, ALLOW_ATT_SYSTEM, Boolean.toString(allowSystem));
         out.endTag(null, ALLOW_TAG);
 
         if (manualRule != null) {
@@ -699,8 +711,11 @@ public class ZenModeConfig implements Parcelable {
         if (allowAlarms) {
             priorityCategories |= Policy.PRIORITY_CATEGORY_ALARMS;
         }
-        if (allowMediaSystemOther) {
-            priorityCategories |= Policy.PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER;
+        if (allowMedia) {
+            priorityCategories |= Policy.PRIORITY_CATEGORY_MEDIA;
+        }
+        if (allowSystem) {
+            priorityCategories |= Policy.PRIORITY_CATEGORY_SYSTEM;
         }
         priorityCallSenders = sourceToPrioritySenders(allowCallsFrom, priorityCallSenders);
         priorityMessageSenders = sourceToPrioritySenders(allowMessagesFrom, priorityMessageSenders);
@@ -743,8 +758,8 @@ public class ZenModeConfig implements Parcelable {
     public void applyNotificationPolicy(Policy policy) {
         if (policy == null) return;
         allowAlarms = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_ALARMS) != 0;
-        allowMediaSystemOther = (policy.priorityCategories
-                & Policy.PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER) != 0;
+        allowMedia = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_MEDIA) != 0;
+        allowSystem = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_SYSTEM) != 0;
         allowEvents = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_EVENTS) != 0;
         allowReminders = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_REMINDERS) != 0;
         allowCalls = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_CALLS) != 0;
@@ -1415,7 +1430,8 @@ public class ZenModeConfig implements Parcelable {
     }
 
     /**
-     * Determines whether dnd behavior should mute all notification sounds
+     * Determines whether dnd behavior should mute all notification/ringer sounds
+     * (sounds associated with ringer volume discluding system)
      */
     public static boolean areAllPriorityOnlyNotificationZenSoundsMuted(NotificationManager.Policy
             policy) {
@@ -1434,7 +1450,7 @@ public class ZenModeConfig implements Parcelable {
     }
 
     /**
-     * Determines whether dnd behavior should mute all notification sounds
+     * Determines whether dnd behavior should mute all sounds controlled by ringer
      */
     public static boolean areAllPriorityOnlyNotificationZenSoundsMuted(ZenModeConfig config) {
         return !config.allowReminders && !config.allowCalls && !config.allowMessages
@@ -1445,7 +1461,7 @@ public class ZenModeConfig implements Parcelable {
      * Determines whether all dnd mutes all sounds
      */
     public static boolean areAllZenBehaviorSoundsMuted(ZenModeConfig config) {
-        return !config.allowAlarms  && !config.allowMediaSystemOther
+        return !config.allowAlarms  && !config.allowMedia && !config.allowSystem
                 && areAllPriorityOnlyNotificationZenSoundsMuted(config);
     }
 

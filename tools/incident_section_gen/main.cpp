@@ -427,6 +427,8 @@ static bool generateSectionListCpp(Descriptor const* descriptor) {
                 printf("    new GZipSection(%d,", field->number());
                 splitAndPrint(s.args());
                 printf(" NULL),\n");
+            case SECTION_TOMBSTONE:
+                printf("    new TombstoneSection(%d, \"%s\"),\n", field->number(), s.args().c_str());
                 break;
         }
     }

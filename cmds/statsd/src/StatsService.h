@@ -177,11 +177,6 @@ private:
     /**
      * Print the event log.
      */
-    status_t cmd_print_stats_log(FILE* out, const Vector<String8>& args);
-
-    /**
-     * Print the event log.
-     */
     status_t cmd_dump_report(FILE* out, FILE* err, const Vector<String8>& args);
 
     /**

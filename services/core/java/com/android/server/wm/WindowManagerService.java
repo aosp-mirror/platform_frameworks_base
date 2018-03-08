@@ -1104,7 +1104,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public int addWindow(Session session, IWindow client, int seq,
-            LayoutParams attrs, int viewVisibility, int displayId,
+            LayoutParams attrs, int viewVisibility, int displayId, Rect outFrame,
             Rect outContentInsets, Rect outStableInsets, Rect outOutsets,
             DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel) {
         int[] appOp = new int[1];
@@ -1445,8 +1445,8 @@ public class WindowManagerService extends IWindowManager.Stub
             } else {
                 taskBounds = null;
             }
-            if (mPolicy.getInsetHintLw(win.mAttrs, taskBounds, displayFrames, outContentInsets,
-                    outStableInsets, outOutsets, outDisplayCutout)) {
+            if (mPolicy.getLayoutHintLw(win.mAttrs, taskBounds, displayFrames, outFrame,
+                    outContentInsets, outStableInsets, outOutsets, outDisplayCutout)) {
                 res |= WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_NAV_BAR;
             }
 

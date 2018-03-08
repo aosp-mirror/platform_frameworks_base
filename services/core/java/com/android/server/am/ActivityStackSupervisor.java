@@ -652,9 +652,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
             Display[] displays = mDisplayManager.getDisplays();
             for (int displayNdx = displays.length - 1; displayNdx >= 0; --displayNdx) {
-                final int displayId = displays[displayNdx].getDisplayId();
-                ActivityDisplay activityDisplay = new ActivityDisplay(this, displayId);
-                mActivityDisplays.put(displayId, activityDisplay);
+                final Display display = displays[displayNdx];
+                ActivityDisplay activityDisplay = new ActivityDisplay(this, display);
+                mActivityDisplays.put(display.getDisplayId(), activityDisplay);
                 calculateDefaultMinimalSizeOfResizeableTasks(activityDisplay);
             }
 
@@ -4085,7 +4085,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return null;
         }
         // The display hasn't been added to ActivityManager yet, create a new record now.
-        activityDisplay = new ActivityDisplay(this, displayId);
+        activityDisplay = new ActivityDisplay(this, display);
         attachDisplay(activityDisplay);
         calculateDefaultMinimalSizeOfResizeableTasks(activityDisplay);
         mWindowManager.onDisplayAdded(displayId);

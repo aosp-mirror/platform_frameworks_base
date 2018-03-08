@@ -211,7 +211,8 @@ public class PrecomputedText implements Spanned {
             return mHyphenationFrequency;
         }
 
-        private boolean isSameTextMetricsInternal(@NonNull TextPaint paint,
+        /** @hide */
+        public boolean isSameTextMetricsInternal(@NonNull TextPaint paint,
                 @NonNull TextDirectionHeuristic textDir, @Layout.BreakStrategy int strategy,
                 @Layout.HyphenationFrequency int frequency) {
             return mTextDir == textDir
@@ -246,6 +247,23 @@ public class PrecomputedText implements Spanned {
                     mPaint.getTextLocales(), mPaint.getTypeface(),
                     mPaint.getFontVariationSettings(), mPaint.isElegantTextHeight(), mTextDir,
                     mBreakStrategy, mHyphenationFrequency);
+        }
+
+        @Override
+        public String toString() {
+            return "{"
+                + "textSize=" + mPaint.getTextSize()
+                + ", textScaleX=" + mPaint.getTextScaleX()
+                + ", textSkewX=" + mPaint.getTextSkewX()
+                + ", letterSpacing=" + mPaint.getLetterSpacing()
+                + ", textLocale=" + mPaint.getTextLocales()
+                + ", typeface=" + mPaint.getTypeface()
+                + ", variationSettings=" + mPaint.getFontVariationSettings()
+                + ", elegantTextHeight=" + mPaint.isElegantTextHeight()
+                + ", textDir=" + mTextDir
+                + ", breakStrategy=" + mBreakStrategy
+                + ", hyphenationFrequency=" + mHyphenationFrequency
+                + "}";
         }
     };
 

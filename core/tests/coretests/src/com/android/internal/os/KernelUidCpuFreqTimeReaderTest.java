@@ -297,6 +297,46 @@ public class KernelUidCpuFreqTimeReaderTest {
     }
 
     @Test
+    public void testReadAbsolute() throws Exception {
+        VerifiableCallback cb = new VerifiableCallback();
+        final long[] freqs = {110, 123, 145, 167, 289, 997};
+        final int[] uids = {1, 22, 333, 444, 555};
+        final long[][] times = new long[uids.length][freqs.length];
+        for (int i = 0; i < uids.length; ++i) {
+            for (int j = 0; j < freqs.length; ++j) {
+                times[i][j] = uids[i] * freqs[j] * 10;
+            }
+        }
+        when(mBufferedReader.readLine()).thenReturn(getFreqsLine(freqs));
+        long[] actualFreqs = mKernelUidCpuFreqTimeReader.readFreqs(mBufferedReader, mPowerProfile);
+
+        assertArrayEquals(freqs, actualFreqs);
+        // Verify that the absolute values are returned
+        when(mProcReader.readBytes()).thenReturn(getUidTimesBytes(uids, times));
+        mKernelUidCpuFreqTimeReader.readAbsolute(cb);
+        for (int i = 0; i < uids.length; ++i) {
+            cb.verify(uids[i], times[i]);
+        }
+        cb.verifyNoMoreInteractions();
+
+        // Verify that a second call should still return absolute values
+        cb.clear();
+        Mockito.reset(mProcReader);
+        final long[][] newTimes1 = new long[uids.length][freqs.length];
+        for (int i = 0; i < uids.length; ++i) {
+            for (int j = 0; j < freqs.length; ++j) {
+                newTimes1[i][j] = times[i][j] + (uids[i] + freqs[j]) * 50;
+            }
+        }
+        when(mProcReader.readBytes()).thenReturn(getUidTimesBytes(uids, newTimes1));
+        mKernelUidCpuFreqTimeReader.readAbsolute(cb);
+        for (int i = 0; i < uids.length; ++i) {
+            cb.verify(uids[i], newTimes1[i]);
+        }
+        cb.verifyNoMoreInteractions();
+    }
+
+    @Test
     public void testReadDelta_malformedData() throws Exception {
         final long[] freqs = {1, 12, 123, 1234, 12345, 123456};
         final int[] uids = {1, 22, 333, 4444, 5555};

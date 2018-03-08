@@ -165,7 +165,7 @@ public class ApkSignatureSchemeV3Verifier {
     private static VerifiedSigner verify(
             RandomAccessFile apk,
             SignatureInfo signatureInfo,
-            boolean doVerifyIntegrity) throws SecurityException {
+            boolean doVerifyIntegrity) throws SecurityException, IOException {
         int signerCount = 0;
         Map<Integer, byte[]> contentDigests = new ArrayMap<>();
         VerifiedSigner result = null;
@@ -214,7 +214,9 @@ public class ApkSignatureSchemeV3Verifier {
         }
 
         if (contentDigests.containsKey(CONTENT_DIGEST_VERITY_CHUNKED_SHA256)) {
-            result.verityRootHash = contentDigests.get(CONTENT_DIGEST_VERITY_CHUNKED_SHA256);
+            byte[] verityDigest = contentDigests.get(CONTENT_DIGEST_VERITY_CHUNKED_SHA256);
+            result.verityRootHash = ApkSigningBlockUtils.parseVerityDigestAndVerifySourceLength(
+                    verityDigest, apk.length(), signatureInfo);
         }
 
         return result;

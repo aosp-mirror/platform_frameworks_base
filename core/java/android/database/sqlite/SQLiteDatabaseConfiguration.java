@@ -111,15 +111,6 @@ public final class SQLiteDatabaseConfiguration {
     public long idleConnectionTimeoutMs = Long.MAX_VALUE;
 
     /**
-     * Enables compatibility WAL mode. Applications cannot explicitly choose compatibility WAL mode,
-     * therefore it is not exposed as a flag.
-     *
-     * <p>In this mode, only database journal mode will be changed, connection pool
-     * size will still be limited to a single connection.
-     */
-    public boolean useCompatibilityWal;
-
-    /**
      * Journal mode to use when {@link SQLiteDatabase#ENABLE_WRITE_AHEAD_LOGGING} is not set.
      * <p>Default is returned by {@link SQLiteGlobal#getDefaultJournalMode()}
      */
@@ -191,7 +182,6 @@ public final class SQLiteDatabaseConfiguration {
         lookasideSlotSize = other.lookasideSlotSize;
         lookasideSlotCount = other.lookasideSlotCount;
         idleConnectionTimeoutMs = other.idleConnectionTimeoutMs;
-        useCompatibilityWal = other.useCompatibilityWal;
         journalMode = other.journalMode;
         syncMode = other.syncMode;
     }

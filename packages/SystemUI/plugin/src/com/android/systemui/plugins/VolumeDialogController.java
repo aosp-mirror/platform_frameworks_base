@@ -101,6 +101,7 @@ public interface VolumeDialogController {
         public int activeStream = NO_ACTIVE_STREAM;
         public boolean disallowAlarms;
         public boolean disallowMedia;
+        public boolean disallowSystem;
         public boolean disallowRinger;
 
         public State copy() {
@@ -118,6 +119,7 @@ public interface VolumeDialogController {
             rt.activeStream = activeStream;
             rt.disallowAlarms = disallowAlarms;
             rt.disallowMedia = disallowMedia;
+            rt.disallowSystem = disallowSystem;
             rt.disallowRinger = disallowRinger;
             return rt;
         }
@@ -150,6 +152,7 @@ public interface VolumeDialogController {
             sep(sb, indent); sb.append("activeStream:").append(activeStream);
             sep(sb, indent); sb.append("disallowAlarms:").append(disallowAlarms);
             sep(sb, indent); sb.append("disallowMedia:").append(disallowMedia);
+            sep(sb, indent); sb.append("disallowSystem:").append(disallowSystem);
             sep(sb, indent); sb.append("disallowRinger:").append(disallowRinger);
             if (indent > 0) sep(sb, indent);
             return sb.append('}').toString();

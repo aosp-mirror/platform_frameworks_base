@@ -1031,12 +1031,18 @@ public class NotificationManager {
         public static final int PRIORITY_CATEGORY_REPEAT_CALLERS = 1 << 4;
         /** Alarms are prioritized */
         public static final int PRIORITY_CATEGORY_ALARMS = 1 << 5;
-        /** Media, system, game (catch-all for non-never suppressible sounds) are prioritized */
-        public static final int PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER = 1 << 6;
+        /** Media, game, voice navigation are prioritized */
+        public static final int PRIORITY_CATEGORY_MEDIA = 1 << 6;
+        /**System (catch-all for non-never suppressible sounds) are prioritized */
+        public static final int PRIORITY_CATEGORY_SYSTEM = 1 << 7;
 
-        private static final int[] ALL_PRIORITY_CATEGORIES = {
+        /**
+         * @hide
+         */
+        public static final int[] ALL_PRIORITY_CATEGORIES = {
             PRIORITY_CATEGORY_ALARMS,
-            PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER,
+            PRIORITY_CATEGORY_MEDIA,
+            PRIORITY_CATEGORY_SYSTEM,
             PRIORITY_CATEGORY_REMINDERS,
             PRIORITY_CATEGORY_EVENTS,
             PRIORITY_CATEGORY_MESSAGES,
@@ -1237,8 +1243,8 @@ public class NotificationManager {
                 case PRIORITY_CATEGORY_CALLS: return "PRIORITY_CATEGORY_CALLS";
                 case PRIORITY_CATEGORY_REPEAT_CALLERS: return "PRIORITY_CATEGORY_REPEAT_CALLERS";
                 case PRIORITY_CATEGORY_ALARMS: return "PRIORITY_CATEGORY_ALARMS";
-                case PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER:
-                    return "PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER";
+                case PRIORITY_CATEGORY_MEDIA: return "PRIORITY_CATEGORY_MEDIA";
+                case PRIORITY_CATEGORY_SYSTEM: return "PRIORITY_CATEGORY_SYSTEM";
                 default: return "PRIORITY_CATEGORY_UNKNOWN_" + priorityCategory;
             }
         }

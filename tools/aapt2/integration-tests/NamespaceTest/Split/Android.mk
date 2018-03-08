@@ -20,6 +20,7 @@ include $(CLEAR_VARS)
 LOCAL_USE_AAPT2 := true
 LOCAL_AAPT_NAMESPACES := true
 LOCAL_PACKAGE_NAME := AaptTestNamespace_Split
+LOCAL_SDK_VERSION := current
 LOCAL_MODULE_TAGS := tests
 LOCAL_SRC_FILES := $(call all-java-files-under,src)
 LOCAL_APK_LIBRARIES := AaptTestNamespace_App

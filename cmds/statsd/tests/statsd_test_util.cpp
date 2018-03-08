@@ -26,6 +26,28 @@ AtomMatcher CreateSimpleAtomMatcher(const string& name, int atomId) {
     return atom_matcher;
 }
 
+AtomMatcher CreateScheduledJobStateChangedAtomMatcher(const string& name,
+                                                      ScheduledJobStateChanged::State state) {
+    AtomMatcher atom_matcher;
+    atom_matcher.set_id(StringToId(name));
+    auto simple_atom_matcher = atom_matcher.mutable_simple_atom_matcher();
+    simple_atom_matcher->set_atom_id(android::util::SCHEDULED_JOB_STATE_CHANGED);
+    auto field_value_matcher = simple_atom_matcher->add_field_value_matcher();
+    field_value_matcher->set_field(3);  // State field.
+    field_value_matcher->set_eq_int(state);
+    return atom_matcher;
+}
+
+AtomMatcher CreateStartScheduledJobAtomMatcher() {
+    return CreateScheduledJobStateChangedAtomMatcher("ScheduledJobStart",
+                                                     ScheduledJobStateChanged::STARTED);
+}
+
+AtomMatcher CreateFinishScheduledJobAtomMatcher() {
+    return CreateScheduledJobStateChangedAtomMatcher("ScheduledJobFinish",
+                                                     ScheduledJobStateChanged::FINISHED);
+}
+
 AtomMatcher CreateScreenBrightnessChangedAtomMatcher() {
     AtomMatcher atom_matcher;
     atom_matcher.set_id(StringToId("ScreenBrightnessChanged"));
@@ -168,6 +190,14 @@ AtomMatcher CreateProcessCrashAtomMatcher() {
         "ProcessCrashed", ProcessLifeCycleStateChanged::PROCESS_CRASHED);
 }
 
+Predicate CreateScheduledJobPredicate() {
+    Predicate predicate;
+    predicate.set_id(StringToId("ScheduledJobRunningPredicate"));
+    predicate.mutable_simple_predicate()->set_start(StringToId("ScheduledJobStart"));
+    predicate.mutable_simple_predicate()->set_stop(StringToId("ScheduledJobFinish"));
+    return predicate;
+}
+
 Predicate CreateBatterySaverModePredicate() {
     Predicate predicate;
     predicate.set_id(StringToId("BatterySaverIsOn"));
@@ -288,6 +318,32 @@ std::unique_ptr<LogEvent> CreateScreenBrightnessChangedEvent(
     event->init();
     return event;
 
+}
+
+std::unique_ptr<LogEvent> CreateScheduledJobStateChangedEvent(
+        const std::vector<AttributionNodeInternal>& attributions, const string& jobName,
+        const ScheduledJobStateChanged::State state, uint64_t timestampNs) {
+    auto event = std::make_unique<LogEvent>(android::util::SCHEDULED_JOB_STATE_CHANGED, timestampNs);
+    event->write(attributions);
+    event->write(jobName);
+    event->write(state);
+    event->init();
+    return event;
+}
+
+std::unique_ptr<LogEvent> CreateStartScheduledJobEvent(
+    const std::vector<AttributionNodeInternal>& attributions,
+    const string& name, uint64_t timestampNs) {
+    return CreateScheduledJobStateChangedEvent(
+            attributions, name, ScheduledJobStateChanged::STARTED, timestampNs);
+}
+
+// Create log event when scheduled job finishes.
+std::unique_ptr<LogEvent> CreateFinishScheduledJobEvent(
+    const std::vector<AttributionNodeInternal>& attributions,
+    const string& name, uint64_t timestampNs) {
+    return CreateScheduledJobStateChangedEvent(
+            attributions, name, ScheduledJobStateChanged::FINISHED, timestampNs);
 }
 
 std::unique_ptr<LogEvent> CreateWakelockStateChangedEvent(
@@ -419,7 +475,6 @@ int64_t StringToId(const string& str) {
 
 void ValidateAttributionUidDimension(const DimensionsValue& value, int atomId, int uid) {
     EXPECT_EQ(value.field(), atomId);
-    EXPECT_EQ(value.value_tuple().dimensions_value_size(), 1);
     // Attribution field.
     EXPECT_EQ(value.value_tuple().dimensions_value(0).field(), 1);
     // Uid only.

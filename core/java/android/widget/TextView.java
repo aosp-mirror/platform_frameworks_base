@@ -4141,6 +4141,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public void setTextMetricsParams(@NonNull PrecomputedText.Params params) {
         mTextPaint.set(params.getTextPaint());
+        mUserSetTextScaleX = true;
         mTextDir = params.getTextDirection();
         mBreakStrategy = params.getBreakStrategy();
         mHyphenationFrequency = params.getHyphenationFrequency();
@@ -5528,9 +5529,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * {@link android.text.Editable.Factory} to create final or intermediate
      * {@link Editable Editables}.
      *
+     * If the passed text is a {@link PrecomputedText} but the parameters used to create the
+     * PrecomputedText mismatches with this TextView, IllegalArgumentException is thrown. To ensure
+     * the parameters match, you can call {@link TextView#setTextMetricsParams} before calling this.
+     *
      * @param text text to be displayed
      *
      * @attr ref android.R.styleable#TextView_text
+     * @throws IllegalArgumentException if the passed text is a {@link PrecomputedText} but the
+     *                                  parameters used to create the PrecomputedText mismatches
+     *                                  with this TextView.
      */
     @android.view.RemotableViewMethod
     public final void setText(CharSequence text) {
@@ -5644,7 +5652,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (imm != null) imm.restartInput(this);
         } else if (type == BufferType.SPANNABLE || mMovement != null) {
             text = mSpannableFactory.newSpannable(text);
-        } else if (!(text instanceof PrecomputedText || text instanceof CharWrapper)) {
+        } else if (text instanceof PrecomputedText) {
+            PrecomputedText precomputed = (PrecomputedText) text;
+            if (mTextDir == null) {
+                mTextDir = getTextDirectionHeuristic();
+            }
+            if (!precomputed.getParams().isSameTextMetricsInternal(
+                    getPaint(), mTextDir, mBreakStrategy, mHyphenationFrequency)) {
+                throw new IllegalArgumentException(
+                        "PrecomputedText's Parameters don't match the parameters of this TextView."
+                        + "Consider using setTextMetricsParams(precomputedText.getParams()) "
+                        + "to override the settings of this TextView: "
+                        + "PrecomputedText: " + precomputed.getParams()
+                        + "TextView: " + getTextMetricsParams());
+            }
+        } else if (!(text instanceof CharWrapper)) {
             text = TextUtils.stringOrSpannedString(text);
         }
 
@@ -8062,7 +8084,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return false;
     }
 
-    private void nullLayouts() {
+    /** @hide */
+    @VisibleForTesting
+    public void nullLayouts() {
         if (mLayout instanceof BoringLayout && mSavedLayout == null) {
             mSavedLayout = (BoringLayout) mLayout;
         }
@@ -8156,7 +8180,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * not the full view width with padding.
      * {@hide}
      */
-    protected void makeNewLayout(int wantWidth, int hintWidth,
+    @VisibleForTesting
+    public void makeNewLayout(int wantWidth, int hintWidth,
                                  BoringLayout.Metrics boring,
                                  BoringLayout.Metrics hintBoring,
                                  int ellipsisWidth, boolean bringIntoView) {
@@ -8446,7 +8471,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return mIncludePad;
     }
 
-    private static final BoringLayout.Metrics UNKNOWN_BORING = new BoringLayout.Metrics();
+    /** @hide */
+    @VisibleForTesting
+    public static final BoringLayout.Metrics UNKNOWN_BORING = new BoringLayout.Metrics();
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -11499,12 +11526,27 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @return Whether or not we're attempting to start the action mode.
      * @hide
      */
-    public boolean requestActionMode(@NonNull TextLinks.TextLink link) {
+    public boolean requestActionMode(@NonNull TextLinks.TextLinkSpan clickedSpan) {
+        Preconditions.checkNotNull(clickedSpan);
+        final TextLinks.TextLink link = clickedSpan.getTextLink();
         Preconditions.checkNotNull(link);
         createEditorIfNeeded();
-        mEditor.startLinkActionModeAsync(link);
+
+        if (!(mText instanceof Spanned)) {
+            return false;
+        }
+
+        final int start = ((Spanned) mText).getSpanStart(clickedSpan);
+        final int end = ((Spanned) mText).getSpanEnd(clickedSpan);
+
+        if (start < 0 || end < 1) {
+            return false;
+        }
+
+        mEditor.startLinkActionModeAsync(start, end);
         return true;
     }
+
     /**
      * @hide
      */

@@ -4389,13 +4389,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     // TODO: Should probably be moved into DisplayFrames.
-    public boolean getInsetHintLw(WindowManager.LayoutParams attrs, Rect taskBounds,
-            DisplayFrames displayFrames, Rect outContentInsets, Rect outStableInsets,
+    public boolean getLayoutHintLw(WindowManager.LayoutParams attrs, Rect taskBounds,
+            DisplayFrames displayFrames, Rect outFrame, Rect outContentInsets, Rect outStableInsets,
             Rect outOutsets, DisplayCutout.ParcelableWrapper outDisplayCutout) {
         final int fl = PolicyControl.getWindowFlags(null, attrs);
         final int pfl = attrs.privateFlags;
-        final int sysuiVis = PolicyControl.getSystemUiVisibility(null, attrs);
-        final int systemUiVisibility = (sysuiVis | attrs.subtreeSystemUiVisibility);
+        final int requestedSysUiVis = PolicyControl.getSystemUiVisibility(null, attrs);
+        final int sysUiVis = requestedSysUiVis | getImpliedSysUiFlagsForLayout(attrs);
         final int displayRotation = displayFrames.mRotation;
         final int displayWidth = displayFrames.mDisplayWidth;
         final int displayHeight = displayFrames.mDisplayHeight;
@@ -4416,21 +4416,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
-        final boolean layoutInScreenAndInsetDecor =
-                (fl & (FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR))
-                        == (FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR);
+        final boolean layoutInScreen = (fl & FLAG_LAYOUT_IN_SCREEN) != 0;
+        final boolean layoutInScreenAndInsetDecor = layoutInScreen &&
+                (fl & FLAG_LAYOUT_INSET_DECOR) != 0;
         final boolean screenDecor = (pfl & PRIVATE_FLAG_IS_SCREEN_DECOR) != 0;
 
         if (layoutInScreenAndInsetDecor && !screenDecor) {
-            Rect frame;
             int availRight, availBottom;
             if (canHideNavigationBar() &&
-                    (systemUiVisibility & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0) {
-                frame = displayFrames.mUnrestricted;
+                    (sysUiVis & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0) {
+                outFrame.set(displayFrames.mUnrestricted);
                 availRight = displayFrames.mUnrestricted.right;
                 availBottom = displayFrames.mUnrestricted.bottom;
             } else {
-                frame = displayFrames.mRestricted;
+                outFrame.set(displayFrames.mRestricted);
                 availRight = displayFrames.mRestricted.right;
                 availBottom = displayFrames.mRestricted.bottom;
             }
@@ -4438,7 +4437,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     availRight - displayFrames.mStable.right,
                     availBottom - displayFrames.mStable.bottom);
 
-            if ((systemUiVisibility & View.SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0) {
+            if ((sysUiVis & View.SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0) {
                 if ((fl & FLAG_FULLSCREEN) != 0) {
                     outContentInsets.set(displayFrames.mStableFullscreen.left,
                             displayFrames.mStableFullscreen.top,
@@ -4460,14 +4459,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         displayWidth, displayHeight);
                 calculateRelevantTaskInsets(taskBounds, outStableInsets,
                         displayWidth, displayHeight);
+                outFrame.intersect(taskBounds);
             }
-            outDisplayCutout.set(displayFrames.mDisplayCutout.calculateRelativeTo(frame));
+            outDisplayCutout.set(displayFrames.mDisplayCutout.calculateRelativeTo(outFrame));
+            return mForceShowSystemBars;
+        } else {
+            if (layoutInScreen) {
+                outFrame.set(displayFrames.mUnrestricted);
+            } else {
+                outFrame.set(displayFrames.mStable);
+            }
+            if (taskBounds != null) {
+                outFrame.intersect(taskBounds);
+            }
+
+            outContentInsets.setEmpty();
+            outStableInsets.setEmpty();
+            outDisplayCutout.set(DisplayCutout.NO_CUTOUT);
             return mForceShowSystemBars;
         }
-        outContentInsets.setEmpty();
-        outStableInsets.setEmpty();
-        outDisplayCutout.set(DisplayCutout.NO_CUTOUT);
-        return mForceShowSystemBars;
     }
 
     /**

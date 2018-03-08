@@ -20,6 +20,7 @@ include $(CLEAR_VARS)
 LOCAL_USE_AAPT2 := true
 LOCAL_AAPT_NAMESPACES := true
 LOCAL_MODULE := AaptTestNamespace_LibOne
+LOCAL_SDK_VERSION := current
 LOCAL_MODULE_TAGS := tests
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 

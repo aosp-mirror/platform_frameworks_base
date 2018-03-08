@@ -24,6 +24,7 @@ import static android.view.View.VISIBLE;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
+import android.util.Log;
 import android.view.Display;
 import android.view.DisplayInfo;
 import org.junit.Assert;
@@ -62,6 +63,7 @@ import java.util.LinkedList;
  * Common base class for window manager unit test classes.
  */
 class WindowTestsBase {
+    private static final String TAG = WindowTestsBase.class.getSimpleName();
     static WindowManagerService sWm = null;
     private static final IWindow sIWindow = new TestIWindow();
     private static Session sMockSession;
@@ -91,46 +93,55 @@ class WindowTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        if (!sOneTimeSetupDone) {
-            sOneTimeSetupDone = true;
+        // If @Before throws an exception, the error isn't logged. This will make sure any failures
+        // in the set up are clear. This can be removed when b/37850063 is fixed.
+        try {
+            if (!sOneTimeSetupDone) {
+                sOneTimeSetupDone = true;
 
-            // Allows to mock package local classes and methods
-            System.setProperty("dexmaker.share_classloader", "true");
-            MockitoAnnotations.initMocks(this);
-            sMockSession = mock(Session.class);
+                // Allows to mock package local classes and methods
+                System.setProperty("dexmaker.share_classloader", "true");
+                MockitoAnnotations.initMocks(this);
+                sMockSession = mock(Session.class);
+            }
+
+            final Context context = InstrumentationRegistry.getTargetContext();
+            AttributeCache.init(context);
+
+            sWm = TestWindowManagerPolicy.getWindowManagerService(context);
+            beforeCreateDisplay();
+
+            mWallpaperController = new WallpaperController(sWm);
+
+            context.getDisplay().getDisplayInfo(mDisplayInfo);
+            mDisplayContent = createNewDisplay();
+            sWm.mDisplayEnabled = true;
+            sWm.mDisplayReady = true;
+
+            // Set-up some common windows.
+            mCommonWindows = new HashSet();
+            mWallpaperWindow = createCommonWindow(null, TYPE_WALLPAPER, "wallpaperWindow");
+            mImeWindow = createCommonWindow(null, TYPE_INPUT_METHOD, "mImeWindow");
+            sWm.mInputMethodWindow = mImeWindow;
+            mImeDialogWindow = createCommonWindow(null, TYPE_INPUT_METHOD_DIALOG,
+                    "mImeDialogWindow");
+            mStatusBarWindow = createCommonWindow(null, TYPE_STATUS_BAR, "mStatusBarWindow");
+            mNavBarWindow = createCommonWindow(null, TYPE_NAVIGATION_BAR, "mNavBarWindow");
+            mDockedDividerWindow = createCommonWindow(null, TYPE_DOCK_DIVIDER,
+                    "mDockedDividerWindow");
+            mAppWindow = createCommonWindow(null, TYPE_BASE_APPLICATION, "mAppWindow");
+            mChildAppWindowAbove = createCommonWindow(mAppWindow, TYPE_APPLICATION_ATTACHED_DIALOG,
+                    "mChildAppWindowAbove");
+            mChildAppWindowBelow = createCommonWindow(mAppWindow, TYPE_APPLICATION_MEDIA_OVERLAY,
+                    "mChildAppWindowBelow");
+
+            // Adding a display will cause freezing the display. Make sure to wait until it's
+            // unfrozen to not run into race conditions with the tests.
+            waitUntilHandlersIdle();
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to set up test", e);
+            throw e;
         }
-
-        final Context context = InstrumentationRegistry.getTargetContext();
-        AttributeCache.init(context);
-
-        sWm = TestWindowManagerPolicy.getWindowManagerService(context);
-        beforeCreateDisplay();
-
-        mWallpaperController = new WallpaperController(sWm);
-
-        context.getDisplay().getDisplayInfo(mDisplayInfo);
-        mDisplayContent = createNewDisplay();
-        sWm.mDisplayEnabled = true;
-        sWm.mDisplayReady = true;
-
-        // Set-up some common windows.
-        mCommonWindows = new HashSet();
-        mWallpaperWindow = createCommonWindow(null, TYPE_WALLPAPER, "wallpaperWindow");
-        mImeWindow = createCommonWindow(null, TYPE_INPUT_METHOD, "mImeWindow");
-        sWm.mInputMethodWindow = mImeWindow;
-        mImeDialogWindow = createCommonWindow(null, TYPE_INPUT_METHOD_DIALOG, "mImeDialogWindow");
-        mStatusBarWindow = createCommonWindow(null, TYPE_STATUS_BAR, "mStatusBarWindow");
-        mNavBarWindow = createCommonWindow(null, TYPE_NAVIGATION_BAR, "mNavBarWindow");
-        mDockedDividerWindow = createCommonWindow(null, TYPE_DOCK_DIVIDER, "mDockedDividerWindow");
-        mAppWindow = createCommonWindow(null, TYPE_BASE_APPLICATION, "mAppWindow");
-        mChildAppWindowAbove = createCommonWindow(mAppWindow, TYPE_APPLICATION_ATTACHED_DIALOG,
-                "mChildAppWindowAbove");
-        mChildAppWindowBelow = createCommonWindow(mAppWindow, TYPE_APPLICATION_MEDIA_OVERLAY,
-                "mChildAppWindowBelow");
-
-        // Adding a display will cause freezing the display. Make sure to wait until it's unfrozen
-        // to not run into race conditions with the tests.
-        waitUntilHandlersIdle();
     }
 
     void beforeCreateDisplay() {
@@ -139,25 +150,32 @@ class WindowTestsBase {
 
     @After
     public void tearDown() throws Exception {
-        final LinkedList<WindowState> nonCommonWindows = new LinkedList();
+        // If @After throws an exception, the error isn't logged. This will make sure any failures
+        // in the tear down are clear. This can be removed when b/37850063 is fixed.
+        try {
+            final LinkedList<WindowState> nonCommonWindows = new LinkedList();
 
-        synchronized (sWm.mWindowMap) {
-            sWm.mRoot.forAllWindows(w -> {
-                if (!mCommonWindows.contains(w)) {
-                    nonCommonWindows.addLast(w);
+            synchronized (sWm.mWindowMap) {
+                sWm.mRoot.forAllWindows(w -> {
+                    if (!mCommonWindows.contains(w)) {
+                        nonCommonWindows.addLast(w);
+                    }
+                }, true /* traverseTopToBottom */);
+
+                while (!nonCommonWindows.isEmpty()) {
+                    nonCommonWindows.pollLast().removeImmediately();
                 }
-            }, true /* traverseTopToBottom */);
 
-            while (!nonCommonWindows.isEmpty()) {
-                nonCommonWindows.pollLast().removeImmediately();
+                mDisplayContent.removeImmediately();
+                sWm.mInputMethodTarget = null;
             }
 
-            mDisplayContent.removeImmediately();
-            sWm.mInputMethodTarget = null;
+            // Wait until everything is really cleaned up.
+            waitUntilHandlersIdle();
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to tear down test", e);
+            throw e;
         }
-
-        // Wait until everything is really cleaned up.
-        waitUntilHandlersIdle();
     }
 
     /**
