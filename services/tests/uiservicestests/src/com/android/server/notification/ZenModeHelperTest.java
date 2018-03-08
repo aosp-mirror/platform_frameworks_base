@@ -407,7 +407,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         verify(mAudioManager, atLeastOnce()).setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
                 mZenModeHelperSpy.TAG);
 
-        // 3. change ringer from normal to silent, verify previous ringer set to new rigner (silent)
+        // 3. change ringer from normal to silent, verify previous ringer set to new ringer (silent)
         ZenModeHelper.RingerModeDelegate ringerModeDelegate =
                 mZenModeHelperSpy.new RingerModeDelegate();
         ringerModeDelegate.onSetRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
@@ -421,6 +421,80 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelperSpy.mZenMode = Global.ZEN_MODE_OFF;
         mZenModeHelperSpy.applyZenToRingerMode();
         verify(mAudioManager, atLeastOnce()).setRingerModeInternal(AudioManager.RINGER_MODE_SILENT,
+                mZenModeHelperSpy.TAG);
+    }
+
+    @Test
+    public void testSilentRingerSavedInZenOff_startsZenOff() {
+        AudioManagerInternal mAudioManager = mock(AudioManagerInternal.class);
+        mZenModeHelperSpy.mAudioManager = mAudioManager;
+
+        // apply zen off multiple times - verify ringer is not set to normal
+        when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_SILENT);
+        mZenModeHelperSpy.mZenMode = Global.ZEN_MODE_OFF;
+        mZenModeHelperSpy.mConfig = null; // will evaluate config to zen mode off
+        for (int i = 0; i < 3; i++) {
+            // if zen doesn't change, zen should not reapply itself to the ringer
+            mZenModeHelperSpy.evaluateZenMode("test", true);
+        }
+        verify(mZenModeHelperSpy, never()).applyZenToRingerMode();
+        verify(mAudioManager, never()).setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
+                mZenModeHelperSpy.TAG);
+    }
+
+    @Test
+    public void testSilentRingerSavedOnZenOff_startsZenOn() {
+        AudioManagerInternal mAudioManager = mock(AudioManagerInternal.class);
+        mZenModeHelperSpy.mAudioManager = mAudioManager;
+        mZenModeHelperSpy.mZenMode = Global.ZEN_MODE_OFF;
+
+        // previously set silent ringer
+        ZenModeHelper.RingerModeDelegate ringerModeDelegate =
+                mZenModeHelperSpy.new RingerModeDelegate();
+        ringerModeDelegate.onSetRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
+                AudioManager.RINGER_MODE_SILENT, "test", AudioManager.RINGER_MODE_NORMAL,
+                VolumePolicy.DEFAULT);
+        assertEquals(AudioManager.RINGER_MODE_SILENT, Global.getInt(mContext.getContentResolver(),
+                Global.ZEN_MODE_RINGER_LEVEL, AudioManager.RINGER_MODE_NORMAL));
+
+        // apply zen off multiple times - verify ringer is not set to normal
+        when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_SILENT);
+        mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelperSpy.mConfig = null; // will evaluate config to zen mode off
+        for (int i = 0; i < 3; i++) {
+            // if zen doesn't change, zen should not reapply itself to the ringer
+            mZenModeHelperSpy.evaluateZenMode("test", true);
+        }
+        verify(mZenModeHelperSpy, times(1)).applyZenToRingerMode();
+        verify(mAudioManager, never()).setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
+                mZenModeHelperSpy.TAG);
+    }
+
+    @Test
+    public void testVibrateRingerSavedOnZenOff_startsZenOn() {
+        AudioManagerInternal mAudioManager = mock(AudioManagerInternal.class);
+        mZenModeHelperSpy.mAudioManager = mAudioManager;
+        mZenModeHelperSpy.mZenMode = Global.ZEN_MODE_OFF;
+
+        // previously set silent ringer
+        ZenModeHelper.RingerModeDelegate ringerModeDelegate =
+                mZenModeHelperSpy.new RingerModeDelegate();
+        ringerModeDelegate.onSetRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
+                AudioManager.RINGER_MODE_VIBRATE, "test", AudioManager.RINGER_MODE_NORMAL,
+                VolumePolicy.DEFAULT);
+        assertEquals(AudioManager.RINGER_MODE_VIBRATE, Global.getInt(mContext.getContentResolver(),
+                Global.ZEN_MODE_RINGER_LEVEL, AudioManager.RINGER_MODE_NORMAL));
+
+        // apply zen off multiple times - verify ringer is not set to normal
+        when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
+        mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelperSpy.mConfig = null; // will evaluate config to zen mode off
+        for (int i = 0; i < 3; i++) {
+            // if zen doesn't change, zen should not reapply itself to the ringer
+            mZenModeHelperSpy.evaluateZenMode("test", true);
+        }
+        verify(mZenModeHelperSpy, times(1)).applyZenToRingerMode();
+        verify(mAudioManager, never()).setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
                 mZenModeHelperSpy.TAG);
     }
 }
