@@ -1865,47 +1865,52 @@ public class TelephonyManager {
     /*
      * When adding a network type to the list below, make sure to add the correct icon to
      * MobileSignalController.mapIconSets().
+     * Do not add negative types.
      */
     /** Network type is unknown */
-    public static final int NETWORK_TYPE_UNKNOWN = 0;
+    public static final int NETWORK_TYPE_UNKNOWN = TelephonyProtoEnums.NETWORK_TYPE_UNKNOWN; // = 0.
     /** Current network is GPRS */
-    public static final int NETWORK_TYPE_GPRS = 1;
+    public static final int NETWORK_TYPE_GPRS = TelephonyProtoEnums.NETWORK_TYPE_GPRS; // = 1.
     /** Current network is EDGE */
-    public static final int NETWORK_TYPE_EDGE = 2;
+    public static final int NETWORK_TYPE_EDGE = TelephonyProtoEnums.NETWORK_TYPE_EDGE; // = 2.
     /** Current network is UMTS */
-    public static final int NETWORK_TYPE_UMTS = 3;
+    public static final int NETWORK_TYPE_UMTS = TelephonyProtoEnums.NETWORK_TYPE_UMTS; // = 3.
     /** Current network is CDMA: Either IS95A or IS95B*/
-    public static final int NETWORK_TYPE_CDMA = 4;
+    public static final int NETWORK_TYPE_CDMA = TelephonyProtoEnums.NETWORK_TYPE_CDMA; // = 4.
     /** Current network is EVDO revision 0*/
-    public static final int NETWORK_TYPE_EVDO_0 = 5;
+    public static final int NETWORK_TYPE_EVDO_0 = TelephonyProtoEnums.NETWORK_TYPE_EVDO_0; // = 5.
     /** Current network is EVDO revision A*/
-    public static final int NETWORK_TYPE_EVDO_A = 6;
+    public static final int NETWORK_TYPE_EVDO_A = TelephonyProtoEnums.NETWORK_TYPE_EVDO_A; // = 6.
     /** Current network is 1xRTT*/
-    public static final int NETWORK_TYPE_1xRTT = 7;
+    public static final int NETWORK_TYPE_1xRTT = TelephonyProtoEnums.NETWORK_TYPE_1XRTT; // = 7.
     /** Current network is HSDPA */
-    public static final int NETWORK_TYPE_HSDPA = 8;
+    public static final int NETWORK_TYPE_HSDPA = TelephonyProtoEnums.NETWORK_TYPE_HSDPA; // = 8.
     /** Current network is HSUPA */
-    public static final int NETWORK_TYPE_HSUPA = 9;
+    public static final int NETWORK_TYPE_HSUPA = TelephonyProtoEnums.NETWORK_TYPE_HSUPA; // = 9.
     /** Current network is HSPA */
-    public static final int NETWORK_TYPE_HSPA = 10;
+    public static final int NETWORK_TYPE_HSPA = TelephonyProtoEnums.NETWORK_TYPE_HSPA; // = 10.
     /** Current network is iDen */
-    public static final int NETWORK_TYPE_IDEN = 11;
+    public static final int NETWORK_TYPE_IDEN = TelephonyProtoEnums.NETWORK_TYPE_IDEN; // = 11.
     /** Current network is EVDO revision B*/
-    public static final int NETWORK_TYPE_EVDO_B = 12;
+    public static final int NETWORK_TYPE_EVDO_B = TelephonyProtoEnums.NETWORK_TYPE_EVDO_B; // = 12.
     /** Current network is LTE */
-    public static final int NETWORK_TYPE_LTE = 13;
+    public static final int NETWORK_TYPE_LTE = TelephonyProtoEnums.NETWORK_TYPE_LTE; // = 13.
     /** Current network is eHRPD */
-    public static final int NETWORK_TYPE_EHRPD = 14;
+    public static final int NETWORK_TYPE_EHRPD = TelephonyProtoEnums.NETWORK_TYPE_EHRPD; // = 14.
     /** Current network is HSPA+ */
-    public static final int NETWORK_TYPE_HSPAP = 15;
+    public static final int NETWORK_TYPE_HSPAP = TelephonyProtoEnums.NETWORK_TYPE_HSPAP; // = 15.
     /** Current network is GSM */
-    public static final int NETWORK_TYPE_GSM = 16;
+    public static final int NETWORK_TYPE_GSM = TelephonyProtoEnums.NETWORK_TYPE_GSM; // = 16.
     /** Current network is TD_SCDMA */
-    public static final int NETWORK_TYPE_TD_SCDMA = 17;
+    public static final int NETWORK_TYPE_TD_SCDMA =
+            TelephonyProtoEnums.NETWORK_TYPE_TD_SCDMA; // = 17.
     /** Current network is IWLAN */
-    public static final int NETWORK_TYPE_IWLAN = 18;
+    public static final int NETWORK_TYPE_IWLAN = TelephonyProtoEnums.NETWORK_TYPE_IWLAN; // = 18.
     /** Current network is LTE_CA {@hide} */
-    public static final int NETWORK_TYPE_LTE_CA = 19;
+    public static final int NETWORK_TYPE_LTE_CA = TelephonyProtoEnums.NETWORK_TYPE_LTE_CA; // = 19.
+
+    /** Max network type number. Update as new types are added. Don't add negative types. {@hide} */
+    public static final int MAX_NETWORK_TYPE = NETWORK_TYPE_LTE_CA;
     /**
      * @return the NETWORK_TYPE_xxxx for current data connection.
      */

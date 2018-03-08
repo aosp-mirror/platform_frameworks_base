@@ -5284,69 +5284,15 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     public void notePhoneDataConnectionStateLocked(int dataType, boolean hasData) {
+        // BatteryStats uses 0 to represent no network type.
+        // Telephony does not have a concept of no network type, and uses 0 to represent unknown.
+        // Unknown is included in DATA_CONNECTION_OTHER.
         int bin = DATA_CONNECTION_NONE;
         if (hasData) {
-            switch (dataType) {
-                case TelephonyManager.NETWORK_TYPE_EDGE:
-                    bin = DATA_CONNECTION_EDGE;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_GPRS:
-                    bin = DATA_CONNECTION_GPRS;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_UMTS:
-                    bin = DATA_CONNECTION_UMTS;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_CDMA:
-                    bin = DATA_CONNECTION_CDMA;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_EVDO_0:
-                    bin = DATA_CONNECTION_EVDO_0;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_EVDO_A:
-                    bin = DATA_CONNECTION_EVDO_A;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_1xRTT:
-                    bin = DATA_CONNECTION_1xRTT;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_HSDPA:
-                    bin = DATA_CONNECTION_HSDPA;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_HSUPA:
-                    bin = DATA_CONNECTION_HSUPA;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_HSPA:
-                    bin = DATA_CONNECTION_HSPA;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_IDEN:
-                    bin = DATA_CONNECTION_IDEN;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_EVDO_B:
-                    bin = DATA_CONNECTION_EVDO_B;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_LTE:
-                    bin = DATA_CONNECTION_LTE;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_EHRPD:
-                    bin = DATA_CONNECTION_EHRPD;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_HSPAP:
-                    bin = DATA_CONNECTION_HSPAP;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_GSM:
-                    bin = DATA_CONNECTION_GSM;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_TD_SCDMA:
-                    bin = DATA_CONNECTION_TD_SCDMA;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_IWLAN:
-                    bin = DATA_CONNECTION_IWLAN;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_LTE_CA:
-                    bin = DATA_CONNECTION_LTE_CA;
-                    break;
-                default:
-                    bin = DATA_CONNECTION_OTHER;
-                    break;
+            if (dataType > 0 && dataType <= TelephonyManager.MAX_NETWORK_TYPE) {
+                bin = dataType;
+            } else {
+                bin = DATA_CONNECTION_OTHER;
             }
         }
         if (DEBUG) Log.i(TAG, "Phone Data Connection -> " + dataType + " = " + hasData);
