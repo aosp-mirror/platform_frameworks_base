@@ -16,62 +16,32 @@
 
 package com.android.internal.backup;
 
+import android.util.KeyValueSettingObserver;
 import android.content.ContentResolver;
-import android.database.ContentObserver;
 import android.os.Handler;
 import android.provider.Settings;
 import android.util.KeyValueListParser;
-import android.util.Slog;
 
-class LocalTransportParameters {
+class LocalTransportParameters extends KeyValueSettingObserver {
     private static final String TAG = "LocalTransportParams";
     private static final String SETTING = Settings.Secure.BACKUP_LOCAL_TRANSPORT_PARAMETERS;
     private static final String KEY_FAKE_ENCRYPTION_FLAG = "fake_encryption_flag";
 
-    private final KeyValueListParser mParser = new KeyValueListParser(',');
-    private final ContentObserver mObserver;
-    private final ContentResolver mResolver;
     private boolean mFakeEncryptionFlag;
 
     LocalTransportParameters(Handler handler, ContentResolver resolver) {
-        mObserver = new Observer(handler);
-        mResolver = resolver;
-    }
-
-    /** Observes for changes in the setting. This method MUST be paired with {@link #stop()}. */
-    void start() {
-        mResolver.registerContentObserver(Settings.Secure.getUriFor(SETTING), false, mObserver);
-        update();
-    }
-
-    /** Stop observing for changes in the setting. */
-    void stop() {
-        mResolver.unregisterContentObserver(mObserver);
+        super(handler, resolver, Settings.Secure.getUriFor(SETTING));
     }
 
     boolean isFakeEncryptionFlag() {
         return mFakeEncryptionFlag;
     }
 
-    private void update() {
-        String parameters = "";
-        try {
-            parameters = Settings.Secure.getString(mResolver, SETTING);
-        } catch (IllegalArgumentException e) {
-            Slog.e(TAG, "Malformed " + SETTING + " setting: " + e.getMessage());
-        }
-        mParser.setString(parameters);
-        mFakeEncryptionFlag = mParser.getBoolean(KEY_FAKE_ENCRYPTION_FLAG, false);
+    public String getSettingValue(ContentResolver resolver) {
+        return Settings.Secure.getString(resolver, SETTING);
     }
 
-    private class Observer extends ContentObserver {
-        private Observer(Handler handler) {
-            super(handler);
-        }
-
-        @Override
-        public void onChange(boolean selfChange) {
-            update();
-        }
+    public void update(KeyValueListParser parser) {
+        mFakeEncryptionFlag = parser.getBoolean(KEY_FAKE_ENCRYPTION_FLAG, false);
     }
 }

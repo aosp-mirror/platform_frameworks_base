@@ -62,7 +62,8 @@ LOCAL_SRC_FILES := \
     $(call all-java-files-under, ../../core/java/android/app/backup) \
     $(call all-Iaidl-files-under, ../../core/java/android/app/backup) \
     ../../core/java/android/content/pm/PackageInfo.java \
-    ../../core/java/android/app/IBackupAgent.aidl
+    ../../core/java/android/app/IBackupAgent.aidl \
+    ../../core/java/android/util/KeyValueSettingObserver.java
 
 LOCAL_AIDL_INCLUDES := \
     $(call all-Iaidl-files-under, $(INTERNAL_BACKUP)) \
