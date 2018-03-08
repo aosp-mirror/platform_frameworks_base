@@ -52,7 +52,6 @@ import android.telephony.ims.aidl.IImsConfig;
 import android.telephony.ims.aidl.IImsMmTelFeature;
 import android.telephony.ims.aidl.IImsRcsFeature;
 import android.telephony.ims.aidl.IImsRegistration;
-import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.util.Log;
 
@@ -1080,7 +1079,7 @@ public class TelephonyManager {
 
     /**
      * An int extra used with {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED} which indicates
-     * the updated carrier id {@link TelephonyManager#getAndroidCarrierIdForSubscription()} of
+     * the updated carrier id {@link TelephonyManager#getSimCarrierId()} of
      * the current subscription.
      * <p>Will be {@link TelephonyManager#UNKNOWN_CARRIER_ID} if the subscription is unavailable or
      * the carrier cannot be identified.
@@ -1090,7 +1089,7 @@ public class TelephonyManager {
     /**
      * An string extra used with {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED} which
      * indicates the updated carrier name of the current subscription.
-     * {@see TelephonyManager#getSubscriptionCarrierName()}
+     * {@see TelephonyManager#getSimCarrierIdName()}
      * <p>Carrier name is a user-facing name of the carrier id {@link #EXTRA_CARRIER_ID},
      * usually the brand name of the subsidiary (e.g. T-Mobile).
      */
@@ -7192,8 +7191,8 @@ public class TelephonyManager {
     /**
      * Returns carrier id of the current subscription.
      * <p>To recognize a carrier (including MVNO) as a first-class identity, Android assigns each
-     * carrier with a canonical integer a.k.a. android carrier id. The Android carrier ID is an
-     * Android platform-wide identifier for a carrier. AOSP maintains carrier ID assignments in
+     * carrier with a canonical integer a.k.a. carrier id. The carrier ID is an Android
+     * platform-wide identifier for a carrier. AOSP maintains carrier ID assignments in
      * <a href="https://android.googlesource.com/platform/packages/providers/TelephonyProvider/+/master/assets/carrier_list.textpb">here</a>
      *
      * <p>Apps which have carrier-specific configurations or business logic can use the carrier id
@@ -7202,7 +7201,7 @@ public class TelephonyManager {
      * @return Carrier id of the current subscription. Return {@link #UNKNOWN_CARRIER_ID} if the
      * subscription is unavailable or the carrier cannot be identified.
      */
-    public int getAndroidCarrierIdForSubscription() {
+    public int getSimCarrierId() {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
@@ -7216,18 +7215,18 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns carrier name of the current subscription.
-     * <p>Carrier name is a user-facing name of carrier id
-     * {@link #getAndroidCarrierIdForSubscription()}, usually the brand name of the subsidiary
+     * Returns carrier id name of the current subscription.
+     * <p>Carrier id name is a user-facing name of carrier id
+     * {@link #getSimCarrierId()}, usually the brand name of the subsidiary
      * (e.g. T-Mobile). Each carrier could configure multiple {@link #getSimOperatorName() SPN} but
      * should have a single carrier name. Carrier name is not a canonical identity,
-     * use {@link #getAndroidCarrierIdForSubscription()} instead.
+     * use {@link #getSimCarrierId()} instead.
      * <p>The returned carrier name is unlocalized.
      *
      * @return Carrier name of the current subscription. Return {@code null} if the subscription is
      * unavailable or the carrier cannot be identified.
      */
-    public CharSequence getAndroidCarrierNameForSubscription() {
+    public CharSequence getSimCarrierIdName() {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
