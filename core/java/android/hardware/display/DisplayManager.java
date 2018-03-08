@@ -28,7 +28,6 @@ import android.content.Context;
 import android.graphics.Point;
 import android.media.projection.MediaProjection;
 import android.os.Handler;
-import android.os.UserHandle;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.Surface;
@@ -636,6 +635,8 @@ public final class DisplayManager {
      *
      * @hide until we make it a system api
      */
+    @SystemApi
+    @TestApi
     @RequiresPermission(Manifest.permission.ACCESS_AMBIENT_LIGHT_STATS)
     public List<AmbientBrightnessDayStats> getAmbientBrightnessStats() {
         return mGlobal.getAmbientBrightnessStats();
