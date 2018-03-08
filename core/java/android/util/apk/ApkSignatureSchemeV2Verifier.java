@@ -213,7 +213,9 @@ public class ApkSignatureSchemeV2Verifier {
 
         byte[] verityRootHash = null;
         if (contentDigests.containsKey(CONTENT_DIGEST_VERITY_CHUNKED_SHA256)) {
-            verityRootHash = contentDigests.get(CONTENT_DIGEST_VERITY_CHUNKED_SHA256);
+            byte[] verityDigest = contentDigests.get(CONTENT_DIGEST_VERITY_CHUNKED_SHA256);
+            verityRootHash = ApkSigningBlockUtils.parseVerityDigestAndVerifySourceLength(
+                    verityDigest, apk.length(), signatureInfo);
         }
 
         return new VerifiedSigner(
