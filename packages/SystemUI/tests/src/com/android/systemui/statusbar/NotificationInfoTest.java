@@ -18,6 +18,8 @@ package com.android.systemui.statusbar;
 
 import static android.app.NotificationChannel.USER_LOCKED_IMPORTANCE;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
+import static android.app.NotificationManager.IMPORTANCE_MIN;
+import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static android.print.PrintManager.PRINT_SPOOLER_PACKAGE_NAME;
 import static android.view.View.GONE;
@@ -147,6 +149,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null, null);
         final TextView textView = mNotificationInfo.findViewById(R.id.pkgname);
         assertTrue(textView.getText().toString().contains("App Name"));
+        assertEquals(VISIBLE, mNotificationInfo.findViewById(R.id.header).getVisibility());
     }
 
     @Test
@@ -210,6 +213,27 @@ public class NotificationInfoTest extends SysuiTestCase {
                 Collections.singleton(TEST_PACKAGE_NAME));
         final TextView textView = mNotificationInfo.findViewById(R.id.channel_name);
         assertEquals(VISIBLE, textView.getVisibility());
+    }
+
+    @Test
+    public void testBindNotification_BlockButton() throws Exception {
+       mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null, null);
+        final View block = mNotificationInfo.findViewById(R.id.block);
+        final View minimize = mNotificationInfo.findViewById(R.id.minimize);
+        assertEquals(VISIBLE, block.getVisibility());
+        assertEquals(GONE, minimize.getVisibility());
+    }
+
+    @Test
+    public void testBindNotification_MinButton() throws Exception {
+        mSbn.getNotification().flags = Notification.FLAG_FOREGROUND_SERVICE;
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null, null);
+        final View block = mNotificationInfo.findViewById(R.id.block);
+        final View minimize = mNotificationInfo.findViewById(R.id.minimize);
+        assertEquals(GONE, block.getVisibility());
+        assertEquals(VISIBLE, minimize.getVisibility());
     }
 
     @Test
@@ -324,6 +348,18 @@ public class NotificationInfoTest extends SysuiTestCase {
     }
 
     @Test
+    public void testDoesNotUpdateNotificationChannelAfterImportanceChangedMin()
+            throws Exception {
+        mNotificationChannel.setImportance(IMPORTANCE_LOW);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null, null);
+
+        mNotificationInfo.findViewById(R.id.minimize).performClick();
+        verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
+                anyString(), eq(TEST_UID), any());
+    }
+
+    @Test
     public void testHandleCloseControls_DoesNotUpdateNotificationChannelIfUnchanged()
             throws Exception {
         int originalImportance = mNotificationChannel.getImportance();
@@ -377,6 +413,39 @@ public class NotificationInfoTest extends SysuiTestCase {
                 anyString(), eq(TEST_UID), updated.capture());
         assertTrue((updated.getValue().getUserLockedFields()
                 & USER_LOCKED_IMPORTANCE) != 0);
+        assertEquals(IMPORTANCE_NONE, updated.getValue().getImportance());
+    }
+
+    @Test
+    public void testNonBlockableAppDoesNotBecomeMin() throws Exception {
+        mNotificationChannel.setImportance(IMPORTANCE_LOW);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null,
+                null, Collections.singleton(TEST_PACKAGE_NAME));
+        mNotificationInfo.findViewById(R.id.minimize).performClick();
+        waitForUndoButton();
+        verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
+                anyString(), eq(TEST_UID), any());
+    }
+
+    @Test
+    public void testMinChangedCallsUpdateNotificationChannel() throws Exception {
+        mNotificationChannel.setImportance(IMPORTANCE_LOW);
+        mSbn.getNotification().flags = Notification.FLAG_FOREGROUND_SERVICE;
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null, null);
+
+        mNotificationInfo.findViewById(R.id.minimize).performClick();
+        waitForUndoButton();
+        mNotificationInfo.handleCloseControls(true, false);
+
+        ArgumentCaptor<NotificationChannel> updated =
+                ArgumentCaptor.forClass(NotificationChannel.class);
+        verify(mMockINotificationManager, times(1)).updateNotificationChannelForPackage(
+                anyString(), eq(TEST_UID), updated.capture());
+        assertTrue((updated.getValue().getUserLockedFields()
+                & USER_LOCKED_IMPORTANCE) != 0);
+        assertEquals(IMPORTANCE_MIN, updated.getValue().getImportance());
     }
 
     @Test
@@ -413,6 +482,40 @@ public class NotificationInfoTest extends SysuiTestCase {
                 anyString(), eq(TEST_UID), updated.capture());
         assertTrue(0 != (mNotificationChannel.getUserLockedFields() & USER_LOCKED_IMPORTANCE));
         assertEquals(IMPORTANCE_LOW, mNotificationChannel.getImportance());
+    }
+
+    @Test
+    public void testMinUndoDoesNotMinNotificationChannel() throws Exception {
+        mNotificationChannel.setImportance(IMPORTANCE_LOW);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null, null);
+
+        mNotificationInfo.findViewById(R.id.minimize).performClick();
+        waitForUndoButton();
+        mNotificationInfo.findViewById(R.id.undo).performClick();
+        waitForStopButton();
+        mNotificationInfo.handleCloseControls(true, false);
+
+        ArgumentCaptor<NotificationChannel> updated =
+                ArgumentCaptor.forClass(NotificationChannel.class);
+        verify(mMockINotificationManager, times(1)).updateNotificationChannelForPackage(
+                anyString(), eq(TEST_UID), updated.capture());
+        assertTrue(0 != (mNotificationChannel.getUserLockedFields() & USER_LOCKED_IMPORTANCE));
+        assertEquals(IMPORTANCE_LOW, mNotificationChannel.getImportance());
+    }
+
+    @Test
+    public void testCloseControlsDoesNotUpdateiMinIfSaveIsFalse() throws Exception {
+        mNotificationChannel.setImportance(IMPORTANCE_LOW);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null,
+                Collections.singleton(TEST_PACKAGE_NAME));
+
+        mNotificationInfo.findViewById(R.id.minimize).performClick();
+        waitForUndoButton();
+        mNotificationInfo.handleCloseControls(false, false);
+        verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
+                eq(TEST_PACKAGE_NAME), eq(TEST_UID), eq(mNotificationChannel));
     }
 
     @Test
@@ -556,5 +659,58 @@ public class NotificationInfoTest extends SysuiTestCase {
     @Test
     public void testWillBeRemovedReturnsFalseBeforeBind() throws Exception {
         assertFalse(mNotificationInfo.willBeRemoved());
+    }
+
+    @Test
+    public void testUndoText_min() throws Exception {
+        mSbn.getNotification().flags = Notification.FLAG_FOREGROUND_SERVICE;
+        mNotificationChannel.setImportance(IMPORTANCE_LOW);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null,
+                Collections.singleton(TEST_PACKAGE_NAME));
+
+        mNotificationInfo.findViewById(R.id.minimize).performClick();
+        waitForUndoButton();
+        TextView confirmationText = mNotificationInfo.findViewById(R.id.confirmation_text);
+        assertTrue(confirmationText.getText().toString().contains("minimized"));
+    }
+
+    @Test
+    public void testUndoText_block() throws Exception {
+        mNotificationChannel.setImportance(IMPORTANCE_LOW);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null,
+                Collections.singleton(TEST_PACKAGE_NAME));
+
+        mNotificationInfo.findViewById(R.id.block).performClick();
+        waitForUndoButton();
+        TextView confirmationText = mNotificationInfo.findViewById(R.id.confirmation_text);
+        assertTrue(confirmationText.getText().toString().contains("won't see"));
+    }
+
+    @Test
+    public void testNoHeaderOnConfirmation() throws Exception {
+        mNotificationChannel.setImportance(IMPORTANCE_LOW);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null,
+                Collections.singleton(TEST_PACKAGE_NAME));
+
+        mNotificationInfo.findViewById(R.id.block).performClick();
+        waitForUndoButton();
+        assertEquals(GONE, mNotificationInfo.findViewById(R.id.header).getVisibility());
+    }
+
+    @Test
+    public void testHeaderOnUndo() throws Exception {
+        mNotificationChannel.setImportance(IMPORTANCE_LOW);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null,
+                Collections.singleton(TEST_PACKAGE_NAME));
+
+        mNotificationInfo.findViewById(R.id.block).performClick();
+        waitForUndoButton();
+        mNotificationInfo.findViewById(R.id.undo).performClick();
+        waitForStopButton();
+        assertEquals(VISIBLE, mNotificationInfo.findViewById(R.id.header).getVisibility());
     }
 }
