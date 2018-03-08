@@ -475,6 +475,28 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         return mWindowContainerController;
     }
 
+    /**
+     * This should be called when an activity in a child task changes state. This should only
+     * be called from
+     * {@link TaskRecord#onActivityStateChanged(ActivityRecord, ActivityState, String)}.
+     * @param record The {@link ActivityRecord} whose state has changed.
+     * @param state The new state.
+     * @param reason The reason for the change.
+     */
+    void onActivityStateChanged(ActivityRecord record, ActivityState state, String reason) {
+        if (record == mResumedActivity && state != RESUMED) {
+            clearResumedActivity(reason + " - onActivityStateChanged");
+        }
+
+        if (state == RESUMED) {
+            if (DEBUG_STACK) Slog.v(TAG_STACK, "set resumed activity to:" + record + " reason:"
+                    + reason);
+            mResumedActivity = record;
+            mService.setResumedActivityUncheckLocked(record, reason);
+            mStackSupervisor.mRecentTasks.add(record.getTask());
+        }
+    }
+
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
         final int prevWindowingMode = getWindowingMode();
@@ -1229,7 +1251,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     void minimalResumeActivityLocked(ActivityRecord r) {
         if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to RESUMED: " + r + " (starting new instance)"
                 + " callers=" + Debug.getCallers(5));
-        setResumedActivityLocked(r, "minimalResumeActivityLocked");
+        r.setState(RESUMED, "minimalResumeActivityLocked");
         r.completeResumeLocked();
         setLaunchTime(r);
         if (DEBUG_SAVED_STATE) Slog.i(TAG_SAVED_STATE,
@@ -1454,7 +1476,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to PAUSING: " + prev);
         else if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Start pausing: " + prev);
-        mResumedActivity = null;
         mPausingActivity = prev;
         mLastPausedActivity = prev;
         mLastNoHistoryActivity = (prev.intent.getFlags() & Intent.FLAG_ACTIVITY_NO_HISTORY) != 0
@@ -2282,13 +2303,21 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         return result;
     }
 
-    void setResumedActivityLocked(ActivityRecord r, String reason) {
-        // TODO: move mResumedActivity to stack supervisor,
-        // there should only be 1 global copy of resumed activity.
-        mResumedActivity = r;
-        r.setState(RESUMED, "setResumedActivityLocked");
-        mService.setResumedActivityUncheckLocked(r, reason);
-        mStackSupervisor.mRecentTasks.add(r.getTask());
+    /**
+     * Returns the currently resumed activity.
+     */
+    protected ActivityRecord getResumedActivity() {
+        return mResumedActivity;
+    }
+
+    /**
+     * Clears reference to currently resumed activity.
+     */
+    private void clearResumedActivity(String reason) {
+        if (DEBUG_STACK) Slog.d(TAG_STACK, "clearResumedActivity: " + mResumedActivity + " reason:"
+                + reason);
+
+        mResumedActivity = null;
     }
 
     @GuardedBy("mService")
@@ -2577,7 +2606,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to RESUMED: " + next
                         + " (in existing)");
 
-                setResumedActivityLocked(next, "resumeTopActivityInnerLocked");
+                next.setState(RESUMED, "resumeTopActivityInnerLocked");
 
                 mService.updateLruProcessLocked(next.app, true, null);
                 updateLRUListLocked(next);
@@ -2679,7 +2708,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                             + lastState + ": " + next);
                     next.setState(lastState, "resumeTopActivityInnerLocked");
                     if (lastStack != null) {
-                        lastStack.mResumedActivity = lastResumedActivity;
+                        lastResumedActivity.setState(RESUMED, "resumeTopActivityInnerLocked");
                     }
                     Slog.i(TAG, "Restarting because process died: " + next);
                     if (!next.hasBeenLaunched) {
@@ -3779,9 +3808,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mStackSupervisor.mStoppingActivities.remove(r);
         mStackSupervisor.mGoingToSleepActivities.remove(r);
         mStackSupervisor.mActivitiesWaitingForVisibleActivity.remove(r);
-        if (mResumedActivity == r) {
-            mResumedActivity = null;
-        }
         final ActivityState prevState = r.getState();
         if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to FINISHING: " + r);
 
@@ -3994,7 +4020,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      */
     void onActivityRemovedFromStack(ActivityRecord r) {
         if (mResumedActivity == r) {
-            mResumedActivity = null;
+            clearResumedActivity("onActivityRemovedFromStack");
         }
         if (mPausingActivity == r) {
             mPausingActivity = null;
@@ -5186,7 +5212,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         + " other stack to this stack mResumedActivity=" + mResumedActivity
                         + " other mResumedActivity=" + topRunningActivity);
             }
-            mResumedActivity = topRunningActivity;
+            topRunningActivity.setState(RESUMED, "positionChildAt");
         }
 
         // The task might have already been running and its visibility needs to be synchronized with
@@ -5231,7 +5257,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // so that we don't resume the same activity again in the new stack.
         // Apps may depend on onResume()/onPause() being called in pairs.
         if (setResume) {
-            mResumedActivity = r;
+            r.setState(RESUMED, "moveToFrontAndResumeStateIfNeeded");
             updateLRUListLocked(r);
         }
         // If the activity was previously pausing, then ensure we transfer that as well
