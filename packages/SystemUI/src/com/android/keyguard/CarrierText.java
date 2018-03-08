@@ -39,9 +39,15 @@ import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.settingslib.WirelessUtils;
+
 import android.telephony.TelephonyManager;
 
 public class CarrierText extends TextView {
+    /** Do not show missing sim message. */
+    public static final int FLAG_HIDE_MISSING_SIM = 1 << 0;
+    /** Do not show airplane mode message. */
+    public static final int FLAG_HIDE_AIRPLANE_MODE = 1 << 1;
+
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final String TAG = "CarrierText";
 
@@ -54,6 +60,8 @@ public class CarrierText extends TextView {
     private WifiManager mWifiManager;
 
     private boolean[] mSimErrorState = new boolean[TelephonyManager.getDefault().getPhoneCount()];
+
+    private int mFlags;
 
     private KeyguardUpdateMonitorCallback mCallback = new KeyguardUpdateMonitorCallback() {
         @Override
@@ -85,6 +93,11 @@ public class CarrierText extends TextView {
             }
         };
     };
+
+    public void setDisplayFlags(int flags) {
+        mFlags = flags;
+    }
+
     /**
      * The status of this lock screen. Primarily used for widgets on LockScreen.
      */
@@ -196,8 +209,7 @@ public class CarrierText extends TextView {
                 // Grab the first subscripton, because they all should contain the emergency text,
                 // described above.
                 displayText =  makeCarrierStringOnEmergencyCapable(
-                        getContext().getText(R.string.keyguard_missing_sim_message_short),
-                        subs.get(0).getCarrierName());
+                        getMissingSimMessage(), subs.get(0).getCarrierName());
             } else {
                 // We don't have a SubscriptionInfo to get the emergency calls only from.
                 // Grab it from the old sticky broadcast if possible instead. We can use it
@@ -223,8 +235,7 @@ public class CarrierText extends TextView {
                         text = concatenate(plmn, spn);
                     }
                 }
-                displayText =  makeCarrierStringOnEmergencyCapable(
-                        getContext().getText(R.string.keyguard_missing_sim_message_short), text);
+                displayText =  makeCarrierStringOnEmergencyCapable(getMissingSimMessage(), text);
             }
         }
 
@@ -232,9 +243,19 @@ public class CarrierText extends TextView {
         // APM (airplane mode) != no carrier state. There are carrier services
         // (e.g. WFC = Wi-Fi calling) which may operate in APM.
         if (!anySimReadyAndInService && WirelessUtils.isAirplaneModeOn(mContext)) {
-            displayText = getContext().getString(R.string.airplane_mode);
+            displayText = getAirplaneModeMessage();
         }
         setText(displayText);
+    }
+
+    private String getMissingSimMessage() {
+        return (mFlags & FLAG_HIDE_MISSING_SIM) == 0
+                ? getContext().getString(R.string.keyguard_missing_sim_message_short) : "";
+    }
+
+    private String getAirplaneModeMessage() {
+        return (mFlags & FLAG_HIDE_AIRPLANE_MODE) == 0
+                ? getContext().getString(R.string.airplane_mode) : "";
     }
 
     @Override

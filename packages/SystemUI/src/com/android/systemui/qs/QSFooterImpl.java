@@ -20,6 +20,7 @@ import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
@@ -27,6 +28,7 @@ import android.graphics.drawable.RippleDrawable;
 import android.os.UserManager;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -36,15 +38,18 @@ import android.widget.Toast;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.keyguard.CarrierText;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.Utils;
 import com.android.settingslib.drawable.UserIconDrawable;
+import com.android.settingslib.graph.SignalDrawable;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.R.dimen;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.TouchAnimator.Builder;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.MultiUserSwitch;
 import com.android.systemui.statusbar.phone.SettingsButton;
@@ -64,7 +69,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     private UserInfoController mUserInfoController;
     private SettingsButton mSettingsButton;
     protected View mSettingsContainer;
-    private View mCarrierText;
+    private CarrierText mCarrierText;
 
     private boolean mQsDisabled;
     private QSPanel mQsPanel;
@@ -86,9 +91,15 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
 
     private View mActionsContainer;
     private View mDragHandle;
+    private View mMobileGroup;
+    private ImageView mMobileSignal;
+    private ImageView mMobileRoaming;
+    private final int mColorForeground;
+    private final CellSignalState mInfo = new CellSignalState();
 
     public QSFooterImpl(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mColorForeground = Utils.getColorAttr(context, android.R.attr.colorForeground);
     }
 
     @Override
@@ -104,7 +115,12 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         mSettingsContainer = findViewById(R.id.settings_button_container);
         mSettingsButton.setOnClickListener(this);
 
+        mMobileGroup = findViewById(R.id.mobile_combo);
+        mMobileSignal = findViewById(R.id.mobile_signal);
+        mMobileRoaming = findViewById(R.id.mobile_roaming);
         mCarrierText = findViewById(R.id.qs_carrier_text);
+        mCarrierText.setDisplayFlags(
+                CarrierText.FLAG_HIDE_AIRPLANE_MODE | CarrierText.FLAG_HIDE_MISSING_SIM);
 
         mMultiUserSwitch = findViewById(R.id.multi_user_switch);
         mMultiUserAvatar = mMultiUserSwitch.findViewById(R.id.multi_user_avatar);
@@ -165,6 +181,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         return new TouchAnimator.Builder()
                 .addFloat(mDivider, "alpha", 0, 1)
                 .addFloat(mCarrierText, "alpha", 0, 0, 1)
+                .addFloat(mMobileGroup, "alpha", 0, 1)
                 .addFloat(mActionsContainer, "alpha", 0, 1)
                 .addFloat(mDragHandle, "alpha", 1, 0, 0)
                 .setStartDelay(0.15f)
@@ -337,5 +354,65 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
                     Mode.SRC_IN);
         }
         mMultiUserAvatar.setImageDrawable(picture);
+    }
+
+    private void handleUpdateState() {
+        mMobileGroup.setVisibility(mInfo.visible ? View.VISIBLE : View.GONE);
+        if (mInfo.visible) {
+            mMobileRoaming.setVisibility(mInfo.roaming ? View.VISIBLE : View.GONE);
+            mMobileRoaming.setImageTintList(ColorStateList.valueOf(mColorForeground));
+            SignalDrawable d = new SignalDrawable(mContext);
+            d.setDarkIntensity(QuickStatusBarHeader.getColorIntensity(mColorForeground));
+            mMobileSignal.setImageDrawable(d);
+            mMobileSignal.setImageLevel(mInfo.mobileSignalIconId);
+
+            StringBuilder contentDescription = new StringBuilder();
+            if (mInfo.contentDescription != null) {
+                contentDescription.append(mInfo.contentDescription).append(", ");
+            }
+            if (mInfo.roaming) {
+                contentDescription
+                        .append(mContext.getString(R.string.data_connection_roaming))
+                        .append(", ");
+            }
+            // TODO: show mobile data off/no internet text for 5 seconds before carrier text
+            if (TextUtils.equals(mInfo.typeContentDescription,
+                    mContext.getString(R.string.data_connection_no_internet))
+                || TextUtils.equals(mInfo.typeContentDescription,
+                    mContext.getString(R.string.cell_data_off))) {
+                contentDescription.append(mInfo.typeContentDescription);
+            }
+            mMobileSignal.setContentDescription(contentDescription);
+        }
+    }
+
+    @Override
+    public void setMobileDataIndicators(NetworkController.IconState statusIcon,
+            NetworkController.IconState qsIcon, int statusType,
+            int qsType, boolean activityIn, boolean activityOut,
+            String typeContentDescription,
+            String description, boolean isWide, int subId, boolean roaming) {
+        mInfo.visible = statusIcon.visible;
+        mInfo.mobileSignalIconId = statusIcon.icon;
+        mInfo.contentDescription = statusIcon.contentDescription;
+        mInfo.typeContentDescription = typeContentDescription;
+        mInfo.roaming = roaming;
+        handleUpdateState();
+    }
+
+    @Override
+    public void setNoSims(boolean hasNoSims, boolean simDetected) {
+        if (hasNoSims) {
+            mInfo.visible = false;
+        }
+        handleUpdateState();
+    }
+
+    private final class CellSignalState {
+        boolean visible;
+        int mobileSignalIconId;
+        public String contentDescription;
+        String typeContentDescription;
+        boolean roaming;
     }
 }
