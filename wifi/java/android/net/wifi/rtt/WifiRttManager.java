@@ -16,7 +16,7 @@
 
 package android.net.wifi.rtt;
 
-import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.Manifest.permission.ACCESS_WIFI_STATE;
 import static android.Manifest.permission.CHANGE_WIFI_STATE;
 import static android.Manifest.permission.LOCATION_HARDWARE;
@@ -109,7 +109,7 @@ public class WifiRttManager {
      * @param executor The Executor on which to run the callback.
      * @param callback A callback for the result of the ranging request.
      */
-    @RequiresPermission(allOf = {ACCESS_COARSE_LOCATION, CHANGE_WIFI_STATE, ACCESS_WIFI_STATE})
+    @RequiresPermission(allOf = {ACCESS_FINE_LOCATION, CHANGE_WIFI_STATE, ACCESS_WIFI_STATE})
     public void startRanging(@NonNull RangingRequest request,
             @NonNull @CallbackExecutor Executor executor, @NonNull RangingResultCallback callback) {
         startRanging(null, request, executor, callback);
@@ -128,7 +128,7 @@ public class WifiRttManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(allOf = {LOCATION_HARDWARE, ACCESS_COARSE_LOCATION, CHANGE_WIFI_STATE,
+    @RequiresPermission(allOf = {LOCATION_HARDWARE, ACCESS_FINE_LOCATION, CHANGE_WIFI_STATE,
             ACCESS_WIFI_STATE})
     public void startRanging(@Nullable WorkSource workSource, @NonNull RangingRequest request,
             @NonNull @CallbackExecutor Executor executor, @NonNull RangingResultCallback callback) {
