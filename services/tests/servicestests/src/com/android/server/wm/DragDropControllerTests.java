@@ -89,7 +89,7 @@ public class DragDropControllerTests extends WindowTestsBase {
      * Creates a window state which can be used as a drop target.
      */
     private WindowState createDropTargetWindow(String name, int ownerId) {
-        final WindowTestUtils.TestAppWindowToken token = new WindowTestUtils.TestAppWindowToken(
+        final WindowTestUtils.TestAppWindowToken token = WindowTestUtils.createTestAppWindowToken(
                 mDisplayContent);
         final TaskStack stack = createStackControllerOnStackOnDisplay(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, mDisplayContent).mContainer;

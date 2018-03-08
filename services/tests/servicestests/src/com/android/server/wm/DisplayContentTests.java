@@ -193,7 +193,8 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(dc, stack.getDisplayContent());
 
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        final WindowTestUtils.TestAppWindowToken token = new WindowTestUtils.TestAppWindowToken(dc);
+        final WindowTestUtils.TestAppWindowToken token = WindowTestUtils.createTestAppWindowToken(
+                dc);
         task.addChild(token, 0);
         assertEquals(dc, task.getDisplayContent());
         assertEquals(dc, token.getDisplayContent());
@@ -265,14 +266,14 @@ public class DisplayContentTests extends WindowTestsBase {
         final TaskStack stack0 = createTaskStackOnDisplay(dc0);
         final Task task0 = createTaskInStack(stack0, 0 /* userId */);
         final WindowTestUtils.TestAppWindowToken token =
-                new WindowTestUtils.TestAppWindowToken(dc0);
+                WindowTestUtils.createTestAppWindowToken(dc0);
         task0.addChild(token, 0);
         dc0.mTapDetector = new TaskTapPointerEventListener(sWm, dc0);
         sWm.registerPointerEventListener(dc0.mTapDetector);
         final TaskStack stack1 = createTaskStackOnDisplay(dc1);
         final Task task1 = createTaskInStack(stack1, 0 /* userId */);
         final WindowTestUtils.TestAppWindowToken token1 =
-                new WindowTestUtils.TestAppWindowToken(dc0);
+                WindowTestUtils.createTestAppWindowToken(dc0);
         task1.addChild(token1, 0);
         dc1.mTapDetector = new TaskTapPointerEventListener(sWm, dc0);
         sWm.registerPointerEventListener(dc1.mTapDetector);
