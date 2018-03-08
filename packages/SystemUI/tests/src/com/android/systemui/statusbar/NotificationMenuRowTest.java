@@ -14,14 +14,23 @@
 
 package com.android.systemui.statusbar;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import android.app.Notification;
+import android.service.notification.StatusBarNotification;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.testing.ViewUtils;
 import android.testing.ViewUtils;
+import android.view.View;
+import android.view.ViewGroup;
+
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
@@ -62,5 +71,20 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
     public void testResetUncreatedMenu() {
         NotificationMenuRowPlugin row = new NotificationMenuRow(mContext);
         row.resetMenu();
+    }
+
+    @Test
+    public void testNoAppOpsInSlowSwipe() {
+        NotificationMenuRow row = new NotificationMenuRow(mContext);
+        Notification n = mock(Notification.class);
+        StatusBarNotification sbn = mock(StatusBarNotification.class);
+        when(sbn.getNotification()).thenReturn(n);
+        ExpandableNotificationRow parent = mock(ExpandableNotificationRow.class);
+        when(parent.getStatusBarNotification()).thenReturn(sbn);
+        row.createMenu(parent, null);
+
+        ViewGroup container = (ViewGroup) row.getMenuView();
+        // one for snooze and one for noti blocking
+        assertEquals(2, container.getChildCount());
     }
 }

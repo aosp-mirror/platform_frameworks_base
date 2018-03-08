@@ -51,6 +51,7 @@ public class NotificationHeaderView extends ViewGroup {
     private View mHeaderText;
     private View mSecondaryHeaderText;
     private OnClickListener mExpandClickListener;
+    private OnClickListener mAppOpsListener;
     private HeaderTouchListener mTouchListener = new HeaderTouchListener();
     private ImageView mExpandButton;
     private CachingIconView mIcon;
@@ -267,15 +268,26 @@ public class NotificationHeaderView extends ViewGroup {
     }
 
     private void updateTouchListener() {
-        if (mExpandClickListener != null) {
-            mTouchListener.bindTouchRects();
+        if (mExpandClickListener == null && mAppOpsListener == null) {
+            setOnTouchListener(null);
+            return;
         }
+        setOnTouchListener(mTouchListener);
+        mTouchListener.bindTouchRects();
+    }
+
+    /**
+     * Sets onclick listener for app ops icons.
+     */
+    public void setAppOpsOnClickListener(OnClickListener l) {
+        mAppOpsListener = l;
+        mAppOps.setOnClickListener(mAppOpsListener);
+        updateTouchListener();
     }
 
     @Override
     public void setOnClickListener(@Nullable OnClickListener l) {
         mExpandClickListener = l;
-        setOnTouchListener(mExpandClickListener != null ? mTouchListener : null);
         mExpandButton.setOnClickListener(mExpandClickListener);
         updateTouchListener();
     }
@@ -308,7 +320,7 @@ public class NotificationHeaderView extends ViewGroup {
      * Shows or hides 'app op in use' icons based on app usage.
      */
     public void showAppOpsIcons(ArraySet<Integer> appOps) {
-        if (mOverlayIcon == null || mCameraIcon == null || mMicIcon == null) {
+        if (mOverlayIcon == null || mCameraIcon == null || mMicIcon == null || appOps == null) {
             return;
         }
 
@@ -366,6 +378,7 @@ public class NotificationHeaderView extends ViewGroup {
 
         private final ArrayList<Rect> mTouchRects = new ArrayList<>();
         private Rect mExpandButtonRect;
+        private Rect mAppOpsRect;
         private int mTouchSlop;
         private boolean mTrackGesture;
         private float mDownX;
@@ -378,6 +391,7 @@ public class NotificationHeaderView extends ViewGroup {
             mTouchRects.clear();
             addRectAroundView(mIcon);
             mExpandButtonRect = addRectAroundView(mExpandButton);
+            mAppOpsRect = addRectAroundView(mAppOps);
             addWidthRect();
             mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
         }
@@ -399,16 +413,18 @@ public class NotificationHeaderView extends ViewGroup {
 
         private Rect getRectAroundView(View view) {
             float size = 48 * getResources().getDisplayMetrics().density;
+            float width = Math.max(size, view.getWidth());
+            float height = Math.max(size, view.getHeight());
             final Rect r = new Rect();
             if (view.getVisibility() == GONE) {
                 view = getFirstChildNotGone();
-                r.left = (int) (view.getLeft() - size / 2.0f);
+                r.left = (int) (view.getLeft() - width / 2.0f);
             } else {
-                r.left = (int) ((view.getLeft() + view.getRight()) / 2.0f - size / 2.0f);
+                r.left = (int) ((view.getLeft() + view.getRight()) / 2.0f - width / 2.0f);
             }
-            r.top = (int) ((view.getTop() + view.getBottom()) / 2.0f - size / 2.0f);
-            r.bottom = (int) (r.top + size);
-            r.right = (int) (r.left + size);
+            r.top = (int) ((view.getTop() + view.getBottom()) / 2.0f - height / 2.0f);
+            r.bottom = (int) (r.top + height);
+            r.right = (int) (r.left + width);
             return r;
         }
 
@@ -436,6 +452,11 @@ public class NotificationHeaderView extends ViewGroup {
                     break;
                 case MotionEvent.ACTION_UP:
                     if (mTrackGesture) {
+                        if (mAppOps.isVisibleToUser() && (mAppOpsRect.contains((int) x, (int) y)
+                                || mAppOpsRect.contains((int) mDownX, (int) mDownY))) {
+                            mAppOps.performClick();
+                            return true;
+                        }
                         mExpandButton.performClick();
                     }
                     break;
