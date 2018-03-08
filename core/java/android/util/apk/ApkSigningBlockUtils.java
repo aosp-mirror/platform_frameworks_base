@@ -285,11 +285,46 @@ final class ApkSigningBlockUtils {
         return result;
     }
 
+    /**
+     * Return the verity digest only if the length of digest content looks correct.
+     * When verity digest is generated, the last incomplete 4k chunk is padded with 0s before
+     * hashing. This means two almost identical APKs with different number of 0 at the end will have
+     * the same verity digest. To avoid this problem, the length of the source content (excluding
+     * Signing Block) is appended to the verity digest, and the digest is returned only if the
+     * length is consistent to the current APK.
+     */
+    static byte[] parseVerityDigestAndVerifySourceLength(
+            byte[] data, long fileSize, SignatureInfo signatureInfo) throws SecurityException {
+        // FORMAT:
+        // OFFSET       DATA TYPE  DESCRIPTION
+        // * @+0  bytes uint8[32]  Merkle tree root hash of SHA-256
+        // * @+32 bytes int64      Length of source data
+        int kRootHashSize = 32;
+        int kSourceLengthSize = 8;
+
+        if (data.length != kRootHashSize + kSourceLengthSize) {
+            throw new SecurityException("Verity digest size is wrong: " + data.length);
+        }
+        ByteBuffer buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
+        buffer.position(kRootHashSize);
+        long expectedSourceLength = buffer.getLong();
+
+        long signingBlockSize = signatureInfo.centralDirOffset
+                - signatureInfo.apkSigningBlockOffset;
+        if (expectedSourceLength != fileSize - signingBlockSize) {
+            throw new SecurityException("APK content size did not verify");
+        }
+
+        return Arrays.copyOfRange(data, 0, kRootHashSize);
+    }
+
     private static void verifyIntegrityForVerityBasedAlgorithm(
-            byte[] expectedRootHash,
+            byte[] expectedDigest,
             RandomAccessFile apk,
             SignatureInfo signatureInfo) throws SecurityException {
         try {
+            byte[] expectedRootHash = parseVerityDigestAndVerifySourceLength(expectedDigest,
+                    apk.length(), signatureInfo);
             ApkVerityBuilder.ApkVerityResult verity = ApkVerityBuilder.generateApkVerity(apk,
                     signatureInfo, new ByteBufferFactory() {
                         @Override
@@ -373,9 +408,9 @@ final class ApkSigningBlockUtils {
     static final int SIGNATURE_ECDSA_WITH_SHA256 = 0x0201;
     static final int SIGNATURE_ECDSA_WITH_SHA512 = 0x0202;
     static final int SIGNATURE_DSA_WITH_SHA256 = 0x0301;
-    static final int SIGNATURE_VERITY_RSA_PKCS1_V1_5_WITH_SHA256 = 0x0411;
-    static final int SIGNATURE_VERITY_ECDSA_WITH_SHA256 = 0x0413;
-    static final int SIGNATURE_VERITY_DSA_WITH_SHA256 = 0x0415;
+    static final int SIGNATURE_VERITY_RSA_PKCS1_V1_5_WITH_SHA256 = 0x0421;
+    static final int SIGNATURE_VERITY_ECDSA_WITH_SHA256 = 0x0423;
+    static final int SIGNATURE_VERITY_DSA_WITH_SHA256 = 0x0425;
 
     static final int CONTENT_DIGEST_CHUNKED_SHA256 = 1;
     static final int CONTENT_DIGEST_CHUNKED_SHA512 = 2;
