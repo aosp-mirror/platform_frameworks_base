@@ -226,6 +226,17 @@ public class KernelUidCpuFreqTimeReader extends
         }
     }
 
+    public void readAbsolute(Callback cb) {
+        synchronized (mProcReader) {
+            readDelta(null);
+            int total = mLastUidCpuFreqTimeMs.size();
+            for (int i = 0; i < total; i ++){
+                int uid = mLastUidCpuFreqTimeMs.keyAt(i);
+                cb.onUidCpuFreqTime(uid, mLastUidCpuFreqTimeMs.get(uid));
+            }
+        }
+    }
+
     public void removeUid(int uid) {
         mLastUidCpuFreqTimeMs.delete(uid);
     }
