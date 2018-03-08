@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.SystemProperties;
+import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,16 +53,6 @@ import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
 /** Quick settings tile: Cellular **/
 public class CellularTile extends QSTileImpl<SignalState> {
-    private static final ComponentName CELLULAR_SETTING_COMPONENT = new ComponentName(
-            "com.android.settings", "com.android.settings.Settings$DataUsageSummaryActivity");
-    private static final ComponentName DATA_PLAN_CELLULAR_COMPONENT = new ComponentName(
-            "com.android.settings", "com.android.settings.Settings$DataPlanUsageSummaryActivity");
-
-    private static final Intent CELLULAR_SETTINGS =
-            new Intent().setComponent(CELLULAR_SETTING_COMPONENT);
-    private static final Intent DATA_PLAN_CELLULAR_SETTINGS =
-            new Intent().setComponent(DATA_PLAN_CELLULAR_COMPONENT);
-
     private static final String ENABLE_SETTINGS_DATA_PLAN = "enable.settings.data.plan";
 
     private final NetworkController mController;
@@ -107,7 +98,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
 
     @Override
     public Intent getLongClickIntent() {
-        return getCellularSettingIntent(mContext);
+        return getCellularSettingIntent();
     }
 
     @Override
@@ -148,8 +139,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
             showDetail(true);
         } else {
             mActivityStarter
-                    .postStartActivityDismissingKeyguard(getCellularSettingIntent(mContext),
-                            0 /* delay */);
+                    .postStartActivityDismissingKeyguard(getCellularSettingIntent(),0 /* delay */);
         }
     }
 
@@ -293,25 +283,8 @@ public class CellularTile extends QSTileImpl<SignalState> {
         }
     }
 
-    static Intent getCellularSettingIntent(Context context) {
-        // TODO(b/62349208): We should replace feature flag check below with data plans
-        // availability check. If the data plans are available we display the data plans usage
-        // summary otherwise we display data usage summary without data plans.
-        boolean isDataPlanFeatureEnabled =
-                SystemProperties.getBoolean(ENABLE_SETTINGS_DATA_PLAN, false /* default */);
-        context.getPackageManager()
-                .setComponentEnabledSetting(
-                        DATA_PLAN_CELLULAR_COMPONENT,
-                        isDataPlanFeatureEnabled ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-                                : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                        PackageManager.DONT_KILL_APP);
-        context.getPackageManager()
-                .setComponentEnabledSetting(
-                        CELLULAR_SETTING_COMPONENT,
-                        isDataPlanFeatureEnabled ? PackageManager.COMPONENT_ENABLED_STATE_DISABLED
-                                : PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                        PackageManager.DONT_KILL_APP);
-        return isDataPlanFeatureEnabled ? DATA_PLAN_CELLULAR_SETTINGS : CELLULAR_SETTINGS;
+    static Intent getCellularSettingIntent() {
+        return new Intent(Settings.ACTION_DATA_USAGE_SETTINGS);
     }
 
     private final class CellularDetailAdapter implements DetailAdapter {
@@ -330,7 +303,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
 
         @Override
         public Intent getSettingsIntent() {
-            return getCellularSettingIntent(mContext);
+            return getCellularSettingIntent();
         }
 
         @Override
