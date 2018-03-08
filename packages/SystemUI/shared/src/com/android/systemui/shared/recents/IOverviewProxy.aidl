@@ -65,4 +65,19 @@ oneway interface IOverviewProxy {
      * Sent for each movement over the nav bar while the user is scrubbing it to switch tasks.
      */
     void onQuickScrubProgress(float progress);
+
+    /**
+     * Sent when overview button is pressed to toggle show/hide of overview.
+     */
+    void onOverviewToggle();
+
+    /**
+     * Sent when overview is to be shown.
+     */
+    void onOverviewShown(boolean triggeredFromAltTab);
+
+    /**
+     * Sent when overview is to be hidden.
+     */
+    void onOverviewHidden(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
 }
