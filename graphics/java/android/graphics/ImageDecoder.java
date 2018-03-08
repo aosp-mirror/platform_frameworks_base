@@ -493,7 +493,7 @@ public final class ImageDecoder implements AutoCloseable {
     private boolean mRequireUnpremultiplied = false;
     private boolean mMutable = false;
     private boolean mConserveMemory = false;
-    private boolean mAsAlphaMask = false;
+    private boolean mDecodeAsAlphaMask = false;
     private Rect    mCropRect;
     private Rect    mOutPaddingRect;
     private Source  mSource;
@@ -730,7 +730,7 @@ public final class ImageDecoder implements AutoCloseable {
      *  Will typically result in a {@link Bitmap.Config#HARDWARE}
      *  allocation, but may be software for small images. In addition, this will
      *  switch to software when HARDWARE is incompatible, e.g.
-     *  {@link #setMutable}, {@link #setAsAlphaMask}.
+     *  {@link #setMutable}, {@link #setDecodeAsAlphaMask}.
      */
     public static final int ALLOCATOR_DEFAULT = 0;
 
@@ -753,7 +753,7 @@ public final class ImageDecoder implements AutoCloseable {
      *  Require a {@link Bitmap.Config#HARDWARE} {@link Bitmap}.
      *
      *  When this is combined with incompatible options, like
-     *  {@link #setMutable} or {@link #setAsAlphaMask}, {@link #decodeDrawable}
+     *  {@link #setMutable} or {@link #setDecodeAsAlphaMask}, {@link #decodeDrawable}
      *  / {@link #decodeBitmap} will throw an
      *  {@link java.lang.IllegalStateException}.
      */
@@ -783,6 +783,14 @@ public final class ImageDecoder implements AutoCloseable {
     }
 
     /**
+     *  Return the allocator for the pixel memory.
+     */
+    @Allocator
+    public int getAllocator() {
+        return mAllocator;
+    }
+
+    /**
      *  Specify whether the {@link Bitmap} should have unpremultiplied pixels.
      *
      *  <p>By default, ImageDecoder will create a {@link Bitmap} with
@@ -800,6 +808,13 @@ public final class ImageDecoder implements AutoCloseable {
     public ImageDecoder setRequireUnpremultiplied(boolean requireUnpremultiplied) {
         mRequireUnpremultiplied = requireUnpremultiplied;
         return this;
+    }
+
+    /**
+     *  Return whether the {@link Bitmap} will have unpremultiplied pixels.
+     */
+    public boolean getRequireUnpremultiplied() {
+        return mRequireUnpremultiplied;
     }
 
     /**
@@ -823,6 +838,14 @@ public final class ImageDecoder implements AutoCloseable {
     }
 
     /**
+     *  Return the {@link PostProcessor} currently set.
+     */
+    @Nullable
+    public PostProcessor getPostProcessor() {
+        return mPostProcessor;
+    }
+
+    /**
      *  Set (replace) the {@link OnPartialImageListener} on this object.
      *
      *  <p>Will be called if there is an error in the input. Without one, an
@@ -833,6 +856,14 @@ public final class ImageDecoder implements AutoCloseable {
     public ImageDecoder setOnPartialImageListener(@Nullable OnPartialImageListener l) {
         mOnPartialImageListener = l;
         return this;
+    }
+
+    /**
+     *  Return the {@link OnPartialImageListener} currently set.
+     */
+    @Nullable
+    public OnPartialImageListener getOnPartialImageListener() {
+        return mOnPartialImageListener;
     }
 
     /**
@@ -852,6 +883,14 @@ public final class ImageDecoder implements AutoCloseable {
     public ImageDecoder setCrop(@Nullable Rect subset) {
         mCropRect = subset;
         return this;
+    }
+
+    /**
+     *  Return the cropping rectangle, if set.
+     */
+    @Nullable
+    public Rect getCrop() {
+        return mCropRect;
     }
 
     /**
@@ -893,6 +932,13 @@ public final class ImageDecoder implements AutoCloseable {
     }
 
     /**
+     *  Return whether the {@link Bitmap} will be mutable.
+     */
+    public boolean getMutable() {
+        return mMutable;
+    }
+
+    /**
      *  Specify whether to potentially save RAM at the expense of quality.
      *
      *  <p>Setting this to {@code true} may result in a {@link Bitmap} with a
@@ -912,22 +958,60 @@ public final class ImageDecoder implements AutoCloseable {
     }
 
     /**
+     *  Return whether this object will try to save RAM at the expense of quality.
+     *
+     *  <p>This returns whether {@link #setConserveMemory} was set to {@code true}.
+     *  It may still return {@code true} even if the {@code ImageDecoder} does not
+     *  have a way to save RAM at the expense of quality for this image.</p>
+     */
+    public boolean getConserveMemory() {
+        return mConserveMemory;
+    }
+
+    /**
      *  Specify whether to potentially treat the output as an alpha mask.
      *
      *  <p>If this is set to {@code true} and the image is encoded in a format
      *  with only one channel, treat that channel as alpha. Otherwise this call has
      *  no effect.</p>
      *
-     *  <p>setAsAlphaMask is incompatible with {@link #ALLOCATOR_HARDWARE}. Trying to
+     *  <p>setDecodeAsAlphaMask is incompatible with {@link #ALLOCATOR_HARDWARE}. Trying to
      *  combine them will result in {@link #decodeDrawable}/
      *  {@link #decodeBitmap} throwing an
      *  {@link java.lang.IllegalStateException}.</p>
      *
      *  @return this object for chaining.
      */
-    public ImageDecoder setAsAlphaMask(boolean asAlphaMask) {
-        mAsAlphaMask = asAlphaMask;
+    public ImageDecoder setDecodeAsAlphaMask(boolean decodeAsAlphaMask) {
+        mDecodeAsAlphaMask = decodeAsAlphaMask;
         return this;
+    }
+
+    /** @removed
+     * @deprecated Call {@link #setDecodeAsAlphaMask} instead.
+     */
+    @java.lang.Deprecated
+    public ImageDecoder setAsAlphaMask(boolean asAlphaMask) {
+        return this.setDecodeAsAlphaMask(asAlphaMask);
+    }
+
+    /**
+     *  Return whether to treat single channel input as alpha.
+     *
+     *  <p>This returns whether {@link #setDecodeAsAlphaMask} was set to {@code true}.
+     *  It may still return {@code true} even if the image has more than one
+     *  channel and therefore will not be treated as an alpha mask.</p>
+     */
+    public boolean getDecodeAsAlphaMask() {
+        return mDecodeAsAlphaMask;
+    }
+
+    /** @removed
+     * @deprecated Call {@link #getDecodeAsAlphaMask} instead.
+     */
+    @java.lang.Deprecated
+    public boolean getAsAlphaMask() {
+        return this.getDecodeAsAlphaMask();
     }
 
     @Override
@@ -960,7 +1044,7 @@ public final class ImageDecoder implements AutoCloseable {
             if (mMutable) {
                 throw new IllegalStateException("Cannot make mutable HARDWARE Bitmap!");
             }
-            if (mAsAlphaMask) {
+            if (mDecodeAsAlphaMask) {
                 throw new IllegalStateException("Cannot make HARDWARE Alpha mask Bitmap!");
             }
         }
@@ -992,7 +1076,7 @@ public final class ImageDecoder implements AutoCloseable {
         return nDecodeBitmap(mNativePtr, partialImagePtr,
                 postProcessPtr, mDesiredWidth, mDesiredHeight, mCropRect,
                 mMutable, mAllocator, mRequireUnpremultiplied,
-                mConserveMemory, mAsAlphaMask);
+                mConserveMemory, mDecodeAsAlphaMask);
     }
 
     private void callHeaderDecoded(@Nullable OnHeaderDecodedListener listener,
@@ -1224,7 +1308,7 @@ public final class ImageDecoder implements AutoCloseable {
             int width, int height,
             @Nullable Rect cropRect, boolean mutable,
             int allocator, boolean requireUnpremul,
-            boolean conserveMemory, boolean asAlphaMask)
+            boolean conserveMemory, boolean decodeAsAlphaMask)
         throws IOException;
     private static native Size nGetSampledSize(long nativePtr,
                                                int sampleSize);
