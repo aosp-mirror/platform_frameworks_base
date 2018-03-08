@@ -84,18 +84,28 @@ public:
     //                       condition.
     // [allConditions]: all condition trackers. This is needed because the condition evaluation is
     //                  done recursively
+    // [dimensionFields]: the needed dimension fields which should be all or subset of the condition
+    //                    tracker output dimension.
+    // [isSubOutputDimensionFields]: true if the needed dimension fields which is strictly subset of
+    //                               the condition tracker output dimension.
+    // [isPartialLink]: true if the link specified by 'conditionParameters' contains all the fields
+    //                  in the condition tracker output dimension.
     // [conditionCache]: the cache holding the condition evaluation values.
     // [dimensionsKeySet]: the dimensions where the sliced condition is true. For combination
     //                    condition, it assumes that only one child predicate is sliced.
     virtual void isConditionMet(
             const ConditionKey& conditionParameters,
             const std::vector<sp<ConditionTracker>>& allConditions,
-            const vector<Matcher>& dimensionFields, std::vector<ConditionState>& conditionCache,
+            const vector<Matcher>& dimensionFields,
+            const bool isSubOutputDimensionFields,
+            const bool isPartialLink,
+            std::vector<ConditionState>& conditionCache,
             std::unordered_set<HashableDimensionKey>& dimensionsKeySet) const = 0;
 
     virtual ConditionState getMetConditionDimension(
             const std::vector<sp<ConditionTracker>>& allConditions,
             const vector<Matcher>& dimensionFields,
+            const bool isSubOutputDimensionFields,
             std::unordered_set<HashableDimensionKey>& dimensionsKeySet) const = 0;
 
     // return the list of LogMatchingTracker index that this ConditionTracker uses.
@@ -107,7 +117,7 @@ public:
         mSliced = mSliced | sliced;
     }
 
-    bool isSliced() const {
+    inline bool isSliced() const {
         return mSliced;
     }
 
@@ -115,6 +125,26 @@ public:
             const std::vector<sp<ConditionTracker>>& allConditions) const = 0;
     virtual const std::set<HashableDimensionKey>* getChangedToFalseDimensions(
             const std::vector<sp<ConditionTracker>>& allConditions) const = 0;
+
+    inline int64_t getConditionId() const {
+        return mConditionId;
+    }
+
+    virtual void getTrueSlicedDimensions(
+        const std::vector<sp<ConditionTracker>>& allConditions,
+        std::set<HashableDimensionKey>* dimensions) const = 0;
+
+    virtual bool IsChangedDimensionTrackable() const = 0;
+
+    virtual bool IsSimpleCondition() const = 0;
+
+    virtual bool equalOutputDimensions(
+        const std::vector<sp<ConditionTracker>>& allConditions,
+        const vector<Matcher>& dimensions) const = 0;
+
+    inline ConditionState getUnSlicedPartConditionState() const  {
+        return mUnSlicedPart;
+    }
 
 protected:
     const int64_t mConditionId;
@@ -131,6 +161,7 @@ protected:
     ConditionState mNonSlicedConditionState;
 
     bool mSliced;
+    ConditionState mUnSlicedPart;
 };
 
 }  // namespace statsd

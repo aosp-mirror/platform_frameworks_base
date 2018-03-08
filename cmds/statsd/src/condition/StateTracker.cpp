@@ -107,7 +107,7 @@ bool StateTracker::hitGuardRail(const HashableDimensionKey& newKey) {
         // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
         if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
             ALOGE("Predicate %lld dropping data for dimension key %s",
-                (long long)mConditionId, newKey.c_str());
+                (long long)mConditionId, newKey.toString().c_str());
             return true;
         }
     }
@@ -181,7 +181,10 @@ void StateTracker::evaluateCondition(const LogEvent& event,
 
 void StateTracker::isConditionMet(
         const ConditionKey& conditionParameters, const vector<sp<ConditionTracker>>& allConditions,
-        const vector<Matcher>& dimensionFields, vector<ConditionState>& conditionCache,
+        const vector<Matcher>& dimensionFields,
+        const bool isSubOutputDimensionFields,
+        const bool isPartialLink,
+        vector<ConditionState>& conditionCache,
         std::unordered_set<HashableDimensionKey>& dimensionsKeySet) const {
     if (conditionCache[mIndex] != ConditionState::kNotEvaluated) {
         // it has been evaluated.
@@ -203,20 +206,19 @@ void StateTracker::isConditionMet(
         return;
     }
 
-    const auto& primaryKeys = pair->second;
+    const auto& primaryKey = pair->second;
     conditionCache[mIndex] = mInitialValue;
-    for (const auto& primaryKey : primaryKeys) {
-        auto it = mSlicedState.find(primaryKey);
-        if (it != mSlicedState.end()) {
-            conditionCache[mIndex] = ConditionState::kTrue;
-            dimensionsKeySet.insert(it->second);
-        }
+    auto it = mSlicedState.find(primaryKey);
+    if (it != mSlicedState.end()) {
+        conditionCache[mIndex] = ConditionState::kTrue;
+        dimensionsKeySet.insert(it->second);
     }
 }
 
 ConditionState StateTracker::getMetConditionDimension(
         const std::vector<sp<ConditionTracker>>& allConditions,
         const vector<Matcher>& dimensionFields,
+        const bool isSubOutputDimensionFields,
         std::unordered_set<HashableDimensionKey>& dimensionsKeySet) const {
     if (mSlicedState.size() > 0) {
         for (const auto& state : mSlicedState) {
