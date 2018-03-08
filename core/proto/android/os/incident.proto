@@ -134,8 +134,14 @@ message IncidentProto {
 
     // Linux services
     optional ProcrankProto procrank = 2000 [
-        (section).type = SECTION_NONE, // disable procrank until figure out permission
-        (section).args = "/system/xbin/procrank"
+        // Disable procrank for reasons below:
+        // 1. incidentd can't execute `procrank` because it don't have DAC perms
+        //    since it is running as its own uid, no root access.
+        // 2. the same information is able to be accessed by meminfo dumpsys.
+        // 3. leave this one here to show case of how to disable a section
+        //    (no removal allowed if you are familiar with PROTOBUF).
+        (section).type = SECTION_NONE,
+        (section).args = "procrank"
     ];
 
     optional PageTypeInfoProto page_type_info = 2001 [

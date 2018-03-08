@@ -173,12 +173,12 @@ TEST_F(SectionTest, CommandSectionConstructor) {
     CommandSection cs3(1, 3123, "echo", "\"this is a test\"", "ooo", NULL);
     CommandSection cs4(2, 43214, "single_command", NULL);
 
-    EXPECT_THAT(cs1.name.string(), StrEq("echo"));
-    EXPECT_THAT(cs2.name.string(), StrEq("single_command"));
+    EXPECT_THAT(cs1.name.string(), StrEq("cmd echo \"this is a test\" ooo"));
+    EXPECT_THAT(cs2.name.string(), StrEq("cmd single_command"));
     EXPECT_EQ(3123, cs3.timeoutMs);
     EXPECT_EQ(43214, cs4.timeoutMs);
-    EXPECT_THAT(cs3.name.string(), StrEq("echo"));
-    EXPECT_THAT(cs4.name.string(), StrEq("single_command"));
+    EXPECT_THAT(cs3.name.string(), StrEq("cmd echo \"this is a test\" ooo"));
+    EXPECT_THAT(cs4.name.string(), StrEq("cmd single_command"));
 }
 
 TEST_F(SectionTest, CommandSectionEcho) {
