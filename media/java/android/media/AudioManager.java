@@ -1552,6 +1552,21 @@ public class AudioManager {
     }
 
     /**
+     * Broadcast Action: microphone muting state changed.
+     *
+     * You <em>cannot</em> receive this through components declared
+     * in manifests, only by explicitly registering for it with
+     * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
+     * Context.registerReceiver()}.
+     *
+     * <p>The intent has no extra values, use {@link #isMicrophoneMute} to check whether the
+     * microphone is muted.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_MICROPHONE_MUTE_CHANGED =
+            "android.media.action.MICROPHONE_MUTE_CHANGED";
+
+    /**
      * Sets the audio mode.
      * <p>
      * The audio mode encompasses audio routing AND the behavior of
