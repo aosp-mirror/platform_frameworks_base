@@ -139,34 +139,44 @@ public class MmTelFeature extends ImsFeature {
 
         @Override
         public int queryCapabilityStatus() throws RemoteException {
-            return MmTelFeature.this.queryCapabilityStatus().mCapabilities;
+            synchronized (mLock) {
+                return MmTelFeature.this.queryCapabilityStatus().mCapabilities;
+            }
         }
 
         @Override
         public void addCapabilityCallback(IImsCapabilityCallback c) {
+            // no need to lock, structure already handles multithreading.
             MmTelFeature.this.addCapabilityCallback(c);
         }
 
         @Override
         public void removeCapabilityCallback(IImsCapabilityCallback c) {
+            // no need to lock, structure already handles multithreading.
             MmTelFeature.this.removeCapabilityCallback(c);
         }
 
         @Override
         public void changeCapabilitiesConfiguration(CapabilityChangeRequest request,
                 IImsCapabilityCallback c) throws RemoteException {
-            MmTelFeature.this.requestChangeEnabledCapabilities(request, c);
+            synchronized (mLock) {
+                MmTelFeature.this.requestChangeEnabledCapabilities(request, c);
+            }
         }
 
         @Override
         public void queryCapabilityConfiguration(int capability, int radioTech,
                 IImsCapabilityCallback c) {
-            queryCapabilityConfigurationInternal(capability, radioTech, c);
+            synchronized (mLock) {
+                queryCapabilityConfigurationInternal(capability, radioTech, c);
+            }
         }
 
         @Override
         public void setSmsListener(IImsSmsListener l) throws RemoteException {
-            MmTelFeature.this.setSmsListener(l);
+            synchronized (mLock) {
+                MmTelFeature.this.setSmsListener(l);
+            }
         }
 
         @Override
