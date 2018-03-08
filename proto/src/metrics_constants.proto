@@ -5453,6 +5453,14 @@ message MetricsEvent {
     // OS: P
     ACTION_OPS_GUTS_SETTINGS = 1346;
 
+    // ACTION: Settings > Battery settings > Battery tip > App restriction tip
+    // OS: P
+    ACTION_APP_RESTRICTION_TIP = 1347;
+
+    // ACTION: Settings > Battery settings > Battery tip > High usage tip
+    // OS: P
+    ACTION_HIGH_USAGE_TIP = 1348;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
