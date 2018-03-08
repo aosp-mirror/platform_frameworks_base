@@ -930,7 +930,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (stack == null) {
             return null;
         }
-        ActivityRecord resumedActivity = stack.mResumedActivity;
+        ActivityRecord resumedActivity = stack.getResumedActivity();
         if (resumedActivity == null || resumedActivity.app == null) {
             resumedActivity = stack.mPausingActivity;
             if (resumedActivity == null || resumedActivity.app == null) {
@@ -985,7 +985,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 if (!isFocusedStack(stack) || stack.numActivities() == 0) {
                     continue;
                 }
-                final ActivityRecord resumedActivity = stack.mResumedActivity;
+                final ActivityRecord resumedActivity = stack.getResumedActivity();
                 if (resumedActivity == null || !resumedActivity.idle) {
                     if (DEBUG_STATES) Slog.d(TAG_STATES, "allResumedActivitiesIdle: stack="
                              + stack.mStackId + " " + resumedActivity + " not idle");
@@ -1004,7 +1004,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = display.getChildAt(stackNdx);
                 if (isFocusedStack(stack)) {
-                    final ActivityRecord r = stack.mResumedActivity;
+                    final ActivityRecord r = stack.getResumedActivity();
                     if (r != null && !r.isState(RESUMED)) {
                         return false;
                     }
@@ -1025,7 +1025,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             final ActivityDisplay display = mActivityDisplays.valueAt(displayNdx);
             for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = display.getChildAt(stackNdx);
-                final ActivityRecord r = stack.mResumedActivity;
+                final ActivityRecord r = stack.getResumedActivity();
                 if (r != null) {
                     if (!r.nowVisible || mActivitiesWaitingForVisibleActivity.contains(r)) {
                         return false;
@@ -1051,9 +1051,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             final ActivityDisplay display = mActivityDisplays.valueAt(displayNdx);
             for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = display.getChildAt(stackNdx);
-                if (!isFocusedStack(stack) && stack.mResumedActivity != null) {
+                if (!isFocusedStack(stack) && stack.getResumedActivity() != null) {
                     if (DEBUG_STATES) Slog.d(TAG_STATES, "pauseBackStacks: stack=" + stack +
-                            " mResumedActivity=" + stack.mResumedActivity);
+                            " mResumedActivity=" + stack.getResumedActivity());
                     someActivityPaused |= stack.startPausingLocked(userLeaving, false, resuming,
                             dontWait);
                 }
@@ -2063,8 +2063,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = display.getChildAt(stackNdx);
                 if (isFocusedStack(stack)) {
-                    if (stack.mResumedActivity != null) {
-                        fgApp = stack.mResumedActivity.app;
+                    final ActivityRecord resumedActivity = stack.getResumedActivity();
+                    if (resumedActivity != null) {
+                        fgApp = resumedActivity.app;
                     } else if (stack.mPausingActivity != null) {
                         fgApp = stack.mPausingActivity.app;
                     }
@@ -3734,7 +3735,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                                 + " state=" + state);
                     }
                 } else {
-                    final ActivityRecord resumed = stack.mResumedActivity;
+                    final ActivityRecord resumed = stack.getResumedActivity();
                     if (resumed != null && resumed == r) Slog.e(TAG,
                             "validateTop...: back stack has resumed activity r=" + r
                             + " state=" + state);
@@ -3884,7 +3885,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     printed = true;
                     needSep = false;
                 }
-                pr = printThisActivity(pw, stack.mResumedActivity, dumpPackage, needSep,
+                pr = printThisActivity(pw, stack.getResumedActivity(), dumpPackage, needSep,
                         "    mResumedActivity: ");
                 if (pr) {
                     printed = true;
