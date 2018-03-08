@@ -5151,32 +5151,35 @@ public class ActivityManagerService extends IActivityManager.Stub
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "startRecentsActivity()");
         final long origId = Binder.clearCallingIdentity();
         try {
+            final int recentsUid;
+            final String recentsPackage;
+            final List<IBinder> topVisibleActivities;
             synchronized (this) {
-                final int recentsUid = mRecentTasks.getRecentsComponentUid();
                 final ComponentName recentsComponent = mRecentTasks.getRecentsComponent();
-                final String recentsPackage = recentsComponent.getPackageName();
-
-                // If provided, kick off the request for the assist data in the background before
-                // starting the activity
-                if (assistDataReceiver != null) {
-                    final AppOpsManager appOpsManager = (AppOpsManager)
-                            mContext.getSystemService(Context.APP_OPS_SERVICE);
-                    final AssistDataReceiverProxy proxy = new AssistDataReceiverProxy(
-                            assistDataReceiver, recentsPackage);
-                    final AssistDataRequester requester = new AssistDataRequester(mContext, this,
-                            mWindowManager, appOpsManager, proxy, this,
-                            OP_ASSIST_STRUCTURE, OP_NONE);
-                    requester.requestAssistData(mStackSupervisor.getTopVisibleActivities(),
-                            true /* fetchData */, false /* fetchScreenshots */,
-                            true /* allowFetchData */, false /* alloweFetchScreenshots */,
-                            recentsUid, recentsPackage);
-                }
+                recentsPackage = recentsComponent.getPackageName();
+                recentsUid = mRecentTasks.getRecentsComponentUid();
+                topVisibleActivities = mStackSupervisor.getTopVisibleActivities();
 
                 // Start a new recents animation
                 final RecentsAnimation anim = new RecentsAnimation(this, mStackSupervisor,
                         mActivityStartController, mWindowManager, mUserController);
                 anim.startRecentsActivity(intent, recentsAnimationRunner, recentsComponent,
                         recentsUid);
+            }
+
+            // If provided, kick off the request for the assist data in the background. Do not hold
+            // the AM lock as this will just proxy directly to the assist data receiver provided.
+            if (assistDataReceiver != null) {
+                final AppOpsManager appOpsManager = (AppOpsManager)
+                        mContext.getSystemService(Context.APP_OPS_SERVICE);
+                final AssistDataReceiverProxy proxy = new AssistDataReceiverProxy(
+                        assistDataReceiver, recentsPackage);
+                final AssistDataRequester requester = new AssistDataRequester(mContext, this,
+                        mWindowManager, appOpsManager, proxy, this, OP_ASSIST_STRUCTURE, OP_NONE);
+                requester.requestAssistData(topVisibleActivities,
+                        true /* fetchData */, false /* fetchScreenshots */,
+                        true /* allowFetchData */, false /* allowFetchScreenshots */,
+                        recentsUid, recentsPackage);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
