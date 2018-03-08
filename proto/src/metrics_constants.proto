@@ -5461,6 +5461,30 @@ message MetricsEvent {
     // OS: P
     ACTION_HIGH_USAGE_TIP = 1348;
 
+    // ACTION: Settings > Battery settings > Battery tip > Summary tip
+    // OS: P
+    ACTION_SUMMARY_TIP = 1349;
+
+    // ACTION: Settings > Battery settings > Battery tip > Smart battery tip
+    // OS: P
+    ACTION_SMART_BATTERY_TIP = 1350;
+
+    // ACTION: Settings > Battery settings > Battery tip > Early warning tip
+    // OS: P
+    ACTION_EARLY_WARNING_TIP = 1351;
+
+    // ACTION: Settings > Battery settings > Battery tip > Low battery tip
+    // OS: P
+    ACTION_LOW_BATTERY_TIP = 1352;
+
+    // ACTION: Settings > Battery settings > Battery tip > App restriction list shown
+    // OS: P
+    ACTION_APP_RESTRICTION_TIP_LIST = 1353;
+
+    // ACTION: Settings > Battery settings > Battery tip > High usage list shown
+    // OS: P
+    ACTION_HIGH_USAGE_TIP_LIST = 1354;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
