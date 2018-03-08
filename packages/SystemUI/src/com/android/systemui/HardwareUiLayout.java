@@ -124,6 +124,7 @@ public class HardwareUiLayout extends MultiListLayout implements Tunable {
                 params.bottomMargin = edge;
             } else {
                 params.rightMargin = edge;
+                params.leftMargin = edge;
             }
             mList.setLayoutParams(params);
         }
