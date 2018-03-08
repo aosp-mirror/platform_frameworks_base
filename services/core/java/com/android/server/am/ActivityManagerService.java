@@ -26593,6 +26593,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             RemoteAnimationAdapter adapter) throws RemoteException {
         enforceCallingPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS,
                 "registerRemoteAnimationForNextActivityStart");
+        adapter.setCallingPid(Binder.getCallingPid());
         synchronized (this) {
             final long origId = Binder.clearCallingIdentity();
             try {
