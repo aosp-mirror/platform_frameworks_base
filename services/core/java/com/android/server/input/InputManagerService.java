@@ -22,7 +22,6 @@ import android.os.LocaleList;
 import android.os.ShellCallback;
 import android.util.Log;
 import android.view.Display;
-import com.android.internal.inputmethod.InputMethodSubtypeHandle;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.SomeArgs;
@@ -79,8 +78,6 @@ import android.os.Message;
 import android.os.MessageQueue;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.ResultReceiver;
-import android.os.ShellCommand;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
@@ -101,6 +98,7 @@ import android.view.Surface;
 import android.view.ViewConfiguration;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -174,7 +172,8 @@ public class InputManagerService extends IInputManager.Stub
     private final ArrayList<InputDevice>
             mTempFullKeyboards = new ArrayList<InputDevice>(); // handler thread only
     private boolean mKeyboardLayoutNotificationShown;
-    private InputMethodSubtypeHandle mCurrentImeHandle;
+    private PendingIntent mKeyboardLayoutIntent;
+    private Toast mSwitchedKeyboardLayoutToast;
 
     // State for vibrator tokens.
     private Object mVibratorLock = new Object();
@@ -1368,82 +1367,6 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     @Override // Binder call
-    @Nullable
-    public KeyboardLayout getKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
-            InputMethodInfo imeInfo, InputMethodSubtype imeSubtype) {
-        InputMethodSubtypeHandle handle = new InputMethodSubtypeHandle(imeInfo, imeSubtype);
-        String key = getLayoutDescriptor(identifier);
-        final String keyboardLayoutDescriptor;
-        synchronized (mDataStore) {
-            keyboardLayoutDescriptor = mDataStore.getKeyboardLayout(key, handle);
-        }
-
-        if (keyboardLayoutDescriptor == null) {
-            return null;
-        }
-
-        final KeyboardLayout[] result = new KeyboardLayout[1];
-        visitKeyboardLayout(keyboardLayoutDescriptor, new KeyboardLayoutVisitor() {
-            @Override
-            public void visitKeyboardLayout(Resources resources,
-                    int keyboardLayoutResId, KeyboardLayout layout) {
-                result[0] = layout;
-            }
-        });
-        if (result[0] == null) {
-            Slog.w(TAG, "Could not get keyboard layout with descriptor '"
-                    + keyboardLayoutDescriptor + "'.");
-        }
-        return result[0];
-    }
-
-    @Override
-    public void setKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
-            InputMethodInfo imeInfo, InputMethodSubtype imeSubtype,
-            String keyboardLayoutDescriptor) {
-        if (!checkCallingPermission(android.Manifest.permission.SET_KEYBOARD_LAYOUT,
-                "setKeyboardLayoutForInputDevice()")) {
-            throw new SecurityException("Requires SET_KEYBOARD_LAYOUT permission");
-        }
-        if (keyboardLayoutDescriptor == null) {
-            throw new IllegalArgumentException("keyboardLayoutDescriptor must not be null");
-        }
-        if (imeInfo == null || imeSubtype == null) {
-            throw new IllegalArgumentException("imeInfo and imeSubtype must not be null");
-        }
-        InputMethodSubtypeHandle handle = new InputMethodSubtypeHandle(imeInfo, imeSubtype);
-        setKeyboardLayoutForInputDeviceInner(identifier, handle, keyboardLayoutDescriptor);
-    }
-
-    private void setKeyboardLayoutForInputDeviceInner(InputDeviceIdentifier identifier,
-            InputMethodSubtypeHandle imeHandle, String keyboardLayoutDescriptor) {
-        String key = getLayoutDescriptor(identifier);
-        synchronized (mDataStore) {
-            try {
-                if (mDataStore.setKeyboardLayout(key, imeHandle, keyboardLayoutDescriptor)) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "Set keyboard layout " + keyboardLayoutDescriptor +
-                                " for subtype " + imeHandle + " and device " + identifier +
-                                " using key " + key);
-                    }
-                    if (imeHandle.equals(mCurrentImeHandle)) {
-                        if (DEBUG) {
-                            Slog.d(TAG, "Layout for current subtype changed, switching layout");
-                        }
-                        SomeArgs args = SomeArgs.obtain();
-                        args.arg1 = identifier;
-                        args.arg2 = imeHandle;
-                        mHandler.obtainMessage(MSG_SWITCH_KEYBOARD_LAYOUT, args).sendToTarget();
-                    }
-                    mHandler.sendEmptyMessage(MSG_RELOAD_KEYBOARD_LAYOUTS);
-                }
-            } finally {
-                mDataStore.saveIfNeeded();
-            }
-        }
-    }
-
-    @Override // Binder call
     public void addKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
             String keyboardLayoutDescriptor) {
         if (!checkCallingPermission(android.Manifest.permission.SET_KEYBOARD_LAYOUT,
@@ -1462,7 +1385,8 @@ public class InputManagerService extends IInputManager.Stub
                     oldLayout = mDataStore.getCurrentKeyboardLayout(identifier.getDescriptor());
                 }
                 if (mDataStore.addKeyboardLayout(key, keyboardLayoutDescriptor)
-                        && !Objects.equals(oldLayout, mDataStore.getCurrentKeyboardLayout(key))) {
+                        && !Objects.equals(oldLayout,
+                                mDataStore.getCurrentKeyboardLayout(key))) {
                     mHandler.sendEmptyMessage(MSG_RELOAD_KEYBOARD_LAYOUTS);
                 }
             } finally {
@@ -1512,44 +1436,45 @@ public class InputManagerService extends IInputManager.Stub
             Slog.i(TAG, "InputMethodSubtype changed: userId=" + userId
                     + " ime=" + inputMethodInfo + " subtype=" + subtype);
         }
-        if (inputMethodInfo == null) {
-            Slog.d(TAG, "No InputMethod is running, ignoring change");
-            return;
-        }
-        if (subtype != null && !"keyboard".equals(subtype.getMode())) {
-            Slog.d(TAG, "InputMethodSubtype changed to non-keyboard subtype, ignoring change");
-            return;
-        }
-        InputMethodSubtypeHandle handle = new InputMethodSubtypeHandle(inputMethodInfo, subtype);
-        if (!handle.equals(mCurrentImeHandle)) {
-            mCurrentImeHandle = handle;
-            handleSwitchKeyboardLayout(null, handle);
-        }
+    }
+
+    public void switchKeyboardLayout(int deviceId, int direction) {
+        mHandler.obtainMessage(MSG_SWITCH_KEYBOARD_LAYOUT, deviceId, direction).sendToTarget();
     }
 
     // Must be called on handler.
-    private void handleSwitchKeyboardLayout(@Nullable InputDeviceIdentifier identifier,
-            InputMethodSubtypeHandle handle) {
-        synchronized (mInputDevicesLock) {
-            for (InputDevice device : mInputDevices) {
-                if (identifier != null && !device.getIdentifier().equals(identifier) ||
-                        !device.isFullKeyboard()) {
-                    continue;
+    private void handleSwitchKeyboardLayout(int deviceId, int direction) {
+        final InputDevice device = getInputDevice(deviceId);
+        if (device != null) {
+            final boolean changed;
+            final String keyboardLayoutDescriptor;
+
+            String key = getLayoutDescriptor(device.getIdentifier());
+            synchronized (mDataStore) {
+                try {
+                    changed = mDataStore.switchKeyboardLayout(key, direction);
+                    keyboardLayoutDescriptor = mDataStore.getCurrentKeyboardLayout(
+                            key);
+                } finally {
+                    mDataStore.saveIfNeeded();
                 }
-                String key = getLayoutDescriptor(device.getIdentifier());
-                boolean changed = false;
-                synchronized (mDataStore) {
-                    try {
-                        if (mDataStore.switchKeyboardLayout(key, handle)) {
-                            changed = true;
-                        }
-                    } finally {
-                        mDataStore.saveIfNeeded();
+            }
+
+            if (changed) {
+                if (mSwitchedKeyboardLayoutToast != null) {
+                    mSwitchedKeyboardLayoutToast.cancel();
+                    mSwitchedKeyboardLayoutToast = null;
+                }
+                if (keyboardLayoutDescriptor != null) {
+                    KeyboardLayout keyboardLayout = getKeyboardLayout(keyboardLayoutDescriptor);
+                    if (keyboardLayout != null) {
+                        mSwitchedKeyboardLayoutToast = Toast.makeText(
+                                mContext, keyboardLayout.getLabel(), Toast.LENGTH_SHORT);
+                        mSwitchedKeyboardLayoutToast.show();
                     }
                 }
-                if (changed) {
-                    reloadKeyboardLayouts();
-                }
+
+                reloadKeyboardLayouts();
             }
         }
     }
@@ -1790,7 +1715,7 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     @Override
-    public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         pw.println("INPUT MANAGER (dumpsys input)\n");
@@ -1798,48 +1723,7 @@ public class InputManagerService extends IInputManager.Stub
         if (dumpStr != null) {
             pw.println(dumpStr);
         }
-        pw.println("  Keyboard Layouts:");
-        visitAllKeyboardLayouts(new KeyboardLayoutVisitor() {
-            @Override
-            public void visitKeyboardLayout(Resources resources,
-                    int keyboardLayoutResId, KeyboardLayout layout) {
-                pw.println("    \"" + layout + "\": " + layout.getDescriptor());
-            }
-        });
-        pw.println();
-        synchronized(mDataStore) {
-            mDataStore.dump(pw, "  ");
-        }
     }
-
-    @Override
-    public void onShellCommand(FileDescriptor in, FileDescriptor out,
-            FileDescriptor err, String[] args, ShellCallback callback,
-            ResultReceiver resultReceiver) {
-        (new Shell()).exec(this, in, out, err, args, callback, resultReceiver);
-    }
-
-    public int onShellCommand(Shell shell, String cmd) {
-        if (TextUtils.isEmpty(cmd)) {
-            shell.onHelp();
-            return 1;
-        }
-        if (cmd.equals("setlayout")) {
-            if (!checkCallingPermission(android.Manifest.permission.SET_KEYBOARD_LAYOUT,
-                    "onShellCommand()")) {
-                throw new SecurityException("Requires SET_KEYBOARD_LAYOUT permission");
-            }
-            InputMethodSubtypeHandle handle = new InputMethodSubtypeHandle(
-                    shell.getNextArgRequired(), Integer.parseInt(shell.getNextArgRequired()));
-            String descriptor = shell.getNextArgRequired();
-            int vid = Integer.decode(shell.getNextArgRequired());
-            int pid = Integer.decode(shell.getNextArgRequired());
-            InputDeviceIdentifier id = new InputDeviceIdentifier(descriptor, vid, pid);
-            setKeyboardLayoutForInputDeviceInner(id, handle, shell.getNextArgRequired());
-        }
-        return 0;
-    }
-
 
     private boolean checkCallingPermission(String permission, String func) {
         // Quick check: if the calling permission is me, it's all okay.
@@ -2169,12 +2053,9 @@ public class InputManagerService extends IInputManager.Stub
                 case MSG_DELIVER_INPUT_DEVICES_CHANGED:
                     deliverInputDevicesChanged((InputDevice[])msg.obj);
                     break;
-                case MSG_SWITCH_KEYBOARD_LAYOUT: {
-                    SomeArgs args = (SomeArgs)msg.obj;
-                    handleSwitchKeyboardLayout((InputDeviceIdentifier)args.arg1,
-                            (InputMethodSubtypeHandle)args.arg2);
+                case MSG_SWITCH_KEYBOARD_LAYOUT:
+                    handleSwitchKeyboardLayout(msg.arg1, msg.arg2);
                     break;
-                }
                 case MSG_RELOAD_KEYBOARD_LAYOUTS:
                     reloadKeyboardLayouts();
                     break;
@@ -2338,25 +2219,6 @@ public class InputManagerService extends IInputManager.Stub
                 Slog.d(TAG, "Vibrator token died.");
             }
             onVibratorTokenDied(this);
-        }
-    }
-
-    private class Shell extends ShellCommand {
-        @Override
-        public int onCommand(String cmd) {
-            return onShellCommand(this, cmd);
-        }
-
-        @Override
-        public void onHelp() {
-            final PrintWriter pw = getOutPrintWriter();
-            pw.println("Input manager commands:");
-            pw.println("  help");
-            pw.println("    Print this help text.");
-            pw.println("");
-            pw.println("  setlayout IME_ID IME_SUPTYPE_HASH_CODE"
-                    + " DEVICE_DESCRIPTOR VENDOR_ID PRODUCT_ID KEYBOARD_DESCRIPTOR");
-            pw.println("    Sets a keyboard layout for a given IME subtype and input device pair");
         }
     }
 

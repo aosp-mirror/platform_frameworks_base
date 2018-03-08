@@ -26,8 +26,6 @@ import android.os.IBinder;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.PointerIcon;
-import android.view.inputmethod.InputMethodInfo;
-import android.view.inputmethod.InputMethodSubtype;
 
 /** @hide */
 interface IInputManager {
@@ -66,11 +64,6 @@ interface IInputManager {
     void addKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier,
             String keyboardLayoutDescriptor);
     void removeKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier,
-            String keyboardLayoutDescriptor);
-    KeyboardLayout getKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier,
-            in InputMethodInfo imeInfo, in InputMethodSubtype imeSubtype);
-    void setKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier,
-            in InputMethodInfo imeInfo, in InputMethodSubtype imeSubtype,
             String keyboardLayoutDescriptor);
 
     // Registers an input devices changed listener.
