@@ -30,20 +30,33 @@ MaxDurationTracker::MaxDurationTracker(const ConfigKey& key, const int64_t& id,
                                        const vector<Matcher>& dimensionInCondition, bool nesting,
                                        uint64_t currentBucketStartNs, uint64_t currentBucketNum,
                                        uint64_t startTimeNs, uint64_t bucketSizeNs,
-                                       bool conditionSliced,
+                                       bool conditionSliced, bool fullLink,
                                        const vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
     : DurationTracker(key, id, eventKey, wizard, conditionIndex, dimensionInCondition, nesting,
                       currentBucketStartNs, currentBucketNum, startTimeNs, bucketSizeNs,
-                      conditionSliced, anomalyTrackers) {
+                      conditionSliced, fullLink, anomalyTrackers) {
+    if (mWizard != nullptr) {
+        mSameConditionDimensionsInTracker =
+            mWizard->equalOutputDimensions(conditionIndex, mDimensionInCondition);
+    }
 }
 
 unique_ptr<DurationTracker> MaxDurationTracker::clone(const uint64_t eventTime) {
     auto clonedTracker = make_unique<MaxDurationTracker>(*this);
-    for (auto it = clonedTracker->mInfos.begin(); it != clonedTracker->mInfos.end(); ++it) {
-        it->second.lastStartTime = eventTime;
-        it->second.lastDuration = 0;
+    for (auto it = clonedTracker->mInfos.begin(); it != clonedTracker->mInfos.end();) {
+        if (it->second.state  != kStopped) {
+            it->second.lastStartTime = eventTime;
+            it->second.lastDuration = 0;
+            it++;
+        } else {
+            it = clonedTracker->mInfos.erase(it);
+        }
     }
-    return clonedTracker;
+    if (clonedTracker->mInfos.empty()) {
+        return nullptr;
+    } else {
+        return clonedTracker;
+    }
 }
 
 bool MaxDurationTracker::hitGuardRail(const HashableDimensionKey& newKey) {
@@ -59,7 +72,7 @@ bool MaxDurationTracker::hitGuardRail(const HashableDimensionKey& newKey) {
         // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
         if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
             ALOGE("MaxDurTracker %lld dropping data for dimension key %s",
-                (long long)mTrackerId, newKey.c_str());
+                (long long)mTrackerId, newKey.toString().c_str());
             return true;
         }
     }
@@ -77,7 +90,7 @@ void MaxDurationTracker::noteStart(const HashableDimensionKey& key, bool conditi
     if (mConditionSliced) {
         duration.conditionKeys = conditionKey;
     }
-    VLOG("MaxDuration: key %s start condition %d", key.c_str(), condition);
+    VLOG("MaxDuration: key %s start condition %d", key.toString().c_str(), condition);
 
     switch (duration.state) {
         case kStarted:
@@ -103,7 +116,7 @@ void MaxDurationTracker::noteStart(const HashableDimensionKey& key, bool conditi
 
 void MaxDurationTracker::noteStop(const HashableDimensionKey& key, const uint64_t eventTime,
                                   bool forceStop) {
-    VLOG("MaxDuration: key %s stop", key.c_str());
+    VLOG("MaxDuration: key %s stop", key.toString().c_str());
     if (mInfos.find(key) == mInfos.end()) {
         // we didn't see a start event before. do nothing.
         return;
@@ -120,7 +133,7 @@ void MaxDurationTracker::noteStop(const HashableDimensionKey& key, const uint64_
                 stopAnomalyAlarm();
                 duration.state = DurationState::kStopped;
                 int64_t durationTime = eventTime - duration.lastStartTime;
-                VLOG("Max, key %s, Stop %lld %lld %lld", key.c_str(),
+                VLOG("Max, key %s, Stop %lld %lld %lld", key.toString().c_str(),
                      (long long)duration.lastStartTime, (long long)eventTime,
                      (long long)durationTime);
                 duration.lastDuration += durationTime;
@@ -241,13 +254,15 @@ void MaxDurationTracker::onSlicedConditionMayChange(const uint64_t timestamp) {
         std::unordered_set<HashableDimensionKey> conditionDimensionKeySet;
         ConditionState conditionState = mWizard->query(
             mConditionTrackerIndex, pair.second.conditionKeys, mDimensionInCondition,
+            !mSameConditionDimensionsInTracker,
+            !mHasLinksToAllConditionDimensionsInTracker,
             &conditionDimensionKeySet);
         bool conditionMet =
                 (conditionState == ConditionState::kTrue) &&
                 (mDimensionInCondition.size() == 0 ||
                  conditionDimensionKeySet.find(mEventKey.getDimensionKeyInCondition()) !=
                          conditionDimensionKeySet.end());
-        VLOG("key: %s, condition: %d", pair.first.c_str(), conditionMet);
+        VLOG("key: %s, condition: %d", pair.first.toString().c_str(), conditionMet);
         noteConditionChanged(pair.first, conditionMet, timestamp);
     }
 }
@@ -277,7 +292,7 @@ void MaxDurationTracker::noteConditionChanged(const HashableDimensionKey& key, b
                     // In case any other dimensions are still started, we need to set the alarm.
                     startAnomalyAlarm(timestamp);
                 }
-                VLOG("MaxDurationTracker Key: %s Started->Paused ", key.c_str());
+                VLOG("MaxDurationTracker Key: %s Started->Paused ", key.toString().c_str());
             }
             break;
         case kStopped:
@@ -290,7 +305,7 @@ void MaxDurationTracker::noteConditionChanged(const HashableDimensionKey& key, b
                 it->second.state = DurationState::kStarted;
                 it->second.lastStartTime = timestamp;
                 startAnomalyAlarm(timestamp);
-                VLOG("MaxDurationTracker Key: %s Paused->Started", key.c_str());
+                VLOG("MaxDurationTracker Key: %s Paused->Started", key.toString().c_str());
             }
             break;
     }

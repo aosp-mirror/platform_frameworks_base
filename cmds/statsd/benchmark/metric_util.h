@@ -14,7 +14,6 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "src/StatsLogProcessor.h"
@@ -40,15 +39,6 @@ AtomMatcher CreateFinishScheduledJobAtomMatcher();
 // Create AtomMatcher proto for screen brightness state changed.
 AtomMatcher CreateScreenBrightnessChangedAtomMatcher();
 
-// Create AtomMatcher proto for starting battery save mode.
-AtomMatcher CreateBatterySaverModeStartAtomMatcher();
-
-// Create AtomMatcher proto for stopping battery save mode.
-AtomMatcher CreateBatterySaverModeStopAtomMatcher();
-
-// Create AtomMatcher proto for process state changed.
-AtomMatcher CreateUidProcessStateChangedAtomMatcher();
-
 // Create AtomMatcher proto for acquiring wakelock.
 AtomMatcher CreateAcquireWakelockAtomMatcher();
 
@@ -73,20 +63,11 @@ AtomMatcher CreateMoveToBackgroundAtomMatcher();
 // Create AtomMatcher proto for app sync moves to foreground.
 AtomMatcher CreateMoveToForegroundAtomMatcher();
 
-// Create AtomMatcher proto for process crashes
-AtomMatcher CreateProcessCrashAtomMatcher() ;
-
-// Create Predicate proto for screen is on.
-Predicate CreateScreenIsOnPredicate();
-
 // Create Predicate proto for screen is off.
 Predicate CreateScreenIsOffPredicate();
 
 // Create Predicate proto for a running scheduled job.
 Predicate CreateScheduledJobPredicate();
-
-// Create Predicate proto for battery saver mode.
-Predicate CreateBatterySaverModePredicate();
 
 // Create Predicate proto for holding wakelock.
 Predicate CreateHoldingWakelockPredicate();
@@ -128,11 +109,6 @@ std::unique_ptr<LogEvent> CreateStartScheduledJobEvent(
 std::unique_ptr<LogEvent> CreateFinishScheduledJobEvent(
     const std::vector<AttributionNodeInternal>& attributions,
     const string& name, uint64_t timestampNs);
-
-// Create log event when battery saver starts.
-std::unique_ptr<LogEvent> CreateBatterySaverOnEvent(uint64_t timestampNs);
-// Create log event when battery saver stops.
-std::unique_ptr<LogEvent> CreateBatterySaverOffEvent(uint64_t timestampNs);
 
 // Create log event for app moving to background.
 std::unique_ptr<LogEvent> CreateMoveToBackgroundEvent(const int uid, uint64_t timestampNs);
@@ -179,40 +155,6 @@ sp<StatsLogProcessor> CreateStatsLogProcessor(const long timeBaseSec, const Stat
 void sortLogEventsByTimestamp(std::vector<std::unique_ptr<LogEvent>> *events);
 
 int64_t StringToId(const string& str);
-
-void ValidateAttributionUidDimension(const DimensionsValue& value, int atomId, int uid);
-void ValidateAttributionUidAndTagDimension(
-    const DimensionsValue& value, int atomId, int uid, const std::string& tag);
-
-struct DimensionsPair {
-    DimensionsPair(DimensionsValue m1, DimensionsValue m2) : dimInWhat(m1), dimInCondition(m2){};
-
-    DimensionsValue dimInWhat;
-    DimensionsValue dimInCondition;
-};
-
-bool LessThan(const DimensionsValue& s1, const DimensionsValue& s2);
-bool LessThan(const DimensionsPair& s1, const DimensionsPair& s2);
-
-struct DimensionCompare {
-    bool operator()(const DimensionsPair& s1, const DimensionsPair& s2) const {
-        return LessThan(s1, s2);
-    }
-};
-
-template <typename T>
-void sortMetricDataByDimensionsValue(const T& metricData, T* sortedMetricData) {
-    std::map<DimensionsPair, int, DimensionCompare> dimensionIndexMap;
-    for (int i = 0; i < metricData.data_size(); ++i) {
-        dimensionIndexMap.insert(
-                std::make_pair(DimensionsPair(metricData.data(i).dimensions_in_what(),
-                                              metricData.data(i).dimensions_in_condition()),
-                               i));
-    }
-    for (const auto& itr : dimensionIndexMap) {
-        *sortedMetricData->add_data() = metricData.data(itr.second);
-    }
-}
 
 }  // namespace statsd
 }  // namespace os

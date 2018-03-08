@@ -59,6 +59,33 @@ android::hash_t hashDimension(const HashableDimensionKey& value) {
     return JenkinsHashWhiten(hash);
 }
 
+bool filterValues(const vector<Matcher>& matcherFields, const vector<FieldValue>& values,
+                  HashableDimensionKey* output) {
+    for (size_t i = 0; i < matcherFields.size(); ++i) {
+        const auto& matcher = matcherFields[i];
+        bool found = false;
+        for (const auto& value : values) {
+            // TODO: potential optimization here to break early because all fields are naturally
+            // sorted.
+            if (value.mField.matches(matcher)) {
+                output->addValue(value);
+                output->mutableValue(i)->mField.setTag(value.mField.getTag());
+                output->mutableValue(i)->mField.setField(value.mField.getField() & matcher.mMask);
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            VLOG("We can't find a dimension value for matcher (%d)%#x.", matcher.mMatcher.getTag(),
+                   matcher.mMatcher.getField());
+            return false;
+        }
+    }
+
+    return true;
+}
+
 // Filter fields using the matchers and output the results as a HashableDimensionKey.
 // Note: HashableDimensionKey is just a wrapper for vector<FieldValue>
 bool filterValues(const vector<Matcher>& matcherFields, const vector<FieldValue>& values,
@@ -168,22 +195,21 @@ void filterGaugeValues(const std::vector<Matcher>& matcherFields,
 
 void getDimensionForCondition(const std::vector<FieldValue>& eventValues,
                               const Metric2Condition& links,
-                              vector<HashableDimensionKey>* conditionDimension) {
+                              HashableDimensionKey* conditionDimension) {
     // Get the dimension first by using dimension from what.
     filterValues(links.metricFields, eventValues, conditionDimension);
 
-    // Then replace the field with the dimension from condition.
-    for (auto& dim : *conditionDimension) {
-        size_t count = dim.getValues().size();
-        if (count != links.conditionFields.size()) {
-            // ALOGE("WTF condition link is bad");
-            return;
-        }
+    size_t count = conditionDimension->getValues().size();
+    if (count != links.conditionFields.size()) {
+        // ALOGE("WTF condition link is bad");
+        return;
+    }
 
-        for (size_t i = 0; i < count; i++) {
-            dim.mutableValue(i)->mField.setField(links.conditionFields[i].mMatcher.getField());
-            dim.mutableValue(i)->mField.setTag(links.conditionFields[i].mMatcher.getTag());
-        }
+    for (size_t i = 0; i < count; i++) {
+        conditionDimension->mutableValue(i)->mField.setField(
+            links.conditionFields[i].mMatcher.getField());
+        conditionDimension->mutableValue(i)->mField.setTag(
+            links.conditionFields[i].mMatcher.getTag());
     }
 }
 

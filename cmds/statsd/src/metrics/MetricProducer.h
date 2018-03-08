@@ -50,7 +50,11 @@ public:
           mCondition(conditionIndex >= 0 ? false : true),
           mConditionSliced(false),
           mWizard(wizard),
-          mConditionTrackerIndex(conditionIndex){};
+          mConditionTrackerIndex(conditionIndex),
+          mContainANYPositionInDimensionsInWhat(false),
+          mSameConditionDimensionsInTracker(false),
+          mHasLinksToAllConditionDimensionsInTracker(false) {
+    }
 
     virtual ~MetricProducer(){};
 
@@ -218,6 +222,16 @@ protected:
 
     vector<Matcher> mDimensionsInWhat;       // The dimensions_in_what defined in statsd_config
     vector<Matcher> mDimensionsInCondition;  // The dimensions_in_condition defined in statsd_config
+
+    bool mContainANYPositionInDimensionsInWhat;
+
+    // True iff the condition dimensions equal to the sliced dimensions in the simple condition
+    // tracker. This field is always false for combinational condition trackers.
+    bool mSameConditionDimensionsInTracker;
+
+    // True iff the metric to condition links cover all dimension fields in the condition tracker.
+    // This field is always false for combinational condition trackers.
+    bool mHasLinksToAllConditionDimensionsInTracker;
 
     std::vector<Metric2Condition> mMetric2ConditionLinks;
 

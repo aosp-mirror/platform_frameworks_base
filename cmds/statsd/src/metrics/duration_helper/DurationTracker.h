@@ -64,7 +64,7 @@ public:
                     sp<ConditionWizard> wizard, int conditionIndex,
                     const std::vector<Matcher>& dimensionInCondition, bool nesting,
                     uint64_t currentBucketStartNs, uint64_t currentBucketNum, uint64_t startTimeNs,
-                    uint64_t bucketSizeNs, bool conditionSliced,
+                    uint64_t bucketSizeNs, bool conditionSliced, bool fullLink,
                     const std::vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
         : mConfigKey(key),
           mTrackerId(id),
@@ -80,6 +80,7 @@ public:
           mCurrentBucketNum(currentBucketNum),
           mStartTimeNs(startTimeNs),
           mConditionSliced(conditionSliced),
+          mHasLinksToAllConditionDimensionsInTracker(fullLink),
           mAnomalyTrackers(anomalyTrackers){};
 
     virtual ~DurationTracker(){};
@@ -197,6 +198,9 @@ protected:
     const uint64_t mStartTimeNs;
 
     const bool mConditionSliced;
+
+    bool mSameConditionDimensionsInTracker;
+    bool mHasLinksToAllConditionDimensionsInTracker;
 
     std::vector<sp<DurationAnomalyTracker>> mAnomalyTrackers;
 

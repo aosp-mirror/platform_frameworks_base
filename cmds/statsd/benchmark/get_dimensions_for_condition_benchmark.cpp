@@ -26,7 +26,7 @@ namespace statsd {
 
 using std::vector;
 
-static void createLogEventAndMatcher(LogEvent* event, FieldMatcher *field_matcher) {
+static void createLogEventAndLink(LogEvent* event, Metric2Condition *link) {
     AttributionNodeInternal node;
     node.set_uid(100);
     node.set_tag("LOCATION");
@@ -38,44 +38,33 @@ static void createLogEventAndMatcher(LogEvent* event, FieldMatcher *field_matche
     event->write((int64_t)990);
     event->init();
 
-    field_matcher->set_field(1);
-    auto child = field_matcher->add_child();
+    link->conditionId = 1;
+
+    FieldMatcher field_matcher;
+    field_matcher.set_field(event->GetTagId());
+    auto child = field_matcher.add_child();
     child->set_field(1);
     child->set_position(FIRST);
     child->add_child()->set_field(1);
+
+    translateFieldMatcher(field_matcher, &link->metricFields);
+    field_matcher.set_field(event->GetTagId() + 1);
+    translateFieldMatcher(field_matcher, &link->conditionFields);
 }
 
-static void BM_FilterValue(benchmark::State& state) {
+static void BM_GetDimensionInCondition(benchmark::State& state) {
+    Metric2Condition link;
     LogEvent event(1, 100000);
-    FieldMatcher field_matcher;
-    createLogEventAndMatcher(&event, &field_matcher);
-
-    std::vector<Matcher> matchers;
-    translateFieldMatcher(field_matcher, &matchers);
-
-    while (state.KeepRunning()) {
-        vector<HashableDimensionKey> output;
-        filterValues(matchers, event.getValues(), &output);
-    }
-}
-
-BENCHMARK(BM_FilterValue);
-
-static void BM_FilterValue2(benchmark::State& state) {
-    LogEvent event(1, 100000);
-    FieldMatcher field_matcher;
-    createLogEventAndMatcher(&event, &field_matcher);
-
-    std::vector<Matcher> matchers;
-    translateFieldMatcher(field_matcher, &matchers);
+    createLogEventAndLink(&event, &link);
 
     while (state.KeepRunning()) {
         HashableDimensionKey output;
-        filterValues(matchers, event.getValues(), &output);
+        getDimensionForCondition(event.getValues(), link, &output);
     }
 }
 
-BENCHMARK(BM_FilterValue2);
+BENCHMARK(BM_GetDimensionInCondition);
+
 
 }  //  namespace statsd
 }  //  namespace os
