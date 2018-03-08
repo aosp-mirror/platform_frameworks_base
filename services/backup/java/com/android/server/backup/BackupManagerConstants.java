@@ -18,53 +18,76 @@ package com.android.server.backup;
 
 import android.app.AlarmManager;
 import android.content.ContentResolver;
-import android.database.ContentObserver;
-import android.net.Uri;
 import android.os.Handler;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.KeyValueListParser;
+import android.util.KeyValueSettingObserver;
 import android.util.Slog;
+import com.android.internal.annotations.VisibleForTesting;
 
 /**
  * Class to access backup manager constants.
  *
- * The backup manager constants are encoded as a key value list separated by commas
- * and stored as a Settings.Secure.
+ * <p>The backup manager constants are encoded as a key value list separated by commas and stored as
+ * a Settings.Secure.
  */
-class BackupManagerConstants extends ContentObserver {
+class BackupManagerConstants extends KeyValueSettingObserver {
     private static final String TAG = "BackupManagerConstants";
+    private static final String SETTING = Settings.Secure.BACKUP_MANAGER_CONSTANTS;
 
     // Key names stored in the secure settings value.
-    private static final String KEY_VALUE_BACKUP_INTERVAL_MILLISECONDS =
+    @VisibleForTesting
+    public static final String KEY_VALUE_BACKUP_INTERVAL_MILLISECONDS =
             "key_value_backup_interval_milliseconds";
-    private static final String KEY_VALUE_BACKUP_FUZZ_MILLISECONDS =
+
+    @VisibleForTesting
+    public static final String KEY_VALUE_BACKUP_FUZZ_MILLISECONDS =
             "key_value_backup_fuzz_milliseconds";
-    private static final String KEY_VALUE_BACKUP_REQUIRE_CHARGING =
+
+    @VisibleForTesting
+    public static final String KEY_VALUE_BACKUP_REQUIRE_CHARGING =
             "key_value_backup_require_charging";
-    private static final String KEY_VALUE_BACKUP_REQUIRED_NETWORK_TYPE =
+
+    @VisibleForTesting
+    public static final String KEY_VALUE_BACKUP_REQUIRED_NETWORK_TYPE =
             "key_value_backup_required_network_type";
-    private static final String FULL_BACKUP_INTERVAL_MILLISECONDS =
+
+    @VisibleForTesting
+    public static final String FULL_BACKUP_INTERVAL_MILLISECONDS =
             "full_backup_interval_milliseconds";
-    private static final String FULL_BACKUP_REQUIRE_CHARGING =
-            "full_backup_require_charging";
-    private static final String FULL_BACKUP_REQUIRED_NETWORK_TYPE =
+
+    @VisibleForTesting
+    public static final String FULL_BACKUP_REQUIRE_CHARGING = "full_backup_require_charging";
+
+    @VisibleForTesting
+    public static final String FULL_BACKUP_REQUIRED_NETWORK_TYPE =
             "full_backup_required_network_type";
-    private static final String BACKUP_FINISHED_NOTIFICATION_RECEIVERS =
+
+    @VisibleForTesting
+    public static final String BACKUP_FINISHED_NOTIFICATION_RECEIVERS =
             "backup_finished_notification_receivers";
 
     // Hard coded default values.
-    private static final long DEFAULT_KEY_VALUE_BACKUP_INTERVAL_MILLISECONDS =
+    @VisibleForTesting
+    public static final long DEFAULT_KEY_VALUE_BACKUP_INTERVAL_MILLISECONDS =
             4 * AlarmManager.INTERVAL_HOUR;
-    private static final long DEFAULT_KEY_VALUE_BACKUP_FUZZ_MILLISECONDS =
-            10 * 60 * 1000;
-    private static final boolean DEFAULT_KEY_VALUE_BACKUP_REQUIRE_CHARGING = true;
-    private static final int DEFAULT_KEY_VALUE_BACKUP_REQUIRED_NETWORK_TYPE = 1;
-    private static final long DEFAULT_FULL_BACKUP_INTERVAL_MILLISECONDS =
+
+    @VisibleForTesting
+    public static final long DEFAULT_KEY_VALUE_BACKUP_FUZZ_MILLISECONDS = 10 * 60 * 1000;
+
+    @VisibleForTesting public static final boolean DEFAULT_KEY_VALUE_BACKUP_REQUIRE_CHARGING = true;
+    @VisibleForTesting public static final int DEFAULT_KEY_VALUE_BACKUP_REQUIRED_NETWORK_TYPE = 1;
+
+    @VisibleForTesting
+    public static final long DEFAULT_FULL_BACKUP_INTERVAL_MILLISECONDS =
             24 * AlarmManager.INTERVAL_HOUR;
-    private static final boolean DEFAULT_FULL_BACKUP_REQUIRE_CHARGING = true;
-    private static final int DEFAULT_FULL_BACKUP_REQUIRED_NETWORK_TYPE = 2;
-    private static final String DEFAULT_BACKUP_FINISHED_NOTIFICATION_RECEIVERS = "";
+
+    @VisibleForTesting public static final boolean DEFAULT_FULL_BACKUP_REQUIRE_CHARGING = true;
+    @VisibleForTesting public static final int DEFAULT_FULL_BACKUP_REQUIRED_NETWORK_TYPE = 2;
+
+    @VisibleForTesting
+    public static final String DEFAULT_BACKUP_FINISHED_NOTIFICATION_RECEIVERS = "";
 
     // Backup manager constants.
     private long mKeyValueBackupIntervalMilliseconds;
@@ -76,49 +99,46 @@ class BackupManagerConstants extends ContentObserver {
     private int mFullBackupRequiredNetworkType;
     private String[] mBackupFinishedNotificationReceivers;
 
-    private ContentResolver mResolver;
-    private final KeyValueListParser mParser = new KeyValueListParser(',');
-
     public BackupManagerConstants(Handler handler, ContentResolver resolver) {
-        super(handler);
-        mResolver = resolver;
-        updateSettings();
-        mResolver.registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.BACKUP_MANAGER_CONSTANTS), false, this);
+        super(handler, resolver, Settings.Secure.getUriFor(SETTING));
     }
 
-    @Override
-    public void onChange(boolean selfChange, Uri uri) {
-        updateSettings();
+    public String getSettingValue(ContentResolver resolver) {
+        return Settings.Secure.getString(resolver, SETTING);
     }
 
-    private synchronized void updateSettings() {
-        try {
-            mParser.setString(Settings.Secure.getString(mResolver,
-                    Settings.Secure.BACKUP_MANAGER_CONSTANTS));
-        } catch (IllegalArgumentException e) {
-            // Failed to parse the settings string. Use defaults.
-            Slog.e(TAG, "Bad backup manager constants: " + e.getMessage());
-        }
-
-        mKeyValueBackupIntervalMilliseconds = mParser.getLong(
-                KEY_VALUE_BACKUP_INTERVAL_MILLISECONDS,
-                DEFAULT_KEY_VALUE_BACKUP_INTERVAL_MILLISECONDS);
-        mKeyValueBackupFuzzMilliseconds = mParser.getLong(KEY_VALUE_BACKUP_FUZZ_MILLISECONDS,
-                DEFAULT_KEY_VALUE_BACKUP_FUZZ_MILLISECONDS);
-        mKeyValueBackupRequireCharging = mParser.getBoolean(KEY_VALUE_BACKUP_REQUIRE_CHARGING,
-                DEFAULT_KEY_VALUE_BACKUP_REQUIRE_CHARGING);
-        mKeyValueBackupRequiredNetworkType = mParser.getInt(KEY_VALUE_BACKUP_REQUIRED_NETWORK_TYPE,
-                DEFAULT_KEY_VALUE_BACKUP_REQUIRED_NETWORK_TYPE);
-        mFullBackupIntervalMilliseconds = mParser.getLong(FULL_BACKUP_INTERVAL_MILLISECONDS,
-                DEFAULT_FULL_BACKUP_INTERVAL_MILLISECONDS);
-        mFullBackupRequireCharging = mParser.getBoolean(FULL_BACKUP_REQUIRE_CHARGING,
-                DEFAULT_FULL_BACKUP_REQUIRE_CHARGING);
-        mFullBackupRequiredNetworkType = mParser.getInt(FULL_BACKUP_REQUIRED_NETWORK_TYPE,
-                DEFAULT_FULL_BACKUP_REQUIRED_NETWORK_TYPE);
-        String backupFinishedNotificationReceivers = mParser.getString(
-                BACKUP_FINISHED_NOTIFICATION_RECEIVERS,
-                DEFAULT_BACKUP_FINISHED_NOTIFICATION_RECEIVERS);
+    public synchronized void update(KeyValueListParser parser) {
+        mKeyValueBackupIntervalMilliseconds =
+                parser.getLong(
+                        KEY_VALUE_BACKUP_INTERVAL_MILLISECONDS,
+                        DEFAULT_KEY_VALUE_BACKUP_INTERVAL_MILLISECONDS);
+        mKeyValueBackupFuzzMilliseconds =
+                parser.getLong(
+                        KEY_VALUE_BACKUP_FUZZ_MILLISECONDS,
+                        DEFAULT_KEY_VALUE_BACKUP_FUZZ_MILLISECONDS);
+        mKeyValueBackupRequireCharging =
+                parser.getBoolean(
+                        KEY_VALUE_BACKUP_REQUIRE_CHARGING,
+                        DEFAULT_KEY_VALUE_BACKUP_REQUIRE_CHARGING);
+        mKeyValueBackupRequiredNetworkType =
+                parser.getInt(
+                        KEY_VALUE_BACKUP_REQUIRED_NETWORK_TYPE,
+                        DEFAULT_KEY_VALUE_BACKUP_REQUIRED_NETWORK_TYPE);
+        mFullBackupIntervalMilliseconds =
+                parser.getLong(
+                        FULL_BACKUP_INTERVAL_MILLISECONDS,
+                        DEFAULT_FULL_BACKUP_INTERVAL_MILLISECONDS);
+        mFullBackupRequireCharging =
+                parser.getBoolean(
+                        FULL_BACKUP_REQUIRE_CHARGING, DEFAULT_FULL_BACKUP_REQUIRE_CHARGING);
+        mFullBackupRequiredNetworkType =
+                parser.getInt(
+                        FULL_BACKUP_REQUIRED_NETWORK_TYPE,
+                        DEFAULT_FULL_BACKUP_REQUIRED_NETWORK_TYPE);
+        String backupFinishedNotificationReceivers =
+                parser.getString(
+                        BACKUP_FINISHED_NOTIFICATION_RECEIVERS,
+                        DEFAULT_BACKUP_FINISHED_NOTIFICATION_RECEIVERS);
         if (backupFinishedNotificationReceivers.isEmpty()) {
             mBackupFinishedNotificationReceivers = new String[] {};
         } else {
@@ -132,40 +152,50 @@ class BackupManagerConstants extends ContentObserver {
     // a reference of this object.
     public synchronized long getKeyValueBackupIntervalMilliseconds() {
         if (BackupManagerService.DEBUG_SCHEDULING) {
-            Slog.v(TAG, "getKeyValueBackupIntervalMilliseconds(...) returns "
-                    + mKeyValueBackupIntervalMilliseconds);
+            Slog.v(
+                    TAG,
+                    "getKeyValueBackupIntervalMilliseconds(...) returns "
+                            + mKeyValueBackupIntervalMilliseconds);
         }
         return mKeyValueBackupIntervalMilliseconds;
     }
 
     public synchronized long getKeyValueBackupFuzzMilliseconds() {
         if (BackupManagerService.DEBUG_SCHEDULING) {
-            Slog.v(TAG, "getKeyValueBackupFuzzMilliseconds(...) returns "
-                    + mKeyValueBackupFuzzMilliseconds);
+            Slog.v(
+                    TAG,
+                    "getKeyValueBackupFuzzMilliseconds(...) returns "
+                            + mKeyValueBackupFuzzMilliseconds);
         }
         return mKeyValueBackupFuzzMilliseconds;
     }
 
     public synchronized boolean getKeyValueBackupRequireCharging() {
         if (BackupManagerService.DEBUG_SCHEDULING) {
-            Slog.v(TAG, "getKeyValueBackupRequireCharging(...) returns "
-                    + mKeyValueBackupRequireCharging);
+            Slog.v(
+                    TAG,
+                    "getKeyValueBackupRequireCharging(...) returns "
+                            + mKeyValueBackupRequireCharging);
         }
         return mKeyValueBackupRequireCharging;
     }
 
     public synchronized int getKeyValueBackupRequiredNetworkType() {
         if (BackupManagerService.DEBUG_SCHEDULING) {
-            Slog.v(TAG, "getKeyValueBackupRequiredNetworkType(...) returns "
-                    + mKeyValueBackupRequiredNetworkType);
+            Slog.v(
+                    TAG,
+                    "getKeyValueBackupRequiredNetworkType(...) returns "
+                            + mKeyValueBackupRequiredNetworkType);
         }
         return mKeyValueBackupRequiredNetworkType;
     }
 
     public synchronized long getFullBackupIntervalMilliseconds() {
         if (BackupManagerService.DEBUG_SCHEDULING) {
-            Slog.v(TAG, "getFullBackupIntervalMilliseconds(...) returns "
-                    + mFullBackupIntervalMilliseconds);
+            Slog.v(
+                    TAG,
+                    "getFullBackupIntervalMilliseconds(...) returns "
+                            + mFullBackupIntervalMilliseconds);
         }
         return mFullBackupIntervalMilliseconds;
     }
@@ -179,19 +209,21 @@ class BackupManagerConstants extends ContentObserver {
 
     public synchronized int getFullBackupRequiredNetworkType() {
         if (BackupManagerService.DEBUG_SCHEDULING) {
-            Slog.v(TAG, "getFullBackupRequiredNetworkType(...) returns "
-                    + mFullBackupRequiredNetworkType);
+            Slog.v(
+                    TAG,
+                    "getFullBackupRequiredNetworkType(...) returns "
+                            + mFullBackupRequiredNetworkType);
         }
         return mFullBackupRequiredNetworkType;
     }
 
-    /**
-     * Returns an array of package names that should be notified whenever a backup finishes.
-     */
+    /** Returns an array of package names that should be notified whenever a backup finishes. */
     public synchronized String[] getBackupFinishedNotificationReceivers() {
         if (BackupManagerService.DEBUG_SCHEDULING) {
-            Slog.v(TAG, "getBackupFinishedNotificationReceivers(...) returns "
-                    + TextUtils.join(", ", mBackupFinishedNotificationReceivers));
+            Slog.v(
+                    TAG,
+                    "getBackupFinishedNotificationReceivers(...) returns "
+                            + TextUtils.join(", ", mBackupFinishedNotificationReceivers));
         }
         return mBackupFinishedNotificationReceivers;
     }
