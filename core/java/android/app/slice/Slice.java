@@ -142,11 +142,8 @@ public final class Slice implements Parcelable {
      */
     public static final String HINT_SEE_MORE = "see_more";
     /**
-     * A hint used when implementing app-specific slice permissions.
-     * Tells the system that for this slice the return value of
-     * {@link SliceProvider#onBindSlice(Uri, List)} may be different depending on
-     * {@link SliceProvider#getBindingPackage} and should not be cached for multiple
-     * apps.
+     * @see Builder#setCallerNeeded
+     * @hide
      */
     public static final String HINT_CALLER_NEEDED = "caller_needed";
     /**
@@ -290,6 +287,14 @@ public final class Slice implements Parcelable {
     }
 
     /**
+     * Returns whether the caller for this slice matters.
+     * @see Builder#setCallerNeeded
+     */
+    public boolean isCallerNeeded() {
+        return hasHint(HINT_CALLER_NEEDED);
+    }
+
+    /**
      * A Builder used to construct {@link Slice}s
      */
     public static class Builder {
@@ -315,6 +320,21 @@ public final class Slice implements Parcelable {
         public Builder(@NonNull Slice.Builder parent) {
             mUri = parent.mUri.buildUpon().appendPath("_gen")
                     .appendPath(String.valueOf(mItems.size())).build();
+        }
+
+        /**
+         * Tells the system whether for this slice the return value of
+         * {@link SliceProvider#onBindSlice(Uri, List)} may be different depending on
+         * {@link SliceProvider#getCallingPackage()} and should not be cached for multiple
+         * apps.
+         */
+        public Builder setCallerNeeded(boolean callerNeeded) {
+            if (callerNeeded) {
+                mHints.add(HINT_CALLER_NEEDED);
+            } else {
+                mHints.remove(HINT_CALLER_NEEDED);
+            }
+            return this;
         }
 
         /**
