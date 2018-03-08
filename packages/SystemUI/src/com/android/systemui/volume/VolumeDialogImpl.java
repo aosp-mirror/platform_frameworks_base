@@ -207,8 +207,6 @@ public class VolumeDialogImpl implements VolumeDialog {
             rescheduleTimeoutH();
             return true;
         });
-        VolumeUiLayout uiLayout = VolumeUiLayout.get(mDialogView);
-        uiLayout.updateRotation();
 
         mDialogRowsView = mDialog.findViewById(R.id.volume_dialog_rows);
         mRinger = mDialog.findViewById(R.id.ringer);

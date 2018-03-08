@@ -5074,11 +5074,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         pf.set(displayFrames.mOverscan);
                     } else if (canHideNavigationBar()
                             && (sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
-                            && type >= FIRST_APPLICATION_WINDOW && type <= LAST_SUB_WINDOW) {
+                            && (type >= FIRST_APPLICATION_WINDOW && type <= LAST_SUB_WINDOW
+                            || type == TYPE_VOLUME_OVERLAY)) {
                         // Asking for layout as if the nav bar is hidden, lets the application
                         // extend into the unrestricted overscan screen area. We only do this for
-                        // application windows to ensure no window that can be above the nav bar can
-                        // do this.
+                        // application windows and certain system windows to ensure no window that
+                        // can be above the nav bar can do this.
                         df.set(displayFrames.mOverscan);
                         pf.set(displayFrames.mOverscan);
                         // We need to tell the app about where the frame inside the overscan is, so
@@ -5138,15 +5139,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (DEBUG_LAYOUT) Slog.v(TAG, String.format(
                             "Laying out IN_SCREEN status bar window: (%d,%d - %d,%d)",
                             pf.left, pf.top, pf.right, pf.bottom));
-                } else if (type == TYPE_VOLUME_OVERLAY) {
-                    // Volume overlay covers everything, including the status and navbar
-                    cf.set(displayFrames.mUnrestricted);
-                    of.set(displayFrames.mUnrestricted);
-                    df.set(displayFrames.mUnrestricted);
-                    pf.set(displayFrames.mUnrestricted);
-                    if (DEBUG_LAYOUT) Slog.v(TAG, String.format(
-                                    "Laying out IN_SCREEN status bar window: (%d,%d - %d,%d)",
-                                    pf.left, pf.top, pf.right, pf.bottom));
                 } else if (type == TYPE_NAVIGATION_BAR || type == TYPE_NAVIGATION_BAR_PANEL) {
                     // The navigation bar has Real Ultimate Power.
                     of.set(displayFrames.mUnrestricted);
@@ -5230,8 +5222,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         "): normal window");
                 // Otherwise, a normal window must be placed inside the content
                 // of all screen decorations.
-                if (type == TYPE_STATUS_BAR_PANEL || type == TYPE_VOLUME_OVERLAY) {
-                    // Status bar panels and the volume dialog are the only windows who can go on
+                if (type == TYPE_STATUS_BAR_PANEL) {
+                    // Status bar panels can go on
                     // top of the status bar. They are protected by the STATUS_BAR_SERVICE
                     // permission, so they have the same privileges as the status bar itself.
                     cf.set(displayFrames.mRestricted);

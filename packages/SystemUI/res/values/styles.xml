@@ -335,6 +335,7 @@
     <style name="qs_theme" parent="qs_base">
         <item name="lightIconTheme">@style/QSIconTheme</item>
         <item name="darkIconTheme">@style/QSIconTheme</item>
+        <item name="android:windowIsFloating">true</item>
     </style>
 
     <style name="systemui_theme_remote_input" parent="@android:style/Theme.DeviceDefault.Light">
@@ -345,7 +346,9 @@
 
     <style name="Theme.SystemUI.Dialog.Alert" parent="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert" />
 
-    <style name="Theme.SystemUI.Dialog.GlobalActions" parent="@android:style/Theme.DeviceDefault.Light.NoActionBar.Fullscreen" />
+    <style name="Theme.SystemUI.Dialog.GlobalActions" parent="@android:style/Theme.DeviceDefault.Light.NoActionBar.Fullscreen">
+        <item name="android:windowIsFloating">true</item>
+    </style>
 
     <style name="QSBorderlessButton">
         <item name="android:padding">12dp</item>

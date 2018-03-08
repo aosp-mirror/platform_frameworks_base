@@ -15,12 +15,14 @@
 package com.android.systemui.globalactions;
 
 import static android.app.StatusBarManager.DISABLE2_GLOBAL_ACTIONS;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
 import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.graphics.Point;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
@@ -80,15 +82,21 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
                 com.android.systemui.R.style.Theme_SystemUI_Dialog_GlobalActions);
         // Window initialization
         Window window = d.getWindow();
+        window.requestFeature(Window.FEATURE_NO_TITLE);
+        window.getAttributes().systemUiVisibility |= View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+        // Inflate the decor view, so the attributes below are not overwritten by the theme.
+        window.getDecorView();
         window.getAttributes().width = ViewGroup.LayoutParams.MATCH_PARENT;
         window.getAttributes().height = ViewGroup.LayoutParams.MATCH_PARENT;
+        window.getAttributes().layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         window.setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
-        window.requestFeature(Window.FEATURE_NO_TITLE);
-        window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND
-                | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR);
+        window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         window.addFlags(
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
                         | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                         | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
                         | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
