@@ -30,6 +30,7 @@ import android.app.ActivityOptions;
 import android.app.IApplicationThread;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ActivityInfo.WindowLayout;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.graphics.Rect;
@@ -39,6 +40,7 @@ import android.platform.test.annotations.Presubmit;
 import android.service.voice.IVoiceInteractionSession;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.view.Gravity;
 
 import org.junit.runner.RunWith;
 import org.junit.Test;
@@ -52,6 +54,7 @@ import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyObject;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -64,6 +67,8 @@ import static android.app.ActivityManager.START_INTENT_NOT_RESOLVED;
 
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.am.ActivityStarter.Factory;
+import com.android.server.am.LaunchParamsController.LaunchParamsModifier;
+import com.android.server.am.TaskRecord.TaskRecordFactory;
 
 /**
  * Tests for the {@link ActivityStarter} class.
@@ -207,7 +212,8 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         if (aInfo != null) {
             aInfo.applicationInfo = new ApplicationInfo();
-            aInfo.applicationInfo.packageName = builder.getDefaultComponentPackageName();
+            aInfo.applicationInfo.packageName =
+                    ActivityBuilder.getDefaultComponent().getPackageName();
         }
 
         // Offset uid by one from {@link ActivityInfo} to simulate different uids.
@@ -284,9 +290,85 @@ public class ActivityStarterTests extends ActivityTestsBase {
         }
     }
 
-// TODO(b/69270257): Add test to verify task layout is passed additional data such as activity and
-// source.
-//    @Test
-//    public void testCreateTaskLayout() {
-//    }
+    private ActivityStarter prepareStarter() {
+        // always allow test to start activity.
+        doReturn(true).when(mService.mStackSupervisor).checkStartAnyActivityPermission(
+                any(), any(), any(), anyInt(), anyInt(), anyInt(), any(),
+                anyBoolean(), any(), any(), any());
+
+        // instrument the stack and task used.
+        final ActivityStack stack = spy(mService.mStackSupervisor.getDefaultDisplay().createStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */));
+        final TaskRecord task =
+                spy(new TaskBuilder(mService.mStackSupervisor).setStack(stack).build());
+
+        // supervisor needs a focused stack.
+        mService.mStackSupervisor.mFocusedStack = task.getStack();
+
+        // use factory that only returns spy task.
+        final TaskRecordFactory factory = mock(TaskRecordFactory.class);
+        TaskRecord.setTaskRecordFactory(factory);
+
+        // return task when created.
+        doReturn(task).when(factory).create(any(), anyInt(), any(), any(), any(), any());
+
+        // direct starter to use spy stack.
+        doReturn(stack).when(mService.mStackSupervisor)
+                .getLaunchStack(any(), any(), any(), anyBoolean());
+        doReturn(stack).when(mService.mStackSupervisor)
+                .getLaunchStack(any(), any(), any(), anyBoolean(), anyInt());
+
+        // ignore the start request.
+        doNothing().when(stack)
+                .startActivityLocked(any(), any(), anyBoolean(), anyBoolean(), any());
+
+        // ignore requests to create window container.
+        doNothing().when(task).createWindowContainer(anyBoolean(), anyBoolean());
+
+        return new ActivityStarter(mController, mService,
+                mService.mStackSupervisor, mock(ActivityStartInterceptor.class));
+    }
+
+    /**
+     * Ensures that values specified at launch time are passed to {@link LaunchParamsModifier}
+     * when we are laying out a new task.
+     */
+    @Test
+    public void testCreateTaskLayout() {
+        // modifier for validating passed values.
+        final LaunchParamsModifier modifier = mock(LaunchParamsModifier.class);
+        mService.mStackSupervisor.getLaunchParamsController().registerModifier(modifier);
+
+        // add custom values to activity info to make unique.
+        final ActivityInfo info = new ActivityInfo();
+        final Rect launchBounds = new Rect(0, 0, 20, 30);
+        final Intent intent = new Intent();
+
+        intent.setComponent(ActivityBuilder.getDefaultComponent());
+
+        final WindowLayout windowLayout =
+                new WindowLayout(10, .5f, 20, 1.0f, Gravity.NO_GRAVITY, 1, 1);
+
+        info.windowLayout = windowLayout;
+        info.applicationInfo = new ApplicationInfo();
+        info.applicationInfo.packageName = ActivityBuilder.getDefaultComponent().getPackageName();
+
+        // create starter.
+        final ActivityStarter optionStarter = prepareStarter();
+
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchBounds(launchBounds);
+
+        // run starter.
+        optionStarter
+                .setIntent(intent)
+                .setReason("testCreateTaskLayout")
+                .setActivityInfo(info)
+                .setActivityOptions(new SafeActivityOptions(options))
+                .execute();
+
+        // verify that values are passed to the modifier.
+        verify(modifier, times(1)).onCalculate(any(), eq(windowLayout), any(), any(), eq(options),
+                any(), any());
+    }
 }
