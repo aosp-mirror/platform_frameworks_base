@@ -82,10 +82,8 @@ statsd_common_static_libraries := \
 statsd_common_shared_libraries := \
     libbase \
     libbinder \
-    libcutils \
     libincident \
     liblog \
-    libselinux \
     libutils \
     libservices \
     libprotoutil \
