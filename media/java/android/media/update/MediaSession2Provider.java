@@ -43,7 +43,7 @@ import java.util.concurrent.Executor;
  */
 public interface MediaSession2Provider extends TransportControlProvider {
     void close_impl();
-    void updatePlayer_impl(MediaPlayerBase player, MediaPlaylistAgent mplc,
+    void updatePlayer_impl(MediaPlayerBase player, MediaPlaylistAgent playlistAgent,
             VolumeProvider2 volumeProvider);
     MediaPlayerBase getPlayer_impl();
     VolumeProvider2 getVolumeProvider_impl();
@@ -123,7 +123,7 @@ public interface MediaSession2Provider extends TransportControlProvider {
 
     interface BuilderBaseProvider<T extends MediaSession2, C extends SessionCallback> {
         void setPlayer_impl(MediaPlayerBase player);
-        void setPlaylistController_impl(MediaPlaylistAgent mplc);
+        void setPlaylistAgent_impl(MediaPlaylistAgent playlistAgent);
         void setVolumeProvider_impl(VolumeProvider2 volumeProvider);
         void setSessionActivity_impl(PendingIntent pi);
         void setId_impl(String id);
