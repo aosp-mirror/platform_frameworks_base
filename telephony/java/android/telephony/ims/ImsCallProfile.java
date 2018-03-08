@@ -296,7 +296,10 @@ public final class ImsCallProfile implements Parcelable {
         readFromParcel(in);
     }
 
-    /** @hide */
+    /**
+     * Default Constructor that initializes the call profile with service type
+     * {@link #SERVICE_TYPE_NORMAL} and call type {@link #CALL_TYPE_VIDEO_N_VOICE}
+     */
     public ImsCallProfile() {
         mServiceType = SERVICE_TYPE_NORMAL;
         mCallType = CALL_TYPE_VOICE_N_VIDEO;
@@ -304,12 +307,59 @@ public final class ImsCallProfile implements Parcelable {
         mMediaProfile = new ImsStreamMediaProfile();
     }
 
-    /** @hide */
+    /**
+     * Constructor.
+     *
+     * @param serviceType the service type for the call. Can be one of the following:
+     *                    {@link #SERVICE_TYPE_NONE},
+     *                    {@link #SERVICE_TYPE_NORMAL},
+     *                    {@link #SERVICE_TYPE_EMERGENCY}
+     * @param callType the call type. Can be one of the following:
+     *                 {@link #CALL_TYPE_VOICE_N_VIDEO},
+     *                 {@link #CALL_TYPE_VOICE},
+     *                 {@link #CALL_TYPE_VIDEO_N_VOICE},
+     *                 {@link #CALL_TYPE_VT},
+     *                 {@link #CALL_TYPE_VT_TX},
+     *                 {@link #CALL_TYPE_VT_RX},
+     *                 {@link #CALL_TYPE_VT_NODIR},
+     *                 {@link #CALL_TYPE_VS},
+     *                 {@link #CALL_TYPE_VS_TX},
+     *                 {@link #CALL_TYPE_VS_RX}
+     */
     public ImsCallProfile(int serviceType, int callType) {
         mServiceType = serviceType;
         mCallType = callType;
         mCallExtras = new Bundle();
         mMediaProfile = new ImsStreamMediaProfile();
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param serviceType the service type for the call. Can be one of the following:
+     *                    {@link #SERVICE_TYPE_NONE},
+     *                    {@link #SERVICE_TYPE_NORMAL},
+     *                    {@link #SERVICE_TYPE_EMERGENCY}
+     * @param callType the call type. Can be one of the following:
+     *                 {@link #CALL_TYPE_VOICE_N_VIDEO},
+     *                 {@link #CALL_TYPE_VOICE},
+     *                 {@link #CALL_TYPE_VIDEO_N_VOICE},
+     *                 {@link #CALL_TYPE_VT},
+     *                 {@link #CALL_TYPE_VT_TX},
+     *                 {@link #CALL_TYPE_VT_RX},
+     *                 {@link #CALL_TYPE_VT_NODIR},
+     *                 {@link #CALL_TYPE_VS},
+     *                 {@link #CALL_TYPE_VS_TX},
+     *                 {@link #CALL_TYPE_VS_RX}
+     * @param callExtras A bundle with the call extras.
+     * @param mediaProfile The IMS stream media profile.
+     */
+    public ImsCallProfile(int serviceType, int callType, Bundle callExtras,
+            ImsStreamMediaProfile mediaProfile) {
+        mServiceType = serviceType;
+        mCallType = callType;
+        mCallExtras = callExtras;
+        mMediaProfile = mediaProfile;
     }
 
     public String getCallExtra(String name) {
@@ -374,6 +424,16 @@ public final class ImsCallProfile implements Parcelable {
         mCallExtras.clear();
         mCallExtras = (Bundle) profile.mCallExtras.clone();
     }
+
+    /**
+     * Updates the media profile for the call.
+     *
+     * @param profile Call profile with new media profile.
+     */
+    public void updateMediaProfile(ImsCallProfile profile) {
+        mMediaProfile = profile.mMediaProfile;
+    }
+
 
     @Override
     public String toString() {

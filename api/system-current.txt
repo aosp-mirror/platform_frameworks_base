@@ -5495,6 +5495,9 @@ package android.telephony.ims {
   }
 
   public final class ImsCallProfile implements android.os.Parcelable {
+    ctor public ImsCallProfile();
+    ctor public ImsCallProfile(int, int);
+    ctor public ImsCallProfile(int, int, android.os.Bundle, android.telephony.ims.ImsStreamMediaProfile);
     method public int describeContents();
     method public java.lang.String getCallExtra(java.lang.String);
     method public java.lang.String getCallExtra(java.lang.String, java.lang.String);
@@ -5518,6 +5521,7 @@ package android.telephony.ims {
     method public void setCallExtraInt(java.lang.String, int);
     method public void updateCallExtras(android.telephony.ims.ImsCallProfile);
     method public void updateCallType(android.telephony.ims.ImsCallProfile);
+    method public void updateMediaProfile(android.telephony.ims.ImsCallProfile);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CALL_RESTRICT_CAUSE_DISABLED = 2; // 0x2
     field public static final int CALL_RESTRICT_CAUSE_HD = 3; // 0x3
@@ -5855,6 +5859,7 @@ package android.telephony.ims {
   }
 
   public final class ImsStreamMediaProfile implements android.os.Parcelable {
+    ctor public ImsStreamMediaProfile(int, int, int, int, int);
     method public void copyFrom(android.telephony.ims.ImsStreamMediaProfile);
     method public int describeContents();
     method public int getAudioDirection();
