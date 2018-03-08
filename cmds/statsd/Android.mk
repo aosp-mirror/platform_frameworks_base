@@ -199,7 +199,9 @@ LOCAL_SRC_FILES := \
     tests/e2e/MetricConditionLink_e2e_test.cpp \
     tests/e2e/Attribution_e2e_test.cpp \
     tests/e2e/GaugeMetric_e2e_test.cpp \
-    tests/e2e/DimensionInCondition_e2e_test.cpp
+    tests/e2e/DimensionInCondition_e2e_combination_AND_cond_test.cpp \
+    tests/e2e/DimensionInCondition_e2e_combination_OR_cond_test.cpp \
+    tests/e2e/DimensionInCondition_e2e_simple_cond_test.cpp
 
 LOCAL_STATIC_LIBRARIES := \
     $(statsd_common_static_libraries) \
@@ -247,11 +249,32 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := statsd_benchmark
 
 LOCAL_SRC_FILES := $(statsd_common_src) \
+                    src/atom_field_options.proto \
+                    src/atoms.proto \
+                    src/stats_log.proto \
                    benchmark/main.cpp \
                    benchmark/hello_world_benchmark.cpp \
                    benchmark/log_event_benchmark.cpp \
                    benchmark/stats_write_benchmark.cpp \
-                   benchmark/filter_value_benchmark.cpp
+                   benchmark/filter_value_benchmark.cpp \
+                   benchmark/get_dimensions_for_condition_benchmark.cpp \
+                   benchmark/metric_util.cpp \
+                   benchmark/duration_metric_benchmark.cpp
+
+LOCAL_STATIC_LIBRARIES := \
+    $(statsd_common_static_libraries)
+
+LOCAL_PROTOC_OPTIMIZE_TYPE := full
+
+LOCAL_PROTOC_FLAGS := \
+    -Iexternal/protobuf/src
+
+LOCAL_SHARED_LIBRARIES := $(statsd_common_shared_libraries) \
+                        libprotobuf-cpp-full
+
+
+LOCAL_STATIC_JAVA_LIBRARIES := \
+    platformprotoslite
 
 LOCAL_C_INCLUDES := $(statsd_common_c_includes)
 

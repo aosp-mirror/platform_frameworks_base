@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "statsd_test_util.h"
+#include "metric_util.h"
 
 namespace android {
 namespace os {
@@ -84,30 +84,6 @@ AtomMatcher CreateReleaseWakelockAtomMatcher() {
     return CreateWakelockStateChangedAtomMatcher("ReleaseWakelock", WakelockStateChanged::RELEASE);
 }
 
-AtomMatcher CreateBatterySaverModeStateChangedAtomMatcher(
-    const string& name, BatterySaverModeStateChanged::State state) {
-    AtomMatcher atom_matcher;
-    atom_matcher.set_id(StringToId(name));
-    auto simple_atom_matcher = atom_matcher.mutable_simple_atom_matcher();
-    simple_atom_matcher->set_atom_id(android::util::BATTERY_SAVER_MODE_STATE_CHANGED);
-    auto field_value_matcher = simple_atom_matcher->add_field_value_matcher();
-    field_value_matcher->set_field(1);  // State field.
-    field_value_matcher->set_eq_int(state);
-    return atom_matcher;
-}
-
-AtomMatcher CreateBatterySaverModeStartAtomMatcher() {
-    return CreateBatterySaverModeStateChangedAtomMatcher(
-        "BatterySaverModeStart", BatterySaverModeStateChanged::ON);
-}
-
-
-AtomMatcher CreateBatterySaverModeStopAtomMatcher() {
-    return CreateBatterySaverModeStateChangedAtomMatcher(
-        "BatterySaverModeStop", BatterySaverModeStateChanged::OFF);
-}
-
-
 AtomMatcher CreateScreenStateChangedAtomMatcher(
     const string& name, android::view::DisplayStateEnum state) {
     AtomMatcher atom_matcher;
@@ -119,7 +95,6 @@ AtomMatcher CreateScreenStateChangedAtomMatcher(
     field_value_matcher->set_eq_int(state);
     return atom_matcher;
 }
-
 
 AtomMatcher CreateScreenTurnedOnAtomMatcher() {
     return CreateScreenStateChangedAtomMatcher("ScreenTurnedOn",
@@ -171,23 +146,6 @@ AtomMatcher CreateMoveToBackgroundAtomMatcher() {
 AtomMatcher CreateMoveToForegroundAtomMatcher() {
     return CreateActivityForegroundStateChangedAtomMatcher(
         "MoveToForeground", ActivityForegroundStateChanged::MOVE_TO_FOREGROUND);
-}
-
-AtomMatcher CreateProcessLifeCycleStateChangedAtomMatcher(
-    const string& name, ProcessLifeCycleStateChanged::Event event) {
-    AtomMatcher atom_matcher;
-    atom_matcher.set_id(StringToId(name));
-    auto simple_atom_matcher = atom_matcher.mutable_simple_atom_matcher();
-    simple_atom_matcher->set_atom_id(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
-    auto field_value_matcher = simple_atom_matcher->add_field_value_matcher();
-    field_value_matcher->set_field(3);  // Process state field.
-    field_value_matcher->set_eq_int(event);
-    return atom_matcher;
-}
-
-AtomMatcher CreateProcessCrashAtomMatcher() {
-    return CreateProcessLifeCycleStateChangedAtomMatcher(
-        "ProcessCrashed", ProcessLifeCycleStateChanged::PROCESS_CRASHED);
 }
 
 Predicate CreateScheduledJobPredicate() {
@@ -290,23 +248,7 @@ FieldMatcher CreateDimensions(const int atomId, const std::vector<int>& fields) 
 std::unique_ptr<LogEvent> CreateScreenStateChangedEvent(
     const android::view::DisplayStateEnum state, uint64_t timestampNs) {
     auto event = std::make_unique<LogEvent>(android::util::SCREEN_STATE_CHANGED, timestampNs);
-    EXPECT_TRUE(event->write(state));
-    event->init();
-    return event;
-}
-
-std::unique_ptr<LogEvent> CreateBatterySaverOnEvent(uint64_t timestampNs) {
-    auto event = std::make_unique<LogEvent>(
-        android::util::BATTERY_SAVER_MODE_STATE_CHANGED, timestampNs);
-    EXPECT_TRUE(event->write(BatterySaverModeStateChanged::ON));
-    event->init();
-    return event;
-}
-
-std::unique_ptr<LogEvent> CreateBatterySaverOffEvent(uint64_t timestampNs) {
-    auto event = std::make_unique<LogEvent>(
-        android::util::BATTERY_SAVER_MODE_STATE_CHANGED, timestampNs);
-    EXPECT_TRUE(event->write(BatterySaverModeStateChanged::OFF));
+    event->write(state);
     event->init();
     return event;
 }
@@ -314,7 +256,7 @@ std::unique_ptr<LogEvent> CreateBatterySaverOffEvent(uint64_t timestampNs) {
 std::unique_ptr<LogEvent> CreateScreenBrightnessChangedEvent(
     int level, uint64_t timestampNs) {
     auto event = std::make_unique<LogEvent>(android::util::SCREEN_BRIGHTNESS_CHANGED, timestampNs);
-    EXPECT_TRUE(event->write(level));
+    (event->write(level));
     event->init();
     return event;
 
@@ -417,33 +359,6 @@ std::unique_ptr<LogEvent> CreateSyncEndEvent(
     return CreateSyncStateChangedEvent(attributions, name, SyncStateChanged::OFF, timestampNs);
 }
 
-std::unique_ptr<LogEvent> CreateProcessLifeCycleStateChangedEvent(
-    const int uid, const ProcessLifeCycleStateChanged::Event event, uint64_t timestampNs) {
-    auto logEvent = std::make_unique<LogEvent>(
-        android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, timestampNs);
-    logEvent->write(uid);
-    logEvent->write("");
-    logEvent->write(event);
-    logEvent->init();
-    return logEvent;
-}
-
-std::unique_ptr<LogEvent> CreateAppCrashEvent(const int uid, uint64_t timestampNs) {
-    return CreateProcessLifeCycleStateChangedEvent(
-        uid, ProcessLifeCycleStateChanged::PROCESS_CRASHED, timestampNs);
-}
-
-std::unique_ptr<LogEvent> CreateIsolatedUidChangedEvent(
-    int isolatedUid, int hostUid, bool is_create, uint64_t timestampNs) {
-    auto logEvent = std::make_unique<LogEvent>(
-        android::util::ISOLATED_UID_CHANGED, timestampNs);
-    logEvent->write(hostUid);
-    logEvent->write(isolatedUid);
-    logEvent->write(is_create);
-    logEvent->init();
-    return logEvent;
-}
-
 sp<StatsLogProcessor> CreateStatsLogProcessor(const long timeBaseSec, const StatsdConfig& config,
                                               const ConfigKey& key) {
     sp<UidMap> uidMap = new UidMap();
@@ -473,138 +388,6 @@ int64_t StringToId(const string& str) {
     return static_cast<int64_t>(std::hash<std::string>()(str));
 }
 
-void ValidateAttributionUidDimension(const DimensionsValue& value, int atomId, int uid) {
-    EXPECT_EQ(value.field(), atomId);
-    // Attribution field.
-    EXPECT_EQ(value.value_tuple().dimensions_value(0).field(), 1);
-    // Uid only.
-    EXPECT_EQ(value.value_tuple().dimensions_value(0)
-        .value_tuple().dimensions_value_size(), 1);
-    EXPECT_EQ(value.value_tuple().dimensions_value(0)
-        .value_tuple().dimensions_value(0).field(), 1);
-    EXPECT_EQ(value.value_tuple().dimensions_value(0)
-        .value_tuple().dimensions_value(0).value_int(), uid);
-}
-
-void ValidateUidDimension(const DimensionsValue& value, int atomId, int uid) {
-    EXPECT_EQ(value.field(), atomId);
-    EXPECT_EQ(value.value_tuple().dimensions_value_size(), 1);
-    // Attribution field.
-    EXPECT_EQ(value.value_tuple().dimensions_value(0).field(), 1);
-    // Uid only.
-    EXPECT_EQ(value.value_tuple().dimensions_value(0)
-        .value_tuple().dimensions_value_size(), 1);
-    EXPECT_EQ(value.value_tuple().dimensions_value(0)
-        .value_tuple().dimensions_value(0).field(), 1);
-    EXPECT_EQ(value.value_tuple().dimensions_value(0)
-        .value_tuple().dimensions_value(0).value_int(), uid);
-}
-
-void ValidateAttributionUidAndTagDimension(
-    const DimensionsValue& value, int atomId, int uid, const std::string& tag) {
-    EXPECT_EQ(value.field(), atomId);
-    EXPECT_EQ(value.value_tuple().dimensions_value_size(), 1);
-    // Attribution field.
-    EXPECT_EQ(value.value_tuple().dimensions_value(0).field(), 1);
-    // Uid only.
-    EXPECT_EQ(value.value_tuple().dimensions_value(0)
-        .value_tuple().dimensions_value_size(), 2);
-    EXPECT_EQ(value.value_tuple().dimensions_value(0)
-        .value_tuple().dimensions_value(0).field(), 1);
-    EXPECT_EQ(value.value_tuple().dimensions_value(0)
-        .value_tuple().dimensions_value(0).value_int(), uid);
-    EXPECT_EQ(value.value_tuple().dimensions_value(0)
-        .value_tuple().dimensions_value(1).field(), 2);
-    EXPECT_EQ(value.value_tuple().dimensions_value(0)
-        .value_tuple().dimensions_value(1).value_str(), tag);
-}
-
-bool EqualsTo(const DimensionsValue& s1, const DimensionsValue& s2) {
-    if (s1.field() != s2.field()) {
-        return false;
-    }
-    if (s1.value_case() != s2.value_case()) {
-        return false;
-    }
-    switch (s1.value_case()) {
-        case DimensionsValue::ValueCase::kValueStr:
-            return (s1.value_str() == s2.value_str());
-        case DimensionsValue::ValueCase::kValueInt:
-            return s1.value_int() == s2.value_int();
-        case DimensionsValue::ValueCase::kValueLong:
-            return s1.value_long() == s2.value_long();
-        case DimensionsValue::ValueCase::kValueBool:
-            return s1.value_bool() == s2.value_bool();
-        case DimensionsValue::ValueCase::kValueFloat:
-            return s1.value_float() == s2.value_float();
-        case DimensionsValue::ValueCase::kValueTuple: {
-            if (s1.value_tuple().dimensions_value_size() !=
-                s2.value_tuple().dimensions_value_size()) {
-                return false;
-            }
-            bool allMatched = true;
-            for (int i = 0; allMatched && i < s1.value_tuple().dimensions_value_size(); ++i) {
-                allMatched &= EqualsTo(s1.value_tuple().dimensions_value(i),
-                                       s2.value_tuple().dimensions_value(i));
-            }
-            return allMatched;
-        }
-        case DimensionsValue::ValueCase::VALUE_NOT_SET:
-        default:
-            return true;
-    }
-}
-
-bool LessThan(const DimensionsValue& s1, const DimensionsValue& s2) {
-    if (s1.field() != s2.field()) {
-        return s1.field() < s2.field();
-    }
-    if (s1.value_case() != s2.value_case()) {
-        return s1.value_case() < s2.value_case();
-    }
-    switch (s1.value_case()) {
-        case DimensionsValue::ValueCase::kValueStr:
-            return s1.value_str() < s2.value_str();
-        case DimensionsValue::ValueCase::kValueInt:
-            return s1.value_int() < s2.value_int();
-        case DimensionsValue::ValueCase::kValueLong:
-            return s1.value_long() < s2.value_long();
-        case DimensionsValue::ValueCase::kValueBool:
-            return (int)s1.value_bool() < (int)s2.value_bool();
-        case DimensionsValue::ValueCase::kValueFloat:
-            return s1.value_float() < s2.value_float();
-        case DimensionsValue::ValueCase::kValueTuple: {
-            if (s1.value_tuple().dimensions_value_size() !=
-                s2.value_tuple().dimensions_value_size()) {
-                return s1.value_tuple().dimensions_value_size() <
-                       s2.value_tuple().dimensions_value_size();
-            }
-            for (int i = 0; i < s1.value_tuple().dimensions_value_size(); ++i) {
-                if (EqualsTo(s1.value_tuple().dimensions_value(i),
-                             s2.value_tuple().dimensions_value(i))) {
-                    continue;
-                } else {
-                    return LessThan(s1.value_tuple().dimensions_value(i),
-                                    s2.value_tuple().dimensions_value(i));
-                }
-            }
-            return false;
-        }
-        case DimensionsValue::ValueCase::VALUE_NOT_SET:
-        default:
-            return false;
-    }
-}
-
-bool LessThan(const DimensionsPair& s1, const DimensionsPair& s2) {
-    if (LessThan(s1.dimInWhat, s2.dimInWhat)) {
-        return true;
-    } else if (LessThan(s2.dimInWhat, s1.dimInWhat)) {
-        return false;
-    }
-
-    return LessThan(s1.dimInCondition, s2.dimInCondition);
-}
 
 }  // namespace statsd
 }  // namespace os
