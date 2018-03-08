@@ -18,6 +18,8 @@ package android.app.slice;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -58,6 +60,18 @@ public class SliceManager {
      */
     public static final String ACTION_REQUEST_SLICE_PERMISSION =
             "android.intent.action.REQUEST_SLICE_PERMISSION";
+
+    /**
+     * Category used to resolve intents that can be rendered as slices.
+     * <p>
+     * This category should be included on intent filters on providers that extend
+     * {@link SliceProvider}.
+     * @see SliceProvider
+     * @see SliceProvider#onMapIntentToUri(Intent)
+     * @see #mapIntentToUri(Intent)
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_SLICE = "android.app.slice.category.SLICE";
 
     /**
      * The meta-data key that allows an activity to easily be linked directly to a slice.
@@ -226,6 +240,18 @@ public class SliceManager {
 
     /**
      * Turns a slice intent into a slice uri. Expects an explicit intent.
+     * <p>
+     * This goes through a several stage resolution process to determine if any slice
+     * can represent this intent.
+     *  - If the intent contains data that {@link ContentResolver#getType} is
+     *  {@link SliceProvider#SLICE_TYPE} then the data will be returned.
+     *  - If the intent with {@link #CATEGORY_SLICE} added resolves to a provider, then
+     *  the provider will be asked to {@link SliceProvider#onMapIntentToUri} and that result
+     *  will be returned.
+     *  - Lastly, if the intent explicitly points at an activity, and that activity has
+     *  meta-data for key {@link #SLICE_METADATA_KEY}, then the Uri specified there will be
+     *  returned.
+     *  - If no slice is found, then {@code null} is returned.
      *
      * @param intent The intent associated with a slice.
      * @return The Slice Uri provided by the app or null if none exists.
@@ -245,8 +271,12 @@ public class SliceManager {
             return intentData;
         }
         // Otherwise ask the app
+        Intent queryIntent = new Intent(intent);
+        if (!queryIntent.hasCategory(CATEGORY_SLICE)) {
+            queryIntent.addCategory(CATEGORY_SLICE);
+        }
         List<ResolveInfo> providers =
-                mContext.getPackageManager().queryIntentContentProviders(intent, 0);
+                mContext.getPackageManager().queryIntentContentProviders(queryIntent, 0);
         if (providers == null || providers.isEmpty()) {
             // There are no providers, see if this activity has a direct link.
             ResolveInfo resolve = mContext.getPackageManager().resolveActivity(intent,
