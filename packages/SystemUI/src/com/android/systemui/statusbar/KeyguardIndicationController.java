@@ -58,6 +58,7 @@ import com.android.systemui.util.wakelock.WakeLock;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.text.NumberFormat;
+import java.util.IllegalFormatConversionException;
 
 /**
  * Controls the indications and error messages shown on the Keyguard
@@ -414,11 +415,24 @@ public class KeyguardIndicationController {
         String percentage = NumberFormat.getPercentInstance()
                 .format(mBatteryLevel / 100f);
         if (hasChargingTime) {
+            // We now have battery percentage in these strings and it's expected that all
+            // locales will also have it in the future. For now, we still have to support the old
+            // format until all languages get the new translations.
             String chargingTimeFormatted = Formatter.formatShortElapsedTimeRoundingUpToMinutes(
                     mContext, chargingTimeRemaining);
-            return mContext.getResources().getString(chargingId, chargingTimeFormatted, percentage);
+            try {
+                return mContext.getResources().getString(chargingId, chargingTimeFormatted,
+                        percentage);
+            } catch (IllegalFormatConversionException e) {
+                return mContext.getResources().getString(chargingId, chargingTimeFormatted);
+            }
         } else {
-            return mContext.getResources().getString(chargingId, percentage);
+            // Same as above
+            try {
+                return mContext.getResources().getString(chargingId, percentage);
+            } catch (IllegalFormatConversionException e) {
+                return mContext.getResources().getString(chargingId);
+            }
         }
     }
 
