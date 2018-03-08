@@ -30,6 +30,7 @@ import android.media.MediaLibraryService2.LibraryRoot;
 import android.media.MediaLibraryService2.MediaLibrarySession;
 import android.media.MediaLibraryService2.MediaLibrarySession.MediaLibrarySessionCallback;
 import android.media.MediaMetadata2;
+import android.media.MediaPlaylistAgent;
 import android.media.MediaSession2;
 import android.media.MediaSession2.CommandButton.Builder;
 import android.media.MediaSession2.PlaylistParams;
@@ -134,4 +135,7 @@ public interface StaticProvider {
     PlaybackState2Provider createPlaybackState2(Context context, PlaybackState2 instance, int state,
             long position, long updateTime, float speed, long bufferedPosition, long activeItemId);
     PlaybackState2 fromBundle_PlaybackState2(Context context, Bundle bundle);
+
+    MediaPlaylistAgentProvider createMediaPlaylistAgent(Context context,
+            MediaPlaylistAgent instance);
 }

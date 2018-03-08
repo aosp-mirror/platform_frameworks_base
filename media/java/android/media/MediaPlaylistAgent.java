@@ -21,6 +21,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.media.update.ApiLoader;
+import android.media.update.MediaPlaylistAgentProvider;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -92,7 +94,7 @@ public abstract class MediaPlaylistAgent {
      */
     public static final int SHUFFLE_MODE_GROUP = 2;
 
-    private MediaPlayerBase mPlayer;
+    private final MediaPlaylistAgentProvider mProvider;
 
     /**
      * A callback class to receive notifications for events on the media player. See
@@ -146,8 +148,7 @@ public abstract class MediaPlaylistAgent {
     }
 
     public MediaPlaylistAgent(@NonNull Context context) {
-        // FYI, Need to have a context in the constructor for making this class be updatable
-        // TODO(jaewan) : implement this (b/74090741)
+        mProvider = ApiLoader.getProvider(context).createMediaPlaylistAgent(context, this);
     }
 
     /**
@@ -160,7 +161,7 @@ public abstract class MediaPlaylistAgent {
      */
     public final void registerPlaylistEventCallback(
             @NonNull @CallbackExecutor Executor executor, @NonNull PlaylistEventCallback callback) {
-        // TODO(jaewan): implement this (b/74090741)
+        mProvider.registerPlaylistEventCallback_impl(executor, callback);
     }
 
     /**
@@ -169,25 +170,24 @@ public abstract class MediaPlaylistAgent {
      * @param callback the callback to be removed
      * @throws IllegalArgumentException if the callback is {@code null}.
      */
-    public final void unregisterPlaylistEventCallback(
-            @NonNull PlaylistEventCallback callback) {
-        // TODO(jaewan): implement this (b/74090741)
+    public final void unregisterPlaylistEventCallback(@NonNull PlaylistEventCallback callback) {
+        mProvider.unregisterPlaylistEventCallback_impl(callback);
     }
 
     public final void notifyPlaylistChanged() {
-        // TODO(jaewan): implement this (b/74090741)
+        mProvider.notifyPlaylistChanged_impl();
     }
 
     public final void notifyPlaylistMetadataChanged() {
-        // TODO(jaewan): implement this (b/74090741)
+        mProvider.notifyPlaylistMetadataChanged_impl();
     }
 
     public final void notifyShuffleModeChanged() {
-        // TODO(jaewan): implement this (b/74090741)
+        mProvider.notifyShuffleModeChanged_impl();
     }
 
     public final void notifyRepeatModeChanged() {
-        // TODO(jaewan): implement this (b/74090741)
+        mProvider.notifyRepeatModeChanged_impl();
     }
 
     /**
@@ -196,8 +196,7 @@ public abstract class MediaPlaylistAgent {
      * @return playlist, or null if none is set.
      */
     public @Nullable List<MediaItem2> getPlaylist() {
-        // TODO(jaewan): implement this (b/74090741)
-        return null;
+        return mProvider.getPlaylist_impl();
     }
 
     /**
@@ -207,7 +206,7 @@ public abstract class MediaPlaylistAgent {
      * @param metadata metadata of the playlist
      */
     public void setPlaylist(@NonNull List<MediaItem2> list, @Nullable MediaMetadata2 metadata) {
-        // TODO(jaewan): implement this (b/74090741)
+        mProvider.setPlaylist_impl(list, metadata);
     }
 
     /**
@@ -216,8 +215,7 @@ public abstract class MediaPlaylistAgent {
      * @return metadata metadata of the playlist, or null if none is set
      */
     public @Nullable MediaMetadata2 getPlaylistMetadata() {
-        // TODO(jaewan): implement this (b/74090741)
-        return null;
+        return mProvider.getPlaylistMetadata_impl();
     }
 
     /**
@@ -226,7 +224,7 @@ public abstract class MediaPlaylistAgent {
      * @param metadata metadata of the playlist
      */
     public void updatePlaylistMetadata(@Nullable MediaMetadata2 metadata) {
-        // TODO(jaewan): implement this (b/74090741)
+        mProvider.updatePlaylistMetadata_impl(metadata);
     }
 
     /**
@@ -236,7 +234,7 @@ public abstract class MediaPlaylistAgent {
      * @param item media item to add
      */
     public void addPlaylistItem(int index, @NonNull MediaItem2 item) {
-        // TODO(jaewan): implement this (b/74090741)
+        mProvider.addPlaylistItem_impl(index, item);
     }
 
     /**
@@ -245,7 +243,7 @@ public abstract class MediaPlaylistAgent {
      * @param item media item to remove
      */
     public void removePlaylistItem(@NonNull MediaItem2 item) {
-        // TODO(jaewan): implement this (b/74090741)
+        mProvider.removePlaylistItem_impl(item);
     }
 
     /**
@@ -256,7 +254,7 @@ public abstract class MediaPlaylistAgent {
      * @param item the new item
      */
     public void replacePlaylistItem(int index, @NonNull MediaItem2 item) {
-        // TODO(jaewan): implement this (b/74090741)
+        mProvider.replacePlaylistItem_impl(index, item);
     }
 
     /**
@@ -265,15 +263,15 @@ public abstract class MediaPlaylistAgent {
      * @param item media item to start playing from
      */
     public void skipToPlaylistItem(@NonNull MediaItem2 item) {
-        // TODO(jaewan): implement this (b/74090741)
+        mProvider.skipToPlaylistItem_impl(item);
     }
 
     public void skipToPreviousItem() {
-        // TODO(jaewan): implement this (b/74090741)
+        mProvider.skipToPreviousItem_impl();
     }
 
     public void skipToNextItem() {
-        // TODO(jaewan): implement this (b/74090741)
+        mProvider.skipToNextItem_impl();
     }
 
     /**
@@ -286,8 +284,7 @@ public abstract class MediaPlaylistAgent {
      * @see #REPEAT_MODE_GROUP
      */
     public @RepeatMode int getRepeatMode() {
-        // TODO(jaewan): implement this (b/74090741)
-        return REPEAT_MODE_NONE;
+        return mProvider.getRepeatMode_impl();
     }
 
     /**
@@ -300,7 +297,7 @@ public abstract class MediaPlaylistAgent {
      * @see #REPEAT_MODE_GROUP
      */
     public void setRepeatMode(@RepeatMode int repeatMode) {
-        // TODO(jaewan): implement this (b/74090741)
+        mProvider.setRepeatMode_impl(repeatMode);
     }
 
     /**
@@ -312,8 +309,7 @@ public abstract class MediaPlaylistAgent {
      * @see #SHUFFLE_MODE_GROUP
      */
     public @ShuffleMode int getShuffleMode() {
-        // TODO(jaewan): implement this (b/74090741)
-        return SHUFFLE_MODE_NONE;
+        return mProvider.getShuffleMode_impl();
     }
 
     /**
@@ -325,6 +321,6 @@ public abstract class MediaPlaylistAgent {
      * @see #SHUFFLE_MODE_GROUP
      */
     public void setShuffleMode(@ShuffleMode int shuffleMode) {
-        // TODO(jaewan): implement this (b/74090741)
+        mProvider.setShuffleMode_impl(shuffleMode);
     }
 }
