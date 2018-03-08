@@ -26,19 +26,24 @@ using std::vector;
 
 ConditionState ConditionWizard::query(const int index, const ConditionKey& parameters,
                                       const vector<Matcher>& dimensionFields,
+                                      const bool isSubOutputDimensionFields,
+                                      const bool isPartialLink,
                                       std::unordered_set<HashableDimensionKey>* dimensionKeySet) {
     vector<ConditionState> cache(mAllConditions.size(), ConditionState::kNotEvaluated);
 
     mAllConditions[index]->isConditionMet(
-        parameters, mAllConditions, dimensionFields, cache, *dimensionKeySet);
+        parameters, mAllConditions, dimensionFields, isSubOutputDimensionFields, isPartialLink,
+        cache, *dimensionKeySet);
     return cache[index];
 }
 
 ConditionState ConditionWizard::getMetConditionDimension(
         const int index, const vector<Matcher>& dimensionFields,
+        const bool isSubOutputDimensionFields,
         std::unordered_set<HashableDimensionKey>* dimensionsKeySet) const {
     return mAllConditions[index]->getMetConditionDimension(mAllConditions, dimensionFields,
-                                 *dimensionsKeySet);
+                                                           isSubOutputDimensionFields,
+                                                           *dimensionsKeySet);
 }
 
 const set<HashableDimensionKey>* ConditionWizard::getChangedToTrueDimensions(
@@ -49,6 +54,30 @@ const set<HashableDimensionKey>* ConditionWizard::getChangedToTrueDimensions(
 const set<HashableDimensionKey>* ConditionWizard::getChangedToFalseDimensions(
         const int index) const {
     return mAllConditions[index]->getChangedToFalseDimensions(mAllConditions);
+}
+
+bool ConditionWizard::IsChangedDimensionTrackable(const int index) {
+    if (index >= 0 && index < (int)mAllConditions.size()) {
+        return mAllConditions[index]->IsChangedDimensionTrackable();
+    } else {
+        return false;
+    }
+}
+
+bool ConditionWizard::IsSimpleCondition(const int index) {
+    if (index >= 0 && index < (int)mAllConditions.size()) {
+        return mAllConditions[index]->IsSimpleCondition();
+    } else {
+        return false;
+    }
+}
+
+bool ConditionWizard::equalOutputDimensions(const int index, const vector<Matcher>& dimensions) {
+    if (index >= 0 && index < (int)mAllConditions.size()) {
+        return mAllConditions[index]->equalOutputDimensions(mAllConditions, dimensions);
+    } else {
+        return false;
+    }
 }
 
 }  // namespace statsd

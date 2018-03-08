@@ -28,14 +28,18 @@ OringDurationTracker::OringDurationTracker(
         const ConfigKey& key, const int64_t& id, const MetricDimensionKey& eventKey,
         sp<ConditionWizard> wizard, int conditionIndex, const vector<Matcher>& dimensionInCondition,
         bool nesting, uint64_t currentBucketStartNs, uint64_t currentBucketNum,
-        uint64_t startTimeNs, uint64_t bucketSizeNs, bool conditionSliced,
+        uint64_t startTimeNs, uint64_t bucketSizeNs, bool conditionSliced, bool fullLink,
         const vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
     : DurationTracker(key, id, eventKey, wizard, conditionIndex, dimensionInCondition, nesting,
                       currentBucketStartNs, currentBucketNum, startTimeNs, bucketSizeNs,
-                      conditionSliced, anomalyTrackers),
+                      conditionSliced, fullLink, anomalyTrackers),
       mStarted(),
       mPaused() {
     mLastStartTime = 0;
+    if (mWizard != nullptr) {
+        mSameConditionDimensionsInTracker =
+            mWizard->equalOutputDimensions(conditionIndex, mDimensionInCondition);
+    }
 }
 
 unique_ptr<DurationTracker> OringDurationTracker::clone(const uint64_t eventTime) {
@@ -57,7 +61,7 @@ bool OringDurationTracker::hitGuardRail(const HashableDimensionKey& newKey) {
         // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
         if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
             ALOGE("OringDurTracker %lld dropping data for dimension key %s",
-                (long long)mTrackerId, newKey.c_str());
+                (long long)mTrackerId, newKey.toString().c_str());
             return true;
         }
     }
@@ -83,13 +87,13 @@ void OringDurationTracker::noteStart(const HashableDimensionKey& key, bool condi
     if (mConditionSliced && mConditionKeyMap.find(key) == mConditionKeyMap.end()) {
         mConditionKeyMap[key] = conditionKey;
     }
-    VLOG("Oring: %s start, condition %d", key.c_str(), condition);
+    VLOG("Oring: %s start, condition %d", key.toString().c_str(), condition);
 }
 
 void OringDurationTracker::noteStop(const HashableDimensionKey& key, const uint64_t timestamp,
                                     const bool stopAll) {
     declareAnomalyIfAlarmExpired(timestamp);
-    VLOG("Oring: %s stop", key.c_str());
+    VLOG("Oring: %s stop", key.toString().c_str());
     auto it = mStarted.find(key);
     if (it != mStarted.end()) {
         (it->second)--;
@@ -217,22 +221,26 @@ void OringDurationTracker::onSlicedConditionMayChange(const uint64_t timestamp) 
     if (!mStarted.empty()) {
         for (auto it = mStarted.begin(); it != mStarted.end();) {
             const auto& key = it->first;
-            if (mConditionKeyMap.find(key) == mConditionKeyMap.end()) {
-                VLOG("Key %s dont have condition key", key.c_str());
+            const auto& condIt = mConditionKeyMap.find(key);
+            if (condIt == mConditionKeyMap.end()) {
+                VLOG("Key %s dont have condition key", key.toString().c_str());
                 ++it;
                 continue;
             }
             std::unordered_set<HashableDimensionKey> conditionDimensionKeySet;
             ConditionState conditionState =
-                mWizard->query(mConditionTrackerIndex, mConditionKeyMap[key],
-                               mDimensionInCondition, &conditionDimensionKeySet);
+                mWizard->query(mConditionTrackerIndex, condIt->second,
+                               mDimensionInCondition,
+                               !mSameConditionDimensionsInTracker,
+                               !mHasLinksToAllConditionDimensionsInTracker,
+                               &conditionDimensionKeySet);
             if (conditionState != ConditionState::kTrue ||
                 (mDimensionInCondition.size() != 0 &&
                  conditionDimensionKeySet.find(mEventKey.getDimensionKeyInCondition()) ==
                          conditionDimensionKeySet.end())) {
                 startedToPaused.push_back(*it);
                 it = mStarted.erase(it);
-                VLOG("Key %s started -> paused", key.c_str());
+                VLOG("Key %s started -> paused", key.toString().c_str());
             } else {
                 ++it;
             }
@@ -250,21 +258,24 @@ void OringDurationTracker::onSlicedConditionMayChange(const uint64_t timestamp) 
         for (auto it = mPaused.begin(); it != mPaused.end();) {
             const auto& key = it->first;
             if (mConditionKeyMap.find(key) == mConditionKeyMap.end()) {
-                VLOG("Key %s dont have condition key", key.c_str());
+                VLOG("Key %s dont have condition key", key.toString().c_str());
                 ++it;
                 continue;
             }
             std::unordered_set<HashableDimensionKey> conditionDimensionKeySet;
             ConditionState conditionState =
                 mWizard->query(mConditionTrackerIndex, mConditionKeyMap[key],
-                               mDimensionInCondition, &conditionDimensionKeySet);
+                               mDimensionInCondition,
+                               !mSameConditionDimensionsInTracker,
+                               !mHasLinksToAllConditionDimensionsInTracker,
+                               &conditionDimensionKeySet);
             if (conditionState == ConditionState::kTrue &&
                 (mDimensionInCondition.size() == 0 ||
                  conditionDimensionKeySet.find(mEventKey.getDimensionKeyInCondition()) !=
                          conditionDimensionKeySet.end())) {
                 pausedToStarted.push_back(*it);
                 it = mPaused.erase(it);
-                VLOG("Key %s paused -> started", key.c_str());
+                VLOG("Key %s paused -> started", key.toString().c_str());
             } else {
                 ++it;
             }

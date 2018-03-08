@@ -123,10 +123,21 @@ private:
     FRIEND_TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks2);
     FRIEND_TEST(AttributionE2eTest, TestAttributionMatchAndSlice);
     FRIEND_TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent);
-    FRIEND_TEST(DimensionInConditionE2eTest, TestCountMetricNoLink);
-    FRIEND_TEST(DimensionInConditionE2eTest, TestCountMetricWithLink);
-    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetricNoLink);
-    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetricWithLink);
+    FRIEND_TEST(DimensionInConditionE2eTest, TestCreateCountMetric_NoLink_OR_CombinationCondition);
+    FRIEND_TEST(DimensionInConditionE2eTest, TestCreateCountMetric_Link_OR_CombinationCondition);
+    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_NoLink_OR_CombinationCondition);
+    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_Link_OR_CombinationCondition);
+
+    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_NoLink_SimpleCondition);
+    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_Link_SimpleCondition);
+    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_PartialLink_SimpleCondition);
+
+
+
+    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_PartialLink_AND_CombinationCondition);
+    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_NoLink_AND_CombinationCondition);
+    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_Link_AND_CombinationCondition);
+
 };
 
 }  // namespace statsd

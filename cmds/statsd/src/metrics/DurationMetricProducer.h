@@ -51,6 +51,9 @@ public:
 
 protected:
     void onMatchedLogEventLocked(const size_t matcherIndex, const LogEvent& event) override;
+
+    void onMatchedLogEventLocked_simple(const size_t matcherIndex, const LogEvent& event);
+
     void onMatchedLogEventInternalLocked(
             const size_t matcherIndex, const MetricDimensionKey& eventKey,
             const ConditionKey& conditionKeys, bool condition,
@@ -68,6 +71,9 @@ private:
 
     // Internal interface to handle sliced condition change.
     void onSlicedConditionMayChangeLocked(const uint64_t eventTime) override;
+
+    void onSlicedConditionMayChangeLocked_opt1(const uint64_t eventTime);
+    void onSlicedConditionMayChangeLocked_opt2(const uint64_t eventTime);
 
     // Internal function to calculate the current used bytes.
     size_t byteSizeLocked() const override;
@@ -98,8 +104,13 @@ private:
     // The dimension from the atom predicate. e.g., uid, wakelock name.
     vector<Matcher> mInternalDimensions;
 
+    bool mContainANYPositionInInternalDimensions;
+
     // This boolean is true iff When mInternalDimensions == mDimensionsInWhat
     bool mUseWhatDimensionAsInternalDimension;
+
+    // Caches the current unsliced part condition.
+    ConditionState mUnSlicedPartCondition;
 
     // Save the past buckets and we can clear when the StatsLogReport is dumped.
     // TODO: Add a lock to mPastBuckets.
