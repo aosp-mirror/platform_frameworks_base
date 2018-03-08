@@ -111,6 +111,20 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     }
 
     @Test
+    public void testNoInternetIcon() {
+        setupNetworkController();
+        when(mMockTm.getDataEnabled(mSubId)).thenReturn(false);
+        setupDefaultSignal();
+        updateDataConnectionState(TelephonyManager.DATA_CONNECTED, 0);
+        setConnectivity(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
+
+        // Verify that a SignalDrawable with a cut out is used to display data disabled.
+        verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, 0,
+                true, DEFAULT_QS_SIGNAL_STRENGTH, 0, false,
+                false, true);
+    }
+
+    @Test
     public void testDataDisabledIcon() {
         setupNetworkController();
         when(mMockTm.getDataEnabled(mSubId)).thenReturn(false);
@@ -118,8 +132,10 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         updateDataConnectionState(TelephonyManager.DATA_DISCONNECTED, 0);
         setConnectivity(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
 
-        verifyDataIndicators(TelephonyIcons.ICON_DATA_DISABLED,
-                TelephonyIcons.QS_ICON_DATA_DISABLED);
+        // Verify that a SignalDrawable with a cut out is used to display data disabled.
+        verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, 0,
+                true, DEFAULT_QS_SIGNAL_STRENGTH, 0, false,
+                false, true);
     }
 
     @Test

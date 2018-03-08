@@ -44,10 +44,6 @@ class TelephonyIcons {
     static final int ICON_4G_PLUS = R.drawable.stat_sys_data_fully_connected_4g_plus;
     static final int ICON_1X = R.drawable.stat_sys_data_fully_connected_1x;
 
-    static final int ICON_DATA_DISABLED = R.drawable.stat_sys_data_disabled;
-
-    static final int QS_ICON_DATA_DISABLED = R.drawable.ic_qs_data_disabled;
-
     static final MobileIconGroup CARRIER_NETWORK_CHANGE = new MobileIconGroup(
             "CARRIER_NETWORK_CHANGE",
             null,
@@ -232,9 +228,9 @@ class TelephonyIcons {
             0,
             AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
             R.string.accessibility_cell_data_off,
-            TelephonyIcons.ICON_DATA_DISABLED,
+            0,
             false,
-            TelephonyIcons.QS_ICON_DATA_DISABLED
+            0
             );
 }
 
