@@ -65,7 +65,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
     private static final long AUTO_FADE_OUT_DELAY_MS = DateUtils.SECOND_IN_MILLIS * 6;
     private static final int FADE_ANIMATION_DURATION_MS = 300;
     private static final int TOOLTIP_NOT_YET_SHOWN_COUNT = 0;
-    public static final int MAX_TOOLTIP_SHOWN_COUNT = 3;
+    public static final int MAX_TOOLTIP_SHOWN_COUNT = 2;
 
     private final Handler mHandler = new Handler();
 
