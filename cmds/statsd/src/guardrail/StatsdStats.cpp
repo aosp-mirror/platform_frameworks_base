@@ -91,18 +91,6 @@ const int FIELD_ID_UID_MAP_BYTES_USED = 3;
 const int FIELD_ID_UID_MAP_DROPPED_SNAPSHOTS = 4;
 const int FIELD_ID_UID_MAP_DROPPED_CHANGES = 5;
 
-std::map<int, long> StatsdStats::kPullerCooldownMap = {
-        {android::util::KERNEL_WAKELOCK, 1},
-        {android::util::WIFI_BYTES_TRANSFER, 1},
-        {android::util::MOBILE_BYTES_TRANSFER, 1},
-        {android::util::WIFI_BYTES_TRANSFER_BY_FG_BG, 1},
-        {android::util::MOBILE_BYTES_TRANSFER_BY_FG_BG, 1},
-        {android::util::SUBSYSTEM_SLEEP_STATE, 1},
-        {android::util::CPU_TIME_PER_FREQ, 1},
-        {android::util::CPU_TIME_PER_UID, 1},
-        {android::util::CPU_TIME_PER_UID_FREQ, 1},
-};
-
 // TODO: add stats for pulled atoms.
 StatsdStats::StatsdStats() {
     mPushedAtomStats.resize(android::util::kMaxPushedAtomId + 1);
