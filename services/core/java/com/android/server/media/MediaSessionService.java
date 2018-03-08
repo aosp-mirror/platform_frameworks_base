@@ -2086,7 +2086,7 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         public SessionTokensListenerRecord(ISessionTokensListener listener, int userId) {
             mListener = listener;
-            // TODO should userId be mapped through mFullUserIds? (b/73597722)
+            // TODO(jaewan): should userId be mapped through mFullUserIds? (b/73597722)
             mUserId = userId;
         }
 

@@ -221,8 +221,8 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
             }
 
             @Override
-            public Builder setPlaylistAgent(@NonNull MediaPlaylistAgent mplc) {
-                return super.setPlaylistAgent(mplc);
+            public Builder setPlaylistAgent(@NonNull MediaPlaylistAgent playlistAgent) {
+                return super.setPlaylistAgent(playlistAgent);
             }
 
             @Override
