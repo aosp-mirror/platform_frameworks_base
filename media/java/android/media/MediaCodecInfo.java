@@ -3078,6 +3078,23 @@ public final class MediaCodecInfo {
          * {@link VideoCapabilities} to determine the codec capabilities.
          */
         public int level;
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+            if (obj instanceof CodecProfileLevel) {
+                CodecProfileLevel other = (CodecProfileLevel)obj;
+                return other.profile == profile && other.level == level;
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return Long.hashCode(((long)profile << Integer.SIZE) | level);
+        }
     };
 
     /**
