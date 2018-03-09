@@ -3088,7 +3088,8 @@
     <!-- Allows an application to collect usage infomation about brightness slider changes.
          <p>Not for use by third-party applications.</p>
          @hide
-         @SystemApi -->
+         @SystemApi
+         @TestApi -->
     <permission android:name="android.permission.BRIGHTNESS_SLIDER_USAGE"
         android:protectionLevel="signature|privileged|development" />
 
@@ -3101,7 +3102,8 @@
 
     <!-- Allows an application to modify the display brightness configuration
          @hide
-         @SystemApi -->
+         @SystemApi
+         @TestApi -->
     <permission android:name="android.permission.CONFIGURE_DISPLAY_BRIGHTNESS"
         android:protectionLevel="signature|privileged|development" />
 
