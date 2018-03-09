@@ -355,7 +355,6 @@ void StatsLogProcessor::WriteDataToDisk() {
         const ConfigKey& key = pair.first;
         vector<uint8_t> data;
         onDumpReportLocked(key, getElapsedRealtimeNs(), &data);
-        // TODO: Add a guardrail to prevent accumulation of file on disk.
         string file_name = StringPrintf("%s/%ld_%d_%lld", STATS_DATA_DIR,
              (long)getWallClockSec(), key.GetUid(), (long long)key.GetId());
         StorageManager::writeFile(file_name.c_str(), &data[0], data.size());

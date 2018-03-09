@@ -210,10 +210,10 @@ private:
      */
     status_t cmd_dump_memory_info(FILE* out);
 
-  /*
+    /*
      * Clear all puller cached data
      */
-  status_t cmd_clear_puller_cache(FILE* out);
+    status_t cmd_clear_puller_cache(FILE* out);
 
     /**
      * Update a configuration.
