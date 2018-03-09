@@ -3422,8 +3422,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      * @param allowFocusSelf Is the focus allowed to remain on the same stack.
      */
     private boolean adjustFocusToNextFocusableStack(String reason, boolean allowFocusSelf) {
-        final ActivityStack stack = mStackSupervisor.getNextFocusableStackLocked(
-                allowFocusSelf ? null : this);
+        final ActivityStack stack =
+                mStackSupervisor.getNextFocusableStackLocked(this, !allowFocusSelf);
         final String myReason = reason + " adjustFocusToNextFocusableStack";
         if (stack == null) {
             return false;
