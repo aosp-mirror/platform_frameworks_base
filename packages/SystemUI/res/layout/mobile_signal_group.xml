@@ -16,7 +16,7 @@
 ** limitations under the License.
 */
 -->
-<LinearLayout
+<com.android.keyguard.AlphaOptimizedLinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/mobile_combo"
@@ -79,4 +79,4 @@
             android:contentDescription="@string/data_connection_roaming"
             android:visibility="gone" />
     </FrameLayout>
-</LinearLayout>
+</com.android.keyguard.AlphaOptimizedLinearLayout>

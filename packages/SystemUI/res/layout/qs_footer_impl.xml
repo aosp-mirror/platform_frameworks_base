@@ -43,6 +43,14 @@
         android:layout_gravity="center_vertical"
         android:gravity="end" >
 
+        <include
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|start"
+            android:layout_margin="15dp"
+            android:visibility="gone"
+            layout="@layout/mobile_signal_group" />
+
         <com.android.keyguard.CarrierText
             android:id="@+id/qs_carrier_text"
             android:layout_width="0dp"
