@@ -74,6 +74,17 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         verifyDataIndicators(TelephonyIcons.ICON_H);
     }
 
+
+    @Test
+    public void testHspaPlusDataIcon() {
+        setupDefaultSignal();
+        updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
+                TelephonyManager.NETWORK_TYPE_HSPAP);
+
+        verifyDataIndicators(TelephonyIcons.ICON_H_PLUS);
+    }
+
+
     @Test
     public void testWfcNoDataIcon() {
         setupDefaultSignal();
