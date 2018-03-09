@@ -31,6 +31,7 @@ import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -60,6 +61,8 @@ import java.util.Locale;
  */
 public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue.Callbacks,
         View.OnClickListener, NextAlarmController.NextAlarmChangeCallback {
+    private static final String TAG = "QuickStatusBarHeader";
+    private static final boolean DEBUG = false;
 
     /** Delay for auto fading out the long press tooltip after it's fully visible (in ms). */
     private static final long AUTO_FADE_OUT_DELAY_MS = DateUtils.SECOND_IN_MILLIS * 6;
@@ -292,6 +295,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
     @Override
     public void onNextAlarmChanged(AlarmManager.AlarmClockInfo nextAlarm) {
         mNextAlarmText = nextAlarm != null ? formatNextAlarm(nextAlarm) : null;
+
         if (mNextAlarmText != null) {
             hideLongPressTooltip(true /* shouldFadeInAlarmText */);
         } else {
@@ -351,6 +355,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
                     .setListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
+                            if (DEBUG) Log.d(TAG, "hideLongPressTooltip: Hid long press tip");
                             mLongPressTooltipView.setVisibility(View.INVISIBLE);
 
                             if (shouldShowAlarmText) {
@@ -361,7 +366,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
                     .start();
         } else {
             mLongPressTooltipView.setVisibility(View.INVISIBLE);
-
             if (shouldShowAlarmText) {
                 showAlarmText();
             }
@@ -377,9 +381,11 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
         mNextAlarmView.setVisibility(View.VISIBLE);
         mNextAlarmTextView.setText(mNextAlarmText);
 
+        // Animate the alarm back in. Make sure to clear the animator listener for the animation!
         mNextAlarmView.animate()
                 .alpha(1f)
                 .setDuration(FADE_ANIMATION_DURATION_MS)
+                .setListener(null)
                 .start();
     }
 
@@ -394,6 +400,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
                     .setListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
+                            if (DEBUG) Log.d(TAG, "hideAlarmText: Hid alarm text");
+
                             // Reset the alpha regardless of how the animation ends for the next
                             // time we show this view/want to animate it.
                             mNextAlarmView.setVisibility(View.INVISIBLE);
