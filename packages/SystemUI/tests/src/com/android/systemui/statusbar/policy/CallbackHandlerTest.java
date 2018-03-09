@@ -111,8 +111,8 @@ public class CallbackHandlerTest extends SysuiTestCase {
         boolean out = true;
         String typeDescription = "Test 1";
         String description = "Test 2";
-        int type = R.drawable.stat_sys_data_fully_connected_1x;
-        int qsType = R.drawable.ic_qs_signal_1x;
+        int type = TelephonyIcons.ICON_1X;
+        int qsType = TelephonyIcons.ICON_1X;
         boolean wide = true;
         int subId = 5;
         boolean roaming = true;
