@@ -8,6 +8,7 @@ Landroid/app/Activity;->getActivityOptions()Landroid/app/ActivityOptions;
 Landroid/app/Activity;->getActivityToken()Landroid/os/IBinder;
 Landroid/app/Activity;->mActivityInfo:Landroid/content/pm/ActivityInfo;
 Landroid/app/ActivityManager;->clearApplicationUserData(Ljava/lang/String;Landroid/content/pm/IPackageDataObserver;)Z
+Landroid/app/ActivityManager;->getMaxRecentTasksStatic()I
 Landroid/app/ActivityManager;->getService()Landroid/app/IActivityManager;
 Landroid/app/ActivityManager;->IActivityManagerSingleton:Landroid/util/Singleton;
 Landroid/app/ActivityManager;->isLowRamDeviceStatic()Z
@@ -301,6 +302,7 @@ Landroid/app/StatusBarManager;->expandNotificationsPanel()V
 Landroid/app/StatusBarManager;->expandSettingsPanel(Ljava/lang/String;)V
 Landroid/app/StatusBarManager;->expandSettingsPanel()V
 Landroid/app/StatusBarManager;->getService()Lcom/android/internal/statusbar/IStatusBarService;
+Landroid/app/TaskStackListener;-><init>()V
 Landroid/app/TimePickerDialog;->mTimePicker:Landroid/widget/TimePicker;
 Landroid/app/trust/ITrustManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/app/usage/UsageStatsManager;->mService:Landroid/app/usage/IUsageStatsManager;
@@ -592,6 +594,7 @@ Landroid/graphics/drawable/NinePatchDrawable$NinePatchState;->mNinePatch:Landroi
 Landroid/graphics/drawable/StateListDrawable;->extractStateSet(Landroid/util/AttributeSet;)[I
 Landroid/graphics/drawable/StateListDrawable;->getStateCount()I
 Landroid/graphics/drawable/StateListDrawable;->getStateDrawable(I)Landroid/graphics/drawable/Drawable;
+Landroid/graphics/drawable/StateListDrawable;->getStateDrawableIndex([I)I
 Landroid/graphics/drawable/StateListDrawable;->getStateSet(I)[I
 Landroid/graphics/drawable/StateListDrawable;->mStateListState:Landroid/graphics/drawable/StateListDrawable$StateListState;
 Landroid/graphics/drawable/StateListDrawable;->updateStateFromTypedArray(Landroid/content/res/TypedArray;)V
@@ -622,6 +625,7 @@ Landroid/graphics/SurfaceTexture;->mProducer:J
 Landroid/graphics/SurfaceTexture;->mSurfaceTexture:J
 Landroid/graphics/SurfaceTexture;->nativeDetachFromGLContext()I
 Landroid/graphics/SurfaceTexture;->postEventFromNative(Ljava/lang/ref/WeakReference;)V
+Landroid/graphics/Typeface;->createFromFamiliesWithDefault([Landroid/graphics/FontFamily;Ljava/lang/String;II)Landroid/graphics/Typeface;
 Landroid/graphics/Typeface;->mStyle:I
 Landroid/graphics/Typeface;->sDefaults:[Landroid/graphics/Typeface;
 Landroid/graphics/Typeface;->setDefault(Landroid/graphics/Typeface;)V
@@ -642,6 +646,7 @@ Landroid/hardware/input/IInputManager$Stub;->asInterface(Landroid/os/IBinder;)La
 Landroid/hardware/input/IInputManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/hardware/input/InputManager;->getInstance()Landroid/hardware/input/InputManager;
 Landroid/hardware/input/InputManager;->mIm:Landroid/hardware/input/IInputManager;
+Landroid/hardware/location/IActivityRecognitionHardwareClient$Stub;-><init>()V
 Landroid/hardware/SerialPort;->mNativeContext:I
 Landroid/hardware/soundtrigger/SoundTrigger$ConfidenceLevel;->confidenceLevel:I
 Landroid/hardware/soundtrigger/SoundTrigger$ConfidenceLevel;-><init>(II)V
@@ -716,6 +721,10 @@ Landroid/location/Country;->getCountryIso()Ljava/lang/String;
 Landroid/location/Country;->getSource()I
 Landroid/location/GeocoderParams;->getClientPackage()Ljava/lang/String;
 Landroid/location/GeocoderParams;->getLocale()Ljava/util/Locale;
+Landroid/location/IFusedProvider$Stub;-><init>()V
+Landroid/location/IGeocodeProvider$Stub;-><init>()V
+Landroid/location/IGeofenceProvider$Stub;-><init>()V
+Landroid/location/ILocationManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/location/ILocationManager;
 Landroid/location/ILocationManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/location/LocationManager;->mService:Landroid/location/ILocationManager;
 Landroid/media/AudioAttributes;->mContentType:I
@@ -739,6 +748,7 @@ Landroid/media/AudioGainConfig;->mValues:[I
 Landroid/media/AudioGain;-><init>(IIIIIIIII)V
 Landroid/media/AudioHandle;-><init>(I)V
 Landroid/media/AudioHandle;->mId:I
+Landroid/media/AudioManager;->forceVolumeControlStream(I)V
 Landroid/media/AudioManager;->getOutputLatency(I)I
 Landroid/media/AudioManager;->getService()Landroid/media/IAudioService;
 Landroid/media/AudioManager;->mAudioFocusIdListenerMap:Ljava/util/concurrent/ConcurrentHashMap;
@@ -1137,6 +1147,7 @@ Landroid/os/storage/VolumeInfo;->isVisible()Z
 Landroid/os/StrictMode;->disableDeathOnFileUriExposure()V
 Landroid/os/StrictMode;->getThreadPolicyMask()I
 Landroid/os/StrictMode;->onBinderStrictModePolicyChange(I)V
+Landroid/os/StrictMode$ThreadPolicy$Builder;->penaltyListener(Landroid/os/StrictMode$OnThreadViolationListener;Ljava/util/concurrent/Executor;)Landroid/os/StrictMode$ThreadPolicy$Builder;
 Landroid/os/StrictMode;->violationsBeingTimed:Ljava/lang/ThreadLocal;
 Landroid/os/SystemProperties;->addChangeCallback(Ljava/lang/Runnable;)V
 Landroid/os/SystemProperties;-><init>()V
@@ -1506,6 +1517,7 @@ Landroid/telephony/SignalStrength;->SIGNAL_STRENGTH_POOR:I
 Landroid/telephony/SmsMessage;->getSubId()I
 Landroid/telephony/SmsMessage;->mWrappedSmsMessage:Lcom/android/internal/telephony/SmsMessageBase;
 Landroid/telephony/SubscriptionManager;->getAllSubscriptionInfoCount()I
+Landroid/telephony/SubscriptionManager;->getAllSubscriptionInfoList()Ljava/util/List;
 Landroid/telephony/SubscriptionManager;->getDefaultDataSubscriptionInfo()Landroid/telephony/SubscriptionInfo;
 Landroid/telephony/SubscriptionManager;->getDefaultSmsPhoneId()I
 Landroid/telephony/SubscriptionManager;->getPhoneId(I)I
@@ -1607,6 +1619,7 @@ Landroid/text/TextLine;->sCached:[Landroid/text/TextLine;
 Landroid/text/TextPaint;->setUnderlineText(IF)V
 Landroid/transition/ChangeBounds;->BOTTOM_RIGHT_ONLY_PROPERTY:Landroid/util/Property;
 Landroid/transition/ChangeBounds;->POSITION_PROPERTY:Landroid/util/Property;
+Landroid/transition/TransitionManager;->sRunningTransitions:Ljava/lang/ThreadLocal;
 Landroid/util/ArrayMap;->mBaseCacheSize:I
 Landroid/util/ArrayMap;->mTwiceBaseCacheSize:I
 Landroid/util/DisplayMetrics;->noncompatHeightPixels:I
@@ -1634,6 +1647,7 @@ Landroid/view/accessibility/AccessibilityManager;->mIsHighTextContrastEnabled:Z
 Landroid/view/accessibility/AccessibilityManager;->sInstance:Landroid/view/accessibility/AccessibilityManager;
 Landroid/view/accessibility/AccessibilityManager;->sInstanceSync:Ljava/lang/Object;
 Landroid/view/accessibility/AccessibilityNodeInfo;->refresh(Landroid/os/Bundle;Z)Z
+Landroid/view/accessibility/AccessibilityRecord;->getSourceNodeId()J
 Landroid/view/accessibility/IAccessibilityManager;->getEnabledAccessibilityServiceList(II)Ljava/util/List;
 Landroid/view/accessibility/IAccessibilityManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/view/accessibility/IAccessibilityManager;
 Landroid/view/accessibility/IAccessibilityManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
@@ -2124,6 +2138,7 @@ Lcom/android/internal/app/IBatteryStats$Stub;->asInterface(Landroid/os/IBinder;)
 Lcom/android/internal/app/IBatteryStats$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Lcom/android/internal/app/IVoiceInteractionManagerService$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/app/IVoiceInteractionManagerService;
 Lcom/android/internal/app/IVoiceInteractionManagerService$Stub$Proxy;->showSessionFromSession(Landroid/os/IBinder;Landroid/os/Bundle;I)Z
+Lcom/android/internal/location/ILocationProvider$Stub;-><init>()V
 Lcom/android/internal/os/BatterySipper;->add(Lcom/android/internal/os/BatterySipper;)V
 Lcom/android/internal/os/BatterySipper;->drainType:Lcom/android/internal/os/BatterySipper$DrainType;
 Lcom/android/internal/os/BatterySipper;->getUid()I
