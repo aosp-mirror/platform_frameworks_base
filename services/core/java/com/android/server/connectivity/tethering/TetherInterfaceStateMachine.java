@@ -31,7 +31,7 @@ import android.net.ip.InterfaceController;
 import android.net.ip.RouterAdvertisementDaemon;
 import android.net.ip.RouterAdvertisementDaemon.RaParams;
 import android.net.util.InterfaceParams;
-import android.net.util.NetdService;
+import android.net.util.InterfaceSet;
 import android.net.util.SharedLog;
 import android.os.INetworkManagementService;
 import android.os.Looper;
@@ -49,12 +49,12 @@ import com.android.internal.util.StateMachine;
 
 import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * Provides the interface to IP-layer serving functionality for a given network
@@ -121,7 +121,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
 
     private int mLastError;
     private int mServingMode;
-    private String mMyUpstreamIfaceName;  // may change over time
+    private InterfaceSet mUpstreamIfaceSet;  // may change over time
     private InterfaceParams mInterfaceParams;
     // TODO: De-duplicate this with mLinkProperties above. Currently, these link
     // properties are those selected by the IPv6TetheringCoordinator and relayed
@@ -622,10 +622,10 @@ public class TetherInterfaceStateMachine extends StateMachine {
         }
 
         private void cleanupUpstream() {
-            if (mMyUpstreamIfaceName == null) return;
+            if (mUpstreamIfaceSet == null) return;
 
-            cleanupUpstreamInterface(mMyUpstreamIfaceName);
-            mMyUpstreamIfaceName = null;
+            for (String ifname : mUpstreamIfaceSet.ifnames) cleanupUpstreamInterface(ifname);
+            mUpstreamIfaceSet = null;
         }
 
         private void cleanupUpstreamInterface(String upstreamIface) {
@@ -661,33 +661,65 @@ public class TetherInterfaceStateMachine extends StateMachine {
                     mLog.e("CMD_TETHER_REQUESTED while already tethering.");
                     break;
                 case CMD_TETHER_CONNECTION_CHANGED:
-                    String newUpstreamIfaceName = (String)(message.obj);
-                    if ((mMyUpstreamIfaceName == null && newUpstreamIfaceName == null) ||
-                            (mMyUpstreamIfaceName != null &&
-                            mMyUpstreamIfaceName.equals(newUpstreamIfaceName))) {
+                    final InterfaceSet newUpstreamIfaceSet = (InterfaceSet) message.obj;
+                    if (noChangeInUpstreamIfaceSet(newUpstreamIfaceSet)) {
                         if (VDBG) Log.d(TAG, "Connection changed noop - dropping");
                         break;
                     }
-                    cleanupUpstream();
-                    if (newUpstreamIfaceName != null) {
+
+                    if (newUpstreamIfaceSet == null) {
+                        cleanupUpstream();
+                        break;
+                    }
+
+                    for (String removed : upstreamInterfacesRemoved(newUpstreamIfaceSet)) {
+                        cleanupUpstreamInterface(removed);
+                    }
+
+                    final Set<String> added = upstreamInterfacesAdd(newUpstreamIfaceSet);
+                    // This makes the call to cleanupUpstream() in the error
+                    // path for any interface neatly cleanup all the interfaces.
+                    mUpstreamIfaceSet = newUpstreamIfaceSet;
+
+                    for (String ifname : added) {
                         try {
-                            mNMService.enableNat(mIfaceName, newUpstreamIfaceName);
-                            mNMService.startInterfaceForwarding(mIfaceName,
-                                    newUpstreamIfaceName);
+                            mNMService.enableNat(mIfaceName, ifname);
+                            mNMService.startInterfaceForwarding(mIfaceName, ifname);
                         } catch (Exception e) {
                             mLog.e("Exception enabling NAT: " + e);
-                            cleanupUpstreamInterface(newUpstreamIfaceName);
+                            cleanupUpstream();
                             mLastError = ConnectivityManager.TETHER_ERROR_ENABLE_NAT_ERROR;
                             transitionTo(mInitialState);
                             return true;
                         }
                     }
-                    mMyUpstreamIfaceName = newUpstreamIfaceName;
                     break;
                 default:
                     return false;
             }
             return true;
+        }
+
+        private boolean noChangeInUpstreamIfaceSet(InterfaceSet newIfaces) {
+            if (mUpstreamIfaceSet == null && newIfaces == null) return true;
+            if (mUpstreamIfaceSet != null && newIfaces != null) {
+                return mUpstreamIfaceSet.equals(newIfaces);
+            }
+            return false;
+        }
+
+        private Set<String> upstreamInterfacesRemoved(InterfaceSet newIfaces) {
+            if (mUpstreamIfaceSet == null) return new HashSet<>();
+
+            final HashSet<String> removed = new HashSet<>(mUpstreamIfaceSet.ifnames);
+            removed.removeAll(newIfaces.ifnames);
+            return removed;
+        }
+
+        private Set<String> upstreamInterfacesAdd(InterfaceSet newIfaces) {
+            final HashSet<String> added = new HashSet<>(newIfaces.ifnames);
+            if (mUpstreamIfaceSet != null) added.removeAll(mUpstreamIfaceSet.ifnames);
+            return added;
         }
     }
 
