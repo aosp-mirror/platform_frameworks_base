@@ -68,6 +68,7 @@ public class AccessPointPreference extends Preference {
     private final UserBadgeCache mBadgeCache;
     private final IconInjector mIconInjector;
     private TextView mTitleView;
+    private boolean mShowDivider;
 
     private boolean mForSavedNetworks = false;
     private AccessPoint mAccessPoint;
@@ -115,7 +116,8 @@ public class AccessPointPreference extends Preference {
                           int iconResId, boolean forSavedNetworks, StateListDrawable frictionSld,
                           int level, IconInjector iconInjector) {
         super(context);
-        setWidgetLayoutResource(R.layout.access_point_friction_widget);
+        setLayoutResource(R.layout.preference_access_point);
+        setWidgetLayoutResource(getWidgetLayoutResourceId());
         mBadgeCache = cache;
         mAccessPoint = accessPoint;
         mForSavedNetworks = forSavedNetworks;
@@ -126,6 +128,10 @@ public class AccessPointPreference extends Preference {
         mIconInjector = iconInjector;
         mBadgePadding = context.getResources()
                 .getDimensionPixelSize(R.dimen.wifi_preference_badge_padding);
+    }
+
+    protected int getWidgetLayoutResourceId() {
+        return R.layout.access_point_friction_widget;
     }
 
     public AccessPoint getAccessPoint() {
@@ -154,6 +160,18 @@ public class AccessPointPreference extends Preference {
 
         ImageView frictionImageView = (ImageView) view.findViewById(R.id.friction_icon);
         bindFrictionImage(frictionImageView);
+
+        final View divider = view.findViewById(R.id.two_target_divider);
+        divider.setVisibility(shouldShowDivider() ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    public boolean shouldShowDivider() {
+        return mShowDivider;
+    }
+
+    public void setShowDivider(boolean showDivider) {
+        mShowDivider = showDivider;
+        notifyChanged();
     }
 
     protected void updateIcon(int level, Context context) {
