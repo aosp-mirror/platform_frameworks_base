@@ -92,6 +92,7 @@ public class AppLaunch extends InstrumentationTestCase {
     private static final int INITIAL_LAUNCH_IDLE_TIMEOUT = 5000; // 5s to allow app to idle
     private static final int POST_LAUNCH_IDLE_TIMEOUT = 750; // 750ms idle for non initial launches
     private static final int BETWEEN_LAUNCH_SLEEP_TIMEOUT = 5000; // 5s between launching apps
+    private static final int PROFILE_SAVE_SLEEP_TIMEOUT = 1000; // Allow 1s for the profile to save
     private static final String LAUNCH_SUB_DIRECTORY = "launch_logs";
     private static final String LAUNCH_FILE = "applaunch.txt";
     private static final String TRACE_SUB_DIRECTORY = "atrace_logs";
@@ -263,6 +264,8 @@ public class AppLaunch extends InstrumentationTestCase {
                             String.format("killall -s SIGUSR1 %s", appPkgName);
                         getInstrumentation().getUiAutomation().executeShellCommand(
                             sendSignalCommand);
+                        // killall is async, wait one second to let the app save the profile.
+                        sleep(PROFILE_SAVE_SLEEP_TIMEOUT);
                         assertTrue(String.format("Not able to compile the app : %s", appPkgName),
                               compileApp(launch.getCompilerFilter(), appPkgName));
                     }
