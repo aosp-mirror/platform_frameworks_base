@@ -49,6 +49,7 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
@@ -1028,6 +1029,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        requestApplyInsets();
         reorient();
         onPluginDisconnected(null); // Create default gesture helper
         Dependency.get(PluginManager.class).addPluginListener(this,
@@ -1103,6 +1105,13 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         dumpButton(pw, "a11y", getAccessibilityButton());
 
         pw.println("    }");
+    }
+
+    @Override
+    public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        setPadding(insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(),
+                insets.getSystemWindowInsetRight(), insets.getSystemWindowInsetBottom());
+        return super.onApplyWindowInsets(insets);
     }
 
     private static void dumpButton(PrintWriter pw, String caption, ButtonDispatcher button) {

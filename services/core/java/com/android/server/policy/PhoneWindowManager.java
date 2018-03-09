@@ -2680,8 +2680,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 attrs.flags &= ~WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
                 break;
             case TYPE_DREAM:
-                // Dreams don't have an app window token and can thus not be letterboxed.
-                // Hence always let them extend under the cutout.
+            case TYPE_WALLPAPER:
+                // Dreams and wallpapers don't have an app window token and can thus not be
+                // letterboxed. Hence always let them extend under the cutout.
                 attrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
                 break;
             case TYPE_STATUS_BAR:
@@ -4748,7 +4749,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // It's a system nav bar or a portrait screen; nav bar goes on bottom.
             final int top = cutoutSafeUnrestricted.bottom
                     - getNavigationBarHeight(rotation, uiMode);
-            mTmpNavigationFrame.set(0, top, displayWidth, cutoutSafeUnrestricted.bottom);
+            mTmpNavigationFrame.set(0, top, displayWidth, displayFrames.mUnrestricted.bottom);
             displayFrames.mStable.bottom = displayFrames.mStableFullscreen.bottom = top;
             if (transientNavBarShowing) {
                 mNavigationBarController.setBarShowingLw(true);
@@ -4771,7 +4772,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // Landscape screen; nav bar goes to the right.
             final int left = cutoutSafeUnrestricted.right
                     - getNavigationBarWidth(rotation, uiMode);
-            mTmpNavigationFrame.set(left, 0, cutoutSafeUnrestricted.right, displayHeight);
+            mTmpNavigationFrame.set(left, 0, displayFrames.mUnrestricted.right, displayHeight);
             displayFrames.mStable.right = displayFrames.mStableFullscreen.right = left;
             if (transientNavBarShowing) {
                 mNavigationBarController.setBarShowingLw(true);
@@ -4794,7 +4795,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // Seascape screen; nav bar goes to the left.
             final int right = cutoutSafeUnrestricted.left
                     + getNavigationBarWidth(rotation, uiMode);
-            mTmpNavigationFrame.set(cutoutSafeUnrestricted.left, 0, right, displayHeight);
+            mTmpNavigationFrame.set(displayFrames.mUnrestricted.left, 0, right, displayHeight);
             displayFrames.mStable.left = displayFrames.mStableFullscreen.left = right;
             if (transientNavBarShowing) {
                 mNavigationBarController.setBarShowingLw(true);
@@ -4823,8 +4824,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mStatusBarLayer = mNavigationBar.getSurfaceLayer();
         // And compute the final frame.
         mNavigationBar.computeFrameLw(mTmpNavigationFrame, mTmpNavigationFrame,
-                mTmpNavigationFrame, mTmpNavigationFrame, mTmpNavigationFrame, dcf,
-                mTmpNavigationFrame, mTmpNavigationFrame, displayFrames.mDisplayCutout);
+                mTmpNavigationFrame, displayFrames.mDisplayCutoutSafe, mTmpNavigationFrame, dcf,
+                mTmpNavigationFrame, displayFrames.mDisplayCutoutSafe,
+                displayFrames.mDisplayCutout);
         if (DEBUG_LAYOUT) Slog.i(TAG, "mNavigationBar frame: " + mTmpNavigationFrame);
         return mNavigationBarController.checkHiddenLw();
     }
@@ -5292,27 +5294,44 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         final int cutoutMode = attrs.layoutInDisplayCutoutMode;
         final boolean attachedInParent = attached != null && !layoutInScreen;
+        final boolean requestedHideNavigation =
+                (requestedSysUiFl & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0;
         // Ensure that windows with a DEFAULT or NEVER display cutout mode are laid out in
         // the cutout safe zone.
         if (cutoutMode != LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS) {
-            final Rect displayCutoutSafeExceptMaybeTop = mTmpRect;
-            displayCutoutSafeExceptMaybeTop.set(displayFrames.mDisplayCutoutSafe);
+            final Rect displayCutoutSafeExceptMaybeBars = mTmpRect;
+            displayCutoutSafeExceptMaybeBars.set(displayFrames.mDisplayCutoutSafe);
             if (layoutInScreen && layoutInsetDecor && !requestedFullscreen
                     && cutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT) {
                 // At the top we have the status bar, so apps that are
                 // LAYOUT_IN_SCREEN | LAYOUT_INSET_DECOR but not FULLSCREEN
                 // already expect that there's an inset there and we don't need to exclude
                 // the window from that area.
-                displayCutoutSafeExceptMaybeTop.top = Integer.MIN_VALUE;
+                displayCutoutSafeExceptMaybeBars.top = Integer.MIN_VALUE;
+            }
+            if (layoutInScreen && layoutInsetDecor && !requestedHideNavigation
+                    && cutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT) {
+                // Same for the navigation bar.
+                switch (mNavigationBarPosition) {
+                    case NAV_BAR_BOTTOM:
+                        displayCutoutSafeExceptMaybeBars.bottom = Integer.MAX_VALUE;
+                        break;
+                    case NAV_BAR_RIGHT:
+                        displayCutoutSafeExceptMaybeBars.right = Integer.MAX_VALUE;
+                        break;
+                    case NAV_BAR_LEFT:
+                        displayCutoutSafeExceptMaybeBars.left = Integer.MIN_VALUE;
+                        break;
+                }
             }
             // Windows that are attached to a parent and laid out in said parent are already
             // avoidingthe cutout according to that parent and don't need to be further constrained.
             if (!attachedInParent) {
-                pf.intersectUnchecked(displayCutoutSafeExceptMaybeTop);
+                pf.intersectUnchecked(displayCutoutSafeExceptMaybeBars);
             }
-            // Make sure that NO_LIMITS windows clipped to the display don't extend into the display
-            // don't extend under the cutout.
-            df.intersectUnchecked(displayCutoutSafeExceptMaybeTop);
+            // Make sure that NO_LIMITS windows clipped to the display don't extend under the
+            // cutout.
+            df.intersectUnchecked(displayCutoutSafeExceptMaybeBars);
         }
 
         // Content should never appear in the cutout.
