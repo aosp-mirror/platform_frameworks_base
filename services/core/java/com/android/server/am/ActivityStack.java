@@ -2854,7 +2854,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 true /* includingParents */);
     }
 
-    final void startActivityLocked(ActivityRecord r, ActivityRecord focusedTopActivity,
+    void startActivityLocked(ActivityRecord r, ActivityRecord focusedTopActivity,
             boolean newTask, boolean keepCurTransition, ActivityOptions options) {
         TaskRecord rTask = r.getTask();
         final int taskId = rTask.taskId;
