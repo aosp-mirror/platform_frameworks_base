@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
@@ -136,7 +135,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
             // started
             mWindowManager.cancelRecentsAnimation();
             mWindowManager.initializeRecentsAnimation(recentsAnimationRunner, this,
-                    display.mDisplayId);
+                    display.mDisplayId, mStackSupervisor.mRecentTasks.getRecentTaskIds());
 
             // If we updated the launch-behind state, update the visibility of the activities after
             // we fetch the visible tasks to be controlled by the animation
