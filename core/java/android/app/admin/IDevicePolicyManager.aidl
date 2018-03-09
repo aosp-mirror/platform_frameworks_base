@@ -404,8 +404,8 @@ interface IDevicePolicyManager {
     CharSequence getStartUserSessionMessage(in ComponentName admin);
     CharSequence getEndUserSessionMessage(in ComponentName admin);
 
-    List<String> setMeteredDataDisabled(in ComponentName admin, in List<String> packageNames);
-    List<String> getMeteredDataDisabled(in ComponentName admin);
+    List<String> setMeteredDataDisabledPackages(in ComponentName admin, in List<String> packageNames);
+    List<String> getMeteredDataDisabledPackages(in ComponentName admin);
 
     int addOverrideApn(in ComponentName admin, in ApnSetting apnSetting);
     boolean updateOverrideApn(in ComponentName admin, int apnId, in ApnSetting apnSetting);
@@ -414,5 +414,5 @@ interface IDevicePolicyManager {
     void setOverrideApnsEnabled(in ComponentName admin, boolean enabled);
     boolean isOverrideApnEnabled(in ComponentName admin);
 
-    boolean isMeteredDataDisabledForUser(in ComponentName admin, String packageName, int userId);
+    boolean isMeteredDataDisabledPackageForUser(in ComponentName admin, String packageName, int userId);
 }

@@ -11407,7 +11407,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public List<String> setMeteredDataDisabled(ComponentName who, List<String> packageNames) {
+    public List<String> setMeteredDataDisabledPackages(ComponentName who, List<String> packageNames) {
         Preconditions.checkNotNull(who);
         Preconditions.checkNotNull(packageNames);
 
@@ -11457,7 +11457,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public List<String> getMeteredDataDisabled(ComponentName who) {
+    public List<String> getMeteredDataDisabledPackages(ComponentName who) {
         Preconditions.checkNotNull(who);
 
         if (!mHasFeature) {
@@ -11472,7 +11472,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public boolean isMeteredDataDisabledForUser(ComponentName who,
+    public boolean isMeteredDataDisabledPackageForUser(ComponentName who,
             String packageName, int userId) {
         Preconditions.checkNotNull(who);
 

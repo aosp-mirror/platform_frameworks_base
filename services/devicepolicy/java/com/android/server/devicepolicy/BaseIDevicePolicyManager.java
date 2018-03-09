@@ -122,12 +122,12 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public List<String> setMeteredDataDisabled(ComponentName admin, List<String> packageNames) {
+    public List<String> setMeteredDataDisabledPackages(ComponentName admin, List<String> packageNames) {
         return packageNames;
     }
 
     @Override
-    public List<String> getMeteredDataDisabled(ComponentName admin) {
+    public List<String> getMeteredDataDisabledPackages(ComponentName admin) {
         return new ArrayList<>();
     }
 
@@ -163,7 +163,7 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean isMeteredDataDisabledForUser(ComponentName admin,
+    public boolean isMeteredDataDisabledPackageForUser(ComponentName admin,
             String packageName, int userId) {
         return false;
     }
