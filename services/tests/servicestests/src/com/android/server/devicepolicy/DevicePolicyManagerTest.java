@@ -57,6 +57,7 @@ import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.PasswordMetrics;
+import android.app.backup.ISelectBackupTransportCallback;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -2263,6 +2264,21 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertNotNull(intent);
         assertEquals(DevicePolicyManager.POLICY_DISABLE_SCREEN_CAPTURE,
                 intent.getStringExtra(DevicePolicyManager.EXTRA_RESTRICTION));
+
+        // Make the backup transport selection succeed
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable {
+                ISelectBackupTransportCallback callback =
+                    (ISelectBackupTransportCallback) invocation.getArguments()[1];
+                if (callback != null) {
+                    callback.onSuccess("");
+                }
+                return null;
+            }
+        }).when(getServices().ibackupManager).selectBackupTransportAsync(
+                any(ComponentName.class), any(ISelectBackupTransportCallback.class));
+
 
         // Backups are not mandatory
         intent = dpm.createAdminSupportIntent(DevicePolicyManager.POLICY_MANDATORY_BACKUPS);
