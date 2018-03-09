@@ -81,6 +81,7 @@ import java.util.concurrent.CountDownLatch;
  *     android:authorities="com.example.mypkg">
  *     <intent-filter>
  *         <action android:name="com.example.mypkg.intent.action.MY_SLICE_INTENT" />
+ *         <category android:name="android.app.slice.category.SLICE" />
  *     </intent-filter>
  * </provider>}
  * </pre>
@@ -253,8 +254,13 @@ public abstract class SliceProvider extends ContentProvider {
      * In that case, this method can be called and is expected to return a non-null Uri representing
      * a slice. Otherwise this will throw {@link UnsupportedOperationException}.
      *
+     * Any intent filter added to a slice provider should also contain
+     * {@link SliceManager#CATEGORY_SLICE}, because otherwise it will not be detected by
+     * {@link SliceManager#mapIntentToUri(Intent)}.
+     *
      * @return Uri representing the slice associated with the provided intent.
-     * @see {@link Slice}
+     * @see Slice
+     * @see SliceManager#mapIntentToUri(Intent)
      */
     public @NonNull Uri onMapIntentToUri(Intent intent) {
         throw new UnsupportedOperationException(
