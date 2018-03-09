@@ -43,6 +43,9 @@ import android.util.ArrayMap;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
@@ -924,6 +927,37 @@ public final class CameraManager {
                     idCount++;
                 }
             }
+
+            // The sort logic must match the logic in
+            // libcameraservice/common/CameraProviderManager.cpp::getAPI1CompatibleCameraDeviceIds
+            Arrays.sort(cameraIds, new Comparator<String>() {
+                    @Override
+                    public int compare(String s1, String s2) {
+                        int s1Int = 0, s2Int = 0;
+                        try {
+                            s1Int = Integer.parseInt(s1);
+                        } catch (NumberFormatException e) {
+                            s1Int = -1;
+                        }
+
+                        try {
+                            s2Int = Integer.parseInt(s2);
+                        } catch (NumberFormatException e) {
+                            s2Int = -1;
+                        }
+
+                        // Uint device IDs first
+                        if (s1Int >= 0 && s2Int >= 0) {
+                            return s1Int - s2Int;
+                        } else if (s1Int >= 0) {
+                            return -1;
+                        } else if (s2Int >= 0) {
+                            return 1;
+                        } else {
+                            // Simple string compare if both id are not uint
+                            return s1.compareTo(s2);
+                        }
+                    }});
             return cameraIds;
         }
 
