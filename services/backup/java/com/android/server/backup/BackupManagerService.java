@@ -3525,7 +3525,10 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                         dumpAgents(pw);
                         return;
                     } else if ("transportclients".equals(arg.toLowerCase())) {
-                        mTransportManager.dump(pw);
+                        mTransportManager.dumpTransportClients(pw);
+                        return;
+                    } else if ("transportstats".equals(arg.toLowerCase())) {
+                        mTransportManager.dumpTransportStats(pw);
                         return;
                     }
                 }
@@ -3590,7 +3593,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                 }
             }
 
-            mTransportManager.dump(pw);
+            mTransportManager.dumpTransportClients(pw);
 
             pw.println("Pending init: " + mPendingInits.size());
             for (String s : mPendingInits) {

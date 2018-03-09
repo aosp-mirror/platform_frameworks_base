@@ -29,6 +29,7 @@ import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
@@ -51,6 +52,7 @@ import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -78,6 +80,7 @@ public class TransportClient {
     private static final int LOG_BUFFER_SIZE = 5;
 
     private final Context mContext;
+    private final TransportStats mTransportStats;
     private final Intent mBindIntent;
     private final ServiceConnection mConnection;
     private final String mIdentifier;
@@ -104,12 +107,14 @@ public class TransportClient {
 
     TransportClient(
             Context context,
+            TransportStats transportStats,
             Intent bindIntent,
             ComponentName transportComponent,
             String identifier,
             String caller) {
         this(
                 context,
+                transportStats,
                 bindIntent,
                 transportComponent,
                 identifier,
@@ -120,12 +125,14 @@ public class TransportClient {
     @VisibleForTesting
     TransportClient(
             Context context,
+            TransportStats transportStats,
             Intent bindIntent,
             ComponentName transportComponent,
             String identifier,
             String caller,
             Handler listenerHandler) {
         mContext = context;
+        mTransportStats = transportStats;
         mTransportComponent = transportComponent;
         mBindIntent = bindIntent;
         mIdentifier = identifier;
@@ -321,11 +328,16 @@ public class TransportClient {
                 (requestedTransport, transportClient) ->
                         transportFuture.complete(requestedTransport);
 
+        long requestTime = SystemClock.elapsedRealtime();
         log(Priority.DEBUG, caller, "Sync connect: calling async");
         connectAsync(requestListener, caller);
 
         try {
-            return transportFuture.get();
+            transport = transportFuture.get();
+            long time = SystemClock.elapsedRealtime() - requestTime;
+            mTransportStats.registerConnectionTime(mTransportComponent, time);
+            log(Priority.DEBUG, caller, String.format(Locale.US, "Connect took %d ms", time));
+            return transport;
         } catch (InterruptedException | ExecutionException e) {
             String error = e.getClass().getSimpleName();
             log(Priority.ERROR, caller, error + " while waiting for transport: " + e.getMessage());
