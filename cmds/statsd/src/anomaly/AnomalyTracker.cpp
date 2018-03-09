@@ -59,6 +59,12 @@ void AnomalyTracker::resetStorage() {
 }
 
 size_t AnomalyTracker::index(int64_t bucketNum) const {
+    if (bucketNum < 0) {
+        // To support this use-case, we can easily modify index to wrap around. But currently
+        // AnomalyTracker should never need this, so if it happens, it's a bug we should log.
+        // TODO: Audit this.
+        ALOGE("index() was passed a negative bucket number (%lld)!", (long long)bucketNum);
+    }
     return bucketNum % mNumOfPastBuckets;
 }
 
@@ -72,9 +78,7 @@ void AnomalyTracker::flushPastBuckets(const int64_t& latestPastBucketNum) {
     // The past packets are ancient. Empty out old mPastBuckets[i] values and reset
     // mSumOverPastBuckets.
     if (latestPastBucketNum - mMostRecentBucketNum >= mNumOfPastBuckets) {
-        mPastBuckets.clear();
-        mPastBuckets.resize(mNumOfPastBuckets);
-        mSumOverPastBuckets.clear();
+        resetStorage();
     } else {
         for (int64_t i = std::max(0LL, (long long)(mMostRecentBucketNum - mNumOfPastBuckets + 1));
              i <= latestPastBucketNum - mNumOfPastBuckets; i++) {
@@ -150,7 +154,7 @@ void AnomalyTracker::addBucketToSum(const shared_ptr<DimToValMap>& bucket) {
 
 int64_t AnomalyTracker::getPastBucketValue(const MetricDimensionKey& key,
                                            const int64_t& bucketNum) const {
-    if (mNumOfPastBuckets == 0) {
+    if (mNumOfPastBuckets == 0 || bucketNum < 0) {
         return 0;
     }
 
