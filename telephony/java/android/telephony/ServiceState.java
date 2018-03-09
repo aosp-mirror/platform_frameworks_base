@@ -470,9 +470,13 @@ public class ServiceState implements Parcelable {
      */
     @DuplexMode
     public int getDuplexMode() {
-        // TODO(b/72117602) determine duplex mode from channel number, using 3GPP 36.101 sections
-        // 5.7.3-1 and 5.5-1
-        return DUPLEX_MODE_UNKNOWN;
+        // only support LTE duplex mode
+        if (!isLte(mRilDataRadioTechnology)) {
+            return DUPLEX_MODE_UNKNOWN;
+        }
+
+        int band = AccessNetworkUtils.getOperatingBandForEarfcn(mChannelNumber);
+        return AccessNetworkUtils.getDuplexModeForEutranBand(band);
     }
 
     /**
@@ -890,6 +894,7 @@ public class ServiceState implements Parcelable {
             .append(", mDataRegState=").append(mDataRegState)
             .append("(" + rilServiceStateToString(mDataRegState) + ")")
             .append(", mChannelNumber=").append(mChannelNumber)
+            .append(", duplexMode()=").append(getDuplexMode())
             .append(", mCellBandwidths=").append(Arrays.toString(mCellBandwidths))
             .append(", mVoiceRoamingType=").append(getRoamingLogString(mVoiceRoamingType))
             .append(", mDataRoamingType=").append(getRoamingLogString(mDataRoamingType))
