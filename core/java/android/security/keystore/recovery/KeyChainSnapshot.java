@@ -18,12 +18,14 @@ package android.security.keystore.recovery;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.os.BadParcelableException;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.util.Preconditions;
 
 import java.security.cert.CertPath;
+import java.security.cert.CertificateException;
 import java.util.List;
 
 /**
@@ -54,7 +56,7 @@ public final class KeyChainSnapshot implements Parcelable {
     private long mCounterId = DEFAULT_COUNTER_ID;
     private byte[] mServerParams;
     private byte[] mPublicKey;  // The raw public key bytes used
-    private CertPath mCertPath;  // The certificate path including the intermediate certificates
+    private RecoveryCertPath mCertPath;  // The cert path including necessary intermediate certs
     private List<KeyChainProtectionParams> mKeyChainProtectionParams;
     private List<WrappedApplicationKey> mEntryRecoveryData;
     private byte[] mEncryptedRecoveryKeyBlob;
@@ -127,7 +129,17 @@ public final class KeyChainSnapshot implements Parcelable {
      */
     // TODO: Change to @NonNull
     public CertPath getTrustedHardwareCertPath() {
-        return mCertPath;
+        if (mCertPath == null) {
+            return null;
+        } else {
+            try {
+                return mCertPath.getCertPath();
+            } catch (CertificateException e) {
+                // Rethrow an unchecked exception as it should not happen. If such an issue exists,
+                // an exception should have been thrown during service initialization.
+                throw new BadParcelableException(e);
+            }
+        }
     }
 
     /**
@@ -232,11 +244,17 @@ public final class KeyChainSnapshot implements Parcelable {
          * contain a certificate of the trusted hardware public key and any necessary intermediate
          * certificates.
          *
-         * @param certPath The public key
+         * @param certPath The certificate path
+         * @throws CertificateException if the given certificate path cannot be encoded properly
          * @return This builder.
          */
-        public Builder setTrustedHardwareCertPath(CertPath certPath) {
-            mInstance.mCertPath = certPath;
+        public Builder setTrustedHardwareCertPath(CertPath certPath) throws CertificateException {
+            // TODO: Make it NonNull when the caller code is all updated
+            if (certPath == null) {
+                mInstance.mCertPath = null;
+            } else {
+                mInstance.mCertPath = RecoveryCertPath.createRecoveryCertPath(certPath);
+            }
             return this;
         }
 
@@ -302,6 +320,7 @@ public final class KeyChainSnapshot implements Parcelable {
         out.writeLong(mCounterId);
         out.writeByteArray(mServerParams);
         out.writeByteArray(mPublicKey);
+        out.writeTypedObject(mCertPath, /* no flags */ 0);
     }
 
     /**
@@ -316,6 +335,7 @@ public final class KeyChainSnapshot implements Parcelable {
         mCounterId = in.readLong();
         mServerParams = in.createByteArray();
         mPublicKey = in.createByteArray();
+        mCertPath = in.readTypedObject(RecoveryCertPath.CREATOR);
     }
 
     @Override

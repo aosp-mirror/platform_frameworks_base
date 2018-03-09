@@ -45,6 +45,7 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertPath;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -284,17 +285,23 @@ public class KeySyncTask implements Runnable {
         // If application keys are not updated, snapshot will not be created on next unlock.
         mRecoverableKeyStoreDb.setShouldCreateSnapshot(mUserId, recoveryAgentUid, false);
 
-        mRecoverySnapshotStorage.put(recoveryAgentUid, new KeyChainSnapshot.Builder()
+        KeyChainSnapshot.Builder keyChainSnapshotBuilder = new KeyChainSnapshot.Builder()
                 .setSnapshotVersion(getSnapshotVersion(recoveryAgentUid, recreateCurrentVersion))
                 .setMaxAttempts(TRUSTED_HARDWARE_MAX_ATTEMPTS)
                 .setCounterId(counterId)
                 .setTrustedHardwarePublicKey(SecureBox.encodePublicKey(publicKey))
-                .setTrustedHardwareCertPath(certPath)
                 .setServerParams(vaultHandle)
                 .setKeyChainProtectionParams(metadataList)
                 .setWrappedApplicationKeys(createApplicationKeyEntries(encryptedApplicationKeys))
-                .setEncryptedRecoveryKeyBlob(encryptedRecoveryKey)
-                .build());
+                .setEncryptedRecoveryKeyBlob(encryptedRecoveryKey);
+        try {
+            keyChainSnapshotBuilder.setTrustedHardwareCertPath(certPath);
+        } catch(CertificateException e) {
+            // Should not happen, as it's just deserialized from bytes stored in the db
+            Log.wtf(TAG, "Cannot serialize CertPath when calling setTrustedHardwareCertPath", e);
+            return;
+        }
+        mRecoverySnapshotStorage.put(recoveryAgentUid, keyChainSnapshotBuilder.build());
 
         mSnapshotListenersStorage.recoverySnapshotAvailable(recoveryAgentUid);
     }
