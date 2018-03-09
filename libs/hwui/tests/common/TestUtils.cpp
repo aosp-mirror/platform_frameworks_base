@@ -96,8 +96,8 @@ void TestUtils::layoutTextUnscaled(const SkPaint& paint, const char* text,
         int32_t unichar = utf32_from_utf8_at(text, 4, 0, &nextIndex);
         text += nextIndex;
 
-        glyph_t glyph = autoCache.get()->unicharToGlyph(unichar);
-        autoCache.getCache()->unicharToGlyph(unichar);
+        glyph_t glyph = autoCache->unicharToGlyph(unichar);
+        autoCache->unicharToGlyph(unichar);
 
         // push glyph and its relative position
         outGlyphs->push_back(glyph);
@@ -105,7 +105,7 @@ void TestUtils::layoutTextUnscaled(const SkPaint& paint, const char* text,
         outPositions->push_back(0);
 
         // compute bounds
-        SkGlyph skGlyph = autoCache.get()->getUnicharMetrics(unichar);
+        SkGlyph skGlyph = autoCache->getUnicharMetrics(unichar);
         Rect glyphBounds(skGlyph.fWidth, skGlyph.fHeight);
         glyphBounds.translate(totalAdvance + skGlyph.fLeft, skGlyph.fTop);
         bounds.unionWith(glyphBounds);
