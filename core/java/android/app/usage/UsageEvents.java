@@ -109,11 +109,11 @@ public final class UsageEvents implements Parcelable {
         public static final int NOTIFICATION_SEEN = 10;
 
         /**
-         * An event type denoting a change in App Standby Bucket. Additional bucket information
-         * is contained in mBucketAndReason.
-         * @hide
+         * An event type denoting a change in App Standby Bucket. The new bucket can be
+         * retrieved by calling {@link #getStandbyBucket()}.
+         *
+         * @see UsageStatsManager#getAppStandbyBucket()
          */
-        @SystemApi
         public static final int STANDBY_BUCKET_CHANGED = 11;
 
         /**
@@ -254,8 +254,11 @@ public final class UsageEvents implements Parcelable {
         /**
          * The event type.
          *
-         * See {@link #MOVE_TO_BACKGROUND}
-         * See {@link #MOVE_TO_FOREGROUND}
+         * @see #MOVE_TO_BACKGROUND
+         * @see #MOVE_TO_FOREGROUND
+         * @see #CONFIGURATION_CHANGE
+         * @see #USER_INTERACTION
+         * @see #STANDBY_BUCKET_CHANGED
          */
         public int getEventType() {
             return mEventType;
@@ -283,9 +286,8 @@ public final class UsageEvents implements Parcelable {
          * Returns the standby bucket of the app, if the event is of type
          * {@link #STANDBY_BUCKET_CHANGED}, otherwise returns 0.
          * @return the standby bucket associated with the event.
-         * @hide
+         *
          */
-        @SystemApi
         public int getStandbyBucket() {
             return (mBucketAndReason & 0xFFFF0000) >>> 16;
         }
