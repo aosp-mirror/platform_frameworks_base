@@ -780,6 +780,9 @@
     <string name="quick_settings_hotspot_label">Hotspot</string>
     <!-- QuickSettings: Hotspot. Secondary label shown when the hotspot is being enabled [CHAR LIMIT=NONE] -->
     <string name="quick_settings_hotspot_secondary_label_transient">Turning on&#8230;</string>
+    <!-- QuickSettings: Hotspot. Secondary label shown when Data Saver mode is enabled to explain to
+         the user why they can't toggle the hotspot tile. [CHAR LIMIT=20] -->
+    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled">Data Saver is on</string>
     <!-- QuickSettings: Hotspot: Secondary label for how many devices are connected to the hotspot [CHAR LIMIT=NONE] -->
     <plurals name="quick_settings_hotspot_secondary_label_num_devices">
         <item quantity="one">%d device</item>
