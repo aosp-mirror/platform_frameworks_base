@@ -30,6 +30,7 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.server.ServiceThread;
+import com.android.server.net.BaseNetdEventCallback;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -50,7 +51,7 @@ final class NetworkLogger {
     private ServiceThread mHandlerThread;
     private NetworkLoggingHandler mNetworkLoggingHandler;
 
-    private final INetdEventCallback mNetdEventCallback = new INetdEventCallback.Stub() {
+    private final INetdEventCallback mNetdEventCallback = new BaseNetdEventCallback() {
         @Override
         public void onDnsEvent(String hostname, String[] ipAddresses, int ipAddressesCount,
                 long timestamp, int uid) {
