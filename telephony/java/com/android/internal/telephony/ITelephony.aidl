@@ -823,12 +823,6 @@ interface ITelephony {
     IImsConfig getImsConfig(int slotId, int feature);
 
     /**
-    * Returns true if emergency calling is available for the MMTEL feature associated with the
-    * slot specified.
-    */
-    boolean isEmergencyMmTelAvailable(int slotId);
-
-    /**
      * @return true if the IMS resolver is busy resolving a binding and should not be considered
      * available, false if the IMS resolver is idle.
      */
