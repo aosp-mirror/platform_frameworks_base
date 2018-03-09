@@ -57,12 +57,14 @@ import android.content.pm.dex.DexMetadataHelper;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.net.Uri;
+import android.os.BaseBundle;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IUserManager;
 import android.os.ParcelFileDescriptor;
+import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -1503,11 +1505,38 @@ class PackageManagerShellCommand extends ShellCommand {
     private int runSuspend(boolean suspendedState) {
         final PrintWriter pw = getOutPrintWriter();
         int userId = UserHandle.USER_SYSTEM;
+        final PersistableBundle appExtras = new PersistableBundle();
+        final PersistableBundle launcherExtras = new PersistableBundle();
         String opt;
         while ((opt = getNextOption()) != null) {
             switch (opt) {
                 case "--user":
                     userId = UserHandle.parseUserArg(getNextArgRequired());
+                    break;
+                case "--ael":
+                case "--aes":
+                case "--aed":
+                case "--lel":
+                case "--les":
+                case "--led":
+                    final String key = getNextArgRequired();
+                    final String val = getNextArgRequired();
+                    if (!suspendedState) {
+                        break;
+                    }
+                    final PersistableBundle bundleToInsert =
+                            opt.startsWith("--a") ? appExtras : launcherExtras;
+                    switch (opt.charAt(4)) {
+                        case 'l':
+                            bundleToInsert.putLong(key, Long.valueOf(val));
+                            break;
+                        case 'd':
+                            bundleToInsert.putDouble(key, Double.valueOf(val));
+                            break;
+                        case 's':
+                            bundleToInsert.putString(key, val);
+                            break;
+                    }
                     break;
                 default:
                     pw.println("Error: Unknown option: " + opt);
@@ -1515,15 +1544,16 @@ class PackageManagerShellCommand extends ShellCommand {
             }
         }
 
-        String packageName = getNextArg();
+        final String packageName = getNextArg();
         if (packageName == null) {
             pw.println("Error: package name not specified");
             return 1;
         }
-
+        final String callingPackage =
+                (Binder.getCallingUid() == Process.ROOT_UID) ? "root" : "com.android.shell";
         try {
             mInterface.setPackagesSuspendedAsUser(new String[]{packageName}, suspendedState,
-                    userId);
+                    appExtras, launcherExtras, callingPackage, userId);
             pw.println("Package " + packageName + " new suspended state: "
                     + mInterface.isPackageSuspendedForUser(packageName, userId));
             return 0;
