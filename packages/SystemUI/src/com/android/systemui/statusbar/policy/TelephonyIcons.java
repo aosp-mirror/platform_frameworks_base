@@ -53,7 +53,7 @@ class TelephonyIcons {
             0,
             0,
             AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
-            R.string.accessibility_carrier_network_change_mode,
+            R.string.carrier_network_change_mode,
             0,
             false,
             0
@@ -68,7 +68,7 @@ class TelephonyIcons {
             0,
             0,
             AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
-            R.string.accessibility_data_connection_3g,
+            R.string.data_connection_3g,
             TelephonyIcons.ICON_3G,
             true,
             TelephonyIcons.QS_DATA_3G
@@ -107,7 +107,7 @@ class TelephonyIcons {
             0,
             0,
             AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
-            R.string.accessibility_data_connection_edge,
+            R.string.data_connection_edge,
             TelephonyIcons.ICON_E,
             false,
             TelephonyIcons.QS_DATA_E
@@ -122,7 +122,7 @@ class TelephonyIcons {
             0,
             0,
             AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
-            R.string.accessibility_data_connection_cdma,
+            R.string.data_connection_cdma,
             TelephonyIcons.ICON_1X,
             true,
             TelephonyIcons.QS_DATA_1X
@@ -137,7 +137,7 @@ class TelephonyIcons {
             0,
             0,
             AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
-            R.string.accessibility_data_connection_gprs,
+            R.string.data_connection_gprs,
             TelephonyIcons.ICON_G,
             false,
             TelephonyIcons.QS_DATA_G
@@ -152,7 +152,7 @@ class TelephonyIcons {
             0,
             0,
             AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
-            R.string.accessibility_data_connection_3_5g,
+            R.string.data_connection_3_5g,
             TelephonyIcons.ICON_H,
             false,
             TelephonyIcons.QS_DATA_H
@@ -167,7 +167,7 @@ class TelephonyIcons {
             0,
             0,
             AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
-            R.string.accessibility_data_connection_4g,
+            R.string.data_connection_4g,
             TelephonyIcons.ICON_4G,
             true,
             TelephonyIcons.QS_DATA_4G
@@ -182,7 +182,7 @@ class TelephonyIcons {
             0,
             0,
             AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
-            R.string.accessibility_data_connection_4g_plus,
+            R.string.data_connection_4g_plus,
             TelephonyIcons.ICON_4G_PLUS,
             true,
             TelephonyIcons.QS_DATA_4G_PLUS
@@ -197,7 +197,7 @@ class TelephonyIcons {
             0,
             0,
             AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
-            R.string.accessibility_data_connection_lte,
+            R.string.data_connection_lte,
             TelephonyIcons.ICON_LTE,
             true,
             TelephonyIcons.QS_DATA_LTE
@@ -212,7 +212,7 @@ class TelephonyIcons {
             0,
             0,
             AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
-            R.string.accessibility_data_connection_lte_plus,
+            R.string.data_connection_lte_plus,
             TelephonyIcons.ICON_LTE_PLUS,
             true,
             TelephonyIcons.QS_DATA_LTE_PLUS
@@ -227,7 +227,7 @@ class TelephonyIcons {
             0,
             0,
             AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
-            R.string.accessibility_cell_data_off,
+            R.string.cell_data_off,
             0,
             false,
             0
