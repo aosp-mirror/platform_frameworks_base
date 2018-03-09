@@ -3811,14 +3811,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         final ActivityState prevState = r.getState();
         if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to FINISHING: " + r);
 
-        // We are already destroying / have already destroyed the activity. Do not continue to
-        // modify it. Note that we do not use ActivityRecord#finishing here as finishing is not
-        // indicative of destruction (though destruction is indicative of finishing) as finishing
-        // can be delayed below.
-        if (r.isState(DESTROYING, DESTROYED)) {
-            return null;
-        }
-
         r.setState(FINISHING, "finishCurrentActivityLocked");
         final boolean finishingActivityInNonFocusedStack
                 = r.getStack() != mStackSupervisor.getFocusedStack()
@@ -4037,26 +4029,16 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      * state to destroy so only the cleanup here is needed.
      *
      * Note: Call before #removeActivityFromHistoryLocked.
-     *
-     * @param r             The {@link ActivityRecord} to cleanup.
-     * @param cleanServices Whether services bound to the {@link ActivityRecord} should also be
-     *                      cleaned up.
-     * @param destroy       Whether the {@link ActivityRecord} should be destroyed.
-     * @param clearProcess  Whether the client process should be cleared.
      */
-    private void cleanUpActivityLocked(ActivityRecord r, boolean cleanServices, boolean destroy,
-            boolean clearProcess) {
+    private void cleanUpActivityLocked(ActivityRecord r, boolean cleanServices, boolean setState) {
         onActivityRemovedFromStack(r);
 
         r.deferRelaunchUntilPaused = false;
         r.frozenBeforeDestroy = false;
 
-        if (destroy) {
+        if (setState) {
             if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to DESTROYED: " + r + " (cleaning up)");
             r.setState(DESTROYED, "cleanupActivityLocked");
-        }
-
-        if (clearProcess) {
             if (DEBUG_APP) Slog.v(TAG_APP, "Clearing app during cleanUp for activity " + r);
             r.app = null;
         }
@@ -4271,7 +4253,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         + ", app=" + (r.app != null ? r.app.processName : "(null)"));
 
         if (r.isState(DESTROYING, DESTROYED)) {
-            if (DEBUG_STATES) Slog.v(TAG_STATES, "activity " + r + " already finishing."
+            if (DEBUG_STATES) Slog.v(TAG_STATES, "activity " + r + " already destroying."
                     + "skipping request with reason:" + reason);
             return false;
         }
@@ -4282,8 +4264,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         boolean removedFromHistory = false;
 
-        cleanUpActivityLocked(r, false /* cleanServices */, false /* destroy */,
-                false /*clearProcess*/);
+        cleanUpActivityLocked(r, false, false);
 
         final boolean hadApp = r.app != null;
 
@@ -4380,6 +4361,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
     }
 
+    /**
+     * This method is to only be called from the client via binder when the activity is destroyed
+     * AND finished.
+     */
     final void activityDestroyedLocked(ActivityRecord record, String reason) {
         if (record != null) {
             mHandler.removeMessages(DESTROY_TIMEOUT_MSG, record);
@@ -4389,8 +4374,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         if (isInStackLocked(record) != null) {
             if (record.isState(DESTROYING, DESTROYED)) {
-                cleanUpActivityLocked(record, true /* cleanServices */, false /* destroy */,
-                        false /*clearProcess*/);
+                cleanUpActivityLocked(record, true, false);
                 removeActivityFromHistoryLocked(record, reason);
             }
         }
@@ -4499,8 +4483,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                             r.icicle = null;
                         }
                     }
-                    cleanUpActivityLocked(r, true /* cleanServices */, remove /* destroy */,
-                            true /*clearProcess*/);
+                    cleanUpActivityLocked(r, true, true);
                     if (remove) {
                         removeActivityFromHistoryLocked(r, "appDied");
                     }

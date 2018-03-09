@@ -147,7 +147,10 @@ public class TransactionExecutor {
             pw.println("Executor:");
             dump(pw, prefix);
 
-            Slog.wtf(TAG, stringWriter.toString());
+            Slog.w(TAG, stringWriter.toString());
+
+            // Ignore requests for non-existent client records for now.
+            return;
         }
 
         // Cycle to the state right before the final requested state.
