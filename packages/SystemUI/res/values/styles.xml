@@ -459,6 +459,12 @@
         <item name="android:alpha">0.87</item>
     </style>
 
+    <style name="TextAppearance.NotificationInfo.Confirmation">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:alpha">0.87</item>
+    </style>
+
     <style name="TextAppearance.NotificationInfo.Secondary">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textSize">14sp</item>
