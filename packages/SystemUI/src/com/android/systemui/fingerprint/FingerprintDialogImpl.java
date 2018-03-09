@@ -180,8 +180,8 @@ public class FingerprintDialogImpl extends SystemUI implements CommandQueue.Call
             }
         }
         mReceiver = null;
-        mWindowManager.removeView(mDialogView);
         mDialogShowing = false;
+        mDialogView.startDismiss();
     }
 
     private void handleButtonNegative() {
