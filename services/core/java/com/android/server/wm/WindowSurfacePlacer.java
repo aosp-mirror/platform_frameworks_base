@@ -52,6 +52,7 @@ import static com.android.server.wm.WindowManagerService.H.REPORT_WINDOWS_CHANGE
 import static com.android.server.wm.WindowManagerService.LAYOUT_REPEAT_THRESHOLD;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_PLACING_SURFACES;
 
+import android.app.WindowConfiguration;
 import android.os.Debug;
 import android.os.Trace;
 import android.util.ArraySet;
@@ -294,12 +295,14 @@ class WindowSurfacePlacer {
         // what will control the animation theme. If all closing windows are obscured, then there is
         // no need to do an animation. This is the case, for example, when this transition is being
         // done behind a dream window.
+        final ArraySet<Integer> activityTypes = collectActivityTypes(mService.mOpeningApps,
+                mService.mClosingApps);
         final AppWindowToken animLpToken = mService.mPolicy.allowAppAnimationsLw()
-                ? findAnimLayoutParamsToken(transit)
+                ? findAnimLayoutParamsToken(transit, activityTypes)
                 : null;
 
         final LayoutParams animLp = getAnimLp(animLpToken);
-        overrideWithRemoteAnimationIfSet(animLpToken, transit);
+        overrideWithRemoteAnimationIfSet(animLpToken, transit, activityTypes);
 
         final boolean voiceInteraction = containsVoiceInteraction(mService.mOpeningApps)
                 || containsVoiceInteraction(mService.mOpeningApps);
@@ -361,13 +364,14 @@ class WindowSurfacePlacer {
      * Overrides the pending transition with the remote animation defined for the transition in the
      * set of defined remote animations in the app window token.
      */
-    private void overrideWithRemoteAnimationIfSet(AppWindowToken animLpToken, int transit) {
+    private void overrideWithRemoteAnimationIfSet(AppWindowToken animLpToken, int transit,
+            ArraySet<Integer> activityTypes) {
         if (animLpToken == null) {
             return;
         }
         final RemoteAnimationDefinition definition = animLpToken.getRemoteAnimationDefinition();
         if (definition != null) {
-            final RemoteAnimationAdapter adapter = definition.getAdapter(transit);
+            final RemoteAnimationAdapter adapter = definition.getAdapter(transit, activityTypes);
             if (adapter != null) {
                 mService.mAppTransition.overridePendingAppTransitionRemote(adapter);
             }
@@ -377,13 +381,14 @@ class WindowSurfacePlacer {
     /**
      * @return The window token that determines the animation theme.
      */
-    private AppWindowToken findAnimLayoutParamsToken(@TransitionType int transit) {
+    private AppWindowToken findAnimLayoutParamsToken(@TransitionType int transit,
+            ArraySet<Integer> activityTypes) {
         AppWindowToken result;
 
         // Remote animations always win, but fullscreen tokens override non-fullscreen tokens.
         result = lookForHighestTokenWithFilter(mService.mClosingApps, mService.mOpeningApps,
                 w -> w.getRemoteAnimationDefinition() != null
-                        && w.getRemoteAnimationDefinition().hasTransition(transit));
+                        && w.getRemoteAnimationDefinition().hasTransition(transit, activityTypes));
         if (result != null) {
             return result;
         }
@@ -396,6 +401,22 @@ class WindowSurfacePlacer {
                 w -> w.findMainWindow() != null);
     }
 
+    /**
+     * @return The set of {@link WindowConfiguration.ActivityType}s contained in the set of apps in
+     *         {@code array1} and {@code array2}.
+     */
+    private ArraySet<Integer> collectActivityTypes(ArraySet<AppWindowToken> array1,
+            ArraySet<AppWindowToken> array2) {
+        final ArraySet<Integer> result = new ArraySet<>();
+        for (int i = array1.size() - 1; i >= 0; i--) {
+            result.add(array1.valueAt(i).getActivityType());
+        }
+        for (int i = array2.size() - 1; i >= 0; i--) {
+            result.add(array2.valueAt(i).getActivityType());
+        }
+        return result;
+    }
+
     private AppWindowToken lookForHighestTokenWithFilter(ArraySet<AppWindowToken> array1,
             ArraySet<AppWindowToken> array2, Predicate<AppWindowToken> filter) {
         final int array1count = array1.size();
@@ -403,12 +424,9 @@ class WindowSurfacePlacer {
         int bestPrefixOrderIndex = Integer.MIN_VALUE;
         AppWindowToken bestToken = null;
         for (int i = 0; i < count; i++) {
-            final AppWindowToken wtoken;
-            if (i < array1count) {
-                wtoken = array1.valueAt(i);
-            } else {
-                wtoken = array2.valueAt(i - array1count);
-            }
+            final AppWindowToken wtoken = i < array1count
+                    ? array1.valueAt(i)
+                    : array2.valueAt(i - array1count);
             final int prefixOrderIndex = wtoken.getPrefixOrderIndex();
             if (filter.test(wtoken) && prefixOrderIndex > bestPrefixOrderIndex) {
                 bestPrefixOrderIndex = prefixOrderIndex;
