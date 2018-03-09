@@ -533,7 +533,7 @@ public class PackageDexOptimizer {
         // Some apps are executed with restrictions on hidden API usage. If this app is one
         // of them, pass a flag to dexopt to enable the same restrictions during compilation.
         int hiddenApiFlag = info.isAllowedToUseHiddenApi() ? 0 : DEXOPT_ENABLE_HIDDEN_API_CHECKS;
-        // Enable CompactDex generation for modes that aren't latency critical.
+        // Avoid generating CompactDex for modes that are latency critical.
         final int compilationReason = options.getCompilationReason();
         boolean generateCompactDex = true;
         switch (compilationReason) {
