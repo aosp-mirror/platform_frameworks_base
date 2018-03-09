@@ -5150,6 +5150,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     public void startRecentsActivity(Intent intent, IAssistDataReceiver assistDataReceiver,
                 IRecentsAnimationRunner recentsAnimationRunner) {
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "startRecentsActivity()");
+        final int callingPid = Binder.getCallingPid();
         final long origId = Binder.clearCallingIdentity();
         try {
             final int recentsUid;
@@ -5163,7 +5164,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 // Start a new recents animation
                 final RecentsAnimation anim = new RecentsAnimation(this, mStackSupervisor,
-                        mActivityStartController, mWindowManager, mUserController);
+                        mActivityStartController, mWindowManager, mUserController, callingPid);
                 anim.startRecentsActivity(intent, recentsAnimationRunner, recentsComponent,
                         recentsUid);
             }
@@ -14341,6 +14342,28 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    void setRunningRemoteAnimation(int pid, boolean runningRemoteAnimation) {
+        synchronized (ActivityManagerService.this) {
+            final ProcessRecord pr;
+            synchronized (mPidsSelfLocked) {
+                pr = mPidsSelfLocked.get(pid);
+                if (pr == null) {
+                    Slog.w(TAG, "setRunningRemoteAnimation called on unknown pid: " + pid);
+                    return;
+                }
+            }
+            if (pr.runningRemoteAnimation == runningRemoteAnimation) {
+                return;
+            }
+            pr.runningRemoteAnimation = runningRemoteAnimation;
+            if (DEBUG_OOM_ADJ) {
+                Slog.i(TAG, "Setting runningRemoteAnimation=" + pr.runningRemoteAnimation
+                        + " for pid=" + pid);
+            }
+            updateOomAdjLocked(pr, true);
+        }
+    }
+
     public final void enterSafeMode() {
         synchronized(this) {
             // It only makes sense to do this before the system is ready
@@ -22751,6 +22774,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             foregroundActivities = true;
             procState = PROCESS_STATE_CUR_TOP;
             if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Making top: " + app);
+        } else if (app.runningRemoteAnimation) {
+            adj = ProcessList.VISIBLE_APP_ADJ;
+            schedGroup = ProcessList.SCHED_GROUP_TOP_APP;
+            app.adjType = "running-remote-anim";
+            procState = PROCESS_STATE_CUR_TOP;
+            if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Making running remote anim: " + app);
         } else if (app.instr != null) {
             // Don't want to kill running instrumentation.
             adj = ProcessList.FOREGROUND_APP_ADJ;
@@ -22826,7 +22855,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                         app.adjType = "vis-activity";
                         if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to vis-activity: " + app);
                     }
-                    schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
+                    if (schedGroup < ProcessList.SCHED_GROUP_DEFAULT) {
+                        schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
+                    }
                     app.cached = false;
                     app.empty = false;
                     foregroundActivities = true;
@@ -22849,7 +22880,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                         app.adjType = "pause-activity";
                         if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to pause-activity: " + app);
                     }
-                    schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
+                    if (schedGroup < ProcessList.SCHED_GROUP_DEFAULT) {
+                        schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
+                    }
                     app.cached = false;
                     app.empty = false;
                     foregroundActivities = true;
@@ -25990,6 +26023,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
+        @Override
+        public void setRunningRemoteAnimation(int pid, boolean runningRemoteAnimation) {
+            ActivityManagerService.this.setRunningRemoteAnimation(pid, runningRemoteAnimation);
+        }
+
         /**
          * Called after the network policy rules are updated by
          * {@link com.android.server.net.NetworkPolicyManagerService} for a specific {@param uid}
@@ -26539,6 +26577,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             throws RemoteException {
         enforceCallingPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS,
                 "registerRemoteAnimations");
+        definition.setCallingPid(Binder.getCallingPid());
         synchronized (this) {
             final ActivityRecord r = ActivityRecord.isInStackLocked(token);
             if (r == null) {
@@ -26558,6 +26597,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             RemoteAnimationAdapter adapter) throws RemoteException {
         enforceCallingPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS,
                 "registerRemoteAnimationForNextActivityStart");
+        adapter.setCallingPid(Binder.getCallingPid());
         synchronized (this) {
             final long origId = Binder.clearCallingIdentity();
             try {
