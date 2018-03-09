@@ -50,6 +50,7 @@ import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 
 import java.io.FileDescriptor;
@@ -66,7 +67,6 @@ public abstract class PanelView extends FrameLayout {
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
     private boolean mPanelUpdateWhenAnimatorEnds;
     private boolean mVibrateOnOpening;
-    private boolean mVibrationEnabled;
     protected boolean mLaunchingNotification;
     private int mFixedDuration = NO_FIXED_DURATION;
 
@@ -110,13 +110,7 @@ public abstract class PanelView extends FrameLayout {
     private FlingAnimationUtils mFlingAnimationUtilsClosing;
     private FlingAnimationUtils mFlingAnimationUtilsDismissing;
     private FalsingManager mFalsingManager;
-    private final Vibrator mVibrator;
-    final private ContentObserver mVibrationObserver = new ContentObserver(Handler.getMain()) {
-        @Override
-        public void onChange(boolean selfChange) {
-            updateHapticFeedBackEnabled();
-        }
-    };
+    private final VibratorHelper mVibratorHelper;
 
     /**
      * Whether an instant expand request is currently pending and we are just waiting for layout.
@@ -218,18 +212,9 @@ public abstract class PanelView extends FrameLayout {
         mFalsingManager = FalsingManager.getInstance(context);
         mNotificationsDragEnabled =
                 getResources().getBoolean(R.bool.config_enableNotificationShadeDrag);
-        mVibrator = mContext.getSystemService(Vibrator.class);
+        mVibratorHelper = new VibratorHelper(context);
         mVibrateOnOpening = mContext.getResources().getBoolean(
                 R.bool.config_vibrateOnIconAnimation);
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(Settings.System.HAPTIC_FEEDBACK_ENABLED), true,
-                mVibrationObserver);
-        mVibrationObserver.onChange(false /* selfChange */);
-    }
-
-    public void updateHapticFeedBackEnabled() {
-        mVibrationEnabled = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.HAPTIC_FEEDBACK_ENABLED, 0, UserHandle.USER_CURRENT) != 0;
     }
 
     protected void loadDimens() {
@@ -421,9 +406,8 @@ public abstract class PanelView extends FrameLayout {
         runPeekAnimation(INITIAL_OPENING_PEEK_DURATION, getOpeningHeight(),
                 false /* collapseWhenFinished */);
         notifyBarPanelExpansionChanged();
-        if (mVibrateOnOpening && mVibrationEnabled) {
-            AsyncTask.execute(() ->
-                    mVibrator.vibrate(VibrationEffect.get(VibrationEffect.EFFECT_TICK, false)));
+        if (mVibrateOnOpening) {
+            mVibratorHelper.vibrate(VibrationEffect.EFFECT_TICK);
         }
 
         //TODO: keyguard opens QS a different way; log that too?
