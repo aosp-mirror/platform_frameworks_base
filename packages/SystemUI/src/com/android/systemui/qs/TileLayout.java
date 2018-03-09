@@ -92,9 +92,10 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int numTiles = mRecords.size();
         final int width = MeasureSpec.getSize(widthMeasureSpec);
-        final int rows = (numTiles + mColumns - 1) / mColumns;
+        final int numRows = (numTiles + mColumns - 1) / mColumns;
         mCellWidth = (width - (mCellMarginHorizontal * (mColumns + 1))) / mColumns;
 
+        // Measure each QS tile.
         View previousView = this;
         for (TileRecord record : mRecords) {
             if (record.tileView.getVisibility() == GONE) continue;
@@ -104,9 +105,10 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
 
         // Only include the top margin in our measurement if we have more than 1 row to show.
         // Otherwise, don't add the extra margin buffer at top.
-        int height = (mCellHeight + mCellMarginVertical) * rows +
-                (rows != 0 ? (mCellMarginTop - mCellMarginVertical) : 0);
+        int height = (mCellHeight + mCellMarginVertical) * numRows +
+                (numRows != 0 ? (mCellMarginTop - mCellMarginVertical) : 0);
         if (height < 0) height = 0;
+
         setMeasuredDimension(width, height);
     }
 
@@ -122,24 +124,30 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         final int w = getWidth();
-        boolean isRtl = getLayoutDirection() == LAYOUT_DIRECTION_RTL;
+        final boolean isRtl = getLayoutDirection() == LAYOUT_DIRECTION_RTL;
         int row = 0;
         int column = 0;
+
+        // Layout each QS tile.
         for (int i = 0; i < mRecords.size(); i++, column++) {
+            // If we reached the last column available to layout a tile, wrap back to the next row.
             if (column == mColumns) {
+                column = 0;
                 row++;
-                column -= mColumns;
             }
-            TileRecord record = mRecords.get(i);
-            int left = getColumnStart(column);
+
+            final TileRecord record = mRecords.get(i);
             final int top = getRowTop(row);
-            int right;
+            final int right;
+            final int left;
             if (isRtl) {
-                right = w - left;
+                right = w - getColumnStart(column);
                 left = right - mCellWidth;
             } else {
+                left = getColumnStart(column);
                 right = left + mCellWidth;
             }
+
             record.tileView.layout(left, top, right, top + record.tileView.getMeasuredHeight());
         }
     }
