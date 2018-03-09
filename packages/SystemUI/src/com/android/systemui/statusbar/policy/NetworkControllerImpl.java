@@ -308,6 +308,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         return mDefaultSignalController;
     }
 
+    @Override
     public String getMobileDataNetworkName() {
         MobileSignalController controller = getDataController();
         return controller != null ? controller.getState().networkNameData : "";
