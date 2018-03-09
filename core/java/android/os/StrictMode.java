@@ -34,6 +34,7 @@ import android.os.strictmode.ContentUriWithoutPermissionViolation;
 import android.os.strictmode.CustomViolation;
 import android.os.strictmode.DiskReadViolation;
 import android.os.strictmode.DiskWriteViolation;
+import android.os.strictmode.ExplicitGcViolation;
 import android.os.strictmode.FileUriExposedViolation;
 import android.os.strictmode.InstanceCountViolation;
 import android.os.strictmode.IntentReceiverLeakedViolation;
@@ -212,13 +213,17 @@ public final class StrictMode {
     /** @hide */
     @TestApi public static final int DETECT_UNBUFFERED_IO = 0x20; // for ThreadPolicy
 
+    /** @hide  */
+    public static final int DETECT_EXPLICIT_GC = 0x40;  // for ThreadPolicy
+
     private static final int ALL_THREAD_DETECT_BITS =
             DETECT_DISK_WRITE
                     | DETECT_DISK_READ
                     | DETECT_NETWORK
                     | DETECT_CUSTOM
                     | DETECT_RESOURCE_MISMATCH
-                    | DETECT_UNBUFFERED_IO;
+                    | DETECT_UNBUFFERED_IO
+                    | DETECT_EXPLICIT_GC;
 
     // Byte 2: Process-policy
 
@@ -581,6 +586,29 @@ public final class StrictMode {
             /** Disable detection of disk writes. */
             public Builder permitDiskWrites() {
                 return disable(DETECT_DISK_WRITE);
+            }
+
+            /**
+             * Detect explicit GC requests, i.e. calls to Runtime.gc().
+             *
+             * @hide
+             */
+            public Builder detectExplicitGc() {
+                // TODO(b/3400644): Un-hide this for next API update
+                // TODO(b/3400644): Un-hide ExplicitGcViolation for next API update
+                // TODO(b/3400644): Make DETECT_EXPLICIT_GC a @TestApi for next API update
+                // TODO(b/3400644): Call this from detectAll in next API update
+                return enable(DETECT_EXPLICIT_GC);
+            }
+
+            /**
+             * Disable detection of explicit GC requests, i.e. calls to Runtime.gc().
+             *
+             * @hide
+             */
+            public Builder permitExplicitGc() {
+                // TODO(b/3400644): Un-hide this for next API update
+                return disable(DETECT_EXPLICIT_GC);
             }
 
             /**
@@ -1479,6 +1507,17 @@ public final class StrictMode {
                 return;
             }
             startHandlingViolationException(new NetworkViolation());
+        }
+
+        // Part of BlockGuard.Policy interface:
+        public void onExplicitGc() {
+            if ((mPolicyMask & DETECT_EXPLICIT_GC) == 0) {
+                return;
+            }
+            if (tooManyViolationsThisLoop()) {
+                return;
+            }
+            startHandlingViolationException(new ExplicitGcViolation());
         }
 
         public void setPolicyMask(int policyMask) {
@@ -2576,6 +2615,8 @@ public final class StrictMode {
                 return DETECT_VM_CONTENT_URI_WITHOUT_PERMISSION;
             } else if (mViolation instanceof UntaggedSocketViolation) {
                 return DETECT_VM_UNTAGGED_SOCKET;
+            } else if (mViolation instanceof ExplicitGcViolation) {
+                return DETECT_EXPLICIT_GC;
             }
             throw new IllegalStateException("missing violation bit");
         }
