@@ -6170,10 +6170,13 @@ public final class Settings {
 
         /**
          * Integer property that specifies the type of color space adjustment to
-         * perform. Valid values are defined in AccessibilityManager:
+         * perform. Valid values are defined in AccessibilityManager and Settings arrays.xml:
          * - AccessibilityManager.DALTONIZER_DISABLED = -1
          * - AccessibilityManager.DALTONIZER_SIMULATE_MONOCHROMACY = 0
-         * - AccessibilityManager.DALTONIZER_CORRECT_DEUTERANOMALY = 12
+         * - <item>@string/daltonizer_mode_protanomaly</item> = 11
+         * - AccessibilityManager.DALTONIZER_CORRECT_DEUTERANOMALY and
+         *       <item>@string/daltonizer_mode_deuteranomaly</item> = 12
+         * - <item>@string/daltonizer_mode_tritanomaly</item> = 13
          *
          * @hide
          */
@@ -6181,7 +6184,8 @@ public final class Settings {
                 "accessibility_display_daltonizer";
 
         private static final Validator ACCESSIBILITY_DISPLAY_DALTONIZER_VALIDATOR =
-                new SettingsValidators.DiscreteValueValidator(new String[] {"-1", "0", "12"});
+                new SettingsValidators.DiscreteValueValidator(
+                        new String[] {"-1", "0", "11", "12", "13"});
 
         /**
          * Setting that specifies whether automatic click when the mouse pointer stops moving is
