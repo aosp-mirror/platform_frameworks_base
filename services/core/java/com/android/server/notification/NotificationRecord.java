@@ -712,13 +712,8 @@ public final class NotificationRecord {
         return Objects.equals(getNotification().category, category);
     }
 
-    public boolean isAudioStream(int stream) {
-        return getNotification().audioStreamType == stream;
-    }
-
     public boolean isAudioAttributesUsage(int usage) {
-        final AudioAttributes attributes = getNotification().audioAttributes;
-        return attributes != null && attributes.getUsage() == usage;
+        return mAttributes != null && mAttributes.getUsage() == usage;
     }
 
     /**

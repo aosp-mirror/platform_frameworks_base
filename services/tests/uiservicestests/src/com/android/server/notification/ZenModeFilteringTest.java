@@ -25,12 +25,14 @@ import static android.provider.Settings.Global.ZEN_MODE_OFF;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.media.AudioAttributes;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -38,28 +40,80 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.internal.util.NotificationMessagingUtil;
 import com.android.server.UiServiceTestCase;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class ZenModeFilteringTest extends UiServiceTestCase {
 
+    @Mock
+    private NotificationMessagingUtil mMessagingUtil;
     private ZenModeFiltering mZenModeFiltering;
 
     @Before
     public void setUp() {
-        mZenModeFiltering = new ZenModeFiltering(mContext);
+        MockitoAnnotations.initMocks(this);
+        mZenModeFiltering = new ZenModeFiltering(mContext, mMessagingUtil);
     }
 
     private NotificationRecord getNotificationRecord() {
+        return getNotificationRecord(mock(NotificationChannel.class));
+    }
+
+    private NotificationRecord getNotificationRecord(NotificationChannel c) {
         StatusBarNotification sbn = mock(StatusBarNotification.class);
         when(sbn.getNotification()).thenReturn(mock(Notification.class));
-        return new NotificationRecord(mContext, sbn, mock(NotificationChannel.class));
+        return new NotificationRecord(mContext, sbn, c);
+    }
+
+    @Test
+    public void testIsMessage() {
+        NotificationRecord r = getNotificationRecord();
+
+        when(mMessagingUtil.isMessaging(any())).thenReturn(true);
+        assertTrue(mZenModeFiltering.isMessage(r));
+
+        when(mMessagingUtil.isMessaging(any())).thenReturn(false);
+        assertFalse(mZenModeFiltering.isMessage(r));
+    }
+
+    @Test
+    public void testIsAlarm() {
+        NotificationChannel c = mock(NotificationChannel.class);
+        when(c.getAudioAttributes()).thenReturn(new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ALARM)
+                .build());
+        NotificationRecord r = getNotificationRecord(c);
+        assertTrue(mZenModeFiltering.isAlarm(r));
+
+        r = getNotificationRecord();
+        r.sbn.getNotification().category = Notification.CATEGORY_ALARM;
+        assertTrue(mZenModeFiltering.isAlarm(r));
+    }
+
+    @Test
+    public void testIsAlarm_wrongCategory() {
+        NotificationRecord r = getNotificationRecord();
+        r.sbn.getNotification().category = Notification.CATEGORY_CALL;
+        assertFalse(mZenModeFiltering.isAlarm(r));
+    }
+
+    @Test
+    public void testIsAlarm_wrongUsage() {
+        NotificationChannel c = mock(NotificationChannel.class);
+        when(c.getAudioAttributes()).thenReturn(new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                .build());
+        NotificationRecord r = getNotificationRecord(c);
+        assertFalse(mZenModeFiltering.isAlarm(r));
     }
 
     @Test
