@@ -18,6 +18,7 @@ import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.ColorInt;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.content.Context;
@@ -128,7 +129,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
 
         Rect tintArea = new Rect(0, 0, 0, 0);
         int colorForeground = Utils.getColorAttr(getContext(), android.R.attr.colorForeground);
-        float intensity = colorForeground == Color.WHITE ? 0 : 1;
+        float intensity = getColorIntensity(colorForeground);
         int fillColor = fillColorForIntensity(intensity, getContext());
 
         // Set light text on the header icons because they will always be on a black background
@@ -443,4 +444,9 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
                 .getBestDateTimePattern(Locale.getDefault(), skeleton);
         return android.text.format.DateFormat.format(pattern, info.getTriggerTime()).toString();
     }
+
+    public static float getColorIntensity(@ColorInt int color) {
+        return color == Color.WHITE ? 0 : 1;
+    }
+
 }
