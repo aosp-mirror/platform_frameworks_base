@@ -546,12 +546,16 @@ public:
     }
 };
 
-static jlong create(JNIEnv* env, jclass clazz, jlong rootNodePtr, jlong surfacePtr) {
+static jlong create(JNIEnv* env, jclass clazz, jlong rootNodePtr, jlong surfacePtr,
+        jboolean isWideColorGamut) {
     RenderNode* rootNode = reinterpret_cast<RenderNode*>(rootNodePtr);
     sp<Surface> surface(reinterpret_cast<Surface*>(surfacePtr));
     ContextFactory factory;
     RenderProxy* proxy = new RenderProxy(false, rootNode, &factory);
     proxy->loadSystemProperties();
+    if (isWideColorGamut) {
+        proxy->setWideGamut(true);
+    }
     proxy->setSwapBehavior(SwapBehavior::kSwap_discardBuffer);
     proxy->initialize(surface);
     // Shadows can't be used via this interface, so just set the light source
@@ -620,7 +624,7 @@ static const JNINativeMethod gSurfaceMethods[] = {
     {"nativeSetAutoRefreshEnabled", "(JZ)I", (void*)nativeSetAutoRefreshEnabled},
 
     // HWUI context
-    {"nHwuiCreate", "(JJ)J", (void*) hwui::create },
+    {"nHwuiCreate", "(JJZ)J", (void*) hwui::create },
     {"nHwuiSetSurface", "(JJ)V", (void*) hwui::setSurface },
     {"nHwuiDraw", "(J)V", (void*) hwui::draw },
     {"nHwuiDestroy", "(J)V", (void*) hwui::destroy },
