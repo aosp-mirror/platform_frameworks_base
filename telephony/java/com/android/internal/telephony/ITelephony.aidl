@@ -375,6 +375,8 @@ interface ITelephony {
 
     /**
      * Report whether data connectivity is possible.
+     *
+     * <p>Requires that the calling app has READ_PRIVILEGED_PHONE_STATE
      */
     boolean isDataConnectivityPossible(int subId);
 
@@ -413,9 +415,23 @@ interface ITelephony {
      * Returns the current active phone type as integer for particular slot.
      * Returns TelephonyManager.PHONE_TYPE_CDMA if RILConstants.CDMA_PHONE
      * and TelephonyManager.PHONE_TYPE_GSM if RILConstants.GSM_PHONE
+     *
+     * <p>Requires that the calling app has READ_PRIVILEGED_PHONE_STATE
+     *
      * @param slotIndex - slot to query.
      */
     int getActivePhoneTypeForSlot(int slotIndex);
+
+    /**
+     * Returns the current active phone type as integer for particular slot.
+     * Returns TelephonyManager.PHONE_TYPE_CDMA if RILConstants.CDMA_PHONE
+     * and TelephonyManager.PHONE_TYPE_GSM if RILConstants.GSM_PHONE
+     *
+     * If the device is not voice-capable, return PHONE_TYPE_NONE
+     *
+     * @param slotIndex - slot to query.
+     */
+    int getVoiceCapableActivePhoneTypeForSlot(int slotIndex);
 
     /**
      * Returns the CDMA ERI icon index to display
@@ -464,6 +480,8 @@ interface ITelephony {
      * Returns true if OTA service provisioning needs to run.
      * Only relevant on some technologies, others will always
      * return false.
+     *
+     * <p>Requires that the calling app has READ_PRIVILEGED_PHONE_STATE
      */
     boolean needsOtaServiceProvisioning();
 
@@ -970,6 +988,8 @@ interface ITelephony {
      * Returns list of the package names of the carrier apps that should handle the input intent
      * and have carrier privileges for the given phoneId.
      *
+     * <p>Requires that the calling app has READ_PRIVILEGED_PHONE_STATE
+     *
      * @param intent Intent that will be sent.
      * @param phoneId The phoneId on which the carrier app has carrier privileges.
      * @return list of carrier app package names that can handle the intent on phoneId.
@@ -1093,6 +1113,8 @@ interface ITelephony {
 
     /**
      * Whether video calling has been enabled by the user.
+     *
+     * <p>Requires that the calling app has READ_PRIVILEGED_PHONE_STATE
      *
      * @param callingPackage The package making the call.
      * @return {@code true} if the user has enabled video calling, {@code false} otherwise.
