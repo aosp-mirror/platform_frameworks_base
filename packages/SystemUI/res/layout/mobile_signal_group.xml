@@ -22,11 +22,12 @@
     android:id="@+id/mobile_combo"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    >
+    android:layout_gravity="center_vertical"
+    android:orientation="horizontal">
     <FrameLayout
         android:layout_height="17dp"
-        android:layout_width="wrap_content">
+        android:layout_width="wrap_content"
+        android:layout_gravity="center_vertical">
         <ImageView
             android:id="@+id/mobile_in"
             android:layout_height="wrap_content"
@@ -44,9 +45,16 @@
             android:visibility="gone"
             />
     </FrameLayout>
+    <ImageView
+        android:id="@+id/mobile_type"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:visibility="gone" />
     <FrameLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical">
         <com.android.systemui.statusbar.AnimatedImageView
             android:theme="@style/DualToneLightTheme"
             android:id="@+id/mobile_signal"
@@ -61,11 +69,6 @@
             android:layout_width="wrap_content"
             android:alpha="0.0"
             systemui:hasOverlappingRendering="false"
-            />
-        <ImageView
-            android:id="@+id/mobile_type"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
             />
         <ImageView
             android:id="@+id/mobile_roaming"

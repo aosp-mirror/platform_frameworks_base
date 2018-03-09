@@ -579,14 +579,13 @@ public class MobileSignalController extends SignalController<
 
         public MobileIconGroup(String name, int[][] sbIcons, int[][] qsIcons, int[] contentDesc,
                 int sbNullState, int qsNullState, int sbDiscState, int qsDiscState,
-                int discContentDesc, int dataContentDesc, int dataType, boolean isWide,
-                int qsDataType) {
+                int discContentDesc, int dataContentDesc, int dataType, boolean isWide) {
             super(name, sbIcons, qsIcons, contentDesc, sbNullState, qsNullState, sbDiscState,
                     qsDiscState, discContentDesc);
             mDataContentDescription = dataContentDesc;
             mDataType = dataType;
             mIsWide = isWide;
-            mQsDataType = qsDataType;
+            mQsDataType = dataType; // TODO: remove this field
         }
     }
 
