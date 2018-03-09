@@ -228,6 +228,25 @@ public class BlockedNumberContract {
     /** @hide */
     public static final String RES_CAN_BLOCK_NUMBERS = "can_block";
 
+    /** @hide */
+    public static final String RES_ENHANCED_SETTING_IS_ENABLED = "enhanced_setting_enabled";
+
+    /** @hide */
+    public static final String RES_SHOW_EMERGENCY_CALL_NOTIFICATION =
+            "show_emergency_call_notification";
+
+    /** @hide */
+    public static final String EXTRA_ENHANCED_SETTING_KEY = "extra_enhanced_setting_key";
+
+    /** @hide */
+    public static final String EXTRA_ENHANCED_SETTING_VALUE = "extra_enhanced_setting_value";
+
+    /** @hide */
+    public static final String EXTRA_CONTACT_EXIST = "extra_contact_exist";
+
+    /** @hide */
+    public static final String EXTRA_CALL_PRESENTATION = "extra_call_presentation";
+
     /**
      * Returns whether a given number is in the blocked list.
      *
@@ -314,10 +333,32 @@ public class BlockedNumberContract {
         public static final String METHOD_GET_BLOCK_SUPPRESSION_STATUS =
                 "get_block_suppression_status";
 
+        public static final String METHOD_SHOULD_SHOW_EMERGENCY_CALL_NOTIFICATION =
+                "should_show_emergency_call_notification";
+
         public static final String RES_IS_BLOCKING_SUPPRESSED = "blocking_suppressed";
 
         public static final String RES_BLOCKING_SUPPRESSED_UNTIL_TIMESTAMP =
                 "blocking_suppressed_until_timestamp";
+
+        public static final String METHOD_GET_ENHANCED_BLOCK_SETTING = "get_enhanced_block_setting";
+        public static final String METHOD_SET_ENHANCED_BLOCK_SETTING = "set_enhanced_block_setting";
+
+        /* Preference key of block numbers not in contacts setting. */
+        public static final String ENHANCED_SETTING_KEY_BLOCK_UNREGISTERED =
+                "block_numbers_not_in_contacts_setting";
+        /* Preference key of block private number calls setting. */
+        public static final String ENHANCED_SETTING_KEY_BLOCK_PRIVATE =
+                "block_private_number_calls_setting";
+        /* Preference key of block payphone calls setting. */
+        public static final String ENHANCED_SETTING_KEY_BLOCK_PAYPHONE =
+                "block_payphone_calls_setting";
+        /* Preference key of block unknown calls setting. */
+        public static final String ENHANCED_SETTING_KEY_BLOCK_UNKNOWN =
+                "block_unknown_calls_setting";
+        /* Preference key for whether should show an emergency call notification. */
+        public static final String ENHANCED_SETTING_KEY_SHOW_EMERGENCY_CALL_NOTIFICATION =
+                "show_emergency_call_notification";
 
         /**
          * Notifies the provider that emergency services were contacted by the user.
@@ -342,13 +383,19 @@ public class BlockedNumberContract {
 
         /**
          * Returns {@code true} if {@code phoneNumber} is blocked taking
-         * {@link #notifyEmergencyContact(Context)} into consideration. If emergency services have
-         * not been contacted recently, this method is equivalent to
-         * {@link #isBlocked(Context, String)}.
+         * {@link #notifyEmergencyContact(Context)} into consideration. If emergency services
+         * have not been contacted recently and enhanced call blocking not been enabled, this
+         * method is equivalent to {@link #isBlocked(Context, String)}.
+         *
+         * @param context the context of the caller.
+         * @param phoneNumber the number to check.
+         * @param extras the extra attribute of the number.
+         * @return {@code true} if should block the number. {@code false} otherwise.
          */
-        public static boolean shouldSystemBlockNumber(Context context, String phoneNumber) {
+        public static boolean shouldSystemBlockNumber(Context context, String phoneNumber,
+                Bundle extras) {
             final Bundle res = context.getContentResolver().call(
-                    AUTHORITY_URI, METHOD_SHOULD_SYSTEM_BLOCK_NUMBER, phoneNumber, null);
+                    AUTHORITY_URI, METHOD_SHOULD_SYSTEM_BLOCK_NUMBER, phoneNumber, extras);
             return res != null && res.getBoolean(RES_NUMBER_IS_BLOCKED, false);
         }
 
@@ -363,9 +410,62 @@ public class BlockedNumberContract {
         }
 
         /**
-         * Represents the current status of {@link #shouldSystemBlockNumber(Context, String)}. If
-         * emergency services have been contacted recently, {@link #isSuppressed} is {@code true},
-         * and blocking is disabled until the timestamp {@link #untilTimestampMillis}.
+         * Check whether should show the emergency call notification.
+         *
+         * @param context the context of the caller.
+         * @return {@code true} if should show emergency call notification. {@code false} otherwise.
+         */
+        public static boolean shouldShowEmergencyCallNotification(Context context) {
+            final Bundle res = context.getContentResolver().call(
+                    AUTHORITY_URI, METHOD_SHOULD_SHOW_EMERGENCY_CALL_NOTIFICATION, null, null);
+            return res != null && res.getBoolean(RES_SHOW_EMERGENCY_CALL_NOTIFICATION, false);
+        }
+
+        /**
+         * Check whether the enhanced block setting is enabled.
+         *
+         * @param context the context of the caller.
+         * @param key the key of the setting to check, can be
+         *        {@link #ENHANCED_SETTING_KEY_BLOCK_UNREGISTERED}
+         *        {@link #ENHANCED_SETTING_KEY_BLOCK_PRIVATE}
+         *        {@link #ENHANCED_SETTING_KEY_BLOCK_PAYPHONE}
+         *        {@link #ENHANCED_SETTING_KEY_BLOCK_UNKNOWN}
+         *        {@link #ENHANCED_SETTING_KEY_EMERGENCY_CALL_NOTIFICATION_SHOWING}
+         * @return {@code true} if the setting is enabled. {@code false} otherwise.
+         */
+        public static boolean getEnhancedBlockSetting(Context context, String key) {
+            Bundle extras = new Bundle();
+            extras.putString(EXTRA_ENHANCED_SETTING_KEY, key);
+            final Bundle res = context.getContentResolver().call(
+                    AUTHORITY_URI, METHOD_GET_ENHANCED_BLOCK_SETTING, null, extras);
+            return res != null && res.getBoolean(RES_ENHANCED_SETTING_IS_ENABLED, false);
+        }
+
+        /**
+         * Set the enhanced block setting enabled status.
+         *
+         * @param context the context of the caller.
+         * @param key the key of the setting to set, can be
+         *        {@link #ENHANCED_SETTING_KEY_BLOCK_UNREGISTERED}
+         *        {@link #ENHANCED_SETTING_KEY_BLOCK_PRIVATE}
+         *        {@link #ENHANCED_SETTING_KEY_BLOCK_PAYPHONE}
+         *        {@link #ENHANCED_SETTING_KEY_BLOCK_UNKNOWN}
+         *        {@link #ENHANCED_SETTING_KEY_EMERGENCY_CALL_NOTIFICATION_SHOWING}
+         * @param value the enabled statue of the setting to set.
+         */
+        public static void setEnhancedBlockSetting(Context context, String key, boolean value) {
+            Bundle extras = new Bundle();
+            extras.putString(EXTRA_ENHANCED_SETTING_KEY, key);
+            extras.putBoolean(EXTRA_ENHANCED_SETTING_VALUE, value);
+            context.getContentResolver().call(AUTHORITY_URI, METHOD_SET_ENHANCED_BLOCK_SETTING,
+                    null, extras);
+        }
+
+        /**
+         * Represents the current status of
+         * {@link #shouldSystemBlockNumber(Context, String, Bundle)}. If emergency services
+         * have been contacted recently, {@link #isSuppressed} is {@code true}, and blocking
+         * is disabled until the timestamp {@link #untilTimestampMillis}.
          */
         public static class BlockSuppressionStatus {
             public final boolean isSuppressed;
