@@ -297,7 +297,9 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
         for (Uri tempFileUri : tempFiles) {
             if (verifyTempFilePath(context, request.getFileServiceId(), tempFileUri)) {
                 File tempFile = new File(tempFileUri.getSchemeSpecificPart());
-                tempFile.delete();
+                if (!tempFile.delete()) {
+                    Log.w(LOG_TAG, "Failed to delete temp file at " + tempFile.getPath());
+                }
             }
         }
     }
@@ -474,6 +476,8 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
 
         if (!MbmsUtils.isContainedIn(
                 MbmsUtils.getEmbmsTempFileDirForService(context, serviceId), tempFile)) {
+            Log.w(LOG_TAG, "File at " + path + " is not contained in the temp file root," +
+                    " which is " + MbmsUtils.getEmbmsTempFileDirForService(context, serviceId));
             return false;
         }
 
