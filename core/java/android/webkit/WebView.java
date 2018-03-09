@@ -3121,6 +3121,11 @@ public class WebView extends AbsoluteLayout
         mProvider.getViewDelegate().onActivityResult(requestCode, resultCode, data);
     }
 
+    @Override
+    public boolean onCheckIsTextEditor() {
+        return mProvider.getViewDelegate().onCheckIsTextEditor();
+    }
+
     /** @hide */
     @Override
     protected void encodeProperties(@NonNull ViewHierarchyEncoder encoder) {
