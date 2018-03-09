@@ -4984,8 +4984,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             df.set(displayFrames.mDock);
             pf.set(displayFrames.mDock);
             // IM dock windows layout below the nav bar...
-            pf.bottom = df.bottom = of.bottom = Math.min(displayFrames.mUnrestricted.bottom,
-                    displayFrames.mDisplayCutoutSafe.bottom);
+            pf.bottom = df.bottom = of.bottom = displayFrames.mUnrestricted.bottom;
             // ...with content insets above the nav bar
             cf.bottom = vf.bottom = displayFrames.mStable.bottom;
             if (mStatusBar != null && mFocusedWindow == mStatusBar && canReceiveInput(mStatusBar)) {
@@ -5323,6 +5322,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         displayCutoutSafeExceptMaybeBars.left = Integer.MIN_VALUE;
                         break;
                 }
+            }
+            if (type == TYPE_INPUT_METHOD && mNavigationBarPosition == NAV_BAR_BOTTOM) {
+                // The IME can always extend under the bottom cutout if the navbar is there.
+                displayCutoutSafeExceptMaybeBars.bottom = Integer.MAX_VALUE;
             }
             // Windows that are attached to a parent and laid out in said parent are already
             // avoidingthe cutout according to that parent and don't need to be further constrained.
