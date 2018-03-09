@@ -16,6 +16,8 @@
 
 package com.android.server.notification;
 
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.TestCase.assertTrue;
@@ -34,6 +36,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.NotificationManager;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
@@ -48,8 +51,11 @@ import android.service.notification.ZenModeConfig;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.util.Xml;
 
+import com.android.internal.R;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.internal.util.FastXmlSerializer;
 import com.android.server.UiServiceTestCase;
 import android.util.Slog;
 
@@ -58,6 +64,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -80,10 +93,25 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mContext = spy(getContext());
         mContentResolver = mContext.getContentResolver();
         when(mContext.getResources()).thenReturn(mResources);
+        when(mResources.getString(R.string.zen_mode_default_every_night_name)).thenReturn("night");
+        when(mResources.getString(R.string.zen_mode_default_events_name)).thenReturn("events");
         when(mContext.getSystemService(NotificationManager.class)).thenReturn(mNotificationManager);
 
         mZenModeHelperSpy = spy(new ZenModeHelper(mContext, mTestableLooper.getLooper(),
                 mConditionProviders));
+    }
+
+    private ByteArrayOutputStream writeXmlAndPurge(boolean forBackup)
+            throws Exception {
+        XmlSerializer serializer = new FastXmlSerializer();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
+        serializer.startDocument(null, true);
+        mZenModeHelperSpy.writeXml(serializer, forBackup);
+        serializer.endDocument();
+        serializer.flush();
+        mZenModeHelperSpy.setConfig(new ZenModeConfig(), "writing xml");
+        return baos;
     }
 
     @Test
@@ -496,5 +524,72 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         verify(mZenModeHelperSpy, times(1)).applyZenToRingerMode();
         verify(mAudioManager, never()).setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
                 mZenModeHelperSpy.TAG);
+    }
+
+    @Test
+    public void testParcelConfig() {
+        mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelperSpy.mConfig.allowAlarms = false;
+        mZenModeHelperSpy.mConfig.allowMedia = false;
+        mZenModeHelperSpy.mConfig.allowSystem = false;
+        mZenModeHelperSpy.mConfig.allowReminders = true;
+        mZenModeHelperSpy.mConfig.allowCalls = true;
+        mZenModeHelperSpy.mConfig.allowMessages = true;
+        mZenModeHelperSpy.mConfig.allowEvents = true;
+        mZenModeHelperSpy.mConfig.allowRepeatCallers= true;
+        mZenModeHelperSpy.mConfig.allowWhenScreenOff = true;
+        mZenModeHelperSpy.mConfig.allowWhenScreenOn = true;
+        mZenModeHelperSpy.mConfig.suppressedVisualEffects = SUPPRESSED_EFFECT_BADGE;
+        mZenModeHelperSpy.mConfig.manualRule = new ZenModeConfig.ZenRule();
+        mZenModeHelperSpy.mConfig.manualRule.component = new ComponentName("a", "a");
+        mZenModeHelperSpy.mConfig.manualRule.enabled = true;
+        mZenModeHelperSpy.mConfig.manualRule.snoozing = true;
+
+        ZenModeConfig actual = mZenModeHelperSpy.mConfig.copy();
+
+        assertEquals(mZenModeHelperSpy.mConfig, actual);
+    }
+
+    @Test
+    public void testWriteXml() throws Exception {
+        mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelperSpy.mConfig.allowAlarms = false;
+        mZenModeHelperSpy.mConfig.allowMedia = false;
+        mZenModeHelperSpy.mConfig.allowSystem = false;
+        mZenModeHelperSpy.mConfig.allowReminders = true;
+        mZenModeHelperSpy.mConfig.allowCalls = true;
+        mZenModeHelperSpy.mConfig.allowMessages = true;
+        mZenModeHelperSpy.mConfig.allowEvents = true;
+        mZenModeHelperSpy.mConfig.allowRepeatCallers= true;
+        mZenModeHelperSpy.mConfig.allowWhenScreenOff = true;
+        mZenModeHelperSpy.mConfig.allowWhenScreenOn = true;
+        mZenModeHelperSpy.mConfig.suppressedVisualEffects = SUPPRESSED_EFFECT_BADGE;
+        mZenModeHelperSpy.mConfig.manualRule = new ZenModeConfig.ZenRule();
+        mZenModeHelperSpy.mConfig.manualRule.zenMode =
+                Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelperSpy.mConfig.manualRule.component = new ComponentName("a", "a");
+        mZenModeHelperSpy.mConfig.manualRule.enabled = true;
+        mZenModeHelperSpy.mConfig.manualRule.snoozing = true;
+
+        ZenModeConfig expected = mZenModeHelperSpy.mConfig.copy();
+
+        ByteArrayOutputStream baos = writeXmlAndPurge(false);
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(baos.toByteArray())), null);
+        parser.nextTag();
+        mZenModeHelperSpy.readXml(parser, false);
+
+        assertEquals(expected, mZenModeHelperSpy.mConfig);
+    }
+
+    @Test
+    public void testPolicyReadsSuppressedEffects() {
+        mZenModeHelperSpy.mConfig.allowWhenScreenOff = true;
+        mZenModeHelperSpy.mConfig.allowWhenScreenOn = true;
+        mZenModeHelperSpy.mConfig.suppressedVisualEffects = SUPPRESSED_EFFECT_BADGE;
+
+        NotificationManager.Policy policy = mZenModeHelperSpy.getNotificationPolicy();
+        assertEquals(SUPPRESSED_EFFECT_BADGE, policy.suppressedVisualEffects);
     }
 }

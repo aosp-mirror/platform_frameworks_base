@@ -602,7 +602,8 @@ public class ZenModeHelper {
             pw.println(config);
             return;
         }
-        pw.printf("allow(alarms=%b,media=%b,system=%b,calls=%b,callsFrom=%s,repeatCallers=%b,messages=%b,messagesFrom=%s,"
+        pw.printf("allow(alarms=%b,media=%b,system=%b,calls=%b,callsFrom=%s,repeatCallers=%b,"
+                + "messages=%b,messagesFrom=%s,"
                 + "events=%b,reminders=%b,whenScreenOff=%b,whenScreenOn=%b)\n",
                 config.allowAlarms, config.allowMedia, config.allowSystem,
                 config.allowCalls, ZenModeConfig.sourceToString(config.allowCallsFrom),
@@ -610,6 +611,7 @@ public class ZenModeHelper {
                 ZenModeConfig.sourceToString(config.allowMessagesFrom),
                 config.allowEvents, config.allowReminders, config.allowWhenScreenOff,
                 config.allowWhenScreenOn);
+        pw.printf(" disallow(visualEffects=%s)\n", config.suppressedVisualEffects);
         pw.print(prefix); pw.print("  manualRule="); pw.println(config.manualRule);
         if (config.automaticRules.isEmpty()) return;
         final int N = config.automaticRules.size();
@@ -623,7 +625,7 @@ public class ZenModeHelper {
             throws XmlPullParserException, IOException {
         final ZenModeConfig config = ZenModeConfig.readXml(parser);
         if (config != null) {
-            if (config.version < ZenModeConfig.XML_VERSION) {
+            if (config.version < ZenModeConfig.XML_VERSION || forRestore) {
                 Settings.Global.putInt(mContext.getContentResolver(),
                         Global.SHOW_ZEN_UPGRADE_NOTIFICATION, 1);
             }
@@ -1176,8 +1178,7 @@ public class ZenModeHelper {
 
     @VisibleForTesting
     protected Notification createZenUpgradeNotification() {
-        Intent intent = new Intent(Settings.ACTION_ZEN_MODE_PRIORITY_SETTINGS)
-                .setPackage("com.android.settings")
+        Intent intent = new Intent(Settings.ACTION_ZEN_MODE_SETTINGS)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         final Bundle extras = new Bundle();
         extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
