@@ -32,7 +32,6 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Xml;
 
 import com.android.internal.R;
@@ -79,7 +78,7 @@ public final class AutofillServiceInfo {
     private final String mSettingsActivity;
 
     @Nullable
-    private final ArrayMap<String, Pair<Long, String>> mCompatibilityPackages;
+    private final ArrayMap<String, Long> mCompatibilityPackages;
 
     public AutofillServiceInfo(Context context, ComponentName comp, int userHandle)
             throws PackageManager.NameNotFoundException {
@@ -117,7 +116,7 @@ public final class AutofillServiceInfo {
         }
 
         String settingsActivity = null;
-        ArrayMap<String, Pair<Long, String>> compatibilityPackages = null;
+        ArrayMap<String, Long> compatibilityPackages = null;
 
         try {
             final Resources resources = context.getPackageManager().getResourcesForApplication(
@@ -153,10 +152,9 @@ public final class AutofillServiceInfo {
         mCompatibilityPackages = compatibilityPackages;
     }
 
-    private ArrayMap<String, Pair<Long, String>> parseCompatibilityPackages(XmlPullParser parser,
-            Resources resources)
-            throws IOException, XmlPullParserException {
-        ArrayMap<String, Pair<Long, String>> compatibilityPackages = null;
+    private ArrayMap<String, Long> parseCompatibilityPackages(XmlPullParser parser,
+            Resources resources) throws IOException, XmlPullParserException {
+        ArrayMap<String, Long> compatibilityPackages = null;
 
         final int outerDepth = parser.getDepth();
         int type;
@@ -200,13 +198,18 @@ public final class AutofillServiceInfo {
                     } else {
                         maxVersionCode = Long.MAX_VALUE;
                     }
-                    final String urlBarResourceId = cpAttributes.getString(
-                            R.styleable.AutofillService_CompatibilityPackage_urlBarResourceId);
+                    if (true) { // TODO(b/74445943): remove block after P DP2 is branched
+                        final String urlBarResourceId = cpAttributes.getString(
+                                R.styleable.AutofillService_CompatibilityPackage_urlBarResourceId);
+                        if (urlBarResourceId != null) {
+                            Log.e(TAG, "Service is using deprecated attribute 'urlBarResourceId'");
+                        }
+                    }
 
                     if (compatibilityPackages == null) {
                         compatibilityPackages = new ArrayMap<>();
                     }
-                    compatibilityPackages.put(name, new Pair<>(maxVersionCode, urlBarResourceId));
+                    compatibilityPackages.put(name, maxVersionCode);
                 } finally {
                     XmlUtils.skipCurrentTag(parser);
                     if (cpAttributes != null) {
@@ -228,21 +231,8 @@ public final class AutofillServiceInfo {
         return mSettingsActivity;
     }
 
-    public ArrayMap<String, Pair<Long, String>> getCompatibilityPackages() {
+    public ArrayMap<String, Long> getCompatibilityPackages() {
         return mCompatibilityPackages;
-    }
-
-    /**
-     * Gets the resource id of the URL bar for a package. Used in compat mode
-     */
-    // TODO: return a list of strings instead
-    @Nullable
-    public String getUrlBarResourceId(String packageName) {
-        if (mCompatibilityPackages == null) {
-            return null;
-        }
-        final Pair<Long, String> pair = mCompatibilityPackages.get(packageName);
-        return pair == null ? null : pair.second;
     }
 
     @Override
