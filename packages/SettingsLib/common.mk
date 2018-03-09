@@ -48,7 +48,7 @@ endif
 
 # Include android-support-v7-preference, if not already included
 ifeq (,$(findstring android-support-v7-preference,$(LOCAL_STATIC_JAVA_LIBRARIES)))
-LOCAL_RESOURCE_DIR += frameworks/support/v7/preference/res
+LOCAL_RESOURCE_DIR += frameworks/support/preference/res
 LOCAL_AAPT_FLAGS += --extra-packages android.support.v7.preference
 LOCAL_STATIC_JAVA_LIBRARIES += android-support-v7-preference
 endif
