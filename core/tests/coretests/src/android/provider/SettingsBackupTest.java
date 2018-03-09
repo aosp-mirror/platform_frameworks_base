@@ -263,6 +263,7 @@ public class SettingsBackupTest {
                     Settings.Global.LOW_BATTERY_SOUND,
                     Settings.Global.LOW_BATTERY_SOUND_TIMEOUT,
                     Settings.Global.LOW_POWER_MODE,
+                    Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL_MAX,
                     Settings.Global.LTE_SERVICE_FORCED,
                     Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE,
                     Settings.Global.MDC_INITIAL_MAX_RETRY,
