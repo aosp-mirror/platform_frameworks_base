@@ -120,6 +120,8 @@ public class PipTouchHandler {
     private boolean mIsImeShowing;
     private int mImeHeight;
     private int mImeOffset;
+    private boolean mIsShelfShowing;
+    private int mShelfHeight;
     private float mSavedSnapFraction = -1f;
     private boolean mSendingHoverAccessibilityEvents;
     private boolean mMovementWithinMinimize;
@@ -249,13 +251,20 @@ public class PipTouchHandler {
         mImeHeight = imeHeight;
     }
 
+    public void onShelfVisibilityChanged(boolean shelfVisible, int shelfHeight) {
+        mIsShelfShowing = shelfVisible;
+        mShelfHeight = shelfHeight;
+    }
+
     public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds, Rect animatingBounds,
-            boolean fromImeAdjustement, int displayRotation) {
+            boolean fromImeAdjustment, boolean fromShelfAdjustment, int displayRotation) {
+        final int bottomOffset = mIsImeShowing ? mImeHeight : 0;
+
         // Re-calculate the expanded bounds
         mNormalBounds = normalBounds;
         Rect normalMovementBounds = new Rect();
         mSnapAlgorithm.getMovementBounds(mNormalBounds, insetBounds, normalMovementBounds,
-                mIsImeShowing ? mImeHeight : 0);
+                bottomOffset);
 
         // Calculate the expanded size
         float aspectRatio = (float) normalBounds.width() / normalBounds.height();
@@ -266,40 +275,23 @@ public class PipTouchHandler {
         mExpandedBounds.set(0, 0, expandedSize.getWidth(), expandedSize.getHeight());
         Rect expandedMovementBounds = new Rect();
         mSnapAlgorithm.getMovementBounds(mExpandedBounds, insetBounds, expandedMovementBounds,
-                mIsImeShowing ? mImeHeight : 0);
+                bottomOffset);
 
-        // If this is from an IME adjustment, then we should move the PiP so that it is not occluded
-        // by the IME
-        if (fromImeAdjustement) {
+        // If this is from an IME or shelf adjustment, then we should move the PiP so that it is not
+        // occluded by the IME or shelf.
+        if (fromImeAdjustment || fromShelfAdjustment) {
             if (mTouchState.isUserInteracting()) {
                 // Defer the update of the current movement bounds until after the user finishes
                 // touching the screen
             } else {
-                final Rect bounds = new Rect(animatingBounds);
                 final Rect toMovementBounds = mMenuState == MENU_STATE_FULL
                         ? expandedMovementBounds
                         : normalMovementBounds;
-                if (mIsImeShowing) {
-                    // IME visible, apply the IME offset if the space allows for it
-                    final int imeOffset = toMovementBounds.bottom - Math.max(toMovementBounds.top,
-                            toMovementBounds.bottom - mImeOffset);
-                    if (bounds.top == mMovementBounds.bottom) {
-                        // If the PIP is currently resting on top of the IME, then adjust it with
-                        // the showing IME
-                        bounds.offsetTo(bounds.left, toMovementBounds.bottom - imeOffset);
-                    } else {
-                        bounds.offset(0, Math.min(0, toMovementBounds.bottom - imeOffset
-                                - bounds.top));
-                    }
-                } else {
-                    // IME hidden
-                    if (bounds.top >= (mMovementBounds.bottom - mImeOffset)) {
-                        // If the PIP is resting on top of the IME, then adjust it with the hiding
-                        // IME
-                        bounds.offsetTo(bounds.left, toMovementBounds.bottom);
-                    }
-                }
-                mMotionHelper.animateToIMEOffset(bounds);
+                animateToOffset(animatingBounds, toMovementBounds,
+                        fromImeAdjustment,
+                        fromImeAdjustment ? mIsImeShowing : mIsShelfShowing,
+                        // Shelf height serves as an offset, but does not change movement bounds.
+                        fromImeAdjustment ? mImeOffset : mShelfHeight);
             }
         }
 
@@ -319,6 +311,26 @@ public class PipTouchHandler {
             mSavedSnapFraction = -1f;
             mDeferResizeToNormalBoundsUntilRotation = -1;
         }
+    }
+
+    private void animateToOffset(Rect animatingBounds, Rect toMovementBounds,
+            boolean fromImeAdjustment, boolean showing, int offset) {
+        final Rect bounds = new Rect(animatingBounds);
+        if (showing) {
+            // IME/shelf visible, apply the IME/shelf offset if the space allows for it
+            final int calculatedOffset = toMovementBounds.bottom - Math.max(toMovementBounds.top,
+                    toMovementBounds.bottom - offset);
+            bounds.offset(0,
+                    Math.min(0, toMovementBounds.bottom - calculatedOffset - bounds.top));
+        } else {
+            // IME/shelf hidden
+            if (bounds.top >= (mMovementBounds.bottom - offset)) {
+                bounds.offset(0, toMovementBounds.bottom - bounds.top -
+                        // Counter going back home from search where keyboard is up.
+                        (fromImeAdjustment ? mShelfHeight : 0));
+            }
+        }
+        mMotionHelper.animateToOffset(bounds);
     }
 
     private void onRegistrationChanged(boolean isRegistered) {
@@ -801,6 +813,8 @@ public class PipTouchHandler {
         pw.println(innerPrefix + "mIsMinimized=" + mIsMinimized);
         pw.println(innerPrefix + "mIsImeShowing=" + mIsImeShowing);
         pw.println(innerPrefix + "mImeHeight=" + mImeHeight);
+        pw.println(innerPrefix + "mIsShelfShowing=" + mIsShelfShowing);
+        pw.println(innerPrefix + "mShelfHeight=" + mShelfHeight);
         pw.println(innerPrefix + "mSavedSnapFraction=" + mSavedSnapFraction);
         pw.println(innerPrefix + "mEnableDragToEdgeDismiss=" + ENABLE_DISMISS_DRAG_TO_EDGE);
         pw.println(innerPrefix + "mEnableMinimize=" + ENABLE_MINIMIZE);
