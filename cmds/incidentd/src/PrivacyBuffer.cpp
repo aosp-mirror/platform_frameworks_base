@@ -101,7 +101,7 @@ status_t PrivacyBuffer::stripField(const Privacy* parentPolicy, const PrivacySpe
 }
 
 // ================================================================================
-PrivacyBuffer::PrivacyBuffer(const Privacy* policy, EncodedBuffer::iterator& data)
+PrivacyBuffer::PrivacyBuffer(const Privacy* policy, EncodedBuffer::iterator data)
     : mPolicy(policy), mData(data), mProto(), mSize(0) {}
 
 PrivacyBuffer::~PrivacyBuffer() {}

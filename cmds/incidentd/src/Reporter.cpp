@@ -89,11 +89,11 @@ bool ReportRequestSet::containsSection(int id) { return mSections.containsSectio
 
 IncidentMetadata::SectionStats* ReportRequestSet::sectionStats(int id) {
     if (mSectionStats.find(id) == mSectionStats.end()) {
-        auto stats = mMetadata.add_sections();
-        stats->set_id(id);
+        IncidentMetadata::SectionStats stats;
+        stats.set_id(id);
         mSectionStats[id] = stats;
     }
-    return mSectionStats[id];
+    return &mSectionStats[id];
 }
 
 // ================================================================================
@@ -182,7 +182,7 @@ Reporter::run_report_status_t Reporter::runReport(size_t* reportByteSize) {
             }
 
             // Execute - go get the data and write it into the file descriptors.
-            auto stats = batch.sectionStats(id);
+            IncidentMetadata::SectionStats* stats = batch.sectionStats(id);
             int64_t startTime = uptimeMillis();
             err = (*section)->Execute(&batch);
             int64_t endTime = uptimeMillis();
