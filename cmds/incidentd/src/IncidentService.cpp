@@ -358,8 +358,7 @@ status_t IncidentService::cmd_privacy(FILE* in, FILE* out, FILE* err, Vector<Str
                 return error;
             }
             fprintf(err, "Read %zu bytes\n", buf.size());
-            auto data = buf.data();
-            PrivacyBuffer pBuf(p, data);
+            PrivacyBuffer pBuf(p, buf.data());
 
             PrivacySpec spec = PrivacySpec::new_spec(argCount > 3 ? atoi(args[3]) : -1);
             error = pBuf.strip(spec);
