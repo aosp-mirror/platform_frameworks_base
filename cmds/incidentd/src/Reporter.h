@@ -66,6 +66,7 @@ public:
     int mainFd() { return mMainFd; }
     int mainDest() { return mMainDest; }
     IncidentMetadata& metadata() { return mMetadata; }
+    map<int, IncidentMetadata::SectionStats>& allSectionStats() { return mSectionStats; }
 
     bool containsSection(int id);
     IncidentMetadata::SectionStats* sectionStats(int id);
@@ -77,7 +78,7 @@ private:
     int mMainDest;
 
     IncidentMetadata mMetadata;
-    map<int, IncidentMetadata::SectionStats*> mSectionStats;
+    map<int, IncidentMetadata::SectionStats> mSectionStats;
 };
 
 // ================================================================================

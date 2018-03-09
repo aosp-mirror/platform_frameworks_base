@@ -109,7 +109,7 @@ static status_t write_report_requests(const int id, const FdBuffer& buffer,
     EncodedBuffer::iterator data = buffer.data();
     PrivacyBuffer privacyBuffer(get_privacy_of_section(id), data);
     int writeable = 0;
-    auto stats = requests->sectionStats(id);
+    IncidentMetadata::SectionStats* stats = requests->sectionStats(id);
 
     stats->set_dump_size_bytes(data.size());
     stats->set_dump_duration_ms(buffer.durationMs());
@@ -215,23 +215,48 @@ MetadataSection::MetadataSection() : Section(FIELD_ID_INCIDENT_METADATA, 0) {}
 MetadataSection::~MetadataSection() {}
 
 status_t MetadataSection::Execute(ReportRequestSet* requests) const {
-    std::string metadataBuf;
-    requests->metadata().SerializeToString(&metadataBuf);
+    ProtoOutputStream proto;
+    IncidentMetadata metadata = requests->metadata();
+    proto.write(FIELD_TYPE_ENUM | IncidentMetadata::kDestFieldNumber, metadata.dest());
+    proto.write(FIELD_TYPE_INT32 | IncidentMetadata::kRequestSizeFieldNumber,
+                metadata.request_size());
+    proto.write(FIELD_TYPE_BOOL | IncidentMetadata::kUseDropboxFieldNumber, metadata.use_dropbox());
+    for (auto iter = requests->allSectionStats().begin(); iter != requests->allSectionStats().end();
+         iter++) {
+        IncidentMetadata::SectionStats stats = iter->second;
+        uint64_t token = proto.start(FIELD_TYPE_MESSAGE | IncidentMetadata::kSectionsFieldNumber);
+        proto.write(FIELD_TYPE_INT32 | IncidentMetadata::SectionStats::kIdFieldNumber, stats.id());
+        proto.write(FIELD_TYPE_BOOL | IncidentMetadata::SectionStats::kSuccessFieldNumber,
+                    stats.success());
+        proto.write(FIELD_TYPE_INT32 | IncidentMetadata::SectionStats::kReportSizeBytesFieldNumber,
+                    stats.report_size_bytes());
+        proto.write(FIELD_TYPE_INT64 | IncidentMetadata::SectionStats::kExecDurationMsFieldNumber,
+                    stats.exec_duration_ms());
+        proto.write(FIELD_TYPE_INT32 | IncidentMetadata::SectionStats::kDumpSizeBytesFieldNumber,
+                    stats.dump_size_bytes());
+        proto.write(FIELD_TYPE_INT64 | IncidentMetadata::SectionStats::kDumpDurationMsFieldNumber,
+                    stats.dump_duration_ms());
+        proto.write(FIELD_TYPE_BOOL | IncidentMetadata::SectionStats::kTimedOutFieldNumber,
+                    stats.timed_out());
+        proto.write(FIELD_TYPE_BOOL | IncidentMetadata::SectionStats::kIsTruncatedFieldNumber,
+                    stats.is_truncated());
+        proto.end(token);
+    }
+
     for (ReportRequestSet::iterator it = requests->begin(); it != requests->end(); it++) {
         const sp<ReportRequest> request = *it;
-        if (metadataBuf.empty() || request->fd < 0 || request->err != NO_ERROR) {
+        if (request->fd < 0 || request->err != NO_ERROR) {
             continue;
         }
-        write_section_header(request->fd, id, metadataBuf.size());
-        if (!WriteFully(request->fd, (uint8_t const*)metadataBuf.data(), metadataBuf.size())) {
+        write_section_header(request->fd, id, proto.size());
+        if (!proto.flush(request->fd)) {
             ALOGW("Failed to write metadata to fd %d", request->fd);
             // we don't fail if we can't write to a single request's fd.
         }
     }
-    if (requests->mainFd() >= 0 && !metadataBuf.empty()) {
-        write_section_header(requests->mainFd(), id, metadataBuf.size());
-        if (!WriteFully(requests->mainFd(), (uint8_t const*)metadataBuf.data(),
-                        metadataBuf.size())) {
+    if (requests->mainFd() >= 0) {
+        write_section_header(requests->mainFd(), id, proto.size());
+        if (!proto.flush(requests->mainFd())) {
             ALOGW("Failed to write metadata to dropbox fd %d", requests->mainFd());
             return -1;
         }
