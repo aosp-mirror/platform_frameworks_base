@@ -1098,6 +1098,17 @@ public final class TvContract {
          * @see #COLUMN_REVIEW_RATING_STYLE
          */
         String COLUMN_REVIEW_RATING = "review_rating";
+
+        /**
+         * The series ID of this TV program for episodic TV shows.
+         *
+         * <p>This is used to indicate the series ID. Programs in the same series share a series ID.
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: TEXT
+         */
+        String COLUMN_SERIES_ID = "series_id";
     }
 
     /**
