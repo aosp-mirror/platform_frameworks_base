@@ -901,9 +901,8 @@ public class MediaSession2 implements AutoCloseable {
         }
 
         /**
-         * Set the underlying {@link MediaPlayerBase} for this session to dispatch incoming event
+         * Sets the underlying {@link MediaPlayerBase} for this session to dispatch incoming event
          * to.
-         * <p>
          *
          * @param player a {@link MediaPlayerBase} that handles actual media playback in your app.
          */
@@ -913,21 +912,24 @@ public class MediaSession2 implements AutoCloseable {
         }
 
         /**
-         * Set the {@link MediaPlaylistAgent} for this session to manages playlist of the
-         * underlying {@link MediaPlayerBase player}.
+         * Sets the {@link MediaPlaylistAgent} for this session to manages playlist of the
+         * underlying {@link MediaPlayerBase}. The playlist agent should manage
+         * {@link MediaPlayerBase} for calling {@link MediaPlayerBase#setNextDataSources(List)}.
+         * <p>
+         * If the {@link MediaPlaylistAgent} isn't set, session will create the default playlist
+         * agent.
          *
          * @param playlistAgent a {@link MediaPlaylistAgent} that manages playlist of the
-         * {@code player}
+         *                      {@code player}
          */
         U setPlaylistAgent(@NonNull MediaPlaylistAgent playlistAgent) {
-            // TODO(jaewan): fix this
             mProvider.setPlaylistAgent_impl(playlistAgent);
             return (U) this;
         }
 
         /**
-         * Set the {@link VolumeProvider2} for this session to receive volume button events. If not
-         * set, system will adjust the appropriate stream volume for this session's player.
+         * Sets the {@link VolumeProvider2} for this session to handle volume events. If not set,
+         * system will adjust the appropriate stream volume for this session's player.
          *
          * @param volumeProvider The provider that will receive volume button events.
          */
@@ -1368,15 +1370,19 @@ public class MediaSession2 implements AutoCloseable {
     }
 
     /**
-     * Set the underlying {@link MediaPlayerBase} for this session to dispatch incoming event
-     * to. Events from the {@link MediaController2} will be sent directly to the underlying
-     * player on the {@link Handler} where the session is created on.
+     * Sets the underlying {@link MediaPlayerBase} and {@link MediaPlaylistAgent} for this session
+     * to dispatch incoming event to.
+     * <p>
+     * When a {@link MediaPlaylistAgent} is specified here, the playlist agent should manage
+     * {@link MediaPlayerBase} for calling {@link MediaPlayerBase#setNextDataSources(List)}.
+     * <p>
+     * If the {@link MediaPlaylistAgent} isn't set, session will recreate the default playlist
+     * agent.
      *
-     * @param player a {@link MediaPlayerBase} that handles actual media playback in your app.
-     * @param playlistAgent a {@link MediaPlaylistAgent} that manages playlist of the
-     * {@code player}
-     * @param volumeProvider The provider that will receive volume button events. If
-     * {@code null}, system will adjust the appropriate stream volume for this session's player.
+     * @param player a {@link MediaPlayerBase} that handles actual media playback in your app
+     * @param playlistAgent a {@link MediaPlaylistAgent} that manages playlist of the {@code player}
+     * @param volumeProvider a {@link VolumeProvider2}. If {@code null}, system will adjust the
+     *                       appropriate stream volume for this session's player.
      */
     public void updatePlayer(@NonNull MediaPlayerBase player,
             @Nullable MediaPlaylistAgent playlistAgent, @Nullable VolumeProvider2 volumeProvider) {
@@ -1391,18 +1397,15 @@ public class MediaSession2 implements AutoCloseable {
     /**
      * @return player
      */
-    public @NonNull
-    MediaPlayerBase getPlayer() {
+    public @NonNull MediaPlayerBase getPlayer() {
         return mProvider.getPlayer_impl();
     }
 
     /**
-     * @return playlist manager
+     * @return playlist agent
      */
-    public @Nullable
-    MediaPlaylistAgent getPlaylistAgent() {
-        // TODO(jaewan): implement this (b/74090741)
-        return null;
+    public @NonNull MediaPlaylistAgent getPlaylistAgent() {
+        return mProvider.getPlaylistAgent_impl();
     }
 
     /**
