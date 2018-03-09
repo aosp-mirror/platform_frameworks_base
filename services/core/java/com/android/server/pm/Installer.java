@@ -43,7 +43,7 @@ public class Installer extends SystemService {
 
     /* ***************************************************************************
      * IMPORTANT: These values are passed to native code. Keep them in sync with
-     * frameworks/native/cmds/installd/installd.h
+     * frameworks/native/cmds/installd/installd_constants.h
      * **************************************************************************/
     /** Application should be visible to everyone */
     public static final int DEXOPT_PUBLIC         = 1 << 1;
