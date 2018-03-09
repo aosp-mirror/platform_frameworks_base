@@ -29,6 +29,7 @@
 
     <!-- Package Info -->
     <RelativeLayout
+        android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clipChildren="false"
@@ -140,6 +141,12 @@
                 android:layout_height="match_parent"
                 style="@style/TextAppearance.NotificationInfo.Button"/>
             <TextView
+                android:id="@+id/minimize"
+                android:text="@string/inline_minimize_button"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                style="@style/TextAppearance.NotificationInfo.Button" />
+            <TextView
                 android:id="@+id/keep"
                 android:text="@string/inline_keep_button"
                 android:layout_width="wrap_content"
@@ -157,10 +164,11 @@
         android:visibility="gone"
         android:orientation="horizontal" >
         <TextView
+            android:id="@+id/confirmation_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/notification_channel_disabled"
-            style="@style/TextAppearance.NotificationInfo.Secondary.Warning"/>
+            style="@style/TextAppearance.NotificationInfo.Confirmation"/>
         <TextView
             android:id="@+id/undo"
             android:layout_width="wrap_content"
