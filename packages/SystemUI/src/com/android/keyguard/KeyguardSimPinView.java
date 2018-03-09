@@ -212,7 +212,9 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
             ((EmergencyCarrierArea) mEcaView).setCarrierTextVisible(true);
         }
         mSimImageView = findViewById(R.id.keyguard_sim);
+
         mPasswordEntry.setQuickUnlockListener(null);
+        setButtonVisibility(getOkButton(), true /* visible */);
     }
 
     @Override

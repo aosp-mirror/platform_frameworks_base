@@ -51,6 +51,17 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
         super(context, attrs);
     }
 
+    public void setButtonVisibility(View button, boolean visible) {
+        if (button instanceof View && button != null) {
+            button.setVisibility(
+                    visible ? View.VISIBLE : View.INVISIBLE);
+        }
+    }
+
+    public View getOkButton() {
+        return mOkButton;
+    }
+
     @Override
     protected boolean onRequestFocusInDescendants(int direction, Rect previouslyFocusedRect) {
         // send focus to the password field
