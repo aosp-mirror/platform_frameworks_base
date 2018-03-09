@@ -110,13 +110,11 @@ public class NetworkScan {
         ITelephony telephony = getITelephony();
         if (telephony == null) {
             Rlog.e(TAG, "Failed to get the ITelephony instance.");
-            throw new RuntimeException("Failed to get the ITelephony instance.");
         }
         try {
             telephony.stopNetworkScan(mSubId, mScanId);
         } catch (RemoteException ex) {
             Rlog.e(TAG, "stopNetworkScan  RemoteException", ex);
-            ex.rethrowAsRuntimeException();
         }
     }
 
