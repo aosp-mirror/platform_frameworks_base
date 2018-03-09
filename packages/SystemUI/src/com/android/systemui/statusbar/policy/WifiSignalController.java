@@ -43,10 +43,11 @@ public class WifiSignalController extends
     private final WifiStatusTracker mWifiTracker;
 
     public WifiSignalController(Context context, boolean hasMobileData,
-            CallbackHandler callbackHandler, NetworkControllerImpl networkController) {
+            CallbackHandler callbackHandler, NetworkControllerImpl networkController,
+            WifiManager wifiManager) {
         super("WifiSignalController", context, NetworkCapabilities.TRANSPORT_WIFI,
                 callbackHandler, networkController);
-        mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        mWifiManager = wifiManager;
         mWifiTracker = new WifiStatusTracker(mWifiManager);
         mHasMobileData = hasMobileData;
         Handler handler = new WifiHandler(Looper.getMainLooper());
