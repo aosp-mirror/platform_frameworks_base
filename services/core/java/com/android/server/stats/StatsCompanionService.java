@@ -278,7 +278,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     && intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
                 return; // Keep only replacing or normal add and remove.
             }
-            Slog.i(TAG, "StatsCompanionService noticed an app was updated.");
+            if (DEBUG) Slog.d(TAG, "StatsCompanionService noticed an app was updated.");
             synchronized (sStatsdLock) {
                 if (sStatsd == null) {
                     Slog.w(TAG, "Could not access statsd to inform it of an app update");
