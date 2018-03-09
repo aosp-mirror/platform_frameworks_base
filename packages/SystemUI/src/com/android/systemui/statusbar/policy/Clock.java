@@ -40,6 +40,7 @@ import android.view.Display;
 import android.view.View;
 import android.widget.TextView;
 
+import com.android.settingslib.Utils;
 import com.android.systemui.DemoMode;
 import com.android.systemui.Dependency;
 import com.android.systemui.FontSizeUtils;
@@ -84,6 +85,17 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
     private boolean mShowSeconds;
     private Handler mSecondsHandler;
 
+    /**
+     * Whether we should use colors that adapt based on wallpaper/the scrim behind quick settings
+     * for text.
+     */
+    private boolean mUseWallpaperTextColor;
+
+    /**
+     * Color to be set on this {@link TextView}, when wallpaperTextColor is <b>not</b> utilized.
+     */
+    private int mNonAdaptedColor;
+
     public Clock(Context context) {
         this(context, null);
     }
@@ -101,6 +113,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
         try {
             mAmPmStyle = a.getInt(R.styleable.Clock_amPmStyle, AM_PM_STYLE_GONE);
             mShowDark = a.getBoolean(R.styleable.Clock_showDark, true);
+            mNonAdaptedColor = getCurrentTextColor();
         } finally {
             a.recycle();
         }
@@ -227,7 +240,10 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
 
     @Override
     public void onDarkChanged(Rect area, float darkIntensity, int tint) {
-        setTextColor(DarkIconDispatcher.getTint(area, this, tint));
+        mNonAdaptedColor = DarkIconDispatcher.getTint(area, this, tint);
+        if (!mUseWallpaperTextColor) {
+            setTextColor(mNonAdaptedColor);
+        }
     }
 
     @Override
@@ -240,6 +256,25 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
                 mContext.getResources().getDimensionPixelSize(
                         R.dimen.status_bar_clock_end_padding),
                 0);
+    }
+
+    /**
+     * Sets whether the clock uses the wallpaperTextColor. If we're not using it, we'll revert back
+     * to dark-mode-based/tinted colors.
+     *
+     * @param shouldUseWallpaperTextColor whether we should use wallpaperTextColor for text color
+     */
+    public void useWallpaperTextColor(boolean shouldUseWallpaperTextColor) {
+        if (shouldUseWallpaperTextColor == mUseWallpaperTextColor) {
+            return;
+        }
+        mUseWallpaperTextColor = shouldUseWallpaperTextColor;
+
+        if (mUseWallpaperTextColor) {
+            setTextColor(Utils.getColorAttr(mContext, R.attr.wallpaperTextColor));
+        } else {
+            setTextColor(mNonAdaptedColor);
+        }
     }
 
     private void updateShowSeconds() {

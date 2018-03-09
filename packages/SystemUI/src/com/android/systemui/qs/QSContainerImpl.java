@@ -18,17 +18,15 @@ package com.android.systemui.qs;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.Canvas;
-import android.graphics.Path;
 import android.graphics.Point;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.qs.customize.QSCustomizer;
-import com.android.systemui.statusbar.ExpandableOutlineView;
 
 /**
  * Wrapper view with background which contains {@link QSPanel} and {@link BaseStatusBarHeader}
@@ -44,7 +42,11 @@ public class QSContainerImpl extends FrameLayout {
     protected float mQsExpansion;
     private QSCustomizer mQSCustomizer;
     private View mQSFooter;
+
     private View mBackground;
+    private View mBackgroundGradient;
+    private View mStatusBarBackground;
+
     private int mSideMargins;
 
     public QSContainerImpl(Context context, AttributeSet attrs) {
@@ -60,11 +62,29 @@ public class QSContainerImpl extends FrameLayout {
         mQSCustomizer = findViewById(R.id.qs_customize);
         mQSFooter = findViewById(R.id.qs_footer);
         mBackground = findViewById(R.id.quick_settings_background);
+        mStatusBarBackground = findViewById(R.id.quick_settings_status_bar_background);
+        mBackgroundGradient = findViewById(R.id.quick_settings_gradient_view);
         mSideMargins = getResources().getDimensionPixelSize(R.dimen.notification_side_paddings);
 
         setClickable(true);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
         setMargins();
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        // Hide the backgrounds when in landscape mode.
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            mBackgroundGradient.setVisibility(View.INVISIBLE);
+            mStatusBarBackground.setVisibility(View.INVISIBLE);
+        } else {
+            mBackgroundGradient.setVisibility(View.VISIBLE);
+            mStatusBarBackground.setVisibility(View.VISIBLE);
+        }
+
+        updateResources();
     }
 
     @Override
@@ -99,6 +119,14 @@ public class QSContainerImpl extends FrameLayout {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         updateExpansion();
+    }
+
+    private void updateResources() {
+        LayoutParams layoutParams = (LayoutParams) mQSPanel.getLayoutParams();
+        layoutParams.topMargin = mContext.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.quick_qs_offset_height);
+
+        mQSPanel.setLayoutParams(layoutParams);
     }
 
     /**

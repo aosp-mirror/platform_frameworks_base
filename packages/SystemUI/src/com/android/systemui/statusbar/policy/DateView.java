@@ -27,6 +27,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
+import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 
@@ -41,6 +42,17 @@ public class DateView extends TextView {
     private DateFormat mDateFormat;
     private String mLastText;
     private String mDatePattern;
+
+    /**
+     * Whether we should use colors that adapt based on wallpaper/the scrim behind quick settings
+     * for text.
+     */
+    private boolean mUseWallpaperTextColor;
+
+    /**
+     * Color to be set on this {@link TextView}, when wallpaperTextColor is <b>not</b> utilized.
+     */
+    private int mNonAdaptedTextColor;
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
@@ -62,6 +74,7 @@ public class DateView extends TextView {
 
     public DateView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mNonAdaptedTextColor = getCurrentTextColor();
         TypedArray a = context.getTheme().obtainStyledAttributes(
                 attrs,
                 R.styleable.DateView,
@@ -114,6 +127,25 @@ public class DateView extends TextView {
         if (!text.equals(mLastText)) {
             setText(text);
             mLastText = text;
+        }
+    }
+
+    /**
+     * Sets whether the date view uses the wallpaperTextColor. If we're not using it, we'll revert
+     * back to dark-mode-based/tinted colors.
+     *
+     * @param shouldUseWallpaperTextColor whether we should use wallpaperTextColor for text color
+     */
+    public void useWallpaperTextColor(boolean shouldUseWallpaperTextColor) {
+        if (shouldUseWallpaperTextColor == mUseWallpaperTextColor) {
+            return;
+        }
+        mUseWallpaperTextColor = shouldUseWallpaperTextColor;
+
+        if (mUseWallpaperTextColor) {
+            setTextColor(Utils.getColorAttr(mContext, R.attr.wallpaperTextColor));
+        } else {
+            setTextColor(mNonAdaptedTextColor);
         }
     }
 
