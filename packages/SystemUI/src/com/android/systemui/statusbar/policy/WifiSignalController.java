@@ -17,12 +17,15 @@ package com.android.systemui.statusbar.policy;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
+import android.net.NetworkScoreManager;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -37,7 +40,6 @@ import java.util.Objects;
 
 public class WifiSignalController extends
         SignalController<WifiSignalController.WifiState, SignalController.IconGroup> {
-    private final WifiManager mWifiManager;
     private final AsyncChannel mWifiChannel;
     private final boolean mHasMobileData;
     private final WifiStatusTracker mWifiTracker;
@@ -47,12 +49,17 @@ public class WifiSignalController extends
             WifiManager wifiManager) {
         super("WifiSignalController", context, NetworkCapabilities.TRANSPORT_WIFI,
                 callbackHandler, networkController);
-        mWifiManager = wifiManager;
-        mWifiTracker = new WifiStatusTracker(mWifiManager);
+        NetworkScoreManager networkScoreManager =
+                context.getSystemService(NetworkScoreManager.class);
+        ConnectivityManager connectivityManager =
+                context.getSystemService(ConnectivityManager.class);
+        mWifiTracker = new WifiStatusTracker(mContext, wifiManager, networkScoreManager,
+                connectivityManager, this::handleStatusUpdated);
+        mWifiTracker.setListening(true);
         mHasMobileData = hasMobileData;
         Handler handler = new WifiHandler(Looper.getMainLooper());
         mWifiChannel = new AsyncChannel();
-        Messenger wifiMessenger = mWifiManager.getWifiServiceMessenger();
+        Messenger wifiMessenger = wifiManager.getWifiServiceMessenger();
         if (wifiMessenger != null) {
             mWifiChannel.connect(context, handler, wifiMessenger);
         }
@@ -68,7 +75,6 @@ public class WifiSignalController extends
                 WifiIcons.QS_WIFI_NO_NETWORK,
                 AccessibilityContentDescriptions.WIFI_NO_CONNECTION
                 );
-
     }
 
     @Override
@@ -87,13 +93,12 @@ public class WifiSignalController extends
         if (mCurrentState.inetCondition == 0) {
             contentDescription += ("," + mContext.getString(R.string.data_connection_no_internet));
         }
-
         IconState statusIcon = new IconState(wifiVisible, getCurrentIconId(), contentDescription);
         IconState qsIcon = new IconState(mCurrentState.connected, getQsCurrentIconId(),
                 contentDescription);
         callback.setWifiIndicators(mCurrentState.enabled, statusIcon, qsIcon,
                 ssidPresent && mCurrentState.activityIn, ssidPresent && mCurrentState.activityOut,
-                wifiDesc, mCurrentState.isTransient);
+                wifiDesc, mCurrentState.isTransient, mCurrentState.statusLabel);
     }
 
     /**
@@ -106,6 +111,12 @@ public class WifiSignalController extends
         mCurrentState.ssid = mWifiTracker.ssid;
         mCurrentState.rssi = mWifiTracker.rssi;
         mCurrentState.level = mWifiTracker.level;
+        mCurrentState.statusLabel = mWifiTracker.statusLabel;
+        notifyListenersIfNecessary();
+    }
+
+    private void handleStatusUpdated() {
+        mCurrentState.statusLabel = mWifiTracker.statusLabel;
         notifyListenersIfNecessary();
     }
 
@@ -150,6 +161,7 @@ public class WifiSignalController extends
     static class WifiState extends SignalController.State {
         String ssid;
         boolean isTransient;
+        String statusLabel;
 
         @Override
         public void copyFrom(State s) {
@@ -157,20 +169,26 @@ public class WifiSignalController extends
             WifiState state = (WifiState) s;
             ssid = state.ssid;
             isTransient = state.isTransient;
+            statusLabel = state.statusLabel;
         }
 
         @Override
         protected void toString(StringBuilder builder) {
             super.toString(builder);
-            builder.append(',').append("ssid=").append(ssid);
-            builder.append(',').append("isTransient=").append(isTransient);
+            builder.append(",ssid=").append(ssid)
+                .append(",isTransient=").append(isTransient)
+                .append(",statusLabel=").append(statusLabel);
         }
 
         @Override
         public boolean equals(Object o) {
-            return super.equals(o)
-                    && Objects.equals(((WifiState) o).ssid, ssid)
-                    && (((WifiState) o).isTransient == isTransient);
+            if (!super.equals(o)) {
+                return false;
+            }
+            WifiState other = (WifiState) o;
+            return Objects.equals(other.ssid, ssid)
+                    && other.isTransient == isTransient
+                    && TextUtils.equals(other.statusLabel, statusLabel);
         }
     }
 }
