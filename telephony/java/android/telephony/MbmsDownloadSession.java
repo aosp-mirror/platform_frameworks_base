@@ -814,11 +814,11 @@ public class MbmsDownloadSession implements AutoCloseable {
         try {
             if (!token.createNewFile()) {
                 throw new RuntimeException("Failed to create download token for request "
-                        + request);
+                        + request + ". Token location is " + token.getPath());
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to create download token for request " + request
-                    + " due to IOException " + e);
+                    + " due to IOException " + e + ". Attempted to write to " + token.getPath());
         }
     }
 
