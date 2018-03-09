@@ -28,6 +28,7 @@ import android.view.DisplayCutout;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityEvent;
 
 import android.widget.FrameLayout;
@@ -37,7 +38,8 @@ import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
-import com.android.systemui.util.leak.RotationUtils;
+
+import java.util.Objects;
 
 public class PhoneStatusBarView extends PanelBar {
     private static final String TAG = "PhoneStatusBarView";
@@ -98,7 +100,7 @@ public class PhoneStatusBarView extends PanelBar {
         // Always have Battery meters in the status bar observe the dark/light modes.
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mBattery);
         if (updateOrientationAndCutout(getResources().getConfiguration().orientation)) {
-            postUpdateLayoutForCutout();
+            updateLayoutForCutout();
         }
     }
 
@@ -115,8 +117,18 @@ public class PhoneStatusBarView extends PanelBar {
 
         // May trigger cutout space layout-ing
         if (updateOrientationAndCutout(newConfig.orientation)) {
-            postUpdateLayoutForCutout();
+            updateLayoutForCutout();
+            requestLayout();
         }
+    }
+
+    @Override
+    public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        if (updateOrientationAndCutout(mLastOrientation)) {
+            updateLayoutForCutout();
+            requestLayout();
+        }
+        return super.onApplyWindowInsets(insets);
     }
 
     /**
@@ -133,12 +145,9 @@ public class PhoneStatusBarView extends PanelBar {
             }
         }
 
-        if (mDisplayCutout == null) {
-            DisplayCutout cutout = getRootWindowInsets().getDisplayCutout();
-            if (cutout != null) {
-                changed = true;
-                mDisplayCutout = cutout;
-            }
+        if (!Objects.equals(getRootWindowInsets().getDisplayCutout(), mDisplayCutout)) {
+            changed = true;
+            mDisplayCutout = getRootWindowInsets().getDisplayCutout();
         }
 
         return changed;
@@ -276,17 +285,6 @@ public class PhoneStatusBarView extends PanelBar {
         updateSafeInsets();
     }
 
-    private void postUpdateLayoutForCutout() {
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                updateLayoutForCutout();
-            }
-        };
-        // Let the cutout emulation draw first
-        postDelayed(r, 0);
-    }
-
     private void updateCutoutLocation() {
         // Not all layouts have a cutout (e.g., Car)
         if (mCutoutSpace == null) {
@@ -310,40 +308,13 @@ public class PhoneStatusBarView extends PanelBar {
         // or letterboxing from the right or left sides.
 
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
-        if (mDisplayCutout == null || mDisplayCutout.isEmpty()) {
+        if (mDisplayCutout == null) {
             lp.leftMargin = 0;
             lp.rightMargin = 0;
             return;
         }
 
-        int leftMargin = 0;
-        int rightMargin = 0;
-        switch (RotationUtils.getRotation(getContext())) {
-            /*
-             * Landscape: <-|
-             * Seascape:  |->
-             */
-            case RotationUtils.ROTATION_LANDSCAPE:
-                leftMargin = getDisplayCutoutHeight();
-                break;
-            case RotationUtils.ROTATION_SEASCAPE:
-                rightMargin = getDisplayCutoutHeight();
-                break;
-            default:
-                break;
-        }
-
-        lp.leftMargin = leftMargin;
-        lp.rightMargin = rightMargin;
-    }
-
-    //TODO: Find a better way
-    private int getDisplayCutoutHeight() {
-        if (mDisplayCutout == null || mDisplayCutout.isEmpty()) {
-            return 0;
-        }
-
-        Rect r = mDisplayCutout.getBoundingRect();
-        return r.bottom - r.top;
+        lp.leftMargin = mDisplayCutout.getSafeInsetLeft();
+        lp.rightMargin = mDisplayCutout.getSafeInsetRight();
     }
 }
