@@ -18,7 +18,6 @@ package com.android.systemui.shared.system;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 
-import android.app.WindowConfiguration;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.view.RemoteAnimationTarget;
@@ -39,6 +38,7 @@ public class RemoteAnimationTargetCompat {
     public final int prefixOrderIndex;
     public final Point position;
     public final Rect sourceContainerBounds;
+    public final boolean isNotInRecents;
 
     private final RemoteAnimationTarget mTarget;
 
@@ -52,6 +52,7 @@ public class RemoteAnimationTargetCompat {
         position = app.position;
         sourceContainerBounds = app.sourceContainerBounds;
         prefixOrderIndex = app.prefixOrderIndex;
+        isNotInRecents = app.isNotInRecents;
     }
 
     public static RemoteAnimationTargetCompat[] wrap(RemoteAnimationTarget[] apps) {
