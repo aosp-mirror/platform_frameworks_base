@@ -373,7 +373,8 @@ public class ActivityTestsBase {
 
         // Just return the current front task. This is called internally so we cannot use spy to mock this out.
         @Override
-        ActivityStack getNextFocusableStackLocked(ActivityStack currentFocus) {
+        ActivityStack getNextFocusableStackLocked(ActivityStack currentFocus,
+                boolean ignoreCurrent) {
             return mFocusedStack;
         }
     }
