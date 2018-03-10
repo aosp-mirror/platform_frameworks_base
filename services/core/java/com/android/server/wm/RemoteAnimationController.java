@@ -214,7 +214,7 @@ class RemoteAnimationController {
                     mCapturedLeash, !mAppWindowToken.fillsParent(),
                     mainWindow.mWinAnimator.mLastClipRect, mainWindow.mContentInsets,
                     mAppWindowToken.getPrefixOrderIndex(), mPosition, mStackBounds,
-                    task.getWindowConfiguration());
+                    task.getWindowConfiguration(), false /*isNotInRecents*/);
         }
 
         private int getMode() {
