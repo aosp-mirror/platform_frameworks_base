@@ -23,6 +23,7 @@ option java_outer_classname = "AtomsProto";
 
 import "frameworks/base/cmds/statsd/src/atom_field_options.proto";
 import "frameworks/base/core/proto/android/app/enums.proto";
+import "frameworks/base/core/proto/android/bluetooth/enums.proto";
 import "frameworks/base/core/proto/android/os/enums.proto";
 import "frameworks/base/core/proto/android/server/enums.proto";
 import "frameworks/base/core/proto/android/telecomm/enums.proto";
@@ -106,6 +107,9 @@ message Atom {
         KeyguardBouncerPasswordEntered keyguard_bouncer_password_entered = 64;
         AppDied app_died=65;
         ResourceConfigurationChanged resource_configuration_changed = 66;
+        BluetoothEnabledStateChanged bluetooth_enabled_state_changed = 67;
+        BluetoothConnectionStateChanged bluetooth_connection_state_changed = 68;
+        BluetoothA2dpAudioStateChanged bluetooth_a2dp_audio_state_changed = 69;
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 
@@ -901,6 +905,63 @@ message ResourceConfigurationChanged {
     // Also contains information about whether the device is in night mode.
     // See: https://d.android.com/reference/android/content/res/Configuration.html#uiMode
     optional int32 uiMode = 17;
+}
+
+/**
+ * Logs when Bluetooth is enabled and disabled.
+ *
+ * Logged from:
+ *   services/core/java/com/android/server/BluetoothManagerService.java
+ */
+message BluetoothEnabledStateChanged {
+    repeated AttributionNode attribution_node = 1;
+    // Whether or not bluetooth is enabled on the device.
+    enum State {
+        UNKNOWN = 0;
+        ENABLED = 1;
+        DISABLED = 2;
+    }
+    optional State state = 2;
+    // The reason for being enabled/disabled.
+    // Eg. Airplane mode, crash, application request.
+    optional android.bluetooth.EnableDisableReasonEnum reason = 3;
+    // If the reason is an application request, this will be the package name.
+    optional string pkgName = 4;
+}
+
+/**
+ * Logs when a Bluetooth device connects and disconnects.
+ *
+ * Logged from:
+ *    packages/apps/Bluetooth/src/com/android/bluetooth/btservice/AdapterProperties.java
+ */
+message BluetoothConnectionStateChanged {
+    // The state of the connection.
+    // Eg: CONNECTING, CONNECTED, DISCONNECTING, DISCONNECTED.
+    optional android.bluetooth.ConnectionStateEnum state = 1;
+    // An identifier that can be used to match connect and disconnect events.
+    // Currently is last two bytes of a hash of a device level ID and
+    // the mac address of the bluetooth device that is connected.
+    optional int32 obfuscated_id = 2;
+    // The profile that is connected. Eg. GATT, A2DP, HEADSET.
+    // From android.bluetooth.BluetoothAdapter.java
+    optional int32 bt_profile = 3;
+}
+
+/**
+ * Logs when Bluetooth A2dp audio streaming state changes.
+ *
+ * Logged from:
+ *    TODO(b/73971848)
+ */
+message BluetoothA2dpAudioStateChanged {
+    // Whether or not audio is being played using Bluetooth A2dp.
+    enum State {
+        UNKNOWN = 0;
+        PLAY = 1;
+        STOP = 2;
+    }
+    optional State state = 1;
 }
 
 /**
