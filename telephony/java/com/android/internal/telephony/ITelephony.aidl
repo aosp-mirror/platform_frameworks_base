@@ -623,12 +623,6 @@ interface ITelephony {
     void setCellInfoListRate(int rateInMillis);
 
     /**
-     * get default sim
-     * @return sim id
-     */
-    int getDefaultSim();
-
-    /**
      * Opens a logical channel to the ICC card.
      *
      * Input parameters equivalent to TS 27.007 AT+CCHO command.
