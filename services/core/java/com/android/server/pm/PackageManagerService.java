@@ -3375,6 +3375,13 @@ public class PackageManagerService extends IPackageManager.Stub
         // "/data/system/package_cache/1"
         File cacheDir = FileUtils.createDir(cacheBaseDir, PACKAGE_PARSER_CACHE_VERSION);
 
+        if (cacheDir == null) {
+            // Something went wrong. Attempt to delete everything and return.
+            Slog.wtf(TAG, "Cache directory cannot be created - wiping base dir " + cacheBaseDir);
+            FileUtils.deleteContentsAndDir(cacheBaseDir);
+            return null;
+        }
+
         // The following is a workaround to aid development on non-numbered userdebug
         // builds or cases where "adb sync" is used on userdebug builds. If we detect that
         // the system partition is newer.
