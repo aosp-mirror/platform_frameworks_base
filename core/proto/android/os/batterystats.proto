@@ -641,9 +641,7 @@ message UidProto {
   message Job {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional string name = 1 [
-        (android.privacy).dest = DEST_EXPLICIT
-    ];
+    optional string name = 1;
     // Job times aren't apportioned.
     optional TimerProto total = 2;
     optional TimerProto background = 3;
@@ -654,9 +652,7 @@ message UidProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     // Job name.
-    optional string name = 1 [
-        (android.privacy).dest = DEST_EXPLICIT
-    ];
+    optional string name = 1;
 
     message ReasonCount {
       option (android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -801,9 +797,7 @@ message UidProto {
   message Sync {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional string name = 1 [
-        (android.privacy).dest = DEST_EXPLICIT
-    ];
+    optional string name = 1;
     // Sync times aren't apportioned.
     optional TimerProto total = 2;
     optional TimerProto background = 3;
@@ -842,9 +836,7 @@ message UidProto {
   message Wakelock {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional string name = 1 [
-        (android.privacy).dest = DEST_EXPLICIT
-    ];
+    optional string name = 1;
 
     // Full wakelocks keep the screen on. Based on
     // PowerManager.SCREEN_BRIGHT_WAKE_LOCK (deprecated in API 13) and
@@ -876,9 +868,7 @@ message UidProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     // Wakeup alarm name.
-    optional string name = 1 [
-        (android.privacy).dest = DEST_EXPLICIT
-    ];
+    optional string name = 1;
     // Only includes counts when screen-off (& on battery).
     optional int32 count = 2;
   }
