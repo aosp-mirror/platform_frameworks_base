@@ -1164,6 +1164,9 @@ class SettingsProtoDumpUtil {
                 Global.HIDDEN_API_BLACKLIST_EXEMPTIONS,
                 GlobalSettingsProto.HIDDEN_API_BLACKLIST_EXEMPTIONS);
         dumpSetting(s, p,
+                Global.SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT,
+                GlobalSettingsProto.SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT);
+        dumpSetting(s, p,
                 Settings.Global.MULTI_SIM_VOICE_CALL_SUBSCRIPTION,
                 GlobalSettingsProto.MULTI_SIM_VOICE_CALL_SUBSCRIPTION);
         dumpSetting(s, p,

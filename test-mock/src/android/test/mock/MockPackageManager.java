@@ -18,6 +18,7 @@ package android.test.mock;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.PackageInstallObserver;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -460,6 +461,11 @@ public class MockPackageManager extends PackageManager {
 
     @Override
     public ResolveInfo resolveService(Intent intent, int flags) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ResolveInfo resolveServiceAsUser(Intent intent, int flags, int userId) {
         throw new UnsupportedOperationException();
     }
 

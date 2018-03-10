@@ -11597,6 +11597,24 @@ public final class Settings {
                 "hidden_api_blacklist_exemptions";
 
         /**
+         * Timeout for a single {@link android.media.soundtrigger.SoundTriggerDetectionService}
+         * operation (in ms).
+         *
+         * @hide
+         */
+        public static final String SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT =
+                "sound_trigger_detection_service_op_timeout";
+
+        /**
+         * Maximum number of {@link android.media.soundtrigger.SoundTriggerDetectionService}
+         * operations per day.
+         *
+         * @hide
+         */
+        public static final String MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY =
+                "max_sound_trigger_detection_service_ops_per_day";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
