@@ -53,7 +53,6 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 
-
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.DumpUtils;
 import com.android.server.accessibility.AccessibilityManagerService.RemoteAccessibilityConnection;
@@ -76,7 +75,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         implements ServiceConnection, IBinder.DeathRecipient, KeyEventDispatcher.KeyEventFilter,
         FingerprintGestureDispatcher.FingerprintGestureClient {
     private static final boolean DEBUG = false;
-    private static final String LOG_TAG = "AccessibilityClientConnection";
+    private static final String LOG_TAG = "AbstractAccessibilityServiceConnection";
 
     protected final Context mContext;
     protected final SystemSupport mSystemSupport;
