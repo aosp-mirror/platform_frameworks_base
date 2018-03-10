@@ -214,6 +214,9 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
             mGestureAborted = false;
         }
         if (mGestureAborted) {
+            if (mIsPressed) {
+                setPressed(false);
+            }
             return false;
         }
 
