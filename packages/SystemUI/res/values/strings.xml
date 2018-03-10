@@ -1526,6 +1526,9 @@
     <!-- Notification Inline Controls: Shown when a channel's notifications are currently blocked -->
     <string name="notification_channel_disabled">You won\'t see these notifications anymore</string>
 
+    <!-- Notification inline controls: Shown when a channel's notifications are minimized -->
+    <string name="notification_channel_minimized">These notifications will be minimized</string>
+
     <!-- Notification Inline controls: continue receiving notifications prompt, channel level -->
     <string name="inline_blocking_helper">You usually dismiss these notifications.
     \nKeep showing them?</string>
@@ -1538,6 +1541,9 @@
 
     <!-- Notification inline controls: keep getting notifications button -->
     <string name="inline_keep_button">Keep showing</string>
+
+    <!-- Notification inline controls: minimize notifications button -->
+    <string name="inline_minimize_button">Minimize</string>
 
     <!-- Notification Inline controls: continue receiving notifications prompt, app level -->
     <string name="inline_keep_showing_app">Keep showing notifications from this app?</string>
