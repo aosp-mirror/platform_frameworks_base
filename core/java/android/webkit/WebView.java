@@ -1311,10 +1311,7 @@ public class WebView extends AbsoluteLayout
      * <p>
      * Note that from {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1} the returned picture
      * should only be drawn into bitmap-backed Canvas - using any other type of Canvas will involve
-     * additional conversion at a cost in memory and performance. Also the
-     * {@link android.graphics.Picture#createFromStream} and
-     * {@link android.graphics.Picture#writeToStream} methods are not supported on the
-     * returned object.
+     * additional conversion at a cost in memory and performance.
      *
      * @deprecated Use {@link #onDraw} to obtain a bitmap snapshot of the WebView, or
      * {@link #saveWebArchive} to save the content to a file.
