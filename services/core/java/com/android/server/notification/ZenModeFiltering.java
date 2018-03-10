@@ -34,6 +34,7 @@ import android.util.ArrayMap;
 import android.util.Slog;
 
 import com.android.internal.messages.nano.SystemMessageProto;
+import com.android.internal.util.NotificationMessagingUtil;
 
 import java.io.PrintWriter;
 import java.util.Date;
@@ -48,9 +49,16 @@ public class ZenModeFiltering {
     private final Context mContext;
 
     private ComponentName mDefaultPhoneApp;
+    private final NotificationMessagingUtil mMessagingUtil;
 
     public ZenModeFiltering(Context context) {
         mContext = context;
+        mMessagingUtil = new NotificationMessagingUtil(mContext);
+    }
+
+    public ZenModeFiltering(Context context, NotificationMessagingUtil messagingUtil) {
+        mContext = context;
+        mMessagingUtil = messagingUtil;
     }
 
     public void dump(PrintWriter pw, String prefix) {
@@ -207,9 +215,8 @@ public class ZenModeFiltering {
         return false;
     }
 
-    private static boolean isAlarm(NotificationRecord record) {
+    protected static boolean isAlarm(NotificationRecord record) {
         return record.isCategory(Notification.CATEGORY_ALARM)
-                || record.isAudioStream(AudioManager.STREAM_ALARM)
                 || record.isAudioAttributesUsage(AudioAttributes.USAGE_ALARM);
     }
 
@@ -249,17 +256,8 @@ public class ZenModeFiltering {
                 && pkg.equals(mDefaultPhoneApp.getPackageName());
     }
 
-    @SuppressWarnings("deprecation")
-    private boolean isDefaultMessagingApp(NotificationRecord record) {
-        final int userId = record.getUserId();
-        if (userId == UserHandle.USER_NULL || userId == UserHandle.USER_ALL) return false;
-        final String defaultApp = Secure.getStringForUser(mContext.getContentResolver(),
-                Secure.SMS_DEFAULT_APPLICATION, userId);
-        return Objects.equals(defaultApp, record.sbn.getPackageName());
-    }
-
-    private boolean isMessage(NotificationRecord record) {
-        return record.isCategory(Notification.CATEGORY_MESSAGE) || isDefaultMessagingApp(record);
+    protected boolean isMessage(NotificationRecord record) {
+        return mMessagingUtil.isMessaging(record.sbn);
     }
 
     private static boolean audienceMatches(int source, float contactAffinity) {
