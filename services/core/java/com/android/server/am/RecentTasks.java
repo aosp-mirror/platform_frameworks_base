@@ -828,6 +828,25 @@ class RecentTasks {
     }
 
     /**
+     * @return ids of tasks that are presented in Recents UI.
+     */
+    SparseBooleanArray getRecentTaskIds() {
+        final SparseBooleanArray res = new SparseBooleanArray();
+        final int size = mTasks.size();
+        int numVisibleTasks = 0;
+        for (int i = 0; i < size; i++) {
+            final TaskRecord tr = mTasks.get(i);
+            if (isVisibleRecentTask(tr)) {
+                numVisibleTasks++;
+                if (isInVisibleRange(tr, numVisibleTasks)) {
+                    res.put(tr.taskId, true);
+                }
+            }
+        }
+        return res;
+    }
+
+    /**
      * @return the task in the task list with the given {@param id} if one exists.
      */
     TaskRecord getTask(int id) {

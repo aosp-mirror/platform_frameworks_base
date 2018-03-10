@@ -109,9 +109,14 @@ public class RemoteAnimationTarget implements Parcelable {
      */
     public final WindowConfiguration windowConfiguration;
 
+    /**
+     * Whether the task is not presented in Recents UI.
+     */
+    public boolean isNotInRecents;
+
     public RemoteAnimationTarget(int taskId, int mode, SurfaceControl leash, boolean isTranslucent,
             Rect clipRect, Rect contentInsets, int prefixOrderIndex, Point position,
-            Rect sourceContainerBounds, WindowConfiguration windowConfig) {
+            Rect sourceContainerBounds, WindowConfiguration windowConfig, boolean isNotInRecents) {
         this.mode = mode;
         this.taskId = taskId;
         this.leash = leash;
@@ -122,6 +127,7 @@ public class RemoteAnimationTarget implements Parcelable {
         this.position = new Point(position);
         this.sourceContainerBounds = new Rect(sourceContainerBounds);
         this.windowConfiguration = windowConfig;
+        this.isNotInRecents = isNotInRecents;
     }
 
     public RemoteAnimationTarget(Parcel in) {
@@ -135,6 +141,7 @@ public class RemoteAnimationTarget implements Parcelable {
         position = in.readParcelable(null);
         sourceContainerBounds = in.readParcelable(null);
         windowConfiguration = in.readParcelable(null);
+        isNotInRecents = in.readBoolean();
     }
 
     @Override
@@ -154,6 +161,7 @@ public class RemoteAnimationTarget implements Parcelable {
         dest.writeParcelable(position, 0 /* flags */);
         dest.writeParcelable(sourceContainerBounds, 0 /* flags */);
         dest.writeParcelable(windowConfiguration, 0 /* flags */);
+        dest.writeBoolean(isNotInRecents);
     }
 
     public static final Creator<RemoteAnimationTarget> CREATOR

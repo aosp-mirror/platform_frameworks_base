@@ -29,12 +29,12 @@ import android.app.WindowConfiguration;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseBooleanArray;
 import android.view.IRecentsAnimationController;
 import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationTarget;
@@ -175,7 +175,7 @@ public class RecentsAnimationController {
      * because it may call cancelAnimation() which needs to properly clean up the controller
      * in the window manager.
      */
-    public void initialize() {
+    public void initialize(SparseBooleanArray recentTaskIds) {
         // Make leashes for each of the visible tasks and add it to the recents animation to be
         // started
         final DisplayContent dc = mService.mRoot.getDisplayContent(mDisplayId);
@@ -189,7 +189,7 @@ public class RecentsAnimationController {
                     || config.getActivityType() == ACTIVITY_TYPE_HOME) {
                 continue;
             }
-            addAnimation(task);
+            addAnimation(task, !recentTaskIds.get(task.mTaskId));
         }
 
         // Skip the animation if there is nothing to animate
@@ -216,11 +216,12 @@ public class RecentsAnimationController {
         mService.mWindowPlacerLocked.performSurfacePlacement();
     }
 
-    private void addAnimation(Task task) {
+    private void addAnimation(Task task, boolean isRecentTaskInvisible) {
         if (DEBUG) Log.d(TAG, "addAnimation(" + task.getName() + ")");
         final SurfaceAnimator anim = new SurfaceAnimator(task, null /* animationFinishedCallback */,
                 mService);
-        final TaskAnimationAdapter taskAdapter = new TaskAnimationAdapter(task);
+        final TaskAnimationAdapter taskAdapter = new TaskAnimationAdapter(task,
+                isRecentTaskInvisible);
         anim.startAnimation(task.getPendingTransaction(), taskAdapter, false /* hidden */);
         task.commitPendingTransaction();
         mPendingAnimations.add(taskAdapter);
@@ -343,12 +344,14 @@ public class RecentsAnimationController {
 
     private class TaskAnimationAdapter implements AnimationAdapter {
 
-        private Task mTask;
+        private final Task mTask;
         private SurfaceControl mCapturedLeash;
         private OnAnimationFinishedCallback mCapturedFinishCallback;
+        private final boolean mIsRecentTaskInvisible;
 
-        TaskAnimationAdapter(Task task) {
+        TaskAnimationAdapter(Task task, boolean isRecentTaskInvisible) {
             mTask = task;
+            mIsRecentTaskInvisible = isRecentTaskInvisible;
         }
 
         RemoteAnimationTarget createRemoteAnimationApp() {
@@ -361,7 +364,7 @@ public class RecentsAnimationController {
             return new RemoteAnimationTarget(mTask.mTaskId, MODE_CLOSING, mCapturedLeash,
                     !mTask.fillsParent(), mainWindow.mWinAnimator.mLastClipRect,
                     mainWindow.mContentInsets, mTask.getPrefixOrderIndex(), position, bounds,
-                    mTask.getWindowConfiguration());
+                    mTask.getWindowConfiguration(), mIsRecentTaskInvisible);
         }
 
         @Override
