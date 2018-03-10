@@ -23,21 +23,24 @@ package android.util;
 public final class StatsLog {
     private static final String TAG = "StatsManager";
 
-    public static final int BLUETOOTH_ENABLED = 0;
+    public static final int BLUETOOTH_ENABLED_STATE_CHANGED = 0;
+    public static final int BLUETOOTH_ENABLED_STATE_CHANGED__STATE__UNKNOWN = 0;
+    public static final int BLUETOOTH_ENABLED_STATE_CHANGED__STATE__ENABLED = 1;
+    public static final int BLUETOOTH_ENABLED_STATE_CHANGED__STATE__DISABLED = 2;
 
     public static final int BLUETOOTH_CONNECTION_STATE_CHANGED = 1;
 
     public static final int BLUETOOTH_A2DP_AUDIO_STATE_CHANGED = 2;
     public static final int BLUETOOTH_A2DP_AUDIO_STATE_CHANGED__STATE__UNKNOWN = 0;
-    public static final int BLUETOOTH_A2DP_AUDIO_STATE_CHANGED__STATE__START = 1;
+    public static final int BLUETOOTH_A2DP_AUDIO_STATE_CHANGED__STATE__PLAY = 1;
     public static final int BLUETOOTH_A2DP_AUDIO_STATE_CHANGED__STATE__STOP = 2;
 
     private StatsLog() {}
 
     public static void write(int id, int field1) {}
 
-    public static void write(int id, int field1, int field2) {}
+    public static void write(int id, int field1, int field2, int field3) {}
 
     public static void write_non_chained(int id, int uid, String tag,
-            boolean field1, int field2, String field3) {}
+            int field1, int field2, String field3) {}
 }
