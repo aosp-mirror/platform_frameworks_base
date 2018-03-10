@@ -95,8 +95,12 @@ public class NearestTouchFrame extends FrameLayout {
     }
 
     private View findNearestChild(MotionEvent event) {
-        return mClickableChildren.stream().map(v -> new Pair<>(distance(v, event), v))
-                .min(Comparator.comparingInt(f -> f.first)).get().second;
+        return mClickableChildren
+                .stream()
+                .filter(v -> v.isAttachedToWindow())
+                .map(v -> new Pair<>(distance(v, event), v))
+                .min(Comparator.comparingInt(f -> f.first))
+                .get().second;
     }
 
     private int distance(View v, MotionEvent event) {
