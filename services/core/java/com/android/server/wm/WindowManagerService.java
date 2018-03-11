@@ -181,6 +181,7 @@ import android.util.MergedConfiguration;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.TypedValue;
@@ -2660,11 +2661,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void initializeRecentsAnimation(
             IRecentsAnimationRunner recentsAnimationRunner,
-            RecentsAnimationController.RecentsAnimationCallbacks callbacks, int displayId) {
+            RecentsAnimationController.RecentsAnimationCallbacks callbacks, int displayId,
+            SparseBooleanArray recentTaskIds) {
         synchronized (mWindowMap) {
             mRecentsAnimationController = new RecentsAnimationController(this,
                     recentsAnimationRunner, callbacks, displayId);
-            mRecentsAnimationController.initialize();
+            mRecentsAnimationController.initialize(recentTaskIds);
         }
     }
 
@@ -4555,6 +4557,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int NOTIFY_KEYGUARD_FLAGS_CHANGED = 56;
         public static final int NOTIFY_KEYGUARD_TRUSTED_CHANGED = 57;
         public static final int SET_HAS_OVERLAY_UI = 58;
+        public static final int SET_RUNNING_REMOTE_ANIMATION = 59;
 
         /**
          * Used to denote that an integer field in a message will not be used.
@@ -4967,6 +4970,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 break;
                 case SET_HAS_OVERLAY_UI: {
                     mAmInternal.setHasOverlayUi(msg.arg1, msg.arg2 == 1);
+                }
+                break;
+                case SET_RUNNING_REMOTE_ANIMATION: {
+                    mAmInternal.setRunningRemoteAnimation(msg.arg1, msg.arg2 == 1);
                 }
                 break;
             }
@@ -6989,6 +6996,15 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy.registerShortcutKey(shortcutCode, shortcutKeyReceiver);
     }
 
+    @Override
+    public void requestUserActivityNotification() {
+        if (!checkCallingPermission(android.Manifest.permission.USER_ACTIVITY,
+                "requestUserActivityNotification()")) {
+            throw new SecurityException("Requires USER_ACTIVITY permission");
+        }
+        mPolicy.requestUserActivityNotification();
+    }
+
     void markForSeamlessRotation(WindowState w, boolean seamlesslyRotated) {
         if (seamlesslyRotated == w.mSeamlesslyRotated) {
             return;
@@ -7408,6 +7424,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     SurfaceControl.Builder makeSurfaceBuilder(SurfaceSession s) {
         return mSurfaceBuilderFactory.make(s);
+    }
+
+    void sendSetRunningRemoteAnimation(int pid, boolean runningRemoteAnimation) {
+        mH.obtainMessage(H.SET_RUNNING_REMOTE_ANIMATION, pid, runningRemoteAnimation ? 1 : 0)
+                .sendToTarget();
     }
 }
 

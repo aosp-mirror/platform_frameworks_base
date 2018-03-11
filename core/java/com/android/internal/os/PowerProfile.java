@@ -38,11 +38,6 @@ import java.util.HashMap;
  */
 public class PowerProfile {
 
-    /**
-     * No power consumption, or accounted for elsewhere.
-     */
-    public static final String POWER_NONE = "none";
-
     /*
      * POWER_CPU_SUSPEND: Power consumption when CPU is in power collapse mode.
      * POWER_CPU_IDLE: Power consumption when CPU is awake (when a wake lock is held). This should

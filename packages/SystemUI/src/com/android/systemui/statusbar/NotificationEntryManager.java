@@ -304,11 +304,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             return true;
         }
 
-        if (mPowerManager.isInteractive()) {
-            return mNotificationData.shouldSuppressScreenOn(key);
-        } else {
-            return mNotificationData.shouldSuppressScreenOff(key);
-        }
+        return mNotificationData.shouldSuppressFullScreenIntent(key);
     }
 
     private void inflateViews(NotificationData.Entry entry, ViewGroup parent) {
@@ -849,12 +845,13 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             return false;
         }
 
-        if (!mPresenter.isDozing() && mNotificationData.shouldSuppressScreenOn(sbn.getKey())) {
+        if (!mPresenter.isDozing() && mNotificationData.shouldSuppressPeek(sbn.getKey())) {
             if (DEBUG) Log.d(TAG, "No peeking: suppressed by DND: " + sbn.getKey());
             return false;
         }
 
-        if (mPresenter.isDozing() && mNotificationData.shouldSuppressScreenOff(sbn.getKey())) {
+        // Peeking triggers an ambient display pulse, so disable peek is ambient is active
+        if (mPresenter.isDozing() && mNotificationData.shouldSuppressAmbient(sbn.getKey())) {
             if (DEBUG) Log.d(TAG, "No peeking: suppressed by DND: " + sbn.getKey());
             return false;
         }

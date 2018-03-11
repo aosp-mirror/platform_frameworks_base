@@ -114,7 +114,8 @@ public class WindowFrameTests extends WindowTestsBase {
         // Just any non zero value.
         sWm.mSystemDecorLayer = 10000;
 
-        mWindowToken = new WindowTestUtils.TestAppWindowToken(sWm.getDefaultDisplayContentLocked());
+        mWindowToken = WindowTestUtils.createTestAppWindowToken(
+                sWm.getDefaultDisplayContentLocked());
         mStubStack = new TaskStack(sWm, 0, null);
     }
 

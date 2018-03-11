@@ -41,6 +41,7 @@ enum class Status : jint {
 
 // Keep in sync with REGION_* constants from RadioManager.java.
 enum class Region : jint {
+    INVALID = -1,
     ITU_1 = 0,
     ITU_2 = 1,
     OIRT = 2,

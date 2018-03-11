@@ -20,7 +20,6 @@ import android.annotation.ColorInt;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -29,21 +28,19 @@ import android.util.TypedValue;
 import android.view.DisplayCutout;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
+import android.view.WindowInsets;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.android.internal.statusbar.StatusBarIcon;
 import com.android.settingslib.Utils;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
-import com.android.systemui.statusbar.phone.StatusBarIconController.IconManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
@@ -210,18 +207,26 @@ public class KeyguardStatusBarView extends RelativeLayout
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
-    private void updateLayoutConsideringCutout() {
+    @Override
+    public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        if (updateLayoutConsideringCutout()) {
+            requestLayout();
+        }
+        return super.onApplyWindowInsets(insets);
+    }
+
+    private boolean updateLayoutConsideringCutout() {
         DisplayCutout dc = getRootWindowInsets().getDisplayCutout();
         if (dc == null) {
-            updateLayoutParamsNoCutout();
+            return updateLayoutParamsNoCutout();
         } else {
-            updateLayoutParamsForCutout(dc);
+            return updateLayoutParamsForCutout(dc);
         }
     }
 
-    private void updateLayoutParamsNoCutout() {
+    private boolean updateLayoutParamsNoCutout() {
         if (mLayoutState == LAYOUT_NO_CUTOUT) {
-            return;
+            return false;
         }
         mLayoutState = LAYOUT_NO_CUTOUT;
 
@@ -240,11 +245,12 @@ public class KeyguardStatusBarView extends RelativeLayout
                 (LinearLayout.LayoutParams) mSystemIconsContainer.getLayoutParams();
         llp.setMarginStart(getResources().getDimensionPixelSize(
                 R.dimen.system_icons_super_container_margin_start));
+        return true;
     }
 
-    private void updateLayoutParamsForCutout(DisplayCutout dc) {
+    private boolean updateLayoutParamsForCutout(DisplayCutout dc) {
         if (mLayoutState == LAYOUT_CUTOUT) {
-            return;
+            return false;
         }
         mLayoutState = LAYOUT_CUTOUT;
 
@@ -268,6 +274,7 @@ public class KeyguardStatusBarView extends RelativeLayout
         LinearLayout.LayoutParams llp =
                 (LinearLayout.LayoutParams) mSystemIconsContainer.getLayoutParams();
         llp.setMarginStart(0);
+        return true;
     }
 
     //TODO: Something is setting signal_cluster to MATCH_PARENT. Why?

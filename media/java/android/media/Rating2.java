@@ -152,7 +152,8 @@ public final class Rating2 {
      *    or {@link #RATING_PERCENTAGE}.
      * @return null if an invalid rating style is passed, a new Rating2 instance otherwise.
      */
-    public static @Nullable Rating2 newUnratedRating(@NonNull Context context, @Style int ratingStyle) {
+    public static @Nullable Rating2 newUnratedRating(@NonNull Context context,
+            @Style int ratingStyle) {
         return ApiLoader.getProvider(context).newUnratedRating_Rating2(context, ratingStyle);
     }
 
@@ -225,8 +226,7 @@ public final class Rating2 {
      *    {@link #RATING_3_STARS}, {@link #RATING_4_STARS}, {@link #RATING_5_STARS},
      *    or {@link #RATING_PERCENTAGE}.
      */
-    @Style
-    public int getRatingStyle() {
+    public @Style int getRatingStyle() {
         return mProvider.getRatingStyle_impl();
     }
 

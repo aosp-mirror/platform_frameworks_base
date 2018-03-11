@@ -18,10 +18,13 @@ package com.android.server.notification;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
 
 import android.app.ActivityManager;
 import android.app.Notification;
@@ -148,5 +151,53 @@ public class BadgeExtractorTest extends UiServiceTestCase {
         extractor.process(r);
 
         assertFalse(r.canShowBadge());
+    }
+
+    @Test
+    public void testDndOverridesYes() {
+        BadgeExtractor extractor = new BadgeExtractor();
+        extractor.setConfig(mConfig);
+
+        when(mConfig.badgingEnabled(mUser)).thenReturn(true);
+        when(mConfig.canShowBadge(mPkg, mUid)).thenReturn(true);
+        NotificationRecord r = getNotificationRecord(true, IMPORTANCE_UNSPECIFIED);
+        r.setIntercepted(true);
+        r.setSuppressedVisualEffects(SUPPRESSED_EFFECT_BADGE);
+
+        extractor.process(r);
+
+        assertFalse(r.canShowBadge());
+    }
+
+    @Test
+    public void testDndOConsidersInterception() {
+        BadgeExtractor extractor = new BadgeExtractor();
+        extractor.setConfig(mConfig);
+
+        when(mConfig.badgingEnabled(mUser)).thenReturn(true);
+        when(mConfig.canShowBadge(mPkg, mUid)).thenReturn(true);
+        NotificationRecord r = getNotificationRecord(true, IMPORTANCE_UNSPECIFIED);
+        r.setIntercepted(false);
+        r.setSuppressedVisualEffects(SUPPRESSED_EFFECT_BADGE);
+
+        extractor.process(r);
+
+        assertTrue(r.canShowBadge());
+    }
+
+    @Test
+    public void testDndConsidersSuppressedVisualEffects() {
+        BadgeExtractor extractor = new BadgeExtractor();
+        extractor.setConfig(mConfig);
+
+        when(mConfig.badgingEnabled(mUser)).thenReturn(true);
+        when(mConfig.canShowBadge(mPkg, mUid)).thenReturn(true);
+        NotificationRecord r = getNotificationRecord(true, IMPORTANCE_UNSPECIFIED);
+        r.setIntercepted(true);
+        r.setSuppressedVisualEffects(SUPPRESSED_EFFECT_LIGHTS);
+
+        extractor.process(r);
+
+        assertTrue(r.canShowBadge());
     }
 }

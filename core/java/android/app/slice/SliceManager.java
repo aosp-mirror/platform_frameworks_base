@@ -16,9 +16,10 @@
 
 package android.app.slice;
 
-import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -34,9 +35,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
-import android.util.ArrayMap;
 import android.util.Log;
-import android.util.Pair;
 
 import com.android.internal.util.Preconditions;
 
@@ -45,7 +44,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Executor;
 
 /**
  * Class to handle interactions with {@link Slice}s.
@@ -64,6 +62,18 @@ public class SliceManager {
             "android.intent.action.REQUEST_SLICE_PERMISSION";
 
     /**
+     * Category used to resolve intents that can be rendered as slices.
+     * <p>
+     * This category should be included on intent filters on providers that extend
+     * {@link SliceProvider}.
+     * @see SliceProvider
+     * @see SliceProvider#onMapIntentToUri(Intent)
+     * @see #mapIntentToUri(Intent)
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_SLICE = "android.app.slice.category.SLICE";
+
+    /**
      * The meta-data key that allows an activity to easily be linked directly to a slice.
      * <p>
      * An activity can be statically linked to a slice uri by including a meta-data item
@@ -74,8 +84,6 @@ public class SliceManager {
 
     private final ISliceManager mService;
     private final Context mContext;
-    private final ArrayMap<Pair<Uri, SliceCallback>, ISliceListener> mListenerLookup =
-            new ArrayMap<>();
     private final IBinder mToken = new Binder();
 
     /**
@@ -101,71 +109,6 @@ public class SliceManager {
         mContext = context;
         mService = ISliceManager.Stub.asInterface(
                 ServiceManager.getServiceOrThrow(Context.SLICE_SERVICE));
-    }
-
-    /**
-     * @deprecated TO BE REMOVED.
-     */
-    @Deprecated
-    public void registerSliceCallback(@NonNull Uri uri, @NonNull SliceCallback callback,
-            @NonNull List<SliceSpec> specs) {
-    }
-
-    /**
-     * @deprecated TO BE REMOVED.
-     */
-    @Deprecated
-    public void registerSliceCallback(@NonNull Uri uri, @NonNull SliceCallback callback,
-            @NonNull List<SliceSpec> specs, Executor executor) {
-    }
-
-    /**
-     * Adds a callback to a specific slice uri.
-     * <p>
-     * This is a convenience that performs a few slice actions at once. It will put
-     * the slice in a pinned state since there is a callback attached. It will also
-     * listen for content changes, when a content change observes, the android system
-     * will bind the new slice and provide it to all registered {@link SliceCallback}s.
-     *
-     * @param uri The uri of the slice being listened to.
-     * @param callback The listener that should receive the callbacks.
-     * @param specs The list of supported {@link SliceSpec}s of the callback.
-     * @see SliceProvider#onSlicePinned(Uri)
-     */
-    public void registerSliceCallback(@NonNull Uri uri, @NonNull List<SliceSpec> specs,
-            @NonNull SliceCallback callback) {
-    }
-
-    /**
-     * Adds a callback to a specific slice uri.
-     * <p>
-     * This is a convenience that performs a few slice actions at once. It will put
-     * the slice in a pinned state since there is a callback attached. It will also
-     * listen for content changes, when a content change observes, the android system
-     * will bind the new slice and provide it to all registered {@link SliceCallback}s.
-     *
-     * @param uri The uri of the slice being listened to.
-     * @param callback The listener that should receive the callbacks.
-     * @param specs The list of supported {@link SliceSpec}s of the callback.
-     * @see SliceProvider#onSlicePinned(Uri)
-     */
-    public void registerSliceCallback(@NonNull Uri uri, @NonNull List<SliceSpec> specs,
-            @NonNull @CallbackExecutor Executor executor, @NonNull SliceCallback callback) {
-
-    }
-
-    /**
-     * Removes a callback for a specific slice uri.
-     * <p>
-     * Removes the app from the pinned state (if there are no other apps/callbacks pinning it)
-     * in addition to removing the callback.
-     *
-     * @param uri The uri of the slice being listened to
-     * @param callback The listener that should no longer receive callbacks.
-     * @see #registerSliceCallback
-     */
-    public void unregisterSliceCallback(@NonNull Uri uri, @NonNull SliceCallback callback) {
-
     }
 
     /**
@@ -297,6 +240,18 @@ public class SliceManager {
 
     /**
      * Turns a slice intent into a slice uri. Expects an explicit intent.
+     * <p>
+     * This goes through a several stage resolution process to determine if any slice
+     * can represent this intent.
+     *  - If the intent contains data that {@link ContentResolver#getType} is
+     *  {@link SliceProvider#SLICE_TYPE} then the data will be returned.
+     *  - If the intent with {@link #CATEGORY_SLICE} added resolves to a provider, then
+     *  the provider will be asked to {@link SliceProvider#onMapIntentToUri} and that result
+     *  will be returned.
+     *  - Lastly, if the intent explicitly points at an activity, and that activity has
+     *  meta-data for key {@link #SLICE_METADATA_KEY}, then the Uri specified there will be
+     *  returned.
+     *  - If no slice is found, then {@code null} is returned.
      *
      * @param intent The intent associated with a slice.
      * @return The Slice Uri provided by the app or null if none exists.
@@ -316,8 +271,12 @@ public class SliceManager {
             return intentData;
         }
         // Otherwise ask the app
+        Intent queryIntent = new Intent(intent);
+        if (!queryIntent.hasCategory(CATEGORY_SLICE)) {
+            queryIntent.addCategory(CATEGORY_SLICE);
+        }
         List<ResolveInfo> providers =
-                mContext.getPackageManager().queryIntentContentProviders(intent, 0);
+                mContext.getPackageManager().queryIntentContentProviders(queryIntent, 0);
         if (providers == null || providers.isEmpty()) {
             // There are no providers, see if this activity has a direct link.
             ResolveInfo resolve = mContext.getPackageManager().resolveActivity(intent,
@@ -450,19 +409,5 @@ public class SliceManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-    }
-
-    /**
-     * Class that listens to changes in {@link Slice}s.
-     */
-    public interface SliceCallback {
-
-        /**
-         * Called when slice is updated.
-         *
-         * @param s The updated slice.
-         * @see #registerSliceCallback
-         */
-        void onSliceUpdated(Slice s);
     }
 }

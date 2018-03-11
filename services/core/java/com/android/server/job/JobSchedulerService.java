@@ -88,7 +88,6 @@ import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerServiceDumpProto.ActiveJob;
 import com.android.server.job.JobSchedulerServiceDumpProto.PendingJob;
 import com.android.server.job.JobSchedulerServiceDumpProto.RegisteredJob;
-import com.android.server.job.controllers.AppIdleController;
 import com.android.server.job.controllers.BackgroundJobsController;
 import com.android.server.job.controllers.BatteryController;
 import com.android.server.job.controllers.ConnectivityController;
@@ -109,6 +108,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
@@ -238,6 +238,27 @@ public final class JobSchedulerService extends com.android.server.SystemService
     final long[] mNextBucketHeartbeat = { 0, 0, 0, 0, Long.MAX_VALUE };
     long mHeartbeat = 0;
     long mLastHeartbeatTime = sElapsedRealtimeClock.millis();
+
+    /**
+     * Named indices into the STANDBY_BEATS array, for clarity in referring to
+     * specific buckets' bookkeeping.
+     */
+    static final int ACTIVE_INDEX = 0;
+    static final int WORKING_INDEX = 1;
+    static final int FREQUENT_INDEX = 2;
+    static final int RARE_INDEX = 3;
+
+    /**
+     * Bookkeeping about when jobs last run.  We keep our own record in heartbeat time,
+     * rather than rely on Usage Stats' timestamps, because heartbeat time can be
+     * manipulated for testing purposes and we need job runnability to track that rather
+     * than real time.
+     *
+     * Outer SparseArray slices by user handle; inner map of package name to heartbeat
+     * is a HashMap<> rather than ArrayMap<> because we expect O(hundreds) of keys
+     * and it will be accessed in a known-hot code path.
+     */
+    final SparseArray<HashMap<String, Long>> mLastJobHeartbeats = new SparseArray<>();
 
     static final String HEARTBEAT_TAG = "*job.heartbeat*";
     final HeartbeatAlarmListener mHeartbeatAlarm = new HeartbeatAlarmListener();
@@ -533,11 +554,11 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     DEFAULT_MIN_EXP_BACKOFF_TIME);
             STANDBY_HEARTBEAT_TIME = mParser.getDurationMillis(KEY_STANDBY_HEARTBEAT_TIME,
                     DEFAULT_STANDBY_HEARTBEAT_TIME);
-            STANDBY_BEATS[1] = mParser.getInt(KEY_STANDBY_WORKING_BEATS,
+            STANDBY_BEATS[WORKING_INDEX] = mParser.getInt(KEY_STANDBY_WORKING_BEATS,
                     DEFAULT_STANDBY_WORKING_BEATS);
-            STANDBY_BEATS[2] = mParser.getInt(KEY_STANDBY_FREQUENT_BEATS,
+            STANDBY_BEATS[FREQUENT_INDEX] = mParser.getInt(KEY_STANDBY_FREQUENT_BEATS,
                     DEFAULT_STANDBY_FREQUENT_BEATS);
-            STANDBY_BEATS[3] = mParser.getInt(KEY_STANDBY_RARE_BEATS,
+            STANDBY_BEATS[RARE_INDEX] = mParser.getInt(KEY_STANDBY_RARE_BEATS,
                     DEFAULT_STANDBY_RARE_BEATS);
             CONN_CONGESTION_DELAY_FRAC = mParser.getFloat(KEY_CONN_CONGESTION_DELAY_FRAC,
                     DEFAULT_CONN_CONGESTION_DELAY_FRAC);
@@ -1051,7 +1072,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 final JobStatus job = jsc.getRunningJobLocked();
                 if (job != null
                         && (job.getJob().getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) == 0
-                        && !job.dozeWhitelisted) {
+                        && !job.dozeWhitelisted
+                        && !job.uidActive) {
                     // We will report active if we have a job running and it is not an exception
                     // due to being in the foreground or whitelisted.
                     active = true;
@@ -1115,7 +1137,6 @@ public final class JobSchedulerService extends com.android.server.SystemService
         mStorageController = new StorageController(this);
         mControllers.add(mStorageController);
         mControllers.add(new BackgroundJobsController(this));
-        mControllers.add(new AppIdleController(this));
         mControllers.add(new ContentObserverController(this));
         mDeviceIdleJobsController = new DeviceIdleJobsController(this);
         mControllers.add(mDeviceIdleJobsController);
@@ -1421,15 +1442,40 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 periodicToReschedule.getLastFailedRunTime());
     }
 
+    /*
+     * We default to "long enough ago that every bucket's jobs are immediately runnable" to
+     * avoid starvation of apps in uncommon-use buckets that might arise from repeated
+     * reboot behavior.
+     */
     long heartbeatWhenJobsLastRun(String packageName, final @UserIdInt int userId) {
-        final long heartbeat;
-        final long timeSinceLastJob = mUsageStats.getTimeSinceLastJobRun(packageName, userId);
+        // The furthest back in pre-boot time that we need to bother with
+        long heartbeat = -mConstants.STANDBY_BEATS[RARE_INDEX];
+        boolean cacheHit = false;
         synchronized (mLock) {
-            heartbeat = mHeartbeat - (timeSinceLastJob / mConstants.STANDBY_HEARTBEAT_TIME);
+            HashMap<String, Long> jobPackages = mLastJobHeartbeats.get(userId);
+            if (jobPackages != null) {
+                long cachedValue = jobPackages.getOrDefault(packageName, Long.MAX_VALUE);
+                if (cachedValue < Long.MAX_VALUE) {
+                    cacheHit = true;
+                    heartbeat = cachedValue;
+                }
+            }
+            if (!cacheHit) {
+                // We haven't seen it yet; ask usage stats about it
+                final long timeSinceJob = mUsageStats.getTimeSinceLastJobRun(packageName, userId);
+                if (timeSinceJob < Long.MAX_VALUE) {
+                    // Usage stats knows about it from before, so calculate back from that
+                    // and go from there.
+                    heartbeat = mHeartbeat - (timeSinceJob / mConstants.STANDBY_HEARTBEAT_TIME);
+                }
+                // If usage stats returned its "not found" MAX_VALUE, we still have the
+                // negative default 'heartbeat' value we established above
+                setLastJobHeartbeatLocked(packageName, userId, heartbeat);
+            }
         }
         if (DEBUG_STANDBY) {
-            Slog.v(TAG, "Last job heartbeat " + heartbeat + " for " + packageName + "/" + userId
-                    + " delta=" + timeSinceLastJob);
+            Slog.v(TAG, "Last job heartbeat " + heartbeat + " for "
+                    + packageName + "/" + userId);
         }
         return heartbeat;
     }
@@ -1438,12 +1484,21 @@ public final class JobSchedulerService extends com.android.server.SystemService
         return heartbeatWhenJobsLastRun(job.getSourcePackageName(), job.getSourceUserId());
     }
 
+    void setLastJobHeartbeatLocked(String packageName, int userId, long heartbeat) {
+        HashMap<String, Long> jobPackages = mLastJobHeartbeats.get(userId);
+        if (jobPackages == null) {
+            jobPackages = new HashMap<>();
+            mLastJobHeartbeats.put(userId, jobPackages);
+        }
+        jobPackages.put(packageName, heartbeat);
+    }
+
     // JobCompletedListener implementations.
 
     /**
      * A job just finished executing. We fetch the
      * {@link com.android.server.job.controllers.JobStatus} from the store and depending on
-     * whether we want to reschedule we readd it to the controllers.
+     * whether we want to reschedule we re-add it to the controllers.
      * @param jobStatus Completed job.
      * @param needsReschedule Whether the implementing class should reschedule this job.
      */
@@ -1867,6 +1922,9 @@ public final class JobSchedulerService extends com.android.server.SystemService
         // scheduled are sitting there, not ready yet) and very cheap to check (just
         // a few conditions on data in JobStatus).
         if (!jobReady) {
+            if (job.getSourcePackageName().equals("android.jobscheduler.cts.jobtestapp")) {
+                Slog.v(TAG, "    NOT READY: " + job);
+            }
             return false;
         }
 
@@ -1905,9 +1963,21 @@ public final class JobSchedulerService extends com.android.server.SystemService
         // an appropriate amount of time since the last invocation.  During device-
         // wide parole, standby bucketing is ignored.
         //
-        // But if a job has FLAG_EXEMPT_FROM_APP_STANDBY, don't check it.
-        if (!mInParole && !job.getJob().isExemptedFromAppStandby()) {
+        // Jobs in 'active' apps are not subject to standby, nor are jobs that are
+        // specifically marked as exempt.
+        if (DEBUG_STANDBY) {
+            Slog.v(TAG, "isReadyToBeExecutedLocked: " + job.toShortString()
+                    + " parole=" + mInParole + " active=" + job.uidActive
+                    + " exempt=" + job.getJob().isExemptedFromAppStandby());
+        }
+        if (!mInParole
+                && !job.uidActive
+                && !job.getJob().isExemptedFromAppStandby()) {
             final int bucket = job.getStandbyBucket();
+            if (DEBUG_STANDBY) {
+                Slog.v(TAG, "  bucket=" + bucket + " heartbeat=" + mHeartbeat
+                        + " next=" + mNextBucketHeartbeat[bucket]);
+            }
             if (mHeartbeat < mNextBucketHeartbeat[bucket]) {
                 // Only skip this job if the app is still waiting for the end of its nominal
                 // bucket interval.  Once it's waited that long, we let it go ahead and clear.
@@ -2192,6 +2262,12 @@ public final class JobSchedulerService extends com.android.server.SystemService
                         + packageName + "/" + userId);
             }
             return baseHeartbeat;
+        }
+
+        public void noteJobStart(String packageName, int userId) {
+            synchronized (mLock) {
+                setLastJobHeartbeatLocked(packageName, userId, mHeartbeat);
+            }
         }
 
         /**

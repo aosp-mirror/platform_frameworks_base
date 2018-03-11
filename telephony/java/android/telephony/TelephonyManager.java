@@ -34,6 +34,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkStats;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.BatteryStats;
 import android.os.Bundle;
 import android.os.Handler;
@@ -74,6 +75,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -2754,18 +2756,17 @@ public class TelephonyManager {
      * @return ImsiEncryptionInfo Carrier specific information that will be used to encrypt the
      *         IMSI and IMPI. This includes the public key and the key identifier. This information
      *         will be stored in the device keystore. The system will return a null when no key was
-     *         found, and the carrier does not require a key. The system will throw the following
-     *         exceptions:
-     *         1. IllegalArgumentException when an invalid key is sent.
-     *         2. RuntimeException if the key is required but not found; and also if there was an
-     *         internal exception.
+     *         found, and the carrier does not require a key. The system will throw
+     *         IllegalArgumentException when an invalid key is sent or when key is required but
+     *         not found.
      * @hide
      */
     public ImsiEncryptionInfo getCarrierInfoForImsiEncryption(int keyType) {
         try {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null) {
-                throw new RuntimeException("IMSI error: Subscriber Info is null");
+                Rlog.e(TAG,"IMSI error: Subscriber Info is null");
+                return null;
             }
             int subId = getSubId(SubscriptionManager.getDefaultDataSubscriptionId());
             if (keyType != KEY_TYPE_EPDG && keyType != KEY_TYPE_WLAN) {
@@ -2773,20 +2774,18 @@ public class TelephonyManager {
             }
             ImsiEncryptionInfo imsiEncryptionInfo = info.getCarrierInfoForImsiEncryption(
                     subId, keyType, mContext.getOpPackageName());
-            if (imsiEncryptionInfo  == null
-                    && isImsiEncryptionRequired(subId, keyType)) {
+            if (imsiEncryptionInfo == null && isImsiEncryptionRequired(subId, keyType)) {
                 Rlog.e(TAG, "IMSI error: key is required but not found");
-                throw new RuntimeException("IMSI error: key is required but not found");
+                throw new IllegalArgumentException("IMSI error: key is required but not found");
             }
             return imsiEncryptionInfo;
         } catch (RemoteException ex) {
             Rlog.e(TAG, "getCarrierInfoForImsiEncryption RemoteException" + ex);
-            throw new RuntimeException("IMSI error: Remote Exception");
         } catch (NullPointerException ex) {
             // This could happen before phone restarts due to crashing
             Rlog.e(TAG, "getCarrierInfoForImsiEncryption NullPointerException" + ex);
-            throw new RuntimeException("IMSI error: Null Pointer exception");
         }
+        return null;
     }
 
     /**
@@ -2802,17 +2801,16 @@ public class TelephonyManager {
         try {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null) {
-                throw new RuntimeException("IMSI error: Subscriber Info is null");
+                Rlog.e(TAG, "IMSI error: Subscriber Info is null");
+                return;
             }
             int subId = getSubId(SubscriptionManager.getDefaultDataSubscriptionId());
             info.resetCarrierKeysForImsiEncryption(subId, mContext.getOpPackageName());
         } catch (RemoteException ex) {
             Rlog.e(TAG, "getCarrierInfoForImsiEncryption RemoteException" + ex);
-            throw new RuntimeException("IMSI error: Remote Exception");
         } catch (NullPointerException ex) {
             // This could happen before phone restarts due to crashing
             Rlog.e(TAG, "getCarrierInfoForImsiEncryption NullPointerException" + ex);
-            throw new RuntimeException("IMSI error: Null Pointer exception");
         }
     }
 
@@ -3788,8 +3786,6 @@ public class TelephonyManager {
      *
      * @throws SecurityException if the caller does not have carrier privileges or is not the
      *         current default dialer
-     *
-     * @throws IllegalStateException if telephony service is unavailable.
      */
     public void sendDialerSpecialCode(String inputCode) {
         try {
@@ -3797,10 +3793,8 @@ public class TelephonyManager {
             telephony.sendDialerSpecialCode(mContext.getOpPackageName(), inputCode);
         } catch (RemoteException ex) {
             // This could happen if binder process crashes.
-            ex.rethrowFromSystemServer();
         } catch (NullPointerException ex) {
             // This could happen before phone restarts due to crashing
-            throw new IllegalStateException("Telephony service unavailable");
         }
     }
 
@@ -4925,10 +4919,10 @@ public class TelephonyManager {
         String v = android.provider.Settings.Global.getString(cr, name);
 
         if (index == Integer.MAX_VALUE) {
-            throw new RuntimeException("putIntAtIndex index == MAX_VALUE index=" + index);
+            throw new IllegalArgumentException("putIntAtIndex index == MAX_VALUE index=" + index);
         }
         if (index < 0) {
-            throw new RuntimeException("putIntAtIndex index < 0 index=" + index);
+            throw new IllegalArgumentException("putIntAtIndex index < 0 index=" + index);
         }
         if (v != null) {
             valArray = v.split(",");
@@ -5394,21 +5388,36 @@ public class TelephonyManager {
      * <p>
      * Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     * Or the calling app has carrier privileges.
+     * @see #hasCarrierPrivileges()
      *
      * @param request Contains all the RAT with bands/channels that need to be scanned.
+     * @param executor The executor through which the callback should be invoked.
      * @param callback Returns network scan results or errors.
      * @return A NetworkScan obj which contains a callback which can be used to stop the scan.
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public NetworkScan requestNetworkScan(
-            NetworkScanRequest request, TelephonyScanManager.NetworkScanCallback callback) {
+            NetworkScanRequest request, Executor executor,
+            TelephonyScanManager.NetworkScanCallback callback) {
         synchronized (this) {
             if (mTelephonyScanManager == null) {
                 mTelephonyScanManager = new TelephonyScanManager();
             }
         }
-        return mTelephonyScanManager.requestNetworkScan(getSubId(), request, callback);
+        return mTelephonyScanManager.requestNetworkScan(getSubId(), request, executor, callback);
+    }
+
+    /**
+     * @deprecated
+     * Use {@link
+     * #requestNetworkScan(NetworkScanRequest, Executor, TelephonyScanManager.NetworkScanCallback)}
+     */
+    @Deprecated
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public NetworkScan requestNetworkScan(
+        NetworkScanRequest request, TelephonyScanManager.NetworkScanCallback callback) {
+        return requestNetworkScan(request, AsyncTask.THREAD_POOL_EXECUTOR, callback);
     }
 
     /**
@@ -7210,7 +7219,6 @@ public class TelephonyManager {
             }
         } catch (RemoteException ex) {
             // This could happen if binder process crashes.
-            ex.rethrowAsRuntimeException();
         }
         return UNKNOWN_CARRIER_ID;
     }
@@ -7235,7 +7243,6 @@ public class TelephonyManager {
             }
         } catch (RemoteException ex) {
             // This could happen if binder process crashes.
-            ex.rethrowAsRuntimeException();
         }
         return null;
     }
@@ -7759,7 +7766,6 @@ public class TelephonyManager {
             }
         } catch (RemoteException ex) {
             // This could happen if binder process crashes.
-            ex.rethrowAsRuntimeException();
         }
     }
 }

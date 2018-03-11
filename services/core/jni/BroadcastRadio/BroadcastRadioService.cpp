@@ -72,6 +72,7 @@ static struct {
 struct Module {
     sp<V1_0::IBroadcastRadio> radioModule;
     HalRevision halRev;
+    std::vector<hardware::broadcastradio::V1_0::BandConfig> bands;
 };
 
 struct ServiceContext {
@@ -169,7 +170,8 @@ static jobject nativeLoadModules(JNIEnv *env, jobject obj, jlong nativeContext) 
             if (module10 == nullptr) continue;
 
             auto idx = ctx.mModules.size();
-            ctx.mModules.push_back({module10, halRev});
+            ctx.mModules.push_back({module10, halRev, {}});
+            auto& nModule = ctx.mModules[idx];
             ALOGI("loaded broadcast radio module %zu: %s:%s (HAL 1.%d)",
                     idx, serviceName.c_str(), V1_0::toString(clazz).c_str(), halMinor);
 
@@ -178,6 +180,7 @@ static jobject nativeLoadModules(JNIEnv *env, jobject obj, jlong nativeContext) 
             Return<void> hidlResult;
             if (module11 != nullptr) {
                 hidlResult = module11->getProperties_1_1([&](const V1_1::Properties& properties) {
+                    nModule.bands = properties.base.bands;
                     jModule = convert::ModulePropertiesFromHal(env, properties, idx, serviceName);
                 });
             } else {
@@ -185,6 +188,7 @@ static jobject nativeLoadModules(JNIEnv *env, jobject obj, jlong nativeContext) 
                         const V1_0::Properties& properties) {
                     halResult = result;
                     if (result != Result::OK) return;
+                    nModule.bands = properties.bands;
                     jModule = convert::ModulePropertiesFromHal(env, properties, idx, serviceName);
                 });
             }
@@ -217,7 +221,21 @@ static jobject nativeOpenTuner(JNIEnv *env, jobject obj, long nativeContext, jin
     auto module = ctx.mModules[moduleId];
 
     Region region;
-    BandConfig bandConfigHal = convert::BandConfigToHal(env, bandConfig, region);
+    BandConfig bandConfigHal;
+    if (bandConfig != nullptr) {
+        bandConfigHal = convert::BandConfigToHal(env, bandConfig, region);
+    } else {
+        region = Region::INVALID;
+        if (module.bands.size() == 0) {
+            ALOGE("No bands defined");
+            return nullptr;
+        }
+        bandConfigHal = module.bands[0];
+        if (bandConfigHal.spacings.size() > 1) {
+            bandConfigHal.spacings = hidl_vec<uint32_t>({ *std::min_element(
+                    bandConfigHal.spacings.begin(), bandConfigHal.spacings.end()) });
+        }
+    }
 
     auto tuner = make_javaref(env, env->NewObject(gjni.Tuner.clazz, gjni.Tuner.cstor,
             callback, module.halRev, region, withAudio, bandConfigHal.type));

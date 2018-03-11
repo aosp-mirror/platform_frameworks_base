@@ -1,6 +1,7 @@
 package android {
 
   public static final class Manifest.permission {
+    field public static final java.lang.String ACCESS_AMBIENT_LIGHT_STATS = "android.permission.ACCESS_AMBIENT_LIGHT_STATS";
     field public static final java.lang.String ACCESS_BROADCAST_RADIO = "android.permission.ACCESS_BROADCAST_RADIO";
     field public static final java.lang.String ACCESS_CACHE_FILESYSTEM = "android.permission.ACCESS_CACHE_FILESYSTEM";
     field public static final java.lang.String ACCESS_CHECKIN_PROPERTIES = "android.permission.ACCESS_CHECKIN_PROPERTIES";
@@ -839,6 +840,7 @@ package android.content {
   }
 
   public class Intent implements java.lang.Cloneable android.os.Parcelable {
+    field public static final java.lang.String ACTION_BATTERY_LEVEL_CHANGED = "android.intent.action.BATTERY_LEVEL_CHANGED";
     field public static final java.lang.String ACTION_CALL_EMERGENCY = "android.intent.action.CALL_EMERGENCY";
     field public static final java.lang.String ACTION_CALL_PRIVILEGED = "android.intent.action.CALL_PRIVILEGED";
     field public static final java.lang.String ACTION_FACTORY_RESET = "android.intent.action.FACTORY_RESET";
@@ -1220,6 +1222,7 @@ package android.hardware.display {
   }
 
   public final class DisplayManager {
+    method public java.util.List<android.hardware.display.AmbientBrightnessDayStats> getAmbientBrightnessStats();
     method public java.util.List<android.hardware.display.BrightnessChangeEvent> getBrightnessEvents();
     method public android.graphics.Point getStableDisplaySize();
     method public void setBrightnessConfiguration(android.hardware.display.BrightnessConfiguration);
@@ -3610,6 +3613,11 @@ package android.nfc {
 
 package android.os {
 
+  public class BatteryManager {
+    field public static final java.lang.String EXTRA_EVENTS = "android.os.extra.EVENTS";
+    field public static final java.lang.String EXTRA_EVENT_TIMESTAMP = "android.os.extra.EVENT_TIMESTAMP";
+  }
+
   public final class ConfigUpdate {
     field public static final java.lang.String ACTION_UPDATE_CARRIER_PROVISIONING_URLS = "android.intent.action.UPDATE_CARRIER_PROVISIONING_URLS";
     field public static final java.lang.String ACTION_UPDATE_CT_LOGS = "android.intent.action.UPDATE_CT_LOGS";
@@ -4993,7 +5001,6 @@ package android.telecom {
 package android.telephony {
 
   public static final class AccessNetworkConstants.TransportType {
-    ctor public AccessNetworkConstants.TransportType();
     field public static final int WLAN = 2; // 0x2
     field public static final int WWAN = 1; // 0x1
   }
@@ -6662,6 +6669,7 @@ package android.webkit {
     method public abstract android.os.Handler getHandler(android.os.Handler);
     method public abstract void onActivityResult(int, int, android.content.Intent);
     method public abstract void onAttachedToWindow();
+    method public default boolean onCheckIsTextEditor();
     method public abstract void onConfigurationChanged(android.content.res.Configuration);
     method public abstract android.view.inputmethod.InputConnection onCreateInputConnection(android.view.inputmethod.EditorInfo);
     method public abstract void onDetachedFromWindow();

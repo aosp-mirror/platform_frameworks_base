@@ -441,6 +441,15 @@ public final class ProgramSelector implements Parcelable {
      */
     public static @NonNull ProgramSelector createAmFmSelector(
             @RadioManager.Band int band, int frequencyKhz, int subChannel) {
+        if (band == RadioManager.BAND_INVALID) {
+            // 50MHz is a rough boundary between AM (<30MHz) and FM (>60MHz).
+            if (frequencyKhz < 50000) {
+                band = (subChannel <= 0) ? RadioManager.BAND_AM : RadioManager.BAND_AM_HD;
+            } else {
+                band = (subChannel <= 0) ? RadioManager.BAND_FM : RadioManager.BAND_FM_HD;
+            }
+        }
+
         boolean isAm = (band == RadioManager.BAND_AM || band == RadioManager.BAND_AM_HD);
         boolean isDigital = (band == RadioManager.BAND_AM_HD || band == RadioManager.BAND_FM_HD);
         if (!isAm && !isDigital && band != RadioManager.BAND_FM) {

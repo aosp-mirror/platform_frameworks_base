@@ -68,7 +68,6 @@ import android.provider.Settings.SettingNotFoundException;
 import android.service.dreams.DreamManagerInternal;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
-import android.util.EventLog;
 import android.util.KeyValueListParser;
 import android.util.MathUtils;
 import android.util.PrintWriterPrinter;
@@ -1487,7 +1486,7 @@ public final class PowerManagerService extends SystemService
                         break;
                 }
             }
-            EventLog.writeEvent(EventLogTags.POWER_SLEEP_REQUESTED, numWakeLocksCleared);
+            EventLogTags.writePowerSleepRequested(numWakeLocksCleared);
 
             // Skip dozing if requested.
             if ((flags & PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE) != 0) {
@@ -1572,7 +1571,7 @@ public final class PowerManagerService extends SystemService
         final long now = SystemClock.uptimeMillis();
         final long savedWakeTimeMs = mOverriddenTimeout - now;
         if (savedWakeTimeMs >= 0) {
-            EventLog.writeEvent(EventLogTags.POWER_SOFT_SLEEP_REQUESTED, savedWakeTimeMs);
+            EventLogTags.writePowerSoftSleepRequested(savedWakeTimeMs);
             mOverriddenTimeout = -1;
         }
     }
@@ -3157,6 +3156,7 @@ public final class PowerManagerService extends SystemService
         synchronized (mLock) {
             if (mUserActivityTimeoutOverrideFromWindowManager != timeoutMillis) {
                 mUserActivityTimeoutOverrideFromWindowManager = timeoutMillis;
+                EventLogTags.writeUserActivityTimeoutOverride(timeoutMillis);
                 mDirty |= DIRTY_SETTINGS;
                 updatePowerStateLocked();
             }

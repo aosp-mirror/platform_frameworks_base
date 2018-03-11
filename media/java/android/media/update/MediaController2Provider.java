@@ -70,7 +70,7 @@ public interface MediaController2Provider extends TransportControlProvider {
     long getPosition_impl();
     float getPlaybackSpeed_impl();
     long getBufferedPosition_impl();
-    MediaItem2 getCurrentPlaylistItem_impl();
+    MediaItem2 getCurrentMediaItem_impl();
 
     interface PlaybackInfoProvider {
         int getPlaybackType_impl();

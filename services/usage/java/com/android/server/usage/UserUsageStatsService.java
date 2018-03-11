@@ -47,7 +47,7 @@ import java.util.List;
 class UserUsageStatsService {
     private static final String TAG = "UsageStatsService";
     private static final boolean DEBUG = UsageStatsService.DEBUG;
-    private static final SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd/HH:mm:ss");
+    private static final SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final int sDateFormatFlags =
             DateUtils.FORMAT_SHOW_DATE
             | DateUtils.FORMAT_SHOW_TIME
@@ -516,25 +516,28 @@ class UserUsageStatsService {
         mDatabase.checkinDailyFiles(new UsageStatsDatabase.CheckinAction() {
             @Override
             public boolean checkin(IntervalStats stats) {
-                printIntervalStats(pw, stats, true, null);
+                printIntervalStats(pw, stats, false, false, null);
                 return true;
             }
         });
     }
 
     void dump(IndentingPrintWriter pw, String pkg) {
-        printLast24HrEvents(pw, true, pkg);
+        dump(pw, pkg, false);
+    }
+    void dump(IndentingPrintWriter pw, String pkg, boolean compact) {
+        printLast24HrEvents(pw, !compact, pkg);
         for (int interval = 0; interval < mCurrentStats.length; interval++) {
             pw.print("In-memory ");
             pw.print(intervalToString(interval));
             pw.println(" stats");
-            printIntervalStats(pw, mCurrentStats[interval], false, pkg);
+            printIntervalStats(pw, mCurrentStats[interval], !compact, true, pkg);
         }
     }
 
     private String formatDateTime(long dateTime, boolean pretty) {
         if (pretty) {
-            return "\"" + DateFormat.format("yyyy-MM-dd HH:mm:ss", dateTime).toString() + "\"";
+            return "\"" + sDateFormat.format(dateTime)+ "\"";
         }
         return Long.toString(dateTime);
     }
@@ -623,8 +626,7 @@ class UserUsageStatsService {
     }
 
     void printIntervalStats(IndentingPrintWriter pw, IntervalStats stats,
-            boolean checkin, String pkg) {
-        boolean prettyDates = !checkin;
+            boolean prettyDates, boolean skipEvents, String pkg) {
         if (prettyDates) {
             pw.printPair("timeRange", "\"" + DateUtils.formatDateRange(mContext,
                     stats.beginTime, stats.endTime, sDateFormatFlags) + "\"");
@@ -699,7 +701,7 @@ class UserUsageStatsService {
 
         // The last 24 hours of events is already printed in the non checkin dump
         // No need to repeat here.
-        if (checkin) {
+        if (!skipEvents) {
             pw.println("events");
             pw.increaseIndent();
             final TimeSparseArray<UsageEvents.Event> events = stats.events;

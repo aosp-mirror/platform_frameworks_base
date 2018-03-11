@@ -110,7 +110,7 @@ protected:
 
     // Number of past buckets. One less than the total number of buckets needed
     // for the anomaly detection (since the current bucket is not in the past).
-    int mNumOfPastBuckets;
+    const int mNumOfPastBuckets;
 
     // The existing bucket list.
     std::vector<shared_ptr<DimToValMap>> mPastBuckets;

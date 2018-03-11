@@ -87,10 +87,12 @@ public class WindowTestUtils {
     /** Creates a {@link Task} and adds it to the specified {@link TaskStack}. */
     public static Task createTaskInStack(WindowManagerService service, TaskStack stack,
             int userId) {
-        final Task newTask = new Task(sNextTaskId++, stack, userId, service, 0, false,
-                new ActivityManager.TaskDescription(), null);
-        stack.addTask(newTask, POSITION_TOP);
-        return newTask;
+        synchronized (service.mWindowMap) {
+            final Task newTask = new Task(sNextTaskId++, stack, userId, service, 0, false,
+                    new ActivityManager.TaskDescription(), null);
+            stack.addTask(newTask, POSITION_TOP);
+            return newTask;
+        }
     }
 
     /**
@@ -108,11 +110,17 @@ public class WindowTestUtils {
         }
     }
 
+    static TestAppWindowToken createTestAppWindowToken(DisplayContent dc) {
+        synchronized (dc.mService.mWindowMap) {
+            return new TestAppWindowToken(dc);
+        }
+    }
+
     /** Used so we can gain access to some protected members of the {@link AppWindowToken} class. */
     public static class TestAppWindowToken extends AppWindowToken {
         boolean mOnTop = false;
 
-        TestAppWindowToken(DisplayContent dc) {
+        private TestAppWindowToken(DisplayContent dc) {
             super(dc.mService, new IApplicationToken.Stub() {
                 public String getName() {return null;}
                 }, false, dc, true /* fillsParent */);
@@ -158,14 +166,21 @@ public class WindowTestUtils {
         }
     }
 
+    static TestWindowToken createTestWindowToken(int type, DisplayContent dc) {
+        return createTestWindowToken(type, dc, false /* persistOnEmpty */);
+    }
+
+    static TestWindowToken createTestWindowToken(int type, DisplayContent dc,
+            boolean persistOnEmpty) {
+        synchronized (dc.mService.mWindowMap) {
+            return new TestWindowToken(type, dc, persistOnEmpty);
+        }
+    }
+
     /* Used so we can gain access to some protected members of the {@link WindowToken} class */
     public static class TestWindowToken extends WindowToken {
 
-        TestWindowToken(int type, DisplayContent dc) {
-            this(type, dc, false /* persistOnEmpty */);
-        }
-
-        TestWindowToken(int type, DisplayContent dc, boolean persistOnEmpty) {
+        private TestWindowToken(int type, DisplayContent dc, boolean persistOnEmpty) {
             super(dc.mService, mock(IBinder.class), type, persistOnEmpty, dc,
                     false /* ownerCanManageAppTokens */);
         }

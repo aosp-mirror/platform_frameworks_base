@@ -33,7 +33,9 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_gravity="center"
-        android:scaleType="center"/>
+        android:scaleType="center"
+        android:alpha="?android:attr/primaryContentAlpha"
+    />
 
     <TextView
         android:id="@*android:id/message"

@@ -1421,6 +1421,7 @@
   <java-symbol type="layout" name="action_menu_layout" />
   <java-symbol type="layout" name="action_mode_close_item" />
   <java-symbol type="layout" name="alert_dialog" />
+  <java-symbol type="layout" name="cascading_menu_item_layout" />
   <java-symbol type="layout" name="choose_account" />
   <java-symbol type="layout" name="choose_account_row" />
   <java-symbol type="layout" name="choose_account_type" />

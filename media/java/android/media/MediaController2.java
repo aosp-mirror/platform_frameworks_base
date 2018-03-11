@@ -223,6 +223,7 @@ public class MediaController2 implements AutoCloseable {
          * @see #onPositionChanged(MediaController2, long, long)
          * @see #onBufferedPositionChanged(MediaController2, long)
          */
+        // TODO(jaewan): Use this (b/74316764)
         public void onCurrentMediaItemChanged(@NonNull MediaController2 controller,
                 @NonNull MediaItem2 item) { }
 
@@ -230,43 +231,43 @@ public class MediaController2 implements AutoCloseable {
          * Called when a playlist is changed.
          *
          * @param controller the controller for this event
-         * @param mplc playlist controller for this event
+         * @param playlistAgent playlist agent for this event
          * @param list new playlist
          * @param metadata new metadata
          */
         public void onPlaylistChanged(@NonNull MediaController2 controller,
-                @NonNull MediaPlaylistAgent mplc, @NonNull List<MediaItem2> list,
+                @NonNull MediaPlaylistAgent playlistAgent, @NonNull List<MediaItem2> list,
                 @Nullable MediaMetadata2 metadata) { }
 
         /**
          * Called when a playlist metadata is changed.
          *
          * @param controller the controller for this event
-         * @param mplc playlist controller for this event
+         * @param playlistAgent playlist agent for this event
          * @param metadata new metadata
          */
         public void onPlaylistMetadataChanged(@NonNull MediaController2 controller,
-                @NonNull MediaPlaylistAgent mplc, @Nullable MediaMetadata2 metadata) { }
+                @NonNull MediaPlaylistAgent playlistAgent, @Nullable MediaMetadata2 metadata) { }
 
         /**
          * Called when the shuffle mode is changed.
          *
          * @param controller the controller for this event
-         * @param mplc playlist controller for this event
+         * @param playlistAgent playlist agent for this event
          * @param shuffleMode repeat mode
          * @see MediaPlaylistAgent#SHUFFLE_MODE_NONE
          * @see MediaPlaylistAgent#SHUFFLE_MODE_ALL
          * @see MediaPlaylistAgent#SHUFFLE_MODE_GROUP
          */
         public void onShuffleModeChanged(@NonNull MediaController2 controller,
-                @NonNull MediaPlaylistAgent mplc,
+                @NonNull MediaPlaylistAgent playlistAgent,
                 @MediaPlaylistAgent.ShuffleMode int shuffleMode) { }
 
         /**
          * Called when the repeat mode is changed.
          *
          * @param controller the controller for this event
-         * @param mplc playlist controller for this event
+         * @param playlistAgent playlist agent for this event
          * @param repeatMode repeat mode
          * @see MediaPlaylistAgent#REPEAT_MODE_NONE
          * @see MediaPlaylistAgent#REPEAT_MODE_ONE
@@ -274,7 +275,7 @@ public class MediaController2 implements AutoCloseable {
          * @see MediaPlaylistAgent#REPEAT_MODE_GROUP
          */
         public void onRepeatModeChanged(@NonNull MediaController2 controller,
-                @NonNull MediaPlaylistAgent mplc,
+                @NonNull MediaPlaylistAgent playlistAgent,
                 @MediaPlaylistAgent.RepeatMode int repeatMode) { }
 
         /**
@@ -821,7 +822,9 @@ public class MediaController2 implements AutoCloseable {
     }
 
     /**
-     * Replace the media item at index in the playlist.
+     * Replace the media item at index in the playlist. This can be also used to update metadata of
+     * an item.
+     *
      * @param index the index of the item to replace
      * @param item the new item
      */
@@ -836,8 +839,7 @@ public class MediaController2 implements AutoCloseable {
      * @return index of the current item
      */
     public MediaItem2 getCurrentMediaItem() {
-        // TODO(jaewan): Rename provider API
-        return mProvider.getCurrentPlaylistItem_impl();
+        return mProvider.getCurrentMediaItem_impl();
     }
 
     /**
@@ -852,13 +854,11 @@ public class MediaController2 implements AutoCloseable {
     }
 
     public void skipToPreviousItem() {
-        // TODO(jaewan): fix this
-        mProvider.skipToPrevious_impl();
+        mProvider.skipToPreviousItem_impl();
     }
 
     public void skipToNextItem() {
-        // TODO(jaewan): fix this
-        mProvider.skipToNext_impl();
+        mProvider.skipToNextItem_impl();
     }
 
     public @RepeatMode int getRepeatMode() {

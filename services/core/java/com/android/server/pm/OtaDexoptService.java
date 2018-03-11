@@ -266,8 +266,8 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                     throws InstallerException {
                 final StringBuilder builder = new StringBuilder();
 
-                // The version. Right now it's 7.
-                builder.append("7 ");
+                // The current version.
+                builder.append("8 ");
 
                 builder.append("dexopt");
 

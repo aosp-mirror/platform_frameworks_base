@@ -80,6 +80,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
@@ -102,8 +103,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     private boolean mScreenOnWhilePlaying;
     private boolean mStayAwake;
     private int mStreamType = AudioManager.USE_DEFAULT_STREAM_TYPE;
-    private int mUsage = -1;
-    private boolean mBypassInterruptionPolicy;
     private final CloseGuard mGuard = CloseGuard.get();
 
     private final Object mSrcLock = new Object();
@@ -116,6 +115,9 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     private int mNextSourceState = NEXT_SOURCE_STATE_INIT;
     private boolean mNextSourcePlayPending = false;
     //--- guarded by |mSrcLock| end
+
+    private AtomicInteger mBufferedPercentageCurrent;
+    private AtomicInteger mBufferedPercentageNext;
 
     // Modular DRM
     private final Object mDrmLock = new Object();
@@ -306,31 +308,38 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      */
     @Override
     public long getBufferedPosition() {
-        // TODO: either get buffered position from native code, or cache BUFFERING_UPDATE
-        // number and convert it to buffered position.
-        return 0;
+        // Use cached buffered percent for now.
+        return getDuration() * mBufferedPercentageCurrent.get() / 100;
     }
 
-    /**
-     * Gets the current player state.
-     *
-     * @return the current player state, one of the following:
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized or has been released.
-     */
     @Override
     public @PlayerState int getPlayerState() {
-        // TODO: use cached state or call native function.
-        return PLAYER_STATE_IDLE;
+        int mediaplayer2State = getMediaPlayer2State();
+        int playerState;
+        switch (mediaplayer2State) {
+            case MEDIAPLAYER2_STATE_IDLE:
+                playerState = PLAYER_STATE_IDLE;
+                break;
+            case MEDIAPLAYER2_STATE_PREPARED:
+            case MEDIAPLAYER2_STATE_PAUSED:
+                playerState = PLAYER_STATE_PAUSED;
+                break;
+            case MEDIAPLAYER2_STATE_PLAYING:
+                playerState = PLAYER_STATE_PLAYING;
+                break;
+            case MEDIAPLAYER2_STATE_ERROR:
+            default:
+                playerState = PLAYER_STATE_ERROR;
+                break;
+        }
+
+        return playerState;
     }
 
     /**
      * Gets the current buffering state of the player.
      * During buffering, see {@link #getBufferedPosition()} for the quantifying the amount already
      * buffered.
-     * @return the buffering state, one of the following:
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized or has been released.
      */
     @Override
     public @BuffState int getBufferingState() {
@@ -352,9 +361,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             final String msg = "Cannot set AudioAttributes to null";
             throw new IllegalArgumentException(msg);
         }
-        mUsage = attributes.getUsage();
-        mBypassInterruptionPolicy = (attributes.getAllFlags()
-                & AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY) != 0;
         Parcel pattributes = Parcel.obtain();
         attributes.writeToParcel(pattributes, AudioAttributes.FLATTEN_TAGS);
         setParameter(KEY_PARAMETER_AUDIO_ATTRIBUTES, pattributes);
@@ -973,8 +979,10 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             // Switch to next source only when it's in prepared state.
             mCurrentDSD = mNextDSDs.get(0);
             mCurrentSrcId = mNextSrcId;
+            mBufferedPercentageCurrent.set(mBufferedPercentageNext.get());
             mNextDSDs.remove(0);
             mNextSrcId = mSrcIdGenerator++;  // make it different from mCurrentSrcId
+            mBufferedPercentageNext.set(0);
             mNextSourceState = NEXT_SOURCE_STATE_INIT;
             mNextSourcePlayPending = false;
 
@@ -2773,9 +2781,21 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             {
                 final int percent = msg.arg1;
                 synchronized (mEventCbLock) {
-                    for (Pair<Executor, MediaPlayer2EventCallback> cb : mEventCallbackRecords) {
-                        cb.first.execute(() -> cb.second.onInfo(
-                                mMediaPlayer, mCurrentDSD, MEDIA_INFO_BUFFERING_UPDATE, percent));
+                    if (srcId == mCurrentSrcId) {
+                        mBufferedPercentageCurrent.set(percent);
+                        for (Pair<Executor, MediaPlayer2EventCallback> cb : mEventCallbackRecords) {
+                            cb.first.execute(() -> cb.second.onInfo(
+                                    mMediaPlayer, mCurrentDSD, MEDIA_INFO_BUFFERING_UPDATE,
+                                    percent));
+                        }
+                    } else if (srcId == mNextSrcId && !mNextDSDs.isEmpty()) {
+                        mBufferedPercentageNext.set(percent);
+                        DataSourceDesc nextDSD = mNextDSDs.get(0);
+                        for (Pair<Executor, MediaPlayer2EventCallback> cb : mEventCallbackRecords) {
+                            cb.first.execute(() -> cb.second.onInfo(
+                                    mMediaPlayer, nextDSD, MEDIA_INFO_BUFFERING_UPDATE,
+                                    percent));
+                        }
                     }
                 }
                 return;

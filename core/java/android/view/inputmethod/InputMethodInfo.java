@@ -261,8 +261,7 @@ public final class InputMethodInfo implements Parcelable {
         mIsDefaultResId = isDefaultResId;
         mIsAuxIme = isAuxIme;
         mSupportsSwitchingToNextInputMethod = supportsSwitchingToNextInputMethod;
-        // TODO(b/68948291): remove this meta-data before release.
-        mIsVrOnly = isVrOnly || service.serviceInfo.metaData.getBoolean("isVrOnly", false);
+        mIsVrOnly = isVrOnly;
     }
 
     InputMethodInfo(Parcel source) {

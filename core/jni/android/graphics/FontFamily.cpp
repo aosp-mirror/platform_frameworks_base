@@ -51,6 +51,18 @@ struct NativeFamilyBuilder {
     std::vector<minikin::FontVariation> axes;
 };
 
+static inline NativeFamilyBuilder* toNativeBuilder(jlong ptr) {
+    return reinterpret_cast<NativeFamilyBuilder*>(ptr);
+}
+
+static inline FontFamilyWrapper* toFamily(jlong ptr) {
+    return reinterpret_cast<FontFamilyWrapper*>(ptr);
+}
+
+template<typename Ptr> static inline jlong toJLong(Ptr ptr) {
+    return reinterpret_cast<jlong>(ptr);
+}
+
 static jlong FontFamily_initBuilder(JNIEnv* env, jobject clazz, jstring langs, jint variant) {
     NativeFamilyBuilder* builder;
     if (langs != nullptr) {
@@ -59,15 +71,14 @@ static jlong FontFamily_initBuilder(JNIEnv* env, jobject clazz, jstring langs, j
     } else {
         builder = new NativeFamilyBuilder(minikin::registerLocaleList(""), variant);
     }
-    return reinterpret_cast<jlong>(builder);
+    return toJLong(builder);
 }
 
 static jlong FontFamily_create(jlong builderPtr) {
     if (builderPtr == 0) {
         return 0;
     }
-    std::unique_ptr<NativeFamilyBuilder> builder(
-            reinterpret_cast<NativeFamilyBuilder*>(builderPtr));
+    NativeFamilyBuilder* builder = toNativeBuilder(builderPtr);
     if (builder->fonts.empty()) {
         return 0;
     }
@@ -76,17 +87,23 @@ static jlong FontFamily_create(jlong builderPtr) {
     if (family->getCoverage().length() == 0) {
         return 0;
     }
-    return reinterpret_cast<jlong>(new FontFamilyWrapper(std::move(family)));
+    return toJLong(new FontFamilyWrapper(std::move(family)));
 }
 
-static void FontFamily_abort(jlong builderPtr) {
-    NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
-    delete builder;
+static void releaseBuilder(jlong builderPtr) {
+    delete toNativeBuilder(builderPtr);
 }
 
-static void FontFamily_unref(jlong familyPtr) {
-    FontFamilyWrapper* family = reinterpret_cast<FontFamilyWrapper*>(familyPtr);
-    delete family;
+static jlong FontFamily_getBuilderReleaseFunc() {
+    return toJLong(&releaseBuilder);
+}
+
+static void releaseFamily(jlong familyPtr) {
+    delete toFamily(familyPtr);
+}
+
+static jlong FontFamily_getFamilyReleaseFunc() {
+    return toJLong(&releaseFamily);
 }
 
 static bool addSkTypeface(NativeFamilyBuilder* builder, sk_sp<SkData>&& data, int ttcIndex,
@@ -175,7 +192,7 @@ static jboolean FontFamily_addFont(JNIEnv* env, jobject clazz, jlong builderPtr,
 static jboolean FontFamily_addFontWeightStyle(JNIEnv* env, jobject clazz, jlong builderPtr,
         jobject font, jint ttcIndex, jint weight, jint isItalic) {
     NPE_CHECK_RETURN_ZERO(env, font);
-    NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
+    NativeFamilyBuilder* builder = toNativeBuilder(builderPtr);
     const void* fontPtr = env->GetDirectBufferAddress(font);
     if (fontPtr == NULL) {
         ALOGE("addFont failed to create font, buffer invalid");
@@ -204,8 +221,7 @@ static jboolean FontFamily_addFontFromAssetManager(JNIEnv* env, jobject, jlong b
     NPE_CHECK_RETURN_ZERO(env, jassetMgr);
     NPE_CHECK_RETURN_ZERO(env, jpath);
 
-    NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
-
+    NativeFamilyBuilder* builder = toNativeBuilder(builderPtr);
     Guarded<AssetManager2>* mgr = AssetManagerForJavaObject(env, jassetMgr);
     if (NULL == mgr) {
         builder->axes.clear();
@@ -249,19 +265,19 @@ static jboolean FontFamily_addFontFromAssetManager(JNIEnv* env, jobject, jlong b
 }
 
 static void FontFamily_addAxisValue(jlong builderPtr, jint tag, jfloat value) {
-    NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
+    NativeFamilyBuilder* builder = toNativeBuilder(builderPtr);
     builder->axes.push_back({static_cast<minikin::AxisTag>(tag), value});
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 static const JNINativeMethod gFontFamilyMethods[] = {
-    { "nInitBuilder",          "(Ljava/lang/String;I)J", (void*)FontFamily_initBuilder },
-    { "nCreateFamily",         "(J)J", (void*)FontFamily_create },
-    { "nAbort",                "(J)V", (void*)FontFamily_abort },
-    { "nUnrefFamily",          "(J)V", (void*)FontFamily_unref },
-    { "nAddFont",              "(JLjava/nio/ByteBuffer;III)Z", (void*)FontFamily_addFont },
-    { "nAddFontWeightStyle",   "(JLjava/nio/ByteBuffer;III)Z",
+    { "nInitBuilder",           "(Ljava/lang/String;I)J", (void*)FontFamily_initBuilder },
+    { "nCreateFamily",          "(J)J", (void*)FontFamily_create },
+    { "nGetBuilderReleaseFunc", "()J", (void*)FontFamily_getBuilderReleaseFunc },
+    { "nGetFamilyReleaseFunc",  "()J", (void*)FontFamily_getFamilyReleaseFunc },
+    { "nAddFont",               "(JLjava/nio/ByteBuffer;III)Z", (void*)FontFamily_addFont },
+    { "nAddFontWeightStyle",    "(JLjava/nio/ByteBuffer;III)Z",
             (void*)FontFamily_addFontWeightStyle },
     { "nAddFontFromAssetManager",    "(JLandroid/content/res/AssetManager;Ljava/lang/String;IZIII)Z",
             (void*)FontFamily_addFontFromAssetManager },

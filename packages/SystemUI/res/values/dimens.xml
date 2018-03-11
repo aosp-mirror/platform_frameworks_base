@@ -882,7 +882,7 @@
             burn-in on AOD -->
     <dimen name="burn_in_prevention_offset_y">50dp</dimen>
 
-    <dimen name="corner_size">16dp</dimen>
+    <dimen name="corner_size">8dp</dimen>
     <dimen name="top_padding">0dp</dimen>
     <dimen name="bottom_padding">48dp</dimen>
     <dimen name="edge_margin">16dp</dimen>

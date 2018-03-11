@@ -506,6 +506,7 @@ public class UsageStatsService extends SystemService implements
             IndentingPrintWriter idpw = new IndentingPrintWriter(pw, "  ");
 
             boolean checkin = false;
+            boolean compact = false;
             String pkg = null;
 
             if (args != null) {
@@ -513,6 +514,9 @@ public class UsageStatsService extends SystemService implements
                     String arg = args[i];
                     if ("--checkin".equals(arg)) {
                         checkin = true;
+                    } else
+                    if ("-c".equals(arg)) {
+                        compact = true;
                     } else if ("flush".equals(arg)) {
                         flushToDiskLocked();
                         pw.println("Flushed stats to disk");
@@ -534,7 +538,7 @@ public class UsageStatsService extends SystemService implements
                 if (checkin) {
                     mUserState.valueAt(i).checkin(idpw);
                 } else {
-                    mUserState.valueAt(i).dump(idpw, pkg);
+                    mUserState.valueAt(i).dump(idpw, pkg, compact);
                     idpw.println();
                 }
                 mAppStandby.dumpUser(idpw, userId, pkg);

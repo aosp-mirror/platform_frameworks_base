@@ -17,6 +17,7 @@
 package android.media.update;
 
 import android.app.PendingIntent;
+import android.media.AudioFocusRequest;
 import android.media.MediaItem2;
 import android.media.MediaMetadata2;
 import android.media.MediaPlayerBase;
@@ -43,14 +44,15 @@ import java.util.concurrent.Executor;
  */
 public interface MediaSession2Provider extends TransportControlProvider {
     void close_impl();
-    void updatePlayer_impl(MediaPlayerBase player, MediaPlaylistAgent mplc,
+    void updatePlayer_impl(MediaPlayerBase player, MediaPlaylistAgent playlistAgent,
             VolumeProvider2 volumeProvider);
     MediaPlayerBase getPlayer_impl();
+    MediaPlaylistAgent getPlaylistAgent_impl();
     VolumeProvider2 getVolumeProvider_impl();
     SessionToken2 getToken_impl();
     List<ControllerInfo> getConnectedControllers_impl();
     void setCustomLayout_impl(ControllerInfo controller, List<CommandButton> layout);
-    void setAudioFocusRequest_impl(int focusGain);
+    void setAudioFocusRequest_impl(AudioFocusRequest afr);
     void setAllowedCommands_impl(ControllerInfo controller, CommandGroup commands);
     void sendCustomCommand_impl(ControllerInfo controller, Command command, Bundle args,
             ResultReceiver receiver);
@@ -123,7 +125,7 @@ public interface MediaSession2Provider extends TransportControlProvider {
 
     interface BuilderBaseProvider<T extends MediaSession2, C extends SessionCallback> {
         void setPlayer_impl(MediaPlayerBase player);
-        void setPlaylistController_impl(MediaPlaylistAgent mplc);
+        void setPlaylistAgent_impl(MediaPlaylistAgent playlistAgent);
         void setVolumeProvider_impl(VolumeProvider2 volumeProvider);
         void setSessionActivity_impl(PendingIntent pi);
         void setId_impl(String id);

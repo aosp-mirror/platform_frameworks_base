@@ -166,7 +166,7 @@ public abstract class MediaSessionService2 extends Service {
      *
      * @return a {@link MediaNotification}. If it's {@code null}, notification wouldn't be shown.
      */
-    public MediaNotification onUpdateNotification() {
+    public @Nullable MediaNotification onUpdateNotification() {
         return mProvider.onUpdateNotification_impl();
     }
 
@@ -202,7 +202,7 @@ public abstract class MediaSessionService2 extends Service {
     }
 
     /**
-     * Returned by {@link #onUpdateNotification()} for making session service forground service
+     * Returned by {@link #onUpdateNotification()} for making session service foreground service
      * to keep playback running in the background. It's highly recommended to show media style
      * notification here.
      */
@@ -229,7 +229,7 @@ public abstract class MediaSessionService2 extends Service {
             return mProvider.getNotificationId_impl();
         }
 
-        public Notification getNotification() {
+        public @NonNull Notification getNotification() {
             return mProvider.getNotification_impl();
         }
     }

@@ -65,6 +65,8 @@ public class Installer extends SystemService {
     public static final int DEXOPT_IDLE_BACKGROUND_JOB = 1 << 9;
     /** Indicates that dexopt should restrict access to private APIs. */
     public static final int DEXOPT_ENABLE_HIDDEN_API_CHECKS = 1 << 10;
+    /** Indicates that dexopt should convert to CompactDex. */
+    public static final int DEXOPT_GENERATE_COMPACT_DEX = 1 << 11;
 
     // NOTE: keep in sync with installd
     public static final int FLAG_CLEAR_CACHE_ONLY = 1 << 8;

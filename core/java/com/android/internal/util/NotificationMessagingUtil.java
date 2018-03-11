@@ -78,6 +78,10 @@ public class NotificationMessagingUtil {
             return false;
         }
 
+        return isMessaging(sbn);
+    }
+
+    public boolean isMessaging(StatusBarNotification sbn) {
         Class<? extends Notification.Style> style = sbn.getNotification().getNotificationStyle();
         if (Notification.MessagingStyle.class.equals(style)) {
             return true;

@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 
 import android.animation.Animator;
@@ -39,6 +40,7 @@ import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -73,6 +75,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private boolean mNonblockable;
     private StatusBarNotification mSbn;
     private AnimatorSet mExpandAnimation;
+    private boolean mIsForeground;
 
     private CheckSaveListener mCheckSaveListener;
     private OnSettingsClickListener mOnSettingsClickListener;
@@ -84,7 +87,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         closeControls(v);
     };
 
-    private OnClickListener mOnStopNotifications = v -> {
+    private OnClickListener mOnStopMinNotifications = v -> {
         swapContent(false);
     };
 
@@ -150,6 +153,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         mSingleNotificationChannel = notificationChannel;
         mStartingUserImportance = mChosenImportance = mSingleNotificationChannel.getImportance();
         mNegativeUserSentiment = negativeUserSentiment;
+        mIsForeground =
+                (mSbn.getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
 
         int numTotalChannels = mINotificationManager.getNumNotificationChannelsForPackage(
                 pkg, mAppUid, false /* includeDeleted */);
@@ -290,14 +295,23 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
     private void bindButtons() {
         View block =  findViewById(R.id.block);
-        block.setOnClickListener(mOnStopNotifications);
+        block.setOnClickListener(mOnStopMinNotifications);
         TextView keep = findViewById(R.id.keep);
         keep.setOnClickListener(mOnKeepShowing);
         findViewById(R.id.undo).setOnClickListener(mOnUndo);
+        View minimize = findViewById(R.id.minimize);
+        minimize.setOnClickListener(mOnStopMinNotifications);
 
         if (mNonblockable) {
             keep.setText(R.string.notification_done);
             block.setVisibility(GONE);
+            minimize.setVisibility(GONE);
+        } else if (mIsForeground) {
+            block.setVisibility(GONE);
+            minimize.setVisibility(VISIBLE);
+        } else if (!mIsForeground) {
+            block.setVisibility(VISIBLE);
+            minimize.setVisibility(GONE);
         }
 
         // app settings link
@@ -306,7 +320,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                 mSbn.getId(), mSbn.getTag());
         if (settingsIntent != null
                 && !TextUtils.isEmpty(mSbn.getNotification().getSettingsText())) {
-            settingsLinkView.setVisibility(View.VISIBLE);
+            settingsLinkView.setVisibility(VISIBLE);
             settingsLinkView.setText(mContext.getString(R.string.notification_app_settings,
                     mSbn.getNotification().getSettingsText()));
             settingsLinkView.setOnClickListener((View view) -> {
@@ -322,14 +336,21 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             mExpandAnimation.cancel();
         }
 
+        View prompt = findViewById(R.id.prompt);
+        ViewGroup confirmation = findViewById(R.id.confirmation);
+        TextView confirmationText = findViewById(R.id.confirmation_text);
+        View header = findViewById(R.id.header);
+
         if (showPrompt) {
             mChosenImportance = mStartingUserImportance;
+        } else if (mIsForeground) {
+            mChosenImportance = IMPORTANCE_MIN;
+            confirmationText.setText(R.string.notification_channel_minimized);
         } else {
             mChosenImportance = IMPORTANCE_NONE;
+            confirmationText.setText(R.string.notification_channel_disabled);
         }
 
-        View prompt = findViewById(R.id.prompt);
-        View confirmation = findViewById(R.id.confirmation);
         ObjectAnimator promptAnim = ObjectAnimator.ofFloat(prompt, View.ALPHA,
                 prompt.getAlpha(), showPrompt ? 1f : 0f);
         promptAnim.setInterpolator(showPrompt ? Interpolators.ALPHA_IN : Interpolators.ALPHA_OUT);
@@ -339,6 +360,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
         prompt.setVisibility(showPrompt ? VISIBLE : GONE);
         confirmation.setVisibility(showPrompt ? GONE : VISIBLE);
+        header.setVisibility(showPrompt ? VISIBLE : GONE);
 
         mExpandAnimation = new AnimatorSet();
         mExpandAnimation.playTogether(promptAnim, confirmAnim);
