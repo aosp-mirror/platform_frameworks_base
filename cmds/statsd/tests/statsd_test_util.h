@@ -180,9 +180,12 @@ void sortLogEventsByTimestamp(std::vector<std::unique_ptr<LogEvent>> *events);
 
 int64_t StringToId(const string& str);
 
+void ValidateUidDimension(const DimensionsValue& value, int node_idx, int atomId, int uid);
 void ValidateAttributionUidDimension(const DimensionsValue& value, int atomId, int uid);
 void ValidateAttributionUidAndTagDimension(
     const DimensionsValue& value, int atomId, int uid, const std::string& tag);
+void ValidateAttributionUidAndTagDimension(
+    const DimensionsValue& value, int node_idx, int atomId, int uid, const std::string& tag);
 
 struct DimensionsPair {
     DimensionsPair(DimensionsValue m1, DimensionsValue m2) : dimInWhat(m1), dimInCondition(m2){};

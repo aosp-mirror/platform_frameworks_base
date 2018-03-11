@@ -327,25 +327,7 @@ void SimpleConditionTracker::evaluateCondition(
         // have both sliced and unsliced version of a predicate.
         handleConditionEvent(outputValue, matchedState == 1, &overallState, &overallChanged);
     } else {
-        std::vector<HashableDimensionKey> outputValues;
-        filterValues(mOutputDimensions, event.getValues(), &outputValues);
-
-        // If this event has multiple nodes in the attribution chain,  this log event probably will
-        // generate multiple dimensions. If so, we will find if the condition changes for any
-        // dimension and ask the corresponding metric producer to verify whether the actual sliced
-        // condition has changed or not.
-        // A high level assumption is that a predicate is either sliced or unsliced. We will never
-        // have both sliced and unsliced version of a predicate.
-        for (const HashableDimensionKey& outputValue : outputValues) {
-            ConditionState tempState;
-            bool tempChanged = false;
-            handleConditionEvent(outputValue, matchedState == 1, &tempState, &tempChanged);
-            if (tempChanged) {
-                overallChanged = true;
-            }
-            // ConditionState's | operator is overridden
-            overallState = overallState | tempState;
-        }
+        ALOGE("The condition tracker should not be sliced by ANY position matcher.");
     }
     conditionCache[mIndex] = overallState;
     conditionChangedCache[mIndex] = overallChanged;

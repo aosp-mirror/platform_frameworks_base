@@ -28,7 +28,7 @@ namespace statsd {
 
 namespace {
 
-StatsdConfig CreateStatsdConfig() {
+StatsdConfig CreateStatsdConfig(const Position position) {
     StatsdConfig config;
     auto wakelockAcquireMatcher = CreateAcquireWakelockAtomMatcher();
     auto attributionNodeMatcher =
@@ -46,15 +46,15 @@ StatsdConfig CreateStatsdConfig() {
     countMetric->set_what(wakelockAcquireMatcher.id());
     *countMetric->mutable_dimensions_in_what() =
         CreateAttributionUidAndTagDimensions(
-            android::util::WAKELOCK_STATE_CHANGED, {Position::FIRST});
+            android::util::WAKELOCK_STATE_CHANGED, {position});
     countMetric->set_bucket(FIVE_MINUTES);
     return config;
 }
 
 }  // namespace
 
-TEST(AttributionE2eTest, TestAttributionMatchAndSlice) {
-    auto config = CreateStatsdConfig();
+TEST(AttributionE2eTest, TestAttributionMatchAndSliceByFirstUid) {
+    auto config = CreateStatsdConfig(Position::FIRST);
     int64_t bucketStartTimeNs = 10000000000;
     int64_t bucketSizeNs =
         TimeUnitToBucketSizeInMillis(config.count_metric(0).bucket()) * 1000000;
@@ -197,6 +197,215 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSlice) {
     EXPECT_EQ(data.bucket_info(0).count(), 1);
     EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs + 2 * bucketSizeNs);
     EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + 3 * bucketSizeNs);
+}
+
+TEST(AttributionE2eTest, TestAttributionMatchAndSliceByChain) {
+    auto config = CreateStatsdConfig(Position::ALL);
+    int64_t bucketStartTimeNs = 10000000000;
+    int64_t bucketSizeNs =
+        TimeUnitToBucketSizeInMillis(config.count_metric(0).bucket()) * 1000000;
+
+    ConfigKey cfgKey;
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
+    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
+
+    // Here it assumes that GMS core has two uids.
+    processor->getUidMap()->updateApp(
+        android::String16("com.android.gmscore"), 222 /* uid */, 1 /* version code*/);
+    processor->getUidMap()->updateApp(
+        android::String16("com.android.gmscore"), 444 /* uid */, 1 /* version code*/);
+    processor->getUidMap()->updateApp(
+        android::String16("app1"), 111 /* uid */, 2 /* version code*/);
+    processor->getUidMap()->updateApp(
+        android::String16("APP3"), 333 /* uid */, 2 /* version code*/);
+
+    // GMS core node is in the middle.
+    std::vector<AttributionNodeInternal> attributions1 = {CreateAttribution(111, "App1"),
+                                                          CreateAttribution(222, "GMSCoreModule1"),
+                                                          CreateAttribution(333, "App3")};
+
+    // GMS core node is the last one.
+    std::vector<AttributionNodeInternal> attributions2 = {CreateAttribution(111, "App1"),
+                                                          CreateAttribution(333, "App3"),
+                                                          CreateAttribution(222, "GMSCoreModule1")};
+
+    // GMS core node is the first one.
+    std::vector<AttributionNodeInternal> attributions3 = {CreateAttribution(222, "GMSCoreModule1"),
+                                                          CreateAttribution(333, "App3")};
+
+    // Single GMS core node.
+    std::vector<AttributionNodeInternal> attributions4 = {CreateAttribution(222, "GMSCoreModule1")};
+
+    // GMS core has another uid.
+    std::vector<AttributionNodeInternal> attributions5 = {CreateAttribution(111, "App1"),
+                                                          CreateAttribution(444, "GMSCoreModule2"),
+                                                          CreateAttribution(333, "App3")};
+
+    // Multiple GMS core nodes.
+    std::vector<AttributionNodeInternal> attributions6 = {CreateAttribution(444, "GMSCoreModule2"),
+                                                          CreateAttribution(222, "GMSCoreModule1")};
+
+    // No GMS core nodes.
+    std::vector<AttributionNodeInternal> attributions7 = {CreateAttribution(111, "App1"),
+                                                          CreateAttribution(333, "App3")};
+    std::vector<AttributionNodeInternal> attributions8 = {CreateAttribution(111, "App1")};
+
+    // GMS core node with isolated uid.
+    const int isolatedUid = 666;
+    std::vector<AttributionNodeInternal> attributions9 = {
+            CreateAttribution(isolatedUid, "GMSCoreModule1")};
+
+    std::vector<std::unique_ptr<LogEvent>> events;
+    // Events 1~4 are in the 1st bucket.
+    events.push_back(CreateAcquireWakelockEvent(
+        attributions1, "wl1", bucketStartTimeNs + 2));
+    events.push_back(CreateAcquireWakelockEvent(
+        attributions2, "wl1", bucketStartTimeNs + 200));
+    events.push_back(CreateAcquireWakelockEvent(
+        attributions3, "wl1", bucketStartTimeNs + bucketSizeNs - 1));
+    events.push_back(CreateAcquireWakelockEvent(
+        attributions4, "wl1", bucketStartTimeNs + bucketSizeNs));
+
+    // Events 5~8 are in the 3rd bucket.
+    events.push_back(CreateAcquireWakelockEvent(
+        attributions5, "wl2", bucketStartTimeNs + 2 * bucketSizeNs + 1));
+    events.push_back(CreateAcquireWakelockEvent(
+        attributions6, "wl2", bucketStartTimeNs + 2 * bucketSizeNs + 100));
+    events.push_back(CreateAcquireWakelockEvent(
+        attributions7, "wl2", bucketStartTimeNs + 3 * bucketSizeNs - 2));
+    events.push_back(CreateAcquireWakelockEvent(
+        attributions8, "wl2", bucketStartTimeNs + 3 * bucketSizeNs));
+    events.push_back(CreateAcquireWakelockEvent(
+        attributions9, "wl2", bucketStartTimeNs + 3 * bucketSizeNs + 1));
+    events.push_back(CreateAcquireWakelockEvent(
+        attributions9, "wl2", bucketStartTimeNs + 3 * bucketSizeNs + 100));
+    events.push_back(CreateIsolatedUidChangedEvent(
+        isolatedUid, 222, true/* is_create*/, bucketStartTimeNs + 3 * bucketSizeNs - 1));
+    events.push_back(CreateIsolatedUidChangedEvent(
+        isolatedUid, 222, false/* is_create*/, bucketStartTimeNs + 3 * bucketSizeNs + 10));
+
+    sortLogEventsByTimestamp(&events);
+
+    for (const auto& event : events) {
+        processor->OnLogEvent(event.get());
+    }
+    ConfigMetricsReportList reports;
+    vector<uint8_t> buffer;
+    processor->onDumpReport(cfgKey, bucketStartTimeNs + 4 * bucketSizeNs + 1, &buffer);
+    EXPECT_TRUE(buffer.size() > 0);
+    EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
+    EXPECT_EQ(reports.reports_size(), 1);
+    EXPECT_EQ(reports.reports(0).metrics_size(), 1);
+
+    StatsLogReport::CountMetricDataWrapper countMetrics;
+    sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).count_metrics(), &countMetrics);
+    EXPECT_EQ(countMetrics.data_size(), 6);
+
+    auto data = countMetrics.data(0);
+    ValidateAttributionUidAndTagDimension(
+        data.dimensions_in_what(), android::util::WAKELOCK_STATE_CHANGED, 222, "GMSCoreModule1");
+    EXPECT_EQ(2, data.bucket_info_size());
+    EXPECT_EQ(1, data.bucket_info(0).count());
+    EXPECT_EQ(bucketStartTimeNs + bucketSizeNs,
+              data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
+              data.bucket_info(0).end_bucket_elapsed_nanos());
+    EXPECT_EQ(1, data.bucket_info(1).count());
+    EXPECT_EQ(bucketStartTimeNs + 3 * bucketSizeNs,
+              data.bucket_info(1).start_bucket_elapsed_nanos());
+    EXPECT_EQ(bucketStartTimeNs + 4 * bucketSizeNs,
+              data.bucket_info(1).end_bucket_elapsed_nanos());
+
+    data = countMetrics.data(1);
+    ValidateUidDimension(
+        data.dimensions_in_what(), 0, android::util::WAKELOCK_STATE_CHANGED, 222);
+    ValidateAttributionUidAndTagDimension(
+        data.dimensions_in_what(), 0, android::util::WAKELOCK_STATE_CHANGED, 222, "GMSCoreModule1");
+    ValidateUidDimension(
+        data.dimensions_in_what(), 1, android::util::WAKELOCK_STATE_CHANGED, 333);
+    ValidateAttributionUidAndTagDimension(
+        data.dimensions_in_what(), 1, android::util::WAKELOCK_STATE_CHANGED, 333, "App3");
+    EXPECT_EQ(data.bucket_info_size(), 1);
+    EXPECT_EQ(data.bucket_info(0).count(), 1);
+    EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
+    EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
+
+    data = countMetrics.data(2);
+    ValidateUidDimension(
+        data.dimensions_in_what(), 0, android::util::WAKELOCK_STATE_CHANGED, 444);
+    ValidateAttributionUidAndTagDimension(
+        data.dimensions_in_what(), 0, android::util::WAKELOCK_STATE_CHANGED, 444, "GMSCoreModule2");
+    ValidateUidDimension(
+        data.dimensions_in_what(), 1, android::util::WAKELOCK_STATE_CHANGED, 222);
+    ValidateAttributionUidAndTagDimension(
+        data.dimensions_in_what(), 1, android::util::WAKELOCK_STATE_CHANGED, 222, "GMSCoreModule1");
+    EXPECT_EQ(data.bucket_info_size(), 1);
+    EXPECT_EQ(data.bucket_info(0).count(), 1);
+    EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
+              data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(bucketStartTimeNs + 3 * bucketSizeNs,
+              data.bucket_info(0).end_bucket_elapsed_nanos());
+
+    data = countMetrics.data(3);
+    ValidateUidDimension(
+        data.dimensions_in_what(), 0, android::util::WAKELOCK_STATE_CHANGED, 111);
+    ValidateAttributionUidAndTagDimension(
+        data.dimensions_in_what(), 0, android::util::WAKELOCK_STATE_CHANGED, 111, "App1");
+    ValidateUidDimension(
+        data.dimensions_in_what(), 1, android::util::WAKELOCK_STATE_CHANGED, 222);
+    ValidateAttributionUidAndTagDimension(
+        data.dimensions_in_what(), 1, android::util::WAKELOCK_STATE_CHANGED, 222, "GMSCoreModule1");
+    ValidateUidDimension(
+        data.dimensions_in_what(), 2, android::util::WAKELOCK_STATE_CHANGED, 333);
+    ValidateAttributionUidAndTagDimension(
+        data.dimensions_in_what(), 2, android::util::WAKELOCK_STATE_CHANGED, 333, "App3");
+    EXPECT_EQ(data.bucket_info_size(), 1);
+    EXPECT_EQ(data.bucket_info(0).count(), 1);
+    EXPECT_EQ(bucketStartTimeNs,
+              data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(bucketStartTimeNs + bucketSizeNs,
+              data.bucket_info(0).end_bucket_elapsed_nanos());
+
+    data = countMetrics.data(4);
+    ValidateUidDimension(
+        data.dimensions_in_what(), 0, android::util::WAKELOCK_STATE_CHANGED, 111);
+    ValidateAttributionUidAndTagDimension(
+        data.dimensions_in_what(), 0, android::util::WAKELOCK_STATE_CHANGED, 111, "App1");
+    ValidateUidDimension(
+        data.dimensions_in_what(), 1, android::util::WAKELOCK_STATE_CHANGED, 333);
+    ValidateAttributionUidAndTagDimension(
+        data.dimensions_in_what(), 1, android::util::WAKELOCK_STATE_CHANGED, 333, "App3");
+    ValidateUidDimension(
+        data.dimensions_in_what(), 2, android::util::WAKELOCK_STATE_CHANGED, 222);
+    ValidateAttributionUidAndTagDimension(
+        data.dimensions_in_what(), 2, android::util::WAKELOCK_STATE_CHANGED, 222, "GMSCoreModule1");
+    EXPECT_EQ(data.bucket_info_size(), 1);
+    EXPECT_EQ(data.bucket_info(0).count(), 1);
+    EXPECT_EQ(bucketStartTimeNs,
+              data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(bucketStartTimeNs + bucketSizeNs,
+              data.bucket_info(0).end_bucket_elapsed_nanos());
+
+    data = countMetrics.data(5);
+    ValidateUidDimension(
+        data.dimensions_in_what(), 0, android::util::WAKELOCK_STATE_CHANGED, 111);
+    ValidateAttributionUidAndTagDimension(
+        data.dimensions_in_what(), 0, android::util::WAKELOCK_STATE_CHANGED, 111, "App1");
+    ValidateUidDimension(
+        data.dimensions_in_what(), 1, android::util::WAKELOCK_STATE_CHANGED, 444);
+    ValidateAttributionUidAndTagDimension(
+        data.dimensions_in_what(), 1, android::util::WAKELOCK_STATE_CHANGED, 444, "GMSCoreModule2");
+    ValidateUidDimension(
+        data.dimensions_in_what(), 2, android::util::WAKELOCK_STATE_CHANGED, 333);
+    ValidateAttributionUidAndTagDimension(
+        data.dimensions_in_what(), 2, android::util::WAKELOCK_STATE_CHANGED, 333, "App3");
+    EXPECT_EQ(data.bucket_info_size(), 1);
+    EXPECT_EQ(data.bucket_info(0).count(), 1);
+    EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
+              data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(bucketStartTimeNs + 3 * bucketSizeNs,
+              data.bucket_info(0).end_bucket_elapsed_nanos());
 }
 
 #else
