@@ -198,7 +198,7 @@ LOCAL_SRC_FILES := \
     tests/e2e/WakelockDuration_e2e_test.cpp \
     tests/e2e/MetricConditionLink_e2e_test.cpp \
     tests/e2e/Attribution_e2e_test.cpp \
-    tests/e2e/GaugeMetric_e2e_test.cpp \
+    tests/e2e/GaugeMetric_e2e_push_test.cpp \
     tests/e2e/DimensionInCondition_e2e_combination_AND_cond_test.cpp \
     tests/e2e/DimensionInCondition_e2e_combination_OR_cond_test.cpp \
     tests/e2e/DimensionInCondition_e2e_simple_cond_test.cpp
