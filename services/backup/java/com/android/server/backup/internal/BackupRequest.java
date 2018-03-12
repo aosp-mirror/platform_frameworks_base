@@ -16,11 +16,12 @@
 
 package com.android.server.backup.internal;
 
+import java.util.Objects;
+
 /**
  * Set of backup services that have pending changes.
  */
 public class BackupRequest {
-
     public String packageName;
 
     public BackupRequest(String pkgName) {
@@ -29,5 +30,22 @@ public class BackupRequest {
 
     public String toString() {
         return "BackupRequest{pkg=" + packageName + "}";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof BackupRequest)) {
+            return false;
+        }
+        BackupRequest that = (BackupRequest) o;
+        return Objects.equals(packageName, that.packageName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(packageName);
     }
 }
