@@ -103,12 +103,13 @@ public abstract class IconLoader {
         int userId = taskKey.userId;
         Bitmap tdIcon = desc.getInMemoryIcon();
         if (tdIcon != null) {
-            return createDrawableFromBitmap(tdIcon, userId);
+            return createDrawableFromBitmap(tdIcon, userId, desc);
         }
         if (desc.getIconResource() != 0) {
             // TODO: Use task context here
             try {
-                return createBadgedDrawable(mContext.getDrawable(desc.getIconResource()), userId);
+                return createBadgedDrawable(
+                        mContext.getDrawable(desc.getIconResource()), userId, desc);
             } catch (Resources.NotFoundException e) {
                 Log.e(TAG, "Could not find icon drawable from resource", e);
             }
@@ -117,13 +118,13 @@ public abstract class IconLoader {
         tdIcon = ActivityManager.TaskDescription.loadTaskDescriptionIcon(
                 desc.getIconFilename(), userId);
         if (tdIcon != null) {
-            return createDrawableFromBitmap(tdIcon, userId);
+            return createDrawableFromBitmap(tdIcon, userId, desc);
         }
 
         // Load the icon from the activity info and cache it
         ActivityInfo activityInfo = getAndUpdateActivityInfo(taskKey);
         if (activityInfo != null) {
-            Drawable icon = getBadgedActivityIcon(activityInfo, userId);
+            Drawable icon = getBadgedActivityIcon(activityInfo, userId, desc);
             if (icon != null) {
                 return icon;
             }
@@ -135,16 +136,20 @@ public abstract class IconLoader {
 
     public abstract Drawable getDefaultIcon(int userId);
 
-    protected Drawable createDrawableFromBitmap(Bitmap icon, int userId) {
-        return createBadgedDrawable(new BitmapDrawable(mContext.getResources(), icon), userId);
+    protected Drawable createDrawableFromBitmap(Bitmap icon, int userId,
+            ActivityManager.TaskDescription desc) {
+        return createBadgedDrawable(
+                new BitmapDrawable(mContext.getResources(), icon), userId, desc);
     }
 
-    protected abstract Drawable createBadgedDrawable(Drawable icon, int userId);
+    protected abstract Drawable createBadgedDrawable(Drawable icon, int userId,
+            ActivityManager.TaskDescription desc);
 
     /**
      * @return the activity icon for the ActivityInfo for a user, badging if necessary.
      */
-    protected abstract Drawable getBadgedActivityIcon(ActivityInfo info, int userId);
+    protected abstract Drawable getBadgedActivityIcon(ActivityInfo info, int userId,
+            ActivityManager.TaskDescription desc);
 
     public static class DefaultIconLoader extends IconLoader {
 
@@ -168,7 +173,8 @@ public abstract class IconLoader {
         }
 
         @Override
-        protected Drawable createBadgedDrawable(Drawable icon, int userId) {
+        protected Drawable createBadgedDrawable(Drawable icon, int userId,
+                ActivityManager.TaskDescription desc) {
             if (userId != UserHandle.myUserId()) {
                 icon = mContext.getPackageManager().getUserBadgedIcon(icon, new UserHandle(userId));
             }
@@ -176,7 +182,8 @@ public abstract class IconLoader {
         }
 
         @Override
-        protected Drawable getBadgedActivityIcon(ActivityInfo info, int userId) {
+        protected Drawable getBadgedActivityIcon(ActivityInfo info, int userId,
+                ActivityManager.TaskDescription desc) {
             return mDrawableFactory.getBadgedIcon(info, info.applicationInfo, userId);
         }
     }
