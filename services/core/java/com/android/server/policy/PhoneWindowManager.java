@@ -4490,7 +4490,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         displayWidth, displayHeight);
                 outFrame.intersect(taskBounds);
             }
-            outDisplayCutout.set(displayFrames.mDisplayCutout.calculateRelativeTo(outFrame));
+            outDisplayCutout.set(displayFrames.mDisplayCutout.calculateRelativeTo(outFrame)
+                    .getDisplayCutout());
             return mForceShowSystemBars;
         } else {
             if (layoutInScreen) {

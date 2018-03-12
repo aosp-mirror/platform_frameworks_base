@@ -17,7 +17,6 @@
 package android.view;
 
 import static android.view.DisplayCutout.NO_CUTOUT;
-import static android.view.DisplayCutout.fromBoundingRect;
 import static android.view.DisplayCutout.fromSpec;
 
 import static org.hamcrest.Matchers.not;
@@ -29,16 +28,16 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import android.graphics.Rect;
-import android.graphics.Region;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.util.Size;
 import android.view.DisplayCutout.ParcelableWrapper;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.Arrays;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -48,7 +47,7 @@ public class DisplayCutoutTest {
     /** This is not a consistent cutout. Useful for verifying insets in one go though. */
     final DisplayCutout mCutoutNumbers = new DisplayCutout(
             new Rect(1, 2, 3, 4),
-            new Region(5, 6, 7, 8), new Size(9, 10));
+            Arrays.asList(new Rect(5, 6, 7, 8)));
 
     final DisplayCutout mCutoutTop = createCutoutTop();
 
@@ -70,7 +69,7 @@ public class DisplayCutoutTest {
 
     @Test
     public void getBoundingRect() throws Exception {
-        assertEquals(new Rect(50, 0, 75, 100), mCutoutTop.getBoundingRect());
+        assertEquals(new Rect(50, 0, 75, 100), mCutoutTop.getBounds().getBounds());
     }
 
     @Test
@@ -154,91 +153,7 @@ public class DisplayCutoutTest {
     public void inset_bounds() throws Exception {
         DisplayCutout cutout = mCutoutTop.inset(1, 2, 3, 4);
 
-        assertEquals(new Rect(49, -2, 74, 98), cutout.getBoundingRect());
-    }
-
-    @Test
-    public void computeSafeInsets_top() throws Exception {
-        DisplayCutout cutout = fromBoundingRect(0, 0, 100, 20)
-                .computeSafeInsets(200, 400);
-
-        assertEquals(new Rect(0, 20, 0, 0), cutout.getSafeInsets());
-    }
-
-    @Test
-    public void computeSafeInsets_left() throws Exception {
-        DisplayCutout cutout = fromBoundingRect(0, 0, 20, 100)
-                .computeSafeInsets(400, 200);
-
-        assertEquals(new Rect(20, 0, 0, 0), cutout.getSafeInsets());
-    }
-
-    @Test
-    public void computeSafeInsets_bottom() throws Exception {
-        DisplayCutout cutout = fromBoundingRect(0, 180, 100, 200)
-                .computeSafeInsets(100, 200);
-
-        assertEquals(new Rect(0, 0, 0, 20), cutout.getSafeInsets());
-    }
-
-    @Test
-    public void computeSafeInsets_right() throws Exception {
-        DisplayCutout cutout = fromBoundingRect(180, 0, 200, 100)
-                .computeSafeInsets(200, 100);
-
-        assertEquals(new Rect(0, 0, 20, 0), cutout.getSafeInsets());
-    }
-
-    @Test
-    public void computeSafeInsets_bounds() throws Exception {
-        DisplayCutout cutout = mCutoutTop.computeSafeInsets(1000, 2000);
-
-        assertEquals(mCutoutTop.getBoundingRect(), cutout.getBounds().getBounds());
-    }
-
-    @Test
-    public void calculateRelativeTo_top() throws Exception {
-        DisplayCutout cutout = fromBoundingRect(0, 0, 100, 20)
-                .computeSafeInsets(200, 400)
-                .calculateRelativeTo(new Rect(5, 5, 95, 195));
-
-        assertEquals(new Rect(0, 15, 0, 0), cutout.getSafeInsets());
-    }
-
-    @Test
-    public void calculateRelativeTo_left() throws Exception {
-        DisplayCutout cutout = fromBoundingRect(0, 0, 20, 100)
-                .computeSafeInsets(400, 200)
-                .calculateRelativeTo(new Rect(5, 5, 195, 95));
-
-        assertEquals(new Rect(15, 0, 0, 0), cutout.getSafeInsets());
-    }
-
-    @Test
-    public void calculateRelativeTo_bottom() throws Exception {
-        DisplayCutout cutout = fromBoundingRect(0, 180, 100, 200)
-                .computeSafeInsets(100, 200)
-                .calculateRelativeTo(new Rect(5, 5, 95, 195));
-
-        assertEquals(new Rect(0, 0, 0, 15), cutout.getSafeInsets());
-    }
-
-    @Test
-    public void calculateRelativeTo_right() throws Exception {
-        DisplayCutout cutout = fromBoundingRect(180, 0, 200, 100)
-                .computeSafeInsets(200, 100)
-                .calculateRelativeTo(new Rect(5, 5, 195, 95));
-
-        assertEquals(new Rect(0, 0, 15, 0), cutout.getSafeInsets());
-    }
-
-    @Test
-    public void calculateRelativeTo_bounds() throws Exception {
-        DisplayCutout cutout = fromBoundingRect(0, 0, 100, 20)
-                .computeSafeInsets(200, 400)
-                .calculateRelativeTo(new Rect(5, 10, 95, 180));
-
-        assertEquals(new Rect(-5, -10, 95, 10), cutout.getBounds().getBounds());
+        assertEquals(new Rect(49, -2, 74, 98), cutout.getBounds().getBounds());
     }
 
     @Test
@@ -276,26 +191,26 @@ public class DisplayCutoutTest {
 
     @Test
     public void fromSpec_caches() {
-        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 200, 1f);
-        assertThat(fromSpec("L1,0 L1,1 L0,1 z", 200, 1f), sameInstance(cached));
+        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f);
+        assertThat(fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f), sameInstance(cached));
     }
 
     @Test
     public void fromSpec_wontCacheIfSpecChanges() {
-        DisplayCutout cached = fromSpec("L1,0 L1000,1000 L0,1 z", 200, 1f);
-        assertThat(fromSpec("L1,0 L1,1 L0,1 z", 200, 1f), not(sameInstance(cached)));
+        DisplayCutout cached = fromSpec("L1,0 L1000,1000 L0,1 z", 200, 400, 1f);
+        assertThat(fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f), not(sameInstance(cached)));
     }
 
     @Test
     public void fromSpec_wontCacheIfScreenWidthChanges() {
-        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 2000, 1f);
-        assertThat(fromSpec("L1,0 L1,1 L0,1 z", 200, 1f), not(sameInstance(cached)));
+        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 2000, 400, 1f);
+        assertThat(fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f), not(sameInstance(cached)));
     }
 
     @Test
     public void fromSpec_wontCacheIfDensityChanges() {
-        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 200, 2f);
-        assertThat(fromSpec("L1,0 L1,1 L0,1 z", 200, 1f), not(sameInstance(cached)));
+        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 2f);
+        assertThat(fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f), not(sameInstance(cached)));
     }
 
     @Test
@@ -348,7 +263,6 @@ public class DisplayCutoutTest {
     private static DisplayCutout createCutoutWithInsets(int left, int top, int right, int bottom) {
         return new DisplayCutout(
                 new Rect(left, top, right, bottom),
-                new Region(50, 0, 75, 100),
-                null);
+                Arrays.asList(new Rect(50, 0, 75, 100)));
     }
 }

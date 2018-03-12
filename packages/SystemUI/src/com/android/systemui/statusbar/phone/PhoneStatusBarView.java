@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.phone;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
+import static com.android.systemui.ScreenDecorations.DisplayCutoutView.boundsFromDirection;
+
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -25,6 +27,7 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.view.DisplayCutout;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -299,8 +302,12 @@ public class PhoneStatusBarView extends PanelBar {
 
         mCutoutSpace.setVisibility(View.VISIBLE);
         LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) mCutoutSpace.getLayoutParams();
-        lp.width = mDisplayCutout.getBoundingRect().width();
-        lp.height = mDisplayCutout.getBoundingRect().height();
+
+        Rect bounds = new Rect();
+        boundsFromDirection(mDisplayCutout, Gravity.TOP, bounds);
+
+        lp.width = bounds.width();
+        lp.height = bounds.height();
     }
 
     private void updateSafeInsets() {

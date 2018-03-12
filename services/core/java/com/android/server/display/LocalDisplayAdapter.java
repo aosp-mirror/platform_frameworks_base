@@ -404,7 +404,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             && SystemProperties.getBoolean(PROPERTY_EMULATOR_CIRCULAR, false))) {
                         mInfo.flags |= DisplayDeviceInfo.FLAG_ROUND;
                     }
-                    mInfo.displayCutout = DisplayCutout.fromResources(res, mInfo.width);
+                    mInfo.displayCutout = DisplayCutout.fromResources(res, mInfo.width,
+                            mInfo.height);
                     mInfo.type = Display.TYPE_BUILT_IN;
                     mInfo.densityDpi = (int)(phys.density * 160 + 0.5f);
                     mInfo.xDpi = phys.xDpi;
