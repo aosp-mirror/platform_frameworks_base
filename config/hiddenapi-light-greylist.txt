@@ -1006,6 +1006,7 @@ Landroid/net/wifi/ScanResult;->untrusted:Z
 Landroid/net/wifi/ScanResult;->wifiSsid:Landroid/net/wifi/WifiSsid;
 Landroid/net/wifi/WifiConfiguration;->apBand:I
 Landroid/net/wifi/WifiConfiguration;->apChannel:I
+Landroid/net/wifi/WifiConfiguration;->defaultGwMacAddress:Ljava/lang/String;
 Landroid/net/wifi/WifiConfiguration;->mIpConfiguration:Landroid/net/IpConfiguration;
 Landroid/net/wifi/WifiConfiguration;->validatedInternetAccess:Z
 Landroid/net/wifi/WifiEnterpriseConfig;->getCaCertificateAlias()Ljava/lang/String;
