@@ -99,6 +99,24 @@ CountMetricProducer::~CountMetricProducer() {
     VLOG("~CountMetricProducer() called");
 }
 
+void CountMetricProducer::dumpStatesLocked(FILE* out, bool verbose) const {
+    if (mCurrentSlicedCounter == nullptr ||
+        mCurrentSlicedCounter->size() == 0) {
+        return;
+    }
+
+    fprintf(out, "CountMetric %lld dimension size %lu\n", (long long)mMetricId,
+            (unsigned long)mCurrentSlicedCounter->size());
+    if (verbose) {
+        for (const auto& it : *mCurrentSlicedCounter) {
+            fprintf(out, "\t(what)%s\t(condition)%s  %lld\n",
+                it.first.getDimensionKeyInWhat().toString().c_str(),
+                it.first.getDimensionKeyInCondition().toString().c_str(),
+                (unsigned long long)it.second);
+        }
+    }
+}
+
 void CountMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eventTime) {
     VLOG("Metric %lld onSlicedConditionMayChange", (long long)mMetricId);
 }
