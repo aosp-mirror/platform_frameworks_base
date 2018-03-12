@@ -101,6 +101,8 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
+import android.os.ShellCallback;
+import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -5843,5 +5845,62 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private static int encodeBool(boolean b) {
         return b ? 1 : 0;
+    }
+
+    @Override
+    public void onShellCommand(FileDescriptor in, FileDescriptor out,
+            FileDescriptor err, String[] args, ShellCallback callback,
+            ResultReceiver resultReceiver) {
+        (new ShellCmd()).exec(this, in, out, err, args, callback, resultReceiver);
+    }
+
+    private class ShellCmd extends ShellCommand {
+
+        @Override
+        public int onCommand(String cmd) {
+            if (cmd == null) {
+                return handleDefaultCommands(cmd);
+            }
+            final PrintWriter pw = getOutPrintWriter();
+            try {
+                switch (cmd) {
+                    case "airplane-mode":
+                        final String action = getNextArg();
+                        if ("enable".equals(action)) {
+                            setAirplaneMode(true);
+                            return 0;
+                        } else if ("disable".equals(action)) {
+                            setAirplaneMode(false);
+                            return 0;
+                        } else if (action == null) {
+                            final ContentResolver cr = mContext.getContentResolver();
+                            final int enabled = Settings.Global.getInt(cr,
+                                    Settings.Global.AIRPLANE_MODE_ON);
+                            pw.println(enabled == 0 ? "disabled" : "enabled");
+                            return 0;
+                        } else {
+                            onHelp();
+                            return -1;
+                        }
+                    default:
+                        return handleDefaultCommands(cmd);
+                }
+            } catch (Exception e) {
+                pw.println(e);
+            }
+            return -1;
+        }
+
+        @Override
+        public void onHelp() {
+            PrintWriter pw = getOutPrintWriter();
+            pw.println("Connectivity service commands:");
+            pw.println("  help");
+            pw.println("    Print this help text.");
+            pw.println("  airplane-mode [enable|disable]");
+            pw.println("    Turn airplane mode on or off.");
+            pw.println("  airplane-mode");
+            pw.println("    Get airplane mode.");
+        }
     }
 }
