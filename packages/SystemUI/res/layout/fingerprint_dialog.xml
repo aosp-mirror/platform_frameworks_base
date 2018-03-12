@@ -35,7 +35,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:elevation="2dp"
-        android:background="@color/fingerprint_dialog_bg_color">
+        android:background="@drawable/fingerprint_dialog_bg">
 
         <TextView
             android:id="@+id/title"
@@ -45,7 +45,7 @@
             android:layout_marginEnd="24dp"
             android:layout_marginStart="24dp"
             android:layout_marginTop="24dp"
-            android:gravity="center"
+            android:gravity="@integer/fingerprint_dialog_text_gravity"
             android:textSize="20sp"
             android:maxLines="1"
             android:singleLine="true"
@@ -57,16 +57,16 @@
             android:id="@+id/subtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="8dp"
             android:layout_marginStart="24dp"
             android:layout_marginEnd="24dp"
-            android:gravity="center_horizontal"
-            android:textSize="14sp"
+            android:gravity="@integer/fingerprint_dialog_text_gravity"
+            android:textSize="16sp"
             android:maxLines="1"
             android:singleLine="true"
             android:ellipsize="marquee"
             android:marqueeRepeatLimit="marquee_forever"
-            android:textColor="@color/fingerprint_dialog_text_light_color"/>
+            android:textColor="@color/fingerprint_dialog_text_dark_color"/>
 
         <TextView
             android:id="@+id/description"
@@ -74,7 +74,8 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="24dp"
             android:layout_marginStart="24dp"
-            android:paddingTop="24dp"
+            android:gravity="@integer/fingerprint_dialog_text_gravity"
+            android:paddingTop="8dp"
             android:textSize="16sp"
             android:maxLines="4"
             android:textColor="@color/fingerprint_dialog_text_dark_color"/>
@@ -84,7 +85,7 @@
             android:layout_width="@dimen/fingerprint_dialog_fp_icon_size"
             android:layout_height="@dimen/fingerprint_dialog_fp_icon_size"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="48dp"
             android:scaleType="fitXY"
             android:contentDescription="@string/accessibility_fingerprint_dialog_fingerprint_icon" />
 
@@ -106,7 +107,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="72dip"
-            android:paddingTop="16dp"
+            android:paddingTop="24dp"
             android:layout_gravity="center_vertical"
             style="?android:attr/buttonBarStyle"
             android:orientation="horizontal"
