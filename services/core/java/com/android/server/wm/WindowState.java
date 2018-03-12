@@ -693,6 +693,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mOwnerCanAddInternalSystemWindow = ownerCanAddInternalSystemWindow;
         mWindowId = new WindowId(this);
         mAttrs.copyFrom(a);
+        mLastSurfaceInsets.set(mAttrs.surfaceInsets);
         mViewVisibility = viewVisibility;
         mPolicy = mService.mPolicy;
         mContext = mService.mContext;
