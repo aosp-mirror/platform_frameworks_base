@@ -45,6 +45,7 @@ import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.LocalServices;
 import com.google.android.collect.Lists;
 
 import libcore.util.HexEncoding;
@@ -1473,6 +1474,13 @@ public class LockPatternUtils {
         }
     }
 
+    private LockSettingsInternal getLockSettingsInternal() {
+        LockSettingsInternal service = LocalServices.getService(LockSettingsInternal.class);
+        if (service == null) {
+            throw new SecurityException("Only available to system server itself");
+        }
+        return service;
+    }
     /**
      * Create an escrow token for the current user, which can later be used to unlock FBE
      * or change user password.
@@ -1481,43 +1489,40 @@ public class LockPatternUtils {
      * confirm credential operation in order to activate the token for future use. If the user
      * has no secure lockscreen, then the token is activated immediately.
      *
+     * <p>This method is only available to code running in the system server process itself.
+     *
      * @return a unique 64-bit token handle which is needed to refer to this token later.
      */
     public long addEscrowToken(byte[] token, int userId) {
-        try {
-            return getLockSettings().addEscrowToken(token, userId);
-        } catch (RemoteException re) {
-            return 0L;
-        }
+        return getLockSettingsInternal().addEscrowToken(token, userId);
     }
 
     /**
      * Remove an escrow token.
+     *
+     * <p>This method is only available to code running in the system server process itself.
+     *
      * @return true if the given handle refers to a valid token previously returned from
      * {@link #addEscrowToken}, whether it's active or not. return false otherwise.
      */
     public boolean removeEscrowToken(long handle, int userId) {
-        try {
-            return getLockSettings().removeEscrowToken(handle, userId);
-        } catch (RemoteException re) {
-            return false;
-        }
+        return getLockSettingsInternal().removeEscrowToken(handle, userId);
     }
 
     /**
      * Check if the given escrow token is active or not. Only active token can be used to call
      * {@link #setLockCredentialWithToken} and {@link #unlockUserWithToken}
+     *
+     * <p>This method is only available to code running in the system server process itself.
      */
     public boolean isEscrowTokenActive(long handle, int userId) {
-        try {
-            return getLockSettings().isEscrowTokenActive(handle, userId);
-        } catch (RemoteException re) {
-            return false;
-        }
+        return getLockSettingsInternal().isEscrowTokenActive(handle, userId);
     }
 
     /**
      * Change a user's lock credential with a pre-configured escrow token.
+     *
+     * <p>This method is only available to code running in the system server process itself.
      *
      * @param credential The new credential to be set
      * @param type Credential type: password / pattern / none.
@@ -1530,55 +1535,55 @@ public class LockPatternUtils {
      */
     public boolean setLockCredentialWithToken(String credential, int type, int requestedQuality,
             long tokenHandle, byte[] token, int userId) {
-        try {
-            if (type != CREDENTIAL_TYPE_NONE) {
-                if (TextUtils.isEmpty(credential) || credential.length() < MIN_LOCK_PASSWORD_SIZE) {
-                    throw new IllegalArgumentException("password must not be null and at least "
-                            + "of length " + MIN_LOCK_PASSWORD_SIZE);
-                }
-                final int quality = computePasswordQuality(type, credential, requestedQuality);
-                if (!getLockSettings().setLockCredentialWithToken(credential, type, tokenHandle,
-                        token, quality, userId)) {
-                    return false;
-                }
-                setLong(PASSWORD_TYPE_KEY, quality, userId);
-
-                updateEncryptionPasswordIfNeeded(credential, quality, userId);
-                updatePasswordHistory(credential, userId);
-            } else {
-                if (!TextUtils.isEmpty(credential)) {
-                    throw new IllegalArgumentException("password must be emtpy for NONE type");
-                }
-                if (!getLockSettings().setLockCredentialWithToken(null, CREDENTIAL_TYPE_NONE,
-                        tokenHandle, token, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED,
-                        userId)) {
-                    return false;
-                }
-                setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED,
-                        userId);
-
-                if (userId == UserHandle.USER_SYSTEM) {
-                    // Set the encryption password to default.
-                    updateEncryptionPassword(StorageManager.CRYPT_TYPE_DEFAULT, null);
-                    setCredentialRequiredToDecrypt(false);
-                }
+        LockSettingsInternal localService = getLockSettingsInternal();
+        if (type != CREDENTIAL_TYPE_NONE) {
+            if (TextUtils.isEmpty(credential) || credential.length() < MIN_LOCK_PASSWORD_SIZE) {
+                throw new IllegalArgumentException("password must not be null and at least "
+                        + "of length " + MIN_LOCK_PASSWORD_SIZE);
             }
-            onAfterChangingPassword(userId);
-            return true;
-        } catch (RemoteException re) {
-            Log.e(TAG, "Unable to save lock password ", re);
-            re.rethrowFromSystemServer();
+            final int quality = computePasswordQuality(type, credential, requestedQuality);
+            if (!localService.setLockCredentialWithToken(credential, type, tokenHandle,
+                    token, quality, userId)) {
+                return false;
+            }
+            setLong(PASSWORD_TYPE_KEY, quality, userId);
+
+            updateEncryptionPasswordIfNeeded(credential, quality, userId);
+            updatePasswordHistory(credential, userId);
+        } else {
+            if (!TextUtils.isEmpty(credential)) {
+                throw new IllegalArgumentException("password must be emtpy for NONE type");
+            }
+            if (!localService.setLockCredentialWithToken(null, CREDENTIAL_TYPE_NONE,
+                    tokenHandle, token, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED,
+                    userId)) {
+                return false;
+            }
+            setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED,
+                    userId);
+
+            if (userId == UserHandle.USER_SYSTEM) {
+                // Set the encryption password to default.
+                updateEncryptionPassword(StorageManager.CRYPT_TYPE_DEFAULT, null);
+                setCredentialRequiredToDecrypt(false);
+            }
         }
-        return false;
+        onAfterChangingPassword(userId);
+        return true;
     }
 
-    public void unlockUserWithToken(long tokenHandle, byte[] token, int userId) {
-        try {
-            getLockSettings().unlockUserWithToken(tokenHandle, token, userId);
-        } catch (RemoteException re) {
-            Log.e(TAG, "Unable to unlock user with token", re);
-            re.rethrowFromSystemServer();
-        }
+    /**
+     * Unlock the specified user by an pre-activated escrow token. This should have the same effect
+     * on device encryption as the user entering his lockscreen credentials for the first time after
+     * boot, this includes unlocking the user's credential-encrypted storage as well as the keystore
+     *
+     * <p>This method is only available to code running in the system server process itself.
+     *
+     * @return {@code true} if the supplied token is valid and unlock succeeds,
+     *         {@code false} otherwise.
+     */
+    public boolean unlockUserWithToken(long tokenHandle, byte[] token, int userId) {
+        return getLockSettingsInternal().unlockUserWithToken(tokenHandle, token, userId);
     }
 
 

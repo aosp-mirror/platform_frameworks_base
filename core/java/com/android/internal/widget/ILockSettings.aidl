@@ -54,13 +54,6 @@ interface ILockSettings {
     void userPresent(int userId);
     int getStrongAuthForUser(int userId);
 
-    long addEscrowToken(in byte[] token, int userId);
-    boolean removeEscrowToken(long handle, int userId);
-    boolean isEscrowTokenActive(long handle, int userId);
-    boolean setLockCredentialWithToken(String credential, int type, long tokenHandle,
-            in byte[] token, int requestedQuality, int userId);
-    void unlockUserWithToken(long tokenHandle, in byte[] token, int userId);
-
     // Keystore RecoveryController methods.
     // {@code ServiceSpecificException} may be thrown to signal an error, which caller can
     // convert to  {@code RecoveryManagerException}.
