@@ -1556,8 +1556,8 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * @hide
      */
     public static KeyEvent obtain(long downTime, long eventTime, int action,
-                    int code, int repeat, int metaState,
-                    int deviceId, int scancode, int flags, int source, String characters) {
+            int code, int repeat, int metaState,
+            int deviceId, int scancode, int flags, int source, String characters) {
         KeyEvent ev = obtain();
         ev.mDownTime = downTime;
         ev.mEventTime = eventTime;

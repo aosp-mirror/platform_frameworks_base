@@ -333,7 +333,7 @@ static void pointerPropertiesFromNative(JNIEnv* env, const PointerProperties* po
 
 static jlong android_view_MotionEvent_nativeInitialize(JNIEnv* env, jclass clazz,
         jlong nativePtr,
-        jint deviceId, jint source, jint action, jint flags, jint edgeFlags,
+        jint deviceId, jint source, jint displayId, jint action, jint flags, jint edgeFlags,
         jint metaState, jint buttonState,
         jfloat xOffset, jfloat yOffset, jfloat xPrecision, jfloat yPrecision,
         jlong downTimeNanos, jlong eventTimeNanos,
@@ -372,8 +372,8 @@ static jlong android_view_MotionEvent_nativeInitialize(JNIEnv* env, jclass clazz
         env->DeleteLocalRef(pointerCoordsObj);
     }
 
-    event->initialize(deviceId, source, action, 0, flags, edgeFlags, metaState, buttonState,
-            xOffset, yOffset, xPrecision, yPrecision,
+    event->initialize(deviceId, source, displayId, action, 0, flags, edgeFlags, metaState,
+            buttonState, xOffset, yOffset, xPrecision, yPrecision,
             downTimeNanos, eventTimeNanos, pointerCount, pointerProperties, rawPointerCoords);
 
     return reinterpret_cast<jlong>(event);
@@ -598,6 +598,16 @@ static void android_view_MotionEvent_nativeSetSource(jlong nativePtr, jint sourc
     event->setSource(source);
 }
 
+static jint android_view_MotionEvent_nativeGetDisplayId(jlong nativePtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return event->getDisplayId();
+}
+
+static void android_view_MotionEvent_nativeSetDisplayId(jlong nativePtr, jint displayId) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return event->setDisplayId(displayId);
+}
+
 static jint android_view_MotionEvent_nativeGetAction(jlong nativePtr) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
     return event->getAction();
@@ -737,7 +747,7 @@ static void android_view_MotionEvent_nativeTransform(jlong nativePtr, jlong matr
 static const JNINativeMethod gMotionEventMethods[] = {
     /* name, signature, funcPtr */
     { "nativeInitialize",
-            "(JIIIIIIIFFFFJJI[Landroid/view/MotionEvent$PointerProperties;"
+            "(JIIIIIIIIFFFFJJI[Landroid/view/MotionEvent$PointerProperties;"
                     "[Landroid/view/MotionEvent$PointerCoords;)J",
             (void*)android_view_MotionEvent_nativeInitialize },
     { "nativeDispose",
@@ -792,8 +802,14 @@ static const JNINativeMethod gMotionEventMethods[] = {
             "(J)I",
             (void*)android_view_MotionEvent_nativeGetSource },
     { "nativeSetSource",
-            "(JI)I",
+            "(JI)V",
             (void*)android_view_MotionEvent_nativeSetSource },
+    { "nativeGetDisplayId",
+            "(J)I",
+            (void*)android_view_MotionEvent_nativeGetDisplayId },
+    { "nativeSetDisplayId",
+            "(JI)V",
+            (void*)android_view_MotionEvent_nativeSetDisplayId },
     { "nativeGetAction",
             "(J)I",
             (void*)android_view_MotionEvent_nativeGetAction },

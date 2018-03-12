@@ -1407,7 +1407,7 @@ static void nativeSetInputFilterEnabled(JNIEnv* /* env */, jclass /* clazz */,
 }
 
 static jint nativeInjectInputEvent(JNIEnv* env, jclass /* clazz */,
-        jlong ptr, jobject inputEventObj, jint displayId, jint injectorPid, jint injectorUid,
+        jlong ptr, jobject inputEventObj, jint injectorPid, jint injectorUid,
         jint syncMode, jint timeoutMillis, jint policyFlags) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
@@ -1420,7 +1420,7 @@ static jint nativeInjectInputEvent(JNIEnv* env, jclass /* clazz */,
         }
 
         return (jint) im->getInputManager()->getDispatcher()->injectInputEvent(
-                & keyEvent, displayId, injectorPid, injectorUid, syncMode, timeoutMillis,
+                & keyEvent, injectorPid, injectorUid, syncMode, timeoutMillis,
                 uint32_t(policyFlags));
     } else if (env->IsInstanceOf(inputEventObj, gMotionEventClassInfo.clazz)) {
         const MotionEvent* motionEvent = android_view_MotionEvent_getNativePtr(env, inputEventObj);
@@ -1430,7 +1430,7 @@ static jint nativeInjectInputEvent(JNIEnv* env, jclass /* clazz */,
         }
 
         return (jint) im->getInputManager()->getDispatcher()->injectInputEvent(
-                motionEvent, displayId, injectorPid, injectorUid, syncMode, timeoutMillis,
+                motionEvent, injectorPid, injectorUid, syncMode, timeoutMillis,
                 uint32_t(policyFlags));
     } else {
         jniThrowRuntimeException(env, "Invalid input event type.");
@@ -1674,7 +1674,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeUnregisterInputChannel },
     { "nativeSetInputFilterEnabled", "(JZ)V",
             (void*) nativeSetInputFilterEnabled },
-    { "nativeInjectInputEvent", "(JLandroid/view/InputEvent;IIIIII)I",
+    { "nativeInjectInputEvent", "(JLandroid/view/InputEvent;IIIII)I",
             (void*) nativeInjectInputEvent },
     { "nativeToggleCapsLock", "(JI)V",
             (void*) nativeToggleCapsLock },

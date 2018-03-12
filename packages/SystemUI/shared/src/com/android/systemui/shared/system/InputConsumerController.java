@@ -67,7 +67,7 @@ public class InputConsumerController {
         }
 
         @Override
-        public void onInputEvent(InputEvent event, int displayId) {
+        public void onInputEvent(InputEvent event) {
             boolean handled = true;
             try {
                 if (mListener != null && event instanceof MotionEvent) {
