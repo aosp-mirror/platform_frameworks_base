@@ -102,6 +102,7 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.widget.ICheckCredentialProgressCallback;
 import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockSettingsInternal;
 import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -436,6 +437,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         mStrongAuthTracker.register(mStrongAuth);
 
         mSpManager = injector.getSyntheticPasswordManager(mStorage);
+
+        LocalServices.addService(LockSettingsInternal.class, new LocalService());
     }
 
     /**
@@ -1041,14 +1044,10 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private boolean isUserSecure(int userId) {
         synchronized (mSpManager) {
-            try {
-                if (isSyntheticPasswordBasedCredentialLocked(userId)) {
-                    long handle = getSyntheticPasswordHandleLocked(userId);
-                    return mSpManager.getCredentialType(handle, userId) !=
-                            LockPatternUtils.CREDENTIAL_TYPE_NONE;
-                }
-            } catch (RemoteException e) {
-                // fall through
+            if (isSyntheticPasswordBasedCredentialLocked(userId)) {
+                long handle = getSyntheticPasswordHandleLocked(userId);
+                return mSpManager.getCredentialType(handle, userId) !=
+                        LockPatternUtils.CREDENTIAL_TYPE_NONE;
             }
         }
         return mStorage.hasCredential(userId);
@@ -2305,7 +2304,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 SyntheticPasswordManager.DEFAULT_HANDLE, userId);
     }
 
-    private boolean isSyntheticPasswordBasedCredentialLocked(int userId) throws RemoteException {
+    private boolean isSyntheticPasswordBasedCredentialLocked(int userId) {
         if (userId == USER_FRP) {
             final int type = mStorage.readPersistentDataBlock().type;
             return type == PersistentData.TYPE_SP || type == PersistentData.TYPE_SP_WEAVER;
@@ -2318,7 +2317,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @VisibleForTesting
-    protected boolean shouldMigrateToSyntheticPasswordLocked(int userId) throws RemoteException {
+    protected boolean shouldMigrateToSyntheticPasswordLocked(int userId) {
         long handle = getSyntheticPasswordHandleLocked(userId);
         // This is a global setting
         long enabled = getLong(SYNTHETIC_PASSWORD_ENABLED_KEY,
@@ -2326,7 +2325,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         return enabled != 0 && handle == SyntheticPasswordManager.DEFAULT_HANDLE;
     }
 
-    private void enableSyntheticPasswordLocked() throws RemoteException {
+    private void enableSyntheticPasswordLocked() {
         setLong(SYNTHETIC_PASSWORD_ENABLED_KEY, 1, UserHandle.USER_SYSTEM);
     }
 
@@ -2525,9 +2524,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mRecoverableKeyStoreManager.lockScreenSecretChanged(credentialType, credential, userId);
     }
 
-    @Override
-    public long addEscrowToken(byte[] token, int userId) throws RemoteException {
-        ensureCallerSystemUid();
+    private long addEscrowToken(byte[] token, int userId) throws RemoteException {
         if (DEBUG) Slog.d(TAG, "addEscrowToken: user=" + userId);
         synchronized (mSpManager) {
             enableSyntheticPasswordLocked();
@@ -2559,7 +2556,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    private void activateEscrowTokens(AuthenticationToken auth, int userId) throws RemoteException {
+    private void activateEscrowTokens(AuthenticationToken auth, int userId) {
         if (DEBUG) Slog.d(TAG, "activateEscrowTokens: user=" + userId);
         synchronized (mSpManager) {
             disableEscrowTokenOnNonManagedDevicesIfNeeded(userId);
@@ -2570,17 +2567,13 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    @Override
-    public boolean isEscrowTokenActive(long handle, int userId) throws RemoteException {
-        ensureCallerSystemUid();
+    private boolean isEscrowTokenActive(long handle, int userId) {
         synchronized (mSpManager) {
             return mSpManager.existsHandle(handle, userId);
         }
     }
 
-    @Override
-    public boolean removeEscrowToken(long handle, int userId) throws RemoteException {
-        ensureCallerSystemUid();
+    private boolean removeEscrowToken(long handle, int userId) {
         synchronized (mSpManager) {
             if (handle == getSyntheticPasswordHandleLocked(userId)) {
                 Slog.w(TAG, "Cannot remove password handle");
@@ -2598,10 +2591,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    @Override
-    public boolean setLockCredentialWithToken(String credential, int type, long tokenHandle,
+    private boolean setLockCredentialWithToken(String credential, int type, long tokenHandle,
             byte[] token, int requestedQuality, int userId) throws RemoteException {
-        ensureCallerSystemUid();
         boolean result;
         synchronized (mSpManager) {
             if (!mSpManager.hasEscrowData(userId)) {
@@ -2650,10 +2641,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         return true;
     }
 
-    @Override
-    public void unlockUserWithToken(long tokenHandle, byte[] token, int userId)
+    private boolean unlockUserWithToken(long tokenHandle, byte[] token, int userId)
             throws RemoteException {
-        ensureCallerSystemUid();
         AuthenticationResult authResult;
         synchronized (mSpManager) {
             if (!mSpManager.hasEscrowData(userId)) {
@@ -2663,11 +2652,12 @@ public class LockSettingsService extends ILockSettings.Stub {
                     tokenHandle, token, userId);
             if (authResult.authToken == null) {
                 Slog.w(TAG, "Invalid escrow token supplied");
-                return;
+                return false;
             }
         }
         unlockUser(userId, null, authResult.authToken.deriveDiskEncryptionKey());
         onAuthTokenKnownForUser(userId, authResult.authToken);
+        return true;
     }
 
     @Override
@@ -2732,17 +2722,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             if (isSyntheticPasswordBasedCredentialLocked(userId)) {
                 mSpManager.destroyEscrowData(userId);
             }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "disableEscrowTokenOnNonManagedDevices", e);
         } finally {
             Binder.restoreCallingIdentity(ident);
-        }
-    }
-
-    private void ensureCallerSystemUid() throws SecurityException {
-        final int callingUid = mInjector.binderGetCallingUid();
-        if (callingUid != Process.SYSTEM_UID) {
-            throw new SecurityException("Only system can call this API.");
         }
     }
 
@@ -2832,6 +2813,48 @@ public class LockSettingsService extends ILockSettings.Stub {
         private boolean isProvisioned() {
             return Settings.Global.getInt(mContext.getContentResolver(),
                     Settings.Global.DEVICE_PROVISIONED, 0) != 0;
+        }
+    }
+
+    private final class LocalService extends LockSettingsInternal {
+
+        @Override
+        public long addEscrowToken(byte[] token, int userId) {
+            try {
+                return LockSettingsService.this.addEscrowToken(token, userId);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+
+        @Override
+        public boolean removeEscrowToken(long handle, int userId) {
+            return LockSettingsService.this.removeEscrowToken(handle, userId);
+        }
+
+        @Override
+        public boolean isEscrowTokenActive(long handle, int userId) {
+            return LockSettingsService.this.isEscrowTokenActive(handle, userId);
+        }
+
+        @Override
+        public boolean setLockCredentialWithToken(String credential, int type, long tokenHandle,
+                byte[] token, int requestedQuality, int userId) {
+            try {
+                return LockSettingsService.this.setLockCredentialWithToken(credential, type,
+                        tokenHandle, token, requestedQuality, userId);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+
+        @Override
+        public boolean unlockUserWithToken(long tokenHandle, byte[] token, int userId) {
+            try {
+                return LockSettingsService.this.unlockUserWithToken(tokenHandle, token, userId);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
         }
     }
 }
