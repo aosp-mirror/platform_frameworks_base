@@ -3129,6 +3129,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             boolean activeWindowGone = true;
 
             final int windowCount = windows.size();
+
+            // We'll clear accessibility focus if the window with focus is no longer visible to
+            // accessibility services
+            boolean shouldClearAccessibilityFocus =
+                    mAccessibilityFocusedWindowId != INVALID_WINDOW_ID;
             if (windowCount > 0) {
                 for (int i = 0; i < windowCount; i++) {
                     WindowInfo windowInfo = windows.get(i);
@@ -3166,6 +3171,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     }
                     if (window.getId() == mAccessibilityFocusedWindowId) {
                         window.setAccessibilityFocused(true);
+                        shouldClearAccessibilityFocus = false;
                     }
                 }
             }
@@ -3175,6 +3181,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             final int oldWindowCount = oldWindowList.size();
             for (int i = oldWindowCount - 1; i >= 0; i--) {
                 oldWindowList.remove(i).recycle();
+            }
+
+            if (shouldClearAccessibilityFocus) {
+                clearAccessibilityFocus(mAccessibilityFocusedWindowId);
             }
         }
 
