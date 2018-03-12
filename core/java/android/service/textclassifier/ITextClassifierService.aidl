@@ -19,13 +19,14 @@ package android.service.textclassifier;
 import android.service.textclassifier.ITextClassificationCallback;
 import android.service.textclassifier.ITextLinksCallback;
 import android.service.textclassifier.ITextSelectionCallback;
+import android.view.textclassifier.SelectionEvent;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextLinks;
 import android.view.textclassifier.TextSelection;
 
 /**
  * TextClassifierService binder interface.
- * See TextClassifier for interface documentation.
+ * See TextClassifier (and TextClassifier.Logger) for interface documentation.
  * {@hide}
  */
 oneway interface ITextClassifierService {
@@ -44,4 +45,6 @@ oneway interface ITextClassifierService {
             in CharSequence text,
             in TextLinks.Options options,
             in ITextLinksCallback c);
+
+    void onSelectionEvent(in SelectionEvent event);
 }

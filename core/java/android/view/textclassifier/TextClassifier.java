@@ -323,6 +323,7 @@ public interface TextClassifier {
      * @see #generateLinks(CharSequence)
      * @see #generateLinks(CharSequence, TextLinks.Options)
      */
+    @WorkerThread
     default int getMaxGenerateLinksTextLength() {
         return Integer.MAX_VALUE;
     }
