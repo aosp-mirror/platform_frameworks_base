@@ -5501,6 +5501,12 @@ message MetricsEvent {
     SETTINGS_ZONE_PICKER_FIXED_OFFSET = 1357;
 
     // ---- End P Constants, all P constants go above this line ----
+
+    // First Q constant in master goes here:
+    // Please delete these lines and use 1500 for your first enum.
+
+    // ---- End Q Constants, all Q constants go above this line ----
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
