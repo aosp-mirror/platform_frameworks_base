@@ -61,7 +61,7 @@ public class FingerprintDialogView extends LinearLayout {
 
     private final IBinder mWindowToken = new Binder();
     private final Interpolator mLinearOutSlowIn;
-    private final Interpolator mFastOutLinearIn;
+    private final WindowManager mWindowManager;
     private final float mAnimationTranslationOffset;
     private final int mErrorTextColor;
     private final int mTextColor;
@@ -78,7 +78,7 @@ public class FingerprintDialogView extends LinearLayout {
         super(context);
         mHandler = handler;
         mLinearOutSlowIn = Interpolators.LINEAR_OUT_SLOW_IN;
-        mFastOutLinearIn = Interpolators.FAST_OUT_LINEAR_IN;
+        mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mAnimationTranslationOffset = getResources()
                 .getDimension(R.dimen.fingerprint_dialog_animation_translation_offset);
         mErrorTextColor = Color.parseColor(
@@ -184,6 +184,34 @@ public class FingerprintDialogView extends LinearLayout {
                         .setDuration(ANIMATION_DURATION)
                         .setInterpolator(mLinearOutSlowIn)
                         .withLayer()
+                        .start();
+            }
+        });
+    }
+
+    public void startDismiss() {
+        final Runnable endActionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                mWindowManager.removeView(FingerprintDialogView.this);
+            }
+        };
+
+        postOnAnimation(new Runnable() {
+            @Override
+            public void run() {
+                mLayout.animate()
+                        .alpha(0f)
+                        .setDuration(ANIMATION_DURATION)
+                        .setInterpolator(mLinearOutSlowIn)
+                        .withLayer()
+                        .start();
+                mDialog.animate()
+                        .translationY(mAnimationTranslationOffset)
+                        .setDuration(ANIMATION_DURATION)
+                        .setInterpolator(mLinearOutSlowIn)
+                        .withLayer()
+                        .withEndAction(endActionRunnable)
                         .start();
             }
         });
