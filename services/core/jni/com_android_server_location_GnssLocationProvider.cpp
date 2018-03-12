@@ -81,6 +81,7 @@ using android::hardware::Return;
 using android::hardware::Void;
 using android::hardware::hidl_vec;
 using android::hardware::hidl_death_recipient;
+using android::hardware::gnss::V1_0::GnssConstellationType;
 using android::hardware::gnss::V1_0::GnssLocation;
 using android::hardware::gnss::V1_0::GnssLocationFlags;
 
@@ -91,7 +92,6 @@ using android::hardware::gnss::V1_0::IAGnssRil;
 using android::hardware::gnss::V1_0::IAGnssRilCallback;
 using android::hardware::gnss::V1_0::IGnssBatching;
 using android::hardware::gnss::V1_0::IGnssBatchingCallback;
-using android::hardware::gnss::V1_0::IGnssConfiguration;
 using android::hardware::gnss::V1_0::IGnssDebug;
 using android::hardware::gnss::V1_0::IGnssGeofenceCallback;
 using android::hardware::gnss::V1_0::IGnssGeofencing;
@@ -108,6 +108,8 @@ using android::hidl::base::V1_0::IBase;
 
 using IGnss_V1_0 = android::hardware::gnss::V1_0::IGnss;
 using IGnss_V1_1 = android::hardware::gnss::V1_1::IGnss;
+using IGnssConfiguration_V1_0 = android::hardware::gnss::V1_0::IGnssConfiguration;
+using IGnssConfiguration_V1_1 = android::hardware::gnss::V1_1::IGnssConfiguration;
 using IGnssMeasurement_V1_0 = android::hardware::gnss::V1_0::IGnssMeasurement;
 using IGnssMeasurement_V1_1 = android::hardware::gnss::V1_1::IGnssMeasurement;
 using IGnssMeasurementCallback_V1_0 = android::hardware::gnss::V1_0::IGnssMeasurementCallback;
@@ -137,7 +139,8 @@ sp<IGnssGeofencing> gnssGeofencingIface = nullptr;
 sp<IAGnss> agnssIface = nullptr;
 sp<IGnssBatching> gnssBatchingIface = nullptr;
 sp<IGnssDebug> gnssDebugIface = nullptr;
-sp<IGnssConfiguration> gnssConfigurationIface = nullptr;
+sp<IGnssConfiguration_V1_0> gnssConfigurationIface = nullptr;
+sp<IGnssConfiguration_V1_1> gnssConfigurationIface_V1_1 = nullptr;
 sp<IGnssNi> gnssNiIface = nullptr;
 sp<IGnssMeasurement_V1_0> gnssMeasurementIface = nullptr;
 sp<IGnssMeasurement_V1_1> gnssMeasurementIface_V1_1 = nullptr;
@@ -1098,13 +1101,11 @@ struct GnssBatchingCallback : public IGnssBatchingCallback {
     * Methods from ::android::hardware::gps::V1_0::IGnssBatchingCallback
     * follow.
     */
-    Return<void> gnssLocationBatchCb(
-        const ::android::hardware::hidl_vec<GnssLocation> & locations)
+    Return<void> gnssLocationBatchCb(const hidl_vec<GnssLocation> & locations)
         override;
 };
 
-Return<void> GnssBatchingCallback::gnssLocationBatchCb(
-        const ::android::hardware::hidl_vec<GnssLocation> & locations) {
+Return<void> GnssBatchingCallback::gnssLocationBatchCb(const hidl_vec<GnssLocation> & locations) {
     JNIEnv* env = getJniEnv();
 
     jobjectArray jLocations = env->NewObjectArray(locations.size(),
@@ -1257,11 +1258,21 @@ static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass 
             gnssNiIface = gnssNi;
         }
 
-        auto gnssConfiguration = gnssHal->getExtensionGnssConfiguration();
-        if (!gnssConfiguration.isOk()) {
-            ALOGD("Unable to get a handle to GnssConfiguration");
+        if (gnssHal_V1_1 != nullptr) {
+            auto gnssConfiguration = gnssHal_V1_1->getExtensionGnssConfiguration_1_1();
+            if (!gnssConfiguration.isOk()) {
+                ALOGD("Unable to get a handle to GnssConfiguration");
+            } else {
+                gnssConfigurationIface_V1_1 = gnssConfiguration;
+                gnssConfigurationIface = gnssConfigurationIface_V1_1;
+            }
         } else {
-            gnssConfigurationIface = gnssConfiguration;
+            auto gnssConfiguration_V1_0 = gnssHal->getExtensionGnssConfiguration();
+            if (!gnssConfiguration_V1_0.isOk()) {
+                ALOGD("Unable to get a handle to GnssConfiguration");
+            } else {
+                gnssConfigurationIface = gnssConfiguration_V1_0;
+            }
         }
 
         auto gnssGeofencing = gnssHal->getExtensionGnssGeofencing();
@@ -1997,6 +2008,48 @@ static jboolean android_location_GnssLocationProvider_set_gnss_pos_protocol_sele
     }
 }
 
+static jboolean android_location_GnssLocationProvider_set_satellite_blacklist(
+        JNIEnv* env, jobject, jintArray constellations, jintArray sv_ids) {
+    if (gnssConfigurationIface_V1_1 == nullptr) {
+        ALOGI("No GNSS Satellite Blacklist interface available");
+        return JNI_FALSE;
+    }
+
+    jint *constellation_array = env->GetIntArrayElements(constellations, 0);
+    if (NULL == constellation_array) {
+        ALOGI("GetIntArrayElements returns NULL.");
+        return JNI_FALSE;
+    }
+    jsize length = env->GetArrayLength(constellations);
+
+    jint *sv_id_array = env->GetIntArrayElements(sv_ids, 0);
+    if (NULL == sv_id_array) {
+        ALOGI("GetIntArrayElements returns NULL.");
+        return JNI_FALSE;
+    }
+
+    if (length != env->GetArrayLength(sv_ids)) {
+        ALOGI("Lengths of constellations and sv_ids are inconsistent.");
+        return JNI_FALSE;
+    }
+
+    hidl_vec<IGnssConfiguration_V1_1::BlacklistedSource> sources;
+    sources.resize(length);
+
+    for (int i = 0; i < length; i++) {
+        sources[i].constellation = static_cast<GnssConstellationType>(constellation_array[i]);
+        sources[i].svid = sv_id_array[i];
+    }
+
+    auto result = gnssConfigurationIface_V1_1->setBlacklist(sources);
+    if (result.isOk()) {
+        return result;
+    } else {
+        return JNI_FALSE;
+    }
+}
+
+
 static jint android_location_GnssLocationProvider_get_batch_size(JNIEnv*, jclass) {
     if (gnssBatchingIface == nullptr) {
         return 0; // batching not supported, size = 0
@@ -2185,6 +2238,9 @@ static const JNINativeMethod sMethods[] = {
     {"native_set_emergency_supl_pdn",
             "(I)Z",
             reinterpret_cast<void *>(android_location_GnssLocationProvider_set_emergency_supl_pdn)},
+    {"native_set_satellite_blacklist",
+            "([I[I)Z",
+            reinterpret_cast<void *>(android_location_GnssLocationProvider_set_satellite_blacklist)},
     {"native_get_batch_size",
             "()I",
             reinterpret_cast<void *>(android_location_GnssLocationProvider_get_batch_size)},
