@@ -60,7 +60,7 @@ public class TransportClientManagerTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        mTransportClientManager = new TransportClientManager(mContext);
+        mTransportClientManager = new TransportClientManager(mContext, new TransportStats());
         mTransportComponent = new ComponentName(PACKAGE_NAME, CLASS_NAME);
         mBindIntent = new Intent(SERVICE_ACTION_TRANSPORT_HOST).setComponent(mTransportComponent);
 
