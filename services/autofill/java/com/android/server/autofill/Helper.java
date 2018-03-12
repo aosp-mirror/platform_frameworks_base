@@ -30,6 +30,7 @@ import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.util.ArrayUtils;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -168,21 +169,24 @@ public final class Helper {
 
     /**
      * Sanitize the {@code webDomain} property of the URL bar node on compat mode.
+     *
+     * @param structure Assist structure
+     * @param urlBarIds list of ids; only the first id found will be sanitized.
      */
     public static void sanitizeUrlBar(@NonNull AssistStructure structure,
-            @NonNull String urlBarId) {
+            @NonNull String[] urlBarIds) {
         final ViewNode urlBarNode = findViewNode(structure, (node) -> {
-            return urlBarId.equals(node.getIdEntry());
+            return ArrayUtils.contains(urlBarIds, node.getIdEntry());
         });
         if (urlBarNode != null) {
             final String domain = urlBarNode.getText().toString();
             if (domain.isEmpty()) {
-                if (sDebug) Slog.d(TAG, "sanitizeUrlBar(): empty on " + urlBarId);
+                if (sDebug) Slog.d(TAG, "sanitizeUrlBar(): empty on " + urlBarNode.getIdEntry());
                 return;
             }
             urlBarNode.setWebDomain(domain);
             if (sDebug) {
-                Slog.d(TAG, "sanitizeUrlBar(): id=" + urlBarId + ", domain="
+                Slog.d(TAG, "sanitizeUrlBar(): id=" + urlBarNode.getIdEntry() + ", domain="
                         + urlBarNode.getWebDomain());
             }
         }

@@ -7978,9 +7978,7 @@
              android.content.pm.PackageInfo#getLongVersionCode()} for the target package.
         -->
         <attr name="maxLongVersionCode" format="string" />
-        <!-- The resource id of view that contains the URL bar of the HTML page being loaded.
-             Typically used when compatibility mode is used in a browser.
-        -->
+        <!-- TODO(b/74445943): STOPSHIP (urlBarResourceId should be removed after P DP2 is branched)-->
         <attr name="urlBarResourceId" format="string" />
     </declare-styleable>
 

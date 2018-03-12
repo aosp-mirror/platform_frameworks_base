@@ -274,11 +274,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
                 if (mCompatMode) {
                     // Sanitize URL bar, if needed
-                    final String urlBarId = mService.getUrlBarResourceIdForCompatModeLocked(
+                    final String[] urlBarIds = mService.getUrlBarResourceIdsForCompatMode(
                             mComponentName.getPackageName());
-                    if (sDebug) Slog.d(TAG, "url_bar in compat mode: " + urlBarId);
-                    if (urlBarId != null) {
-                        Helper.sanitizeUrlBar(structure, urlBarId);
+                    if (sDebug) {
+                        Slog.d(TAG, "url_bars in compat mode: " + Arrays.toString(urlBarIds));
+                    }
+                    if (urlBarIds != null) {
+                        Helper.sanitizeUrlBar(structure, urlBarIds);
                     }
                 }
                 structure.sanitizeForParceling(true);
