@@ -23,6 +23,7 @@ import static junit.framework.Assert.assertTrue;
 
 import android.app.Activity;
 import android.app.Instrumentation;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Paint;
 import android.platform.test.annotations.Presubmit;
@@ -44,6 +45,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.lang.reflect.Field;
 import java.util.Locale;
 
 /**
@@ -320,6 +322,15 @@ public class TextViewTest {
         assertTrue(mTextView.useDynamicLayout());
     }
 
+    @Test
+    @UiThreadTest
+    public void testConstructor_doesNotLeaveTextNull() {
+        mTextView = new NullSetTextTextView(mActivity);
+        // Check that mText and mTransformed are empty string instead of null.
+        assertEquals("", mTextView.getText().toString());
+        assertEquals("", mTextView.getTransformed().toString());
+    }
+
     private String createLongText() {
         int size = 600 * 1000;
         final StringBuilder builder = new StringBuilder(size);
@@ -327,5 +338,27 @@ public class TextViewTest {
             builder.append('a');
         }
         return builder.toString();
+    }
+
+    private class NullSetTextTextView extends TextView {
+        NullSetTextTextView(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void setText(CharSequence text, BufferType type) {
+            // #setText will be called from the TextView constructor. Here we reproduce
+            // the situation when the method sets mText and mTransformed to null.
+            try {
+                final Field textField = TextView.class.getDeclaredField("mText");
+                textField.setAccessible(true);
+                textField.set(this, null);
+                final Field transformedField = TextView.class.getDeclaredField("mTransformed");
+                transformedField.setAccessible(true);
+                transformedField.set(this, null);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                // Empty.
+            }
+        }
     }
 }
