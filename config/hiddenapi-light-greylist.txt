@@ -685,7 +685,13 @@ Landroid/hardware/SystemSensorManager$BaseEventQueue;->dispatchFlushCompleteEven
 Landroid/hardware/SystemSensorManager$BaseEventQueue;->dispatchSensorEvent(I[FIJ)V
 Landroid/hardware/usb/IUsbManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/hardware/usb/UsbDeviceConnection;->mNativeContext:J
+Landroid/hardware/usb/UsbManager;->getPorts()[Landroid/hardware/usb/UsbPort;
+Landroid/hardware/usb/UsbManager;->getPortStatus(Landroid/hardware/usb/UsbPort;)Landroid/hardware/usb/UsbPortStatus;
 Landroid/hardware/usb/UsbManager;->setCurrentFunction(Ljava/lang/String;Z)V
+Landroid/hardware/usb/UsbManager;->setPortRoles(Landroid/hardware/usb/UsbPort;II)V
+Landroid/hardware/usb/UsbPortStatus;->getCurrentDataRole()I
+Landroid/hardware/usb/UsbPortStatus;->isConnected()Z
+Landroid/hardware/usb/UsbPortStatus;->isRoleCombinationSupported(II)Z
 Landroid/hardware/usb/UsbRequest;->mNativeContext:J
 Landroid/icu/impl/CurrencyData;-><init>()V
 Landroid/icu/impl/number/DecimalFormatProperties;->readObject(Ljava/io/ObjectInputStream;)V
