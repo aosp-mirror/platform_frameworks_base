@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package android.view.textclassifier.logging;
+package android.view.textclassifier;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.content.Context;
 import android.util.Log;
-import android.view.textclassifier.TextClassification;
-import android.view.textclassifier.TextClassifier;
-import android.view.textclassifier.TextSelection;
 
 import com.android.internal.util.Preconditions;
 
