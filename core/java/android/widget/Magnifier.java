@@ -23,6 +23,7 @@ import android.annotation.TestApi;
 import android.annotation.UiThread;
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Outline;
@@ -34,6 +35,7 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
+import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.DisplayListCanvas;
 import android.view.LayoutInflater;
@@ -49,6 +51,7 @@ import android.view.View;
 import android.view.ViewParent;
 import android.view.ViewRootImpl;
 
+import com.android.internal.R;
 import com.android.internal.util.Preconditions;
 
 /**
@@ -83,6 +86,8 @@ public final class Magnifier {
     private final int mBitmapHeight;
     // The elevation of the window containing the magnifier.
     private final float mWindowElevation;
+    // The corner radius of the window containing the magnifier.
+    private final float mWindowCornerRadius;
     // The center coordinates of the content that is to be magnified.
     private final Point mCenterZoomCoords = new Point();
     // Variables holding previous states, used for detecting redundant calls and invalidation.
@@ -104,17 +109,13 @@ public final class Magnifier {
     public Magnifier(@NonNull View view) {
         mView = Preconditions.checkNotNull(view);
         final Context context = mView.getContext();
-        final View content = LayoutInflater.from(context).inflate(
-                com.android.internal.R.layout.magnifier, null);
-        content.findViewById(com.android.internal.R.id.magnifier_inner).setClipToOutline(true);
-        mWindowWidth = context.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.magnifier_width);
-        mWindowHeight = context.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.magnifier_height);
-        mWindowElevation = context.getResources().getDimension(
-                com.android.internal.R.dimen.magnifier_elevation);
-        mZoom = context.getResources().getFloat(
-                com.android.internal.R.dimen.magnifier_zoom_scale);
+        final View content = LayoutInflater.from(context).inflate(R.layout.magnifier, null);
+        content.findViewById(R.id.magnifier_inner).setClipToOutline(true);
+        mWindowWidth = context.getResources().getDimensionPixelSize(R.dimen.magnifier_width);
+        mWindowHeight = context.getResources().getDimensionPixelSize(R.dimen.magnifier_height);
+        mWindowElevation = context.getResources().getDimension(R.dimen.magnifier_elevation);
+        mWindowCornerRadius = getDeviceDefaultDialogCornerRadius();
+        mZoom = context.getResources().getFloat(R.dimen.magnifier_zoom_scale);
         mBitmapWidth = Math.round(mWindowWidth / mZoom);
         mBitmapHeight = Math.round(mWindowHeight / mZoom);
         // The view's surface coordinates will not be updated until the magnifier is first shown.
@@ -123,6 +124,21 @@ public final class Magnifier {
 
     static {
         sPixelCopyHandlerThread.start();
+    }
+
+    /**
+     * Returns the device default theme dialog corner radius attribute.
+     * We retrieve this from the device default theme to avoid
+     * using the values set in the custom application themes.
+     */
+    private float getDeviceDefaultDialogCornerRadius() {
+        final Context deviceDefaultContext =
+                new ContextThemeWrapper(mView.getContext(), R.style.Theme_DeviceDefault);
+        final TypedArray ta = deviceDefaultContext.obtainStyledAttributes(
+                new int[]{android.R.attr.dialogCornerRadius});
+        final float dialogCornerRadius = ta.getDimension(0, 0);
+        ta.recycle();
+        return dialogCornerRadius;
     }
 
     /**
@@ -178,7 +194,8 @@ public final class Magnifier {
             if (mWindow == null) {
                 synchronized (mLock) {
                     mWindow = new InternalPopupWindow(mView.getContext(), mView.getDisplay(),
-                            getValidViewSurface(), mWindowWidth, mWindowHeight, mWindowElevation,
+                            getValidViewSurface(),
+                            mWindowWidth, mWindowHeight, mWindowElevation, mWindowCornerRadius,
                             Handler.getMain() /* draw the magnifier on the UI thread */, mLock,
                             mCallback);
                 }
@@ -271,7 +288,7 @@ public final class Magnifier {
         // Compute the position of the magnifier window. Again, this has to be relative to the
         // surface of the magnified view, as this surface is the parent of the magnifier surface.
         final int verticalOffset = mView.getContext().getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.magnifier_offset);
+                R.dimen.magnifier_offset);
         mWindowCoords.x = mCenterZoomCoords.x - mWindowWidth / 2;
         mWindowCoords.y = mCenterZoomCoords.y - mWindowHeight / 2 - verticalOffset;
     }
@@ -393,7 +410,7 @@ public final class Magnifier {
 
         InternalPopupWindow(final Context context, final Display display,
                 final Surface parentSurface,
-                final int width, final int height, final float elevation,
+                final int width, final int height, final float elevation, final float cornerRadius,
                 final Handler handler, final Object lock, final Callback callback) {
             mDisplay = display;
             mLock = lock;
@@ -424,7 +441,8 @@ public final class Magnifier {
             );
             mBitmapRenderNode = createRenderNodeForBitmap(
                     "magnifier content",
-                    elevation
+                    elevation,
+                    cornerRadius
             );
 
             final DisplayListCanvas canvas = mRenderer.getRootNode().start(width, height);
@@ -442,7 +460,8 @@ public final class Magnifier {
             mFrameDrawScheduled = false;
         }
 
-        private RenderNode createRenderNodeForBitmap(final String name, final float elevation) {
+        private RenderNode createRenderNodeForBitmap(final String name,
+                final float elevation, final float cornerRadius) {
             final RenderNode bitmapRenderNode = RenderNode.create(name, null);
 
             // Define the position of the bitmap in the parent render node. The surface regions
@@ -452,7 +471,7 @@ public final class Magnifier {
             bitmapRenderNode.setElevation(elevation);
 
             final Outline outline = new Outline();
-            outline.setRoundRect(0, 0, mContentWidth, mContentHeight, 3);
+            outline.setRoundRect(0, 0, mContentWidth, mContentHeight, cornerRadius);
             outline.setAlpha(1.0f);
             bitmapRenderNode.setOutline(outline);
             bitmapRenderNode.setClipToOutline(true);
@@ -658,8 +677,8 @@ public final class Magnifier {
         final Resources resources = Resources.getSystem();
         final float density = resources.getDisplayMetrics().density;
         final PointF size = new PointF();
-        size.x = resources.getDimension(com.android.internal.R.dimen.magnifier_width) / density;
-        size.y = resources.getDimension(com.android.internal.R.dimen.magnifier_height) / density;
+        size.x = resources.getDimension(R.dimen.magnifier_width) / density;
+        size.y = resources.getDimension(R.dimen.magnifier_height) / density;
         return size;
     }
 
