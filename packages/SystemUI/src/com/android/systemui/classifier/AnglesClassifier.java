@@ -79,8 +79,8 @@ public class AnglesClassifier extends StrokeClassifier {
     @Override
     public float getFalseTouchEvaluation(int type, Stroke stroke) {
         Data data = mStrokeMap.get(stroke);
-        return AnglesVarianceEvaluator.evaluate(data.getAnglesVariance())
-                + AnglesPercentageEvaluator.evaluate(data.getAnglesPercentage());
+        return AnglesVarianceEvaluator.evaluate(data.getAnglesVariance(), type)
+                + AnglesPercentageEvaluator.evaluate(data.getAnglesPercentage(), type);
     }
 
     private static class Data {

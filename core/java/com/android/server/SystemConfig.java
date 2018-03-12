@@ -284,8 +284,9 @@ public class SystemConfig {
         readPermissions(Environment.buildPath(
                 Environment.getVendorDirectory(), "etc", "permissions"), vendorPermissionFlag);
 
-        // Allow ODM to customize system configs around libs, features and apps
-        int odmPermissionFlag = ALLOW_LIBS | ALLOW_FEATURES | ALLOW_APP_CONFIGS;
+        // Allow ODM to customize system configs as much as Vendor, because /odm is another
+        // vendor partition other than /vendor.
+        int odmPermissionFlag = vendorPermissionFlag;
         readPermissions(Environment.buildPath(
                 Environment.getOdmDirectory(), "etc", "sysconfig"), odmPermissionFlag);
         readPermissions(Environment.buildPath(
@@ -631,7 +632,9 @@ public class SystemConfig {
                     // granting permissions to priv apps in the system partition and vice
                     // versa.
                     boolean vendor = permFile.toPath().startsWith(
-                            Environment.getVendorDirectory().toPath());
+                            Environment.getVendorDirectory().toPath())
+                            || permFile.toPath().startsWith(
+                                Environment.getOdmDirectory().toPath());
                     boolean product = permFile.toPath().startsWith(
                             Environment.getProductDirectory().toPath());
                     if (vendor) {

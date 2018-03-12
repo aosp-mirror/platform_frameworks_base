@@ -545,6 +545,12 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         public int getCameraLensCoverState();
 
         /**
+         * Switch the keyboard layout for the given device.
+         * Direction should be +1 or -1 to go to the next or previous keyboard layout.
+         */
+        public void switchKeyboardLayout(int deviceId, int direction);
+
+        /**
          * Switch the input method, to be precise, input method subtype.
          *
          * @param forwardDirection {@code true} to rotate in a forward direction.

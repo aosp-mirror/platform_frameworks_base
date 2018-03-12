@@ -20,6 +20,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.MathUtils;
 import android.util.Slog;
 import android.util.StatsLog;
 import android.view.KeyEvent;
@@ -49,7 +50,8 @@ import static com.android.keyguard.KeyguardSecurityModel.SecurityMode;
  */
 public class KeyguardBouncer {
 
-    final static private String TAG = "KeyguardBouncer";
+    private static final String TAG = "KeyguardBouncer";
+    static final float ALPHA_EXPANSION_THRESHOLD = 0.95f;
 
     protected final Context mContext;
     protected final ViewMediatorCallback mCallback;
@@ -86,13 +88,25 @@ public class KeyguardBouncer {
     }
 
     public void show(boolean resetSecuritySelection) {
+        show(resetSecuritySelection, true /* notifyFalsing */);
+    }
+
+    public void show(boolean resetSecuritySelection, boolean notifyFalsing) {
         final int keyguardUserId = KeyguardUpdateMonitor.getCurrentUser();
         if (keyguardUserId == UserHandle.USER_SYSTEM && UserManager.isSplitSystemUser()) {
             // In split system user mode, we never unlock system user.
             return;
         }
-        mFalsingManager.onBouncerShown();
         ensureView();
+
+        // On the keyguard, we want to show the bouncer when the user drags up, but it's
+        // not correct to end the falsing session. We still need to verify if those touches
+        // are valid.
+        // Later, at the end of the animation, when the bouncer is at the top of the screen,
+        // onFullyShown() will be called and FalsingManager will stop recording touches.
+        if (notifyFalsing) {
+            mFalsingManager.onBouncerShown();
+        }
         if (resetSecuritySelection) {
             // showPrimarySecurityScreen() updates the current security method. This is needed in
             // case we are already showing and the current security method changed.
@@ -124,6 +138,28 @@ public class KeyguardBouncer {
         DejankUtils.postAfterTraversal(mShowRunnable);
 
         mCallback.onBouncerVisiblityChanged(true /* shown */);
+    }
+
+    /**
+     * This method must be called at the end of the bouncer animation when
+     * the translation is performed manually by the user, otherwise FalsingManager
+     * will never be notified and its internal state will be out of sync.
+     */
+    public void onFullyShown() {
+        mFalsingManager.onBouncerShown();
+    }
+
+    /**
+     * This method must be called at the end of the bouncer animation when
+     * the translation is performed manually by the user, otherwise FalsingManager
+     * will never be notified and its internal state will be out of sync.
+     */
+    public void onFullyHidden() {
+        if (!mShowingSoon) {
+            cancelShowRunnable();
+            inflateView();
+            mFalsingManager.onBouncerHidden();
+        }
     }
 
     private final Runnable mShowRunnable = new Runnable() {
@@ -245,6 +281,18 @@ public class KeyguardBouncer {
             mKeyguardView.showPrimarySecurityScreen();
         }
         mBouncerPromptReason = mCallback.getBouncerPromptReason();
+    }
+
+    /**
+     * Current notification panel expansion
+     * @param fraction 0 when notification panel is collapsed and 1 when expanded.
+     * @see StatusBarKeyguardViewManager#onPanelExpansionChanged
+     */
+    public void setExpansion(float fraction) {
+        if (mKeyguardView != null) {
+            mKeyguardView.setAlpha(MathUtils.map(ALPHA_EXPANSION_THRESHOLD, 1, 1, 0, fraction));
+            mKeyguardView.setTranslationY(fraction * mKeyguardView.getHeight());
+        }
     }
 
     protected void ensureView() {
