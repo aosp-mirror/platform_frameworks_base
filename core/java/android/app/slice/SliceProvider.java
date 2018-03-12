@@ -16,7 +16,6 @@
 package android.app.slice;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.ContentProvider;
@@ -35,7 +34,6 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Process;
 import android.os.StrictMode;
 import android.os.StrictMode.ThreadPolicy;
@@ -46,7 +44,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * A SliceProvider allows an app to provide content to be displayed in system spaces. This content
@@ -162,18 +159,10 @@ public abstract class SliceProvider extends ContentProvider {
 
     private static final boolean DEBUG = false;
 
-    private String mBindingPkg;
-    private SliceManager mSliceManager;
+    private static final long SLICE_BIND_ANR = 2000;
 
-    /**
-     * Return the package name of the caller that initiated the binding request
-     * currently happening. The returned package will have been
-     * verified to belong to the calling UID. Returns {@code null} if not
-     * currently performing an {@link #onBindSlice(Uri, List)}.
-     */
-    public final @Nullable String getBindingPackage() {
-        return mBindingPkg;
-    }
+    private String mCallback;
+    private SliceManager mSliceManager;
 
     @Override
     public void attachInfo(Context context, ProviderInfo info) {
@@ -182,12 +171,12 @@ public abstract class SliceProvider extends ContentProvider {
     }
 
     /**
-     * Implemented to create a slice. Will be called on the main thread.
+     * Implemented to create a slice.
      * <p>
      * onBindSlice should return as quickly as possible so that the UI tied
      * to this slice can be responsive. No network or other IO will be allowed
      * during onBindSlice. Any loading that needs to be done should happen
-     * off the main thread with a call to {@link ContentResolver#notifyChange(Uri, ContentObserver)}
+     * in the background with a call to {@link ContentResolver#notifyChange(Uri, ContentObserver)}
      * when the app is ready to provide the complete data in onBindSlice.
      * <p>
      * The slice returned should have a spec that is compatible with one of
@@ -375,55 +364,32 @@ public abstract class SliceProvider extends ContentProvider {
     }
 
     private Collection<Uri> handleGetDescendants(Uri uri) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
+        mCallback = "onGetSliceDescendants";
+        Handler.getMain().postDelayed(mAnr, SLICE_BIND_ANR);
+        try {
             return onGetSliceDescendants(uri);
-        } else {
-            CountDownLatch latch = new CountDownLatch(1);
-            Collection<Uri>[] output = new Collection[1];
-            Handler.getMain().post(() -> {
-                output[0] = onGetSliceDescendants(uri);
-                latch.countDown();
-            });
-            try {
-                latch.await();
-                return output[0];
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+        } finally {
+            Handler.getMain().removeCallbacks(mAnr);
         }
     }
 
     private void handlePinSlice(Uri sliceUri) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
+        mCallback = "onSlicePinned";
+        Handler.getMain().postDelayed(mAnr, SLICE_BIND_ANR);
+        try {
             onSlicePinned(sliceUri);
-        } else {
-            CountDownLatch latch = new CountDownLatch(1);
-            Handler.getMain().post(() -> {
-                onSlicePinned(sliceUri);
-                latch.countDown();
-            });
-            try {
-                latch.await();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+        } finally {
+            Handler.getMain().removeCallbacks(mAnr);
         }
     }
 
     private void handleUnpinSlice(Uri sliceUri) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
+        mCallback = "onSliceUnpinned";
+        Handler.getMain().postDelayed(mAnr, SLICE_BIND_ANR);
+        try {
             onSliceUnpinned(sliceUri);
-        } else {
-            CountDownLatch latch = new CountDownLatch(1);
-            Handler.getMain().post(() -> {
-                onSliceUnpinned(sliceUri);
-                latch.countDown();
-            });
-            try {
-                latch.await();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+        } finally {
+            Handler.getMain().removeCallbacks(mAnr);
         }
     }
 
@@ -441,21 +407,12 @@ public abstract class SliceProvider extends ContentProvider {
                 return createPermissionSlice(getContext(), sliceUri, pkg);
             }
         }
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            return onBindSliceStrict(sliceUri, supportedSpecs, pkg);
-        } else {
-            CountDownLatch latch = new CountDownLatch(1);
-            Slice[] output = new Slice[1];
-            Handler.getMain().post(() -> {
-                output[0] = onBindSliceStrict(sliceUri, supportedSpecs, pkg);
-                latch.countDown();
-            });
-            try {
-                latch.await();
-                return output[0];
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+        mCallback = "onBindSlice";
+        Handler.getMain().postDelayed(mAnr, SLICE_BIND_ANR);
+        try {
+            return onBindSliceStrict(sliceUri, supportedSpecs);
+        } finally {
+            Handler.getMain().removeCallbacks(mAnr);
         }
     }
 
@@ -507,19 +464,21 @@ public abstract class SliceProvider extends ContentProvider {
         }
     }
 
-    private Slice onBindSliceStrict(Uri sliceUri, List<SliceSpec> supportedSpecs,
-            String callingPackage) {
+    private Slice onBindSliceStrict(Uri sliceUri, List<SliceSpec> supportedSpecs) {
         ThreadPolicy oldPolicy = StrictMode.getThreadPolicy();
         try {
             StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
                     .detectAll()
                     .penaltyDeath()
                     .build());
-            mBindingPkg = callingPackage;
             return onBindSlice(sliceUri, supportedSpecs);
         } finally {
-            mBindingPkg = null;
             StrictMode.setThreadPolicy(oldPolicy);
         }
     }
+
+    private final Runnable mAnr = () -> {
+        Process.sendSignal(Process.myPid(), Process.SIGNAL_QUIT);
+        Log.wtf(TAG, "Timed out while handling slice callback " + mCallback);
+    };
 }
