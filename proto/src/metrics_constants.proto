@@ -5511,6 +5511,36 @@ message MetricsEvent {
     // OS: P
     SETTINGS_PREVENT_RINGING = 1360;
 
+    // ACTION: Settings > Battery settings > Battery tip > Open app restriction page
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_TIP_OPEN_APP_RESTRICTION_PAGE = 1361;
+
+    // ACTION: Settings > Battery settings > Battery tip > Restrict app
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_TIP_RESTRICT_APP = 1362;
+
+    // ACTION: Settings > Battery settings > Battery tip > Unrestrict app
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_TIP_UNRESTRICT_APP = 1363;
+
+    // ACTION: Settings > Battery settings > Battery tip > Open smart battery page
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_TIP_OPEN_SMART_BATTERY = 1364;
+
+    // ACTION: Settings > Battery settings > Battery tip > Turn on battery saver
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_TIP_TURN_ON_BATTERY_SAVER = 1365;
+
+    // FIELD: type of anomaly in settings app
+    // CATEGORY: SETTINGS
+    // OS: P
+    FIELD_ANOMALY_TYPE = 1366;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
