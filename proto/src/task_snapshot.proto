@@ -27,4 +27,5 @@
      int32 inset_top = 3;
      int32 inset_right = 4;
      int32 inset_bottom = 5;
+     bool is_real_snapshot = 6;
  }

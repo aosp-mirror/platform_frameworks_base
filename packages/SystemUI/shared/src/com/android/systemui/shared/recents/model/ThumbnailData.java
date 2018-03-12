@@ -31,6 +31,7 @@ public class ThumbnailData {
     public int orientation;
     public Rect insets;
     public boolean reducedResolution;
+    public boolean isRealSnapshot;
     public float scale;
 
     public ThumbnailData() {
@@ -39,6 +40,7 @@ public class ThumbnailData {
         insets = new Rect();
         reducedResolution = false;
         scale = 1f;
+        isRealSnapshot = true;
     }
 
     public ThumbnailData(TaskSnapshot snapshot) {
@@ -47,5 +49,6 @@ public class ThumbnailData {
         orientation = snapshot.getOrientation();
         reducedResolution = snapshot.isReducedResolution();
         scale = snapshot.getScale();
+        isRealSnapshot = snapshot.isRealSnapshot();
     }
 }
