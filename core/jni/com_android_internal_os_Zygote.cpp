@@ -550,8 +550,21 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
   sigemptyset(&sigchld);
   sigaddset(&sigchld, SIGCHLD);
 
-  auto fail_fn = [env](const std::string& msg) __attribute__ ((noreturn)) {
-    env->FatalError(msg.c_str());
+  auto fail_fn = [env, java_se_name, is_system_server](const std::string& msg)
+      __attribute__ ((noreturn)) {
+    const char* se_name_c_str = nullptr;
+    std::unique_ptr<ScopedUtfChars> se_name;
+    if (java_se_name != nullptr) {
+      se_name.reset(new ScopedUtfChars(env, java_se_name));
+      se_name_c_str = se_name->c_str();
+    }
+    if (se_name_c_str == nullptr && is_system_server) {
+      se_name_c_str = "system_server";
+    }
+    const std::string& error_msg = (se_name_c_str == nullptr)
+        ? msg
+        : StringPrintf("(%s) %s", se_name_c_str, msg.c_str());
+    env->FatalError(error_msg.c_str());
     __builtin_unreachable();
   };
 
