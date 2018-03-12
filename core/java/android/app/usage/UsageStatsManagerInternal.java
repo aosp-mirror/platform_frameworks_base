@@ -59,6 +59,16 @@ public abstract class UsageStatsManagerInternal {
     public abstract void reportConfigurationChange(Configuration config, @UserIdInt int userId);
 
     /**
+     * Reports that an application has posted an interruptive notification.
+     *
+     * @param packageName The package name of the app that posted the notification
+     * @param channelId The ID of the NotificationChannel to which the notification was posted
+     * @param userId The user in which the notification was posted
+     */
+    public abstract void reportInterruptiveNotification(String packageName, String channelId,
+            @UserIdInt int userId);
+
+    /**
      * Reports that an action equivalent to a ShortcutInfo is taken by the user.
      *
      * @param packageName The package name of the shortcut publisher
