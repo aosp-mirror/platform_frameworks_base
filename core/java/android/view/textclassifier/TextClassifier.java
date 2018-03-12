@@ -28,7 +28,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
 import android.util.Slog;
-import android.view.textclassifier.logging.Logger;
 
 import com.android.internal.util.Preconditions;
 
