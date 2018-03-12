@@ -42,7 +42,7 @@ import java.io.File;
 /**
  * Test class for {@link TaskSnapshotPersister} and {@link TaskSnapshotLoader}
  *
- * runtest frameworks-services -c com.android.server.wm.TaskSnapshotPersisterLoaderTest
+ * atest FrameworksServicesTests:TaskSnapshotPersisterLoaderTest
  */
 @MediumTest
 @Presubmit
@@ -160,6 +160,23 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
 
         final TaskSnapshot snapshotNotExist = mLoader.loadTask(1, mTestUserId, false /* reduced */);
         assertNull(snapshotNotExist);
+    }
+
+    @Test
+    public void testIsRealSnapshotPersistAndLoadSnapshot() {
+        TaskSnapshot a = createSnapshot(1f /* scale */, true /* isRealSnapshot */);
+        TaskSnapshot b = createSnapshot(1f /* scale */, false /* isRealSnapshot */);
+        assertTrue(a.isRealSnapshot());
+        assertFalse(b.isRealSnapshot());
+        mPersister.persistSnapshot(1, mTestUserId, a);
+        mPersister.persistSnapshot(2, mTestUserId, b);
+        mPersister.waitForQueueEmpty();
+        final TaskSnapshot snapshotA = mLoader.loadTask(1, mTestUserId, false /* reduced */);
+        final TaskSnapshot snapshotB = mLoader.loadTask(2, mTestUserId, false /* reduced */);
+        assertNotNull(snapshotA);
+        assertNotNull(snapshotB);
+        assertTrue(snapshotA.isRealSnapshot());
+        assertFalse(snapshotB.isRealSnapshot());
     }
 
     @Test
