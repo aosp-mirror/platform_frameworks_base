@@ -1784,7 +1784,8 @@ public final class FloatingToolbar {
     private static Context applyDefaultTheme(Context originalContext) {
         TypedArray a = originalContext.obtainStyledAttributes(new int[]{R.attr.isLightTheme});
         boolean isLightTheme = a.getBoolean(0, true);
-        int themeId = isLightTheme ? R.style.Theme_Material_Light : R.style.Theme_Material;
+        int themeId
+                = isLightTheme ? R.style.Theme_DeviceDefault_Light : R.style.Theme_DeviceDefault;
         a.recycle();
         return new ContextThemeWrapper(originalContext, themeId);
     }
