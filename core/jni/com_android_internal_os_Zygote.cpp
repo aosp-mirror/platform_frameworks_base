@@ -591,12 +591,12 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
     fail_fn(error_msg);
   }
   if (gOpenFdTable == NULL) {
-    gOpenFdTable = FileDescriptorTable::Create(fds_to_ignore);
+    gOpenFdTable = FileDescriptorTable::Create(fds_to_ignore, &error_msg);
     if (gOpenFdTable == NULL) {
-      fail_fn(CREATE_ERROR("Unable to construct file descriptor table."));
+      fail_fn(error_msg);
     }
-  } else if (!gOpenFdTable->Restat(fds_to_ignore)) {
-    fail_fn(CREATE_ERROR("Unable to restat file descriptor table."));
+  } else if (!gOpenFdTable->Restat(fds_to_ignore, &error_msg)) {
+    fail_fn(error_msg);
   }
 
   pid_t pid = fork();
@@ -611,8 +611,8 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 
     // Re-open all remaining open file descriptors so that they aren't shared
     // with the zygote across a fork.
-    if (!gOpenFdTable->ReopenOrDetach()) {
-      fail_fn(CREATE_ERROR("Unable to reopen whitelisted descriptors."));
+    if (!gOpenFdTable->ReopenOrDetach(&error_msg)) {
+      fail_fn(error_msg);
     }
 
     if (sigprocmask(SIG_UNBLOCK, &sigchld, nullptr) == -1) {
