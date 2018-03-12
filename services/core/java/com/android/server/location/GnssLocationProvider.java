@@ -423,8 +423,8 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private final GnssStatusListenerHelper mListenerHelper;
     private final GnssMeasurementsProvider mGnssMeasurementsProvider;
     private final GnssNavigationMessageProvider mGnssNavigationMessageProvider;
-    private final FusedLocationListener mFusedLocationListener = new FusedLocationListener();
-    private static int sNumFusedLocationUpdatesRequests = 0;
+    private final LocationChangeListener mNetworkLocationListener = new NetworkLocationListener();
+    private final LocationChangeListener mFusedLocationListener = new FusedLocationListener();
 
     // Handler for processing events
     private Handler mHandler;
@@ -1097,30 +1097,31 @@ public class GnssLocationProvider implements LocationProviderInterface {
 
         LocationManager locationManager = (LocationManager) mContext.getSystemService(
                 Context.LOCATION_SERVICE);
+        String provider;
+        LocationChangeListener locationListener;
 
         if (independentFromGnss) {
             // For fast GNSS TTFF
-            Location networkLocation = getLastFreshLocation(locationManager,
-                    LocationManager.NETWORK_PROVIDER);
-            if (networkLocation != null) {
-                handleUpdateLocation(networkLocation);
-                return;
-            }
-            locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER,
-                    new NetworkLocationListener(),
-                    mHandler.getLooper());
+            provider = LocationManager.NETWORK_PROVIDER;
+            locationListener = mNetworkLocationListener;
         } else {
             // For Device-Based Hybrid (E911)
-            locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER,
-                    LOCATION_UPDATE_MIN_TIME_INTERVAL_MILLIS, /*minDistance=*/ 0,
-                    mFusedLocationListener, mHandler.getLooper());
-            sNumFusedLocationUpdatesRequests++;
-            mHandler.postDelayed(() -> {
-                if (--sNumFusedLocationUpdatesRequests == 0) {
-                    locationManager.removeUpdates(mFusedLocationListener);
-                }
-            }, LOCATION_UPDATE_DURATION_MILLIS);
+            provider = LocationManager.FUSED_PROVIDER;
+            locationListener = mFusedLocationListener;
         }
+
+        Log.i(TAG,
+                String.format("GNSS HAL Requesting location updates from %s provider.", provider));
+        locationManager.requestLocationUpdates(provider,
+                LOCATION_UPDATE_MIN_TIME_INTERVAL_MILLIS, /*minDistance=*/ 0,
+                locationListener, mHandler.getLooper());
+        locationListener.numLocationUpdateRequest++;
+        mHandler.postDelayed(() -> {
+            if (--locationListener.numLocationUpdateRequest == 0) {
+                Log.i(TAG, String.format("Removing location updates from %s provider.", provider));
+                locationManager.removeUpdates(locationListener);
+            }
+        }, LOCATION_UPDATE_DURATION_MILLIS);
     }
 
     private void injectBestLocation(Location location) {
@@ -2597,6 +2598,8 @@ public class GnssLocationProvider implements LocationProviderInterface {
     }
 
     private abstract class LocationChangeListener implements LocationListener {
+        int numLocationUpdateRequest;
+
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
         }
@@ -2624,7 +2627,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
         @Override
         public void onLocationChanged(Location location) {
             if (LocationManager.FUSED_PROVIDER.equals(location.getProvider())) {
-                Log.d(TAG, "fused location listener: " + location);
                 injectBestLocation(location);
             }
         }
