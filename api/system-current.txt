@@ -336,6 +336,9 @@ package android.app {
   }
 
   public class Notification implements android.os.Parcelable {
+    field public static final java.lang.String CATEGORY_CAR_EMERGENCY = "car_emergency";
+    field public static final java.lang.String CATEGORY_CAR_INFORMATION = "car_information";
+    field public static final java.lang.String CATEGORY_CAR_WARNING = "car_warning";
     field public static final java.lang.String EXTRA_ALLOW_DURING_SETUP = "android.allowDuringSetup";
     field public static final java.lang.String EXTRA_SUBSTITUTE_APP_NAME = "android.substName";
     field public static final int FLAG_AUTOGROUP_SUMMARY = 1024; // 0x400
