@@ -238,7 +238,6 @@ public class NotificationPanelView extends PanelView implements
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
     private boolean mNoVisibleNotifications = true;
     private ValueAnimator mDarkAnimator;
-    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private boolean mUserSetupComplete;
     private int mQsNotificationTopPadding;
     private float mExpandOffset;
@@ -265,10 +264,8 @@ public class NotificationPanelView extends PanelView implements
         mKeyguardStatusBar = findViewById(R.id.keyguard_header);
         mKeyguardStatusView = findViewById(R.id.keyguard_status_view);
 
-        mNotificationContainerParent = (NotificationsQuickSettingsContainer)
-                findViewById(R.id.notification_container_parent);
-        mNotificationStackScroller = (NotificationStackScrollLayout)
-                findViewById(R.id.notification_stack_scroller);
+        mNotificationContainerParent = findViewById(R.id.notification_container_parent);
+        mNotificationStackScroller = findViewById(R.id.notification_stack_scroller);
         mNotificationStackScroller.setOnHeightChangedListener(this);
         mNotificationStackScroller.setOverscrollTopChangedListener(this);
         mNotificationStackScroller.setOnEmptySpaceClickListener(this);
@@ -470,7 +467,9 @@ public class NotificationPanelView extends PanelView implements
                     getMaxPanelHeight(),
                     totalHeight,
                     mKeyguardStatusView.getHeight(),
-                    mDarkAmount);
+                    mDarkAmount,
+                    mStatusBar.isKeyguardCurrentlySecure(),
+                    mTracking);
             mClockPositionAlgorithm.run(mClockPositionResult);
             if (animate || mClockAnimator != null) {
                 startClockAnimation(mClockPositionResult.clockX, mClockPositionResult.clockY);
@@ -1710,7 +1709,16 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private void updateKeyguardBottomAreaAlpha() {
-        float alpha = Math.min(getKeyguardContentsAlpha(), 1 - getQsExpansionFraction());
+        // There are two possible panel expansion behaviors:
+        // • User dragging up to unlock: we want to fade out as quick as possible
+        //   (ALPHA_EXPANSION_THRESHOLD) to avoid seeing the bouncer over the bottom area.
+        // • User tapping on lock screen: bouncer won't be visible but panel expansion will
+        //   change due to "unlock hint animation." In this case, fading out the bottom area
+        //   would also hide the message that says "swipe to unlock," we don't want to do that.
+        float expansionAlpha = MathUtils.map(isUnlockHintRunning()
+                        ? 0 : KeyguardBouncer.ALPHA_EXPANSION_THRESHOLD, 1f,
+                0f, 1f, getExpandedFraction());
+        float alpha = Math.min(expansionAlpha, 1 - getQsExpansionFraction());
         mKeyguardBottomArea.setAlpha(alpha);
         mKeyguardBottomArea.setImportantForAccessibility(alpha == 0f
                 ? IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
@@ -1809,7 +1817,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     protected void onTrackingStarted() {
-        mFalsingManager.onTrackingStarted();
+        mFalsingManager.onTrackingStarted(mStatusBar.isKeyguardCurrentlySecure());
         super.onTrackingStarted();
         if (mQsFullyExpanded) {
             mQsExpandImmediate = true;
