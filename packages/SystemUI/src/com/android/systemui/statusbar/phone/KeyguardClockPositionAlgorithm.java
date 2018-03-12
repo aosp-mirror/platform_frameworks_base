@@ -79,14 +79,9 @@ public class KeyguardClockPositionAlgorithm {
     private int mMaxShadeBottom;
 
     /**
-     * Margin that we should respect within the available space.
+     * Minimum distance from the status bar.
      */
-    private int mContainerPadding;
-
-    /**
-     * Position where clock should be when the panel is collapsed.
-     */
-    private int mClockYTarget;
+    private int mContainerTopPadding;
 
     /**
      * @see NotificationPanelView#getMaxPanelHeight()
@@ -109,12 +104,22 @@ public class KeyguardClockPositionAlgorithm {
     private float mDarkAmount;
 
     /**
+     * If keyguard will require a password or just fade away.
+     */
+    private boolean mCurrentlySecure;
+
+    /**
+     * If notification panel view currently has a touch.
+     */
+    private boolean mTracking;
+
+    /**
      * Refreshes the dimension values.
      */
     public void loadDimens(Resources res) {
         mClockNotificationsMargin = res.getDimensionPixelSize(
                 R.dimen.keyguard_clock_notifications_margin);
-        mContainerPadding = res.getDimensionPixelSize(
+        mContainerTopPadding = res.getDimensionPixelSize(
                 R.dimen.keyguard_clock_top_margin);
         mBurnInPreventionOffsetX = res.getDimensionPixelSize(
                 R.dimen.burn_in_prevention_offset_x);
@@ -124,8 +129,8 @@ public class KeyguardClockPositionAlgorithm {
 
     public void setup(int minTopMargin, int maxShadeBottom, int notificationStackHeight,
             float expandedHeight, float maxPanelHeight, int parentHeight, int keyguardStatusHeight,
-            float dark) {
-        mMinTopMargin = minTopMargin;
+            float dark, boolean secure, boolean tracking) {
+        mMinTopMargin = minTopMargin + mContainerTopPadding;
         mMaxShadeBottom = maxShadeBottom;
         mNotificationStackHeight = notificationStackHeight;
         mExpandedHeight = expandedHeight;
@@ -133,13 +138,8 @@ public class KeyguardClockPositionAlgorithm {
         mHeight = parentHeight;
         mKeyguardStatusHeight = keyguardStatusHeight;
         mDarkAmount = dark;
-
-        // Where the clock should stop when swiping up.
-        // This should be outside of the display when unlocked or
-        // under then status bar when the bouncer will be shown
-        mClockYTarget = -mKeyguardStatusHeight;
-        // TODO: on bouncer animation follow-up CL
-        // mClockYTarget = mMinTopMargin + mContainerPadding;
+        mCurrentlySecure = secure;
+        mTracking = tracking;
     }
 
     public void run(Result result) {
@@ -173,8 +173,8 @@ public class KeyguardClockPositionAlgorithm {
 
         float y = containerCenter - mKeyguardStatusHeight * CLOCK_HEIGHT_WEIGHT
                 - mClockNotificationsMargin - mNotificationStackHeight / 2;
-        if (y < mMinTopMargin + mContainerPadding) {
-            y = mMinTopMargin + mContainerPadding;
+        if (y < mMinTopMargin) {
+            y = mMinTopMargin;
         }
 
         // Don't allow the clock base to be under half of the screen
@@ -190,18 +190,32 @@ public class KeyguardClockPositionAlgorithm {
         // Dark: Align the bottom edge of the clock at about half of the screen:
         final float clockYDark = getMaxClockY() + burnInPreventionOffsetY();
         float clockYRegular = getExpandedClockPosition();
+        float clockYTarget = mCurrentlySecure ? mMinTopMargin : -mKeyguardStatusHeight;
 
         // Move clock up while collapsing the shade
         final float shadeExpansion = mExpandedHeight / mMaxPanelHeight;
-        final float clockY = MathUtils.lerp(mClockYTarget, clockYRegular, shadeExpansion);
+        final float clockY = MathUtils.lerp(clockYTarget, clockYRegular, shadeExpansion);
 
         return (int) MathUtils.lerp(clockY, clockYDark, mDarkAmount);
     }
 
+    /**
+     * We might want to fade out the clock when the user is swiping up.
+     * One exception is when the bouncer will become visible, in this cause the clock
+     * should always persist.
+     *
+     * @param y Current clock Y.
+     * @return Alpha from 0 to 1.
+     */
     private float getClockAlpha(int y) {
-        float alphaKeyguard = Math.max(0, Math.min(1, (y - mMinTopMargin)
-                / Math.max(1f, getExpandedClockPosition() - mMinTopMargin)));
-        alphaKeyguard = Interpolators.ACCELERATE.getInterpolation(alphaKeyguard);
+        float alphaKeyguard;
+        if (mCurrentlySecure) {
+            alphaKeyguard = 1;
+        } else {
+            alphaKeyguard = Math.max(0, Math.min(1, (y - mMinTopMargin)
+                    / Math.max(1f, getExpandedClockPosition() - mMinTopMargin)));
+            alphaKeyguard = Interpolators.ACCELERATE.getInterpolation(alphaKeyguard);
+        }
         return MathUtils.lerp(alphaKeyguard, 1f, mDarkAmount);
     }
 
