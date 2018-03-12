@@ -3180,6 +3180,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
     // Called by window manager policy.  Not exposed externally.
     @Override
+    public void switchKeyboardLayout(int deviceId, int direction) {
+        mInputManager.switchKeyboardLayout(deviceId, direction);
+    }
+
+    // Called by window manager policy.  Not exposed externally.
+    @Override
     public void switchInputMethod(boolean forwardDirection) {
         final InputMethodManagerInternal inputMethodManagerInternal =
                 LocalServices.getService(InputMethodManagerInternal.class);
