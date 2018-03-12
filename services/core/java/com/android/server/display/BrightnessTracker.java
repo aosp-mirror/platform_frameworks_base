@@ -69,6 +69,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
@@ -657,7 +658,10 @@ public class BrightnessTracker {
     }
 
     public ParceledListSlice<AmbientBrightnessDayStats> getAmbientBrightnessStats(int userId) {
-        return new ParceledListSlice<>(mAmbientBrightnessStatsTracker.getUserStats(userId));
+        ArrayList<AmbientBrightnessDayStats> stats = mAmbientBrightnessStatsTracker.getUserStats(
+                userId);
+        return (stats != null) ? new ParceledListSlice<>(stats) : new ParceledListSlice<>(
+                Collections.EMPTY_LIST);
     }
 
     // Not allowed to keep the SensorEvent so used to copy the data we care about.

@@ -101,11 +101,6 @@ public interface NotificationPresenter extends NotificationData.Environment,
     void updateNotificationViews();
 
     /**
-     * @return true iff the device is dozing
-     */
-    boolean isDozing();
-
-    /**
      * Returns the maximum number of notifications to show while locked.
      *
      * @param recompute whether something has changed that means we should recompute this value

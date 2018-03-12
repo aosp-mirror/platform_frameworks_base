@@ -1296,7 +1296,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mDozeScrimController, keyguardViewMediator,
                 mScrimController, this, UnlockMethodCache.getInstance(mContext));
         mStatusBarKeyguardViewManager = keyguardViewMediator.registerStatusBar(this,
-                getBouncerContainer(), mFingerprintUnlockController);
+                getBouncerContainer(), mNotificationPanel, mFingerprintUnlockController);
         mKeyguardIndicationController
                 .setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mFingerprintUnlockController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
@@ -4603,6 +4603,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mAmbientIndicationContainer instanceof DozeReceiver) {
             ((DozeReceiver) mAmbientIndicationContainer).setDozing(mDozing);
         }
+        mEntryManager.updateNotifications();
         updateDozingState();
         updateReportRejectedTouchVisibility();
         Trace.endSection();
@@ -4618,7 +4619,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                 == FingerprintUnlockController.MODE_WAKE_AND_UNLOCK;
 
         if (mBouncerShowing) {
-            mScrimController.transitionTo(ScrimState.BOUNCER);
+            mScrimController.transitionTo(
+                    mIsOccluded ? ScrimState.BOUNCER_OCCLUDED : ScrimState.BOUNCER);
         } else if (mLaunchCameraOnScreenTurningOn || isInLaunchTransition()) {
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
         } else if (mBrightnessMirrorVisible) {

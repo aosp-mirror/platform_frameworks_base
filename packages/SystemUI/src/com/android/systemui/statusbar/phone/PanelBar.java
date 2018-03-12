@@ -27,6 +27,7 @@ public abstract class PanelBar extends FrameLayout {
     public static final boolean DEBUG = false;
     public static final String TAG = PanelBar.class.getSimpleName();
     private static final boolean SPEW = false;
+    private boolean mBouncerShowing;
 
     public static final void LOG(String fmt, Object... args) {
         if (!DEBUG) return;
@@ -65,6 +66,7 @@ public abstract class PanelBar extends FrameLayout {
     }
 
     public void setBouncerShowing(boolean showing) {
+        mBouncerShowing = showing;
         int important = showing ? IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
                 : IMPORTANT_FOR_ACCESSIBILITY_AUTO;
 
@@ -122,7 +124,7 @@ public abstract class PanelBar extends FrameLayout {
         boolean fullyOpened = false;
         if (SPEW) LOG("panelExpansionChanged: start state=%d", mState);
         PanelView pv = mPanel;
-        pv.setVisibility(expanded ? VISIBLE : INVISIBLE);
+        pv.setVisibility(expanded || mBouncerShowing ? VISIBLE : INVISIBLE);
         // adjust any other panels that may be partially visible
         if (expanded) {
             if (mState == STATE_CLOSED) {

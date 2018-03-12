@@ -120,6 +120,12 @@ class Tuner extends ITuner.Stub {
         }
     }
 
+    private boolean checkConfiguredLocked() {
+        if (mTunerCallback.isInitialConfigurationDone()) return true;
+        Slog.w(TAG, "Initial configuration is still pending, skipping the operation");
+        return false;
+    }
+
     @Override
     public void setConfiguration(RadioManager.BandConfig config) {
         if (config == null) {
@@ -170,6 +176,7 @@ class Tuner extends ITuner.Stub {
     public void step(boolean directionDown, boolean skipSubChannel) {
         synchronized (mLock) {
             checkNotClosedLocked();
+            if (!checkConfiguredLocked()) return;
             nativeStep(mNativeContext, directionDown, skipSubChannel);
         }
     }
@@ -178,6 +185,7 @@ class Tuner extends ITuner.Stub {
     public void scan(boolean directionDown, boolean skipSubChannel) {
         synchronized (mLock) {
             checkNotClosedLocked();
+            if (!checkConfiguredLocked()) return;
             nativeScan(mNativeContext, directionDown, skipSubChannel);
         }
     }
@@ -190,6 +198,7 @@ class Tuner extends ITuner.Stub {
         Slog.i(TAG, "Tuning to " + selector);
         synchronized (mLock) {
             checkNotClosedLocked();
+            if (!checkConfiguredLocked()) return;
             nativeTune(mNativeContext, selector);
         }
     }

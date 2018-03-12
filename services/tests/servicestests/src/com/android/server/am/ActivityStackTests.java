@@ -26,6 +26,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECOND
 
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYED;
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYING;
+import static com.android.server.am.ActivityStack.ActivityState.PAUSING;
+import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 
 import static org.junit.Assert.assertEquals;
@@ -99,7 +101,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         // Simulate the a resumed activity set during
         // {@link ActivityStack#resumeTopActivityUncheckedLocked}.
         mSupervisor.inResumeTopActivity = true;
-        mStack.mResumedActivity = r;
+        r.setState(RESUMED, "testNoPauseDuringResumeTopActivity");
 
         final boolean waiting = mStack.goToSleepIfPossible(false);
 
@@ -107,7 +109,18 @@ public class ActivityStackTests extends ActivityTestsBase {
         assertFalse(waiting);
 
         // Make sure the resumed activity is untouched.
-        assertEquals(mStack.mResumedActivity, r);
+        assertEquals(mStack.getResumedActivity(), r);
+    }
+
+    @Test
+    public void testResumedActivity() throws Exception {
+        final ActivityRecord r = new ActivityBuilder(mService).setTask(mTask).build();
+        assertEquals(mStack.getResumedActivity(), null);
+        r.setState(RESUMED, "testResumedActivity");
+        assertEquals(mStack.getResumedActivity(), r);
+        r.setState(PAUSING, "testResumedActivity");
+        assertEquals(mStack.getResumedActivity(), null);
+
     }
 
     @Test

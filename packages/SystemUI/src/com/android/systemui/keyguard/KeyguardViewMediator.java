@@ -83,6 +83,7 @@ import com.android.systemui.SystemUIFactory;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.phone.FingerprintUnlockController;
+import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 
@@ -2011,8 +2012,9 @@ public class KeyguardViewMediator extends SystemUI {
     }
 
     public StatusBarKeyguardViewManager registerStatusBar(StatusBar statusBar,
-            ViewGroup container, FingerprintUnlockController fingerprintUnlockController) {
-        mStatusBarKeyguardViewManager.registerStatusBar(statusBar, container,
+            ViewGroup container, NotificationPanelView panelView,
+            FingerprintUnlockController fingerprintUnlockController) {
+        mStatusBarKeyguardViewManager.registerStatusBar(statusBar, container, panelView,
                 fingerprintUnlockController, mDismissCallbackRegistry);
         return mStatusBarKeyguardViewManager;
     }

@@ -101,6 +101,7 @@ public class ActivityTestsBase {
     protected ActivityManagerService setupActivityManagerService(ActivityManagerService service) {
         service = spy(service);
         doReturn(mock(IPackageManager.class)).when(service).getPackageManager();
+        doNothing().when(service).grantEphemeralAccessLocked(anyInt(), any(), anyInt(), anyInt());
         service.mWindowManager = prepareMockWindowManager();
         return service;
     }
@@ -131,6 +132,11 @@ public class ActivityTestsBase {
             return this;
         }
 
+        static ComponentName getDefaultComponent() {
+            return ComponentName.createRelative(DEFAULT_COMPONENT_PACKAGE_NAME,
+                    DEFAULT_COMPONENT_PACKAGE_NAME);
+        }
+
         ActivityBuilder setTask(TaskRecord task) {
             mTaskRecord = task;
             return this;
@@ -149,10 +155,6 @@ public class ActivityTestsBase {
         ActivityBuilder setUid(int uid) {
             mUid = uid;
             return this;
-        }
-
-        String getDefaultComponentPackageName() {
-            return DEFAULT_COMPONENT_PACKAGE_NAME;
         }
 
         ActivityRecord build() {
@@ -371,7 +373,8 @@ public class ActivityTestsBase {
 
         // Just return the current front task. This is called internally so we cannot use spy to mock this out.
         @Override
-        ActivityStack getNextFocusableStackLocked(ActivityStack currentFocus) {
+        ActivityStack getNextFocusableStackLocked(ActivityStack currentFocus,
+                boolean ignoreCurrent) {
             return mFocusedStack;
         }
     }

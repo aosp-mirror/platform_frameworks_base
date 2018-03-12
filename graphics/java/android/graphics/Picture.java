@@ -160,6 +160,7 @@ public class Picture {
      * properly and are highly discouraged.
      *
      * @see #writeToStream(java.io.OutputStream)
+     * @removed
      * @deprecated The recommended alternative is to not use writeToStream and
      * instead draw the picture into a Bitmap from which you can persist it as
      * raw or compressed pixels.
@@ -176,6 +177,7 @@ public class Picture {
      * there is no guarantee that the Picture can be successfully reconstructed.
      *
      * @see #createFromStream(java.io.InputStream)
+     * @removed
      * @deprecated The recommended alternative is to draw the picture into a
      * Bitmap from which you can persist it as raw or compressed pixels.
      */

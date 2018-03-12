@@ -2596,7 +2596,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         "Failed to load frameworks package; check log for warnings");
             }
 
-            // Collected privileged system packages.
+            // Collect privileged system packages.
             final File privilegedAppDir = new File(Environment.getRootDirectory(), "priv-app");
             scanDirTracedLI(privilegedAppDir,
                     mDefParseFlags
@@ -2615,7 +2615,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     | SCAN_AS_SYSTEM,
                     0);
 
-            // Collected privileged vendor packages.
+            // Collect privileged vendor packages.
             File privilegedVendorAppDir = new File(Environment.getVendorDirectory(), "priv-app");
             try {
                 privilegedVendorAppDir = privilegedVendorAppDir.getCanonicalFile();
@@ -2639,6 +2639,40 @@ public class PackageManagerService extends IPackageManager.Stub
                 // failed to look up canonical path, continue with original one
             }
             scanDirTracedLI(vendorAppDir,
+                    mDefParseFlags
+                    | PackageParser.PARSE_IS_SYSTEM_DIR,
+                    scanFlags
+                    | SCAN_AS_SYSTEM
+                    | SCAN_AS_VENDOR,
+                    0);
+
+            // Collect privileged odm packages. /odm is another vendor partition
+            // other than /vendor.
+            File privilegedOdmAppDir = new File(Environment.getOdmDirectory(),
+                        "priv-app");
+            try {
+                privilegedOdmAppDir = privilegedOdmAppDir.getCanonicalFile();
+            } catch (IOException e) {
+                // failed to look up canonical path, continue with original one
+            }
+            scanDirTracedLI(privilegedOdmAppDir,
+                    mDefParseFlags
+                    | PackageParser.PARSE_IS_SYSTEM_DIR,
+                    scanFlags
+                    | SCAN_AS_SYSTEM
+                    | SCAN_AS_VENDOR
+                    | SCAN_AS_PRIVILEGED,
+                    0);
+
+            // Collect ordinary odm packages. /odm is another vendor partition
+            // other than /vendor.
+            File odmAppDir = new File(Environment.getOdmDirectory(), "app");
+            try {
+                odmAppDir = odmAppDir.getCanonicalFile();
+            } catch (IOException e) {
+                // failed to look up canonical path, continue with original one
+            }
+            scanDirTracedLI(odmAppDir,
                     mDefParseFlags
                     | PackageParser.PARSE_IS_SYSTEM_DIR,
                     scanFlags
@@ -3374,6 +3408,13 @@ public class PackageManagerService extends IPackageManager.Stub
         // Return the versioned package cache directory. This is something like
         // "/data/system/package_cache/1"
         File cacheDir = FileUtils.createDir(cacheBaseDir, PACKAGE_PARSER_CACHE_VERSION);
+
+        if (cacheDir == null) {
+            // Something went wrong. Attempt to delete everything and return.
+            Slog.wtf(TAG, "Cache directory cannot be created - wiping base dir " + cacheBaseDir);
+            FileUtils.deleteContentsAndDir(cacheBaseDir);
+            return null;
+        }
 
         // The following is a workaround to aid development on non-numbered userdebug
         // builds or cases where "adb sync" is used on userdebug builds. If we detect that

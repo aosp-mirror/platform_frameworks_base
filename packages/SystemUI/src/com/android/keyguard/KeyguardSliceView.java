@@ -331,6 +331,37 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         updateVisibility();
     }
 
+    public static class Row extends LinearLayout {
+
+        public Row(Context context) {
+            super(context);
+        }
+
+        public Row(Context context, AttributeSet attrs) {
+            super(context, attrs);
+        }
+
+        public Row(Context context, AttributeSet attrs, int defStyleAttr) {
+            super(context, attrs, defStyleAttr);
+        }
+
+        public Row(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+            super(context, attrs, defStyleAttr, defStyleRes);
+        }
+
+        @Override
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            int width = MeasureSpec.getSize(widthMeasureSpec);
+            for (int i = 0; i < getChildCount(); i++) {
+                View child = getChildAt(i);
+                if (child instanceof KeyguardSliceButton) {
+                    ((KeyguardSliceButton) child).setMaxWidth(width / 2);
+                }
+            }
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        }
+    }
+
     /**
      * Representation of an item that appears under the clock on main keyguard message.
      */
@@ -344,7 +375,6 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
             setPadding(horizontalPadding / 2, 0, horizontalPadding / 2, 0);
             setCompoundDrawablePadding((int) context.getResources()
                     .getDimension(R.dimen.widget_icon_padding));
-            setMaxWidth(KeyguardSliceView.this.getWidth() / 2);
             setMaxLines(1);
             setEllipsize(TruncateAt.END);
         }

@@ -427,6 +427,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 KeyEvent.KEYCODE_CALCULATOR, Intent.CATEGORY_APP_CALCULATOR);
     }
 
+    private static final int USER_ACTIVITY_NOTIFICATION_DELAY = 200;
+
     /** Amount of time (in milliseconds) to wait for windows drawn before powering on. */
     static final int WAITING_FOR_DRAWN_TIMEOUT = 1000;
 
@@ -674,6 +676,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private boolean mPendingKeyguardOccluded;
     private boolean mKeyguardOccludedChanged;
+    private boolean mNotifyUserActivity;
 
     boolean mShowingDream;
     private boolean mLastShowingDream;
@@ -831,6 +834,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_LAUNCH_ASSIST = 26;
     private static final int MSG_LAUNCH_ASSIST_LONG_PRESS = 27;
     private static final int MSG_POWER_VERY_LONG_PRESS = 28;
+    private static final int MSG_NOTIFY_USER_ACTIVITY = 29;
 
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS = 0;
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION = 1;
@@ -931,6 +935,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_HANDLE_ALL_APPS:
                     launchAllAppsAction();
+                    break;
+                case MSG_NOTIFY_USER_ACTIVITY:
+                    removeMessages(MSG_NOTIFY_USER_ACTIVITY);
+                    Intent intent = new Intent(ACTION_USER_ACTIVITY_NOTIFICATION);
+                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                    mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
+                            android.Manifest.permission.USER_ACTIVITY);
                     break;
             }
         }
@@ -3869,6 +3880,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             hideRecentApps(true, false);
         }
 
+        // Handle keyboard layout switching.
+        // TODO: Deprecate this behavior when we fully migrate to IME subtype-based layout rotation.
+        if (down && repeatCount == 0 && keyCode == KeyEvent.KEYCODE_SPACE
+                && ((metaState & KeyEvent.META_CTRL_MASK) != 0)) {
+            int direction = (metaState & KeyEvent.META_SHIFT_MASK) != 0 ? -1 : 1;
+            mWindowManagerFuncs.switchKeyboardLayout(event.getDeviceId(), direction);
+            return -1;
+        }
+
         // Handle input method switching.
         if (down && repeatCount == 0
                 && (keyCode == KeyEvent.KEYCODE_LANGUAGE_SWITCH
@@ -5083,11 +5103,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         pf.set(displayFrames.mOverscan);
                     } else if (canHideNavigationBar()
                             && (sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
-                            && type >= FIRST_APPLICATION_WINDOW && type <= LAST_SUB_WINDOW) {
+                            && (type >= FIRST_APPLICATION_WINDOW && type <= LAST_SUB_WINDOW
+                            || type == TYPE_VOLUME_OVERLAY)) {
                         // Asking for layout as if the nav bar is hidden, lets the application
                         // extend into the unrestricted overscan screen area. We only do this for
-                        // application windows to ensure no window that can be above the nav bar can
-                        // do this.
+                        // application windows and certain system windows to ensure no window that
+                        // can be above the nav bar can do this.
                         df.set(displayFrames.mOverscan);
                         pf.set(displayFrames.mOverscan);
                         // We need to tell the app about where the frame inside the overscan is, so
@@ -5147,15 +5168,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (DEBUG_LAYOUT) Slog.v(TAG, String.format(
                             "Laying out IN_SCREEN status bar window: (%d,%d - %d,%d)",
                             pf.left, pf.top, pf.right, pf.bottom));
-                } else if (type == TYPE_VOLUME_OVERLAY) {
-                    // Volume overlay covers everything, including the status and navbar
-                    cf.set(displayFrames.mUnrestricted);
-                    of.set(displayFrames.mUnrestricted);
-                    df.set(displayFrames.mUnrestricted);
-                    pf.set(displayFrames.mUnrestricted);
-                    if (DEBUG_LAYOUT) Slog.v(TAG, String.format(
-                                    "Laying out IN_SCREEN status bar window: (%d,%d - %d,%d)",
-                                    pf.left, pf.top, pf.right, pf.bottom));
                 } else if (type == TYPE_NAVIGATION_BAR || type == TYPE_NAVIGATION_BAR_PANEL) {
                     // The navigation bar has Real Ultimate Power.
                     of.set(displayFrames.mUnrestricted);
@@ -5239,8 +5251,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         "): normal window");
                 // Otherwise, a normal window must be placed inside the content
                 // of all screen decorations.
-                if (type == TYPE_STATUS_BAR_PANEL || type == TYPE_VOLUME_OVERLAY) {
-                    // Status bar panels and the volume dialog are the only windows who can go on
+                if (type == TYPE_STATUS_BAR_PANEL) {
+                    // Status bar panels can go on
                     // top of the status bar. They are protected by the STATUS_BAR_SERVICE
                     // permission, so they have the same privileges as the status bar itself.
                     cf.set(displayFrames.mRestricted);
@@ -7495,6 +7507,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mHandler.sendEmptyMessage(MSG_HIDE_BOOT_MESSAGE);
     }
 
+    @Override
+    public void requestUserActivityNotification() {
+        if (!mNotifyUserActivity && !mHandler.hasMessages(MSG_NOTIFY_USER_ACTIVITY)) {
+            mNotifyUserActivity = true;
+        }
+    }
+
     /** {@inheritDoc} */
     @Override
     public void userActivity() {
@@ -7515,6 +7534,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mHandler.removeCallbacks(mScreenLockTimeout);
                 mHandler.postDelayed(mScreenLockTimeout, mLockScreenTimeout);
             }
+        }
+
+        if (mAwake && mNotifyUserActivity) {
+            mHandler.sendEmptyMessageDelayed(MSG_NOTIFY_USER_ACTIVITY,
+                    USER_ACTIVITY_NOTIFICATION_DELAY);
+            mNotifyUserActivity = false;
         }
     }
 

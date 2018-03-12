@@ -840,6 +840,7 @@ package android.content {
   }
 
   public class Intent implements java.lang.Cloneable android.os.Parcelable {
+    field public static final java.lang.String ACTION_BATTERY_LEVEL_CHANGED = "android.intent.action.BATTERY_LEVEL_CHANGED";
     field public static final java.lang.String ACTION_CALL_EMERGENCY = "android.intent.action.CALL_EMERGENCY";
     field public static final java.lang.String ACTION_CALL_PRIVILEGED = "android.intent.action.CALL_PRIVILEGED";
     field public static final java.lang.String ACTION_FACTORY_RESET = "android.intent.action.FACTORY_RESET";
@@ -3612,6 +3613,11 @@ package android.nfc {
 
 package android.os {
 
+  public class BatteryManager {
+    field public static final java.lang.String EXTRA_EVENTS = "android.os.extra.EVENTS";
+    field public static final java.lang.String EXTRA_EVENT_TIMESTAMP = "android.os.extra.EVENT_TIMESTAMP";
+  }
+
   public final class ConfigUpdate {
     field public static final java.lang.String ACTION_UPDATE_CARRIER_PROVISIONING_URLS = "android.intent.action.UPDATE_CARRIER_PROVISIONING_URLS";
     field public static final java.lang.String ACTION_UPDATE_CT_LOGS = "android.intent.action.UPDATE_CT_LOGS";
@@ -4697,6 +4703,7 @@ package android.service.textclassifier {
 
   public abstract class TextClassifierService extends android.app.Service {
     ctor public TextClassifierService();
+    method public final android.view.textclassifier.TextClassifier getLocalTextClassifier();
     method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract void onClassifyText(java.lang.CharSequence, int, int, android.view.textclassifier.TextClassification.Options, android.os.CancellationSignal, android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextClassification>);
     method public abstract void onGenerateLinks(java.lang.CharSequence, android.view.textclassifier.TextLinks.Options, android.os.CancellationSignal, android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextLinks>);
@@ -6664,6 +6671,7 @@ package android.webkit {
     method public abstract android.os.Handler getHandler(android.os.Handler);
     method public abstract void onActivityResult(int, int, android.content.Intent);
     method public abstract void onAttachedToWindow();
+    method public default boolean onCheckIsTextEditor();
     method public abstract void onConfigurationChanged(android.content.res.Configuration);
     method public abstract android.view.inputmethod.InputConnection onCreateInputConnection(android.view.inputmethod.EditorInfo);
     method public abstract void onDetachedFromWindow();

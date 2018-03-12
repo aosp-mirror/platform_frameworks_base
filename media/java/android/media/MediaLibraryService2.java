@@ -73,7 +73,7 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          * Callback for the {@link MediaLibrarySession}.
          */
         public static class MediaLibrarySessionCallback extends MediaSession2.SessionCallback {
-            public MediaLibrarySessionCallback(Context context) {
+            public MediaLibrarySessionCallback(@NonNull Context context) {
                 super(context);
             }
 
@@ -221,12 +221,12 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
             }
 
             @Override
-            public Builder setPlaylistAgent(@NonNull MediaPlaylistAgent mplc) {
-                return super.setPlaylistAgent(mplc);
+            public Builder setPlaylistAgent(@NonNull MediaPlaylistAgent playlistAgent) {
+                return super.setPlaylistAgent(playlistAgent);
             }
 
             @Override
-            public Builder setVolumeProvider(@NonNull VolumeProvider2 volumeProvider) {
+            public Builder setVolumeProvider(@Nullable VolumeProvider2 volumeProvider) {
                 return super.setVolumeProvider(volumeProvider);
             }
 
@@ -236,12 +236,12 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
             }
 
             @Override
-            public Builder setId(String id) {
+            public Builder setId(@NonNull String id) {
                 return super.setId(id);
             }
 
             @Override
-            public Builder setSessionCallback(@NonNull Executor executor,
+            public Builder setSessionCallback(@NonNull @CallbackExecutor Executor executor,
                     @NonNull MediaLibrarySessionCallback callback) {
                 return super.setSessionCallback(executor, callback);
             }

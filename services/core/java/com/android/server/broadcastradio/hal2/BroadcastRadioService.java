@@ -101,7 +101,9 @@ public class BroadcastRadioService {
         }
 
         TunerSession session = module.openSession(callback);
-        session.setConfiguration(legacyConfig);
+        if (legacyConfig != null) {
+            session.setConfiguration(legacyConfig);
+        }
         return session;
     }
 

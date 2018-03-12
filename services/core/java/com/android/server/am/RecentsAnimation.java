@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
@@ -50,6 +49,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
     private final WindowManagerService mWindowManager;
     private final UserController mUserController;
     private final Handler mHandler;
+    private final int mCallingPid;
 
     private final Runnable mCancelAnimationRunnable;
 
@@ -58,13 +58,14 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
 
     RecentsAnimation(ActivityManagerService am, ActivityStackSupervisor stackSupervisor,
             ActivityStartController activityStartController, WindowManagerService wm,
-            UserController userController) {
+            UserController userController, int callingPid) {
         mService = am;
         mStackSupervisor = stackSupervisor;
         mActivityStartController = activityStartController;
         mHandler = new Handler(mStackSupervisor.mLooper);
         mWindowManager = wm;
         mUserController = userController;
+        mCallingPid = callingPid;
 
         mCancelAnimationRunnable = () -> {
             // The caller has not finished the animation in a predefined amount of time, so
@@ -94,9 +95,10 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
             }
         }
 
+        mService.setRunningRemoteAnimation(mCallingPid, true);
+
         mWindowManager.deferSurfaceLayout();
         try {
-
             final ActivityDisplay display;
             if (hasExistingHomeActivity) {
                 // Move the home activity into place for the animation if it is not already top most
@@ -136,7 +138,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
             // started
             mWindowManager.cancelRecentsAnimation();
             mWindowManager.initializeRecentsAnimation(recentsAnimationRunner, this,
-                    display.mDisplayId);
+                    display.mDisplayId, mStackSupervisor.mRecentTasks.getRecentTaskIds());
 
             // If we updated the launch-behind state, update the visibility of the activities after
             // we fetch the visible tasks to be controlled by the animation
@@ -152,6 +154,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
         mHandler.removeCallbacks(mCancelAnimationRunnable);
         synchronized (mService) {
             if (mWindowManager.getRecentsAnimationController() == null) return;
+
+            mService.setRunningRemoteAnimation(mCallingPid, false);
 
             mWindowManager.inSurfaceTransaction(() -> {
                 Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER,

@@ -2076,11 +2076,15 @@ public class WifiConfiguration implements Parcelable {
     }
 
     /**
-     * Set the {@link ProxyInfo} for this WifiConfiguration.
+     * Set the {@link ProxyInfo} for this WifiConfiguration. This method should only be used by a
+     * device owner or profile owner. When other apps attempt to save a {@link WifiConfiguration}
+     * with modified proxy settings, the methods {@link WifiManager#addNetwork} and
+     * {@link WifiManager#updateNetwork} fail and return {@code -1}.
+     *
      * @param httpProxy {@link ProxyInfo} representing the httpProxy to be used by this
-     *                  WifiConfiguration. Setting this {@code null} will explicitly set no proxy,
-     *                  removing any proxy that was previously set.
-     * @exception throw IllegalArgumentException for invalid httpProxy
+     *                  WifiConfiguration. Setting this to {@code null} will explicitly set no
+     *                  proxy, removing any proxy that was previously set.
+     * @exception IllegalArgumentException for invalid httpProxy
      */
     public void setHttpProxy(ProxyInfo httpProxy) {
         if (httpProxy == null) {

@@ -44,6 +44,7 @@ import com.android.server.backup.transport.TransportClientManager;
 import com.android.server.backup.transport.TransportConnectionListener;
 import com.android.server.backup.transport.TransportNotAvailableException;
 import com.android.server.backup.transport.TransportNotRegisteredException;
+import com.android.server.backup.transport.TransportStats;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -64,6 +65,7 @@ public class TransportManager {
     private final PackageManager mPackageManager;
     private final Set<ComponentName> mTransportWhitelist;
     private final TransportClientManager mTransportClientManager;
+    private final TransportStats mTransportStats;
     private OnTransportRegisteredListener mOnTransportRegisteredListener = (c, n) -> {};
 
     /**
@@ -85,7 +87,12 @@ public class TransportManager {
     private volatile String mCurrentTransportName;
 
     TransportManager(Context context, Set<ComponentName> whitelist, String selectedTransport) {
-        this(context, whitelist, selectedTransport, new TransportClientManager(context));
+        mContext = context;
+        mPackageManager = context.getPackageManager();
+        mTransportWhitelist = Preconditions.checkNotNull(whitelist);
+        mCurrentTransportName = selectedTransport;
+        mTransportStats = new TransportStats();
+        mTransportClientManager = new TransportClientManager(context, mTransportStats);
     }
 
     @VisibleForTesting
@@ -98,6 +105,7 @@ public class TransportManager {
         mPackageManager = context.getPackageManager();
         mTransportWhitelist = Preconditions.checkNotNull(whitelist);
         mCurrentTransportName = selectedTransport;
+        mTransportStats = new TransportStats();
         mTransportClientManager = transportClientManager;
     }
 
@@ -416,9 +424,13 @@ public class TransportManager {
      *     {@link TransportClient#connectAsync(TransportConnectionListener, String)} for more
      *     details.
      * @return A {@link TransportClient} or null if not registered.
+     * @throws IllegalStateException if no transport is selected.
      */
     @Nullable
     public TransportClient getCurrentTransportClient(String caller) {
+        if (mCurrentTransportName == null) {
+            throw new IllegalStateException("No transport selected");
+        }
         synchronized (mTransportLock) {
             return getTransportClient(mCurrentTransportName, caller);
         }
@@ -432,9 +444,13 @@ public class TransportManager {
      *     details.
      * @return A {@link TransportClient}.
      * @throws TransportNotRegisteredException if the transport is not registered.
+     * @throws IllegalStateException if no transport is selected.
      */
     public TransportClient getCurrentTransportClientOrThrow(String caller)
             throws TransportNotRegisteredException {
+        if (mCurrentTransportName == null) {
+            throw new IllegalStateException("No transport selected");
+        }
         synchronized (mTransportLock) {
             return getTransportClientOrThrow(mCurrentTransportName, caller);
         }
@@ -547,8 +563,9 @@ public class TransportManager {
     /** Transport has to be whitelisted and privileged. */
     private boolean isTransportTrusted(ComponentName transport) {
         if (!mTransportWhitelist.contains(transport)) {
-            Slog.w(TAG, "BackupTransport " + transport.flattenToShortString() +
-                    " not whitelisted.");
+            Slog.w(
+                    TAG,
+                    "BackupTransport " + transport.flattenToShortString() + " not whitelisted.");
             return false;
         }
         try {
@@ -588,8 +605,9 @@ public class TransportManager {
         Bundle extras = new Bundle();
         extras.putBoolean(BackupTransport.EXTRA_TRANSPORT_REGISTRATION, true);
 
-        TransportClient transportClient = mTransportClientManager.getTransportClient(
-            transportComponent, extras, callerLogString);
+        TransportClient transportClient =
+                mTransportClientManager.getTransportClient(
+                        transportComponent, extras, callerLogString);
         final IBackupTransport transport;
         try {
             transport = transportClient.connectOrThrow(callerLogString);
@@ -640,8 +658,12 @@ public class TransportManager {
                 !Thread.holdsLock(mTransportLock), "Can't call transport with transport lock held");
     }
 
-    public void dump(PrintWriter pw) {
+    public void dumpTransportClients(PrintWriter pw) {
         mTransportClientManager.dump(pw);
+    }
+
+    public void dumpTransportStats(PrintWriter pw) {
+        mTransportStats.dump(pw);
     }
 
     private static Predicate<ComponentName> fromPackageFilter(String packageName) {

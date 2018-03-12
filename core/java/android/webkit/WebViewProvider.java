@@ -424,6 +424,11 @@ public interface WebViewProvider {
         public Handler getHandler(Handler originalHandler);
 
         public View findFocus(View originalFocusedView);
+
+        @SuppressWarnings("unused")
+        default boolean onCheckIsTextEditor() {
+            return false;
+        }
     }
 
     interface ScrollDelegate {

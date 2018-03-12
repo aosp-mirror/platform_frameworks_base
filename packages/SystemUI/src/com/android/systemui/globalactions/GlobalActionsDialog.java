@@ -14,6 +14,7 @@
 
 package com.android.systemui.globalactions;
 
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
@@ -877,9 +878,8 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         public View getView(int position, View convertView, ViewGroup parent) {
             Action action = getItem(position);
             View view = action.create(mContext, convertView, parent, LayoutInflater.from(mContext));
-            // Power off, restart, logout (if present) and lockdown (if present) should be in white
-            // background. Set the division based on which buttons are currently being displayed.
-            if (position == 2 + (mHasLogoutButton ? 1 : 0) + (mHasLockdownButton ? 1 : 0)) {
+            // Everything but screenshot, the last item, gets white background.
+            if (position == getCount() - 1) {
                 HardwareUiLayout.get(parent).setDivisionView(view);
             }
             return view;
@@ -1357,11 +1357,17 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             // Window initialization
             Window window = getWindow();
             window.requestFeature(Window.FEATURE_NO_TITLE);
-            window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND
-                    | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR);
+            // Inflate the decor view, so the attributes below are not overwritten by the theme.
+            window.getDecorView();
+            window.getAttributes().systemUiVisibility |= View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+            window.setLayout(MATCH_PARENT, MATCH_PARENT);
+            window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
             window.addFlags(
                     WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
                     | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                     | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
                     | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);

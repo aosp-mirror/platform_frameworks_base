@@ -26,8 +26,8 @@ public interface TransportControlProvider {
     void play_impl();
     void pause_impl();
     void stop_impl();
-    void skipToPrevious_impl();
-    void skipToNext_impl();
+    void skipToPreviousItem_impl();
+    void skipToNextItem_impl();
 
     void prepare_impl();
     void fastForward_impl();

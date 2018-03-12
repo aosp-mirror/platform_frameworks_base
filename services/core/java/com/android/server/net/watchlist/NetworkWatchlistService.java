@@ -39,6 +39,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.net.INetworkWatchlistManager;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
+import com.android.server.net.BaseNetdEventCallback;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -139,7 +140,7 @@ public class NetworkWatchlistService extends INetworkWatchlistManager.Stub {
                 ServiceManager.getService(IpConnectivityLog.SERVICE_NAME));
     }
 
-    private final INetdEventCallback mNetdEventCallback = new INetdEventCallback.Stub() {
+    private final INetdEventCallback mNetdEventCallback = new BaseNetdEventCallback() {
         @Override
         public void onDnsEvent(String hostname, String[] ipAddresses, int ipAddressesCount,
                 long timestamp, int uid) {

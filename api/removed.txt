@@ -152,6 +152,11 @@ package android.graphics {
     method public deprecated boolean clipRegion(android.graphics.Region);
   }
 
+  public final class ImageDecoder implements java.lang.AutoCloseable {
+    method public deprecated boolean getAsAlphaMask();
+    method public deprecated android.graphics.ImageDecoder setAsAlphaMask(boolean);
+  }
+
   public deprecated class LayerRasterizer extends android.graphics.Rasterizer {
     ctor public LayerRasterizer();
     method public void addLayer(android.graphics.Paint, float, float);
@@ -161,6 +166,11 @@ package android.graphics {
   public class Paint {
     method public deprecated android.graphics.Rasterizer getRasterizer();
     method public deprecated android.graphics.Rasterizer setRasterizer(android.graphics.Rasterizer);
+  }
+
+  public class Picture {
+    method public static deprecated android.graphics.Picture createFromStream(java.io.InputStream);
+    method public deprecated void writeToStream(java.io.OutputStream);
   }
 
   public deprecated class PixelXorXfermode extends android.graphics.Xfermode {

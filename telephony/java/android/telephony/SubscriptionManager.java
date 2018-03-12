@@ -25,6 +25,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.app.BroadcastOptions;
@@ -42,7 +43,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.ServiceManager.ServiceNotFoundException;
 import android.util.DisplayMetrics;
 
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
@@ -59,9 +59,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * SubscriptionManager is the application interface to SubscriptionController
  * and provides information about the current Telephony Subscriptions.
- * <p>
- * All SDK public methods require android.Manifest.permission.READ_PHONE_STATE unless otherwise
- * specified.
  */
 @SystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE)
 public class SubscriptionManager {
@@ -612,6 +609,8 @@ public class SubscriptionManager {
      * @param listener an instance of {@link OnSubscriptionsChangedListener} with
      *                 onSubscriptionsChanged overridden.
      */
+    // TODO(b/70041899): Find a way to extend this to carrier-privileged apps.
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public void addOnSubscriptionsChangedListener(OnSubscriptionsChangedListener listener) {
         String pkgName = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         if (DBG) {
@@ -660,9 +659,15 @@ public class SubscriptionManager {
     /**
      * Get the active SubscriptionInfo with the input subId.
      *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see
+     * {@link TelephonyManager#hasCarrierPrivileges}).
+     *
      * @param subId The unique SubscriptionInfo key in database.
      * @return SubscriptionInfo, maybe null if its not active.
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public SubscriptionInfo getActiveSubscriptionInfo(int subId) {
         if (VDBG) logd("[getActiveSubscriptionInfo]+ subId=" + subId);
         if (!isValidSubscriptionId(subId)) {
@@ -716,9 +721,16 @@ public class SubscriptionManager {
 
     /**
      * Get the active SubscriptionInfo associated with the slotIndex
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see
+     * {@link TelephonyManager#hasCarrierPrivileges}).
+     *
      * @param slotIndex the slot which the subscription is inserted
      * @return SubscriptionInfo, maybe null if its not active
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public SubscriptionInfo getActiveSubscriptionInfoForSimSlotIndex(int slotIndex) {
         if (VDBG) logd("[getActiveSubscriptionInfoForSimSlotIndex]+ slotIndex=" + slotIndex);
         if (!isValidSlotIndex(slotIndex)) {
@@ -770,6 +782,11 @@ public class SubscriptionManager {
      * Get the SubscriptionInfo(s) of the currently inserted SIM(s). The records will be sorted
      * by {@link SubscriptionInfo#getSimSlotIndex} then by {@link SubscriptionInfo#getSubscriptionId}.
      *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see
+     * {@link TelephonyManager#hasCarrierPrivileges}). In the latter case, only records accessible
+     * to the calling app are returned.
+     *
      * @return Sorted list of the currently {@link SubscriptionInfo} records available on the device.
      * <ul>
      * <li>
@@ -786,6 +803,8 @@ public class SubscriptionManager {
      * </li>
      * </ul>
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public List<SubscriptionInfo> getActiveSubscriptionInfoList() {
         List<SubscriptionInfo> result = null;
 
@@ -928,10 +947,18 @@ public class SubscriptionManager {
     }
 
     /**
+     *
+     * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see
+     * {@link TelephonyManager#hasCarrierPrivileges}). In the latter case, the count will include
+     * only those subscriptions accessible to the caller.
+     *
      * @return the current number of active subscriptions. There is no guarantee the value
      * returned by this method will be the same as the length of the list returned by
      * {@link #getActiveSubscriptionInfoList}.
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public int getActiveSubscriptionInfoCount() {
         int result = 0;
 

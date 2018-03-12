@@ -61,7 +61,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
         mStack = createTaskStackOnDisplay(mDisplayContent);
         mTask = createTaskInStack(mStack, 0 /* userId */);
-        mToken = new WindowTestUtils.TestAppWindowToken(mDisplayContent);
+        mToken = WindowTestUtils.createTestAppWindowToken(mDisplayContent);
 
         mTask.addChild(mToken, 0);
     }

@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.R;
+import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -37,6 +38,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
@@ -99,6 +101,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.animation.LinearInterpolator;
 import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
@@ -200,11 +203,11 @@ public class Editor {
 
     private final boolean mHapticTextHandleEnabled;
 
-    private final Magnifier mMagnifier;
+    private final MagnifierMotionAnimator mMagnifierAnimator;
     private final Runnable mUpdateMagnifierRunnable = new Runnable() {
         @Override
         public void run() {
-            mMagnifier.update();
+            mMagnifierAnimator.update();
         }
     };
     // Update the magnifier contents whenever anything in the view hierarchy is updated.
@@ -215,7 +218,7 @@ public class Editor {
             new ViewTreeObserver.OnDrawListener() {
         @Override
         public void onDraw() {
-            if (mMagnifier != null) {
+            if (mMagnifierAnimator != null) {
                 // Posting the method will ensure that updating the magnifier contents will
                 // happen right after the rendering of the current frame.
                 mTextView.post(mUpdateMagnifierRunnable);
@@ -371,7 +374,9 @@ public class Editor {
         mHapticTextHandleEnabled = mTextView.getContext().getResources().getBoolean(
                 com.android.internal.R.bool.config_enableHapticTextHandle);
 
-        mMagnifier = FLAG_USE_MAGNIFIER ? new Magnifier(mTextView) : null;
+        if (FLAG_USE_MAGNIFIER) {
+            mMagnifierAnimator = new MagnifierMotionAnimator(new Magnifier(mTextView));
+        }
     }
 
     ParcelableParcel saveInstanceState() {
@@ -4309,6 +4314,88 @@ public class Editor {
         }
     }
 
+    private static class MagnifierMotionAnimator {
+        private static final long DURATION = 100 /* miliseconds */;
+
+        // The magnifier being animated.
+        private final Magnifier mMagnifier;
+        // A value animator used to animate the magnifier.
+        private final ValueAnimator mAnimator;
+
+        // Whether the magnifier is currently visible.
+        private boolean mMagnifierIsShowing;
+        // The coordinates of the magnifier when the currently running animation started.
+        private float mAnimationStartX;
+        private float mAnimationStartY;
+        // The coordinates of the magnifier in the latest animation frame.
+        private float mAnimationCurrentX;
+        private float mAnimationCurrentY;
+        // The latest coordinates the motion animator was asked to #show() the magnifier at.
+        private float mLastX;
+        private float mLastY;
+
+        private MagnifierMotionAnimator(final Magnifier magnifier) {
+            mMagnifier = magnifier;
+            // Prepare the animator used to run the motion animation.
+            mAnimator = ValueAnimator.ofFloat(0, 1);
+            mAnimator.setDuration(DURATION);
+            mAnimator.setInterpolator(new LinearInterpolator());
+            mAnimator.addUpdateListener((animation) -> {
+                // Interpolate to find the current position of the magnifier.
+                mAnimationCurrentX = mAnimationStartX
+                        + (mLastX - mAnimationStartX) * animation.getAnimatedFraction();
+                mAnimationCurrentY = mAnimationStartY
+                        + (mLastY - mAnimationStartY) * animation.getAnimatedFraction();
+                mMagnifier.show(mAnimationCurrentX, mAnimationCurrentY);
+            });
+        }
+
+        /**
+         * Shows the magnifier at a new position.
+         * If the y coordinate is different from the previous y coordinate
+         * (probably corresponding to a line jump in the text), a short
+         * animation is added to the jump.
+         */
+        private void show(final float x, final float y) {
+            final boolean startNewAnimation = mMagnifierIsShowing && y != mLastY;
+
+            if (startNewAnimation) {
+                if (mAnimator.isRunning()) {
+                    mAnimator.cancel();
+                    mAnimationStartX = mAnimationCurrentX;
+                    mAnimationStartY = mAnimationCurrentY;
+                } else {
+                    mAnimationStartX = mLastX;
+                    mAnimationStartY = mLastY;
+                }
+                mAnimator.start();
+            } else {
+                if (!mAnimator.isRunning()) {
+                    mMagnifier.show(x, y);
+                }
+            }
+            mLastX = x;
+            mLastY = y;
+            mMagnifierIsShowing = true;
+        }
+
+        /**
+         * Updates the content of the magnifier.
+         */
+        private void update() {
+            mMagnifier.update();
+        }
+
+        /**
+         * Dismisses the magnifier, or does nothing if it is already dismissed.
+         */
+        private void dismiss() {
+            mMagnifier.dismiss();
+            mAnimator.cancel();
+            mMagnifierIsShowing = false;
+        }
+    }
+
     @VisibleForTesting
     public abstract class HandleView extends View implements TextViewPositionListener {
         protected Drawable mDrawable;
@@ -4648,52 +4735,106 @@ public class Editor {
             return 0;
         }
 
-        protected final void showMagnifier(@NonNull final MotionEvent event) {
-            if (mMagnifier == null) {
-                return;
-            }
+        /**
+         * Computes the position where the magnifier should be shown, relative to
+         * {@code mTextView}, and writes them to {@code showPosInView}. Also decides
+         * whether the magnifier should be shown or dismissed after this touch event.
+         * @return Whether the magnifier should be shown at the computed coordinates or dismissed.
+         */
+        private boolean obtainMagnifierShowCoordinates(@NonNull final MotionEvent event,
+                final PointF showPosInView) {
 
             final int trigger = getMagnifierHandleTrigger();
             final int offset;
+            final int otherHandleOffset;
             switch (trigger) {
-                case MagnifierHandleTrigger.INSERTION: // Fall through.
+                case MagnifierHandleTrigger.INSERTION:
+                    offset = mTextView.getSelectionStart();
+                    otherHandleOffset = -1;
+                    break;
                 case MagnifierHandleTrigger.SELECTION_START:
                     offset = mTextView.getSelectionStart();
+                    otherHandleOffset = mTextView.getSelectionEnd();
                     break;
                 case MagnifierHandleTrigger.SELECTION_END:
                     offset = mTextView.getSelectionEnd();
+                    otherHandleOffset = mTextView.getSelectionStart();
                     break;
                 default:
                     offset = -1;
+                    otherHandleOffset = -1;
                     break;
             }
 
             if (offset == -1) {
-                dismissMagnifier();
+                return false;
             }
 
             final Layout layout = mTextView.getLayout();
             final int lineNumber = layout.getLineForOffset(offset);
-            // Horizontally move the magnifier smoothly.
+            // Compute whether the selection handles are currently on the same line, and,
+            // in this particular case, whether the selected text is right to left.
+            final boolean sameLineSelection = otherHandleOffset != -1
+                    && lineNumber == layout.getLineForOffset(otherHandleOffset);
+            final boolean rtl = sameLineSelection
+                    && (offset < otherHandleOffset)
+                        != (getHorizontal(mTextView.getLayout(), offset)
+                            < getHorizontal(mTextView.getLayout(), otherHandleOffset));
+
+            // Horizontally move the magnifier smoothly, clamp inside the current line / selection.
             final int[] textViewLocationOnScreen = new int[2];
             mTextView.getLocationOnScreen(textViewLocationOnScreen);
-            final float xPosInView = event.getRawX() - textViewLocationOnScreen[0];
+            final float touchXInView = event.getRawX() - textViewLocationOnScreen[0];
+            float leftBound = mTextView.getTotalPaddingLeft() - mTextView.getScrollX();
+            float rightBound = mTextView.getTotalPaddingLeft() - mTextView.getScrollX();
+            if (sameLineSelection && ((trigger == MagnifierHandleTrigger.SELECTION_END) ^ rtl)) {
+                leftBound += getHorizontal(mTextView.getLayout(), otherHandleOffset);
+            } else {
+                leftBound += mTextView.getLayout().getLineLeft(lineNumber);
+            }
+            if (sameLineSelection && ((trigger == MagnifierHandleTrigger.SELECTION_START) ^ rtl)) {
+                rightBound += getHorizontal(mTextView.getLayout(), otherHandleOffset);
+            } else {
+                rightBound += mTextView.getLayout().getLineRight(lineNumber);
+            }
+            final float contentWidth = Math.round(mMagnifierAnimator.mMagnifier.getWidth()
+                    / mMagnifierAnimator.mMagnifier.getZoom());
+            if (touchXInView < leftBound - contentWidth / 2
+                    || touchXInView > rightBound + contentWidth / 2) {
+                // The touch is too far from the current line / selection, so hide the magnifier.
+                return false;
+            }
+            showPosInView.x = Math.max(leftBound, Math.min(rightBound, touchXInView));
+
             // Vertically snap to middle of current line.
-            final float yPosInView = (mTextView.getLayout().getLineTop(lineNumber)
+            showPosInView.y = (mTextView.getLayout().getLineTop(lineNumber)
                     + mTextView.getLayout().getLineBottom(lineNumber)) / 2.0f
                     + mTextView.getTotalPaddingTop() - mTextView.getScrollY();
 
-            // Make the cursor visible and stop blinking.
-            mRenderCursorRegardlessTiming = true;
-            mTextView.invalidateCursorPath();
-            suspendBlink();
+            return true;
+        }
 
-            mMagnifier.show(xPosInView, yPosInView);
+        protected final void updateMagnifier(@NonNull final MotionEvent event) {
+            if (mMagnifierAnimator == null) {
+                return;
+            }
+
+            final PointF showPosInView = new PointF();
+            final boolean shouldShow = obtainMagnifierShowCoordinates(event, showPosInView);
+            if (shouldShow) {
+                // Make the cursor visible and stop blinking.
+                mRenderCursorRegardlessTiming = true;
+                mTextView.invalidateCursorPath();
+                suspendBlink();
+                mMagnifierAnimator.show(showPosInView.x, showPosInView.y);
+            } else {
+                dismissMagnifier();
+            }
         }
 
         protected final void dismissMagnifier() {
-            if (mMagnifier != null) {
-                mMagnifier.dismiss();
+            if (mMagnifierAnimator != null) {
+                mMagnifierAnimator.dismiss();
                 mRenderCursorRegardlessTiming = false;
                 resumeBlink();
             }
@@ -4877,11 +5018,11 @@ public class Editor {
                 case MotionEvent.ACTION_DOWN:
                     mDownPositionX = ev.getRawX();
                     mDownPositionY = ev.getRawY();
-                    showMagnifier(ev);
+                    updateMagnifier(ev);
                     break;
 
                 case MotionEvent.ACTION_MOVE:
-                    showMagnifier(ev);
+                    updateMagnifier(ev);
                     break;
 
                 case MotionEvent.ACTION_UP:
@@ -5235,11 +5376,11 @@ public class Editor {
                     // re-engages the handle.
                     mTouchWordDelta = 0.0f;
                     mPrevX = UNSET_X_VALUE;
-                    showMagnifier(event);
+                    updateMagnifier(event);
                     break;
 
                 case MotionEvent.ACTION_MOVE:
-                    showMagnifier(event);
+                    updateMagnifier(event);
                     break;
 
                 case MotionEvent.ACTION_UP:
