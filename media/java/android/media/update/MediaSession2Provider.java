@@ -47,6 +47,8 @@ public interface MediaSession2Provider extends TransportControlProvider {
     void updatePlayer_impl(MediaPlayerBase player, MediaPlaylistAgent playlistAgent,
             VolumeProvider2 volumeProvider);
     MediaPlayerBase getPlayer_impl();
+    MediaMetadata2 getPlaylistMetadata_impl();
+    void updatePlaylistMetadata_impl(MediaMetadata2 metadata);
     MediaPlaylistAgent getPlaylistAgent_impl();
     VolumeProvider2 getVolumeProvider_impl();
     SessionToken2 getToken_impl();
