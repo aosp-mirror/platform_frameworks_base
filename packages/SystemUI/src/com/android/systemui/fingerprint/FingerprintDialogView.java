@@ -17,6 +17,7 @@
 package com.android.systemui.fingerprint;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
@@ -27,6 +28,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -42,6 +44,7 @@ import android.widget.TextView;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.util.leak.RotationUtils;
 
 /**
  * This class loads the view for the system-provided dialog. The view consists of:
@@ -74,6 +77,8 @@ public class FingerprintDialogView extends LinearLayout {
     private final LinearLayout mDialog;
     private int mLastState;
 
+    private final float mDisplayWidth;
+
     public FingerprintDialogView(Context context, Handler handler) {
         super(context);
         mHandler = handler;
@@ -87,6 +92,10 @@ public class FingerprintDialogView extends LinearLayout {
                 getResources().getString(R.color.fingerprint_dialog_text_light_color));
         mFingerprintColor = Color.parseColor(
                 getResources().getString(R.color.fingerprint_dialog_fingerprint_color));
+
+        DisplayMetrics metrics = new DisplayMetrics();
+        mWindowManager.getDefaultDisplay().getMetrics(metrics);
+        mDisplayWidth = metrics.widthPixels;
 
         // Create the dialog
         LayoutInflater factory = LayoutInflater.from(getContext());
@@ -117,15 +126,14 @@ public class FingerprintDialogView extends LinearLayout {
         });
 
         final View space = mLayout.findViewById(R.id.space);
+        final View leftSpace = mLayout.findViewById(R.id.left_space);
+        final View rightSpace = mLayout.findViewById(R.id.right_space);
         final Button negative = mLayout.findViewById(R.id.button2);
         final Button positive = mLayout.findViewById(R.id.button1);
 
-        space.setClickable(true);
-        space.setOnTouchListener((View view, MotionEvent event) -> {
-            mHandler.obtainMessage(FingerprintDialogImpl.MSG_HIDE_DIALOG, true /* userCanceled */)
-                    .sendToTarget();
-            return true;
-        });
+        setDismissesDialog(space);
+        setDismissesDialog(leftSpace);
+        setDismissesDialog(rightSpace);
 
         negative.setOnClickListener((View v) -> {
             mHandler.obtainMessage(FingerprintDialogImpl.MSG_BUTTON_NEGATIVE).sendToTarget();
@@ -148,6 +156,8 @@ public class FingerprintDialogView extends LinearLayout {
         final TextView description = mLayout.findViewById(R.id.description);
         final Button negative = mLayout.findViewById(R.id.button2);
         final Button positive = mLayout.findViewById(R.id.button1);
+
+        mDialog.getLayoutParams().width = (int) mDisplayWidth;
 
         mLastState = STATE_NONE;
         updateFingerprintIcon(STATE_FINGERPRINT);
@@ -186,6 +196,15 @@ public class FingerprintDialogView extends LinearLayout {
                         .withLayer()
                         .start();
             }
+        });
+    }
+
+    private void setDismissesDialog(View v) {
+        v.setClickable(true);
+        v.setOnTouchListener((View view, MotionEvent event) -> {
+            mHandler.obtainMessage(FingerprintDialogImpl.MSG_HIDE_DIALOG, true /* userCanceled */)
+                    .sendToTarget();
+            return true;
         });
     }
 
