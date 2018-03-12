@@ -270,7 +270,7 @@
 
     <dimen name="volume_dialog_panel_width">64dp</dimen>
 
-    <dimen name="volume_dialog_slider_height">101dp</dimen>
+    <dimen name="volume_dialog_slider_height">108dp</dimen>
 
     <dimen name="volume_dialog_row_height">252dp</dimen>
 
@@ -280,7 +280,13 @@
 
     <dimen name="volume_dialog_spacer">4dp</dimen>
 
-    <dimen name="volume_dialog_slider_margin_top">13dp</dimen>
+    <dimen name="volume_dialog_slider_margin_top">22dp</dimen>
+
+    <dimen name="volume_dialog_slider_margin_bottom">-2dp</dimen>
+
+    <dimen name="volume_dialog_row_margin_bottom">8dp</dimen>
+
+    <dimen name="volume_dialog_settings_icon_size">16dp</dimen>
 
     <!-- Gravity for the notification panel -->
     <integer name="notification_panel_layout_gravity">0x31</integer><!-- center_horizontal|top -->
