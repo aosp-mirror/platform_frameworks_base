@@ -18,6 +18,8 @@ package android.view.textclassifier;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.view.textclassifier.TextClassifier.EntityType;
 
 import com.android.internal.util.Preconditions;
@@ -25,12 +27,13 @@ import com.android.internal.util.Preconditions;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * A selection event.
  * Specify index parameters as word token indices.
  */
-public final class SelectionEvent {
+public final class SelectionEvent implements Parcelable {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -121,9 +124,9 @@ public final class SelectionEvent {
     private String mSignature;
     private long mEventTime;
     private long mDurationSinceSessionStart;
-    private long mDurationSinceLastEvent;
+    private long mDurationSincePreviousEvent;
     private int mEventIndex;
-    private String mSessionId;
+    @Nullable private String mSessionId;
     private int mStart;
     private int mEnd;
     private int mSmartStart;
@@ -144,6 +147,60 @@ public final class SelectionEvent {
         mPackageName = Preconditions.checkNotNull(config.getPackageName());
         mWidgetType = Preconditions.checkNotNull(config.getWidgetType());
         mInvocationMethod = invocationMethod;
+    }
+
+    private SelectionEvent(Parcel in) {
+        mAbsoluteStart = in.readInt();
+        mAbsoluteEnd = in.readInt();
+        mEventType = in.readInt();
+        mEntityType = in.readString();
+        mWidgetVersion = in.readInt() > 0 ? in.readString() : null;
+        mPackageName = in.readString();
+        mWidgetType = in.readString();
+        mInvocationMethod = in.readInt();
+        mSignature = in.readString();
+        mEventTime = in.readLong();
+        mDurationSinceSessionStart = in.readLong();
+        mDurationSincePreviousEvent = in.readLong();
+        mEventIndex = in.readInt();
+        mSessionId = in.readInt() > 0 ? in.readString() : null;
+        mStart = in.readInt();
+        mEnd = in.readInt();
+        mSmartStart = in.readInt();
+        mSmartEnd = in.readInt();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mAbsoluteStart);
+        dest.writeInt(mAbsoluteEnd);
+        dest.writeInt(mEventType);
+        dest.writeString(mEntityType);
+        dest.writeInt(mWidgetVersion != null ? 1 : 0);
+        if (mWidgetVersion != null) {
+            dest.writeString(mWidgetVersion);
+        }
+        dest.writeString(mPackageName);
+        dest.writeString(mWidgetType);
+        dest.writeInt(mInvocationMethod);
+        dest.writeString(mSignature);
+        dest.writeLong(mEventTime);
+        dest.writeLong(mDurationSinceSessionStart);
+        dest.writeLong(mDurationSincePreviousEvent);
+        dest.writeInt(mEventIndex);
+        dest.writeInt(mSessionId != null ? 1 : 0);
+        if (mSessionId != null) {
+            dest.writeString(mSessionId);
+        }
+        dest.writeInt(mStart);
+        dest.writeInt(mEnd);
+        dest.writeInt(mSmartStart);
+        dest.writeInt(mSmartEnd);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     int getAbsoluteStart() {
@@ -240,11 +297,11 @@ public final class SelectionEvent {
      * in the selection session was triggered.
      */
     public long getDurationSincePreviousEvent() {
-        return mDurationSinceLastEvent;
+        return mDurationSincePreviousEvent;
     }
 
     SelectionEvent setDurationSincePreviousEvent(long durationMs) {
-        this.mDurationSinceLastEvent = durationMs;
+        this.mDurationSincePreviousEvent = durationMs;
         return this;
     }
 
@@ -342,15 +399,66 @@ public final class SelectionEvent {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(mAbsoluteStart, mAbsoluteEnd, mEventType, mEntityType,
+                mWidgetVersion, mPackageName, mWidgetType, mInvocationMethod, mSignature,
+                mEventTime, mDurationSinceSessionStart, mDurationSincePreviousEvent,
+                mEventIndex, mSessionId, mStart, mEnd, mSmartStart, mSmartEnd);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof SelectionEvent)) {
+            return false;
+        }
+
+        final SelectionEvent other = (SelectionEvent) obj;
+        return mAbsoluteStart == other.mAbsoluteStart
+                && mAbsoluteEnd == other.mAbsoluteEnd
+                && mEventType == other.mEventType
+                && Objects.equals(mEntityType, other.mEntityType)
+                && Objects.equals(mWidgetVersion, other.mWidgetVersion)
+                && Objects.equals(mPackageName, other.mPackageName)
+                && Objects.equals(mWidgetType, other.mWidgetType)
+                && mInvocationMethod == other.mInvocationMethod
+                && Objects.equals(mSignature, other.mSignature)
+                && mEventTime == other.mEventTime
+                && mDurationSinceSessionStart == other.mDurationSinceSessionStart
+                && mDurationSincePreviousEvent == other.mDurationSincePreviousEvent
+                && mEventIndex == other.mEventIndex
+                && Objects.equals(mSessionId, other.mSessionId)
+                && mStart == other.mStart
+                && mEnd == other.mEnd
+                && mSmartStart == other.mSmartStart
+                && mSmartEnd == other.mSmartEnd;
+    }
+
+    @Override
     public String toString() {
         return String.format(Locale.US,
         "SelectionEvent {absoluteStart=%d, absoluteEnd=%d, eventType=%d, entityType=%s, "
-                + "widgetVersion=%s, packageName=%s, widgetType=%s, signature=%s, "
-                + "eventTime=%d, durationSinceSessionStart=%d, durationSinceLastEvent=%d, "
-                + "eventIndex=%d, sessionId=%s, start=%d, end=%d, smartStart=%d, smartEnd=%d}",
+                + "widgetVersion=%s, packageName=%s, widgetType=%s, invocationMethod=%s, "
+                + "signature=%s, eventTime=%d, durationSinceSessionStart=%d, "
+                + "durationSincePreviousEvent=%d, eventIndex=%d, sessionId=%s, start=%d, end=%d, "
+                + "smartStart=%d, smartEnd=%d}",
                 mAbsoluteStart, mAbsoluteEnd, mEventType, mEntityType,
-                mWidgetVersion, mPackageName, mWidgetType, mSignature,
-                mEventTime, mDurationSinceSessionStart, mDurationSinceLastEvent,
+                mWidgetVersion, mPackageName, mWidgetType, mInvocationMethod, mSignature,
+                mEventTime, mDurationSinceSessionStart, mDurationSincePreviousEvent,
                 mEventIndex, mSessionId, mStart, mEnd, mSmartStart, mSmartEnd);
     }
+
+    public static final Creator<SelectionEvent> CREATOR = new Creator<SelectionEvent>() {
+        @Override
+        public SelectionEvent createFromParcel(Parcel in) {
+            return new SelectionEvent(in);
+        }
+
+        @Override
+        public SelectionEvent[] newArray(int size) {
+            return new SelectionEvent[size];
+        }
+    };
 }
