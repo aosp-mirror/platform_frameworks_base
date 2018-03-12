@@ -200,4 +200,11 @@
 
     <!-- Default for Settings.Secure.BACKUP_LOCAL_TRANSPORT_PARAMETERS -->
     <string name="def_backup_local_transport_parameters"></string>
+
+    <!-- Default for Settings.Global.ZEN_DURATION
+        If 0, turning on dnd manually will last indefinitely.
+        Else if non-negative, turning on dnd manually will last for this many minutes.
+        Else (if negative), turning on dnd manually will surface a dialog that prompts
+            user to specify a duration.-->
+    <integer name="def_zen_duration">0</integer>
 </resources>

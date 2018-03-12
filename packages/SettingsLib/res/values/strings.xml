@@ -1062,10 +1062,13 @@
     <!-- Content description of zen mode time condition minus button (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_manual_zen_less_time">Less time.</string>
 
-    <!--  Do not disturb: Label for button in enable zen dialog that will turn on zen mode. [CHAR LIMIT=30] -->
-    <string name="zen_mode_enable_dialog_turn_on">Turn on</string>
     <!-- Button label for generic cancel action [CHAR LIMIT=20] -->
     <string name="cancel">Cancel</string>
+    <!-- Button label for generic OK action [CHAR LIMIT=20] -->
+    <string name="okay">OK</string>
+
+    <!--  Do not disturb: Label for button in enable zen dialog that will turn on zen mode. [CHAR LIMIT=30] -->
+    <string name="zen_mode_enable_dialog_turn_on">Turn on</string>
     <!-- Do not disturb: Title for the Do not Disturb dialog to turn on Do not disturb. [CHAR LIMIT=50]-->
     <string name="zen_mode_settings_turn_on_dialog_title">Turn on Do Not Disturb</string>
     <!-- Sound: Summary for the Do not Disturb option when there is no automatic rules turned on. [CHAR LIMIT=NONE]-->
@@ -1083,4 +1086,8 @@
     <!-- Alarm template for far in the future alarms [CHAR LIMIT=25] -->
     <string name="alarm_template_far">on <xliff:g id="when" example="Fri 7:00 AM">%1$s</xliff:g></string>
 
+    <!-- Do not disturb: Title for the dnd duration setting (user can specify how long dnd will last when toggling dnd on from qs or settings) [CHAR LIMIT=30] -->
+    <string name="zen_mode_duration_settings_title">Duration</string>
+    <!-- Do not disturb: Duration option to always prompt for the duration of dnd -->
+    <string name="zen_mode_duration_always_prompt_title">Ask every time</string>
 </resources>
