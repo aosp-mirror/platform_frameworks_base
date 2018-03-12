@@ -382,7 +382,7 @@ public final class NetworkCapabilities implements Parcelable {
     /**
      * Removes (if found) the given capability from this {@code NetworkCapability} instance.
      * <p>
-     * Note that this method removes capabilities that was added via {@link #addCapability(int)},
+     * Note that this method removes capabilities that were added via {@link #addCapability(int)},
      * {@link #addUnwantedCapability(int)} or {@link #setCapabilities(int[], int[])} .
      *
      * @param capability the capability to be removed.
@@ -471,6 +471,7 @@ public final class NetworkCapabilities implements Parcelable {
                 && ((mUnwantedNetworkCapabilities & (1 << capability)) != 0);
     }
 
+    /** Note this method may result in having the same capability in wanted and unwanted lists. */
     private void combineNetCapabilities(NetworkCapabilities nc) {
         this.mNetworkCapabilities |= nc.mNetworkCapabilities;
         this.mUnwantedNetworkCapabilities |= nc.mUnwantedNetworkCapabilities;
@@ -1132,7 +1133,11 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     /**
-     * Combine a set of Capabilities to this one.  Useful for coming up with the complete set
+     * Combine a set of Capabilities to this one.  Useful for coming up with the complete set.
+     * <p>
+     * Note that this method may break an invariant of having a particular capability in either
+     * wanted or unwanted lists but never in both.  Requests that have the same capability in
+     * both lists will never be satisfied.
      * @hide
      */
     public void combineCapabilities(NetworkCapabilities nc) {
