@@ -149,7 +149,6 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
         mSecurityContainer.setLockPatternUtils(mLockPatternUtils);
         mSecurityContainer.setSecurityCallback(this);
         mSecurityContainer.showPrimarySecurityScreen(false);
-        // mSecurityContainer.updateSecurityViews(false /* not bouncing */);
     }
 
     /**

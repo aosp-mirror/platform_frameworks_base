@@ -17,10 +17,11 @@
 package com.android.systemui.classifier;
 
 public class AnglesPercentageEvaluator {
-    public static float evaluate(float value) {
+    public static float evaluate(float value, int type) {
+        final boolean secureUnlock = type == Classifier.BOUNCER_UNLOCK;
         float evaluation = 0.0f;
-        if (value < 1.00) evaluation++;
-        if (value < 0.90) evaluation++;
+        if (value < 1.00 && !secureUnlock) evaluation++;
+        if (value < 0.90 && !secureUnlock) evaluation++;
         if (value < 0.70) evaluation++;
         return evaluation;
     }

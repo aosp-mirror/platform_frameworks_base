@@ -35,7 +35,6 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
-import android.view.animation.PathInterpolator;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
@@ -97,14 +96,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
      * The most common scrim, the one under the keyguard.
      */
     protected static final float SCRIM_BEHIND_ALPHA_KEYGUARD = GRADIENT_SCRIM_ALPHA;
-    /**
-     * We fade out the bottom scrim when the bouncer is visible.
-     */
-    protected static final float SCRIM_BEHIND_ALPHA_UNLOCKING = 0.2f;
-    /**
-     * Opacity of the scrim behind the bouncer (the one doing actual background protection.)
-     */
-    protected static final float SCRIM_IN_FRONT_ALPHA_LOCKED = GRADIENT_SCRIM_ALPHA_BUSY;
 
     static final int TAG_KEY_ANIM = R.id.scrim;
     private static final int TAG_START_ALPHA = R.id.scrim_alpha_start;
@@ -130,7 +121,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     protected float mScrimBehindAlpha;
     protected float mScrimBehindAlphaResValue;
     protected float mScrimBehindAlphaKeyguard = SCRIM_BEHIND_ALPHA_KEYGUARD;
-    protected float mScrimBehindAlphaUnlocking = SCRIM_BEHIND_ALPHA_UNLOCKING;
 
     // Assuming the shade is expanded during initialization
     private float mExpansionFraction = 1f;
@@ -177,6 +167,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         mScrimVisibleListener = scrimVisibleListener;
         mContext = scrimBehind.getContext();
         mUnlockMethodCache = UnlockMethodCache.getInstance(mContext);
+        mDarkenWhileDragging = !mUnlockMethodCache.canSkipBouncer();
         mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
         mLightBarController = lightBarController;
         mScrimBehindAlphaResValue = mContext.getResources().getFloat(R.dimen.scrim_behind_alpha);
@@ -300,10 +291,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         return mState;
     }
 
-    protected void setScrimBehindValues(float scrimBehindAlphaKeyguard,
-            float scrimBehindAlphaUnlocking) {
+    protected void setScrimBehindValues(float scrimBehindAlphaKeyguard) {
         mScrimBehindAlphaKeyguard = scrimBehindAlphaKeyguard;
-        mScrimBehindAlphaUnlocking = scrimBehindAlphaUnlocking;
         ScrimState[] states = ScrimState.values();
         for (int i = 0; i < states.length; i++) {
             states[i].setScrimBehindAlphaKeyguard(scrimBehindAlphaKeyguard);
@@ -404,9 +393,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             float interpolatedFract = getInterpolatedFraction();
             float alphaBehind = mState.getBehindAlpha(mNotificationDensity);
             if (mDarkenWhileDragging) {
-                mCurrentBehindAlpha = MathUtils.lerp(mScrimBehindAlphaUnlocking, alphaBehind,
+                mCurrentBehindAlpha = MathUtils.lerp(GRADIENT_SCRIM_ALPHA_BUSY, alphaBehind,
                         interpolatedFract);
-                mCurrentInFrontAlpha = (1f - interpolatedFract) * SCRIM_IN_FRONT_ALPHA_LOCKED;
+                mCurrentInFrontAlpha = 0;
             } else {
                 mCurrentBehindAlpha = MathUtils.lerp(0 /* start */, alphaBehind,
                         interpolatedFract);
@@ -455,7 +444,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         if (mNeedsDrawableColorUpdate) {
             mNeedsDrawableColorUpdate = false;
             final GradientColors currentScrimColors;
-            if (mState == ScrimState.KEYGUARD || mState == ScrimState.BOUNCER) {
+            if (mState == ScrimState.KEYGUARD || mState == ScrimState.BOUNCER_OCCLUDED
+                    || mState == ScrimState.BOUNCER) {
                 // Always animate color changes if we're seeing the keyguard
                 mScrimInFront.setColors(mLockColors, true /* animated */);
                 mScrimBehind.setColors(mLockColors, true /* animated */);

@@ -356,11 +356,12 @@ public class FalsingManager implements SensorEventListener {
         mDataCollector.setQsExpanded(expanded);
     }
 
-    public void onTrackingStarted() {
+    public void onTrackingStarted(boolean secure) {
         if (FalsingLog.ENABLED) {
             FalsingLog.i("onTrackingStarted", "");
         }
-        mHumanInteractionClassifier.setType(Classifier.UNLOCK);
+        mHumanInteractionClassifier.setType(secure ?
+                Classifier.BOUNCER_UNLOCK : Classifier.UNLOCK);
         mDataCollector.onTrackingStarted();
     }
 

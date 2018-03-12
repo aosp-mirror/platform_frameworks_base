@@ -170,12 +170,22 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void transitionToBouncer() {
+    public void transitionToKeyguardBouncer() {
         mScrimController.transitionTo(ScrimState.BOUNCER);
         mScrimController.finishAnimationsImmediately();
         // Front scrim should be transparent
         // Back scrim should be visible without tint
-        assertScrimVisibility(VISIBILITY_SEMI_TRANSPARENT, VISIBILITY_SEMI_TRANSPARENT);
+        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_SEMI_TRANSPARENT);
+        assertScrimTint(mScrimBehind, false /* tinted */);
+    }
+
+    @Test
+    public void transitionToBouncer() {
+        mScrimController.transitionTo(ScrimState.BOUNCER_OCCLUDED);
+        mScrimController.finishAnimationsImmediately();
+        // Front scrim should be transparent
+        // Back scrim should be visible without tint
+        assertScrimVisibility(VISIBILITY_SEMI_TRANSPARENT, VISIBILITY_FULLY_TRANSPARENT);
         assertScrimTint(mScrimBehind, false /* tinted */);
     }
 
