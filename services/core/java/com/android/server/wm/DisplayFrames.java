@@ -27,6 +27,8 @@ import android.util.proto.ProtoOutputStream;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 
+import com.android.server.wm.utils.WmDisplayCutout;
+
 import java.io.PrintWriter;
 
 /**
@@ -97,10 +99,10 @@ public class DisplayFrames {
     public final Rect mDock = new Rect();
 
     /** The display cutout used for layout (after rotation) */
-    @NonNull public DisplayCutout mDisplayCutout = DisplayCutout.NO_CUTOUT;
+    @NonNull public WmDisplayCutout mDisplayCutout = WmDisplayCutout.NO_CUTOUT;
 
     /** The cutout as supplied by display info */
-    @NonNull private DisplayCutout mDisplayInfoCutout = DisplayCutout.NO_CUTOUT;
+    @NonNull public WmDisplayCutout mDisplayInfoCutout = WmDisplayCutout.NO_CUTOUT;
 
     /**
      * During layout, the frame that is display-cutout safe, i.e. that does not intersect with it.
@@ -114,19 +116,18 @@ public class DisplayFrames {
 
     public int mRotation;
 
-    public DisplayFrames(int displayId, DisplayInfo info) {
+    public DisplayFrames(int displayId, DisplayInfo info, WmDisplayCutout displayCutout) {
         mDisplayId = displayId;
-        onDisplayInfoUpdated(info);
+        onDisplayInfoUpdated(info, displayCutout);
     }
 
-    public void onDisplayInfoUpdated(DisplayInfo info) {
+    public void onDisplayInfoUpdated(DisplayInfo info, WmDisplayCutout displayCutout) {
         mDisplayWidth = info.logicalWidth;
         mDisplayHeight = info.logicalHeight;
         mRotation = info.rotation;
         mDisplayInfoOverscan.set(
                 info.overscanLeft, info.overscanTop, info.overscanRight, info.overscanBottom);
-        mDisplayInfoCutout = info.displayCutout != null
-                ? info.displayCutout : DisplayCutout.NO_CUTOUT;
+        mDisplayInfoCutout = displayCutout != null ? displayCutout : WmDisplayCutout.NO_CUTOUT;
     }
 
     public void onBeginLayout() {
@@ -171,8 +172,8 @@ public class DisplayFrames {
         mDisplayCutout = mDisplayInfoCutout;
         mDisplayCutoutSafe.set(Integer.MIN_VALUE, Integer.MIN_VALUE,
                 Integer.MAX_VALUE, Integer.MAX_VALUE);
-        if (!mDisplayCutout.isEmpty()) {
-            final DisplayCutout c = mDisplayCutout;
+        if (!mDisplayCutout.getDisplayCutout().isEmpty()) {
+            final DisplayCutout c = mDisplayCutout.getDisplayCutout();
             if (c.getSafeInsetLeft() > 0) {
                 mDisplayCutoutSafe.left = mRestrictedOverscan.left + c.getSafeInsetLeft();
             }

@@ -154,6 +154,7 @@ import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.view.IInputMethodClient;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.utils.RotationCache;
+import com.android.server.wm.utils.WmDisplayCutout;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -214,7 +215,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     int mInitialDisplayDensity = 0;
 
     DisplayCutout mInitialDisplayCutout;
-    private final RotationCache<DisplayCutout, DisplayCutout> mDisplayCutoutCache
+    private final RotationCache<DisplayCutout, WmDisplayCutout> mDisplayCutoutCache
             = new RotationCache<>(this::calculateDisplayCutoutForRotationUncached);
 
     /**
@@ -735,7 +736,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         display.getDisplayInfo(mDisplayInfo);
         display.getMetrics(mDisplayMetrics);
         isDefaultDisplay = mDisplayId == DEFAULT_DISPLAY;
-        mDisplayFrames = new DisplayFrames(mDisplayId, mDisplayInfo);
+        mDisplayFrames = new DisplayFrames(mDisplayId, mDisplayInfo,
+                calculateDisplayCutoutForRotation(mDisplayInfo.rotation));
         initializeDisplayBaseInfo();
         mDividerControllerLocked = new DockedStackDividerController(service, this);
         mPinnedStackControllerLocked = new PinnedStackController(service, this);
@@ -1128,7 +1130,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mService.mPolicy.setInitialDisplaySize(getDisplay(),
                 mBaseDisplayWidth, mBaseDisplayHeight, mBaseDisplayDensity);
 
-        mDisplayFrames.onDisplayInfoUpdated(mDisplayInfo);
+        mDisplayFrames.onDisplayInfoUpdated(mDisplayInfo,
+                calculateDisplayCutoutForRotation(mDisplayInfo.rotation));
     }
 
     /**
@@ -1161,8 +1164,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         // Update application display metrics.
-        final DisplayCutout displayCutout = calculateDisplayCutoutForRotation(
-                mRotation);
+        final WmDisplayCutout wmDisplayCutout = calculateDisplayCutoutForRotation(mRotation);
+        final DisplayCutout displayCutout = wmDisplayCutout.getDisplayCutout();
+
         final int appWidth = mService.mPolicy.getNonDecorDisplayWidth(dw, dh, mRotation, uiMode,
                 mDisplayId, displayCutout);
         final int appHeight = mService.mPolicy.getNonDecorDisplayHeight(dw, dh, mRotation, uiMode,
@@ -1177,7 +1181,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mDisplayInfo.getLogicalMetrics(mRealDisplayMetrics,
                     CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
         }
-        mDisplayInfo.displayCutout = displayCutout;
+        mDisplayInfo.displayCutout = displayCutout.isEmpty() ? null : displayCutout;
         mDisplayInfo.getAppMetrics(mDisplayMetrics);
         if (mDisplayScalingDisabled) {
             mDisplayInfo.flags |= Display.FLAG_SCALING_DISABLED;
@@ -1199,24 +1203,25 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mDisplayInfo;
     }
 
-    DisplayCutout calculateDisplayCutoutForRotation(int rotation) {
+    WmDisplayCutout calculateDisplayCutoutForRotation(int rotation) {
         return mDisplayCutoutCache.getOrCompute(mInitialDisplayCutout, rotation);
     }
 
-    private DisplayCutout calculateDisplayCutoutForRotationUncached(
+    private WmDisplayCutout calculateDisplayCutoutForRotationUncached(
             DisplayCutout cutout, int rotation) {
         if (cutout == null || cutout == DisplayCutout.NO_CUTOUT) {
-            return cutout;
+            return WmDisplayCutout.NO_CUTOUT;
         }
         if (rotation == ROTATION_0) {
-            return cutout.computeSafeInsets(mInitialDisplayWidth, mInitialDisplayHeight);
+            return WmDisplayCutout.computeSafeInsets(
+                    cutout, mInitialDisplayWidth, mInitialDisplayHeight);
         }
         final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
         final Path bounds = cutout.getBounds().getBoundaryPath();
         transformPhysicalToLogicalCoordinates(rotation, mInitialDisplayWidth, mInitialDisplayHeight,
                 mTmpMatrix);
         bounds.transform(mTmpMatrix);
-        return DisplayCutout.fromBounds(bounds).computeSafeInsets(
+        return WmDisplayCutout.computeSafeInsets(DisplayCutout.fromBounds(bounds),
                 rotated ? mInitialDisplayHeight : mInitialDisplayWidth,
                 rotated ? mInitialDisplayWidth : mInitialDisplayHeight);
     }
@@ -1441,7 +1446,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     private void adjustDisplaySizeRanges(DisplayInfo displayInfo, int displayId, int rotation,
             int uiMode, int dw, int dh) {
-        final DisplayCutout displayCutout = calculateDisplayCutoutForRotation(rotation);
+        final DisplayCutout displayCutout = calculateDisplayCutoutForRotation(
+                rotation).getDisplayCutout();
         final int width = mService.mPolicy.getConfigDisplayWidth(dw, dh, rotation, uiMode,
                 displayId, displayCutout);
         if (width < displayInfo.smallestNominalAppWidth) {
@@ -2910,7 +2916,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             Slog.v(TAG, "performLayout: needed=" + isLayoutNeeded() + " dw=" + dw + " dh=" + dh);
         }
 
-        mDisplayFrames.onDisplayInfoUpdated(mDisplayInfo);
+        mDisplayFrames.onDisplayInfoUpdated(mDisplayInfo,
+                calculateDisplayCutoutForRotation(mDisplayInfo.rotation));
         // TODO: Not sure if we really need to set the rotation here since we are updating from the
         // display info above...
         mDisplayFrames.mRotation = mRotation;

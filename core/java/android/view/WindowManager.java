@@ -2241,18 +2241,20 @@ public interface WindowManager extends ViewManager {
 
         /**
          * The window is allowed to extend into the {@link DisplayCutout} area, only if the
-         * {@link DisplayCutout} is fully contained within the status bar. Otherwise, the window is
+         * {@link DisplayCutout} is fully contained within a system bar. Otherwise, the window is
          * laid out such that it does not overlap with the {@link DisplayCutout} area.
          *
          * <p>
          * In practice, this means that if the window did not set FLAG_FULLSCREEN or
-         * SYSTEM_UI_FLAG_FULLSCREEN, it can extend into the cutout area in portrait.
-         * Otherwise (i.e. fullscreen or landscape) it is laid out such that it does overlap the
+         * SYSTEM_UI_FLAG_FULLSCREEN, it can extend into the cutout area in portrait if the cutout
+         * is at the top edge. Similarly for SYSTEM_UI_FLAG_HIDE_NAVIGATION and a cutout at the
+         * bottom of the screen.
+         * Otherwise (i.e. fullscreen or landscape) it is laid out such that it does not overlap the
          * cutout area.
          *
          * <p>
-         * The usual precautions for not overlapping with the status bar are sufficient for ensuring
-         * that no important content overlaps with the DisplayCutout.
+         * The usual precautions for not overlapping with the status and navigation bar are
+         * sufficient for ensuring that no important content overlaps with the DisplayCutout.
          *
          * @see DisplayCutout
          * @see WindowInsets
@@ -2260,8 +2262,18 @@ public interface WindowManager extends ViewManager {
         public static final int LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT = 0;
 
         /**
-         * The window is always allowed to extend into the {@link DisplayCutout} area,
-         * even if fullscreen or in landscape.
+         * @deprecated use {@link #LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES}
+         * @hide
+         */
+        @Deprecated
+        public static final int LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS = 1;
+
+        /**
+         * The window is always allowed to extend into the {@link DisplayCutout} areas on the short
+         * edges of the screen.
+         *
+         * The window will never extend into a {@link DisplayCutout} area on the long edges of the
+         * screen.
          *
          * <p>
          * The window must make sure that no important content overlaps with the
@@ -2270,7 +2282,7 @@ public interface WindowManager extends ViewManager {
          * @see DisplayCutout
          * @see WindowInsets#getDisplayCutout()
          */
-        public static final int LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS = 1;
+        public static final int LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES = 1;
 
         /**
          * The window is never allowed to overlap with the DisplayCutout area.
