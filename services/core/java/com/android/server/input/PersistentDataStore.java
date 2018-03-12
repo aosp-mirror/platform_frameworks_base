@@ -16,7 +16,6 @@
 
 package com.android.server.input;
 
-import com.android.internal.inputmethod.InputMethodSubtypeHandle;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
@@ -28,8 +27,6 @@ import org.xmlpull.v1.XmlSerializer;
 import android.annotation.Nullable;
 import android.view.Surface;
 import android.hardware.input.TouchCalibration;
-import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
@@ -41,13 +38,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -139,26 +133,9 @@ final class PersistentDataStore {
         }
         return state.getKeyboardLayouts();
     }
-    public String getKeyboardLayout(String inputDeviceDescriptor,
-            InputMethodSubtypeHandle imeHandle) {
-        InputDeviceState state = getInputDeviceState(inputDeviceDescriptor, false);
-        if (state == null) {
-            return null;
-        }
-        return state.getKeyboardLayout(imeHandle);
-    }
 
-    public boolean setKeyboardLayout(String inputDeviceDescriptor,
-            InputMethodSubtypeHandle imeHandle, String keyboardLayoutDescriptor) {
-        InputDeviceState state = getInputDeviceState(inputDeviceDescriptor, true);
-        if (state.setKeyboardLayout(imeHandle, keyboardLayoutDescriptor)) {
-            setDirty();
-            return true;
-        }
-        return false;
-    }
-
-    public boolean addKeyboardLayout(String inputDeviceDescriptor, String keyboardLayoutDescriptor) {
+    public boolean addKeyboardLayout(String inputDeviceDescriptor,
+            String keyboardLayoutDescriptor) {
         InputDeviceState state = getInputDeviceState(inputDeviceDescriptor, true);
         if (state.addKeyboardLayout(keyboardLayoutDescriptor)) {
             setDirty();
@@ -177,10 +154,9 @@ final class PersistentDataStore {
         return false;
     }
 
-    public boolean switchKeyboardLayout(String inputDeviceDescriptor,
-            InputMethodSubtypeHandle imeHandle) {
+    public boolean switchKeyboardLayout(String inputDeviceDescriptor, int direction) {
         InputDeviceState state = getInputDeviceState(inputDeviceDescriptor, false);
-        if (state != null && state.switchKeyboardLayout(imeHandle)) {
+        if (state != null && state.switchKeyboardLayout(direction)) {
             setDirty();
             return true;
         }
@@ -327,18 +303,6 @@ final class PersistentDataStore {
         serializer.endDocument();
     }
 
-    public void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + "PersistentDataStore");
-        pw.println(prefix + "  mLoaded=" + mLoaded);
-        pw.println(prefix + "  mDirty=" + mDirty);
-        pw.println(prefix + "  InputDeviceStates:");
-        int i = 0;
-        for (Map.Entry<String, InputDeviceState> entry : mInputDevices.entrySet()) {
-            pw.println(prefix + "    " + i++ + ": " + entry.getKey());
-            entry.getValue().dump(pw, prefix + "      ");
-        }
-    }
-
     private static final class InputDeviceState {
         private static final String[] CALIBRATION_NAME = { "x_scale",
                 "x_ymix", "x_offset", "y_xmix", "y_scale", "y_offset" };
@@ -346,8 +310,7 @@ final class PersistentDataStore {
         private TouchCalibration[] mTouchCalibration = new TouchCalibration[4];
         @Nullable
         private String mCurrentKeyboardLayout;
-        private List<String> mUnassociatedKeyboardLayouts = new ArrayList<>();
-        private ArrayMap<InputMethodSubtypeHandle, String> mKeyboardLayouts = new ArrayMap<>();
+        private ArrayList<String> mKeyboardLayouts = new ArrayList<String>();
 
         public TouchCalibration getTouchCalibration(int surfaceRotation) {
             try {
@@ -386,34 +349,18 @@ final class PersistentDataStore {
         }
 
         public String[] getKeyboardLayouts() {
-            if (mUnassociatedKeyboardLayouts.isEmpty()) {
+            if (mKeyboardLayouts.isEmpty()) {
                 return (String[])ArrayUtils.emptyArray(String.class);
             }
-            return mUnassociatedKeyboardLayouts.toArray(
-                    new String[mUnassociatedKeyboardLayouts.size()]);
-        }
-
-        public String getKeyboardLayout(InputMethodSubtypeHandle handle) {
-            return mKeyboardLayouts.get(handle);
-        }
-
-        public boolean setKeyboardLayout(InputMethodSubtypeHandle imeHandle,
-                String keyboardLayout) {
-            String existingLayout = mKeyboardLayouts.get(imeHandle);
-            if (TextUtils.equals(existingLayout, keyboardLayout)) {
-                return false;
-            }
-            mKeyboardLayouts.put(imeHandle, keyboardLayout);
-            return true;
+            return mKeyboardLayouts.toArray(new String[mKeyboardLayouts.size()]);
         }
 
         public boolean addKeyboardLayout(String keyboardLayout) {
-            int index = Collections.binarySearch(
-                    mUnassociatedKeyboardLayouts, keyboardLayout);
+            int index = Collections.binarySearch(mKeyboardLayouts, keyboardLayout);
             if (index >= 0) {
                 return false;
             }
-            mUnassociatedKeyboardLayouts.add(-index - 1, keyboardLayout);
+            mKeyboardLayouts.add(-index - 1, keyboardLayout);
             if (mCurrentKeyboardLayout == null) {
                 mCurrentKeyboardLayout = keyboardLayout;
             }
@@ -421,11 +368,11 @@ final class PersistentDataStore {
         }
 
         public boolean removeKeyboardLayout(String keyboardLayout) {
-            int index = Collections.binarySearch(mUnassociatedKeyboardLayouts, keyboardLayout);
+            int index = Collections.binarySearch(mKeyboardLayouts, keyboardLayout);
             if (index < 0) {
                 return false;
             }
-            mUnassociatedKeyboardLayouts.remove(index);
+            mKeyboardLayouts.remove(index);
             updateCurrentKeyboardLayoutIfRemoved(keyboardLayout, index);
             return true;
         }
@@ -433,34 +380,41 @@ final class PersistentDataStore {
         private void updateCurrentKeyboardLayoutIfRemoved(
                 String removedKeyboardLayout, int removedIndex) {
             if (Objects.equals(mCurrentKeyboardLayout, removedKeyboardLayout)) {
-                if (!mUnassociatedKeyboardLayouts.isEmpty()) {
+                if (!mKeyboardLayouts.isEmpty()) {
                     int index = removedIndex;
-                    if (index == mUnassociatedKeyboardLayouts.size()) {
+                    if (index == mKeyboardLayouts.size()) {
                         index = 0;
                     }
-                    mCurrentKeyboardLayout = mUnassociatedKeyboardLayouts.get(index);
+                    mCurrentKeyboardLayout = mKeyboardLayouts.get(index);
                 } else {
                     mCurrentKeyboardLayout = null;
                 }
             }
         }
 
-        public boolean switchKeyboardLayout(InputMethodSubtypeHandle imeHandle) {
-            final String layout = mKeyboardLayouts.get(imeHandle);
-            if (!TextUtils.equals(mCurrentKeyboardLayout, layout)) {
-                mCurrentKeyboardLayout = layout;
-                return true;
+        public boolean switchKeyboardLayout(int direction) {
+            final int size = mKeyboardLayouts.size();
+            if (size < 2) {
+                return false;
             }
-            return false;
+            int index = Collections.binarySearch(mKeyboardLayouts, mCurrentKeyboardLayout);
+            assert index >= 0;
+            if (direction > 0) {
+                index = (index + 1) % size;
+            } else {
+                index = (index + size - 1) % size;
+            }
+            mCurrentKeyboardLayout = mKeyboardLayouts.get(index);
+            return true;
         }
 
         public boolean removeUninstalledKeyboardLayouts(Set<String> availableKeyboardLayouts) {
             boolean changed = false;
-            for (int i = mUnassociatedKeyboardLayouts.size(); i-- > 0; ) {
-                String keyboardLayout = mUnassociatedKeyboardLayouts.get(i);
+            for (int i = mKeyboardLayouts.size(); i-- > 0; ) {
+                String keyboardLayout = mKeyboardLayouts.get(i);
                 if (!availableKeyboardLayouts.contains(keyboardLayout)) {
                     Slog.i(TAG, "Removing uninstalled keyboard layout " + keyboardLayout);
-                    mUnassociatedKeyboardLayouts.remove(i);
+                    mKeyboardLayouts.remove(i);
                     updateCurrentKeyboardLayoutIfRemoved(keyboardLayout, i);
                     changed = true;
                 }
@@ -478,40 +432,19 @@ final class PersistentDataStore {
                         throw new XmlPullParserException(
                                 "Missing descriptor attribute on keyboard-layout.");
                     }
-
                     String current = parser.getAttributeValue(null, "current");
+                    if (mKeyboardLayouts.contains(descriptor)) {
+                        throw new XmlPullParserException(
+                                "Found duplicate keyboard layout.");
+                    }
+
+                    mKeyboardLayouts.add(descriptor);
                     if (current != null && current.equals("true")) {
                         if (mCurrentKeyboardLayout != null) {
                             throw new XmlPullParserException(
                                     "Found multiple current keyboard layouts.");
                         }
                         mCurrentKeyboardLayout = descriptor;
-                    }
-
-                    String inputMethodId = parser.getAttributeValue(null, "input-method-id");
-                    String inputMethodSubtypeId =
-                        parser.getAttributeValue(null, "input-method-subtype-id");
-                    if (inputMethodId == null && inputMethodSubtypeId != null
-                            || inputMethodId != null && inputMethodSubtypeId == null) {
-                        throw new XmlPullParserException(
-                                "Found an incomplete input method description");
-                    }
-
-                    if (inputMethodSubtypeId != null) {
-                        InputMethodSubtypeHandle handle = new InputMethodSubtypeHandle(
-                                inputMethodId, Integer.parseInt(inputMethodSubtypeId));
-                        if (mKeyboardLayouts.containsKey(handle)) {
-                            throw new XmlPullParserException(
-                                    "Found duplicate subtype to keyboard layout mapping: "
-                                    + handle);
-                        }
-                        mKeyboardLayouts.put(handle, descriptor);
-                    } else {
-                        if (mUnassociatedKeyboardLayouts.contains(descriptor)) {
-                            throw new XmlPullParserException(
-                                    "Found duplicate unassociated keyboard layout: " + descriptor);
-                        }
-                        mUnassociatedKeyboardLayouts.add(descriptor);
                     }
                 } else if (parser.getName().equals("calibration")) {
                     String format = parser.getAttributeValue(null, "format");
@@ -563,31 +496,19 @@ final class PersistentDataStore {
             }
 
             // Maintain invariant that layouts are sorted.
-            Collections.sort(mUnassociatedKeyboardLayouts);
+            Collections.sort(mKeyboardLayouts);
 
             // Maintain invariant that there is always a current keyboard layout unless
             // there are none installed.
-            if (mCurrentKeyboardLayout == null && !mUnassociatedKeyboardLayouts.isEmpty()) {
-                mCurrentKeyboardLayout = mUnassociatedKeyboardLayouts.get(0);
+            if (mCurrentKeyboardLayout == null && !mKeyboardLayouts.isEmpty()) {
+                mCurrentKeyboardLayout = mKeyboardLayouts.get(0);
             }
         }
 
         public void saveToXml(XmlSerializer serializer) throws IOException {
-            for (String layout : mUnassociatedKeyboardLayouts) {
+            for (String layout : mKeyboardLayouts) {
                 serializer.startTag(null, "keyboard-layout");
                 serializer.attribute(null, "descriptor", layout);
-                serializer.endTag(null, "keyboard-layout");
-            }
-
-            final int N = mKeyboardLayouts.size();
-            for (int i = 0; i < N; i++) {
-                final InputMethodSubtypeHandle handle = mKeyboardLayouts.keyAt(i);
-                final String layout = mKeyboardLayouts.valueAt(i);
-                serializer.startTag(null, "keyboard-layout");
-                serializer.attribute(null, "descriptor", layout);
-                serializer.attribute(null, "input-method-id", handle.getInputMethodId());
-                serializer.attribute(null, "input-method-subtype-id",
-                        Integer.toString(handle.getSubtypeId()));
                 if (layout.equals(mCurrentKeyboardLayout)) {
                     serializer.attribute(null, "current", "true");
                 }
@@ -609,22 +530,6 @@ final class PersistentDataStore {
                     }
                     serializer.endTag(null, "calibration");
                 }
-            }
-        }
-
-        private void dump(final PrintWriter pw, final String prefix) {
-            pw.println(prefix + "CurrentKeyboardLayout=" + mCurrentKeyboardLayout);
-            pw.println(prefix + "UnassociatedKeyboardLayouts=" + mUnassociatedKeyboardLayouts);
-            pw.println(prefix + "TouchCalibration=" + Arrays.toString(mTouchCalibration));
-            pw.println(prefix + "Subtype to Layout Mappings:");
-            final int N = mKeyboardLayouts.size();
-            if (N != 0) {
-                for (int i = 0; i < N; i++) {
-                    pw.println(prefix + "  " + mKeyboardLayouts.keyAt(i) + ": "
-                            + mKeyboardLayouts.valueAt(i));
-                }
-            } else {
-                pw.println(prefix + "  <none>");
             }
         }
 
