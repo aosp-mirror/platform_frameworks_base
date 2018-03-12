@@ -995,9 +995,9 @@ public class Activity extends ContextThemeWrapper
      * cursors for data being displayed, etc.
      *
      * <p>You can call {@link #finish} from within this function, in
-     * which case onDestroy() will be immediately called without any of the rest
-     * of the activity lifecycle ({@link #onStart}, {@link #onResume},
-     * {@link #onPause}, etc) executing.
+     * which case onDestroy() will be immediately called after {@link #onCreate} without any of the
+     * rest of the activity lifecycle ({@link #onStart}, {@link #onResume}, {@link #onPause}, etc)
+     * executing.
      *
      * <p><em>Derived classes must call through to the super class's
      * implementation of this method.  If they do not, an exception will be
