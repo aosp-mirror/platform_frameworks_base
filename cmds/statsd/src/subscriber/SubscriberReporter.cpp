@@ -77,6 +77,12 @@ void SubscriberReporter::alertBroadcastSubscriber(const ConfigKey& configKey,
     }
     int64_t subscriberId = subscription.broadcast_subscriber_details().subscriber_id();
 
+    vector<String16> cookies;
+    cookies.reserve(subscription.broadcast_subscriber_details().cookie_size());
+    for (auto& cookie : subscription.broadcast_subscriber_details().cookie()) {
+        cookies.push_back(String16(cookie.c_str()));
+    }
+
     auto it1 = mIntentMap.find(configKey);
     if (it1 == mIntentMap.end()) {
         ALOGW("Cannot inform subscriber for missing config key %s ", configKey.ToString().c_str());
@@ -88,12 +94,13 @@ void SubscriberReporter::alertBroadcastSubscriber(const ConfigKey& configKey,
                 configKey.ToString().c_str(), (long long)subscriberId);
         return;
     }
-    sendBroadcastLocked(it2->second, configKey, subscription, dimKey);
+    sendBroadcastLocked(it2->second, configKey, subscription, cookies, dimKey);
 }
 
 void SubscriberReporter::sendBroadcastLocked(const sp<IBinder>& intentSender,
                                              const ConfigKey& configKey,
                                              const Subscription& subscription,
+                                             const vector<String16>& cookies,
                                              const MetricDimensionKey& dimKey) const {
     VLOG("SubscriberReporter::sendBroadcastLocked called.");
     if (mStatsCompanionService == nullptr) {
@@ -101,11 +108,16 @@ void SubscriberReporter::sendBroadcastLocked(const sp<IBinder>& intentSender,
         return;
     }
     mStatsCompanionService->sendSubscriberBroadcast(
-            intentSender, configKey.GetUid(), configKey.GetId(), subscription.id(),
-            subscription.rule_id(), getStatsDimensionsValue(dimKey.getDimensionKeyInWhat()));
+            intentSender,
+            configKey.GetUid(),
+            configKey.GetId(),
+            subscription.id(),
+            subscription.rule_id(),
+            cookies,
+            getStatsDimensionsValue(dimKey.getDimensionKeyInWhat()));
 }
 
-void getStatsDimensionsValueHelper(const std::vector<FieldValue>& dims, size_t* index, int depth,
+void getStatsDimensionsValueHelper(const vector<FieldValue>& dims, size_t* index, int depth,
                                    int prefix, vector<StatsDimensionsValue>* output) {
     size_t count = dims.size();
     while (*index < count) {
