@@ -37,12 +37,14 @@ public class TransportClientManager {
     private static final String TAG = "TransportClientManager";
 
     private final Context mContext;
+    private final TransportStats mTransportStats;
     private final Object mTransportClientsLock = new Object();
     private int mTransportClientsCreated = 0;
     private Map<TransportClient, String> mTransportClientsCallerMap = new WeakHashMap<>();
 
-    public TransportClientManager(Context context) {
+    public TransportClientManager(Context context, TransportStats transportStats) {
         mContext = context;
+        mTransportStats = transportStats;
     }
 
     /**
@@ -88,6 +90,7 @@ public class TransportClientManager {
             TransportClient transportClient =
                     new TransportClient(
                             mContext,
+                            mTransportStats,
                             bindIntent,
                             transportComponent,
                             Integer.toString(mTransportClientsCreated),
