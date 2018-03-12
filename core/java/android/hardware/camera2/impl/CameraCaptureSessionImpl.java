@@ -20,20 +20,18 @@ import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.ICameraDeviceUser;
-import android.hardware.camera2.dispatch.ArgumentReplacingDispatcher;
-import android.hardware.camera2.dispatch.BroadcastDispatcher;
-import android.hardware.camera2.dispatch.DuckTypingDispatcher;
-import android.hardware.camera2.dispatch.HandlerDispatcher;
-import android.hardware.camera2.dispatch.InvokeDispatcher;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.utils.TaskDrainer;
 import android.hardware.camera2.utils.TaskSingleDrainer;
+import android.os.Binder;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.util.Log;
 import android.view.Surface;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import static android.hardware.camera2.impl.CameraDeviceImpl.checkHandler;
 import static com.android.internal.util.Preconditions.*;
@@ -51,11 +49,11 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
     private final Surface mInput;
     /**
      * User-specified state callback, used for outgoing events; calls to this object will be
-     * automatically {@link Handler#post(Runnable) posted} to {@code mStateHandler}.
+     * automatically invoked via {@code mStateExecutor}.
      */
     private final CameraCaptureSession.StateCallback mStateCallback;
-    /** User-specified state handler used for outgoing state callback events */
-    private final Handler mStateHandler;
+    /** User-specified state executor used for outgoing state callback events */
+    private final Executor mStateExecutor;
 
     /** Internal camera device; used to translate calls into existing deprecated API */
     private final android.hardware.camera2.impl.CameraDeviceImpl mDeviceImpl;
@@ -87,7 +85,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
      * (e.g. no pending captures, no repeating requests, no flush).</p>
      */
     CameraCaptureSessionImpl(int id, Surface input,
-            CameraCaptureSession.StateCallback callback, Handler stateHandler,
+            CameraCaptureSession.StateCallback callback, Executor stateExecutor,
             android.hardware.camera2.impl.CameraDeviceImpl deviceImpl,
             Handler deviceStateHandler, boolean configureSuccess) {
         if (callback == null) {
@@ -98,8 +96,8 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
         mIdString = String.format("Session %d: ", mId);
 
         mInput = input;
-        mStateHandler = checkHandler(stateHandler);
-        mStateCallback = createUserStateCallbackProxy(mStateHandler, callback);
+        mStateExecutor = checkNotNull(stateExecutor, "stateExecutor must not be null");
+        mStateCallback = createUserStateCallbackProxy(mStateExecutor, callback);
 
         mDeviceHandler = checkNotNull(deviceStateHandler, "deviceStateHandler must not be null");
         mDeviceImpl = checkNotNull(deviceImpl, "deviceImpl must not be null");
@@ -110,12 +108,12 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
          * This ensures total ordering between CameraDevice.StateCallback and
          * CameraDeviceImpl.CaptureCallback events.
          */
-        mSequenceDrainer = new TaskDrainer<>(mDeviceHandler, new SequenceDrainListener(),
-                /*name*/"seq");
-        mIdleDrainer = new TaskSingleDrainer(mDeviceHandler, new IdleDrainListener(),
-                /*name*/"idle");
-        mAbortDrainer = new TaskSingleDrainer(mDeviceHandler, new AbortDrainListener(),
-                /*name*/"abort");
+        mSequenceDrainer = new TaskDrainer<>(new HandlerExecutor(mDeviceHandler),
+                new SequenceDrainListener(), /*name*/"seq");
+        mIdleDrainer = new TaskSingleDrainer(new HandlerExecutor(mDeviceHandler),
+                new IdleDrainListener(), /*name*/"idle");
+        mAbortDrainer = new TaskSingleDrainer(new HandlerExecutor(mDeviceHandler),
+                new AbortDrainListener(), /*name*/"abort");
 
         // CameraDevice should call configureOutputs and have it finish before constructing us
 
@@ -446,114 +444,140 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
     }
 
     /**
-     * Post calls into a CameraCaptureSession.StateCallback to the user-specified {@code handler}.
+     * Post calls into a CameraCaptureSession.StateCallback to the user-specified {@code executor}.
      */
-    private StateCallback createUserStateCallbackProxy(Handler handler, StateCallback callback) {
-        InvokeDispatcher<StateCallback> userCallbackSink = new InvokeDispatcher<>(callback);
-        HandlerDispatcher<StateCallback> handlerPassthrough =
-                new HandlerDispatcher<>(userCallbackSink, handler);
-
-        return new CallbackProxies.SessionStateCallbackProxy(handlerPassthrough);
+    private StateCallback createUserStateCallbackProxy(Executor executor, StateCallback callback) {
+        return new CallbackProxies.SessionStateCallbackProxy(executor, callback);
     }
 
     /**
      * Forward callbacks from
      * CameraDeviceImpl.CaptureCallback to the CameraCaptureSession.CaptureCallback.
      *
-     * <p>In particular, all calls are automatically split to go both to our own
-     * internal callback, and to the user-specified callback (by transparently posting
-     * to the user-specified handler).</p>
-     *
      * <p>When a capture sequence finishes, update the pending checked sequences set.</p>
      */
     @SuppressWarnings("deprecation")
     private CameraDeviceImpl.CaptureCallback createCaptureCallbackProxy(
             Handler handler, CaptureCallback callback) {
-        CameraDeviceImpl.CaptureCallback localCallback = new CameraDeviceImpl.CaptureCallback() {
+        final Executor executor = (callback != null) ? CameraDeviceImpl.checkAndWrapHandler(
+                handler) : null;
 
+        return new CameraDeviceImpl.CaptureCallback() {
             @Override
             public void onCaptureStarted(CameraDevice camera,
                     CaptureRequest request, long timestamp, long frameNumber) {
-                // Do nothing
+                if ((callback != null) && (executor != null)) {
+                    final long ident = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> callback.onCaptureStarted(
+                                    CameraCaptureSessionImpl.this, request, timestamp,
+                                    frameNumber));
+                    } finally {
+                        Binder.restoreCallingIdentity(ident);
+                    }
+                }
             }
 
             @Override
             public void onCapturePartial(CameraDevice camera,
                     CaptureRequest request, android.hardware.camera2.CaptureResult result) {
-                // Do nothing
+                if ((callback != null) && (executor != null)) {
+                    final long ident = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> callback.onCapturePartial(
+                                    CameraCaptureSessionImpl.this, request, result));
+                    } finally {
+                        Binder.restoreCallingIdentity(ident);
+                    }
+                }
             }
 
             @Override
             public void onCaptureProgressed(CameraDevice camera,
                     CaptureRequest request, android.hardware.camera2.CaptureResult partialResult) {
-                // Do nothing
+                if ((callback != null) && (executor != null)) {
+                    final long ident = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> callback.onCaptureProgressed(
+                                    CameraCaptureSessionImpl.this, request, partialResult));
+                    } finally {
+                        Binder.restoreCallingIdentity(ident);
+                    }
+                }
             }
 
             @Override
             public void onCaptureCompleted(CameraDevice camera,
                     CaptureRequest request, android.hardware.camera2.TotalCaptureResult result) {
-                // Do nothing
+                if ((callback != null) && (executor != null)) {
+                    final long ident = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> callback.onCaptureCompleted(
+                                    CameraCaptureSessionImpl.this, request, result));
+                    } finally {
+                        Binder.restoreCallingIdentity(ident);
+                    }
+                }
             }
 
             @Override
             public void onCaptureFailed(CameraDevice camera,
                     CaptureRequest request, android.hardware.camera2.CaptureFailure failure) {
-                // Do nothing
+                if ((callback != null) && (executor != null)) {
+                    final long ident = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> callback.onCaptureFailed(
+                                    CameraCaptureSessionImpl.this, request, failure));
+                    } finally {
+                        Binder.restoreCallingIdentity(ident);
+                    }
+                }
             }
 
             @Override
             public void onCaptureSequenceCompleted(CameraDevice camera,
                     int sequenceId, long frameNumber) {
+                if ((callback != null) && (executor != null)) {
+                    final long ident = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> callback.onCaptureSequenceCompleted(
+                                    CameraCaptureSessionImpl.this, sequenceId, frameNumber));
+                    } finally {
+                        Binder.restoreCallingIdentity(ident);
+                    }
+                }
                 finishPendingSequence(sequenceId);
             }
 
             @Override
             public void onCaptureSequenceAborted(CameraDevice camera,
                     int sequenceId) {
+                if ((callback != null) && (executor != null)) {
+                    final long ident = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> callback.onCaptureSequenceAborted(
+                                    CameraCaptureSessionImpl.this, sequenceId));
+                    } finally {
+                        Binder.restoreCallingIdentity(ident);
+                    }
+                }
                 finishPendingSequence(sequenceId);
             }
 
             @Override
             public void onCaptureBufferLost(CameraDevice camera,
                     CaptureRequest request, Surface target, long frameNumber) {
-                // Do nothing
+                if ((callback != null) && (executor != null)) {
+                    final long ident = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> callback.onCaptureBufferLost(
+                                    CameraCaptureSessionImpl.this, request, target, frameNumber));
+                    } finally {
+                        Binder.restoreCallingIdentity(ident);
+                    }
+                }
             }
-
         };
-
-        /*
-         * Split the calls from the device callback into local callback and the following chain:
-         * - replace the first CameraDevice arg with a CameraCaptureSession
-         * - duck type from device callback to session callback
-         * - then forward the call to a handler
-         * - then finally invoke the destination method on the session callback object
-         */
-        if (callback == null) {
-            // OK: API allows the user to not specify a callback, and the handler may
-            // also be null in that case. Collapse whole dispatch chain to only call the local
-            // callback
-            return localCallback;
-        }
-
-        InvokeDispatcher<CameraDeviceImpl.CaptureCallback> localSink =
-                new InvokeDispatcher<>(localCallback);
-
-        InvokeDispatcher<CaptureCallback> userCallbackSink =
-                new InvokeDispatcher<>(callback);
-        HandlerDispatcher<CaptureCallback> handlerPassthrough =
-                new HandlerDispatcher<>(userCallbackSink, handler);
-        DuckTypingDispatcher<CameraDeviceImpl.CaptureCallback, CaptureCallback> duckToSession
-                = new DuckTypingDispatcher<>(handlerPassthrough, CaptureCallback.class);
-        ArgumentReplacingDispatcher<CameraDeviceImpl.CaptureCallback, CameraCaptureSessionImpl>
-                replaceDeviceWithSession = new ArgumentReplacingDispatcher<>(duckToSession,
-                        /*argumentIndex*/0, this);
-
-        BroadcastDispatcher<CameraDeviceImpl.CaptureCallback> broadcaster =
-                new BroadcastDispatcher<CameraDeviceImpl.CaptureCallback>(
-                    replaceDeviceWithSession,
-                    localSink);
-
-        return new CallbackProxies.DeviceCaptureCallbackProxy(broadcaster);
     }
 
     /**

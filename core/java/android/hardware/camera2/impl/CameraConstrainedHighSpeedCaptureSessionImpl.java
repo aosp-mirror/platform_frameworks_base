@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import static com.android.internal.util.Preconditions.*;
 
@@ -59,14 +60,14 @@ public class CameraConstrainedHighSpeedCaptureSessionImpl
      * (e.g. no pending captures, no repeating requests, no flush).</p>
      */
     CameraConstrainedHighSpeedCaptureSessionImpl(int id,
-            CameraCaptureSession.StateCallback callback, Handler stateHandler,
+            CameraCaptureSession.StateCallback callback, Executor stateExecutor,
             android.hardware.camera2.impl.CameraDeviceImpl deviceImpl,
             Handler deviceStateHandler, boolean configureSuccess,
             CameraCharacteristics characteristics) {
         mCharacteristics = characteristics;
         CameraCaptureSession.StateCallback wrapperCallback = new WrapperCallback(callback);
         mSessionImpl = new CameraCaptureSessionImpl(id, /*input*/null, wrapperCallback,
-                stateHandler, deviceImpl, deviceStateHandler, configureSuccess);
+                stateExecutor, deviceImpl, deviceStateHandler, configureSuccess);
     }
 
     @Override
