@@ -1750,8 +1750,11 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             // this when there is an activity waiting to become translucent as the extra binder
             // calls will lead to noticeable jank. A later call to
             // ActivityStack#ensureActivitiesVisibleLocked will bring the activity to the proper
-            // paused state.
-            if (isState(STOPPED, STOPPING) && stack.mTranslucentActivityWaiting == null) {
+            // paused state. We also avoid doing this for the activity the stack supervisor
+            // considers the resumed activity, as normal means will bring the activity from STOPPED
+            // to RESUMED. Adding PAUSING in this scenario will lead to double lifecycles.
+            if (isState(STOPPED, STOPPING) && stack.mTranslucentActivityWaiting == null
+                    && mStackSupervisor.getResumedActivityLocked() != this) {
                 // Capture reason before state change
                 final String reason = getLifecycleDescription("makeVisibleIfNeeded");
 
