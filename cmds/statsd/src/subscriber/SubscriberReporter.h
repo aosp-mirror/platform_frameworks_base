@@ -26,6 +26,7 @@
 
 #include <mutex>
 #include <unordered_map>
+#include <vector>
 
 namespace android {
 namespace os {
@@ -102,6 +103,7 @@ private:
     void sendBroadcastLocked(const sp<android::IBinder>& intentSender,
                              const ConfigKey& configKey,
                              const Subscription& subscription,
+                             const std::vector<String16>& cookies,
                              const MetricDimensionKey& dimKey) const;
 };
 
