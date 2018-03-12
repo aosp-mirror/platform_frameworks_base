@@ -273,7 +273,8 @@ class TaskSnapshotController {
         }
         return new TaskSnapshot(buffer, top.getConfiguration().orientation,
                 getInsetsFromTaskBounds(mainWindow, task),
-                isLowRamDevice /* reduced */, scaleFraction /* scale */);
+                isLowRamDevice /* reduced */, scaleFraction /* scale */,
+                true /* isRealSnapshot */);
     }
 
     private boolean shouldDisableSnapshots() {
@@ -369,7 +370,8 @@ class TaskSnapshotController {
         }
         return new TaskSnapshot(hwBitmap.createGraphicBufferHandle(),
                 topChild.getConfiguration().orientation, mainWindow.mStableInsets,
-                ActivityManager.isLowRamDeviceStatic() /* reduced */, 1.0f /* scale */);
+                ActivityManager.isLowRamDeviceStatic() /* reduced */, 1.0f /* scale */,
+                false /* isRealSnapshot */);
     }
 
     /**
