@@ -39,23 +39,13 @@
             android:theme="@android:style/Theme"
             android:layout_alignParentTop="true"/>
 
-        <!-- This progress bar is the countdown timer. -->
-        <ProgressBar
-            android:id="@+id/countdown_progress"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/car_user_switcher_progress_bar_height"
-            style="@style/CarUserSwitcher.ProgressBar"
-            android:layout_marginTop="@dimen/car_user_switcher_progress_bar_margin_top"
-            android:layout_alignParentTop="true"/>
-
         <com.android.systemui.statusbar.car.UserGridView
             android:id="@+id/user_grid"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/car_margin"
             android:layout_marginRight="@dimen/car_margin"
-            android:layout_marginBottom="@dimen/car_user_grid_margin_bottom"
-            android:layout_centerInParent="true" />
+            android:layout_centerInParent="true"/>
 
         <com.android.systemui.statusbar.car.PageIndicator
             android:id="@+id/user_switcher_page_indicator"

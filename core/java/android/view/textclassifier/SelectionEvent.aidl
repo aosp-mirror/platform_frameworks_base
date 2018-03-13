@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,26 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.hardware.camera2.dispatch;
 
+package android.view.textclassifier;
 
-import java.lang.reflect.Method;
-
-/**
- * Do nothing when dispatching; follows the null object pattern.
- */
-public class NullDispatcher<T> implements Dispatchable<T> {
-    /**
-     * Create a dispatcher that does nothing when dispatched to.
-     */
-    public NullDispatcher() {
-    }
-
-    /**
-     * Do nothing; all parameters are ignored.
-     */
-    @Override
-    public Object dispatch(Method method, Object[] args) {
-        return null;
-    }
-}
+parcelable SelectionEvent;

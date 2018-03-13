@@ -2101,15 +2101,17 @@ public class ActivityManager {
         private final int mOrientation;
         private final Rect mContentInsets;
         private final boolean mReducedResolution;
+        private final boolean mIsRealSnapshot;
         private final float mScale;
 
         public TaskSnapshot(GraphicBuffer snapshot, int orientation, Rect contentInsets,
-                boolean reducedResolution, float scale) {
+                boolean reducedResolution, float scale, boolean isRealSnapshot) {
             mSnapshot = snapshot;
             mOrientation = orientation;
             mContentInsets = new Rect(contentInsets);
             mReducedResolution = reducedResolution;
             mScale = scale;
+            mIsRealSnapshot = isRealSnapshot;
         }
 
         private TaskSnapshot(Parcel source) {
@@ -2118,6 +2120,7 @@ public class ActivityManager {
             mContentInsets = source.readParcelable(null /* classLoader */);
             mReducedResolution = source.readBoolean();
             mScale = source.readFloat();
+            mIsRealSnapshot = source.readBoolean();
         }
 
         /**
@@ -2150,6 +2153,14 @@ public class ActivityManager {
         }
 
         /**
+         * @return Whether or not the snapshot is a real snapshot or an app-theme generated snapshot
+         * due to the task having a secure window or having previews disabled.
+         */
+        public boolean isRealSnapshot() {
+            return mIsRealSnapshot;
+        }
+
+        /**
          * @return The scale this snapshot was taken in.
          */
         public float getScale() {
@@ -2168,13 +2179,15 @@ public class ActivityManager {
             dest.writeParcelable(mContentInsets, 0);
             dest.writeBoolean(mReducedResolution);
             dest.writeFloat(mScale);
+            dest.writeBoolean(mIsRealSnapshot);
         }
 
         @Override
         public String toString() {
             return "TaskSnapshot{mSnapshot=" + mSnapshot + " mOrientation=" + mOrientation
                     + " mContentInsets=" + mContentInsets.toShortString()
-                    + " mReducedResolution=" + mReducedResolution + " mScale=" + mScale;
+                    + " mReducedResolution=" + mReducedResolution + " mScale=" + mScale
+                    + " mIsRealSnapshot=" + mIsRealSnapshot;
         }
 
         public static final Creator<TaskSnapshot> CREATOR = new Creator<TaskSnapshot>() {

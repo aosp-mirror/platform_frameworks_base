@@ -3002,6 +3002,7 @@ public final class MediaCodecInfo {
         // from OMX_VIDEO_HEVCPROFILETYPE
         public static final int HEVCProfileMain        = 0x01;
         public static final int HEVCProfileMain10      = 0x02;
+        public static final int HEVCProfileMainStill   = 0x04;
         public static final int HEVCProfileMain10HDR10 = 0x1000;
 
         // from OMX_VIDEO_HEVCLEVELTYPE
@@ -3078,6 +3079,23 @@ public final class MediaCodecInfo {
          * {@link VideoCapabilities} to determine the codec capabilities.
          */
         public int level;
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+            if (obj instanceof CodecProfileLevel) {
+                CodecProfileLevel other = (CodecProfileLevel)obj;
+                return other.profile == profile && other.level == level;
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return Long.hashCode(((long)profile << Integer.SIZE) | level);
+        }
     };
 
     /**

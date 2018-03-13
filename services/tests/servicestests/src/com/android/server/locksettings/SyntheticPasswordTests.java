@@ -300,14 +300,14 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         initializeCredentialUnderSP(PASSWORD, PRIMARY_USER_ID);
         final byte[] storageKey = mStorageManager.getUserUnlockToken(PRIMARY_USER_ID);
 
-        long handle = mService.addEscrowToken(TOKEN.getBytes(), PRIMARY_USER_ID);
-        assertFalse(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
+        long handle = mLocalService.addEscrowToken(TOKEN.getBytes(), PRIMARY_USER_ID);
+        assertFalse(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
 
         mService.verifyCredential(PASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0,
                 PRIMARY_USER_ID).getResponseCode();
-        assertTrue(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
+        assertTrue(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
 
-        mService.setLockCredentialWithToken(PATTERN, LockPatternUtils.CREDENTIAL_TYPE_PATTERN,
+        mLocalService.setLockCredentialWithToken(PATTERN, LockPatternUtils.CREDENTIAL_TYPE_PATTERN,
                 handle, TOKEN.getBytes(), PASSWORD_QUALITY_SOMETHING, PRIMARY_USER_ID);
 
         // Verify DPM gets notified about new device lock
@@ -329,16 +329,16 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         initializeCredentialUnderSP(PASSWORD, PRIMARY_USER_ID);
         final byte[] storageKey = mStorageManager.getUserUnlockToken(PRIMARY_USER_ID);
 
-        long handle = mService.addEscrowToken(TOKEN.getBytes(), PRIMARY_USER_ID);
-        assertFalse(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
+        long handle = mLocalService.addEscrowToken(TOKEN.getBytes(), PRIMARY_USER_ID);
+        assertFalse(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
 
         mService.verifyCredential(PASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
                 0, PRIMARY_USER_ID).getResponseCode();
-        assertTrue(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
+        assertTrue(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
 
-        mService.setLockCredentialWithToken(null, LockPatternUtils.CREDENTIAL_TYPE_NONE, handle,
-                TOKEN.getBytes(), PASSWORD_QUALITY_UNSPECIFIED, PRIMARY_USER_ID);
-        mService.setLockCredentialWithToken(PATTERN, LockPatternUtils.CREDENTIAL_TYPE_PATTERN,
+        mLocalService.setLockCredentialWithToken(null, LockPatternUtils.CREDENTIAL_TYPE_NONE,
+                handle, TOKEN.getBytes(), PASSWORD_QUALITY_UNSPECIFIED, PRIMARY_USER_ID);
+        mLocalService.setLockCredentialWithToken(PATTERN, LockPatternUtils.CREDENTIAL_TYPE_PATTERN,
                 handle, TOKEN.getBytes(), PASSWORD_QUALITY_SOMETHING, PRIMARY_USER_ID);
 
         assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
@@ -355,18 +355,19 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         initializeCredentialUnderSP(PASSWORD, PRIMARY_USER_ID);
         final byte[] storageKey = mStorageManager.getUserUnlockToken(PRIMARY_USER_ID);
 
-        long handle = mService.addEscrowToken(TOKEN.getBytes(), PRIMARY_USER_ID);
-        assertFalse(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
+        long handle = mLocalService.addEscrowToken(TOKEN.getBytes(), PRIMARY_USER_ID);
+        assertFalse(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
 
         mService.verifyCredential(PASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
                 0, PRIMARY_USER_ID).getResponseCode();
-        assertTrue(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
+        assertTrue(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
 
         mService.setLockCredential(PATTERN, LockPatternUtils.CREDENTIAL_TYPE_PATTERN, PASSWORD,
                 PASSWORD_QUALITY_SOMETHING, PRIMARY_USER_ID);
 
-        mService.setLockCredentialWithToken(NEWPASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
-                handle, TOKEN.getBytes(), PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
+        mLocalService.setLockCredentialWithToken(NEWPASSWORD,
+                LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, handle, TOKEN.getBytes(),
+                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
 
         assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
                 NEWPASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
@@ -378,8 +379,8 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
             throws RemoteException {
         final String TOKEN = "some-high-entropy-secure-token";
         enableSyntheticPassword();
-        long handle = mService.addEscrowToken(TOKEN.getBytes(), PRIMARY_USER_ID);
-        assertTrue(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
+        long handle = mLocalService.addEscrowToken(TOKEN.getBytes(), PRIMARY_USER_ID);
+        assertTrue(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
         assertEquals(0, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
         assertTrue(hasSyntheticPassword(PRIMARY_USER_ID));
     }
@@ -388,8 +389,8 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
             throws RemoteException {
         final String TOKEN = "some-high-entropy-secure-token";
         initializeCredentialUnderSP(null, PRIMARY_USER_ID);
-        long handle = mService.addEscrowToken(TOKEN.getBytes(), PRIMARY_USER_ID);
-        assertTrue(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
+        long handle = mLocalService.addEscrowToken(TOKEN.getBytes(), PRIMARY_USER_ID);
+        assertTrue(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
         assertEquals(0, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
         assertTrue(hasSyntheticPassword(PRIMARY_USER_ID));
     }
@@ -404,15 +405,15 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
                 PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
         enableSyntheticPassword();
 
-        long handle = mService.addEscrowToken(TOKEN.getBytes(), PRIMARY_USER_ID);
+        long handle = mLocalService.addEscrowToken(TOKEN.getBytes(), PRIMARY_USER_ID);
         // Token not activated immediately since user password exists
-        assertFalse(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
+        assertFalse(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
         // Activate token (password gets migrated to SP at the same time)
         assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
                 PASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
                     .getResponseCode());
         // Verify token is activated
-        assertTrue(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
+        assertTrue(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
     }
 
     public void testPasswordData_serializeDeserialize() {

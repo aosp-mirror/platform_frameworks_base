@@ -124,6 +124,7 @@ import android.widget.Toast;
 import android.widget.Toolbar;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ToolbarActionBar;
 import com.android.internal.app.WindowDecorActionBar;
@@ -995,9 +996,9 @@ public class Activity extends ContextThemeWrapper
      * cursors for data being displayed, etc.
      *
      * <p>You can call {@link #finish} from within this function, in
-     * which case onDestroy() will be immediately called without any of the rest
-     * of the activity lifecycle ({@link #onStart}, {@link #onResume},
-     * {@link #onPause}, etc) executing.
+     * which case onDestroy() will be immediately called after {@link #onCreate} without any of the
+     * rest of the activity lifecycle ({@link #onStart}, {@link #onResume}, {@link #onPause}, etc)
+     * executing.
      *
      * <p><em>Derived classes must call through to the super class's
      * implementation of this method.  If they do not, an exception will be
@@ -7108,6 +7109,12 @@ public class Activity extends ContextThemeWrapper
     /** @hide */
     public final IBinder getActivityToken() {
         return mParent != null ? mParent.getActivityToken() : mToken;
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    public final ActivityThread getActivityThread() {
+        return mMainThread;
     }
 
     final void performCreate(Bundle icicle) {

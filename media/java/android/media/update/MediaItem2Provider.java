@@ -35,6 +35,7 @@ public interface MediaItem2Provider {
     MediaMetadata2 getMetadata_impl();
     String getMediaId_impl();
     DataSourceDesc getDataSourceDesc_impl();
+    boolean equals_impl(Object obj);
 
     interface BuilderProvider {
         Builder setMediaId_impl(String mediaId);

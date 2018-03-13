@@ -88,6 +88,7 @@ public class TransportClientTest {
     @Mock private TransportConnectionListener mTransportConnectionListener;
     @Mock private TransportConnectionListener mTransportConnectionListener2;
     @Mock private IBackupTransport.Stub mTransportBinder;
+    private TransportStats mTransportStats;
     private TransportClient mTransportClient;
     private ComponentName mTransportComponent;
     private String mTransportString;
@@ -105,10 +106,12 @@ public class TransportClientTest {
         mTransportComponent =
                 new ComponentName(PACKAGE_NAME, PACKAGE_NAME + ".transport.Transport");
         mTransportString = mTransportComponent.flattenToShortString();
+        mTransportStats = new TransportStats();
         mBindIntent = new Intent(SERVICE_ACTION_TRANSPORT_HOST).setComponent(mTransportComponent);
         mTransportClient =
                 new TransportClient(
                         mContext,
+                        mTransportStats,
                         mBindIntent,
                         mTransportComponent,
                         "1",

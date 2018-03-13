@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package android.view.textclassifier.logging;
+package android.view.textclassifier;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.content.Context;
 import android.util.Log;
-import android.view.textclassifier.TextClassification;
-import android.view.textclassifier.TextClassifier;
-import android.view.textclassifier.TextSelection;
 
 import com.android.internal.util.Preconditions;
 
@@ -97,10 +94,7 @@ public abstract class Logger {
     }
 
     /**
-     * Writes the selection event.
-     *
-     * <p><strong>NOTE: </strong>This method is designed for subclasses.
-     * Apps should not call it directly.
+     * Writes the selection event to a log.
      */
     public abstract void writeEvent(@NonNull SelectionEvent event);
 

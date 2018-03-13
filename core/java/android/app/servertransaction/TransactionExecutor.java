@@ -191,7 +191,7 @@ public class TransactionExecutor {
                     mTransactionHandler.handleStartActivity(r, mPendingActions);
                     break;
                 case ON_RESUME:
-                    mTransactionHandler.handleResumeActivity(r.token, false /* clearHide */,
+                    mTransactionHandler.handleResumeActivity(r.token, false /* finalStateRequest */,
                             r.isForward, "LIFECYCLER_RESUME_ACTIVITY");
                     break;
                 case ON_PAUSE:

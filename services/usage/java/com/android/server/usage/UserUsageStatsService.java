@@ -759,6 +759,8 @@ class UserUsageStatsService {
                 return "NOTIFICATION_SEEN";
             case UsageEvents.Event.STANDBY_BUCKET_CHANGED:
                 return "STANDBY_BUCKET_CHANGED";
+            case UsageEvents.Event.NOTIFICATION_INTERRUPTION:
+                return "NOTIFICATION_INTERRUPTION";
             default:
                 return "UNKNOWN";
         }

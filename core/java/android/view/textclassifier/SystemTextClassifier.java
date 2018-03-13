@@ -29,6 +29,7 @@ import android.service.textclassifier.ITextClassifierService;
 import android.service.textclassifier.ITextLinksCallback;
 import android.service.textclassifier.ITextSelectionCallback;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 
 import java.util.concurrent.CountDownLatch;
@@ -46,6 +47,12 @@ final class SystemTextClassifier implements TextClassifier {
     private final TextClassifier mFallback;
     private final String mPackageName;
 
+    private final Object mLoggerLock = new Object();
+    @GuardedBy("mLoggerLock")
+    private Logger.Config mLoggerConfig;
+    @GuardedBy("mLoggerLock")
+    private Logger mLogger;
+
     SystemTextClassifier(Context context, TextClassificationConstants settings)
                 throws ServiceManager.ServiceNotFoundException {
         mManagerService = ITextClassifierService.Stub.asInterface(
@@ -58,6 +65,7 @@ final class SystemTextClassifier implements TextClassifier {
     /**
      * @inheritDoc
      */
+    @Override
     @WorkerThread
     public TextSelection suggestSelection(
             @NonNull CharSequence text,
@@ -84,6 +92,7 @@ final class SystemTextClassifier implements TextClassifier {
     /**
      * @inheritDoc
      */
+    @Override
     @WorkerThread
     public TextClassification classifyText(
             @NonNull CharSequence text,
@@ -109,6 +118,7 @@ final class SystemTextClassifier implements TextClassifier {
     /**
      * @inheritDoc
      */
+    @Override
     @WorkerThread
     public TextLinks generateLinks(
             @NonNull CharSequence text, @Nullable TextLinks.Options options) {
@@ -142,9 +152,31 @@ final class SystemTextClassifier implements TextClassifier {
      * @inheritDoc
      */
     @Override
+    @WorkerThread
     public int getMaxGenerateLinksTextLength() {
         // TODO: retrieve this from the bound service.
         return mFallback.getMaxGenerateLinksTextLength();
+    }
+
+    @Override
+    public Logger getLogger(@NonNull Logger.Config config) {
+        Preconditions.checkNotNull(config);
+        synchronized (mLoggerLock) {
+            if (mLogger == null || !config.equals(mLoggerConfig)) {
+                mLoggerConfig = config;
+                mLogger = new Logger(config) {
+                    @Override
+                    public void writeEvent(SelectionEvent event) {
+                        try {
+                            mManagerService.onSelectionEvent(event);
+                        } catch (RemoteException e) {
+                            e.rethrowAsRuntimeException();
+                        }
+                    }
+                };
+            }
+        }
+        return mLogger;
     }
 
     private static final class TextSelectionCallback extends ITextSelectionCallback.Stub {

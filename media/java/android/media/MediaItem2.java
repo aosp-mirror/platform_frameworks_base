@@ -65,6 +65,13 @@ public class MediaItem2 {
     }
 
     /**
+     * @hide
+     */
+    public MediaItem2Provider getProvider() {
+        return mProvider;
+    }
+
+    /**
      * Return this object as a bundle to share between processes.
      *
      * @return a new bundle instance
@@ -141,9 +148,7 @@ public class MediaItem2 {
 
     @Override
     public boolean equals(Object obj) {
-        // TODO(jaewan): Override this. MediaItem2 may have auto-generated srcId when the DSD isn't
-        //               set, and it should be compared for the equals.
-        return super.equals(obj);
+        return mProvider.equals_impl(obj);
     }
 
     /**

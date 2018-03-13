@@ -41,6 +41,7 @@ import android.os.IBinder;
 import android.os.UserHandle;
 import android.support.test.InstrumentationRegistry;
 import android.testing.TestableResources;
+import android.util.Pair;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
@@ -53,6 +54,7 @@ import android.view.accessibility.IAccessibilityManager;
 
 import com.android.server.policy.keyguard.KeyguardServiceDelegate;
 import com.android.server.wm.DisplayFrames;
+import com.android.server.wm.utils.WmDisplayCutout;
 
 import org.junit.Before;
 
@@ -98,8 +100,9 @@ public class PhoneWindowManagerTestBase {
     }
 
     private void updateDisplayFrames() {
-        DisplayInfo info = displayInfoForRotation(mRotation, mHasDisplayCutout);
-        mFrames = new DisplayFrames(Display.DEFAULT_DISPLAY, info);
+        Pair<DisplayInfo, WmDisplayCutout> info = displayInfoAndCutoutForRotation(mRotation,
+                mHasDisplayCutout);
+        mFrames = new DisplayFrames(Display.DEFAULT_DISPLAY, info.first, info.second);
     }
 
     public void addStatusBar() {
@@ -146,19 +149,26 @@ public class PhoneWindowManagerTestBase {
     }
 
     public static DisplayInfo displayInfoForRotation(int rotation, boolean withDisplayCutout) {
+        return displayInfoAndCutoutForRotation(rotation, withDisplayCutout).first;
+    }
+    public static Pair<DisplayInfo, WmDisplayCutout> displayInfoAndCutoutForRotation(int rotation,
+            boolean withDisplayCutout) {
         DisplayInfo info = new DisplayInfo();
+        WmDisplayCutout cutout = null;
 
         final boolean flippedDimensions = rotation == ROTATION_90 || rotation == ROTATION_270;
         info.logicalWidth = flippedDimensions ? DISPLAY_HEIGHT : DISPLAY_WIDTH;
         info.logicalHeight = flippedDimensions ? DISPLAY_WIDTH : DISPLAY_HEIGHT;
         info.rotation = rotation;
         if (withDisplayCutout) {
-            info.displayCutout = displayCutoutForRotation(rotation)
-                    .computeSafeInsets(info.logicalWidth, info.logicalHeight);
+            cutout = WmDisplayCutout.computeSafeInsets(
+                    displayCutoutForRotation(rotation), info.logicalWidth,
+                    info.logicalHeight);
+            info.displayCutout = cutout.getDisplayCutout();
         } else {
             info.displayCutout = null;
         }
-        return info;
+        return Pair.create(info, cutout);
     }
 
     private static DisplayCutout displayCutoutForRotation(int rotation) {

@@ -748,7 +748,14 @@ public class MediaController2 implements AutoCloseable {
     }
 
     /**
-     * Return playlist from the session.
+     * Returns the cached playlist from
+     * {@link ControllerCallback#onPlaylistChanged(MediaController2, MediaPlaylistAgent, List,
+     * MediaMetadata2)}.
+     * <p>
+     * This list may differ with the list that was specified with
+     * {@link #setPlaylist(List, MediaMetadata2)} depending on the {@link MediaPlaylistAgent}
+     * implementation. Use media items returned here for other playlist agent APIs such as
+     * {@link MediaPlaylistAgent#skipToPlaylistItem(MediaItem2)}.
      *
      * @return playlist. Can be {@code null} if the controller doesn't have enough permission.
      */
@@ -758,12 +765,19 @@ public class MediaController2 implements AutoCloseable {
 
     /**
      * Sets the playlist.
+     * <p>
+     * Even when the playlist is successfully set, use the playlist returned from
+     * {@link #getPlaylist()} for playlist APIs such as {@link #skipToPlaylistItem(MediaItem2)}.
+     * Otherwise the session in the remote process can't distinguish between media items.
      *
      * @param list playlist
      * @param metadata metadata of the playlist
+     * @see #getPlaylist()
+     * @see ControllerCallback#onPlaylistChanged(
+     *      MediaController2, MediaPlaylistAgent, List, MediaMetadata2)
      */
     public void setPlaylist(@NonNull List<MediaItem2> list, @Nullable MediaMetadata2 metadata) {
-        // TODO(jaewan): Implement (b/74174649)
+        mProvider.setPlaylist_impl(list, metadata);
     }
 
     /**
@@ -772,17 +786,20 @@ public class MediaController2 implements AutoCloseable {
      * @param metadata metadata of the playlist
      */
     public void updatePlaylistMetadata(@Nullable MediaMetadata2 metadata) {
-        // TODO(jaewan): Implement (b/74174649)
+        mProvider.updatePlaylistMetadata_impl(metadata);
     }
 
     /**
-     * Returns the playlist metadata
+     * Gets the lastly cached playlist playlist metadata either from
+     * {@link ControllerCallback#onPlaylistMetadataChanged(
+     * MediaController2, MediaPlaylistAgent, MediaMetadata2)} or
+     * {@link ControllerCallback#onPlaylistChanged(
+     * MediaController2, MediaPlaylistAgent, List, MediaMetadata2)}.
      *
      * @return metadata metadata of the playlist, or null if none is set
      */
     public @Nullable MediaMetadata2 getPlaylistMetadata() {
-        // TODO(jaewan): Implement (b/74174649)
-        return null;
+        return mProvider.getPlaylistMetadata_impl();
     }
 
     /**
@@ -797,15 +814,14 @@ public class MediaController2 implements AutoCloseable {
     }
 
     /**
-     * Inserts the media item to the play list at position index.
+     * Inserts the media item to the playlist at position index.
      * <p>
      * This will not change the currently playing media item.
-     * If index is less than or equal to the current index of the play list,
-     * the current index of the play list will be incremented correspondingly.
+     * If index is less than or equal to the current index of the playlist,
+     * the current index of the playlist will be incremented correspondingly.
      *
      * @param index the index you want to add
      * @param item the media item you want to add
-     * @throws IndexOutOfBoundsException if index is outside play list range
      */
     public void addPlaylistItem(int index, @NonNull MediaItem2 item) {
         mProvider.addPlaylistItem_impl(index, item);
@@ -816,6 +832,8 @@ public class MediaController2 implements AutoCloseable {
      *<p>
      * If the item is the currently playing item of the playlist, current playback
      * will be stopped and playback moves to next source in the list.
+     *
+     * @param item the media item you want to add
      */
     public void removePlaylistItem(@NonNull MediaItem2 item) {
         mProvider.removePlaylistItem_impl(item);

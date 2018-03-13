@@ -33,7 +33,9 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.Slog;
+import android.view.textclassifier.SelectionEvent;
 import android.view.textclassifier.TextClassification;
+import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassifier;
 import android.view.textclassifier.TextLinks;
 import android.view.textclassifier.TextSelection;
@@ -47,7 +49,7 @@ import android.view.textclassifier.TextSelection;
  * {@link android.view.textclassifier.TextClassifierImpl} is loaded in the calling app's process.
  *
  * <p>See: {@link TextClassifier}.
- * See: {@link android.view.textclassifier.TextClassificationManager}.
+ * See: {@link TextClassificationManager}.
  *
  * <p>Include the following in the manifest:
  *
@@ -170,6 +172,12 @@ public abstract class TextClassifierService extends Service {
                         }
                     });
         }
+
+        /** {@inheritDoc} */
+        @Override
+        public void onSelectionEvent(SelectionEvent event) throws RemoteException {
+            TextClassifierService.this.onSelectionEvent(event);
+        }
     };
 
     @Nullable
@@ -235,6 +243,27 @@ public abstract class TextClassifierService extends Service {
             @Nullable TextLinks.Options options,
             @NonNull CancellationSignal cancellationSignal,
             @NonNull Callback<TextLinks> callback);
+
+    /**
+     * Writes the selection event.
+     * This is called when a selection event occurs. e.g. user changed selection; or smart selection
+     * happened.
+     *
+     * <p>The default implementation ignores the event.
+     */
+    public void onSelectionEvent(@NonNull SelectionEvent event) {}
+
+    /**
+     * Returns a TextClassifier that runs in this service's process.
+     * If the local TextClassifier is disabled, this returns {@link TextClassifier#NO_OP}.
+     */
+    public final TextClassifier getLocalTextClassifier() {
+        final TextClassificationManager tcm = getSystemService(TextClassificationManager.class);
+        if (tcm != null) {
+            return tcm.getTextClassifier(TextClassifier.LOCAL);
+        }
+        return TextClassifier.NO_OP;
+    }
 
     /**
      * Callbacks for TextClassifierService results.

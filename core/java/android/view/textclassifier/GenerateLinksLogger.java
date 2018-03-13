@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package android.view.textclassifier.logging;
+package android.view.textclassifier;
 
 import android.annotation.Nullable;
 import android.metrics.LogMaker;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.view.textclassifier.TextClassifier;
-import android.view.textclassifier.TextLinks;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;

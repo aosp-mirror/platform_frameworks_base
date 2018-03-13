@@ -74,6 +74,7 @@ interface IStatsCompanionService {
      */
     oneway void sendSubscriberBroadcast(in IBinder intentSender, long configUid, long configId,
                                         long subscriptionId, long subscriptionRuleId,
+                                        in String[] cookies,
                                         in StatsDimensionsValue dimensionsValue);
 
     /** Tells StatsCompaionService to grab the uid map snapshot and send it to statsd. */

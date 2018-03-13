@@ -33,13 +33,13 @@ import android.text.Spannable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.ActionMode;
+import android.view.textclassifier.Logger;
+import android.view.textclassifier.SelectionEvent;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassificationConstants;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassifier;
 import android.view.textclassifier.TextSelection;
-import android.view.textclassifier.logging.Logger;
-import android.view.textclassifier.logging.SelectionEvent;
 import android.widget.Editor.SelectionModifierCursorController;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -648,6 +648,9 @@ public final class SelectionActionModeHelper {
      * Part selection of a word e.g. "or" is counted as selecting the
      * entire word i.e. equivalent to "York", and each special character is counted as a word, e.g.
      * "," is at [2, 3). Whitespaces are ignored.
+     *
+     * NOTE that the definition of a word is defined by the TextClassifier's Logger's token
+     * iterator.
      */
     private static final class SelectionMetricsLogger {
 
