@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SuppressAutoDoc;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -1113,7 +1114,11 @@ public class TelephonyManager {
      * Returns the software version number for the device, for example,
      * the IMEI/SV for GSM phones. Return null if the software version is
      * not available.
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public String getDeviceSoftwareVersion() {
         return getDeviceSoftwareVersion(getSlotIndex());
@@ -1145,10 +1150,14 @@ public class TelephonyManager {
      * Returns the unique device ID, for example, the IMEI for GSM and the MEID
      * or ESN for CDMA phones. Return null if device ID is not available.
      *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
      * @deprecated Use (@link getImei} which returns IMEI for GSM or (@link getMeid} which returns
      * MEID for CDMA.
      */
     @Deprecated
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public String getDeviceId() {
         try {
@@ -1167,12 +1176,16 @@ public class TelephonyManager {
      * Returns the unique device ID of a subscription, for example, the IMEI for
      * GSM and the MEID for CDMA phones. Return null if device ID is not available.
      *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
      * @param slotIndex of which deviceID is returned
      *
      * @deprecated Use (@link getImei} which returns IMEI for GSM or (@link getMeid} which returns
      * MEID for CDMA.
      */
     @Deprecated
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public String getDeviceId(int slotIndex) {
         // FIXME this assumes phoneId == slotIndex
@@ -1191,7 +1204,11 @@ public class TelephonyManager {
     /**
      * Returns the IMEI (International Mobile Equipment Identity). Return null if IMEI is not
      * available.
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public String getImei() {
         return getImei(getSlotIndex());
@@ -1201,8 +1218,12 @@ public class TelephonyManager {
      * Returns the IMEI (International Mobile Equipment Identity). Return null if IMEI is not
      * available.
      *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
      * @param slotIndex of which IMEI is returned
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public String getImei(int slotIndex) {
         ITelephony telephony = getITelephony();
@@ -1219,7 +1240,11 @@ public class TelephonyManager {
 
     /**
      * Returns the MEID (Mobile Equipment Identifier). Return null if MEID is not available.
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public String getMeid() {
         return getMeid(getSlotIndex());
@@ -1228,8 +1253,12 @@ public class TelephonyManager {
     /**
      * Returns the MEID (Mobile Equipment Identifier). Return null if MEID is not available.
      *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
      * @param slotIndex of which MEID is returned
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public String getMeid(int slotIndex) {
         ITelephony telephony = getITelephony();
@@ -1246,10 +1275,11 @@ public class TelephonyManager {
 
     /**
      * Returns the Network Access Identifier (NAI). Return null if NAI is not available.
-     * <p>
-     * Requires Permission:
-     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public String getNai() {
         return getNaiBySubscriberId(getSubId());
@@ -1750,6 +1780,7 @@ public class TelephonyManager {
      * @see #createForSubscriptionId(int)
      * @see #createForPhoneAccountHandle(PhoneAccountHandle)
      */
+    // TODO(b/73136824, b/70041899): Permit carrier-privileged callers as well.
     @WorkerThread
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public PersistableBundle getCarrierConfig() {
@@ -1948,6 +1979,9 @@ public class TelephonyManager {
      * If this object has been created with {@link #createForSubscriptionId}, applies to the given
      * subId. Otherwise, applies to {@link SubscriptionManager#getDefaultDataSubscriptionId()}
      *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
      * @return the network type
      *
      * @see #NETWORK_TYPE_UNKNOWN
@@ -1967,6 +2001,7 @@ public class TelephonyManager {
      * @see #NETWORK_TYPE_EHRPD
      * @see #NETWORK_TYPE_HSPAP
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public int getDataNetworkType() {
         return getDataNetworkType(getSubId(SubscriptionManager.getDefaultDataSubscriptionId()));
@@ -2001,7 +2036,11 @@ public class TelephonyManager {
 
     /**
      * Returns the NETWORK_TYPE_xxxx for voice
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public int getVoiceNetworkType() {
         return getVoiceNetworkType(getSubId());
@@ -2587,7 +2626,11 @@ public class TelephonyManager {
     /**
      * Returns the serial number of the SIM, if applicable. Return null if it is
      * unavailable.
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public String getSimSerialNumber() {
          return getSimSerialNumber(getSubId());
@@ -2712,7 +2755,11 @@ public class TelephonyManager {
     /**
      * Returns the unique subscriber ID, for example, the IMSI for a GSM phone.
      * Return null if it is unavailable.
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public String getSubscriberId() {
         return getSubscriberId(getSubId());
@@ -2876,7 +2923,11 @@ public class TelephonyManager {
     /**
      * Returns the Group Identifier Level1 for a GSM phone.
      * Return null if it is unavailable.
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public String getGroupIdLevel1() {
         try {
@@ -2917,9 +2968,15 @@ public class TelephonyManager {
     /**
      * Returns the phone number string for line 1, for example, the MSISDN
      * for a GSM phone. Return null if it is unavailable.
-     * <p>
-     * The default SMS app can also use this.
+     *
+     * <p>Requires Permission:
+     *     {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE},
+     *     {@link android.Manifest.permission#READ_SMS READ_SMS},
+     *     {@link android.Manifest.permission#READ_PHONE_NUMBERS READ_PHONE_NUMBERS},
+     *     that the caller is the default SMS app,
+     *     or that the caller has carrier privileges (see {@link #hasCarrierPrivileges}).
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges or default SMS app
     @RequiresPermission(anyOf = {
             android.Manifest.permission.READ_PHONE_STATE,
             android.Manifest.permission.READ_SMS,
@@ -2974,8 +3031,7 @@ public class TelephonyManager {
      * change the actual MSISDN/MDN. To unset alphatag or number, pass in a null
      * value.
      *
-     * <p>Requires that the calling app has carrier privileges.
-     * @see #hasCarrierPrivileges
+     * <p>Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param alphaTag alpha-tagging of the dailing nubmer
      * @param number The dialing number
@@ -2991,8 +3047,7 @@ public class TelephonyManager {
      * change the actual MSISDN/MDN. To unset alphatag or number, pass in a null
      * value.
      *
-     * <p>Requires that the calling app has carrier privileges.
-     * @see #hasCarrierPrivileges
+     * <p>Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param subId the subscriber that the alphatag and dialing number belongs to.
      * @param alphaTag alpha-tagging of the dailing nubmer
@@ -3111,7 +3166,11 @@ public class TelephonyManager {
 
     /**
      * Returns the voice mail number. Return null if it is unavailable.
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public String getVoiceMailNumber() {
         return getVoiceMailNumber(getSubId());
@@ -3172,8 +3231,7 @@ public class TelephonyManager {
     /**
      * Sets the voice mail number.
      *
-     * <p>Requires that the calling app has carrier privileges.
-     * @see #hasCarrierPrivileges
+     * <p>Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param alphaTag The alpha tag to display.
      * @param number The voicemail number.
@@ -3185,8 +3243,7 @@ public class TelephonyManager {
     /**
      * Sets the voicemail number for the given subscriber.
      *
-     * <p>Requires that the calling app has carrier privileges.
-     * @see #hasCarrierPrivileges
+     * <p>Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param subId The subscription id.
      * @param alphaTag The alpha tag to display.
@@ -3207,9 +3264,9 @@ public class TelephonyManager {
     /**
      * Enables or disables the visual voicemail client for a phone account.
      *
-     * <p>Requires that the calling app is the default dialer, or has carrier privileges, or
-     * has permission {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
-     * @see #hasCarrierPrivileges
+     * <p>Requires that the calling app is the default dialer, or has carrier privileges (see
+     * {@link #hasCarrierPrivileges}), or has permission
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
      *
      * @param phoneAccountHandle the phone account to change the client state
      * @param enabled the new state of the client
@@ -3272,11 +3329,15 @@ public class TelephonyManager {
      * to the TelephonyManager. Returns {@code null} when there is no package responsible for
      * processing visual voicemail for the subscription.
      *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
      * @see #createForSubscriptionId(int)
      * @see #createForPhoneAccountHandle(PhoneAccountHandle)
      * @see VisualVoicemailService
      */
     @Nullable
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public String getVisualVoicemailPackageName() {
         try {
@@ -3519,15 +3580,14 @@ public class TelephonyManager {
       * Sets the voice activation state
       *
       * <p>Requires Permission:
-      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-      * Or the calling app has carrier privileges.
+      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the
+      * calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
       *
       * @param activationState The voice activation state
       * @see #SIM_ACTIVATION_STATE_UNKNOWN
       * @see #SIM_ACTIVATION_STATE_ACTIVATING
       * @see #SIM_ACTIVATION_STATE_ACTIVATED
       * @see #SIM_ACTIVATION_STATE_DEACTIVATED
-      * @see #hasCarrierPrivileges
       * @hide
       */
     @SystemApi
@@ -3540,8 +3600,8 @@ public class TelephonyManager {
      * Sets the voice activation state for the given subscriber.
      *
      * <p>Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges.
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the
+     * calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param subId The subscription id.
      * @param activationState The voice activation state of the given subscriber.
@@ -3549,7 +3609,6 @@ public class TelephonyManager {
      * @see #SIM_ACTIVATION_STATE_ACTIVATING
      * @see #SIM_ACTIVATION_STATE_ACTIVATED
      * @see #SIM_ACTIVATION_STATE_DEACTIVATED
-     * @see #hasCarrierPrivileges
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
@@ -3567,8 +3626,8 @@ public class TelephonyManager {
      * Sets the data activation state
      *
      * <p>Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges.
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the
+     * calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param activationState The data activation state
      * @see #SIM_ACTIVATION_STATE_UNKNOWN
@@ -3576,7 +3635,6 @@ public class TelephonyManager {
      * @see #SIM_ACTIVATION_STATE_ACTIVATED
      * @see #SIM_ACTIVATION_STATE_DEACTIVATED
      * @see #SIM_ACTIVATION_STATE_RESTRICTED
-     * @see #hasCarrierPrivileges
      * @hide
      */
     @SystemApi
@@ -3589,8 +3647,8 @@ public class TelephonyManager {
      * Sets the data activation state for the given subscriber.
      *
      * <p>Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges.
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the
+     * calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param subId The subscription id.
      * @param activationState The data activation state of the given subscriber.
@@ -3599,7 +3657,6 @@ public class TelephonyManager {
      * @see #SIM_ACTIVATION_STATE_ACTIVATED
      * @see #SIM_ACTIVATION_STATE_DEACTIVATED
      * @see #SIM_ACTIVATION_STATE_RESTRICTED
-     * @see #hasCarrierPrivileges
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
@@ -3617,15 +3674,14 @@ public class TelephonyManager {
      * Returns the voice activation state
      *
      * <p>Requires Permission:
-     *   {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
-     * Or the calling app has carrier privileges.
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @return voiceActivationState
      * @see #SIM_ACTIVATION_STATE_UNKNOWN
      * @see #SIM_ACTIVATION_STATE_ACTIVATING
      * @see #SIM_ACTIVATION_STATE_ACTIVATED
      * @see #SIM_ACTIVATION_STATE_DEACTIVATED
-     * @see #hasCarrierPrivileges
      * @hide
      */
     @SystemApi
@@ -3638,8 +3694,8 @@ public class TelephonyManager {
      * Returns the voice activation state for the given subscriber.
      *
      * <p>Requires Permission:
-     *   {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
-     * Or the calling app has carrier privileges.
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param subId The subscription id.
      *
@@ -3648,7 +3704,6 @@ public class TelephonyManager {
      * @see #SIM_ACTIVATION_STATE_ACTIVATING
      * @see #SIM_ACTIVATION_STATE_ACTIVATED
      * @see #SIM_ACTIVATION_STATE_DEACTIVATED
-     * @see #hasCarrierPrivileges
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
@@ -3667,8 +3722,8 @@ public class TelephonyManager {
      * Returns the data activation state
      *
      * <p>Requires Permission:
-     *   {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
-     * Or the calling app has carrier privileges.
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @return dataActivationState for the given subscriber
      * @see #SIM_ACTIVATION_STATE_UNKNOWN
@@ -3676,7 +3731,6 @@ public class TelephonyManager {
      * @see #SIM_ACTIVATION_STATE_ACTIVATED
      * @see #SIM_ACTIVATION_STATE_DEACTIVATED
      * @see #SIM_ACTIVATION_STATE_RESTRICTED
-     * @see #hasCarrierPrivileges
      * @hide
      */
     @SystemApi
@@ -3689,8 +3743,8 @@ public class TelephonyManager {
      * Returns the data activation state for the given subscriber.
      *
      * <p>Requires Permission:
-     *   {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
-     * Or the calling app has carrier privileges.
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param subId The subscription id.
      *
@@ -3700,7 +3754,6 @@ public class TelephonyManager {
      * @see #SIM_ACTIVATION_STATE_ACTIVATED
      * @see #SIM_ACTIVATION_STATE_DEACTIVATED
      * @see #SIM_ACTIVATION_STATE_RESTRICTED
-     * @see #hasCarrierPrivileges
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
@@ -3748,7 +3801,11 @@ public class TelephonyManager {
     /**
      * Retrieves the alphabetic identifier associated with the voice
      * mail number.
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public String getVoiceMailAlphaTag() {
         return getVoiceMailAlphaTag(getSubId());
@@ -3777,9 +3834,8 @@ public class TelephonyManager {
     }
 
     /**
-     * Send the special dialer code. The IPC caller must be the current default dialer or has
-     * carrier privileges.
-     * @see #hasCarrierPrivileges
+     * Send the special dialer code. The IPC caller must be the current default dialer or have
+     * carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param inputCode The special dialer code to send
      *
@@ -4303,8 +4359,8 @@ public class TelephonyManager {
      * Input parameters equivalent to TS 27.007 AT+CCHO command.
      *
      * <p>Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param AID Application id. See ETSI 102.221 and 101.220.
      * @return an IccOpenLogicalChannelResponse object.
@@ -4321,8 +4377,8 @@ public class TelephonyManager {
      * Input parameters equivalent to TS 27.007 AT+CCHO command.
      *
      * <p>Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param AID Application id. See ETSI 102.221 and 101.220.
      * @param p2 P2 parameter (described in ISO 7816-4).
@@ -4338,8 +4394,8 @@ public class TelephonyManager {
      * Input parameters equivalent to TS 27.007 AT+CCHO command.
      *
      * <p>Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param subId The subscription to use.
      * @param AID Application id. See ETSI 102.221 and 101.220.
@@ -4364,8 +4420,8 @@ public class TelephonyManager {
      * Input parameters equivalent to TS 27.007 AT+CCHC command.
      *
      * <p>Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param channel is the channel id to be closed as retruned by a successful
      *            iccOpenLogicalChannel.
@@ -4381,8 +4437,8 @@ public class TelephonyManager {
      * Input parameters equivalent to TS 27.007 AT+CCHC command.
      *
      * <p>Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param subId The subscription to use.
      * @param channel is the channel id to be closed as retruned by a successful
@@ -4407,8 +4463,8 @@ public class TelephonyManager {
      * Input parameters equivalent to TS 27.007 AT+CGLA command.
      *
      * <p>Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param channel is the channel id to be closed as returned by a successful
      *            iccOpenLogicalChannel.
@@ -4434,8 +4490,8 @@ public class TelephonyManager {
      * Input parameters equivalent to TS 27.007 AT+CGLA command.
      *
      * <p>Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param subId The subscription to use.
      * @param channel is the channel id to be closed as returned by a successful
@@ -4470,8 +4526,8 @@ public class TelephonyManager {
      * Input parameters equivalent to TS 27.007 AT+CSIM command.
      *
      * <p>Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param cla Class of the APDU command.
      * @param instruction Instruction of the APDU command.
@@ -4495,8 +4551,8 @@ public class TelephonyManager {
      * Input parameters equivalent to TS 27.007 AT+CSIM command.
      *
      * <p>Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param subId The subscription to use.
      * @param cla Class of the APDU command.
@@ -4527,8 +4583,8 @@ public class TelephonyManager {
      * Returns the response APDU for a command APDU sent through SIM_IO.
      *
      * <p>Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param fileID
      * @param command
@@ -4547,8 +4603,8 @@ public class TelephonyManager {
      * Returns the response APDU for a command APDU sent through SIM_IO.
      *
      * <p>Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param subId The subscription to use.
      * @param fileID
@@ -4576,8 +4632,8 @@ public class TelephonyManager {
      * Send ENVELOPE to the SIM and return the response.
      *
      * <p>Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param content String containing SAT/USAT response in hexadecimal
      *                format starting with command tag. See TS 102 223 for
@@ -4594,8 +4650,8 @@ public class TelephonyManager {
      * Send ENVELOPE to the SIM and return the response.
      *
      * <p>Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param subId The subscription to use.
      * @param content String containing SAT/USAT response in hexadecimal
@@ -4620,10 +4676,10 @@ public class TelephonyManager {
     /**
      * Read one of the NV items defined in com.android.internal.telephony.RadioNVItems.
      * Used for device configuration by some CDMA operators.
-     * <p>
-     * Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param itemID the ID of the item to read.
      * @return the NV item as a String, or null on any failure.
@@ -4646,10 +4702,10 @@ public class TelephonyManager {
     /**
      * Write one of the NV items defined in com.android.internal.telephony.RadioNVItems.
      * Used for device configuration by some CDMA operators.
-     * <p>
-     * Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param itemID the ID of the item to read.
      * @param itemValue the value to write, as a String.
@@ -4673,10 +4729,10 @@ public class TelephonyManager {
     /**
      * Update the CDMA Preferred Roaming List (PRL) in the radio NV storage.
      * Used for device configuration by some CDMA operators.
-     * <p>
-     * Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param preferredRoamingList byte array containing the new PRL.
      * @return true on success; false on any failure.
@@ -4700,10 +4756,10 @@ public class TelephonyManager {
      * Perform the specified type of NV config reset. The radio will be taken offline
      * and the device must be rebooted after the operation. Used for device
      * configuration by some CDMA operators.
-     * <p>
-     * Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param resetType reset type: 1: reload NV reset, 2: erase NV reset, 3: factory NV reset
      * @return true on success; false on any failure.
@@ -5051,8 +5107,8 @@ public class TelephonyManager {
      * Returns the response of authentication for the default subscription.
      * Returns null if the authentication hasn't been successful
      *
-     * <p>Requires that the calling app has carrier privileges or READ_PRIVILEGED_PHONE_STATE
-     * permission.
+     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param appType the icc application type, like {@link #APPTYPE_USIM}
      * @param authType the authentication type, {@link #AUTHTYPE_EAP_AKA} or
@@ -5060,9 +5116,10 @@ public class TelephonyManager {
      * @param data authentication challenge data, base64 encoded.
      * See 3GPP TS 31.102 7.1.2 for more details.
      * @return the response of authentication, or null if not available
-     *
-     * @see #hasCarrierPrivileges
      */
+    // TODO(b/73660190): This should probably require MODIFY_PHONE_STATE, not
+    // READ_PRIVILEGED_PHONE_STATE. It certainly shouldn't reference the permission in Javadoc since
+    // it's not public API.
     public String getIccAuthentication(int appType, int authType, String data) {
         return getIccAuthentication(getSubId(), appType, authType, data);
     }
@@ -5071,7 +5128,7 @@ public class TelephonyManager {
      * Returns the response of USIM Authentication for specified subId.
      * Returns null if the authentication hasn't been successful
      *
-     * <p>Requires that the calling app has carrier privileges.
+     * <p>Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param subId subscription ID used for authentication
      * @param appType the icc application type, like {@link #APPTYPE_USIM}
@@ -5080,8 +5137,6 @@ public class TelephonyManager {
      * @param data authentication challenge data, base64 encoded.
      * See 3GPP TS 31.102 7.1.2 for more details.
      * @return the response of authentication, or null if not available
-     *
-     * @see #hasCarrierPrivileges
      * @hide
      */
     public String getIccAuthentication(int subId, int appType, int authType, String data) {
@@ -5102,8 +5157,12 @@ public class TelephonyManager {
      * Returns an array of Forbidden PLMNs from the USIM App
      * Returns null if the query fails.
      *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
      * @return an array of forbidden PLMNs or null if not available
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public String[] getForbiddenPlmns() {
       return getForbiddenPlmns(getSubId(), APPTYPE_USIM);
@@ -5309,10 +5368,10 @@ public class TelephonyManager {
     /**
      * Get the preferred network type.
      * Used for device configuration by some CDMA operators.
-     * <p>
-     * Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @return the preferred network type, defined in RILConstants.java.
      * @hide
@@ -5332,11 +5391,12 @@ public class TelephonyManager {
 
     /**
      * Sets the network selection mode to automatic.
-     * <p>
-     * Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setNetworkSelectionModeAutomatic() {
         try {
@@ -5352,15 +5412,14 @@ public class TelephonyManager {
     }
 
     /**
-     * Perform a radio scan and return the list of avialble networks.
+     * Perform a radio scan and return the list of available networks.
      *
      * The return value is a list of the OperatorInfo of the networks found. Note that this
      * scan can take a long time (sometimes minutes) to happen.
      *
-     * <p>
-     * Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @hide
      * TODO: Add an overload that takes no args.
@@ -5384,17 +5443,16 @@ public class TelephonyManager {
      * This method is asynchronous, so the network scan results will be returned by callback.
      * The returned NetworkScan will contain a callback method which can be used to stop the scan.
      *
-     * <p>
-     * Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges.
-     * @see #hasCarrierPrivileges()
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param request Contains all the RAT with bands/channels that need to be scanned.
      * @param executor The executor through which the callback should be invoked.
      * @param callback Returns network scan results or errors.
      * @return A NetworkScan obj which contains a callback which can be used to stop the scan.
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public NetworkScan requestNetworkScan(
             NetworkScanRequest request, Executor executor,
@@ -5422,10 +5480,9 @@ public class TelephonyManager {
     /**
      * Ask the radio to connect to the input network and change selection mode to manual.
      *
-     * <p>
-     * Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param operatorNumeric the PLMN ID of the network to select.
      * @param persistSelection whether the selection will persist until reboot. If true, only allows
@@ -5433,6 +5490,7 @@ public class TelephonyManager {
      * normal network selection next time.
      * @return true on success; false on any failure.
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public boolean setNetworkSelectionModeManual(String operatorNumeric, boolean persistSelection) {
         try {
@@ -5452,10 +5510,10 @@ public class TelephonyManager {
     /**
      * Set the preferred network type.
      * Used for device configuration by some CDMA operators.
-     * <p>
-     * Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param subId the id of the subscription to set the preferred network type for.
      * @param networkType the preferred network type, defined in RILConstants.java.
@@ -5479,9 +5537,7 @@ public class TelephonyManager {
     /**
      * Set the preferred network type to global mode which includes LTE, CDMA, EvDo and GSM/WCDMA.
      *
-     * <p>
-     * Requires that the calling app has carrier privileges.
-     * @see #hasCarrierPrivileges
+     * <p>Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @return true on success; false on any failure.
      */
@@ -5492,9 +5548,7 @@ public class TelephonyManager {
     /**
      * Set the preferred network type to global mode which includes LTE, CDMA, EvDo and GSM/WCDMA.
      *
-     * <p>
-     * Requires that the calling app has carrier privileges.
-     * @see #hasCarrierPrivileges
+     * <p>Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @return true on success; false on any failure.
      * @hide
@@ -5584,8 +5638,7 @@ public class TelephonyManager {
      * brand value input. To unset the value, the same function should be
      * called with a null brand value.
      *
-     * <p>Requires that the calling app has carrier privileges.
-     * @see #hasCarrierPrivileges
+     * <p>Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param brand The brand name to display/set.
      * @return true if the operation was executed correctly.
@@ -5602,8 +5655,7 @@ public class TelephonyManager {
      * brand value input. To unset the value, the same function should be
      * called with a null brand value.
      *
-     * <p>Requires that the calling app has carrier privileges.
-     * @see #hasCarrierPrivileges
+     * <p>Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param subId The subscription to use.
      * @param brand The brand name to display/set.
@@ -6257,15 +6309,15 @@ public class TelephonyManager {
      * subId. Otherwise, applies to {@link SubscriptionManager#getDefaultDataSubscriptionId()}
      *
      * <p>Requires Permission:
-     *     {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the
-     *     calling app has carrier privileges.
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param enable Whether to enable mobile data.
      *
-     * @see #hasCarrierPrivileges
      * @deprecated use {@link #setUserMobileDataEnabled(boolean)} instead.
      */
     @Deprecated
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setDataEnabled(boolean enable) {
         setUserMobileDataEnabled(enable);
@@ -6302,7 +6354,7 @@ public class TelephonyManager {
      * <p>Requires one of the following permissions:
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE ACCESS_NETWORK_STATE},
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}, or that the
-     * calling app has carrier privileges.
+     * calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * <p>Note that this does not take into account any data restrictions that may be present on the
      * calling app. Such restrictions may be inspected with
@@ -6310,7 +6362,6 @@ public class TelephonyManager {
      *
      * @return true if mobile data is enabled.
      *
-     * @see #hasCarrierPrivileges
      * @deprecated use {@link #isUserMobileDataEnabled()} instead.
      */
     @Deprecated
@@ -7081,7 +7132,11 @@ public class TelephonyManager {
 
     /**
      * Returns the current {@link ServiceState} information.
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public ServiceState getServiceState() {
         return getServiceStateForSubscriber(getSubId());
@@ -7127,14 +7182,14 @@ public class TelephonyManager {
     /**
      * Sets the per-account voicemail ringtone.
      *
-     * <p>Requires that the calling app is the default dialer, or has carrier privileges, or has
-     * permission {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
+     * <p>Requires that the calling app is the default dialer, or has carrier privileges (see
+     * {@link #hasCarrierPrivileges}, or has permission
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
      *
      * @param phoneAccountHandle The handle for the {@link PhoneAccount} for which to set the
      * voicemail ringtone.
      * @param uri The URI for the ringtone to play when receiving a voicemail from a specific
      * PhoneAccount.
-     * @see #hasCarrierPrivileges
      *
      * @deprecated Use {@link android.provider.Settings#ACTION_CHANNEL_NOTIFICATION_SETTINGS}
      * instead.
@@ -7172,14 +7227,14 @@ public class TelephonyManager {
     /**
      * Sets the per-account preference whether vibration is enabled for voicemail notifications.
      *
-     * <p>Requires that the calling app is the default dialer, or has carrier privileges, or has
-     * permission {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
+     * <p>Requires that the calling app is the default dialer, or has carrier privileges (see
+     * {@link #hasCarrierPrivileges}, or has permission
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
      *
      * @param phoneAccountHandle The handle for the {@link PhoneAccount} for which to set the
      * voicemail vibration setting.
      * @param enabled Whether to enable or disable vibration for voicemail notifications from a
      * specific PhoneAccount.
-     * @see #hasCarrierPrivileges
      *
      * @deprecated Use {@link android.provider.Settings#ACTION_CHANNEL_NOTIFICATION_SETTINGS}
      * instead.
@@ -7600,12 +7655,10 @@ public class TelephonyManager {
      * Otherwise, it applies to {@link SubscriptionManager#getDefaultDataSubscriptionId()}
      *
      * <p>Requires Permission:
-     *     {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the
-     *     calling app has carrier privileges.
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}.
      *
      * @param enable Whether to enable mobile data.
-     *
-     * @see #hasCarrierPrivileges
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setUserMobileDataEnabled(boolean enable) {
@@ -7623,15 +7676,13 @@ public class TelephonyManager {
      * <p>Requires one of the following permissions:
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE ACCESS_NETWORK_STATE},
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}, or that the
-     * calling app has carrier privileges.
+     * calling app has carrier privileges (see {@link #hasCarrierPrivileges}.
      *
      * <p>Note that this does not take into account any data restrictions that may be present on the
      * calling app. Such restrictions may be inspected with
      * {@link ConnectivityManager#getRestrictBackgroundStatus}.
      *
      * @return true if mobile data is enabled.
-     *
-     * @see #hasCarrierPrivileges
      */
     @RequiresPermission(anyOf = {
             android.Manifest.permission.ACCESS_NETWORK_STATE,
