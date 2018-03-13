@@ -115,6 +115,8 @@ public class NetworkScan {
             telephony.stopNetworkScan(mSubId, mScanId);
         } catch (RemoteException ex) {
             Rlog.e(TAG, "stopNetworkScan  RemoteException", ex);
+        } catch (RuntimeException ex) {
+            Rlog.e(TAG, "stopNetworkScan  RuntimeException", ex);
         }
     }
 
