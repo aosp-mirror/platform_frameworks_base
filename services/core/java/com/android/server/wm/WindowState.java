@@ -113,6 +113,10 @@ import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
 import static com.android.server.wm.proto.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.proto.IdentifierProto.TITLE;
 import static com.android.server.wm.proto.IdentifierProto.USER_ID;
+import static com.android.server.wm.proto.AnimationSpecProto.MOVE;
+import static com.android.server.wm.proto.MoveAnimationSpecProto.DURATION;
+import static com.android.server.wm.proto.MoveAnimationSpecProto.FROM;
+import static com.android.server.wm.proto.MoveAnimationSpecProto.TO;
 import static com.android.server.wm.proto.WindowStateProto.ANIMATING_EXIT;
 import static com.android.server.wm.proto.WindowStateProto.ANIMATOR;
 import static com.android.server.wm.proto.WindowStateProto.ATTRIBUTES;
@@ -4723,6 +4727,22 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             final float v = mInterpolator.getInterpolation(fraction);
             t.setPosition(leash, mFrom.x + (mTo.x - mFrom.x) * v,
                     mFrom.y + (mTo.y - mFrom.y) * v);
+        }
+
+        @Override
+        public void dump(PrintWriter pw, String prefix) {
+            pw.print(prefix); pw.print("from="); pw.print(mFrom);
+            pw.print(" to="); pw.print(mTo);
+            pw.print(" duration="); pw.println(mDuration);
+        }
+
+        @Override
+        public void writeToProtoInner(ProtoOutputStream proto) {
+            final long token = proto.start(MOVE);
+            mFrom.writeToProto(proto, FROM);
+            mTo.writeToProto(proto, TO);
+            proto.write(DURATION, mDuration);
+            proto.end(token);
         }
     }
 }

@@ -19,10 +19,13 @@ package com.android.server.wm;
 import static com.android.server.wm.AnimationAdapter.STATUS_BAR_TRANSITION_DURATION;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
+import static com.android.server.wm.proto.AnimationSpecProto.WINDOW;
+import static com.android.server.wm.proto.WindowAnimationSpecProto.ANIMATION;
 
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.SystemClock;
+import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.animation.Animation;
@@ -32,6 +35,8 @@ import android.view.animation.Transformation;
 import android.view.animation.TranslateAnimation;
 
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
+
+import java.io.PrintWriter;
 
 /**
  * Animation spec for regular window animations.
@@ -127,6 +132,18 @@ public class WindowAnimationSpec implements AnimationSpec {
     @Override
     public boolean canSkipFirstFrame() {
         return mCanSkipFirstFrame;
+    }
+
+    @Override
+    public void dump(PrintWriter pw, String prefix) {
+        pw.print(prefix); pw.println(mAnimation);
+    }
+
+    @Override
+    public void writeToProtoInner(ProtoOutputStream proto) {
+        final long token = proto.start(WINDOW);
+        proto.write(ANIMATION, mAnimation.toString());
+        proto.end(token);
     }
 
     /**
