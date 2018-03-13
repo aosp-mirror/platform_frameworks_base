@@ -19,8 +19,6 @@
 #include "SkiaDisplayList.h"
 #include "SkiaPipeline.h"
 
-#include <SkBlurMask.h>
-#include <SkBlurMaskFilter.h>
 #include <SkPathOps.h>
 #include <SkRRectsGaussianEdgeMaskFilter.h>
 #include <SkShadowUtils.h>
