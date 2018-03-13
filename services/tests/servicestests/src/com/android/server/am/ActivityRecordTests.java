@@ -222,35 +222,4 @@ public class ActivityRecordTests extends ActivityTestsBase {
         verify(mService.mStackSupervisor, times(1)).canPlaceEntityOnDisplay(anyInt(), eq(expected),
                 anyInt(), anyInt(), eq(record.info));
     }
-
-    @Test
-    public void testFinishingAfterDestroying() throws Exception {
-        assertFalse(mActivity.finishing);
-        mActivity.setState(DESTROYING, "testFinishingAfterDestroying");
-        assertTrue(mActivity.isState(DESTROYING));
-        assertTrue(mActivity.finishing);
-    }
-
-    @Test
-    public void testFinishingAfterDestroyed() throws Exception {
-        assertFalse(mActivity.finishing);
-        mActivity.setState(DESTROYED, "testFinishingAfterDestroyed");
-        assertTrue(mActivity.isState(DESTROYED));
-        assertTrue(mActivity.finishing);
-    }
-
-    @Test
-    public void testSetInvalidState() throws Exception {
-        mActivity.setState(DESTROYED, "testInvalidState");
-
-        boolean exceptionEncountered = false;
-
-        try {
-            mActivity.setState(FINISHING, "testInvalidState");
-        } catch (IllegalArgumentException e) {
-            exceptionEncountered = true;
-        }
-
-        assertTrue(exceptionEncountered);
-    }
 }
