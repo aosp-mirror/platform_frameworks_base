@@ -47,6 +47,7 @@ import android.provider.Settings.SettingNotFoundException;
 import android.service.carrier.CarrierIdentifier;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
+import android.telecom.TelecomManager;
 import android.telephony.VisualVoicemailService.VisualVoicemailTask;
 import android.telephony.ims.aidl.IImsConfig;
 import android.telephony.ims.aidl.IImsMmTelFeature;
@@ -3701,26 +3702,45 @@ public class TelephonyManager {
         return IPhoneSubInfo.Stub.asInterface(ServiceManager.getService("iphonesubinfo"));
     }
 
-    /** Device call state: No activity. */
+    /**
+     * Device call state: No activity.
+     */
     public static final int CALL_STATE_IDLE = 0;
-    /** Device call state: Ringing. A new call arrived and is
+    /**
+     * Device call state: Ringing. A new call arrived and is
      *  ringing or waiting. In the latter case, another call is
-     *  already active. */
+     *  already active.
+     */
     public static final int CALL_STATE_RINGING = 1;
-    /** Device call state: Off-hook. At least one call exists
-      * that is dialing, active, or on hold, and no calls are ringing
-      * or waiting. */
+    /**
+     * Device call state: Off-hook. At least one call exists
+     * that is dialing, active, or on hold, and no calls are ringing
+     * or waiting.
+     */
     public static final int CALL_STATE_OFFHOOK = 2;
 
+    /** @hide */
+    @IntDef(prefix = { "CALL_STATE_" }, value = {
+            CALL_STATE_IDLE,
+            CALL_STATE_RINGING,
+            CALL_STATE_OFFHOOK
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CallState{}
+
     /**
-     * Returns one of the following constants that represents the current state of all
-     * phone calls.
+     * Returns the state of all calls on the device.
+     * <p>
+     * This method considers not only calls in the Telephony stack, but also calls via other
+     * {@link android.telecom.ConnectionService} implementations.
+     * <p>
+     * Note: The call state returned via this method may differ from what is reported by
+     * {@link PhoneStateListener#onCallStateChanged(int, String)}, as that callback only considers
+     * Telephony (mobile) calls.
      *
-     * {@link TelephonyManager#CALL_STATE_RINGING}
-     * {@link TelephonyManager#CALL_STATE_OFFHOOK}
-     * {@link TelephonyManager#CALL_STATE_IDLE}
+     * @return the current call state.
      */
-    public int getCallState() {
+    public @CallState int getCallState() {
         try {
             ITelecomService telecom = getTelecomService();
             if (telecom != null) {
@@ -3733,23 +3753,31 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns a constant indicating the call state (cellular) on the device
-     * for a subscription.
+     * Returns the Telephony call state for calls on a specific subscription.
+     * <p>
+     * Note: This method considers ONLY telephony/mobile calls, where {@link #getCallState()}
+     * considers the state of calls from other {@link android.telecom.ConnectionService}
+     * implementations.
      *
-     * @param subId whose call state is returned
+     * @param subId the subscription to check call state for.
      * @hide
      */
-    public int getCallState(int subId) {
+    public @CallState int getCallState(int subId) {
         int phoneId = SubscriptionManager.getPhoneId(subId);
         return getCallStateForSlot(phoneId);
     }
 
     /**
-     * See getCallState.
+     * Returns the Telephony call state for calls on a specific SIM slot.
+     * <p>
+     * Note: This method considers ONLY telephony/mobile calls, where {@link #getCallState()}
+     * considers the state of calls from other {@link android.telecom.ConnectionService}
+     * implementations.
      *
+     * @param slotIndex the SIM slot index to check call state for.
      * @hide
      */
-    public int getCallStateForSlot(int slotIndex) {
+    public @CallState int getCallStateForSlot(int slotIndex) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony == null)
