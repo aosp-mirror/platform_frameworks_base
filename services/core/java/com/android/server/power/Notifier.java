@@ -720,9 +720,12 @@ final class Notifier {
     private void playChargingStartedSound() {
         final boolean enabled = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.CHARGING_SOUNDS_ENABLED, 1) != 0;
+        final boolean dndOff = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS)
+                == Settings.Global.ZEN_MODE_OFF;
         final String soundPath = Settings.Global.getString(mContext.getContentResolver(),
                 Settings.Global.CHARGING_STARTED_SOUND);
-        if (enabled && soundPath != null) {
+        if (enabled && dndOff && soundPath != null) {
             final Uri soundUri = Uri.parse("file://" + soundPath);
             if (soundUri != null) {
                 final Ringtone sfx = RingtoneManager.getRingtone(mContext, soundUri);
