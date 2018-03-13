@@ -126,6 +126,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private float mExpansionFraction = 1f;
 
     private boolean mDarkenWhileDragging;
+    private boolean mExpansionAffectsAlpha = true;
     protected boolean mAnimateChange;
     private boolean mUpdatePending;
     private boolean mTracking;
@@ -381,6 +382,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     }
 
     private void applyExpansionToAlpha() {
+        if (!mExpansionAffectsAlpha) {
+            return;
+        }
+
         if (mState == ScrimState.UNLOCKED) {
             // Darken scrim as you pull down the shade when unlocked
             float behindFraction = getInterpolatedFraction();
@@ -910,6 +915,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
 
     public void onScreenTurnedOff() {
         mScreenOn = false;
+    }
+
+    public void setExpansionAffectsAlpha(boolean expansionAffectsAlpha) {
+        mExpansionAffectsAlpha = expansionAffectsAlpha;
     }
 
     public interface Callback {

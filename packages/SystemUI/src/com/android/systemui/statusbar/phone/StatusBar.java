@@ -3688,6 +3688,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void finishKeyguardFadingAway() {
         mKeyguardFadingAway = false;
         mKeyguardMonitor.notifyKeyguardDoneFading();
+        mScrimController.setExpansionAffectsAlpha(true);
     }
 
     // TODO: Move this to NotificationLockscreenUserManager.
@@ -4617,6 +4618,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         // fingerprint from doze. We should cross fade directly from black.
         final boolean wakeAndUnlocking = mFingerprintUnlockController.getMode()
                 == FingerprintUnlockController.MODE_WAKE_AND_UNLOCK;
+
+        // Do not animate the scrim expansion when it's triggered by the fingerprint sensor.
+        mScrimController.setExpansionAffectsAlpha(mFingerprintUnlockController.getMode()
+                != FingerprintUnlockController.MODE_UNLOCK);
 
         if (mBouncerShowing) {
             mScrimController.transitionTo(
