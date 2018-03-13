@@ -161,11 +161,6 @@ public class ImsService extends Service {
         }
 
         @Override
-        public void notifyImsFeatureReady(int slotId, int featureType) {
-            ImsService.this.notifyImsFeatureReady(slotId, featureType);
-        }
-
-        @Override
         public IImsConfig getConfig(int slotId) {
             ImsConfigImplBase c = ImsService.this.getConfig(slotId);
             return c != null ? c.getIImsConfig() : null;
@@ -271,25 +266,6 @@ public class ImsService extends Service {
             f.removeImsFeatureStatusCallback(c);
             f.onFeatureRemoved();
             features.remove(featureType);
-        }
-    }
-
-    private void notifyImsFeatureReady(int slotId, int featureType) {
-        synchronized (mFeaturesBySlot) {
-            // get ImsFeature associated with the slot/feature
-            SparseArray<ImsFeature> features = mFeaturesBySlot.get(slotId);
-            if (features == null) {
-                Log.w(LOG_TAG, "Can not notify ImsFeature ready. No ImsFeatures exist on " +
-                        "slot " + slotId);
-                return;
-            }
-            ImsFeature f = features.get(featureType);
-            if (f == null) {
-                Log.w(LOG_TAG, "Can not notify ImsFeature ready. No feature with type "
-                        + featureType + " exists on slot " + slotId);
-                return;
-            }
-            f.onFeatureReady();
         }
     }
 
