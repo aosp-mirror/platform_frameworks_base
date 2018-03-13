@@ -249,7 +249,6 @@ void CountMetricProducer::flushCurrentBucketLocked(const uint64_t& eventTimeNs) 
     } else {
         info.mBucketEndNs = fullBucketEndTimeNs;
     }
-    info.mBucketNum = mCurrentBucketNum;
     for (const auto& counter : *mCurrentSlicedCounter) {
         info.mCount = counter.second;
         auto& bucketList = mPastBuckets[counter.first];

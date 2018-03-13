@@ -219,7 +219,6 @@ bool MaxDurationTracker::flushCurrentBucket(
         DurationBucket info;
         info.mBucketStartNs = mCurrentBucketStartTimeNs;
         info.mBucketEndNs = currentBucketEndTimeNs;
-        info.mBucketNum = mCurrentBucketNum;
         info.mDuration = mDuration;
         (*output)[mEventKey].push_back(info);
         VLOG("  final duration for last bucket: %lld", (long long)mDuration);
