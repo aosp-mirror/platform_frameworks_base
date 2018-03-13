@@ -32,9 +32,12 @@ public class TransportStats {
 
     void registerConnectionTime(ComponentName transportComponent, long timeMs) {
         synchronized (mStatsLock) {
-            mTransportStats
-                    .computeIfAbsent(transportComponent, name -> new Stats())
-                    .register(timeMs);
+            Stats stats = mTransportStats.get(transportComponent);
+            if (stats == null) {
+                stats = new Stats();
+                mTransportStats.put(transportComponent, stats);
+            }
+            stats.register(timeMs);
         }
     }
 
@@ -71,52 +74,49 @@ public class TransportStats {
     private static void dumpStats(PrintWriter pw, String prefix, Stats stats) {
         pw.println(
                 String.format(
-                        Locale.US, "%sAverage connection time: %.2f ms", prefix, stats.mAverage));
-        pw.println(String.format(Locale.US, "%sMax connection time: %d ms", prefix, stats.mMax));
-        pw.println(String.format(Locale.US, "%sMin connection time: %d ms", prefix, stats.mMin));
-        pw.println(String.format(Locale.US, "%sNumber of connections: %d ", prefix, stats.mN));
+                        Locale.US, "%sAverage connection time: %.2f ms", prefix, stats.average));
+        pw.println(String.format(Locale.US, "%sMax connection time: %d ms", prefix, stats.max));
+        pw.println(String.format(Locale.US, "%sMin connection time: %d ms", prefix, stats.min));
+        pw.println(String.format(Locale.US, "%sNumber of connections: %d ", prefix, stats.n));
     }
 
     public static final class Stats {
         public static Stats merge(Stats a, Stats b) {
             return new Stats(
-                    a.mN + b.mN,
-                    (a.mAverage * a.mN + b.mAverage * b.mN) / (a.mN + b.mN),
-                    Math.max(a.mMax, b.mMax),
-                    Math.min(a.mMin, b.mMin));
+                    a.n + b.n,
+                    (a.average * a.n + b.average * b.n) / (a.n + b.n),
+                    Math.max(a.max, b.max),
+                    Math.min(a.min, b.min));
         }
 
-        public int mN;
-        public double mAverage;
-        public long mMax;
-        public long mMin;
+        public int n;
+        public double average;
+        public long max;
+        public long min;
 
         public Stats() {
-            mN = 0;
-            mAverage = 0;
-            mMax = 0;
-            mMin = Long.MAX_VALUE;
-        }
-
-        private Stats(Stats original) {
-            mN = original.mN;
-            mAverage = original.mAverage;
-            mMax = original.mMax;
-            mMin = original.mMin;
+            n = 0;
+            average = 0;
+            max = 0;
+            min = Long.MAX_VALUE;
         }
 
         private Stats(int n, double average, long max, long min) {
-            mN = n;
-            mAverage = average;
-            mMax = max;
-            mMin = min;
+            this.n = n;
+            this.average = average;
+            this.max = max;
+            this.min = min;
+        }
+
+        private Stats(Stats original) {
+            this(original.n, original.average, original.max, original.min);
         }
 
         private void register(long sample) {
-            mAverage = (mAverage * mN + sample) / (mN + 1);
-            mN++;
-            mMax = Math.max(mMax, sample);
-            mMin = Math.min(mMin, sample);
+            average = (average * n + sample) / (n + 1);
+            n++;
+            max = Math.max(max, sample);
+            min = Math.min(min, sample);
         }
     }
 }
