@@ -28,7 +28,6 @@ class TelephonyIcons {
     static final int ICON_G = R.drawable.ic_g_mobiledata;
     static final int ICON_E = R.drawable.ic_e_mobiledata;
     static final int ICON_H = R.drawable.ic_h_mobiledata;
-    // TODO: add logic to insert H+ icon
     static final int ICON_H_PLUS = R.drawable.ic_h_plus_mobiledata;
     static final int ICON_3G = R.drawable.ic_3g_mobiledata;
     static final int ICON_4G = R.drawable.ic_4g_mobiledata;
@@ -133,6 +132,19 @@ class TelephonyIcons {
             AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
             R.string.data_connection_3_5g,
             TelephonyIcons.ICON_H,
+            false);
+
+    static final MobileIconGroup H_PLUS = new MobileIconGroup(
+            "H+",
+            null,
+            null,
+            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
+            0, 0,
+            0,
+            0,
+            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
+            R.string.data_connection_3_5g_plus,
+            TelephonyIcons.ICON_H_PLUS,
             false);
 
     static final MobileIconGroup FOUR_G = new MobileIconGroup(
