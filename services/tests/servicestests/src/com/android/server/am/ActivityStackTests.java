@@ -479,28 +479,6 @@ public class ActivityStackTests extends ActivityTestsBase {
     }
 
     @Test
-    public void testSuppressMultipleDestroy() throws Exception {
-        final ActivityRecord r = new ActivityBuilder(mService).setTask(mTask).build();
-        final ClientLifecycleManager lifecycleManager = mock(ClientLifecycleManager.class);
-        final ProcessRecord app = r.app;
-
-        // The mocked lifecycle manager must be set on the ActivityStackSupervisor's reference to
-        // the service rather than mService as mService is a spy and setting the value will not
-        // propagate as ActivityManagerService hands its own reference to the
-        // ActivityStackSupervisor during construction.
-        ((TestActivityManagerService) mSupervisor.mService).setLifecycleManager(lifecycleManager);
-
-        mStack.destroyActivityLocked(r, true, "first invocation");
-        verify(lifecycleManager, times(1)).scheduleTransaction(eq(app.thread),
-                eq(r.appToken), any(DestroyActivityItem.class));
-        assertTrue(r.isState(DESTROYED, DESTROYING));
-
-        mStack.destroyActivityLocked(r, true, "second invocation");
-        verify(lifecycleManager, times(1)).scheduleTransaction(eq(app.thread),
-                eq(r.appToken), any(DestroyActivityItem.class));
-    }
-
-    @Test
     public void testFinishDisabledPackageActivities() throws Exception {
         final ActivityRecord firstActivity = new ActivityBuilder(mService).setTask(mTask).build();
         final ActivityRecord secondActivity = new ActivityBuilder(mService).setTask(mTask).build();
