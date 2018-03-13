@@ -829,6 +829,12 @@ interface ITelephony {
     boolean isEmergencyMmTelAvailable(int slotId);
 
     /**
+     * @return true if the IMS resolver is busy resolving a binding and should not be considered
+     * available, false if the IMS resolver is idle.
+     */
+    boolean isResolvingImsBinding();
+
+    /**
      * Set the network selection mode to automatic.
      *
      * @param subId the id of the subscription to update.
