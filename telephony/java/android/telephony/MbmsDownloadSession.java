@@ -131,6 +131,14 @@ public class MbmsDownloadSession implements AutoCloseable {
      */
     public static final String DEFAULT_TOP_LEVEL_TEMP_DIRECTORY = "androidMbmsTempFileRoot";
 
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {RESULT_SUCCESSFUL, RESULT_CANCELLED, RESULT_EXPIRED, RESULT_IO_ERROR,
+            RESULT_SERVICE_ID_NOT_DEFINED, RESULT_DOWNLOAD_FAILURE, RESULT_OUT_OF_STORAGE,
+            RESULT_FILE_ROOT_UNREACHABLE}, prefix = { "RESULT_" })
+    public @interface DownloadResultCode{}
+
     /**
      * Indicates that the download was successful.
      */
