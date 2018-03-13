@@ -49,7 +49,8 @@ import java.util.List;
  * </ul>
  *
  * <P> The minimum permission needed to access this content provider is
- * {@link android.Manifest.permission#ADD_VOICEMAIL}
+ * {@link android.Manifest.permission#ADD_VOICEMAIL} or carrier privileges (see
+ * {@link android.telephony.TelephonyManager#hasCarrierPrivileges}).
  *
  * <P>Voicemails are inserted by what is called as a "voicemail source"
  * application, which is responsible for syncing voicemail data between a remote
