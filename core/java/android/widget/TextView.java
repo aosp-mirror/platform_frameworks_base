@@ -291,6 +291,7 @@ import java.util.Locale;
  * @attr ref android.R.styleable#TextView_drawableTintMode
  * @attr ref android.R.styleable#TextView_lineSpacingExtra
  * @attr ref android.R.styleable#TextView_lineSpacingMultiplier
+ * @attr ref android.R.styleable#TextView_justificationMode
  * @attr ref android.R.styleable#TextView_marqueeRepeatLimit
  * @attr ref android.R.styleable#TextView_inputType
  * @attr ref android.R.styleable#TextView_imeOptions
