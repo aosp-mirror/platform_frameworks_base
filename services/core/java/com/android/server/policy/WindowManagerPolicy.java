@@ -93,6 +93,7 @@ import android.view.animation.Animation;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
 import com.android.server.wm.DisplayFrames;
+import com.android.server.wm.utils.WmDisplayCutout;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -217,11 +218,11 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * @param stableFrame The frame around which stable system decoration is positioned.
          * @param outsetFrame The frame that includes areas that aren't part of the surface but we
          * want to treat them as such.
-         * @param displayCutout the display displayCutout
+         * @param displayCutout the display cutout
          */
         public void computeFrameLw(Rect parentFrame, Rect displayFrame,
                 Rect overlayFrame, Rect contentFrame, Rect visibleFrame, Rect decorFrame,
-                Rect stableFrame, @Nullable Rect outsetFrame, DisplayCutout displayCutout);
+                Rect stableFrame, @Nullable Rect outsetFrame, WmDisplayCutout displayCutout);
 
         /**
          * Retrieve the current frame of the window that has been assigned by
