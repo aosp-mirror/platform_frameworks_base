@@ -19,7 +19,6 @@ package android.media.update;
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
-import android.media.DataSourceDesc;
 import android.media.MediaBrowser2;
 import android.media.MediaBrowser2.BrowserCallback;
 import android.media.MediaController2;
@@ -32,12 +31,10 @@ import android.media.MediaLibraryService2.MediaLibrarySession.MediaLibrarySessio
 import android.media.MediaMetadata2;
 import android.media.MediaPlaylistAgent;
 import android.media.MediaSession2;
-import android.media.MediaSession2.CommandButton.Builder;
 import android.media.MediaSession2.PlaylistParams;
 import android.media.MediaSession2.SessionCallback;
 import android.media.MediaSessionService2;
 import android.media.MediaSessionService2.MediaNotification;
-import android.media.PlaybackState2;
 import android.media.Rating2;
 import android.media.SessionToken2;
 import android.media.VolumeProvider2;
@@ -131,10 +128,6 @@ public interface StaticProvider {
     Rating2 newThumbRating_Rating2(Context context, boolean thumbIsUp);
     Rating2 newStarRating_Rating2(Context context, int starRatingStyle, float starRating);
     Rating2 newPercentageRating_Rating2(Context context, float percent);
-
-    PlaybackState2Provider createPlaybackState2(Context context, PlaybackState2 instance, int state,
-            long position, long updateTime, float speed, long bufferedPosition, long activeItemId);
-    PlaybackState2 fromBundle_PlaybackState2(Context context, Bundle bundle);
 
     MediaPlaylistAgentProvider createMediaPlaylistAgent(Context context,
             MediaPlaylistAgent instance);
