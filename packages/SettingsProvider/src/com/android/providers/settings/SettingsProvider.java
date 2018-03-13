@@ -2938,7 +2938,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 156;
+            private static final int SETTINGS_VERSION = 157;
 
             private final int mUserId;
 
@@ -3604,7 +3604,21 @@ public class SettingsProvider extends ContentProvider {
                     currentVersion = 156;
                 }
 
+                if (currentVersion == 156) {
+                    // Version 156: Set a default value for zen duration
+                    final SettingsState globalSettings = getGlobalSettingsLocked();
+                    final Setting currentSetting = globalSettings.getSettingLocked(
+                            Global.ZEN_DURATION);
+                    if (currentSetting.isNull()) {
+                        String defaultZenDuration = Integer.toString(getContext()
+                                .getResources().getInteger(R.integer.def_zen_duration));
+                        globalSettings.insertSettingLocked(
+                                Global.ZEN_DURATION, defaultZenDuration,
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
 
+                    currentVersion = 157;
+                }
                 // vXXX: Add new settings above this point.
 
                 if (currentVersion != newVersion) {
