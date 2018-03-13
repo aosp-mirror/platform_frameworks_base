@@ -60,6 +60,8 @@ public interface MediaController2Provider extends TransportControlProvider {
     void sendCustomCommand_impl(Command command, Bundle args, ResultReceiver cb);
     List<MediaItem2> getPlaylist_impl();
     void setPlaylist_impl(List<MediaItem2> list, MediaMetadata2 metadata);
+    MediaMetadata2 getPlaylistMetadata_impl();
+    void updatePlaylistMetadata_impl(MediaMetadata2 metadata);
 
     void addPlaylistItem_impl(int index, MediaItem2 item);
     void replacePlaylistItem_impl(int index, MediaItem2 item);

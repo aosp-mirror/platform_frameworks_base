@@ -786,17 +786,20 @@ public class MediaController2 implements AutoCloseable {
      * @param metadata metadata of the playlist
      */
     public void updatePlaylistMetadata(@Nullable MediaMetadata2 metadata) {
-        // TODO(jaewan): Implement (b/74174649)
+        mProvider.updatePlaylistMetadata_impl(metadata);
     }
 
     /**
-     * Returns the playlist metadata
+     * Returns the lastly cached playlist playlist metadata either from
+     * {@link ControllerCallback#onPlaylistMetadataChanged(
+     * MediaController2, MediaPlaylistAgent, MediaMetadata2)} or
+     * {@link ControllerCallback#onPlaylistChanged(
+     * MediaController2, MediaPlaylistAgent, List, MediaMetadata2)}.
      *
      * @return metadata metadata of the playlist, or null if none is set
      */
     public @Nullable MediaMetadata2 getPlaylistMetadata() {
-        // TODO(jaewan): Implement (b/74174649)
-        return null;
+        return mProvider.getPlaylistMetadata_impl();
     }
 
     /**
