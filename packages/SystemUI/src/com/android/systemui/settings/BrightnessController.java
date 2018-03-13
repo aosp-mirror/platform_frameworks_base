@@ -368,7 +368,9 @@ public class BrightnessController implements ToggleSlider.Listener {
         } else {
             final int val = value + mMinimumBacklight;
             if (stopTracking) {
-                MetricsLogger.action(mContext, MetricsEvent.ACTION_BRIGHTNESS, val);
+                final int metric = mAutomatic ?
+                        MetricsEvent.ACTION_BRIGHTNESS_AUTO : MetricsEvent.ACTION_BRIGHTNESS;
+                MetricsLogger.action(mContext, metric, val);
             }
             setBrightness(val);
             if (!tracking) {
