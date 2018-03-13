@@ -157,7 +157,7 @@ public class KeyguardBouncer {
     public void onFullyHidden() {
         if (!mShowingSoon) {
             cancelShowRunnable();
-            inflateView();
+            mRoot.setVisibility(View.INVISIBLE);
             mFalsingManager.onBouncerHidden();
         }
     }
