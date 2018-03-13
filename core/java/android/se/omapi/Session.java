@@ -301,12 +301,6 @@ public class Session {
      *         provide a new logical channel.
      */
     public @Nullable Channel openLogicalChannel(byte[] aid, byte p2) throws IOException {
-
-        if ((mReader.getName().startsWith("SIM")) && (aid == null)) {
-            Log.e(TAG, "NULL AID not supported on " + mReader.getName());
-            return null;
-        }
-
         if (!mService.isConnected()) {
             throw new IllegalStateException("service not connected to system");
         }
