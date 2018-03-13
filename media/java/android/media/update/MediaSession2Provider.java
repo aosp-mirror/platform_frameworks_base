@@ -61,7 +61,6 @@ public interface MediaSession2Provider extends TransportControlProvider {
     void sendCustomCommand_impl(Command command, Bundle args);
     void addPlaylistItem_impl(int index, MediaItem2 item);
     void removePlaylistItem_impl(MediaItem2 item);
-    void editPlaylistItem_impl(MediaItem2 item);
     void replacePlaylistItem_impl(int index, MediaItem2 item);
     List<MediaItem2> getPlaylist_impl();
     void setPlaylist_impl(List<MediaItem2> list, MediaMetadata2 metadata);

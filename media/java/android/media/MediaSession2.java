@@ -265,9 +265,6 @@ public class MediaSession2 implements AutoCloseable {
     /**
      * Command code for {@link MediaController2#getPlaylistMetadata()}. This will expose
      * metadata information to the controller.
-     * *
-     * Command code for {@link MediaController2#setPlaylist(List, MediaMetadata2)} and
-     * {@link MediaController2#updatePlaylistMetadata(MediaMetadata2)}.
      * <p>
      * Command would be sent directly to the playlist agent if the session doesn't reject the
      * request through the
@@ -1770,12 +1767,17 @@ public class MediaSession2 implements AutoCloseable {
         mProvider.skipToNextItem_impl();
     }
 
+    /**
+     * Gets the playlist metadata from the {@link MediaPlaylistAgent}.
+     *
+     * @return the playlist metadata
+     */
     public MediaMetadata2 getPlaylistMetadata() {
         return mProvider.getPlaylistMetadata_impl();
     }
 
     /**
-     * Add the media item to the play list at position index.
+     * Adds the media item to the playlist at position index.
      * <p>
      * This will not change the currently playing media item.
      * If index is less than or equal to the current index of the play list,
@@ -1783,26 +1785,25 @@ public class MediaSession2 implements AutoCloseable {
      *
      * @param index the index you want to add
      * @param item the media item you want to add
-     * @throws IndexOutOfBoundsException if index is outside play list range
      */
     public void addPlaylistItem(int index, @NonNull MediaItem2 item) {
         mProvider.addPlaylistItem_impl(index, item);
     }
 
     /**
-     * Remove the media item in the play list.
+     * Removes the media item in the playlist.
      * <p>
      * If the item is the currently playing item of the playlist, current playback
      * will be stopped and playback moves to next source in the list.
      *
-     * @throws IllegalArgumentException if the play list is null
+     * @param item the media item you want to add
      */
     public void removePlaylistItem(@NonNull MediaItem2 item) {
         mProvider.removePlaylistItem_impl(item);
     }
 
     /**
-     * Replace the media item at index in the playlist. This can be also used to update metadata of
+     * Replaces the media item at index in the playlist. This can be also used to update metadata of
      * an item.
      *
      * @param index the index of the item to replace
@@ -1822,6 +1823,11 @@ public class MediaSession2 implements AutoCloseable {
         return mProvider.getCurrentPlaylistItem_impl();
     }
 
+    /**
+     * Updates the playlist metadata to the {@link MediaPlaylistAgent}.
+     *
+     * @param metadata metadata of the playlist
+     */
     public void updatePlaylistMetadata(@Nullable MediaMetadata2 metadata) {
         mProvider.updatePlaylistMetadata_impl(metadata);
     }

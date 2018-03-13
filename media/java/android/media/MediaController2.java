@@ -790,7 +790,7 @@ public class MediaController2 implements AutoCloseable {
     }
 
     /**
-     * Returns the lastly cached playlist playlist metadata either from
+     * Gets the lastly cached playlist playlist metadata either from
      * {@link ControllerCallback#onPlaylistMetadataChanged(
      * MediaController2, MediaPlaylistAgent, MediaMetadata2)} or
      * {@link ControllerCallback#onPlaylistChanged(
@@ -814,15 +814,14 @@ public class MediaController2 implements AutoCloseable {
     }
 
     /**
-     * Inserts the media item to the play list at position index.
+     * Inserts the media item to the playlist at position index.
      * <p>
      * This will not change the currently playing media item.
-     * If index is less than or equal to the current index of the play list,
-     * the current index of the play list will be incremented correspondingly.
+     * If index is less than or equal to the current index of the playlist,
+     * the current index of the playlist will be incremented correspondingly.
      *
      * @param index the index you want to add
      * @param item the media item you want to add
-     * @throws IndexOutOfBoundsException if index is outside play list range
      */
     public void addPlaylistItem(int index, @NonNull MediaItem2 item) {
         mProvider.addPlaylistItem_impl(index, item);
@@ -833,6 +832,8 @@ public class MediaController2 implements AutoCloseable {
      *<p>
      * If the item is the currently playing item of the playlist, current playback
      * will be stopped and playback moves to next source in the list.
+     *
+     * @param item the media item you want to add
      */
     public void removePlaylistItem(@NonNull MediaItem2 item) {
         mProvider.removePlaylistItem_impl(item);
