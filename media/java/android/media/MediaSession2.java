@@ -1771,8 +1771,7 @@ public class MediaSession2 implements AutoCloseable {
     }
 
     public MediaMetadata2 getPlaylistMetadata() {
-        // TODO(jaewan): Implement (b/74174649)
-        return null;
+        return mProvider.getPlaylistMetadata_impl();
     }
 
     /**
@@ -1824,7 +1823,7 @@ public class MediaSession2 implements AutoCloseable {
     }
 
     public void updatePlaylistMetadata(@Nullable MediaMetadata2 metadata) {
-        // TODO(jaewan): Implement (b/74174649)
+        mProvider.updatePlaylistMetadata_impl(metadata);
     }
 
     public @RepeatMode int getRepeatMode() {
