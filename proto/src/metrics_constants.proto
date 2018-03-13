@@ -5499,6 +5499,10 @@ message MetricsEvent {
     // OS: P
     SETTINGS_ZONE_PICKER_FIXED_OFFSET = 1357;
 
+    // Action: notification shade > manage notifications
+    // OS: P
+    ACTION_MANAGE_NOTIFICATIONS = 1358;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
