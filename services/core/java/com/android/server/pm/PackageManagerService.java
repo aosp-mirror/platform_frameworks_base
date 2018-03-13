@@ -2877,7 +2877,8 @@ public class PackageManagerService extends IPackageManager.Stub
                             rescanFlags =
                                     scanFlags
                                     | SCAN_AS_SYSTEM;
-                        } else if (FileUtils.contains(privilegedVendorAppDir, scanFile)) {
+                        } else if (FileUtils.contains(privilegedVendorAppDir, scanFile)
+                                || FileUtils.contains(privilegedOdmAppDir, scanFile)) {
                             reparseFlags =
                                     mDefParseFlags |
                                     PackageParser.PARSE_IS_SYSTEM_DIR;
@@ -2886,7 +2887,8 @@ public class PackageManagerService extends IPackageManager.Stub
                                     | SCAN_AS_SYSTEM
                                     | SCAN_AS_VENDOR
                                     | SCAN_AS_PRIVILEGED;
-                        } else if (FileUtils.contains(vendorAppDir, scanFile)) {
+                        } else if (FileUtils.contains(vendorAppDir, scanFile)
+                                || FileUtils.contains(odmAppDir, scanFile)) {
                             reparseFlags =
                                     mDefParseFlags |
                                     PackageParser.PARSE_IS_SYSTEM_DIR;
@@ -11788,6 +11790,8 @@ public class PackageManagerService extends IPackageManager.Stub
             codeRoot = Environment.getOemDirectory();
         } else if (FileUtils.contains(Environment.getVendorDirectory(), codePath)) {
             codeRoot = Environment.getVendorDirectory();
+        } else if (FileUtils.contains(Environment.getOdmDirectory(), codePath)) {
+            codeRoot = Environment.getOdmDirectory();
         } else if (FileUtils.contains(Environment.getProductDirectory(), codePath)) {
             codeRoot = Environment.getProductDirectory();
         } else {
@@ -18217,9 +18221,11 @@ public class PackageManagerService extends IPackageManager.Stub
         try {
             final File privilegedAppDir = new File(Environment.getRootDirectory(), "priv-app");
             final File privilegedVendorAppDir = new File(Environment.getVendorDirectory(), "priv-app");
+            final File privilegedOdmAppDir = new File(Environment.getOdmDirectory(), "priv-app");
             final File privilegedProductAppDir = new File(Environment.getProductDirectory(), "priv-app");
             return path.startsWith(privilegedAppDir.getCanonicalPath())
                     || path.startsWith(privilegedVendorAppDir.getCanonicalPath())
+                    || path.startsWith(privilegedOdmAppDir.getCanonicalPath())
                     || path.startsWith(privilegedProductAppDir.getCanonicalPath());
         } catch (IOException e) {
             Slog.e(TAG, "Unable to access code path " + path);
@@ -18238,7 +18244,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     static boolean locationIsVendor(String path) {
         try {
-            return path.startsWith(Environment.getVendorDirectory().getCanonicalPath());
+            return path.startsWith(Environment.getVendorDirectory().getCanonicalPath())
+                    || path.startsWith(Environment.getOdmDirectory().getCanonicalPath());
         } catch (IOException e) {
             Slog.e(TAG, "Unable to access code path " + path);
         }
