@@ -921,6 +921,28 @@ static jboolean Bitmap_compress(JNIEnv* env, jobject clazz, jlong bitmapHandle,
 
     SkBitmap skbitmap;
     bitmap->getSkBitmap(&skbitmap);
+    if (skbitmap.colorType() == kRGBA_F16_SkColorType) {
+        // Convert to P3 before encoding. This matches SkAndroidCodec::computeOutputColorSpace
+        // for wide gamuts.
+        auto cs = SkColorSpace::MakeRGB(SkColorSpace::kSRGB_RenderTargetGamma,
+                                        SkColorSpace::kDCIP3_D65_Gamut);
+        auto info = skbitmap.info().makeColorType(kRGBA_8888_SkColorType)
+                                   .makeColorSpace(std::move(cs));
+        SkBitmap p3;
+        if (!p3.tryAllocPixels(info)) {
+            return JNI_FALSE;
+        }
+        auto xform = SkColorSpaceXform::New(skbitmap.colorSpace(), info.colorSpace());
+        if (!xform) {
+            return JNI_FALSE;
+        }
+        if (!xform->apply(SkColorSpaceXform::kRGBA_8888_ColorFormat, p3.getPixels(),
+                          SkColorSpaceXform::kRGBA_F16_ColorFormat, skbitmap.getPixels(),
+                          info.width() * info.height(), kUnpremul_SkAlphaType)) {
+            return JNI_FALSE;
+        }
+        skbitmap = p3;
+    }
     return SkEncodeImage(strm.get(), skbitmap, fm, quality) ? JNI_TRUE : JNI_FALSE;
 }
 
