@@ -26,8 +26,10 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
+import android.app.IActivityManager;
 import android.app.PendingIntent;
 import android.app.SynchronousUserSwitchObserver;
+import android.app.TaskStackListener;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -137,6 +139,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
     @GuardedBy("this")
     private IBiometricsFingerprint mDaemon;
     private IStatusBarService mStatusBarService;
+    private final IActivityManager mActivityManager;
     private final PowerManager mPowerManager;
     private final AlarmManager mAlarmManager;
     private final UserManager mUserManager;
@@ -215,6 +218,30 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         }
     };
 
+    private final TaskStackListener mTaskStackListener = new TaskStackListener() {
+        @Override
+        public void onTaskStackChanged() {
+            try {
+                if (!(mCurrentClient instanceof AuthenticationClient)) {
+                    return;
+                }
+                if (isKeyguard(mCurrentClient.getOwnerString())) {
+                    return; // Keyguard is always allowed
+                }
+                List<ActivityManager.RunningTaskInfo> runningTasks = mActivityManager.getTasks(1);
+                if (!runningTasks.isEmpty()) {
+                    if (runningTasks.get(0).topActivity.getPackageName()
+                            != mCurrentClient.getOwnerString()) {
+                        mCurrentClient.stop(false /* initiatedByClient */);
+                        Slog.e(TAG, "Stopping background authentication");
+                    }
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Unable to get running tasks", e);
+            }
+        }
+    };
+
     public FingerprintService(Context context) {
         super(context);
         mContext = context;
@@ -230,6 +257,13 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         mFailedAttempts = new SparseIntArray();
         mStatusBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+        mActivityManager = ((ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE))
+                .getService();
+        try {
+            mActivityManager.registerTaskStackListener(mTaskStackListener);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Could not register task stack listener", e);
+        }
     }
 
     @Override
