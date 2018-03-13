@@ -148,16 +148,16 @@
     <string name="CLIRPermanent">You can\'t change the caller ID setting.</string>
 
     <!-- Notification title to tell the user that data service is blocked by access control. -->
-    <string name="RestrictedOnDataTitle">No data service</string>
+    <string name="RestrictedOnDataTitle">No mobile data service</string>
     <!-- Notification title to tell the user that emergency calling is blocked by access control. -->
-    <string name="RestrictedOnEmergencyTitle">No emergency calling</string>
+    <string name="RestrictedOnEmergencyTitle">Emergency calling unavailable</string>
     <!-- Notification title to tell the user that normal service is blocked by access control. -->
     <string name="RestrictedOnNormalTitle">No voice service</string>
     <!-- Notification title to tell the user that all emergency and normal voice services are blocked by access control. -->
-    <string name="RestrictedOnAllVoiceTitle">No voice/emergency service</string>
+    <string name="RestrictedOnAllVoiceTitle">No voice service or emergency calling</string>
 
     <!-- Notification content to tell the user that voice/data/emergency service is blocked by access control. -->
-    <string name="RestrictedStateContent">Temporarily not offered by the mobile network at your location</string>
+    <string name="RestrictedStateContent">Temporarily turned off by your carrier</string>
 
     <!-- Displayed to tell the user that they should switch their network preference. -->
     <string name="NetworkPreferenceSwitchTitle">Can\u2019t reach network</string>
