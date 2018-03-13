@@ -56,388 +56,455 @@ message GlobalSettingsProto {
     optional SettingProto enable_accessibility_global_gesture_enabled = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto airplane_mode_on = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto theater_mode_on = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    reserved 6,7,8,9,10; // Accidentally used. They are currently free to be reused.
     // A comma-separated list of radios that need to be disabled when airplane
     // mode is on. This overrides wifi_on and bluetooth_on if wifi and bluetooth
     // are included in the comma-separated list.
-    optional SettingProto airplane_mode_radios = 11 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto airplane_mode_toggleable_radios = 12 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto bluetooth_class_of_device = 293 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto bluetooth_disabled_profiles = 13;
-    optional SettingProto bluetooth_interoperability_list = 14;
-    optional SettingProto wifi_sleep_policy = 15 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto auto_time = 16 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto auto_time_zone = 17 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto car_dock_sound = 18;
-    optional SettingProto car_undock_sound = 19;
-    optional SettingProto desk_dock_sound = 20;
-    optional SettingProto desk_undock_sound = 21;
-    optional SettingProto dock_sounds_enabled = 22 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto dock_sounds_enabled_when_accessibility = 23 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto lock_sound = 24;
-    optional SettingProto unlock_sound = 25;
-    optional SettingProto trusted_sound = 26;
-    optional SettingProto low_battery_sound = 27;
-    optional SettingProto power_sounds_enabled = 28 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wireless_charging_started_sound = 29;
-    optional SettingProto charging_sounds_enabled = 30 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto stay_on_while_plugged_in = 31 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto bugreport_in_power_menu = 32 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto adb_enabled = 33 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto airplane_mode_radios = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto airplane_mode_toggleable_radios = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto bluetooth_class_of_device = 8 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto bluetooth_disabled_profiles = 9;
+    optional SettingProto bluetooth_interoperability_list = 10;
+    optional SettingProto wifi_sleep_policy = 11 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto auto_time = 12 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto auto_time_zone = 13 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto car_dock_sound = 14;
+    optional SettingProto car_undock_sound = 15;
+    optional SettingProto desk_dock_sound = 16;
+    optional SettingProto desk_undock_sound = 17;
+    optional SettingProto dock_sounds_enabled = 18 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto dock_sounds_enabled_when_accessibility = 19 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto lock_sound = 20;
+    optional SettingProto unlock_sound = 21;
+    optional SettingProto trusted_sound = 22;
+    optional SettingProto low_battery_sound = 23;
+    optional SettingProto power_sounds_enabled = 24 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wireless_charging_started_sound = 25;
+    optional SettingProto charging_sounds_enabled = 26 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto stay_on_while_plugged_in = 27 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto bugreport_in_power_menu = 28 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto adb_enabled = 29 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Whether views are allowed to save their attribute data.
-    optional SettingProto debug_view_attributes = 34 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto assisted_gps_enabled = 35 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto bluetooth_on = 36 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto cdma_cell_broadcast_sms = 37 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto cdma_roaming_mode = 38 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto cdma_subscription_mode = 39 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto data_activity_timeout_mobile = 40 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto data_activity_timeout_wifi = 41 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto data_roaming = 42 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto mdc_initial_max_retry = 43 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto force_allow_on_external = 44 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto euicc_provisioned = 294 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto development_force_resizable_activities = 45 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto development_enable_freeform_windows_support = 46 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto development_settings_enabled = 47 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto device_provisioned = 48 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto device_provisioning_mobile_data_enabled = 49 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto display_size_forced = 50 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto display_scaling_force = 51 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto download_max_bytes_over_mobile = 52 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto download_recommended_max_bytes_over_mobile = 53 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto hdmi_control_enabled = 54 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto hdmi_system_audio_control_enabled = 55 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto hdmi_control_auto_wakeup_enabled = 56 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto hdmi_control_auto_device_off_enabled = 57 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto location_background_throttle_interval_ms = 295 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto location_background_throttle_proximity_alert_interval_ms = 296 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto debug_view_attributes = 30 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto assisted_gps_enabled = 31 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto bluetooth_on = 32 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto cdma_cell_broadcast_sms = 33 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto cdma_roaming_mode = 34 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto cdma_subscription_mode = 35 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto data_activity_timeout_mobile = 36 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto data_activity_timeout_wifi = 37 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto data_roaming = 38 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto mdc_initial_max_retry = 39 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto force_allow_on_external = 40 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto euicc_provisioned = 41 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto development_force_resizable_activities = 42 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto development_enable_freeform_windows_support = 43 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto development_settings_enabled = 44 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto device_provisioned = 45 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto device_provisioning_mobile_data_enabled = 46 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto display_size_forced = 47 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto display_scaling_force = 48 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto download_max_bytes_over_mobile = 49 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto download_recommended_max_bytes_over_mobile = 50 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto hdmi_control_enabled = 51 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto hdmi_system_audio_control_enabled = 52 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto hdmi_control_auto_wakeup_enabled = 53 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto hdmi_control_auto_device_off_enabled = 54 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    // If true, out-of-the-box execution for priv apps is enabled.
+    optional SettingProto priv_app_oob_enabled = 55 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto location_background_throttle_interval_ms = 56 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto location_background_throttle_proximity_alert_interval_ms = 57 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Packages that are whitelisted for background throttling (throttling will
     // not be applied).
-    optional SettingProto location_background_throttle_package_whitelist = 297 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_scan_background_throttle_interval_ms = 298 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_scan_background_throttle_package_whitelist = 299 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto mhl_input_switching_enabled = 58 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto mhl_power_charge_enabled = 59 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto mobile_data = 60 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto mobile_data_always_on = 61 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto connectivity_metrics_buffer_size = 62 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto netstats_enabled = 63 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto netstats_poll_interval = 64 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto netstats_time_cache_max_age = 65 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto netstats_global_alert_bytes = 66 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto netstats_sample_enabled = 67 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto netstats_augment_enabled = 300 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto netstats_dev_bucket_duration = 68 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto netstats_dev_persist_bytes = 69 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto netstats_dev_rotate_age = 70 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto netstats_dev_delete_age = 71 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto netstats_uid_bucket_duration = 72 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto netstats_uid_persist_bytes = 73 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto netstats_uid_rotate_age = 74 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto netstats_uid_delete_age = 75 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto netstats_uid_tag_bucket_duration = 76 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto netstats_uid_tag_persist_bytes = 77 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto netstats_uid_tag_rotate_age = 78 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto netstats_uid_tag_delete_age = 79 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto location_background_throttle_package_whitelist = 58 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_scan_background_throttle_interval_ms = 59 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_scan_background_throttle_package_whitelist = 60 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto mhl_input_switching_enabled = 61 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto mhl_power_charge_enabled = 62 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto mobile_data = 63 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto mobile_data_always_on = 64 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto connectivity_metrics_buffer_size = 65 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto netstats_enabled = 66 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto netstats_poll_interval = 67 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto netstats_time_cache_max_age = 68 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto netstats_global_alert_bytes = 69 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto netstats_sample_enabled = 70 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto netstats_augment_enabled = 71 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto netstats_dev_bucket_duration = 72 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto netstats_dev_persist_bytes = 73 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto netstats_dev_rotate_age = 74 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto netstats_dev_delete_age = 75 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto netstats_uid_bucket_duration = 76 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto netstats_uid_persist_bytes = 77 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto netstats_uid_rotate_age = 78 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto netstats_uid_delete_age = 79 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto netstats_uid_tag_bucket_duration = 80 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto netstats_uid_tag_persist_bytes = 81 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto netstats_uid_tag_rotate_age = 82 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto netstats_uid_tag_delete_age = 83 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // User preference for which network(s) should be used.
-    optional SettingProto network_preference = 80;
-    optional SettingProto network_scorer_app = 81 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto nitz_update_diff = 82 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto nitz_update_spacing = 83 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto ntp_server = 84;
-    optional SettingProto ntp_timeout = 85 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto storage_benchmark_interval = 86 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto dns_resolver_sample_validity_seconds = 87 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto dns_resolver_success_threshold_percent = 88 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto dns_resolver_min_samples = 89 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto dns_resolver_max_samples = 90 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto network_preference = 84;
+    optional SettingProto network_scorer_app = 85 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto night_display_forced_auto_mode_available = 86 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto nitz_update_diff = 87 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto nitz_update_spacing = 88 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto ntp_server = 89;
+    optional SettingProto ntp_timeout = 90 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto storage_benchmark_interval = 91 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto dns_resolver_sample_validity_seconds = 92 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto dns_resolver_success_threshold_percent = 93 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto dns_resolver_min_samples = 94 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto dns_resolver_max_samples = 95 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Whether to disable the automatic scheduling of system updates.
-    optional SettingProto ota_disable_automatic_update = 91 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto package_verifier_enable = 92 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto package_verifier_timeout = 93 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto package_verifier_default_response = 94;
-    optional SettingProto package_verifier_setting_visible = 95 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto package_verifier_include_adb = 96 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto fstrim_mandatory_interval = 97 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto pdp_watchdog_poll_interval_ms = 98 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto pdp_watchdog_long_poll_interval_ms = 99 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto pdp_watchdog_error_poll_interval_ms = 100 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto pdp_watchdog_trigger_packet_count = 101 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto pdp_watchdog_error_poll_count = 102 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto pdp_watchdog_max_pdp_reset_fail_count = 103 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto setup_prepaid_data_service_url = 105;
-    optional SettingProto setup_prepaid_detection_target_url = 106;
-    optional SettingProto setup_prepaid_detection_redir_host = 107;
-    optional SettingProto sms_outgoing_check_interval_ms = 108 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto sms_outgoing_check_max_count = 109 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto ota_disable_automatic_update = 96 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto package_verifier_enable = 97 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto package_verifier_timeout = 98 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto package_verifier_default_response = 99;
+    optional SettingProto package_verifier_setting_visible = 100 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto package_verifier_include_adb = 101 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto fstrim_mandatory_interval = 102 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto pdp_watchdog_poll_interval_ms = 103 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto pdp_watchdog_long_poll_interval_ms = 104 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto pdp_watchdog_error_poll_interval_ms = 105 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto pdp_watchdog_trigger_packet_count = 106 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto pdp_watchdog_error_poll_count = 107 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto pdp_watchdog_max_pdp_reset_fail_count = 108 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto setup_prepaid_data_service_url = 109;
+    optional SettingProto setup_prepaid_detection_target_url = 110;
+    optional SettingProto setup_prepaid_detection_redir_host = 111;
+    optional SettingProto sms_outgoing_check_interval_ms = 112 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto sms_outgoing_check_max_count = 113 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Used to disable SMS short code confirmation. Defaults to true.
-    optional SettingProto sms_short_code_confirmation = 110 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto sms_short_code_rule = 111 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto tcp_default_init_rwnd = 112 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto tether_supported = 113 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto tether_dun_required = 114 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto tether_dun_apn = 115;
-    optional SettingProto tether_offload_disabled = 301 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto sms_short_code_confirmation = 114 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto sms_short_code_rule = 115 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto tcp_default_init_rwnd = 116 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto tether_supported = 117 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto tether_dun_required = 118 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto tether_dun_apn = 119;
+    optional SettingProto tether_offload_disabled = 120 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // List of carrier app certificate mapped to carrier app package id which are whitelisted to
     // prompt the user for install when a SIM card with matching UICC carrier privilege rules is
     // inserted.
-    optional SettingProto carrier_app_whitelist = 116 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto carrier_app_names = 358 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto usb_mass_storage_enabled = 117 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto use_google_mail = 118 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto webview_data_reduction_proxy_key = 119;
-    optional SettingProto webview_fallback_logic_enabled = 120 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto carrier_app_whitelist = 121 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto carrier_app_names = 122 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto usb_mass_storage_enabled = 123 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto use_google_mail = 124 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto webview_data_reduction_proxy_key = 125;
+    optional SettingProto webview_fallback_logic_enabled = 126 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Name of the package used as WebView provider.
-    optional SettingProto webview_provider = 121 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto webview_multiprocess = 122 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto network_switch_notification_daily_limit = 123 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto network_switch_notification_rate_limit_millis = 124 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto network_avoid_bad_wifi = 125 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto network_metered_multipath_preference = 302 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto network_watchlist_last_report_time = 303 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_badging_thresholds = 304 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_display_on = 126 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_display_certification_on = 127 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_display_wps_config = 128 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_networks_available_notification_on = 129 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wimax_networks_available_notification_on = 130 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_networks_available_repeat_delay = 131 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_country_code = 132;
-    optional SettingProto wifi_framework_scan_interval_ms = 133 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_idle_ms = 134 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_num_open_networks_kept = 135 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_on = 136 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_scan_always_available = 137 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_wakeup_enabled = 138 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    reserved 305; // Removed wifi_wakeup_available
-    optional SettingProto network_scoring_ui_enabled = 306 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto speed_label_cache_eviction_age_millis = 307 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto recommended_network_evaluator_cache_expiry_ms = 308 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto network_recommendations_enabled = 139 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto network_recommendations_package = 286 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto use_open_wifi_package = 309 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto network_recommendation_request_timeout_ms = 310 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto ble_scan_always_available = 140 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_saved_state = 141 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_supplicant_scan_interval_ms = 142 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_enhanced_auto_join = 143 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_network_show_rssi = 144 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_scan_interval_when_p2p_connected_ms = 145 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_watchdog_on = 146 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_watchdog_poor_network_test_enabled = 147 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_suspend_optimizations_enabled = 148 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_verbose_logging_enabled = 149 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_connected_mac_randomization_enabled = 350 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_max_dhcp_retry_count = 150 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_mobile_data_transition_wakelock_timeout_ms = 151 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_device_owner_configs_lockdown = 152 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_frequency_band = 153 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_p2p_device_name = 154;
-    optional SettingProto wifi_reenable_delay_ms = 155 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_ephemeral_out_of_range_timeout_ms = 156 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto data_stall_alarm_non_aggressive_delay_in_ms = 157 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto data_stall_alarm_aggressive_delay_in_ms = 158 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto provisioning_apn_alarm_delay_in_ms = 159 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto gprs_register_check_period_ms = 160 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wtf_is_fatal = 161 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto webview_provider = 127 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto webview_multiprocess = 128 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto network_switch_notification_daily_limit = 129 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto network_switch_notification_rate_limit_millis = 130 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto network_avoid_bad_wifi = 131 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto network_metered_multipath_preference = 132 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto network_watchlist_last_report_time = 133 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_badging_thresholds = 134 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_display_on = 135 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_display_certification_on = 136 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_display_wps_config = 137 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_networks_available_notification_on = 138 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_carrier_networks_available_notification_on = 139 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wimax_networks_available_notification_on = 140 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_networks_available_repeat_delay = 141 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_country_code = 142;
+    optional SettingProto wifi_framework_scan_interval_ms = 143 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_idle_ms = 144 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_num_open_networks_kept = 145 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_on = 146 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_scan_always_available = 147 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto soft_ap_timeout_enabled = 148 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_wakeup_enabled = 149 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto network_scoring_ui_enabled = 150 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto speed_label_cache_eviction_age_millis = 151 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto recommended_network_evaluator_cache_expiry_ms = 152 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto network_recommendations_enabled = 153 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto network_recommendations_package = 154 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto use_open_wifi_package = 155 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto network_recommendation_request_timeout_ms = 156 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto ble_scan_always_available = 157 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto ble_scan_low_power_window_ms = 158 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto ble_scan_balanced_window_ms = 159 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto ble_scan_low_latency_window_ms = 160 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto ble_scan_low_power_interval_ms = 161 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto ble_scan_balanced_interval_ms = 162 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto ble_scan_low_latency_interval_ms = 163 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_saved_state = 164 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_supplicant_scan_interval_ms = 165 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_enhanced_auto_join = 166 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_network_show_rssi = 167 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_scan_interval_when_p2p_connected_ms = 168 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_watchdog_on = 169 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_watchdog_poor_network_test_enabled = 170 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_suspend_optimizations_enabled = 171 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_verbose_logging_enabled = 172 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_connected_mac_randomization_enabled = 173 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_max_dhcp_retry_count = 174 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_mobile_data_transition_wakelock_timeout_ms = 175 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_device_owner_configs_lockdown = 176 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_frequency_band = 177 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_p2p_device_name = 178;
+    optional SettingProto wifi_reenable_delay_ms = 179 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_ephemeral_out_of_range_timeout_ms = 180 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto data_stall_alarm_non_aggressive_delay_in_ms = 181 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto data_stall_alarm_aggressive_delay_in_ms = 182 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto provisioning_apn_alarm_delay_in_ms = 183 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto gprs_register_check_period_ms = 184 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wtf_is_fatal = 185 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Ringer mode. A change in this value will not reflect as a change in the
     // ringer mode.
-    optional SettingProto mode_ringer = 162 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto mode_ringer = 186 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Overlay display devices setting.
     // The value is a specially formatted string that describes the size and
     // density of simulated secondary devices.
     // Format: {width}x{height}/dpi;...
-    optional SettingProto overlay_display_devices = 163 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto battery_discharge_duration_threshold = 164 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto battery_discharge_threshold = 165 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto send_action_app_error = 166 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto dropbox_age_seconds = 167 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto dropbox_max_files = 168 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto dropbox_quota_kb = 169 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto dropbox_quota_percent = 170 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto dropbox_reserve_percent = 171 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto dropbox_tag_prefix = 172 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto error_logcat_prefix = 173 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto sys_free_storage_log_interval = 174 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto disk_free_change_reporting_threshold = 175 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto sys_storage_threshold_percentage = 176 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto sys_storage_threshold_max_bytes = 177 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto sys_storage_full_threshold_bytes = 178 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto sys_storage_cache_percentage = 311 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto sys_storage_cache_max_bytes = 312 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto sync_max_retry_delay_in_seconds = 179 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto connectivity_change_delay = 180 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto connectivity_sampling_interval_in_seconds = 181 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto pac_change_delay = 182 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto captive_portal_mode = 183 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto captive_portal_detection_enabled = 313 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto captive_portal_server = 184;
-    optional SettingProto captive_portal_https_url = 185;
-    optional SettingProto captive_portal_http_url = 186;
-    optional SettingProto captive_portal_fallback_url = 187;
-    optional SettingProto captive_portal_other_fallback_urls = 314;
-    optional SettingProto captive_portal_use_https = 188 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto captive_portal_user_agent = 189;
-    optional SettingProto nsd_on = 190 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto overlay_display_devices = 187 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto battery_discharge_duration_threshold = 188 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto battery_discharge_threshold = 189 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto send_action_app_error = 190 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto dropbox_age_seconds = 191 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto dropbox_max_files = 192 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto dropbox_quota_kb = 193 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto dropbox_quota_percent = 194 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto dropbox_reserve_percent = 195 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    repeated SettingProto dropbox_settings = 196;
+    repeated SettingProto error_logcat_lines = 197;
+    optional SettingProto sys_free_storage_log_interval = 198 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto disk_free_change_reporting_threshold = 199 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto sys_storage_threshold_percentage = 200 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto sys_storage_threshold_max_bytes = 201 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto sys_storage_full_threshold_bytes = 202 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto sys_storage_cache_percentage = 203 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto sys_storage_cache_max_bytes = 204 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto sync_max_retry_delay_in_seconds = 205 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto connectivity_change_delay = 206 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto connectivity_sampling_interval_in_seconds = 207 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto pac_change_delay = 208 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto captive_portal_mode = 209 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto captive_portal_detection_enabled = 210 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto captive_portal_server = 211;
+    optional SettingProto captive_portal_https_url = 212;
+    optional SettingProto captive_portal_http_url = 213;
+    optional SettingProto captive_portal_fallback_url = 214;
+    optional SettingProto captive_portal_other_fallback_urls = 215;
+    optional SettingProto captive_portal_use_https = 216 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto captive_portal_user_agent = 217;
+    optional SettingProto nsd_on = 218 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Let user pick default install location.
-    optional SettingProto set_install_location = 191 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto default_install_location = 192 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto inet_condition_debounce_up_delay = 193 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto inet_condition_debounce_down_delay = 194 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto read_external_storage_enforced_default = 195 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto http_proxy = 196;
-    optional SettingProto global_http_proxy_host = 197;
-    optional SettingProto global_http_proxy_port = 198;
-    optional SettingProto global_http_proxy_exclusion_list = 199;
-    optional SettingProto global_http_proxy_pac = 200;
+    optional SettingProto set_install_location = 219 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto default_install_location = 220 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto inet_condition_debounce_up_delay = 221 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto inet_condition_debounce_down_delay = 222 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto read_external_storage_enforced_default = 223 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto http_proxy = 224;
+    optional SettingProto global_http_proxy_host = 225;
+    optional SettingProto global_http_proxy_port = 226;
+    optional SettingProto global_http_proxy_exclusion_list = 227;
+    optional SettingProto global_http_proxy_pac = 228;
     // Enables the UI setting to allow the user to specify the global HTTP proxy
     // and associated exclusion list.
-    optional SettingProto set_global_http_proxy = 201 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto default_dns_server = 202;
+    optional SettingProto set_global_http_proxy = 229 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto default_dns_server = 230;
     // The requested Private DNS mode and an accompanying specifier.
-    optional SettingProto private_dns_mode = 315;
-    optional SettingProto private_dns_specifier = 316;
-    optional SettingProto bluetooth_headset_priority_prefix = 203 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto bluetooth_a2dp_sink_priority_prefix = 204 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto bluetooth_a2dp_src_priority_prefix = 205 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto bluetooth_a2dp_supports_optional_codecs_prefix = 287 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto bluetooth_a2dp_optional_codecs_enabled_prefix = 288 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto bluetooth_input_device_priority_prefix = 206 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto bluetooth_map_priority_prefix = 207 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto bluetooth_map_client_priority_prefix = 208 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto bluetooth_pbap_client_priority_prefix = 209 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto bluetooth_sap_priority_prefix = 210 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto bluetooth_pan_priority_prefix = 211 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto bluetooth_hearing_aid_priority_prefix = 345 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto activity_manager_constants = 317;
-    optional SettingProto device_idle_constants = 212;
-    optional SettingProto device_idle_constants_watch = 213;
-    optional SettingProto battery_saver_constants = 318;
-    optional SettingProto anomaly_detection_constants = 319;
-    optional SettingProto always_on_display_constants = 320;
-    optional SettingProto app_idle_constants = 214;
-    optional SettingProto power_manager_constants = 321;
-    optional SettingProto alarm_manager_constants = 215;
-    optional SettingProto job_scheduler_constants = 216;
-    optional SettingProto shortcut_manager_constants = 217;
-    optional SettingProto device_policy_constants = 322;
-    optional SettingProto text_classifier_constants = 323;
-    optional SettingProto window_animation_scale = 218 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto transition_animation_scale = 219 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto animator_duration_scale = 220 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto fancy_ime_animations = 221 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto compatibility_mode = 222 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto emergency_tone = 223 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto call_auto_retry = 224 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto emergency_affordance_needed = 225 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto preferred_network_mode = 226 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto private_dns_mode = 231;
+    optional SettingProto private_dns_specifier = 232;
+    repeated SettingProto bluetooth_headset_priorities = 233;
+    repeated SettingProto bluetooth_a2dp_sink_priorities = 234;
+    repeated SettingProto bluetooth_a2dp_src_priorities = 235;
+    repeated SettingProto bluetooth_a2dp_supports_optional_codecs = 236;
+    repeated SettingProto bluetooth_a2dp_optional_codecs_enabled = 237;
+    repeated SettingProto bluetooth_input_device_priorities = 238;
+    repeated SettingProto bluetooth_map_priorities = 239;
+    repeated SettingProto bluetooth_map_client_priorities = 240;
+    repeated SettingProto bluetooth_pbap_client_priorities = 241;
+    repeated SettingProto bluetooth_sap_priorities = 242;
+    repeated SettingProto bluetooth_pan_priorities = 243;
+    repeated SettingProto bluetooth_hearing_aid_priorities = 244;
+    // These are key=value lists, separated by commas.
+    optional SettingProto activity_manager_constants = 245;
+    optional SettingProto device_idle_constants = 246;
+    optional SettingProto battery_saver_constants = 247;
+    optional SettingProto battery_saver_device_specific_constants = 248;
+    optional SettingProto battery_tip_constants = 249;
+    optional SettingProto anomaly_detection_constants = 250;
+    // Version of the anomaly config.
+    optional SettingProto anomaly_config_version = 251 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    // A base64-encoded string represents anomaly stats config.
+    optional SettingProto anomaly_config = 252;
+    // This is a key=value list, separated by commas.
+    optional SettingProto always_on_display_constants = 253;
+    // System VDSO global setting. This links to the "sys.vdso" system property.
+    // The following values are supported:
+    // false  -> both 32 and 64 bit vdso disabled
+    // 32     -> 32 bit vdso enabled
+    // 64     -> 64 bit vdso enabled
+    // Any other value defaults to both 32 bit and 64 bit true.
+    optional SettingProto sys_vdso = 254 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    // UidCpuPower global setting. This links the sys.uidcpupower system property.
+    // The following values are supported:
+    // 0 -> /proc/uid_cpupower/* are disabled
+    // 1 -> /proc/uid_cpupower/* are enabled
+    // Any other value defaults to enabled.
+    optional SettingProto sys_uidcpupower = 255 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    // An integer to reduce the FPS by this factor. Only for experiments.
+    optional SettingProto fps_divisor = 256 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    // Flag to enable or disable display panel low power mode (lpm)
+    // false -> Display panel power saving mode is disabled.
+    // true  -> Display panel power saving mode is enabled.
+    optional SettingProto display_panel_lpm = 257 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    // These are key=value lists, separated by commas.
+    optional SettingProto app_idle_constants = 258;
+    optional SettingProto power_manager_constants = 259;
+    optional SettingProto alarm_manager_constants = 260;
+    optional SettingProto job_scheduler_constants = 261;
+    optional SettingProto shortcut_manager_constants = 262;
+    optional SettingProto device_policy_constants = 263;
+    optional SettingProto text_classifier_constants = 264;
+    optional SettingProto battery_stats_constants = 265;
+    optional SettingProto sync_manager_constants = 266;
+    optional SettingProto app_standby_enabled = 267 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto app_auto_restriction_enabled = 268 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto forced_app_standby_enabled = 269 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto forced_app_standby_for_small_battery_enabled = 270 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto off_body_radios_off_for_small_battery_enabled = 271 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto off_body_radios_off_delay_ms = 272 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_on_when_proxy_disconnected = 273 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto time_only_mode_enabled = 274 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto network_watchlist_enabled = 275 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto keep_profile_in_background = 276 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto window_animation_scale = 277 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto transition_animation_scale = 278 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto animator_duration_scale = 279 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto fancy_ime_animations = 280 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto compatibility_mode = 281 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto emergency_tone = 282 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto call_auto_retry = 283 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto emergency_affordance_needed = 284 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto preferred_network_mode = 285 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Name of an application package to be debugged.
-    optional SettingProto debug_app = 227;
-    optional SettingProto wait_for_debugger = 228 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto enable_gpu_debug_layers = 342 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto debug_app = 286;
+    optional SettingProto wait_for_debugger = 287 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto enable_gpu_debug_layers = 288 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // App allowed to load GPU debug layers.
-    optional SettingProto gpu_debug_app = 343;
-    optional SettingProto gpu_debug_layers = 344 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto low_power_mode = 229 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto low_power_mode_trigger_level = 230 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto always_finish_activities = 231 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto dock_audio_media_enabled = 232 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto encoded_surround_output = 233 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto audio_safe_volume_state = 234 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto tzinfo_update_content_url = 235;
-    optional SettingProto tzinfo_update_metadata_url = 236;
-    optional SettingProto selinux_update_content_url = 237;
-    optional SettingProto selinux_update_metadata_url = 238;
-    optional SettingProto sms_short_codes_update_content_url = 239;
-    optional SettingProto sms_short_codes_update_metadata_url = 240;
-    optional SettingProto apn_db_update_content_url = 241;
-    optional SettingProto apn_db_update_metadata_url = 242;
-    optional SettingProto cert_pin_update_content_url = 243;
-    optional SettingProto cert_pin_update_metadata_url = 244;
-    optional SettingProto intent_firewall_update_content_url = 245;
-    optional SettingProto intent_firewall_update_metadata_url = 246;
-    optional SettingProto lang_id_update_content_url = 324;
-    optional SettingProto lang_id_update_metadata_url = 325;
-    optional SettingProto smart_selection_update_content_url = 326;
-    optional SettingProto smart_selection_update_metadata_url = 327;
-    optional SettingProto selinux_status = 247 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto development_force_rtl = 248 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto low_battery_sound_timeout = 249 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_bounce_delay_override_ms = 250 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto policy_control = 251 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto zen_mode = 252 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto zen_mode_ringer_level = 253 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto zen_mode_config_etag = 254;
-    optional SettingProto heads_up_notifications_enabled = 255 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto device_name = 256;
-    optional SettingProto network_scoring_provisioned = 257 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto require_password_to_decrypt = 258 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto enhanced_4g_mode_enabled = 259 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto vt_ims_enabled = 260 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wfc_ims_enabled = 261 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wfc_ims_mode = 262 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wfc_ims_roaming_mode = 263 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wfc_ims_roaming_enabled = 264 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto lte_service_forced = 265 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto ephemeral_cookie_max_size_bytes = 266 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto enable_ephemeral_feature = 267 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto instant_app_dexopt_enabled = 328 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto installed_instant_app_min_cache_period = 268 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto installed_instant_app_max_cache_period = 289 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto uninstalled_instant_app_min_cache_period = 290 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto uninstalled_instant_app_max_cache_period = 291 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto unused_static_shared_lib_min_cache_period = 292 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto allow_user_switching_when_system_user_locked = 269 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto boot_count = 270 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto safe_boot_disallowed = 271 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto device_demo_mode = 272 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto network_access_timeout_ms = 329 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto database_downgrade_reason = 274;
-    optional SettingProto database_creation_buildid = 330 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto contacts_database_wal_enabled = 275 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto location_settings_link_to_permissions_enabled = 331 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    reserved 332; // Removed backup_refactored_service_disabled
-    optional SettingProto euicc_factory_reset_timeout_millis = 333 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto storage_settings_clobber_threshold = 334 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto chained_battery_attribution_enabled = 353 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto hidden_api_blacklist_exemptions = 355 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto gpu_debug_app = 289;
+    optional SettingProto gpu_debug_layers = 290 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto low_power_mode = 291 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    // Battery level [1-100] at which low power mode automatically turns on. If
+    // 0, it will not automatically turn on.
+    optional SettingProto low_power_mode_trigger_level = 292 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    // The max value for {@link #LOW_POWER_MODE_TRIGGER_LEVEL}. If this setting
+    // is not set or the value is 0, the default max will be used.
+    optional SettingProto low_power_mode_trigger_level_max = 293 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto always_finish_activities = 294 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto dock_audio_media_enabled = 295 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto encoded_surround_output = 296 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto audio_safe_volume_state = 297 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto tzinfo_update_content_url = 298;
+    optional SettingProto tzinfo_update_metadata_url = 299;
+    optional SettingProto selinux_update_content_url = 300;
+    optional SettingProto selinux_update_metadata_url = 301;
+    optional SettingProto sms_short_codes_update_content_url = 302;
+    optional SettingProto sms_short_codes_update_metadata_url = 303;
+    optional SettingProto apn_db_update_content_url = 304;
+    optional SettingProto apn_db_update_metadata_url = 305;
+    optional SettingProto cert_pin_update_content_url = 306;
+    optional SettingProto cert_pin_update_metadata_url = 307;
+    optional SettingProto intent_firewall_update_content_url = 308;
+    optional SettingProto intent_firewall_update_metadata_url = 309;
+    optional SettingProto lang_id_update_content_url = 310;
+    optional SettingProto lang_id_update_metadata_url = 311;
+    optional SettingProto smart_selection_update_content_url = 312;
+    optional SettingProto smart_selection_update_metadata_url = 313;
+    optional SettingProto selinux_status = 314 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto development_force_rtl = 315 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto low_battery_sound_timeout = 316 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wifi_bounce_delay_override_ms = 317 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto policy_control = 318 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto emulate_display_cutout = 319 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto zen_mode = 320 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto zen_mode_ringer_level = 321 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto zen_mode_config_etag = 322;
+    // If 0, turning on dnd manually will last indefinitely. Else if
+    // non-negative, turning on dnd manually will last for this many minutes.
+    // Else (if negative), turning on dnd manually will surface a dialog that
+    // prompts user to specify a duration.
+    optional SettingProto zen_duration = 323 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto heads_up_notifications_enabled = 324 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto device_name = 325;
+    optional SettingProto network_scoring_provisioned = 326 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto require_password_to_decrypt = 327 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto enhanced_4g_mode_enabled = 328 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto vt_ims_enabled = 329 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wfc_ims_enabled = 330 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wfc_ims_mode = 331 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wfc_ims_roaming_mode = 332 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wfc_ims_roaming_enabled = 333 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto lte_service_forced = 334 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto ephemeral_cookie_max_size_bytes = 335 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto enable_ephemeral_feature = 336 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto instant_app_dexopt_enabled = 337 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto installed_instant_app_min_cache_period = 338 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto installed_instant_app_max_cache_period = 339 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto uninstalled_instant_app_min_cache_period = 340 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto uninstalled_instant_app_max_cache_period = 341 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto unused_static_shared_lib_min_cache_period = 342 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto allow_user_switching_when_system_user_locked = 343 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto boot_count = 344 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto safe_boot_disallowed = 345 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto device_demo_mode = 346 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto network_access_timeout_ms = 347 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto database_downgrade_reason = 348;
+    optional SettingProto database_creation_buildid = 349 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto contacts_database_wal_enabled = 350 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto location_settings_link_to_permissions_enabled = 351 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto euicc_factory_reset_timeout_millis = 352 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto storage_settings_clobber_threshold = 353 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    // If set to 1, {@link Secure#LOCATION_MODE} will be set to {@link
+    // Secure#LOCATION_MODE_OFF} temporarily for all users.
+    optional SettingProto location_global_kill_switch = 354 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    // If set to 1, SettingsProvider's restoreAnyVersion="true" attribute will
+    // be ignored and restoring to lower version of platform API will be
+    // skipped.
+    optional SettingProto override_settings_provider_restore_any_version = 355 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto chained_battery_attribution_enabled = 356 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto autofill_compat_allowed_packages = 357 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto hidden_api_blacklist_exemptions = 358 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Subscription to be used for voice call on a multi sim device. The
     // supported values are 0 = SUB1, 1 = SUB2 and etc.
-    optional SettingProto multi_sim_voice_call_subscription = 276 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto multi_sim_voice_prompt = 277 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto multi_sim_data_call_subscription = 278 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto multi_sim_sms_subscription = 279 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto multi_sim_sms_prompt = 280 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto multi_sim_voice_call_subscription = 359 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto multi_sim_voice_prompt = 360 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto multi_sim_data_call_subscription = 361 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto multi_sim_sms_subscription = 362 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto multi_sim_sms_prompt = 363 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Whether to enable new contacts aggregator or not.
     // 1 = enable, 0 = disable.
-    optional SettingProto new_contact_aggregator = 281 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto contact_metadata_sync_enabled = 282 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto enable_cellular_on_boot = 283 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto max_notification_enqueue_rate = 284 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto show_notification_channel_warnings = 335 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto cell_on = 285 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto show_temperature_warning = 336 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto warning_temperature = 337 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto enable_diskstats_logging = 338 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto enable_cache_quota_calculation = 339 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto enable_deletion_helper_no_threshold_toggle = 340 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto notification_snooze_options = 341 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto enable_gnss_raw_meas_full_tracking = 346 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto install_carrier_app_notification_persistent = 356 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto install_carrier_app_notification_sleep_millis = 357 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto zram_enabled = 347 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto smart_replies_in_notifications_flags = 348 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto show_first_crash_dialog = 349 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto show_restart_in_crash_dialog = 351 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto show_mute_in_crash_dialog = 352 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingsProto show_zen_upgrade_notification = 354  [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingsProto app_auto_restriction_enabled = 359  [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingsProto zen_duration = 360  [ (android.privacy).dest = DEST_AUTOMATIC ];
-
+    optional SettingProto new_contact_aggregator = 364 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto contact_metadata_sync_enabled = 365 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto enable_cellular_on_boot = 366 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto max_notification_enqueue_rate = 367 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto show_notification_channel_warnings = 368 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto cell_on = 369 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto show_temperature_warning = 370 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto warning_temperature = 371 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto enable_diskstats_logging = 372 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto enable_cache_quota_calculation = 373 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto enable_deletion_helper_no_threshold_toggle = 374 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto notification_snooze_options = 375 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    // Configuration flags for SQLite Compatibility WAL. Encoded as a key-value
+    // list, separated by commas.
+    // E.g.: compatibility_wal_supported=true, wal_syncmode=OFF
+    optional SettingProto sqlite_compatibility_wal_flags = 376 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto enable_gnss_raw_meas_full_tracking = 377 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto install_carrier_app_notification_persistent = 378 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto install_carrier_app_notification_sleep_millis = 379 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto zram_enabled = 380 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto smart_replies_in_notifications_flags = 381 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto show_first_crash_dialog = 382 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto show_restart_in_crash_dialog = 383 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto show_mute_in_crash_dialog = 384 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingsProto show_zen_upgrade_notification = 385  [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Please insert fields in the same order as in
     // frameworks/base/core/java/android/provider/Settings.java.
-    // Next tag = 361;
+    // Next tag = 386;
 }
 
 message SecureSettingsProto {
@@ -454,227 +521,229 @@ message SecureSettingsProto {
     optional SettingProto voice_interaction_service = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // The currently selected autofill service flattened ComponentName.
     optional SettingProto autofill_service = 8 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto bluetooth_hci_log = 9;
-    optional SettingProto user_setup_complete = 10 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    // Boolean indicating if Autofill supports field classification.
+    optional SettingProto autofill_feature_field_classification = 9 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto autofill_user_data_max_user_data_size = 10 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto autofill_user_data_max_field_classification_ids_size = 11 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto autofill_user_data_max_category_count = 12 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto autofill_user_data_max_value_length = 13 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto autofill_user_data_min_value_length = 14 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto user_setup_complete = 15 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Whether the current user has been set up via setup wizard (0 = false,
     // 1 = true). This value differs from USER_SETUP_COMPLETE in that it can be
     // reset back to 0 in case SetupWizard has been re-enabled on TV devices.
-    optional SettingProto tv_user_setup_complete = 170 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto completed_category_prefix = 11 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto enabled_input_methods = 12 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto disabled_system_input_methods = 13 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto show_ime_with_hard_keyboard = 14 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto always_on_vpn_app = 15;
-    optional SettingProto always_on_vpn_lockdown = 16 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto install_non_market_apps = 17 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto unknown_sources_default_reversed = 171 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto tv_user_setup_complete = 16 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    repeated SettingProto completed_categories = 17;
+    optional SettingProto enabled_input_methods = 18 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto disabled_system_input_methods = 19 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto show_ime_with_hard_keyboard = 20 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto always_on_vpn_app = 21;
+    optional SettingProto always_on_vpn_lockdown = 22 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto install_non_market_apps = 23 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto unknown_sources_default_reversed = 24 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // The degree of location access enabled by the user.
-    optional SettingProto location_mode = 18 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto location_previous_mode = 19;
+    optional SettingProto location_mode = 25 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    // The App or module that changes the location mode.
+    optional SettingProto location_changer = 26 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Whether lock-to-app will lock the keyguard when exiting.
-    optional SettingProto lock_to_app_exit_locked = 20 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto lock_screen_lock_after_timeout = 21 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto lock_screen_allow_private_notifications = 172 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto lock_screen_allow_remote_input = 22 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto show_note_about_notification_hiding = 23 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto trust_agents_initialized = 24 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto parental_control_enabled = 25 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto parental_control_last_update = 26 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto parental_control_redirect_url = 27 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto settings_classname = 28 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accessibility_enabled = 29 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accessibility_shortcut_enabled = 173 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accessibility_shortcut_on_lock_screen = 174 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accessibility_shortcut_dialog_shown = 175 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accessibility_shortcut_target_service = 176 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto lock_to_app_exit_locked = 27 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto lock_screen_lock_after_timeout = 28 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto lock_screen_allow_private_notifications = 29 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto lock_screen_allow_remote_input = 30 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto show_note_about_notification_hiding = 31 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto trust_agents_initialized = 32 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto parental_control_enabled = 33 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto parental_control_last_update = 34 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto parental_control_redirect_url = 35 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto settings_classname = 36 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accessibility_enabled = 37 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accessibility_shortcut_enabled = 38 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accessibility_shortcut_on_lock_screen = 39 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accessibility_shortcut_dialog_shown = 40 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accessibility_shortcut_target_service = 41 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Setting specifying the accessibility service or feature to be toggled via
     // the accessibility button in the navigation bar. This is either a
     // flattened ComponentName or the class name of a system class implementing
     // a supported accessibility feature.
-    optional SettingProto accessibility_button_target_component = 177 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto touch_exploration_enabled = 30 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accessibility_button_target_component = 42 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto touch_exploration_enabled = 43 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // List of the enabled accessibility providers.
-    optional SettingProto enabled_accessibility_services = 31;
+    optional SettingProto enabled_accessibility_services = 44;
     // List of the accessibility services to which the user has granted
     // permission to put the device into touch exploration mode.
-    optional SettingProto touch_exploration_granted_accessibility_services = 32;
+    optional SettingProto touch_exploration_granted_accessibility_services = 45;
+    // Uri of the slice that's presented on the keyguard. Defaults to a slice
+    // with the date and next alarm.
+    optional SettingProto keyguard_slice_uri = 46;
     // Whether to speak passwords while in accessibility mode.
-    optional SettingProto accessibility_speak_password = 33 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accessibility_high_text_contrast_enabled = 34 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accessibility_script_injection = 35;
-    optional SettingProto accessibility_screen_reader_url = 36;
-    optional SettingProto accessibility_web_content_key_bindings = 37;
-    optional SettingProto accessibility_display_magnification_enabled = 38 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accessibility_display_magnification_navbar_enabled = 178 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accessibility_display_magnification_scale = 39 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accessibility_display_magnification_auto_update = 179 [deprecated = true];
-    optional SettingProto accessibility_soft_keyboard_mode = 40 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accessibility_captioning_enabled = 41 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accessibility_captioning_locale = 42 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accessibility_captioning_preset = 43 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accessibility_captioning_background_color = 44 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accessibility_captioning_foreground_color = 45 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accessibility_captioning_edge_type = 46 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accessibility_captioning_edge_color = 47 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accessibility_captioning_window_color = 48 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accessibility_captioning_typeface = 49 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accessibility_captioning_font_scale = 50 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accessibility_display_inversion_enabled = 51 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accessibility_display_daltonizer_enabled = 52 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accessibility_display_daltonizer = 53 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accessibility_autoclick_enabled = 54 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accessibility_autoclick_delay = 55 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accessibility_large_pointer_icon = 56 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto long_press_timeout = 57 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto multi_press_timeout = 58 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto enabled_print_services = 59;
-    optional SettingProto disabled_print_services = 60;
-    optional SettingProto display_density_forced = 61 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto tts_default_rate = 62 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto tts_default_pitch = 63 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto tts_default_synth = 64 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto tts_default_locale = 65 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto tts_enabled_plugins = 66;
-    optional SettingProto connectivity_release_pending_intent_delay_ms = 67 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto allowed_geolocation_origins = 68;
-    optional SettingProto preferred_tty_mode = 69 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto enhanced_voice_privacy_enabled = 70 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto tty_mode_enabled = 71 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto backup_enabled = 72 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto backup_auto_restore = 73 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto backup_provisioned = 74 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto backup_transport = 75 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto last_setup_shown = 76 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto search_global_search_activity = 77 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto search_num_promoted_sources = 78 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto search_max_results_to_display = 79 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto search_max_results_per_source = 80 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto search_web_results_override_limit = 81 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto search_promoted_source_deadline_millis = 82 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto search_source_timeout_millis = 83 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto search_prefill_millis = 84 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto search_max_stat_age_millis = 85 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto search_max_source_event_age_millis = 86 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto search_min_impressions_for_source_ranking = 87 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto search_min_clicks_for_source_ranking = 88 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto search_max_shortcuts_returned = 89 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto search_query_thread_core_pool_size = 90 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto search_query_thread_max_pool_size = 91 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto search_shortcut_refresh_core_pool_size = 92 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto search_shortcut_refresh_max_pool_size = 93 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto search_thread_keepalive_seconds = 94 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto search_per_source_concurrent_query_limit = 95 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accessibility_speak_password = 47 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accessibility_high_text_contrast_enabled = 48 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accessibility_display_magnification_enabled = 49 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accessibility_display_magnification_navbar_enabled = 50 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accessibility_display_magnification_scale = 51 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accessibility_soft_keyboard_mode = 52 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accessibility_captioning_enabled = 53 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accessibility_captioning_locale = 54 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accessibility_captioning_preset = 55 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accessibility_captioning_background_color = 56 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accessibility_captioning_foreground_color = 57 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accessibility_captioning_edge_type = 58 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accessibility_captioning_edge_color = 59 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accessibility_captioning_window_color = 60 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accessibility_captioning_typeface = 61 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accessibility_captioning_font_scale = 62 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accessibility_display_inversion_enabled = 63 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accessibility_display_daltonizer_enabled = 64 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    // Integer property that specifies the type of color space adjustment to perform.
+    optional SettingProto accessibility_display_daltonizer = 65 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accessibility_autoclick_enabled = 66 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accessibility_autoclick_delay = 67 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accessibility_large_pointer_icon = 68 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto long_press_timeout = 69 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto multi_press_timeout = 70 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto enabled_print_services = 71;
+    optional SettingProto disabled_print_services = 72;
+    optional SettingProto display_density_forced = 73 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto tts_default_rate = 74 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto tts_default_pitch = 75 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto tts_default_synth = 76 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto tts_default_locale = 77 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto tts_enabled_plugins = 78;
+    optional SettingProto connectivity_release_pending_intent_delay_ms = 79 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto allowed_geolocation_origins = 80;
+    optional SettingProto preferred_tty_mode = 81 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto enhanced_voice_privacy_enabled = 82 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto tty_mode_enabled = 83 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto backup_enabled = 84 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto backup_auto_restore = 85 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto backup_provisioned = 86 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto backup_transport = 87 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto last_setup_shown = 88 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto search_global_search_activity = 89 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto search_num_promoted_sources = 90 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto search_max_results_to_display = 91 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto search_max_results_per_source = 92 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto search_web_results_override_limit = 93 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto search_promoted_source_deadline_millis = 94 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto search_source_timeout_millis = 95 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto search_prefill_millis = 96 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto search_max_stat_age_millis = 97 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto search_max_source_event_age_millis = 98 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto search_min_impressions_for_source_ranking = 99 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto search_min_clicks_for_source_ranking = 100 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto search_max_shortcuts_returned = 101 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto search_query_thread_core_pool_size = 102 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto search_query_thread_max_pool_size = 103 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto search_shortcut_refresh_core_pool_size = 104 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto search_shortcut_refresh_max_pool_size = 105 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto search_thread_keepalive_seconds = 106 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto search_per_source_concurrent_query_limit = 107 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Whether or not alert sounds are played on StorageManagerService events.
-    optional SettingProto mount_play_notification_snd = 96 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto mount_ums_autostart = 97 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto mount_ums_prompt = 98 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto mount_ums_notify_enabled = 99 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto anr_show_background = 100 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto mount_play_notification_snd = 108 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto mount_ums_autostart = 109 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto mount_ums_prompt = 110 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto mount_ums_notify_enabled = 111 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto anr_show_background = 112 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto show_first_crash_dialog_dev_option = 113 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // The ComponentName string of the service to be used as the voice
     // recognition service.
-    optional SettingProto voice_recognition_service = 101 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto package_verifier_user_consent = 102 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto selected_spell_checker = 103 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto selected_spell_checker_subtype = 104 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto spell_checker_enabled = 105 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto incall_power_button_behavior = 106 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto incall_back_button_behavior = 107 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wake_gesture_enabled = 108 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto doze_enabled = 109 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto doze_always_on = 110 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto doze_pulse_on_pick_up = 111 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto doze_pulse_on_long_press = 180 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto doze_pulse_on_double_tap = 112 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto ui_night_mode = 113 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto screensaver_enabled = 114 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto screensaver_components = 115 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto screensaver_activate_on_dock = 116 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto screensaver_activate_on_sleep = 117 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto screensaver_default_component = 118 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto nfc_payment_default_component = 119 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto nfc_payment_foreground = 120 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto sms_default_application = 121 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto dialer_default_application = 122 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto emergency_assistance_application = 123 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto assist_structure_enabled = 124 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto assist_screenshot_enabled = 125 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto assist_disclosure_enabled = 126 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto voice_recognition_service = 114 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto package_verifier_user_consent = 115 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto selected_spell_checker = 116 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto selected_spell_checker_subtype = 117 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto spell_checker_enabled = 118 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto incall_power_button_behavior = 119 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto incall_back_button_behavior = 120 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto wake_gesture_enabled = 121 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto doze_enabled = 122 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto doze_always_on = 123 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto doze_pulse_on_pick_up = 124 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto doze_pulse_on_long_press = 125 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto doze_pulse_on_double_tap = 126 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto ui_night_mode = 127 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto screensaver_enabled = 128 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto screensaver_components = 129 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto screensaver_activate_on_dock = 130 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto screensaver_activate_on_sleep = 131 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto screensaver_default_component = 132 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto nfc_payment_default_component = 133 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto nfc_payment_foreground = 134 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto sms_default_application = 135 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto dialer_default_application = 136 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto emergency_assistance_application = 137 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto assist_structure_enabled = 138 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto assist_screenshot_enabled = 139 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto assist_disclosure_enabled = 140 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto show_rotation_suggestions = 141 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto num_rotation_suggestions_accepted = 142 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Read only list of the service components that the current user has
     // explicitly allowed to see and assist with all of the user's
     // notifications.
-    optional SettingProto enabled_notification_assistant = 127 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto enabled_notification_listeners = 128 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto enabled_notification_policy_access_packages = 129 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto enabled_notification_assistant = 143 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto enabled_notification_listeners = 144 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto enabled_notification_policy_access_packages = 145 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Defines whether managed profile ringtones should be synced from its
     // parent profile.
-    optional SettingProto sync_parent_sounds = 130 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto immersive_mode_confirmations = 131 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto sync_parent_sounds = 146 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto immersive_mode_confirmations = 147 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // The query URI to find a print service to install.
-    optional SettingProto print_service_search_uri = 132 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto print_service_search_uri = 148 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // The query URI to find an NFC service to install.
-    optional SettingProto payment_service_search_uri = 133 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto payment_service_search_uri = 149 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // The query URI to find an auto fill service to install.
-    optional SettingProto autofill_service_search_uri = 181 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto skip_first_use_hints = 134 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto unsafe_volume_music_active_ms = 135 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto lock_screen_show_notifications = 136 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto tv_input_hidden_inputs = 137;
-    optional SettingProto tv_input_custom_labels = 138;
-    optional SettingProto usb_audio_automatic_routing_disabled = 139 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto sleep_timeout = 140 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto double_tap_to_wake = 141 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto autofill_service_search_uri = 150 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto skip_first_use_hints = 151 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto unsafe_volume_music_active_ms = 152 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto lock_screen_show_notifications = 153 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto tv_input_hidden_inputs = 154;
+    optional SettingProto tv_input_custom_labels = 155;
+    optional SettingProto usb_audio_automatic_routing_disabled = 156 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto sleep_timeout = 157 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto double_tap_to_wake = 158 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // The current assistant component. It could be a voice interaction service,
     // or an activity that handles ACTION_ASSIST, or empty, which means using
     // the default handling.
-    optional SettingProto assistant = 142 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto camera_gesture_disabled = 143 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto camera_double_tap_power_gesture_disabled = 144 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto camera_double_twist_to_flip_enabled = 145 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto camera_lift_trigger_enabled = 182 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto assist_gesture_enabled = 183 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto assist_gesture_sensitivity = 184 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto assist_gesture_silence_alerts_enabled = 185 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto assist_gesture_wake_enabled = 186 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto assist_gesture_setup_complete = 187 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto night_display_activated = 146 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto night_display_auto_mode = 147 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto night_display_color_temperature = 188 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto night_display_custom_start_time = 148 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto night_display_custom_end_time = 149 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto night_display_last_activated_time = 189 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto brightness_use_twilight = 150;
-    optional SettingProto enabled_vr_listeners = 151 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto vr_display_mode = 152 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto carrier_apps_handled = 153 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto managed_profile_contact_remote_search = 154 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto automatic_storage_manager_enabled = 155 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto automatic_storage_manager_days_to_retain = 156 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto automatic_storage_manager_bytes_cleared = 157 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto automatic_storage_manager_last_run = 158 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto automatic_storage_manager_turned_off_by_policy = 190 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto system_navigation_keys_enabled = 159 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto downloads_backup_enabled = 160;
-    optional SettingProto downloads_backup_allow_metered = 161;
-    optional SettingProto downloads_backup_charging_only = 162;
-    optional SettingProto automatic_storage_manager_downloads_days_to_retain = 163;
+    optional SettingProto assistant = 159 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto camera_gesture_disabled = 160 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto camera_double_tap_power_gesture_disabled = 161 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto camera_double_twist_to_flip_enabled = 162 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto camera_lift_trigger_enabled = 163 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto assist_gesture_enabled = 164 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto assist_gesture_sensitivity = 165 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto assist_gesture_silence_alerts_enabled = 166 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto assist_gesture_wake_enabled = 167 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto assist_gesture_setup_complete = 168 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto night_display_activated = 169 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto night_display_auto_mode = 170 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto night_display_color_temperature = 171 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto night_display_custom_start_time = 172 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto night_display_custom_end_time = 173 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto night_display_last_activated_time = 174 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto enabled_vr_listeners = 175 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto vr_display_mode = 176 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto carrier_apps_handled = 177 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto managed_profile_contact_remote_search = 178 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto automatic_storage_manager_enabled = 179 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto automatic_storage_manager_days_to_retain = 180 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto automatic_storage_manager_bytes_cleared = 181 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto automatic_storage_manager_last_run = 182 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto automatic_storage_manager_turned_off_by_policy = 183 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto system_navigation_keys_enabled = 184 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Holds comma-separated list of ordering of QuickSettings tiles.
-    optional SettingProto qs_tiles = 164 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    reserved 165; // Removed demo_user_setup_complete
-    optional SettingProto instant_apps_enabled = 166 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto device_paired = 167 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto package_verifier_state = 191 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto cmas_additional_broadcast_pkg = 192 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto notification_badging = 168 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto qs_auto_added_tiles = 193 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto lockdown_in_power_menu = 194 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto backup_manager_constants = 169;
-    optional SettingProto show_first_crash_dialog_dev_option = 195 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto bluetooth_on_while_driving = 196 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto backup_local_transport_parameters = 197;
-
+    optional SettingProto qs_tiles = 185 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto instant_apps_enabled = 186 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto device_paired = 187 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto package_verifier_state = 188 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto cmas_additional_broadcast_pkg = 189 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto notification_badging = 190 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto qs_auto_added_tiles = 191 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto lockdown_in_power_menu = 192 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto backup_manager_constants = 193;
+    optional SettingProto backup_local_transport_parameters = 194;
+    optional SettingProto bluetooth_on_while_driving = 195 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Please insert fields in the same order as in
     // frameworks/base/core/java/android/provider/Settings.java.
-    // Next tag = 198
+    // Next tag = 196
 }
 
 message SystemSettingsProto {
@@ -688,29 +757,31 @@ message SystemSettingsProto {
     optional SettingProto bluetooth_discoverability_timeout = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto font_scale = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto system_locales = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto display_color_mode = 67 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto screen_off_timeout = 8 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto screen_brightness = 9 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto screen_brightness_for_vr = 10 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto screen_brightness_mode = 11 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto screen_auto_brightness_adj = 12 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto display_color_mode = 8 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto screen_off_timeout = 9 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto screen_brightness = 10 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto screen_brightness_for_vr = 11 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto screen_brightness_mode = 12 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto screen_auto_brightness_adj = 13 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Determines which streams are affected by ringer mode changes. The stream
     // type's bit will be set to 1 if it should be muted when going into an
     // inaudible ringer mode.
-    optional SettingProto mode_ringer_streams_affected = 13 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto mute_streams_affected = 14 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto vibrate_on = 15 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto vibrate_input_devices = 16 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto volume_ring = 17 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto volume_system = 18 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto volume_voice = 19 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto volume_music = 20 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto volume_alarm = 21 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto volume_notification = 22 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto volume_bluetooth_sco = 23 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto volume_accessibility = 68 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto volume_master = 24 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto master_mono = 25 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto mode_ringer_streams_affected = 14 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto mute_streams_affected = 15 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto vibrate_on = 16 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto vibrate_input_devices = 17 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto notification_vibration_intensity = 18 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto haptic_feedback_intensity = 19 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto volume_ring = 20 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto volume_system = 21 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto volume_voice = 22 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto volume_music = 23 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto volume_alarm = 24 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto volume_notification = 25 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto volume_bluetooth_sco = 26 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto volume_accessibility = 27 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto volume_master = 28 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto master_mono = 29 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Whether silent mode should allow vibration feedback. This is used
     // internally in AudioService and the Sound settings activity to coordinate
     // decoupling of vibrate and silent modes. This setting will likely be
@@ -719,59 +790,63 @@ message SystemSettingsProto {
     // Not used anymore. On devices with vibrator, the user explicitly selects
     // silent or vibrate mode. Kept for use by legacy database upgrade code in
     // DatabaseHelper.
-    optional SettingProto vibrate_in_silent = 26 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto vibrate_in_silent = 30 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Appended to various volume related settings to record the previous values
     // before the settings were affected by a silent/vibrate ringer mode change.
-    optional SettingProto append_for_last_audible = 27 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto ringtone = 28;
-    optional SettingProto ringtone_cache = 29;
-    optional SettingProto notification_sound = 30;
-    optional SettingProto notification_sound_cache = 31;
-    optional SettingProto alarm_alert = 32;
-    optional SettingProto alarm_alert_cache = 33;
-    optional SettingProto media_button_receiver = 34;
-    optional SettingProto text_auto_replace = 35 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto text_auto_caps = 36 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto text_auto_punctuate = 37 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto text_show_password = 38 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto show_gtalk_service_status = 39 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto time_12_24 = 40 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto date_format = 41 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto setup_wizard_has_run = 42 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accelerometer_rotation = 43 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto user_rotation = 44 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto hide_rotation_lock_toggle_for_accessibility = 45 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto vibrate_when_ringing = 46 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto dtmf_tone_when_dialing = 47 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto dtmf_tone_type_when_dialing = 48 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto hearing_aid = 49 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto tty_mode = 50 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto sound_effects_enabled = 51 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto haptic_feedback_enabled = 52 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto notification_light_pulse = 53 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto append_for_last_audible = 31 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto ringtone = 32;
+    optional SettingProto ringtone_cache = 33;
+    optional SettingProto notification_sound = 34;
+    optional SettingProto notification_sound_cache = 35;
+    optional SettingProto alarm_alert = 36;
+    optional SettingProto alarm_alert_cache = 37;
+    optional SettingProto media_button_receiver = 38;
+    optional SettingProto text_auto_replace = 39 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto text_auto_caps = 40 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto text_auto_punctuate = 41 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto text_show_password = 42 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto show_gtalk_service_status = 43 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto time_12_24 = 44 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto date_format = 45 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto setup_wizard_has_run = 46 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto accelerometer_rotation = 47 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto user_rotation = 48 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto hide_rotation_lock_toggle_for_accessibility = 49 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto vibrate_when_ringing = 50 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto dtmf_tone_when_dialing = 51 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto dtmf_tone_type_when_dialing = 52 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto hearing_aid = 53 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto tty_mode = 54 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    // User-selected RTT mode. When on, outgoing and incoming calls will be
+    // answered as RTT calls when supported by the device and carrier. Boolean
+    // value.
+    optional SettingProto rtt_calling_mode = 55 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto sound_effects_enabled = 56 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto haptic_feedback_enabled = 57 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto notification_light_pulse = 58 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Show pointer location on screen? 0 = no, 1 = yes.
-    optional SettingProto pointer_location = 54 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto show_touches = 55 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto pointer_location = 59 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto show_touches = 60 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Log raw orientation data from {@link
     // com.android.server.policy.WindowOrientationListener} for use with the
     // orientationplot.py tool.
     // 0 = no, 1 = yes
-    optional SettingProto window_orientation_listener_log = 56 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto lockscreen_sounds_enabled = 57 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto lockscreen_disabled = 58 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto sip_receive_calls = 59 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto sip_call_options = 60 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto sip_always = 61 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto sip_address_only = 62 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto pointer_speed = 63 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto lock_to_app_enabled = 64 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto egg_mode = 65 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto show_battery_percent = 69 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto when_to_make_wifi_calls = 66 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto window_orientation_listener_log = 61 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto lockscreen_sounds_enabled = 62 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto lockscreen_disabled = 63 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto sip_receive_calls = 64 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto sip_call_options = 65 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto sip_always = 66 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto sip_address_only = 67 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto pointer_speed = 68 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto lock_to_app_enabled = 69 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto egg_mode = 70 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto show_battery_percent = 71 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto when_to_make_wifi_calls = 72 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     // Please insert fields in the same order as in
     // frameworks/base/core/java/android/provider/Settings.java.
-    // Next tag = 70;
+    // Next tag = 73;
 }
 
 message SettingProto {

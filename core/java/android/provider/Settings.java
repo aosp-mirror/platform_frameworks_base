@@ -10271,31 +10271,6 @@ public final class Settings {
                 "battery_saver_device_specific_constants";
 
         /**
-         * Battery anomaly detection specific settings
-         * This is encoded as a key=value list, separated by commas.
-         * wakeup_blacklisted_tags is a string, encoded as a set of tags, encoded via
-         * {@link Uri#encode(String)}, separated by colons. Ex:
-         *
-         * "anomaly_detection_enabled=true,wakelock_threshold=2000,wakeup_alarm_enabled=true,"
-         * "wakeup_alarm_threshold=10,wakeup_blacklisted_tags=tag1:tag2:with%2Ccomma:with%3Acolon"
-         *
-         * The following keys are supported:
-         *
-         * <pre>
-         * anomaly_detection_enabled       (boolean)
-         * wakelock_enabled                (boolean)
-         * wakelock_threshold              (long)
-         * wakeup_alarm_enabled            (boolean)
-         * wakeup_alarm_threshold          (long)
-         * wakeup_blacklisted_tags         (string)
-         * bluetooth_scan_enabled          (boolean)
-         * bluetooth_scan_threshold        (long)
-         * </pre>
-         * @hide
-         */
-        public static final String ANOMALY_DETECTION_CONSTANTS = "anomaly_detection_constants";
-
-        /**
          * Battery tip specific settings
          * This is encoded as a key=value list, separated by commas. Ex:
          *
@@ -10322,6 +10297,31 @@ public final class Settings {
          * @hide
          */
         public static final String BATTERY_TIP_CONSTANTS = "battery_tip_constants";
+
+        /**
+         * Battery anomaly detection specific settings
+         * This is encoded as a key=value list, separated by commas.
+         * wakeup_blacklisted_tags is a string, encoded as a set of tags, encoded via
+         * {@link Uri#encode(String)}, separated by colons. Ex:
+         *
+         * "anomaly_detection_enabled=true,wakelock_threshold=2000,wakeup_alarm_enabled=true,"
+         * "wakeup_alarm_threshold=10,wakeup_blacklisted_tags=tag1:tag2:with%2Ccomma:with%3Acolon"
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         * anomaly_detection_enabled       (boolean)
+         * wakelock_enabled                (boolean)
+         * wakelock_threshold              (long)
+         * wakeup_alarm_enabled            (boolean)
+         * wakeup_alarm_threshold          (long)
+         * wakeup_blacklisted_tags         (string)
+         * bluetooth_scan_enabled          (boolean)
+         * bluetooth_scan_threshold        (long)
+         * </pre>
+         * @hide
+         */
+        public static final String ANOMALY_DETECTION_CONSTANTS = "anomaly_detection_constants";
 
         /**
          * An integer to show the version of the anomaly config. Ex: 1, which means
@@ -10598,7 +10598,7 @@ public final class Settings {
          * Default: 1
          * @hide
          */
-        public static final java.lang.String APP_STANDBY_ENABLED = "app_standby_enabled";
+        public static final String APP_STANDBY_ENABLED = "app_standby_enabled";
 
         /**
          * Whether or not app auto restriction is enabled. When it is enabled, settings app will
@@ -10609,7 +10609,7 @@ public final class Settings {
          *
          * @hide
          */
-        public static final java.lang.String APP_AUTO_RESTRICTION_ENABLED =
+        public static final String APP_AUTO_RESTRICTION_ENABLED =
                 "app_auto_restriction_enabled";
 
         private static final Validator APP_AUTO_RESTRICTION_ENABLED_VALIDATOR =
