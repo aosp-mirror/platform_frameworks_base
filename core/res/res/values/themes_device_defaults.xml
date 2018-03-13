@@ -1318,6 +1318,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- volume background -->
+        <item name="panelColorBackground">@color/primary_material_light</item>
     </style>
 
     <style name="Theme.DeviceDefault.QuickSettings.Dialog" parent="Theme.DeviceDefault.Light.Dialog">
