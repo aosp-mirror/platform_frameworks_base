@@ -60,6 +60,7 @@ import static com.android.server.pm.Installer.DEXOPT_STORAGE_DE;
 import static com.android.server.pm.Installer.DEXOPT_IDLE_BACKGROUND_JOB;
 import static com.android.server.pm.Installer.DEXOPT_ENABLE_HIDDEN_API_CHECKS;
 import static com.android.server.pm.Installer.DEXOPT_GENERATE_COMPACT_DEX;
+import static com.android.server.pm.Installer.DEXOPT_GENERATE_APP_IMAGE;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 
@@ -523,6 +524,10 @@ public class PackageDexOptimizer {
         return getDexFlags(pkg.applicationInfo, compilerFilter, options);
     }
 
+    private boolean isAppImageEnabled() {
+        return SystemProperties.get("dalvik.vm.appimageformat", "").length() > 0;
+    }
+
     private int getDexFlags(ApplicationInfo info, String compilerFilter, DexoptOptions options) {
         int flags = info.flags;
         boolean debuggable = (flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
@@ -549,6 +554,14 @@ public class PackageDexOptimizer {
             case PackageManagerService.REASON_INSTALL:
                  generateCompactDex = false;
         }
+        // Use app images only if it is enabled and we are compiling
+        // profile-guided (so the app image doesn't conservatively contain all classes).
+        // If the app didn't request for the splits to be loaded in isolation or if it does not
+        // declare inter-split dependencies, then all the splits will be loaded in the base
+        // apk class loader (in the order of their definition, otherwise disable app images
+        // because they are unsupported for multiple class loaders. b/7269679
+        boolean generateAppImage = isProfileGuidedFilter && (info.splitDependencies == null ||
+                !info.requestsIsolatedSplitLoading()) && isAppImageEnabled();
         int dexFlags =
                 (isPublic ? DEXOPT_PUBLIC : 0)
                 | (debuggable ? DEXOPT_DEBUGGABLE : 0)
@@ -556,6 +569,7 @@ public class PackageDexOptimizer {
                 | (options.isBootComplete() ? DEXOPT_BOOTCOMPLETE : 0)
                 | (options.isDexoptIdleBackgroundJob() ? DEXOPT_IDLE_BACKGROUND_JOB : 0)
                 | (generateCompactDex ? DEXOPT_GENERATE_COMPACT_DEX : 0)
+                | (generateAppImage ? DEXOPT_GENERATE_APP_IMAGE : 0)
                 | hiddenApiFlag;
         return adjustDexoptFlags(dexFlags);
     }
