@@ -42,11 +42,13 @@ import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.recovery.KeyDerivationParams;
 import android.security.keystore.recovery.KeyChainSnapshot;
+import android.security.keystore.recovery.RecoveryController;
 import android.security.keystore.recovery.WrappedApplicationKey;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import android.util.Log;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySnapshotStorage;
 
@@ -514,6 +516,34 @@ public class KeySyncTaskTest {
         verify(mSnapshotListenersStorage).recoverySnapshotAvailable(TEST_RECOVERY_AGENT_UID);
         verify(mSnapshotListenersStorage, never()).
                 recoverySnapshotAvailable(TEST_RECOVERY_AGENT_UID2);
+    }
+
+    @Test
+    public void run_customLockScreen_RecoveryStatusFailure() throws Exception {
+      mKeySyncTask = new KeySyncTask(
+          mRecoverableKeyStoreDb,
+          mRecoverySnapshotStorage,
+          mSnapshotListenersStorage,
+          TEST_USER_ID,
+          /*credentialType=*/ 3,
+          "12345",
+          /*credentialUpdated=*/ false,
+          mPlatformKeyManager);
+
+      addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
+
+      int status =
+          mRecoverableKeyStoreDb
+              .getStatusForAllKeys(TEST_RECOVERY_AGENT_UID)
+              .get(TEST_APP_KEY_ALIAS);
+      assertEquals(RecoveryController.RECOVERY_STATUS_SYNC_IN_PROGRESS, status);
+
+      mKeySyncTask.run();
+
+      status = mRecoverableKeyStoreDb
+          .getStatusForAllKeys(TEST_RECOVERY_AGENT_UID)
+          .get(TEST_APP_KEY_ALIAS);
+      assertEquals(RecoveryController.RECOVERY_STATUS_PERMANENT_FAILURE, status);
     }
 
     private SecretKey addApplicationKey(int userId, int recoveryAgentUid, String alias)
