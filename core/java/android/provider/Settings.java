@@ -12338,6 +12338,28 @@ public final class Settings {
          * @hide
          */
         public static final String SHOW_ZEN_UPGRADE_NOTIFICATION = "show_zen_upgrade_notification";
+
+        /**
+         * Backup and restore agent timeout parameters.
+         * These parameters are represented by a comma-delimited key-value list.
+         *
+         * The following strings are supported as keys:
+         * <pre>
+         *     kv_backup_agent_timeout_millis         (long)
+         *     full_backup_agent_timeout_millis       (long)
+         *     shared_backup_agent_timeout_millis     (long)
+         *     restore_agent_timeout_millis           (long)
+         *     restore_agent_finished_timeout_millis  (long)
+         * </pre>
+         *
+         * They map to milliseconds represented as longs.
+         *
+         * Ex: "kv_backup_agent_timeout_millis=30000,full_backup_agent_timeout_millis=300000"
+         *
+         * @hide
+         */
+        public static final String BACKUP_AGENT_TIMEOUT_PARAMETERS =
+                "backup_agent_timeout_parameters";
     }
 
     /**
