@@ -156,17 +156,6 @@ public class MediaController2 implements AutoCloseable {
                 @NonNull List<MediaItem2> playlist) { }
 
         /**
-         * Called when the playback state is changed.
-         *
-         * @param controller the controller for this event
-         * @param state latest playback state
-         * @hide
-         */
-        // TODO(jaewan): Remove (b/73971431)
-        public void onPlaybackStateChanged(@NonNull MediaController2 controller,
-                @NonNull PlaybackState2 state) { }
-
-        /**
          * Called when the player state is changed.
          *
          * @param controller the controller for this event
@@ -644,20 +633,6 @@ public class MediaController2 implements AutoCloseable {
      */
     public @Nullable PendingIntent getSessionActivity() {
         return mProvider.getSessionActivity_impl();
-    }
-
-    /**
-     * Get the lastly cached {@link PlaybackState2} from
-     * {@link ControllerCallback#onPlaybackStateChanged(MediaController2, PlaybackState2)}.
-     * <p>
-     * It may return {@code null} before the first callback or session has sent {@code null}
-     * playback state.
-     *
-     * @return a playback state. Can be {@code null}
-     * @hide
-     */
-    public @Nullable PlaybackState2 getPlaybackState() {
-        return mProvider.getPlaybackState_impl();
     }
 
     /**
