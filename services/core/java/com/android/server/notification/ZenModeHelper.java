@@ -874,7 +874,14 @@ public class ZenModeHelper {
             } else if (suppressionBehavior == AudioAttributes.SUPPRESSIBLE_MEDIA) {
                 applyRestrictions(muteMedia || muteEverything, usage);
             } else if (suppressionBehavior == AudioAttributes.SUPPRESSIBLE_SYSTEM) {
-                applyRestrictions(muteSystem || muteEverything, usage);
+                if (usage == AudioAttributes.USAGE_ASSISTANCE_SONIFICATION) {
+                    // normally DND will only restrict touch sounds, not haptic feedback/vibrations
+                    applyRestrictions(muteSystem || muteEverything, usage,
+                            AppOpsManager.OP_PLAY_AUDIO);
+                    applyRestrictions(false, usage, AppOpsManager.OP_VIBRATE);
+                } else {
+                    applyRestrictions(muteSystem || muteEverything, usage);
+                }
             } else {
                 applyRestrictions(muteEverything, usage);
             }
@@ -883,16 +890,20 @@ public class ZenModeHelper {
 
 
     @VisibleForTesting
-    protected void applyRestrictions(boolean mute, int usage) {
+    protected void applyRestrictions(boolean mute, int usage, int code) {
         final String[] exceptionPackages = null; // none (for now)
 
-        mAppOps.setRestriction(AppOpsManager.OP_VIBRATE, usage,
-                mute ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
-                exceptionPackages);
-        mAppOps.setRestriction(AppOpsManager.OP_PLAY_AUDIO, usage,
+        mAppOps.setRestriction(code, usage,
                 mute ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
                 exceptionPackages);
     }
+
+    @VisibleForTesting
+    protected void applyRestrictions(boolean mute, int usage) {
+        applyRestrictions(mute, usage, AppOpsManager.OP_VIBRATE);
+        applyRestrictions(mute, usage, AppOpsManager.OP_PLAY_AUDIO);
+    }
+
 
     @VisibleForTesting
     protected void applyZenToRingerMode() {
