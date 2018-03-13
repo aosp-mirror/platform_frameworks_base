@@ -5401,11 +5401,12 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         final int callingPid = Binder.getCallingPid();
         final int callingUid = Binder.getCallingUid();
+        final SafeActivityOptions safeOptions = SafeActivityOptions.fromBundle(bOptions);
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
                 return mStackSupervisor.startActivityFromRecents(callingPid, callingUid, taskId,
-                        SafeActivityOptions.fromBundle(bOptions));
+                        safeOptions);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
