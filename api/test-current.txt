@@ -1,3 +1,12 @@
+package android {
+
+  public static final class Manifest.permission {
+    field public static final java.lang.String BRIGHTNESS_SLIDER_USAGE = "android.permission.BRIGHTNESS_SLIDER_USAGE";
+    field public static final java.lang.String CONFIGURE_DISPLAY_BRIGHTNESS = "android.permission.CONFIGURE_DISPLAY_BRIGHTNESS";
+  }
+
+}
+
 package android.animation {
 
   public class ValueAnimator extends android.animation.Animator {
