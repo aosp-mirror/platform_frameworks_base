@@ -188,7 +188,7 @@ protected:
 
     // Convenience to compute the current bucket's end time, which is always aligned with the
     // start time of the metric.
-    uint64_t getCurrentBucketEndTimeNs() {
+    uint64_t getCurrentBucketEndTimeNs() const {
         return mStartTimeNs + (mCurrentBucketNum + 1) * mBucketSizeNs;
     }
 
