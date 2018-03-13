@@ -3722,16 +3722,27 @@ public final class ActivityThread extends ClientTransactionHandler {
         //Slog.i(TAG, "Running services: " + mServices);
     }
 
-    ActivityClientRecord performResumeActivity(IBinder token, boolean clearHide, String reason) {
+    ActivityClientRecord performResumeActivity(IBinder token, boolean finalStateRequest,
+            String reason) {
         ActivityClientRecord r = mActivities.get(token);
         if (localLOGV) Slog.v(TAG, "Performing resume of " + r
                 + " finished=" + r.activity.mFinished);
         if (r != null && !r.activity.mFinished) {
             if (r.getLifecycleState() == ON_RESUME) {
-                throw new IllegalStateException(
-                        "Trying to resume activity which is already resumed");
+                if (!finalStateRequest) {
+                    final RuntimeException e = new IllegalStateException(
+                            "Trying to resume activity which is already resumed");
+                    Slog.e(TAG, e.getMessage(), e);
+                    Slog.e(TAG, r.getStateString());
+                    // TODO(lifecycler): A double resume request is possible when an activity
+                    // receives two consequent transactions with relaunch requests and "resumed"
+                    // final state requests and the second relaunch is omitted. We still try to
+                    // handle two resume requests for the final state. For cases other than this
+                    // one, we don't expect it to happen.
+                }
+                return null;
             }
-            if (clearHide) {
+            if (finalStateRequest) {
                 r.hideForNow = false;
                 r.activity.mStartedActivity = false;
             }
@@ -3782,7 +3793,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     @Override
-    public void handleResumeActivity(IBinder token, boolean clearHide, boolean isForward,
+    public void handleResumeActivity(IBinder token, boolean finalStateRequest, boolean isForward,
             String reason) {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
@@ -3790,7 +3801,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         mSomeActivitiesChanged = true;
 
         // TODO Push resumeArgs into the activity for consideration
-        final ActivityClientRecord r = performResumeActivity(token, clearHide, reason);
+        final ActivityClientRecord r = performResumeActivity(token, finalStateRequest, reason);
 
         if (r != null) {
             final Activity a = r.activity;

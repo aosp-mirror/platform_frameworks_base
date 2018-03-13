@@ -67,9 +67,16 @@ public abstract class ClientTransactionHandler {
     public abstract void handlePauseActivity(IBinder token, boolean finished, boolean userLeaving,
             int configChanges, PendingTransactionActions pendingActions, String reason);
 
-    /** Resume the activity. */
-    public abstract void handleResumeActivity(IBinder token, boolean clearHide, boolean isForward,
-            String reason);
+    /**
+     * Resume the activity.
+     * @param token Target activity token.
+     * @param finalStateRequest Flag indicating if this call is handling final lifecycle state
+     *                          request for a transaction.
+     * @param isForward Flag indicating if next transition is forward.
+     * @param reason Reason for performing this operation.
+     */
+    public abstract void handleResumeActivity(IBinder token, boolean finalStateRequest,
+            boolean isForward, String reason);
 
     /** Stop the activity. */
     public abstract void handleStopActivity(IBinder token, boolean show, int configChanges,
