@@ -267,7 +267,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                 final StringBuilder builder = new StringBuilder();
 
                 // The current version.
-                builder.append("8 ");
+                builder.append("9 ");
 
                 builder.append("dexopt");
 
