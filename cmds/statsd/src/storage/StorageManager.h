@@ -78,6 +78,12 @@ public:
      * files, accumulation of outdated files.
      */
     static void trimToFit(const char* dir);
+
+    /**
+     * Returns true if there already exists identical configuration on device.
+     */
+    static bool hasIdenticalConfig(const ConfigKey& key,
+                                   const vector<uint8_t>& config);
 };
 
 }  // namespace statsd
