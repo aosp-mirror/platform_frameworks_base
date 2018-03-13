@@ -103,7 +103,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     .replaceWith("?");
     private ByteBuffer mUtf8BufferStat = ByteBuffer.allocateDirect(MAX_LOW_POWER_STATS_SIZE);
     private CharBuffer mUtf16BufferStat = CharBuffer.allocate(MAX_LOW_POWER_STATS_SIZE);
-    private static final int MAX_LOW_POWER_STATS_SIZE = 512;
+    private static final int MAX_LOW_POWER_STATS_SIZE = 2048;
 
     /**
      * Replaces the information in the given rpmStats with up-to-date information.
