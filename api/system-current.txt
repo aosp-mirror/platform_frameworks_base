@@ -717,7 +717,9 @@ package android.app.usage {
   }
 
   public static final class UsageEvents.Event {
+    method public java.lang.String getNotificationChannelId();
     method public int getStandbyBucket();
+    field public static final int NOTIFICATION_INTERRUPTION = 12; // 0xc
     field public static final int NOTIFICATION_SEEN = 10; // 0xa
     field public static final int STANDBY_BUCKET_CHANGED = 11; // 0xb
   }

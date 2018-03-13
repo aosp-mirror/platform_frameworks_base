@@ -1782,11 +1782,10 @@ public class NotificationManagerService extends SystemService {
      * Report to usage stats that the notification was seen.
      * @param r notification record
      */
+    @GuardedBy("mNotificationLock")
     protected void reportSeen(NotificationRecord r) {
-        final int userId = r.sbn.getUserId();
         mAppUsageStats.reportEvent(r.sbn.getPackageName(),
-                userId == UserHandle.USER_ALL ? USER_SYSTEM
-                        : userId,
+                getRealUserId(r.sbn.getUserId()),
                 UsageEvents.Event.NOTIFICATION_SEEN);
     }
 
@@ -1858,15 +1857,28 @@ public class NotificationManagerService extends SystemService {
         return newSuppressedVisualEffects;
     }
 
+    // TODO: log visual differences, not just audible ones
+    @GuardedBy("mNotificationLock")
+    protected void maybeRecordInterruptionLocked(NotificationRecord r) {
+        if (r.isInterruptive()) {
+            mAppUsageStats.reportInterruptiveNotification(r.sbn.getPackageName(),
+                    r.getChannel().getId(),
+                    getRealUserId(r.sbn.getUserId()));
+        }
+    }
+
     /**
      * Report to usage stats that the notification was clicked.
      * @param r notification record
      */
     protected void reportUserInteraction(NotificationRecord r) {
-        final int userId = r.sbn.getUserId();
         mAppUsageStats.reportEvent(r.sbn.getPackageName(),
-                userId == UserHandle.USER_ALL ? UserHandle.USER_SYSTEM : userId,
+                getRealUserId(r.sbn.getUserId()),
                 UsageEvents.Event.USER_INTERACTION);
+    }
+
+    private int getRealUserId(int userId) {
+        return userId == UserHandle.USER_ALL ? UserHandle.USER_SYSTEM : userId;
     }
 
     @VisibleForTesting
@@ -4345,6 +4357,7 @@ public class NotificationManagerService extends SystemService {
                     }
 
                     buzzBeepBlinkLocked(r);
+                    maybeRecordInterruptionLocked(r);
                 } finally {
                     int N = mEnqueuedNotifications.size();
                     for (int i = 0; i < N; i++) {
@@ -4554,6 +4567,7 @@ public class NotificationManagerService extends SystemService {
             updateLightsLocked();
         }
         if (buzz || beep || blink) {
+            record.setInterruptive(true);
             MetricsLogger.action(record.getLogMaker()
                     .setCategory(MetricsEvent.NOTIFICATION_ALERT)
                     .setType(MetricsEvent.TYPE_OPEN)
