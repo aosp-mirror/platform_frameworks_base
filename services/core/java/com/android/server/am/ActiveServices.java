@@ -56,6 +56,8 @@ import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.FastPrintWriter;
+import com.android.server.AppStateTracker;
+import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.am.ActivityManagerService.NeededUriGrants;
 import com.android.server.am.proto.ActiveServicesProto;
@@ -163,6 +165,44 @@ public final class ActiveServices {
             }
         }
     };
+
+    /**
+     * Watch for apps being put into forced app standby, so we can step their fg
+     * services down.
+     */
+    class ForcedStandbyListener extends AppStateTracker.Listener {
+        @Override
+        public void stopForegroundServicesForUidPackage(final int uid, final String packageName) {
+            synchronized (mAm) {
+                final ServiceMap smap = getServiceMapLocked(UserHandle.getUserId(uid));
+                final int N = smap.mServicesByName.size();
+                final ArrayList<ServiceRecord> toStop = new ArrayList<>(N);
+                for (int i = 0; i < N; i++) {
+                    final ServiceRecord r = smap.mServicesByName.valueAt(i);
+                    if (uid == r.serviceInfo.applicationInfo.uid
+                            || packageName.equals(r.serviceInfo.packageName)) {
+                        if (r.isForeground) {
+                            toStop.add(r);
+                        }
+                    }
+                }
+
+                // Now stop them all
+                final int numToStop = toStop.size();
+                if (numToStop > 0 && DEBUG_FOREGROUND_SERVICE) {
+                    Slog.i(TAG, "Package " + packageName + "/" + uid
+                            + " entering FAS with foreground services");
+                }
+                for (int i = 0; i < numToStop; i++) {
+                    final ServiceRecord r = toStop.get(i);
+                    if (DEBUG_FOREGROUND_SERVICE) {
+                        Slog.i(TAG, "  Stopping fg for service " + r);
+                    }
+                    setServiceForegroundInnerLocked(r, 0, null, 0);
+                }
+            }
+        }
+    }
 
     /**
      * Information about an app that is currently running one or more foreground services.
@@ -302,6 +342,11 @@ public final class ActiveServices {
                 ? maxBg : ActivityManager.isLowRamDeviceStatic() ? 1 : 8;
     }
 
+    void systemServicesReady() {
+        AppStateTracker ast = LocalServices.getService(AppStateTracker.class);
+        ast.addListener(new ForcedStandbyListener());
+    }
+
     ServiceRecord getServiceByNameLocked(ComponentName name, int callingUser) {
         // TODO: Deal with global services
         if (DEBUG_MU)
@@ -325,6 +370,12 @@ public final class ActiveServices {
 
     ArrayMap<ComponentName, ServiceRecord> getServicesLocked(int callingUser) {
         return getServiceMapLocked(callingUser).mServicesByName;
+    }
+
+    private boolean appRestrictedAnyInBackground(final int uid, final String packageName) {
+        final int mode = mAm.mAppOpsService.checkOperation(
+                AppOpsManager.OP_RUN_ANY_IN_BACKGROUND, uid, packageName);
+        return (mode != AppOpsManager.MODE_ALLOWED);
     }
 
     ComponentName startServiceLocked(IApplicationThread caller, Intent service, String resolvedType,
@@ -365,13 +416,24 @@ public final class ActiveServices {
             return null;
         }
 
+        // If the app has strict background restrictions, we treat any service
+        // start analogously to the legacy-app forced-restrictions case.
+        boolean forcedStandby = false;
+        if (appRestrictedAnyInBackground(r.appInfo.uid, r.packageName)) {
+            if (DEBUG_FOREGROUND_SERVICE) {
+                Slog.d(TAG, "Forcing bg-only service start only for "
+                        + r.name.flattenToShortString());
+            }
+            forcedStandby = true;
+        }
+
         // If this isn't a direct-to-foreground start, check our ability to kick off an
         // arbitrary service
-        if (!r.startRequested && !fgRequired) {
+        if (forcedStandby || (!r.startRequested && !fgRequired)) {
             // Before going further -- if this app is not allowed to start services in the
             // background, then at this point we aren't going to let it period.
             final int allowed = mAm.getAppStartModeLocked(r.appInfo.uid, r.packageName,
-                    r.appInfo.targetSdkVersion, callingPid, false, false);
+                    r.appInfo.targetSdkVersion, callingPid, false, false, forcedStandby);
             if (allowed != ActivityManager.APP_START_MODE_NORMAL) {
                 Slog.w(TAG, "Background start not allowed: service "
                         + service + " to " + r.name.flattenToShortString()
@@ -625,7 +687,7 @@ public final class ActiveServices {
                 ServiceRecord service = services.mServicesByName.valueAt(i);
                 if (service.appInfo.uid == uid && service.startRequested) {
                     if (mAm.getAppStartModeLocked(service.appInfo.uid, service.packageName,
-                            service.appInfo.targetSdkVersion, -1, false, false)
+                            service.appInfo.targetSdkVersion, -1, false, false, false)
                             != ActivityManager.APP_START_MODE_NORMAL) {
                         if (stopping == null) {
                             stopping = new ArrayList<>();
@@ -1019,7 +1081,10 @@ public final class ActiveServices {
         }
     }
 
-    private void setServiceForegroundInnerLocked(ServiceRecord r, int id,
+    /**
+     * @param id Notification ID.  Zero === exit foreground state for the given service.
+     */
+    private void setServiceForegroundInnerLocked(final ServiceRecord r, int id,
             Notification notification, int flags) {
         if (id != 0) {
             if (notification == null) {
@@ -1061,44 +1126,56 @@ public final class ActiveServices {
                 mAm.mHandler.removeMessages(
                         ActivityManagerService.SERVICE_FOREGROUND_TIMEOUT_MSG, r);
             }
-            if (r.foregroundId != id) {
-                cancelForegroundNotificationLocked(r);
-                r.foregroundId = id;
-            }
-            notification.flags |= Notification.FLAG_FOREGROUND_SERVICE;
-            r.foregroundNoti = notification;
-            if (!r.isForeground) {
-                final ServiceMap smap = getServiceMapLocked(r.userId);
-                if (smap != null) {
-                    ActiveForegroundApp active = smap.mActiveForegroundApps.get(r.packageName);
-                    if (active == null) {
-                        active = new ActiveForegroundApp();
-                        active.mPackageName = r.packageName;
-                        active.mUid = r.appInfo.uid;
-                        active.mShownWhileScreenOn = mScreenOn;
-                        if (r.app != null) {
-                            active.mAppOnTop = active.mShownWhileTop =
-                                    r.app.uidRecord.curProcState
-                                            <= ActivityManager.PROCESS_STATE_TOP;
-                        }
-                        active.mStartTime = active.mStartVisibleTime
-                                = SystemClock.elapsedRealtime();
-                        smap.mActiveForegroundApps.put(r.packageName, active);
-                        requestUpdateActiveForegroundAppsLocked(smap, 0);
-                    }
-                    active.mNumActive++;
+
+            // Apps under strict background restrictions simply don't get to have foreground
+            // services, so now that we've enforced the startForegroundService() contract
+            // we only do the machinery of making the service foreground when the app
+            // is not restricted.
+            if (!appRestrictedAnyInBackground(r.appInfo.uid, r.packageName)) {
+                if (r.foregroundId != id) {
+                    cancelForegroundNotificationLocked(r);
+                    r.foregroundId = id;
                 }
-                r.isForeground = true;
-                StatsLog.write(StatsLog.FOREGROUND_SERVICE_STATE_CHANGED, r.appInfo.uid, r.shortName,
-                        StatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER);
+                notification.flags |= Notification.FLAG_FOREGROUND_SERVICE;
+                r.foregroundNoti = notification;
+                if (!r.isForeground) {
+                    final ServiceMap smap = getServiceMapLocked(r.userId);
+                    if (smap != null) {
+                        ActiveForegroundApp active = smap.mActiveForegroundApps.get(r.packageName);
+                        if (active == null) {
+                            active = new ActiveForegroundApp();
+                            active.mPackageName = r.packageName;
+                            active.mUid = r.appInfo.uid;
+                            active.mShownWhileScreenOn = mScreenOn;
+                            if (r.app != null) {
+                                active.mAppOnTop = active.mShownWhileTop =
+                                        r.app.uidRecord.curProcState
+                                        <= ActivityManager.PROCESS_STATE_TOP;
+                            }
+                            active.mStartTime = active.mStartVisibleTime
+                                    = SystemClock.elapsedRealtime();
+                            smap.mActiveForegroundApps.put(r.packageName, active);
+                            requestUpdateActiveForegroundAppsLocked(smap, 0);
+                        }
+                        active.mNumActive++;
+                    }
+                    r.isForeground = true;
+                    StatsLog.write(StatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
+                            r.appInfo.uid, r.shortName,
+                            StatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER);
+                }
+                r.postNotification();
+                if (r.app != null) {
+                    updateServiceForegroundLocked(r.app, true);
+                }
+                getServiceMapLocked(r.userId).ensureNotStartingBackgroundLocked(r);
+                mAm.notifyPackageUse(r.serviceInfo.packageName,
+                        PackageManager.NOTIFY_PACKAGE_USE_FOREGROUND_SERVICE);
+            } else {
+                if (DEBUG_FOREGROUND_SERVICE) {
+                    Slog.d(TAG, "Suppressing startForeground() for FAS " + r);
+                }
             }
-            r.postNotification();
-            if (r.app != null) {
-                updateServiceForegroundLocked(r.app, true);
-            }
-            getServiceMapLocked(r.userId).ensureNotStartingBackgroundLocked(r);
-            mAm.notifyPackageUse(r.serviceInfo.packageName,
-                                 PackageManager.NOTIFY_PACKAGE_USE_FOREGROUND_SERVICE);
         } else {
             if (r.isForeground) {
                 final ServiceMap smap = getServiceMapLocked(r.userId);
@@ -1106,7 +1183,8 @@ public final class ActiveServices {
                     decActiveForegroundAppLocked(smap, r);
                 }
                 r.isForeground = false;
-                StatsLog.write(StatsLog.FOREGROUND_SERVICE_STATE_CHANGED, r.appInfo.uid, r.shortName,
+                StatsLog.write(StatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
+                        r.appInfo.uid, r.shortName,
                         StatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT);
                 if (r.app != null) {
                     mAm.updateLruProcessLocked(r.app, false, null);

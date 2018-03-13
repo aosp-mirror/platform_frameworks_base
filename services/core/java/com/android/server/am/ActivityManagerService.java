@@ -122,7 +122,6 @@ import static android.service.voice.VoiceInteractionSession.SHOW_SOURCE_APPLICAT
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
-
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.readLongAttribute;
@@ -203,7 +202,6 @@ import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_TASK_IN_PLACE;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
-
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
@@ -388,8 +386,8 @@ import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.View;
 import android.view.WindowManager;
-
 import android.view.autofill.AutofillManagerInternal;
+
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -2859,6 +2857,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         public void onBootPhase(int phase) {
             if (phase == PHASE_SYSTEM_SERVICES_READY) {
                 mService.mBatteryStatsService.systemServicesReady();
+                mService.mServices.systemServicesReady();
             }
         }
 
@@ -9101,7 +9100,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     public boolean isAppStartModeDisabled(int uid, String packageName) {
         synchronized (this) {
-            return getAppStartModeLocked(uid, packageName, 0, -1, false, true)
+            return getAppStartModeLocked(uid, packageName, 0, -1, false, true, false)
                     == ActivityManager.APP_START_MODE_DISABLED;
         }
     }
@@ -9177,12 +9176,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     int getAppStartModeLocked(int uid, String packageName, int packageTargetSdk,
-            int callingPid, boolean alwaysRestrict, boolean disabledOnly) {
+            int callingPid, boolean alwaysRestrict, boolean disabledOnly, boolean forcedStandby) {
         UidRecord uidRec = mActiveUids.get(uid);
         if (DEBUG_BACKGROUND_CHECK) Slog.d(TAG, "checkAllowBackground: uid=" + uid + " pkg="
                 + packageName + " rec=" + uidRec + " always=" + alwaysRestrict + " idle="
                 + (uidRec != null ? uidRec.idle : false));
-        if (uidRec == null || alwaysRestrict || uidRec.idle) {
+        if (uidRec == null || alwaysRestrict || forcedStandby || uidRec.idle) {
             boolean ephemeral;
             if (uidRec == null) {
                 ephemeral = getPackageManagerInternalLocked().isPackageEphemeral(
