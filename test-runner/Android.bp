@@ -31,7 +31,7 @@ java_library {
     libs: [
         "framework",
         "android.test.base",
-        "android.test.mock",
+        "android.test.mock.stubs",
     ],
 }
 
@@ -48,7 +48,7 @@ java_library {
     libs: [
         "framework",
         "android.test.base",
-        "android.test.mock",
+        "android.test.mock.stubs",
         "junit",
     ],
 }
