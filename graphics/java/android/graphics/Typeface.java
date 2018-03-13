@@ -883,6 +883,15 @@ public class Typeface {
     }
 
     /**
+     * This method is used by supportlib-v27.
+     * TODO: Remove private API use in supportlib: http://b/72665240
+     */
+    private static Typeface createFromFamiliesWithDefault(FontFamily[] families, int weight,
+                int italic) {
+        return createFromFamiliesWithDefault(families, DEFAULT_FAMILY, weight, italic);
+    }
+
+    /**
      * Create a new typeface from an array of font families, including
      * also the font families in the fallback list.
      * @param fallbackName the family name. If given families don't support characters, the
