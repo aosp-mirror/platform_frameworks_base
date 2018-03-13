@@ -17,7 +17,6 @@
 package com.android.server.pm;
 
 import static android.content.pm.PackageManager.INSTALL_FAILED_ABORTED;
-import static android.content.pm.PackageManager.INSTALL_FAILED_BAD_DEX_METADATA;
 import static android.content.pm.PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
@@ -74,6 +73,7 @@ import android.os.ParcelableException;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.RevocableFileDescriptor;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.system.ErrnoException;
@@ -111,9 +111,9 @@ import java.io.FileDescriptor;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -153,6 +153,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String ATTR_VOLUME_UUID = "volumeUuid";
     private static final String ATTR_NAME = "name";
     private static final String ATTR_INSTALL_REASON = "installRason";
+
+    private static final String PROPERTY_NAME_INHERIT_NATIVE = "pi.inherit_native_on_dont_kill";
 
     // TODO: enforce INSTALL_ALLOW_TEST
     // TODO: enforce INSTALL_ALLOW_DOWNGRADE
@@ -254,6 +256,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private final List<File> mResolvedInheritedFiles = new ArrayList<>();
     @GuardedBy("mLock")
     private final List<String> mResolvedInstructionSets = new ArrayList<>();
+    @GuardedBy("mLock")
+    private final List<String> mResolvedNativeLibPaths = new ArrayList<>();
     @GuardedBy("mLock")
     private File mInheritedFilesBase;
 
@@ -971,6 +975,26 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         final File oatDir = new File(toDir, "oat");
                         createOatDirs(mResolvedInstructionSets, oatDir);
                     }
+                    // pre-create lib dirs for linking if necessary
+                    if (!mResolvedNativeLibPaths.isEmpty()) {
+                        for (String libPath : mResolvedNativeLibPaths) {
+                            // "/lib/arm64" -> ["lib", "arm64"]
+                            final int splitIndex = libPath.lastIndexOf('/');
+                            if (splitIndex < 0 || splitIndex >= libPath.length() - 1) {
+                                Slog.e(TAG, "Skipping native library creation for linking due to "
+                                        + "invalid path: " + libPath);
+                                continue;
+                            }
+                            final String libDirPath = libPath.substring(1, splitIndex);
+                            final File libDir = new File(toDir, libDirPath);
+                            if (!libDir.exists()) {
+                                NativeLibraryHelper.createNativeLibrarySubdir(libDir);
+                            }
+                            final String archDirPath = libPath.substring(splitIndex + 1);
+                            NativeLibraryHelper.createNativeLibrarySubdir(
+                                    new File(libDir, archDirPath));
+                        }
+                    }
                     linkFiles(fromFiles, toDir, mInheritedFilesBase);
                 } else {
                     // TODO: this should delegate to DCS so the system process
@@ -988,7 +1012,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         computeProgressLocked(true);
 
         // Unpack native libraries
-        extractNativeLibraries(mResolvedStageDir, params.abiOverride);
+        extractNativeLibraries(mResolvedStageDir, params.abiOverride, mayInheritNativeLibs());
 
         // We've reached point of no return; call into PMS to install the stage.
         // Regardless of success or failure we always destroy session.
@@ -1025,6 +1049,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         "Could not rename file " + from + " to " + to);
             }
         }
+    }
+
+    /**
+     * Returns true if the session should attempt to inherit any existing native libraries already
+     * extracted at the current install location. This is necessary to prevent double loading of
+     * native libraries already loaded by the running app.
+     */
+    private boolean mayInheritNativeLibs() {
+        return SystemProperties.getBoolean(PROPERTY_NAME_INHERIT_NATIVE, true) &&
+                params.mode == SessionParams.MODE_INHERIT_EXISTING &&
+                (params.installFlags & PackageManager.DONT_KILL_APP) != 0;
     }
 
     /**
@@ -1249,6 +1284,38 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     }
                 }
             }
+
+            // Inherit native libraries for DONT_KILL sessions.
+            if (mayInheritNativeLibs() && removeSplitList.isEmpty()) {
+                File[] libDirs = new File[]{
+                        new File(packageInstallDir, NativeLibraryHelper.LIB_DIR_NAME),
+                        new File(packageInstallDir, NativeLibraryHelper.LIB64_DIR_NAME)};
+                for (File libDir : libDirs) {
+                    if (!libDir.exists() || !libDir.isDirectory()) {
+                        continue;
+                    }
+                    final List<File> libDirsToInherit = new LinkedList<>();
+                    for (File archSubDir : libDir.listFiles()) {
+                        if (!archSubDir.isDirectory()) {
+                            continue;
+                        }
+                        String relLibPath;
+                        try {
+                            relLibPath = getRelativePath(archSubDir, packageInstallDir);
+                        } catch (IOException e) {
+                            Slog.e(TAG, "Skipping linking of native library directory!", e);
+                            // shouldn't be possible, but let's avoid inheriting these to be safe
+                            libDirsToInherit.clear();
+                            break;
+                        }
+                        if (!mResolvedNativeLibPaths.contains(relLibPath)) {
+                            mResolvedNativeLibPaths.add(relLibPath);
+                        }
+                        libDirsToInherit.addAll(Arrays.asList(archSubDir.listFiles()));
+                    }
+                    mResolvedInheritedFiles.addAll(libDirsToInherit);
+                }
+            }
         }
     }
 
@@ -1374,11 +1441,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         Slog.d(TAG, "Copied " + fromFiles.size() + " files into " + toDir);
     }
 
-    private static void extractNativeLibraries(File packageDir, String abiOverride)
+    private static void extractNativeLibraries(File packageDir, String abiOverride, boolean inherit)
             throws PackageManagerException {
-        // Always start from a clean slate
         final File libDir = new File(packageDir, NativeLibraryHelper.LIB_DIR_NAME);
-        NativeLibraryHelper.removeNativeBinariesFromDirLI(libDir, true);
+        if (!inherit) {
+            // Start from a clean slate
+            NativeLibraryHelper.removeNativeBinariesFromDirLI(libDir, true);
+        }
 
         NativeLibraryHelper.Handle handle = null;
         try {
