@@ -25,7 +25,6 @@
     <LinearLayout
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:layout_marginTop="@dimen/volume_dialog_slider_margin_top"
         android:gravity="center"
         android:layout_gravity="center"
         android:orientation="vertical" >
@@ -42,6 +41,8 @@
         <FrameLayout
             android:id="@+id/volume_row_slider_frame"
             android:layout_width="match_parent"
+            android:layout_marginTop="@dimen/volume_dialog_slider_margin_top"
+            android:layout_marginBottom="@dimen/volume_dialog_slider_margin_bottom"
             android:layoutDirection="rtl"
             android:layout_height="@dimen/volume_dialog_slider_height">
             <SeekBar
@@ -60,6 +61,7 @@
             android:layout_width="@dimen/volume_dialog_tap_target_size"
             android:layout_height="@dimen/volume_dialog_tap_target_size"
             android:background="?android:selectableItemBackgroundBorderless"
+            android:layout_marginBottom="@dimen/volume_dialog_row_margin_bottom"
             android:tint="@color/accent_tint_color_selector"
             android:soundEffectsEnabled="false" />
     </LinearLayout>
