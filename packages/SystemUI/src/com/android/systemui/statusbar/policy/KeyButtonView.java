@@ -126,7 +126,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 
         mRipple = new KeyButtonRipple(context, this);
-        mVibratorHelper = new VibratorHelper(context);
+        mVibratorHelper = Dependency.get(VibratorHelper.class);
         mOverviewProxyService = Dependency.get(OverviewProxyService.class);
         setBackground(mRipple);
     }
