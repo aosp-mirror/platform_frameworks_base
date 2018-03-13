@@ -20,7 +20,6 @@ import android.app.Notification;
 import android.content.Intent;
 import android.media.MediaSession2;
 import android.media.MediaSessionService2.MediaNotification;
-import android.media.PlaybackState2;
 import android.os.IBinder;
 
 /**
