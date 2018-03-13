@@ -115,7 +115,9 @@ private:
     /**
      * Save the configs to disk.
      */
-    void update_saved_configs_locked(const ConfigKey& key, const StatsdConfig& config);
+    void update_saved_configs_locked(const ConfigKey& key,
+                                     const std::vector<uint8_t>& buffer,
+                                     const int numBytes);
 
     /**
      * Remove saved configs from disk.
@@ -123,7 +125,7 @@ private:
     void remove_saved_configs(const ConfigKey& key);
 
     /**
-     * The Configs that have been set. Each config should
+     * Config keys that have been set.
      */
     std::set<ConfigKey> mConfigs;
 
