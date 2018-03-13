@@ -836,20 +836,30 @@ public class MediaController2 implements AutoCloseable {
     }
 
     /**
-     * Sets the index of current DataSourceDesc in the play list to be played.
+     * Skips to the item in the playlist.
+     * <p>
+     * This calls {@link MediaPlaylistAgent#skipToPlaylistItem(MediaItem2)}.
      *
-     * @param item the index of DataSourceDesc in the play list you want to play
-     * @throws IllegalArgumentException if the play list is null
-     * @throws NullPointerException if index is outside play list range
+     * @param item The item in the playlist you want to play
      */
     public void skipToPlaylistItem(@NonNull MediaItem2 item) {
         mProvider.skipToPlaylistItem_impl(item);
     }
 
+    /**
+     * Skips to the previous item in the playlist.
+     * <p>
+     * This calls {@link MediaPlaylistAgent#skipToPreviousItem()}.
+     */
     public void skipToPreviousItem() {
         mProvider.skipToPreviousItem_impl();
     }
 
+    /**
+     * Skips to the next item in the playlist.
+     * <p>
+     * This calls {@link MediaPlaylistAgent#skipToNextItem()}.
+     */
     public void skipToNextItem() {
         mProvider.skipToNextItem_impl();
     }
