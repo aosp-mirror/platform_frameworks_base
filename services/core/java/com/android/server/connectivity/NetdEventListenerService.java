@@ -101,9 +101,12 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
 
 
     /**
-     * There are only 2 possible callbacks.
+     * There are only 3 possible callbacks.
      *
-     * mNetdEventCallbackList[CALLBACK_CALLER_DEVICE_POLICY].
+     * mNetdEventCallbackList[CALLBACK_CALLER_CONNECTIVITY_SERVICE]
+     * Callback registered/unregistered by ConnectivityService.
+     *
+     * mNetdEventCallbackList[CALLBACK_CALLER_DEVICE_POLICY]
      * Callback registered/unregistered when logging is being enabled/disabled in DPM
      * by the device owner. It's DevicePolicyManager's responsibility to ensure that.
      *
@@ -112,6 +115,7 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
      */
     @GuardedBy("this")
     private static final int[] ALLOWED_CALLBACK_TYPES = {
+        INetdEventCallback.CALLBACK_CALLER_CONNECTIVITY_SERVICE,
         INetdEventCallback.CALLBACK_CALLER_DEVICE_POLICY,
         INetdEventCallback.CALLBACK_CALLER_NETWORK_WATCHLIST
     };
@@ -204,6 +208,19 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
         for (INetdEventCallback callback : mNetdEventCallbackList) {
             if (callback != null) {
                 callback.onDnsEvent(hostname, ipAddresses, ipAddressesCount, timestamp, uid);
+            }
+        }
+    }
+
+    @Override
+    // Called concurrently by multiple binder threads.
+    // This method must not block or perform long-running operations.
+    public synchronized void onPrivateDnsValidationEvent(int netId,
+            String ipAddress, String hostname, boolean validated)
+            throws RemoteException {
+        for (INetdEventCallback callback : mNetdEventCallbackList) {
+            if (callback != null) {
+                callback.onPrivateDnsValidationEvent(netId, ipAddress, hostname, validated);
             }
         }
     }
