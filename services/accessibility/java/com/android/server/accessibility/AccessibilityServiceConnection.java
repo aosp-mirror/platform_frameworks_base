@@ -165,7 +165,14 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         }
     }
 
-    public void initializeService() {
+    @Override
+    public AccessibilityServiceInfo getServiceInfo() {
+        // Update crashed data
+        mAccessibilityServiceInfo.crashed = mWasConnectedAndDied;
+        return mAccessibilityServiceInfo;
+    }
+
+    private void initializeService() {
         IAccessibilityServiceClient serviceInterface = null;
         synchronized (mLock) {
             UserState userState = mUserStateWeakReference.get();
