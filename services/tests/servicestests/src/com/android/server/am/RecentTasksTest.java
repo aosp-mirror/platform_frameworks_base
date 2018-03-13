@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -24,6 +25,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static org.junit.Assert.assertFalse;
@@ -74,7 +76,7 @@ import java.util.Random;
 import java.util.Set;
 
 /**
- * runtest --path frameworks/base/services/tests/servicestests/src/com/android/server/am/RecentTasksTest.java
+ * atest FrameworksServicesTests:RecentTasksTest
  */
 @MediumTest
 @Presubmit
@@ -145,7 +147,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         mRecentTasks = (TestRecentTasks) mService.getRecentTasks();
         mRecentTasks.loadParametersFromResources(mContext.getResources());
         mHomeStack = mService.mStackSupervisor.getDefaultDisplay().createStack(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, true /* onTop */);
         mStack = mService.mStackSupervisor.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         ((MyTestActivityStackSupervisor) mService.mStackSupervisor).setHomeStack(mHomeStack);
@@ -236,7 +238,7 @@ public class RecentTasksTest extends ActivityTestsBase {
     }
 
     @Test
-    public void testAddTasksMultipleTasks_expectNoTrim() throws Exception {
+    public void testAddTasksMultipleDocumentTasks_expectNoTrim() throws Exception {
         // Add same multiple-task document tasks does not trim the first tasks
         TaskRecord documentTask1 = createDocumentTask(".DocumentTask1",
                 FLAG_ACTIVITY_MULTIPLE_TASK);
@@ -249,6 +251,50 @@ public class RecentTasksTest extends ActivityTestsBase {
         assertTrue(mCallbacksRecorder.added.contains(documentTask2));
         assertTrue(mCallbacksRecorder.trimmed.isEmpty());
         assertTrue(mCallbacksRecorder.removed.isEmpty());
+    }
+
+    @Test
+    public void testAddTasksMultipleTasks_expectRemovedNoTrim() throws Exception {
+        // Add multiple same-affinity non-document tasks, ensure that it removes the other task,
+        // but that it does not trim it
+        TaskRecord task1 = createTaskBuilder(".Task1")
+                .setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_MULTIPLE_TASK)
+                .build();
+        TaskRecord task2 = createTaskBuilder(".Task1")
+                .setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_MULTIPLE_TASK)
+                .build();
+        mRecentTasks.add(task1);
+        assertTrue(mCallbacksRecorder.added.size() == 1);
+        assertTrue(mCallbacksRecorder.added.contains(task1));
+        assertTrue(mCallbacksRecorder.trimmed.isEmpty());
+        assertTrue(mCallbacksRecorder.removed.isEmpty());
+        mCallbacksRecorder.clear();
+        mRecentTasks.add(task2);
+        assertTrue(mCallbacksRecorder.added.size() == 1);
+        assertTrue(mCallbacksRecorder.added.contains(task2));
+        assertTrue(mCallbacksRecorder.trimmed.isEmpty());
+        assertTrue(mCallbacksRecorder.removed.size() == 1);
+        assertTrue(mCallbacksRecorder.removed.contains(task1));
+    }
+
+    @Test
+    public void testAddTasksDifferentStacks_expectNoRemove() throws Exception {
+        // Adding the same task with different activity types should not trigger removal of the
+        // other task
+        TaskRecord task1 = createTaskBuilder(".Task1")
+                .setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_MULTIPLE_TASK)
+                .setStack(mHomeStack).build();
+        TaskRecord task2 = createTaskBuilder(".Task1")
+                .setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_MULTIPLE_TASK)
+                .setStack(mStack).build();
+        mRecentTasks.add(task1);
+        mRecentTasks.add(task2);
+        assertTrue(mCallbacksRecorder.added.size() == 2);
+        assertTrue(mCallbacksRecorder.added.contains(task1));
+        assertTrue(mCallbacksRecorder.added.contains(task2));
+        assertTrue(mCallbacksRecorder.trimmed.isEmpty());
+        assertTrue(mCallbacksRecorder.removed.isEmpty());
+
     }
 
     @Test
