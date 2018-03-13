@@ -145,7 +145,7 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     @Test
     public void testShow_resetsSecuritySelection() {
         mBouncer.show(false);
-        verify(mKeyguardHostView, never());
+        verify(mKeyguardHostView, never()).showPrimarySecurityScreen();
 
         mBouncer.hide(false);
         mBouncer.show(true);

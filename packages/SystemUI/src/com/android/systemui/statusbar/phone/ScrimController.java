@@ -449,7 +449,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         if (mNeedsDrawableColorUpdate) {
             mNeedsDrawableColorUpdate = false;
             final GradientColors currentScrimColors;
-            if (mState == ScrimState.KEYGUARD || mState == ScrimState.BOUNCER_OCCLUDED
+            if (mState == ScrimState.KEYGUARD || mState == ScrimState.BOUNCER_SCRIMMED
                     || mState == ScrimState.BOUNCER) {
                 // Always animate color changes if we're seeing the keyguard
                 mScrimInFront.setColors(mLockColors, true /* animated */);

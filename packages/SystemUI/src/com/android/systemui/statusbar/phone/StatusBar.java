@@ -4631,9 +4631,10 @@ public class StatusBar extends SystemUI implements DemoMode,
                 != FingerprintUnlockController.MODE_UNLOCK);
 
         if (mBouncerShowing) {
-            final boolean qsExpanded = mQSPanel != null && mQSPanel.isExpanded();
-            mScrimController.transitionTo(mIsOccluded || qsExpanded ?
-                    ScrimState.BOUNCER_OCCLUDED : ScrimState.BOUNCER);
+            // Bouncer needs the front scrim when it's on top of an activity,
+            // tapping on a notification or editing QS.
+            mScrimController.transitionTo(mIsOccluded || mNotificationPanel.needsScrimming() ?
+                    ScrimState.BOUNCER_SCRIMMED : ScrimState.BOUNCER);
         } else if (mLaunchCameraOnScreenTurningOn || isInLaunchTransition()) {
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
         } else if (mBrightnessMirrorVisible) {
