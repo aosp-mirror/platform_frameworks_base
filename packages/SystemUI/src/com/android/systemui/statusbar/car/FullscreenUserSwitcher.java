@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.car;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.res.Resources;
-import android.os.CountDownTimer;
 import android.view.View;
 import android.view.ViewStub;
 import android.widget.ProgressBar;
@@ -36,15 +35,10 @@ public class FullscreenUserSwitcher {
     private final View mParent;
     private final UserGridView mUserGridView;
     private final UserSwitcherController mUserSwitcherController;
-    private final ProgressBar mProgressBar;
     private final ProgressBar mSwitchingUsers;
-    private final int mLoginTimeoutMs;
-    private final int mAnimUpdateIntervalMs;
     private final int mShortAnimDuration;
 
     private boolean mShowing;
-
-    private CountDownTimer mTimer;
 
     public FullscreenUserSwitcher(StatusBar statusBar,
             UserSwitcherController userSwitcherController,
@@ -63,24 +57,11 @@ public class FullscreenUserSwitcher {
         PageIndicator pageIndicator = mContainer.findViewById(R.id.user_switcher_page_indicator);
         pageIndicator.setupWithViewPager(mUserGridView);
 
-        mProgressBar = mContainer.findViewById(R.id.countdown_progress);
         Resources res = mContainer.getResources();
-        mLoginTimeoutMs = res.getInteger(R.integer.car_user_switcher_timeout_ms);
-        mAnimUpdateIntervalMs = res.getInteger(R.integer.car_user_switcher_anim_update_ms);
         mShortAnimDuration = res.getInteger(android.R.integer.config_shortAnimTime);
 
         mContainer.findViewById(R.id.start_driving).setOnClickListener(v -> {
-            cancelTimer();
             automaticallySelectUser();
-        });
-
-        // Any interaction with the screen should cancel the timer.
-        mContainer.setOnClickListener(v -> {
-            cancelTimer();
-        });
-        mUserGridView.setOnTouchListener((v, e) -> {
-            cancelTimer();
-            return false;
         });
 
         mSwitchingUsers = mParent.findViewById(R.id.switching_users);
@@ -127,42 +108,12 @@ public class FullscreenUserSwitcher {
         }
         mShowing = true;
         mParent.setVisibility(View.VISIBLE);
-        cancelTimer();
-
-        // This would be the case if we were in the middle of a switch.
-        if (mProgressBar.getVisibility() != View.VISIBLE) {
-            return;
-        }
-
-        mTimer = new CountDownTimer(mLoginTimeoutMs, mAnimUpdateIntervalMs) {
-            @Override
-            public void onTick(long msUntilFinished) {
-                int elapsed = mLoginTimeoutMs - (int) msUntilFinished;
-                mProgressBar.setProgress((int) elapsed, true /* animate */);
-            }
-
-            @Override
-            public void onFinish() {
-                mProgressBar.setProgress(mLoginTimeoutMs, true /* animate */);
-                automaticallySelectUser();
-            }
-        };
-        mTimer.start();
     }
 
     public void hide() {
         mShowing = false;
-        cancelTimer();
         toggleSwitchInProgress(false);
         mParent.setVisibility(View.GONE);
-    }
-
-    private void cancelTimer() {
-        if (mTimer != null) {
-            mTimer.cancel();
-            mTimer = null;
-            mProgressBar.setProgress(0, true /* animate */);
-        }
     }
 
     private void automaticallySelectUser() {

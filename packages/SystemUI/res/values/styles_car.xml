@@ -16,14 +16,6 @@
 -->
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
-    <style name="CarUserSwitcher.ProgressBar" parent="@android:style/Widget.ProgressBar.Horizontal">
-        <item name="android:progressDrawable">@drawable/car_progress_bar</item>
-        <item name="android:min">0</item>
-        <item name="android:max">@integer/car_user_switcher_timeout_ms</item>
-        <item name="android:progress">0</item>
-        <item name="android:interpolator">@android:anim/linear_interpolator</item>
-    </style>
-
     <style name="CarUserSwitcher.StartDrivingButton" parent="@android:style/Widget.Material.Button">
         <item name="android:background">@drawable/car_round_button</item>
         <item name="android:textSize">@dimen/car_start_driving_text_size</item>
