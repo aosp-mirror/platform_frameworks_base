@@ -2196,7 +2196,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         final ActivityRecord r = task.getTopActivity();
-        currentStack.moveTaskToFrontLocked(task, false /* noAnimation */, options,
+        currentStack.moveTaskToFrontLocked(task, r, false /* noAnimation */, options,
                 r == null ? null : r.appTimeTracker, reason);
 
         if (DEBUG_STACK) Slog.d(TAG_STACK,
