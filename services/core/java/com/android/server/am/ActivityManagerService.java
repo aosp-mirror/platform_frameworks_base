@@ -256,6 +256,7 @@ import android.app.RemoteAction;
 import android.app.WaitResult;
 import android.app.WindowConfiguration.ActivityType;
 import android.app.WindowConfiguration.WindowingMode;
+import android.app.admin.DevicePolicyCache;
 import android.app.admin.DevicePolicyManager;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
@@ -13726,9 +13727,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             userId = activity.userId;
         }
-        DevicePolicyManager dpm = (DevicePolicyManager) mContext.getSystemService(
-                Context.DEVICE_POLICY_SERVICE);
-        return (dpm == null) || (!dpm.getScreenCaptureDisabled(null, userId));
+        return !DevicePolicyCache.getInstance().getScreenCaptureDisabled(userId);
     }
 
     @Override

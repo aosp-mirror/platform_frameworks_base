@@ -181,9 +181,10 @@ interface IWindowManager
     void setStrictModeVisualIndicatorPreference(String enabled);
 
     /**
-     * Set whether screen capture is disabled for all windows of a specific user
+     * Set whether screen capture is disabled for all windows of a specific user from
+     * the device policy cache.
      */
-    void setScreenCaptureDisabled(int userId, boolean disabled);
+    void refreshScreenCaptureDisabled(int userId);
 
     // These can only be called with the SET_ORIENTATION permission.
     /**
