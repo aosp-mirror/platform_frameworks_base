@@ -973,11 +973,6 @@ framework_docs_args = "-android -manifest $(location core/res/AndroidManifest.xm
 doc_defaults {
     name: "framework-docs-default",
     srcs: [
-        // test mock src files.
-        "test-mock/src/android/test/mock/**/*.java",
-        // test runner excluding mock src files.
-        "test-runner/src/**/*.java",
-        "test-base/src/**/*.java",
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
         ":openjdk_javadoc_files",
