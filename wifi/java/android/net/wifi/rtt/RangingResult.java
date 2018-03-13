@@ -189,7 +189,8 @@ public final class RangingResult implements Parcelable {
     }
 
     /**
-     * @return The Location Configuration Information (LCI) as self-reported by the peer.
+     * @return The Location Configuration Information (LCI) as self-reported by the peer. The format
+     * is specified in the IEEE 802.11-2016 specifications, section 9.4.2.22.10.
      * <p>
      * Note: the information is NOT validated - use with caution. Consider validating it with
      * other sources of information before using it.
@@ -207,7 +208,8 @@ public final class RangingResult implements Parcelable {
     }
 
     /**
-     * @return The Location Civic report (LCR) as self-reported by the peer.
+     * @return The Location Civic report (LCR) as self-reported by the peer. The format
+     * is specified in the IEEE 802.11-2016 specifications, section 9.4.2.22.13.
      * <p>
      * Note: the information is NOT validated - use with caution. Consider validating it with
      * other sources of information before using it.
