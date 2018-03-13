@@ -313,7 +313,9 @@ class SurfaceAnimator {
      */
     void writeToProto(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        proto.write(ANIMATION_ADAPTER, mAnimation != null ? mAnimation.toString() : "null");
+        if (mAnimation != null) {
+            mAnimation.writeToProto(proto, ANIMATION_ADAPTER);
+        }
         if (mLeash != null){
             mLeash.writeToProto(proto, LEASH);
         }
@@ -322,8 +324,18 @@ class SurfaceAnimator {
     }
 
     void dump(PrintWriter pw, String prefix) {
-        pw.print(prefix); pw.print("mAnimation="); pw.print(mAnimation);
-        pw.print(" mLeash="); pw.println(mLeash);
+        pw.print(prefix); pw.print("mLeash="); pw.print(mLeash);
+        if (mAnimationStartDelayed) {
+            pw.print(" mAnimationStartDelayed="); pw.println(mAnimationStartDelayed);
+        } else {
+            pw.println();
+        }
+        pw.print(prefix); pw.println("Animation:");
+        if (mAnimation != null) {
+            mAnimation.dump(pw, prefix + "  ");
+        } else {
+            pw.print(prefix); pw.println("null");
+        }
     }
 
     /**

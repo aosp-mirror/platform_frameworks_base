@@ -16,11 +16,17 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.proto.AnimationAdapterProto.LOCAL;
+import static com.android.server.wm.proto.LocalAnimationAdapterProto.ANIMATION_SPEC;
+
 import android.os.SystemClock;
+import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
+
+import java.io.PrintWriter;
 
 /**
  * Animation that can be executed without holding the window manager lock. See
@@ -72,6 +78,18 @@ class LocalAnimationAdapter implements AnimationAdapter {
     @Override
     public long getStatusBarTransitionsStartTime() {
         return mSpec.calculateStatusBarTransitionStartTime();
+    }
+
+    @Override
+    public void dump(PrintWriter pw, String prefix) {
+        mSpec.dump(pw, prefix);
+    }
+
+    @Override
+    public void writeToProto(ProtoOutputStream proto) {
+        final long token = proto.start(LOCAL);
+        mSpec.writeToProto(proto, ANIMATION_SPEC);
+        proto.end(token);
     }
 
     /**
@@ -127,5 +145,15 @@ class LocalAnimationAdapter implements AnimationAdapter {
         default boolean canSkipFirstFrame() {
             return false;
         }
+
+        void dump(PrintWriter pw, String prefix);
+
+        default void writeToProto(ProtoOutputStream proto, long fieldId) {
+            final long token = proto.start(fieldId);
+            writeToProtoInner(proto);
+            proto.end(token);
+        }
+
+        void writeToProtoInner(ProtoOutputStream proto);
     }
 }
