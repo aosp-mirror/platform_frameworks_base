@@ -9,7 +9,7 @@
         android:targetSdkVersion="18" />
 
     <application
-        android:name="android.support.multidex.MultiDexApplication"
+        android:name="androidx.multidex.MultiDexApplication"
         android:allowBackup="true"
         android:label="MultiDexLegacyVersionedTestApp_v1">
         <activity
