@@ -61,7 +61,7 @@ import java.util.concurrent.Executor;
  * sessions can be created to provide finer grain controls of media.
  * <p>
  * If you want to support background playback, {@link MediaSessionService2} is preferred
- * instead. With it, your playback can be revived even after you've finished playback. See
+ * instead. With it, your playback can be revived even after playback is finished. See
  * {@link MediaSessionService2} for details.
  * <p>
  * A session can be obtained by {@link Builder}. The owner of the session may pass its session token
@@ -254,7 +254,7 @@ public class MediaSession2 implements AutoCloseable {
     public static final int COMMAND_CODE_PLAYLIST_GET_LIST = 18;
 
     /**
-     * Command code for {@link MediaController2#setPlaylist(List, MediaMetadata2).
+     * Command code for {@link MediaController2#setPlaylist(List, MediaMetadata2)}.
      * <p>
      * Command would be sent directly to the playlist agent if the session doesn't reject the
      * request through the
@@ -263,7 +263,7 @@ public class MediaSession2 implements AutoCloseable {
     public static final int COMMAND_CODE_PLAYLIST_SET_LIST = 19;
 
     /**
-     * Command code for {@link MediaController2#getPlaylistMetadata()} ()}. This will expose
+     * Command code for {@link MediaController2#getPlaylistMetadata()}. This will expose
      * metadata information to the controller.
      * *
      * Command code for {@link MediaController2#setPlaylist(List, MediaMetadata2)} and
@@ -827,7 +827,11 @@ public class MediaSession2 implements AutoCloseable {
                 @NonNull MediaPlayerBase player, @NonNull MediaItem2 item, @BuffState int state) { }
 
         /**
-         * Called when a playlist is changed.
+         * Called when a playlist is changed from the {@link MediaPlaylistAgent}.
+         * <p>
+         * This is called when the underlying agent has called
+         * {@link MediaPlaylistAgent.PlaylistEventCallback#onPlaylistChanged(MediaPlaylistAgent,
+         * List, MediaMetadata2)}.
          *
          * @param session the session for this event
          * @param playlistAgent playlist agent for this event
@@ -1681,7 +1685,7 @@ public class MediaSession2 implements AutoCloseable {
      * <p>
      * If it's not set, playback wouldn't happen for the item without data source descriptor.
      * <p>
-     * The helper will be run on the executor that you've specified by the
+     * The helper will be run on the executor that was specified by
      * {@link Builder#setSessionCallback(Executor, SessionCallback)}.
      *
      * @param helper a data source missing helper.
@@ -1705,40 +1709,46 @@ public class MediaSession2 implements AutoCloseable {
     }
 
     /**
-     * Return the playlist which is lastly set.
+     * Returns the playlist from the {@link MediaPlaylistAgent}.
+     * <p>
+     * This list may differ with the list that was specified with
+     * {@link #setPlaylist(List, MediaMetadata2)} depending on the {@link MediaPlaylistAgent}
+     * implementation. Use media items returned here for other playlist agent APIs such as
+     * {@link MediaPlaylistAgent#skipToPlaylistItem(MediaItem2)}.
      *
      * @return playlist
+     * @see MediaPlaylistAgent#getPlaylist()
+     * @see SessionCallback#onPlaylistChanged(
+     *          MediaSession2, MediaPlaylistAgent, List, MediaMetadata2)
      */
     public List<MediaItem2> getPlaylist() {
         return mProvider.getPlaylist_impl();
     }
 
     /**
-     * Set a list of {@link MediaItem2} as the current play list.
-     *
-     * @param playlist A list of {@link MediaItem2} objects to set as a play list.
-     * @throws IllegalArgumentException if given {@param playlist} is null.
-     * @hide
-     */
-    // TODO(jaewan): Remove
-    public void setPlaylist(@NonNull List<MediaItem2> playlist) {
-        mProvider.setPlaylist_impl(playlist);
-    }
-
-    /**
-     * Set a list of {@link MediaItem2} as the current play list. Ensure uniqueness in the
-     * {@link MediaItem2} in the playlist so session can uniquely identity individual items.
+     * Sets a list of {@link MediaItem2} to the {@link MediaPlaylistAgent}. Ensure uniqueness of
+     * each {@link MediaItem2} in the playlist so the session can uniquely identity individual
+     * items.
      * <p>
-     * You may specify a {@link MediaItem2} without {@link DataSourceDesc}. However, in that case,
-     * you should set {@link OnDataSourceMissingHelper} for player to prepare.
+     * This may be an asynchronous call, and {@link MediaPlaylistAgent} may keep the copy of the
+     * list. Wait for {@link SessionCallback#onPlaylistChanged(MediaSession2, MediaPlaylistAgent,
+     * List, MediaMetadata2)} to know the operation finishes.
+     * <p>
+     * You may specify a {@link MediaItem2} without {@link DataSourceDesc}. In that case,
+     * {@link MediaPlaylistAgent} has responsibility to dynamically query {@link DataSourceDesc}
+     * when such media item is ready for preparation or play. Default implementation needs
+     * {@link OnDataSourceMissingHelper} for such case.
      *
      * @param list A list of {@link MediaItem2} objects to set as a play list.
-     * @throws IllegalArgumentException if given list is {@code null}, or has duplicated media item.
+     * @throws IllegalArgumentException if given list is {@code null}, or has duplicated media
+     * items.
+     * @see MediaPlaylistAgent#setPlaylist(List, MediaMetadata2)
+     * @see SessionCallback#onPlaylistChanged(
+     *          MediaSession2, MediaPlaylistAgent, List, MediaMetadata2)
      * @see #setOnDataSourceMissingHelper
      */
     public void setPlaylist(@NonNull List<MediaItem2> list, @Nullable MediaMetadata2 metadata) {
-        // TODO(jaewan): Handle metadata here (b/74174649)
-        // TODO(jaewan): Handle list change (b/74326040)
+        mProvider.setPlaylist_impl(list, metadata);
     }
 
     /**
