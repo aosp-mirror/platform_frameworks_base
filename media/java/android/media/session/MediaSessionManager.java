@@ -775,8 +775,7 @@ public final class MediaSessionManager {
                         public void run() {
                             final Context context = mContext;
                             if (context != null) {
-                                ArrayList<MediaController> controllers
-                                        = new ArrayList<MediaController>();
+                                ArrayList<MediaController> controllers = new ArrayList<>();
                                 int size = tokens.size();
                                 for (int i = 0; i < size; i++) {
                                     controllers.add(new MediaController(context, tokens.get(i)));
@@ -814,10 +813,16 @@ public final class MediaSessionManager {
         private final ISessionTokensListener.Stub mStub = new ISessionTokensListener.Stub() {
             @Override
             public void onSessionTokensChanged(final List<Bundle> bundles) {
-                mExecutor.execute(() -> {
-                    List<SessionToken2> tokens = toTokenList(mContext, bundles);
-                    mListener.onSessionTokensChanged(tokens);
-                });
+                final Executor executor = mExecutor;
+                if (executor != null) {
+                    executor.execute(() -> {
+                        final Context context = mContext;
+                        final OnSessionTokensChangedListener listener = mListener;
+                        if (context != null && listener != null) {
+                            listener.onSessionTokensChanged(toTokenList(context, bundles));
+                        }
+                    });
+                }
             }
         };
 
