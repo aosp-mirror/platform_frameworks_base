@@ -240,11 +240,16 @@ public class RecentsAnimationController {
             return;
         }
         try {
-            final RemoteAnimationTarget[] appAnimations =
-                    new RemoteAnimationTarget[mPendingAnimations.size()];
+            final ArrayList<RemoteAnimationTarget> appAnimations = new ArrayList<>();
             for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
-                appAnimations[i] = mPendingAnimations.get(i).createRemoteAnimationApp();
+                final RemoteAnimationTarget target =
+                        mPendingAnimations.get(i).createRemoteAnimationApp();
+                if (target != null) {
+                    appAnimations.add(target);
+                }
             }
+            final RemoteAnimationTarget[] appTargets = appAnimations.toArray(
+                    new RemoteAnimationTarget[appAnimations.size()]);
             mPendingStart = false;
 
             final Rect minimizedHomeBounds =
@@ -253,7 +258,7 @@ public class RecentsAnimationController {
             final Rect contentInsets =
                     mHomeAppToken != null && mHomeAppToken.findMainWindow() != null
                             ? mHomeAppToken.findMainWindow().mContentInsets : null;
-            mRunner.onAnimationStart_New(mController, appAnimations, contentInsets,
+            mRunner.onAnimationStart_New(mController, appTargets, contentInsets,
                     minimizedHomeBounds);
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to start recents animation", e);
@@ -367,6 +372,9 @@ public class RecentsAnimationController {
             container.getRelativePosition(position);
             container.getBounds(bounds);
             final WindowState mainWindow = mTask.getTopVisibleAppMainWindow();
+            if (mainWindow == null) {
+                return null;
+            }
             mTarget = new RemoteAnimationTarget(mTask.mTaskId, MODE_CLOSING, mCapturedLeash,
                     !mTask.fillsParent(), mainWindow.mWinAnimator.mLastClipRect,
                     mainWindow.mContentInsets, mTask.getPrefixOrderIndex(), position, bounds,
