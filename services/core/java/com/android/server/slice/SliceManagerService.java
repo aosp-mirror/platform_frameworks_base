@@ -16,6 +16,8 @@
 
 package com.android.server.slice;
 
+import static android.app.usage.UsageEvents.Event.SLICE_PINNED;
+import static android.app.usage.UsageEvents.Event.SLICE_PINNED_PRIV;
 import static android.content.ContentProvider.getUriWithoutUserId;
 import static android.content.ContentProvider.getUserIdFromUri;
 import static android.content.ContentProvider.maybeAddUserId;
@@ -31,6 +33,7 @@ import android.app.IActivityManager;
 import android.app.slice.ISliceManager;
 import android.app.slice.SliceManager;
 import android.app.slice.SliceSpec;
+import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -95,6 +98,7 @@ public class SliceManagerService extends ISliceManager.Stub {
     private final AtomicFile mSliceAccessFile;
     @GuardedBy("mAccessList")
     private final SliceFullAccessList mAccessList;
+    private final UsageStatsManagerInternal mAppUsageStats;
 
     public SliceManagerService(Context context) {
         this(context, createHandler().getLooper());
@@ -112,6 +116,7 @@ public class SliceManagerService extends ISliceManager.Stub {
         final File systemDir = new File(Environment.getDataDirectory(), "system");
         mSliceAccessFile = new AtomicFile(new File(systemDir, "slice_access.xml"));
         mAccessList = new SliceFullAccessList(mContext);
+        mAppUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
 
         synchronized (mSliceAccessFile) {
             if (!mSliceAccessFile.exists()) return;
@@ -166,8 +171,19 @@ public class SliceManagerService extends ISliceManager.Stub {
     public void pinSlice(String pkg, Uri uri, SliceSpec[] specs, IBinder token) throws RemoteException {
         verifyCaller(pkg);
         enforceAccess(pkg, uri);
-        uri = maybeAddUserId(uri, Binder.getCallingUserHandle().getIdentifier());
+        int user = Binder.getCallingUserHandle().getIdentifier();
+        uri = maybeAddUserId(uri, user);
         getOrCreatePinnedSlice(uri, pkg).pin(pkg, specs, token);
+
+        Uri finalUri = uri;
+        mHandler.post(() -> {
+            String slicePkg = getProviderPkg(finalUri, user);
+            if (slicePkg != null && !Objects.equals(pkg, slicePkg)) {
+                mAppUsageStats.reportEvent(slicePkg, user,
+                        isAssistant(pkg, user) || isDefaultHomeApp(pkg, user)
+                                ? SLICE_PINNED_PRIV : SLICE_PINNED);
+            }
+        });
     }
 
     @Override
@@ -352,36 +368,43 @@ public class SliceManagerService extends ISliceManager.Stub {
             if (getContext().checkUriPermission(uri, pid, uid,
                     Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != PERMISSION_GRANTED) {
                 // Last fallback (if the calling app owns the authority, then it can have access).
-                long ident = Binder.clearCallingIdentity();
-                try {
-                    IBinder token = new Binder();
-                    IActivityManager activityManager = ActivityManager.getService();
-                    ContentProviderHolder holder = null;
-                    String providerName = getUriWithoutUserId(uri).getAuthority();
-                    try {
-                        try {
-                            holder = activityManager.getContentProviderExternal(
-                                    providerName, getUserIdFromUri(uri, user), token);
-                            if (holder == null || holder.info == null
-                                    || !Objects.equals(holder.info.packageName, pkg)) {
-                                return PERMISSION_DENIED;
-                            }
-                        } finally {
-                            if (holder != null && holder.provider != null) {
-                                activityManager.removeContentProviderExternal(providerName, token);
-                            }
-                        }
-                    } catch (RemoteException e) {
-                        // Can't happen.
-                        e.rethrowAsRuntimeException();
-                    }
-                } finally {
-                    // I know, the double finally seems ugly, but seems safest for the identity.
-                    Binder.restoreCallingIdentity(ident);
+                if (!Objects.equals(getProviderPkg(uri, user), pkg)) {
+                    return PERMISSION_DENIED;
                 }
             }
         }
         return PERMISSION_GRANTED;
+    }
+
+    private String getProviderPkg(Uri uri, int user) {
+        long ident = Binder.clearCallingIdentity();
+        try {
+            IBinder token = new Binder();
+            IActivityManager activityManager = ActivityManager.getService();
+            ContentProviderHolder holder = null;
+            String providerName = getUriWithoutUserId(uri).getAuthority();
+            try {
+                try {
+                    holder = activityManager.getContentProviderExternal(
+                            providerName, getUserIdFromUri(uri, user), token);
+                    if (holder != null && holder.info != null) {
+                        return holder.info.packageName;
+                    } else {
+                        return null;
+                    }
+                } finally {
+                    if (holder != null && holder.provider != null) {
+                        activityManager.removeContentProviderExternal(providerName, token);
+                    }
+                }
+            } catch (RemoteException e) {
+                // Can't happen.
+                throw e.rethrowAsRuntimeException();
+            }
+        } finally {
+            // I know, the double finally seems ugly, but seems safest for the identity.
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     private void enforceCrossUser(String pkg, Uri uri) {
