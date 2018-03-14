@@ -418,8 +418,8 @@ public final class SubscribeConfig implements Parcelable {
          * notification. I.e. discovery will be triggered if we've found a matching publisher
          * (based on the other criteria in this configuration) <b>and</b> the distance to the
          * publisher is larger than the value specified in this API. Can be used in conjunction with
-         * {@link #setMaxDistanceMm(int)} to specify a geofence, i.e. discovery with min <
-         * distance < max.
+         * {@link #setMaxDistanceMm(int)} to specify a geofence, i.e. discovery with min <=
+         * distance <= max.
          * <p>
          * For ranging to be used in discovery it must also be enabled on the publisher using
          * {@link PublishConfig.Builder#setRangingEnabled(boolean)}. However, ranging may
@@ -453,8 +453,8 @@ public final class SubscribeConfig implements Parcelable {
          * notification. I.e. discovery will be triggered if we've found a matching publisher
          * (based on the other criteria in this configuration) <b>and</b> the distance to the
          * publisher is smaller than the value specified in this API. Can be used in conjunction
-         * with {@link #setMinDistanceMm(int)} to specify a geofence, i.e. discovery with min <
-         * distance < max.
+         * with {@link #setMinDistanceMm(int)} to specify a geofence, i.e. discovery with min <=
+         * distance <= max.
          * <p>
          * For ranging to be used in discovery it must also be enabled on the publisher using
          * {@link PublishConfig.Builder#setRangingEnabled(boolean)}. However, ranging may
