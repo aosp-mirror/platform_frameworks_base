@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.telecom.TelecomManager;
 
 import com.android.internal.telephony.IPhoneStateListener;
 
@@ -428,16 +429,20 @@ public class PhoneStateListener {
 
     /**
      * Callback invoked when device call state changes.
+     * <p>
+     * Reports the state of Telephony (mobile) calls on the device.
+     * <p>
+     * Note: The state returned here may differ from that returned by
+     * {@link TelephonyManager#getCallState()}. Receivers of this callback should be aware that
+     * calling {@link TelephonyManager#getCallState()} from within this callback may return a
+     * different state than the callback reports.
+     *
      * @param state call state
      * @param phoneNumber call phone number. If application does not have
      * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} permission, an empty
      * string will be passed as an argument.
-     *
-     * @see TelephonyManager#CALL_STATE_IDLE
-     * @see TelephonyManager#CALL_STATE_RINGING
-     * @see TelephonyManager#CALL_STATE_OFFHOOK
      */
-    public void onCallStateChanged(int state, String phoneNumber) {
+    public void onCallStateChanged(@TelephonyManager.CallState int state, String phoneNumber) {
         // default implementation empty
     }
 
