@@ -16,10 +16,14 @@
 
 package android.view;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+
 import android.annotation.Nullable;
+import android.app.WindowConfiguration;
+import android.app.WindowConfiguration.ActivityType;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.SparseArray;
 import android.view.WindowManager.TransitionType;
 
@@ -30,7 +34,7 @@ import android.view.WindowManager.TransitionType;
  */
 public class RemoteAnimationDefinition implements Parcelable {
 
-    private final SparseArray<RemoteAnimationAdapter> mTransitionAnimationMap;
+    private final SparseArray<RemoteAnimationAdapterEntry> mTransitionAnimationMap;
 
     public RemoteAnimationDefinition() {
         mTransitionAnimationMap = new SparseArray<>();
@@ -40,34 +44,70 @@ public class RemoteAnimationDefinition implements Parcelable {
      * Registers a remote animation for a specific transition.
      *
      * @param transition The transition type. Must be one of WindowManager.TRANSIT_* values.
+     * @param activityTypeFilter The remote animation only runs if an activity with type of this
+     *                           parameter is involved in the transition.
+     * @param adapter The adapter that described how to run the remote animation.
+     */
+    public void addRemoteAnimation(@TransitionType int transition,
+            @ActivityType int activityTypeFilter, RemoteAnimationAdapter adapter) {
+        mTransitionAnimationMap.put(transition,
+                new RemoteAnimationAdapterEntry(adapter, activityTypeFilter));
+    }
+
+    /**
+     * Registers a remote animation for a specific transition without defining an activity type
+     * filter.
+     *
+     * @param transition The transition type. Must be one of WindowManager.TRANSIT_* values.
      * @param adapter The adapter that described how to run the remote animation.
      */
     public void addRemoteAnimation(@TransitionType int transition, RemoteAnimationAdapter adapter) {
-        mTransitionAnimationMap.put(transition, adapter);
+        addRemoteAnimation(transition, ACTIVITY_TYPE_UNDEFINED, adapter);
     }
 
     /**
      * Checks whether a remote animation for specific transition is defined.
      *
      * @param transition The transition type. Must be one of WindowManager.TRANSIT_* values.
+     * @param activityTypes The set of activity types of activities that are involved in the
+     *                      transition. Will be used for filtering.
      * @return Whether this definition has defined a remote animation for the specified transition.
      */
-    public boolean hasTransition(@TransitionType int transition) {
-        return mTransitionAnimationMap.get(transition) != null;
+    public boolean hasTransition(@TransitionType int transition, ArraySet<Integer> activityTypes) {
+        return getAdapter(transition, activityTypes) != null;
     }
 
     /**
      * Retrieves the remote animation for a specific transition.
      *
      * @param transition The transition type. Must be one of WindowManager.TRANSIT_* values.
+     * @param activityTypes The set of activity types of activities that are involved in the
+     *                      transition. Will be used for filtering.
      * @return The remote animation adapter for the specified transition.
      */
-    public @Nullable RemoteAnimationAdapter getAdapter(@TransitionType int transition) {
-        return mTransitionAnimationMap.get(transition);
+    public @Nullable RemoteAnimationAdapter getAdapter(@TransitionType int transition,
+            ArraySet<Integer> activityTypes) {
+        final RemoteAnimationAdapterEntry entry = mTransitionAnimationMap.get(transition);
+        if (entry == null) {
+            return null;
+        }
+        if (entry.activityTypeFilter == ACTIVITY_TYPE_UNDEFINED
+                || activityTypes.contains(entry.activityTypeFilter)) {
+            return entry.adapter;
+        } else {
+            return null;
+        }
     }
 
     public RemoteAnimationDefinition(Parcel in) {
-        mTransitionAnimationMap = in.readSparseArray(null /* loader */);
+        final int size = in.readInt();
+        mTransitionAnimationMap = new SparseArray<>(size);
+        for (int i = 0; i < size; i++) {
+            final int transition = in.readInt();
+            final RemoteAnimationAdapterEntry entry = in.readTypedObject(
+                    RemoteAnimationAdapterEntry.CREATOR);
+            mTransitionAnimationMap.put(transition, entry);
+        }
     }
 
     /**
@@ -76,7 +116,7 @@ public class RemoteAnimationDefinition implements Parcelable {
      */
     public void setCallingPid(int pid) {
         for (int i = mTransitionAnimationMap.size() - 1; i >= 0; i--) {
-            mTransitionAnimationMap.valueAt(i).setCallingPid(pid);
+            mTransitionAnimationMap.valueAt(i).adapter.setCallingPid(pid);
         }
     }
 
@@ -87,7 +127,12 @@ public class RemoteAnimationDefinition implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeSparseArray((SparseArray) mTransitionAnimationMap);
+        final int size = mTransitionAnimationMap.size();
+        dest.writeInt(size);
+        for (int i = 0; i < size; i++) {
+            dest.writeInt(mTransitionAnimationMap.keyAt(i));
+            dest.writeTypedObject(mTransitionAnimationMap.valueAt(i), flags);
+        }
     }
 
     public static final Creator<RemoteAnimationDefinition> CREATOR =
@@ -100,4 +145,50 @@ public class RemoteAnimationDefinition implements Parcelable {
             return new RemoteAnimationDefinition[size];
         }
     };
+
+    private static class RemoteAnimationAdapterEntry implements Parcelable {
+
+        final RemoteAnimationAdapter adapter;
+
+        /**
+         * Only run the transition if one of the activities matches the filter.
+         * {@link WindowConfiguration.ACTIVITY_TYPE_UNDEFINED} means no filter
+         */
+        @ActivityType final int activityTypeFilter;
+
+        RemoteAnimationAdapterEntry(RemoteAnimationAdapter adapter, int activityTypeFilter) {
+            this.adapter = adapter;
+            this.activityTypeFilter = activityTypeFilter;
+        }
+
+        private RemoteAnimationAdapterEntry(Parcel in) {
+            adapter = in.readParcelable(RemoteAnimationAdapter.class.getClassLoader());
+            activityTypeFilter = in.readInt();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeParcelable(adapter, flags);
+            dest.writeInt(activityTypeFilter);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        private static final Creator<RemoteAnimationAdapterEntry> CREATOR
+                = new Creator<RemoteAnimationAdapterEntry>() {
+
+            @Override
+            public RemoteAnimationAdapterEntry createFromParcel(Parcel in) {
+                return new RemoteAnimationAdapterEntry(in);
+            }
+
+            @Override
+            public RemoteAnimationAdapterEntry[] newArray(int size) {
+                return new RemoteAnimationAdapterEntry[size];
+            }
+        };
+    }
 }
