@@ -893,9 +893,18 @@ public class ZenModeHelper {
     protected void applyRestrictions(boolean mute, int usage, int code) {
         final String[] exceptionPackages = null; // none (for now)
 
-        mAppOps.setRestriction(code, usage,
-                mute ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
-                exceptionPackages);
+        // Only do this if we are executing within the system process...  otherwise
+        // we are running as test code, so don't have access to the protected call.
+        if (Process.myUid() == Process.SYSTEM_UID) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mAppOps.setRestriction(code, usage,
+                        mute ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
+                        exceptionPackages);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
     }
 
     @VisibleForTesting
