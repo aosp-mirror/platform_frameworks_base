@@ -294,6 +294,14 @@ package android.database.sqlite {
 
 }
 
+package android.graphics {
+
+  public final class ImageDecoder implements java.lang.AutoCloseable {
+    method public static android.graphics.ImageDecoder.Source createSource(android.content.res.Resources, java.io.InputStream, int);
+  }
+
+}
+
 package android.graphics.drawable {
 
   public class AdaptiveIconDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {
