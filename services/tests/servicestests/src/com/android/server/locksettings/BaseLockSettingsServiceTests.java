@@ -43,6 +43,7 @@ import android.test.AndroidTestCase;
 
 import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockSettingsInternal;
 import com.android.server.LocalServices;
 
 import org.mockito.invocation.InvocationOnMock;
@@ -67,6 +68,7 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
     private ArrayList<UserInfo> mPrimaryUserProfiles = new ArrayList<>();
 
     LockSettingsService mService;
+    LockSettingsInternal mLocalService;
 
     MockLockSettingsContext mContext;
     LockSettingsStorageTestable mStorage;
@@ -95,6 +97,7 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
         mDevicePolicyManager = mock(DevicePolicyManager.class);
         mDevicePolicyManagerInternal = mock(DevicePolicyManagerInternal.class);
 
+        LocalServices.removeServiceForTest(LockSettingsInternal.class);
         LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
         LocalServices.addService(DevicePolicyManagerInternal.class, mDevicePolicyManagerInternal);
 
@@ -146,6 +149,7 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
         // Adding a fake Device Owner app which will enable escrow token support in LSS.
         when(mDevicePolicyManager.getDeviceOwnerComponentOnAnyUser()).thenReturn(
                 new ComponentName("com.dummy.package", ".FakeDeviceOwner"));
+        mLocalService = LocalServices.getService(LockSettingsInternal.class);
     }
 
     private UserInfo installChildProfile(int profileId) {

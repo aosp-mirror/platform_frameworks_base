@@ -282,7 +282,7 @@ public class NetworkCapabilitiesTest {
         assertTrue("Request: " + request + ", Network:" + network,
                 request.satisfiedByNetworkCapabilities(network));
 
-        // Adding capabilities that doesn't exist in the network anyway
+        // Requesting absence of capabilities that network doesn't have. Request should satisfy.
         request.addUnwantedCapability(NET_CAPABILITY_WIFI_P2P);
         request.addUnwantedCapability(NET_CAPABILITY_NOT_METERED);
         assertTrue(request.satisfiedByNetworkCapabilities(network));
@@ -296,7 +296,6 @@ public class NetworkCapabilitiesTest {
         request.addUnwantedCapability(NET_CAPABILITY_NOT_RESTRICTED);
         assertTrue(request.hasUnwantedCapability(NET_CAPABILITY_NOT_RESTRICTED));
         assertFalse(request.hasCapability(NET_CAPABILITY_NOT_RESTRICTED));
-
 
         // Now this request won't be satisfied because network contains NOT_RESTRICTED.
         assertFalse(request.satisfiedByNetworkCapabilities(network));

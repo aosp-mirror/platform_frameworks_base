@@ -623,12 +623,6 @@ interface ITelephony {
     void setCellInfoListRate(int rateInMillis);
 
     /**
-     * get default sim
-     * @return sim id
-     */
-    int getDefaultSim();
-
-    /**
      * Opens a logical channel to the ICC card.
      *
      * Input parameters equivalent to TS 27.007 AT+CCHO command.
@@ -823,10 +817,10 @@ interface ITelephony {
     IImsConfig getImsConfig(int slotId, int feature);
 
     /**
-    * Returns true if emergency calling is available for the MMTEL feature associated with the
-    * slot specified.
-    */
-    boolean isEmergencyMmTelAvailable(int slotId);
+     * @return true if the IMS resolver is busy resolving a binding and should not be considered
+     * available, false if the IMS resolver is idle.
+     */
+    boolean isResolvingImsBinding();
 
     /**
      * Set the network selection mode to automatic.
@@ -1358,10 +1352,10 @@ interface ITelephony {
 
     /**
      * Returns carrier name of the given subscription.
-     * <p>Carrier name is a user-facing name of carrier id {@link #getSubscriptionCarrierId(int)},
+     * <p>Carrier name is a user-facing name of carrier id {@link #getSimCarrierId(int)},
      * usually the brand name of the subsidiary (e.g. T-Mobile). Each carrier could configure
      * multiple {@link #getSimOperatorName() SPN} but should have a single carrier name.
-     * Carrier name is not canonical identity, use {@link #getSubscriptionCarrierId(int)} instead.
+     * Carrier name is not canonical identity, use {@link #getSimCarrierId(int)} instead.
      * <p>Returned carrier name is unlocalized.
      *
      * @return Carrier name of given subscription id. return {@code null} if subscription is

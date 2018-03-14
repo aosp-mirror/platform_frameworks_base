@@ -147,8 +147,17 @@ public class LatencyTracker {
         }
         mStartRtc.delete(action);
         Trace.asyncTraceEnd(Trace.TRACE_TAG_APP, NAMES[action], 0);
-        long duration = endRtc - startRtc;
+        logAction(action, (int)(endRtc - startRtc));
+    }
+
+    /**
+     * Logs an action that has started and ended. This needs to be called from the main thread.
+     *
+     * @param action The action to end. One of the ACTION_* values.
+     * @param duration The duration of the action in ms.
+     */
+    public static void logAction(int action, int duration) {
         Log.i(TAG, "action=" + action + " latency=" + duration);
-        EventLog.writeEvent(EventLogTags.SYSUI_LATENCY, action, (int) duration);
+        EventLog.writeEvent(EventLogTags.SYSUI_LATENCY, action, duration);
     }
 }

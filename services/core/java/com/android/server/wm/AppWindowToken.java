@@ -187,6 +187,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     StartingSurface startingSurface;
     boolean startingDisplayed;
     boolean startingMoved;
+
     // True if the hidden state of this token was forced to false due to a transferred starting
     // window.
     private boolean mHiddenSetFromTransferredStartingWindow;
@@ -1134,6 +1135,25 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     public void onAppFreezeTimeout() {
         Slog.w(TAG_WM, "Force clearing freeze: " + this);
         stopFreezingScreen(true, true);
+    }
+
+    /**
+     * Tries to transfer the starting window from a token that's above ourselves in the task but
+     * not visible anymore. This is a common scenario apps use: Trampoline activity T start main
+     * activity M in the same task. Now, when reopening the task, T starts on top of M but then
+     * immediately finishes after, so we have to transfer T to M.
+     */
+    void transferStartingWindowFromHiddenAboveTokenIfNeeded() {
+        final Task task = getTask();
+        for (int i = task.mChildren.size() - 1; i >= 0; i--) {
+            final AppWindowToken fromToken = task.mChildren.get(i);
+            if (fromToken == this) {
+                return;
+            }
+            if (fromToken.hiddenRequested && transferStartingWindow(fromToken.token)) {
+                return;
+            }
+        }
     }
 
     boolean transferStartingWindow(IBinder transferFrom) {

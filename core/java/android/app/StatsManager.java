@@ -54,6 +54,12 @@ public final class StatsManager {
     public static final String EXTRA_STATS_SUBSCRIPTION_RULE_ID =
             "android.app.extra.STATS_SUBSCRIPTION_RULE_ID";
     /**
+     *   List<String> of the relevant statsd_config.proto's BroadcastSubscriberDetails.cookie.
+     *   Obtain using {@link android.content.Intent#getStringArrayListExtra(String)}.
+     */
+    public static final String EXTRA_STATS_BROADCAST_SUBSCRIBER_COOKIES =
+            "android.app.extra.STATS_BROADCAST_SUBSCRIBER_COOKIES";
+    /**
      * Extra of a {@link android.os.StatsDimensionsValue} representing sliced dimension value
      * information.
      */
@@ -146,7 +152,8 @@ public final class StatsManager {
      * {@link #EXTRA_STATS_CONFIG_UID},
      * {@link #EXTRA_STATS_CONFIG_KEY},
      * {@link #EXTRA_STATS_SUBSCRIPTION_ID},
-     * {@link #EXTRA_STATS_SUBSCRIPTION_RULE_ID}, and
+     * {@link #EXTRA_STATS_SUBSCRIPTION_RULE_ID},
+     * {@link #EXTRA_STATS_BROADCAST_SUBSCRIBER_COOKIES}, and
      * {@link #EXTRA_STATS_DIMENSIONS_VALUE}.
      * <p>
      * This function can only be called by the owner (uid) of the config. It must be called each

@@ -123,12 +123,20 @@ public class ActivityRecordTests extends ActivityTestsBase {
             }
             return null;
         }).when(mActivity.app.thread).scheduleTransaction(any());
+
         mActivity.setState(STOPPED, "testPausingWhenVisibleFromStopped");
 
+        // The activity is in the focused stack so it should not move to paused.
         mActivity.makeVisibleIfNeeded(null /* starting */);
+        assertTrue(mActivity.isState(STOPPED));
+        assertFalse(pauseFound.value);
 
+        // Clear focused stack
+        mActivity.mStackSupervisor.mFocusedStack = null;
+
+        // In the unfocused stack, the activity should move to paused.
+        mActivity.makeVisibleIfNeeded(null /* starting */);
         assertTrue(mActivity.isState(PAUSING));
-
         assertTrue(pauseFound.value);
 
         // Make sure that the state does not change for current non-stopping states.
@@ -213,36 +221,5 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         verify(mService.mStackSupervisor, times(1)).canPlaceEntityOnDisplay(anyInt(), eq(expected),
                 anyInt(), anyInt(), eq(record.info));
-    }
-
-    @Test
-    public void testFinishingAfterDestroying() throws Exception {
-        assertFalse(mActivity.finishing);
-        mActivity.setState(DESTROYING, "testFinishingAfterDestroying");
-        assertTrue(mActivity.isState(DESTROYING));
-        assertTrue(mActivity.finishing);
-    }
-
-    @Test
-    public void testFinishingAfterDestroyed() throws Exception {
-        assertFalse(mActivity.finishing);
-        mActivity.setState(DESTROYED, "testFinishingAfterDestroyed");
-        assertTrue(mActivity.isState(DESTROYED));
-        assertTrue(mActivity.finishing);
-    }
-
-    @Test
-    public void testSetInvalidState() throws Exception {
-        mActivity.setState(DESTROYED, "testInvalidState");
-
-        boolean exceptionEncountered = false;
-
-        try {
-            mActivity.setState(FINISHING, "testInvalidState");
-        } catch (IllegalArgumentException e) {
-            exceptionEncountered = true;
-        }
-
-        assertTrue(exceptionEncountered);
     }
 }

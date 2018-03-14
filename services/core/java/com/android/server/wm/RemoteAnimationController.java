@@ -16,8 +16,11 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.proto.AnimationAdapterProto.REMOTE;
+import static com.android.server.wm.proto.RemoteAnimationAdapterWrapperProto.TARGET;
 
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -25,16 +28,18 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 import android.view.IRemoteAnimationFinishedCallback;
-import android.view.IRemoteAnimationFinishedCallback.Stub;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 
+import com.android.internal.util.FastPrintWriter;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
-import java.lang.ref.WeakReference;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 
 /**
@@ -104,6 +109,20 @@ class RemoteAnimationController {
             }
         });
         sendRunningRemoteAnimation(true);
+        if (DEBUG_APP_TRANSITIONS) {
+            writeStartDebugStatement();
+        }
+    }
+
+    private void writeStartDebugStatement() {
+        Slog.i(TAG, "Starting remote animation");
+        final StringWriter sw = new StringWriter();
+        final FastPrintWriter pw = new FastPrintWriter(sw);
+        for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
+            mPendingAnimations.get(i).dump(pw, "");
+        }
+        pw.close();
+        Slog.i(TAG, sw.toString());
     }
 
     private RemoteAnimationTarget[] createAnimations() {
@@ -133,6 +152,7 @@ class RemoteAnimationController {
             }
         }
         sendRunningRemoteAnimation(false);
+        if (DEBUG_APP_TRANSITIONS) Slog.i(TAG, "Finishing remote animation");
     }
 
     private void invokeAnimationCancelled() {
@@ -193,6 +213,7 @@ class RemoteAnimationController {
         private OnAnimationFinishedCallback mCapturedFinishCallback;
         private final Point mPosition = new Point();
         private final Rect mStackBounds = new Rect();
+        private RemoteAnimationTarget mTarget;
 
         RemoteAnimationAdapterWrapper(AppWindowToken appWindowToken, Point position,
                 Rect stackBounds) {
@@ -210,11 +231,12 @@ class RemoteAnimationController {
             if (mainWindow == null) {
                 return null;
             }
-            return new RemoteAnimationTarget(task.mTaskId, getMode(),
+            mTarget = new RemoteAnimationTarget(task.mTaskId, getMode(),
                     mCapturedLeash, !mAppWindowToken.fillsParent(),
                     mainWindow.mWinAnimator.mLastClipRect, mainWindow.mContentInsets,
                     mAppWindowToken.getPrefixOrderIndex(), mPosition, mStackBounds,
                     task.getWindowConfiguration(), false /*isNotInRecents*/);
+            return mTarget;
         }
 
         private int getMode() {
@@ -274,6 +296,26 @@ class RemoteAnimationController {
         public long getStatusBarTransitionsStartTime() {
             return SystemClock.uptimeMillis()
                     + mRemoteAnimationAdapter.getStatusBarTransitionDelay();
+        }
+
+        @Override
+        public void dump(PrintWriter pw, String prefix) {
+            pw.print(prefix); pw.print("token="); pw.println(mAppWindowToken);
+            if (mTarget != null) {
+                pw.print(prefix); pw.println("Target:");
+                mTarget.dump(pw, prefix + "  ");
+            } else {
+                pw.print(prefix); pw.println("Target: null");
+            }
+        }
+
+        @Override
+        public void writeToProto(ProtoOutputStream proto) {
+            final long token = proto.start(REMOTE);
+            if (mTarget != null) {
+                mTarget.writeToProto(proto, TARGET);
+            }
+            proto.end(token);
         }
     }
 }

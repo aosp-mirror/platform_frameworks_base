@@ -42,7 +42,6 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/car_margin"
             android:layout_marginRight="@dimen/car_margin"
-            android:layout_marginBottom="@dimen/car_user_grid_margin_bottom"
             android:layout_above="@id/user_switcher_page_indicator" />
 
         <com.android.systemui.statusbar.car.PageIndicator

@@ -3688,6 +3688,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void finishKeyguardFadingAway() {
         mKeyguardFadingAway = false;
         mKeyguardMonitor.notifyKeyguardDoneFading();
+        mScrimController.setExpansionAffectsAlpha(true);
     }
 
     // TODO: Move this to NotificationLockscreenUserManager.
@@ -4618,9 +4619,14 @@ public class StatusBar extends SystemUI implements DemoMode,
         final boolean wakeAndUnlocking = mFingerprintUnlockController.getMode()
                 == FingerprintUnlockController.MODE_WAKE_AND_UNLOCK;
 
+        // Do not animate the scrim expansion when it's triggered by the fingerprint sensor.
+        mScrimController.setExpansionAffectsAlpha(mFingerprintUnlockController.getMode()
+                != FingerprintUnlockController.MODE_UNLOCK);
+
         if (mBouncerShowing) {
-            mScrimController.transitionTo(
-                    mIsOccluded ? ScrimState.BOUNCER_OCCLUDED : ScrimState.BOUNCER);
+            final boolean qsExpanded = mQSPanel != null && mQSPanel.isExpanded();
+            mScrimController.transitionTo(mIsOccluded || qsExpanded ?
+                    ScrimState.BOUNCER_OCCLUDED : ScrimState.BOUNCER);
         } else if (mLaunchCameraOnScreenTurningOn || isInLaunchTransition()) {
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
         } else if (mBrightnessMirrorVisible) {

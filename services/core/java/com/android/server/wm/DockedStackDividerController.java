@@ -175,7 +175,7 @@ public class DockedStackDividerController {
                     getContentWidth());
 
             final DisplayCutout displayCutout = mDisplayContent.calculateDisplayCutoutForRotation(
-                    rotation);
+                    rotation).getDisplayCutout();
 
             // Since we only care about feasible states, snap to the closest snap target, like it
             // would happen when actually rotating the screen.
@@ -233,7 +233,7 @@ public class DockedStackDividerController {
                     ? mDisplayContent.mBaseDisplayWidth
                     : mDisplayContent.mBaseDisplayHeight;
             final DisplayCutout displayCutout =
-                    mDisplayContent.calculateDisplayCutoutForRotation(rotation);
+                    mDisplayContent.calculateDisplayCutoutForRotation(rotation).getDisplayCutout();
             mService.mPolicy.getStableInsetsLw(rotation, dw, dh, displayCutout, mTmpRect);
             config.unset();
             config.orientation = (dw <= dh) ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;

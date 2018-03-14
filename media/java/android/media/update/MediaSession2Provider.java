@@ -47,6 +47,8 @@ public interface MediaSession2Provider extends TransportControlProvider {
     void updatePlayer_impl(MediaPlayerBase player, MediaPlaylistAgent playlistAgent,
             VolumeProvider2 volumeProvider);
     MediaPlayerBase getPlayer_impl();
+    MediaMetadata2 getPlaylistMetadata_impl();
+    void updatePlaylistMetadata_impl(MediaMetadata2 metadata);
     MediaPlaylistAgent getPlaylistAgent_impl();
     VolumeProvider2 getVolumeProvider_impl();
     SessionToken2 getToken_impl();
@@ -57,12 +59,11 @@ public interface MediaSession2Provider extends TransportControlProvider {
     void sendCustomCommand_impl(ControllerInfo controller, Command command, Bundle args,
             ResultReceiver receiver);
     void sendCustomCommand_impl(Command command, Bundle args);
-    void setPlaylist_impl(List<MediaItem2> playlist);
     void addPlaylistItem_impl(int index, MediaItem2 item);
     void removePlaylistItem_impl(MediaItem2 item);
-    void editPlaylistItem_impl(MediaItem2 item);
     void replacePlaylistItem_impl(int index, MediaItem2 item);
     List<MediaItem2> getPlaylist_impl();
+    void setPlaylist_impl(List<MediaItem2> list, MediaMetadata2 metadata);
     MediaItem2 getCurrentPlaylistItem_impl();
     void setPlaylistParams_impl(PlaylistParams params);
     PlaylistParams getPlaylistParams_impl();

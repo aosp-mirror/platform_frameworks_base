@@ -36,8 +36,6 @@ interface IImsServiceController {
     ImsFeatureConfiguration querySupportedImsFeatures();
     // Synchronous call to ensure the ImsService is ready before continuing with feature creation.
     void notifyImsServiceReadyForFeatureCreation();
-    // Synchronous call to ensure the new ImsFeature is ready before using the Feature.
-    void notifyImsFeatureReady(int slotId, int featureType);
     void removeImsFeature(int slotId, int featureType, in IImsFeatureStatusCallback c);
     IImsConfig getConfig(int slotId);
     IImsRegistration getRegistration(int slotId);

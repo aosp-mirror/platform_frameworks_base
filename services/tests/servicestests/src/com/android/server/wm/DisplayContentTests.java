@@ -50,6 +50,8 @@ import android.view.DisplayCutout;
 import android.view.MotionEvent;
 import android.view.Surface;
 
+import com.android.server.wm.utils.WmDisplayCutout;
+
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -398,8 +400,9 @@ public class DisplayContentTests extends WindowTestsBase {
             dc.mInitialDisplayWidth = 200;
             dc.mInitialDisplayHeight = 400;
             Rect r = new Rect(80, 0, 120, 10);
-            final DisplayCutout cutout = fromBoundingRect(r.left, r.top, r.right, r.bottom)
-                    .computeSafeInsets(200, 400);
+            final DisplayCutout cutout = new WmDisplayCutout(
+                    fromBoundingRect(r.left, r.top, r.right, r.bottom), null)
+                    .computeSafeInsets(200, 400).getDisplayCutout();
 
             dc.mInitialDisplayCutout = cutout;
             dc.setRotation(Surface.ROTATION_0);
@@ -416,16 +419,18 @@ public class DisplayContentTests extends WindowTestsBase {
             dc.mInitialDisplayWidth = 200;
             dc.mInitialDisplayHeight = 400;
             Rect r1 = new Rect(80, 0, 120, 10);
-            final DisplayCutout cutout = fromBoundingRect(r1.left, r1.top, r1.right, r1.bottom)
-                    .computeSafeInsets(200, 400);
+            final DisplayCutout cutout = new WmDisplayCutout(
+                    fromBoundingRect(r1.left, r1.top, r1.right, r1.bottom), null)
+                    .computeSafeInsets(200, 400).getDisplayCutout();
 
             dc.mInitialDisplayCutout = cutout;
             dc.setRotation(Surface.ROTATION_90);
             dc.computeScreenConfiguration(new Configuration()); // recomputes dc.mDisplayInfo.
 
             final Rect r = new Rect(0, 80, 10, 120);
-            assertEquals(fromBoundingRect(r.left, r.top, r.right, r.bottom)
-                    .computeSafeInsets(400, 200), dc.getDisplayInfo().displayCutout);
+            assertEquals(new WmDisplayCutout(
+                    fromBoundingRect(r.left, r.top, r.right, r.bottom), null)
+                    .computeSafeInsets(400, 200).getDisplayCutout(), dc.getDisplayInfo().displayCutout);
         }
     }
 

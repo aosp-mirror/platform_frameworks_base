@@ -64,7 +64,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.LocalLog;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -78,12 +77,12 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.LocalServices;
+import com.android.server.autofill.AutofillManagerService.AutofillCompatState;
 import com.android.server.autofill.ui.AutoFillUI;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 /**
@@ -164,12 +163,15 @@ final class AutofillManagerServiceImpl {
     @GuardedBy("mLock")
     private FillEventHistory mEventHistory;
 
+    /** Shared instance, doesn't need to be logged */
+    private final AutofillCompatState mAutofillCompatState;
+
     /** When was {@link PruneTask} last executed? */
     private long mLastPrune = 0;
 
     AutofillManagerServiceImpl(Context context, Object lock, LocalLog requestsHistory,
             LocalLog uiLatencyHistory, LocalLog wtfHistory, int userId, AutoFillUI ui,
-            boolean disabled) {
+            AutofillCompatState autofillCompatState, boolean disabled) {
         mContext = context;
         mLock = lock;
         mRequestsHistory = requestsHistory;
@@ -178,6 +180,7 @@ final class AutofillManagerServiceImpl {
         mUserId = userId;
         mUi = ui;
         mFieldClassificationStrategy = new FieldClassificationStrategy(context, userId);
+        mAutofillCompatState = autofillCompatState;
         updateLocked(disabled);
     }
 
@@ -208,14 +211,9 @@ final class AutofillManagerServiceImpl {
     }
 
 
-    @GuardedBy("mLock")
     @Nullable
-    String getUrlBarResourceIdForCompatModeLocked(@NonNull String packageName) {
-        if (mInfo == null) {
-            Slog.w(TAG,  "getUrlBarResourceIdForCompatModeLocked(): no mInfo");
-            return null;
-        }
-        return mInfo.getUrlBarResourceId(packageName);
+    String[] getUrlBarResourceIdsForCompatMode(@NonNull String packageName) {
+        return mAutofillCompatState.getUrlBarResourceIds(packageName, mUserId);
     }
 
     @Nullable
@@ -893,7 +891,7 @@ final class AutofillManagerServiceImpl {
         pw.print(prefix); pw.print("Field classification enabled: ");
             pw.println(isFieldClassificationEnabledLocked());
         pw.print(prefix); pw.print("Compat pkgs: ");
-        final ArrayMap<String, Pair<Long, String>> compatPkgs = getCompatibilityPackagesLocked();
+        final ArrayMap<String, Long> compatPkgs = getCompatibilityPackagesLocked();
         if (compatPkgs == null) {
             pw.println("N/A");
         } else {
@@ -1022,7 +1020,7 @@ final class AutofillManagerServiceImpl {
     }
 
     @GuardedBy("mLock")
-    @Nullable ArrayMap<String, Pair<Long, String>> getCompatibilityPackagesLocked() {
+    @Nullable ArrayMap<String, Long> getCompatibilityPackagesLocked() {
         if (mInfo != null) {
             return mInfo.getCompatibilityPackages();
         }

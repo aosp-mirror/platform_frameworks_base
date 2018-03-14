@@ -229,6 +229,9 @@ public class AppLaunch extends InstrumentationTestCase {
             setLaunchOrder();
 
             for (LaunchOrder launch : mLaunchOrderList) {
+                if (mNameToIntent.get(launch.getApp()) == null) {
+                    continue;
+                }
                 dropCache();
                 String appPkgName = mNameToIntent.get(launch.getApp())
                         .getComponent().getPackageName();

@@ -48,7 +48,8 @@ public class ResumeActivityItem extends ActivityLifecycleItem {
     public void execute(ClientTransactionHandler client, IBinder token,
             PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityResume");
-        client.handleResumeActivity(token, true /* clearHide */, mIsForward, "RESUME_ACTIVITY");
+        client.handleResumeActivity(token, true /* finalStateRequest */, mIsForward,
+                "RESUME_ACTIVITY");
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 

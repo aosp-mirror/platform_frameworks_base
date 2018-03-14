@@ -6546,7 +6546,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             } finally {
                 // Set it to already called so it's not called twice when called by
                 // performClickInternal()
-                mPrivateFlags |= ~PFLAG_NOTIFY_AUTOFILL_MANAGER_ON_CLICK;
+                mPrivateFlags &= ~PFLAG_NOTIFY_AUTOFILL_MANAGER_ON_CLICK;
             }
         }
     }

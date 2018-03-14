@@ -145,6 +145,7 @@ public final class NotificationRecord {
     private final List<Adjustment> mAdjustments;
     private final NotificationStats mStats;
     private int mUserSentiment;
+    private boolean mIsInterruptive;
 
     @VisibleForTesting
     public NotificationRecord(Context context, StatusBarNotification sbn,
@@ -519,6 +520,7 @@ public final class NotificationRecord {
         pw.println(prefix + "mLight= " + mLight);
         pw.println(prefix + "mShowBadge=" + mShowBadge);
         pw.println(prefix + "mColorized=" + notification.isColorized());
+        pw.println(prefix + "mIsInterruptive=" + mIsInterruptive);
         pw.println(prefix + "effectiveNotificationChannel=" + getChannel());
         if (getPeopleOverride() != null) {
             pw.println(prefix + "overridePeople= " + TextUtils.join(",", getPeopleOverride()));
@@ -886,6 +888,14 @@ public final class NotificationRecord {
 
     public ArrayList<String> getPeopleOverride() {
         return mPeopleOverride;
+    }
+
+    public void setInterruptive(boolean interruptive) {
+        mIsInterruptive = interruptive;
+    }
+
+    public boolean isInterruptive() {
+        return mIsInterruptive;
     }
 
     protected void setPeopleOverride(ArrayList<String> people) {

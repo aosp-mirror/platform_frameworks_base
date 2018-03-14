@@ -84,12 +84,16 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
     }
 
     TaskSnapshot createSnapshot(float scale) {
+        return createSnapshot(scale, true /* isRealSnapshot */);
+    }
+
+    TaskSnapshot createSnapshot(float scale, boolean isRealSnapshot) {
         final GraphicBuffer buffer = GraphicBuffer.create(100, 100, PixelFormat.RGBA_8888,
                 USAGE_HW_TEXTURE | USAGE_SW_READ_RARELY | USAGE_SW_READ_RARELY);
         Canvas c = buffer.lockCanvas();
         c.drawColor(Color.RED);
         buffer.unlockCanvasAndPost(c);
         return new TaskSnapshot(buffer, ORIENTATION_PORTRAIT, TEST_INSETS,
-                scale < 1f /* reducedResolution */, scale);
+                scale < 1f /* reducedResolution */, scale, isRealSnapshot);
     }
 }

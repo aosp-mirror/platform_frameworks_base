@@ -16,10 +16,18 @@
 
 package com.android.server.wm;
 
-import android.view.SurfaceControl;
+import static com.android.server.wm.proto.AlphaAnimationSpecProto.DURATION;
+import static com.android.server.wm.proto.AlphaAnimationSpecProto.FROM;
+import static com.android.server.wm.proto.AlphaAnimationSpecProto.TO;
+import static com.android.server.wm.proto.AnimationSpecProto.ALPHA;
+
 import android.graphics.Rect;
+import android.util.proto.ProtoOutputStream;
+import android.view.SurfaceControl;
 
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.io.PrintWriter;
 
 /**
  * Utility class for use by a WindowContainer implementation to add "DimLayer" support, that is
@@ -333,6 +341,22 @@ class Dimmer {
             float alpha = ((float) currentPlayTime / getDuration()) * (mToAlpha - mFromAlpha)
                     + mFromAlpha;
             t.setAlpha(sc, alpha);
+        }
+
+        @Override
+        public void dump(PrintWriter pw, String prefix) {
+            pw.print(prefix); pw.print("from="); pw.print(mFromAlpha);
+            pw.print(" to="); pw.print(mToAlpha);
+            pw.print(" duration="); pw.println(mDuration);
+        }
+
+        @Override
+        public void writeToProtoInner(ProtoOutputStream proto) {
+            final long token = proto.start(ALPHA);
+            proto.write(FROM, mFromAlpha);
+            proto.write(TO, mToAlpha);
+            proto.write(DURATION, mDuration);
+            proto.end(token);
         }
     }
 }

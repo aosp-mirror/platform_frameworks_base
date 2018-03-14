@@ -721,7 +721,7 @@ public class WifiTrackerTest {
         // mStaleAccessPoints is true
         verify(mockWifiListenerExecutor, never()).onAccessPointsChanged();
 
-        assertThat(tracker.getAccessPoints().size()).isEqualTo(1);
+        assertThat(tracker.getAccessPoints()).hasSize(1);
         assertThat(tracker.getAccessPoints().get(0).isActive()).isTrue();
     }
 

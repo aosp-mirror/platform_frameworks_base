@@ -9534,6 +9534,12 @@ public final class Settings {
         public static final String BLE_SCAN_LOW_LATENCY_INTERVAL_MS =
                 "ble_scan_low_latency_interval_ms";
 
+        /**
+         * The mode that BLE scanning clients will be moved to when in the background.
+         * @hide
+         */
+        public static final String BLE_SCAN_BACKGROUND_MODE = "ble_scan_background_mode";
+
        /**
         * Used to save the Wifi_ON state prior to tethering.
         * This state will be checked to restore Wifi after
@@ -10393,6 +10399,17 @@ public final class Settings {
         public static final String SYS_UIDCPUPOWER = "sys_uidcpupower";
 
         /**
+        * traced global setting. This controls weather the deamons: traced and
+        * traced_probes run. This links the sys.traced system property.
+        * The following values are supported:
+        * 0 -> traced and traced_probes are disabled
+        * 1 -> traced and traced_probes are enabled
+        * Any other value defaults to disabled.
+        * @hide
+        */
+        public static final String SYS_TRACED = "sys_traced";
+
+        /**
          * An integer to reduce the FPS by this factor. Only for experiments. Need to reboot the
          * device for this setting to take full effect.
          *
@@ -11210,6 +11227,20 @@ public final class Settings {
         public static final String ZEN_MODE_CONFIG_ETAG = "zen_mode_config_etag";
 
         /**
+         * If 0, turning on dnd manually will last indefinitely.
+         * Else if non-negative, turning on dnd manually will last for this many minutes.
+         * Else (if negative), turning on dnd manually will surface a dialog that prompts
+         * user to specify a duration.
+         * @hide
+         */
+        public static final String ZEN_DURATION = "zen_duration";
+
+        private static final Validator ZEN_DURATION_VALIDATOR = ANY_INTEGER_VALIDATOR;
+
+        /** @hide */ public static final int ZEN_DURATION_PROMPT = -1;
+        /** @hide */ public static final int ZEN_DURATION_FOREVER = 0;
+
+        /**
          * Defines global heads up toggle.  One of HEADS_UP_OFF, HEADS_UP_ON.
          *
          * @hide
@@ -11525,7 +11556,14 @@ public final class Settings {
 
         /**
          * The packages whitelisted to be run in autofill compatibility mode. The list
-         * of packages is ":" colon delimited.
+         * of packages is {@code ":"} colon delimited, and each entry has the name of the
+         * package and an optional list of url bar resource ids (the list is delimited by
+         * brackets&mdash{@code [} and {@code ]}&mdash and is also comma delimited).
+         *
+         * <p>For example, a list with 3 packages {@code p1}, {@code p2}, and {@code p3}, where
+         * package {@code p1} have one id ({@code url_bar}, {@code p2} has none, and {@code p3 }
+         * have 2 ids {@code url_foo} and {@code url_bas}) would be
+         * {@code p1[url_bar]:p2:p3[url_foo,url_bas]}
          *
          * @hide
          */
@@ -11583,7 +11621,8 @@ public final class Settings {
             BLUETOOTH_ON,
             PRIVATE_DNS_MODE,
             PRIVATE_DNS_SPECIFIER,
-            SOFT_AP_TIMEOUT_ENABLED
+            SOFT_AP_TIMEOUT_ENABLED,
+            ZEN_DURATION,
         };
 
         /**
@@ -11624,6 +11663,7 @@ public final class Settings {
             VALIDATORS.put(WIFI_CARRIER_NETWORKS_AVAILABLE_NOTIFICATION_ON,
                     WIFI_CARRIER_NETWORKS_AVAILABLE_NOTIFICATION_ON_VALIDATOR);
             VALIDATORS.put(APP_AUTO_RESTRICTION_ENABLED, APP_AUTO_RESTRICTION_ENABLED_VALIDATOR);
+            VALIDATORS.put(ZEN_DURATION, ZEN_DURATION_VALIDATOR);
         }
 
         /**

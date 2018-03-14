@@ -261,6 +261,7 @@ package android.app {
 
   public class AppOpsManager {
     method public static java.lang.String[] getOpStrs();
+    method public void setMode(java.lang.String, int, java.lang.String, int);
     method public void setUidMode(java.lang.String, int, int);
     field public static final java.lang.String OPSTR_ACCEPT_HANDOVER = "android:accept_handover";
     field public static final java.lang.String OPSTR_ACCESS_NOTIFICATIONS = "android:access_notifications";
@@ -377,6 +378,7 @@ package android.app {
     method public boolean setBroadcastSubscriber(long, long, android.app.PendingIntent);
     method public boolean setDataFetchOperation(long, android.app.PendingIntent);
     field public static final java.lang.String ACTION_STATSD_STARTED = "android.app.action.STATSD_STARTED";
+    field public static final java.lang.String EXTRA_STATS_BROADCAST_SUBSCRIBER_COOKIES = "android.app.extra.STATS_BROADCAST_SUBSCRIBER_COOKIES";
     field public static final java.lang.String EXTRA_STATS_CONFIG_KEY = "android.app.extra.STATS_CONFIG_KEY";
     field public static final java.lang.String EXTRA_STATS_CONFIG_UID = "android.app.extra.STATS_CONFIG_UID";
     field public static final java.lang.String EXTRA_STATS_DIMENSIONS_VALUE = "android.app.extra.STATS_DIMENSIONS_VALUE";
@@ -716,7 +718,9 @@ package android.app.usage {
   }
 
   public static final class UsageEvents.Event {
+    method public java.lang.String getNotificationChannelId();
     method public int getStandbyBucket();
+    field public static final int NOTIFICATION_INTERRUPTION = 12; // 0xc
     field public static final int NOTIFICATION_SEEN = 10; // 0xa
     field public static final int STANDBY_BUCKET_CHANGED = 11; // 0xb
   }
@@ -5258,12 +5262,13 @@ package android.telephony {
   }
 
   public class UiccSlotInfo implements android.os.Parcelable {
-    ctor public UiccSlotInfo(boolean, boolean, java.lang.String, int, int);
+    ctor public UiccSlotInfo(boolean, boolean, java.lang.String, int, int, boolean);
     method public int describeContents();
     method public java.lang.String getCardId();
     method public int getCardStateInfo();
     method public boolean getIsActive();
     method public boolean getIsEuicc();
+    method public boolean getIsExtendedApduSupported();
     method public int getLogicalSlotIdx();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CARD_STATE_INFO_ABSENT = 1; // 0x1
@@ -5502,6 +5507,9 @@ package android.telephony.ims {
   }
 
   public final class ImsCallProfile implements android.os.Parcelable {
+    ctor public ImsCallProfile();
+    ctor public ImsCallProfile(int, int);
+    ctor public ImsCallProfile(int, int, android.os.Bundle, android.telephony.ims.ImsStreamMediaProfile);
     method public int describeContents();
     method public java.lang.String getCallExtra(java.lang.String);
     method public java.lang.String getCallExtra(java.lang.String, java.lang.String);
@@ -5525,6 +5533,7 @@ package android.telephony.ims {
     method public void setCallExtraInt(java.lang.String, int);
     method public void updateCallExtras(android.telephony.ims.ImsCallProfile);
     method public void updateCallType(android.telephony.ims.ImsCallProfile);
+    method public void updateMediaProfile(android.telephony.ims.ImsCallProfile);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CALL_RESTRICT_CAUSE_DISABLED = 2; // 0x2
     field public static final int CALL_RESTRICT_CAUSE_HD = 3; // 0x3
@@ -5862,6 +5871,7 @@ package android.telephony.ims {
   }
 
   public final class ImsStreamMediaProfile implements android.os.Parcelable {
+    ctor public ImsStreamMediaProfile(int, int, int, int, int);
     method public void copyFrom(android.telephony.ims.ImsStreamMediaProfile);
     method public int describeContents();
     method public int getAudioDirection();
@@ -6119,17 +6129,22 @@ package android.telephony.ims.stub {
   }
 
   public final class ImsFeatureConfiguration implements android.os.Parcelable {
-    ctor public ImsFeatureConfiguration();
     method public int describeContents();
-    method public int[] getServiceFeatures();
+    method public java.util.Set<android.telephony.ims.stub.ImsFeatureConfiguration.FeatureSlotPair> getServiceFeatures();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.telephony.ims.stub.ImsFeatureConfiguration> CREATOR;
   }
 
   public static class ImsFeatureConfiguration.Builder {
     ctor public ImsFeatureConfiguration.Builder();
-    method public android.telephony.ims.stub.ImsFeatureConfiguration.Builder addFeature(int);
+    method public android.telephony.ims.stub.ImsFeatureConfiguration.Builder addFeature(int, int);
     method public android.telephony.ims.stub.ImsFeatureConfiguration build();
+  }
+
+  public static final class ImsFeatureConfiguration.FeatureSlotPair {
+    ctor public ImsFeatureConfiguration.FeatureSlotPair(int, int);
+    field public final int featureType;
+    field public final int slotId;
   }
 
   public class ImsMultiEndpointImplBase {
@@ -6669,6 +6684,7 @@ package android.webkit {
     method public abstract android.view.View findFocus(android.view.View);
     method public abstract android.view.accessibility.AccessibilityNodeProvider getAccessibilityNodeProvider();
     method public abstract android.os.Handler getHandler(android.os.Handler);
+    method public default boolean isVisibleToUserForAutofill(int);
     method public abstract void onActivityResult(int, int, android.content.Intent);
     method public abstract void onAttachedToWindow();
     method public default boolean onCheckIsTextEditor();

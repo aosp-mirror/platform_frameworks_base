@@ -1438,7 +1438,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
             final DisplayFrames displayFrames = displayContent.mDisplayFrames;
             // TODO: Not sure if onDisplayInfoUpdated() call is needed.
-            displayFrames.onDisplayInfoUpdated(displayContent.getDisplayInfo());
+            final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+            displayFrames.onDisplayInfoUpdated(displayInfo,
+                    displayContent.calculateDisplayCutoutForRotation(displayInfo.rotation));
             final Rect taskBounds;
             if (atoken != null && atoken.getTask() != null) {
                 taskBounds = mTmpRect;
@@ -2097,7 +2099,7 @@ public class WindowManagerService extends IWindowManager.Stub
             win.mLastRelayoutContentInsets.set(win.mContentInsets);
             outVisibleInsets.set(win.mVisibleInsets);
             outStableInsets.set(win.mStableInsets);
-            outCutout.set(win.mDisplayCutout);
+            outCutout.set(win.mDisplayCutout.getDisplayCutout());
             outOutsets.set(win.mOutsets);
             outBackdropFrame.set(win.getBackdropFrame(win.mFrame));
             if (localLOGV) Slog.v(

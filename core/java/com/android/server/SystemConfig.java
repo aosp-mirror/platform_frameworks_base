@@ -22,6 +22,7 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Process;
 import android.os.storage.StorageManager;
@@ -141,11 +142,23 @@ public class SystemConfig {
     // Package names that are exempted from private API blacklisting
     final ArraySet<String> mHiddenApiPackageWhitelist = new ArraySet<>();
 
+    // The list of carrier applications which should be disabled until used.
+    // This function suppresses update notifications for these pre-installed apps.
+    // In SubscriptionInfoUpdater, the listed applications are disabled until used when all of the
+    // following conditions are met.
+    // 1. Not currently carrier-privileged according to the inserted SIM
+    // 2. Pre-installed
+    // 3. In the default state (enabled but not explicitly)
+    // And SubscriptionInfoUpdater undoes this and marks the app enabled when a SIM is inserted
+    // that marks the app as carrier privileged. It also grants the app default permissions
+    // for Phone and Location. As such, apps MUST only ever be added to this list if they
+    // obtain user consent to access their location through other means.
+    final ArraySet<String> mDisabledUntilUsedPreinstalledCarrierApps = new ArraySet<>();
+
     // These are the packages of carrier-associated apps which should be disabled until used until
     // a SIM is inserted which grants carrier privileges to that carrier app.
     final ArrayMap<String, List<String>> mDisabledUntilUsedPreinstalledCarrierAssociatedApps =
             new ArrayMap<>();
-
 
     final ArrayMap<String, ArraySet<String>> mPrivAppPermissions = new ArrayMap<>();
     final ArrayMap<String, ArraySet<String>> mPrivAppDenyPermissions = new ArrayMap<>();
@@ -231,6 +244,10 @@ public class SystemConfig {
         return mBackupTransportWhitelist;
     }
 
+    public ArraySet<String> getDisabledUntilUsedPreinstalledCarrierApps() {
+        return mDisabledUntilUsedPreinstalledCarrierApps;
+    }
+
     public ArrayMap<String, List<String>> getDisabledUntilUsedPreinstalledCarrierAssociatedApps() {
         return mDisabledUntilUsedPreinstalledCarrierAssociatedApps;
     }
@@ -276,9 +293,12 @@ public class SystemConfig {
         readPermissions(Environment.buildPath(
                 Environment.getRootDirectory(), "etc", "permissions"), ALLOW_ALL);
 
-        // Allow Vendor to customize system configs around libs, features, permissions and apps
-        int vendorPermissionFlag = ALLOW_LIBS | ALLOW_FEATURES | ALLOW_PERMISSIONS |
-                ALLOW_APP_CONFIGS | ALLOW_PRIVAPP_PERMISSIONS;
+        // Vendors are only allowed to customze libs, features and privapp permissions
+        int vendorPermissionFlag = ALLOW_LIBS | ALLOW_FEATURES | ALLOW_PRIVAPP_PERMISSIONS;
+        if (Build.VERSION.FIRST_SDK_INT <= Build.VERSION_CODES.O_MR1) {
+            // For backward compatibility
+            vendorPermissionFlag |= (ALLOW_PERMISSIONS | ALLOW_APP_CONFIGS);
+        }
         readPermissions(Environment.buildPath(
                 Environment.getVendorDirectory(), "etc", "sysconfig"), vendorPermissionFlag);
         readPermissions(Environment.buildPath(
@@ -626,6 +646,18 @@ public class SystemConfig {
                         associatedPkgs.add(pkgname);
                     }
                     XmlUtils.skipCurrentTag(parser);
+                } else if ("disabled-until-used-preinstalled-carrier-app".equals(name)
+                        && allowAppConfigs) {
+                    String pkgname = parser.getAttributeValue(null, "package");
+                    if (pkgname == null) {
+                        Slog.w(TAG,
+                                "<disabled-until-used-preinstalled-carrier-app> without "
+                                        + "package in " + permFile + " at "
+                                        + parser.getPositionDescription());
+                    } else {
+                        mDisabledUntilUsedPreinstalledCarrierApps.add(pkgname);
+                    }
+                    XmlUtils.skipCurrentTag(parser);
                 } else if ("privapp-permissions".equals(name) && allowPrivappPermissions) {
                     // privapp permissions from system, vendor and product partitions are stored
                     // separately. This is to prevent xml files in the vendor partition from
@@ -659,6 +691,8 @@ public class SystemConfig {
                     }
                     XmlUtils.skipCurrentTag(parser);
                 } else {
+                    Slog.w(TAG, "Tag " + name + " is unknown or not allowed in "
+                            + permFile.getParent());
                     XmlUtils.skipCurrentTag(parser);
                     continue;
                 }

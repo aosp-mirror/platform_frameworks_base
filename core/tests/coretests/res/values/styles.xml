@@ -25,8 +25,8 @@
     <style name="LayoutInDisplayCutoutModeDefault">
         <item name="android:windowLayoutInDisplayCutoutMode">default</item>
     </style>
-    <style name="LayoutInDisplayCutoutModeAlways">
-        <item name="android:windowLayoutInDisplayCutoutMode">always</item>
+    <style name="LayoutInDisplayCutoutModeShortEdges">
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
     </style>
     <style name="LayoutInDisplayCutoutModeNever">
         <item name="android:windowLayoutInDisplayCutoutMode">never</item>

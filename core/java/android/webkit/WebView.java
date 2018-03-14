@@ -2903,6 +2903,11 @@ public class WebView extends AbsoluteLayout
         mProvider.getViewDelegate().autofill(values);
     }
 
+    @Override
+    public boolean isVisibleToUserForAutofill(int virtualId) {
+        return mProvider.getViewDelegate().isVisibleToUserForAutofill(virtualId);
+    }
+
     /** @hide */
     @Override
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {

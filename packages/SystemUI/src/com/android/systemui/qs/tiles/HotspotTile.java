@@ -137,7 +137,6 @@ public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
 
         state.icon = mEnabledStatic;
         state.label = mContext.getString(R.string.quick_settings_hotspot_label);
-        state.secondaryLabel = getSecondaryLabel(state.value, isTransient, numConnectedDevices);
         state.isAirplaneMode = mAirplaneMode.getValue() != 0;
         state.isTransient = isTransient;
         state.slash.isSlashed = !state.value && !state.isTransient;
@@ -149,19 +148,26 @@ public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
 
         final boolean isTileUnavailable = (state.isAirplaneMode || isDataSaverEnabled);
         final boolean isTileActive = (state.value || state.isTransient);
-        state.state = isTileUnavailable
-                ? Tile.STATE_UNAVAILABLE
-                : isTileActive
-                        ? Tile.STATE_ACTIVE
-                        : Tile.STATE_INACTIVE;
+
+        if (isTileUnavailable) {
+            state.state = Tile.STATE_UNAVAILABLE;
+        } else {
+            state.state = isTileActive ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
+        }
+
+        state.secondaryLabel = getSecondaryLabel(
+                isTileActive, isTransient, isDataSaverEnabled, numConnectedDevices);
     }
 
     @Nullable
-    private String getSecondaryLabel(
-            boolean enabled, boolean isTransient, int numConnectedDevices) {
+    private String getSecondaryLabel(boolean isActive, boolean isTransient,
+            boolean isDataSaverEnabled, int numConnectedDevices) {
         if (isTransient) {
             return mContext.getString(R.string.quick_settings_hotspot_secondary_label_transient);
-        } else if (numConnectedDevices > 0 && enabled) {
+        } else if (isDataSaverEnabled) {
+            return mContext.getString(
+                    R.string.quick_settings_hotspot_secondary_label_data_saver_enabled);
+        } else if (numConnectedDevices > 0 && isActive) {
             return mContext.getResources().getQuantityString(
                     R.plurals.quick_settings_hotspot_secondary_label_num_devices,
                     numConnectedDevices,

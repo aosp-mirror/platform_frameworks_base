@@ -113,6 +113,10 @@ import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
 import static com.android.server.wm.proto.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.proto.IdentifierProto.TITLE;
 import static com.android.server.wm.proto.IdentifierProto.USER_ID;
+import static com.android.server.wm.proto.AnimationSpecProto.MOVE;
+import static com.android.server.wm.proto.MoveAnimationSpecProto.DURATION;
+import static com.android.server.wm.proto.MoveAnimationSpecProto.FROM;
+import static com.android.server.wm.proto.MoveAnimationSpecProto.TO;
 import static com.android.server.wm.proto.WindowStateProto.ANIMATING_EXIT;
 import static com.android.server.wm.proto.WindowStateProto.ANIMATOR;
 import static com.android.server.wm.proto.WindowStateProto.ATTRIBUTES;
@@ -202,6 +206,7 @@ import com.android.internal.util.ToBooleanFunction;
 import com.android.server.input.InputWindowHandle;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
+import com.android.server.wm.utils.WmDisplayCutout;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -351,8 +356,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private boolean mOutsetsChanged = false;
 
     /** Part of the display that has been cut away. See {@link DisplayCutout}. */
-    DisplayCutout mDisplayCutout = DisplayCutout.NO_CUTOUT;
-    private DisplayCutout mLastDisplayCutout = DisplayCutout.NO_CUTOUT;
+    WmDisplayCutout mDisplayCutout = WmDisplayCutout.NO_CUTOUT;
+    private WmDisplayCutout mLastDisplayCutout = WmDisplayCutout.NO_CUTOUT;
     private boolean mDisplayCutoutChanged;
 
     /**
@@ -693,6 +698,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mOwnerCanAddInternalSystemWindow = ownerCanAddInternalSystemWindow;
         mWindowId = new WindowId(this);
         mAttrs.copyFrom(a);
+        mLastSurfaceInsets.set(mAttrs.surfaceInsets);
         mViewVisibility = viewVisibility;
         mPolicy = mService.mPolicy;
         mContext = mService.mContext;
@@ -833,7 +839,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     public void computeFrameLw(Rect parentFrame, Rect displayFrame, Rect overscanFrame,
             Rect contentFrame, Rect visibleFrame, Rect decorFrame, Rect stableFrame,
-            Rect outsetFrame, DisplayCutout displayCutout) {
+            Rect outsetFrame, WmDisplayCutout displayCutout) {
         if (mWillReplaceWindow && (mAnimatingExit || !mReplacingRemoveRequested)) {
             // This window is being replaced and either already got information that it's being
             // removed or we are still waiting for some information. Because of this we don't
@@ -2079,7 +2085,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             super(inputChannel, mService.mH.getLooper());
         }
         @Override
-        public void onInputEvent(InputEvent event, int displayId) {
+        public void onInputEvent(InputEvent event) {
             finishInputEvent(event, true);
         }
     }
@@ -2914,7 +2920,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             final boolean reportDraw = mWinAnimator.mDrawState == DRAW_PENDING;
             final boolean reportOrientation = mReportOrientationChanged;
             final int displayId = getDisplayId();
-            final DisplayCutout displayCutout = mDisplayCutout;
+            final DisplayCutout displayCutout = mDisplayCutout.getDisplayCutout();
             if (mAttrs.type != WindowManager.LayoutParams.TYPE_APPLICATION_STARTING
                     && mClient instanceof IWindow.Stub) {
                 // To prevent deadlock simulate one-way call if win.mClient is a local object.
@@ -3186,7 +3192,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mVisibleInsets.writeToProto(proto, VISIBLE_INSETS);
         mStableInsets.writeToProto(proto, STABLE_INSETS);
         mOutsets.writeToProto(proto, OUTSETS);
-        mDisplayCutout.writeToProto(proto, CUTOUT);
+        mDisplayCutout.getDisplayCutout().writeToProto(proto, CUTOUT);
         proto.write(REMOVE_ON_EXIT, mRemoveOnExit);
         proto.write(DESTROYING, mDestroying);
         proto.write(REMOVED, mRemoved);
@@ -3332,7 +3338,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     pw.print(" stable="); mStableInsets.printShortString(pw);
                     pw.print(" surface="); mAttrs.surfaceInsets.printShortString(pw);
                     pw.print(" outsets="); mOutsets.printShortString(pw);
-                    pw.print(" cutout=" + mDisplayCutout);
+            pw.print(" cutout=" + mDisplayCutout.getDisplayCutout());
                     pw.println();
             pw.print(prefix); pw.print("Lst insets: overscan=");
                     mLastOverscanInsets.printShortString(pw);
@@ -4721,6 +4727,22 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             final float v = mInterpolator.getInterpolation(fraction);
             t.setPosition(leash, mFrom.x + (mTo.x - mFrom.x) * v,
                     mFrom.y + (mTo.y - mFrom.y) * v);
+        }
+
+        @Override
+        public void dump(PrintWriter pw, String prefix) {
+            pw.print(prefix); pw.print("from="); pw.print(mFrom);
+            pw.print(" to="); pw.print(mTo);
+            pw.print(" duration="); pw.println(mDuration);
+        }
+
+        @Override
+        public void writeToProtoInner(ProtoOutputStream proto) {
+            final long token = proto.start(MOVE);
+            mFrom.writeToProto(proto, FROM);
+            mTo.writeToProto(proto, TO);
+            proto.write(DURATION, mDuration);
+            proto.end(token);
         }
     }
 }

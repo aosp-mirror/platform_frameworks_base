@@ -191,6 +191,16 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
+    /**
+     * Returns the name of the current process. A package's default process name
+     * is the same as its package name. Non-default processes will look like
+     * "$PACKAGE_NAME:$NAME", where $NAME corresponds to an android:process
+     * attribute within AndroidManifest.xml.
+     */
+    public static String getProcessName() {
+        return ActivityThread.currentProcessName();
+    }
+
     // ------------------ Internal API ------------------
 
     /**

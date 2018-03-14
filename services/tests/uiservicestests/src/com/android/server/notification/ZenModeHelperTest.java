@@ -35,6 +35,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.AppOpsManager;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -160,6 +161,26 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testTotalSilence() {
+        mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_NO_INTERRUPTIONS;
+        mZenModeHelperSpy.applyRestrictions();
+
+        // Total silence will silence alarms, media and system noises (but not vibrations)
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true,
+                AudioAttributes.USAGE_ALARM);
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true,
+                AudioAttributes.USAGE_MEDIA);
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true,
+                AudioAttributes.USAGE_GAME);
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true,
+                AudioAttributes.USAGE_ASSISTANCE_SONIFICATION, AppOpsManager.OP_PLAY_AUDIO);
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false,
+                AudioAttributes.USAGE_ASSISTANCE_SONIFICATION, AppOpsManager.OP_VIBRATE);
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true,
+                AudioAttributes.USAGE_UNKNOWN);
+    }
+
+    @Test
     public void testAlarmsOnly_alarmMediaMuteNotApplied() {
         mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_ALARMS;
         mZenModeHelperSpy.mConfig.allowAlarms = false;
@@ -179,9 +200,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false,
                 AudioAttributes.USAGE_GAME);
 
-        // Alarms only will silence system noises
+        // Alarms only will silence system noises (but not vibrations)
         verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true,
-                AudioAttributes.USAGE_ASSISTANCE_SONIFICATION);
+                AudioAttributes.USAGE_ASSISTANCE_SONIFICATION, AppOpsManager.OP_PLAY_AUDIO);
         verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true,
                 AudioAttributes.USAGE_UNKNOWN);
     }
@@ -228,6 +249,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     @Test
     public void testZenAllCannotBypass() {
         // Only audio attributes with SUPPRESIBLE_NEVER can bypass
+        // with special case USAGE_ASSISTANCE_SONIFICATION
         mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         mZenModeHelperSpy.mConfig.allowAlarms = false;
         mZenModeHelperSpy.mConfig.allowMedia = false;
@@ -247,9 +269,17 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelperSpy.applyRestrictions();
 
         for (int usage : AudioAttributes.SDK_USAGES) {
-            boolean shouldMute = AudioAttributes.SUPPRESSIBLE_USAGES.get(usage)
-                    != AudioAttributes.SUPPRESSIBLE_NEVER;
-            verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(shouldMute, usage);
+            if (usage == AudioAttributes.USAGE_ASSISTANCE_SONIFICATION) {
+                // only mute audio, not vibrations
+                verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true, usage,
+                        AppOpsManager.OP_PLAY_AUDIO);
+                verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, usage,
+                        AppOpsManager.OP_VIBRATE);
+            } else {
+                boolean shouldMute = AudioAttributes.SUPPRESSIBLE_USAGES.get(usage)
+                        != AudioAttributes.SUPPRESSIBLE_NEVER;
+                verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(shouldMute, usage);
+            }
         }
     }
 

@@ -59,9 +59,7 @@ import android.service.autofill.UserData;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.LocalLog;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -73,6 +71,7 @@ import android.view.autofill.IAutoFillManager;
 import android.view.autofill.IAutoFillManagerClient;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.IResultReceiver;
@@ -88,8 +87,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Entry point service for autofill management.
@@ -105,6 +104,13 @@ public final class AutofillManagerService extends SystemService {
     static final String RECEIVER_BUNDLE_EXTRA_SESSIONS = "sessions";
 
     private static final char COMPAT_PACKAGE_DELIMITER = ':';
+    private static final char COMPAT_PACKAGE_URL_IDS_DELIMITER = ',';
+    private static final char COMPAT_PACKAGE_URL_IDS_BLOCK_BEGIN = '[';
+    private static final char COMPAT_PACKAGE_URL_IDS_BLOCK_END = ']';
+
+    // TODO(b/74445943): temporary work around until P Development Preview 3 is branched
+    private static final List<String> DEFAULT_BUTTONS = Arrays.asList("url_bar",
+            "location_bar_edit_text");
 
     private final Context mContext;
     private final AutoFillUI mUi;
@@ -326,7 +332,7 @@ public final class AutofillManagerService extends SystemService {
         if (service == null) {
             service = new AutofillManagerServiceImpl(mContext, mLock, mRequestsHistory,
                     mUiLatencyHistory, mWtfHistory, resolvedUserId, mUi,
-                    mDisabledUsers.get(resolvedUserId));
+                    mAutofillCompatState, mDisabledUsers.get(resolvedUserId));
             mServicesCache.put(userId, service);
             addCompatibilityModeRequestsLocked(service, userId);
         }
@@ -544,23 +550,24 @@ public final class AutofillManagerService extends SystemService {
     private void addCompatibilityModeRequestsLocked(@NonNull AutofillManagerServiceImpl service
             , int userId) {
         mAutofillCompatState.reset();
-        final ArrayMap<String, Pair<Long, String>> compatPackages =
+        final ArrayMap<String, Long> compatPackages =
                 service.getCompatibilityPackagesLocked();
         if (compatPackages == null || compatPackages.isEmpty()) {
             return;
         }
-        final Set<String> whiteListedPackages = getWhitelistedCompatModePackages();
+
+        final Map<String, String[]> whiteListedPackages = getWhitelistedCompatModePackages();
         final int compatPackageCount = compatPackages.size();
         for (int i = 0; i < compatPackageCount; i++) {
             final String packageName = compatPackages.keyAt(i);
-            if (whiteListedPackages == null || !whiteListedPackages.contains(packageName)) {
+            if (whiteListedPackages == null || !whiteListedPackages.containsKey(packageName)) {
                 Slog.w(TAG, "Ignoring not whitelisted compat package " + packageName);
                 continue;
             }
-            final Long maxVersionCode = compatPackages.valueAt(i).first;
+            final Long maxVersionCode = compatPackages.valueAt(i);
             if (maxVersionCode != null) {
                 mAutofillCompatState.addCompatibilityModeRequest(packageName,
-                        maxVersionCode, userId);
+                        maxVersionCode, whiteListedPackages.get(packageName), userId);
             }
         }
     }
@@ -571,16 +578,60 @@ public final class AutofillManagerService extends SystemService {
                 Settings.Global.AUTOFILL_COMPAT_ALLOWED_PACKAGES);
     }
 
-    private @Nullable Set<String> getWhitelistedCompatModePackages() {
-        final String compatPackagesSetting = getWhitelistedCompatModePackagesFromSettings();
-        if (TextUtils.isEmpty(compatPackagesSetting)) {
+    @Nullable
+    private Map<String, String[]> getWhitelistedCompatModePackages() {
+        return getWhitelistedCompatModePackages(getWhitelistedCompatModePackagesFromSettings());
+    }
+
+    @Nullable
+    @VisibleForTesting
+    static Map<String, String[]> getWhitelistedCompatModePackages(String setting) {
+        if (TextUtils.isEmpty(setting)) {
             return null;
         }
-        final Set<String> compatPackages = new ArraySet<>();
+
+        final ArrayMap<String, String[]> compatPackages = new ArrayMap<>();
         final SimpleStringSplitter splitter = new SimpleStringSplitter(COMPAT_PACKAGE_DELIMITER);
-        splitter.setString(compatPackagesSetting);
+        splitter.setString(setting);
         while (splitter.hasNext()) {
-            compatPackages.add(splitter.next());
+            final String packageBlock = splitter.next();
+            final int urlBlockIndex = packageBlock.indexOf(COMPAT_PACKAGE_URL_IDS_BLOCK_BEGIN);
+            final String packageName;
+            final List<String> urlBarIds;
+            if (urlBlockIndex == -1) {
+                packageName = packageBlock;
+                urlBarIds = DEFAULT_BUTTONS; // TODO(b/74445943): back to null
+            } else {
+                if (packageBlock.charAt(packageBlock.length() - 1)
+                        != COMPAT_PACKAGE_URL_IDS_BLOCK_END) {
+                    Slog.w(TAG, "Ignoring entry '" + packageBlock + "' on '" + setting
+                            + "'because it does not end on '" + COMPAT_PACKAGE_URL_IDS_BLOCK_END +
+                            "'");
+                    continue;
+                }
+                packageName = packageBlock.substring(0, urlBlockIndex);
+                urlBarIds = new ArrayList<>();
+                final String urlBarIdsBlock =
+                        packageBlock.substring(urlBlockIndex + 1, packageBlock.length() - 1);
+                if (sVerbose) {
+                    Slog.v(TAG, "pkg:" + packageName + ": block:" + packageBlock + ": urls:"
+                            + urlBarIds + ": block:" + urlBarIdsBlock + ":");
+                }
+                final SimpleStringSplitter splitter2 =
+                        new SimpleStringSplitter(COMPAT_PACKAGE_URL_IDS_DELIMITER);
+                splitter2.setString(urlBarIdsBlock);
+                while (splitter2.hasNext()) {
+                    final String urlBarId = splitter2.next();
+                    urlBarIds.add(urlBarId);
+                }
+            }
+            if (urlBarIds == null) {
+                compatPackages.put(packageName, null);
+            } else {
+                final String[] urlBarIdsArray = new String[urlBarIds.size()];
+                urlBarIds.toArray(urlBarIdsArray);
+                compatPackages.put(packageName, urlBarIdsArray);
+            }
         }
         return compatPackages;
     }
@@ -598,13 +649,41 @@ public final class AutofillManagerService extends SystemService {
             return mAutofillCompatState.isCompatibilityModeRequested(
                     packageName, versionCode, userId);
         }
+
     }
 
-    private static final class AutofillCompatState {
+    /**
+     * Compatibility mode metadata per package.
+     */
+    private static final class PackageCompatState {
+        private final long maxVersionCode;
+        private final String[] urlBarResourceIds;
+
+        PackageCompatState(long maxVersionCode, String[] urlBarResourceIds) {
+            this.maxVersionCode = maxVersionCode;
+            this.urlBarResourceIds = urlBarResourceIds;
+        }
+
+        @Override
+        public String toString() {
+            return "PackageCompatState: [maxVersionCode=" + maxVersionCode
+                    + ", urlBarResourceIds=" + Arrays.toString(urlBarResourceIds) + "]";
+        }
+    }
+
+    /**
+     * Compatibility mode metadata associated with all services.
+     *
+     * <p>This object is defined here instead of on each {@link AutofillManagerServiceImpl} because
+     * it cannot hold a lock on the main lock when
+     * {@link AutofillCompatState#isCompatibilityModeRequested(String, long, int)} is called by
+     * external services.
+     */
+    static final class AutofillCompatState {
         private final Object mLock = new Object();
 
         @GuardedBy("mLock")
-        private SparseArray<ArrayMap<String, Long>> mUserSpecs;
+        private SparseArray<ArrayMap<String, PackageCompatState>> mUserSpecs;
 
         boolean isCompatibilityModeRequested(@NonNull String packageName,
                 long versionCode, @UserIdInt int userId) {
@@ -612,30 +691,49 @@ public final class AutofillManagerService extends SystemService {
                 if (mUserSpecs == null) {
                     return false;
                 }
-                final ArrayMap<String, Long> userSpec = mUserSpecs.get(userId);
+                final ArrayMap<String, PackageCompatState> userSpec = mUserSpecs.get(userId);
                 if (userSpec == null) {
                     return false;
                 }
-                final Long maxVersionCode = userSpec.get(packageName);
-                if (maxVersionCode == null) {
+                final PackageCompatState metadata = userSpec.get(packageName);
+                if (metadata == null) {
                     return false;
                 }
-                return versionCode <= maxVersionCode;
+                return versionCode <= metadata.maxVersionCode;
+            }
+        }
+
+        @Nullable
+        String[] getUrlBarResourceIds(@NonNull String packageName, @UserIdInt int userId) {
+            synchronized (mLock) {
+                if (mUserSpecs == null) {
+                    return null;
+                }
+                final ArrayMap<String, PackageCompatState> userSpec = mUserSpecs.get(userId);
+                if (userSpec == null) {
+                    return null;
+                }
+                final PackageCompatState metadata = userSpec.get(packageName);
+                if (metadata == null) {
+                    return null;
+                }
+                return metadata.urlBarResourceIds;
             }
         }
 
         void addCompatibilityModeRequest(@NonNull String packageName,
-                long versionCode, @UserIdInt int userId) {
+                long versionCode, @Nullable String[] urlBarResourceIds, @UserIdInt int userId) {
             synchronized (mLock) {
                 if (mUserSpecs == null) {
                     mUserSpecs = new SparseArray<>();
                 }
-                ArrayMap<String, Long> userSpec = mUserSpecs.get(userId);
+                ArrayMap<String, PackageCompatState> userSpec = mUserSpecs.get(userId);
                 if (userSpec == null) {
                     userSpec = new ArrayMap<>();
                     mUserSpecs.put(userId, userSpec);
                 }
-                userSpec.put(packageName, versionCode);
+                userSpec.put(packageName,
+                        new PackageCompatState(versionCode, urlBarResourceIds));
             }
         }
 

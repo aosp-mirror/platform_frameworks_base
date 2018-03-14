@@ -167,10 +167,8 @@ public class Typeface {
         nativeSetDefault(t.native_instance);
     }
 
-    // TODO: Make this public API. (b/64852739)
-    /** @hide */
-    @VisibleForTesting
-    public int getWeight() {
+    /** Returns the typeface's weight value */
+    public @IntRange(from = 0, to = 1000) int getWeight() {
         return mWeight;
     }
 
@@ -880,6 +878,15 @@ public class Typeface {
         }
         return new Typeface(nativeCreateFromArray(
                 ptrArray, RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE));
+    }
+
+    /**
+     * This method is used by supportlib-v27.
+     * TODO: Remove private API use in supportlib: http://b/72665240
+     */
+    private static Typeface createFromFamiliesWithDefault(FontFamily[] families, int weight,
+                int italic) {
+        return createFromFamiliesWithDefault(families, DEFAULT_FAMILY, weight, italic);
     }
 
     /**

@@ -23,6 +23,8 @@ import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import static android.media.AudioManager.RINGER_MODE_SILENT;
 import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 import static android.media.AudioManager.STREAM_ACCESSIBILITY;
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 
 import static com.android.systemui.volume.Events.DISMISS_REASON_SETTINGS_CLICKED;
 
@@ -81,6 +83,7 @@ import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.VolumeDialogController.State;
 import com.android.systemui.plugins.VolumeDialogController.StreamState;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -102,6 +105,7 @@ public class VolumeDialogImpl implements VolumeDialog {
     private final Context mContext;
     private final H mHandler = new H();
     private final VolumeDialogController mController;
+    private final DeviceProvisionedController mDeviceProvisionedController;
 
     private Window mWindow;
     private CustomDialog mDialog;
@@ -109,6 +113,7 @@ public class VolumeDialogImpl implements VolumeDialog {
     private ViewGroup mDialogRowsView;
     private ViewGroup mRinger;
     private ImageButton mRingerIcon;
+    private View mSettingsView;
     private ImageButton mSettingsIcon;
     private ImageView mZenIcon;
     private final List<VolumeRow> mRows = new ArrayList<>();
@@ -139,6 +144,7 @@ public class VolumeDialogImpl implements VolumeDialog {
         mAccessibilityMgr = Dependency.get(AccessibilityManagerWrapper.class);
         mActiveSliderTint = ColorStateList.valueOf(Utils.getColorAccent(mContext));
         mInactiveSliderTint = loadColorStateList(R.color.volume_slider_inactive);
+        mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
     }
 
     public void init(int windowType, Callback callback) {
@@ -212,6 +218,7 @@ public class VolumeDialogImpl implements VolumeDialog {
         mRinger = mDialog.findViewById(R.id.ringer);
         mRingerIcon = mRinger.findViewById(R.id.ringer_icon);
         mZenIcon = mRinger.findViewById(R.id.dnd_icon);
+        mSettingsView = mDialog.findViewById(R.id.settings_container);
         mSettingsIcon = mDialog.findViewById(R.id.settings);
 
         if (mRows.isEmpty()) {
@@ -387,6 +394,8 @@ public class VolumeDialogImpl implements VolumeDialog {
     }
 
     public void initSettingsH() {
+        mSettingsView.setVisibility(
+                mDeviceProvisionedController.isDeviceProvisioned() ? VISIBLE : GONE);
         mSettingsIcon.setOnClickListener(v -> {
             Intent intent = new Intent(Settings.ACTION_SOUND_SETTINGS);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -607,7 +616,7 @@ public class VolumeDialogImpl implements VolumeDialog {
      * @param enable whether to enable volume row views and hide dnd icon
      */
     private void enableVolumeRowViewsH(VolumeRow row, boolean enable) {
-        row.dndIcon.setVisibility(enable ? View.GONE : View.VISIBLE);
+        row.dndIcon.setVisibility(enable ? GONE : VISIBLE);
     }
 
     /**
@@ -617,7 +626,7 @@ public class VolumeDialogImpl implements VolumeDialog {
      */
     private void enableRingerViewsH(boolean enable) {
         mRingerIcon.setEnabled(enable);
-        mZenIcon.setVisibility(enable ? View.GONE : View.VISIBLE);
+        mZenIcon.setVisibility(enable ? GONE : VISIBLE);
     }
 
     private void trimObsoleteH() {
@@ -797,7 +806,7 @@ public class VolumeDialogImpl implements VolumeDialog {
         }
         final int progress = row.slider.getProgress();
         final int level = getImpliedLevel(row.slider, progress);
-        final boolean rowVisible = row.view.getVisibility() == View.VISIBLE;
+        final boolean rowVisible = row.view.getVisibility() == VISIBLE;
         final boolean inGracePeriod = (SystemClock.uptimeMillis() - row.userAttempt)
                 < USER_ATTEMPT_GRACE_PERIOD;
         mHandler.removeMessages(H.RECHECK, row);

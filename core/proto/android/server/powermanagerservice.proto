@@ -315,4 +315,6 @@ message PowerServiceSettingsAndConfigurationDumpProto {
     optional bool is_double_tap_wake_enabled = 37;
     // True if we are currently in VR Mode.
     optional bool is_vr_mode_enabled = 38;
+    // True if Sidekick is controlling the display and we shouldn't change its power mode.
+    optional bool draw_wake_lock_override_from_sidekick = 39;
 }
