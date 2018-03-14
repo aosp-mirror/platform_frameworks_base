@@ -189,7 +189,7 @@ public class RecentsOnboarding {
         }
     }
 
-    public void onQuickStepStarted() {
+    public void onRecentsAnimationStarted() {
         boolean alreadySeenRecentsOnboarding = Prefs.getBoolean(mContext,
                 Prefs.Key.HAS_SEEN_RECENTS_ONBOARDING, false);
         if (!alreadySeenRecentsOnboarding) {
