@@ -14,9 +14,6 @@
 
 package com.android.server.slice;
 
-import static android.app.slice.SliceManager.PERMISSION_GRANTED;
-
-import android.app.slice.Slice;
 import android.app.slice.SliceProvider;
 import android.app.slice.SliceSpec;
 import android.content.ContentProviderClient;
@@ -33,7 +30,6 @@ import android.util.Log;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -54,16 +50,22 @@ public class PinnedSliceState {
     private final ArraySet<String> mPinnedPkgs = new ArraySet<>();
     @GuardedBy("mLock")
     private final ArrayMap<IBinder, ListenerInfo> mListeners = new ArrayMap<>();
+    private final String mPkg;
     @GuardedBy("mLock")
     private SliceSpec[] mSupportedSpecs = null;
 
     private final DeathRecipient mDeathRecipient = this::handleRecheckListeners;
     private boolean mSlicePinned;
 
-    public PinnedSliceState(SliceManagerService service, Uri uri) {
+    public PinnedSliceState(SliceManagerService service, Uri uri, String pkg) {
         mService = service;
         mUri = uri;
+        mPkg = pkg;
         mLock = mService.getLock();
+    }
+
+    public String getPkg() {
+        return mPkg;
     }
 
     public SliceSpec[] getSpecs() {
