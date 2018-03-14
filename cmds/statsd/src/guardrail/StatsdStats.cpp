@@ -21,6 +21,7 @@
 #include <android/util/ProtoOutputStream.h>
 #include "../stats_log_util.h"
 #include "statslog.h"
+#include "storage/StorageManager.h"
 
 namespace android {
 namespace os {
@@ -403,6 +404,8 @@ void StatsdStats::dumpStats(FILE* out) const {
             fprintf(out, "alert %lld declared %d times\n", (long long)stats.first, stats.second);
         }
     }
+    fprintf(out, "********Disk Usage stats***********\n");
+    StorageManager::printStats(out);
     fprintf(out, "********Pushed Atom stats***********\n");
     const size_t atomCounts = mPushedAtomStats.size();
     for (size_t i = 2; i < atomCounts; i++) {
