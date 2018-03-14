@@ -17,6 +17,7 @@
 package com.android.settingslib.testutils.shadow;
 
 import android.content.Context;
+import android.content.pm.UserInfo;
 import android.os.UserManager;
 
 import org.robolectric.RuntimeEnvironment;
@@ -24,6 +25,9 @@ import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.annotation.Resetter;
 import org.robolectric.shadow.api.Shadow;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Implements(value = UserManager.class, inheritImplementationMethods = true)
 public class ShadowUserManager extends org.robolectric.shadows.ShadowUserManager {
@@ -47,6 +51,20 @@ public class ShadowUserManager extends org.robolectric.shadows.ShadowUserManager
     @Implementation
     public static UserManager get(Context context) {
         return (UserManager) context.getSystemService(Context.USER_SERVICE);
+    }
+
+    @Implementation
+    public int[] getProfileIdsWithDisabled(int userId) {
+        return new int[] { 0 };
+    }
+
+    @Implementation
+    public List<UserInfo> getProfiles() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.id = 0;
+        List<UserInfo> userInfos = new ArrayList<>();
+        userInfos.add(userInfo);
+        return userInfos;
     }
 
     public static ShadowUserManager getShadow() {
