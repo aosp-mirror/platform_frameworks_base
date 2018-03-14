@@ -126,6 +126,24 @@ GaugeMetricProducer::~GaugeMetricProducer() {
     }
 }
 
+void GaugeMetricProducer::dumpStatesLocked(FILE* out, bool verbose) const {
+    if (mCurrentSlicedBucket == nullptr ||
+        mCurrentSlicedBucket->size() == 0) {
+        return;
+    }
+
+    fprintf(out, "GaugeMetric %lld dimension size %lu\n", (long long)mMetricId,
+            (unsigned long)mCurrentSlicedBucket->size());
+    if (verbose) {
+        for (const auto& it : *mCurrentSlicedBucket) {
+            fprintf(out, "\t(what)%s\t(condition)%s  %d atoms\n",
+                it.first.getDimensionKeyInWhat().toString().c_str(),
+                it.first.getDimensionKeyInCondition().toString().c_str(),
+                (int)it.second.size());
+        }
+    }
+}
+
 void GaugeMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
                                              ProtoOutputStream* protoOutput) {
     VLOG("gauge metric %lld report now...", (long long)mMetricId);
