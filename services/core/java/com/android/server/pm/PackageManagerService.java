@@ -4086,14 +4086,24 @@ public class PackageManagerService extends IPackageManager.Stub
             @Nullable ComponentName component, @ComponentType int type) {
         if (type == TYPE_ACTIVITY) {
             final PackageParser.Activity activity = mActivities.mActivities.get(component);
-            return activity != null
-                    ? (activity.info.flags & ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP) != 0
-                    : false;
+            if (activity == null) {
+                return false;
+            }
+            final boolean visibleToInstantApp =
+                    (activity.info.flags & ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP) != 0;
+            final boolean explicitlyVisibleToInstantApp =
+                    (activity.info.flags & ActivityInfo.FLAG_IMPLICITLY_VISIBLE_TO_INSTANT_APP) == 0;
+            return visibleToInstantApp && explicitlyVisibleToInstantApp;
         } else if (type == TYPE_RECEIVER) {
             final PackageParser.Activity activity = mReceivers.mActivities.get(component);
-            return activity != null
-                    ? (activity.info.flags & ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP) != 0
-                    : false;
+            if (activity == null) {
+                return false;
+            }
+            final boolean visibleToInstantApp =
+                    (activity.info.flags & ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP) != 0;
+            final boolean explicitlyVisibleToInstantApp =
+                    (activity.info.flags & ActivityInfo.FLAG_IMPLICITLY_VISIBLE_TO_INSTANT_APP) == 0;
+            return visibleToInstantApp && !explicitlyVisibleToInstantApp;
         } else if (type == TYPE_SERVICE) {
             final PackageParser.Service service = mServices.mServices.get(component);
             return service != null
@@ -4138,6 +4148,10 @@ public class PackageManagerService extends IPackageManager.Stub
             return false;
         }
         if (callerIsInstantApp) {
+            // both caller and target are both instant, but, different applications, filter
+            if (ps.getInstantApp(userId)) {
+                return true;
+            }
             // request for a specific component; if it hasn't been explicitly exposed through
             // property or instrumentation target, filter
             if (component != null) {
@@ -4150,7 +4164,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 return !isComponentVisibleToInstantApp(component, componentType);
             }
             // request for application; if no components have been explicitly exposed, filter
-            return ps.getInstantApp(userId) || !ps.pkg.visibleToInstantApps;
+            return !ps.pkg.visibleToInstantApps;
         }
         if (ps.getInstantApp(userId)) {
             // caller can see all components of all instant applications, don't filter
