@@ -2962,6 +2962,7 @@
   <java-symbol type="integer" name="config_nightDisplayColorTemperatureMax" />
   <java-symbol type="array" name="config_nightDisplayColorTemperatureCoefficients" />
   <java-symbol type="array" name="config_nightDisplayColorTemperatureCoefficientsNative" />
+  <java-symbol type="array" name="config_availableColorModes" />
 
   <!-- Default first user restrictions -->
   <java-symbol type="array" name="config_defaultFirstUserRestrictions" />
