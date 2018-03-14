@@ -3128,6 +3128,7 @@
   <java-symbol type="string" name="notification_channel_usb" />
   <java-symbol type="string" name="notification_channel_heavy_weight_app" />
   <java-symbol type="string" name="notification_channel_system_changes" />
+  <java-symbol type="string" name="notification_channel_do_not_disturb" />
   <java-symbol type="string" name="config_defaultAutofillService" />
   <java-symbol type="string" name="config_defaultTextClassifierPackage" />
 
@@ -3294,6 +3295,8 @@
 
   <java-symbol type="string" name="zen_upgrade_notification_title" />
   <java-symbol type="string" name="zen_upgrade_notification_content" />
+  <java-symbol type="string" name="zen_upgrade_notification_visd_title" />
+  <java-symbol type="string" name="zen_upgrade_notification_visd_content" />
 
   <java-symbol type="string" name="config_managed_provisioning_package" />
 
