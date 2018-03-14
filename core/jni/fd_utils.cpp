@@ -119,14 +119,57 @@ FileDescriptorWhitelist::FileDescriptorWhitelist()
 
 FileDescriptorWhitelist* FileDescriptorWhitelist::instance_ = nullptr;
 
+// Keeps track of all relevant information (flags, offset etc.) of an
+// open zygote file descriptor.
+class FileDescriptorInfo {
+ public:
+  // Create a FileDescriptorInfo for a given file descriptor. Returns
+  // |NULL| if an error occurred.
+  static FileDescriptorInfo* CreateFromFd(int fd, std::string* error_msg);
+
+  // Checks whether the file descriptor associated with this object
+  // refers to the same description.
+  bool Restat() const;
+
+  bool ReopenOrDetach(std::string* error_msg) const;
+
+  const int fd;
+  const struct stat stat;
+  const std::string file_path;
+  const int open_flags;
+  const int fd_flags;
+  const int fs_flags;
+  const off_t offset;
+  const bool is_sock;
+
+ private:
+  FileDescriptorInfo(int fd);
+
+  FileDescriptorInfo(struct stat stat, const std::string& file_path, int fd, int open_flags,
+                     int fd_flags, int fs_flags, off_t offset);
+
+  // Returns the locally-bound name of the socket |fd|. Returns true
+  // iff. all of the following hold :
+  //
+  // - the socket's sa_family is AF_UNIX.
+  // - the length of the path is greater than zero (i.e, not an unnamed socket).
+  // - the first byte of the path isn't zero (i.e, not a socket with an abstract
+  //   address).
+  static bool GetSocketName(const int fd, std::string* result);
+
+  bool DetachSocket(std::string* error_msg) const;
+
+  DISALLOW_COPY_AND_ASSIGN(FileDescriptorInfo);
+};
+
 // static
-FileDescriptorInfo* FileDescriptorInfo::CreateFromFd(int fd) {
+FileDescriptorInfo* FileDescriptorInfo::CreateFromFd(int fd, std::string* error_msg) {
   struct stat f_stat;
   // This should never happen; the zygote should always have the right set
   // of permissions required to stat all its open files.
   if (TEMP_FAILURE_RETRY(fstat(fd, &f_stat)) == -1) {
-    PLOG(ERROR) << "Unable to stat fd " << fd;
-    return NULL;
+    *error_msg = android::base::StringPrintf("Unable to stat %d", fd);
+    return nullptr;
   }
 
   const FileDescriptorWhitelist* whitelist = FileDescriptorWhitelist::Get();
@@ -134,13 +177,15 @@ FileDescriptorInfo* FileDescriptorInfo::CreateFromFd(int fd) {
   if (S_ISSOCK(f_stat.st_mode)) {
     std::string socket_name;
     if (!GetSocketName(fd, &socket_name)) {
-      return NULL;
+      *error_msg = "Unable to get socket name";
+      return nullptr;
     }
 
     if (!whitelist->IsAllowed(socket_name)) {
-      LOG(ERROR) << "Socket name not whitelisted : " << socket_name
-                 << " (fd=" << fd << ")";
-      return NULL;
+      *error_msg = android::base::StringPrintf("Socket name not whitelisted : %s (fd=%d)",
+                                               socket_name.c_str(),
+                                               fd);
+      return nullptr;
     }
 
     return new FileDescriptorInfo(fd);
@@ -157,19 +202,22 @@ FileDescriptorInfo* FileDescriptorInfo::CreateFromFd(int fd) {
   // with the child process across forks but those should have been closed
   // before we got to this point.
   if (!S_ISCHR(f_stat.st_mode) && !S_ISREG(f_stat.st_mode)) {
-    LOG(ERROR) << "Unsupported st_mode " << f_stat.st_mode;
-    return NULL;
+    *error_msg = android::base::StringPrintf("Unsupported st_mode %u", f_stat.st_mode);
+    return nullptr;
   }
 
   std::string file_path;
   const std::string fd_path = android::base::StringPrintf("/proc/self/fd/%d", fd);
   if (!android::base::Readlink(fd_path, &file_path)) {
-    return NULL;
+    *error_msg = android::base::StringPrintf("Could not read fd link %s: %s",
+                                             fd_path.c_str(),
+                                             strerror(errno));
+    return nullptr;
   }
 
   if (!whitelist->IsAllowed(file_path)) {
-    LOG(ERROR) << "Not whitelisted : " << file_path;
-    return NULL;
+    *error_msg = std::string("Not whitelisted : ").append(file_path);
+    return nullptr;
   }
 
   // File descriptor flags : currently on FD_CLOEXEC. We can set these
@@ -177,8 +225,11 @@ FileDescriptorInfo* FileDescriptorInfo::CreateFromFd(int fd) {
   // there won't be any races.
   const int fd_flags = TEMP_FAILURE_RETRY(fcntl(fd, F_GETFD));
   if (fd_flags == -1) {
-    PLOG(ERROR) << "Failed fcntl(" << fd << ", F_GETFD)";
-    return NULL;
+    *error_msg = android::base::StringPrintf("Failed fcntl(%d, F_GETFD) (%s): %s",
+                                             fd,
+                                             file_path.c_str(),
+                                             strerror(errno));
+    return nullptr;
   }
 
   // File status flags :
@@ -195,8 +246,11 @@ FileDescriptorInfo* FileDescriptorInfo::CreateFromFd(int fd) {
   //   their presence and pass them in to open().
   int fs_flags = TEMP_FAILURE_RETRY(fcntl(fd, F_GETFL));
   if (fs_flags == -1) {
-    PLOG(ERROR) << "Failed fcntl(" << fd << ", F_GETFL)";
-    return NULL;
+    *error_msg = android::base::StringPrintf("Failed fcntl(%d, F_GETFL) (%s): %s",
+                                             fd,
+                                             file_path.c_str(),
+                                             strerror(errno));
+    return nullptr;
   }
 
   // File offset : Ignore the offset for non seekable files.
@@ -221,9 +275,9 @@ bool FileDescriptorInfo::Restat() const {
   return f_stat.st_ino == stat.st_ino && f_stat.st_dev == stat.st_dev;
 }
 
-bool FileDescriptorInfo::ReopenOrDetach() const {
+bool FileDescriptorInfo::ReopenOrDetach(std::string* error_msg) const {
   if (is_sock) {
-    return DetachSocket();
+    return DetachSocket(error_msg);
   }
 
   // NOTE: This might happen if the file was unlinked after being opened.
@@ -232,31 +286,49 @@ bool FileDescriptorInfo::ReopenOrDetach() const {
   const int new_fd = TEMP_FAILURE_RETRY(open(file_path.c_str(), open_flags));
 
   if (new_fd == -1) {
-    PLOG(ERROR) << "Failed open(" << file_path << ", " << open_flags << ")";
+    *error_msg = android::base::StringPrintf("Failed open(%s, %i): %s",
+                                             file_path.c_str(),
+                                             open_flags,
+                                             strerror(errno));
     return false;
   }
 
   if (TEMP_FAILURE_RETRY(fcntl(new_fd, F_SETFD, fd_flags)) == -1) {
     close(new_fd);
-    PLOG(ERROR) << "Failed fcntl(" << new_fd << ", F_SETFD, " << fd_flags << ")";
+    *error_msg = android::base::StringPrintf("Failed fcntl(%d, F_SETFD, %d) (%s): %s",
+                                             new_fd,
+                                             fd_flags,
+                                             file_path.c_str(),
+                                             strerror(errno));
     return false;
   }
 
   if (TEMP_FAILURE_RETRY(fcntl(new_fd, F_SETFL, fs_flags)) == -1) {
     close(new_fd);
-    PLOG(ERROR) << "Failed fcntl(" << new_fd << ", F_SETFL, " << fs_flags << ")";
+    *error_msg = android::base::StringPrintf("Failed fcntl(%d, F_SETFL, %d) (%s): %s",
+                                             new_fd,
+                                             fs_flags,
+                                             file_path.c_str(),
+                                             strerror(errno));
     return false;
   }
 
   if (offset != -1 && TEMP_FAILURE_RETRY(lseek64(new_fd, offset, SEEK_SET)) == -1) {
     close(new_fd);
-    PLOG(ERROR) << "Failed lseek64(" << new_fd << ", SEEK_SET)";
+    *error_msg = android::base::StringPrintf("Failed lseek64(%d, SEEK_SET) (%s): %s",
+                                             new_fd,
+                                             file_path.c_str(),
+                                             strerror(errno));
     return false;
   }
 
   if (TEMP_FAILURE_RETRY(dup2(new_fd, fd)) == -1) {
     close(new_fd);
-    PLOG(ERROR) << "Failed dup2(" << fd << ", " << new_fd << ")";
+    *error_msg = android::base::StringPrintf("Failed dup2(%d, %d) (%s): %s",
+                                             fd,
+                                             new_fd,
+                                             file_path.c_str(),
+                                             strerror(errno));
     return false;
   }
 
@@ -332,20 +404,22 @@ bool FileDescriptorInfo::GetSocketName(const int fd, std::string* result) {
   return true;
 }
 
-bool FileDescriptorInfo::DetachSocket() const {
+bool FileDescriptorInfo::DetachSocket(std::string* error_msg) const {
   const int dev_null_fd = open("/dev/null", O_RDWR);
   if (dev_null_fd < 0) {
-    PLOG(ERROR) << "Failed to open /dev/null";
+    *error_msg = std::string("Failed to open /dev/null: ").append(strerror(errno));
     return false;
   }
 
   if (dup2(dev_null_fd, fd) == -1) {
-    PLOG(ERROR) << "Failed dup2 on socket descriptor " << fd;
+    *error_msg = android::base::StringPrintf("Failed dup2 on socket descriptor %d: %s",
+                                             fd,
+                                             strerror(errno));
     return false;
   }
 
   if (close(dev_null_fd) == -1) {
-    PLOG(ERROR) << "Failed close(" << dev_null_fd << ")";
+    *error_msg = android::base::StringPrintf("Failed close(%d): %s", dev_null_fd, strerror(errno));
     return false;
   }
 
@@ -353,11 +427,12 @@ bool FileDescriptorInfo::DetachSocket() const {
 }
 
 // static
-FileDescriptorTable* FileDescriptorTable::Create(const std::vector<int>& fds_to_ignore) {
+FileDescriptorTable* FileDescriptorTable::Create(const std::vector<int>& fds_to_ignore,
+                                                 std::string* error_msg) {
   DIR* d = opendir(kFdPath);
-  if (d == NULL) {
-    PLOG(ERROR) << "Unable to open directory " << std::string(kFdPath);
-    return NULL;
+  if (d == nullptr) {
+    *error_msg = std::string("Unable to open directory ").append(kFdPath);
+    return nullptr;
   }
   int dir_fd = dirfd(d);
   dirent* e;
@@ -373,7 +448,7 @@ FileDescriptorTable* FileDescriptorTable::Create(const std::vector<int>& fds_to_
       continue;
     }
 
-    FileDescriptorInfo* info = FileDescriptorInfo::CreateFromFd(fd);
+    FileDescriptorInfo* info = FileDescriptorInfo::CreateFromFd(fd, error_msg);
     if (info == NULL) {
       if (closedir(d) == -1) {
         PLOG(ERROR) << "Unable to close directory";
@@ -384,19 +459,21 @@ FileDescriptorTable* FileDescriptorTable::Create(const std::vector<int>& fds_to_
   }
 
   if (closedir(d) == -1) {
-    PLOG(ERROR) << "Unable to close directory";
-    return NULL;
+    *error_msg = "Unable to close directory";
+    return nullptr;
   }
   return new FileDescriptorTable(open_fd_map);
 }
 
-bool FileDescriptorTable::Restat(const std::vector<int>& fds_to_ignore) {
+bool FileDescriptorTable::Restat(const std::vector<int>& fds_to_ignore, std::string* error_msg) {
   std::set<int> open_fds;
 
   // First get the list of open descriptors.
   DIR* d = opendir(kFdPath);
   if (d == NULL) {
-    PLOG(ERROR) << "Unable to open directory " << std::string(kFdPath);
+    *error_msg = android::base::StringPrintf("Unable to open directory %s: %s",
+                                             kFdPath,
+                                             strerror(errno));
     return false;
   }
 
@@ -416,21 +493,21 @@ bool FileDescriptorTable::Restat(const std::vector<int>& fds_to_ignore) {
   }
 
   if (closedir(d) == -1) {
-    PLOG(ERROR) << "Unable to close directory";
+    *error_msg = android::base::StringPrintf("Unable to close directory: %s", strerror(errno));
     return false;
   }
 
-  return RestatInternal(open_fds);
+  return RestatInternal(open_fds, error_msg);
 }
 
 // Reopens all file descriptors that are contained in the table. Returns true
 // if all descriptors were successfully re-opened or detached, and false if an
 // error occurred.
-bool FileDescriptorTable::ReopenOrDetach() {
+bool FileDescriptorTable::ReopenOrDetach(std::string* error_msg) {
   std::unordered_map<int, FileDescriptorInfo*>::const_iterator it;
   for (it = open_fd_map_.begin(); it != open_fd_map_.end(); ++it) {
     const FileDescriptorInfo* info = it->second;
-    if (info == NULL || !info->ReopenOrDetach()) {
+    if (info == NULL || !info->ReopenOrDetach(error_msg)) {
       return false;
     }
   }
@@ -443,7 +520,7 @@ FileDescriptorTable::FileDescriptorTable(
     : open_fd_map_(map) {
 }
 
-bool FileDescriptorTable::RestatInternal(std::set<int>& open_fds) {
+bool FileDescriptorTable::RestatInternal(std::set<int>& open_fds, std::string* error_msg) {
   bool error = false;
 
   // Iterate through the list of file descriptors we've already recorded
@@ -451,6 +528,8 @@ bool FileDescriptorTable::RestatInternal(std::set<int>& open_fds) {
   //
   // (a) they continue to be open.
   // (b) they refer to the same file.
+  //
+  // We'll only store the last error message.
   std::unordered_map<int, FileDescriptorInfo*>::iterator it = open_fd_map_.begin();
   while (it != open_fd_map_.end()) {
     std::set<int>::const_iterator element = open_fds.find(it->first);
@@ -471,7 +550,7 @@ bool FileDescriptorTable::RestatInternal(std::set<int>& open_fds) {
         // The file descriptor refers to a different description. We must
         // update our entry in the table.
         delete it->second;
-        it->second = FileDescriptorInfo::CreateFromFd(*element);
+        it->second = FileDescriptorInfo::CreateFromFd(*element, error_msg);
         if (it->second == NULL) {
           // The descriptor no longer no longer refers to a whitelisted file.
           // We flag an error and remove it from the list of files we're
@@ -506,7 +585,7 @@ bool FileDescriptorTable::RestatInternal(std::set<int>& open_fds) {
     std::set<int>::const_iterator it;
     for (it = open_fds.begin(); it != open_fds.end(); ++it) {
       const int fd = (*it);
-      FileDescriptorInfo* info = FileDescriptorInfo::CreateFromFd(fd);
+      FileDescriptorInfo* info = FileDescriptorInfo::CreateFromFd(fd, error_msg);
       if (info == NULL) {
         // A newly opened file is not on the whitelist. Flag an error and
         // continue.
