@@ -84,6 +84,17 @@ public:
      */
     static bool hasIdenticalConfig(const ConfigKey& key,
                                    const vector<uint8_t>& config);
+
+    /**
+     * Prints disk usage statistics related to statsd.
+     */
+    static void printStats(FILE* out);
+
+private:
+    /**
+     * Prints disk usage statistics about a directory related to statsd.
+     */
+    static void printDirStats(FILE* out, const char* path);
 };
 
 }  // namespace statsd
