@@ -26,13 +26,17 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.telephony.ITelephony;
+
+import java.util.function.Supplier;
 
 /** Utility class for Telephony permission enforcement. */
 public final class TelephonyPermissions {
     private static final String LOG_TAG = "TelephonyPermissions";
 
     private static final boolean DBG = false;
+
+    private static final Supplier<ITelephony> TELEPHONY_SUPPLIER = () ->
+            ITelephony.Stub.asInterface(ServiceManager.getService(Context.TELEPHONY_SERVICE));
 
     private TelephonyPermissions() {}
 
@@ -41,8 +45,8 @@ public final class TelephonyPermissions {
      *
      * <p>This method behaves in one of the following ways:
      * <ul>
-     *   <li>return true: if the caller has either the READ_PRIVILEGED_PHONE_STATE permission or the
-     *       READ_PHONE_STATE runtime permission.
+     *   <li>return true: if the caller has the READ_PRIVILEGED_PHONE_STATE permission, the
+     *       READ_PHONE_STATE runtime permission, or carrier privileges on the given subId.
      *   <li>throw SecurityException: if the caller didn't declare any of these permissions, or, for
      *       apps which support runtime permissions, if the caller does not currently have any of
      *       these permissions.
@@ -51,20 +55,30 @@ public final class TelephonyPermissions {
      *       manually (via AppOps). In this case we can't throw as it would break app compatibility,
      *       so we return false to indicate that the calling function should return dummy data.
      * </ul>
+     *
+     * <p>Note: for simplicity, this method always returns false for callers using legacy
+     * permissions and who have had READ_PHONE_STATE revoked, even if they are carrier-privileged.
+     * Such apps should migrate to runtime permissions or stop requiring READ_PHONE_STATE on P+
+     * devices.
+     *
+     * @param subId the subId of the relevant subscription; used to check carrier privileges. May be
+     *              {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID} to skip this check for cases
+     *              where it isn't relevant (hidden APIs, or APIs which are otherwise okay to leave
+     *              inaccesible to carrier-privileged apps).
      */
     public static boolean checkCallingOrSelfReadPhoneState(
-            Context context, String callingPackage, String message) {
-        return checkReadPhoneState(context, Binder.getCallingPid(), Binder.getCallingUid(),
+            Context context, int subId, String callingPackage, String message) {
+        return checkReadPhoneState(context, subId, Binder.getCallingPid(), Binder.getCallingUid(),
                 callingPackage, message);
     }
 
     /**
      * Check whether the app with the given pid/uid can read phone state.
      *
-     * <p>This method behaves in one of the following ways:
+    * <p>This method behaves in one of the following ways:
      * <ul>
-     *   <li>return true: if the caller has either the READ_PRIVILEGED_PHONE_STATE permission or the
-     *       READ_PHONE_STATE runtime permission.
+     *   <li>return true: if the caller has the READ_PRIVILEGED_PHONE_STATE permission, the
+     *       READ_PHONE_STATE runtime permission, or carrier privileges on the given subId.
      *   <li>throw SecurityException: if the caller didn't declare any of these permissions, or, for
      *       apps which support runtime permissions, if the caller does not currently have any of
      *       these permissions.
@@ -73,9 +87,22 @@ public final class TelephonyPermissions {
      *       manually (via AppOps). In this case we can't throw as it would break app compatibility,
      *       so we return false to indicate that the calling function should return dummy data.
      * </ul>
+     *
+     * <p>Note: for simplicity, this method always returns false for callers using legacy
+     * permissions and who have had READ_PHONE_STATE revoked, even if they are carrier-privileged.
+     * Such apps should migrate to runtime permissions or stop requiring READ_PHONE_STATE on P+
+     * devices.
      */
     public static boolean checkReadPhoneState(
-            Context context, int pid, int uid, String callingPackage, String message) {
+            Context context, int subId, int pid, int uid, String callingPackage, String message) {
+        return checkReadPhoneState(
+                context, TELEPHONY_SUPPLIER, subId, pid, uid, callingPackage, message);
+    }
+
+    @VisibleForTesting
+    public static boolean checkReadPhoneState(
+            Context context, Supplier<ITelephony> telephonySupplier, int subId, int pid, int uid,
+            String callingPackage, String message) {
         try {
             context.enforcePermission(
                     android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, pid, uid, message);
@@ -83,8 +110,18 @@ public final class TelephonyPermissions {
             // SKIP checking for run-time permission since caller has PRIVILEGED permission
             return true;
         } catch (SecurityException privilegedPhoneStateException) {
-            context.enforcePermission(
-                    android.Manifest.permission.READ_PHONE_STATE, pid, uid, message);
+            try {
+                context.enforcePermission(
+                        android.Manifest.permission.READ_PHONE_STATE, pid, uid, message);
+            } catch (SecurityException phoneStateException) {
+                // If we don't have the runtime permission, but do have carrier privileges, that
+                // suffices for reading phone state.
+                if (SubscriptionManager.isValidSubscriptionId(subId)) {
+                    enforceCarrierPrivilege(telephonySupplier, subId, uid, message);
+                    return true;
+                }
+                throw phoneStateException;
+            }
         }
 
         // We have READ_PHONE_STATE permission, so return true as long as the AppOps bit hasn't been
@@ -101,14 +138,16 @@ public final class TelephonyPermissions {
      * default SMS app and apps with READ_SMS or READ_PHONE_NUMBERS can also read phone numbers.
      */
     public static boolean checkCallingOrSelfReadPhoneNumber(
-            Context context, String callingPackage, String message) {
+            Context context, int subId, String callingPackage, String message) {
         return checkReadPhoneNumber(
-                context, Binder.getCallingPid(), Binder.getCallingUid(), callingPackage, message);
+                context, TELEPHONY_SUPPLIER, subId, Binder.getCallingPid(), Binder.getCallingUid(),
+                callingPackage, message);
     }
 
     @VisibleForTesting
     public static boolean checkReadPhoneNumber(
-            Context context, int pid, int uid, String callingPackage, String message) {
+            Context context, Supplier<ITelephony> telephonySupplier, int subId, int pid, int uid,
+            String callingPackage, String message) {
         // Default SMS app can always read it.
         AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         if (appOps.noteOp(AppOpsManager.OP_WRITE_SMS, uid, callingPackage) ==
@@ -121,7 +160,8 @@ public final class TelephonyPermissions {
 
         // First, check if we can read the phone state.
         try {
-            return checkReadPhoneState(context, pid, uid, callingPackage, message);
+            return checkReadPhoneState(
+                    context, telephonySupplier, subId, pid, uid, callingPackage, message);
         } catch (SecurityException readPhoneStateSecurityException) {
         }
         // Can be read with READ_SMS too.
@@ -186,16 +226,21 @@ public final class TelephonyPermissions {
     }
 
     private static void enforceCarrierPrivilege(int subId, int uid, String message) {
-        if (getCarrierPrivilegeStatus(subId, uid) !=
+        enforceCarrierPrivilege(TELEPHONY_SUPPLIER, subId, uid, message);
+    }
+
+    private static void enforceCarrierPrivilege(
+            Supplier<ITelephony> telephonySupplier, int subId, int uid, String message) {
+        if (getCarrierPrivilegeStatus(telephonySupplier, subId, uid) !=
                 TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
             if (DBG) Rlog.e(LOG_TAG, "No Carrier Privilege.");
             throw new SecurityException(message);
         }
     }
 
-    private static int getCarrierPrivilegeStatus(int subId, int uid) {
-        ITelephony telephony =
-                ITelephony.Stub.asInterface(ServiceManager.getService(Context.TELEPHONY_SERVICE));
+    private static int getCarrierPrivilegeStatus(
+            Supplier<ITelephony> telephonySupplier, int subId, int uid) {
+        ITelephony telephony = telephonySupplier.get();
         try {
             if (telephony != null) {
                 return telephony.getCarrierPrivilegeStatusForUid(subId, uid);
