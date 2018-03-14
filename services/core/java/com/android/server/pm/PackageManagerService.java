@@ -23858,6 +23858,15 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
 
         @Override
+        public boolean canAccessComponent(int callingUid, ComponentName component, int userId) {
+            synchronized (mPackages) {
+                final PackageSetting ps = mSettings.mPackages.get(component.getPackageName());
+                return !PackageManagerService.this.filterAppAccessLPr(
+                        ps, callingUid, component, TYPE_UNKNOWN, userId);
+            }
+        }
+
+        @Override
         public boolean hasInstantApplicationMetadata(String packageName, int userId) {
             synchronized (mPackages) {
                 return mInstantAppRegistry.hasInstantApplicationMetadataLPr(packageName, userId);
