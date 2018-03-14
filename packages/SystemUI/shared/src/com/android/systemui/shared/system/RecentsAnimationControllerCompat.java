@@ -51,6 +51,14 @@ public class RecentsAnimationControllerCompat {
         }
     }
 
+    public void setAnimationTargetsBehindSystemBars(boolean behindSystemBars) {
+        try {
+            mAnimationController.setAnimationTargetsBehindSystemBars(behindSystemBars);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to set whether animation targets are behind system bars", e);
+        }
+    }
+
     public void finish(boolean toHome) {
         try {
             mAnimationController.finish(toHome);
