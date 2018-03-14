@@ -239,7 +239,7 @@ public abstract class ColorSpace {
          *     <tr>
          *         <td>Opto-electronic transfer function (OETF)</td>
          *         <td colspan="4">\(\begin{equation}
-         *             C_{sRGB} = \begin{cases} 12.92 \times C_{linear} & C_{linear} \lt 0.0031308 \\
+         *             C_{sRGB} = \begin{cases} 12.92 \times C_{linear} & C_{linear} \lt 0.0031308 \\\
          *             1.055 \times C_{linear}^{\frac{1}{2.4}} - 0.055 & C_{linear} \ge 0.0031308 \end{cases}
          *             \end{equation}\)
          *         </td>
@@ -247,7 +247,7 @@ public abstract class ColorSpace {
          *     <tr>
          *         <td>Electro-optical transfer function (EOTF)</td>
          *         <td colspan="4">\(\begin{equation}
-         *             C_{linear} = \begin{cases}\frac{C_{sRGB}}{12.92} & C_{sRGB} \lt 0.04045 \\
+         *             C_{linear} = \begin{cases}\frac{C_{sRGB}}{12.92} & C_{sRGB} \lt 0.04045 \\\
          *             \left( \frac{C_{sRGB} + 0.055}{1.055} \right) ^{2.4} & C_{sRGB} \ge 0.04045 \end{cases}
          *             \end{equation}\)
          *         </td>
@@ -302,7 +302,7 @@ public abstract class ColorSpace {
          *         <td>Opto-electronic transfer function (OETF)</td>
          *         <td colspan="4">\(\begin{equation}
          *             C_{scRGB} = \begin{cases} sign(C_{linear}) 12.92 \times \left| C_{linear} \right| &
-         *                      \left| C_{linear} \right| \lt 0.0031308 \\
+         *                      \left| C_{linear} \right| \lt 0.0031308 \\\
          *             sign(C_{linear}) 1.055 \times \left| C_{linear} \right| ^{\frac{1}{2.4}} - 0.055 &
          *                      \left| C_{linear} \right| \ge 0.0031308 \end{cases}
          *             \end{equation}\)
@@ -312,7 +312,7 @@ public abstract class ColorSpace {
          *         <td>Electro-optical transfer function (EOTF)</td>
          *         <td colspan="4">\(\begin{equation}
          *             C_{linear} = \begin{cases}sign(C_{scRGB}) \frac{\left| C_{scRGB} \right|}{12.92} &
-         *                  \left| C_{scRGB} \right| \lt 0.04045 \\
+         *                  \left| C_{scRGB} \right| \lt 0.04045 \\\
          *             sign(C_{scRGB}) \left( \frac{\left| C_{scRGB} \right| + 0.055}{1.055} \right) ^{2.4} &
          *                  \left| C_{scRGB} \right| \ge 0.04045 \end{cases}
          *             \end{equation}\)
@@ -367,7 +367,7 @@ public abstract class ColorSpace {
          *     <tr>
          *         <td>Opto-electronic transfer function (OETF)</td>
          *         <td colspan="4">\(\begin{equation}
-         *             C_{BT709} = \begin{cases} 4.5 \times C_{linear} & C_{linear} \lt 0.018 \\
+         *             C_{BT709} = \begin{cases} 4.5 \times C_{linear} & C_{linear} \lt 0.018 \\\
          *             1.099 \times C_{linear}^{\frac{1}{2.2}} - 0.099 & C_{linear} \ge 0.018 \end{cases}
          *             \end{equation}\)
          *         </td>
@@ -375,7 +375,7 @@ public abstract class ColorSpace {
          *     <tr>
          *         <td>Electro-optical transfer function (EOTF)</td>
          *         <td colspan="4">\(\begin{equation}
-         *             C_{linear} = \begin{cases}\frac{C_{BT709}}{4.5} & C_{BT709} \lt 0.081 \\
+         *             C_{linear} = \begin{cases}\frac{C_{BT709}}{4.5} & C_{BT709} \lt 0.081 \\\
          *             \left( \frac{C_{BT709} + 0.099}{1.099} \right) ^{2.2} & C_{BT709} \ge 0.081 \end{cases}
          *             \end{equation}\)
          *         </td>
@@ -402,7 +402,7 @@ public abstract class ColorSpace {
          *     <tr>
          *         <td>Opto-electronic transfer function (OETF)</td>
          *         <td colspan="4">\(\begin{equation}
-         *             C_{BT2020} = \begin{cases} 4.5 \times C_{linear} & C_{linear} \lt 0.0181 \\
+         *             C_{BT2020} = \begin{cases} 4.5 \times C_{linear} & C_{linear} \lt 0.0181 \\\
          *             1.0993 \times C_{linear}^{\frac{1}{2.2}} - 0.0993 & C_{linear} \ge 0.0181 \end{cases}
          *             \end{equation}\)
          *         </td>
@@ -410,7 +410,7 @@ public abstract class ColorSpace {
          *     <tr>
          *         <td>Electro-optical transfer function (EOTF)</td>
          *         <td colspan="4">\(\begin{equation}
-         *             C_{linear} = \begin{cases}\frac{C_{BT2020}}{4.5} & C_{BT2020} \lt 0.08145 \\
+         *             C_{linear} = \begin{cases}\frac{C_{BT2020}}{4.5} & C_{BT2020} \lt 0.08145 \\\
          *             \left( \frac{C_{BT2020} + 0.0993}{1.0993} \right) ^{2.2} & C_{BT2020} \ge 0.08145 \end{cases}
          *             \end{equation}\)
          *         </td>
@@ -464,7 +464,7 @@ public abstract class ColorSpace {
          *     <tr>
          *         <td>Opto-electronic transfer function (OETF)</td>
          *         <td colspan="4">\(\begin{equation}
-         *             C_{DisplayP3} = \begin{cases} 12.92 \times C_{linear} & C_{linear} \lt 0.0030186 \\
+         *             C_{DisplayP3} = \begin{cases} 12.92 \times C_{linear} & C_{linear} \lt 0.0030186 \\\
          *             1.055 \times C_{linear}^{\frac{1}{2.4}} - 0.055 & C_{linear} \ge 0.0030186 \end{cases}
          *             \end{equation}\)
          *         </td>
@@ -472,7 +472,7 @@ public abstract class ColorSpace {
          *     <tr>
          *         <td>Electro-optical transfer function (EOTF)</td>
          *         <td colspan="4">\(\begin{equation}
-         *             C_{linear} = \begin{cases}\frac{C_{DisplayP3}}{12.92} & C_{sRGB} \lt 0.039 \\
+         *             C_{linear} = \begin{cases}\frac{C_{DisplayP3}}{12.92} & C_{sRGB} \lt 0.039 \\\
          *             \left( \frac{C_{DisplayP3} + 0.055}{1.055} \right) ^{2.4} & C_{sRGB} \ge 0.039 \end{cases}
          *             \end{equation}\)
          *         </td>
@@ -499,7 +499,7 @@ public abstract class ColorSpace {
          *     <tr>
          *         <td>Opto-electronic transfer function (OETF)</td>
          *         <td colspan="4">\(\begin{equation}
-         *             C_{BT709} = \begin{cases} 4.5 \times C_{linear} & C_{linear} \lt 0.018 \\
+         *             C_{BT709} = \begin{cases} 4.5 \times C_{linear} & C_{linear} \lt 0.018 \\\
          *             1.099 \times C_{linear}^{\frac{1}{2.2}} - 0.099 & C_{linear} \ge 0.018 \end{cases}
          *             \end{equation}\)
          *         </td>
@@ -507,7 +507,7 @@ public abstract class ColorSpace {
          *     <tr>
          *         <td>Electro-optical transfer function (EOTF)</td>
          *         <td colspan="4">\(\begin{equation}
-         *             C_{linear} = \begin{cases}\frac{C_{BT709}}{4.5} & C_{BT709} \lt 0.081 \\
+         *             C_{linear} = \begin{cases}\frac{C_{BT709}}{4.5} & C_{BT709} \lt 0.081 \\\
          *             \left( \frac{C_{BT709} + 0.099}{1.099} \right) ^{2.2} & C_{BT709} \ge 0.081 \end{cases}
          *             \end{equation}\)
          *         </td>
@@ -534,7 +534,7 @@ public abstract class ColorSpace {
          *     <tr>
          *         <td>Opto-electronic transfer function (OETF)</td>
          *         <td colspan="4">\(\begin{equation}
-         *             C_{BT709} = \begin{cases} 4.5 \times C_{linear} & C_{linear} \lt 0.018 \\
+         *             C_{BT709} = \begin{cases} 4.5 \times C_{linear} & C_{linear} \lt 0.018 \\\
          *             1.099 \times C_{linear}^{\frac{1}{2.2}} - 0.099 & C_{linear} \ge 0.018 \end{cases}
          *             \end{equation}\)
          *         </td>
@@ -542,7 +542,7 @@ public abstract class ColorSpace {
          *     <tr>
          *         <td>Electro-optical transfer function (EOTF)</td>
          *         <td colspan="4">\(\begin{equation}
-         *             C_{linear} = \begin{cases}\frac{C_{BT709}}{4.5} & C_{BT709} \lt 0.081 \\
+         *             C_{linear} = \begin{cases}\frac{C_{BT709}}{4.5} & C_{BT709} \lt 0.081 \\\
          *             \left( \frac{C_{BT709} + 0.099}{1.099} \right) ^{2.2} & C_{BT709} \ge 0.081 \end{cases}
          *             \end{equation}\)
          *         </td>
@@ -596,7 +596,7 @@ public abstract class ColorSpace {
          *     <tr>
          *         <td>Opto-electronic transfer function (OETF)</td>
          *         <td colspan="4">\(\begin{equation}
-         *             C_{ROMM} = \begin{cases} 16 \times C_{linear} & C_{linear} \lt 0.001953 \\
+         *             C_{ROMM} = \begin{cases} 16 \times C_{linear} & C_{linear} \lt 0.001953 \\\
          *             C_{linear}^{\frac{1}{1.8}} & C_{linear} \ge 0.001953 \end{cases}
          *             \end{equation}\)
          *         </td>
@@ -604,7 +604,7 @@ public abstract class ColorSpace {
          *     <tr>
          *         <td>Electro-optical transfer function (EOTF)</td>
          *         <td colspan="4">\(\begin{equation}
-         *             C_{linear} = \begin{cases}\frac{C_{ROMM}}{16} & C_{ROMM} \lt 0.031248 \\
+         *             C_{linear} = \begin{cases}\frac{C_{ROMM}}{16} & C_{ROMM} \lt 0.031248 \\\
          *             C_{ROMM}^{1.8} & C_{ROMM} \ge 0.031248 \end{cases}
          *             \end{equation}\)
          *         </td>
@@ -759,12 +759,12 @@ public abstract class ColorSpace {
      *
      * $$\begin{align*}
      * \left[ \begin{array}{c} L_1\\ M_1\\ S_1 \end{array} \right] &=
-     *      A \left[ \begin{array}{c} W1_X\\ W1_Y\\ W1_Z \end{array} \right] \\
+     *      A \left[ \begin{array}{c} W1_X\\ W1_Y\\ W1_Z \end{array} \right] \\\
      * \left[ \begin{array}{c} L_2\\ M_2\\ S_2 \end{array} \right] &=
-     *      A \left[ \begin{array}{c} W2_X\\ W2_Y\\ W2_Z \end{array} \right] \\
-     * D &= \left[ \begin{matrix} \frac{L_2}{L_1} & 0 & 0 \\
-     *      0 & \frac{M_2}{M_1} & 0 \\
-     *      0 & 0 & \frac{S_2}{S_1} \end{matrix} \right] \\
+     *      A \left[ \begin{array}{c} W2_X\\ W2_Y\\ W2_Z \end{array} \right] \\\
+     * D &= \left[ \begin{matrix} \frac{L_2}{L_1} & 0 & 0 \\\
+     *      0 & \frac{M_2}{M_1} & 0 \\\
+     *      0 & 0 & \frac{S_2}{S_1} \end{matrix} \right] \\\
      * T &= A^{-1}.D.A
      * \end{align*}$$
      *
@@ -2028,7 +2028,7 @@ public abstract class ColorSpace {
          * <p>The EOTF is of the form:</p>
          *
          * \(\begin{equation}
-         * Y = \begin{cases}c X + f & X \lt d \\
+         * Y = \begin{cases}c X + f & X \lt d \\\
          * \left( a X + b \right) ^{g} + e & X \ge d \end{cases}
          * \end{equation}\)
          *
@@ -2066,7 +2066,7 @@ public abstract class ColorSpace {
              * <p>The EOTF is of the form:</p>
              *
              * \(\begin{equation}
-             * Y = \begin{cases}c X & X \lt d \\
+             * Y = \begin{cases}c X & X \lt d \\\
              * \left( a X + b \right) ^{g} & X \ge d \end{cases}
              * \end{equation}\)
              *
