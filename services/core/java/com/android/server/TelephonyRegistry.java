@@ -65,7 +65,6 @@ import com.android.server.am.BatteryStatsService;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -164,13 +163,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private int[] mDataActivity;
 
+    // Connection state of default APN type data (i.e. internet) of phones
     private int[] mDataConnectionState;
-
-    private ArrayList<String>[] mConnectedApns;
-
-    private LinkProperties[] mDataConnectionLinkProperties;
-
-    private NetworkCapabilities[] mDataConnectionNetworkCapabilities;
 
     private Bundle[] mCellLocation;
 
@@ -323,9 +317,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mBatteryStats = BatteryStatsService.getService();
 
         int numPhones = TelephonyManager.getDefault().getPhoneCount();
-        if (DBG) log("TelephonyRegistor: ctor numPhones=" + numPhones);
+        if (DBG) log("TelephonyRegistry: ctor numPhones=" + numPhones);
         mNumPhones = numPhones;
-        mConnectedApns = new ArrayList[numPhones];
         mCallState = new int[numPhones];
         mDataActivity = new int[numPhones];
         mDataConnectionState = new int[numPhones];
@@ -339,8 +332,6 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mMessageWaiting = new boolean[numPhones];
         mCallForwarding = new boolean[numPhones];
         mCellLocation = new Bundle[numPhones];
-        mDataConnectionLinkProperties = new LinkProperties[numPhones];
-        mDataConnectionNetworkCapabilities = new NetworkCapabilities[numPhones];
         mCellInfo = new ArrayList<List<CellInfo>>();
         mPhysicalChannelConfigs = new ArrayList<List<PhysicalChannelConfig>>();
         for (int i = 0; i < numPhones; i++) {
@@ -358,7 +349,6 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mCellLocation[i] = new Bundle();
             mCellInfo.add(i, null);
             mPhysicalChannelConfigs.add(i, null);
-            mConnectedApns[i] = new ArrayList<String>();
         }
 
         // Note that location can be null for non-phone builds like
@@ -1219,36 +1209,12 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         int phoneId = SubscriptionManager.getPhoneId(subId);
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {
-                boolean modified = false;
-                if (state == TelephonyManager.DATA_CONNECTED) {
-                    if (!mConnectedApns[phoneId].contains(apnType)) {
-                        mConnectedApns[phoneId].add(apnType);
-                        if (mDataConnectionState[phoneId] != state) {
-                            mDataConnectionState[phoneId] = state;
-                            modified = true;
-                        }
-                    }
-                } else {
-                    if (mConnectedApns[phoneId].remove(apnType)) {
-                        if (mConnectedApns[phoneId].isEmpty()) {
-                            mDataConnectionState[phoneId] = state;
-                            modified = true;
-                        } else {
-                            // leave mDataConnectionState as is and
-                            // send out the new status for the APN in question.
-                        }
-                    }
-                }
-                mDataConnectionLinkProperties[phoneId] = linkProperties;
-                mDataConnectionNetworkCapabilities[phoneId] = networkCapabilities;
-                if (mDataConnectionNetworkType[phoneId] != networkType) {
-                    mDataConnectionNetworkType[phoneId] = networkType;
-                    // need to tell registered listeners about the new network type
-                    modified = true;
-                }
-                if (modified) {
-                    String str = "onDataConnectionStateChanged(" + mDataConnectionState[phoneId]
-                            + ", " + mDataConnectionNetworkType[phoneId] + ")";
+                // We only call the callback when the change is for default APN type.
+                if (PhoneConstants.APN_TYPE_DEFAULT.equals(apnType)
+                        && (mDataConnectionState[phoneId] != state
+                        || mDataConnectionNetworkType[phoneId] != networkType)) {
+                    String str = "onDataConnectionStateChanged(" + state
+                            + ", " + networkType + ")";
                     log(str);
                     mLocalLog.log(str);
                     for (Record r : mRecords) {
@@ -1259,15 +1225,16 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                                 if (DBG) {
                                     log("Notify data connection state changed on sub: " + subId);
                                 }
-                                r.callback.onDataConnectionStateChanged(
-                                        mDataConnectionState[phoneId],
-                                        mDataConnectionNetworkType[phoneId]);
+                                r.callback.onDataConnectionStateChanged(state, networkType);
                             } catch (RemoteException ex) {
                                 mRemoveList.add(r.binder);
                             }
                         }
                     }
                     handleRemoveListLocked();
+
+                    mDataConnectionState[phoneId] = state;
+                    mDataConnectionNetworkType[phoneId] = networkType;
                 }
                 mPreciseDataConnectionState = new PreciseDataConnectionState(state, networkType,
                         apnType, apn, reason, linkProperties, "");
@@ -1503,14 +1470,10 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 pw.println("mCallForwarding=" + mCallForwarding[i]);
                 pw.println("mDataActivity=" + mDataActivity[i]);
                 pw.println("mDataConnectionState=" + mDataConnectionState[i]);
-                pw.println("mDataConnectionLinkProperties=" + mDataConnectionLinkProperties[i]);
-                pw.println("mDataConnectionNetworkCapabilities=" +
-                        mDataConnectionNetworkCapabilities[i]);
                 pw.println("mCellLocation=" + mCellLocation[i]);
                 pw.println("mCellInfo=" + mCellInfo.get(i));
                 pw.decreaseIndent();
             }
-            pw.println("mConnectedApns=" + Arrays.toString(mConnectedApns));
             pw.println("mPreciseDataConnectionState=" + mPreciseDataConnectionState);
             pw.println("mPreciseCallState=" + mPreciseCallState);
             pw.println("mCarrierNetworkChangeState=" + mCarrierNetworkChangeState);
