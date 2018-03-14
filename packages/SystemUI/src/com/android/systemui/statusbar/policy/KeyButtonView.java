@@ -126,7 +126,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 
         mRipple = new KeyButtonRipple(context, this);
-        mVibratorHelper = new VibratorHelper(context);
+        mVibratorHelper = Dependency.get(VibratorHelper.class);
         mOverviewProxyService = Dependency.get(OverviewProxyService.class);
         setBackground(mRipple);
     }
@@ -224,8 +224,10 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
             case MotionEvent.ACTION_DOWN:
                 mDownTime = SystemClock.uptimeMillis();
                 mLongClicked = false;
-                mTouchDownX = (int) ev.getX();
-                mTouchDownY = (int) ev.getY();
+
+                // Use raw X and Y to detect gestures in case a parent changes the x and y values
+                mTouchDownX = (int) ev.getRawX();
+                mTouchDownY = (int) ev.getRawY();
                 if (mCode != 0) {
                     sendEvent(KeyEvent.ACTION_DOWN, 0, mDownTime);
                 } else {
@@ -241,8 +243,8 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 postDelayed(mCheckLongPress, ViewConfiguration.getLongPressTimeout());
                 break;
             case MotionEvent.ACTION_MOVE:
-                x = (int)ev.getX();
-                y = (int)ev.getY();
+                x = (int)ev.getRawX();
+                y = (int)ev.getRawY();
                 boolean exceededTouchSlopX = Math.abs(x - mTouchDownX) > mTouchSlop;
                 boolean exceededTouchSlopY = Math.abs(y - mTouchDownY) > mTouchSlop;
                 if (exceededTouchSlopX || exceededTouchSlopY) {

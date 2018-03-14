@@ -377,6 +377,9 @@
     <!-- Content description of the data connection type 3.5G. [CHAR LIMIT=NONE] -->
     <string name="data_connection_3_5g">3.5G</string>
 
+    <!-- Content description of the data connection type 3.5G+. [CHAR LIMIT=NONE] -->
+    <string name="data_connection_3_5g_plus">3.5G+</string>
+
     <!-- Content description of the data connection type 4G . [CHAR LIMIT=NONE] -->
     <string name="data_connection_4g">4G</string>
 
@@ -1270,6 +1273,9 @@
 
     <!-- Button label for ending zen mode in the volume dialog -->
     <string name="volume_zen_end_now">Turn off now</string>
+
+    <!-- Content description for accessibility (not shown on the screen): volume dialog settings button. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_volume_settings">Sound settings</string>
 
     <!-- Content description for accessibility (not shown on the screen): volume dialog expand button. [CHAR LIMIT=NONE] -->
     <string name="accessibility_volume_expand">Expand</string>

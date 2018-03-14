@@ -727,6 +727,36 @@ public class AudioService extends IAudioService.Stub
             }
         }
 
+        int maxAlarmVolume = SystemProperties.getInt("ro.config.alarm_vol_steps", -1);
+        if (maxAlarmVolume != -1) {
+            MAX_STREAM_VOLUME[AudioSystem.STREAM_ALARM] = maxAlarmVolume;
+        }
+
+        int defaultAlarmVolume = SystemProperties.getInt("ro.config.alarm_vol_default", -1);
+        if (defaultAlarmVolume != -1 &&
+                defaultAlarmVolume <= MAX_STREAM_VOLUME[AudioSystem.STREAM_ALARM]) {
+            AudioSystem.DEFAULT_STREAM_VOLUME[AudioSystem.STREAM_ALARM] = defaultAlarmVolume;
+        } else {
+            // Default is 6 out of 7 (default maximum), so scale accordingly.
+            AudioSystem.DEFAULT_STREAM_VOLUME[AudioSystem.STREAM_ALARM] =
+                        6 * MAX_STREAM_VOLUME[AudioSystem.STREAM_ALARM] / 7;
+        }
+
+        int maxSystemVolume = SystemProperties.getInt("ro.config.system_vol_steps", -1);
+        if (maxSystemVolume != -1) {
+            MAX_STREAM_VOLUME[AudioSystem.STREAM_SYSTEM] = maxSystemVolume;
+        }
+
+        int defaultSystemVolume = SystemProperties.getInt("ro.config.system_vol_default", -1);
+        if (defaultSystemVolume != -1 &&
+                defaultSystemVolume <= MAX_STREAM_VOLUME[AudioSystem.STREAM_SYSTEM]) {
+            AudioSystem.DEFAULT_STREAM_VOLUME[AudioSystem.STREAM_SYSTEM] = defaultSystemVolume;
+        } else {
+            // Default is to use maximum.
+            AudioSystem.DEFAULT_STREAM_VOLUME[AudioSystem.STREAM_SYSTEM] =
+                        MAX_STREAM_VOLUME[AudioSystem.STREAM_SYSTEM];
+        }
+
         sSoundEffectVolumeDb = context.getResources().getInteger(
                 com.android.internal.R.integer.config_soundEffectVolumeDb);
 

@@ -379,6 +379,8 @@ public class AppWindowContainerController
 
                 if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "No longer Stopped: " + wtoken);
                 wtoken.mAppStopped = false;
+
+                mContainer.transferStartingWindowFromHiddenAboveTokenIfNeeded();
             }
 
             // If we are preparing an app transition, then delay changing

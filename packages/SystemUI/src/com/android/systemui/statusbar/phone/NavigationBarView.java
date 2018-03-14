@@ -50,6 +50,7 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
@@ -246,7 +247,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         mOverviewProxyService = Dependency.get(OverviewProxyService.class);
         mRecentsOnboarding = new RecentsOnboarding(context, mOverviewProxyService);
-        mVibratorHelper = new VibratorHelper(context);
+        mVibratorHelper = Dependency.get(VibratorHelper.class);
 
         mConfiguration = new Configuration();
         mConfiguration.updateFrom(context.getResources().getConfiguration());
@@ -289,16 +290,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         notifyVerticalChangedListener(mVertical);
     }
 
-    public void setRecentsAnimationStarted(boolean started) {
+    public void onQuickStepStarted() {
         if (mRecentsOnboarding != null) {
-            mRecentsOnboarding.onRecentsAnimationStarted();
+            mRecentsOnboarding.onQuickStepStarted();
         }
-    }
-
-    public void onConnectionChanged(boolean isConnected) {
-        updateSlippery();
-        updateNavButtonIcons();
-        setUpSwipeUpOnboarding(isConnected);
     }
 
     @Override
@@ -674,6 +669,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         }
     }
 
+    public void onNavigationButtonLongPress(View v) {
+        mGestureHelper.onNavigationButtonLongPress(v);
+    }
+
     public void onPanelExpandedChange(boolean expanded) {
         updateSlippery();
     }
@@ -1035,6 +1034,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        requestApplyInsets();
         reorient();
         onPluginDisconnected(null); // Create default gesture helper
         Dependency.get(PluginManager.class).addPluginListener(this,
@@ -1110,6 +1110,13 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         dumpButton(pw, "a11y", getAccessibilityButton());
 
         pw.println("    }");
+    }
+
+    @Override
+    public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        setPadding(insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(),
+                insets.getSystemWindowInsetRight(), insets.getSystemWindowInsetBottom());
+        return super.onApplyWindowInsets(insets);
     }
 
     private static void dumpButton(PrintWriter pw, String caption, ButtonDispatcher button) {

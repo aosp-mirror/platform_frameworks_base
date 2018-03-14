@@ -55,6 +55,7 @@ import android.util.MathUtils;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
@@ -911,5 +912,17 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             boolean secure = mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser());
             return (secure && !canSkipBouncer) ? SECURE_CAMERA_INTENT : INSECURE_CAMERA_INTENT;
         }
+    }
+
+    @Override
+    public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        int bottom = insets.getDisplayCutout() != null
+                ? insets.getDisplayCutout().getSafeInsetBottom() : 0;
+        if (isPaddingRelative()) {
+            setPaddingRelative(getPaddingStart(), getPaddingTop(), getPaddingEnd(), bottom);
+        } else {
+            setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(), bottom);
+        }
+        return insets;
     }
 }

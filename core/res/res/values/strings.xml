@@ -148,16 +148,16 @@
     <string name="CLIRPermanent">You can\'t change the caller ID setting.</string>
 
     <!-- Notification title to tell the user that data service is blocked by access control. -->
-    <string name="RestrictedOnDataTitle">No data service</string>
+    <string name="RestrictedOnDataTitle">No mobile data service</string>
     <!-- Notification title to tell the user that emergency calling is blocked by access control. -->
-    <string name="RestrictedOnEmergencyTitle">No emergency calling</string>
+    <string name="RestrictedOnEmergencyTitle">Emergency calling unavailable</string>
     <!-- Notification title to tell the user that normal service is blocked by access control. -->
     <string name="RestrictedOnNormalTitle">No voice service</string>
     <!-- Notification title to tell the user that all emergency and normal voice services are blocked by access control. -->
-    <string name="RestrictedOnAllVoiceTitle">No voice/emergency service</string>
+    <string name="RestrictedOnAllVoiceTitle">No voice service or emergency calling</string>
 
     <!-- Notification content to tell the user that voice/data/emergency service is blocked by access control. -->
-    <string name="RestrictedStateContent">Temporarily not offered by the mobile network at your location</string>
+    <string name="RestrictedStateContent">Temporarily turned off by your carrier</string>
 
     <!-- Displayed to tell the user that they should switch their network preference. -->
     <string name="NetworkPreferenceSwitchTitle">Can\u2019t reach network</string>
@@ -352,9 +352,6 @@
     <!-- Work profile deleted notification--> <skip />
     <!-- Shows up in the notification's title when the system deletes the work profile. [CHAR LIMIT=NONE] -->
     <string name="work_profile_deleted">Work profile deleted</string>
-    <!-- Content text for a notification. The Title of the notification is "Work profile deleted".
-        This says that the profile is deleted by the system as a result of the current profile owner gone missing. [CHAR LIMIT=100]-->
-    <string name="work_profile_deleted_description">Work profile deleted due to missing admin app</string>
     <!-- Content text for an expanded notification. The Title of the notification is "Work profile deleted".
         This further explains that the profile is deleted by the system as a result of the current profile admin gone missing. [CHAR LIMIT=NONE]-->
     <string name="work_profile_deleted_details">The work profile admin app is either missing or corrupted.
@@ -2447,6 +2444,18 @@
     <string name="more_item_label">More</string>
     <!-- Prepended to the shortcut for a menu item to indicate that the user should hold the MENU button together with the shortcut to invoke the item. For example, if the shortcut to open a new tab in browser is MENU and B together, then this would be prepended to the letter "B" -->
     <string name="prepend_shortcut_label">Menu+</string>
+    <!-- Prepended to the shortcut for a menu item to indicate that the user should hold the META key together with the shortcut to invoke the item. -->
+    <string name="menu_meta_shortcut_label">Meta+</string>
+    <!-- Prepended to the shortcut for a menu item to indicate that the user should hold the CTRL key together with the shortcut to invoke the item. -->
+    <string name="menu_ctrl_shortcut_label">Ctrl+</string>
+    <!-- Prepended to the shortcut for a menu item to indicate that the user should hold the ALT key together with the shortcut to invoke the item. -->
+    <string name="menu_alt_shortcut_label">Alt+</string>
+    <!-- Prepended to the shortcut for a menu item to indicate that the user should hold the SHIFT key together with the shortcut to invoke the item. -->
+    <string name="menu_shift_shortcut_label">Shift+</string>
+    <!-- Prepended to the shortcut for a menu item to indicate that the user should hold the SYM key together with the shortcut to invoke the item. -->
+    <string name="menu_sym_shortcut_label">Sym+</string>
+    <!-- Prepended to the shortcut for a menu item to indicate that the user should hold the FUNCTION key together with the shortcut to invoke the item. -->
+    <string name="menu_function_shortcut_label">Function+</string>
     <!-- Displayed in place of the regular shortcut letter when a menu item has Menu+space for the shortcut. -->
     <string name="menu_space_shortcut_label">space</string>
     <!-- Displayed in place of the regular shortcut letter when a menu item has Menu+enter for the shortcut. -->

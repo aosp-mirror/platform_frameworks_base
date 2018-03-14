@@ -563,8 +563,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
 
             // If there were no scan results, create an AP for the currently connected network (if
             // it exists).
-            // TODO(sghuman): Investigate if this works for an ephemeral (auto-connected) network
-            // when there are no scan results, as it may not have a valid WifiConfiguration
+            // TODO(b/b/73076869): Add support for passpoint (ephemeral) networks
             if (accessPoints.isEmpty() && connectionConfig != null) {
                 AccessPoint activeAp = new AccessPoint(mContext, connectionConfig);
                 activeAp.update(connectionConfig, mLastInfo, mLastNetworkInfo);

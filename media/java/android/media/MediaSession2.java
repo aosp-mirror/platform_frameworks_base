@@ -16,6 +16,8 @@
 
 package android.media;
 
+import static android.media.MediaPlayerBase.PLAYER_STATE_IDLE;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -1639,13 +1641,36 @@ public class MediaSession2 implements AutoCloseable {
     }
 
     /**
-     * Return the {@link PlaybackState2} from the player.
+     * Get the player state.
      *
-     * @return playback state
+     * @return player state
      * @hide
      */
-    public PlaybackState2 getPlaybackState() {
-        return mProvider.getPlaybackState_impl();
+    public @PlayerState int getPlayerState() {
+        // TODO(jaewan): implement this (b/74578458)
+        return PLAYER_STATE_IDLE;
+    }
+
+    /**
+     * Get the current position.
+     *
+     * @return position
+     * @hide
+     */
+    public long getCurrentPosition() {
+        // TODO(jaewan): implement this (b/74578458)
+        return -1;
+    }
+
+    /**
+     * Get the buffered position.
+     *
+     * @return buffered position
+     * @hide
+     */
+    public long getBufferedPosition() {
+        // TODO(jaewan): implement this (b/74578458)
+        return -1;
     }
 
     /**
