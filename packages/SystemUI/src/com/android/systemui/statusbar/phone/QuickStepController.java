@@ -200,12 +200,6 @@ public class QuickStepController extends GestureDetector.SimpleOnGestureListener
      */
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        if (!mNavigationBarView.isQuickScrubEnabled()
-                && !mNavigationBarView.isQuickStepSwipeUpEnabled()) {
-            mNavigationBarView.getHomeButton().setDelayTouchFeedback(false /* delay */);
-            return false;
-        }
-        mNavigationBarView.requestUnbufferedDispatch(event);
         return handleTouchEvent(event);
     }
 
@@ -222,6 +216,13 @@ public class QuickStepController extends GestureDetector.SimpleOnGestureListener
     }
 
     private boolean handleTouchEvent(MotionEvent event) {
+        if (!mNavigationBarView.isQuickScrubEnabled()
+                && !mNavigationBarView.isQuickStepSwipeUpEnabled()) {
+            mNavigationBarView.getHomeButton().setDelayTouchFeedback(false /* delay */);
+            return false;
+        }
+        mNavigationBarView.requestUnbufferedDispatch(event);
+
         final ButtonDispatcher homeButton = mNavigationBarView.getHomeButton();
         if (mGestureDetector.onTouchEvent(event)) {
             // If the fling has been handled on UP, then skip proxying the UP
