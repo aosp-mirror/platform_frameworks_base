@@ -3727,7 +3727,7 @@ public final class Settings {
         public static final Validator SOUND_EFFECTS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
-         * Whether the haptic feedback (long presses, ...) are enabled. The value is
+         * Whether haptic feedback (Vibrate on tap) is enabled. The value is
          * boolean (1 or 0).
          */
         public static final String HAPTIC_FEEDBACK_ENABLED = "haptic_feedback_enabled";
