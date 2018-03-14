@@ -182,16 +182,6 @@ public class MediaSession2 implements AutoCloseable {
     public static final int COMMAND_CODE_PLAYBACK_ADJUST_VOLUME = 11;
 
     /**
-     * Command code for {@link MediaController2#setPlaylistParams(PlaylistParams)}.
-     * <p>
-     * Command would be sent directly to the player if the session doesn't reject the request
-     * through the {@link SessionCallback#onCommandRequest(MediaSession2, ControllerInfo, Command)}.
-     * @hide
-     */
-    // TODO(jaewan): Remove (b/74116823)
-    public static final int COMMAND_CODE_PLAYBACK_SET_PLAYLIST_PARAMS = 12;
-
-    /**
      * Command code for {@link MediaController2#skipToPlaylistItem(MediaItem2)}.
      * <p>
      * Command would be sent directly to the playlist agent if the session doesn't reject the
@@ -314,6 +304,13 @@ public class MediaSession2 implements AutoCloseable {
     public static final int COMMAND_CODE_PREPARE_FROM_SEARCH = 27;
 
     /**
+     * Command code for {@link MediaController2#setRating(String, Rating2)}.
+     * @hide
+     */
+    // TODO(jaewan): Unhide
+    public static final int COMMAND_CODE_SET_RATING = 29;
+
+    /**
      * Command code for {@link MediaBrowser2} specific functions that allows navigation and search
      * from the {@link MediaLibraryService2}. This would be ignored for a {@link MediaSession2},
      * not {@link android.media.MediaLibraryService2.MediaLibrarySession}.
@@ -321,11 +318,6 @@ public class MediaSession2 implements AutoCloseable {
      * @see MediaBrowser2
      */
     public static final int COMMAND_CODE_BROWSER = 28;
-
-    /**
-     * @hide
-     */
-    public static final int COMMAND_CODE_MAX = 28;
 
     /**
      * @hide
@@ -452,6 +444,13 @@ public class MediaSession2 implements AutoCloseable {
                     .createMediaSession2Command(this, COMMAND_CODE_CUSTOM, action, extras);
         }
 
+        /**
+         * @hide
+         */
+        public CommandProvider getProvider() {
+            return mProvider;
+        }
+
         public int getCommandCode() {
             return mProvider.getCommandCode_impl();
         }
@@ -508,6 +507,13 @@ public class MediaSession2 implements AutoCloseable {
         public CommandGroup(@NonNull Context context, @Nullable CommandGroup others) {
             mProvider = ApiLoader.getProvider(context)
                     .createMediaSession2CommandGroup(context, this, others);
+        }
+
+        /**
+         * @hide
+         */
+        public CommandGroup(@NonNull CommandGroupProvider provider) {
+            mProvider = provider;
         }
 
         public void addCommand(@NonNull Command command) {
@@ -622,7 +628,6 @@ public class MediaSession2 implements AutoCloseable {
          * @see #COMMAND_CODE_PLAYBACK_REWIND
          * @see #COMMAND_CODE_PLAYBACK_SEEK_TO
          * @see #COMMAND_CODE_PLAYLIST_SKIP_TO_PLAYLIST_ITEM
-         * @see #COMMAND_CODE_PLAYBACK_SET_PLAYLIST_PARAMS
          * @see #COMMAND_CODE_PLAYLIST_ADD_ITEM
          * @see #COMMAND_CODE_PLAYLIST_REMOVE_ITEM
          * @see #COMMAND_CODE_PLAYLIST_GET_LIST
