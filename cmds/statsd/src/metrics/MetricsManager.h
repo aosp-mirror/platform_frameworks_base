@@ -69,8 +69,12 @@ public:
     void dumpStates(FILE* out, bool verbose);
 
     // Returns the elapsed realtime when this metric manager last reported metrics.
-    uint64_t getLastReportTimeNs() {
+    inline int64_t getLastReportTimeNs() const {
         return mLastReportTimeNs;
+    };
+
+    inline int64_t getLastReportWallClockNs() const {
+        return mLastReportWallClockNs;
     };
 
     virtual void dropData(const uint64_t dropTimeNs);
@@ -89,7 +93,8 @@ private:
 
     bool mConfigValid = false;
 
-    uint64_t mLastReportTimeNs;
+    int64_t mLastReportTimeNs;
+    int64_t mLastReportWallClockNs;
 
     // The uid log sources from StatsdConfig.
     std::vector<int32_t> mAllowedUid;

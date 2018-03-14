@@ -53,7 +53,9 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
                                const sp<UidMap> &uidMap,
                                const sp<AlarmMonitor>& anomalyAlarmMonitor,
                                const sp<AlarmMonitor>& periodicAlarmMonitor)
-    : mConfigKey(key), mUidMap(uidMap), mLastReportTimeNs(timeBaseSec * NS_PER_SEC) {
+    : mConfigKey(key), mUidMap(uidMap),
+      mLastReportTimeNs(timeBaseSec * NS_PER_SEC),
+      mLastReportWallClockNs(getWallClockNs()) {
     mConfigValid =
             initStatsdConfig(key, config, *uidMap, anomalyAlarmMonitor, periodicAlarmMonitor,
                              timeBaseSec, mTagIds, mAllAtomMatchers,
@@ -193,6 +195,7 @@ void MetricsManager::onDumpReport(const uint64_t dumpTimeStampNs, ProtoOutputStr
         }
     }
     mLastReportTimeNs = dumpTimeStampNs;
+    mLastReportWallClockNs = getWallClockNs();
     VLOG("=========================Metric Reports End==========================");
 }
 
