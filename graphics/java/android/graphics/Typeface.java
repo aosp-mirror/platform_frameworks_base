@@ -167,10 +167,8 @@ public class Typeface {
         nativeSetDefault(t.native_instance);
     }
 
-    // TODO: Make this public API. (b/64852739)
-    /** @hide */
-    @VisibleForTesting
-    public int getWeight() {
+    /** Returns the typeface's weight value */
+    public @IntRange(from = 0, to = 1000) int getWeight() {
         return mWeight;
     }
 
