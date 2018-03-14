@@ -175,8 +175,8 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         }
 
         @Override
-        public void onRecentsAnimationStarted() {
-            mNavigationBarView.setRecentsAnimationStarted(true);
+        public void onQuickStepStarted() {
+            mNavigationBarView.onQuickStepStarted();
 
             // Use navbar dragging as a signal to hide the rotate button
             setRotateSuggestionButtonState(false);
@@ -751,6 +751,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         if (shouldDisableNavbarGestures()) {
             return false;
         }
+        mNavigationBarView.onNavigationButtonLongPress(v);
         mMetricsLogger.action(MetricsEvent.ACTION_ASSIST_LONG_PRESS);
         mAssistManager.startAssist(new Bundle() /* args */);
         mStatusBar.awakenDreams();
@@ -787,10 +788,12 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     }
 
     private boolean onLongPressBackHome(View v) {
+        mNavigationBarView.onNavigationButtonLongPress(v);
         return onLongPressNavigationButtons(v, R.id.back, R.id.home);
     }
 
     private boolean onLongPressBackRecents(View v) {
+        mNavigationBarView.onNavigationButtonLongPress(v);
         return onLongPressNavigationButtons(v, R.id.back, R.id.recent_apps);
     }
 
