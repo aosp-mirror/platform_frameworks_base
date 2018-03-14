@@ -34,7 +34,6 @@ struct ValueBucket {
     int64_t mBucketStartNs;
     int64_t mBucketEndNs;
     int64_t mValue;
-    uint64_t mBucketNum;
 };
 
 class ValueMetricProducer : public virtual MetricProducer, public virtual PullDataReceiver {

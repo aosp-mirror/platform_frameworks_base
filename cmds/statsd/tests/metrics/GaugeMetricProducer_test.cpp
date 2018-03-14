@@ -112,7 +112,6 @@ TEST(GaugeMetricProducerTest, TestNoCondition) {
     it++;
     EXPECT_EQ(INT, it->mValue.getType());
     EXPECT_EQ(11L, it->mValue.int_value);
-    EXPECT_EQ(1UL, gaugeProducer.mPastBuckets.begin()->second.back().mBucketNum);
 
     gaugeProducer.flushIfNeededLocked(bucket4StartTimeNs);
     EXPECT_EQ(0UL, gaugeProducer.mCurrentSlicedBucket->size());
@@ -125,7 +124,6 @@ TEST(GaugeMetricProducerTest, TestNoCondition) {
     it++;
     EXPECT_EQ(INT, it->mValue.getType());
     EXPECT_EQ(25L, it->mValue.int_value);
-    EXPECT_EQ(2UL, gaugeProducer.mPastBuckets.begin()->second.back().mBucketNum);
 }
 
 TEST(GaugeMetricProducerTest, TestPushedEventsWithUpgrade) {
@@ -337,7 +335,6 @@ TEST(GaugeMetricProducerTest, TestWithCondition) {
                             .mGaugeAtoms.front()
                             .mFields->begin()
                             ->mValue.int_value);
-    EXPECT_EQ(1UL, gaugeProducer.mPastBuckets.begin()->second.back().mBucketNum);
 }
 
 TEST(GaugeMetricProducerTest, TestAnomalyDetection) {
