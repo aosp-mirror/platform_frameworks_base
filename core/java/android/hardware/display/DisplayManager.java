@@ -668,6 +668,45 @@ public final class DisplayManager {
     }
 
     /**
+     * Gets the global display brightness configuration or the default curve if one hasn't been set.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS)
+    public BrightnessConfiguration getBrightnessConfiguration() {
+        return getBrightnessConfigurationForUser(mContext.getUserId());
+    }
+
+    /**
+     * Gets the global display brightness configuration or the default curve if one hasn't been set
+     * for a specific user.
+     *
+     * Note this requires the INTERACT_ACROSS_USERS permission if getting the configuration for a
+     * user other than the one you're currently running as.
+     *
+     * @hide
+     */
+    public BrightnessConfiguration getBrightnessConfigurationForUser(int userId) {
+        return mGlobal.getBrightnessConfigurationForUser(userId);
+    }
+
+    /**
+     * Gets the default global display brightness configuration or null one hasn't
+     * been configured.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS)
+    @Nullable
+    public BrightnessConfiguration getDefaultBrightnessConfiguration() {
+        return mGlobal.getDefaultBrightnessConfiguration();
+    }
+
+    /**
      * Temporarily sets the brightness of the display.
      * <p>
      * Requires the {@link android.Manifest.permission#CONTROL_DISPLAY_BRIGHTNESS} permission.
