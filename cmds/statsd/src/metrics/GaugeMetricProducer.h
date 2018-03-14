@@ -44,7 +44,6 @@ struct GaugeBucket {
     int64_t mBucketStartNs;
     int64_t mBucketEndNs;
     std::vector<GaugeAtom> mGaugeAtoms;
-    uint64_t mBucketNum;
 };
 
 typedef std::unordered_map<MetricDimensionKey, std::vector<GaugeAtom>>

@@ -411,7 +411,6 @@ void GaugeMetricProducer::flushCurrentBucketLocked(const uint64_t& eventTimeNs) 
     } else {
         info.mBucketEndNs = fullBucketEndTimeNs;
     }
-    info.mBucketNum = mCurrentBucketNum;
 
     for (const auto& slice : *mCurrentSlicedBucket) {
         info.mGaugeAtoms = slice.second;
