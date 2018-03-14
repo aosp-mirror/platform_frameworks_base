@@ -239,6 +239,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         mCurrentBehindAlpha = state.getBehindAlpha(mNotificationDensity);
         applyExpansionToAlpha();
 
+        // Scrim might acquire focus when user is navigating with a D-pad or a keyboard.
+        // We need to disable focus otherwise AOD would end up with a gray overlay.
+        mScrimInFront.setFocusable(!state.isLowPowerState());
+        mScrimBehind.setFocusable(!state.isLowPowerState());
+
         // Cancel blanking transitions that were pending before we requested a new state
         if (mPendingFrameCallback != null) {
             Choreographer.getInstance().removeFrameCallback(mPendingFrameCallback);
@@ -257,7 +262,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         // the animation plays properly until the last frame.
         // It's important to avoid holding the wakelock unless necessary because
         // WakeLock#aqcuire will trigger an IPC and will cause jank.
-        if (mState == ScrimState.AOD) {
+        if (mState.isLowPowerState()) {
             holdWakeLock();
         }
 
@@ -528,7 +533,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             scrim.setClickable(false);
         } else {
             // Eat touch events (unless dozing).
-            scrim.setClickable(!(mState == ScrimState.AOD));
+            scrim.setClickable(!mState.isLowPowerState());
         }
         updateScrim(scrim, alpha);
     }

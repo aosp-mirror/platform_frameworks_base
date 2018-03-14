@@ -116,6 +116,11 @@ public enum ScrimState {
             // to set our state.
             mAnimateChange = mCanControlScreenOff;
         }
+
+        @Override
+        public boolean isLowPowerState() {
+            return true;
+        }
     },
 
     /**
@@ -249,5 +254,9 @@ public enum ScrimState {
 
     public void setWallpaperSupportsAmbientMode(boolean wallpaperSupportsAmbientMode) {
         mWallpaperSupportsAmbientMode = wallpaperSupportsAmbientMode;
+    }
+
+    public boolean isLowPowerState() {
+        return false;
     }
 }
