@@ -343,10 +343,19 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
             boolean showImeSwitcher) {
         boolean imeShown = (vis & InputMethodService.IME_VISIBLE) != 0;
         int hints = mNavigationIconHints;
-        if (imeShown && backDisposition != InputMethodService.BACK_DISPOSITION_WILL_NOT_DISMISS) {
-            hints |= NAVIGATION_HINT_BACK_ALT;
-        } else {
-            hints &= ~NAVIGATION_HINT_BACK_ALT;
+        switch (backDisposition) {
+            case InputMethodService.BACK_DISPOSITION_DEFAULT:
+            case InputMethodService.BACK_DISPOSITION_WILL_NOT_DISMISS:
+            case InputMethodService.BACK_DISPOSITION_WILL_DISMISS:
+                if (imeShown) {
+                    hints |= NAVIGATION_HINT_BACK_ALT;
+                } else {
+                    hints &= ~NAVIGATION_HINT_BACK_ALT;
+                }
+                break;
+            case InputMethodService.BACK_DISPOSITION_ADJUST_NOTHING:
+                hints &= ~NAVIGATION_HINT_BACK_ALT;
+                break;
         }
         if (showImeSwitcher) {
             hints |= NAVIGATION_HINT_IME_SHOWN;
