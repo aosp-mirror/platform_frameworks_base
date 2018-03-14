@@ -45,7 +45,7 @@ public class NavigationBarCompat {
 
     public static final int FLAG_DISABLE_SWIPE_UP = 0x1;
     /**
-     * Interaction type: enable quick scrub and switch interaction on the home button
+     * Interaction type: enable quick scrub interaction on the home button
      */
     public static final int FLAG_DISABLE_QUICK_SCRUB = 0x2;
 
