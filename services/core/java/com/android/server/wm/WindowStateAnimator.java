@@ -1457,11 +1457,9 @@ class WindowStateAnimator {
         float DsDy = mService.mTmpFloats[Matrix.MSCALE_Y];
         float nx = mService.mTmpFloats[Matrix.MTRANS_X];
         float ny = mService.mTmpFloats[Matrix.MTRANS_Y];
-        t.setPosition(mSurfaceController.mSurfaceControl, nx, ny);
-        t.setMatrix(mSurfaceController.mSurfaceControl, DsDx * w.mHScale,
-                DtDx * w.mVScale,
-                DtDy * w.mHScale,
-                DsDy * w.mVScale);
+        mSurfaceController.setPosition(t, nx, ny, false);
+        mSurfaceController.setMatrix(t, DsDx * w.mHScale, DtDx * w.mVScale, DtDy
+                * w.mHScale, DsDy * w.mVScale, false);
     }
 
     /** The force-scaled state for a given window can persist past

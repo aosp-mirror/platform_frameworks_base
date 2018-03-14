@@ -242,6 +242,11 @@ class WindowSurfaceController {
     }
 
     void setPositionInTransaction(float left, float top, boolean recoveringMemory) {
+        setPosition(null, left, top, recoveringMemory);
+    }
+
+    void setPosition(SurfaceControl.Transaction t, float left, float top,
+            boolean recoveringMemory) {
         final boolean surfaceMoved = mSurfaceX != left || mSurfaceY != top;
         if (surfaceMoved) {
             mSurfaceX = left;
@@ -251,7 +256,11 @@ class WindowSurfaceController {
                 if (SHOW_TRANSACTIONS) logSurface(
                         "POS (setPositionInTransaction) @ (" + left + "," + top + ")", null);
 
-                mSurfaceControl.setPosition(left, top);
+                if (t == null) {
+                    mSurfaceControl.setPosition(left, top);
+                } else {
+                    t.setPosition(mSurfaceControl, left, top);
+                }
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Error positioning surface of " + this
                         + " pos=(" + left + "," + top + ")", e);
@@ -268,6 +277,11 @@ class WindowSurfaceController {
 
     void setMatrixInTransaction(float dsdx, float dtdx, float dtdy, float dsdy,
             boolean recoveringMemory) {
+        setMatrix(null, dsdx, dtdx, dtdy, dsdy, false);
+    }
+
+    void setMatrix(SurfaceControl.Transaction t, float dsdx, float dtdx,
+            float dtdy, float dsdy, boolean recoveringMemory) {
         final boolean matrixChanged = mLastDsdx != dsdx || mLastDtdx != dtdx ||
                                       mLastDtdy != dtdy || mLastDsdy != dsdy;
         if (!matrixChanged) {
@@ -282,8 +296,11 @@ class WindowSurfaceController {
         try {
             if (SHOW_TRANSACTIONS) logSurface(
                     "MATRIX [" + dsdx + "," + dtdx + "," + dtdy + "," + dsdy + "]", null);
-            mSurfaceControl.setMatrix(
-                    dsdx, dtdx, dtdy, dsdy);
+            if (t == null) {
+                mSurfaceControl.setMatrix(dsdx, dtdx, dtdy, dsdy);
+            } else {
+                t.setMatrix(mSurfaceControl, dsdx, dtdx, dtdy, dsdy);
+            }
         } catch (RuntimeException e) {
             // If something goes wrong with the surface (such
             // as running out of memory), don't take down the
