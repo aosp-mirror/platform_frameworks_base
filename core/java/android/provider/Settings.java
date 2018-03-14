@@ -9541,6 +9541,12 @@ public final class Settings {
         public static final String BLE_SCAN_LOW_LATENCY_INTERVAL_MS =
                 "ble_scan_low_latency_interval_ms";
 
+        /**
+         * The mode that BLE scanning clients will be moved to when in the background.
+         * @hide
+         */
+        public static final String BLE_SCAN_BACKGROUND_MODE = "ble_scan_background_mode";
+
        /**
         * Used to save the Wifi_ON state prior to tethering.
         * This state will be checked to restore Wifi after

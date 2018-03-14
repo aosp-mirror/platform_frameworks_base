@@ -129,6 +129,7 @@ public class SettingsBackupTest {
                     Settings.Global.BLE_SCAN_BALANCED_INTERVAL_MS,
                     Settings.Global.BLE_SCAN_LOW_LATENCY_WINDOW_MS,
                     Settings.Global.BLE_SCAN_LOW_LATENCY_INTERVAL_MS,
+                    Settings.Global.BLE_SCAN_BACKGROUND_MODE,
                     Settings.Global.BLUETOOTH_A2DP_SINK_PRIORITY_PREFIX,
                     Settings.Global.BLUETOOTH_A2DP_SRC_PRIORITY_PREFIX,
                     Settings.Global.BLUETOOTH_A2DP_SUPPORTS_OPTIONAL_CODECS_PREFIX,
