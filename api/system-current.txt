@@ -4530,6 +4530,7 @@ package android.telephony.euicc {
 
   public class EuiccManager {
     method public void continueOperation(android.content.Intent, android.os.Bundle);
+    method public void eraseSubscriptions(android.app.PendingIntent);
     method public void getDefaultDownloadableSubscriptionList(android.app.PendingIntent);
     method public void getDownloadableSubscriptionMetadata(android.telephony.euicc.DownloadableSubscription, android.app.PendingIntent);
     method public int getOtaStatus();
