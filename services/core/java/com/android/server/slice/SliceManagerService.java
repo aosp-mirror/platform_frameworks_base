@@ -149,11 +149,25 @@ public class SliceManagerService extends ISliceManager.Stub {
 
     ///  ----- ISliceManager stuff -----
     @Override
+    public Uri[] getPinnedSlices(String pkg) {
+        verifyCaller(pkg);
+        ArrayList<Uri> ret = new ArrayList<>();
+        synchronized (mLock) {
+            for (PinnedSliceState state : mPinnedSlicesByUri.values()) {
+                if (Objects.equals(pkg, state.getPkg())) {
+                    ret.add(state.getUri());
+                }
+            }
+        }
+        return ret.toArray(new Uri[ret.size()]);
+    }
+
+    @Override
     public void pinSlice(String pkg, Uri uri, SliceSpec[] specs, IBinder token) throws RemoteException {
         verifyCaller(pkg);
         enforceAccess(pkg, uri);
         uri = maybeAddUserId(uri, Binder.getCallingUserHandle().getIdentifier());
-        getOrCreatePinnedSlice(uri).pin(pkg, specs, token);
+        getOrCreatePinnedSlice(uri, pkg).pin(pkg, specs, token);
     }
 
     @Override
@@ -302,11 +316,11 @@ public class SliceManagerService extends ISliceManager.Stub {
         }
     }
 
-    private PinnedSliceState getOrCreatePinnedSlice(Uri uri) {
+    private PinnedSliceState getOrCreatePinnedSlice(Uri uri, String pkg) {
         synchronized (mLock) {
             PinnedSliceState manager = mPinnedSlicesByUri.get(uri);
             if (manager == null) {
-                manager = createPinnedSlice(uri);
+                manager = createPinnedSlice(uri, pkg);
                 mPinnedSlicesByUri.put(uri, manager);
             }
             return manager;
@@ -314,8 +328,8 @@ public class SliceManagerService extends ISliceManager.Stub {
     }
 
     @VisibleForTesting
-    protected PinnedSliceState createPinnedSlice(Uri uri) {
-        return new PinnedSliceState(this, uri);
+    protected PinnedSliceState createPinnedSlice(Uri uri, String pkg) {
+        return new PinnedSliceState(this, uri, pkg);
     }
 
     public Object getLock() {
