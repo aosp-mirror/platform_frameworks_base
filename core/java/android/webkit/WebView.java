@@ -251,7 +251,7 @@ import java.util.Map;
  * density, or high density screens, respectively. For example:
  * <pre>
  * &lt;link rel="stylesheet" media="screen and (-webkit-device-pixel-ratio:1.5)" href="hdpi.css" /&gt;</pre>
- * <p>The {@code hdpi.css} stylesheet is only used for devices with a screen pixel ration of 1.5,
+ * <p>The {@code hdpi.css} stylesheet is only used for devices with a screen pixel ratio of 1.5,
  * which is the high density pixel ratio.
  * </li>
  * </ul>
