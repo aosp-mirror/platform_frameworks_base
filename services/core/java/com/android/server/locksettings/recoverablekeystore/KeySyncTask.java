@@ -149,6 +149,11 @@ public class KeySyncTask implements Runnable {
             mPlatformKeyManager.invalidatePlatformKey(mUserId, generation);
             return;
         }
+        if (isCustomLockScreen()) {
+            Log.w(TAG, "Unsupported credential type " + mCredentialType + "for user " + mUserId);
+            mRecoverableKeyStoreDb.invalidateKeysForUserIdOnCustomScreenLock(mUserId);
+            return;
+        }
 
         List<Integer> recoveryAgents = mRecoverableKeyStoreDb.getRecoveryAgents(mUserId);
         for (int uid : recoveryAgents) {
@@ -157,6 +162,12 @@ public class KeySyncTask implements Runnable {
         if (recoveryAgents.isEmpty()) {
             Log.w(TAG, "No recovery agent initialized for user " + mUserId);
         }
+    }
+
+    private boolean isCustomLockScreen() {
+        return mCredentialType != LockPatternUtils.CREDENTIAL_TYPE_NONE
+            && mCredentialType != LockPatternUtils.CREDENTIAL_TYPE_PATTERN
+            && mCredentialType != LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
     }
 
     private void syncKeysForAgent(int recoveryAgentUid) {
