@@ -851,6 +851,10 @@ public class BackupManagerService implements BackupManagerServiceInterface {
         mJournal = null;        // will be created on first use
 
         mConstants = new BackupManagerConstants(mBackupHandler, mContext.getContentResolver());
+        // We are observing changes to the constants throughout the lifecycle of BMS. This is
+        // because we reference the constants in multiple areas of BMS, which otherwise would
+        // require frequent starting and stopping.
+        mConstants.start();
 
         // Set up the various sorts of package tracking we do
         mFullBackupScheduleFile = new File(mBaseStateDir, "fb-schedule");
