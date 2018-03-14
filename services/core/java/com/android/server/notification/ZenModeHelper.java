@@ -1203,15 +1203,21 @@ public class ZenModeHelper {
         final Bundle extras = new Bundle();
         extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
                 mContext.getResources().getString(R.string.global_action_settings));
-        return new Notification.Builder(mContext, SystemNotificationChannels.SYSTEM_CHANGES)
+        int title = R.string.zen_upgrade_notification_title;
+        int content = R.string.zen_upgrade_notification_content;
+        if (NotificationManager.Policy.areAllVisualEffectsSuppressed(
+                getNotificationPolicy().suppressedVisualEffects)) {
+            title = R.string.zen_upgrade_notification_visd_title;
+            content = R.string.zen_upgrade_notification_visd_content;
+        }
+        return new Notification.Builder(mContext, SystemNotificationChannels.DO_NOT_DISTURB)
                 .setSmallIcon(R.drawable.ic_settings_24dp)
-                .setContentTitle(mContext.getResources().getString(
-                        R.string.zen_upgrade_notification_title))
-                .setContentText(mContext.getResources().getString(
-                        R.string.zen_upgrade_notification_content))
+                .setContentTitle(mContext.getResources().getString(title))
+                .setContentText(mContext.getResources().getString(content))
                 .setAutoCancel(true)
                 .setLocalOnly(true)
                 .addExtras(extras)
+                .setStyle(new Notification.BigTextStyle())
                 .setContentIntent(PendingIntent.getActivity(mContext, 0, intent, 0, null))
                 .build();
     }
