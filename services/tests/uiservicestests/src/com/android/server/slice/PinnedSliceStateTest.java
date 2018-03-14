@@ -1,7 +1,5 @@
 package com.android.server.slice;
 
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -12,23 +10,18 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.slice.ISliceListener;
-import android.app.slice.Slice;
 import android.app.slice.SliceProvider;
 import android.app.slice.SliceSpec;
 import android.content.ContentProvider;
-import android.content.Context;
 import android.content.IContentProvider;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
@@ -83,7 +76,7 @@ public class PinnedSliceStateTest extends UiServiceTestCase {
         mIContentProvider = mock(IContentProvider.class);
         when(mContentProvider.getIContentProvider()).thenReturn(mIContentProvider);
         mContext.getContentResolver().addProvider(AUTH, mContentProvider);
-        mPinnedSliceManager = new PinnedSliceState(mSliceService, TEST_URI);
+        mPinnedSliceManager = new PinnedSliceState(mSliceService, TEST_URI, "pkg");
     }
 
     @Test
