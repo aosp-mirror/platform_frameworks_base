@@ -33,6 +33,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManager;
+import android.os.SystemProperties;
 import android.provider.Settings.Secure;
 import android.support.annotation.VisibleForTesting;
 import android.util.DisplayMetrics;
@@ -65,6 +66,8 @@ import com.android.systemui.tuner.TunerService.Tunable;
 public class ScreenDecorations extends SystemUI implements Tunable {
     public static final String SIZE = "sysui_rounded_size";
     public static final String PADDING = "sysui_rounded_content_padding";
+    private static final boolean DEBUG_SCREENSHOT_ROUNDED_CORNERS =
+            SystemProperties.getBoolean("debug.screenshot_rounded_corners", false);
 
     private int mRoundedDefault;
     private View mOverlay;
@@ -236,8 +239,10 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                         | WindowManager.LayoutParams.FLAG_SLIPPERY
                         | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
                 PixelFormat.TRANSLUCENT);
-        lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS
-                | WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
+        lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+        if (!DEBUG_SCREENSHOT_ROUNDED_CORNERS) {
+            lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
+        }
         lp.setTitle("ScreenDecorOverlay");
         lp.gravity = Gravity.TOP | Gravity.LEFT;
         lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
