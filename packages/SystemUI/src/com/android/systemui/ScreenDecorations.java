@@ -380,6 +380,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                 mBounds.set(mInfo.displayCutout.getBounds());
                 localBounds(mBoundingRect);
                 mInfo.displayCutout.getBounds().getBoundaryPath(mBoundingPath);
+                invalidate();
                 newVisible = VISIBLE;
             } else {
                 newVisible = GONE;
