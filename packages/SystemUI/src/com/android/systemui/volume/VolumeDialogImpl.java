@@ -897,6 +897,9 @@ public class VolumeDialogImpl implements VolumeDialog {
     }
 
     private String getStreamLabelH(StreamState ss) {
+        if (ss == null) {
+            return "";
+        }
         if (ss.remoteLabel != null) {
             return ss.remoteLabel;
         }
