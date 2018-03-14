@@ -2552,6 +2552,12 @@
     <permission android:name="android.permission.MANAGE_APP_OPS_RESTRICTIONS"
         android:protectionLevel="signature|installer" />
 
+    <!-- Allows an application to update the user app op modes.
+         Not for use by third party apps.
+         @hide -->
+    <permission android:name="android.permission.MANAGE_APP_OPS_MODES"
+        android:protectionLevel="signature|installer|verifier" />
+
     <!-- @SystemApi Allows an application to open windows that are for use by parts
          of the system user interface.
          <p>Not for use by third-party applications.
