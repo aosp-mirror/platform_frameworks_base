@@ -507,7 +507,7 @@ class WindowStateAnimator {
             mDrawState = NO_SURFACE;
             return null;
         } catch (Exception e) {
-            Slog.e(TAG, "Exception creating surface", e);
+            Slog.e(TAG, "Exception creating surface (parent dead?)", e);
             mDrawState = NO_SURFACE;
             return null;
         }
