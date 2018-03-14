@@ -55,6 +55,7 @@ import android.provider.Telephony.Sms.Intents;
 import android.security.Credentials;
 import android.service.textclassifier.TextClassifierService;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -829,13 +830,11 @@ public final class DefaultPermissionGrantPolicy {
         }
 
         // TextClassifier Service
-        ComponentName textClassifierComponent =
-                TextClassifierService.getServiceComponentName(mContext);
-        if (textClassifierComponent != null) {
-            Intent textClassifierServiceIntent = new Intent(TextClassifierService.SERVICE_INTERFACE)
-                    .setComponent(textClassifierComponent);
+        String textClassifierPackageName =
+                mContext.getPackageManager().getSystemTextClassifierPackageName();
+        if (!TextUtils.isEmpty(textClassifierPackageName)) {
             PackageParser.Package textClassifierPackage =
-                    getDefaultSystemHandlerServicePackage(textClassifierServiceIntent, userId);
+                    getSystemPackage(textClassifierPackageName);
             if (textClassifierPackage != null
                     && doesPackageSupportRuntimePermissions(textClassifierPackage)) {
                 grantRuntimePermissions(textClassifierPackage, PHONE_PERMISSIONS, true, userId);
