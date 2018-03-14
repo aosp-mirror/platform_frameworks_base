@@ -67,6 +67,7 @@ which apps should be allowed to access the entire private API.
   <hidden-api-whitelisted-app package="com.android.pacprocessor" />
   <hidden-api-whitelisted-app package="com.android.phone" />
   <hidden-api-whitelisted-app package="com.android.pmc" />
+  <hidden-api-whitelisted-app package="com.android.printservice.recommendation" />
   <hidden-api-whitelisted-app package="com.android.printspooler" />
   <hidden-api-whitelisted-app package="com.android.providers.blockednumber" />
   <hidden-api-whitelisted-app package="com.android.providers.contacts" />
