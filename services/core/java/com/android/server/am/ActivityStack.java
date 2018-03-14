@@ -2707,9 +2707,12 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     if (DEBUG_STATES) Slog.v(TAG_STATES, "Resume failed; resetting state to "
                             + lastState + ": " + next);
                     next.setState(lastState, "resumeTopActivityInnerLocked");
-                    if (lastStack != null) {
+
+                    // lastResumedActivity being non-null implies there is a lastStack present.
+                    if (lastResumedActivity != null) {
                         lastResumedActivity.setState(RESUMED, "resumeTopActivityInnerLocked");
                     }
+
                     Slog.i(TAG, "Restarting because process died: " + next);
                     if (!next.hasBeenLaunched) {
                         next.hasBeenLaunched = true;
