@@ -16,8 +16,6 @@
 
 package android.app;
 
-import java.util.ArrayList;
-
 import android.annotation.CallSuper;
 import android.content.ComponentCallbacks;
 import android.content.ComponentCallbacks2;
@@ -26,7 +24,10 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.autofill.AutofillManager;
+
+import java.util.ArrayList;
 
 /**
  * Base class for maintaining global application state. You can provide your own
@@ -46,6 +47,7 @@ import android.view.autofill.AutofillManager;
  * </p>
  */
 public class Application extends ContextWrapper implements ComponentCallbacks2 {
+    private static final String TAG = "Application";
     private ArrayList<ComponentCallbacks> mComponentCallbacks =
             new ArrayList<ComponentCallbacks>();
     private ArrayList<ActivityLifecycleCallbacks> mActivityLifecycleCallbacks =
@@ -318,6 +320,9 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         if (client != null) {
             return client;
         }
+        if (android.view.autofill.Helper.sVerbose) {
+            Log.v(TAG, "getAutofillClient(): null on super, trying to find activity thread");
+        }
         // Okay, ppl use the application context when they should not. This breaks
         // autofill among other things. We pick the focused activity since autofill
         // interacts only with the currently focused activity and we need the fill
@@ -338,8 +343,15 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
                 continue;
             }
             if (activity.getWindow().getDecorView().hasFocus()) {
-                return record.activity;
+                if (android.view.autofill.Helper.sVerbose) {
+                    Log.v(TAG, "getAutofillClient(): found activity for " + this + ": " + activity);
+                }
+                return activity;
             }
+        }
+        if (android.view.autofill.Helper.sVerbose) {
+            Log.v(TAG, "getAutofillClient(): none of the " + activityCount + " activities on "
+                    + this + " have focus");
         }
         return null;
     }
