@@ -559,7 +559,8 @@ class WindowSurfacePlacer {
                         + wtoken.allDrawn + " startingDisplayed="
                         + wtoken.startingDisplayed + " startingMoved="
                         + wtoken.startingMoved + " isRelaunching()="
-                        + wtoken.isRelaunching());
+                        + wtoken.isRelaunching() + " startingWindow="
+                        + wtoken.startingWindow);
 
 
                 final boolean allDrawn = wtoken.allDrawn && !wtoken.isRelaunching();
