@@ -428,4 +428,14 @@ interface IWindowManager
      * on the next user activity.
      */
     void requestUserActivityNotification();
+
+    /**
+     * Notify WindowManager that it should not override the info in DisplayManager for the specified
+     * display. This can disable letter- or pillar-boxing applied in DisplayManager when the metrics
+     * of the logical display reported from WindowManager do not correspond to the metrics of the
+     * physical display it is based on.
+     *
+     * @param displayId The id of the display.
+     */
+    void dontOverrideDisplayInfo(int displayId);
 }
