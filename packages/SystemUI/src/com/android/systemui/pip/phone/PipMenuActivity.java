@@ -63,7 +63,6 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
@@ -551,7 +550,6 @@ public class PipMenuActivity extends Activity {
             alpha = (int) (interpolatedAlpha * 255);
         } else {
             if (mMenuState == MENU_STATE_CLOSE) {
-                mSettingsButton.setAlpha(menuAlpha);
                 mDismissButton.setAlpha(menuAlpha);
             }
             alpha = (int) (fraction * DISMISS_BACKGROUND_ALPHA * 255);
