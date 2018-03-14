@@ -1255,13 +1255,23 @@ public class ViewPager extends ViewGroup {
         };
 
         SavedState(Parcel in, ClassLoader loader) {
-            super(in, loader);
+            super(loadParcelable(in, loader));
             if (loader == null) {
                 loader = getClass().getClassLoader();
             }
             position = in.readInt();
             adapterState = in.readParcelable(loader);
             this.loader = loader;
+        }
+
+        /**
+         * Substitute for AbsSavedState two-arg constructor, which was added in
+         * SDK 24. Loads the super state from a given class loader or returns
+         * the empty state if null.
+         */
+        private static Parcelable loadParcelable(Parcel in, ClassLoader loader) {
+            Parcelable superState = in.readParcelable(loader);
+            return superState != null ? superState : AbsSavedState.EMPTY_STATE;
         }
     }
 
