@@ -96,6 +96,7 @@ Landroid/app/ActivityThread;->mLocalProviders:Landroid/util/ArrayMap;
 Landroid/app/ActivityThread;->mNumVisibleActivities:I
 Landroid/app/ActivityThread;->mPackages:Landroid/util/ArrayMap;
 Landroid/app/ActivityThread;->mProviderMap:Landroid/util/ArrayMap;
+Landroid/app/ActivityThread;->mResourcePackages:Landroid/util/ArrayMap;
 Landroid/app/ActivityThread;->mServices:Landroid/util/ArrayMap;
 Landroid/app/ActivityThread;->performNewIntents(Landroid/os/IBinder;Ljava/util/List;Z)V
 Landroid/app/ActivityThread;->performStopActivity(Landroid/os/IBinder;ZLjava/lang/String;)V
@@ -502,6 +503,7 @@ Landroid/content/res/Resources;->mTypedArrayPool:Landroid/util/Pools$Synchronize
 Landroid/content/res/Resources;->setCompatibilityInfo(Landroid/content/res/CompatibilityInfo;)V
 Landroid/content/res/Resources;->updateSystemConfiguration(Landroid/content/res/Configuration;Landroid/util/DisplayMetrics;Landroid/content/res/CompatibilityInfo;)V
 Landroid/content/res/StringBlock;-><init>(JZ)V
+Landroid/content/res/TypedArray;->extractThemeAttrs()[I
 Landroid/content/res/TypedArray;->getNonConfigurationString(II)Ljava/lang/String;
 Landroid/content/res/TypedArray;->getValueAt(ILandroid/util/TypedValue;)Z
 Landroid/content/res/TypedArray;->mAssets:Landroid/content/res/AssetManager;
@@ -518,6 +520,7 @@ Landroid/content/res/XmlBlock;-><init>([B)V
 Landroid/content/res/XmlBlock;->newParser()Landroid/content/res/XmlResourceParser;
 Landroid/content/res/XmlBlock$Parser;->mBlock:Landroid/content/res/XmlBlock;
 Landroid/content/res/XmlBlock$Parser;->mParseState:J
+Landroid/content/SearchRecentSuggestionsProvider;->mSuggestionProjection:[Ljava/lang/String;
 Landroid/content/SyncStatusInfo;->lastSuccessTime:J
 Landroid/database/AbstractCursor;->mExtras:Landroid/os/Bundle;
 Landroid/database/AbstractCursor;->mNotifyUri:Landroid/net/Uri;
@@ -622,6 +625,8 @@ Landroid/graphics/Movie;->mNativeMovie:J
 Landroid/graphics/NinePatch$InsetStruct;-><init>(IIIIIIIIFIF)V
 Landroid/graphics/NinePatch;->mBitmap:Landroid/graphics/Bitmap;
 Landroid/graphics/Picture;->mNativePicture:J
+Landroid/graphics/PorterDuffColorFilter;->setColor(I)V
+Landroid/graphics/PorterDuffColorFilter;->setMode(Landroid/graphics/PorterDuff$Mode;)V
 Landroid/graphics/Region;-><init>(JI)V
 Landroid/graphics/Region;->mNativeRegion:J
 Landroid/graphics/SurfaceTexture;->mFrameAvailableListener:J
@@ -1726,7 +1731,9 @@ Landroid/util/NtpTrustedTime;->getCachedNtpTime()J
 Landroid/util/NtpTrustedTime;->getCachedNtpTimeReference()J
 Landroid/util/NtpTrustedTime;->getInstance(Landroid/content/Context;)Landroid/util/NtpTrustedTime;
 Landroid/util/NtpTrustedTime;->hasCache()Z
+Landroid/util/Pools$SimplePool;->mPool:[Ljava/lang/Object;
 Landroid/util/Pools$SynchronizedPool;->acquire()Ljava/lang/Object;
+Landroid/util/Pools$SynchronizedPool;-><init>(I)V
 Landroid/util/Rational;->mDenominator:I
 Landroid/util/Rational;->mNumerator:I
 Landroid/util/Rational;->readObject(Ljava/io/ObjectInputStream;)V
