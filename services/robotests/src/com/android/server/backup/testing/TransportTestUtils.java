@@ -79,10 +79,21 @@ public class TransportTestUtils {
     /** {@code transportName} has to be in the {@link ComponentName} format (with '/') */
     public static TransportMock setUpCurrentTransport(
             TransportManager transportManager, TransportData transport) throws Exception {
-        TransportMock transportMock = setUpTransports(transportManager, transport).get(0);
-        if (transportMock.transportClient != null) {
+        TransportMock transportMock = setUpTransport(transportManager, transport);
+        int status = transport.transportStatus;
+        when(transportManager.getCurrentTransportName()).thenReturn(transport.transportName);
+        if (status == TransportStatus.REGISTERED_AVAILABLE
+                || status == TransportStatus.REGISTERED_UNAVAILABLE) {
+            // Transport registered
             when(transportManager.getCurrentTransportClient(any()))
                     .thenReturn(transportMock.transportClient);
+            when(transportManager.getCurrentTransportClientOrThrow(any()))
+                    .thenReturn(transportMock.transportClient);
+        } else {
+            // Transport not registered
+            when(transportManager.getCurrentTransportClient(any())).thenReturn(null);
+            when(transportManager.getCurrentTransportClientOrThrow(any()))
+                    .thenThrow(TransportNotRegisteredException.class);
         }
         return transportMock;
     }
