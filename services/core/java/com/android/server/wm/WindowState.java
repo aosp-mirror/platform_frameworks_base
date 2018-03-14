@@ -1573,7 +1573,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             final boolean exiting = mAnimatingExit || mDestroying;
             return shown && !exiting;
         } else {
-            return !mAppToken.isHidden();
+            final Task task = getTask();
+            final boolean canFromTask = task != null && task.canAffectSystemUiFlags();
+            return canFromTask && !mAppToken.isHidden();
         }
     }
 

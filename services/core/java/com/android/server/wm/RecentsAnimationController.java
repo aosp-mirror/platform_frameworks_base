@@ -141,6 +141,22 @@ public class RecentsAnimationController {
         }
 
         @Override
+        public void setAnimationTargetsBehindSystemBars(boolean behindSystemBars)
+                throws RemoteException {
+            long token = Binder.clearCallingIdentity();
+            try {
+                synchronized (mService.getWindowManagerLock()) {
+                    for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
+                        mPendingAnimations.get(i).mTask.setCanAffectSystemUiFlags(behindSystemBars);
+                    }
+                    mService.mWindowPlacerLocked.requestTraversal();
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
         public void setInputConsumerEnabled(boolean enabled) {
             if (DEBUG) Log.d(TAG, "setInputConsumerEnabled(" + enabled + "): mCanceled="
                     + mCanceled);
@@ -289,6 +305,7 @@ public class RecentsAnimationController {
                 + mPendingAnimations.size());
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
             final TaskAnimationAdapter adapter = mPendingAnimations.get(i);
+            adapter.mTask.setCanAffectSystemUiFlags(true);
             adapter.mCapturedFinishCallback.onAnimationFinished(adapter);
         }
         mPendingAnimations.clear();
