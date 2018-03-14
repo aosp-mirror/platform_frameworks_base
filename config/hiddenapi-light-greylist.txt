@@ -649,6 +649,8 @@ Landroid/hardware/HardwareBuffer;->mNativeObject:J
 Landroid/hardware/input/IInputManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/hardware/input/IInputManager;
 Landroid/hardware/input/IInputManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/hardware/input/InputManager;->getInstance()Landroid/hardware/input/InputManager;
+Landroid/hardware/input/InputManager;->injectInputEvent(Landroid/view/InputEvent;I)Z
+Landroid/hardware/input/InputManager;->INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH:I
 Landroid/hardware/input/InputManager;->mIm:Landroid/hardware/input/IInputManager;
 Landroid/hardware/location/IActivityRecognitionHardwareClient$Stub;-><init>()V
 Landroid/hardware/SerialPort;->mNativeContext:I
@@ -656,6 +658,7 @@ Landroid/hardware/soundtrigger/SoundTrigger$ConfidenceLevel;->confidenceLevel:I
 Landroid/hardware/soundtrigger/SoundTrigger$ConfidenceLevel;-><init>(II)V
 Landroid/hardware/soundtrigger/SoundTrigger$ConfidenceLevel;->userId:I
 Landroid/hardware/soundtrigger/SoundTrigger$GenericRecognitionEvent;-><init>(IIZIIIZLandroid/media/AudioFormat;[B)V
+Landroid/hardware/soundtrigger/SoundTrigger$GenericSoundModel;-><init>(Ljava/util/UUID;Ljava/util/UUID;[B)V
 Landroid/hardware/soundtrigger/SoundTrigger$Keyphrase;->id:I
 Landroid/hardware/soundtrigger/SoundTrigger$Keyphrase;->locale:Ljava/lang/String;
 Landroid/hardware/soundtrigger/SoundTrigger$KeyphraseRecognitionEvent;-><init>(IIZIIIZLandroid/media/AudioFormat;[B[Landroid/hardware/soundtrigger/SoundTrigger$KeyphraseRecognitionExtra;)V
@@ -674,6 +677,7 @@ Landroid/hardware/soundtrigger/SoundTriggerModule;->postEventFromNative(Ljava/la
 Landroid/hardware/soundtrigger/SoundTrigger$ModuleProperties;-><init>(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;IIIIIZIZIZ)V
 Landroid/hardware/soundtrigger/SoundTrigger$RecognitionConfig;->captureRequested:Z
 Landroid/hardware/soundtrigger/SoundTrigger$RecognitionConfig;->data:[B
+Landroid/hardware/soundtrigger/SoundTrigger$RecognitionConfig;-><init>(ZZ[Landroid/hardware/soundtrigger/SoundTrigger$KeyphraseRecognitionExtra;[B)V
 Landroid/hardware/soundtrigger/SoundTrigger$RecognitionConfig;->keyphrases:[Landroid/hardware/soundtrigger/SoundTrigger$KeyphraseRecognitionExtra;
 Landroid/hardware/soundtrigger/SoundTrigger$RecognitionEvent;-><init>(IIZIIIZLandroid/media/AudioFormat;[B)V
 Landroid/hardware/soundtrigger/SoundTrigger$SoundModel;->data:[B
@@ -890,6 +894,10 @@ Landroid/media/RemoteDisplay;->notifyDisplayDisconnected()V
 Landroid/media/RemoteDisplay;->notifyDisplayError(I)V
 Landroid/media/RingtoneManager;->getRingtone(Landroid/content/Context;Landroid/net/Uri;I)Landroid/media/Ringtone;
 Landroid/media/session/MediaSessionLegacyHelper;->getHelper(Landroid/content/Context;)Landroid/media/session/MediaSessionLegacyHelper;
+Landroid/media/soundtrigger/SoundTriggerDetector$EventPayload;->getCaptureSession()Ljava/lang/Integer;
+Landroid/media/soundtrigger/SoundTriggerDetector$EventPayload;->getData()[B
+Landroid/media/soundtrigger/SoundTriggerManager;->loadSoundModel(Landroid/hardware/soundtrigger/SoundTrigger$SoundModel;)I
+Landroid/media/soundtrigger/SoundTriggerManager;->startRecognition(Ljava/util/UUID;Landroid/app/PendingIntent;Landroid/hardware/soundtrigger/SoundTrigger$RecognitionConfig;)I
 Landroid/media/soundtrigger/SoundTriggerManager;->stopRecognition(Ljava/util/UUID;)I
 Landroid/media/soundtrigger/SoundTriggerManager;->unloadSoundModel(Ljava/util/UUID;)I
 Landroid/media/SubtitleController;->mHandler:Landroid/os/Handler;
@@ -1556,6 +1564,7 @@ Landroid/service/media/MediaBrowserService;->KEY_MEDIA_ITEM:Ljava/lang/String;
 Landroid/service/media/MediaBrowserService$Result;->mFlags:I
 Landroid/service/notification/NotificationListenerService;->registerAsSystemService(Landroid/content/Context;Landroid/content/ComponentName;I)V
 Landroid/service/notification/NotificationListenerService;->unregisterAsSystemService()V
+Landroid/service/voice/AlwaysOnHotwordDetector$EventPayload;->getCaptureSession()Ljava/lang/Integer;
 Landroid/service/voice/VoiceInteractionService;->isKeyphraseAndLocaleSupportedForHotword(Ljava/lang/String;Ljava/util/Locale;)Z
 Landroid/service/wallpaper/WallpaperService$Engine;->setFixedSizeAllowed(Z)V
 Landroid/speech/tts/TextToSpeech;->getCurrentEngine()Ljava/lang/String;
@@ -1571,6 +1580,7 @@ Landroid/telephony/CellSignalStrengthLte;->mRssnr:I
 Landroid/telephony/CellSignalStrengthLte;->mSignalStrength:I
 Landroid/telephony/CellSignalStrengthWcdma;->mBitErrorRate:I
 Landroid/telephony/CellSignalStrengthWcdma;->mSignalStrength:I
+Landroid/telephony/PhoneNumberUtils;->isLocalEmergencyNumber(Landroid/content/Context;ILjava/lang/String;)Z
 Landroid/telephony/PhoneStateListener;->mSubId:Ljava/lang/Integer;
 Landroid/telephony/ServiceState;->newFromBundle(Landroid/os/Bundle;)Landroid/telephony/ServiceState;
 Landroid/telephony/SignalStrength;->getAsuLevel()I
@@ -1595,6 +1605,7 @@ Landroid/telephony/SignalStrength;->SIGNAL_STRENGTH_NONE_OR_UNKNOWN:I
 Landroid/telephony/SignalStrength;->SIGNAL_STRENGTH_POOR:I
 Landroid/telephony/SmsMessage;->getSubId()I
 Landroid/telephony/SmsMessage;->mWrappedSmsMessage:Lcom/android/internal/telephony/SmsMessageBase;
+Landroid/telephony/SubscriptionManager;->getActiveSubscriptionIdList()[I
 Landroid/telephony/SubscriptionManager;->getAllSubscriptionInfoCount()I
 Landroid/telephony/SubscriptionManager;->getAllSubscriptionInfoList()Ljava/util/List;
 Landroid/telephony/SubscriptionManager;->getDefaultDataSubscriptionInfo()Landroid/telephony/SubscriptionInfo;
@@ -1767,6 +1778,7 @@ Landroid/view/InputChannel;->mPtr:J
 Landroid/view/InputDevice;->addMotionRange(IIFFFFF)V
 Landroid/view/InputDevice;-><init>(IIILjava/lang/String;IILjava/lang/String;ZIILandroid/view/KeyCharacterMap;ZZZ)V
 Landroid/view/InputDevice;->isExternal()Z
+Landroid/view/InputEvent;->getSequenceNumber()I
 Landroid/view/InputEventReceiver;->dispatchBatchedInputEventPending()V
 Landroid/view/InputEventReceiver;->dispatchInputEvent(ILandroid/view/InputEvent;)V
 Landroid/view/InputEventSender;->dispatchInputEventFinished(IZ)V
@@ -1885,6 +1897,7 @@ Landroid/view/View$AttachInfo;->mStableInsets:Landroid/graphics/Rect;
 Landroid/view/View;->clearAccessibilityFocus()V
 Landroid/view/View;->computeFitSystemWindows(Landroid/graphics/Rect;Landroid/graphics/Rect;)Z
 Landroid/view/View;->computeOpaqueFlags()V
+Landroid/view/ViewConfiguration;->getDoubleTapMinTime()I
 Landroid/view/ViewConfiguration;->mFadingMarqueeEnabled:Z
 Landroid/view/ViewConfiguration;->sHasPermanentMenuKeySet:Z
 Landroid/view/ViewConfiguration;->sHasPermanentMenuKey:Z
@@ -2280,6 +2293,7 @@ Lcom/android/ims/internal/uce/presence/PresTupleInfo;-><init>()V
 Lcom/android/ims/internal/uce/presence/PresTupleInfo;->setContactUri(Ljava/lang/String;)V
 Lcom/android/ims/internal/uce/presence/PresTupleInfo;->setFeatureTag(Ljava/lang/String;)V
 Lcom/android/ims/internal/uce/presence/PresTupleInfo;->setTimestamp(Ljava/lang/String;)V
+Lcom/android/internal/app/AlertController$RecycleListView;-><init>(Landroid/content/Context;Landroid/util/AttributeSet;)V
 Lcom/android/internal/app/IAppOpsService$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/app/IAppOpsService;
 Lcom/android/internal/app/IAppOpsService$Stub$Proxy;->checkOperation(IILjava/lang/String;)I
 Lcom/android/internal/app/IAppOpsService$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
