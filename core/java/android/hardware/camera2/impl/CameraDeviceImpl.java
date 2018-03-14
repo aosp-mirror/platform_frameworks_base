@@ -35,8 +35,10 @@ import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.utils.SubmitInfo;
 import android.hardware.camera2.utils.SurfaceUtils;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -58,6 +60,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.Executor;
 
 /**
  * HAL2.1+ implementation of CameraDevice. Use CameraManager#open to instantiate
@@ -501,8 +504,9 @@ public class CameraDeviceImpl extends CameraDevice
         for (Surface surface : outputs) {
             outConfigurations.add(new OutputConfiguration(surface));
         }
-        createCaptureSessionInternal(null, outConfigurations, callback, handler,
-                /*operatingMode*/ICameraDeviceUser.NORMAL_MODE, /*sessionParams*/ null);
+        createCaptureSessionInternal(null, outConfigurations, callback,
+                checkAndWrapHandler(handler), /*operatingMode*/ICameraDeviceUser.NORMAL_MODE,
+                /*sessionParams*/ null);
     }
 
     @Override
@@ -517,7 +521,7 @@ public class CameraDeviceImpl extends CameraDevice
         // OutputConfiguration objects are immutable, but need to have our own array
         List<OutputConfiguration> currentOutputs = new ArrayList<>(outputConfigurations);
 
-        createCaptureSessionInternal(null, currentOutputs, callback, handler,
+        createCaptureSessionInternal(null, currentOutputs, callback, checkAndWrapHandler(handler),
                 /*operatingMode*/ICameraDeviceUser.NORMAL_MODE, /*sessionParams*/null);
     }
 
@@ -537,8 +541,9 @@ public class CameraDeviceImpl extends CameraDevice
         for (Surface surface : outputs) {
             outConfigurations.add(new OutputConfiguration(surface));
         }
-        createCaptureSessionInternal(inputConfig, outConfigurations, callback, handler,
-                /*operatingMode*/ICameraDeviceUser.NORMAL_MODE, /*sessionParams*/ null);
+        createCaptureSessionInternal(inputConfig, outConfigurations, callback,
+                checkAndWrapHandler(handler), /*operatingMode*/ICameraDeviceUser.NORMAL_MODE,
+                /*sessionParams*/ null);
     }
 
     @Override
@@ -566,8 +571,8 @@ public class CameraDeviceImpl extends CameraDevice
             currentOutputs.add(new OutputConfiguration(output));
         }
         createCaptureSessionInternal(inputConfig, currentOutputs,
-                callback, handler, /*operatingMode*/ICameraDeviceUser.NORMAL_MODE,
-                /*sessionParams*/ null);
+                callback, checkAndWrapHandler(handler),
+                /*operatingMode*/ICameraDeviceUser.NORMAL_MODE, /*sessionParams*/ null);
     }
 
     @Override
@@ -582,7 +587,8 @@ public class CameraDeviceImpl extends CameraDevice
         for (Surface surface : outputs) {
             outConfigurations.add(new OutputConfiguration(surface));
         }
-        createCaptureSessionInternal(null, outConfigurations, callback, handler,
+        createCaptureSessionInternal(null, outConfigurations, callback,
+                checkAndWrapHandler(handler),
                 /*operatingMode*/ICameraDeviceUser.CONSTRAINED_HIGH_SPEED_MODE,
                 /*sessionParams*/ null);
     }
@@ -597,8 +603,8 @@ public class CameraDeviceImpl extends CameraDevice
         for (OutputConfiguration output : outputs) {
             currentOutputs.add(new OutputConfiguration(output));
         }
-        createCaptureSessionInternal(inputConfig, currentOutputs, callback, handler, operatingMode,
-                /*sessionParams*/ null);
+        createCaptureSessionInternal(inputConfig, currentOutputs, callback,
+                checkAndWrapHandler(handler), operatingMode, /*sessionParams*/ null);
     }
 
     @Override
@@ -612,14 +618,17 @@ public class CameraDeviceImpl extends CameraDevice
         if (outputConfigs == null) {
             throw new IllegalArgumentException("Invalid output configurations");
         }
+        if (config.getExecutor() == null) {
+            throw new IllegalArgumentException("Invalid executor");
+        }
         createCaptureSessionInternal(config.getInputConfiguration(), outputConfigs,
-                config.getStateCallback(), config.getHandler(), config.getSessionType(),
+                config.getStateCallback(), config.getExecutor(), config.getSessionType(),
                 config.getSessionParameters());
     }
 
     private void createCaptureSessionInternal(InputConfiguration inputConfig,
             List<OutputConfiguration> outputConfigurations,
-            CameraCaptureSession.StateCallback callback, Handler handler,
+            CameraCaptureSession.StateCallback callback, Executor executor,
             int operatingMode, CaptureRequest sessionParams) throws CameraAccessException {
         synchronized(mInterfaceLock) {
             if (DEBUG) {
@@ -673,12 +682,11 @@ public class CameraDeviceImpl extends CameraDevice
                 SurfaceUtils.checkConstrainedHighSpeedSurfaces(surfaces, /*fpsRange*/null, config);
 
                 newSession = new CameraConstrainedHighSpeedCaptureSessionImpl(mNextSessionId++,
-                        callback, handler, this, mDeviceHandler, configureSuccess,
+                        callback, executor, this, mDeviceHandler, configureSuccess,
                         mCharacteristics);
             } else {
                 newSession = new CameraCaptureSessionImpl(mNextSessionId++, input,
-                        callback, handler, this, mDeviceHandler,
-                        configureSuccess);
+                        callback, executor, this, mDeviceHandler, configureSuccess);
             }
 
             // TODO: wait until current session closes, then create the new session
@@ -963,7 +971,12 @@ public class CameraDeviceImpl extends CameraDevice
                         }
                     }
                 };
-                holder.getHandler().post(resultDispatch);
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    holder.getExecutor().execute(resultDispatch);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
             } else {
                 Log.w(TAG, String.format(
                         "did not register callback to request %d",
@@ -984,9 +997,9 @@ public class CameraDeviceImpl extends CameraDevice
     private int submitCaptureRequest(List<CaptureRequest> requestList, CaptureCallback callback,
             Handler handler, boolean repeating) throws CameraAccessException {
 
-        // Need a valid handler, or current thread needs to have a looper, if
+        // Need a valid executor, or current thread needs to have a looper, if
         // callback is valid
-        handler = checkHandler(handler, callback);
+        Executor executor = getExecutor(handler, callback);
 
         // Make sure that there all requests have at least 1 surface; all surfaces are non-null;
         // the surface isn't a physical stream surface for reprocessing request
@@ -1040,7 +1053,7 @@ public class CameraDeviceImpl extends CameraDevice
             if (callback != null) {
                 mCaptureCallbackMap.put(requestInfo.getRequestId(),
                         new CaptureCallbackHolder(
-                            callback, requestList, handler, repeating, mNextSessionId - 1));
+                            callback, requestList, executor, repeating, mNextSessionId - 1));
             } else {
                 if (DEBUG) {
                     Log.d(TAG, "Listen for request " + requestInfo.getRequestId() + " is null");
@@ -1354,7 +1367,7 @@ public class CameraDeviceImpl extends CameraDevice
         private final boolean mRepeating;
         private final CaptureCallback mCallback;
         private final List<CaptureRequest> mRequestList;
-        private final Handler mHandler;
+        private final Executor mExecutor;
         private final int mSessionId;
         /**
          * <p>Determine if the callback holder is for a constrained high speed request list that
@@ -1366,13 +1379,13 @@ public class CameraDeviceImpl extends CameraDevice
         private final boolean mHasBatchedOutputs;
 
         CaptureCallbackHolder(CaptureCallback callback, List<CaptureRequest> requestList,
-                Handler handler, boolean repeating, int sessionId) {
-            if (callback == null || handler == null) {
+                Executor executor, boolean repeating, int sessionId) {
+            if (callback == null || executor == null) {
                 throw new UnsupportedOperationException(
                     "Must have a valid handler and a valid callback");
             }
             mRepeating = repeating;
-            mHandler = handler;
+            mExecutor = executor;
             mRequestList = new ArrayList<CaptureRequest>(requestList);
             mCallback = callback;
             mSessionId = sessionId;
@@ -1425,8 +1438,8 @@ public class CameraDeviceImpl extends CameraDevice
             return getRequest(0);
         }
 
-        public Handler getHandler() {
-            return mHandler;
+        public Executor getExecutor() {
+            return mExecutor;
         }
 
         public int getSessionId() {
@@ -1810,7 +1823,12 @@ public class CameraDeviceImpl extends CameraDevice
                         }
                     }
                 };
-                holder.getHandler().post(resultDispatch);
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    holder.getExecutor().execute(resultDispatch);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
             }
         }
     }
@@ -1861,7 +1879,7 @@ public class CameraDeviceImpl extends CameraDevice
         private void scheduleNotifyError(int code) {
             mInError = true;
             CameraDeviceImpl.this.mDeviceHandler.post(obtainRunnable(
-                    CameraDeviceCallbacks::notifyError, this, code));
+                        CameraDeviceCallbacks::notifyError, this, code));
         }
 
         private void notifyError(int code) {
@@ -1929,36 +1947,41 @@ public class CameraDeviceImpl extends CameraDevice
                 if (isClosed()) return;
 
                 // Dispatch capture start notice
-                holder.getHandler().post(
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            if (!CameraDeviceImpl.this.isClosed()) {
-                                final int subsequenceId = resultExtras.getSubsequenceId();
-                                final CaptureRequest request = holder.getRequest(subsequenceId);
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    holder.getExecutor().execute(
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                if (!CameraDeviceImpl.this.isClosed()) {
+                                    final int subsequenceId = resultExtras.getSubsequenceId();
+                                    final CaptureRequest request = holder.getRequest(subsequenceId);
 
-                                if (holder.hasBatchedOutputs()) {
-                                    // Send derived onCaptureStarted for requests within the batch
-                                    final Range<Integer> fpsRange =
-                                        request.get(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE);
-                                    for (int i = 0; i < holder.getRequestCount(); i++) {
+                                    if (holder.hasBatchedOutputs()) {
+                                        // Send derived onCaptureStarted for requests within the
+                                        // batch
+                                        final Range<Integer> fpsRange =
+                                            request.get(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE);
+                                        for (int i = 0; i < holder.getRequestCount(); i++) {
+                                            holder.getCallback().onCaptureStarted(
+                                                CameraDeviceImpl.this,
+                                                holder.getRequest(i),
+                                                timestamp - (subsequenceId - i) *
+                                                NANO_PER_SECOND/fpsRange.getUpper(),
+                                                frameNumber - (subsequenceId - i));
+                                        }
+                                    } else {
                                         holder.getCallback().onCaptureStarted(
                                             CameraDeviceImpl.this,
-                                            holder.getRequest(i),
-                                            timestamp - (subsequenceId - i) *
-                                            NANO_PER_SECOND/fpsRange.getUpper(),
-                                            frameNumber - (subsequenceId - i));
+                                            holder.getRequest(resultExtras.getSubsequenceId()),
+                                            timestamp, frameNumber);
                                     }
-                                } else {
-                                    holder.getCallback().onCaptureStarted(
-                                        CameraDeviceImpl.this,
-                                        holder.getRequest(resultExtras.getSubsequenceId()),
-                                        timestamp, frameNumber);
                                 }
                             }
-                        }
-                    });
-
+                        });
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
             }
         }
 
@@ -2111,7 +2134,12 @@ public class CameraDeviceImpl extends CameraDevice
                     finalResult = resultAsCapture;
                 }
 
-                holder.getHandler().post(resultDispatch);
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    holder.getExecutor().execute(resultDispatch);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
 
                 // Collect the partials for a total result; or mark the frame as totally completed
                 mFrameNumberTracker.updateTracker(frameNumber, finalResult, isPartialResult,
@@ -2207,7 +2235,12 @@ public class CameraDeviceImpl extends CameraDevice
                         }
                     };
                     // Dispatch the failure callback
-                    holder.getHandler().post(failureDispatch);
+                    final long ident = Binder.clearCallingIdentity();
+                    try {
+                        holder.getExecutor().execute(failureDispatch);
+                    } finally {
+                        Binder.restoreCallingIdentity(ident);
+                    }
                 }
             } else {
                 boolean mayHaveBuffers = (errorCode == ERROR_CAMERA_RESULT);
@@ -2247,12 +2280,48 @@ public class CameraDeviceImpl extends CameraDevice
                 checkAndFireSequenceComplete();
 
                 // Dispatch the failure callback
-                holder.getHandler().post(failureDispatch);
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    holder.getExecutor().execute(failureDispatch);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
             }
 
         }
 
     } // public class CameraDeviceCallbacks
+
+    /**
+     * Instantiate a new Executor.
+     *
+     * <p>If the callback isn't null, check the handler and instantiate a new executor,
+     * otherwise instantiate a new executor in case handler is valid.</p>
+     */
+    static <T> Executor getExecutor(Handler handler, T callback) {
+        if (callback != null) {
+            return checkAndWrapHandler(handler);
+        }
+
+        if (handler != null) {
+            return new HandlerExecutor(handler);
+        }
+
+        return null;
+    }
+
+    /**
+     * Wrap Handler in Executor.
+     *
+     * <p>
+     * If handler is null, get the current thread's
+     * Looper to create a Executor with. If no looper exists, throw
+     * {@code IllegalArgumentException}.
+     * </p>
+     */
+    static Executor checkAndWrapHandler(Handler handler) {
+        return new HandlerExecutor(checkHandler(handler));
+    }
 
     /**
      * Default handler management.
