@@ -329,4 +329,19 @@ public abstract class MediaPlaylistAgent {
     public void setShuffleMode(@ShuffleMode int shuffleMode) {
         mProvider.setShuffleMode_impl(shuffleMode);
     }
+
+    /**
+     * Gets a {@link MediaItem2} in the playlist that matches given {@code dsd}.
+     * You can override this method to have more finer control of updating {@link DataSourceDesc}
+     * on items in the playlist.
+     *
+     * @return A {@link MediaItem2} object in the playlist that matches given {@code dsd}.
+     *         {@code null} if playlist is not set, or if the playlist has no matching item.
+     * @throws IllegalArgumentException if {@code dsd} is null
+     * @hide
+     */
+    // TODO(jaewan): Unhide
+    public @Nullable MediaItem2 getMediaItem(@NonNull DataSourceDesc dsd) {
+        return mProvider.getMediaItem_impl(dsd);
+    }
 }
