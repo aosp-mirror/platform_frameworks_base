@@ -80,4 +80,17 @@ oneway interface IOverviewProxy {
      * Sent when overview is to be hidden.
      */
     void onOverviewHidden(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
+
+    /**
+     * Sent when a user swipes up over the navigation bar to launch overview. Swipe up is determined
+     * by passing the touch slop in the direction towards launcher from navigation bar. During and
+     * after this event is sent the caller will continue to send motion events. The motion
+     * {@param event} passed after the touch slop was exceeded will also be passed after by
+     * {@link onMotionEvent}. Since motion events will be sent, motion up or cancel can still be
+     * sent to cancel overview regardless the current state of launcher (eg. if overview is already
+     * visible, this event will still be sent if user swipes up). When this signal is sent,
+     * navigation bar will not handle any gestures such as quick scrub or switch and the home button
+     * will cancel (long) press.
+     */
+    void onQuickStep(in MotionEvent event);
 }
