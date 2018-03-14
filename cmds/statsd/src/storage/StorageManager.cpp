@@ -245,6 +245,45 @@ void StorageManager::readConfigFromDisk(map<ConfigKey, StatsdConfig>& configsMap
     }
 }
 
+bool StorageManager::hasIdenticalConfig(const ConfigKey& key,
+                                        const vector<uint8_t>& config) {
+    unique_ptr<DIR, decltype(&closedir)> dir(opendir(STATS_SERVICE_DIR),
+                                             closedir);
+    if (dir == NULL) {
+        VLOG("Directory does not exist: %s", STATS_SERVICE_DIR);
+        return false;
+    }
+
+    const char* suffix =
+            StringPrintf("%d_%lld", key.GetUid(), (long long)key.GetId()).c_str();
+
+    dirent* de;
+    while ((de = readdir(dir.get()))) {
+        char* name = de->d_name;
+        if (name[0] == '.') {
+            continue;
+        }
+        size_t nameLen = strlen(name);
+        size_t suffixLen = strlen(suffix);
+        // There can be at most one file that matches this suffix (config key).
+        if (suffixLen <= nameLen &&
+                strncmp(name + nameLen - suffixLen, suffix, suffixLen) == 0) {
+            int fd = open(StringPrintf("%s/%s", STATS_SERVICE_DIR, name).c_str(),
+                                  O_RDONLY | O_CLOEXEC);
+            if (fd != -1) {
+                string content;
+                if (android::base::ReadFdToString(fd, &content)) {
+                    vector<uint8_t> vec(content.begin(), content.end());
+                    if (vec == config) {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
 void StorageManager::trimToFit(const char* path) {
     unique_ptr<DIR, decltype(&closedir)> dir(opendir(path), closedir);
     if (dir == NULL) {

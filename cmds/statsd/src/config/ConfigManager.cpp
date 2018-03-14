@@ -68,11 +68,24 @@ void ConfigManager::UpdateConfig(const ConfigKey& key, const StatsdConfig& confi
     {
         lock_guard <mutex> lock(mMutex);
 
+        auto it = mConfigs.find(key);
+
+        const int numBytes = config.ByteSize();
+        vector<uint8_t> buffer(numBytes);
+        config.SerializeToArray(&buffer[0], numBytes);
+
+        const bool isDuplicate =
+            it != mConfigs.end() &&
+            StorageManager::hasIdenticalConfig(key, buffer);
+
+        // Update saved file on disk. We still update timestamp of file when
+        // there exists a duplicate configuration to avoid garbage collection.
+        update_saved_configs_locked(key, buffer, numBytes);
+
+        if (isDuplicate) return;
+
         // Add to set
         mConfigs.insert(key);
-
-        // Save to disk
-        update_saved_configs_locked(key, config);
 
         for (sp<ConfigListener> listener : mListeners) {
             broadcastList.push_back(listener);
@@ -136,7 +149,6 @@ void ConfigManager::RemoveConfigs(int uid) {
     vector<sp<ConfigListener>> broadcastList;
     {
         lock_guard <mutex> lock(mMutex);
-
 
         for (auto it = mConfigs.begin(); it != mConfigs.end();) {
             // Remove from map
@@ -230,16 +242,16 @@ void ConfigManager::Dump(FILE* out) {
     }
 }
 
-void ConfigManager::update_saved_configs_locked(const ConfigKey& key, const StatsdConfig& config) {
+void ConfigManager::update_saved_configs_locked(const ConfigKey& key,
+                                                const vector<uint8_t>& buffer,
+                                                const int numBytes) {
     // If there is a pre-existing config with same key we should first delete it.
     remove_saved_configs(key);
 
     // Then we save the latest config.
-    string file_name = StringPrintf("%s/%ld_%d_%lld", STATS_SERVICE_DIR, time(nullptr),
-                                    key.GetUid(), (long long)key.GetId());
-    const int numBytes = config.ByteSize();
-    vector<uint8_t> buffer(numBytes);
-    config.SerializeToArray(&buffer[0], numBytes);
+    string file_name =
+        StringPrintf("%s/%ld_%d_%lld", STATS_SERVICE_DIR, time(nullptr),
+                     key.GetUid(), (long long)key.GetId());
     StorageManager::writeFile(file_name.c_str(), &buffer[0], numBytes);
 }
 
