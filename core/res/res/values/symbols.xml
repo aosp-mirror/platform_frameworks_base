@@ -528,9 +528,15 @@
   <java-symbol type="string" name="delete" />
   <java-symbol type="string" name="deleteText" />
   <java-symbol type="string" name="grant_permissions_header_text" />
+  <java-symbol type="string" name="menu_alt_shortcut_label" />
+  <java-symbol type="string" name="menu_ctrl_shortcut_label" />
   <java-symbol type="string" name="menu_delete_shortcut_label" />
   <java-symbol type="string" name="menu_enter_shortcut_label" />
+  <java-symbol type="string" name="menu_function_shortcut_label" />
+  <java-symbol type="string" name="menu_meta_shortcut_label" />
   <java-symbol type="string" name="menu_space_shortcut_label" />
+  <java-symbol type="string" name="menu_shift_shortcut_label" />
+  <java-symbol type="string" name="menu_sym_shortcut_label" />
   <java-symbol type="string" name="notification_title" />
   <java-symbol type="string" name="permission_request_notification_with_subtitle" />
   <java-symbol type="string" name="prepend_shortcut_label" />
