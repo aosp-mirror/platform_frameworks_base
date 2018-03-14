@@ -562,6 +562,10 @@ bool initAlerts(const StatsdConfig& config,
                   (long long)alert.metric_id());
             return false;
         }
+        if (!alert.has_trigger_if_sum_gt()) {
+            ALOGW("invalid alert: missing threshold");
+            return false;
+        }
         if (alert.trigger_if_sum_gt() < 0 || alert.num_buckets() <= 0) {
             ALOGW("invalid alert: threshold=%f num_buckets= %d",
                   alert.trigger_if_sum_gt(), alert.num_buckets());

@@ -19,6 +19,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <math.h>
 #include <stdio.h>
 #include <set>
 #include <unordered_map>
@@ -416,7 +417,7 @@ TEST(OringDurationTrackerTest, TestAnomalyDetectionExpiredAlarm) {
     tracker.noteStop(kEventKey1, eventStartTimeNs + 2 * bucketSizeNs + 25, false);
     EXPECT_EQ(anomalyTracker->getSumOverPastBuckets(eventKey), (long long)(bucketSizeNs));
     EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(eventKey),
-              (eventStartTimeNs + 2 * bucketSizeNs + 25) / NS_PER_SEC + refPeriodSec);
+              std::ceil((eventStartTimeNs + 2 * bucketSizeNs + 25.0) / NS_PER_SEC + refPeriodSec));
 }
 
 TEST(OringDurationTrackerTest, TestAnomalyDetectionFiredAlarm) {

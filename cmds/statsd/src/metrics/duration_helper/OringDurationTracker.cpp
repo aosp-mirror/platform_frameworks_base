@@ -328,12 +328,16 @@ int64_t OringDurationTracker::predictAnomalyTimestampNs(
     // TODO: Unit-test this and see if it can be done more efficiently (e.g. use int32).
     // All variables below represent durations (not timestamps).
 
+    const int64_t thresholdNs = anomalyTracker.getAnomalyThreshold();
+
     // The time until the current bucket ends. This is how much more 'space' it can hold.
     const int64_t currRemainingBucketSizeNs =
             mBucketSizeNs - (eventTimestampNs - mCurrentBucketStartTimeNs);
-    // TODO: This should never be < 0. Document/guard against possible failures if it is.
-
-    const int64_t thresholdNs = anomalyTracker.getAnomalyThreshold();
+    if (currRemainingBucketSizeNs < 0) {
+        ALOGE("OringDurationTracker currRemainingBucketSizeNs < 0");
+        // This should never happen. Return the safest thing possible given that data is corrupt.
+        return eventTimestampNs + thresholdNs;
+    }
 
     // As we move into the future, old buckets get overwritten (so their old data is erased).
 

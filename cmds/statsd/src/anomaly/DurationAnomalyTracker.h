@@ -32,7 +32,8 @@ public:
 
     virtual ~DurationAnomalyTracker();
 
-    // Starts the alarm at the given timestamp.
+    // Sets an alarm for the given timestamp.
+    // Replaces previous alarm if one already exists.
     void startAlarm(const MetricDimensionKey& dimensionKey, const uint64_t& eventTime);
 
     // Stops the alarm.
@@ -46,7 +47,7 @@ public:
                                       const uint64_t& timestampNs);
 
     // Declares an anomaly for each alarm in firedAlarms that belongs to this DurationAnomalyTracker
-    // and removes it from firedAlarms.
+    // and removes it from firedAlarms. The AlarmMonitor is not informed.
     // Note that this will generally be called from a different thread from the other functions;
     // the caller is responsible for thread safety.
     void informAlarmsFired(const uint64_t& timestampNs,

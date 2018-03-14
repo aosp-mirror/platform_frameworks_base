@@ -35,7 +35,7 @@ DurationAnomalyTracker::~DurationAnomalyTracker() {
 
 void DurationAnomalyTracker::resetStorage() {
     AnomalyTracker::resetStorage();
-    if (!mAlarms.empty()) VLOG("AnomalyTracker.resetStorage() called but mAlarms is NOT empty!");
+    if (!mAlarms.empty()) ALOGW("AnomalyTracker.resetStorage() called but mAlarms is NOT empty!");
 }
 
 void DurationAnomalyTracker::declareAnomalyIfAlarmExpired(const MetricDimensionKey& dimensionKey,
@@ -57,11 +57,18 @@ void DurationAnomalyTracker::startAlarm(const MetricDimensionKey& dimensionKey,
     // Alarms are stored in secs. Must round up, since if it fires early, it is ignored completely.
     uint32_t timestampSec = static_cast<uint32_t>((timestampNs -1)/ NS_PER_SEC) + 1; // round up
     if (isInRefractoryPeriod(timestampNs, dimensionKey)) {
+        // TODO: Bug! By the refractory's end, the data might be erased and the alarm inapplicable.
         VLOG("Setting a delayed anomaly alarm lest it fall in the refractory period");
         timestampSec = getRefractoryPeriodEndsSec(dimensionKey) + 1;
     }
+
+    auto itr = mAlarms.find(dimensionKey);
+    if (itr != mAlarms.end() && mAlarmMonitor != nullptr) {
+        mAlarmMonitor->remove(itr->second);
+    }
+
     sp<const InternalAlarm> alarm = new InternalAlarm{timestampSec};
-    mAlarms.insert({dimensionKey, alarm});
+    mAlarms[dimensionKey] = alarm;
     if (mAlarmMonitor != nullptr) {
         mAlarmMonitor->add(alarm);
     }
