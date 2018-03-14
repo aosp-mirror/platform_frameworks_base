@@ -451,6 +451,9 @@ public abstract class PackageManagerInternal {
     /** Whether the binder caller can access instant apps. */
     public abstract boolean canAccessInstantApps(int callingUid, int userId);
 
+    /** Whether the binder caller can access the given component. */
+    public abstract boolean canAccessComponent(int callingUid, ComponentName component, int userId);
+
     /**
      * Returns {@code true} if a given package has instant application meta-data.
      * Otherwise, returns {@code false}. Meta-data is state (eg. cookie, app icon, etc)
