@@ -372,7 +372,6 @@ void ValueMetricProducer::flushCurrentBucketLocked(const uint64_t& eventTimeNs) 
     } else {
         info.mBucketEndNs = fullBucketEndTimeNs;
     }
-    info.mBucketNum = mCurrentBucketNum;
 
     int tainted = 0;
     for (const auto& slice : mCurrentSlicedBucket) {
