@@ -266,10 +266,16 @@ public abstract class MediaPlaylistAgent {
         mProvider.skipToPlaylistItem_impl(item);
     }
 
+    /**
+     * Skips to the previous item in the playlist.
+     */
     public void skipToPreviousItem() {
         mProvider.skipToPreviousItem_impl();
     }
 
+    /**
+     * Skips to the next item in the playlist.
+     */
     public void skipToNextItem() {
         mProvider.skipToNextItem_impl();
     }
