@@ -1457,8 +1457,10 @@ public class PermissionManagerService {
         final PermissionsState permissionsState = ps.getPermissionsState();
 
         final int flags = permissionsState.getPermissionFlags(permName, userId);
-        if ((flags & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) != 0) {
-            throw new SecurityException("Cannot revoke system fixed permission "
+        // Only the system may revoke SYSTEM_FIXED permissions.
+        if ((flags & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) != 0
+                && UserHandle.getCallingAppId() != Process.SYSTEM_UID) {
+            throw new SecurityException("Non-System UID cannot revoke system fixed permission "
                     + permName + " for package " + packageName);
         }
         if (!overridePolicy && (flags & PackageManager.FLAG_PERMISSION_POLICY_FIXED) != 0) {
