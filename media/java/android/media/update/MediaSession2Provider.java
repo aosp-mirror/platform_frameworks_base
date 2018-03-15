@@ -65,6 +65,9 @@ public interface MediaSession2Provider extends TransportControlProvider {
     void setPlaylist_impl(List<MediaItem2> list, MediaMetadata2 metadata);
     MediaItem2 getCurrentPlaylistItem_impl();
     void notifyError_impl(int errorCode, Bundle extras);
+    int getPlayerState_impl();
+    long getPosition_impl();
+    long getBufferedPosition_impl();
 
     interface CommandProvider {
         int getCommandCode_impl();
