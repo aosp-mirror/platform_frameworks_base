@@ -3165,8 +3165,8 @@ public final class Telephony {
             values.put(RIL_VOICE_RADIO_TECHNOLOGY, state.getRilVoiceRadioTechnology());
             values.put(RIL_DATA_RADIO_TECHNOLOGY, state.getRilDataRadioTechnology());
             values.put(CSS_INDICATOR, state.getCssIndicator());
-            values.put(NETWORK_ID, state.getNetworkId());
-            values.put(SYSTEM_ID, state.getSystemId());
+            values.put(NETWORK_ID, state.getCdmaNetworkId());
+            values.put(SYSTEM_ID, state.getCdmaSystemId());
             values.put(CDMA_ROAMING_INDICATOR, state.getCdmaRoamingIndicator());
             values.put(CDMA_DEFAULT_ROAMING_INDICATOR, state.getCdmaDefaultRoamingIndicator());
             values.put(CDMA_ERI_ICON_INDEX, state.getCdmaEriIconIndex());
@@ -3296,13 +3296,13 @@ public final class Telephony {
         public static final String CSS_INDICATOR = "css_indicator";
 
         /**
-         * This is the same as {@link ServiceState#getNetworkId()}.
+         * This is the same as {@link ServiceState#getCdmaNetworkId()}.
          * @hide
          */
         public static final String NETWORK_ID = "network_id";
 
         /**
-         * This is the same as {@link ServiceState#getSystemId()}.
+         * This is the same as {@link ServiceState#getCdmaSystemId()}.
          * @hide
          */
         public static final String SYSTEM_ID = "system_id";
