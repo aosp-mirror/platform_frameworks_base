@@ -176,6 +176,8 @@ bool mergeProfileDataIntoProto(service::GraphicsStatsProto* proto, const std::st
     summary->set_slow_bitmap_upload_count(summary->slow_bitmap_upload_count() +
                                           data->jankTypeCount(kSlowSync));
     summary->set_slow_draw_count(summary->slow_draw_count() + data->jankTypeCount(kSlowRT));
+    summary->set_missed_deadline_count(summary->missed_deadline_count()
+            + data->jankTypeCount(kMissedDeadline));
 
     bool creatingHistogram = false;
     if (proto->histogram_size() == 0) {
@@ -246,6 +248,7 @@ void dumpAsTextToFd(service::GraphicsStatsProto* proto, int fd) {
     dprintf(fd, "\nNumber Slow UI thread: %d", summary.slow_ui_thread_count());
     dprintf(fd, "\nNumber Slow bitmap uploads: %d", summary.slow_bitmap_upload_count());
     dprintf(fd, "\nNumber Slow issue draw commands: %d", summary.slow_draw_count());
+    dprintf(fd, "\nNumber Frame deadline missed: %d", summary.missed_deadline_count());
     dprintf(fd, "\nHISTOGRAM:");
     for (const auto& it : proto->histogram()) {
         dprintf(fd, " %dms=%d", it.render_millis(), it.frame_count());
