@@ -1346,8 +1346,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return;
             }
             if (!client.mStartedOps.remove(op)) {
-                throw new IllegalStateException("Operation not started: uid" + op.uid
+                Slog.wtf(TAG, "Operation not started: uid" + op.uid
                         + " pkg=" + op.packageName + " op=" + op.op);
+                return;
             }
             finishOperationLocked(op, /*finishNested*/ false);
             if (op.nesting <= 0) {
