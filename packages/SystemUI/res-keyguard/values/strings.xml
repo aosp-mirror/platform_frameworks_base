@@ -44,6 +44,15 @@
          Displayed in one line in a large font.  -->
     <string name="keyguard_password_enter_pin_password_code">Type PIN to unlock</string>
 
+    <!-- Instructions telling the user to enter their PIN password to unlock the keyguard [CHAR LIMIT=30] -->
+    <string name="keyguard_enter_your_pin">Enter your PIN</string>
+
+    <!-- Instructions telling the user to enter their pattern to unlock the keyguard [CHAR LIMIT=30] -->
+    <string name="keyguard_enter_your_pattern">Enter your Pattern</string>
+
+    <!-- Instructions telling the user to enter their text password to unlock the keyguard [CHAR LIMIT=30] -->
+    <string name="keyguard_enter_your_password">Enter your Password</string>
+
     <!-- Instructions telling the user that they entered the wrong pin while trying
          to unlock the keyguard.  Displayed in one line in a large font.  -->
     <string name="keyguard_password_wrong_pin_code">Incorrect PIN code.</string>
