@@ -208,7 +208,7 @@ message ScreenStateChanged {
  *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
  */
 message UidProcessStateChanged {
-    optional int32 uid = 1 [(stateFieldOption).option = PRIMARY];
+    optional int32 uid = 1 [(stateFieldOption).option = PRIMARY, (is_uid) = true];
 
     // The state, from frameworks/base/core/proto/android/app/enums.proto.
     optional android.app.ProcessStateEnum state = 2 [(stateFieldOption).option = EXCLUSIVE];
@@ -222,7 +222,7 @@ message UidProcessStateChanged {
  */
 message ProcessLifeCycleStateChanged {
     // TODO: should be a string tagged w/ uid annotation
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
 
     // The process name (usually same as the app name).
     optional string name = 2;
@@ -592,7 +592,7 @@ message WakeupAlarmOccurred {
  */
 message MobileRadioPowerStateChanged {
     // TODO: Add attribution instead of uid?
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
 
     // Power state, from frameworks/base/core/proto/android/telephony/enums.proto.
     optional android.telephony.DataConnectionPowerStateEnum state = 2;
@@ -607,7 +607,7 @@ message MobileRadioPowerStateChanged {
  */
 message WifiRadioPowerStateChanged {
     // TODO: Add attribution instead of uid?
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
 
     // Power state, from frameworks/base/core/proto/android/telephony/enums.proto.
     optional android.telephony.DataConnectionPowerStateEnum state = 2;
@@ -1079,7 +1079,8 @@ message ChargeCyclesReported {
  */
 message DaveyOccurred {
     // The UID that logged this atom.
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
+    ;
 
     // Amount of time it took to render the frame. Should be >=700ms.
     optional int64 jank_duration_millis = 2;
@@ -1136,7 +1137,7 @@ message SettingChanged {
   *   frameworks/base/services/core/java/com/android/server/am/ActivityRecord.java
  */
 message ActivityForegroundStateChanged {
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
     optional string pkg_name = 2;
     optional string class_name = 3;
 
@@ -1154,7 +1155,7 @@ message ActivityForegroundStateChanged {
  */
 message DropboxErrorChanged {
     // The uid if available. -1 means not available.
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
 
     // Tag used when recording this error to dropbox. Contains data_ or system_ prefix.
     optional string tag = 2;
@@ -1185,7 +1186,7 @@ message DropboxErrorChanged {
  */
 message AppBreadcrumbReported {
     // The uid of the application that sent this custom atom.
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
 
     // An arbitrary label chosen by the developer. For Android P, the label should be in [0, 16).
     optional int32 label = 2;
@@ -1209,7 +1210,7 @@ message AppBreadcrumbReported {
  */
 message AnomalyDetected {
     // Uid that owns the config whose anomaly detection alert fired.
-    optional int32 config_uid = 1;
+    optional int32 config_uid = 1 [(is_uid) = true];
 
     // Id of the config whose anomaly detection alert fired.
     optional int64 config_id = 2;
@@ -1220,7 +1221,7 @@ message AnomalyDetected {
 
 message AppStartChanged {
     // The uid if available. -1 means not available.
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
 
     // The app package name.
     optional string pkg_name = 2;
@@ -1267,7 +1268,7 @@ message AppStartChanged {
 
 message AppStartCancelChanged {
     // The uid if available. -1 means not available.
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
 
     // The app package name.
     optional string pkg_name = 2;
@@ -1287,7 +1288,7 @@ message AppStartCancelChanged {
 
 message AppStartFullyDrawnChanged {
     // The uid if available. -1 means not available.
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
 
     // The app package name.
     optional string pkg_name = 2;
@@ -1318,7 +1319,7 @@ message AppStartFullyDrawnChanged {
  */
 message PictureInPictureStateChanged {
     // -1 if it is not available
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
 
     optional string short_name = 2;
 
@@ -1337,7 +1338,7 @@ message PictureInPictureStateChanged {
  *     services/core/java/com/android/server/wm/Session.java
  */
 message OverlayStateChanged {
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
 
     optional string package_name = 2;
 
@@ -1358,7 +1359,7 @@ message OverlayStateChanged {
  *     //frameworks/base/services/core/java/com/android/server/am/ActiveServices.java
  */
 message ForegroundServiceStateChanged {
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
     // package_name + "/" + class_name
     optional string short_name = 2;
 
@@ -1378,6 +1379,7 @@ message ForegroundServiceStateChanged {
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message IsolatedUidChanged {
+    // NOTE: DO NOT annotate uid field in this atom. This atom is specially handled in statsd.
     // The host UID. Generally, we should attribute metrics from the isolated uid to the host uid.
     optional int32 parent_uid = 1;
 
@@ -1399,7 +1401,7 @@ message IsolatedUidChanged {
 message PacketWakeupOccurred {
     // The uid owning the socket into which the packet was delivered, or -1 if the packet was
     // delivered nowhere.
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
     // The interface name on which the packet was received.
     optional string iface = 2;
     // The ethertype value of the packet.
@@ -1427,7 +1429,7 @@ message PacketWakeupOccurred {
  */
 message AppStartMemoryStateCaptured {
     // The uid if available. -1 means not available.
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
 
     // The process name.
     optional string process_name = 2;
@@ -1473,7 +1475,7 @@ message LmkStateChanged {
  */
 message LmkKillOccurred {
     // The uid if available. -1 means not available.
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
 
     // The process name.
     optional string process_name = 2;
@@ -1505,7 +1507,7 @@ message LmkKillOccurred {
  */
 message AppDied {
     // timestamp(elapsedRealtime) of record creation
-    optional uint64 timestamp_millis = 1;
+    optional uint64 timestamp_millis = 1 [(stateFieldOption).option = EXCLUSIVE];
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1519,7 +1521,7 @@ message AppDied {
  *   StatsCompanionService (using BatteryStats to get which interfaces are wifi)
  */
 message WifiBytesTransfer {
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
 
     optional int64 rx_bytes = 2;
 
@@ -1537,9 +1539,10 @@ message WifiBytesTransfer {
  *   StatsCompanionService (using BatteryStats to get which interfaces are wifi)
  */
 message WifiBytesTransferByFgBg {
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
 
-    // 1 denotes foreground and 0 denotes background. This is called Set in NetworkStats.
+    // 1 denotes foreground and 0 denotes background. This is called Set in
+    // NetworkStats.
     optional int32 is_foreground = 2;
 
     optional int64 rx_bytes = 3;
@@ -1558,7 +1561,7 @@ message WifiBytesTransferByFgBg {
  *   StatsCompanionService (using BatteryStats to get which interfaces are mobile data)
  */
 message MobileBytesTransfer {
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
 
     optional int64 rx_bytes = 2;
 
@@ -1576,9 +1579,10 @@ message MobileBytesTransfer {
  *   StatsCompanionService (using BatteryStats to get which interfaces are mobile data)
  */
 message MobileBytesTransferByFgBg {
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
 
-    // 1 denotes foreground and 0 denotes background. This is called Set in NetworkStats.
+    // 1 denotes foreground and 0 denotes background. This is called Set in
+    // NetworkStats.
     optional int32 is_foreground = 2;
 
     optional int64 rx_bytes = 3;
@@ -1597,7 +1601,7 @@ message MobileBytesTransferByFgBg {
  *   StatsCompanionService
  */
 message BluetoothBytesTransfer {
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
 
     optional int64 rx_bytes = 2;
 
@@ -1657,7 +1661,7 @@ message CpuTimePerFreq {
  * Note that isolated process uid time should be attributed to host uids.
  */
 message CpuTimePerUid {
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
     optional uint64 user_time_millis = 2;
     optional uint64 sys_time_millis = 3;
 }
@@ -1668,7 +1672,7 @@ message CpuTimePerUid {
  * For each uid, we order the time by descending frequencies.
  */
 message CpuTimePerUidFreq {
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
     optional uint32 freq_index = 2;
     optional uint64 time_millis = 3;
 }
@@ -1750,7 +1754,7 @@ message BluetoothActivityInfo {
  */
 message ProcessMemoryState {
     // The uid if available. -1 means not available.
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
 
     // The process name.
     optional string process_name = 2;
@@ -1802,7 +1806,7 @@ message SystemUptime {
  * The file contains a monotonically increasing count of time for a single boot.
  */
 message CpuActiveTime {
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
     optional uint64 time_millis = 2;
 }
 
@@ -1816,7 +1820,7 @@ message CpuActiveTime {
  * The file contains a monotonically increasing count of time for a single boot.
  */
 message CpuClusterTime {
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
     optional int32 cluster_index = 2;
     optional uint64 time_millis = 3;
 }

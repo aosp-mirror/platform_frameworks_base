@@ -170,9 +170,10 @@ bool isStateTracker(const SimplePredicate& simplePredicate, vector<Matcher>* pri
     // 1. must not have "stop". must have "dimension"
     if (!simplePredicate.has_stop() && simplePredicate.has_dimensions()) {
         // TODO: need to check the start atom matcher too.
-        auto it = android::util::kStateAtomsFieldOptions.find(simplePredicate.dimensions().field());
+        auto it = android::util::AtomsInfo::kStateAtomsFieldOptions.find(
+                simplePredicate.dimensions().field());
         // 2. must be based on a state atom.
-        if (it != android::util::kStateAtomsFieldOptions.end()) {
+        if (it != android::util::AtomsInfo::kStateAtomsFieldOptions.end()) {
             // 3. dimension must be primary fields + state field IN ORDER
             size_t expectedDimensionCount = it->second.primaryFields.size() + 1;
             vector<Matcher> dimensions;
