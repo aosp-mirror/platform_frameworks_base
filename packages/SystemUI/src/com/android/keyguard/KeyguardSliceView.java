@@ -182,6 +182,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
             }
             button.setCompoundDrawables(iconDrawable, null, null, null);
             button.setOnClickListener(this);
+            button.setClickable(pendingIntent != null);
         }
 
         // Removing old views
