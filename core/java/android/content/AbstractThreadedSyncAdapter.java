@@ -16,9 +16,14 @@
 
 package android.content;
 
+import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
+
 import android.accounts.Account;
+import android.annotation.MainThread;
+import android.annotation.NonNull;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
@@ -167,9 +172,10 @@ public abstract class AbstractThreadedSyncAdapter {
 
     private class ISyncAdapterImpl extends ISyncAdapter.Stub {
         @Override
-        public void onUnsyncableAccount(ISyncAdapterUnsyncableAccountCallback cb)
-                throws RemoteException {
-            cb.onUnsyncableAccountDone(AbstractThreadedSyncAdapter.this.onUnsyncableAccount());
+        public void onUnsyncableAccount(ISyncAdapterUnsyncableAccountCallback cb) {
+            Handler.getMain().sendMessage(obtainMessage(
+                    AbstractThreadedSyncAdapter::handleOnUnsyncableAccount,
+                    AbstractThreadedSyncAdapter.this, cb));
         }
 
         @Override
@@ -381,6 +387,27 @@ public abstract class AbstractThreadedSyncAdapter {
     }
 
     /**
+     * Handle a call of onUnsyncableAccount.
+     *
+     * @param cb The callback to report the return value to
+     */
+    private void handleOnUnsyncableAccount(@NonNull ISyncAdapterUnsyncableAccountCallback cb) {
+        boolean doSync;
+        try {
+            doSync = onUnsyncableAccount();
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Exception while calling onUnsyncableAccount, assuming 'true'", e);
+            doSync = true;
+        }
+
+        try {
+            cb.onUnsyncableAccountDone(doSync);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not report result of onUnsyncableAccount", e);
+        }
+    }
+
+    /**
      * Allows to defer syncing until all accounts are properly set up.
      *
      * <p>Called when a account / authority pair
@@ -393,9 +420,16 @@ public abstract class AbstractThreadedSyncAdapter {
      *
      * <p>This might be called on a different service connection as {@link #onPerformSync}.
      *
+     * <p>The system expects this method to immediately return. If the call stalls the system
+     * behaves as if this method returned {@code true}. If it is required to perform a longer task
+     * (such as interacting with the user), return {@code false} and proceed in a difference
+     * context, such as an {@link android.app.Activity}, or foreground service. The sync can then be
+     * rescheduled once the account becomes syncable.
+     *
      * @return If {@code false} syncing is deferred. Returns {@code true} by default, i.e. by
      *         default syncing starts immediately.
      */
+    @MainThread
     public boolean onUnsyncableAccount() {
         return true;
     }
