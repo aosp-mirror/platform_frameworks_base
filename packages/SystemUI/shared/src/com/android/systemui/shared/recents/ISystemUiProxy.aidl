@@ -36,11 +36,6 @@ interface ISystemUiProxy {
     void startScreenPinning(int taskId) = 1;
 
     /**
-     * Called when the overview service has started the recents animation.
-     */
-    void onRecentsAnimationStarted() = 2;
-
-    /**
      * Specifies the text to be shown for onboarding the new swipe-up gesture to access recents.
      */
     void setRecentsOnboardingText(CharSequence text) = 3;
