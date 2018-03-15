@@ -88,13 +88,13 @@
     support charging on it.  That is, a charger that fits into the USB port and goes into
     a wall socket, not into a computer. (This happens because some devices require more
     current than the USB spec allows.  [CHAR LIMIT=NONE] -->
-    <string name="invalid_charger">USB charging not supported.\nUse only the supplied charger.</string>
+    <string name="invalid_charger">Can\'t charge via USB. Use the charger that came with your device.</string>
 
     <!-- First line of invalid_charger, used in the notification form.  [CHAR LIMIT=NONE]-->
-    <string name="invalid_charger_title">USB charging not supported.</string>
+    <string name="invalid_charger_title">Can\'t charge via USB</string>
 
     <!-- Second line of invalid_charger, used in the notification form.  [CHAR LIMIT=NONE]-->
-    <string name="invalid_charger_text">Use only the supplied charger.</string>
+    <string name="invalid_charger_text">Use the charger that came with your device</string>
 
     <!-- When the battery is low, this is the label of the button to go to the
          power usage activity to find out what drained the battery.  [CHAR LIMIT=30] -->
