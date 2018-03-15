@@ -25925,16 +25925,19 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Bundle bOptions) {
             Preconditions.checkNotNull(intents, "intents");
             final String[] resolvedTypes = new String[intents.length];
-            for (int i = 0; i < intents.length; i++) {
-                resolvedTypes[i] = intents[i].resolveTypeIfNeeded(mContext.getContentResolver());
-            }
 
             // UID of the package on user userId.
             // "= 0" is needed because otherwise catch(RemoteException) would make it look like
             // packageUid may not be initialized.
             int packageUid = 0;
             final long ident = Binder.clearCallingIdentity();
+
             try {
+                for (int i = 0; i < intents.length; i++) {
+                    resolvedTypes[i] =
+                            intents[i].resolveTypeIfNeeded(mContext.getContentResolver());
+                }
+
                 packageUid = AppGlobals.getPackageManager().getPackageUid(
                         packageName, PackageManager.MATCH_DEBUG_TRIAGED_MISSING, userId);
             } catch (RemoteException e) {
