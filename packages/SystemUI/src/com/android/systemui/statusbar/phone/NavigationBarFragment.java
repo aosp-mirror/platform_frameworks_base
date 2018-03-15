@@ -112,6 +112,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
     public static final String TAG = "NavigationBar";
     private static final boolean DEBUG = false;
+    private static final boolean DEBUG_ROTATION = true;
     private static final String EXTRA_DISABLE_STATE = "disabled_state";
 
     private final static int BUTTON_FADE_IN_OUT_DURATION_MS = 100;
@@ -396,6 +397,16 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
     @Override
     public void onRotationProposal(final int rotation, boolean isValid) {
+        final int winRotation = mWindowManager.getDefaultDisplay().getRotation();
+        if (DEBUG_ROTATION) {
+            Log.v(TAG, "onRotationProposal proposedRotation=" + Surface.rotationToString(rotation)
+                    + ", winRotation=" + Surface.rotationToString(winRotation)
+                    + ", isValid=" + isValid + ", mNavBarWindowState="
+                    + StatusBarManager.windowStateToString(mNavigationBarWindowState)
+                    + ", isRotateButtonVisible=" + (mNavigationBarView == null ? "null" :
+                        mNavigationBarView.isRotateButtonVisible()));
+        }
+
         // This method will be called on rotation suggestion changes even if the proposed rotation
         // is not valid for the top app. Use invalid rotation choices as a signal to remove the
         // rotate button if shown.
@@ -405,7 +416,6 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         }
 
         // If window rotation matches suggested rotation, remove any current suggestions
-        final int winRotation = mWindowManager.getDefaultDisplay().getRotation();
         if (rotation == winRotation) {
             getView().removeCallbacks(mRemoveRotationProposal);
             setRotateSuggestionButtonState(false);
