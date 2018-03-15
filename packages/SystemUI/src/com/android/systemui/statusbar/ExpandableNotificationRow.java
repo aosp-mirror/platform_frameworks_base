@@ -1058,11 +1058,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
-    public void setDismissed(boolean dismissed, boolean fromAccessibility) {
-        mDismissed = dismissed;
+    public void setDismissed(boolean fromAccessibility) {
+        mDismissed = true;
         mGroupParentWhenDismissed = mNotificationParent;
         mRefocusOnDismiss = fromAccessibility;
         mChildAfterViewWhenDismissed = null;
+        mEntry.icon.setDismissed();
         if (isChildInGroup()) {
             List<ExpandableNotificationRow> notificationChildren =
                     mNotificationParent.getNotificationChildren();
@@ -1146,7 +1147,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 groupSummary.performDismiss(fromAccessibility);
             }
         }
-        setDismissed(true, fromAccessibility);
+        setDismissed(fromAccessibility);
         if (isClearable()) {
             if (mOnDismissRunnable != null) {
                 mOnDismissRunnable.run();

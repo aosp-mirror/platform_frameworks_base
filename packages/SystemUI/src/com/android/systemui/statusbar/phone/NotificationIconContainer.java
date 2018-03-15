@@ -97,6 +97,34 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         }
     }.setDuration(200).setDelay(50);
 
+    /**
+     * The animation property used for all icons that were not isolated, when the isolation ends.
+     * This just fades the alpha and doesn't affect the movement and has a delay.
+     */
+    private static final AnimationProperties UNISOLATION_PROPERTY_OTHERS
+            = new AnimationProperties() {
+        private AnimationFilter mAnimationFilter = new AnimationFilter().animateAlpha();
+
+        @Override
+        public AnimationFilter getAnimationFilter() {
+            return mAnimationFilter;
+        }
+    }.setDuration(HeadsUpAppearanceController.CONTENT_FADE_DURATION).setDelay(
+            HeadsUpAppearanceController.CONTENT_FADE_DURATION);
+
+    /**
+     * The animation property used for the icon when its isolation ends.
+     * This animates the translation back to the right position.
+     */
+    private static final AnimationProperties UNISOLATION_PROPERTY = new AnimationProperties() {
+        private AnimationFilter mAnimationFilter = new AnimationFilter().animateX();
+
+        @Override
+        public AnimationFilter getAnimationFilter() {
+            return mAnimationFilter;
+        }
+    }.setDuration(HeadsUpAppearanceController.CONTENT_FADE_DURATION);
+
     public static final int MAX_VISIBLE_ICONS_WHEN_DARK = 5;
     public static final int MAX_STATIC_ICONS = 4;
     private static final int MAX_DOTS = 3;
@@ -127,6 +155,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private StatusBarIconView mIsolatedIcon;
     private Rect mIsolatedIconLocation;
     private int[] mAbsolutePosition = new int[2];
+    private View mIsolatedIconForAnimation;
 
 
     public NotificationIconContainer(Context context, AttributeSet attrs) {
@@ -219,6 +248,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         mAddAnimationStartIndex = -1;
         mCannedAnimationStartIndex = -1;
         mDisallowNextAnimation = false;
+        mIsolatedIconForAnimation = null;
     }
 
     @Override
@@ -286,8 +316,10 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                 mIconStates.remove(child);
                 if (!isReplacingIcon) {
                     addTransientView(icon, 0);
+                    boolean isIsolatedIcon = child == mIsolatedIcon;
                     icon.setVisibleState(StatusBarIconView.STATE_HIDDEN, true /* animate */,
-                            () -> removeTransientView(icon));
+                            () -> removeTransientView(icon),
+                            isIsolatedIcon ? HeadsUpAppearanceController.CONTENT_FADE_DURATION : 0);
                 }
             }
         }
@@ -588,7 +620,11 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         mReplacingIcons = replacingIcons;
     }
 
-    public void showIconIsolated(StatusBarIconView icon, Rect absoluteIconPosition) {
+    public void showIconIsolated(StatusBarIconView icon, Rect absoluteIconPosition,
+            boolean animated) {
+        if (animated) {
+            mIsolatedIconForAnimation = mIsolatedIcon;
+        }
         mIsolatedIcon = icon;
         mIsolatedIconLocation = absoluteIconPosition;
         updateState();
@@ -665,6 +701,14 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                         sTempProperties.resetCustomInterpolators();
                         animationProperties = sTempProperties;
                         animationProperties.setDuration(CANNED_ANIMATION_DURATION);
+                        animate = true;
+                    }
+                    if (mIsolatedIconForAnimation != null) {
+                        if (view == mIsolatedIconForAnimation) {
+                            animationProperties = UNISOLATION_PROPERTY;
+                        } else {
+                            animationProperties = UNISOLATION_PROPERTY_OTHERS;
+                        }
                         animate = true;
                     }
                 }

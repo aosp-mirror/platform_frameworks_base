@@ -1386,8 +1386,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         updateQsExpansionEnabled();
 
         // Let's also update the icons
-        mNotificationIconAreaController.updateNotificationIcons(
-                mEntryManager.getNotificationData());
+        mNotificationIconAreaController.updateNotificationIcons();
     }
 
     @Override

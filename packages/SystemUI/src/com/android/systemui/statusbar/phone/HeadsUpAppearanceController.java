@@ -16,17 +16,13 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.app.Notification;
-import android.app.PendingIntent;
 import android.graphics.Rect;
-import android.service.notification.StatusBarNotification;
-import android.util.EventLog;
-import android.util.Log;
 import android.view.View;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.HeadsUpStatusBarView;
 import com.android.systemui.statusbar.NotificationData;
@@ -34,13 +30,13 @@ import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
-import java.util.stream.Stream;
-
 /**
  * Controls the appearance of heads up notifications in the icon area and the header itself.
  */
 class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
         DarkIconDispatcher.DarkReceiver {
+    public static final int CONTENT_FADE_DURATION = 110;
+    public static final int CONTENT_FADE_DELAY = 100;
     private final NotificationIconAreaController mNotificationIconAreaController;
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final NotificationStackScrollLayout mStackScroller;
@@ -98,24 +94,39 @@ class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
         NotificationData.Entry previousEntry = mHeadsUpStatusBarView.getShowingEntry();
         mHeadsUpStatusBarView.setEntry(newEntry);
         if (newEntry != previousEntry) {
+            boolean animateIsolation = false;
             if (newEntry == null) {
                 // no heads up anymore, lets start the disappear animation
 
                 setShown(false);
+                animateIsolation = !mIsExpanded;
             } else if (previousEntry == null) {
                 // We now have a headsUp and didn't have one before. Let's start the disappear
                 // animation
                 setShown(true);
             }
             mNotificationIconAreaController.showIconIsolated(newEntry == null ? null
-                    : newEntry.icon, mHeadsUpStatusBarView.getIconDrawingRect());
+                    : newEntry.icon, mHeadsUpStatusBarView.getIconDrawingRect(), animateIsolation);
         }
     }
 
     private void setShown(boolean isShown) {
-        mShown = isShown;
-        mHeadsUpStatusBarView.setVisibility(isShown ? View.VISIBLE : View.GONE);
-        mClockView.setVisibility(!isShown ? View.VISIBLE : View.INVISIBLE);
+        if (mShown != isShown) {
+            mShown = isShown;
+            if (isShown) {
+                mHeadsUpStatusBarView.setVisibility(View.VISIBLE);
+                CrossFadeHelper.fadeIn(mHeadsUpStatusBarView, CONTENT_FADE_DURATION /* duration */,
+                        CONTENT_FADE_DELAY /* delay */);
+                CrossFadeHelper.fadeOut(mClockView, CONTENT_FADE_DURATION/* duration */,
+                        0 /* delay */, () -> mClockView.setVisibility(View.INVISIBLE));
+            } else {
+                CrossFadeHelper.fadeIn(mClockView, CONTENT_FADE_DURATION /* duration */,
+                        CONTENT_FADE_DELAY /* delay */);
+                CrossFadeHelper.fadeOut(mHeadsUpStatusBarView, CONTENT_FADE_DURATION/* duration */,
+                        0 /* delay */, () -> mHeadsUpStatusBarView.setVisibility(View.GONE));
+
+            }
+        }
     }
 
     @VisibleForTesting
