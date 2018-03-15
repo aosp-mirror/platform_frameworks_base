@@ -505,31 +505,6 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     public static final String EXTRA_TRANSFER_OWNERSHIP_ADMIN_EXTRAS_BUNDLE =
             "android.app.extra.TRANSFER_OWNERSHIP_ADMIN_EXTRAS_BUNDLE";
 
-    /**
-     * Name under which a device administration component indicates whether it supports transfer of
-     * ownership. This meta-data is of type <code>boolean</code>. A value of <code>true</code>
-     * allows this administrator to be used as a target administrator for a transfer. If the value
-     * is <code>false</code>, ownership cannot be transferred to this administrator. The default
-     * value is <code>false</code>.
-     * <p>This metadata is used to avoid ownership transfer migration to an administrator with a
-     * version which does not yet support it.
-     * <p>Usage:
-     * <pre>
-     * &lt;receiver name="..." android:permission="android.permission.BIND_DEVICE_ADMIN"&gt;
-     *     &lt;meta-data
-     *         android:name="android.app.device_admin"
-     *         android:resource="@xml/..." /&gt;
-     *     &lt;meta-data
-     *         android:name="android.app.support_transfer_ownership"
-     *         android:value="true" /&gt;
-     * &lt;/receiver&gt;
-     * </pre>
-     *
-     * @see DevicePolicyManager#transferOwnership(ComponentName, ComponentName, PersistableBundle)
-     */
-    public static final String SUPPORT_TRANSFER_OWNERSHIP_META_DATA =
-            "android.app.support_transfer_ownership";
-
     private DevicePolicyManager mManager;
     private ComponentName mWho;
 
