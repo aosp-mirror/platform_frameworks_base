@@ -31,6 +31,8 @@ enum Position {
   LAST = 2;
 
   ANY = 3;
+
+  ALL = 4;
 }
 
 enum TimeUnit {

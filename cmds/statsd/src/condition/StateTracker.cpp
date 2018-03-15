@@ -137,21 +137,18 @@ void StateTracker::evaluateCondition(const LogEvent& event,
 
     VLOG("StateTracker evaluate event %s", event.ToString().c_str());
 
-    vector<HashableDimensionKey> keys;
-    vector<HashableDimensionKey> outputs;
-    filterValues(mPrimaryKeys, event.getValues(), &keys);
-    filterValues(mOutputDimensions, event.getValues(), &outputs);
-    if (keys.size() != 1 || outputs.size() != 1) {
-        ALOGE("More than 1 states in the event?? panic now!");
+    // Primary key can exclusive fields must be simple fields. so there won't be more than
+    // one keys matched.
+    HashableDimensionKey primaryKey;
+    HashableDimensionKey state;
+    if (!filterValues(mPrimaryKeys, event.getValues(), &primaryKey) ||
+        !filterValues(mOutputDimensions, event.getValues(), &state)) {
+        ALOGE("Failed to filter fields in the event?? panic now!");
         conditionCache[mIndex] =
                 mSlicedState.size() > 0 ? ConditionState::kTrue : ConditionState::kFalse;
         conditionChangedCache[mIndex] = false;
         return;
     }
-    // Primary key can exclusive fields must be simple fields. so there won't be more than
-    // one keys matched.
-    const auto& primaryKey = keys[0];
-    const auto& state = outputs[0];
     hitGuardRail(primaryKey);
 
     VLOG("StateTracker: key %s state %s", primaryKey.toString().c_str(), state.toString().c_str());

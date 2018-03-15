@@ -61,125 +61,22 @@ android::hash_t hashDimension(const HashableDimensionKey& value) {
 
 bool filterValues(const vector<Matcher>& matcherFields, const vector<FieldValue>& values,
                   HashableDimensionKey* output) {
-    for (size_t i = 0; i < matcherFields.size(); ++i) {
-        const auto& matcher = matcherFields[i];
-        bool found = false;
-        for (const auto& value : values) {
+    size_t num_matches = 0;
+    for (const auto& value : values) {
+        for (size_t i = 0; i < matcherFields.size(); ++i) {
+            const auto& matcher = matcherFields[i];
             // TODO: potential optimization here to break early because all fields are naturally
             // sorted.
             if (value.mField.matches(matcher)) {
                 output->addValue(value);
-                output->mutableValue(i)->mField.setTag(value.mField.getTag());
-                output->mutableValue(i)->mField.setField(value.mField.getField() & matcher.mMask);
-                found = true;
-                break;
-            }
-        }
-
-        if (!found) {
-            VLOG("We can't find a dimension value for matcher (%d)%#x.", matcher.mMatcher.getTag(),
-                   matcher.mMatcher.getField());
-            return false;
-        }
-    }
-
-    return true;
-}
-
-// Filter fields using the matchers and output the results as a HashableDimensionKey.
-// Note: HashableDimensionKey is just a wrapper for vector<FieldValue>
-bool filterValues(const vector<Matcher>& matcherFields, const vector<FieldValue>& values,
-                  vector<HashableDimensionKey>* output) {
-    output->push_back(HashableDimensionKey());
-    // Top level is only tag id. Now take the real child matchers
-    int prevAnyMatcherPrefix = 0;
-    size_t prevPrevFanout = 0;
-    size_t prevFanout = 0;
-
-    // For each matcher get matched results.
-    vector<FieldValue> matchedResults(2);
-    for (const auto& matcher : matcherFields) {
-        size_t num_matches = 0;
-        for (const auto& value : values) {
-            // TODO: potential optimization here to break early because all fields are naturally
-            // sorted.
-            if (value.mField.matches(matcher)) {
-                if (num_matches >= matchedResults.size()) {
-                    matchedResults.resize(num_matches * 2);
-                }
-                matchedResults[num_matches].mField.setTag(value.mField.getTag());
-                matchedResults[num_matches].mField.setField(value.mField.getField() & matcher.mMask);
-                matchedResults[num_matches].mValue = value.mValue;
+                output->mutableValue(num_matches)->mField.setTag(value.mField.getTag());
+                output->mutableValue(num_matches)->mField.setField(
+                    value.mField.getField() & matcher.mMask);
                 num_matches++;
             }
         }
-
-        if (num_matches == 0) {
-            VLOG("We can't find a dimension value for matcher (%d)%#x.", matcher.mMatcher.getTag(),
-                   matcher.mMatcher.getField());
-            continue;
-        }
-
-        if (num_matches == 1) {
-            for (auto& dimension : *output) {
-                dimension.addValue(matchedResults[0]);
-            }
-            prevAnyMatcherPrefix = 0;
-            prevFanout = 0;
-            continue;
-        }
-
-        // All the complexity below is because we support ANY in dimension.
-        bool createFanout = true;
-        // createFanout is true when the matcher doesn't need to follow the prev matcher's
-        // order.
-        // e.g., get (uid, tag) from any position in attribution. because we have translated
-        // it as 2 matchers, they need to follow the same ordering, we can't create a cross
-        // product of all uid and tags.
-        // However, if the 2 matchers have different prefix, they will create a cross product
-        // e.g., [any uid] [any some other repeated field], we will create a cross product for them
-        if (prevAnyMatcherPrefix != 0) {
-            int anyMatcherPrefix = 0;
-            bool isAnyMatcher = matcher.hasAnyPositionMatcher(&anyMatcherPrefix);
-            if (isAnyMatcher && anyMatcherPrefix == prevAnyMatcherPrefix) {
-                createFanout = false;
-            } else {
-                prevAnyMatcherPrefix = anyMatcherPrefix;
-            }
-        }
-
-        // Each matcher should match exact one field, unless position is ANY
-        // When x number of fields matches a matcher, the returned dimension
-        // size is multiplied by x.
-        int oldSize;
-        if (createFanout) {
-            // First create fanout (fanout size is matchedResults.Size which could be one,
-            // which means we do nothing here)
-            oldSize = output->size();
-            for (size_t i = 1; i < num_matches; i++) {
-                output->insert(output->end(), output->begin(), output->begin() + oldSize);
-            }
-            prevPrevFanout = oldSize;
-            prevFanout = num_matches;
-        } else {
-            // If we should not create fanout, e.g., uid tag from same position should be remain
-            // together.
-            oldSize = prevPrevFanout;
-            if (prevFanout != num_matches) {
-                // sanity check.
-                ALOGE("2 Any matcher result in different output");
-                return false;
-            }
-        }
-        // now add the matched field value to output
-        for (size_t i = 0; i < num_matches; i++) {
-            for (int j = 0; j < oldSize; j++) {
-                (*output)[i * oldSize + j].addValue(matchedResults[i]);
-            }
-        }
     }
-
-    return output->size() > 0 && (*output)[0].getValues().size() > 0;
+    return num_matches > 0;
 }
 
 void filterGaugeValues(const std::vector<Matcher>& matcherFields,

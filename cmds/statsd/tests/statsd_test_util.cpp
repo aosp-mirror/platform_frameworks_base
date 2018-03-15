@@ -500,12 +500,42 @@ void ValidateUidDimension(const DimensionsValue& value, int atomId, int uid) {
         .value_tuple().dimensions_value(0).value_int(), uid);
 }
 
+void ValidateUidDimension(const DimensionsValue& value, int node_idx, int atomId, int uid) {
+    EXPECT_EQ(value.field(), atomId);
+    EXPECT_GT(value.value_tuple().dimensions_value_size(), node_idx);
+    // Attribution field.
+    EXPECT_EQ(value.value_tuple().dimensions_value(node_idx).field(), 1);
+    EXPECT_EQ(value.value_tuple().dimensions_value(node_idx)
+        .value_tuple().dimensions_value(0).field(), 1);
+    EXPECT_EQ(value.value_tuple().dimensions_value(node_idx)
+        .value_tuple().dimensions_value(0).value_int(), uid);
+}
+
+void ValidateAttributionUidAndTagDimension(
+    const DimensionsValue& value, int node_idx, int atomId, int uid, const std::string& tag) {
+    EXPECT_EQ(value.field(), atomId);
+    EXPECT_GT(value.value_tuple().dimensions_value_size(), node_idx);
+    // Attribution field.
+    EXPECT_EQ(1, value.value_tuple().dimensions_value(node_idx).field());
+    // Uid only.
+    EXPECT_EQ(2, value.value_tuple().dimensions_value(node_idx)
+        .value_tuple().dimensions_value_size());
+    EXPECT_EQ(1, value.value_tuple().dimensions_value(node_idx)
+        .value_tuple().dimensions_value(0).field());
+    EXPECT_EQ(uid, value.value_tuple().dimensions_value(node_idx)
+        .value_tuple().dimensions_value(0).value_int());
+    EXPECT_EQ(2, value.value_tuple().dimensions_value(node_idx)
+        .value_tuple().dimensions_value(1).field());
+    EXPECT_EQ(tag, value.value_tuple().dimensions_value(node_idx)
+        .value_tuple().dimensions_value(1).value_str());
+}
+
 void ValidateAttributionUidAndTagDimension(
     const DimensionsValue& value, int atomId, int uid, const std::string& tag) {
     EXPECT_EQ(value.field(), atomId);
-    EXPECT_EQ(value.value_tuple().dimensions_value_size(), 1);
+    EXPECT_EQ(1, value.value_tuple().dimensions_value_size());
     // Attribution field.
-    EXPECT_EQ(value.value_tuple().dimensions_value(0).field(), 1);
+    EXPECT_EQ(1, value.value_tuple().dimensions_value(0).field());
     // Uid only.
     EXPECT_EQ(value.value_tuple().dimensions_value(0)
         .value_tuple().dimensions_value_size(), 2);
