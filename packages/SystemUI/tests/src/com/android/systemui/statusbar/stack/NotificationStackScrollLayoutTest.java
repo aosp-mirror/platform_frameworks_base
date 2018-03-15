@@ -17,17 +17,16 @@
 package com.android.systemui.statusbar.stack;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.annotation.UiThread;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.view.NotificationHeaderView;
-import android.view.View;
 
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.NotificationTestHelper;
+import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -72,4 +71,27 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 0.01 /* delta */);
     }
 
+    @Test
+    public void updateEmptyView_dndSuppressing() {
+        EmptyShadeView view = mock(EmptyShadeView.class);
+        mStackScroller.setEmptyShadeView(view);
+        when(view.willBeGone()).thenReturn(true);
+        when(mBar.areNotificationsHidden()).thenReturn(true);
+
+        mStackScroller.updateEmptyShadeView(true);
+
+        verify(view).setText(R.string.dnd_suppressing_shade_text);
+    }
+
+    @Test
+    public void updateEmptyView_dndNotSuppressing() {
+        EmptyShadeView view = mock(EmptyShadeView.class);
+        mStackScroller.setEmptyShadeView(view);
+        when(view.willBeGone()).thenReturn(true);
+        when(mBar.areNotificationsHidden()).thenReturn(false);
+
+        mStackScroller.updateEmptyShadeView(true);
+
+        verify(view).setText(R.string.empty_shade_text);
+    }
 }
