@@ -309,7 +309,7 @@ namespace PaintGlue {
             jint count, jint bidiFlags, jfloat x, jfloat y, SkPath* path) {
         minikin::Layout layout = MinikinUtils::doLayout(
                 paint, static_cast<minikin::Bidi>(bidiFlags), typeface, text, 0, count, count,
-                nullptr, 0);
+                nullptr);
         size_t nGlyphs = layout.nGlyphs();
         uint16_t* glyphs = new uint16_t[nGlyphs];
         SkPoint* pos = new SkPoint[nGlyphs];
@@ -351,8 +351,7 @@ namespace PaintGlue {
         SkIRect ir;
 
         minikin::Layout layout = MinikinUtils::doLayout(&paint,
-                static_cast<minikin::Bidi>(bidiFlags), typeface, text, 0, count, count, nullptr,
-                0);
+                static_cast<minikin::Bidi>(bidiFlags), typeface, text, 0, count, count, nullptr);
         minikin::MinikinRect rect;
         layout.getBounds(&rect);
         r.fLeft = rect.mLeft;
@@ -468,7 +467,7 @@ namespace PaintGlue {
         }
         minikin::Layout layout = MinikinUtils::doLayout(paint,
                 static_cast<minikin::Bidi>(bidiFlags), typeface, str.get(), 0, str.size(),
-                str.size(), nullptr, 0);
+                str.size(), nullptr);
         size_t nGlyphs = countNonSpaceGlyphs(layout);
         if (nGlyphs != 1 && nChars > 1) {
             // multiple-character input, and was not a ligature
@@ -489,7 +488,7 @@ namespace PaintGlue {
             static const jchar ZZ_FLAG_STR[] = { 0xD83C, 0xDDFF, 0xD83C, 0xDDFF };
             minikin::Layout zzLayout = MinikinUtils::doLayout(paint,
                     static_cast<minikin::Bidi>(bidiFlags), typeface, ZZ_FLAG_STR, 0, 4, 4,
-                    nullptr, 0);
+                    nullptr);
             if (zzLayout.nGlyphs() != 1 || layoutContainsNotdef(zzLayout)) {
                 // The font collection doesn't have a glyph for unknown flag. Just return true.
                 return true;

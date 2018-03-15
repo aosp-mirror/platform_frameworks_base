@@ -454,8 +454,7 @@ public abstract class BaseCanvas {
 
         throwIfHasHwBitmapInSwMode(paint);
         nDrawTextRun(mNativeCanvasWrapper, text, index, count, contextIndex, contextCount,
-                x, y, isRtl, paint.getNativeInstance(), 0 /* measured text */,
-                0 /* measured text offset */);
+                x, y, isRtl, paint.getNativeInstance(), 0 /* measured text */);
     }
 
     public void drawTextRun(@NonNull CharSequence text, int start, int end, int contextStart,
@@ -486,19 +485,16 @@ public abstract class BaseCanvas {
             char[] buf = TemporaryBuffer.obtain(contextLen);
             TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
             long measuredTextPtr = 0;
-            int measuredTextOffset = 0;
             if (text instanceof PrecomputedText) {
                 PrecomputedText mt = (PrecomputedText) text;
                 int paraIndex = mt.findParaIndex(start);
                 if (end <= mt.getParagraphEnd(paraIndex)) {
-                    // Only suppor the same paragraph.
+                    // Only suppor the text in the same paragraph.
                     measuredTextPtr = mt.getMeasuredParagraph(paraIndex).getNativePtr();
-                    measuredTextOffset = start - mt.getParagraphStart(paraIndex);
                 }
             }
             nDrawTextRun(mNativeCanvasWrapper, buf, start - contextStart, len,
-                    0, contextLen, x, y, isRtl, paint.getNativeInstance(),
-                    measuredTextPtr, measuredTextOffset);
+                    0, contextLen, x, y, isRtl, paint.getNativeInstance(), measuredTextPtr);
             TemporaryBuffer.recycle(buf);
         }
     }
@@ -647,7 +643,7 @@ public abstract class BaseCanvas {
 
     private static native void nDrawTextRun(long nativeCanvas, char[] text, int start, int count,
             int contextStart, int contextCount, float x, float y, boolean isRtl, long nativePaint,
-            long nativePrecomputedText, int measuredTextOffset);
+            long nativePrecomputedText);
 
     private static native void nDrawTextOnPath(long nativeCanvas, char[] text, int index, int count,
             long nativePath, float hOffset, float vOffset, int bidiFlags, long nativePaint);
