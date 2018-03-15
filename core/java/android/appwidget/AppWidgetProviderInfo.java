@@ -16,6 +16,7 @@
 
 package android.appwidget;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -31,6 +32,9 @@ import android.os.Parcelable;
 import android.os.UserHandle;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Describes the meta data for an installed AppWidget provider.  The fields in this class
@@ -55,6 +59,14 @@ public class AppWidgetProviderInfo implements Parcelable {
      */
     public static final int RESIZE_BOTH = RESIZE_HORIZONTAL | RESIZE_VERTICAL;
 
+    /** @hide */
+    @IntDef(flag = true, prefix = { "FLAG_" }, value = {
+            RESIZE_HORIZONTAL,
+            RESIZE_VERTICAL,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ResizeModeFlags {}
+
     /**
      * Indicates that the widget can be displayed on the home screen. This is the default value.
      */
@@ -69,6 +81,15 @@ public class AppWidgetProviderInfo implements Parcelable {
      * Indicates that the widget can be displayed within a space reserved for the search box.
      */
     public static final int WIDGET_CATEGORY_SEARCHBOX = 4;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "FLAG_" }, value = {
+            WIDGET_CATEGORY_HOME_SCREEN,
+            WIDGET_CATEGORY_KEYGUARD,
+            WIDGET_CATEGORY_SEARCHBOX,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CategoryFlags {}
 
     /**
      * The widget can be reconfigured anytime after it is bound by starting the
@@ -86,6 +107,14 @@ public class AppWidgetProviderInfo implements Parcelable {
      * @see #widgetFeatures
      */
     public static final int WIDGET_FEATURE_HIDE_FROM_PICKER = 2;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "FLAG_" }, value = {
+            WIDGET_FEATURE_RECONFIGURABLE,
+            WIDGET_FEATURE_HIDE_FROM_PICKER,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FeatureFlags {}
 
     /**
      * Identity of this AppWidget component.  This component should be a {@link
@@ -215,6 +244,7 @@ public class AppWidgetProviderInfo implements Parcelable {
      * <p>This field corresponds to the <code>android:resizeMode</code> attribute in
      * the AppWidget meta-data file.
      */
+    @ResizeModeFlags
     public int resizeMode;
 
     /**
@@ -226,6 +256,7 @@ public class AppWidgetProviderInfo implements Parcelable {
      * <p>This field corresponds to the <code>widgetCategory</code> attribute in
      * the AppWidget meta-data file.
      */
+    @CategoryFlags
     public int widgetCategory;
 
     /**
@@ -235,6 +266,7 @@ public class AppWidgetProviderInfo implements Parcelable {
      * @see #WIDGET_FEATURE_RECONFIGURABLE
      * @see #WIDGET_FEATURE_HIDE_FROM_PICKER
      */
+    @FeatureFlags
     public int widgetFeatures;
 
     /** @hide */
