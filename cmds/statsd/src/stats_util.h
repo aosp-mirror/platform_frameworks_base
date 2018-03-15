@@ -17,7 +17,6 @@
 #pragma once
 
 #include "HashableDimensionKey.h"
-#include "frameworks/base/cmds/statsd/src/stats_log_common.pb.h"
 #include "logd/LogReader.h"
 
 #include <unordered_map>
